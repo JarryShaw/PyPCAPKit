@@ -16,6 +16,7 @@ origin. Please refer to :doc:`ip` for more information.
    .. autoattribute:: __protocol_type__
    .. autoattribute:: __callback_fn__
       :no-value:
+   .. autoattribute:: __timeout__
 
 Terminology
 -----------
@@ -25,7 +26,7 @@ Terminology
    reasm.ipv4.packet
        Data structure for **IPv4 datagram reassembly**
        (:meth:`IPv4.reassembly <pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly>`)
-       is as following, with ``ipv4`` the protocol instance
+       is as follows, with ``ipv4`` the protocol instance
        (``frame['IPv4']``) and ``ipv4_info`` its :attr:`~pcapkit.protocols.protocol.Protocol.info`
        -- the header fields come off the latter, the raw octets off the former:
 
@@ -53,7 +54,7 @@ Terminology
    reasm.ipv4.datagram
        Data structure for **reassembled IPv4 datagram** (element from
        :attr:`IPv4.datagram <pcapkit.foundation.reassembly.reassembly.Reassembly.datagram>`
-       *tuple*) is as following:
+       *tuple*) is as follows:
 
        .. code-block:: text
 
@@ -118,7 +119,7 @@ Terminology
    reasm.ipv4.buffer
        Data structure for internal buffering when performing reassembly algorithms
        (:attr:`IPv4._buffer <pcapkit.foundation.reassembly.reassembly.Reassembly._buffer>`)
-       is as following:
+       is as follows:
 
        .. code-block:: text
 
@@ -175,4 +176,4 @@ Terminology
           :attr:`~pcapkit.foundation.reassembly.data.data.Completion.PARTIAL`,
           which is what tells "these fragments are gone" apart from "these
           fragments had not arrived yet". See
-          :meth:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase.expire`.
+          :meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.expire`.

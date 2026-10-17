@@ -113,7 +113,7 @@ whose structure is described as below:
 
 .. versionchanged:: 1.5.0
 
-   ``bytes(frame)`` and :attr:`~pcapkit.protocols.misc.pcap.frame.Frame.packet`
+   ``bytes(frame)`` and :attr:`~pcapkit.protocols.protocol.Protocol.packet`
    hold this frame's own octets, where they held the next frame's
    (:issue:`357`), and the parsed ``time`` is timezone-aware UTC. The parsed
    ``len`` is the on-wire length and ``cap_len`` the captured one, where the

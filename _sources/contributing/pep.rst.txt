@@ -71,9 +71,9 @@ SCTP
 ~~~~
 
 **Done.** :class:`~pcapkit.protocols.transport.sctp.SCTP` is a first-class
-transport layer protocol implemented per :rfc:`9260`: the common header, all
-thirteen chunk types the RFC defines, its eight chunk parameters, its thirteen
-error causes, and CRC32c checksum verification.
+transport layer protocol implemented per :rfc:`9260`: the common header, every
+chunk type, chunk parameter and error cause the RFC defines, and CRC32c checksum
+verification.
 
 One note on how it differs from its siblings. The next layer is dispatched
 on the DATA chunk's *payload protocol identifier* through
@@ -85,9 +85,8 @@ What is still wanted is the registered-but-unimplemented type codes. IANA
 registers considerably more than :rfc:`9260` defines, and the surplus falls
 through to the generic handlers rather than failing the extraction -- so a
 capture using one parses, but yields an opaque chunk instead of its fields.
-As things stand that is 17 of the 30 registered chunk types, 24 of the 32
-chunk parameters and 10 of the 23 error causes; :doc:`/pcapkit/const/sctp`
-lists them all.
+That is true of many of the registered chunk types, chunk parameters and error
+causes; :doc:`/pcapkit/const/sctp` lists them all.
 
 The other thing wanted for SCTP is reassembly, which no protocol beyond IP and
 TCP has -- see `Reassembly Beyond IP and TCP`_ below, since it needs work in
@@ -100,19 +99,18 @@ ESP
 decrypts when a Security Association is supplied through the protocol keyed
 :mod:`pcapkit.corekit.context` channel.
 
-What is still wanted there is wider algorithm coverage. The two enumerations
-under :doc:`/pcapkit/const/esp` carry every transform IANA has registered -- 36
-:class:`~pcapkit.const.esp.cipher.Cipher` members and 15
-:class:`~pcapkit.const.esp.integrity.Integrity` members -- but
-:data:`~pcapkit.protocols.internet.esp.CIPHER_SUITES` and
-:data:`~pcapkit.protocols.internet.esp.INTEGRITY_SUITES` apply only five of
-each, and two of those ten are the no-ops ``ENCR_NULL`` and ``NONE``. So the
-real coverage is AES-CBC and AES-GCM at all three tag lengths for encryption,
-and HMAC-SHA1-96 plus the three :rfc:`4868` HMAC-SHA2 truncations for
-integrity.
+What is still wanted there is wider algorithm coverage. The enumerations
+under :doc:`/pcapkit/const/esp` --
+:class:`~pcapkit.const.esp.cipher.Cipher` and
+:class:`~pcapkit.const.esp.integrity.Integrity` -- carry every transform IANA has
+registered, but :data:`~pcapkit.protocols.internet.esp.CIPHER_SUITES` and
+:data:`~pcapkit.protocols.internet.esp.INTEGRITY_SUITES` apply only a few of
+them, the no-ops ``ENCR_NULL`` and ``NONE`` among them. So the real coverage is
+AES-CBC and AES-GCM at every tag length for encryption, and HMAC-SHA1-96 plus
+the :rfc:`4868` HMAC-SHA2 truncations for integrity.
 
 Not implemented, roughly in the order a capture is likely to want them:
-AES-CTR [:rfc:`3686`], AES-CCM at all three tag lengths [:rfc:`4309`],
+AES-CTR [:rfc:`3686`], AES-CCM at every tag length [:rfc:`4309`],
 ChaCha20-Poly1305 [:rfc:`7634`], AES-XCBC-MAC-96 [:rfc:`3566`], AES-CMAC-96
 [:rfc:`4494`], the AES-GMAC family and its ``ENCR_NULL_AUTH_AES_GMAC``
 counterpart [:rfc:`4543`], and then the Camellia, implicit-IV [:rfc:`8750`] and
@@ -121,12 +119,12 @@ either, and are the one item on this list that is not simply a table entry: the
 high-order 32 bits are never transmitted, so recovering them is stateful, and
 they widen both the ICV coverage and the AEAD associated data.
 
-Two structural notes for anyone starting. Adding an integrity algorithm that is
-not an HMAC needs more than a row --
+Some structural notes matter to anyone starting. Adding an integrity algorithm
+that is not an HMAC needs more than a row --
 :class:`~pcapkit.protocols.internet.esp.IntegritySuite` records the digest as
 the name of a :mod:`hashlib` constructor, which AES-XCBC and AES-CMAC are not.
 And :func:`~pcapkit.protocols.internet.esp.load_cryptography` imports only the
-``ciphers`` submodules of :mod:`cryptography`, so the AEAD and CMAC primitives
+``ciphers`` submodules of ``cryptography``, so the AEAD and CMAC primitives
 have to be added there before a cipher suite can reach them. Unsupported
 algorithms are refused loudly, when the Security Association is constructed
 rather than when a packet is read, so nothing decodes wrongly in the meantime.
@@ -136,8 +134,8 @@ Mobility Header
 
 **Done.**
 :class:`~pcapkit.protocols.internet.mh.MH` decodes and constructs the whole
-registry: **all 24 registered message data types**, **all 4 CGA extensions**, and
-**all 71 registered options**. Every one of them is registered in
+registry: **every registered message data type**, **every CGA extension**, and
+**every registered option**. Every one of them is registered in
 :attr:`~pcapkit.protocols.internet.mh.MH.__message__`,
 :attr:`~pcapkit.protocols.internet.mh.MH.__option__` or
 :attr:`~pcapkit.protocols.internet.mh.MH.__extension__` with both a ``_read_``
@@ -147,7 +145,7 @@ Every message type and every one of those options round-trips byte-for-byte
 through the public API -- ``make`` then ``read`` then ``make`` again reproduces
 the same octets, which
 :file:`tests/protocols/test_option_roundtrip_unit.py` checks for the whole
-registry. The **four CGA extensions round-trip end to end as well**: the CGA
+registry. The **CGA extensions round-trip end to end as well**: the CGA
 Parameters option (type 12) is the only thing that can carry a CGA extension on
 the wire, so registering it reached the whole
 :attr:`~pcapkit.protocols.internet.mh.MH.__extension__` registry with it, and no
@@ -157,17 +155,17 @@ The sub-registries are the easy half: binding revocation types and triggers,
 handoff indicators, access network identifier sub-options, flow identification
 and flow binding sub-options, LMA-controlled MAG parameters, DNS update status,
 traffic selector formats and QoS attributes are all generated in full under
-:doc:`/pcapkit/const/mh`. Two value sets live in ``mh.py`` itself rather than in
-:mod:`pcapkit.const.mh`, because IANA registers neither: the localized routing
-acknowledgment status codes of :rfc:`6705#section-10.2`
+:doc:`/pcapkit/const/mh`. Value sets that IANA does not register live in ``mh.py`` itself rather than
+in :mod:`pcapkit.const.mh`: the localized routing acknowledgment status codes of
+:rfc:`6705#section-10.2`
 (:class:`~pcapkit.protocols.internet.mh.LocalizedRoutingStatus`) and the local
 mobility anchor address option codes of :rfc:`5949#section-6.2.2`
-(:class:`~pcapkit.protocols.internet.mh.LMAAddressCode`), alongside two
-:rfc:`5568` sets.
+(:class:`~pcapkit.protocols.internet.mh.LMAAddressCode`). Sets from :rfc:`5568`
+live there alongside them.
 
 What is left, and why:
 
-* **Payloads that belong to another protocol** are carried opaquely for now. The
+* **Payloads that belong to another protocol** are carried opaquely. The
   multicast options (54, 56, 57, 60 and 61) embed :rfc:`3810` MLD or :rfc:`3376`
   IGMP address records, and the traffic selectors of :rfc:`6089` and :rfc:`7222`
   embed the flag-driven range lists of :rfc:`6088`. Each is a separate registry
@@ -188,14 +186,14 @@ What is left, and why:
   with the rest rather than inventing a convention; and once a dissector for one
   of these formats exists, registering it needs no change at the option site.
 
-  None of those four keys is checked against the values its RFC allows, on
+  None of those keys is checked against the values its RFC allows, on
   either side. :rfc:`7028` says ``protocol`` MUST be 143 or 131 for MLD, or
   ``0x12``, ``0x16`` or ``0x22`` for IGMP, yet
   :meth:`~pcapkit.protocols.internet.mh.MH._make_opt_mcast_sel` builds and
   :meth:`~pcapkit.protocols.internet.mh.MH._read_opt_mcast_sel` parses any octet
-  without a warning, and the other three keys behave the same. The registry is
+  without a warning, and the other keys behave the same. The registry is
   where an unknown key would first be noticed, so the check belongs there rather
-  than in four separate makers.
+  than in each maker separately.
 
   It wants a registry of its own rather than
   :meth:`~pcapkit.protocols.protocol.Protocol._decode_next_layer`, which is
@@ -205,10 +203,10 @@ What is left, and why:
   behave wrongly. Changing the parsed shape from :obj:`bytes` to ``Raw`` also
   changes what existing captures dump to, so it is its own change.
 
-Two wire-format traps are worth knowing before touching this code, since both
-look like ordinary fields and are not:
+Wire-format traps are worth knowing before touching this code, since each
+looks like an ordinary field and is not:
 
-* :rfc:`7411`'s two multicast options measure their length field in **32-bit
+* :rfc:`7411`'s multicast options measure their length field in **32-bit
   words**, and exclude the option-code and status octets as well as the type and
   length ones -- so the option occupies ``4 + length * 4`` octets, not
   ``length + 2``.
@@ -232,9 +230,9 @@ that does not exist:
   DTLS Key Management chunk parameter, ``0x8006`` of
   :class:`~pcapkit.const.sctp.parameter.Parameter` -- both fall through to the
   generic handlers, so they parse as opaque;
-* four of its error causes, 100 to 103 of
+* its error causes, 100 to 103 of
   :class:`~pcapkit.const.sctp.cause_code.CauseCode`;
-* seven payload protocol identifiers -- 47 (Diameter over DTLS/SCTP), 66 to 69
+* payload protocol identifiers -- 47 (Diameter over DTLS/SCTP), 66 to 69
   (NGAP, XnAP, F1AP and E1AP, each over DTLS over SCTP) and 4242 (DTLS chunk
   key management).
 
@@ -262,32 +260,31 @@ small part of each is bound to a dissector; everything else resolves to
 :class:`~pcapkit.protocols.misc.raw.Raw`, so the capture parses without
 complaint and yields nothing useful.
 
-* **5 of the 219** :class:`~pcapkit.const.reg.linktype.LinkType` values --
+* :class:`~pcapkit.const.reg.linktype.LinkType` --
   ``NULL``, ``ETHERNET``, ``LOOP``, ``IPV4`` and ``IPV6``, declared identically
   in :class:`~pcapkit.protocols.misc.pcap.frame.Frame` and
   :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`, which also read ``RAW`` as
   ``IPV4`` or ``IPV6`` by its version nibble.
-* **17 of the 151** :class:`~pcapkit.const.reg.transtype.TransType` values, in
+* :class:`~pcapkit.const.reg.transtype.TransType` -- the values in
   :attr:`Internet.__proto__
   <pcapkit.protocols.internet.internet.Internet.__proto__>`.
-* **7 of the 160** :class:`~pcapkit.const.reg.ethertype.EtherType` values, in
+* :class:`~pcapkit.const.reg.ethertype.EtherType` -- the values in
   :attr:`Link.__proto__ <pcapkit.protocols.link.link.Link.__proto__>`: ARP,
   RARP, IPv4, IPv6, IPX and both VLAN tags.
-* **7 bindings over 5 port numbers**, against a
-  :class:`~pcapkit.const.reg.apptype.AppType` registry carrying every IANA
-  service name -- TCP 20 to FTP-DATA and 21 to FTP, port 80 and 8080 to HTTP on
-  both TCP and UDP, and UDP 1701 to L2TP. The two counts differ because 80 and
-  8080 are each bound twice, once per transport.
-* **2 of the 75**
-  :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`
-  values, in :attr:`SCTP.__proto__
-  <pcapkit.protocols.transport.sctp.SCTP.__proto__>`: PPIDs 60 and 66, both to
+* :class:`~pcapkit.const.reg.apptype.apptype.AppType` -- the ports bound in
+  :attr:`TCP.__proto__ <pcapkit.protocols.transport.tcp.TCP.__proto__>` and
+  :attr:`UDP.__proto__ <pcapkit.protocols.transport.udp.UDP.__proto__>`, out of
+  a registry carrying every IANA service name: TCP 20 to FTP-DATA and 21 to FTP,
+  ports 80 and 8080 to HTTP on both TCP and UDP, and UDP 1701 to L2TP.
+* :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`
+  -- the values in :attr:`SCTP.__proto__
+  <pcapkit.protocols.transport.sctp.SCTP.__proto__>`: PPIDs 60 and 66, each to
   :class:`~pcapkit.protocols.application.ngap.NGAP`. Every other DATA chunk
   payload is ``Raw`` until something calls
   :func:`~pcapkit.foundation.registry.protocols.register_sctp`.
 
-Each pair above is measurable, which is why the command is written down rather
-than trusted to stay current:
+How much of each registry is bound is measurable, so measure it rather than
+trust a figure written down here:
 
 .. code-block:: shell
 
@@ -296,7 +293,7 @@ than trusted to stay current:
               print(len(Internet.__proto__), len(list(TransType)))"
 
 Most of those want a dissector written and are covered by the stub list above.
-A handful wanted only a table entry, because the dissector was already there:
+Some wanted only a table entry, because the dissector was already there:
 
 * **Done.** :class:`~pcapkit.protocols.application.ospf.OSPF` is bound at
   ``TransType`` 89 (``OSPFIGP``) and
@@ -325,7 +322,7 @@ A handful wanted only a table entry, because the dissector was already there:
   (:issue:`1574`). ``RAW`` has no binding of its own: its bare IPv4 or IPv6 is
   dispatched by the version nibble of the first octet (:issue:`1502`).
 
-Three follow-ups the above deliberately left alone:
+Follow-ups to the bindings above:
 
 * ``TransType`` 115 (``L2TP``) stays unbound, and the reason is structural: it
   references :rfc:`3931`, i.e. L2TPv3 over IP, and
@@ -353,7 +350,7 @@ Three follow-ups the above deliberately left alone:
   instead of guessing, since a guess path is wrong on non-HTTP input.
 
 Beyond those, the gaps most likely to be met in a real capture are ICMP (1),
-ICMPv6 (58) and IGMP (2) on the internet layer, all three of which have stubs;
+ICMPv6 (58) and IGMP (2) on the internet layer, each of which has a stub;
 and ``LINUX_SLL`` and ``LINUX_SLL2`` at the link layer, which every
 ``tcpdump -i any`` capture uses and which have no stub.
 
@@ -369,8 +366,9 @@ Maybe Even Faster?
 ------------------
 
 **Partly done.** A measured benchmark exists, and acting on it cut extraction
-time on a 1117-frame HTTP capture by about 46% with byte-identical output. Four
-things were wrong on the hot path, none of them the ones the thread predicted:
+time on a 1117-frame HTTP capture by about 46% with byte-identical output. The
+profiling found these wrong on the hot path, none of them the ones the thread
+predicted:
 
 * character-set detection was uncached, and accounted for 30% of an HTTP
   extraction -- 3011 :func:`chardet.detect` calls over 163 distinct
@@ -379,20 +377,20 @@ things were wrong on the hot path, none of them the ones the thread predicted:
   :func:`copy.copy` machinery, 63207 times per extraction;
 * :attr:`Field.length <pcapkit.corekit.fields.field.FieldBase.length>` recomputes
   :func:`struct.calcsize` on each read and was read two to four times per field;
-* :meth:`Schema.__setattr__ <pcapkit.protocols.schema.schema.Schema.__setattr__>`
-  re-entered itself once per field assigned.
+* :class:`~pcapkit.protocols.schema.schema.Schema`'s ``__setattr__`` re-entered
+  itself once per field assigned.
 
-Two predictions the profiling **contradicted**, recorded so nobody spends time on
+Predictions the profiling **contradicted**, recorded so nobody spends time on
 them again: :class:`~pcapkit.corekit.infoclass.Info` construction -- the usual
 suspect -- is 0.0% of its own cost and 4.4% of a parse, and the logging
 integration is 0.03% even in the heaviest shape, since every call site is a lazy
 ``%s``. The IO-batching idea the thread proposed was never the bottleneck.
 
-Of the three larger wins this section listed, all outside the parse path, one has
-landed in full and the other two in part:
+The larger wins this section listed, all outside the parse path, have landed in
+full or in part:
 
 * **The flow dumper reopens its output file once per frame**, in
-  :meth:`PCAPIO.__call__ <pcapkit.dumpkit.pcap.PCAPIO.__call__>`. It does not
+  :class:`~pcapkit.dumpkit.pcap.PCAPIO`'s ``__call__``. It does not
   *also* rebuild a whole
   :class:`~pcapkit.protocols.misc.pcap.frame.Frame` to obtain bytes it already
   holds; dropping that re-dissection was about 82% of the cost of a flow-traced
@@ -415,7 +413,7 @@ landed in full and the other two in part:
   schema's type field to choose the option schema, rather than unpacking the
   whole base schema and throwing it away.
 
-Two traps for anyone benchmarking this library. ``reassembly=True`` and
+Some traps for anyone benchmarking this library. ``reassembly=True`` and
 ``trace=True`` are **no-ops** without ``ip=``/``tcp=``, so a benchmark that passes
 only the switch measures nothing; and timing several capture shapes in one
 process inflates them by up to 73%, so each shape wants its own interpreter.
@@ -505,7 +503,7 @@ both of the following are worth knowing before reaching for them:
 * **pypcapfile** -- the released 0.12.0 imports the ``imp`` module, removed in
   Python 3.12. Precisely, ``pcapfile/linklayer.py`` imports it at module scope
   and ``pcapfile.savefile`` imports ``linklayer``, so while a bare
-  ``import pcapfile`` still succeeds on 3.12+, the two modules the engine
+  ``import pcapfile`` still succeeds on 3.12+, the modules the engine
   actually needs raise :exc:`ModuleNotFoundError`. Upstream ``master`` (0.12.1,
   unreleased) has fixed this, and that is what the engine was verified against.
   The extra therefore installs a version that only works on Python 3.10 and
@@ -558,7 +556,7 @@ both of the following are worth knowing before reaching for them:
   says so, rather than one ``engine=`` string silently meaning two different
   implementations.
 
-  Two caveats remain. Both distributions are still beta releases, and ``pcap-ct``
+  Caveats remain. Both distributions are still beta releases, and ``pcap-ct``
   targets the ``pypcap`` 1.2.3 API -- within what this engine uses, but worth
   knowing. And despite the `libpcap <https://pypi.org/project/libpcap/>`__ wheel
   bundling prebuilt binaries, a runtime ``libpcap`` shared library is still
@@ -578,8 +576,8 @@ them.
 
 Adding a further engine does not mean adding handler methods to
 :class:`~pcapkit.foundation.extraction.Extractor`, as the thread describes. A new engine subclasses
-:class:`pcapkit.foundation.engines.engine.Engine` and implements just two
-methods, :meth:`~pcapkit.foundation.engines.engine.EngineBase.run`
+:class:`pcapkit.foundation.engines.engine.Engine` and implements just
+:meth:`~pcapkit.foundation.engines.engine.EngineBase.run`
 and :meth:`~pcapkit.foundation.engines.engine.EngineBase.read_frame`; passing the
 ``engine`` class keyword registers it. See :doc:`/ext` for a worked example. What does
 still apply is the unified auxiliary tools in :mod:`pcapkit.toolkit`, where
@@ -643,7 +641,7 @@ Reassembly Beyond IP and TCP
 ----------------------------
 
 **Still open.**
-:doc:`/pcapkit/foundation/reassembly/index` covers three protocols and no more.
+:doc:`/pcapkit/foundation/reassembly/index` covers IPv4, IPv6 and TCP, and no more.
 IPv4 and IPv6 share the :rfc:`791` procedure, and TCP uses the :rfc:`815`
 hole-descriptor algorithm, which does handle out-of-order and overlapping
 segments. SCTP has nothing: a user message split across DATA chunks is never put
@@ -657,7 +655,7 @@ reassembler needs, on
 ``flags.E`` for the beginning and ending fragment bits -- and nothing reads
 those two bits outside the construction path. So each fragment is dispatched on
 its own PPID as though it were a whole PDU, and a registered upper layer is
-handed half a message. Two related holes compound it: only the *first* DATA
+handed half a message. Related holes compound it: only the *first* DATA
 chunk of a bundle is dispatched at all, and I-DATA [:rfc:`8260`], chunk type 64,
 is not dissected -- so the MID and FSN fields that exist precisely to make
 interleaved reassembly tractable are never parsed, and an I-DATA-only packet
@@ -666,25 +664,24 @@ likewise unhandled, so partial-reliability stream advancement is invisible.
 
 Writing the reassembler is the smaller half of the job. It would go at
 ``pcapkit/foundation/reassembly/sctp.py``, subclass
-:class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` and implement two
-methods,
+:class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` and implement
 :meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly` and
 :meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.submit`. Registering
 it, though, is inert:
 :meth:`~pcapkit.foundation.extraction.Extractor.register_reassembly` accepts any
 protocol name, while
 :class:`~pcapkit.foundation.extraction.Extractor` only ever instantiates the
-three it names literally, and
+ones it names literally, and
 :class:`~pcapkit.foundation.reassembly.ReassemblyManager` is a fixed-field
-container with no room for a fourth. Making SCTP reachable therefore also means
+container with no room for another. Making SCTP reachable therefore also means
 touching that manager and its read-side twin, the construction branch in
 :class:`~pcapkit.foundation.extraction.Extractor`, one adapter per engine in
 :mod:`pcapkit.toolkit`, the call site in each of those engines, and
 :func:`~pcapkit.interface.core.reassemble`. Generalising that wiring so a
 registered reassembler is actually used is worth doing on its own account, and
-would make the fourth protocol cheaper than the third rather than dearer.
+would make each further protocol cheaper than the last rather than dearer.
 
-Two smaller items in the same subsystem:
+Smaller items in the same subsystem:
 
 * **Flow tracing is TCP only**, and blocked on the same generalisation --
   :class:`~pcapkit.foundation.traceflow.TraceFlowManager` holds a single field,
@@ -715,7 +712,7 @@ Two smaller items in the same subsystem:
   flow is finalised only by proof that nothing more can arrive: a new connection's
   SYN on the same endpoints, or the end of the capture, via
   :meth:`TraceFlow.finish
-  <pcapkit.foundation.traceflow.traceflow.TraceFlowBase.finish>`. Distinguishing
+  <pcapkit.foundation.traceflow.traceflow.TraceFlow.finish>`. Distinguishing
   that SYN from the peer's SYN-ACK is what the recorded teardown is for.
 
   One case remains undecided rather than solved: a capture that *starts* in the
@@ -724,14 +721,14 @@ Two smaller items in the same subsystem:
   :class:`~pcapkit.foundation.traceflow.data.tcp.Packet`, which would make
   ``syn and not ack`` a definitive new-connection test on its own.
 
-  **The application layer is wired into flow tracing** as well. Of the two ways
+  **The application layer is wired into flow tracing** as well. Of the ways
   of buffering a traced payload, the tracer **delegates to**
   :class:`~pcapkit.foundation.reassembly.tcp.TCP` rather than growing a
   per-direction payload buffer of its own. A buffer that concatenated payloads in
   capture order would be silently wrong on the first retransmission or reordered
   segment, where the :rfc:`815` hole-descriptor algorithm already in the
   reassembler is not -- so
-  :class:`~pcapkit.foundation.traceflow.data.tcp.Packet` carries the four segment
+  :class:`~pcapkit.foundation.traceflow.data.tcp.Packet` carries the segment
   fields (``seq``, ``ack``, ``header``, ``payload``) that reassembler needs, and
   the tracer hands each traced segment straight to it.
 
@@ -753,9 +750,9 @@ Two smaller items in the same subsystem:
   adapter at all; asking for it there warns and falls back.
 * **Timing a partial datagram out** is implemented, for IP.
   :meth:`Reassembly.expire
-  <pcapkit.foundation.reassembly.reassembly.ReassemblyBase.expire>` abandons a
+  <pcapkit.foundation.reassembly.reassembly.Reassembly.expire>` abandons a
   buffer whose first-arriving fragment is older than
-  :attr:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase.timeout`
+  :attr:`~pcapkit.foundation.reassembly.reassembly.Reassembly.timeout`
   seconds, and the buffer models carry the timestamp that makes it possible.
 
   The clock is the **capture's own timestamps**, not the host's: an offline
@@ -784,7 +781,7 @@ Two smaller items in the same subsystem:
   reassembly a deadline and an idle connection is ordinary rather than
   pathological; ``timeout`` enables one on request.
 
-  Two related things are *not* done. :rfc:`8200#section-4.5` and
+  Related things are *not* done. :rfc:`8200#section-4.5` and
   :rfc:`1122#section-3.3.2` both want an ICMP Time Exceeded sent on expiry when
   the offset-zero fragment has been received; a parser sends nothing, so the
   condition is only reported in the log record. And the memory motive is
@@ -801,7 +798,7 @@ is worth knowing before benchmarking against them: ``pyshark``, ``pypcap`` and
 Checksum and Integrity Verification
 -----------------------------------
 
-Ten protocols parse a checksum or CRC field —
+These protocols parse a checksum or CRC field —
 :class:`~pcapkit.protocols.internet.hip.HIP`,
 :class:`~pcapkit.protocols.internet.hopopt.HOPOPT`,
 :class:`~pcapkit.protocols.internet.ipv4.IPv4`,
@@ -811,13 +808,13 @@ Ten protocols parse a checksum or CRC field —
 :class:`~pcapkit.protocols.application.ospf.OSPF`,
 :class:`~pcapkit.protocols.transport.sctp.SCTP`,
 :class:`~pcapkit.protocols.transport.tcp.TCP` and
-:class:`~pcapkit.protocols.transport.udp.UDP` — and exactly one of them checks
+:class:`~pcapkit.protocols.transport.udp.UDP` — and only one of them checks
 whether the value is *right*:
 :attr:`SCTP.checksum_valid <pcapkit.protocols.transport.sctp.SCTP.checksum_valid>`.
-For the other nine the field is recorded and never questioned, so a corrupted
+For the others the field is recorded and never questioned, so a corrupted
 capture parses as cleanly as an intact one.
 
-**These are two different problems and they want separating**, because only one
+**These are different problems and they want separating**, because only one
 of them is cryptographic and the distinction decides what is actually hard.
 
 **The one's-complement Internet checksum**, which covers IPv4's header, TCP, UDP,
@@ -835,7 +832,7 @@ the SCTP packet alone. Note also that SCTP's CRC32c is a hand-rolled lookup tabl
 in :mod:`pcapkit.protocols.transport.sctp`, not a library call, so it is not
 precedent for a dependency either.
 
-**The cryptographic integrity checks** are where the :mod:`cryptography`
+**The cryptographic integrity checks** are where the ``cryptography``
 dependency — introduced for ESP — genuinely buys something new, and half of that
 is already done. :class:`~pcapkit.protocols.internet.esp.ESP` **already verifies
 its ICV** when a Security Association is supplied, and deliberately reports a
@@ -847,7 +844,7 @@ packet. Verifying them needs a keying context in the shape ESP already
 established through :mod:`pcapkit.corekit.context`, which is the reusable part of
 the design rather than something to invent.
 
-All three of the policy questions this raised have been settled by the repo
+The policy questions this raised have all been settled by the repo
 owner, and each lands on a precedent the library already has:
 
 * **Verification is opt-in.** Checksumming every packet costs real time on a
@@ -913,8 +910,8 @@ from the same test.
 
 Worth spelling out how that workflow is *reached*, because reading its ``on:``
 block alone suggests it is not reachable from an ordinary commit at all — it
-lists only ``push`` on ``v*`` tags and a ``workflow_run``. The chain is three
-hops, not two: a push to ``main`` triggers **Unit Tests**
+lists only ``push`` on ``v*`` tags and a ``workflow_run``. The chain has an
+extra hop: a push to ``main`` triggers **Unit Tests**
 (``unit-tests.yml``), whose completion triggers **Vendor Update**
 (``cron-vendor.yml``) via ``workflow_run`` -- ``cron-vendor.yml`` carries no
 ``push`` trigger of its own, deliberately, per its own comment at
@@ -945,10 +942,10 @@ tag that output answers for is the one ``github`` is about to create. ``tag``,
 ``pypi`` and ``conda`` each gate on their own target instead -- whether the
 matching Conda tag exists, whether PyPI's file count for the version has
 reached the expected total, whether Anaconda's upload is complete. Each of
-those three additionally requires ``version_check`` and the release test gate
+those additionally requires ``version_check`` and the release test gate
 (``unit-tests``) to have succeeded, and ``github`` -- and, for ``conda``,
 ``tag`` -- to have succeeded *or skipped*. ``github`` itself needs the gate
-directly, and the gate runs only when one of the four would.
+directly, and the gate runs only when one of the publishing jobs would.
 Those conditions open with ``!cancelled()``, which suppresses the ``success()``
 Actions would otherwise prepend; accepting ``skipped`` is then what stops an
 upstream job's legitimate skip cascading into skipping a job whose own evidence
@@ -958,8 +955,8 @@ cleanly, instead of letting it run against an artefact that was never
 produced.
 
 That is why an ordinary commit does not publish: the version string has not
-moved, so each job's own check finds its target already there and all four
-skip, as does the full-suite release test gate ahead of them. Changing the version string is what flips every one of those checks, and
+moved, so each job's own check finds its target already there and every one of
+them skips, as does the full-suite release test gate ahead of them. Changing the version string is what flips every one of those checks, and
 the next push then tags and publishes. So:
 
 .. list-table::
@@ -1031,7 +1028,7 @@ instead of defaulting to ``LinkType.NULL``.
 
 **Wave 3 — the remaining protocols** from the same list, taken three or four at a
 time. QUIC, DSL, FDDI and ISDN come last: QUIC because it is really HTTP/3 over a
-new transport and wants that settled first, the other three because a capture in
+new transport and wants that settled first, the rest because a capture in
 the wild is rare enough that the work buys little until the commoner protocols
 are in.
 
@@ -1049,7 +1046,7 @@ with nothing but ``Raw`` to register. The counter-argument is real though, and
 worth weighing rather than dismissing: changing the parsed shape from
 :obj:`bytes` to ``Raw`` is the disruptive half, since it changes what existing
 captures dump to, so there is a case for taking that churn early and registering
-dissectors later. The third format, the :rfc:`6088` traffic selectors of
+dissectors later. The remaining format, the :rfc:`6088` traffic selectors of
 :rfc:`6089` and :rfc:`7222`, has no wave at all — it is a registry of its own and
 nobody has claimed it.
 
@@ -1060,10 +1057,10 @@ working per-entry read/make pair behind it. The goal of this item is to close
 that gap to zero for every code whose format is actually specified.
 
 Both halves of the gap are measurable — the registered codes against the
-eighteen families :file:`examples/generators/options.py` walks, and the shortfall
+families :file:`examples/generators/options.py` walks, and the shortfall
 against ``EXPECTED_FAILURES`` in
 :file:`tests/protocols/test_option_roundtrip_unit.py` — so the commands are
-written down instead of a pair of figures that will be stale by the next merge:
+written down instead of figures that will be stale by the next merge:
 
 .. code-block:: shell
 
@@ -1079,13 +1076,13 @@ written down instead of a pair of figures that will be stale by the next merge:
               spec.loader.exec_module(m); \
               print(collections.Counter(k.split('/')[0] for k in m.EXPECTED_FAILURES))"
 
-Two things to be precise about before anyone starts. First, the round-trip half
+Things to be precise about before anyone starts. First, the round-trip half
 is closed: ``EXPECTED_FAILURES`` is empty, so every case the harness enumerates
 round-trips, and a new entry there would record a defect rather than a
 deferral. Second, **round-tripping is not the same as being implemented** — the
 harness walks the codes each protocol registers a handler for, not every code
 its enumeration names, so what remains is the codes with no per-entry handler,
-such as the 17 SCTP chunk types under `SCTP`_ above, which fall through to the
+such as the SCTP chunk types under `SCTP`_ above, which fall through to the
 generic handlers and parse as opaque.
 
 This is deliberately **not** the same request as the ``__proto__`` dispatch
@@ -1103,7 +1100,7 @@ protocol's dispatch reaches it.
 **Between wave 1 and wave 2 — a library-wide consistency sweep.** Clearing
 defects one at a time, each found because something else was being worked on
 nearby, is a poor way to find the rest of them. So before wave 2 starts the
-library gets swept deliberately, in five strands:
+library gets swept deliberately, in strands:
 
 * **Prose against code.** Docstrings, the README, and inline comments checked
   against what the code does. A docstring outliving the thing it described is a
@@ -1122,30 +1119,30 @@ library gets swept deliberately, in five strands:
 * **Packet formats against the specifications.** The most valuable strand, and
   the one with the clearest evidence behind it: reading the RFC field-by-field
   against the schema is what produced
-  `#472 <https://github.com/JarryShaw/PyPCAPKit/issues/472>`__ — two HIP
+  `#472 <https://github.com/JarryShaw/PyPCAPKit/issues/472>`__ — HIP
   parameters sizing their list entries at one octet where :rfc:`5770` §5.4 and
   :rfc:`7402` §5.1.2 specify sixteen bits — and the same method then *cleared*
-  fourteen further
+  the further
   ``EnumField(length=1)`` sites in the same file against :rfc:`7401`,
   :rfc:`8002`, :rfc:`8003`, :rfc:`5770` and :rfc:`6078`. It both finds real
   defects and retires suspicion, which is why it is worth doing exhaustively
   rather than opportunistically.
 * **Duplicated logic that wants a shared module.** The same method or the same
   arithmetic written out in several protocols, where one definition would do.
-  This strand has the sharpest evidence of the five, because duplication here has
+  This strand has the sharpest evidence of them all, because duplication here has
   already *caused* defects rather than merely offended tidiness:
 
   - `#487 <https://github.com/JarryShaw/PyPCAPKit/issues/487>`__ existed because
-    ``IPv6_Route.make()`` computed ``Hdr Ext Len`` in **two** branches with two
-    different wrong units, and the read side computed the inverse in a third
-    place with a fourth. The fix was not new arithmetic but one helper per
+    ``IPv6_Route.make()`` computed ``Hdr Ext Len`` in **separate** branches with
+    different wrong units, and the read side computed the inverse elsewhere with
+    yet another. The fix was not new arithmetic but one helper per
     direction, each documenting the :rfc:`8200#section-4.4` unit and saying what
     its counterpart is.
   - `#483 <https://github.com/JarryShaw/PyPCAPKit/issues/483>`__ was the scapy
     toolkit adapter passing a fragment offset unscaled where every sibling
-    adapter scaled it. Five adapters each restate the same field mapping, so a
-    convention that holds in four and breaks in the fifth is invisible until a
-    capture is wrong.
+    adapter scaled it. Every adapter restates the same field mapping, so a
+    convention that holds in all but one is invisible until a capture is
+    wrong.
 
   So the strand is not a style pass. Look for arithmetic that encodes a wire
   unit, field-mapping tables restated per engine, and guards of the same shape
@@ -1166,7 +1163,7 @@ both wrong when re-derived.
 **Queued for wave 2 or 3 — checksum and integrity verification.** See `Checksum
 and Integrity Verification`_ above. It splits in two, and the halves are not
 equally blocked: the cryptographic half (HIP's ``HIP_MAC``/``RVS_HMAC``/
-``RELAY_HMAC`` and its two signature parameters) could start whenever, since
+``RELAY_HMAC`` and its signature parameters) could start whenever, since
 :class:`~pcapkit.protocols.internet.esp.ESP` has already established both the
 keying-context channel and the report-rather-than-raise policy. The
 one's-complement half (IPv4, TCP, UDP, ICMP/ICMPv6, OSPF) needs the IP

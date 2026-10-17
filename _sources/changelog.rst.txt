@@ -37,11 +37,11 @@ All notable changes to PyPCAPKit are recorded here.
    carry something real, it is called out.
 
 Releases are listed newest first. The repository root's :file:`CHANGELOG.md`
-carries only the version being released; this page is the whole history.
+carries only the version being released; this page is the whole recorded history.
 
 * **1.5.0** (unreleased) -- The largest release since 1.0, and the first
-  recorded here as it happened rather than reconstructed: three more
-  extraction engines, ESP with payload decryption, SCTP and NGAP over SCTP,
+  recorded here as it happened rather than reconstructed: more extraction
+  engines, ESP with payload decryption, SCTP and NGAP over SCTP,
   and a logger that no longer hijacks the consumer's. :doc:`Full changelog
   <changelog/1.5.0>`.
 * **1.4.1** (2026-08-22) -- Release engineering only -- no library behaviour
@@ -78,12 +78,11 @@ carries only the version being released; this page is the whole history.
   day earlier in 1.2.0. :doc:`Full changelog <changelog/1.2.1>`.
 * **1.2.0** (2023-08-26) -- Added streaming input through
   ``SeekableReader``, so a capture can be read from ``stdin`` or a pipe
-  (:issue:`156`), and fixed reassembly, broken since 0.16.3 (:issue:`155`). :doc:`Full
-  changelog <changelog/1.2.0>`.
-* **1.1.1** (2023-08-15) -- Fixed ``AppType`` enumeration lookups,
-  ``typing.TypeAlias`` compatibility on older interpreters, the flow-tracing
-  output file name, and ``Schema`` dumping through a custom dumper. :doc:`Full
-  changelog <changelog/1.1.1>`.
+  (:issue:`156`). :doc:`Full changelog <changelog/1.2.0>`.
+* **1.1.1** (2023-08-15) -- Fixed reassembly, broken since 1.0.0 (:issue:`155`),
+  ``AppType`` enumeration lookups, ``typing.TypeAlias`` compatibility on older
+  interpreters, the flow-tracing output file name, and ``Schema`` dumping through
+  a custom dumper. :doc:`Full changelog <changelog/1.1.1>`.
 * **1.1.0** (2023-07-09) -- Rebuilt the schema and field classes on
   metaclasses, with ``EnumSchema`` for enum-dispatched schemas, and revised
   the IPv4, HOPOPT, IPv6-Opts, IPv6-Route, HIP, MH, TCP, HTTP/2 and PCAP-NG
@@ -101,7 +100,8 @@ carries only the version being released; this page is the whole history.
 * **1.0.0** (2023-05-09) -- The 1.0 rewrite: parsing and construction became
   one declarative schema and field definition per protocol, the extraction
   backend became pluggable (with PCAP-NG support and the DPKT, Scapy and
-  PyShark engines), and roughly 55,000 lines changed across 617 files.
+  PyShark engines), and roughly 55,000 lines added and 15,000 removed across
+  617 files.
   :doc:`Full changelog <changelog/1.0.0>`.
 * **0.16.3** (2022-10-31) -- Fixed import crashes on some interpreters (:issue:`114`,
   :issue:`116`), the reassembly property caches, and README rendering for PyPI; the

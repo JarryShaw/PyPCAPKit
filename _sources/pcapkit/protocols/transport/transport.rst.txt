@@ -1,11 +1,11 @@
-Base Protocol
-=============
+Transport Layer Base Protocol
+=============================
 
 .. module:: pcapkit.protocols.transport.transport
 
 :mod:`pcapkit.protocols.transport.transport` contains
 :class:`~pcapkit.protocols.transport.transport.Transport`,
-which is a base class for transport layer protocols, eg.
+which is a base class for transport layer protocols, e.g.
 :class:`~pcapkit.protocols.transport.tcp.TCP`,
 :class:`~pcapkit.protocols.transport.udp.UDP` and
 :class:`~pcapkit.protocols.transport.sctp.SCTP`.

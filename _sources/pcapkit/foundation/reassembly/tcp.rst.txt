@@ -19,6 +19,8 @@ which reconstructs fragmented TCP packets back to origin.
    .. autoattribute:: __protocol_type__
    .. autoattribute:: __callback_fn__
       :no-value:
+   .. autoattribute:: __timeout__
+   .. autoattribute:: __window__
 
 Algorithm
 =========
@@ -157,7 +159,7 @@ Terminology
    reasm.tcp.packet
        Data structure for **TCP datagram reassembly**
        (:meth:`TCP.reassembly <pcapkit.foundation.reassembly.reassembly.Reassembly.reassembly>`)
-       is as following:
+       is as follows:
 
        .. code-block:: python
 
@@ -195,7 +197,7 @@ Terminology
    reasm.tcp.datagram
        Data structure for **reassembled TCP datagram** (element from
        :attr:`TCP.datagram <pcapkit.foundation.reassembly.reassembly.Reassembly.datagram>`
-       *tuple*) is as following:
+       *tuple*) is as follows:
 
        .. code-block:: text
 
@@ -254,7 +256,7 @@ Terminology
    reasm.tcp.buffer
        Data structure for internal buffering when performing reassembly algorithms
        (:attr:`TCP._buffer <pcapkit.foundation.reassembly.reassembly.Reassembly._buffer>`)
-       is as following:
+       is as follows:
 
        .. code-block:: text
 
@@ -375,9 +377,4 @@ Type Variables
    :module: pcapkit.foundation.reassembly.data.tcp
    :type: ipaddress.IPv4Address | ipaddress.IPv6Address
 
-.. data:: BufferID
-   :module: pcapkit.foundation.reassembly.data.tcp
-   :type: typing.Tuple[~pcapkit.foundation.reassembly.data.tcp._AT, int, ~pcapkit.foundation.reassembly.data.tcp._AT, int]
-   :no-index:
-
-   Buffer ID data structure.
+   IP address type.

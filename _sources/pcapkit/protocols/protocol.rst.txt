@@ -130,10 +130,14 @@ starts at the first layer it dissects. One chain of extension headers is also bo
 its own, by :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`.
 The ``pyshark``, ``scapy`` and ``pypcapfile`` engines dissect with their own
 parsers, which do not apply the frame's layer bound (:issue:`1609`). The
-``dpkt`` toolkit reads what :mod:`dpkt` decodes, which applies neither bound.
+``dpkt`` toolkit reads what ``dpkt`` decodes, which applies neither bound.
 
 Data Models
 -----------
+
+.. autoclass:: pcapkit.protocols.data.protocol.Protocol
+   :members:
+   :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.data.protocol.Packet
    :members:
@@ -189,6 +193,7 @@ Internal Definitions
                   _make_data
                   _make_index
                   _make_payload
+                  _packing_target
                   _lookup_registry
                   _lookup_next_layer
                   _decode_next_layer
@@ -214,6 +219,7 @@ Internal Definitions
       :meth:`~Protocol.expand_comp`, :meth:`~Protocol._read_packet`,
       :meth:`~Protocol._get_payload`, :meth:`~Protocol._make_data`,
       :meth:`~Protocol._make_index`, :meth:`~Protocol._make_payload`,
+      :meth:`~Protocol._packing_target`,
       :meth:`~Protocol._lookup_registry`, :meth:`~Protocol._lookup_next_layer`,
       :meth:`~Protocol._decode_next_layer`,
       :meth:`~Protocol._import_next_layer`,

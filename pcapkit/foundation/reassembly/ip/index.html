@@ -7,9 +7,9 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/foundation/reassembly/ip/index.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="The algorithm below follows the IP reassembly procedure of RFC 791, using RCVBT(fragment received bit table). RFC 815 explains an alternative that replaces RCVBT; it is not used here. Base Class- D..." />
-<meta name="description" content="The algorithm below follows the IP reassembly procedure of RFC 791, using RCVBT(fragment received bit table). RFC 815 explains an alternative that replaces RCVBT; it is not used here. Base Class- D..." />
-<link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html"><link rel="next" title="Base Class" href="ip.html"><link rel="prev" title="Base Class" href="../reassembly.html">
+<meta property="og:description" content="The algorithm below follows the IP reassembly procedure of RFC 791, using RCVBT(fragment received bit table). RFC 815 explains an alternative that replaces RCVBT; it is not used here. IP Reassembly..." />
+<meta name="description" content="The algorithm below follows the IP reassembly procedure of RFC 791, using RCVBT(fragment received bit table). RFC 815 explains an alternative that replaces RCVBT; it is not used here. IP Reassembly..." />
+<link rel="index" title="Index" href="../../../../genindex.html"><link rel="search" title="Search" href="../../../../search.html"><link rel="next" title="IP Reassembly Base Class" href="ip.html"><link rel="prev" title="Reassembly Base Class" href="../reassembly.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
         <title>IP Datagram Reassembly - PyPCAPKit</title>
@@ -222,9 +222,9 @@
 </ul>
 </li>
 <li class="toctree-l3 current has-children"><a class="reference internal" href="../index.html">Packets Reassembly</a><input aria-label="Toggle navigation of Packets Reassembly" checked="" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="../reassembly.html">Base Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../reassembly.html">Reassembly Base Class</a></li>
 <li class="toctree-l4 current has-children current-page"><a class="current reference internal" href="#">IP Datagram Reassembly</a><input aria-label="Toggle navigation of IP Datagram Reassembly" checked="" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l5"><a class="reference internal" href="ip.html">Base Class</a></li>
+<li class="toctree-l5"><a class="reference internal" href="ip.html">IP Reassembly Base Class</a></li>
 <li class="toctree-l5"><a class="reference internal" href="ipv4.html">IPv4 Datagram Reassembly</a></li>
 <li class="toctree-l5"><a class="reference internal" href="ipv6.html">IPv6 Datagram Reassembly</a></li>
 </ul>
@@ -233,7 +233,7 @@
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../traceflow/index.html">Flow Tracing</a><input aria-label="Toggle navigation of Flow Tracing" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../traceflow/traceflow.html">Base Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../traceflow/traceflow.html">Flow Tracing Base Class</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../traceflow/tcp.html">Follow TCP Stream</a></li>
 </ul>
 </li>
@@ -243,7 +243,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../protocols/index.html">Protocol Family</a><input aria-label="Toggle navigation of Protocol Family" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../../../protocols/protocol.html">Root Protocol</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../protocols/link/index.html">Link Layer</a><input aria-label="Toggle navigation of Link Layer" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../protocols/link/link.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/link/link.html">Link Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../protocols/link/ethernet.html">Ethernet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
@@ -255,7 +255,7 @@
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../protocols/internet/index.html">Internet Layer</a><input aria-label="Toggle navigation of Internet Layer" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../protocols/internet/internet.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/internet/internet.html">Internet Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
@@ -274,14 +274,14 @@
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../protocols/transport/index.html">Transport Layer</a><input aria-label="Toggle navigation of Transport Layer" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../protocols/transport/transport.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/transport/transport.html">Transport Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../protocols/transport/sctp.html">SCTP - Stream Control Transmission Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../protocols/transport/tcp.html">TCP - Transmission Control Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../protocols/transport/udp.html">UDP - User Datagram Protocol</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../../protocols/application/index.html">Application Layer</a><input aria-label="Toggle navigation of Application Layer" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../../protocols/application/application.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/application/application.html">Application Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../protocols/application/http.html">HTTP - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
@@ -499,7 +499,7 @@
 that replaces <code class="docutils literal notranslate"><span class="pre">RCVBT</span></code>; it is not used here.</p>
 <div class="toctree-wrapper compound">
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="ip.html">Base Class</a><ul>
+<li class="toctree-l1"><a class="reference internal" href="ip.html">IP Reassembly Base Class</a><ul>
 <li class="toctree-l2"><a class="reference internal" href="ip.html#module-pcapkit.foundation.reassembly.data.ip">Data Models</a></li>
 <li class="toctree-l2"><a class="reference internal" href="ip.html#type-variables">Type Variables</a></li>
 </ul>
@@ -609,7 +609,7 @@ timer expires: {
 <p>Because completion frees the buffer (<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html#section-3.2"><strong>RFC 791 Section 3.2</strong></a>), a fragment that
 arrives after its datagram has completed opens a new buffer, which is later
 reported as a separate incomplete datagram; this is intended (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1507">#1507</a>).</p>
-<p>Three departures from the procedure above:</p>
+<p>Departures from the procedure above:</p>
 <ul class="simple">
 <li><p>Only the final fragment’s partial last <code class="docutils literal notranslate"><span class="pre">RCVBT</span></code> block is set. A non-final
 fragment carries a multiple of 8 octets, so one ending mid-block was cut or
@@ -637,7 +637,7 @@ buffer instead, and only the buffer bounds it.</p></li>
                 <div class="context">
                   <span>Next</span>
                 </div>
-                <div class="title">Base Class</div>
+                <div class="title">IP Reassembly Base Class</div>
               </div>
               <svg class="furo-related-icon"><use href="#svg-arrow-right"></use></svg>
             </a>
@@ -648,7 +648,7 @@ buffer instead, and only the buffer bounds it.</p></li>
                   <span>Previous</span>
                 </div>
                 
-                <div class="title">Base Class</div>
+                <div class="title">Reassembly Base Class</div>
                 
               </div>
             </a>

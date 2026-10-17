@@ -7,7 +7,7 @@ File Extractor
 :class:`~pcapkit.foundation.extraction.Extractor` only,
 which synthesises file I/O and protocol analysis,
 coordinates information exchange in all network layers,
-extracts parameters from a PCAP file.
+and extracts parameters from a PCAP file.
 
 .. seealso::
 
@@ -15,9 +15,9 @@ extracts parameters from a PCAP file.
    :class:`pcapkit.foundation.engines.pypcap.PyPCAP` (``engine='pypcap'``),
    :class:`pcapkit.foundation.engines.pcap_ct.PCAP_CT` (``engine='pcap_ct'``)
    and :class:`pcapkit.foundation.engines.pypcapfile.PyPCAPFile`
-   (``engine='pypcapfile'``). All three support less than the ``default``
-   engine does; :doc:`engines/index` tabulates the gaps, and :doc:`../../index`
-   documents their installation prerequisites.
+   (``engine='pypcapfile'``). Each supports less than the ``default``
+   engine does; :doc:`engines/index` tabulates the gaps, and the
+   :doc:`main page <../../index>` documents their installation prerequisites.
 
 .. autoclass:: pcapkit.foundation.extraction.Extractor
    :no-members:
@@ -106,6 +106,8 @@ Type Variables
 
 .. data:: _P
    :type: typing.Any
+
+   Frame type the extractor yields, as read by its engine.
 
 .. |pypcap| replace:: ``pypcap``
 .. _pypcap: https://github.com/pynetwork/pypcap

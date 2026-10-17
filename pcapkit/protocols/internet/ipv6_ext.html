@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/internet/ipv6_ext.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.internet.ipv6_ext contains IPv6_Ext only, which serves two roles at once. It is the shared base class of all eight IPv6 extension headers this package implements, supplying the ex..." />
-<meta name="description" content="pcapkit.protocols.internet.ipv6_ext contains IPv6_Ext only, which serves two roles at once. It is the shared base class of all eight IPv6 extension headers this package implements, supplying the ex..." />
+<meta property="og:description" content="pcapkit.protocols.internet.ipv6_ext contains IPv6_Ext only, which plays a double role. It is the shared base class of every IPv6 extension header this package implements, supplying the extension-mo..." />
+<meta name="description" content="pcapkit.protocols.internet.ipv6_ext contains IPv6_Ext only, which plays a double role. It is the shared base class of every IPv6 extension header this package implements, supplying the extension-mo..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="IPv6-Frag - Fragment Header for IPv6" href="ipv6_frag.html"><link rel="prev" title="IPv6 - Internet Protocol version 6" href="ipv6.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -222,9 +222,9 @@
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../foundation/reassembly/index.html">Packets Reassembly</a><input aria-label="Toggle navigation of Packets Reassembly" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../foundation/reassembly/reassembly.html">Base Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/reassembly/reassembly.html">Reassembly Base Class</a></li>
 <li class="toctree-l4 has-children"><a class="reference internal" href="../../foundation/reassembly/ip/index.html">IP Datagram Reassembly</a><input aria-label="Toggle navigation of IP Datagram Reassembly" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l5"><a class="reference internal" href="../../foundation/reassembly/ip/ip.html">Base Class</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../foundation/reassembly/ip/ip.html">IP Reassembly Base Class</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../../foundation/reassembly/ip/ipv4.html">IPv4 Datagram Reassembly</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../../foundation/reassembly/ip/ipv6.html">IPv6 Datagram Reassembly</a></li>
 </ul>
@@ -233,7 +233,7 @@
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../foundation/traceflow/index.html">Flow Tracing</a><input aria-label="Toggle navigation of Flow Tracing" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../foundation/traceflow/traceflow.html">Base Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/traceflow/traceflow.html">Flow Tracing Base Class</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/traceflow/tcp.html">Follow TCP Stream</a></li>
 </ul>
 </li>
@@ -243,7 +243,7 @@
 <li class="toctree-l2 current has-children"><a class="reference internal" href="../index.html">Protocol Family</a><input aria-label="Toggle navigation of Protocol Family" checked="" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="../protocol.html">Root Protocol</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../link/index.html">Link Layer</a><input aria-label="Toggle navigation of Link Layer" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../link/link.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../link/link.html">Link Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/ethernet.html">Ethernet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
@@ -255,7 +255,7 @@
 </ul>
 </li>
 <li class="toctree-l3 current has-children"><a class="reference internal" href="index.html">Internet Layer</a><input aria-label="Toggle navigation of Internet Layer" checked="" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l4"><a class="reference internal" href="internet.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="internet.html">Internet Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ipv6.html">IPv6 - Internet Protocol version 6</a></li>
@@ -274,14 +274,14 @@
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../transport/index.html">Transport Layer</a><input aria-label="Toggle navigation of Transport Layer" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../transport/transport.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../transport/transport.html">Transport Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../transport/sctp.html">SCTP - Stream Control Transmission Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../transport/tcp.html">TCP - Transmission Control Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../transport/udp.html">UDP - User Datagram Protocol</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../application/index.html">Application Layer</a><input aria-label="Toggle navigation of Application Layer" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../application/application.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../application/application.html">Application Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/http.html">HTTP - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
@@ -496,8 +496,8 @@
 <span id="ipv6-ext-ipv6-extension-header"></span><h1>IPv6_Ext - IPv6 Extension Header<a class="headerlink" href="#module-pcapkit.protocols.internet.ipv6_ext" title="Link to this heading">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.protocols.internet.ipv6_ext" title="pcapkit.protocols.internet.ipv6_ext"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6_ext</span></code></a> contains
 <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a>
-only, which serves two roles at once. It is the shared <strong>base class</strong> of all
-eight IPv6 extension headers this package implements, supplying the
+only, which plays a double role. It is the shared <strong>base class</strong> of every
+IPv6 extension header this package implements, supplying the
 <code class="docutils literal notranslate"><span class="pre">extension</span></code>-mode contract: the guards that make
 <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.payload" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.payload"><code class="xref py py-attr docutils literal notranslate"><span class="pre">payload</span></code></a>,
 <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protocol" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protocol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">protocol</span></code></a> and
@@ -525,11 +525,8 @@ April 2012 carry the same first two octets:</p>
 <tr class="row-odd"><td><p>1</p></td>
 <td><p>8</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">len</span></code></p></td>
-<td><dl class="simple">
-<dt>Hdr Ext Len (8-octet units,</dt><dd><p>excluding the first 8 octets)</p>
-</dd>
-</dl>
-</td>
+<td><p>Hdr Ext Len (8-octet units,
+excluding the first 8 octets)</p></td>
 </tr>
 <tr class="row-even"><td><p>2</p></td>
 <td><p>16</p></td>
@@ -544,7 +541,7 @@ header. The module docstring in <code class="file docutils literal notranslate">
 holds the closed exception table (<code class="docutils literal notranslate"><span class="pre">IPv6-Frag</span></code> and <code class="docutils literal notranslate"><span class="pre">AH</span></code> each use their own
 length rule; <code class="docutils literal notranslate"><span class="pre">ESP</span></code> has a dedicated parser whose own info reports no next header
 rather than lacking one, and <code class="docutils literal notranslate"><span class="pre">253</span></code> and <code class="docutils literal notranslate"><span class="pre">254</span></code> have no dedicated parser at all,
-so none of the three ever reaches this class), the two ways this class is
+so none of them ever reaches this class), the ways this class is
 dispatched to, and why an overrun stops the walk instead of clipping it.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext">
@@ -552,18 +549,17 @@ dispatched to, and why an overrun stops the walk instead of clipping it.</p>
 <dd><p>Bases: <a class="reference internal" href="internet.html#pcapkit.protocols.internet.internet.Internet" title="pcapkit.protocols.internet.internet.Internet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Internet</span></code></a>[<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol._PT" title="pcapkit.protocols.protocol._PT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_PT</span></code></a>, <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol._ST" title="pcapkit.protocols.protocol._ST"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_ST</span></code></a>], <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Generic" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Generic</span></code></a>[<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol._PT" title="pcapkit.protocols.protocol._PT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_PT</span></code></a>, <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol._ST" title="pcapkit.protocols.protocol._ST"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_ST</span></code></a>]</p>
 <p>This class implements a generic IPv6 extension header parser, and is
 the shared base of every IPv6 extension header in this package.</p>
-<p>The module docstring has the RFC citations behind the length rules, the two
+<p>The module docstring has the RFC citations behind the length rules, the
 ways this class is dispatched to, and why an overrun stops the walk rather
 than clipping.</p>
-<section id="the-two-roles">
-<h2>The two roles<a class="headerlink" href="#the-two-roles" title="Link to this heading">¶</a></h2>
+<p class="rubric">Base and Fallback Roles</p>
 <p>One class plays both, on the owner’s ruling for GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/917">#917</a>:</p>
 <ol class="arabic simple">
 <li><p><strong>The concrete fallback parser</strong> for an <span class="target" id="index-1"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6564.html"><strong>RFC 6564</strong></a>-conforming header
 with no dedicated class, or whose dedicated class raised. <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a>,
 <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.make" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">make()</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.name" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.alias" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.alias"><code class="xref py py-attr docutils literal notranslate"><span class="pre">alias</span></code></a> and the <code class="docutils literal notranslate"><span class="pre">schema=</span></code>/<code class="docutils literal notranslate"><span class="pre">data=</span></code>
-above implement it.</p></li>
-<li><p><strong>The base class</strong> of the eight implemented extension headers
+class keywords implement it.</p></li>
+<li><p><strong>The base class</strong> of the implemented extension headers
 (<a class="reference internal" href="hopopt.html#pcapkit.protocols.internet.hopopt.HOPOPT" title="pcapkit.protocols.internet.hopopt.HOPOPT"><code class="xref py py-class docutils literal notranslate"><span class="pre">HOPOPT</span></code></a>,
 <a class="reference internal" href="ipv6_route.html#pcapkit.protocols.internet.ipv6_route.IPv6_Route" title="pcapkit.protocols.internet.ipv6_route.IPv6_Route"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Route</span></code></a>,
 <a class="reference internal" href="ipv6_frag.html#pcapkit.protocols.internet.ipv6_frag.IPv6_Frag" title="pcapkit.protocols.internet.ipv6_frag.IPv6_Frag"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Frag</span></code></a>,
@@ -576,15 +572,15 @@ above implement it.</p></li>
 <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protochain" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protochain"><code class="xref py py-attr docutils literal notranslate"><span class="pre">protochain</span></code></a> are for.</p></li>
 </ol>
 <p>It is generic in its data and schema types, like
-<a class="reference internal" href="ipsec.html#pcapkit.protocols.internet.ipsec.IPsec" title="pcapkit.protocols.internet.ipsec.IPsec"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPsec</span></code></a>, the other base in this
+<a class="reference internal" href="ipsec.html#pcapkit.protocols.internet.ipsec.IPsec" title="pcapkit.protocols.internet.ipsec.IPsec"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPsec</span></code></a>, another base in this
 package, so that a subclass keeps its <em>own</em> <code class="docutils literal notranslate"><span class="pre">_PT</span></code>/<code class="docutils literal notranslate"><span class="pre">_ST</span></code> instead of
 inheriting this class’s. <code class="docutils literal notranslate"><span class="pre">AH</span></code> and <code class="docutils literal notranslate"><span class="pre">ESP</span></code> therefore double-inherit two
 identically-parameterised generic bases, <code class="docutils literal notranslate"><span class="pre">IPsec[…]</span></code> and <code class="docutils literal notranslate"><span class="pre">IPv6_Ext[…]</span></code>.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p>A subclass <strong>must</strong> define <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.name" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.name"><code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.alias" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.alias"><code class="xref py py-attr docutils literal notranslate"><span class="pre">alias</span></code></a>,
-<a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protocol" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protocol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">protocol</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.length" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a> and <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.__index__" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.__index__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__index__()</span></code></a> itself. All five
-carry this class’s <em>fallback-role</em> answers, which are wrong for a
+<a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protocol" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protocol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">protocol</span></code></a>, <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.length" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">length</span></code></a> and <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.__index__" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.__index__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__index__()</span></code></a> itself. Each
+carries this class’s <em>fallback-role</em> answer, which is wrong for a
 header with an identity of its own: it would report itself as
 <code class="docutils literal notranslate"><span class="pre">IPv6</span> <span class="pre">Extension</span> <span class="pre">Header</span></code> / <code class="docutils literal notranslate"><span class="pre">IPv6-Ext</span></code>, read its length off a data
 model that is not its own, and <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.__index__" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.__index__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__index__()</span></code></a> would raise rather
@@ -628,7 +624,7 @@ dict as <code class="docutils literal notranslate"><span class="pre">_ext</span>
 <p>Fallback-role member: it reads this module’s <em>own</em> data model, so a
 subclass whose data model records its length elsewhere, or not at all
 (as <a class="reference internal" href="ipv6_frag.html#pcapkit.protocols.data.internet.ipv6_frag.IPv6_Frag" title="pcapkit.protocols.data.internet.ipv6_frag.IPv6_Frag"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Frag</span></code></a>), must
-override it. All eight implemented headers do, and
+override it. Every implemented header does, and
 <code class="docutils literal notranslate"><span class="pre">tests/protocols/internet/test_ipv6_ext_unit.py</span></code> holds them to it.</p>
 </dd></dl>
 
@@ -654,7 +650,7 @@ holds before it dispatches. See <a class="reference internal" href="#pcapkit.pro
 it would make the identity unreadable in exactly the case it exists for.</p>
 <p>In the <em>base</em> role it falls through to <code class="docutils literal notranslate"><span class="pre">super()</span></code>, restoring the
 ordinary <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> meaning.
-That is load-bearing: all eight subclasses implement their own
+That is load-bearing: every subclass implements its own
 <code class="docutils literal notranslate"><span class="pre">_extf</span></code>-guarded <code class="docutils literal notranslate"><span class="pre">protocol</span></code> as <code class="docutils literal notranslate"><span class="pre">return</span> <span class="pre">super().protocol</span></code>, and this
 class sits between them and
 <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> in the MRO, so without
@@ -712,8 +708,8 @@ module docstring’s “overrun guard” section.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – Length of packet data.</p></li>
 <li><p><strong>extension</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – If the protocol is used as an IPv6 extension header.</p></li>
-<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – <p>Arbitrary keyword arguments, two of which are this
-class’s own and are supplied by <a class="reference internal" href="ipv6.html#pcapkit.protocols.internet.ipv6.IPv6._import_next_layer" title="pcapkit.protocols.internet.ipv6.IPv6._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv6._import_next_layer</span></code></a>
+<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – <p>Arbitrary keyword arguments, including these, which are
+this class’s own and are supplied by <a class="reference internal" href="ipv6.html#pcapkit.protocols.internet.ipv6.IPv6._import_next_layer" title="pcapkit.protocols.internet.ipv6.IPv6._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv6._import_next_layer</span></code></a>
 rather than typed by a caller:</p>
 <ul>
 <li><p><code class="docutils literal notranslate"><span class="pre">alias</span></code> – the numeric extension header code this instance
@@ -735,10 +731,10 @@ fallback rather than by direct dispatch.</p></li>
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Those two are read out of <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code> rather than declared, and
+<p>These are read out of <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code> rather than declared, and
 <code class="docutils literal notranslate"><span class="pre">version</span></code> is not declared either, because this class is <em>also</em>
-the base of eight subclasses whose own <code class="docutils literal notranslate"><span class="pre">read</span></code> accepts none of the
-three. Declaring them would assert of the whole family an interface
+the base of subclasses whose own <code class="docutils literal notranslate"><span class="pre">read</span></code> accepts none of them.
+Declaring them would assert of the whole family an interface
 only the fallback has, which mypy (<code class="docutils literal notranslate"><span class="pre">Signature</span> <span class="pre">of</span> <span class="pre">&quot;read&quot;</span>
 <span class="pre">incompatible</span> <span class="pre">with</span> <span class="pre">supertype</span></code>, <code class="docutils literal notranslate"><span class="pre">[override]</span></code>) and pylint
 (<code class="docutils literal notranslate"><span class="pre">arguments-differ</span></code>) both reject. This method never reads
@@ -773,21 +769,21 @@ verbatim ahead of <code class="docutils literal notranslate"><span class="pre">p
 </dl>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p><strong>Keyword-only</strong>, for two reasons.</p>
-<p>The four stay <em>declared</em>, unlike <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a>’s own keywords,
-because <code class="xref py py-func docutils literal notranslate"><span class="pre">_check_construction_keywords()</span></code>
+<p><strong>Declared, and keyword-only</strong>, each for its own reason.</p>
+<p>These keywords stay <em>declared</em>, unlike <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.read"><code class="xref py py-meth docutils literal notranslate"><span class="pre">read()</span></code></a>’s own,
+because <code class="docutils literal notranslate"><span class="pre">_check_construction_keywords()</span></code>
 builds its allowlist from <a class="reference external" href="https://docs.python.org/3/library/inspect.html#inspect.signature" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">inspect.signature()</span></code></a> of <code class="docutils literal notranslate"><span class="pre">make</span></code>.
 Hiding them in <code class="docutils literal notranslate"><span class="pre">**kwargs</span></code> <strong>breaks construction</strong>: a plain
 <code class="docutils literal notranslate"><span class="pre">IPv6_Ext(next=...,</span> <span class="pre">len=...,</span> <span class="pre">data=...,</span> <span class="pre">payload=...)</span></code> raises
 <code class="docutils literal notranslate"><span class="pre">UnsupportedCall:</span> <span class="pre">IPv6_Ext:</span> <span class="pre">unexpected</span> <span class="pre">keyword(s)</span></code>. The
 <code class="docutils literal notranslate"><span class="pre">__keywords__</span></code> escape hatch would cover that, but it is unioned
 down the MRO, so it would widen the allowlist, and weaken that
-misspelling check, for all eight subclasses too.</p>
+misspelling check, for every subclass too.</p>
 <p>They are keyword-<em>only</em> because this class is also a base and each
 subclass’s <code class="docutils literal notranslate"><span class="pre">make</span></code> puts different names in the same positions. As
 positional parameters they draw pylint <code class="docutils literal notranslate"><span class="pre">arguments-renamed</span></code>
 warnings (<code class="docutils literal notranslate"><span class="pre">ESP.make</span></code> has <code class="docutils literal notranslate"><span class="pre">spi</span></code>, <code class="docutils literal notranslate"><span class="pre">seq</span></code> and <code class="docutils literal notranslate"><span class="pre">next</span></code> where
-these have <code class="docutils literal notranslate"><span class="pre">next</span></code>, <code class="docutils literal notranslate"><span class="pre">len</span></code> and <code class="docutils literal notranslate"><span class="pre">payload</span></code>) and mypy
+these have <code class="docutils literal notranslate"><span class="pre">next</span></code>, <code class="docutils literal notranslate"><span class="pre">len</span></code> and <code class="docutils literal notranslate"><span class="pre">data</span></code>) and mypy
 <code class="docutils literal notranslate"><span class="pre">[override]</span></code> errors. With no positional parameters there is no
 position to disagree about, and the allowlist is unaffected because
 <code class="docutils literal notranslate"><span class="pre">_declared_keywords</span></code> collects <code class="docutils literal notranslate"><span class="pre">KEYWORD_ONLY</span></code> parameters too.
@@ -842,7 +838,7 @@ the rebuild is byte-exact whichever per-protocol length rule
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If this is the <em>fallback</em> parser (see the class
-    docstring’s “two roles”) and <code class="docutils literal notranslate"><span class="pre">version</span></code> is not <code class="docutils literal notranslate"><span class="pre">6</span></code>.</p>
+    docstring’s “Base and Fallback Roles”) and <code class="docutils literal notranslate"><span class="pre">version</span></code> is not <code class="docutils literal notranslate"><span class="pre">6</span></code>.</p>
 </dd>
 </dl>
 <div class="admonition seealso">
@@ -853,7 +849,7 @@ the rebuild is byte-exact whichever per-protocol length rule
 <p class="admonition-title">Note</p>
 <p>The version gate is scoped to the fallback role by the same
 <code class="docutils literal notranslate"><span class="pre">__data__</span></code> discriminator <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protocol" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protocol"><code class="xref py py-attr docutils literal notranslate"><span class="pre">protocol</span></code></a> uses. Applying it to
-subclasses would break the two that are <em>not</em> IPv6-only:
+subclasses would break those that are <em>not</em> IPv6-only:
 <a class="reference internal" href="ah.html#pcapkit.protocols.internet.ah.AH" title="pcapkit.protocols.internet.ah.AH"><code class="xref py py-class docutils literal notranslate"><span class="pre">AH</span></code></a> and
 <a class="reference internal" href="esp.html#pcapkit.protocols.internet.esp.ESP" title="pcapkit.protocols.internet.esp.ESP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code></a> both default to
 <code class="docutils literal notranslate"><span class="pre">version=4</span></code> and are valid under IPv4, so an unconditional gate
@@ -902,7 +898,6 @@ behaviour, with no IPv4-specific code.</p>
 </dl>
 </dd></dl>
 
-</section>
 </dd></dl>
 
 <section id="module-pcapkit.protocols.schema.internet.ipv6_ext">
@@ -946,7 +941,7 @@ interpretation is not fixed here.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.internet.ipv6_ext.IPv6_Ext">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.internet.ipv6_ext.</span></span><span class="sig-name descname"><span class="pre">IPv6_Ext</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.VT" title="pcapkit.corekit.infoclass.VT"><span class="pre">VT</span></a></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span><span class="w"> </span><span class="n"><a class="reference internal" href="../../corekit/infoclass.html#pcapkit.corekit.infoclass.VT" title="pcapkit.corekit.infoclass.VT"><span class="pre">VT</span></a></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/data/internet/ipv6_ext.html#IPv6_Ext"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.internet.ipv6_ext.IPv6_Ext" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="../protocol.html#pcapkit.protocols.data.protocol.Protocol" title="pcapkit.protocols.data.protocol.Protocol"><code class="xref py py-class docutils literal notranslate"><span class="pre">Protocol</span></code></a></p>
 <p>Data model for a generically-parsed IPv6 extension header.</p>
 <p>See <a class="reference internal" href="#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6_ext.IPv6_Ext</span></code></a>
 for how each field below is derived.</p>

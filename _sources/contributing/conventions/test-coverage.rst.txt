@@ -20,7 +20,7 @@ no tolerance in between: a cycle that comes back with different octets is a bug,
 when both halves are internally consistent.
 
 Coverage is **enumerated from the registries rather than hand-picked**, so a code
-registered tomorrow gets a case tomorrow. The two registry-driven suites that carry a
+registered tomorrow gets a case tomorrow. The registry-driven suites that carry a
 known-failure table keep their cases in a generator, beside the captures it also writes:
 
 .. list-table::
@@ -44,7 +44,7 @@ The rules those tables carry:
 
 *  **Every registered code has a case.** ``test_every_registered_code_has_a_case``
    fails otherwise. The option suite's ``SKIP`` table is the only exit, and each of its
-   three entries states why a case would assert nothing: ``Multipath_TCP`` is the
+   entries states why a case would assert nothing: ``Multipath_TCP`` is the
    envelope of the ``tcp-mptcp`` family and would duplicate one of its subtypes, and
    ``PadN`` under HOPOPT and IPv6-Opts emits the same option-less header as ``Pad1``.
    A code that fails is never skipped.
@@ -55,7 +55,7 @@ The rules those tables carry:
    parameters in every HIP packet, so the unrepresentable length of a lone one
    (:issue:`651`) was never constructed.
    ``KNOWN_DEGRADED`` entries have a different shape -- a fragment and a reason -- and
-   its two record why the probe's placeholder payload cannot reach the target, not a
+   they record why the probe's placeholder payload cannot reach the target, not a
    defect to fix, so the ``file:line``-and-issue rule does not apply to them.
 *  **A regression is fixed; a pre-existing defect is recorded.** A case that a change
    breaks -- including a code it registers that does not close -- is fixed in that

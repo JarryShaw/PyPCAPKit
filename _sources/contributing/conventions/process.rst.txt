@@ -3,7 +3,7 @@
 Running the Repository
 ----------------------
 
-The five pages before this one are about writing library code. The rulings here are
+The pages before this one are about writing library code. The rulings here are
 about running the repository -- what an install carries, what a changelog entry is,
 and what the issue and pull request labels mean. None of them is derivable from a
 module, and none fits a code-convention page, so the owner ruled on
@@ -18,7 +18,7 @@ The ``all`` Extra
 ``all`` means **core addons only** -- the things that let the library itself run at
 full functionality -- rather than everything a user might conceivably want. The owner
 settled that on :issue:`910` and named
-the three that qualify: the CLI addon, the crypto addon, and ``pycrate``.
+the ones that qualify: the CLI addon, the crypto addon, and ``pycrate``.
 
 On the tree, in :file:`pyproject.toml`:
 
@@ -30,7 +30,7 @@ On the tree, in :file:`pyproject.toml`:
 
    all    = [ "emoji", "cryptography>=3.4", "pycrate" ]
 
-So ``all`` is exactly the union of those three extras, written out as literals rather
+So ``all`` is exactly the union of those extras, written out as literals rather
 than referenced.
 
 Two groups stay out, and the reasons are **different** rather than two versions of
@@ -41,7 +41,7 @@ once:
    ``PyShark``, ``PyPCAPFile``, ``PyPCAP`` and ``PCAP_CT`` are not core addons, so
    they are on demand -- one extra at a time, ``pip install pypcapkit[Scapy]`` and so
    on. This holds however easy they are to install, and it is what the ruling
-   changed: four of them used to be in ``all``.
+   changed: some of them used to be in ``all``.
 *  ``PyPCAP`` **and** ``PCAP_CT`` **were already excluded for installability**, which the
    ruling leaves untouched. ``pypcap`` is an sdist-only C extension needing a
    compiler and the libpcap development files; ``pcap-ct`` and ``libpcap`` are
@@ -57,7 +57,7 @@ back to the default engine rather than raising when a requested engine is absent
 
    The ``dev`` extra exists **because** of this narrowing, and is not a second
    catch-all. pylint, mypy and autodoc all resolve imports against what is installed,
-   so the four engines leaving ``all`` would have made them newly unresolvable to the
+   so the engines leaving ``all`` would have made them newly unresolvable to the
    toolchain. ``dev`` is defined by what the toolchain must be able to *see*, and the
    workflows that need full resolution install ``.[all,dev]``. Do not add
    ``pypcap``/``pcap-ct`` to it to silence a lint finding; :file:`.github/workflows/lint.yml`
@@ -142,12 +142,12 @@ statement someone made rather than a value derived from the change. That matters
 for the ``review:`` family below: such a label is not evidence of the state it names,
 it is a record that the owner asserted it.
 
-Two paths are automated, and both are worth knowing about because a label they set has
+Some paths are automated, and each is worth knowing about because a label they set has
 had no human judgement behind it:
 
 *  **dependabot** puts ``dependencies`` and ``python`` on its own pull requests, and
-   only those two: :file:`.github/dependabot.yml` configures a single ecosystem,
-   ``pip``, so it never opens a workflow bump here. ``github_actions`` exists as a
+   only those: :file:`.github/dependabot.yml` configures only the ``pip``
+   ecosystem, so it never opens a workflow bump here. ``github_actions`` exists as a
    label but is **hand-applied like the rest** -- naming it as dependabot's would tell
    a reader the opposite of this section's point.
 *  **The issue templates** apply an issue-kind label from their front matter, before
@@ -160,9 +160,9 @@ Nothing else automates a label. :file:`.github/release.yml` only *reads* existin
 labels to bucket release notes, and the ``PCAPKIT_CONDA_LABEL`` in the release
 workflows is a conda channel label, unrelated to these.
 
-The ones that carry meaning here fall into five groups, which stack rather than
+The ones that carry meaning here fall into the groups below, which stack rather than
 compete: a pull request normally carries one from the first group and as many of the
-rest as apply. **The five groups are not the whole label set** -- the repository also
+rest as apply. **These groups are not the whole label set** -- the repository also
 has GitHub's own defaults, of which ``wontfix``, ``invalid``, ``help wanted`` and
 ``duplicate`` are all in live use and ``good first issue`` is archived. GitHub cannot
 archive a label, so an archived one keeps its name and description and is recoloured
@@ -170,8 +170,7 @@ grey (``cccccc``); it is kept rather than deleted so the name stays reserved.
 Those are documented by GitHub rather than here, and are counted rather than listed so
 this page does not go stale every time one is added::
 
-   $ gh label list -R JarryShaw/PyPCAPKit --limit 100 --json name -q '.[].name' | wc -l
-   31
+   gh label list -R JarryShaw/PyPCAPKit --limit 100 --json name -q '.[].name' | wc -l
 
 One of those defaults carries a local ruling worth knowing: an issue closed as
 unnecessary takes ``invalid`` (or the nearest applicable) rather than ``bug``, since
@@ -228,14 +227,14 @@ these, so that its status is readable without opening it:
    remembered -- a command someone else can run and get an answer from.
 *  ``needs: decision`` -- waiting on the owner, and on nothing else.
 
-The four are **mutually exclusive**, so moving between them is a swap rather than an
+They are **mutually exclusive**, so moving between them is a swap rather than an
 addition: dispatching work on a ``pending`` issue removes that label as it adds
 ``wip``. ``pending`` exists because the alternative was an unlabelled issue, and
 nothing then distinguished *accepted but untouched* from *nobody has looked at the
 labels* -- the two want different responses, and the second is a gap to close rather
 than a state to leave alone.
 
-Two things the board shows rather than the rule: ``wip`` and ``needs: decision``
+Things the board shows rather than the rule: ``wip`` and ``needs: decision``
 legitimately **co-occur**, when the bulk of an issue is being worked and one
 sub-question is held for the owner -- :issue:`918` itself was labelled that way. And
 an open issue with no state label at all is a gap rather than a category, which is
@@ -250,8 +249,8 @@ worth checking for rather than assuming away:
 has a status of its own. ``review: pending`` means no verdict **and nobody producing
 one** -- never reviewed, or the head moved since the last verdict; ``review: running``
 means a cross-review is in flight against this head, so a verdict is coming;
-``review: good-to-go`` and ``review: needs-changes`` are the two verdicts. Because all
-four are keyed on the head rather than on the pull request, a new push invalidates the
+``review: good-to-go`` and ``review: needs-changes`` are the verdicts. Because all of
+them are keyed on the head rather than on the pull request, a new push invalidates the
 label -- a verdict that outlives the commit it was given on is worse than none, and so
 is a ``running`` label pointing at a review of a commit that is no longer the head.
 
@@ -312,10 +311,10 @@ carrying it are that kind:
    **The label is not applied uniformly across the repository's history, and a census
    that assumes it is will be wrong.** It is dense on pull requests from the
    examples-directory change above onward and effectively absent below it: the only
-   earlier carriers are seven pre-``0.15`` pull requests, clustered at the very start
-   of the numbering, with nothing labelled at all between them and that change. Three
-   of those seven are distribution rollups, each also carrying ``release``; the other
-   four are early ``refactor``/``feat`` work from before the project stabilised. On
+   earlier carriers are a few pre-``0.15`` pull requests, clustered at the very start
+   of the numbering, with nothing labelled at all between them and that change. Some
+   of those are distribution rollups, each also carrying ``release``; the others
+   are early ``refactor``/``feat`` work from before the project stabilised. On
    issues it is sparser still, appearing only from :issue:`719` up. So ``breaking``'s
    absence on an old pull request is weak evidence at best. The current figures, rather
    than these:
@@ -377,7 +376,7 @@ scopes, because ``GITHUB_TOKEN`` cannot write a user-owned project; **without th
 secret every run skips with a notice** rather than failing, and Status falls back to
 being set by hand.
 
-The board has seven views: *All items*; *Board*, the open items in one column per
+The board has these views: *All items*; *Board*, the open items in one column per
 Status; *Release 1.5*, the open milestone; *Needs decision* and *Blocked*, each the
 open items in that state; *Open pull requests*; and *History*, everything *Done*.
 Rename *Release 1.5* when the next milestone opens. Sorting and grouping are set in

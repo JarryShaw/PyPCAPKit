@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/corekit/enum.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.corekit.enum contains the two bases every enumeration in this library inherits from: EnumLookup, the lookup half shared by open registries and closed sets alike, and its subclass EnumRegist..." />
-<meta name="description" content="pcapkit.corekit.enum contains the two bases every enumeration in this library inherits from: EnumLookup, the lookup half shared by open registries and closed sets alike, and its subclass EnumRegist..." />
+<meta property="og:description" content="pcapkit.corekit.enum contains the bases every enumeration in this library inherits from: EnumLookup, the lookup half shared by open registries and closed sets alike, and its subclass EnumRegistry, ..." />
+<meta name="description" content="pcapkit.corekit.enum contains the bases every enumeration in this library inherits from: EnumLookup, the lookup half shared by open registries and closed sets alike, and its subclass EnumRegistry, ..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Info Class" href="infoclass.html"><link rel="prev" title="Decorator Functions" href="decorators.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -222,9 +222,9 @@
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../foundation/reassembly/index.html">Packets Reassembly</a><input aria-label="Toggle navigation of Packets Reassembly" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../foundation/reassembly/reassembly.html">Base Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../foundation/reassembly/reassembly.html">Reassembly Base Class</a></li>
 <li class="toctree-l4 has-children"><a class="reference internal" href="../foundation/reassembly/ip/index.html">IP Datagram Reassembly</a><input aria-label="Toggle navigation of IP Datagram Reassembly" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l5"><a class="reference internal" href="../foundation/reassembly/ip/ip.html">Base Class</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../foundation/reassembly/ip/ip.html">IP Reassembly Base Class</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../foundation/reassembly/ip/ipv4.html">IPv4 Datagram Reassembly</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../foundation/reassembly/ip/ipv6.html">IPv6 Datagram Reassembly</a></li>
 </ul>
@@ -233,7 +233,7 @@
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../foundation/traceflow/index.html">Flow Tracing</a><input aria-label="Toggle navigation of Flow Tracing" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../foundation/traceflow/traceflow.html">Base Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../foundation/traceflow/traceflow.html">Flow Tracing Base Class</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../foundation/traceflow/tcp.html">Follow TCP Stream</a></li>
 </ul>
 </li>
@@ -243,7 +243,7 @@
 <li class="toctree-l2 has-children"><a class="reference internal" href="../protocols/index.html">Protocol Family</a><input aria-label="Toggle navigation of Protocol Family" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l3"><a class="reference internal" href="../protocols/protocol.html">Root Protocol</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/link/index.html">Link Layer</a><input aria-label="Toggle navigation of Link Layer" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../protocols/link/link.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/link/link.html">Link Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/ethernet.html">Ethernet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
@@ -255,7 +255,7 @@
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/internet/index.html">Internet Layer</a><input aria-label="Toggle navigation of Internet Layer" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/internet.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/internet.html">Internet Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
@@ -274,14 +274,14 @@
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/transport/index.html">Transport Layer</a><input aria-label="Toggle navigation of Transport Layer" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../protocols/transport/transport.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/transport/transport.html">Transport Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/transport/sctp.html">SCTP - Stream Control Transmission Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/transport/tcp.html">TCP - Transmission Control Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/transport/udp.html">UDP - User Datagram Protocol</a></li>
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../protocols/application/index.html">Application Layer</a><input aria-label="Toggle navigation of Application Layer" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../protocols/application/application.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/application/application.html">Application Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/http.html">HTTP - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/application/httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
@@ -494,7 +494,7 @@
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.corekit.enum">
 <span id="enumeration-base"></span><h1>Enumeration Base<a class="headerlink" href="#module-pcapkit.corekit.enum" title="Link to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.corekit.enum" title="pcapkit.corekit.enum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.enum</span></code></a> contains the two bases every enumeration in this
+<p><a class="reference internal" href="#module-pcapkit.corekit.enum" title="pcapkit.corekit.enum"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.enum</span></code></a> contains the bases every enumeration in this
 library inherits from: <a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>, the <em>lookup</em> half shared by open
 registries and closed sets alike, and its subclass <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, which
 adds the <em>mutating</em> half every registry under <a class="reference internal" href="../const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> inherits.</p>
@@ -520,7 +520,7 @@ an enumeration that already has members cannot be subclassed. Mixed in
 <code class="docutils literal notranslate"><span class="pre">class</span> <span class="pre">Bar(EnumLookup,</span> <span class="pre">IntEnum)</span></code> – it contributes methods only, so
 <code class="xref py py-mod docutils literal notranslate"><span class="pre">aenum</span></code> still resolves the member data type from the enumeration base:
 <code class="docutils literal notranslate"><span class="pre">int</span></code> for <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code> and <code class="xref py py-class docutils literal notranslate"><span class="pre">IntFlag</span></code>, <code class="docutils literal notranslate"><span class="pre">str</span></code> for
-<code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code>. That is what lets one base serve all three, where a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code>. That is what lets one base serve each of them, where a
 generated template fragment would have needed a separate rendering per
 member type.</p>
 <p>Because both tiers are plain classes, inserting this one <em>above</em>
@@ -529,10 +529,10 @@ member type.</p>
 <span class="pre">EnumLookup</span> <span class="pre">-&gt;</span> <span class="pre">IntFlag</span> <span class="pre">-&gt;</span> <span class="pre">int</span> <span class="pre">-&gt;</span> <span class="pre">...</span></code>, so <code class="docutils literal notranslate"><span class="pre">_member_type_</span></code> still comes from
 the enumeration base and not from anything in this module. Had this tier
 subclassed <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code> in order to “be an enum”, it would have
-become the member type itself and broken all three shapes at once.</p>
+become the member type itself and broken every one of these shapes at once.</p>
 <p>The methods deliberately touch only <code class="docutils literal notranslate"><span class="pre">_member_map_</span></code>, <code class="docutils literal notranslate"><span class="pre">_member_names_</span></code> and
 <code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code>, which both <a class="reference external" href="https://docs.python.org/3/library/enum.html#module-enum" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code></a> and <code class="xref py py-mod docutils literal notranslate"><span class="pre">aenum</span></code> maintain, so
-nothing on this tier depends on <code class="xref py py-mod docutils literal notranslate"><span class="pre">aenum</span></code> internals at all – the one
+nothing on this tier depends on <code class="xref py py-mod docutils literal notranslate"><span class="pre">aenum</span></code> internals at all – the
 <code class="xref py py-func docutils literal notranslate"><span class="pre">extend_enum()</span></code> call in this module belongs to
 <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, which is the tier that mutates.</p>
 <dl class="py method">
@@ -579,7 +579,7 @@ exactly as the override raised it – <a class="reference internal" href="#pcapk
 <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> unchanged rather than re-wrapping it, so the override’s own
 message and the single log record it already emitted are what the caller
 sees.</p>
-<p>Called from exactly two places, and the omissions are deliberate:</p>
+<p>Called from the places below, and the omissions are deliberate:</p>
 <ul class="simple">
 <li><p><a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a>, immediately before <code class="docutils literal notranslate"><span class="pre">cls(key)</span></code> – the one point at which
 a lookup can reach a subclass’s <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> and mint. The <code class="docutils literal notranslate"><span class="pre">str</span></code>-key
@@ -595,7 +595,7 @@ through a path of their own,
 <a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType.register" title="pcapkit.const.pcapng.option_type.OptionType.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">OptionType.register</span></code></a>
 and
 <a class="reference internal" href="../const/reg.html#pcapkit.const.reg.apptype.apptype.AppType.register" title="pcapkit.const.reg.apptype.apptype.AppType.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">AppType.register</span></code></a>
-both call it at the same point.</p>
+each call it at the same point.</p>
 <p><a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register_alias" title="pcapkit.corekit.enum.EnumRegistry.register_alias"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumRegistry.register_alias()</span></code></a> does not call it, and does not need
 to: it refuses any <code class="docutils literal notranslate"><span class="pre">value</span></code> that is not already registered, so the value
 it aliases has necessarily passed validation already.
@@ -631,14 +631,14 @@ separate object – so two names for one assignment resolve to one
 enum.</p>
 <p>It never mints while resolving <code class="docutils literal notranslate"><span class="pre">default</span></code>; <code class="docutils literal notranslate"><span class="pre">key</span></code> may still mint
 through a <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> that GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/775">#775</a>’s ruling
-deliberately kept minting, on one registry (<code class="docutils literal notranslate"><span class="pre">CGAType</span></code>). Registering a member any other way is <code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code>’s job
+deliberately kept minting, on <code class="docutils literal notranslate"><span class="pre">CGAType</span></code>. Registering a member any other way is <code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code>’s job
 and nobody else’s, which is the ruling <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/775">#775</a> exists to carry
 out: an unrecognised or unregistered value does not become a registered
 member unless a user or caller explicitly creates one. A value inside a
 registry’s declared-but-unassigned range still resolves, through that
 registry’s own <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code>, to a
 member that is deliberately absent from the lookup tables – true
-outside the one registry named above, where such a value instead lands
+outside <code class="docutils literal notranslate"><span class="pre">CGAType</span></code>, where such a value instead lands
 in <em>both</em> tables, exactly as <code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code> would leave it – for a
 non-<code class="docutils literal notranslate"><span class="pre">str</span></code> key; the <code class="docutils literal notranslate"><span class="pre">str</span></code> case is qualified below. Both describe
 <code class="docutils literal notranslate"><span class="pre">key</span></code> resolution only. <code class="docutils literal notranslate"><span class="pre">default</span></code> never reaches <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> on
@@ -658,15 +658,15 @@ the <code class="docutils literal notranslate"><span class="pre">str</span></cod
 (<a class="reference internal" href="../const/ftp.html#pcapkit.const.ftp.command.Command" title="pcapkit.const.ftp.command.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a>,
 <a class="reference internal" href="../const/ftp.html#pcapkit.const.ftp.command.FEATCode" title="pcapkit.const.ftp.command.FEATCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">FEATCode</span></code></a>, <a class="reference internal" href="../const/http.html#pcapkit.const.http.method.Method" title="pcapkit.const.http.method.Method"><code class="xref py py-class docutils literal notranslate"><span class="pre">Method</span></code></a>,
 <a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.option_type.OptionType" title="pcapkit.const.pcapng.option_type.OptionType"><code class="xref py py-class docutils literal notranslate"><span class="pre">OptionType</span></code></a>,
-<a class="reference internal" href="../const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a> and its four
+<a class="reference internal" href="../const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a> and its
 transport subclasses <a class="reference internal" href="../const/reg.html#pcapkit.const.reg.apptype.tcp.TCP" title="pcapkit.const.reg.apptype.tcp.TCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">TCP</span></code></a>,
 <a class="reference internal" href="../const/reg.html#pcapkit.const.reg.apptype.udp.UDP" title="pcapkit.const.reg.apptype.udp.UDP"><code class="xref py py-class docutils literal notranslate"><span class="pre">UDP</span></code></a>,
 <a class="reference internal" href="../const/reg.html#pcapkit.const.reg.apptype.sctp.SCTP" title="pcapkit.const.reg.apptype.sctp.SCTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">SCTP</span></code></a> and
 <a class="reference internal" href="../const/reg.html#pcapkit.const.reg.apptype.dccp.DCCP" title="pcapkit.const.reg.apptype.dccp.DCCP"><code class="xref py py-class docutils literal notranslate"><span class="pre">DCCP</span></code></a>, and
 <a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.tls_key_label.TLSKeyLabel" title="pcapkit.const.pcapng.tls_key_label.TLSKeyLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLSKeyLabel</span></code></a>) mints on
-any path, so no live witness exists in this tree. The one registry
-that still mints directly via <code class="xref py py-func docutils literal notranslate"><span class="pre">extend_enum()</span></code>,
-<a class="reference internal" href="../const/mh.html#pcapkit.const.mh.cga_type.CGAType" title="pcapkit.const.mh.cga_type.CGAType"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGAType</span></code></a>, is <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>-valued, so
+any path, so no live witness exists in this tree.
+<a class="reference internal" href="../const/mh.html#pcapkit.const.mh.cga_type.CGAType" title="pcapkit.const.mh.cga_type.CGAType"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGAType</span></code></a>, which still mints directly
+via <code class="xref py py-func docutils literal notranslate"><span class="pre">extend_enum()</span></code>, is <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>-valued, so
 a <code class="docutils literal notranslate"><span class="pre">str</span></code> name could not reach its mint branch even if this restriction
 did not exist; it is not an exception to it, just not reachable by it.
 This is about a future <code class="docutils literal notranslate"><span class="pre">str</span></code>-valued registry (or a present one whose
@@ -710,14 +710,14 @@ miss is <a class="reference external" href="https://docs.python.org/3/builtins/e
 matching <code class="docutils literal notranslate"><span class="pre">E['nosuch']</span></code> and <code class="docutils literal notranslate"><span class="pre">E(999)</span></code> on a stdlib <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a>,
 so every <code class="docutils literal notranslate"><span class="pre">except</span> <span class="pre">KeyError</span></code> and <code class="docutils literal notranslate"><span class="pre">except</span> <span class="pre">ValueError</span></code> around a call to
 this method catches.</p>
-<p>Two details are worth stating, since neither is visible from the
-exception type alone:</p>
+<p>These details are worth stating, since the exception type alone does
+not show them:</p>
 <ul class="simple">
 <li><p><strong>The name miss is raised quietly</strong> –
 <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumKeyError" title="pcapkit.utilities.exceptions.EnumKeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumKeyError</span></code></a> with <code class="docutils literal notranslate"><span class="pre">quiet=True</span></code>,
 so nothing is logged and <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.tracebacklimit" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.tracebacklimit</span></code></a> is left alone.
 That is not a cosmetic choice: this method’s name miss is in-library
-control flow at six call sites, and at
+control flow, and at
 <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> it is part of a
 <em>successful</em> call – that override catches it in order to build an
 unregistered member. A loud
@@ -781,8 +781,9 @@ have raised.</p></li>
 registry inheriting this base unmodified – that tuple holds exactly one
 entry, since an alias registered by <code class="xref py py-meth docutils literal notranslate"><span class="pre">register_alias()</span></code> is a second
 <em>name</em> for the canonical member rather than a second member. The method
-still exists here, because all four methods are to exist on every const
-registry (GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/842">#842</a>), and it is where a registry with genuinely
+still exists here, because <code class="docutils literal notranslate"><span class="pre">get</span></code>, <code class="docutils literal notranslate"><span class="pre">get_all</span></code>, <code class="docutils literal notranslate"><span class="pre">register</span></code> and
+<code class="docutils literal notranslate"><span class="pre">register_alias</span></code> are all to exist on every const registry (GitHub
+issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/842">#842</a>), and it is where a registry with genuinely
 several matches puts them: <code class="docutils literal notranslate"><span class="pre">AppType</span></code> overrides it to return every service IANA
 assigns to a port.</p>
 <dl class="field-list simple">
@@ -822,7 +823,7 @@ registry <em>open</em>: <a class="reference internal" href="#pcapkit.corekit.enu
 <a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> directly when it may not. The owner’s ruling on GitHub
 issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/877">#877</a> is what draws that line: an enumeration is immutable
 unless RFC or IANA says otherwise.</p>
-<p>Mixed in ahead of the enum base exactly as before – <code class="docutils literal notranslate"><span class="pre">class</span>
+<p>Mixed in ahead of the enum base – <code class="docutils literal notranslate"><span class="pre">class</span>
 <span class="pre">Foo(EnumRegistry,</span> <span class="pre">IntFlag)</span></code> – and gaining <a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a> as a parent
 does not disturb that: both tiers are plain classes, so <code class="docutils literal notranslate"><span class="pre">_member_type_</span></code>
 still resolves past them to the enumeration base.</p>

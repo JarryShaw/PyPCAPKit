@@ -25,6 +25,8 @@ Generic Data Fields
    :members:
    :show-inheritance:
 
+.. autofunction:: pcapkit.corekit.fields.misc.nested_packet_context
+
 .. autoclass:: pcapkit.corekit.fields.misc.PayloadField
    :members:
    :show-inheritance:
@@ -43,7 +45,7 @@ Type Variables
    :type: pcapkit.protocols.schema.schema.Schema
 
 .. data:: _TP
-   :type: pcapkit.protocols.protocol.Protocol
+   :type: pcapkit.protocols.protocol.ProtocolBase
 
 .. data:: _TN
    :type: pcapkit.corekit.sentinels.NoValueType

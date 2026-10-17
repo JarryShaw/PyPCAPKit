@@ -42,7 +42,7 @@ every extraction engine.
          :attr:`__engine_module__` class attribute.
 
    .. property:: registry
-      :type: python:dict[str, ModuleDescriptor[EngineBase] | typing.Type[EngineBase]]
+      :type: dict[str, ModuleDescriptor[EngineBase] | typing.Type[EngineBase]]
 
       Mapping of engine names to engine classes.
 
@@ -80,3 +80,5 @@ Type Variables
 
 .. data:: _T
    :type: typing.Any
+
+   Frame type the engine reads.

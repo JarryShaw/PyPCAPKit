@@ -3,16 +3,16 @@
   <head><meta charset="utf-8">
     <meta name="viewport" content="width=device-width,initial-scale=1">
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta property="og:title" content="Base Protocol" />
+<meta property="og:title" content="Application Layer Base Protocol" />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/application/application.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.application.application contains only Application, which is a base class for application layer protocols, eg. HTTP/1.*, HTTP/2 and etc." />
-<meta name="description" content="pcapkit.protocols.application.application contains only Application, which is a base class for application layer protocols, eg. HTTP/1.*, HTTP/2 and etc." />
+<meta property="og:description" content="pcapkit.protocols.application.application contains only Application, which is a base class for application layer protocols, e.g. HTTP/1.* and HTTP/2." />
+<meta name="description" content="pcapkit.protocols.application.application contains only Application, which is a base class for application layer protocols, e.g. HTTP/1.* and HTTP/2." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="HTTP - Hypertext Transfer Protocol" href="http.html"><link rel="prev" title="Application Layer" href="index.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>Base Protocol - PyPCAPKit</title>
+        <title>Application Layer Base Protocol - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
@@ -222,9 +222,9 @@
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../foundation/reassembly/index.html">Packets Reassembly</a><input aria-label="Toggle navigation of Packets Reassembly" class="toctree-checkbox" id="toctree-checkbox-5" name="toctree-checkbox-5" role="switch" type="checkbox"/><label for="toctree-checkbox-5"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../foundation/reassembly/reassembly.html">Base Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/reassembly/reassembly.html">Reassembly Base Class</a></li>
 <li class="toctree-l4 has-children"><a class="reference internal" href="../../foundation/reassembly/ip/index.html">IP Datagram Reassembly</a><input aria-label="Toggle navigation of IP Datagram Reassembly" class="toctree-checkbox" id="toctree-checkbox-6" name="toctree-checkbox-6" role="switch" type="checkbox"/><label for="toctree-checkbox-6"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l5"><a class="reference internal" href="../../foundation/reassembly/ip/ip.html">Base Class</a></li>
+<li class="toctree-l5"><a class="reference internal" href="../../foundation/reassembly/ip/ip.html">IP Reassembly Base Class</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../../foundation/reassembly/ip/ipv4.html">IPv4 Datagram Reassembly</a></li>
 <li class="toctree-l5"><a class="reference internal" href="../../foundation/reassembly/ip/ipv6.html">IPv6 Datagram Reassembly</a></li>
 </ul>
@@ -233,7 +233,7 @@
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../../foundation/traceflow/index.html">Flow Tracing</a><input aria-label="Toggle navigation of Flow Tracing" class="toctree-checkbox" id="toctree-checkbox-7" name="toctree-checkbox-7" role="switch" type="checkbox"/><label for="toctree-checkbox-7"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../../foundation/traceflow/traceflow.html">Base Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../foundation/traceflow/traceflow.html">Flow Tracing Base Class</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../foundation/traceflow/tcp.html">Follow TCP Stream</a></li>
 </ul>
 </li>
@@ -243,7 +243,7 @@
 <li class="toctree-l2 current has-children"><a class="reference internal" href="../index.html">Protocol Family</a><input aria-label="Toggle navigation of Protocol Family" checked="" class="toctree-checkbox" id="toctree-checkbox-8" name="toctree-checkbox-8" role="switch" type="checkbox"/><label for="toctree-checkbox-8"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="../protocol.html">Root Protocol</a></li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../link/index.html">Link Layer</a><input aria-label="Toggle navigation of Link Layer" class="toctree-checkbox" id="toctree-checkbox-9" name="toctree-checkbox-9" role="switch" type="checkbox"/><label for="toctree-checkbox-9"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../link/link.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../link/link.html">Link Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/ethernet.html">Ethernet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/arp.html">ARP/InARP - (Inverse) Address Resolution Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../link/l2tp.html">L2TP - Layer Two Tunnelling Protocol</a></li>
@@ -255,7 +255,7 @@
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../internet/index.html">Internet Layer</a><input aria-label="Toggle navigation of Internet Layer" class="toctree-checkbox" id="toctree-checkbox-10" name="toctree-checkbox-10" role="switch" type="checkbox"/><label for="toctree-checkbox-10"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../internet/internet.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../internet/internet.html">Internet Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
@@ -274,14 +274,14 @@
 </ul>
 </li>
 <li class="toctree-l3 has-children"><a class="reference internal" href="../transport/index.html">Transport Layer</a><input aria-label="Toggle navigation of Transport Layer" class="toctree-checkbox" id="toctree-checkbox-11" name="toctree-checkbox-11" role="switch" type="checkbox"/><label for="toctree-checkbox-11"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
-<li class="toctree-l4"><a class="reference internal" href="../transport/transport.html">Base Protocol</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../transport/transport.html">Transport Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../transport/sctp.html">SCTP - Stream Control Transmission Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../transport/tcp.html">TCP - Transmission Control Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../transport/udp.html">UDP - User Datagram Protocol</a></li>
 </ul>
 </li>
 <li class="toctree-l3 current has-children"><a class="reference internal" href="index.html">Application Layer</a><input aria-label="Toggle navigation of Application Layer" checked="" class="toctree-checkbox" id="toctree-checkbox-12" name="toctree-checkbox-12" role="switch" type="checkbox"/><label for="toctree-checkbox-12"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
-<li class="toctree-l4 current current-page"><a class="current reference internal" href="#">Base Protocol</a></li>
+<li class="toctree-l4 current current-page"><a class="current reference internal" href="#">Application Layer Base Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="http.html">HTTP - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="httpv1.html">HTTP/1.* - Hypertext Transfer Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="httpv2.html">HTTP/2 - Hypertext Transfer Protocol</a></li>
@@ -493,13 +493,12 @@
         </div>
         <article role="main" id="furo-main-content">
           <section id="module-pcapkit.protocols.application.application">
-<span id="base-protocol"></span><h1>Base Protocol<a class="headerlink" href="#module-pcapkit.protocols.application.application" title="Link to this heading">¶</a></h1>
+<span id="application-layer-base-protocol"></span><h1>Application Layer Base Protocol<a class="headerlink" href="#module-pcapkit.protocols.application.application" title="Link to this heading">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.protocols.application.application" title="pcapkit.protocols.application.application"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.application.application</span></code></a> contains only
 <a class="reference internal" href="#pcapkit.protocols.application.application.Application" title="pcapkit.protocols.application.application.Application"><code class="xref py py-class docutils literal notranslate"><span class="pre">Application</span></code></a>,
-which is a base class for application layer protocols, eg.
-<a class="reference internal" href="httpv1.html#pcapkit.protocols.application.httpv1.HTTP" title="pcapkit.protocols.application.httpv1.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP/1.*</span></code></a>,
-<a class="reference internal" href="httpv2.html#pcapkit.protocols.application.httpv2.HTTP" title="pcapkit.protocols.application.httpv2.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP/2</span></code></a>
-and etc.</p>
+which is a base class for application layer protocols, e.g.
+<a class="reference internal" href="httpv1.html#pcapkit.protocols.application.httpv1.HTTP" title="pcapkit.protocols.application.httpv1.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP/1.*</span></code></a> and
+<a class="reference internal" href="httpv2.html#pcapkit.protocols.application.httpv2.HTTP" title="pcapkit.protocols.application.httpv2.HTTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">HTTP/2</span></code></a>.</p>
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.5.0: </span><a class="reference internal" href="#pcapkit.protocols.application.application.Application._decode_next_layer" title="pcapkit.protocols.application.application.Application._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_decode_next_layer()</span></code></a>
 and
@@ -537,7 +536,7 @@ nothing remains.</p>
 <li><p><strong>proto</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – next layer protocol index; only the <code class="docutils literal notranslate"><span class="pre">-1</span></code> sentinel
 (the rest, undissected) is accepted</p></li>
 <li><p><strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – valid (<em>non-padding</em>) length</p></li>
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – packet info (passed from <code class="xref py py-meth docutils literal notranslate"><span class="pre">self.unpack</span></code>)</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – packet info (passed from <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.unpack" title="pcapkit.protocols.protocol.Protocol.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.unpack</span></code></a>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -547,7 +546,7 @@ nothing remains.</p>
 <dd class="field-odd"><p>Current protocol with the undissected remainder as payload.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – <code class="docutils literal notranslate"><span class="pre">proto</span></code> is anything but <code class="docutils literal notranslate"><span class="pre">-1</span></code>, i.e. a real
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – If <code class="docutils literal notranslate"><span class="pre">proto</span></code> is anything but <code class="docutils literal notranslate"><span class="pre">-1</span></code>, i.e. a real
     protocol dispatch, which this protocol doesn’t support.</p>
 </dd>
 </dl>
@@ -563,7 +562,7 @@ nothing remains.</p>
 <li><p><strong>proto</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – next layer protocol index; only the <code class="docutils literal notranslate"><span class="pre">-1</span></code> sentinel
 (the rest, undissected) is accepted</p></li>
 <li><p><strong>length</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – valid (<em>non-padding</em>) length</p></li>
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – packet info (passed from <code class="xref py py-meth docutils literal notranslate"><span class="pre">self.unpack</span></code>)</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></a></span>) – packet info (passed from <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol.unpack" title="pcapkit.protocols.protocol.Protocol.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.unpack</span></code></a>)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -574,7 +573,7 @@ nothing remains.</p>
 <a class="reference internal" href="../misc/null.html#pcapkit.protocols.misc.null.NoPayload" title="pcapkit.protocols.misc.null.NoPayload"><code class="xref py py-class docutils literal notranslate"><span class="pre">NoPayload</span></code></a> when nothing remains.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – <code class="docutils literal notranslate"><span class="pre">proto</span></code> is anything but <code class="docutils literal notranslate"><span class="pre">-1</span></code>, i.e. a real
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – If <code class="docutils literal notranslate"><span class="pre">proto</span></code> is anything but <code class="docutils literal notranslate"><span class="pre">-1</span></code>, i.e. a real
     protocol dispatch, which this protocol doesn’t support.</p>
 </dd>
 </dl>

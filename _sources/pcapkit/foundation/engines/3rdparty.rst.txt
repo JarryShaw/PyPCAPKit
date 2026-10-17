@@ -20,8 +20,11 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    Importing a narrower submodule leaves them empty, and
    :class:`~scapy.utils.PcapReader` then returns every frame as one opaque
    :class:`~scapy.packet.Raw` layer without raising, so the engine would dissect
-   nothing and say so only on :data:`sys.stderr`. See :meth:`Scapy.__init__` for
-   why naming the layer modules individually is not a cheaper route.
+   nothing and say so only on :data:`sys.stderr`. Naming the layer modules
+   individually is not a cheaper route: it repairs the link layer but leaves the
+   payload table short, so :file:`dhcp.pcapng` still comes back as
+   ``Ethernet / IP / UDP / Raw``, and such a list would go stale silently as
+   `Scapy`_ gains layer types.
 
    One side effect: :mod:`scapy.all` loads :mod:`scapy.layers.dcerpc`, which
    reaches `Scapy`_'s TLS layer and there triggers a
@@ -107,7 +110,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
 .. important::
 
-   `PyShark`_ has **two** requirements beyond installing it, and neither is
+   `PyShark`_ has requirements beyond installing it, and none is
    visible to an import -- the package imports cleanly and then fails when used,
    which is why
    :meth:`~pcapkit.foundation.engines.pyshark.PyShark.unsupported_reason` checks
@@ -264,7 +267,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
       pip install pypcapkit[PCAP_CT]
 
-   The two engines together cover every interpreter the project supports, and
+   Together these engines cover every interpreter the project supports, and
    ``PCAP_CT`` covers all of it on its own:
 
    =========================================================================  ==================
@@ -342,10 +345,10 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    ================  ===========================================================
    System libpcap    Result
    ================  ===========================================================
-   1.11.0            correct -- the same four frames and the same sub-second
+   1.11.0            correct -- the same frames and the same sub-second
                      timestamps as
                      :class:`~pcapkit.foundation.engines.pcapng.PCAPNG`
-   1.5.3             four frames, but nonsense sub-second timestamps
+   1.5.3             the same frames, but nonsense sub-second timestamps
                      (``1102274184.0000002`` and the like), silently and with no
                      error
    ================  ===========================================================
@@ -438,15 +441,15 @@ Backend Detection
 
 .. module:: pcapkit.foundation.engines._pcap_backend
 
-Two unrelated PyPI distributions install a top-level module named :mod:`pcap` --
+Unrelated PyPI distributions install a top-level module named :mod:`pcap` --
 `PyPCAP`_, a Cython binding shipped as a single extension module, and `pcap-ct`_,
 a :mod:`ctypes` reimplementation shipped as a package. They therefore collide,
 and ``import pcap`` resolves to whichever the import system finds first.
 :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` and
 :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` each have to know which one
 they actually got rather than assume, and this module is the one place that
-answers it -- deliberately shared, since the two engines must agree and two
-copies of the detection would be two chances to disagree. It is *only* detection,
+answers it -- deliberately shared, since the engines must agree and a copy of
+the detection in each would be a chance to disagree. It is *only* detection,
 and it imports nothing from :mod:`pcapkit`, so it cannot introduce an import
 cycle.
 

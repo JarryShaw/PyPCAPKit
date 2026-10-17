@@ -172,7 +172,7 @@ The following code snippet shows how to create a new protocol class:
 .. note::
 
    Following is a PoC implementation of a new internet layer protocol. For
-   demonstration purpose, we use the IPv4 protocol as an example, where the
+   demonstration purposes, we use the IPv4 protocol as an example, where the
    comprehensive implementation can be found in the
    :mod:`pcapkit.protocols.internet.ipv4` module.
 
@@ -244,7 +244,7 @@ The following code snippet shows how to create a new protocol class:
    ``**kwargs`` to the construction and to the parse, so a keyword only ``read``
    declares still travels through ``make``.
 
-   Two shapes a signature cannot express are declared on the class instead, via
+   Shapes a signature cannot express are declared on the class instead, via
    :attr:`ProtocolBase.__keywords__
    <pcapkit.protocols.protocol.ProtocolBase.__keywords__>`:
 
@@ -262,15 +262,17 @@ The following code snippet shows how to create a new protocol class:
 
    Setting it to :obj:`None` skips the check entirely, and is meant only for a
    *dispatcher* whose real signature belongs to a class chosen at call time --
-   :meth:`HTTP.make <pcapkit.protocols.application.http.HTTP.make>` is the one
-   such class in the library. Unlike a set, :obj:`None` is not inherited, so a
+   :class:`~pcapkit.protocols.application.http.HTTP`, whose
+   :meth:`~pcapkit.protocols.application.http.HTTP.make` builds the HTTP version it
+   is given, is the
+   only such class in the library. Unlike a set, :obj:`None` is not inherited, so a
    subclass of a dispatcher is checked normally. Prefer a declared parameter to
    either: it is also what documents the keyword to your callers.
 
    Parsing is unaffected. :meth:`ProtocolBase.from_data
    <pcapkit.protocols.protocol.ProtocolBase.from_data>` checks the keywords its
    caller passes just as strictly, raising
-   :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`, but only warns
+   :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`, but only warns with
    :exc:`~pcapkit.utilities.warnings.UnknownFieldWarning` for a key that comes
    from your ``_make_data`` -- a mismatch there is a disagreement between two of
    your own mappings rather than a caller's typo.
@@ -437,7 +439,7 @@ The available engines and the file formats they read:
 .. note::
 
    `PyPCAP`_ and `pcap-ct`_ are two distributions of one :manpage:`libpcap(3)`
-   interface, and both install a top-level :mod:`pcap` module, so they are two
+   interface, and both install a top-level ``pcap`` module, so they are two
    engines rather than one: ``engine='pypcap'`` and ``engine='pcap_ct'``. Upstream
    `PyPCAP`_ cannot be installed on Python 3.12 or newer, and `pcap-ct`_ can --
    which is why both exist. See
@@ -895,7 +897,7 @@ produced.
 A reassembly callback runs on every submission and takes one argument, the list
 of datagrams that submission produced. A flow tracing callback runs as each flow
 is finalised and takes that flow's
-:class:`~pcapkit.foundation.traceflow.data.tcp.Index`. Either returns
+:class:`~pcapkit.foundation.traceflow.data.tcp.Index`. Each should return
 :obj:`None`; any return value is ignored.
 
 A reassembly callback can modify its list in place, which discards datagrams,

@@ -20,11 +20,11 @@ wrong type, raises :exc:`ValueError`.
 
 In almost every registry that object is **not** installed: the registry does not
 grow, and a second lookup of the same value returns an equal but distinct object.
-A handful behave otherwise, and :ref:`mint-criterion` gives the full split:
+Some behave otherwise, and :ref:`mint-criterion` gives the full split:
 
 * :class:`~pcapkit.const.mh.cga_type.CGAType` installs a permanent member, so
   ``__members__`` and iteration grow.
-* :class:`~pcapkit.const.tcp.flags.Flags` and the four Mobility Header flag
+* :class:`~pcapkit.const.tcp.flags.Flags` and the Mobility Header flag
   registries, such as
   :class:`~pcapkit.const.mh.binding_ack_flag.BindingACKFlag`, hand back to
   ``aenum``'s flag base, which caches the composed object in the value lookup

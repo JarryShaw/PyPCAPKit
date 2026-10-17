@@ -15,7 +15,7 @@ Octets      Bits        Name                    Description
   0           0   ``esp.spi``             Security Parameters Index (SPI)
   4          32   ``esp.seq``             Sequence Number
   8          64   ``esp.payload_data``    Payload Data (variable, encrypted)
-  ?           ?                           Padding (0-255 bytes, encrypted)
+  ?           ?   ``esp.padding``         Padding (0-255 bytes, encrypted)
   ?           ?   ``esp.pad_len``         Pad Length (encrypted)
   ?           ?   ``esp.next``            Next Header (encrypted)
   ?           ?   ``esp.icv``             Integrity Check Value (ICV, variable)
@@ -217,8 +217,10 @@ MD5, DES-MAC, KPDK-MD5       MUST NOT            **no**       registered, delibe
    :show-inheritance:
 
 .. autodata:: pcapkit.protocols.internet.esp.CIPHER_SUITES
+   :no-value:
 
 .. autodata:: pcapkit.protocols.internet.esp.INTEGRITY_SUITES
+   :no-value:
 
 Known Limitations
 -----------------

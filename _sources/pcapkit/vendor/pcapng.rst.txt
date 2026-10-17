@@ -29,14 +29,14 @@ vendor crawlers include:
 
 .. note::
 
-   The three crawlers that scrape a registry table --
+   The crawlers that scrape a registry table --
    :class:`BlockType <pcapkit.vendor.pcapng.block_type.BlockType>`,
    :class:`OptionType <pcapkit.vendor.pcapng.option_type.OptionType>` and
    :class:`RecordType <pcapkit.vendor.pcapng.record_type.RecordType>` -- all read
    revision ``-03`` of the draft, as each one's ``LINK`` below shows. Revision
    ``-02`` renders its registries as ASCII art inside ``<pre>`` and carries no
-   registry ``<table>`` at all, so the ``table-1`` through ``table-10`` ids the
-   three crawlers select on exist only in ``-03``, where the registries are real
+   registry ``<table>`` at all, so the ``table-1`` through ``table-10`` ids
+   these crawlers select on exist only in ``-03``, where the registries are real
    tables. The footnotes below point at ``-03`` for the same reason.
 
 Block Types

@@ -12,8 +12,9 @@ A project-wide revision, and the last release of the pre-1.0 design.
 * **Added** -- ``pcapkit.foundation.registry``, so protocols can be subscribed
   by name; ``Protocol.analyze`` for analysing a payload directly, used by the
   reassembly classes; ``pcapkit.corekit.multidict``, adapted from Werkzeug.
-* **Changed** -- reassembly became a package (IP, IPv4, IPv6, TCP) with revised
-  data models; PCAP and the auxiliary protocols moved under ``pcapkit.misc``.
+* **Changed** -- reassembly moved from ``pcapkit.reassembly`` into
+  ``pcapkit.foundation.reassembly``, with revised data models; PCAP and the
+  auxiliary protocols moved under ``pcapkit.protocols.misc``.
 * **Removed** -- the ``validators`` module, several decorators from
   ``pcapkit.utilities``, and multiprocessing support in ``Extractor``.
 * **Fixed** -- the DPKT toolkit (:issue:`101`), IP reassembly, and missing ``id``
