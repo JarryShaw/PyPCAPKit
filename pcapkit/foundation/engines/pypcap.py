@@ -31,6 +31,7 @@ from pcapkit.utilities.warnings import AttributeWarning, EngineWarning, warn
 __all__ = ['PyPCAP']
 
 if TYPE_CHECKING:
+    from types import ModuleType
     from typing import Iterator, Optional
 
     from pcap import pcap as Handle
@@ -86,10 +87,8 @@ class PyPCAP(EngineBase['RawFrame']):
 
     """
     if TYPE_CHECKING:
-        import pcap
-
-        #: Engine extraction package.
-        _expkg: 'pcap'
+        #: Engine extraction package, i.e. :mod:`pcap`.
+        _expkg: 'ModuleType'
         #: Engine extraction temporary storage.
         _extmp: 'Iterator[RawFrame]'
         #: Data link layer protocol, from the capture handle.
