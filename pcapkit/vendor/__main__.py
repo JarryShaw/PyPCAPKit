@@ -24,6 +24,7 @@ from pcapkit import __version__
 from pcapkit import vendor as vendor_module
 from pcapkit.utilities.logging import VERBOSE, get_logger
 from pcapkit.utilities.warnings import InvalidVendorWarning, VendorRuntimeWarning, warn
+from pcapkit.vendor import _missing_message
 
 if TYPE_CHECKING:
     from argparse import ArgumentParser
@@ -212,14 +213,29 @@ def main() -> 'int':
     from a real one at the process boundary, which is what CI actually checks.
 
     Returns:
-        ``0`` if every target ran to completion, ``1`` if any target raised.
+        ``0`` if every target ran to completion, ``1`` if any target raised, or
+        if a package the crawlers import at module scope is not installed.
 
     Warns:
         InvalidVendorWarning: If vendor target not found in :mod:`pcapkit.vendor` module.
 
+    .. versionchanged:: 1.5.0
+
+       Without ``requests`` or ``beautifulsoup4`` from the ``vendor`` extra,
+       writes one line to :data:`sys.stderr` naming the missing packages and
+       the extra to install, and returns ``1`` before any target runs
+       (:issue:`1850`). Importing this module used to raise
+       :exc:`ModuleNotFoundError` with a traceback. ``--help`` and
+       ``--version`` work without them.
+
     """
     parser = get_parser()
     args = parser.parse_args()
+
+    missing = _missing_message()
+    if missing:
+        print(f'{parser.prog}: error: {missing}', file=sys.stderr)
+        return 1
 
     target_list = []  # type: list[Type[Vendor]]
     for target in args.target:

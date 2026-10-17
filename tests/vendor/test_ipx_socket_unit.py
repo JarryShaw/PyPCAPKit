@@ -37,13 +37,12 @@ if TYPE_CHECKING:
 #: Repository root, i.e. the grandparent of the directory holding this file.
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
-#: Whether the crawler machinery is importable at all. Two packages are needed
-#: and neither is optional to this file: ``pcapkit.vendor.default`` imports
-#: :mod:`requests` at module scope, and :mod:`pcapkit.vendor` then imports every
-#: crawler unconditionally, several of which import :mod:`bs4` at module scope --
-#: so importing *one* crawler needs both. (:mod:`pcapkit.vendor`'s own
-#: ``try: import bs4`` suppresses the warning, not the ``ModuleNotFoundError``
-#: raised by the crawler imports below it.)
+#: Whether the crawler machinery is importable at all. ``pcapkit.vendor.default``
+#: imports :mod:`requests` at module scope, and :mod:`pcapkit.vendor` imports its
+#: crawlers, several of which import :mod:`bs4` at module scope, only when
+#: :mod:`requests` and :mod:`bs4` are installed (#1850). This file's crawler
+#: imports no :mod:`bs4`, so :mod:`bs4` is in the gate for the package to import
+#: as it does in CI, not because the import would fail without it.
 #:
 #: Both ship in the ``test`` extra as well as ``vendor``
 #: (:file:`pyproject.toml`), because CI installs ``.[test]`` and a skipped pin

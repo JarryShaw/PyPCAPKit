@@ -91,11 +91,13 @@ if TYPE_CHECKING:
 #: Repository root, i.e. the grandparent of the directory holding this file.
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
-#: Every distribution importing :mod:`pcapkit.vendor` needs. Copied from
-#: :file:`tests/vendor/test_user_agent_unit.py`, and for its reason: ``requests``
-#: alone is not enough, because importing :mod:`pcapkit.vendor.default` imports the
-#: :mod:`pcapkit.vendor` package first and its :file:`__init__.py` pulls in
-#: subpackages that ``import bs4`` at module scope.
+#: Every distribution importing :mod:`pcapkit.vendor` with its crawlers needs.
+#: Copied from :file:`tests/vendor/test_user_agent_unit.py`, and for its reason:
+#: importing :mod:`pcapkit.vendor.default` imports the :mod:`pcapkit.vendor`
+#: package first, whose :file:`__init__.py` pulls in subpackages that
+#: ``import bs4`` at module scope only when ``requests`` and ``bs4`` are
+#: installed (#1850), and the gate keeps the package as the ``vendor`` extra
+#: imports it.
 VENDOR_DEPS = ('requests', 'bs4', 'html5lib')
 
 #: Whether the crawlers are importable at all. ``html5lib`` ships in the

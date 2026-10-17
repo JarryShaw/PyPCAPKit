@@ -8,6 +8,19 @@ This module contains all web crawlers of :mod:`pcapkit`, which are
 automatically generating the :mod:`pcapkit.const` module's constant
 enumerations.
 
+The crawlers need the ``vendor`` extra, ``pip install "pypcapkit[vendor]"``.
+
+.. versionchanged:: 1.5.0
+
+   Without ``requests`` or ``beautifulsoup4``, which the crawlers import at
+   module scope, importing this package succeeds and imports no crawler.
+   Reading any name in its ``__all__``, or
+   :class:`~pcapkit.vendor.default.Vendor`, then raises
+   :exc:`ModuleNotFoundError` naming the missing packages and the extra to
+   install (:issue:`1850`). Importing a crawler module directly, such as
+   :mod:`pcapkit.vendor.reg`, still raises the missing package's own
+   :exc:`ModuleNotFoundError`. Before, importing this package raised it.
+
 Crawler Implementations
 =======================
 
@@ -95,3 +108,11 @@ constant enumerations.
    options:
      -h, --help     show this help message and exit
      -V, --version  show program's version number and exit
+
+.. versionchanged:: 1.5.0
+
+   Without ``requests`` or ``beautifulsoup4`` from the ``vendor`` extra,
+   :program:`pcapkit-vendor` writes one line to standard error naming the
+   missing packages and the extra to install, and exits with status ``1``
+   before any target runs (:issue:`1850`). It used to fail with a traceback.
+   ``--help`` and ``--version`` work without them.
