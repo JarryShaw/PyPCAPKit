@@ -174,12 +174,13 @@ import tempfile
 import unittest
 from unittest import mock
 
-#: Same two-dependency gate the rest of :file:`tests/vendor/` uses. Importing
+#: Same gate the rest of :file:`tests/vendor/` uses. Importing
 #: :mod:`pcapkit.vendor.__main__` imports :mod:`pcapkit.vendor` (for its
-#: ``vendor_module`` default-target-list fallback), which pulls in every
-#: crawler subpackage unconditionally -- :mod:`pcapkit.vendor.default`
-#: itself imports :mod:`requests` at module scope and several crawlers import
-#: :mod:`bs4` at module scope.
+#: ``vendor_module`` default-target-list fallback), which imports every
+#: crawler subpackage when :mod:`requests` and :mod:`bs4` are installed and
+#: none otherwise (#1850) -- :mod:`pcapkit.vendor.default` itself imports
+#: :mod:`requests` at module scope and several crawlers import :mod:`bs4` at
+#: module scope.
 VENDOR_DEPS = ('requests', 'bs4')
 
 #: Whether the crawler machinery is importable at all. Both ship in the

@@ -63,13 +63,14 @@ import unittest
 import warnings
 from unittest import mock
 
-#: Same two-dependency gate :file:`tests/vendor/test_crawler_reachability_unit.py`
-#: and :file:`tests/vendor/test_vendor_dest_path_unit.py` use. Importing
+#: Same gate :file:`tests/vendor/test_crawler_reachability_unit.py` and
+#: :file:`tests/vendor/test_vendor_dest_path_unit.py` use. Importing
 #: :mod:`pcapkit.vendor.__main__` imports :mod:`pcapkit.vendor` (for the
 #: ``vendor_module`` default-target-list fallback this suite patches), which
-#: pulls in every crawler subpackage unconditionally --
-#: :mod:`pcapkit.vendor.default` imports :mod:`requests` at module scope and
-#: several crawlers import :mod:`bs4` at module scope.
+#: imports every crawler subpackage when :mod:`requests` and :mod:`bs4` are
+#: installed and none otherwise (#1850). :mod:`pcapkit.vendor.default`, whose
+#: :class:`~pcapkit.vendor.default.Vendor` this suite subclasses, imports
+#: :mod:`requests` at module scope.
 VENDOR_DEPS = ('requests', 'bs4')
 
 #: Whether the crawler machinery is importable at all. Both ship in the

@@ -9,51 +9,117 @@ This module contains all web crawlers of :mod:`pcapkit`, which are
 automatically generating the :mod:`pcapkit.const` module's constant
 enumerations.
 
+The crawlers need the ``vendor`` extra, ``pip install "pypcapkit[vendor]"``.
+
+.. versionchanged:: 1.5.0
+
+   Without ``requests`` or ``beautifulsoup4``, which the crawlers import at
+   module scope, importing this package succeeds and imports no crawler.
+   Reading any name in its ``__all__``, or
+   :class:`~pcapkit.vendor.default.Vendor`, then raises
+   :exc:`ModuleNotFoundError` naming the missing packages and the extra to
+   install, and :program:`pcapkit-vendor` exits with that message on one line
+   (:issue:`1850`). Importing a crawler module directly, such as
+   :mod:`pcapkit.vendor.reg`, still raises the missing package's own
+   :exc:`ModuleNotFoundError`. Before, importing this package raised it.
+
 """
+import typing
 
 from pcapkit.utilities.compat import ModuleNotFoundError  # pylint: disable=redefined-builtin
 from pcapkit.utilities.exceptions import stacklevel
 from pcapkit.utilities.warnings import VendorWarning, warn
 
+#: list[str]: Distributions of the ``vendor`` extra whose modules the crawlers
+#: import at module scope, and which cannot be imported here. While it is not
+#: empty no crawler is imported: :func:`__getattr__` raises for their names,
+#: and :func:`pcapkit.vendor.__main__.main` exits (:issue:`1850`). :mod:`pcapkit`
+#: has already put the conda package's :file:`pcapkit/_extern` on
+#: :data:`sys.path` by then, so a package vendored there counts as installed.
+_MISSING = []  # type: list[str]
+
 try:
     import requests
+except ModuleNotFoundError:
+    _MISSING.append('requests')
+
+try:
+    import bs4
+except ModuleNotFoundError:
+    _MISSING.append('beautifulsoup4')
+
+# The ``[socks]`` and ``[html5lib]`` extras of those packages are needed only at
+# run time, by a crawler that goes through a SOCKS proxy or parses HTML, so
+# their absence stays a warning.
+try:
     import socks
 except ModuleNotFoundError:
     warn("dependency package 'requests[socks]' not found",
          VendorWarning, stacklevel=stacklevel())
 
 try:
-    import bs4
     import html5lib
 except ModuleNotFoundError:
     warn("dependency package 'beautifulsoup4[html5lib]' not found",
          VendorWarning, stacklevel=stacklevel())
 
-# base crawler
-from pcapkit.vendor.default import Vendor
 
-# IANA registration
-from pcapkit.vendor.reg import *
+def _missing_message() -> 'str':
+    """Why no crawler was imported, naming the extra to install.
 
-# Miscellanous
-from pcapkit.vendor.pcapng import *
+    Returns:
+        The packages in :data:`_MISSING` and the extra that installs them, on
+        one line, or an empty string if :data:`_MISSING` is empty.
 
-# per protocol
-from pcapkit.vendor.arp import *
-from pcapkit.vendor.esp import *
-from pcapkit.vendor.ftp import *
-from pcapkit.vendor.hip import *
-from pcapkit.vendor.http import *
-from pcapkit.vendor.ipv4 import *
-from pcapkit.vendor.ipv6 import *
-from pcapkit.vendor.ipx import *
-from pcapkit.vendor.l2tp import *
-from pcapkit.vendor.mh import *
-from pcapkit.vendor.ngap import *
-from pcapkit.vendor.ospf import *
-from pcapkit.vendor.sctp import *
-from pcapkit.vendor.tcp import *
-from pcapkit.vendor.vlan import *
+    """
+    if not _MISSING:
+        return ''
+    return (f"missing dependencies: {', '.join(_MISSING)}; "
+            'install the vendor extra: pip install "pypcapkit[vendor]"')
+
+
+if _MISSING:
+    def __getattr__(name: 'str') -> 'typing.NoReturn':
+        """Raise for a crawler, or for its base class, which were not imported.
+
+        :pep:`562` calls this only for a name missing from this module's
+        globals, so it is defined only while :data:`_MISSING` is not empty.
+
+        Raises:
+            ModuleNotFoundError: If ``name`` is in ``__all__``, or is
+                ``Vendor``, naming the missing packages and the extra.
+            AttributeError: For any other name, as without this hook.
+
+        """
+        if name == 'Vendor' or name in __all__:
+            raise ModuleNotFoundError(f'cannot import {name!r} from {__name__!r}: {_missing_message()}')
+        raise AttributeError(f'module {__name__!r} has no attribute {name!r}')
+else:
+    # base crawler
+    from pcapkit.vendor.default import Vendor
+
+    # IANA registration
+    from pcapkit.vendor.reg import *
+
+    # Miscellanous
+    from pcapkit.vendor.pcapng import *
+
+    # per protocol
+    from pcapkit.vendor.arp import *
+    from pcapkit.vendor.esp import *
+    from pcapkit.vendor.ftp import *
+    from pcapkit.vendor.hip import *
+    from pcapkit.vendor.http import *
+    from pcapkit.vendor.ipv4 import *
+    from pcapkit.vendor.ipv6 import *
+    from pcapkit.vendor.ipx import *
+    from pcapkit.vendor.l2tp import *
+    from pcapkit.vendor.mh import *
+    from pcapkit.vendor.ngap import *
+    from pcapkit.vendor.ospf import *
+    from pcapkit.vendor.sctp import *
+    from pcapkit.vendor.tcp import *
+    from pcapkit.vendor.vlan import *
 
 # Crawlers only. This list is also the default target list of
 # :mod:`pcapkit.vendor.__main__`, which runs every name in it, so the base

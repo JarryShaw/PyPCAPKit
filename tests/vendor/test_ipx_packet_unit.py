@@ -43,13 +43,12 @@ if TYPE_CHECKING:
 #: Repository root, i.e. the grandparent of the directory holding this file.
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
-#: Every distribution importing :mod:`pcapkit.vendor` needs. ``requests`` is the
-#: obvious one -- ``pcapkit.vendor.default`` imports it at module scope -- but it
-#: is not sufficient: importing *any* crawler imports the ``pcapkit.vendor``
-#: package, whose :file:`__init__.py` pulls in all seventeen subpackages, seven of
-#: which ``import bs4`` at module scope. So a guard on ``requests`` alone lets the
-#: suite error instead of skipping on a machine that happens to have ``requests``
-#: and not ``beautifulsoup4``.
+#: Every distribution importing :mod:`pcapkit.vendor` with its crawlers needs.
+#: ``pcapkit.vendor.default`` imports ``requests`` at module scope, and several
+#: crawlers ``import bs4`` at module scope. Without either, the ``pcapkit.vendor``
+#: package imports none of its crawlers (#1850), so this file's crawler, which
+#: imports no ``bs4``, would import with ``requests`` alone; the gate names the
+#: whole set so the package imports here as it does with the ``vendor`` extra.
 VENDOR_DEPS = ('requests', 'bs4', 'html5lib')
 
 #: Whether the crawlers are importable at all. ``html5lib`` ships in the
