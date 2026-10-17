@@ -88,6 +88,25 @@ def time_limit(seconds: int = 30) -> Iterator[None]:
     :data:`signal.SIGTERM` from an outer :program:`timeout`, which such a loop
     likewise never gets around to handling.
 
+    Once the deadline has passed, the :exc:`TimeoutError` repeats every second
+    until the body has left the ``with`` (#1892): each raise re-arms the alarm for
+    one more second before it is raised. One raise is not enough, because it can
+    be lost before it reaches the body. Raised inside a finaliser, it goes to
+    :func:`sys.unraisablehook` and is dropped; an ``except OSError`` drops it too,
+    :exc:`TimeoutError` being one, and that is exactly what
+    :meth:`Extractor.__del__ <pcapkit.foundation.extraction.Extractor.__del__>`
+    catches. With a single alarm the body then runs on until pytest-timeout's
+    backstop ends the whole :program:`pytest-xdist` worker, with no traceback --
+    what the option generator's own one-shot deadline did (#1889). The repeat
+    stops on the way out, whichever way the body leaves.
+
+    One window stays open, and pure Python cannot close it: a deadline that comes
+    due after the body has ended but before the generator resumes, inside
+    :meth:`contextlib._GeneratorContextManager.__exit__`, raises
+    :exc:`TimeoutError` into the caller before the way out has run. The repeat
+    then keeps firing until that exception is released, since its traceback holds
+    the generator whose ``finally`` would stop it.
+
     There is only ever one pending alarm per process, so arming this one cancels
     whatever was already scheduled -- an enclosing ``time_limit``, or a deadline the
     test runner set for itself. Both the handler and that pending alarm are put back
@@ -120,7 +139,7 @@ def time_limit(seconds: int = 30) -> Iterator[None]:
 
     Raises:
         TimeoutError: If the body has not finished within ``seconds`` seconds,
-            as scaled.
+            as scaled -- and again each second after that, until it has.
         ValueError: If :data:`TIMEOUT_SCALE_ENV` is malformed; see
             :func:`scale_timeout`.
 
@@ -134,7 +153,18 @@ def time_limit(seconds: int = 30) -> Iterator[None]:
     # Before the handler is swapped, so a malformed scale leaves nothing to undo.
     seconds = scale_timeout(seconds)
 
-    def expire(signum: int, frame: object) -> None:
+    # Set as the first statement on the way out: from then on a repeat already
+    # due does nothing, so it cannot interrupt the restoring below or re-arm
+    # itself past the ``with``. A plain store, not a call, so that a repeat
+    # landing right at the way out has no extra place to be delivered.
+    leaving = False
+
+    def expire(signum: int, frame: object) -> None:  # pylint: disable=unused-argument
+        if leaving:
+            return
+        # Re-armed before raising, so a raise that never reaches the body is
+        # followed by another one (#1892).
+        signal.alarm(1)
         raise TimeoutError(f'did not finish within {seconds}s')
 
     previous_handler = signal.signal(signal.SIGALRM, expire)
@@ -154,12 +184,14 @@ def time_limit(seconds: int = 30) -> Iterator[None]:
         started = time.monotonic()
         yield
     finally:
-        # Cancel first, so that an alarm which fires between here and the handler
-        # being restored cannot be delivered to whatever handler was installed
-        # before -- and so that the alarm re-armed below belongs to that handler
-        # rather than to ``expire``. Only if arming happened, though: a failed
-        # ``signal.alarm`` replaced nothing, so an enclosing deadline is still
-        # pending as it was, and cancelling it here would drop it unrecorded.
+        leaving = True
+        # Cancel first -- the deadline, or the repeat it has re-armed -- so that
+        # an alarm which fires between here and the handler being restored cannot
+        # be delivered to whatever handler was installed before, and so that the
+        # alarm re-armed below belongs to that handler rather than to ``expire``.
+        # Only if arming happened, though: a failed ``signal.alarm`` replaced
+        # nothing, so an enclosing deadline is still pending as it was, and
+        # cancelling it here would drop it unrecorded.
         if armed:
             signal.alarm(0)
         signal.signal(signal.SIGALRM, previous_handler)

@@ -53,6 +53,7 @@ extractors, so it reads no sample capture and needs no engine installed.
 """
 from __future__ import annotations
 
+import contextlib
 import hashlib
 import importlib
 import importlib.util
@@ -75,6 +76,11 @@ from tests._support import (MAX_TIMEOUT, PCAPNG_GENERATOR, TIMEOUT_SCALE_ENV,
                             restore_modules, restore_modules_after, scale_timeout,
                             skip_if_stand_in, snapshot_modules, stand_in_reason, time_limit,
                             upstream_digests)
+
+#: Seconds a :class:`TimeLimitTests` body spins waiting for the deadline before it
+#: gives up and fails by name: ten times the one-second deadline those tests arm,
+#: so a deadline that fires at all, its repeat included, lands well inside it.
+SPIN_LIMIT = 10.0
 
 
 class Closeable:
@@ -226,7 +232,29 @@ class TimeLimitTests(unittest.TestCase):
     pin that, because an enclosing deadline going missing is invisible until the
     run it should have bounded hangs instead.
 
+    A deadline that has fired repeats until the ``with`` is left (#1892), since its
+    first raise can be dropped before the body sees it; these pin that the repeat
+    gets through and that it never outlives the block. Every body that waits for
+    the deadline here gives up after :data:`SPIN_LIMIT` and fails by name, so a
+    deadline that never gets through fails this test in seconds rather than
+    hanging the worker until pytest-timeout's backstop ends it.
+
     """
+
+    def spin(self, until: float) -> None:
+        """Busy-wait in pure Python until :func:`time.monotonic` reaches ``until``.
+
+        The stand-in for a hang, but a bounded one. Pure Python, so the deadline's
+        signal is delivered inside it, between bytecodes.
+
+        """
+        while time.monotonic() < until:
+            pass
+
+    def hang(self, until: float) -> None:
+        """:meth:`spin`, then fail: the deadline should have interrupted it first."""
+        self.spin(until)
+        self.fail(f'time_limit did not interrupt the body within {SPIN_LIMIT:g}s')
 
     def setUp(self) -> None:
         # Whatever a test leaves behind, the next one starts from nothing pending
@@ -247,8 +275,7 @@ class TimeLimitTests(unittest.TestCase):
         """The point of the helper, pinned so the rest cannot be met by disarming."""
         with self.assertRaises(TimeoutError):
             with time_limit(1):
-                while True:
-                    pass
+                self.hang(time.monotonic() + SPIN_LIMIT)
 
     def test_an_enclosing_alarm_is_restored(self) -> None:
         """An outer deadline keeps counting down across the ``with``.
@@ -320,8 +347,7 @@ class TimeLimitTests(unittest.TestCase):
         os.environ[TIMEOUT_SCALE_ENV] = '0.5'
         with self.assertRaisesRegex(TimeoutError, r'within 1s'):
             with time_limit(2):
-                while True:
-                    pass
+                self.hang(time.monotonic() + SPIN_LIMIT)
 
     def test_a_scaled_deadline_rounds_up_to_whole_seconds(self) -> None:
         """An alarm counts whole seconds, and a deadline of zero is no deadline."""
@@ -383,6 +409,148 @@ class TimeLimitTests(unittest.TestCase):
 
         self.assertIs(signal.getsignal(signal.SIGALRM), own_handler)
         self.assertIn(real_alarm(0), range(28, 31))
+
+    def assert_nothing_left_behind(self, own_handler: 'object') -> None:
+        """No alarm pending, this class's handler back, and nothing delivered to it."""
+        self.assertIs(signal.getsignal(signal.SIGALRM), own_handler)
+        self.assertEqual(signal.alarm(0), 0)
+        self.assertEqual(self.handled, [])
+
+    def test_each_raise_re_arms_the_alarm_for_one_second(self) -> None:
+        """The handler re-arms before it raises, so a dropped raise has a successor."""
+        with time_limit(5):
+            expire = signal.getsignal(signal.SIGALRM)
+            with self.assertRaisesRegex(TimeoutError, r'within 5s'):
+                expire(signal.SIGALRM, None)
+            self.assertEqual(signal.alarm(0), 1)
+
+    @unittest.skipUnless(sys.implementation.name == 'cpython' and sys.version_info >= (3, 8),
+                         'needs a finaliser run on the last reference, and sys.unraisablehook')
+    def test_a_raise_a_finaliser_drops_is_raised_again(self) -> None:
+        """#1892: the first raise lands in a finaliser and is lost; the repeat is not.
+
+        A finaliser cannot raise: what escapes one goes to
+        :func:`sys.unraisablehook` and the code that dropped the last reference
+        carries on. So the body below outlives its deadline unless the deadline
+        tries again.
+
+        """
+        own_handler = signal.getsignal(signal.SIGALRM)
+        end = time.monotonic() + SPIN_LIMIT
+        dropped = []  # type: list[type]
+        spin = self.spin
+
+        class Finalised:  # pylint: disable=too-few-public-methods
+            """Holds the body in its finaliser until the deadline lands there."""
+
+            def __del__(self) -> None:
+                spin(end)
+
+        with mock.patch.object(sys, 'unraisablehook',
+                               lambda unraisable: dropped.append(unraisable.exc_type)):
+            with self.assertRaisesRegex(TimeoutError, r'within 1s'):
+                with time_limit(1):
+                    held = Finalised()
+                    del held
+                    self.hang(end)
+
+        self.assertEqual(dropped, [TimeoutError])
+        self.assert_nothing_left_behind(own_handler)
+
+    def test_a_raise_an_except_oserror_drops_is_raised_again(self) -> None:
+        """#1892: :exc:`TimeoutError` is an :exc:`OSError`, so a handler for one drops it.
+
+        :meth:`pcapkit.foundation.extraction.Extractor.__del__` guards its close
+        with exactly that clause, so the first raise is caught there and the body
+        carries on, as it does below.
+
+        """
+        own_handler = signal.getsignal(signal.SIGALRM)
+        end = time.monotonic() + SPIN_LIMIT
+        dropped = []  # type: list[type]
+
+        with self.assertRaisesRegex(TimeoutError, r'within 1s'):
+            with time_limit(1):
+                try:
+                    self.hang(end)
+                except OSError as exc:
+                    dropped.append(type(exc))
+                self.hang(end)
+
+        self.assertEqual(dropped, [TimeoutError])
+        self.assert_nothing_left_behind(own_handler)
+
+    def test_the_repeat_never_outlives_the_block(self) -> None:
+        """Left normally, by timeout, or by another exception, nothing stays armed.
+
+        Each exit is taken while a repeat is pending: the first raise is caught in
+        the body, as a dropped one would be, so the alarm the handler re-armed is
+        still due when the ``with`` is left.
+
+        """
+        own_handler = signal.getsignal(signal.SIGALRM)
+        for how, expected in (('normally', None), ('by timeout', TimeoutError),
+                              ('by another exception', LookupError)):
+            with self.subTest(exit=how):
+                end = time.monotonic() + SPIN_LIMIT
+                raised = None
+                try:
+                    with time_limit(1):
+                        with contextlib.suppress(TimeoutError):
+                            self.hang(end)
+                        if expected is TimeoutError:
+                            self.hang(end)
+                        elif expected is LookupError:
+                            raise LookupError(how)
+                except (TimeoutError, LookupError) as exc:
+                    raised = type(exc)
+
+                self.assertIs(raised, expected)
+                self.assert_nothing_left_behind(own_handler)
+
+    def test_a_repeat_due_as_the_block_is_left_does_nothing(self) -> None:
+        """A deadline landing while the way out runs neither raises nor re-arms.
+
+        The signal is sent from inside the cancel, while ``time_limit``'s own
+        handler is still installed: the point a repeat already due would land.
+        Raised there, it would escape the ``with`` and leave that handler and a
+        fresh repeat behind it.
+
+        """
+        own_handler = signal.getsignal(signal.SIGALRM)
+        real_alarm = signal.alarm
+        sent = []  # type: list[int]
+
+        def alarm(seconds: int) -> int:
+            if seconds == 0:
+                sent.append(signal.SIGALRM)
+                os.kill(os.getpid(), signal.SIGALRM)
+            return real_alarm(seconds)
+
+        with mock.patch.object(signal, 'alarm', side_effect=alarm):
+            with time_limit(5):
+                pass
+
+        self.assertEqual(sent, [signal.SIGALRM])
+        self.assert_nothing_left_behind(own_handler)
+
+    def test_an_enclosing_alarm_survives_a_deadline_that_repeated(self) -> None:
+        """An outer deadline comes back, less the body's seconds, after a repeat."""
+        own_handler = signal.getsignal(signal.SIGALRM)
+        end = time.monotonic() + SPIN_LIMIT
+
+        signal.alarm(30)
+        with self.assertRaisesRegex(TimeoutError, r'within 1s'):
+            with time_limit(1):
+                with contextlib.suppress(TimeoutError):
+                    self.hang(end)
+                self.hang(end)
+
+        # The body ran for the deadline and its repeat at least, and for less than
+        # :data:`SPIN_LIMIT`, or it would have failed rather than timed out.
+        self.assertIn(signal.alarm(0), range(30 - int(SPIN_LIMIT), 29))
+        self.assertIs(signal.getsignal(signal.SIGALRM), own_handler)
+        self.assertEqual(self.handled, [])
 
 
 class SnapshotRestoreTests(unittest.TestCase):
