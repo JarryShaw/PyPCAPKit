@@ -21,13 +21,18 @@ references:
 
 The hook tests drive the hooks with the nodes Sphinx's own producers build and
 with napoleon itself, and check that ``setup`` connects each one where the build
-needs it, so they need Sphinx and skip without it. The directive test is textual
-and runs everywhere.
+needs it, so they need Sphinx and the pinned sphinx-autodoc-typehints, and skip
+without them. The directive test is textual and runs everywhere.
+
+This module also holds what every test loading :file:`conf.py` shares: the
+loader, the ``setup`` connection reader, and :data:`HAS_SPHINX` with its skip
+message.
 
 """
 
 from __future__ import annotations
 
+import importlib.metadata
 import importlib.util
 import inspect
 import os
@@ -39,7 +44,7 @@ from typing import TYPE_CHECKING
 from unittest import mock
 
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Any, Optional
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
@@ -47,9 +52,57 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 DOCS = ROOT / 'docs' / 'source'
 CONF = DOCS / 'conf.py'
 
-#: ``conf.py`` imports both at module level.
-HAS_SPHINX = all(importlib.util.find_spec(name) is not None
-                 for name in ('sphinx', 'sphinx_autodoc_typehints'))
+#: The distribution whose private modules ``conf.py`` imports.
+TYPEHINTS = 'sphinx-autodoc-typehints'
+
+#: The requirements file the docs build installs, which pins :data:`TYPEHINTS`.
+REQUIREMENTS = ROOT / 'docs' / 'requirements.txt'
+
+
+def pinned_release() -> 'str':
+    """The release of :data:`TYPEHINTS` that :data:`REQUIREMENTS` pins."""
+    text = REQUIREMENTS.read_text(encoding='utf-8')
+    match = re.search(rf'^{re.escape(TYPEHINTS)}==(\S+)\s*$', text, re.MULTILINE)
+    if match is None:
+        raise AssertionError(f'{REQUIREMENTS} pins no exact {TYPEHINTS} release')
+    return match.group(1)
+
+
+def installed_release() -> 'Optional[str]':
+    """The installed release of :data:`TYPEHINTS`, or :data:`None` without one."""
+    try:
+        return importlib.metadata.version(TYPEHINTS)
+    except importlib.metadata.PackageNotFoundError:
+        return None
+
+
+def runs_pinned_release() -> 'bool':
+    """Whether the installed :data:`TYPEHINTS` is the release ``conf.py`` is written against."""
+    return installed_release() == pinned_release()
+
+
+#: ``conf.py`` imports these at module level, and imports private modules of
+#: sphinx-autodoc-typehints that only the pinned release is known to have. Another release would
+#: fail the load, or load and test something the docs build never runs, so a
+#: test that loads ``conf.py`` gates on this and skips with
+#: :data:`SPHINX_SKIP_REASON`.
+HAS_SPHINX = (all(importlib.util.find_spec(name) is not None
+                  for name in ('sphinx', 'sphinx_autodoc_typehints'))
+              and runs_pinned_release())
+
+
+def sphinx_skip_reason() -> 'str':
+    """Why :data:`HAS_SPHINX` is false, for a skip message; empty when it is true."""
+    if HAS_SPHINX:
+        return ''
+    if any(importlib.util.find_spec(name) is None for name in ('sphinx', 'sphinx_autodoc_typehints')):
+        return 'Sphinx and sphinx-autodoc-typehints are not installed'
+    return (f'{TYPEHINTS} {installed_release()} is installed, not the {pinned_release()} '
+            f'that docs/requirements.txt pins and docs/source/conf.py is written against')
+
+
+#: The skip message of every test gated on :data:`HAS_SPHINX`.
+SPHINX_SKIP_REASON = sphinx_skip_reason()
 
 #: A Python domain directive, or one that sets the current module.
 DIRECTIVE = re.compile(r'^\s*\.\. (?:py:)?(?P<kind>[a-z]+)::\s*(?P<name>\S+)')
@@ -138,7 +191,7 @@ class DirectiveNameTests(unittest.TestCase):
         self.assertEqual(doubled_names(), [])
 
 
-@unittest.skipUnless(HAS_SPHINX, 'Sphinx and sphinx-autodoc-typehints are not installed')
+@unittest.skipUnless(HAS_SPHINX, SPHINX_SKIP_REASON)
 class BuiltinReferenceTests(unittest.TestCase):
     """``resolve_builtins_exactly`` keeps builtin names off registry members."""
 
@@ -226,7 +279,7 @@ class BuiltinReferenceTests(unittest.TestCase):
         self.assertEqual(wired, [('doctree-read', 500)])
 
 
-@unittest.skipUnless(HAS_SPHINX, 'Sphinx and sphinx-autodoc-typehints are not installed')
+@unittest.skipUnless(HAS_SPHINX, SPHINX_SKIP_REASON)
 class EnumMemberDocstringTests(unittest.TestCase):
     """Napoleon's inline type is undone on enum members, and only there."""
 

@@ -230,9 +230,9 @@ MODULE_PROVIDERS = {
     # ``HAS_PYPCAP``'s candidates -- see :func:`ambiguous_satisfactions`'s own
     # docstring.
     'pcap._pcap': ('pcap-ct',),
-    # The two :file:`docs/source/conf.py` imports at module level, which the
+    # The :file:`docs/source/conf.py` imports at module level, which the
     # ``HAS_SPHINX`` gate on its hook tests (#1775) asks for. Only the ``docs``
-    # extra carries either.
+    # extra carries them.
     'sphinx': ('Sphinx',),
     'sphinx_autodoc_typehints': ('sphinx-autodoc-typehints',),
     # The reST parser Sphinx renders the const comments with, which the
@@ -635,16 +635,22 @@ DEPENDENCY_GATE_EXCLUSIONS = {
         dark={'test': ('sphinx', 'sphinx_autodoc_typehints'),
               'gate': ('sphinx', 'sphinx_autodoc_typehints')},
         reason=(
-            'The two classes it gates (#1775) load docs/source/conf.py and drive its '
-            'cross-reference and napoleon hooks with the nodes Sphinx itself builds, so '
-            'they need the docs extra, which only deploy-pages.yml installs -- and that '
-            'workflow builds the documentation rather than running pytest. The same '
-            'argument declines it here as declines HAS_MYPY above: the docs build is '
-            'already the end-to-end check of those hooks, and putting Sphinx, furo and '
-            'their dependencies on every unit-test leg would cost each one an install for '
-            'two classes. They run wherever Sphinx is importable, a developer checkout '
-            'with the docs extra included, and skip visibly elsewhere. The '
-            'directive-name test in the same module needs nothing and runs on every leg.'
+            'The classes it gates (#1775, #1856 and the enum-value hook\'s) load '
+            'docs/source/conf.py and drive its hooks with the nodes and events Sphinx '
+            'itself builds, so they need Sphinx and the pinned sphinx-autodoc-typehints. '
+            'Only deploy-pages.yml installs those, from docs/requirements.txt, and that '
+            'workflow builds the documentation rather than running pytest; no workflow '
+            'installs the docs extra itself. The same argument declines it here as '
+            'declines HAS_MYPY above: the docs build is already the end-to-end check of '
+            'those hooks, and putting Sphinx, furo and their dependencies on every '
+            'unit-test leg would cost each one an install for these classes alone. The '
+            'flag also requires the installed sphinx-autodoc-typehints to be the release '
+            'docs/requirements.txt pins, since conf.py imports that release\'s private '
+            'modules; that check reads no module, so this entry still names only the '
+            'imports. They run wherever docs/requirements.txt or the docs extra is '
+            'installed, a developer checkout included, and skip visibly elsewhere, saying '
+            'which condition failed. The directive-name and pin-agreement tests need '
+            'nothing and run on every leg.'
         ),
     ),
     'HAS_DOCUTILS': Exclusion(

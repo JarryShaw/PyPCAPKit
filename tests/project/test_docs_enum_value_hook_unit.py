@@ -10,7 +10,8 @@ answers ``False`` -- include -- for a private member that has a docstring.
 
 The tests call the hook directly, and replay the event through Sphinx's own
 :class:`~sphinx.events.EventManager` with napoleon's real handler, in the order
-the build connects them. They need Sphinx and skip without it, but run no build.
+the build connects them. They need Sphinx and the pinned sphinx-autodoc-typehints,
+and skip without them, but run no build.
 
 """
 
@@ -22,7 +23,8 @@ import types
 import unittest
 from typing import TYPE_CHECKING
 
-from tests.project.test_docs_ambiguous_xrefs_1775_unit import HAS_SPHINX, connections, load_conf
+from tests.project.test_docs_ambiguous_xrefs_1775_unit import (HAS_SPHINX, SPHINX_SKIP_REASON, connections,
+                                                               load_conf)
 
 if TYPE_CHECKING:
     from typing import Any
@@ -40,7 +42,7 @@ class Colour(enum.Enum):
     RED = 1
 
 
-@unittest.skipUnless(HAS_SPHINX, 'Sphinx and sphinx-autodoc-typehints are not installed')
+@unittest.skipUnless(HAS_SPHINX, SPHINX_SKIP_REASON)
 class EnumValueHookTests(unittest.TestCase):
     """``skip_enum_value_hook`` skips the inherited hook, and nothing else."""
 
