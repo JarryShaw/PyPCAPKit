@@ -21,6 +21,8 @@
   ``conda-update`` in :file:`.github/workflows/cron-conda.yml` installs
   requests and runs ``--refresh-pins`` between installing ``.[all]`` and
   writing the requirements, read with :func:`yaml.safe_load`.
+* Every test reaches the script through :func:`load_vendor`, which skips without
+  :mod:`tomllib`, so none fails on the 3.8 to 3.10 legs (#1898).
 
 """
 
@@ -67,16 +69,26 @@ REQUIRES = '!=3.9.0,!=3.9.1,>=3.9'
 _MODULE = []  # type: list[Any]
 
 
-def vendor() -> 'Any':
-    """:file:`util/conda_vendor.py`, loaded once; skipped without :mod:`tomllib`, which it imports."""
+def load_vendor(name: 'str' = 'conda_vendor') -> 'Any':
+    """:file:`util/conda_vendor.py`, loaded afresh as ``name``; skipped without :mod:`tomllib`, which it imports.
+
+    Every test reaches the script through here, so none fails on the 3.8 to 3.10
+    legs, which lack :mod:`tomllib` (#1898): :class:`TomllibGuardTests`.
+
+    """
     if tomllib is None:  # pragma: no cover
         raise unittest.SkipTest('tomllib, which util/conda_vendor.py imports, needs Python 3.11+')
+    spec = importlib.util.spec_from_file_location(name, ROOT / 'util' / 'conda_vendor.py')
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)  # type: ignore[union-attr]
+    return module
+
+
+def vendor() -> 'Any':
+    """:file:`util/conda_vendor.py`, loaded once through :func:`load_vendor`."""
     if not _MODULE:
-        spec = importlib.util.spec_from_file_location('conda_vendor', ROOT / 'util' / 'conda_vendor.py')
-        assert spec is not None and spec.loader is not None
-        module = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(module)  # type: ignore[union-attr]
-        _MODULE.append(module)
+        _MODULE.append(load_vendor())
     return _MODULE[0]
 
 
@@ -398,11 +410,7 @@ class FetchTests(unittest.TestCase):
 
         """
         with no_urllib(), mock.patch.dict(sys.modules, {'requests': None}):
-            spec = importlib.util.spec_from_file_location('conda_vendor_without_requests',
-                                                          ROOT / 'util' / 'conda_vendor.py')
-            assert spec is not None and spec.loader is not None
-            fresh = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(fresh)  # type: ignore[union-attr]
+            fresh = load_vendor('conda_vendor_without_requests')
             with self.assertRaises(ImportError):
                 fresh._fetch('cryptography')
             with tempfile.TemporaryDirectory() as temp:
@@ -633,6 +641,33 @@ class WorkflowTests(unittest.TestCase):
             for step in job.get('steps', ()):
                 with self.subTest(job=job_id, step=step.get('name')):
                     self.assertNotIn('--refresh-pins', str(step.get('run', '')))
+
+
+class TomllibGuardTests(unittest.TestCase):
+    """Without :mod:`tomllib`, as on the 3.8 to 3.10 legs, every other test here passes or skips (#1898).
+
+    Those legs read green even when a test fails (#1679), so a test reaching the
+    script's module-level ``import tomllib`` other than through :func:`load_vendor`
+    shows only in their annotations. This runs the rest of the module with
+    :mod:`tomllib` gone instead, on any interpreter.
+
+    """
+
+    def test_every_other_test_passes_or_skips_without_tomllib(self) -> None:
+        module = sys.modules[__name__]
+        loader = unittest.defaultTestLoader
+        suite = unittest.TestSuite(
+            loader.loadTestsFromTestCase(case) for case in vars(module).values()
+            if isinstance(case, type) and issubclass(case, unittest.TestCase)
+            and case.__module__ == __name__ and case is not type(self))
+        result = unittest.TestResult()
+        with mock.patch.dict(sys.modules, {'tomllib': None}), mock.patch.object(module, 'tomllib', None), \
+                mock.patch.object(module, '_MODULE', []):
+            suite.run(result)
+        self.assertEqual([f'{test.id()}: {trace.strip().splitlines()[-1]}'
+                          for test, trace in result.errors + result.failures], [])
+        skipped = {test.id().rpartition('.')[2] for test, reason in result.skipped if 'tomllib' in reason}
+        self.assertIn('test_without_requests_only_the_request_fails', skipped)
 
 
 if __name__ == '__main__':
