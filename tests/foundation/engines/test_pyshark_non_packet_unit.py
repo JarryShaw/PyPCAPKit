@@ -125,7 +125,7 @@ class TestPySharkNonPacketRecords(unittest.TestCase):
     def test_verbose_mode_prints_a_commented_packet(self) -> None:
         engine, ext = self._engine([_packet(1, comment=True), _packet(2)])
         vars(ext).update(_exlyr='none', _exptl='null', _exctx=None, _flag_r=False, _flag_v=True,
-                         _ifnm='test.pcapng', record_header=lambda: None)
+                         _vfunc_default=True, _ifnm='test.pcapng', record_header=lambda: None)
         stream = engine._extmp
         engine._expkg = types.SimpleNamespace(FileCapture=lambda *args, **kwargs: stream)
         engine.run()  # installs the verbose handler
@@ -135,6 +135,27 @@ class TestPySharkNonPacketRecords(unittest.TestCase):
             engine.read_frame()
         self.assertEqual(out.getvalue().splitlines(),
                          [f'Frame   1: {PROTOCOLS}', f'Frame   2: {PROTOCOLS}'])
+
+    def test_a_verbose_callback_is_kept_and_called_per_packet(self) -> None:
+        # #1874: a callable given as ``verbose`` is not replaced by the printer
+        first, last = _packet(1), _packet(2)
+        engine, ext = self._engine([first, last])
+        calls = []  # type: list[tuple[object, object]]
+        vars(ext).update(_exlyr='none', _exptl='null', _exctx=None, _flag_r=False, _flag_v=True,
+                         _vfunc_default=False, _vfunc=lambda e, f: calls.append((e, f)),
+                         _ifnm='test.pcapng', record_header=lambda: None)
+        stream = engine._extmp
+        engine._expkg = types.SimpleNamespace(FileCapture=lambda *args, **kwargs: stream)
+        engine.run()
+
+        with contextlib.redirect_stdout(io.StringIO()) as out:
+            engine.read_frame()
+            engine.read_frame()
+        self.assertEqual(len(calls), 2)
+        for (called_ext, frame), packet in zip(calls, (first, last)):
+            self.assertIs(called_ext, ext)
+            self.assertIs(frame, packet)
+        self.assertEqual(out.getvalue(), '')
 
 
 if __name__ == '__main__':

@@ -253,9 +253,10 @@ class PyShark(EngineBase['PySharkPacket']):
                  f"so 'ipv4={ext._ipv4}', 'ipv6={ext._ipv6}' and 'tcp={ext._tcp}' will be ignored",
                  AttributeWarning, stacklevel=stacklevel())
 
-        # setup verbose handler; a packet always has a frame layer, since
-        # read_frame skips every record that does not (#1515)
-        if ext._flag_v:
+        # setup verbose handler, unless the caller gave one of their own
+        # (#1874); a packet always has a frame layer, since read_frame skips
+        # every record that does not (#1515)
+        if ext._vfunc_default:
             ext._vfunc = lambda e, f: print(
                 f'Frame {e._frnum:>3d}: '  # pylint: disable=protected-access
                 f'{cast("BaseLayer", _frame_layer(cast("PySharkPacket", f))).protocols}'

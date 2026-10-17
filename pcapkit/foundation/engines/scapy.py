@@ -382,8 +382,8 @@ class Scapy(EngineBase['ScapyPacket']):
                  "'context=' is ignored",
                  AttributeWarning, stacklevel=stacklevel())
 
-        # setup verbose handler
-        if ext._flag_v:
+        # setup verbose handler, unless the caller gave one of their own (#1874)
+        if ext._vfunc_default:
             from pcapkit.toolkit.scapy import packet2chain  # isort:skip
             ext._vfunc = lambda e, f: print(
                 f'Frame {e._frnum:>3d}: {packet2chain(cast("ScapyPacket", f))}'  # pylint: disable=protected-access

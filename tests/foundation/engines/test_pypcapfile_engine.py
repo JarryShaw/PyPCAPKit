@@ -179,6 +179,7 @@ class PyPCAPFileEngineTests(unittest.TestCase):
             '_flag_q': False,
             '_flag_f': False,
             '_flag_v': False,
+            '_vfunc_default': False,
             '_flag_r': False,
             '_flag_t': False,
             '_flag_d': True,
@@ -312,7 +313,7 @@ class PyPCAPFileEngineTests(unittest.TestCase):
         self.assertIsNone(engine._declf)
 
     def test_run_installs_verbose_handler_reporting_the_chain(self) -> None:
-        extractor, _ = self.make_extractor(_flag_v=True)
+        extractor, _ = self.make_extractor(_flag_v=True, _vfunc_default=True)
         engine = self.engine(extractor)
         engine.run()
 
@@ -322,6 +323,15 @@ class PyPCAPFileEngineTests(unittest.TestCase):
             extractor._vfunc(extractor, packet)
         printer.assert_called_once()
         self.assertIn('ETHERNET:Raw', printer.call_args.args[0])
+
+    def test_run_keeps_a_callers_verbose_callback(self) -> None:
+        # #1874: a callable given as ``verbose`` turns verbose output on without
+        # asking for the default printer, so the engine must not replace it
+        callback = mock.Mock()
+        extractor, _ = self.make_extractor(_flag_v=True, _vfunc_default=False, _vfunc=callback)
+        engine = self.engine(extractor)
+        engine.run()
+        self.assertIs(extractor._vfunc, callback)
 
     ##########################################################################
     # Records (#1512, #1571).

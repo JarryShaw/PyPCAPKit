@@ -512,9 +512,13 @@ The following code snippet shows how to create a new engine class:
            # check if there's any extraction protocol and/or layer thresholds
            # set by the user (some engines may not support this feature); or
            # to set up the verbose handler for the underlying engine module,
-           # as in the following code snippet.
+           # as in the following code snippet. Install it only when the user
+           # asked for the default output, i.e., `verbose=True`, which sets
+           # `ext._vfunc_default`: a callable given as `verbose=` is the
+           # user's own handler, already stored as `ext._vfunc`, so it must
+           # be kept rather than replaced.
 
-           if ext._flag_v:  # check if verbose mode is enabled
+           if ext._vfunc_default:  # check if the default verbose output is requested
                # NOTE: PyPCAPKit has its own bundled supporting functions for
                # third-party libraries, e.g., the `packet2chain` function is
                # to convert a given Packet instance of the Scapy library to a
