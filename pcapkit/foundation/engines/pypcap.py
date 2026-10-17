@@ -31,12 +31,17 @@ from pcapkit.utilities.warnings import AttributeWarning, EngineWarning, warn
 __all__ = ['PyPCAP']
 
 if TYPE_CHECKING:
-    from types import ModuleType
-    from typing import Iterator, Optional
+    from typing import Iterator, Optional, Protocol, Type
 
     from pcap import pcap as Handle
 
     from pcapkit.foundation.extraction import Extractor
+
+    class _PyPCAPPackage(Protocol):
+        """:mod:`pcap`, as :class:`PyPCAP` reads it through :attr:`PyPCAP._expkg` (#1878)."""
+
+        @property
+        def pcap(self) -> 'Type[Handle]': ...
 
     #: A PyPCAP "frame": the ``(timestamp, bytes)`` pair that :class:`pcap.pcap`
     #: iteration yields. Deliberately *not* named ``Frame``, so that it is not
@@ -88,7 +93,7 @@ class PyPCAP(EngineBase['RawFrame']):
     """
     if TYPE_CHECKING:
         #: Engine extraction package, i.e. :mod:`pcap`.
-        _expkg: 'ModuleType'
+        _expkg: '_PyPCAPPackage'
         #: Engine extraction temporary storage.
         _extmp: 'Iterator[RawFrame]'
         #: Data link layer protocol, from the capture handle.
@@ -308,7 +313,7 @@ class PyPCAP(EngineBase['RawFrame']):
         # ``pcap.pcap`` ignores it, but should ``pcap_open_offline`` ever fail the
         # constructor falls through to opening the name as a live device, and we
         # do not want that attempt to request promiscuous mode.
-        handle = cast('Handle', self._expkg.pcap(name=ext._ifnm, promisc=False))
+        handle = self._expkg.pcap(name=ext._ifnm, promisc=False)
         self._dlink = Enum_LinkType.get(handle.datalink())
 
         # setup verbose handler, unless the caller gave one of their own (#1874)

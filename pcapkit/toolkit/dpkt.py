@@ -280,7 +280,7 @@ def packet2bytes(packet: 'Packet') -> 'bytes':
     buffer = getattr(packet, BUFFER_ATTR, None)
     if buffer is not None:
         return cast('bytes', buffer)
-    return cast('bytes', copy.deepcopy(packet).pack())
+    return copy.deepcopy(packet).pack()
 
 
 def packet2frame(packet: 'Packet', timestamp: 'float | Decimal', *,
@@ -697,7 +697,9 @@ def ipv6_reassembly(packet: 'Packet', timestamp: 'float', *,
     network = _network(packet)
     ipv6 = cast('IP6', network) if hasattr(network, 'extension_hdrs') else None
     if ipv6 is not None:
-        ipv6_frag = ipv6.extension_hdrs.get(44)  # type: Optional[IP6FragmentHeader]
+        # dpkt keeps each extension header under its protocol number, so 44 is a
+        # Fragment header; the dict's value type cannot say so
+        ipv6_frag = cast('Optional[IP6FragmentHeader]', ipv6.extension_hdrs.get(44))
         if ipv6_frag is None:       # dismiss not fragmented packet
             return None
         hdr_len = ipv6_hdr_len(ipv6)

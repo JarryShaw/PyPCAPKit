@@ -24,12 +24,17 @@ from pcapkit.utilities.warnings import AttributeWarning, EngineWarning, warn
 __all__ = ['PCAP_CT']
 
 if TYPE_CHECKING:
-    from types import ModuleType
-    from typing import Iterator, Optional
+    from typing import Iterator, Optional, Protocol, Type
 
     from pcap import pcap as Handle
 
     from pcapkit.foundation.extraction import Extractor
+
+    class _PCAPCTPackage(Protocol):
+        """:mod:`pcap`, as :class:`PCAP_CT` reads it through :attr:`PCAP_CT._expkg` (#1878)."""
+
+        @property
+        def pcap(self) -> 'Type[Handle]': ...
 
     #: A `pcap-ct`_ "frame": the ``(timestamp, bytes)`` pair that
     #: :class:`pcap.pcap` iteration yields. Deliberately *not* named ``Frame``,
@@ -113,7 +118,7 @@ class PCAP_CT(EngineBase['RawFrame']):
     """
     if TYPE_CHECKING:
         #: Engine extraction package, i.e. :mod:`pcap`.
-        _expkg: 'ModuleType'
+        _expkg: '_PCAPCTPackage'
         #: Capture handle, kept separately from the iterator it is read through
         #: so that :meth:`close` does not depend on ``iter(handle) is handle``.
         _handle: 'Handle'
@@ -395,7 +400,7 @@ class PCAP_CT(EngineBase['RawFrame']):
         # want that attempt to request promiscuous mode. (That fallback is also
         # why a bad path surfaces as ``OSError: ... No such device exists``,
         # which is what the ``os.path.isfile`` check above pre-empts.)
-        self._handle = cast('Handle', self._expkg.pcap(name=ext._ifnm, promisc=False))
+        self._handle = self._expkg.pcap(name=ext._ifnm, promisc=False)
         self._dlink = Enum_LinkType.get(self._handle.datalink())
 
         # setup verbose handler, unless the caller gave one of their own (#1874)

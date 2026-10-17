@@ -22,14 +22,19 @@ from pcapkit.utilities.warnings import AttributeWarning, warn
 __all__ = ['PyShark']
 
 if TYPE_CHECKING:
-    from types import ModuleType
-    from typing import Optional
+    from typing import Optional, Protocol, Type
 
-    from pyshark.capture.file_capture import FileCapture
+    from pyshark.capture.file_capture import FileCapture as PySharkFileCapture
     from pyshark.packet.layers.base import BaseLayer
     from pyshark.packet.packet import Packet as PySharkPacket
 
     from pcapkit.foundation.extraction import Extractor
+
+    class _PySharkPackage(Protocol):
+        """:mod:`pyshark`, as :class:`PyShark` reads it through :attr:`PyShark._expkg` (#1878)."""
+
+        @property
+        def FileCapture(self) -> 'Type[PySharkFileCapture]': ...
 
 #: logging.Logger: Module-level logger, a child of the package-wide
 #: :data:`pcapkit.utilities.logging.logger`.
@@ -84,9 +89,9 @@ class PyShark(EngineBase['PySharkPacket']):
     """
     if TYPE_CHECKING:
         #: Engine extraction package, i.e. :mod:`pyshark`.
-        _expkg: 'ModuleType'
+        _expkg: '_PySharkPackage'
         #: Engine extraction temporary storage.
-        _extmp: 'FileCapture'
+        _extmp: 'PySharkFileCapture'
 
     ##########################################################################
     # Defaults.
@@ -200,7 +205,7 @@ class PyShark(EngineBase['PySharkPacket']):
         import pyshark  # isort:skip
 
         self._expkg = pyshark
-        self._extmp = cast('FileCapture', None)
+        self._extmp = cast('PySharkFileCapture', None)
 
         super().__init__(extractor)
 
@@ -289,7 +294,7 @@ class PyShark(EngineBase['PySharkPacket']):
 
         # fetch the next PyShark packet that is a packet record
         while True:
-            packet = cast('PySharkPacket', self._extmp.next())
+            packet = self._extmp.next()
             if _is_packet(packet):
                 break
             logger.debug('pyshark: skipping tshark frame %s, not a packet record', packet.number)

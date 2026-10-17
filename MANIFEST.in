@@ -10,6 +10,11 @@ prune .venv
 prune docs
 prune examples/captures
 prune temp
+# The engine stubs mypy reads (#1878) check this tree and are not for shipping.
+# Not load-bearing today: ``global-include *.py`` does not match a ``.pyi``,
+# measured by building an sdist without this line. It keeps them out should a
+# pattern above come to match one.
+prune typings
 
 # Belt-and-braces, both of them: setuptools ships these two whether or not this
 # file mentions them, so neither line is load-bearing. An earlier version of this

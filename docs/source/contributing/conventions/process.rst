@@ -57,11 +57,24 @@ back to the default engine rather than raising when a requested engine is absent
 
    The ``dev`` extra exists **because** of this narrowing, and is not a second
    catch-all. pylint, mypy and autodoc all resolve imports against what is installed,
-   so the engines leaving ``all`` would have made them newly unresolvable to the
+   mypy for every package without a stub under :file:`typings/` (below), so the
+   engines leaving ``all`` would have made them newly unresolvable to the
    toolchain. ``dev`` is defined by what the toolchain must be able to *see*, and the
    workflows that need full resolution install ``.[all,dev]``. Do not add
    ``pypcap``/``pcap-ct`` to it to silence a lint finding; :file:`.github/workflows/lint.yml`
    carries a tracked ``import-error`` count that is deliberate rather than accidental.
+
+.. note::
+
+   mypy types the engine packages that ship no types -- ``dpkt``, ``pyshark``,
+   ``pcap`` and ``pcapfile`` -- from local stubs under :file:`typings/`, which
+   :file:`mypy.ini` registers through ``mypy_path`` and which ship in neither the
+   wheel nor the sdist (:issue:`1878`). ``scapy`` ships its own. A stub declares only
+   what :mod:`pcapkit` uses and cites the version it was written against, so a name
+   :mod:`pcapkit` starts to use goes into the stub first. Each engine's ``_expkg`` is
+   a :class:`~typing.Protocol` of what the engine reads through it, defined in its
+   module's ``if TYPE_CHECKING:`` block; :file:`tests/project/test_engine_stubs_1878_unit.py`
+   checks both against the code.
 
 Changelog Entry Granularity
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

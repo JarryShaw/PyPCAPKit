@@ -29,14 +29,18 @@ from pcapkit.utilities.warnings import AttributeWarning, DPKTWarning, warn
 __all__ = ['DPKT', 'PCAPNGReader']
 
 if TYPE_CHECKING:
-    from types import ModuleType
-    from typing import IO, Iterator, Literal, Optional, Type, Union
+    from typing import IO, Iterator, Literal, Optional, Protocol, Type, Union
 
     from dpkt.dpkt import Packet as DPKTPacket
+    from dpkt.ethernet import Ethernet as DPKTEthernet
+    from dpkt.ip import IP as DPKTIP
+    from dpkt.ip6 import IP6 as DPKTIP6
+    from dpkt.loopback import Loopback as DPKTLoopback
     from dpkt.pcap import Reader as PCAPReader
 
     from pcapkit.foundation.engines.pcapng import Context
     from pcapkit.foundation.extraction import Extractor
+    from pcapkit.protocols.data.misc.pcapng import IF_TSOffsetOption as Data_IF_TSOffsetOption
     from pcapkit.protocols.data.misc.pcapng import IF_TSResolOption as Data_IF_TSResolOption
     from pcapkit.protocols.data.misc.pcapng import \
         InterfaceDescriptionBlock as Data_InterfaceDescriptionBlock
@@ -44,6 +48,57 @@ if TYPE_CHECKING:
     from pcapkit.protocols.data.misc.pcapng import SimplePacketBlock as Data_SimplePacketBlock
 
     Reader = Union[PCAPReader, 'PCAPNGReader']
+
+    class _DPKTCoreModule(Protocol):
+        """:mod:`dpkt.dpkt`, as :class:`DPKT` reads it."""
+
+        @property
+        def Packet(self) -> 'Type[DPKTPacket]': ...
+
+    class _DPKTEthernetModule(Protocol):
+        """:mod:`dpkt.ethernet`, as :class:`DPKT` reads it."""
+
+        @property
+        def Ethernet(self) -> 'Type[DPKTEthernet]': ...
+
+    class _DPKTIPModule(Protocol):
+        """:mod:`dpkt.ip`, as :class:`DPKT` reads it."""
+
+        @property
+        def IP(self) -> 'Type[DPKTIP]': ...
+
+    class _DPKTIP6Module(Protocol):
+        """:mod:`dpkt.ip6`, as :class:`DPKT` reads it."""
+
+        @property
+        def IP6(self) -> 'Type[DPKTIP6]': ...
+
+    class _DPKTLoopbackModule(Protocol):
+        """:mod:`dpkt.loopback`, as :class:`DPKT` reads it."""
+
+        @property
+        def Loopback(self) -> 'Type[DPKTLoopback]': ...
+
+    class _DPKTPackage(Protocol):
+        """:mod:`dpkt`, as :class:`DPKT` reads it through :attr:`DPKT._expkg` (#1878).
+
+        Each attribute is a submodule, described by what the engine reads of it.
+        mypy matches a module with a protocol at the top level only, so the
+        submodules are checked through the stub types they name, under
+        :file:`typings/dpkt`.
+
+        """
+
+        @property
+        def dpkt(self) -> '_DPKTCoreModule': ...
+        @property
+        def ethernet(self) -> '_DPKTEthernetModule': ...
+        @property
+        def ip(self) -> '_DPKTIPModule': ...
+        @property
+        def ip6(self) -> '_DPKTIP6Module': ...
+        @property
+        def loopback(self) -> '_DPKTLoopbackModule': ...
 
 #: logging.Logger: Module-level logger, a child of the package-wide
 #: :data:`pcapkit.utilities.logging.logger`.
@@ -182,8 +237,10 @@ class PCAPNGReader:
             raise FormatError(f'PCAP-NG: [{tag}] invalid interface ID: {iface_id}')
         interface = self._ctx.interfaces[iface_id]
 
-        tsresol = interface.options.get(Enum_OptionType.if_tsresol)
-        tsoffset = interface.options.get(Enum_OptionType.if_tsoffset)
+        tsresol = cast('Optional[Data_IF_TSResolOption]',
+                       interface.options.get(Enum_OptionType.if_tsresol))
+        tsoffset = cast('Optional[Data_IF_TSOffsetOption]',
+                        interface.options.get(Enum_OptionType.if_tsoffset))
         resolution = DEFAULT_RESOLUTION if tsresol is None else tsresol.resolution
         offset = 0 if tsoffset is None else tsoffset.offset
 
@@ -268,7 +325,7 @@ def _pcap_reader() -> 'Type[PCAPReader]':
     #: Attributes of :class:`dpkt.pcap.Reader` the loop below reads, as of dpkt 1.9.8.
     private = ('_Reader__f', '_Reader__ph', '_divisor')
 
-    class _Reader(dpkt.pcap.Reader):  # type: ignore[name-defined,misc]
+    class _Reader(dpkt.pcap.Reader):
         def __init__(self, fileobj: 'IO[bytes]') -> 'None':
             super().__init__(fileobj)
             missing = [name for name in private if not hasattr(self, name)]
@@ -284,8 +341,9 @@ def _pcap_reader() -> 'Type[PCAPReader]':
         # NOTE: the loop is :meth:`dpkt.pcap.Reader.__iter__`'s, over the stream
         # and the record header type that method reads them through. A generator,
         # so ``dpkt.pcap.Reader.__init__`` calling it runs none of it before
-        # :attr:`_upstream` is set.
-        def __iter__(self) -> 'Iterator[tuple[float, bytes]]':
+        # :attr:`_upstream` is set. The timestamp is a ``Decimal`` for a
+        # nanosecond file, from upstream's loop and from this one alike.
+        def __iter__(self) -> 'Iterator[tuple[float | decimal.Decimal, bytes]]':
             if self._upstream:
                 yield from super().__iter__()
                 return
@@ -347,7 +405,10 @@ def _loopback_protocol(base: 'Type[DPKTPacket]', ip: 'Type[DPKTPacket]', ip6: 'T
 
     layers = {2: ip, 24: ip6, 28: ip6, 30: ip6}
 
-    class Loopback(base):
+    # ``base`` is an argument so that the class derives from the given module's
+    # own ``Loopback``; mypy takes a base class only from a name it can resolve
+    # statically
+    class Loopback(base):  # type: ignore[valid-type,misc]
         """BSD loopback encapsulation."""
 
         def unpack(ext, buf: 'bytes') -> 'None':
@@ -382,7 +443,7 @@ class DPKT(EngineBase['DPKTPacket']):
     """
     if TYPE_CHECKING:
         #: Engine extraction package, i.e. :mod:`dpkt`.
-        _expkg: 'ModuleType'
+        _expkg: '_DPKTPackage'
         #: Engine extraction temporary storage.
         _extmp: 'Reader'
 
@@ -464,7 +525,7 @@ class DPKT(EngineBase['DPKTPacket']):
 
         if ext.magic_number in PCAP.MAGIC_NUMBER:
             logger.debug('dpkt: reading %s as PCAP', ext._ifnm)
-            reader = _pcap_reader()(ext._ifile)
+            reader = _pcap_reader()(ext._ifile)  # type: Reader
         elif ext.magic_number in PCAPNG.MAGIC_NUMBER:
             logger.debug('dpkt: reading %s as PCAP-NG', ext._ifnm)
             reader = PCAPNGReader(ext._ifile)
@@ -594,6 +655,7 @@ class DPKT(EngineBase['DPKTPacket']):
             linktype = Enum_LinkType.get(reader.datalink())
         version = data[0] >> 4 if data else None
 
+        pkg: 'Type[DPKTPacket]'
         if linktype == Enum_LinkType.ETHERNET:
             pkg = dpkt.ethernet.Ethernet
         elif linktype.value == Enum_LinkType.IPV4 or (linktype.value == Enum_LinkType.RAW and version == 4):

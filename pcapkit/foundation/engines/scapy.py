@@ -51,13 +51,22 @@ from pcapkit.utilities.warnings import AttributeWarning, warn
 __all__ = ['Scapy']
 
 if TYPE_CHECKING:
-    from types import ModuleType
-    from typing import Any, Iterator, Type
+    from typing import Any, Iterator, Protocol, Type
 
     from scapy.packet import Packet as ScapyPacket
+    from scapy.plist import PacketList
     from scapy.utils import PcapReader
 
     from pcapkit.foundation.extraction import Extractor
+
+    class _ScapyPackage(Protocol):
+        """:mod:`scapy.all`, as :class:`Scapy` reads it through :attr:`Scapy._expkg` (#1878).
+
+        Typed by scapy itself, which ships its own type information.
+
+        """
+
+        def sniff(self, *args: 'Any', **kwargs: 'Any') -> 'PacketList': ...
 
 #: logging.Logger: Module-level logger, a child of the package-wide
 #: :data:`pcapkit.utilities.logging.logger`.
@@ -284,7 +293,7 @@ class Scapy(EngineBase['ScapyPacket']):
     """
     if TYPE_CHECKING:
         #: Engine extraction package, i.e. :mod:`scapy.all`.
-        _expkg: 'ModuleType'
+        _expkg: '_ScapyPackage'
         #: Engine extraction temporary storage.
         _extmp: 'Iterator[ScapyPacket]'
 
