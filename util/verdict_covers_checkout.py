@@ -56,11 +56,17 @@ BOT_EMAIL = 'github-actions[bot]@users.noreply.github.com'
 
 #: Files a bot commit may touch and still be built under its parent's verdict.
 #: These are what Conda Update ("Bumped build to N") and Create Release's
-#: ``tag`` job ("Reset conda build number") commit, and no test reads either.
+#: ``tag`` job ("Reset conda build number") commit. No test reads the committed
+#: ``conda/build``; the #1814 and #1827 tests do read ``conda/requirements.txt``,
+#: and a bot commit to it is still built under its parent's verdict.
 #: Vendor Update's "Bumped version to N" commits are left out on purpose: every
 #: one of them rewrites ``pcapkit/``, and e58618bdf's Unit Tests run
 #: 36355214959 reported "12 failed" on each Python leg, where its parent
-#: 70fa92010's run 36354135989 passed every job.
+#: 70fa92010's run 36354135989 passed every job. ``conda/platform-pins.toml`` is
+#: left out too, though a Conda Update commit that moves a platform pin touches
+#: it (#1851): util/conda_vendor.py reads it on import, so every test of that
+#: script does, and a moved pin changes what those tests expect of
+#: ``conda/requirements.txt``.
 BOT_MANAGED_PATHS = frozenset({'conda/build', 'conda/requirements.txt'})
 
 #: A full commit sha, which is all ``head_sha`` ever holds for a push run.

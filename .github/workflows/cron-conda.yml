@@ -161,13 +161,29 @@ jobs:
       # extra, walks what they require through the installed metadata, and
       # pins each package at the version installed here, but for its
       # `PLATFORM_PINS` (#1827). So this install is the step that resolves the
-      # newest releases, and the script itself reads nothing from the network.
+      # newest releases, and of the script's runs only the next one reads the
+      # network, through `requests`, which `.[all]` does not bring.
       - name: Install and Setup
         run: |
           set -x
 
-          python -m pip install -U pip setuptools wheel packaging
+          python -m pip install -U pip setuptools wheel packaging requests
           python -m pip install -e .[all]
+
+      # #1851: asks PyPI for each `PLATFORM_PINS` package's releases and moves
+      # its pin in conda/platform-pins.toml up to the newest release, up to the
+      # one installed above, with a wheel for the pinned platform, renewing its
+      # review-by date; a pin that reaches the installed release, or already
+      # pins it, goes.
+      # The step below then writes the moved pin into conda/requirements.txt,
+      # and Commit Changes commits both. The table is not one of
+      # util/verdict_covers_checkout.py's bot-managed paths, which says why:
+      # the workflows chained off Unit Tests wait for such a commit's own run
+      # (#1643). A package PyPI cannot be read for keeps its pin, with a
+      # warning, and a pin past its review-by date gets one too; either way the
+      # step passes.
+      - name: Refresh the platform pins
+        run: python util/conda_vendor.py --refresh-pins
 
       - name: Setup Conda Distribution
         run: |
