@@ -22,7 +22,6 @@ that use them do not re-export them (:issue:`1744`).
 
 .. autoclass:: pcapkit.corekit.sentinels.NoValueType
 .. autodata:: pcapkit.corekit.sentinels.NO_VALUE
-   :no-value:
 
 .. autoclass:: pcapkit.corekit.sentinels.NoDefaultType
 .. autodata:: pcapkit.corekit.sentinels.NO_DEFAULT
@@ -37,3 +36,11 @@ that use them do not re-export them (:issue:`1744`).
 
 .. autoclass:: pcapkit.corekit.sentinels.AbsentType
 .. autodata:: pcapkit.corekit.sentinels.ABSENT
+
+Internal Definitions
+--------------------
+
+Every sentinel type above derives from this private abstract base, which makes
+each one a true singleton (:issue:`1842`).
+
+.. autoclass:: pcapkit.corekit.sentinels._Sentinel

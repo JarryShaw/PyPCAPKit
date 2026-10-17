@@ -222,11 +222,12 @@ class SentinelsModuleExportRuleTests(unittest.TestCase):
 class PicklePayloadTests(unittest.TestCase):
     """A ``NULL`` pickle names :mod:`pcapkit.corekit.sentinels` and loads back.
 
-    :meth:`NullType.__reduce__` names its factory by module path. A pickle
-    written by 1.5.0b5 or b6, before GitHub issue #911 relocated the
-    definitions, named ``pcapkit.corekit.module _get_null`` instead; the
-    re-export that kept those loadable was dropped under GitHub issue #1744,
-    since nothing in the library reads that path.
+    ``NullType.__reduce__`` names ``NULL`` itself by module path, since GitHub
+    issue #1842 gave every sentinel that reduce. A pickle written by 1.5.0b5
+    or b6, before GitHub issue #911 relocated the definitions, named
+    ``pcapkit.corekit.module _get_null`` instead; the re-export that kept
+    those loadable was dropped under GitHub issue #1744, since nothing in the
+    library reads that path.
 
     """
 

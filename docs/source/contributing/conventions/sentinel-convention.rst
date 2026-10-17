@@ -69,12 +69,12 @@ public use rather than left off it, since the name alone no longer says so.
 
 .. note::
 
-   Of the sentinels, only :class:`~pcapkit.corekit.sentinels.NullType` is a full worked
-   example. :class:`~pcapkit.corekit.sentinels.NoValueType` follows the naming rule but
-   is **not** a singleton (``NoValueType() is NO_VALUE`` is :obj:`False`) and has no
-   ``__repr__`` of its own, so it demonstrates the name and nothing else; ``AbsentType``
-   has a ``__repr__`` (``<absent>``) but no singleton guard either. Copy ``NullType``
-   when you need a pattern to follow.
+   Every sentinel type subclasses :class:`~pcapkit.corekit.sentinels._Sentinel`, a private
+   abstract base that carries the singleton protocol and the repr. So a new sentinel is
+   short: subclass it, set ``_name`` to the object's name, and add ``__bool__`` if the
+   sentinel stands for an absent value. :class:`~pcapkit.corekit.sentinels.NoValueType`
+   is the smallest example. ``AbsentType`` also overrides ``__repr__``, to keep the
+   ``<absent>`` it had before the base gave every sentinel one built from its name.
 
 Why a Class and Not ``object()``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -110,14 +110,13 @@ ever sees. The rule above is for sentinels this package writes itself.
 Per-Sentinel Dunder Methods
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The sentinels deliberately differ, and the differences are **needs, not
-inconsistencies**:
+Most of the protocol is shared and lives on ``_Sentinel``. Where the sentinels differ,
+the differences are **needs, not inconsistencies**:
 
 ``__new__`` returning a cached instance
-   Guards against a caller constructing a second, non-identical sentinel that then
-   fails every ``is`` check. Worth having wherever the type is reachable by a caller at
-   all -- which, since the type is kept out of ``__all__``, means wherever it is
-   importable by its dotted path rather than wherever it is star-exported.
+   Every sentinel has it, from the base. It guards against a caller constructing a
+   second, non-identical sentinel that then fails every ``is`` check, and it hands back
+   the cached instance rather than raising, so that mistake corrects itself.
    :class:`~pcapkit.corekit.sentinels.NullType` documents the limit honestly: a module
    **reload** re-executes the class statement, so the guard does not survive one, and
    code holding the pre-reload instance will fail ``is``. The module that matters there
@@ -134,20 +133,20 @@ inconsistencies**:
    prevent.
 
 ``__copy__`` / ``__deepcopy__`` / ``__reduce__``
-   :class:`~pcapkit.corekit.sentinels.NullType` is the only sentinel that has
-   them, because ``NULL`` is stored in a
-   :class:`~pcapkit.corekit.module.ModuleDescriptor` field, so a caller's
-   :func:`copy.deepcopy` or :mod:`pickle` can walk into it and would otherwise
-   reconstruct a second instance. ``NO_VALUE``, ``NO_DEFAULT`` and ``ABSENT`` have none.
-   Measured, since the consequence differs: ``NO_DEFAULT`` survives a copy identically
-   anyway, because its ``__new__`` hands back the cached instance, while
-   ``copy.copy(NO_VALUE)`` and ``copy.copy(ABSENT)`` each build a distinct object that
-   fails both ``is`` and ``==``. Neither is reached by a copy that would notice:
-   ``ABSENT`` never leaves the
-   module that reads it, and ``NO_VALUE``, though it rides
-   :attr:`FieldBase.default <pcapkit.corekit.fields.field.FieldBase.default>` through a
-   field copy once per field per packet, keeps its identity there because
-   :meth:`FieldBase.__copy__ <pcapkit.corekit.fields.field.FieldBase.__copy__>` is
-   shallow and shares the reference. Add them all when, and only when, the sentinel
-   becomes reachable from a copy that is not.
+   Every sentinel has them, from the base. The owner ruled on :issue:`1842` that every
+   sentinel is a true singleton, rather than gaining these only once a deep copy is
+   found to reach it -- as one had by then, through a parsed schema and a field that
+   hold ``NO_VALUE``. ``__copy__`` and ``__deepcopy__`` return the object itself, and
+   ``__reduce__`` returns its module-level name, so :mod:`pickle` stores a reference to
+   that name and every protocol loads the same object back. A guarded ``__new__``
+   alone would not do, since pickle protocols 0 and 1 rebuild through
+   :func:`copyreg._reconstructor`, which calls :meth:`object.__new__` directly. That
+   path also limits pickles written before :issue:`1842`: one of ``NO_VALUE``,
+   ``NO_DEFAULT`` or ``ABSENT`` at protocol 0 or 1 still loads, but as a second
+   instance, because nothing on the class can intercept it.
+
+``__repr__``
+   The base builds it from the object's name -- ``<NULL>``, ``<NO_VALUE>``,
+   ``<NO_DEFAULT>`` -- which is what a signature, :func:`help` and a traceback show.
+   ``ABSENT`` keeps its own ``<absent>``.
 
