@@ -259,7 +259,7 @@ class PyShark(EngineBase['PySharkPacket']):
         if ext._flag_v:
             ext._vfunc = lambda e, f: print(
                 f'Frame {e._frnum:>3d}: '  # pylint: disable=protected-access
-                f'{cast("BaseLayer", _frame_layer(f)).protocols}'
+                f'{cast("BaseLayer", _frame_layer(cast("PySharkPacket", f))).protocols}'
             )
 
         # extract global header

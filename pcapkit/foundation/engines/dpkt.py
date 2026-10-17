@@ -458,7 +458,7 @@ class DPKT(EngineBase['DPKTPacket']):
         if ext._flag_v:
             from pcapkit.toolkit.dpkt import packet2chain  # isort:skip
             ext._vfunc = lambda e, f: print(
-                f'Frame {e._frnum:>3d}: {packet2chain(f)}'  # pylint: disable=protected-access
+                f'Frame {e._frnum:>3d}: {packet2chain(cast("DPKTPacket", f))}'  # pylint: disable=protected-access
             )
 
         # extract global header

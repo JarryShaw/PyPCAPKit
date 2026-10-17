@@ -85,7 +85,9 @@ if TYPE_CHECKING:
                    PCAPFilePacket, tuple[float, bytes]]
 
     Protocols = Union[str, ProtocolBase, Type[ProtocolBase]]
-    VerboseHandler = Callable[['Extractor', Packet], Any]
+    # NOTE: every caller discards the callback's result. ``object`` rather than
+    # ``None`` still accepts one that returns something, e.g. ``sys.stdout.write``.
+    VerboseHandler = Callable[['Extractor', Packet], object]
 
 __all__ = ['Extractor']
 
@@ -177,11 +179,8 @@ class Extractor(Generic[_P]):
         #: the file object after extraction.
         _flag_s: 'bool'
 
-        # NOTE: not ``VerboseHandler``, whose frame parameter is the whole
-        # ``Packet`` union: mypy would then reject the default and the engines'
-        # callbacks, each of which handles only its own packet type (#1839).
         #: Verbose callback function.
-        _vfunc: 'Callable[[Extractor, Any], Any]'
+        _vfunc: 'VerboseHandler'
 
         #: Frame number.
         _frnum: 'int'
@@ -1287,9 +1286,11 @@ class Extractor(Generic[_P]):
                 # user-facing output on stdout, not diagnostics -- the frame
                 # chains are a feature of the tool, so they stay on ``print``
                 # rather than becoming log records a consumer has to configure
-                # a handler to see (and on a different stream at that).
+                # a handler to see (and on a different stream at that). Of the
+                # built-in engines only PCAP and PCAPNG keep this callback, so
+                # its frame is theirs; the others install their own.
                 self._vfunc = lambda e, f: print(
-                    f'Frame {e._frnum:>3d}: {f.protochain}'  # pylint: disable=protected-access
+                    f'Frame {e._frnum:>3d}: {cast("Frame | PCAPNG", f).protochain}'  # pylint: disable=protected-access
                 )
             else:
                 self._vfunc = lambda e, f: None
