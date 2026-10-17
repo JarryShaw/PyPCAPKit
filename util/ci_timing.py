@@ -49,8 +49,10 @@ it before it can take more. ``--concurrency-hours`` adds the runner-pool
 measurement, which costs one call per run of every workflow in that window and is
 therefore off unless asked for.
 
-Standard library only, so the workflow runs it on a bare interpreter. The token is
-``GH_TOKEN`` (or ``GITHUB_TOKEN``); locally, ``GH_TOKEN=$(gh auth token)`` works.
+It fetches with :mod:`requests` and parses JUnit XML with lxml (#1894), which
+the workflow installs, and needs nothing else outside the standard library.
+The token is ``GH_TOKEN`` (or ``GITHUB_TOKEN``); locally,
+``GH_TOKEN=$(gh auth token)`` works.
 
 """
 
@@ -69,19 +71,17 @@ import sys
 import time
 import tomllib
 import traceback
-import urllib.error
 import urllib.parse
-import urllib.request
-# Parses JUnit XML that this repository's own CI wrote, never anything untrusted.
-import xml.etree.ElementTree as ET  # nosec B405
 import zipfile
 from typing import TYPE_CHECKING
+
+import requests
 
 if TYPE_CHECKING:
     from typing import Any, Callable, Iterable, Iterator, Optional
 
     #: Fetches one URL with an ``Accept`` header; returns the body and the headers,
-    #: names lower-cased.
+    #: names lower-cased, and raises :exc:`requests.HTTPError` for an error status.
     Transport = Callable[[str, str], tuple[bytes, dict[str, str]]]
 
 API = 'https://api.github.com'
@@ -408,9 +408,21 @@ def step_cap(spec: 'Optional[dict[str, Any]]', name: 'str') -> 'Optional[int]':
 
 
 def next_link(header: 'str') -> 'Optional[str]':
-    """The ``rel="next"`` URL of a ``Link`` header."""
-    match = re.search(r'<([^>]+)>;\s*rel="next"', header or '')
-    return match.group(1) if match else None
+    """The ``rel="next"`` URL of a ``Link`` header.
+
+    Parsed as :attr:`requests.Response.links` parses it, from the header the
+    transport returns, so a test's transport needs to send only the header.
+
+    """
+    for link in requests.utils.parse_header_links(header or ''):
+        if link.get('rel') == 'next':
+            return link.get('url')
+    return None
+
+
+def status_of(error: 'requests.HTTPError') -> 'int':
+    """The HTTP status an error carries, or 0 when it has no response."""
+    return getattr(error.response, 'status_code', None) or 0
 
 
 class Client:
@@ -428,22 +440,27 @@ class Client:
                  max_calls: 'int' = DEFAULT_MAX_CALLS,
                  sleep: 'Callable[[float], None]' = time.sleep) -> 'None':
         self.token = token
-        self.transport = transport or self._urlopen
+        self.transport = transport or self._get
         self.max_calls = max_calls
         self.sleep = sleep
         self.calls = 0
         self.rate_remaining = None  # type: Optional[int]
+        #: The connections :meth:`_get` reuses, opened on its first call.
+        self.session = None  # type: Optional[requests.Session]
 
-    def _urlopen(self, url: 'str', accept: 'str') -> 'tuple[bytes, dict[str, str]]':
-        request = urllib.request.Request(url, headers={
+    def _get(self, url: 'str', accept: 'str') -> 'tuple[bytes, dict[str, str]]':
+        """The default transport: one GET, following redirects."""
+        if self.session is None:
+            self.session = requests.Session()
+        # requests drops the Authorization header on a redirect to another host
+        # (Session.rebuild_auth), so an artifact download's redirect to blob
+        # storage does not carry the token to a host that rejects it. Only https
+        # URLs reach here: the API root, or a Link/download URL it sent.
+        response = self.session.get(url, timeout=60, headers={
             'Accept': accept, 'X-GitHub-Api-Version': '2022-11-28',
-            'User-Agent': 'PyPCAPKit-ci-timing'})
-        # Unredirected, so an artifact download's redirect to blob storage does not
-        # carry the token to a host that rejects it.
-        request.add_unredirected_header('Authorization', f'Bearer {self.token}')
-        # Only https URLs reach here: the API root, or a Link/download URL it sent.
-        with urllib.request.urlopen(request, timeout=60) as response:  # nosec B310
-            return response.read(), {k.lower(): v for k, v in response.headers.items()}
+            'User-Agent': 'PyPCAPKit-ci-timing', 'Authorization': f'Bearer {self.token}'})
+        response.raise_for_status()
+        return response.content, {k.lower(): v for k, v in response.headers.items()}
 
     def fetch(self, url: 'str', accept: 'str' = 'application/vnd.github+json') -> 'tuple[bytes, dict[str, str]]':
         """One request; ``url`` may be a path under the API root."""
@@ -457,10 +474,12 @@ class Client:
             self.calls += 1
             try:
                 body, headers = self.transport(url, accept)
-            except urllib.error.HTTPError as error:
-                if wait is None or error.code < 500:
+            except requests.HTTPError as error:
+                if wait is None or status_of(error) < 500:
                     raise
-            except OSError:  # URLError, and a timeout or reset mid-read
+            # requests' ConnectionError and Timeout, a timeout or reset mid-read
+            # among them, are OSErrors, as its HTTPError is.
+            except OSError:
                 if wait is None:
                     raise
             else:
@@ -595,8 +614,8 @@ def collect(client: 'Client', repo: 'str', *, now: 'datetime.datetime', days: 'f
                      if text_sha == sha]
             try:
                 text = known[0] if known else client.text(path, ref=sha)
-            except urllib.error.HTTPError as error:
-                if error.code != 404:
+            except requests.HTTPError as error:
+                if status_of(error) != 404:
                     raise
                 data['notes'].append(f'{workflow} is not at {sha[:9]}, so its {label} caps are unknown.')
                 continue
@@ -637,9 +656,27 @@ def collect(client: 'Client', repo: 'str', *, now: 'datetime.datetime', days: 'f
     return data
 
 
+def parse_xml(raw: 'bytes') -> 'Any':
+    """``raw``'s root element, parsed strictly by lxml (#1894).
+
+    The JUnit files are ones this repository's own CI wrote, but the parser
+    trusts nothing in them. Malformed XML raises
+    :exc:`lxml.etree.XMLSyntaxError`, and so does nesting past libxml2's depth
+    limit, which ``huge_tree=False`` keeps. No DTD is loaded and nothing is
+    fetched: an entity in text is left unexpanded, and an attribute that
+    references an external one is an error, so an entity naming a file or a URL
+    is never read. lxml is imported here, so only a run that reads JUnit needs it.
+
+    """
+    from lxml import etree  # pylint: disable=import-outside-toplevel
+
+    parser = etree.XMLParser(resolve_entities=False, no_network=True, huge_tree=False, load_dtd=False)
+    return etree.fromstring(raw, parser)
+
+
 def parse_junit(raw: 'bytes') -> 'dict[str, Any]':
     """The testcases of one pytest JUnit file, and its suite's ``tests=`` total."""
-    root = ET.fromstring(raw)  # nosec B314
+    root = parse_xml(raw)
     suites = [root] if root.tag == 'testsuite' else root.findall('testsuite')
     cases = [(case.get('classname') or '', case.get('name') or '', float(case.get('time') or 0))
              for suite in suites for case in suite.iter('testcase')]

@@ -108,7 +108,8 @@ Requires the :program:`tshark` and :program:`editcap` binaries (Wireshark
 4.6.9 is what every measurement here was taken against); their absence is
 reported on :data:`sys.stderr` and exits cleanly rather than raising, so a
 host without Wireshark installed does not turn "nothing to regenerate" into a
-traceback.
+traceback. It reads the PDML with lxml (#1894), which the ``test`` extra
+installs except on GraalPy, which has no wheel for it.
 
 This cannot be run in CI to verify the committed tables, only locally against
 a pinned Wireshark
@@ -151,14 +152,13 @@ import struct
 import subprocess
 import sys
 import tempfile
-import xml.etree.ElementTree as ET
 from typing import TYPE_CHECKING, NamedTuple
 
 if TYPE_CHECKING:
     from typing import Any, Optional, Sequence
 
 __all__ = [
-    'EncapSweepError', 'parse_parenthesised_number', 'list_encap_types',
+    'EncapSweepError', 'parse_parenthesised_number', 'parse_pdml', 'list_encap_types',
     'measure_encap', 'build_tables', 'render_dict', 'rewrite', 'main',
 ]
 
@@ -266,6 +266,30 @@ def parse_parenthesised_number(showname: str) -> int:
     return int(match.group(1))
 
 
+def parse_pdml(document: bytes) -> 'Any':
+    """The root element of :program:`tshark`'s PDML, parsed strictly by lxml (#1894).
+
+    Bytes, not text: the document declares its own encoding, which lxml reads
+    and refuses to be handed an already-decoded string with. Malformed XML
+    raises :exc:`lxml.etree.XMLSyntaxError`, and so does nesting past libxml2's
+    depth limit, which ``huge_tree=False`` keeps. No DTD is loaded and nothing
+    is fetched: an entity in text is left unexpanded, and an attribute that
+    references an external one is an error, so an entity naming a file or a URL
+    is never read. lxml is imported here, so only a sweep needs it.
+
+    Args:
+        document: ``tshark -T pdml``'s standard output.
+
+    Returns:
+        The ``<pdml>`` element.
+
+    """
+    from lxml import etree  # pylint: disable=import-outside-toplevel
+
+    parser = etree.XMLParser(resolve_entities=False, no_network=True, huge_tree=False, load_dtd=False)
+    return etree.fromstring(document, parser)
+
+
 def list_encap_types(editcap: str) -> 'list[str]':
     """The ``editcap -T`` tokens this binary accepts, in the order it lists them.
 
@@ -333,9 +357,9 @@ def measure_encap(editcap: str, tshark: str, source: pathlib.Path,
 
     pdml = subprocess.run(
         [tshark, '-r', str(out_path), '-c', '1', '-T', 'pdml'],
-        capture_output=True, text=True, check=False,
+        capture_output=True, check=False,
     )
-    root = ET.fromstring(pdml.stdout)
+    root = parse_pdml(pdml.stdout)
     packet = root.find('packet')
     if packet is None:
         return Missing(name, 'tshark produced no packet in its PDML output')

@@ -107,7 +107,7 @@ and never its body -- which is the "dark test" hazard #745 exists to stop, and
 which #766 carries for the sibling isort check.
 
 What the gate is worth has not changed. mypy is a :file:`Pipfile`
-``[dev-packages]`` entry (line 50) and is in no :file:`pyproject.toml` extra,
+``[dev-packages]`` entry (line 54) and is in no :file:`pyproject.toml` extra,
 so no ``pytest`` job in :file:`.github/workflows/unit-tests.yml` -- every one
 installs ``.[test,...]`` -- ever has it importable, and this test skips on all
 of them; it runs where mypy is installed, which is a developer checkout and

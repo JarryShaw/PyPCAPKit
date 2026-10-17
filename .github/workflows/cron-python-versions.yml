@@ -57,9 +57,11 @@ jobs:
           python-version: ${{ steps.python-versions.outputs.latest }}
 
       # PyYAML, from the `test` extra, for the workflow readers and the audit;
-      # neither imports pcapkit.
-      - name: Install PyYAML
-        run: python -m pip install PyYAML
+      # neither imports pcapkit. requests fetches the sources and markdown-it-py
+      # reads the runner-images table (#1894); only `update` imports either, so
+      # `pr`'s `publish` runs without them.
+      - name: Install PyYAML, requests and markdown-it-py
+        run: python -m pip install PyYAML requests markdown-it-py
 
       # Fetches the sources, rewrites the files, and writes the proposal to
       # $RUNNER_TEMP/proposal. `publish` is false when nothing changed, or when
