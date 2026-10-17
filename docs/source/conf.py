@@ -8,23 +8,36 @@ import builtins
 import datetime
 import enum
 import importlib
+import inspect
 import logging
 import os
 import pkgutil
+import re
+import typing
 from typing import TYPE_CHECKING
 
+import aenum
+from docutils import nodes
 from sphinx import addnodes
+from sphinx.ext.autodoc.preserve_defaults import DefaultValue, update_default_value
+from sphinx.transforms.post_transforms import SphinxPostTransform
+from sphinx.util.inspect import stringify_signature
 
 # NB: private modules of ``sphinx-autodoc-typehints``, used deliberately -- see
-# ``bind_type_checking_names`` below for what they buy and why reimplementing them
-# here would be worse. This file is written against the release that
-# ``docs/requirements.txt`` pins, which the ``docs`` extra in ``pyproject.toml``
-# pins too, and ``tests/project/test_docs_typehints_pin_1856_unit.py`` keeps the
-# pins equal, so there is no other release to branch for. A bump that moves these
-# modules fails this import loudly at build time, which is the outcome to want:
-# the alternative is a build that silently goes back to emitting unresolvable
-# annotations.
+# ``bind_type_checking_names``, ``restore_class_signature`` and
+# ``read_constructor_types_from_init`` below for what they buy and why
+# reimplementing them here would be worse. This file is written against the
+# release that ``docs/requirements.txt`` pins, which the ``docs`` extra in
+# ``pyproject.toml`` pins too, and
+# ``tests/project/test_docs_typehints_pin_1856_unit.py`` keeps the pins equal, so
+# there is no other release to branch for. A bump that moves these modules fails
+# this import loudly at build time, which is the outcome to want: the alternative
+# is a build that silently goes back to emitting unresolvable annotations.
+from sphinx_autodoc_typehints._docstring import handler as typehints_docstring_handler
+from sphinx_autodoc_typehints._documented import hints as typehints_hints
+from sphinx_autodoc_typehints._objects import constructor_name as typehints_constructor_name
 from sphinx_autodoc_typehints._resolve import guarded_names, resolve_type_guarded_imports
+from sphinx_autodoc_typehints._signature.handler import process_signature as typehints_process_signature
 
 # NB: this must precede ``import pcapkit``. ``pcapkit.utilities.logging`` reads
 # ``PCAPKIT_SPHINX`` at *import* time to compute ``SPHINX_TYPE_CHECKING``, and
@@ -34,12 +47,16 @@ from sphinx_autodoc_typehints._resolve import guarded_names, resolve_type_guarde
 os.environ['PCAPKIT_SPHINX'] = '1'
 
 import pcapkit
+from pcapkit.corekit.infoclass import Info
+from pcapkit.corekit.sentinels import NO_VALUE
+from pcapkit.protocols.schema.schema import Schema
 
 if TYPE_CHECKING:
-    from types import ModuleType
+    from types import FunctionType, ModuleType
     from typing import Any, Dict, List, Optional
     from docutils.nodes import document
     from sphinx.application import Sphinx
+    from sphinx.config import Config
     from sphinx.environment import BuildEnvironment
 
 logger = logging.getLogger('pcapkit-sphinx')
@@ -173,6 +190,11 @@ autodoc_default_options = {
     'show-inheritance': True,
 }
 autodoc_typehints = 'signature'
+# NB: a default renders as its source text rather than its ``repr()``. By value,
+# every ``byteorder=sys.byteorder`` showed the build host's ``'little'``, and the
+# ``corekit.fields`` pages showed ``default=<pcapkit.corekit.sentinels.NoValueType
+# object>`` and ``callback=<function NumberField.<lambda>>`` (:issue:`1859`).
+autodoc_preserve_defaults = True
 #autodoc_member_order = 'bysource'
 #autodoc_member_order = 'alphabetic'
 autoclass_content = 'class'
@@ -199,6 +221,7 @@ manpages_url = 'https://linux.die.net/man/{section}/{page}'
 todo_include_todos = True
 
 set_type_checking_flag = True
+# NB: ``typehints_formatter`` is set below, beside ``format_aenum_class``.
 typehints_fully_qualified = False
 always_document_param_types = False
 typehints_document_rtype = True
@@ -563,6 +586,367 @@ def restore_enum_member_docstring(app: 'Sphinx', what: str, name: str,  # pylint
         lines[:] = original
 
 
+def format_aenum_class(annotation: 'Any', config: 'Config') -> 'Optional[str]':  # pylint: disable=unused-argument
+    """Name a class that :mod:`aenum` defines by its qualified name.
+
+    ``typehints_fully_qualified`` is off, so a class renders by its bare name, and
+    :mod:`aenum` publishes no inventory to link to. A union of an :mod:`aenum`
+    class and its standard library namesake therefore read ``IntEnum | IntEnum``:
+    the first linked to :class:`enum.IntEnum`, the second plain text
+    (:issue:`1858`). Qualifying the :mod:`aenum` one tells them apart.
+
+    The name is the one the package exports, ``aenum.IntEnum``, rather than the
+    ``aenum._enum`` module that defines the class. ``sphinx-autodoc-typehints``
+    3.15 renders ``Bases:`` lines too, so ``NumberField[IntEnum | IntEnum]``
+    reads apart there as well.
+
+    Args:
+        annotation: The type being rendered, or a part of one.
+        config: Sphinx configuration.
+
+    Returns:
+        A ``:py:class:`` role naming an :mod:`aenum` class, or :data:`None` to
+        leave anything else to the default rendering.
+
+    """
+    module = getattr(annotation, '__module__', None)
+    if not isinstance(annotation, type) or not isinstance(module, str) or module.partition('.')[0] != 'aenum':
+        return None
+    name = annotation.__qualname__
+    owner = 'aenum' if getattr(aenum, name, None) is annotation else module
+    return f':py:class:`{owner}.{name}`'
+
+
+# NB: only one formatter can be configured, so any other formatter-based fix has
+# to share this one.
+typehints_formatter = format_aenum_class
+
+#: A name followed by an attribute access or a call, in the source text of a default.
+DOTTED_HEAD = re.compile(r'(?<![\w.])([A-Za-z_]\w*)(?=[.(])')
+
+
+def unalias_defaults(signature: 'inspect.Signature', namespace: 'Dict[str, Any]') -> 'inspect.Signature':
+    """Name each class a preserved default reaches through an import alias by its own name.
+
+    ``autodoc_preserve_defaults`` renders a default as its source text, and the
+    protocol modules import their registries under private aliases, so a
+    ``make()`` signature read ``next=Enum_TransType.UDP`` (:issue:`1859`). The
+    alias is the module's own spelling; the class is
+    :class:`~pcapkit.const.reg.transtype.TransType`, which the parameter field
+    names, so the default reads ``next=TransType.UDP``.
+
+    Only a name the module binds to a class of another name is replaced, and only
+    where it heads an attribute access or a call, as in an enumeration member or
+    ``Enum_FilterType(0)``. A module, such as ``sys`` in ``sys.byteorder``, is
+    left alone.
+
+    Args:
+        signature: The signature, its defaults as autodoc preserved them.
+        namespace: The globals of the module defining the callable.
+
+    Returns:
+        The signature with those defaults renamed.
+
+    """
+    def rename(match: 're.Match[str]') -> str:
+        value = namespace.get(match.group(1))
+        return value.__name__ if isinstance(value, type) and value.__name__ != match.group(1) else match.group(1)
+
+    parameters = []
+    for param in signature.parameters.values():
+        if isinstance(param.default, DefaultValue):
+            text = DOTTED_HEAD.sub(rename, param.default.name)
+            # NB: an unchanged parameter is kept as is, since a DefaultValue
+            # compares by identity and the caller compares the signatures.
+            if text != param.default.name:
+                param = param.replace(default=DefaultValue(text))
+        parameters.append(param)
+    return signature.replace(parameters=parameters)
+
+
+def name_aliased_defaults(app: 'Sphinx', obj: 'Any', bound_method: bool) -> None:  # pylint: disable=unused-argument
+    """Rename the aliased classes in the defaults autodoc just preserved.
+
+    autodoc emits ``autodoc-before-process-signature`` once it has written the
+    preserved defaults to the callable's ``__signature__``, and reads the
+    signature after it, so :func:`unalias_defaults` is applied there.
+
+    Args:
+        app: Sphinx application.
+        obj: The function or method whose signature autodoc is about to read.
+        bound_method: Whether it is read as a bound method.
+
+    """
+    if not app.config.autodoc_preserve_defaults or not (inspect.isfunction(obj) or inspect.ismethod(obj)):
+        return
+    signature = getattr(obj, '__signature__', None)
+    namespace = getattr(inspect.unwrap(getattr(obj, '__func__', obj)), '__globals__', None)
+    if not isinstance(signature, inspect.Signature) or namespace is None:
+        return
+    renamed = unalias_defaults(signature, namespace)
+    if renamed == signature:
+        return
+    # NB: as autodoc stores it, since a bound method takes no attribute of its own.
+    try:
+        obj.__signature__ = renamed
+    except AttributeError:
+        obj.__dict__['__signature__'] = renamed
+
+
+def passes_through(new: 'FunctionType') -> bool:
+    """Whether a ``__new__`` takes nothing but ``*args`` and ``**kwargs``.
+
+    Such a ``__new__`` leaves the parameters to ``__init__``.
+    :class:`~pcapkit.protocols.protocol.ProtocolBase`, :class:`Info`,
+    :class:`Schema` and the reassembly and flow-tracing bases each define one.
+
+    Args:
+        new: The ``__new__`` function.
+
+    Returns:
+        :data:`True` if its parameters after ``cls`` are exactly ``*args`` and
+        ``**kwargs``.
+
+    """
+    try:
+        parameters = list(inspect.signature(new).parameters.values())[1:]
+    except (TypeError, ValueError):
+        return False
+    return [param.kind for param in parameters] == [inspect.Parameter.VAR_POSITIONAL,
+                                                    inspect.Parameter.VAR_KEYWORD]
+
+
+def hidden_init(cls: type) -> 'Optional[FunctionType]':
+    """The ``__init__`` a call to ``cls`` runs, where a ``__new__`` hides it from autodoc.
+
+    Sphinx 9.1 takes a class signature from any ``__new__`` the class defines or
+    inherits before it looks at ``__init__``. ``sphinx-autodoc-typehints`` 3.15
+    takes the ``__new__`` where it and the ``__init__`` sit at the same depth of the MRO, as
+    :func:`inspect.signature` does, and otherwise leaves Sphinx's choice alone
+    when the ``__init__`` it picks carries no annotations, or names parameters the
+    other does not. So a ``__new__`` passing ``*args`` and ``**kwargs`` through
+    wins over the ``__init__`` that names the parameters, and ``FTP`` rendered as
+    ``FTP(*args, **kwargs)``. A ``__new__`` deeper in the MRO wins over a nearer
+    ``__init__`` too, so :class:`~pcapkit.dumpkit.pcap.PCAPIO` rendered the
+    ``(fname, **kwargs)`` of :class:`dictdumper.dumper.Dumper` (:issue:`1860`).
+
+    The MRO is walked as :func:`inspect.signature` walks it, but past each
+    ``__new__`` that only passes its arguments through. A ``__new__`` with
+    parameters of its own is the constructor, and autodoc reads it already.
+
+    :class:`Info` and :class:`Schema` give each subclass its own ``__init__`` on
+    its first construction (see :func:`~pcapkit.corekit.infoclass.info_final`),
+    so the ``__init__`` a subclass inherits from them before then is not the one
+    a call runs. Such a class keeps the catch-all, which is also what
+    :func:`inspect.signature` reports for it.
+
+    Args:
+        cls: The class being documented.
+
+    Returns:
+        The ``__init__`` function, or :data:`None` where autodoc already reads
+        the constructor or where it is not known until the class is first
+        constructed.
+
+    """
+    if not inspect.isfunction(inspect.unwrap(cls.__new__)):
+        return None
+    for klass in cls.__mro__:
+        namespace = vars(klass)
+        new = namespace.get('__new__')
+        if isinstance(new, staticmethod):
+            new = new.__func__
+        if inspect.isfunction(new) and not passes_through(new):
+            return None
+        if '__init__' in namespace:
+            init = namespace['__init__']
+            if not inspect.isfunction(init) or (klass in (Info, Schema) and klass is not cls):
+                return None
+            return init
+    return None
+
+
+def init_signature(app: 'Sphinx', init: 'FunctionType') -> str:
+    """Render an ``__init__``'s parameters as a class signature.
+
+    The instance parameter is dropped, as a call to the class does not pass it.
+    The types are left out, as ``sphinx-autodoc-typehints`` leaves them out of
+    every signature in this build and puts them in the parameter fields. The
+    defaults go through ``autodoc_preserve_defaults`` and
+    :func:`unalias_defaults` as autodoc's own signatures do. A generated
+    ``__init__`` has no source for that to read, so its
+    :data:`~pcapkit.corekit.sentinels.NO_VALUE` defaults are written as the
+    generator writes them, whatever the sentinel's ``repr()``.
+
+    Args:
+        app: Sphinx application.
+        init: The ``__init__`` function.
+
+    Returns:
+        The parenthesised parameter list.
+
+    """
+    preserve = app.config.autodoc_preserve_defaults
+    if preserve:
+        update_default_value(init, False)
+    signature = inspect.signature(init)
+    if preserve:
+        signature = unalias_defaults(signature, init.__globals__)
+    parameters = list(signature.parameters.values())[1:]
+    if preserve:
+        parameters = [param.replace(default=DefaultValue('NO_VALUE')) if param.default is NO_VALUE else param
+                      for param in parameters]
+    text = stringify_signature(signature.replace(parameters=parameters),
+                               show_annotation=False, show_return_annotation=False)
+    return text.replace('\\', '\\\\') if app.config.strip_signature_backslash else text
+
+
+def restore_class_signature(app: 'Sphinx', what: str, name: str, obj: 'Any',
+                            options: 'Dict[str, Any]', signature: 'Optional[str]',
+                            return_annotation: 'Optional[str]') -> 'Optional[tuple[str, None]]':
+    """Give a class the signature that a call to it takes.
+
+    * A class whose ``__init__`` a ``__new__`` hides (see :func:`hidden_init`)
+      gets that ``__init__``'s parameters.
+    * An enumeration gets ``(*values)``, the lookup by value. The standard
+      library's ``__signature__`` gives a class with no members the
+      functional-API form instead, ``(new_class_name, /, names, *, module=None,
+      ...)``, which is how :class:`~pcapkit.const.reg.apptype.apptype.AppType`,
+      :class:`~pcapkit.const.pcapng.filter_type.FilterType` and
+      ``FrameType.Flags`` rendered (:issue:`1862`).
+
+    The handler of ``sphinx-autodoc-typehints`` is still run first, for what it
+    records: it notes each object autodoc documents, and only a noted class has
+    its type parameters added to its header. Its signature is then replaced.
+
+    Args:
+        app: Sphinx application.
+        what: Type of the object being documented.
+        name: Fully qualified name of the object.
+        obj: The object itself.
+        options: Directive options.
+        signature: Signature autodoc has so far, if any.
+        return_annotation: Return annotation autodoc has so far, if any.
+
+    Returns:
+        The signature and no return annotation for such a class; :data:`None`
+        otherwise, to let the other handlers run.
+
+    """
+    if what not in {'class', 'exception'} or not isinstance(obj, type):
+        return None
+    if isinstance(obj, enum.EnumMeta):
+        restored = '(*values)'
+    else:
+        init = hidden_init(obj)
+        if init is None:
+            return None
+        restored = init_signature(app, init)
+    typehints_process_signature(app, what, name, obj, options, signature, return_annotation)
+    return restored, None
+
+
+def constructor_for_types(cls: type) -> str:
+    """Which constructor ``sphinx-autodoc-typehints`` reads a class's parameter types from.
+
+    The library reads them from the constructor :func:`inspect.signature` would
+    choose, so a pass-through ``__new__`` defined beside the ``__init__`` wins,
+    and a class docstring's parameter list loses its types: ``strict``,
+    ``store`` and ``timeout`` on the reassembly classes, ``fout`` and the rest on
+    the flow-tracing ones, ``dict_`` on :class:`Info` (:issue:`1860`). The
+    ``__init__`` that :func:`hidden_init` finds is read instead, as the releases
+    before 3.14 read it.
+
+    An overloaded ``__init__`` keeps the library's choice. Reading it would add an
+    ``Overloads`` field to each class, which no release showed for these classes,
+    and the protocol classes, whose shared ``__init__`` is overloaded, list no
+    constructor parameters for types to go on.
+
+    Args:
+        cls: The class being documented.
+
+    Returns:
+        ``'__init__'`` or ``'__new__'``.
+
+    """
+    chosen = typehints_constructor_name(cls)
+    if chosen == '__new__':
+        init = hidden_init(cls)
+        if init is not None and not typing.get_overloads(init):
+            return '__init__'
+    return chosen
+
+
+def read_constructor_types_from_init(app: 'Sphinx') -> None:  # pylint: disable=unused-argument
+    """Have ``sphinx-autodoc-typehints`` choose constructors with :func:`constructor_for_types`.
+
+    The library has no setting for the choice, so the modules of it that read the
+    choice for the docstring types are pointed at this one.
+
+    Args:
+        app: Sphinx application.
+
+    """
+    for module in (typehints_docstring_handler, typehints_hints):
+        # NB: read first, so a release that drops the name fails here rather
+        # than gaining an attribute nothing reads.
+        getattr(module, 'constructor_name')
+        module.constructor_name = constructor_for_types
+
+
+class DropTableWrapperIds(SphinxPostTransform):
+    """Take a wrapped table's ids off the ``table-wrapper`` container furo adds.
+
+    furo wraps each table in a container so it can scroll, and copies every
+    attribute of the table onto it, ``ids`` included. A titled ``list-table``
+    carries an id, so the page carried that id on the wrapper as well as on the
+    table -- the titled tables on ``const/reg.html`` (:issue:`1861`). The table
+    keeps its ids, so a reference to it still lands on it.
+
+    """
+
+    formats = ('html',)
+    #: After furo's own wrapper transform, at the default 500.
+    default_priority = 510
+
+    def run(self, **kwargs: 'Any') -> None:
+        for container in self.document.findall(nodes.container):
+            if 'table-wrapper' not in container['classes']:
+                continue
+            inner = {id_ for child in container.children if isinstance(child, nodes.table)
+                     for id_ in child['ids']}
+            container['ids'] = [id_ for id_ in container['ids'] if id_ not in inner]
+
+
+def follow_builtins_alias(app: 'Sphinx', modname: 'Optional[str]',  # pylint: disable=unused-argument
+                          attribute: str) -> 'Optional[str]':
+    """Keep viewcode on the module that binds a name whose object reports :mod:`builtins`.
+
+    The ``BufferID`` aliases are subscripted ``Tuple``, and ``Tuple`` in
+    :mod:`pcapkit.utilities.compat` is the builtin :class:`tuple`, so each alias
+    reports ``__module__ == 'builtins'``. viewcode followed that, recorded a
+    module with no source, and listed it in its module index, which then linked a
+    ``builtins.html`` that is never written (:issue:`1863`).
+
+    Args:
+        app: Sphinx application.
+        modname: The module the object is documented in.
+        attribute: Its name there.
+
+    Returns:
+        ``modname`` for such an object, and :data:`None` for anything else, which
+        leaves viewcode to follow it as usual.
+
+    """
+    if not modname:
+        return None
+    try:
+        value = pkgutil.resolve_name(f'{modname}:{attribute}')
+    except (ImportError, AttributeError, ValueError):
+        return None
+    return modname if getattr(value, '__module__', None) == 'builtins' else None
+
+
 # NB: handlers used to sit here -- ``remove_module_docstring``,
 # ``process_docstring``, ``process_fields`` and ``source_read`` -- each with its
 # ``app.connect`` call commented out in ``setup`` below, so none of them had run
@@ -594,6 +978,17 @@ def setup(app: 'Sphinx') -> None:
     # default 500 and returns ``False`` for this hook; the first answer that is
     # not ``None`` is the one autodoc uses.
     app.connect('autodoc-skip-member', skip_enum_value_hook, priority=400)
+    app.connect('builder-inited', read_constructor_types_from_init)
+    # NB: below ``sphinx_autodoc_typehints``, which connects at the default 500 and
+    # would otherwise win the tie on registration order -- conf.py's ``setup`` runs
+    # after the extensions in ``extensions`` have been set up. Its signature is
+    # the one this replaces.
+    app.connect('autodoc-process-signature', restore_class_signature, priority=400)
+    # NB: after the ``update_defvalue`` that autodoc's legacy documenters connect
+    # at the default 500; the current ones preserve the defaults before emitting.
+    app.connect('autodoc-before-process-signature', name_aliased_defaults, priority=600)
+    app.connect('viewcode-follow-imported', follow_builtins_alias)
+    app.add_post_transform(DropTableWrapperIds)
     app.connect('doctree-read', resolve_builtins_exactly)
     # NB: either side of napoleon's ``autodoc-process-docstring`` handler, which
     # connects at the default 500.
