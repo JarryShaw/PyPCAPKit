@@ -323,6 +323,7 @@ from pcapkit.protocols.data.internet.mh import MulticastMobilityOption as MH_Mul
 from pcapkit.protocols.data.internet.mh import MultiPrefixExtension as MH_MultiPrefixExtension
 from pcapkit.protocols.data.internet.mh import NATDetectionOption as MH_NATDetectionOption
 from pcapkit.protocols.data.internet.mh import NonceIndicesOption as MH_NonceIndicesOption
+from pcapkit.protocols.data.internet.mh import NTPTimestamp as MH_NTPTimestamp
 from pcapkit.protocols.data.internet.mh import Option as MH_Option
 from pcapkit.protocols.data.internet.mh import \
     PadFlowIdentificationSuboption as MH_PadFlowIdentificationSuboption
@@ -331,6 +332,7 @@ from pcapkit.protocols.data.internet.mh import \
     PermanentHomeKeygenTokenOption as MH_PermanentHomeKeygenTokenOption
 from pcapkit.protocols.data.internet.mh import \
     PerSessionBitRateAttribute as MH_PerSessionBitRateAttribute
+from pcapkit.protocols.data.internet.mh import PMIPv6Timestamp as MH_PMIPv6Timestamp
 from pcapkit.protocols.data.internet.mh import PreviousMAAROption as MH_PreviousMAAROption
 from pcapkit.protocols.data.internet.mh import QoSAttribute as MH_QoSAttribute
 from pcapkit.protocols.data.internet.mh import \
@@ -478,6 +480,7 @@ __all__ = [
     'MH_MulticastAcknowledgementOption', 'MH_LMAControlledMAGParametersOption', 'MH_MAGMultipathBindingOption',
     'MH_MAGIdentifierOption', 'MH_AnchoredPrefixOption', 'MH_LocalPrefixOption', 'MH_PreviousMAAROption',
     'MH_ServingMAAROption', 'MH_DLIFLinkLocalAddressOption', 'MH_DLIFLinkLayerAddressOption',
+    'MH_NTPTimestamp', 'MH_PMIPv6Timestamp',
     'MH_ContextRequest',
     'MH_FlowIdentificationSuboption',
     'MH_UnassignedFlowIdentificationSuboption', 'MH_PadFlowIdentificationSuboption', 'MH_BIDReferenceSuboption',

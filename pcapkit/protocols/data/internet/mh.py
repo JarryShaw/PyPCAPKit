@@ -68,8 +68,7 @@ if TYPE_CHECKING:
     from pcapkit.corekit.multidict import OrderedMultiDict
     from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
                                                IPv6AddressPrefixCode, LMAAddressCode,
-                                               LocalizedRoutingStatus, NTPTimestamp,
-                                               PMIPv6Timestamp)
+                                               LocalizedRoutingStatus)
 
 __all__ = [
     'MH',
@@ -107,6 +106,8 @@ __all__ = [
     'MAGMultipathBindingOption', 'MAGIdentifierOption', 'AnchoredPrefixOption',
     'LocalPrefixOption', 'PreviousMAAROption', 'ServingMAAROption',
     'DLIFLinkLocalAddressOption', 'DLIFLinkLayerAddressOption',
+
+    'NTPTimestamp', 'PMIPv6Timestamp',
 
     'ContextRequest',
 
@@ -984,6 +985,33 @@ class AuthOption(Option):
 
 
 @info_final
+class NTPTimestamp(Data):
+    """Data model for NTP timestamp format, c.f., :rfc:`1305`.
+
+    .. versionchanged:: 1.5.0
+
+       An :class:`~pcapkit.corekit.infoclass.Info` data model in this module,
+       rather than a named tuple in :mod:`pcapkit.protocols.internet.mh`, which
+       no longer binds the name (:issue:`1886`). This breaks 1.4.x code that
+       treats it as a tuple: it no longer indexes, unpacks, hashes, orders,
+       compares equal to a :obj:`tuple`, or has ``_replace`` and ``_asdict``.
+       :attr:`seconds` and :attr:`fraction` read as before, and it still
+       pickles. The dumpers write it keyed by field, as
+       ``{"seconds": ..., "fraction": ...}``, where they wrote
+       ``{"type": "NTPTimestamp", "value": [...]}``.
+
+    """
+
+    #: Seconds since 1 January 1900.
+    seconds: 'int'
+    #: Fraction of a second.
+    fraction: 'int'
+
+    if TYPE_CHECKING:
+        def __init__(self, seconds: 'int', fraction: 'int') -> 'None': ...
+
+
+@info_final
 class MesgIDOption(Option):
     """Data model for Mobility Message Replay Protection option."""
 
@@ -1257,6 +1285,36 @@ class LinkLocalAddressOption(Option):
 
     if TYPE_CHECKING:
         def __init__(self, type: 'Enum_Option', length: 'int', address: 'IPv6Address') -> 'None': ...
+
+
+@info_final
+class PMIPv6Timestamp(Data):
+    """Data model for Proxy Mobile IPv6 timestamp format, c.f., :rfc:`5213#section-8.8`.
+
+    Note:
+        This is **not** an :rfc:`1305` NTP timestamp, which is why it is a type of
+        its own rather than a reuse of :class:`NTPTimestamp`. It counts from the
+        UNIX epoch rather than NTP's 1900 one, and splits its 64 bits 48/16
+        rather than 32/32, so each field means something different in the two.
+
+    .. versionchanged:: 1.5.0
+
+       An :class:`~pcapkit.corekit.infoclass.Info` data model in this module,
+       rather than the named tuple in :mod:`pcapkit.protocols.internet.mh` it
+       was in the 1.5.0 pre-releases (:issue:`1886`). It no longer indexes,
+       unpacks, hashes, orders, compares equal to a :obj:`tuple`, or has
+       ``_replace`` and ``_asdict``. The dumpers write it keyed by field, as
+       ``{"seconds": ..., "fraction": ...}``.
+
+    """
+
+    #: Seconds since 1 January 1970, in the leading 48 bits.
+    seconds: 'int'
+    #: Fraction of a second, in units of 1/65536, in the trailing 16 bits.
+    fraction: 'int'
+
+    if TYPE_CHECKING:
+        def __init__(self, seconds: 'int', fraction: 'int') -> 'None': ...
 
 
 @info_final

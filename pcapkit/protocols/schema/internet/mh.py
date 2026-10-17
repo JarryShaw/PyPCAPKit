@@ -1209,8 +1209,8 @@ class TimestampOption(Option, code=Enum_Option.Timestamp_Option):
         integer part occupies the leading **48** bits and whose fractional part
         occupies the trailing **16**, each unit of the latter being 1/65536 of a
         second. NTP splits its 64 bits 32/32 from a different epoch, so reusing
-        :class:`~pcapkit.protocols.internet.mh.NTPTimestamp` here would misread
-        both halves.
+        :class:`~pcapkit.protocols.data.internet.mh.NTPTimestamp` here would
+        misread both halves.
 
     """
 

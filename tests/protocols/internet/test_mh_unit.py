@@ -480,7 +480,7 @@ class MHUnitTests(unittest.TestCase):
         from pcapkit.const.mh.option import Option
         from pcapkit.corekit.multidict import OrderedMultiDict
         from pcapkit.protocols.data.internet import mh as data
-        from pcapkit.protocols.internet.mh import MH, NTPTimestamp
+        from pcapkit.protocols.internet.mh import MH
         from pcapkit.protocols.schema.internet import mh as schema
         from pcapkit.utilities.exceptions import ProtocolError
 
@@ -527,7 +527,7 @@ class MHUnitTests(unittest.TestCase):
             proto._make_opt_auth(Option.AUTH_OPTION_TYPE, data=b'a')
         self.assertEqual(proto._make_opt_mesg_id(
             Option.MESG_ID_OPTION_TYPE,
-            timestamp=NTPTimestamp(seconds=1, fraction=2),
+            timestamp=data.NTPTimestamp(seconds=1, fraction=2),
         ).seconds, 1)
         self.assertGreater(proto._make_opt_mesg_id(
             Option.MESG_ID_OPTION_TYPE,
@@ -609,7 +609,7 @@ class MHUnitTests(unittest.TestCase):
         from pcapkit.corekit.multidict import OrderedMultiDict
         from pcapkit.protocols.data.internet import mh as data
         from pcapkit.protocols.internet.internet import Internet
-        from pcapkit.protocols.internet.mh import MH, NTPTimestamp
+        from pcapkit.protocols.internet.mh import MH
         from pcapkit.protocols.schema.internet import mh as schema
 
         proto = object.__new__(MH)
@@ -821,7 +821,7 @@ class MHUnitTests(unittest.TestCase):
                                   length=8,
                                   timestamp=datetime.datetime(2026, 1, 1,
                                                               tzinfo=datetime.timezone.utc),
-                                  ntp_timestamp=NTPTimestamp(seconds=1, fraction=2)),
+                                  ntp_timestamp=data.NTPTimestamp(seconds=1, fraction=2)),
             ).fraction, 2)
             self.assertEqual(proto._make_opt_signature(
                 Option.Signature,
@@ -2181,13 +2181,15 @@ class MHUnitTests(unittest.TestCase):
         data = proto._read_opt_timestamp(schema, options=None)  # type: ignore[arg-type]
         self.assertEqual(data.timestamp,
                          dt.datetime(2000, 1, 1, tzinfo=dt.timezone.utc))
-        self.assertEqual(tuple(data.pmip_timestamp), (epoch_2000, 0))
+        self.assertEqual((data.pmip_timestamp.seconds, data.pmip_timestamp.fraction),
+                         (epoch_2000, 0))
 
         # a half-second is 0x8000 of the 16-bit fraction, and survives the trip
         half = proto._make_opt_timestamp(  # type: ignore[arg-type]
             Option.Timestamp_Option, seconds=epoch_2000, fraction=0x8000)
         parsed = proto._read_opt_timestamp(half, options=None)  # type: ignore[arg-type]
-        self.assertEqual(tuple(parsed.pmip_timestamp), (epoch_2000, 0x8000))
+        self.assertEqual((parsed.pmip_timestamp.seconds, parsed.pmip_timestamp.fraction),
+                         (epoch_2000, 0x8000))
         self.assertEqual(
             proto._make_opt_timestamp(Option.Timestamp_Option, parsed).pack(),  # type: ignore[arg-type]
             half.pack())

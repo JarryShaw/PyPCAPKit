@@ -20,6 +20,22 @@ Octets      Bits        Name                    Description
 
 .. [*] https://en.wikipedia.org/wiki/Mobile_IP#Changes_in_IPv6_for_Mobile_IPv6
 
+.. versionremoved:: 1.5.0
+
+   ``pcapkit.protocols.internet.mh.NTPTimestamp``, with no alias; use
+   :class:`pcapkit.protocols.data.internet.mh.NTPTimestamp` instead
+   (:issue:`1886`).
+
+.. versionchanged:: 1.5.0
+
+   :class:`~pcapkit.protocols.data.internet.mh.NTPTimestamp` and
+   :class:`~pcapkit.protocols.data.internet.mh.PMIPv6Timestamp` are
+   :class:`~pcapkit.corekit.infoclass.Info` data models rather than named
+   tuples, so they no longer index, unpack, hash or compare equal to a
+   :obj:`tuple`, and the dumpers write them keyed by field, as
+   ``{"seconds": ..., "fraction": ...}``. For ``NTPTimestamp`` this is a
+   breaking change from 1.4.x (:issue:`1886`).
+
 """
 import collections
 import datetime
@@ -231,6 +247,7 @@ from pcapkit.protocols.data.internet.mh import \
 from pcapkit.protocols.data.internet.mh import MultiPrefixExtension as Data_MultiPrefixExtension
 from pcapkit.protocols.data.internet.mh import NATDetectionOption as Data_NATDetectionOption
 from pcapkit.protocols.data.internet.mh import NonceIndicesOption as Data_NonceIndicesOption
+from pcapkit.protocols.data.internet.mh import NTPTimestamp as Data_NTPTimestamp
 from pcapkit.protocols.data.internet.mh import \
     PadFlowIdentificationSuboption as Data_PadFlowIdentificationSuboption
 from pcapkit.protocols.data.internet.mh import PadOption as Data_PadOption
@@ -238,6 +255,7 @@ from pcapkit.protocols.data.internet.mh import \
     PermanentHomeKeygenTokenOption as Data_PermanentHomeKeygenTokenOption
 from pcapkit.protocols.data.internet.mh import \
     PerSessionBitRateAttribute as Data_PerSessionBitRateAttribute
+from pcapkit.protocols.data.internet.mh import PMIPv6Timestamp as Data_PMIPv6Timestamp
 from pcapkit.protocols.data.internet.mh import PreviousMAAROption as Data_PreviousMAAROption
 from pcapkit.protocols.data.internet.mh import QoSAttribute as Data_QoSAttribute
 from pcapkit.protocols.data.internet.mh import \
@@ -533,36 +551,6 @@ if TYPE_CHECKING:
                                      KwArg(Any)], Schema_CGAExtension]
 
 __all__ = ['MH']
-
-
-class NTPTimestamp(collections.namedtuple('NTPTimestamp', 'seconds fraction')):
-    """NTP timestamp format, c.f., :rfc:`1305`."""
-
-    __slots__ = ()
-
-    #: Seconds since 1 January 1900.
-    seconds: int
-    #: Fraction of a second.
-    fraction: int
-
-
-class PMIPv6Timestamp(collections.namedtuple('PMIPv6Timestamp', 'seconds fraction')):
-    """Proxy Mobile IPv6 timestamp format, c.f., :rfc:`5213#section-8.8`.
-
-    Note:
-        This is **not** an :rfc:`1305` NTP timestamp, which is why it is a type of
-        its own rather than a reuse of :class:`NTPTimestamp`. It counts from the
-        UNIX epoch rather than NTP's 1900 one, and splits its 64 bits 48/16
-        rather than 32/32, so each field means something different in the two.
-
-    """
-
-    __slots__ = ()
-
-    #: Seconds since 1 January 1970, in the leading 48 bits.
-    seconds: int
-    #: Fraction of a second, in units of 1/65536, in the trailing 16 bits.
-    fraction: int
 
 
 class FastBindingAcknowledgmentStatus(EnumLookup, IntEnum):
@@ -3372,7 +3360,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             type=schema.type,
             length=self._mh_option_length(schema.length),
             timestamp=schema.timestamp,
-            ntp_timestamp=NTPTimestamp(schema.seconds, schema.fraction),
+            ntp_timestamp=Data_NTPTimestamp(seconds=schema.seconds, fraction=schema.fraction),
         )
         return data
 
@@ -4094,7 +4082,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             1900 one, and splits the 64 bits 48/16 rather than 32/32. Reading it
             as an NTP timestamp would be wrong in both the epoch and the field
             widths, which is why it gets its own
-            :class:`~pcapkit.protocols.internet.mh.PMIPv6Timestamp`.
+            :class:`~pcapkit.protocols.data.internet.mh.PMIPv6Timestamp`.
 
         Args:
             schema: Parsed option schema.
@@ -4115,7 +4103,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             length=self._mh_option_length(schema.length),
             timestamp=datetime.datetime.fromtimestamp(
                 seconds + fraction / 65536, tz=datetime.timezone.utc),
-            pmip_timestamp=PMIPv6Timestamp(seconds, fraction),
+            pmip_timestamp=Data_PMIPv6Timestamp(seconds=seconds, fraction=fraction),
         )
         return data
 
@@ -8382,7 +8370,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
 
     def _make_opt_mesg_id(self, type: 'Enum_Option', option: 'Optional[Data_MesgIDOption]' = None, *,
-                          timestamp: 'Optional[NTPTimestamp]' = None,
+                          timestamp: 'Optional[Data_NTPTimestamp]' = None,
                           interval: 'Optional[dt_type]' = None,
                           **kwargs: 'Any') -> 'Schema_MesgIDOption':
         """Make MH mobility message replay protection option.
@@ -8410,8 +8398,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             ts_sec = math.floor(int_ts)
             ts_frc = min(round((int_ts - ts_sec) * 2**32), 0xFFFF_FFFF)  # 1/2**32 seconds per unit
 
-            timestamp = NTPTimestamp(seconds=ts_sec + 2_208_988_800,  # 70 years
-                                     fraction=ts_frc)
+            timestamp = Data_NTPTimestamp(seconds=ts_sec + 2_208_988_800,  # 70 years
+                                          fraction=ts_frc)
 
         return Schema_MesgIDOption(
             type=type,
@@ -8982,7 +8970,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         """
         if option is not None:
-            seconds, fraction = option.pmip_timestamp
+            seconds = option.pmip_timestamp.seconds
+            fraction = option.pmip_timestamp.fraction
 
         if not 0 <= seconds < 2 ** 48:
             raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid timestamp seconds: {seconds}')
