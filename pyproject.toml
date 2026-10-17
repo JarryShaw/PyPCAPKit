@@ -304,9 +304,13 @@ test = [
     # Enough of the ``vendor`` extra for a test to import a vendor crawler.
     # Without these, ``tests/vendor/test_ipx_socket_unit.py`` reports its tests as
     # skipped rather than failing, so the byte-for-byte regeneration check that is the
-    # only guard on the hand-maintained IPX socket registry never runs on any CI
-    # path: every ``unit-tests.yml`` job's install line builds on ``.[test]``,
-    # and ``cron-vendor.yml`` installs ``.[all,vendor]`` but never invokes pytest.
+    # only guard on the hand-maintained IPX socket registry runs in no
+    # ``unit-tests.yml`` job: every one's install line builds on ``.[test]``.
+    # ``cron-vendor.yml`` does run it, but needs nothing from here to: its job
+    # installs ``.[all,vendor]`` before ``.[test]``, and runs ``tests/vendor``
+    # only when a crawl changed a constant module, by which point
+    # ``pcapkit-vendor`` has rewritten the IPX constant file from that same table
+    # (#1853).
     #
     # Both are needed, not just ``requests``. ``pcapkit.vendor.default`` imports
     # ``requests`` at module scope, and ``pcapkit.vendor.__init__`` then imports
