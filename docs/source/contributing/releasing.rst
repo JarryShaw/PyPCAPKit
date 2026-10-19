@@ -338,7 +338,7 @@ checks *is* the one it is about to create:
   exists.
 * ``pypi`` compares PyPI's file count for the version against the expected one
   -- a wheel per supported leg plus the sdist kept only on the 3.15 leg; the
-  KTLO legs' wheels (`#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__) are not counted. This job is
+  :ref:`KTLO <ktlo-tier>` legs' wheels (`#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__) are not counted. This job is
   already idempotent (``skip-existing: true`` on every upload step), so the
   check exists only to save the cost of the build matrix, not for correctness.
 * ``conda`` compares Anaconda's aggregate count against the expected one (the
