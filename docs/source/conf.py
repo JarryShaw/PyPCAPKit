@@ -19,8 +19,10 @@ from typing import TYPE_CHECKING
 
 from docutils import nodes
 from sphinx import addnodes
+from sphinx.errors import NoUri
 from sphinx.ext.autodoc.preserve_defaults import DefaultValue, update_default_value
 from sphinx.transforms.post_transforms import SphinxPostTransform
+from sphinx.util import logging as sphinx_logging
 from sphinx.util.inspect import safe_getattr, stringify_signature
 
 # NB: private modules of ``sphinx-autodoc-typehints``, used deliberately -- see
@@ -178,6 +180,11 @@ intersphinx_mapping = {
 # Those packages are therefore linked to their project pages instead, through
 # :data:`rst_epilog` below (:issue:`1936`).
 
+#: The label on the note in :file:`pcapkit/foundation/engines/3rdparty.rst` that
+#: says which distribution installs the ``pcap`` module, which ``|pcap|_`` links
+#: to (:issue:`1948`).
+PCAP_MODULE_LABEL = 'pcap-module'
+
 #: Every third-party project page the docs link to, defined once for all pages.
 #: Sphinx appends this to every source file, and so to every page autodoc
 #: assembles from docstrings, so a page or a docstring must not define these
@@ -189,9 +196,14 @@ intersphinx_mapping = {
 #: and `Name`_ links the project by its own name. Target names are
 #: case-insensitive, so `PyShark`_ and ``|pyshark|_`` share one target. A name
 #: below a package, such as ``dpkt.dpkt.Packet.data``, stays a plain literal,
-#: since it would link to the same project page. ``pcap`` has no substitution:
-#: `PyPCAP`_ and `pcap-ct`_ both install that module, so no one project page is
-#: the right target for it.
+#: since it would link to the same project page.
+#:
+#: ``|pcap|_`` links inside these docs instead. `PyPCAP`_ and `pcap-ct`_ both
+#: install that module, so no one project page is the right target for it, and
+#: it links to the note labelled :data:`PCAP_MODULE_LABEL`, which says which
+#: distribution is which. Its target is that label's anchor, right on the note's
+#: own page; :func:`link_pcap_module` points it at the note's page from every
+#: other one.
 rst_epilog = """
 .. |aenum| replace:: ``aenum``
 .. _aenum: https://github.com/ethanfurman/aenum
@@ -206,6 +218,8 @@ rst_epilog = """
 .. _emoji: https://carpedm20.github.io/emoji/docs/
 .. |jspcapy| replace:: ``jspcapy``
 .. _jspcapy: https://github.com/JarryShaw/jspcapy
+.. |pcap| replace:: ``pcap``
+.. _pcap: #pcap-module
 .. |pcap-ct| replace:: ``pcap-ct``
 .. _pcap-ct: https://pypi.org/project/pcap-ct/
 .. |pcapfile| replace:: ``pcapfile``
@@ -1059,6 +1073,54 @@ class DropTableWrapperIds(SphinxPostTransform):
             container['ids'] = [id_ for id_ in container['ids'] if id_ not in inner]
 
 
+def link_pcap_module(app: 'Sphinx', doctree: 'document', docname: str) -> None:
+    """Point each ``|pcap|_`` at the note labelled :data:`PCAP_MODULE_LABEL`.
+
+    The target :data:`rst_epilog` gives ``|pcap|_`` is the label's bare anchor,
+    since a hyperlink target can only name a URI or a target on the same page,
+    and the note is on one page while the epilog is on all of them. The anchor
+    is right on the note's own page; on every other page this prefixes it with
+    the URI of the note's page, as the builder spells it from ``docname``
+    (:issue:`1948`). A :rst:role:`ref` would resolve across pages without this,
+    but renders its text as plain text rather than as the literal the other
+    ``|pkg|_`` links are.
+
+    Two kinds of builder are left to themselves. One whose URI for the note's
+    page is itself a fragment, as singlehtml's ``#document-<docname>`` is, writes
+    every page into one output, where the bare anchor already resolves and a
+    second ``#`` would break it. One that raises :exc:`~sphinx.errors.NoUri` has
+    no page for the note, as latex has not when its document set leaves the note
+    out, so each link is replaced by its literal, as Sphinx replaces a
+    cross-reference with no URI.
+
+    Args:
+        app: Sphinx application.
+        doctree: The resolved doctree of ``docname``.
+        docname: The document being written.
+
+    """
+    anchor = f'#{PCAP_MODULE_LABEL}'
+    refs = [ref for ref in doctree.findall(nodes.reference) if ref.get('refuri') == anchor]
+    if not refs:
+        return
+    target, labelid = app.env.domains.standard_domain.anonlabels.get(PCAP_MODULE_LABEL, ('', ''))
+    if not target:
+        sphinx_logging.getLogger(__name__).warning(
+            'undefined label: %r, which |pcap|_ links to', PCAP_MODULE_LABEL, location=refs[0])
+        return
+    try:
+        page = app.builder.get_relative_uri(docname, target)
+    except NoUri:
+        for ref in refs:
+            ref.replace_self(ref.children)
+        return
+    if '#' in page:
+        return
+    for ref in refs:
+        ref['refuri'] = f'{page}#{labelid}'
+        ref['internal'] = True
+
+
 def follow_builtins_alias(app: 'Sphinx', modname: 'Optional[str]',  # pylint: disable=unused-argument
                           attribute: str) -> 'Optional[str]':
     """Keep viewcode on the module that binds a name whose object reports :mod:`builtins`.
@@ -1159,6 +1221,7 @@ def setup(app: 'Sphinx') -> None:
     app.connect('autodoc-before-process-signature', sign_wrapped_function, priority=700)
     app.connect('viewcode-follow-imported', follow_builtins_alias)
     app.add_post_transform(DropTableWrapperIds)
+    app.connect('doctree-resolved', link_pcap_module)
     app.connect('doctree-read', resolve_builtins_exactly)
     # NB: either side of napoleon's ``autodoc-process-docstring`` handler, which
     # connects at the default 500.

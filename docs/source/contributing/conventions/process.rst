@@ -67,7 +67,7 @@ back to the default engine rather than raising when a requested engine is absent
 .. note::
 
    mypy types the engine packages that ship no types -- |dpkt|_, |pyshark|_,
-   ``pcap`` and |pcapfile|_ -- from local stubs under :file:`typings/`, which
+   |pcap|_ and |pcapfile|_ -- from local stubs under :file:`typings/`, which
    :file:`mypy.ini` registers through ``mypy_path`` and which ship in neither the
    wheel nor the sdist (:issue:`1878`). ``scapy`` ships its own. A stub declares only
    what :mod:`pcapkit` uses and cites the version it was written against, so a name

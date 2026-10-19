@@ -35,7 +35,7 @@ if TYPE_CHECKING:
     from pcapkit.foundation.extraction import Extractor
 
     class _PyPCAPPackage(Protocol):
-        """``pcap``, as :class:`PyPCAP` reads it through :attr:`PyPCAP._expkg` (#1878)."""
+        """|pcap|_, as :class:`PyPCAP` reads it through :attr:`PyPCAP._expkg` (#1878)."""
 
         @property
         def pcap(self) -> 'Type[Handle]': ...
@@ -73,7 +73,7 @@ class PyPCAP(EngineBase['RawFrame']):
        interface that does install there, and
        :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` is the engine for it.
 
-       Because `pcap-ct`_ installs the same top-level ``pcap`` module, this
+       Because `pcap-ct`_ installs the same top-level |pcap|_ module, this
        engine checks which distribution it got and refuses the other one rather
        than running under the wrong name -- see :meth:`__init__`.
 
@@ -81,12 +81,12 @@ class PyPCAP(EngineBase['RawFrame']):
         extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.
 
     Raises:
-        UnsupportedCall: If the installed ``pcap`` is `pcap-ct`_ rather than
+        UnsupportedCall: If the installed |pcap|_ is `pcap-ct`_ rather than
             upstream `PyPCAP`_.
 
     """
     if TYPE_CHECKING:
-        #: Engine extraction package, i.e. ``pcap``.
+        #: Engine extraction package, i.e. |pcap|_.
         _expkg: '_PyPCAPPackage'
         #: Engine extraction temporary storage.
         _extmp: 'Iterator[RawFrame]'
@@ -94,7 +94,7 @@ class PyPCAP(EngineBase['RawFrame']):
         _dlink: 'Enum_LinkType'
         #: Closed flag, so that the handle is not closed twice.
         _closed: 'bool'
-        #: What the ``pcap`` import actually found, cf. :attr:`backend`.
+        #: What the |pcap|_ import actually found, cf. :attr:`backend`.
         _backend: '_pcap_backend.Probe'
 
     ##########################################################################
@@ -151,7 +151,7 @@ class PyPCAP(EngineBase['RawFrame']):
         distributions install happily and either could be the one in place.
 
         Returns:
-            A phrase naming the real cause, or :data:`None`. An absent ``pcap``
+            A phrase naming the real cause, or :data:`None`. An absent |pcap|_
             returns :data:`None`, since the import test reports that case in its
             own words and duplicating it would produce two warnings for one
             problem.
@@ -172,7 +172,7 @@ class PyPCAP(EngineBase['RawFrame']):
     def backend(self) -> 'str':
         """The distribution, version and location this engine is driving.
 
-        More than one distribution provides ``pcap``, so "the PyPCAP engine failed" is
+        More than one distribution provides |pcap|_, so "the PyPCAP engine failed" is
         not a complete statement of what ran. This says which one it was, e.g.
         ``pypcap 1.3.0 (/.../pcap.cpython-310-x86_64-linux-gnu.so)``.
 
@@ -187,14 +187,14 @@ class PyPCAP(EngineBase['RawFrame']):
         """Initialise the engine.
 
         Warns:
-            EngineWarning: If both distributions that provide ``pcap`` are
+            EngineWarning: If both distributions that provide |pcap|_ are
                 installed. Only one of them can win the import, so the other is
                 shadowed and unreachable -- a state worth naming, because
                 ``engine=`` then selects an engine that cannot run and nothing
                 else would say why.
 
         Raises:
-            UnsupportedCall: If the installed ``pcap`` is `pcap-ct`_ rather
+            UnsupportedCall: If the installed |pcap|_ is `pcap-ct`_ rather
                 than upstream `PyPCAP`_. This is the same condition
                 :meth:`unsupported_reason` reports, kept here as well because that
                 hook is only consulted by
@@ -243,7 +243,7 @@ class PyPCAP(EngineBase['RawFrame']):
         """Call ``pcap.pcap`` to extract PCAP files.
 
         This method assigns :attr:`self._expkg <PyPCAP._expkg>`
-        as ``pcap`` and :attr:`self._extmp <PyPCAP._extmp>`
+        as |pcap|_ and :attr:`self._extmp <PyPCAP._extmp>`
         as an iterator from ``pcap.pcap``.
 
         Warns:

@@ -29,7 +29,7 @@ if TYPE_CHECKING:
     from pcapkit.foundation.extraction import Extractor
 
     class _PCAPCTPackage(Protocol):
-        """``pcap``, as :class:`PCAP_CT` reads it through :attr:`PCAP_CT._expkg` (#1878)."""
+        """|pcap|_, as :class:`PCAP_CT` reads it through :attr:`PCAP_CT._expkg` (#1878)."""
 
         @property
         def pcap(self) -> 'Type[Handle]': ...
@@ -49,7 +49,7 @@ class PCAP_CT(EngineBase['RawFrame']):
     the `libpcap`_ package, which supplies the :manpage:`libpcap(3)` bindings
     (and ships a vendored copy of the library that it does not, by default, use
     -- see the warning below). Both distributions install a
-    top-level ``pcap`` module and expose the same interface, so this engine is
+    top-level |pcap|_ module and expose the same interface, so this engine is
     a sibling of :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` rather than a
     replacement for it -- see :attr:`__engine_module__` for how the two are told
     apart, and :doc:`the engine documentation
@@ -82,7 +82,7 @@ class PCAP_CT(EngineBase['RawFrame']):
        rely on it. Setting ``LIBPCAP = tcpdump`` in :file:`libpcap.cfg` selects the
        vendored copy instead -- verified loading, and reporting libpcap 1.10.6.
 
-    Being the same interface, it has the same limits. Offline, ``pcap`` is a
+    Being the same interface, it has the same limits. Offline, |pcap|_ is a
     savefile reader and nothing more: iteration yields the ``(timestamp, bytes)``
     pair from :c:func:`pcap_next_ex` and no protocol dissection is performed.
     Consequently this engine
@@ -113,7 +113,7 @@ class PCAP_CT(EngineBase['RawFrame']):
 
     """
     if TYPE_CHECKING:
-        #: Engine extraction package, i.e. ``pcap``.
+        #: Engine extraction package, i.e. |pcap|_.
         _expkg: '_PCAPCTPackage'
         #: Capture handle, kept separately from the iterator it is read through
         #: so that :meth:`close` does not depend on ``iter(handle) is handle``.
@@ -124,7 +124,7 @@ class PCAP_CT(EngineBase['RawFrame']):
         _dlink: 'Enum_LinkType'
         #: Closed flag, so that the handle is not closed twice.
         _closed: 'bool'
-        #: What the ``pcap`` import actually found, cf. :attr:`backend`.
+        #: What the |pcap|_ import actually found, cf. :attr:`backend`.
         _backend: '_pcap_backend.Probe'
 
     ##########################################################################
@@ -134,13 +134,13 @@ class PCAP_CT(EngineBase['RawFrame']):
     #: Engine name.
     __engine_name__ = 'PCAP_CT'
 
-    #: Engine module name. Note that this is ``pcap._pcap``, not ``pcap``:
-    #: `pcap-ct`_ and upstream `PyPCAP`_ both install a top-level ``pcap``,
+    #: Engine module name. Note that this is ``pcap._pcap``, not |pcap|_:
+    #: `pcap-ct`_ and upstream `PyPCAP`_ both install a top-level |pcap|_,
     #: so importing that name cannot tell which of the two is present, and
     #: :meth:`Extractor.import_test
     #: <pcapkit.foundation.extraction.Extractor.import_test>` decides engine
     #: availability by import alone. ``pcap._pcap`` is the `pcap-ct`_
-    #: implementation module; upstream ships ``pcap`` as a single extension
+    #: implementation module; upstream ships |pcap|_ as a single extension
     #: module rather than a package, so the submodule import fails there and the
     #: two engines stay distinguishable.
     __engine_module__ = 'pcap._pcap'
@@ -185,7 +185,7 @@ class PCAP_CT(EngineBase['RawFrame']):
         Consulted by :meth:`pcapkit.foundation.extraction.Extractor.run` *before*
         the import test, and it answers questions the import test cannot.
 
-        **Which distribution owns** ``pcap``. Upstream `PyPCAP`_ owns that name
+        **Which distribution owns** |pcap|_. Upstream `PyPCAP`_ owns that name
         just as legitimately, and ``import pcap._pcap`` -- what
         :attr:`__engine_module__` names -- separates them only as long as upstream
         keeps shipping a single extension module. Asking
@@ -214,7 +214,7 @@ class PCAP_CT(EngineBase['RawFrame']):
         which the import test then reports correctly on its own.
 
         Returns:
-            A phrase naming the real cause, or :data:`None`. A ``pcap`` that is
+            A phrase naming the real cause, or :data:`None`. A |pcap|_ that is
             merely absent returns :data:`None`, since the import test reports that
             case in its own words.
 
@@ -236,7 +236,7 @@ class PCAP_CT(EngineBase['RawFrame']):
     def backend(self) -> 'str':
         """The distribution, version and location this engine is driving.
 
-        More than one distribution provides ``pcap``, so "the pcap-ct engine failed" is
+        More than one distribution provides |pcap|_, so "the pcap-ct engine failed" is
         not a complete statement of what ran. This says which one it was, e.g.
         ``pcap-ct 1.3.0b3 (/.../pcap/__init__.py)``.
 
@@ -251,7 +251,7 @@ class PCAP_CT(EngineBase['RawFrame']):
         """Initialise the engine.
 
         Warns:
-            EngineWarning: If both distributions that provide ``pcap`` are
+            EngineWarning: If both distributions that provide |pcap|_ are
                 installed. Only one of them can win the import -- measured on
                 Python 3.10 with both present, the ``pcap-ct`` package wins and
                 upstream's extension module is shadowed -- so the other is
@@ -307,7 +307,7 @@ class PCAP_CT(EngineBase['RawFrame']):
         """Call ``pcap.pcap`` to extract PCAP files.
 
         This method assigns :attr:`self._expkg <PCAP_CT._expkg>`
-        as ``pcap``, :attr:`self._handle <PCAP_CT._handle>` as the
+        as |pcap|_, :attr:`self._handle <PCAP_CT._handle>` as the
         ``pcap.pcap`` capture handle and :attr:`self._extmp
         <PCAP_CT._extmp>` as an iterator over it.
 

@@ -31,9 +31,13 @@ import unittest
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 CONF = ROOT / 'docs' / 'source' / 'conf.py'
 
-#: Packages linked as ``|pkg|_``. ``pcap`` is not one: two distributions install
-#: it, so no one project page is its target, and it stays a literal.
+#: Packages linked as ``|pkg|_``. ``pcap`` is linked too, but two distributions
+#: install it, so no one project page is its target: it links to a note in these
+#: docs instead, pinned by :file:`test_docs_pcap_module_link_1948_unit.py`.
 LINKED = ('aenum', 'cryptography', 'dpkt', 'emoji', 'pcapfile', 'pyshark')
+
+#: Epilog targets that are not a project page, with the URI each one has.
+INTERNAL = {'pcap': '#pcap-module'}
 
 #: A list of literals that names engines, adapters or toolkits.
 ENGINE_LIST = re.compile(r'``\w+``(?:,\s+``\w+``)*(?:,?\s+(?:and|or)\s+``\w+``)?'
@@ -129,14 +133,16 @@ class EpilogTests(unittest.TestCase):
         for name in SUBST.findall(epilog):
             self.assertIn(_norm(name), targets, name)
         for name, url in targets.items():
-            self.assertTrue(url.startswith('https://'), f'{name}: {url}')
+            if name in INTERNAL:
+                self.assertEqual(url, INTERNAL[name], name)
+            else:
+                self.assertTrue(url.startswith('https://'), f'{name}: {url}')
 
     def test_each_linked_package_has_a_substitution(self) -> 'None':
-        """Every name in :data:`LINKED`, and not ``pcap``."""
+        """Every name in :data:`LINKED` and :data:`INTERNAL`."""
         names = set(SUBST.findall(_epilog()))
-        for name in LINKED:
+        for name in (*LINKED, *INTERNAL):
             self.assertIn(name, names)
-        self.assertNotIn('pcap', names)
 
     def test_no_target_is_defined_twice(self) -> 'None':
         """Docutils folds case, so ``_DPKT`` and ``_dpkt`` would be one name."""

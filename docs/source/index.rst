@@ -5,8 +5,9 @@
 PyPCAPKit - Comprehensive Network Packet Analysis Library
 =========================================================
 
-PyPCAPKit is an open source Python library for `PCAP`_ file extraction,
-construction and analysis.
+PyPCAPKit is an open source Python library for
+`PCAP <https://en.wikipedia.org/wiki/Pcap>`__ file extraction, construction and
+analysis.
 
 .. important::
 
@@ -132,7 +133,7 @@ spelled ``'pcapkit'``) is :mod:`pcapkit`'s own parser and the only one with no
 third-party requirement.
 
 `PyPCAP`_ and `pcap-ct`_ are two independent distributions of the same
-:manpage:`libpcap(3)` interface and both install a top-level ``pcap`` module,
+:manpage:`libpcap(3)` interface and both install a top-level |pcap|_ module,
 so they are two engines rather than one: upstream `PyPCAP`_ stops at Python 3.11,
 `pcap-ct`_ covers 3.10 and newer. **Install exactly one of them** -- with both
 present, ``pcap-ct`` wins the import and the other becomes unselectable.
@@ -164,7 +165,7 @@ Every engine also answers a preflight check --
 :meth:`Extractor.run <pcapkit.foundation.extraction.Extractor.run>` consults
 before anything is imported -- so asking for one that cannot run in the current
 environment gives a single warning naming the actual cause (a Python version, a
-missing :program:`tshark`, a missing :manpage:`libpcap(3)`, the wrong ``pcap``
+missing :program:`tshark`, a missing :manpage:`libpcap(3)`, the wrong |pcap|_
 distribution) and a clean fall back, rather than an error from inside the
 third-party package.
 
@@ -358,7 +359,7 @@ plug-in functions, you may want to install the optional ones:
 .. warning::
 
    **Install only one of** ``pypcap`` **and** ``pcap-ct``. Both own the top-level
-   ``pcap`` module, and ``pip`` will install both without complaint. With both
+   |pcap|_ module, and ``pip`` will install both without complaint. With both
    present the ``pcap-ct`` package wins the import and ``pypcap``'s extension
    module is shadowed and unreachable, so ``engine='pypcap'`` stops working --
    measured on Python 3.10. :mod:`pcapkit` detects that state and warns with an
@@ -476,5 +477,4 @@ Indices and Tables
 * :ref:`modindex`
 * :ref:`search`
 
-.. _PCAP: https://en.wikipedia.org/wiki/Pcap
 .. _libpcap: https://www.tcpdump.org
