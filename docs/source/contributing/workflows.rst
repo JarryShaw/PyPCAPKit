@@ -491,12 +491,18 @@ its two-hour legs stay measured), a day per query because a filtered listing sto
 at 1,000 runs (Pages completed 1,154 in the week to 2026-10-09). It then reads the
 jobs of an evenly spaced sample -- 150 push and 150 pull-request runs of Unit Tests,
 60 runs of each other workflow -- and the summary says how many runs each sample
-holds and which span they cover. That is about 690 calls (estimate: 63 listing
-pages, one per workflow per day and one more per further 100 runs, by the week to
-2026-10-09's run counts with Experimental Tests taken as Unit Tests' 10, since it
-runs on the same events; at most 300 + 300 job reads; 15 for the JUnit artifacts;
-up to 12 workflow-file reads) of ``GITHUB_TOKEN``'s 1,000 an hour, on a read-only token
-(``actions: read``, ``contents: read``). A job is measured by its own outcome: one
+holds and which span they cover. For the week to 2026-10-19 that was 677 calls
+(`#1930 <https://github.com/JarryShaw/PyPCAPKit/issues/1930>`__: 49 listing pages,
+one per workflow per day and one more per further 100 runs; 601 job reads; 15 for
+the JUnit artifacts; 12 workflow-file reads) of ``GITHUB_TOKEN``'s 1,000 an hour, on
+a read-only token (``actions: read``, ``contents: read``). It took 16.6 minutes,
+908 seconds of it on the job reads, which the API answers at up to 2.4 s each and
+which are made one at a time. So they are read last, in an order every prefix of
+which spans each sample, and stop at ``--budget-minutes`` (30): the report is then
+written on the runs read, with a note saying so. The step's cap (35 minutes) and the
+job's (40) sit above that budget, and the summary and upload steps run on
+``always()``, so a report written before a cap stopped the job is still published.
+Progress goes to the log as the script runs. A job is measured by its own outcome: one
 cancelled at 95% of its cap or later timed out and counts, even in a run that reads
 ``cancelled`` for that reason; one cancelled earlier was superseded and does not. A
 step cap written as an expression differs by leg and reads as none.
