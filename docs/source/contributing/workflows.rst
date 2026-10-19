@@ -590,7 +590,7 @@ fire while the pool stays saturated, and the JUnit timings are what show whether
 
 ``H1``, ``H2`` and ``H4`` on a non-blocking job are warnings, not HARD, so they do
 not fail the run (`#1732 <https://github.com/JarryShaw/PyPCAPKit/issues/1732>`__): on every job of :file:`experimental.yml`, which no
-required context names, on every KTLO leg, a job whose name ends in ``(KTLO)``
+required context names, on every :ref:`KTLO <ktlo-tier>` leg, a job whose name ends in ``(KTLO)``
 (`#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__), and on a job whose name ends in ``(experimental)`` in any workflow. That
 last covers the experimental legs that ran in :file:`unit-tests.yml` under
 ``test``'s 45-minute cap before the split. The finding keeps its ``H`` id and says it is non-blocking. A
@@ -686,12 +686,14 @@ triggers; the ``gate-only: true`` reusable calls documented above skip it via
 ``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:1939``),
 so it is never produced -- and never expected -- on those paths.
 
+.. _ktlo-tier:
+
 Python versions are tiered -- supported and KTLO
 (`#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__), and experimental
 (`#1660 <https://github.com/JarryShaw/PyPCAPKit/issues/1660>`__, below) -- in
 :file:`.github/python-versions.toml` (see `Python Versions`_).
 The **supported** tier, 3.11-3.15, blocks: a failed leg fails ``Required checks passed`` or its own
-required ``Compat`` context. The **KTLO** tier -- end-of-life 3.7-3.10, still built and
+required ``Compat`` context. The **KTLO** (*keep the lights on*) tier -- end-of-life 3.7-3.10, still built and
 tested -- never blocks, is never a required context, and never shows a commit or a
 pull request red (`#1672 <https://github.com/JarryShaw/PyPCAPKit/issues/1672>`__). In ``unit-tests.yml`` the KTLO legs are jobs of their own
 since `#1738 <https://github.com/JarryShaw/PyPCAPKit/issues/1738>`__: ``test-ktlo``,
