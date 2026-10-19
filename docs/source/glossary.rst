@@ -13,7 +13,7 @@ sense applies where, and links to the page that explains it.
        octets of :attr:`Protocol.data <pcapkit.protocols.protocol.Protocol.data>`.
        Its base, :class:`~pcapkit.corekit.infoclass.Info`, models the library's
        other records too, such as the reassembly ones; :ref:`ext-new-protocol`
-       explains it.
+       explains data models.
 
    default engine
        The engine that ``engine='default'`` (also spelled ``'pcapkit'``) selects,
@@ -24,8 +24,8 @@ sense applies where, and links to the page that explains it.
 
    info
        On a protocol, :attr:`Protocol.info
-       <pcapkit.protocols.protocol.Protocol.info>`: its :term:`data model`, which
-       the enclosing layer's holds under :attr:`Protocol.info_name
+       <pcapkit.protocols.protocol.Protocol.info>`: its :term:`data model`, stored
+       in the enclosing layer's data model under :attr:`Protocol.info_name
        <pcapkit.protocols.protocol.Protocol.info_name>`
        (:doc:`pcapkit/protocols/protocol`). Elsewhere, an
        :class:`~pcapkit.corekit.infoclass.Info` instance, such as the
