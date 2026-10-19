@@ -35,6 +35,7 @@ import importlib.util
 import io
 import json
 import pathlib
+import re
 import shlex
 import sys
 import tarfile
@@ -590,6 +591,52 @@ class VerdictTests(unittest.TestCase):
         self.assertNotIn('conda/platform-pins.toml', verdict.BOT_MANAGED_PATHS)
 
 
+#: A requirement's project name, at the start of a requirement specifier.
+REQUIREMENT_NAME = re.compile(r'[A-Za-z0-9](?:[A-Za-z0-9._-]*[A-Za-z0-9])?')
+
+
+def pip_installs(line: 'str') -> 'list[str]':
+    """The projects a ``python -m pip install`` shell line names, normalised; none for any other line.
+
+    Split as the shell would, so nothing after a ``#`` counts (#1902), and each
+    requirement read for its project name, so ``requests[socks]`` and
+    ``requests>=2`` are both :mod:`requests`. Options, and an argument that is
+    not a project name, such as ``.[all]``, name nothing.
+
+    """
+    # Checked before the split, which raises on a quote another line closes.
+    if line.split()[:4] != ['python', '-m', 'pip', 'install']:
+        return []
+    names = []  # type: list[str]
+    for word in shlex.split(line, comments=True)[4:]:
+        match = None if word.startswith('-') else REQUIREMENT_NAME.match(word)
+        if match is not None:
+            names.append(re.sub(r'[-_.]+', '-', match.group()).lower())
+    return names
+
+
+class PipInstallsTests(unittest.TestCase):
+    """:func:`pip_installs` reads an install line for the projects it installs, as pip would."""
+
+    def test_a_requirement_is_read_for_its_name(self) -> None:
+        for line, expected in (
+                ('python -m pip install -U pip requests', ['pip', 'requests']),
+                ('python -m pip install requests[socks]', ['requests']),
+                ("python -m pip install 'requests>=2'", ['requests']),
+                ('python -m pip install Requests_Toolbelt', ['requests-toolbelt']),
+                ('python -m pip install -e .[all]', []),
+                ('python util/conda_vendor.py requests', []),
+                ("echo 'requests", []),
+        ):
+            with self.subTest(line=line):
+                self.assertEqual(pip_installs(line), expected)
+
+    def test_a_name_after_a_comment_is_not_installed(self) -> None:
+        # #1902: split without comment handling, ``requests`` here read as installed.
+        self.assertEqual(pip_installs('python -m pip install -e .[all]  # requests comes later'), [])
+        self.assertEqual(pip_installs('python -m pip install pip # requests'), ['pip'])
+
+
 @unittest.skipIf(yaml is None, 'PyYAML, from the test extra, is not installed')
 class WorkflowTests(unittest.TestCase):
     """``conda-update`` refreshes the pins after installing ``.[all]`` and before writing the requirements."""
@@ -624,9 +671,8 @@ class WorkflowTests(unittest.TestCase):
     def test_the_job_installs_requests_before_the_refresh(self) -> None:
         """``.[all]`` does not bring :mod:`requests`, which ``--refresh-pins`` reads PyPI with."""
         refresh = self.index(lambda step: self.runs(step) == ['python util/conda_vendor.py --refresh-pins'])
-        # Only the install lines are split: another step's run carries a quote across lines.
         installs = [index for index, step in enumerate(self.steps) for line in self.runs(step)
-                    if line.startswith('python -m pip install ') and 'requests' in shlex.split(line)]
+                    if 'requests' in pip_installs(line)]
         self.assertTrue(installs, 'no step of conda-update installs requests')
         self.assertLess(min(installs), refresh)
 

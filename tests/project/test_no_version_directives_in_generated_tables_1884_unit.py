@@ -38,8 +38,8 @@ if TYPE_CHECKING:
 #: Repository root.
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
-#: A version directive, as Sphinx spells it.
-DIRECTIVE = re.compile(r'\.\. version(?:added|changed|removed)::.*')
+#: A version directive, as Sphinx spells it: reST allows any whitespace after the ``..`` (#1902).
+DIRECTIVE = re.compile(r'\.\.\s+version(?:added|changed|removed)::.*')
 
 #: The crawler modules whose templates carried a directive before #1884.
 ISSUE_VENDORS = (
@@ -191,6 +191,8 @@ class TestVendorTemplates(unittest.TestCase):
 
             LINE = lambda NAME: f"class {NAME}:\\n    .. versionadded:: 1.0.3\\n"
 
+            WIDE = "..  versionchanged:: 1.0.10"
+
 
             def helper():
                 """Hand-written helper.
@@ -230,8 +232,16 @@ class TestVendorTemplates(unittest.TestCase):
         crawlers = vendor_classes([tree])
         self.assertEqual(crawlers, frozenset({'Vendor', 'Base', 'Child'}))
         found = sorted(directive for _, directive in template_directives(tree, crawlers))
-        self.assertEqual(found, ['.. versionadded:: 1.0.3', '.. versionadded:: 1.0.8',
-                                 '.. versionchanged:: 1.0.5', '.. versionchanged:: 1.0.7'])
+        self.assertEqual(found, ['..  versionchanged:: 1.0.10', '.. versionadded:: 1.0.3',
+                                 '.. versionadded:: 1.0.8', '.. versionchanged:: 1.0.5',
+                                 '.. versionchanged:: 1.0.7'])
+
+    def test_a_directive_spaced_wider_is_matched(self) -> 'None':
+        # #1902: reST takes any whitespace between ``..`` and the directive name.
+        for text in ('..  versionchanged:: 1.5.0', '..\tversionadded:: 1.5.0', '.. versionremoved:: 1.5.0'):
+            with self.subTest(text=text):
+                self.assertIsNotNone(DIRECTIVE.search(text))
+        self.assertIsNone(DIRECTIVE.search('..versionadded:: 1.5.0'))
 
 
 class TestDocsPages(unittest.TestCase):
