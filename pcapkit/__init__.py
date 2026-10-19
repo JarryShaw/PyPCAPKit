@@ -11,7 +11,7 @@
 .. _DictDumper: https://dictdumper.jarryshaw.me
 
 Unlike popular PCAP file extractors, such as `Scapy`_,
-`DPKT`_, `PyShark`_, and etc, :mod:`pcapkit` uses streaming
+`DPKT`_ and `PyShark`_, :mod:`pcapkit` uses streaming
 strategy to read input files. That is to read frame by
 frame, decrease occupation on memory, as well as enhance
 efficiency in some way.

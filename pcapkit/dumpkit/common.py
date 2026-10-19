@@ -107,7 +107,7 @@ class Dumper(DumperBase):
 
            from pcapkit.foundation.registry.foundation import register_dumper
 
-           register_dumper('my_mixin', MyMixin, '.mine')
+           register_dumper('my_mixin', MyMixin, ext='.mine')
 
     .. versionchanged:: 1.5.0
 

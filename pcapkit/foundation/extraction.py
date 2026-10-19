@@ -111,11 +111,11 @@ class Extractor(Generic[_P]):
         For supported engines, please refer to
         :meth:`~pcapkit.foundation.extraction.Extractor.run`.
 
-    .. versionchanged:: 1.2.0
+    .. versionchanged:: 1.1.1
 
-       ``strict`` is renamed ``reasm_strict``, with no alias, and
-       ``reasm_store`` is inserted after it, so a positional argument from
-       ``trace`` onwards moves one place along.
+       From ``1.1.1.post2``, ``strict`` is renamed ``reasm_strict``, with no
+       alias, and ``reasm_store`` is inserted after it, so a positional
+       argument from ``trace`` onwards moves one place along.
 
     .. versionchanged:: 1.5.0
 
@@ -218,7 +218,7 @@ class Extractor(Generic[_P]):
         _exptl: 'Protocols'
         #: Extract til layer.
         _exlyr: 'Layers'
-        #: Caller supplied parsing context, c.f. :mod:`pcapkit.corekit.context`.
+        #: Caller supplied parsing context, cf. :mod:`pcapkit.corekit.context`.
         _exctx: 'ContextRegistry'
         #: Extraction engine name.
         _exnam: 'Engines'
@@ -1202,7 +1202,7 @@ class Extractor(Generic[_P]):
 
             context: caller supplied parsing context for protocols that need
                 information not carried on the wire, keyed by protocol index
-                ID -- c.f. :mod:`pcapkit.corekit.context`. Accepts a
+                ID -- cf. :mod:`pcapkit.corekit.context`. Accepts a
                 :class:`~pcapkit.corekit.context.ContextRegistry`, a single
                 :class:`~pcapkit.corekit.context.ProtocolContext`, a mapping,
                 or any iterable of contexts. The channel is honoured by the
@@ -1224,7 +1224,7 @@ class Extractor(Generic[_P]):
                 engine first, which supports PCAP output.
 
             pcapkit.utilities.warnings.EngineWarning: If the requested extraction
-                engine is not available, c.f. :meth:`run`.
+                engine is not available, cf. :meth:`run`.
             pcapkit.utilities.warnings.AttributeWarning: If ``trace_analyse`` is
                 requested while the extraction engine is PyShark.
 

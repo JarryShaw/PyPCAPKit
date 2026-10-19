@@ -14,6 +14,7 @@ origin, using the :rfc:`791` procedure described in :doc:`index`.
 
    .. automethod:: reassembly
    .. automethod:: submit
+   .. automethod:: _detect_conflicts
 
 Data Models
 -----------

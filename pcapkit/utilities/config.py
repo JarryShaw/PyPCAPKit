@@ -63,7 +63,7 @@ _BOOLEAN_STATES = {'1': True, '0': False,
                    'true': True, 'false': False,
                    'on': True, 'off': False}
 
-#: What a recursion-bound limit risks once lifted, c.f. :issue:`1610`.
+#: What a recursion-bound limit risks once lifted, cf. :issue:`1610`.
 _RECURSION_RISK = ("each layer is dissected from inside the parse of the one before it, so a deep "
                    "frame may hit Python's recursion limit and raise RecursionError (#1610)")
 
@@ -195,7 +195,7 @@ FRAME_LAYER_LIMIT = read_limit('FRAME_LAYER_LIMIT', 64, risk=_RECURSION_RISK)
 #: header is a layer, so :data:`FRAME_LAYER_LIMIT` applies as well.
 #:
 #: Rebuilding a frame with :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data`
-#: stops where parsing it did, and warns once too (:issue:`1619`), c.f.
+#: stops where parsing it did, and warns once too (:issue:`1619`), cf.
 #: :meth:`Internet._make_payload
 #: <pcapkit.protocols.internet.internet.Internet._make_payload>`.
 #:

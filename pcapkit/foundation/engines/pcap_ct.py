@@ -128,7 +128,7 @@ class PCAP_CT(EngineBase['RawFrame']):
         _dlink: 'Enum_LinkType'
         #: Closed flag, so that the handle is not closed twice.
         _closed: 'bool'
-        #: What the :mod:`pcap` import actually found, c.f. :attr:`backend`.
+        #: What the :mod:`pcap` import actually found, cf. :attr:`backend`.
         _backend: '_pcap_backend.Probe'
 
     ##########################################################################

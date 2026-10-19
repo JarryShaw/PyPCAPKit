@@ -223,8 +223,8 @@ class BaseError(Exception):
     A loud error -- the default -- is reported once, at
     :data:`logging.CRITICAL` level, on the ``pcapkit`` logger
     (:data:`~pcapkit.utilities.logging.logger`). Outside development mode it
-    also installs :func:`_excepthook` as :data:`sys.excepthook` and
-    :func:`_threading_excepthook` as :data:`threading.excepthook`, the first time
+    also installs :func:`_excepthook` as :func:`sys.excepthook` and
+    :func:`_threading_excepthook` as :func:`threading.excepthook`, the first time
     a loud error needs them, so that error -- and every loud error reaching the
     top level after it, on the main thread or any other -- prints its one-line
     exception message rather than a walk through :mod:`pcapkit`'s internals.
@@ -234,7 +234,7 @@ class BaseError(Exception):
     :exc:`~pcapkit.utilities.exceptions.MissingKeyError` behind
     :meth:`MultiDict.get <pcapkit.corekit.multidict.MultiDict.get>`. It is
     therefore silent and free of side effects: nothing is logged, and neither
-    :data:`sys.excepthook` nor :data:`threading.excepthook` is touched. It is
+    :func:`sys.excepthook` nor :func:`threading.excepthook` is touched. It is
     still a perfectly ordinary exception, carrying its message for whoever
     catches it.
 
@@ -255,8 +255,8 @@ class BaseError(Exception):
           installed before it first needed its own.
         * The hooks are installed lazily, from here, rather than at import
           time, so a program that imports :mod:`pcapkit` but never raises one of
-          its errors never has :data:`sys.excepthook` or
-          :data:`threading.excepthook` touched.
+          its errors never has :func:`sys.excepthook` or
+          :func:`threading.excepthook` touched.
         * The hooks still do not cover *every* path an exception can take.
           A traceback a caller formats itself with :mod:`traceback` -- rather
           than letting it reach the top level uncaught -- passes through
@@ -292,7 +292,7 @@ class BaseError(Exception):
 
 
 #: Callable[[Type[BaseException], BaseException, Optional[TracebackType]], None]:
-#: Whatever :data:`sys.excepthook` was installed immediately before
+#: Whatever :func:`sys.excepthook` was installed immediately before
 #: :func:`_install_excepthook` last replaced it -- :data:`None` until that
 #: happens. This is what a non-:class:`BaseError` is delegated to from
 #: :func:`_excepthook`.
@@ -302,7 +302,7 @@ class BaseError(Exception):
 #: :data:`None` in the very globals the already-installed :func:`_excepthook`
 #: still reads from on every call (a global lookup, not a value closed over at
 #: definition time). The old hook -- still installed, since a reload does not
-#: retroactively change what :data:`sys.excepthook` points at -- then falls
+#: retroactively change what :func:`sys.excepthook` points at -- then falls
 #: back to :data:`sys.__excepthook__` for a non-:class:`BaseError`, silently
 #: losing whatever had been captured before the reload (a host application's
 #: own hook, or ``tbtrim``'s). Measured: a delegate trimmed to one frame before
@@ -315,10 +315,10 @@ class BaseError(Exception):
 _previous_excepthook = None  # type: Optional[Callable[..., None]]
 
 #: bool: Set for the duration of :func:`_excepthook`, so a re-entrant call -- the
-#: delegate somehow routing back through :data:`sys.excepthook` -- falls back to
+#: delegate somehow routing back through :func:`sys.excepthook` -- falls back to
 #: the interpreter's own hook rather than recursing or printing twice. A single
 #: shared flag is correct here, unlike the threading analogue below: nothing
-#: but the main thread's own unwind ever calls :data:`sys.excepthook`, so there
+#: but the main thread's own unwind ever calls :func:`sys.excepthook`, so there
 #: is no concurrent, unrelated invocation for one flag to be confused with.
 _excepthook_running = False
 
@@ -367,7 +367,7 @@ def _excepthook(etype: 'Type[BaseException]', value: 'BaseException',
 
 
 # A generic, external marker -- "some pcapkit instance's hook is active" -- for
-# a caller that only has :data:`sys.excepthook` and no reference to a particular
+# a caller that only has :func:`sys.excepthook` and no reference to a particular
 # loaded copy of this module. Diagnostic only: :func:`_install_excepthook`'s own
 # guard below does *not* use this, and must not go back to doing so. The marker
 # is a plain :obj:`True`, identical on every reloaded copy of this function, so
@@ -378,18 +378,18 @@ _excepthook.installed_by_pcapkit = True  # type: ignore[attr-defined]
 
 
 #: Callable[[ExceptHookArgs], object]: The thread analogue of
-#: ``_previous_excepthook`` -- whatever :data:`threading.excepthook` was
+#: ``_previous_excepthook`` -- whatever :func:`threading.excepthook` was
 #: installed immediately before :func:`_install_excepthook` last replaced it.
 #: Subject to the same reload caveat documented on ``_previous_excepthook``.
 #: Typed to return :class:`object` rather than :data:`None`, matching
-#: :data:`threading.excepthook` itself in typeshed -- unlike
-#: :data:`sys.excepthook`, which is typed as returning :data:`None`.
+#: :func:`threading.excepthook` itself in typeshed -- unlike
+#: :func:`sys.excepthook`, which is typed as returning :data:`None`.
 _previous_threading_excepthook = None  # type: Optional[Callable[..., object]]
 
 #: threading.local: Per-thread re-entrancy guard for
 #: :func:`_threading_excepthook`, kept separate from ``_excepthook_running``
-#: rather than shared with it. Unlike :data:`sys.excepthook`, which only ever
-#: fires once, on the main thread's own unwind, :data:`threading.excepthook`
+#: rather than shared with it. Unlike :func:`sys.excepthook`, which only ever
+#: fires once, on the main thread's own unwind, :func:`threading.excepthook`
 #: can genuinely be running in *two different threads at once* -- each with its
 #: own uncaught exception, entirely unrelated to the other. A single shared
 #: flag would make one thread's hook see the other's unrelated, concurrent
@@ -402,10 +402,10 @@ _threading_hook_state = threading.local()
 def _threading_excepthook(args: 'ExceptHookArgs') -> 'None':
     """Thread analogue of :func:`_excepthook`; same contract, one argument.
 
-    :data:`threading.excepthook` is called with a single
+    :func:`threading.excepthook` is called with a single
     :class:`threading.ExceptHookArgs`, carrying ``exc_type``, ``exc_value``,
     ``exc_traceback`` and ``thread`` -- not the three positional parameters
-    :data:`sys.excepthook` takes. Everything else here mirrors :func:`_excepthook`
+    :func:`sys.excepthook` takes. Everything else here mirrors :func:`_excepthook`
     as closely as the default thread hook's own output allows: a loud
     :class:`BaseError` prints the ``"Exception in thread ...:"`` header the
     default hook always prints first -- the one piece of that output
@@ -419,7 +419,7 @@ def _threading_excepthook(args: 'ExceptHookArgs') -> 'None':
     hook's own printing at all.
 
     This hook is needed because the interpreter's *default*
-    :data:`threading.excepthook` consults :data:`sys.tracebacklimit`, which
+    :func:`threading.excepthook` consults :data:`sys.tracebacklimit`, which
     :class:`BaseError` does not set; without it a loud :class:`BaseError` raised
     on a worker thread would print a full default traceback.
 
@@ -455,7 +455,7 @@ def _install_excepthook() -> 'None':
 
     Called from :class:`BaseError`'s constructor rather than at import time, so
     that a program that never raises a :mod:`pcapkit` error never has
-    :data:`sys.excepthook` or :data:`threading.excepthook` touched merely for
+    :func:`sys.excepthook` or :func:`threading.excepthook` touched merely for
     having imported the package.
 
     Idempotent for *this* module instance, independently for each hook: if a
