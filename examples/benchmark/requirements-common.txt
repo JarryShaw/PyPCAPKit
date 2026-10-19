@@ -9,7 +9,7 @@
 # engine's hot path, so a different `chardet` is a different baseline, and the
 # baseline is what every ratio in the report divides by.
 dictdumper==0.8.4.post6
-chardet==7.6.0
+chardet==7.7.0
 aenum==3.1.17
 tbtrim==0.3.1
 
