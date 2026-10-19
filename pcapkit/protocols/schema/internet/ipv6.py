@@ -167,7 +167,7 @@ def jumbogram_error(length: 'int', next: 'int', data: 'bytes',  # pylint: disabl
                     fragment: 'Optional[Callable[[], bool]]' = None) -> 'Optional[str]':
     """Name the error :rfc:`2675#section-3` has a receiver detect in an IPv6 packet, if any.
 
-    The errors that section lists for a node that understands the Jumbo
+    The four errors that section lists for a node that understands the Jumbo
     Payload option, each a packet the default engine rejects (:issue:`1687`):
 
     * a Payload Length of zero, a Next Header of Hop-by-Hop Options, and no

@@ -3074,7 +3074,7 @@ class LocalizedRoutingAcknowledgmentMessage(
     """Header schema for MH Localized Routing Acknowledgment messages.
 
     Note:
-        :rfc:`6705#section-10.2` defines this message's status values
+        :rfc:`6705#section-10.2` defines this message's three status values
         inline and IANA keeps no registry for them -- they are neither in the
         general *Status Codes* registry nor in one of their own -- so their
         enumeration lives in
