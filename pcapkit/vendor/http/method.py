@@ -115,7 +115,7 @@ class {NAME}(EnumRegistry, StrEnum):
 
     @classmethod
     def get(cls, key: 'str', default: 'Optional[str]' = None) -> '{NAME}':
-        """Backport support for original codes.
+        """Resolve ``key`` to a member, matching the method token case-sensitively.
 
         Delegates to :meth:`~pcapkit.corekit.enum.EnumLookup.get` for the
         lookup itself, so ``key`` is checked against member values as well
@@ -151,18 +151,23 @@ class {NAME}(EnumRegistry, StrEnum):
                 matches neither a name nor a value. ``None``, the
                 default, uses ``key`` itself.
 
+        Returns:
+            The member whose name or value is ``key``. On a miss, an
+            unregistered member named ``key`` upper-cased, with the value
+            ``default`` (or ``key``), which is not added to the lookup tables,
+            so ``get`` never registers a method (:issue:`860`).
+
         Raises:
             ValueError: If ``key`` is not a :class:`str`. This reaches the
                 caller from the base's non-``str`` branch, where
                 :meth:`_validate_value` refuses it before ``cls(key)`` could
                 reach ``_missing_``, and is **not** caught by
-                the ``except KeyError`` fallback below -- only a failed
-                *name* lookup is. Raising is the intended behaviour for
+                the miss fallback described under *Returns* -- only a failed
+                lookup is. Raising is the intended behaviour for
                 ``get(b'GET')`` as well: a member whose name and
                 value were both the :class:`bytes` object is not a thing
                 this registry should hand back.
 
-        :meta private:
         """
         try:
             return super().get(key)

@@ -393,7 +393,7 @@ class {NAME}(EnumRegistry, StrEnum):
 
     @classmethod
     def get(cls, key: 'str', default: 'Optional[str]' = None) -> '{NAME}':
-        """Backport support for original codes.
+        """Resolve ``key`` to a member, matching the command code case-insensitively.
 
         A non-:class:`str` ``key`` is delegated to
         :meth:`~pcapkit.corekit.enum.EnumLookup.get`, as
@@ -418,6 +418,12 @@ class {NAME}(EnumRegistry, StrEnum):
                 matches no member name. ``None``, the default, uses ``key``
                 itself.
 
+        Returns:
+            The member named ``key`` upper-cased. On a miss, an unregistered
+            member with that name and the value ``default`` (or ``key``),
+            which is not added to the lookup tables, so ``get`` never registers
+            a command (:issue:`860`).
+
         Raises:
             EnumValueError: If ``key`` is not a :class:`str`. This reaches the
                 caller from the base's non-``str`` branch, where
@@ -425,7 +431,6 @@ class {NAME}(EnumRegistry, StrEnum):
                 reach :meth:`_missing_`. A :exc:`ValueError`, so an
                 ``except ValueError`` caller is unaffected.
 
-        :meta private:
         """
         if not isinstance(key, str):
             # NOTE: unreachable only by the ``str`` annotation, which a caller
