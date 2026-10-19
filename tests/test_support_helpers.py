@@ -68,6 +68,7 @@ import time
 import types
 import unittest
 import urllib.error
+from typing import TYPE_CHECKING
 from unittest import mock
 
 from tests._support import (MAX_TIMEOUT, PCAPNG_GENERATOR, TIMEOUT_SCALE_ENV,
@@ -77,10 +78,22 @@ from tests._support import (MAX_TIMEOUT, PCAPNG_GENERATOR, TIMEOUT_SCALE_ENV,
                             skip_if_stand_in, snapshot_modules, stand_in_reason, time_limit,
                             upstream_digests)
 
+if TYPE_CHECKING:
+    from typing import Iterator
+
 #: Seconds a :class:`TimeLimitTests` body spins waiting for the deadline before it
 #: gives up and fails by name: ten times the one-second deadline those tests arm,
 #: so a deadline that fires at all, its repeat included, lands well inside it.
 SPIN_LIMIT = 10.0
+
+#: Seconds a stalled :class:`TimeLimitTests` body sleeps before its ``try``: past
+#: the one-second deadline, so an alarm armed as the ``with`` was entered comes due
+#: in it (#1902).
+STALL = 1.5
+
+#: :func:`signal.alarm` itself, for :meth:`TimeLimitTests.spin` to reach while
+#: :meth:`TimeLimitTests.held_deadline` stands in for the name.
+_ALARM = signal.alarm
 
 
 class Closeable:
@@ -239,15 +252,59 @@ class TimeLimitTests(unittest.TestCase):
     deadline that never gets through fails this test in seconds rather than
     hanging the worker until pytest-timeout's backstop ends it.
 
+    A body that drops the first raise has to have it land inside the ``try``, or
+    the finaliser, that drops it (#1902). So it runs under :meth:`held_deadline`,
+    and the deadline is armed only once :meth:`spin` is called from in there.
+    Armed as the ``with`` is entered, it counts down through everything before
+    that ``try``, and a runner stalled there for the whole second gets the raise
+    outside it. A body that only needs a raise to land somewhere in it takes the
+    deadline as armed.
+
     """
+
+    #: Seconds ``time_limit`` asked :func:`signal.alarm` for as it was entered under
+    #: :meth:`held_deadline`, or ``0``.
+    deadline = 0
+
+    #: Seconds :meth:`held_deadline` held back and :meth:`spin` has not yet armed.
+    held = 0
+
+    @contextlib.contextmanager
+    def held_deadline(self) -> 'Iterator[None]':
+        """Hold the deadline's arm back for :meth:`spin`, and check it was armed there.
+
+        Within the block, the first non-zero :func:`signal.alarm` is ``time_limit``
+        arming its deadline. It is recorded in :attr:`deadline` and cancels what
+        was pending, as arming does, but nothing is armed until :meth:`spin` arms
+        it. Every other call reaches the alarm, so the deadline's repeats, its
+        cancel and the restoring of an enclosing alarm are real.
+
+        """
+        self.deadline = self.held = 0
+
+        def alarm(seconds: int) -> int:
+            if seconds and not self.deadline:
+                self.deadline = self.held = seconds
+                return _ALARM(0)
+            return _ALARM(seconds)
+
+        with mock.patch.object(signal, 'alarm', alarm):
+            yield
+        self.assertEqual((self.deadline, self.held), (1, 0),
+                         'the one-second deadline was not held back and then armed by spin')
 
     def spin(self, until: float) -> None:
         """Busy-wait in pure Python until :func:`time.monotonic` reaches ``until``.
 
         The stand-in for a hang, but a bounded one. Pure Python, so the deadline's
-        signal is delivered inside it, between bytecodes.
+        signal is delivered inside it, between bytecodes. A deadline
+        :meth:`held_deadline` holds is armed first, so its first raise lands in
+        here, wherever the caller is.
 
         """
+        if self.held:
+            seconds, self.held = self.held, 0
+            _ALARM(seconds)
         while time.monotonic() < until:
             pass
 
@@ -447,7 +504,8 @@ class TimeLimitTests(unittest.TestCase):
                 spin(end)
 
         with mock.patch.object(sys, 'unraisablehook',
-                               lambda unraisable: dropped.append(unraisable.exc_type)):
+                               lambda unraisable: dropped.append(unraisable.exc_type)), \
+                self.held_deadline():
             with self.assertRaisesRegex(TimeoutError, r'within 1s'):
                 with time_limit(1):
                     held = Finalised()
@@ -469,8 +527,32 @@ class TimeLimitTests(unittest.TestCase):
         end = time.monotonic() + SPIN_LIMIT
         dropped = []  # type: list[type]
 
-        with self.assertRaisesRegex(TimeoutError, r'within 1s'):
+        with self.held_deadline(), self.assertRaisesRegex(TimeoutError, r'within 1s'):
             with time_limit(1):
+                try:
+                    self.hang(end)
+                except OSError as exc:
+                    dropped.append(type(exc))
+                self.hang(end)
+
+        self.assertEqual(dropped, [TimeoutError])
+        self.assert_nothing_left_behind(own_handler)
+
+    def test_a_stall_before_the_try_still_leaves_a_raise_to_drop(self) -> None:
+        """#1902: a runner stalled past the deadline before the body's ``try`` changes nothing.
+
+        Armed as the ``with`` was entered, the deadline came due in the stall,
+        before the ``try`` meant to drop its first raise. That raise went straight
+        through and none was dropped.
+
+        """
+        own_handler = signal.getsignal(signal.SIGALRM)
+        dropped = []  # type: list[type]
+
+        with self.held_deadline(), self.assertRaisesRegex(TimeoutError, r'within 1s'):
+            with time_limit(1):
+                time.sleep(STALL)
+                end = time.monotonic() + SPIN_LIMIT
                 try:
                     self.hang(end)
                 except OSError as exc:
@@ -494,16 +576,17 @@ class TimeLimitTests(unittest.TestCase):
             with self.subTest(exit=how):
                 end = time.monotonic() + SPIN_LIMIT
                 raised = None
-                try:
-                    with time_limit(1):
-                        with contextlib.suppress(TimeoutError):
-                            self.hang(end)
-                        if expected is TimeoutError:
-                            self.hang(end)
-                        elif expected is LookupError:
-                            raise LookupError(how)
-                except (TimeoutError, LookupError) as exc:
-                    raised = type(exc)
+                with self.held_deadline():
+                    try:
+                        with time_limit(1):
+                            with contextlib.suppress(TimeoutError):
+                                self.hang(end)
+                            if expected is TimeoutError:
+                                self.hang(end)
+                            elif expected is LookupError:
+                                raise LookupError(how)
+                    except (TimeoutError, LookupError) as exc:
+                        raised = type(exc)
 
                 self.assertIs(raised, expected)
                 self.assert_nothing_left_behind(own_handler)
@@ -540,7 +623,7 @@ class TimeLimitTests(unittest.TestCase):
         end = time.monotonic() + SPIN_LIMIT
 
         signal.alarm(30)
-        with self.assertRaisesRegex(TimeoutError, r'within 1s'):
+        with self.held_deadline(), self.assertRaisesRegex(TimeoutError, r'within 1s'):
             with time_limit(1):
                 with contextlib.suppress(TimeoutError):
                     self.hang(end)
