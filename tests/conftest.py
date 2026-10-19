@@ -1,7 +1,11 @@
 # -*- coding: utf-8 -*-
 """Suite-wide :program:`pytest` configuration.
 
-Holds three things. The first is :func:`restore_module_table`, the guard that
+Besides session hooks documented where they are defined -- the warm import
+and coverage flush in :func:`pytest_sessionstart` and
+:func:`pytest_sessionfinish`, and the timer release in
+:func:`pytest_timeout_cancel_timer` -- it holds the following. The first is
+:func:`restore_module_table`, the guard that
 puts the :mod:`pcapkit` region of :data:`sys.modules` back after every test; see
 its own docstring for why it is here rather than left to each test file.
 

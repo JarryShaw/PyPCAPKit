@@ -182,7 +182,7 @@ class RejectionTests(unittest.TestCase):
     def test_the_three_misspellings_of_the_defect_are_each_refused(self) -> None:
         """Each key of #602, put back one at a time, raises and is named.
 
-        ``TCP_BASE`` is correct today, so reproducing the report means
+        ``TCP_BASE`` is correct, so reproducing the report means
         reintroducing the misspelling. Before the fix each of these built a
         segment whose field kept its default -- ``seq=1`` giving ``info.seq == 0``
         -- and captured no warning at all.

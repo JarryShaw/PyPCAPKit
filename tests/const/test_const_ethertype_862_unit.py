@@ -26,7 +26,7 @@ it, leaving every non-overlapping pair in the CSV's own row order. Sweeping
 every range test in the committed, generated file (measured directly against
 ``main`` at ``70fa92010``, the #861 merge commit this issue was blocked on)
 found this to be the *only* containment pair among them -- no other subsumed
-range exists in :class:`~pcapkit.const.reg.ethertype.EtherType` today, so
+range exists in :class:`~pcapkit.const.reg.ethertype.EtherType`, so
 :class:`EtherTypeGeneratorGeneralOrderingTests` below pins the algorithm
 itself against synthetic nested ranges rather than a second real-world pair.
 

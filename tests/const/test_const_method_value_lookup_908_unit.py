@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """``Method.get`` must consult ``_value2member_map_``, not only ``_member_map_``.
 
-GitHub issue #908. :class:`~pcapkit.const.http.method.Method` has 40 members,
-and exactly two of them -- ``BASELINE_CONTROL`` (value ``'BASELINE-CONTROL'``)
-and ``VERSION_CONTROL`` (value ``'VERSION-CONTROL'``) -- have a member *name*
+GitHub issue #908. Of :class:`~pcapkit.const.http.method.Method`'s members,
+only ``BASELINE_CONTROL`` (value ``'BASELINE-CONTROL'``)
+and ``VERSION_CONTROL`` (value ``'VERSION-CONTROL'``) have a member *name*
 that differs from their *value*, because a hyphen cannot appear in a Python
 identifier. The override's own ``get`` checked only ``_member_map_`` (names)
 and fell straight through to building an *unregistered* member on any miss,
@@ -52,7 +52,7 @@ instead of ``key`` itself. Widening the signature to adopt ``NO_DEFAULT``
 would therefore be caller-visible (a non-``None`` ``default`` on an unknown
 ``key`` would start resolving to an *existing* registered member instead of
 minting a new one carrying that string), even though nothing in this tree
-currently calls ``get`` with a non-``None`` ``default`` to notice --
+calls ``get`` with a non-``None`` ``default`` to notice --
 confirmed by grepping every call site under ``pcapkit/`` and ``tests/``.
 So the signature and the default's meaning are left exactly as they were;
 :class:`DefaultSignatureTests` below pins that explicitly.

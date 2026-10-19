@@ -48,7 +48,7 @@ SWEEP_TIMEOUT = 300
 
 
 class Gap(NamedTuple):
-    """One check that fails today, and the defect that stops it."""
+    """One check that fails, and the defect that stops it."""
 
     #: Tracking issue, or :data:`None` while the defect is not yet filed.
     issue: 'Optional[int]'
@@ -58,7 +58,7 @@ class Gap(NamedTuple):
     defect: 'str'
 
 
-#: Every check that fails today, by test method; each applies to every capture.
+#: Every check that fails, by test method; each applies to every capture.
 KNOWN_FAILURES = {}  # type: dict[str, Gap]
 
 

@@ -50,7 +50,7 @@ would now produce, verified by reading the generators rather than by running
 them. The third shape is dropped from :data:`ACCEPTED_FRAGMENT` entirely.
 
 :data:`ACCEPTED_FRAGMENT`'s set is not a survey of shapes this tree happens to
-use today -- it is Sphinx's own. ``sphinx.roles._format_rfc_target`` titles
+use -- it is Sphinx's own. ``sphinx.roles._format_rfc_target`` titles
 exactly three anchor prefixes, ``{'appendix', 'page', 'section'}``, and
 :file:`tests/project/test_changelog_md.py` already exercises ``#page-N`` as a
 correctly-rendered citation (``793#page-5``); confirmed real against RFC
@@ -67,8 +67,8 @@ shape check cannot tell from a typo without becoming a vocabulary list rather
 than a shape check. A bare ``section`` with no number is indistinguishable
 from a citation that dropped its number, the same incompleteness this test
 exists to catch -- Sphinx happening not to error on it is not the same claim
-as it being a well-formed citation. Neither shape appears under :mod:`pcapkit`
-today, so this changes nothing here; rejecting is the more conservative
+as it being a well-formed citation. Neither shape appears under :mod:`pcapkit`,
+so this changes nothing here; rejecting is the more conservative
 default should either turn up later.
 
 One thing the shape check above does not catch: whether the anchor actually
@@ -166,8 +166,8 @@ KNOWN_DEAD_ANCHORS: 'dict[int, frozenset[str]]' = {
 #:
 #: The bounded question is a different size. Rather than classifying every literal in
 #: the tree -- **23,869** spans across **926** files, every one of which had to be got
-#: right -- it asks only where a *denylisted fragment* appears, which is **2**
-#: occurrences today, and classifies each against this list. Adding a form means one
+#: right -- it asks only where a *denylisted fragment* appears, which is a
+#: handful of occurrences, and classifies each against this list. Adding a form means one
 #: reviewed entry, the same scrutiny :data:`KNOWN_DEAD_ANCHORS` entries already get.
 QUOTED_FORMS: 'tuple[tuple[str, str], ...]' = (
     ('``', '``'),

@@ -158,7 +158,7 @@ class DeferredSignTests(unittest.TestCase):
         template was built from the raw ``signed`` *argument*. A subclass that
         fixes ``__signed__`` and leaves ``__template__`` unset -- which the
         base class explicitly allows, and which nothing in ``pcapkit`` happens
-        to do today -- therefore declared itself signed and then unpacked
+        to do -- therefore declared itself signed and then unpacked
         unsigned: ``>I`` for a class saying ``__signed__ = True``, so
         ``b'\\xff\\xff\\xff\\xff'`` parsed as ``4294967295`` instead of ``-1``.
 

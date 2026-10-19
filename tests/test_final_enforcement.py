@@ -35,7 +35,7 @@ and construction failed with ``TypeError: 'int' object is not iterable`` on the
 :class:`Info` side, and *silently returned bookkeeping attributes* on the
 :class:`~pcapkit.protocols.schema.schema.Schema` side.
 
-What the rule costs is nothing today and everything later, which is why it needs
+What the rule costs is nothing up front and everything later, which is why it needs
 tests rather than a measurement. Measured at ``110381b63``: of :class:`Info`'s
 488 descendants 455 carry ``__final__`` in their own ``__dict__`` and **none is
 subclassed**; of :class:`~pcapkit.protocols.schema.schema.Schema`'s 445, 408 do

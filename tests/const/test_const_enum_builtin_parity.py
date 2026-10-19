@@ -432,11 +432,17 @@ class ConstEnumBuiltinParityTests(unittest.TestCase):
         """Explicitly *not* ``EnumError``, and explicitly not loud.
 
         :class:`~pcapkit.utilities.exceptions.BaseError` logs at CRITICAL from
-        its constructor, so it fires even for an exception that is caught and
-        discarded -- which the ``except ValueError`` fallback in every generated
-        ``get()`` does on purpose. A guard raising a
+        its constructor unless it is quiet, so it fires even for an exception
+        that is caught and discarded. The base
+        :meth:`~pcapkit.corekit.enum.EnumLookup.get` constructs its lookup inside
+        a ``_CaughtByCaller(ValueError)`` block (#1845), which quiets a
+        :exc:`ValueError` subclass there, but a direct ``cls(value)`` caught by
+        its caller has no such block: a guard raising a
         :class:`~pcapkit.utilities.exceptions.BaseError` subclass would log once
-        per discarded default.
+        per value discarded that way. And
+        :class:`~pcapkit.utilities.exceptions.EnumError`, not being a
+        :exc:`ValueError`, would escape its ``except ValueError`` fallback
+        altogether.
         """
         from pcapkit.utilities.exceptions import BaseError, EnumError
 

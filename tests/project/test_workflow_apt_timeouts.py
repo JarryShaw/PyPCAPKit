@@ -20,7 +20,7 @@ The rule asserted here is not a copy of the current file: **any step in any
 workflow whose script invokes ``apt-get`` must declare a ``timeout-minutes``,
 and that value must be below its job's own budget.** Stated that way it also
 catches a *new* apt-installing step added later without a bound, in a workflow
-that has none today.
+that has none.
 
 The second half of the rule matters as much as the first. A step timeout at or
 above the job's budget is decorative -- the job's own timer fires first and the
@@ -70,14 +70,14 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 #: Every workflow, rather than only the one #974 was filed against. The hazard is
 #: a property of invoking apt unbounded, not of a particular file, and scanning
-#: the directory is what lets a new apt step in a workflow that has none today be
+#: the directory is what lets a new apt step in a workflow that has none be
 #: caught by this module rather than by a stalled run.
 WORKFLOW_DIR = ROOT / '.github' / 'workflows'
 
 #: What counts as invoking apt. A substring of the comment-stripped step script,
 #: coarse on purpose: ``sudo apt-get``, ``DEBIAN_FRONTEND=noninteractive
 #: apt-get`` and a bare ``apt-get`` all match, as does an invocation this
-#: repository does not currently write.
+#: repository does not write.
 #:
 #: It does not match :program:`apt`, :program:`aptitude`, or a package manager
 #: reached some other way. That is the same allowlist limitation
@@ -87,7 +87,7 @@ WORKFLOW_DIR = ROOT / '.github' / 'workflows'
 #: means adding its marker here.
 APT_MARKER = 'apt-get'
 
-#: The steps known to invoke apt today, as ``(workflow name, step name)``. Quoted
+#: The steps known to invoke apt, as ``(workflow name, step name)``. Quoted
 #: so :class:`TestTheScannerIsNotBlind` can tell "the rule holds everywhere" from
 #: "the scanner found nothing to check", which look identical in a passing run.
 KNOWN_APT_STEPS = {

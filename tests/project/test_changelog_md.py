@@ -6,8 +6,8 @@
 the ``Create Release`` workflow's release body and the source distribution get
 Markdown without a second copy of the history to keep in step by hand.
 
-The conversion is six mechanical rules over a small reStructuredText subset, and
-there is one test per rule. Each asserts both halves -- that the Markdown form
+The conversion is a set of mechanical rules over a small reStructuredText subset,
+and there is one test per rule. Each asserts both halves -- that the Markdown form
 arrived *and* that the reStructuredText form is gone -- because a rule that fires
 in the wrong place and a rule that does not fire at all both leave markup in a
 published release body, and only checking for the new spelling would miss the
@@ -67,7 +67,7 @@ def _load_generator():
 changelog_md = _load_generator()
 
 
-#: One entry exercising all six rules at once: a setext heading, a wrapped
+#: One entry exercising every rule at once: a setext heading, a wrapped
 #: paragraph, ``*`` bullets whose text wraps, an ``:rfc:`` role, a double-backtick
 #: literal, and a footnote reference with its definition.
 ENTRY = """\

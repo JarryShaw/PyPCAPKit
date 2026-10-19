@@ -89,15 +89,13 @@ VENDOR_ROOT = pathlib.Path(__file__).resolve().parents[2] / 'pcapkit' / 'vendor'
 #: never covered joins invisibly, because nothing here shrinks when one is
 #: added.
 #:
-#: Measured on ``main`` at ``946b84e83``: 96 crawler modules define
-#: ``process()``. Of those, 35 assign ``miss`` as a list literal of string
-#: constants -- the ones this test can see -- 53 build it by ``.append()``
-#: instead, and 8 never return an ``(enum, miss)`` pair at all. That leaves
-#: **61 of the 96 invisible to this guard**, not merely the two crawlers used
-#: as an example in :func:`_constant_miss_lines`'s docstring below. A crawler
-#: that assigns ``miss`` from a comprehension, from a variable, or under a
-#: different variable name entirely is skipped by construction too, same as
-#: one built by ``.append()``. All 61 are covered behaviourally, not
+#: Only those crawlers are visible to this guard. Every other crawler that
+#: defines ``process()`` -- one that builds ``miss`` by ``.append()``, or never
+#: returns an ``(enum, miss)`` pair at all -- is invisible to it, not merely the
+#: crawlers named as examples in :func:`_constant_miss_lines`'s docstring
+#: below. A crawler that assigns ``miss`` from a comprehension, from a variable,
+#: or under a different variable name entirely is skipped by construction too,
+#: same as one built by ``.append()``. Those are covered behaviourally, not
 #: statically, by :file:`tests/const/test_const_enum_lookup.py`.
 EXPECTED_CRAWLERS_WITH_CONSTANT_MISS_LINES = 35
 
@@ -110,11 +108,11 @@ def _constant_miss_lines() -> 'dict[str, list[str]]':
     ``miss`` by ``.append()``, assigns it from a comprehension or a variable,
     or never returns an ``(enum, miss)`` pair at all, is absent from the
     returned mapping entirely -- not present with an empty list. That is
-    **61 of the 96** crawler modules defining ``process()``, not just the two
-    examples this docstring used to single out
+    every other crawler module defining ``process()``, not just the
+    examples this docstring names
     (:mod:`pcapkit.vendor.reg.ethertype`, :mod:`pcapkit.vendor.ipx.socket`);
-    see :data:`EXPECTED_CRAWLERS_WITH_CONSTANT_MISS_LINES` for the full
-    breakdown. All 61 are covered behaviourally, not statically, by
+    see :data:`EXPECTED_CRAWLERS_WITH_CONSTANT_MISS_LINES` for the
+    breakdown. They are covered behaviourally, not statically, by
     :file:`tests/const/test_const_enum_lookup.py`.
 
     """

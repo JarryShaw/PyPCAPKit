@@ -212,7 +212,7 @@ class NestedPacketContextSemanticsTests(unittest.TestCase):
         Mirrors ``tests/protocols/misc/test_pcapng_unit.py``'s own
         ``UnknownBlock(...).post_process({'__packet__': {...}})`` call, and
         additionally checks it still resolves the enclosing block's type when
-        handed what ``SchemaField`` builds today.
+        handed what ``SchemaField`` builds.
 
         """
         from pcapkit.corekit.fields.misc import nested_packet_context

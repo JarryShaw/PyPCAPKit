@@ -87,7 +87,7 @@ Measured on the 8-octet form, which the old lambda did reach: ``_make_mptcp_dss(
 40)`` raised ``struct.error: required argument is not an integer``. #576 left that to
 :mod:`pcapkit.corekit.fields.numbers`, and **#598 has since fixed it** by recomputing
 ``_need_process`` from the width in force rather than once from the placeholder, so a callable
-length packs and unpacks both widths today. The schema keeps selecting between
+length packs and unpacks both widths. The schema keeps selecting between
 :class:`~pcapkit.corekit.fields.numbers.UInt32Field` and
 :class:`~pcapkit.corekit.fields.numbers.UInt64Field`, which each fix ``__template__`` at class
 level, through a :class:`~pcapkit.corekit.fields.misc.SwitchField` -- the pattern

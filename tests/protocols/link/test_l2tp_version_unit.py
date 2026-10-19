@@ -241,7 +241,7 @@ class L2TPVersionTests(unittest.TestCase):
         """:rfc:`3931` §4.1.2 puts L2TPv3 on port 1701 too, and that is a live capture.
 
         This is the part of the change that fixes a real dissection rather than
-        guarding a hypothetical registration: port 1701 is bound today, so
+        guarding a hypothetical registration: port 1701 is bound, so
         before the version guard a v3 datagram arriving on it was dissected as
         L2TPv2 and reported ``tunnelid=0x1234``/``sessionid=0x5678`` read out
         of v3's Control Connection ID. :rfc:`3931` §3.2.1 requires ``Ver`` to

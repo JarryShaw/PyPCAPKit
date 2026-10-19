@@ -2835,7 +2835,7 @@ class HIPUnitTests(unittest.TestCase):
         readers raise for a malformed ``PUZZLE`` or ``SOLUTION``, and it is declared
         ``ProtocolError(BaseError, ValueError)`` -- so it joins the family *and*
         stays catchable by any caller already written around the
-        :exc:`ValueError` that escapes today. Both halves are asserted below,
+        :exc:`ValueError` that escapes. Both halves are asserted below,
         because the second is what makes this a non-breaking change.
         :class:`~pcapkit.utilities.exceptions.EnumError` would not do: it is
         ``EnumError(BaseError, TypeError)``, so it would silently stop being caught.
@@ -3160,7 +3160,7 @@ class HIPUnitTests(unittest.TestCase):
             return 11 + length - (length + 3) % 8
 
         def pre_651_total(length: int) -> int:
-            """What every one of the 95 padding sites computed before #651."""
+            """What every padding site computed before #651."""
             return 4 + length + (8 - (length % 8)) % 8
 
         for length in range(64):
@@ -3339,8 +3339,8 @@ class HIPUnitTests(unittest.TestCase):
         """#651: the octets a real parameter packs, not just the arithmetic.
 
         :func:`~pcapkit.protocols.schema.internet.hip.parameter_total_len` being
-        right is necessary but not sufficient -- all 46 padding sites in the
-        schema module have to *use* it. So this packs real parameter schemas,
+        right is necessary but not sufficient -- every padding site in the
+        schema module has to *use* it. So this packs real parameter schemas,
         chosen to cover the residues that discriminate, and measures the octets.
 
         ``SEQ`` is the one to read first. It carries a single four-octet Update
@@ -3423,7 +3423,7 @@ class HIPUnitTests(unittest.TestCase):
         for copy in copies:
             self.assertEqual(copy.id, 0x01020304)
             # the record length the data model reports is the RFC total, not the
-            # contents-aligned one -- this is the 49 sites in the protocol module
+            # contents-aligned one -- this is the protocol module's sites
             self.assertEqual(copy.length, 8)
 
         # and the header's own ``len`` is now exact rather than exact-in-pairs:

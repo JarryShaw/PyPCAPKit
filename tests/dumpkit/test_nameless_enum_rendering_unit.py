@@ -220,7 +220,7 @@ class NamelessEnumRenderingTests(unittest.TestCase):
         Reached when the member carries public instance attributes, which for a
         pseudo-member takes a :meth:`~enum.Enum._missing_` override. No registry
         under :mod:`pcapkit.const` is both a flag enumeration and an annotated
-        one today, so this branch is not reachable from a capture on ``main`` --
+        one, so this branch is not reachable from a capture on ``main`` --
         but the interpolation was character-for-character the same as the other
         two, so it is guarded with them rather than left as the one place the
         literal ``None`` survives.

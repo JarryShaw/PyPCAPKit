@@ -197,12 +197,12 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
                 self.assertIs(getattr(importlib.import_module(entry.module), entry.name), cls)
 
     def test_ospf_leaves_links_registry_behind_and_rarp_keeps_it(self) -> None:
-        """``Link`` sets ten names of its own; OSPF loses four of them.
+        """``Link`` sets names of its own; OSPF loses its EtherType machinery.
 
         ``__proto__``, its shipped copy ``_shipped_proto``, ``register`` and
-        ``_read_protos`` are ``Link``'s EtherType machinery, and OSPF takes all
-        four from ``ProtocolBase`` instead. The first assertion pins seven of the
-        ten. The loss is inert because a ``-1`` lookup misses in either
+        ``_read_protos`` are ``Link``'s EtherType machinery, and OSPF takes each
+        of them from ``ProtocolBase`` instead. The first assertion pins a subset
+        of ``Link``'s own names. The loss is inert because a ``-1`` lookup misses in either
         registry and falls back to :class:`~pcapkit.protocols.misc.raw.Raw`.
         """
         from pcapkit.protocols.application.ospf import OSPF

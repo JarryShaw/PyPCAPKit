@@ -1470,7 +1470,7 @@ class HTTPUnitTests(unittest.TestCase):
         ``ProtocolError`` rather than a bare :exc:`struct.error`), but neither
         retired the suppression: it stays as defence in depth for any
         ``__length__``-keyed field #805 did not individually verify, across
-        the ten schema modules that share the pattern. See
+        the schema modules that share the pattern. See
         ``test_guess_version_reports_unknown_version_for_a_short_payload`` for
         the outer-header case #799 closed, and
         ``test_guess_version_no_longer_leaks_a_bare_struct_error_for_an_inner_field_shortfall``
@@ -1525,7 +1525,7 @@ class HTTPUnitTests(unittest.TestCase):
         Pre-#805, that raised a bare :exc:`struct.error` straight through
         ``httpv2.HTTP``; #805 closed the actual root, generic
         ``FieldBase.length`` (``struct.calcsize`` on a negative-count template),
-        shared by at least ten schema modules, not something httpv2-specific --
+        shared by many schema modules, not something httpv2-specific --
         so direct construction now raises :exc:`ProtocolError` too.
 
         ``_guess_version``'s last arm keeps suppressing :exc:`struct.error`
@@ -1533,7 +1533,7 @@ class HTTPUnitTests(unittest.TestCase):
         revision of this fix did, regressed the direct ``HTTP()`` guess path
         for a *different* input class (the sub-nine-octet outer-header one),
         and #805 does not touch every ``__length__``-keyed field in every one
-        of those ten modules, so the suppression stays as defence in depth.
+        of those modules, so the suppression stays as defence in depth.
         This test drives real wire bytes through the actual guess path -- no
         ``mock.patch`` -- specifically because a mocked fault cannot see a
         regression in the *un-mocked* route the fault is meant to stand in for.

@@ -3,7 +3,7 @@
 
 Every field's :meth:`~pcapkit.corekit.fields.field.FieldBase.__call__` made a
 defensive copy of ``self`` once per field per packet, via
-``copy.copy(self)`` at eight call sites across
+``copy.copy(self)`` at call sites across
 :mod:`pcapkit.corekit.fields.field`, :mod:`pcapkit.corekit.fields.collections`
 and :mod:`pcapkit.corekit.fields.misc`. Profiling ``extract()`` on
 ``examples/captures/http.pcap`` attributed 55,846 ``getattr`` calls (~1.7% of
@@ -16,7 +16,7 @@ what a profiler credits to ``builtins.getattr``.
 ``copier = getattr(cls, '__copy__', None); copier(x)`` is exactly
 ``x.__copy__()``, so calling it directly does not change *when* a field is
 copied or what the copy contains -- only the redundant lookup is removed. This
-module proves that: every one of the eight call sites now reaches
+module proves that: every one of those call sites reaches
 :meth:`FieldBase.__copy__` without ever calling :func:`copy.copy`.
 
 On the tree before this fix, every test below fails: each ``__call__``

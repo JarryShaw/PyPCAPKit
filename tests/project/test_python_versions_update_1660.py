@@ -101,7 +101,7 @@ def workflow() -> 'dict[str, Any]':
 
 
 def snapshot() -> 'dict[str, Any]':
-    """The four sources as saved on 2026-10-13, parsed."""
+    """The sources as saved on 2026-10-13, parsed."""
     return copy.deepcopy(updater().parse_sources(updater().read_sources(FIXTURES)))
 
 
@@ -203,7 +203,7 @@ def scratch(test: 'unittest.TestCase', regenerate: 'bool' = True) -> 'pathlib.Pa
 
 
 def save_sources(test: 'unittest.TestCase', sources: 'dict[str, Any]') -> 'pathlib.Path':
-    """``sources`` written as the four files ``update --sources`` reads."""
+    """``sources`` written as the files ``update --sources`` reads."""
     tmp = tempfile.TemporaryDirectory(prefix='pcapkit-1660b-sources-')  # pylint: disable=consider-using-with
     test.addCleanup(tmp.cleanup)
     directory = pathlib.Path(tmp.name)

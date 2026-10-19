@@ -329,7 +329,7 @@ def write_tiers(directory: 'pathlib.Path', data: 'dict[str, Any]') -> 'pathlib.P
 TOMLLIB_FLOOR = (3, 11)
 #: The ``python3`` each runner label a job runs the script on puts on ``PATH``, every
 #: image it may mean: actions/runner-images at 2c421200c (2026-10-12), "Language and
-#: Runtime" in images/ubuntu/Ubuntu2404-Readme.md:28 (``ubuntu-latest`` today),
+#: Runtime" in images/ubuntu/Ubuntu2404-Readme.md:28 (what ``ubuntu-latest`` named then),
 #: Ubuntu2604-Readme.md:27 (from 2026-10-19) and images/macos/macos-26-arm64-Readme.md:28
 #: (``macos-latest``). Ubuntu2204-Readme.md:30's is 3.10.12, which has no tomllib.
 RUNNER_PYTHON3 = {'ubuntu-latest': ((3, 12), (3, 14)), 'macos-latest': ((3, 14),)}

@@ -347,7 +347,7 @@ class IPAddressFieldTests(unittest.TestCase):
     def test_parse_ip_address_pins_the_family_when_version_is_given(self) -> None:
         """``version=4`` and ``version=6`` each select a *different* stdlib constructor.
 
-        Worth stating on its own because **no caller passes ``version=4`` today** --
+        Worth stating on its own because **no caller passes ``version=4``** --
         only the HIP locator passes a version at all, and it passes ``6`` -- so
         nothing else in the suite pins what ``version=4`` does. An unexercised
         parameter is one that can be broken without a failure, and the widening it

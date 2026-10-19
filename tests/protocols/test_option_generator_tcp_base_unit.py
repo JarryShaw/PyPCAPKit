@@ -283,7 +283,7 @@ class TCPBaseKeywordTests(unittest.TestCase):
     def test_the_three_keys_of_the_defect_are_each_refused(self) -> None:
         """Each misspelling of #602 raises, named, rather than being dropped.
 
-        ``TCP_BASE`` is correct today, so the mapping itself can no longer
+        ``TCP_BASE`` is correct, so the mapping itself cannot
         demonstrate the defect. Putting the three keys back one at a time is what
         keeps the original report reproducible: before the fix every one of them
         built a segment whose field kept its default -- ``seq=1`` produced

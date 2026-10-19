@@ -34,10 +34,10 @@ synthetic and instantaneous rather than a real fetch timing out. The default
 target list itself is stubbed too, by patching the
 ``pcapkit.vendor.__main__.vendor_module`` name :func:`main` reads its
 ``__all__`` from -- so this suite never imports, runs, or writes anything
-under the real 117 crawlers, and touches no file under :file:`pcapkit/const/`.
+under the real crawlers, and touches no file under :file:`pcapkit/const/`.
 
 Run against the pre-fix code (``run()`` ending on a bare ``return None`` and
-``main()`` ending on a bare ``return 0``), all 5 methods below fail:
+``main()`` ending on a bare ``return 0``), every method below fails:
 :meth:`~ExitCodeTests.test_run_returns_false_for_a_raising_crawler` (``run()``
 returns :data:`None`, not the exact value :data:`False` --
 :meth:`~unittest.TestCase.assertIs` is what makes this one discriminate: a
