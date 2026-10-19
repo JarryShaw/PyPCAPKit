@@ -131,7 +131,7 @@ class MultiDict(dict, Generic[_KT, _VT]):
     only return the first value when multiple values for one key are found.
 
     See Also:
-        The class is inspired from and based on the `Werkzeug`_ project (c.f.
+        The class is inspired from and based on the `Werkzeug`_ project (cf.
         ``werkzeug.datastructures.MultiDict``).
 
     """

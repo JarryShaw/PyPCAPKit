@@ -18,7 +18,7 @@ and known only to the caller.
 Rather than adding protocol-specific keyword arguments to
 :class:`~pcapkit.foundation.extraction.Extractor`, such information is passed
 as a :class:`~pcapkit.corekit.context.ContextRegistry` -- a mapping of protocol
-index ID (c.f. :meth:`Protocol.id <pcapkit.protocols.protocol.Protocol.id>`) to
+index ID (cf. :meth:`Protocol.id <pcapkit.protocols.protocol.Protocol.id>`) to
 a :class:`~pcapkit.corekit.context.ProtocolContext` instance. It is handed to
 :class:`~pcapkit.foundation.extraction.Extractor` once and propagated down the
 protocol stack by

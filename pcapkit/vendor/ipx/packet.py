@@ -86,7 +86,7 @@ __all__ = ['Packet']
 #: Every value below is independently corroborated by Wireshark's IPX dissector,
 #: ``epan/dissectors/packet-ipx.h`` (fetched 2026-09-19), which defines
 #: ``IPX_PACKET_TYPE_IPX 0``, ``_RIP 1``, ``_ECHO 2``, ``_ERROR 3``, ``_PEP 4``,
-#: ``_SPX 5``, ``_NCP 17`` and ``_WANBCAST 20`` -- the same eight values in the
+#: ``_SPX 5``, ``_NCP 17`` and ``_WANBCAST 20`` -- the same values in the
 #: same order. Types 1-5 are inherited from Xerox XNS IDP, which IPX was derived
 #: from; no RFC assigns them, and the notes below say so where that is the case.
 DATA = {

@@ -372,10 +372,10 @@ class EnumLookup:
           -- the interpreter's own, unless an earlier loud error installed
           :mod:`pcapkit`'s. The name miss is
           :exc:`~pcapkit.utilities.exceptions.EnumKeyError` with
-          ``quiet=True``, because it is in-library control flow -- at
-          :meth:`~pcapkit.const.http.method.Method.get` it is part of a
-          *successful* call, since that override catches it in order to build
-          an unregistered member. The value miss is quiet through the block
+          ``quiet=True``, because it is in-library control flow -- in the
+          ``get`` override of :class:`~pcapkit.const.http.method.Method` it is
+          part of a *successful* call, since that override catches it in order
+          to build an unregistered member. The value miss is quiet through the block
           described above, as ruled on :issue:`1845` on the ground that this
           method is mostly called from protocol parsing: a value it cannot
           resolve is input for the caller to handle, not a fault to report. A

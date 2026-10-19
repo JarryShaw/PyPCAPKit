@@ -53,7 +53,7 @@ class DeferredPacket:
     A mixin for :class:`~pcapkit.corekit.infoclass.Info` subclasses; see
     :mod:`pcapkit.corekit.packet` for the contract a subclass keeps. Reading
     ``packet`` -- as an attribute, as ``x['packet']``, or through
-    :meth:`to_dict`, :func:`str` or :func:`repr` -- resolves a placeholder once
+    :meth:`to_dict`, :class:`str` or :func:`repr` -- resolves a placeholder once
     and keeps the result. ``'packet' in x``, :func:`len` and iteration report the
     field by name without resolving it.
 

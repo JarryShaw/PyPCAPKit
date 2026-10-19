@@ -355,7 +355,7 @@ class NumberField(Field[int], Generic[_T]):
             integer code for. The flag is therefore consulted **after** the
             rebuild rather than before it, since deciding first and rebuilding
             second would let the template and the value being returned
-            disagree. C.f. :issue:`591`.
+            disagree. Cf. :issue:`591`.
 
             That width is a **ceiling** of the bit length over eight, and it is
             written as one. ``math.ceil(value.bit_length() // 8)`` is not a
@@ -850,9 +850,8 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
             still raises. Nothing on the
             parse or reconstruction path does that to a value it just resolved
             this way, which is what keeps this safe to return from
-            ``post_process``. A direct call to
-            :meth:`~pcapkit.const.reg.apptype.apptype.AppType.get` for the same port
-            does not come through here, and it does not mint either: it
+            ``post_process``. A direct call to ``AppType.get()`` for the same
+            port does not come through here, and it does not mint either: it
             builds an unregistered member of its own, through the registry's
             ``_unregistered_member`` -- measured on this tree,
             ``AppType.get(54321, proto=tcp)`` returns
@@ -1090,8 +1089,7 @@ class PortEnumField(EnumField):
             the port itself, when the registry declares none.
 
         Notes:
-            This peeks at what
-            :meth:`~pcapkit.const.reg.apptype.apptype.AppType.get` itself would
+            This peeks at what ``AppType.get()`` itself would
             consult -- the per-port rows via ``__registry__.getlist``, then the
             documented IANA spans via
             :meth:`~pcapkit.const.reg.apptype.apptype.AppType._missing_` -- and
@@ -1121,8 +1119,8 @@ class PortEnumField(EnumField):
             :meth:`~pcapkit.const.reg.apptype.apptype.AppType._missing_`, which
             raises a bare :exc:`ValueError` for it. That call sits inside an
             ``except ValueError`` that absorbs a foreign miss, and
-            :meth:`~pcapkit.const.reg.apptype.apptype.AppType.get` rejects the
-            out-of-range case deliberately, so that it is never minted over -- a
+            ``AppType.get()`` rejects the out-of-range case deliberately, so
+            that it is never minted over -- a
             catch keyed on exception type alone cannot see the difference
             between that and a "no member has this value", so it would quietly
             turn the rejection into a miss. Within the width, ``_missing_``

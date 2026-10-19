@@ -5,7 +5,7 @@
 
 .. module:: pcapkit.corekit.fields
 
-:mod:`pcapkit.corekit.fields` is collection of protocol fields,
+:mod:`pcapkit.corekit.fields` is a collection of protocol fields,
 descriptive of the structure of protocol headers.
 
 """

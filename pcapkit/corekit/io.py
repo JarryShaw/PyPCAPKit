@@ -416,12 +416,12 @@ class SeekableReader(io.BufferedReader):
     def seek(self, offset: 'int', whence: 'int' = io.SEEK_SET, /) -> 'int':
         """Change the stream position to the given byte ``offset``. ``offset`` is interpreted
         relative to the position indicated by ``whence``. The default value for ``whence`` is
-        :data:`~io.SEEK_SET`. Values for ``whence`` are:
+        :data:`~os.SEEK_SET`. Values for ``whence`` are:
 
-        * :data:`~io.SEEK_SET` or ``0`` - start of the stream (the default); ``offset`` should
+        * :data:`~os.SEEK_SET` or ``0`` - start of the stream (the default); ``offset`` should
           be zero or positive
-        * :data:`~io.SEEK_CUR` or ``1`` - current stream position; ``offset`` may be negative
-        * :data:`~io.SEEK_END` or ``2`` - end of the stream; ``offset`` is usually negative
+        * :data:`~os.SEEK_CUR` or ``1`` - current stream position; ``offset`` may be negative
+        * :data:`~os.SEEK_END` or ``2`` - end of the stream; ``offset`` is usually negative
 
         Return the new absolute position.
 
@@ -435,7 +435,7 @@ class SeekableReader(io.BufferedReader):
             error.
 
             The negative check applies to every ``whence``, rather than only
-            :data:`~io.SEEK_SET` looking at its offset. An absolute position below zero
+            :data:`~os.SEEK_SET` looking at its offset. An absolute position below zero
             cannot exist under any of them, and it is not the same failure as a position
             that has merely slid out of the window -- which is ordinary, and recoverable
             with ``buffer_save=True``. Reporting the first as ``negative seek value`` keeps
@@ -443,7 +443,7 @@ class SeekableReader(io.BufferedReader):
             the window, it holds with a saved buffer as well, which is exempt from the window
             check and would otherwise return a negative position as if the seek had worked.
 
-            A non-seekable stream has no end until it is over, so :data:`~io.SEEK_END` is
+            A non-seekable stream has no end until it is over, so :data:`~os.SEEK_END` is
             as far as :meth:`_read_ahead` reads past the position: ``_read_ahead_size``
             octets, a buffer's worth by default, or to the real end if that comes first.
             The frame readers measure what is left this way, and the engines set that size
@@ -451,7 +451,7 @@ class SeekableReader(io.BufferedReader):
             edge will not do as the end: once the buffer has filled it is just how far the
             stream has been read, so the first record ending there would be taken for the end
             of the capture (:issue:`1586`). The read slides the buffer, so a position before
-            the one :data:`~io.SEEK_END` was sought from may then be refused, as
+            the one :data:`~os.SEEK_END` was sought from may then be refused, as
             :meth:`_read_ahead` says.
 
         """

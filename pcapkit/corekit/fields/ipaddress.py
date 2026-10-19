@@ -103,7 +103,7 @@ def _reject_bool(value: 'object', description: str) -> 'None':
         :class:`~ipaddress.IPv4Address`'s version mismatches -- and that
         asymmetry is exactly what let this slip past :issue:`469`'s otherwise
         equivalent guard for :meth:`MH._make_opt_mn_id
-        <pcapkit.protocols.internet.mh.MH._make_opt_mn_id>` (c.f.
+        <pcapkit.protocols.internet.mh.MH._make_opt_mn_id>` (cf.
         :issue:`491`).
 
         Every caller checks this *before* dispatching on the value's type,
@@ -114,7 +114,7 @@ def _reject_bool(value: 'object', description: str) -> 'None':
         ``_make_*`` that must know the address family before it can build the
         schema converts the argument itself and so never hands this module a
         :obj:`bool` at all. :func:`parse_ip_address` is where those callers
-        reach this guard (c.f. :issue:`508`).
+        reach this guard (cf. :issue:`508`).
 
     """
     if isinstance(value, bool):
@@ -145,7 +145,7 @@ def parse_ip_address(value: 'IPv4Address | IPv6Address | bytes | int | str',
         The converted address.
 
     Raises:
-        FieldValueError: If ``value`` is a :obj:`bool` (c.f.
+        FieldValueError: If ``value`` is a :obj:`bool` (cf.
             :func:`_reject_bool`), is not a valid IP address, or is not of
             ``version``.
 
@@ -260,7 +260,7 @@ class _IPAddressField(_IPField[_AT]):
             Processed field value.
 
         Raises:
-            FieldValueError: If ``value`` is a :obj:`bool` (c.f.
+            FieldValueError: If ``value`` is a :obj:`bool` (cf.
                 :func:`_reject_bool`), is not a valid IP address, or is the
                 wrong IP version for this field.
 
@@ -373,7 +373,7 @@ class _RawMaskIPv4Interface(ipaddress.IPv4Interface):
     in :attr:`netmask`, so :meth:`IPv4InterfaceField.pre_process` writes them
     back unchanged.
 
-    :func:`str`, :func:`repr` and :mod:`pickle` use the ``address/mask``
+    :class:`str`, :func:`repr` and :mod:`pickle` use the ``address/mask``
     form, which :meth:`IPv4InterfaceField.pre_process` packs back to the same
     octets. The mask is dotted, except when it is hostmask-shaped (ones, then
     zeros, read from the low bit): :func:`ipaddress.ip_interface` would read
@@ -389,7 +389,7 @@ class _RawMaskIPv4Interface(ipaddress.IPv4Interface):
     and the prefix length all describe the address alone (``/32``); only
     :attr:`netmask`, :attr:`hostmask`, :attr:`with_netmask` and
     :attr:`with_hostmask` carry the mask. :attr:`with_netmask` is always
-    dotted, so it is not the round-trip form; :func:`str` is.
+    dotted, so it is not the round-trip form; :class:`str` is.
 
     """
 
@@ -467,7 +467,7 @@ def _is_hostmask(mask: 'IPv4Address') -> 'bool':
     return not value & (value + 1)
 
 
-#: Hex spelling of a literal mask, as :func:`str` writes a hostmask-shaped one.
+#: Hex spelling of a literal mask, as :class:`str` writes a hostmask-shaped one.
 _HEX_MASK = re.compile(r'0[xX][0-9a-fA-F]{8}')
 
 
@@ -584,7 +584,7 @@ class IPv4InterfaceField(_IPInterfaceField[ipaddress.IPv4Interface]):
             Processed field value.
 
         Raises:
-            FieldValueError: If ``value`` is a :obj:`bool` (c.f.
+            FieldValueError: If ``value`` is a :obj:`bool` (cf.
                 :func:`_reject_bool`), is not a valid IP interface, or is the
                 wrong IP version for this field.
 
@@ -595,7 +595,7 @@ class IPv4InterfaceField(_IPInterfaceField[ipaddress.IPv4Interface]):
             taken literally: a dotted mask that is neither a netmask nor a
             hostmask, such as ``'10.0.0.1/255.0.255.0'``, or eight hex
             digits, such as ``'10.0.0.1/0x000000ff'``. Those are the forms
-            :func:`str` gives a :class:`_RawMaskIPv4Interface`.
+            :class:`str` gives a :class:`_RawMaskIPv4Interface`.
 
         """
         _reject_bool(value, 'invalid IP interface')
@@ -689,7 +689,7 @@ class IPv6InterfaceField(_IPInterfaceField[ipaddress.IPv6Interface]):
             Processed field value.
 
         Raises:
-            FieldValueError: If ``value`` is a :obj:`bool` (c.f.
+            FieldValueError: If ``value`` is a :obj:`bool` (cf.
                 :func:`_reject_bool`), is not a valid IP interface, or is the
                 wrong IP version for this field.
 

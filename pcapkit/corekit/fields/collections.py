@@ -208,7 +208,7 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
         # of :exc:`~pcapkit.utilities.exceptions.ProtocolError` from
         # :meth:`TCP._read_mode_sack
         # <pcapkit.protocols.transport.tcp.TCP._read_mode_sack>`, depending on
-        # unrelated things that ran earlier in the same process. C.f. #525.
+        # unrelated things that ran earlier in the same process. Cf. #525.
         # Importing at module level, once, for the life of this module object,
         # closes that off: ``SchemaField`` then stays whatever class this
         # module resolved at its own import time, regardless of what happens to
@@ -224,7 +224,7 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
         # ``SACK`` option declaring more octets than the option area holds leaves
         # ``sack``'s ``ListField`` reading ``SACKBlock`` off an exhausted stream.
         # Remembering where the previous item ended is what bounds the iteration
-        # count, since it does not depend on what the schema reports. C.f. #431,
+        # count, since it does not depend on what the schema reports. Cf. #431,
         # which is the same defect in the ``OptionField`` subclass.
         #
         # ``start`` is where the field itself begins. The comparison needs stream
@@ -306,7 +306,7 @@ class OptionField(ListField, Generic[_TS]):
            does not depend on packet data the shortcut has not read.
 
         All of that is true of every ``OptionField`` declared in this package. A
-        base schema registered from outside it -- c.f.
+        base schema registered from outside it -- cf.
         :mod:`pcapkit.foundation.registry` -- need not satisfy it, and is **not**
         rejected: such a base schema is unpacked in full. It parses correctly and
         pays the cost of the second parse. Only the shortcut is withheld, so a base schema whose type field
@@ -434,7 +434,7 @@ class OptionField(ListField, Generic[_TS]):
         # over-reads leaves ``length`` above zero with ``file`` already exhausted,
         # every field of the next option reads ``b''``, and an option that read
         # nothing reports ``len(data) == 0`` and leaves ``length`` untouched --
-        # which spins forever, with no exception and no diagnostic. C.f. #431.
+        # which spins forever, with no exception and no diagnostic. Cf. #431.
         #
         # Remembering where the previous option ended gives the loop a measure of
         # progress that does not depend on what a schema reports, and one octet of
@@ -481,7 +481,7 @@ class OptionField(ListField, Generic[_TS]):
         # octets with zeros, so the option would rebuild octets that were never
         # there: a HIP ``ACK`` declaring 256 octets with 4 present, or an MH
         # ``PadN`` declaring 3 with none. Nothing downstream can tell, because
-        # the schema records the zeros as values. C.f. #1325.
+        # the schema records the zeros as values. Cf. #1325.
         #
         # So the stream is read through a proxy that notes any short read, and
         # an option that began with at least one octet present and then read

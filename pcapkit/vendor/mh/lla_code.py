@@ -30,7 +30,7 @@ DATA = {
     2: 'MN',
     #: Link-Layer Address of the NAR (i.e., Proxied Originator).
     3: 'NAR',
-    #: Link-Layer Address of the source of RtSolPr or PrRtAdv.
+    #: Link-Layer Address of the source of RtSolPr or PrRtAdv
     #: message.
     4: 'RtSolPr or PrRtAdv',
     #: The access point identified by the LLA belongs to the
@@ -56,7 +56,7 @@ class LLACode(Vendor):
         """Fetch registry data.
 
         Returns:
-            Registry data (:data:`~pcapkit.vendor.ipv4.qs_function.DATA`).
+            Registry data (:data:`~pcapkit.vendor.mh.lla_code.DATA`).
 
         """
         return DATA

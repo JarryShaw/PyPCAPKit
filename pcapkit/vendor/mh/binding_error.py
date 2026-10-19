@@ -37,7 +37,7 @@ class BindingError(Vendor):
         """Fetch registry data.
 
         Returns:
-            Registry data (:data:`~pcapkit.vendor.ipv4.qs_function.DATA`).
+            Registry data (:data:`~pcapkit.vendor.mh.binding_error.DATA`).
 
         """
         return DATA
