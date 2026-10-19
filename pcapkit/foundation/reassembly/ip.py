@@ -117,7 +117,7 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         """Reassembly procedure.
 
         Arguments:
-            info: info dict of packets to be reassembled
+            info: :term:`info` record of packets to be reassembled
 
         Note:
             A completed datagram's buffer is freed, as in the

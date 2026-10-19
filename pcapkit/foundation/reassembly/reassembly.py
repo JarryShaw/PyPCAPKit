@@ -240,7 +240,7 @@ class ReassemblyBase(Generic[_PT, _DT, _IT, _BT], metaclass=ReassemblyMeta):
         """Reassembly procedure.
 
         Arguments:
-            info: info dict of packets to be reassembled
+            info: :term:`info` record of packets to be reassembled
 
         """
         # clear cache

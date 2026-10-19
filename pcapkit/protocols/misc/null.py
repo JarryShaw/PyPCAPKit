@@ -116,7 +116,7 @@ class NoPayload(ProtocolBase[Data_NoPayload, Schema_NoPayload],
         self._data = b''
         #: io.BytesIO: Source data stream.
         self._file = io.BytesIO()
-        #: pcapkit.protocols.data.misc.null.NoPayload: Info dict of current instance.
+        #: pcapkit.protocols.data.misc.null.NoPayload: Data model of current instance.
         self._info = Data_NoPayload()
 
         #: pcapkit.protocols.misc.null.NoPayload: Payload of current instance.

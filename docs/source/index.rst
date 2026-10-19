@@ -33,6 +33,7 @@ analysis.
 
    ext
    demo
+   glossary
    changelog
 
 .. toctree::

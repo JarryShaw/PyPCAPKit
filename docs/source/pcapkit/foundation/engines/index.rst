@@ -219,7 +219,7 @@ installed.** Pick on availability, not on features.
    system library at all ``import pcap`` raises :exc:`OSError` rather than
    :exc:`ImportError`; :meth:`PCAP_CT.unsupported_reason
    <pcapkit.foundation.engines.pcap_ct.PCAP_CT.unsupported_reason>` catches that and turns
-   it into an ordinary fall back to the default engine, instead of the hard error it would
+   it into an ordinary fall back to the :term:`default engine`, instead of the hard error it would
    otherwise be.
 
 **The two distributions collide, so install exactly one.** Both own the top-level

@@ -595,16 +595,16 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         """Acronym of current protocol."""
         return self.__class__.__name__
 
-    # key name for the info dict
+    # key name for the data model
     @property
     def info_name(self) -> 'str':
-        """Key name of the :attr:`info` dict."""
+        """Key the enclosing layer's :term:`data model` holds :attr:`info` under."""
         return self.__class__.__name__.lower()
 
-    # info dict of current instance
+    # data model of current instance
     @property
     def info(self) -> '_PT':
-        """Info dict of current instance."""
+        """Parsed :term:`data model` of current instance."""
         return self._info
 
     # binary packet data if current instance
@@ -669,10 +669,10 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                 payload=self._read_packet(),
             )
 
-    # schema data
+    # header schema
     @cached_property
     def schema(self) -> '_ST':
-        """Schema data of the protocol."""
+        """Header :term:`schema` instance of the protocol."""
         return self.__header__
 
     # caller supplied parsing context
@@ -1361,7 +1361,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         # post-init customisations
         self.__post_init__(file, length, **kwargs)  # type: ignore[arg-type]
 
-        # inject packet payload to the info dict
+        # inject packet payload into the data model
         self._info.__update__(packet=self.packet.payload)
 
     @overload  # pragma: no cover
@@ -1415,7 +1415,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         This method is called when a subclass of :class:`Protocol` is defined.
         It is used to set the :attr:`self.__schema__ <pcapkit.protocols.protocol.Protocol.__schema__>`
         attribute of the subclass, and, if ``code`` is given, to register the
-        subclass into the next-layer dispatch registry (or registries) that
+        subclass into the next-layer dispatch :term:`registry` (or registries) that
         ``code`` names -- e.g. :attr:`Link.__proto__
         <pcapkit.protocols.link.link.Link.__proto__>`.
 
@@ -2233,7 +2233,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
     @staticmethod
     def _lookup_registry(registry: 'DefaultDict[Any, _VT]', code: 'Any') -> '_VT':
-        """Look up a dispatch registry entry without recording a miss.
+        """Look up a dispatch :term:`registry` entry without recording a miss.
 
         Arguments:
             registry: dispatch registry to read, i.e. :attr:`self.__proto__

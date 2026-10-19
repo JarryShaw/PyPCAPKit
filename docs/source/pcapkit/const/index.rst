@@ -11,7 +11,7 @@ automatically generated from the :mod:`pcapkit.vendor` module.
 Unrecognised Values
 -------------------
 
-Nearly every registry below departs from :mod:`enum` in one deliberate way, and it
+Nearly every :term:`registry` below departs from :mod:`enum` in one deliberate way, and it
 is the behaviour to know about before using any of them: looking one up by a value
 it does not define does **not** raise. Its ``_missing_`` override returns a
 member-like object for a value inside the registry's valid range, named for the

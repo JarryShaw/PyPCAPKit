@@ -15,8 +15,8 @@ and extracts parameters from a PCAP file.
    :class:`pcapkit.foundation.engines.pypcap.PyPCAP` (``engine='pypcap'``),
    :class:`pcapkit.foundation.engines.pcap_ct.PCAP_CT` (``engine='pcap_ct'``)
    and :class:`pcapkit.foundation.engines.pypcapfile.PyPCAPFile`
-   (``engine='pypcapfile'``). Each supports less than the ``default``
-   engine does; :doc:`engines/index` tabulates the gaps, and the
+   (``engine='pypcapfile'``). Each supports less than the
+   :term:`default engine` does; :doc:`engines/index` tabulates the gaps, and the
    :doc:`main page <../../index>` documents their installation prerequisites.
 
 .. autoclass:: pcapkit.foundation.extraction.Extractor
