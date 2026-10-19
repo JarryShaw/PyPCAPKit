@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Pins the hand-written cross-references that could never resolve (#1919, #1920).
+"""Pins the hand-written cross-references that cannot resolve (#1919, #1920).
 
 Sphinx builds without ``nitpicky``, so a role whose target exists in no inventory
 and on no page renders as an unlinked chip and warns about nothing. #934 part C
@@ -10,20 +10,21 @@ entry where the name is contract, and otherwise demote the role to a literal.
 * :class:`InventorylessPackageRoleTests` -- ``aenum``, ``pyshark``, ``pcap``
   (PyPCAP and pcap-ct), ``pcapfile`` (PyPCAPFile) and ``emoji`` publish no
   ``objects.inv`` with ``py:`` objects in it, so no role naming them can resolve.
-  ``AenumRoleExclusionTests`` in :file:`test_conventions_doc_claims.py` enforced
-  that for the conventions pages only; this widens it to every hand-written
-  source under :file:`docs/` and :file:`pcapkit/`.
-* :class:`DeadTargetTests` -- the targets #1919 found that *are* in a package with
-  an inventory, but not in that inventory: the role, the path, or the name was
-  wrong. Each is pinned in the form it used to take.
-* :class:`DocumentedEntryTests` -- the names #1919 decided are contract, and so
-  gained an entry rather than losing the role.
+  ``AenumRoleExclusionTests`` in :file:`test_conventions_doc_claims.py` checks
+  the conventions pages; this class checks every hand-written source under
+  :file:`docs/` and :file:`pcapkit/`.
+* :class:`DeadTargetTests` -- targets in a package that has an inventory, but
+  absent from that inventory because the role, the path or the name is wrong
+  (#1919). Each is pinned in the form that fails to resolve.
+* :class:`DocumentedEntryTests` -- the names #1919 decided are contract, which
+  have an entry rather than a demoted role.
 
-Scoped to hand-written sources. :file:`docs/source/conf.py` is excluded because
-its aenum formatter emits roles at build time (#1858) and is the generated half
-of #1920. ``pcapkit/vendor/`` and ``pcapkit/const/`` are excluded too: the
-templates are regenerated into the constant modules, and both are handled
-separately from this change.
+Scoped to hand-written sources. The class formatter in :file:`docs/source/conf.py`
+covers the generated half of #1920 by writing a literal for a package outside
+``intersphinx_mapping``; its output exists only at build time, so this scan reads
+the file's own source like any other. ``pcapkit/const/`` and the vendor
+templates that generate it are excluded, and are handled separately; the rest of
+``pcapkit/vendor/`` is scanned.
 
 """
 
@@ -38,8 +39,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 #: Paths, relative to :data:`ROOT`, that the scan does not read -- see the module
 #: docstring for why each is out of scope.
 EXCLUDED = (
-    'docs/source/conf.py',
-    'pcapkit/vendor/',
+    'pcapkit/vendor/pcapng/option_type.py',
+    'pcapkit/vendor/reg/apptype/apptype.py',
     'pcapkit/const/',
 )
 
@@ -97,7 +98,9 @@ class InventorylessPackageRoleTests(unittest.TestCase):
                          'docs/source/pcapkit/toolkit/3rdparty.rst',
                          'pcapkit/corekit/fields/numbers.py',
                          'pcapkit/corekit/enum.py',
-                         'pcapkit/foundation/engines/pypcap.py'):
+                         'pcapkit/foundation/engines/pypcap.py',
+                         'pcapkit/vendor/default.py',
+                         'docs/source/conf.py'):
             self.assertIn(expected, names)
         for excluded in EXCLUDED:
             self.assertFalse(any(name == excluded or name.startswith(excluded)
@@ -114,7 +117,7 @@ class InventorylessPackageRoleTests(unittest.TestCase):
 
         Matched on the target's first dotted component, so ``pcapkit`` and
         ``pcapng`` are not mistaken for ``pcap``. The plain double-backtick
-        literal stays allowed: it is what #934 part C converts these roles to.
+        literal is allowed: it is the form #934 part C prescribes for these roles.
 
         """
         offenders = [f'{path}:{line}: :{role}:`{target}`'
@@ -162,12 +165,14 @@ class DeadTargetTests(unittest.TestCase):
          'the pcapng schema field has no entry; write it as a literal'),
         (None, 'pcapkit.protocols.schema.misc.pcapng.OptionEnumField.post_process',
          'the pcapng schema field has no entry; write it as a literal'),
+        (None, 'pcapkit.vendor.__main__.run',
+         'the CLI module documents no functions; write it as a literal'),
         (None, 'EnumMeta.registry',
          'unqualified, it does not resolve from the pages that cite it; qualify it'),
     )
 
-    def test_no_dead_target_comes_back(self) -> 'None':
-        """Each pairing #1919 retargeted or demoted stays gone."""
+    def test_no_dead_target_appears(self) -> 'None':
+        """No retargeted or demoted pairing from #1919 appears."""
         roles = _roles()
         offenders = []
         for want_role, want_target, why in self.DEAD:
@@ -178,7 +183,7 @@ class DeadTargetTests(unittest.TestCase):
 
 
 class DocumentedEntryTests(unittest.TestCase):
-    """The names #1919 found cited as contract gained an entry of their own."""
+    """The names cited as contract (#1919) have an entry of their own."""
 
     def test_compat_final_has_an_entry_under_its_module(self) -> 'None':
         """``pcapkit.utilities.compat.final`` is what ``@info_final`` tells callers to use.
