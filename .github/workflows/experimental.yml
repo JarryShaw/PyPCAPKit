@@ -242,6 +242,20 @@ jobs:
         id: checkout
         continue-on-error: true
 
+      # #1954: the project pins run once per push, in unit-tests.yml's
+      # `project-tests`, so these legs leave them out, as `test`'s do. The
+      # runner's own `python3` asks tests/_tiers.py, which needs only the
+      # standard library, before setup-python puts the leg's interpreter on
+      # PATH, so GraalPy does not parse the tree. Where it fails, the tests
+      # run the pins too, and `Experimental summary` names this step.
+      - name: List the project pins
+        id: pins
+        if: ${{ steps.checkout.outcome == 'success' }}
+        continue-on-error: true
+        run: |
+          pins=$(python3 -c "from tests._tiers import project_pin_paths; print(' '.join(project_pin_paths()))")
+          echo "paths=$pins" >> "$GITHUB_OUTPUT"
+
       - uses: actions/setup-python@v7
         id: python
         continue-on-error: true
@@ -447,6 +461,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           WATCHER: ${{ steps.watcher.outcome }}
           WATCHER_PYTHON: ${{ steps.watcher-python.outputs.python-path }}
+          PINS: ${{ steps.pins.outputs.paths }}
         run: |
           tail -n +1 -F "$RUNNER_TEMP/resource-monitor.log" 2>/dev/null &
           monitor=$!
@@ -455,8 +470,12 @@ jobs:
             --durations=30 --durations-min=1.0 --junitxml="$RUNNER_TEMP/junit.xml" \
             --ignore=tests/integration \
             --ignore-glob='*_runtime.py' \
-            --ignore-glob='*_regression.py' \
-            --ignore-glob='*roundtrip*'
+            --ignore-glob='*_regression.py'
+          # #1954: the project pins, from `List the project pins`.
+          for pin in $PINS; do
+            set -- "$@" --ignore="$pin"
+          done
+          set -- "$@" --ignore-glob='*roundtrip*'
           set -- prlimit --fsize=2147483648 timeout --signal=INT --kill-after=3m 110m python -m pytest "$@"
           scoped() {
             unit=$1

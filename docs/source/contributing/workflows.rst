@@ -323,12 +323,13 @@ engine, each looping over its Python versions), ``pypcap-parity``,
 once for this commit from Unit Tests' own ``push`` trigger (and, all but
 ``unittest-ordering``, which runs on ``main`` pushes only, from its
 ``pull_request`` trigger), so running any of them again per caller would test
-the same commit several times over. It also skips the docs-only path's
-``changes`` and ``project-tests``, and ``required-checks`` (see `Required Status
+the same commit several times over. It also skips ``changes``,
+``project-tests``, whose project pins ``gate``'s full suite runs too (see
+`Project Pins`_ below), and ``required-checks`` (see `Required Status
 Checks`_ below), which are gated out by their own ``if:`` rather than by having
 already run. ``changelog`` carries no
 ``if:`` at all and runs on every path regardless -- deliberately, per its own
-comment (``unit-tests.yml:1612-1618``): ``create-release.yml`` feeds
+comment (``unit-tests.yml:1632-1638``): ``create-release.yml`` feeds
 ``CHANGELOG.md`` to the GitHub Release body, so the release path is exactly
 where a drifted file must not go unchecked. Confirmed on run `36210743295
 <https://github.com/JarryShaw/PyPCAPKit/actions/runs/36210743295>`__ (a
@@ -638,7 +639,7 @@ grepping every workflow file for its name:
      - Where
    * - ``Required checks passed``
      - job ``required-checks``
-     - ``unit-tests.yml:1937``
+     - ``unit-tests.yml:2001``
    * - ``Compat Python 3.11``
      - job ``compatibility``, matrix leg ``3.11``
      - ``python-compatibility.yml:60``, ``.github/python-versions.toml:20``
@@ -660,30 +661,31 @@ which added ``Compat Python 3.15`` and removed ``Compat Python 3.10``. Moving a 
 between the tiers below means editing the ruleset in the same change.
 
 ``Required checks passed`` is defined by exactly one job
-(``unit-tests.yml:1937``). ``Compat Python`` is defined by one, the
+(``unit-tests.yml:2001``). ``Compat Python`` is defined by one, the
 ``compatibility`` job in ``python-compatibility.yml`` (``:60``), whose matrix
 (``:74``) comes from :file:`.github/python-versions.toml`: the required legs
 are its supported tier (``python-versions.toml:20-24``), and its KTLO legs
 (``python-versions.toml:16-19``) have names ending in ``(KTLO)``, so no required
 context matches one. A comment at
-``unit-tests.yml:1849`` mentions the string without defining it.
+``unit-tests.yml:1913`` mentions the string without defining it.
 
 ``Required checks passed`` is an aggregate, not a single check run. The ruleset
 requires it and the ``Compat Python 3.11``-``3.15`` legs, nothing else, as
-``unit-tests.yml``'s own comment (``unit-tests.yml:1848-1858``) records. It
+``unit-tests.yml``'s own comment (``unit-tests.yml:1912-1922``) records. It
 ``needs:`` the gating jobs of ``unit-tests.yml`` -- ``test``, ``integration``,
-``engine-tests`` and ``pypcap-parity``, plus ``changes`` and ``project-tests``
-for the docs-only path -- and checks each result explicitly
-(``unit-tests.yml:1936-1990``). Rulesets match check names literally, with no
+``engine-tests`` and ``pypcap-parity``, plus ``project-tests``, the one run of
+the project pins, and ``changes`` for the docs-only path -- and checks each
+result explicitly
+(``unit-tests.yml:2000-2056``). Rulesets match check names literally, with no
 wildcard, so requiring the matrix cells one by one would mean editing the
 ruleset whenever a matrix changes; the aggregate keeps the required list fixed.
 It accepts the gating jobs as ``skipped`` only on a docs-only pull request, where
-``project-tests`` -- every test that reads ``docs/`` or Markdown -- must pass
-instead. The ``Compat`` legs stay required separately because they come from
+``project-tests`` runs every test that reads ``docs/`` or Markdown as well;
+``project-tests`` must pass on every diff. The ``Compat`` legs stay required separately because they come from
 ``python-compatibility.yml``, and a job cannot ``needs:`` a job in another
 workflow file. This job runs on Unit Tests' own ``push``/``pull_request``
 triggers; the ``gate-only: true`` reusable calls documented above skip it via
-``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:1939``),
+``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:2003``),
 so it is never produced -- and never expected -- on those paths.
 
 .. _ktlo-tier:
@@ -707,7 +709,7 @@ and keeps its legs' check names, ``Python 3.10 (KTLO)`` and so on. In
 with supported legs. Every job holding KTLO legs works the same way:
 
 * Every step that can fail on a KTLO leg has an ``id`` and
-  ``continue-on-error: ${{ matrix.ktlo == true }}`` (``unit-tests.yml:406-423``),
+  ``continue-on-error: ${{ matrix.ktlo == true }}`` (``unit-tests.yml:420-437``),
   unless it is masked on every leg, as the timings uploads are. Its ``outcome`` is
   then ``failure`` but its ``conclusion`` ``success``, so the job, its check run
   and ``required-checks`` read ``success``. A step that needs an earlier one's work
@@ -838,7 +840,10 @@ holds ``roundtrip`` (``ROUNDTRIP_SWEEP_GLOB`` in :file:`tests/_tiers.py`), and
 since pytest applies no ignore to a path it was handed. On 2026-10-14 they took
 8% of the unit tier's time in a serial 3.14 run (86 of 1,031 s), and 10-11% on the
 3.14, 3.15 and 3.14t legs of run 38581834697, so the rest should take GraalPy 88-113
-minutes (estimate).
+minutes (estimate). The experimental legs leave out the project pins too, as
+``test``'s do (see `Project Pins`_ below); ``List the project pins`` asks for them
+on the runner's own ``python3``, before setup-python, so GraalPy does not parse the
+tree.
 
 GraalPy's leg still loses its runner 18-30 minutes into its tests, with ``The runner
 has received a shutdown signal`` (`#1740 <https://github.com/JarryShaw/PyPCAPKit/issues/1740>`__),
@@ -904,6 +909,36 @@ KTLO summary's script, still warns of every failed step, ``tests`` included. The
 workers rather than 4, GraalPy's tests should take about 117-151 minutes (an inference
 from the 88-113 above, not measured), so its leg may end on the 110-minute timeout as a
 warning: that is expected, blocks nothing, and leaves the caps as they are.
+
+Project Pins
+------------
+
+The *project pins* run once per push (`#1954
+<https://github.com/JarryShaw/PyPCAPKit/issues/1954>`__): the modules under
+:file:`tests/project` whose run does not vary by interpreter, as they read the
+repository's text or drive a ``util/`` script. ``is_project_pin()`` in
+:file:`tests/_tiers.py` decides, by the AST of each module and of the repository
+code it runs: a module is a pin unless it, a module it takes names from, or a file
+it runs by path imports ``pcapkit``, or compares ``sys.version_info`` or
+``sys.implementation``. A computed import, or a ``.py`` name computed for a
+loader or a child process, counts as importing it, and so does a file that does
+not parse. The modules that import ``pcapkit`` stay on every leg.
+
+``project-tests`` runs the pins under pytest, with ``test``'s flags, on ``latest``,
+on every pull request and every push to ``main``, and ``required-checks`` needs it.
+Every ``test``, ``test-ktlo`` and ``experimental`` leg passes each pin as an
+``--ignore``, ``latest``'s coverage leg included, which measures only ``pcapkit``.
+Each asks ``project_pin_paths()`` at run time, as ``integration`` asks for its
+selection, so no workflow lists the pins, and :file:`tests/test_tier_guard.py` runs
+the steps to check what each does with the answer. Under ``gate-only``, ``gate``'s
+full suite runs the pins with everything else. ``unittest-ordering``'s ``project``
+cell keeps them, as it asks how a module runs in one interpreter, in file order and
+without xdist, which is a question about the module rather than the Python version.
+
+A pin's skip where ``tomllib`` is missing, before 3.11, runs on no leg: the scripts
+those pins drive read the tier file on the runner's own ``python3``, and
+:file:`tests/project/test_python_versions_1660.py` checks those skips in a child
+interpreter that cannot import ``tomllib``.
 
 Python Versions
 ---------------

@@ -35,9 +35,12 @@ modules it needs are written into a temporary directory and audited by path.
 from __future__ import annotations
 
 import ast
+import os
 import pathlib
 import re
+import shutil
 import subprocess
+import sys
 import tempfile
 import textwrap
 import unittest
@@ -266,6 +269,185 @@ class WorkflowAgreementTests(unittest.TestCase):
             "hand-written selection here can drift silently"
         )
         self.assertIn('pytest', run_block)
+
+    @unittest.skipIf(shutil.which('bash') is None, 'the steps are bash scripts')
+    def test_the_legs_leave_out_exactly_the_pins_project_tests_runs(self) -> None:
+        """#1954: run as bash runs them, ``test`` ignores each project pin and ``project-tests`` runs each.
+
+        Both steps ask :data:`~tests._tiers.PROJECT_PINS_SELECTOR` at run time, so
+        they cannot drift from :func:`~tests._tiers.is_project_pin`; what can is
+        how each uses the answer, which is what running them checks. Off
+        ``latest`` too, where the sweeps' glob is added after the pins.
+        experimental.yml asks in a step of its own, under the runner's
+        ``python3``; its legs run in
+        :file:`tests/project/test_sweeps_on_latest_only_1732.py`.
+
+        """
+        if not WORKFLOW.is_file():
+            self.skipTest(f'{WORKFLOW} is not present, e.g. in a source distribution')
+        text = WORKFLOW.read_text(encoding='utf-8')
+        pins = list(_tiers.project_pin_paths())
+        self.assertTrue(pins)
+        for sweeps in ('true', 'false'):
+            with self.subTest(sweeps=sweeps):
+                self.assertEqual(leg_pin_ignores(text, sweeps), pins)
+        self.assertEqual(project_pins_run(text), pins)
+        for workflow, job, step in ((WORKFLOW, 'test', 'Run unit tests'),
+                                    (WORKFLOW, 'project-tests', 'Run the project pins'),
+                                    (EXPERIMENTAL_WORKFLOW, 'experimental', 'List the project pins')):
+            with self.subTest(job=job):
+                script = run_script(job_section(workflow.read_text(encoding='utf-8'), job), step)
+                self.assertIn(_tiers.PROJECT_PINS_SELECTOR.replace('python -c', 'python3 -c')
+                              if job == 'experimental' else _tiers.PROJECT_PINS_SELECTOR, script)
+        # The experimental legs ignore what that step printed, as `test` does.
+        tests = step_run_block(job_section(EXPERIMENTAL_WORKFLOW.read_text(encoding='utf-8'), 'experimental'),
+                               'Run unit tests')
+        self.assertIn('PINS: ${{ steps.pins.outputs.paths }}', tests)
+        self.assertIn('for pin in $PINS; do\n            set -- "$@" --ignore="$pin"', tests)
+
+    @unittest.skipIf(shutil.which('bash') is None, 'the steps are bash scripts')
+    def test_a_leg_that_stops_ignoring_the_pins_is_caught(self) -> None:
+        """The check above, against a ``test`` step that computes the pins and then drops them."""
+        if not WORKFLOW.is_file():
+            self.skipTest(f'{WORKFLOW} is not present, e.g. in a source distribution')
+        text = WORKFLOW.read_text(encoding='utf-8')
+        loop = 'set -- "$@" --ignore="$pin"'
+        self.assertEqual(text.count(loop), 1, 'the loop this test removes has been reworded')
+        self.assertEqual(leg_pin_ignores(text.replace(loop, ':'), 'true'), [])
+
+
+#: The experimental legs' workflow (#1732), whose unit-tier step leaves the pins out too.
+EXPERIMENTAL_WORKFLOW = _tiers.ROOT / '.github' / 'workflows' / 'experimental.yml'
+#: A ``python`` that writes each argument on a line of ``$ARGS_FILE``, and hands a
+#: ``-c`` to the real one, which is how the steps ask tests/_tiers.py for the pins.
+PYTHON_STUB = ('#!/bin/sh\nif [ "$1" = -c ]; then exec "$REAL_PYTHON" "$@"; fi\n'
+               'printf \'%s\\n\' "$@" > "$ARGS_FILE"\n')
+
+
+def run_script(section: 'str', step_name: 'str') -> 'str':
+    """The dedented ``run: |`` script of the step named ``step_name`` in a job section."""
+    match = re.search(r'(?ms)^        run: \|\n(.*)', step_run_block(section, step_name))
+    if match is None:
+        raise AssertionError(f'the step {step_name!r} has no run: | block')
+    lines = []
+    for line in match.group(1).splitlines():
+        if line.strip() and not line.startswith(' ' * 10):
+            break
+        lines.append(line)
+    return textwrap.dedent('\n'.join(lines))
+
+
+def stubbed_argv(script: 'str', env: 'dict[str, str]') -> 'list[str]':
+    """The arguments ``script`` hands ``python``, run from the root under ``bash -e``."""
+    with tempfile.TemporaryDirectory(prefix='pcapkit-pins-') as temp:
+        stub = pathlib.Path(temp, 'python')
+        stub.write_text(PYTHON_STUB, encoding='utf-8')
+        stub.chmod(0o755)
+        record = pathlib.Path(temp, 'args')
+        full = dict(os.environ, **env, ARGS_FILE=str(record), RUNNER_TEMP=temp, REAL_PYTHON=sys.executable,
+                    PATH=temp + os.pathsep + os.environ.get('PATH', ''))
+        full.pop('PYTHONSAFEPATH', None)  # the runner sets none, and it would hide tests/ from `-c`
+        result = subprocess.run(['bash', '-e', '-c', script], env=full, cwd=str(_tiers.ROOT),
+                                capture_output=True, text=True, check=False, timeout=120)
+        if result.returncode:
+            raise AssertionError(f'the step failed: {result.stdout[-1000:]}{result.stderr[-1000:]}')
+        return record.read_text(encoding='utf-8').splitlines()
+
+
+def leg_pin_ignores(text: 'str', sweeps: 'str') -> 'list[str]':
+    """The ``tests/project`` paths a ``test`` leg's ``Run unit tests`` step ``--ignore``\\ s."""
+    script = run_script(job_section(text, 'test'), 'Run unit tests')
+    argv = stubbed_argv(script, {'ANNOTATION_LEVEL': 'error', 'COVERAGE': 'false', 'SWEEPS': sweeps})
+    return [arg.split('=', 1)[1] for arg in argv if arg.startswith(f'--ignore=tests/{_tiers.PROJECT_PINS_DIR}/')]
+
+
+def project_pins_run(text: 'str') -> 'list[str]':
+    """The modules ``project-tests``'s ``Run the project pins`` step hands pytest."""
+    argv = stubbed_argv(run_script(job_section(text, 'project-tests'), 'Run the project pins'), {})
+    return [arg for arg in argv if arg.endswith('.py')]
+
+
+class ProjectPinRuleTests(unittest.TestCase):
+    """#1954: :func:`~tests._tiers.varies_by_interpreter`, the rule behind the project pins."""
+
+    def varies(self, source: 'str') -> 'bool':
+        with tempfile.TemporaryDirectory(prefix='pcapkit-pin-rule-') as temp:
+            return _tiers.varies_by_interpreter(write_module(pathlib.Path(temp), 'test_probe.py', source))
+
+    def test_each_way_of_reaching_the_package_is_seen(self) -> None:
+        cases = {
+            'import pcapkit': 'import pcapkit\n',
+            'nested from-import': 'def test():\n    from pcapkit.protocols import Raw\n',
+            'import_module, literal': 'import importlib\nimportlib.import_module("pcapkit.foundation")\n',
+            'import_module, computed': 'import importlib\ndef f(name):\n    importlib.import_module(name)\n',
+            'mock.patch target': 'from unittest import mock\n@mock.patch("pcapkit.utilities.logging.logger")\n'
+                                 'def test(_):\n    pass\n',
+            '-m in a child': 'import subprocess, sys\nsubprocess.run([sys.executable, "-m", "pcapkit"])\n',
+            '-c in a child': 'import subprocess, sys\nSCRIPT = "import pcapkit"\n'
+                             'subprocess.run([sys.executable, "-c", SCRIPT])\n',
+            'version branch': 'import sys, unittest\n@unittest.skipIf(sys.version_info < (3, 12), "")\n'
+                              'def test():\n    pass\n',
+            'implementation branch': 'import sys\nGRAAL = sys.implementation.name == "graalpy"\n',
+            'a script that imports it, by path': 'import importlib.util\nfrom tests._tiers import ROOT\n'
+                                                 'importlib.util.spec_from_file_location('
+                                                 '"b", ROOT / "util" / "bump_version.py")\n',
+            'a computed script name': 'import importlib.util\ndef load(name):\n'
+                                      '    importlib.util.spec_from_file_location(name, f"util/{name}.py")\n',
+            'a module that imports it on import': 'from tests.project.test_pyshark_encap_map import ROOT\n',
+            'unparsable': 'def broken(:\n',
+        }
+        for label, source in cases.items():
+            with self.subTest(case=label):
+                self.assertIs(self.varies(source), True)
+
+    def test_text_and_scripts_that_import_nothing_are_independent(self) -> None:
+        cases = {
+            'reads text': 'from tests._tiers import ROOT\nTEXT = (ROOT / "pcapkit" / "__init__.py").read_text()\n',
+            'names it in prose': 'MESSAGE = "run python -c \'import pcapkit\' to check"\n'
+                                 'PATH = "util/bump_version.py"\n',
+            'a dotted name, not imported': 'NAME = "pcapkit.foundation.extraction"\n',
+            'a script that imports nothing, by path': 'import importlib.util\nfrom tests._tiers import ROOT\n'
+                                                      'importlib.util.spec_from_file_location('
+                                                      '"c", ROOT / "util" / "ci_timing.py")\n',
+            'a helper whose other names would': 'from tests._tiers import ROOT, is_unit_tier\n',
+            'a version only assigned': 'import types\nFAKE = types.SimpleNamespace()\nFAKE.version_info = (3, 5)\n',
+        }
+        for label, source in cases.items():
+            with self.subTest(case=label):
+                self.assertIs(self.varies(source), False)
+
+    def test_a_pin_is_an_independent_unit_tier_module_under_tests_project(self) -> None:
+        cases = {
+            'tests/project/test_isort_clean.py': True,
+            'tests/project/test_workflows_at_a_glance_1732.py': True,
+            'tests/project/test_public_api.py': False,  # imports pcapkit
+            'tests/project/test_release_gates.py': False,  # branches on sys.version_info
+            'tests/project/test_docs_ambiguous_xrefs_1775_unit.py': False,  # loads docs/source/conf.py
+            'tests/test_tier_guard.py': False,  # not under tests/project
+            'tests/project/__init__.py': False,
+            'util/ci_timing.py': False,
+        }
+        for module, expected in cases.items():
+            with self.subTest(module=module):
+                self.assertIs(_tiers.is_project_pin(module), expected)
+                self.assertIs(_tiers.is_project_pin(_tiers.ROOT / module), expected)
+
+    def test_the_pins_are_sorted_paths_the_rule_accepts(self) -> None:
+        pins = _tiers.project_pin_paths()
+        self.assertTrue(pins)
+        self.assertEqual(list(pins), sorted(set(pins)))
+        rest = [path.relative_to(_tiers.ROOT).as_posix()
+                for path in (_tiers.TESTS_ROOT / _tiers.PROJECT_PINS_DIR).rglob('test_*.py')
+                if path.relative_to(_tiers.ROOT).as_posix() not in pins]
+        self.assertTrue(rest)
+        for module in pins:
+            with self.subTest(module=module):
+                self.assertTrue(module.startswith(f'tests/{_tiers.PROJECT_PINS_DIR}/'))
+                self.assertTrue(_tiers.is_unit_tier(module))
+                self.assertFalse(_tiers.varies_by_interpreter(module))
+        for module in rest:
+            with self.subTest(module=module):
+                self.assertTrue(_tiers.varies_by_interpreter(module))
 
 
 class EnclosingScopeTests(unittest.TestCase):
@@ -1389,20 +1571,23 @@ class DependencyGateSelectionTests(unittest.TestCase):
                 self.assertEqual(section, job_section(text, name))
 
     def test_each_job_selection_is_one_of_the_three_recognised_shapes(self) -> None:
-        """A fifth shape has to fail here rather than be guessed at.
+        """A sixth shape has to fail here rather than be guessed at.
 
-        Four are recognised: subtract ``--ignore`` flags from the whole suite
+        Five are recognised: subtract ``--ignore`` flags from the whole suite
         (``test``), ask :func:`~tests._tiers.fixture_tier_paths`
-        (``integration``), pass no selection at all (``gate``), or name
+        (``integration``), pass no selection at all (``gate``), name
         literal test-file paths (``engine-tests``, one :class:`Job` per
-        ``matrix.engine`` cell, #849). A new job selecting some fifth way
-        would otherwise be classified ``'whole-suite'`` by the fallback and
-        credited with reaching gates it does not run.
+        ``matrix.engine`` cell, #849), or run what
+        :func:`~tests._tiers.project_pin_paths` prints (``project-tests``,
+        #1954). A new job selecting some sixth way would otherwise be
+        classified ``'whole-suite'`` by the fallback and credited with
+        reaching gates it does not run.
 
         """
         for job in _dependency_gates.pytest_jobs():
             with self.subTest(job=job.name):
-                self.assertIn(job.selection, ('ignore', 'fixture-tier', 'whole-suite', 'explicit'))
+                self.assertIn(job.selection, ('ignore', 'fixture-tier', 'whole-suite', 'explicit',
+                                              'project-pins'))
 
         # engine-tests yields several Job entries sharing that one name --
         # one per matrix.engine cell, all ``'explicit'`` -- so this collects
@@ -1412,7 +1597,8 @@ class DependencyGateSelectionTests(unittest.TestCase):
             selections.setdefault(job.name, set()).add(job.selection)
         self.assertEqual(selections, {'test': {'ignore'}, 'integration': {'fixture-tier'},
                                       'gate': {'whole-suite'}, 'engine-tests': {'explicit'},
-                                      'pypcap-parity': {'fixture-tier'}})
+                                      'pypcap-parity': {'fixture-tier'},
+                                      'project-tests': {'project-pins'}})
 
     def test_the_selection_is_read_off_the_step_that_runs_pytest(self) -> None:
         """Not off the job, whose comments contradict it.
@@ -1446,7 +1632,8 @@ class DependencyGateSelectionTests(unittest.TestCase):
             selections.setdefault(job.name, set()).add(job.selection)
         self.assertEqual(selections, {'test': {'ignore'}, 'integration': {'fixture-tier'},
                                       'gate': {'whole-suite'}, 'engine-tests': {'explicit'},
-                                      'pypcap-parity': {'fixture-tier'}})
+                                      'pypcap-parity': {'fixture-tier'},
+                                      'project-tests': {'project-pins'}})
 
     def test_two_install_lines_in_one_pytest_job_is_refused(self) -> None:
         """Ambiguity fails loudly instead of the first line winning."""
@@ -1481,16 +1668,36 @@ class DependencyGateSelectionTests(unittest.TestCase):
         self.assertIn('steps', str(caught.exception))
 
     def test_the_ignore_selection_is_exactly_the_unit_tier(self) -> None:
-        """Answered by :func:`~tests._tiers.is_unit_tier`, not by a second copy."""
+        """Answered by :func:`~tests._tiers.is_unit_tier`, not by a second copy,
+        less the project pins, which ``project-tests`` runs instead (#1954)."""
         job = next(job for job in _dependency_gates.pytest_jobs() if job.selection == 'ignore')
         cases = {
             'tests/protocols/internet/test_esp_unit.py': True,
+            'tests/project/test_public_api.py': True,
+            'tests/project/test_isort_clean.py': False,
             'tests/integration/test_cli_subprocess.py': False,
             'tests/foundation/engines/test_new_engine_parity_runtime.py': False,
         }
         for module, expected in cases.items():
             with self.subTest(module=module):
                 gate = _dependency_gates.Gate('HAS_CRYPTO', module, 1, 'Tests', None)
+                self.assertIs(_dependency_gates.job_reaches(job, gate), expected)
+
+    def test_the_project_pins_selection_is_exactly_the_pins(self) -> None:
+        """#1954: ``project-tests`` reaches the pins and nothing else, so a gate moves with its module."""
+        job = next(job for job in _dependency_gates.pytest_jobs() if job.selection == 'project-pins')
+        self.assertEqual(job.name, 'project-tests')
+        self.assertEqual(job.extras, next(job for job in _dependency_gates.pytest_jobs()
+                                          if job.name == 'test').extras)
+        cases = {
+            'tests/project/test_isort_clean.py': True,
+            'tests/project/test_public_api.py': False,
+            'tests/protocols/internet/test_esp_unit.py': False,
+            'tests/integration/test_cli_subprocess.py': False,
+        }
+        for module, expected in cases.items():
+            with self.subTest(module=module):
+                gate = _dependency_gates.Gate('HAS_ISORT', module, 1, 'Tests', None)
                 self.assertIs(_dependency_gates.job_reaches(job, gate), expected)
 
     def test_the_whole_suite_selection_reaches_everything(self) -> None:
@@ -1745,8 +1952,9 @@ class DependencyGateCoverageTests(unittest.TestCase):
         reaching = {job.name for job in _dependency_gates.pytest_jobs()
                     if _dependency_gates.job_reaches(job, gates[0])}
         self.assertEqual(
-            reaching, {'test', 'gate'},
-            'the ignore-shape leg and the whole-suite one collect tests/project/; '
+            reaching, {'project-tests', 'gate'},
+            'the module is a project pin, so project-tests runs it and the ignore-shape '
+            'leg leaves it out (#1954); the whole-suite one collects tests/project/; '
             'integration and pypcap-parity select by fixture tier and never reach it, '
             'the same reason they are absent from HAS_MYPY above. engine-tests (#849) '
             'no longer reaches it either -- none of its five explicit TEST_PATHS lists '
@@ -2005,7 +2213,7 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
         :meth:`DependencyGateCoverageTests.test_the_isort_gate_is_visible_and_closed_by_the_test_extra`
         says a gap is *absent*, and an analysis that had quietly stopped
         resolving ``HAS_ISORT`` at all would satisfy every one of them. So this
-        takes the requirement back out on a copy and requires the three gaps to
+        takes the requirement back out on a copy and requires the gaps to
         reappear -- which is also the state #766 predicted a visible gate would
         produce before the extra carried isort ("would correctly turn the
         dependency-gate guard red until isort is on a pytest install line"), and
@@ -2028,17 +2236,18 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
 
             # engine-tests (#849) no longer reaches tests/project/ at all -- see
             # test_the_isort_gate_is_visible_and_closed_by_the_test_extra above.
+            # #1954: the module is a project pin, which project-tests runs instead of test.
             self.assertEqual(
                 sorted(job for (flag, job) in gaps if flag == 'HAS_ISORT'),
-                ['gate', 'test'])
+                ['gate', 'project-tests'])
 
-            gap = gaps[('HAS_ISORT', 'test')]
+            gap = gaps[('HAS_ISORT', 'project-tests')]
             self.assertEqual(gap.missing, ('isort',))
             self.assertEqual({gate.module for gate in gap.gates},
                              {'tests/project/test_isort_clean.py'})
 
             message = _dependency_gates.describe_gap(gap)
-            self.assertIn("the 'test' job", message)
+            self.assertIn("the 'project-tests' job", message)
             self.assertIn('isort', message)
             self.assertIn('test_isort_clean.py', message)
 

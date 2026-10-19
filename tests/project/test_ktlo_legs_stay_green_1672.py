@@ -130,7 +130,8 @@ JOB_CAP = 45
 #: without a cap of their own -- checkout, the parallelism report, the resource
 #: monitor, the uploads and the summaries. Everything but the install and the tests
 #: took at most 0.32 minutes, setup-python included, on every uncovered leg of runs
-#: 38569321543, 38569429406 and 38569522442.
+#: 38569321543, 38569429406 and 38569522442. #1954's ``List the project pins`` runs
+#: on the runner's CPython, which lists them in seconds (measured locally on 3.14).
 UNCAPPED_MINUTES = 3
 #: Those steps' cap on every other leg: the largest a step's ``timeout-minutes`` may be
 #: (docs.github.com, workflow-syntax, ``jobs.<job_id>.steps[*].timeout-minutes``).

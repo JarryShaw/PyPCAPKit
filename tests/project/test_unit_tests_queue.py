@@ -7,6 +7,7 @@ These fail silently if they drift, so they are pinned here:
   classified the diff as docs-only. Its shell step is executed below against
   every combination that matters, rather than read, because the one way it goes
   wrong -- a skip accepted on a code change -- is a green gate over untested code.
+  It needs ``project-tests`` on every diff, as the project pins' one run (#1954).
 * The ``changes`` classifier must call anything outside ``docs/`` and ``*.md``
   code, and a Markdown file under a code directory code too.
 * ``unittest-ordering`` stays off pull requests and out of the required set,
@@ -106,15 +107,21 @@ class TestRequiredChecksSkips(unittest.TestCase):
                               capture_output=True, text=True).returncode
 
     def test_needs_every_leg_and_the_docs_only_helpers(self) -> None:
-        """The gate reads every leg plus ``changes`` and ``project-tests``."""
+        """The gate reads every leg plus ``changes`` and ``project-tests``, the pins' one run (#1954)."""
         self.assertEqual(required_needs(), set(LEGS) | {'changes', 'project-tests'})
 
     def test_code_change_requires_every_leg_to_succeed(self) -> None:
         """On a code change nothing but ``success`` passes."""
-        self.assertEqual(self.gate('true', 'success', 'skipped'), 0)
+        self.assertEqual(self.gate('true', 'success', 'success'), 0)
         for result in ('skipped', 'failure', 'cancelled'):
             with self.subTest(result=result):
-                self.assertNotEqual(self.gate('true', result, 'skipped'), 0)
+                self.assertNotEqual(self.gate('true', result, 'success'), 0)
+
+    def test_code_change_still_needs_project_tests(self) -> None:
+        """#1954: ``project-tests`` is the one run of the project pins, so a code change needs it too."""
+        for result in ('skipped', 'failure', 'cancelled'):
+            with self.subTest(result=result):
+                self.assertNotEqual(self.gate('true', 'success', result), 0)
 
     def test_docs_only_accepts_skipped_legs_when_project_tests_pass(self) -> None:
         """A docs-only diff may skip the legs when ``project-tests`` passed."""
@@ -135,8 +142,8 @@ class TestRequiredChecksSkips(unittest.TestCase):
         """One failing leg among passing ones fails the gate, on either path."""
         for env_name in ('TEST', 'INTEGRATION', 'ENGINE_TESTS', 'PYPCAP_PARITY'):
             with self.subTest(leg=env_name):
-                for code, legs, project, odd in (('true', 'success', 'skipped', 'failure'),
-                                                 ('true', 'success', 'skipped', 'skipped'),
+                for code, legs, project, odd in (('true', 'success', 'success', 'failure'),
+                                                 ('true', 'success', 'success', 'skipped'),
                                                  ('false', 'skipped', 'success', 'failure')):
                     self.assertNotEqual(self.gate(code, legs, project, **{env_name: odd}), 0)
 
@@ -194,9 +201,20 @@ class TestJobGating(unittest.TestCase):
                 self.assertIn("needs.changes.outputs.code != 'false'", head)
                 self.assertRegex(head, r'(?m)^    needs: \[changes, python-versions\]$')
 
-    def test_project_tests_runs_only_on_a_docs_only_diff(self) -> None:
-        """``project-tests`` never duplicates ``test`` on a code change."""
-        self.assertIn("needs.changes.outputs.code == 'false'", header(job('project-tests')))
+    def test_project_tests_runs_on_every_diff_and_never_duplicates_test(self) -> None:
+        """#1954: ``project-tests`` runs on every diff, but not under ``gate-only``, whose ``gate``
+        runs the pins in its full suite. Its pins step runs on a code change, and its steps that
+        stand in for ``test`` only on a docs-only diff, where they take in the pins."""
+        head = header(job('project-tests'))
+        self.assertIn('if: ${{ inputs.gate-only != true }}', head)
+        self.assertNotIn('needs.changes.outputs.code', head)
+        for name, condition in (('Run the project pins', "needs.changes.outputs.code != 'false'"),
+                                ('Run tests/project and the root-level modules under plain unittest',
+                                 "needs.changes.outputs.code == 'false'"),
+                                ('Run the other tests that read docs/ or Markdown',
+                                 "needs.changes.outputs.code == 'false'")):
+            with self.subTest(step=name):
+                self.assertIn(f'if: ${{{{ {condition} }}}}', step(job('project-tests'), name))
 
     def test_project_tests_failures_are_not_softened(self) -> None:
         """No ``continue-on-error`` anywhere in ``project-tests``: a red step must fail it."""

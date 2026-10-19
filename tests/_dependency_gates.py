@@ -652,6 +652,7 @@ DEPENDENCY_GATE_EXCLUSIONS = {
     ),
     'HAS_SPHINX': Exclusion(
         dark={'test': ('sphinx', 'sphinx_autodoc_typehints'),
+              'project-tests': ('sphinx', 'sphinx_autodoc_typehints'),
               'gate': ('sphinx', 'sphinx_autodoc_typehints')},
         reason=(
             'The classes it gates (#1775, #1856, #1858-#1863, #1917, #1918 and the enum-value '
@@ -669,11 +670,12 @@ DEPENDENCY_GATE_EXCLUSIONS = {
             'imports. They run wherever docs/requirements.txt or the docs extra is '
             'installed, a developer checkout included, and skip visibly elsewhere, saying '
             'which condition failed. The directive-name and pin-agreement tests need '
-            'nothing and run on every leg.'
+            'nothing and run on every leg, or in project-tests where their module is a '
+            'project pin (#1954).'
         ),
     ),
     'HAS_PYLINT': Exclusion(
-        dark={'test': ('pylint',), 'gate': ('pylint',)},
+        dark={'project-tests': ('pylint',), 'gate': ('pylint',)},
         reason=(
             'The method it gates (#1923) looks every pylint pragma name in pcapkit/ up in '
             "pylint's own message store, with the plugins `make pylint` loads, so it needs "
@@ -683,8 +685,9 @@ DEPENDENCY_GATE_EXCLUSIONS = {
             'no pyproject.toml extra declares it. The argument that declines HAS_MYPY above '
             'declines it here: lint.yml already runs pylint over the whole package, and an '
             'unknown pragma name shows there as W0012 unknown-option-value, so a pytest leg '
-            'that installed pylint would pay for a second copy of that check. What runs on '
-            'every leg instead is the ungated check in the same module, which holds each '
+            'that installed pylint would pay for a second copy of that check. What runs '
+            'instead is the ungated check in the same module, a project pin that '
+            'project-tests runs (#1954), which holds each '
             'pragma name to the pinned KNOWN_MESSAGES list; the lookup keeps that list '
             'honest wherever pylint is importable, a developer checkout included, and skips '
             'visibly elsewhere.'
@@ -777,7 +780,9 @@ class Job(NamedTuple):
     #: :func:`~tests._tiers.fixture_tier_paths` for the selection,
     #: ``'ignore'`` when it subtracts ``--ignore`` flags from the whole suite,
     #: ``'whole-suite'`` when it passes no selection at all, ``'explicit'``
-    #: when it names literal test-file paths (see :attr:`paths`).
+    #: when it names literal test-file paths (see :attr:`paths`), and
+    #: ``'project-pins'`` when it runs what :func:`~tests._tiers.project_pin_paths`
+    #: prints (#1954).
     selection: 'str'
     #: The literal test-file paths named by an ``'explicit'`` selection, empty
     #: for every other shape. Compared to :class:`Gate`.\ ``module`` by exact
@@ -1572,6 +1577,8 @@ def pytest_jobs(workflow: 'Optional[pathlib.Path]' = None) -> 'tuple[Job, ...]':
             selection = 'fixture-tier'
         elif '--ignore' in run_block:
             selection = 'ignore'
+        elif 'project_pin_paths' in run_block:
+            selection = 'project-pins'
         else:
             selection = 'whole-suite'
 
@@ -1583,12 +1590,13 @@ def pytest_jobs(workflow: 'Optional[pathlib.Path]' = None) -> 'tuple[Job, ...]':
 def job_reaches(job: 'Job', gate: 'Gate') -> 'bool':
     """Whether ``job``'s selection would collect the tests ``gate`` guards.
 
-    The four selection shapes are answered four ways, and none of them
+    The five selection shapes are answered five ways, and none of them
     reimplements the workflow's own list:
 
     * ``'whole-suite'`` reaches everything under :file:`tests/`.
-    * ``'ignore'`` is the unit tier, so :func:`~tests._tiers.is_unit_tier`
-      answers it -- and
+    * ``'ignore'`` is the unit tier less the project pins (#1954), so
+      :func:`~tests._tiers.is_unit_tier` and :func:`~tests._tiers.is_project_pin`
+      answer it -- and
       :meth:`~tests.test_tier_guard.WorkflowAgreementTests\
 .test_ignore_flags_match_the_fixture_tier_constants`
       is what keeps that equivalence true. It is the ``latest`` leg's: the
@@ -1596,6 +1604,8 @@ def job_reaches(job: 'Job', gate: 'Gate') -> 'bool':
       changes no answer, since every leg shares the job's one install line. The
       same holds for ``'fixture'``, whose legs off ``latest`` drop
       :data:`~tests._tiers.ROUNDTRIP_RUNTIME_GLOB`'s modules.
+    * ``'project-pins'`` is :func:`~tests._tiers.is_project_pin`, the job running
+      exactly what :func:`~tests._tiers.project_pin_paths` prints.
     * ``'explicit'`` is exact membership in :attr:`Job.paths` -- the literal
       ``TEST_PATHS`` list a ``matrix.engine`` cell of ``engine-tests`` (#849)
       runs, at file granularity (that job names whole files, never node IDs).
@@ -1619,7 +1629,9 @@ def job_reaches(job: 'Job', gate: 'Gate') -> 'bool':
     if job.selection == 'whole-suite':
         return True
     if job.selection == 'ignore':
-        return _tiers.is_unit_tier(gate.module)
+        return _tiers.is_unit_tier(gate.module) and not _tiers.is_project_pin(gate.module)
+    if job.selection == 'project-pins':
+        return _tiers.is_project_pin(gate.module)
     if job.selection == 'explicit':
         return gate.module in job.paths
 
