@@ -553,7 +553,8 @@ def workflow_labels(workflows: 'dict[str, Any]') -> 'dict[str, list[str]]':
     ``supported``
         ``default``, plus each label of a literal ``os`` axis (the conda jobs).
     ``latest``
-        The ``runs-on`` of every job whose setup-python reads ``latest``.
+        The ``runs-on`` of every job whose setup-python reads ``latest``, or the
+        label its ``matrix.os || '...'`` falls back to.
 
     """
     default, axis, latest = set(), set(), set()  # type: set[str], set[str], set[str]
@@ -567,9 +568,15 @@ def workflow_labels(workflows: 'dict[str, Any]') -> 'dict[str, list[str]]':
                 if output is None and 'matrix.python-version' not in text:
                     continue  # a pin the tier file exempts
                 if output == 'latest':
-                    if '${{' in runs_on:
+                    # #1938: experimental's legs set up `latest` beside their own version, on the
+                    # label `matrix.os || '...'` falls back to, as `default` reads it.
+                    match = DEFAULT_LABEL.fullmatch(runs_on)
+                    if match:
+                        latest.add(match.group(1))
+                    elif '${{' in runs_on:
                         raise ValueError(f'{name} {job_id} installs latest on {runs_on!r}, which this cannot read')
-                    latest.add(runs_on)
+                    else:
+                        latest.add(runs_on)
                     continue
                 match = DEFAULT_LABEL.fullmatch(runs_on)
                 if match:

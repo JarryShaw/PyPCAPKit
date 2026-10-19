@@ -59,7 +59,8 @@ RUNTIME_SWEEPS = ('tests/foundation/traceflow/test_traceflow_reread_roundtrip_ru
 CONSUMERS = ('coverage-comment.yml', 'deploy-pages.yml', 'cron-vendor.yml', 'cron-conda.yml')
 #: Each job's ``timeout-minutes``, and its capped steps', by ``id``: ``test``'s are
 #: main's, ``experimental``'s are sized for GraalPy (88-113 minutes, estimate).
-CAPS = {JOB: (45, {}), EXPERIMENTAL: (140, {'python': 5, 'install': 10, 'tests': 120})}
+#: #1938 adds the watcher's interpreter and its requests, capped too.
+CAPS = {JOB: (45, {}), EXPERIMENTAL: (140, {'python': 5, 'install': 10, 'watcher-python': 1, 'watcher': 1, 'tests': 120})}
 #: The jobs whose result reaches a gate: ``required-checks`` and what it needs, and
 #: ``unittest-ordering``, which runs on main's pushes and gates publishing.
 GATING = ('required-checks', 'unittest-ordering')
@@ -97,8 +98,9 @@ def stringify(value: 'object') -> 'str':
 
 def step_env(leg: 'dict[str, Any]', where: 'tuple[str, str]' = JOB) -> 'dict[str, str]':
     """The step's ``env:`` on ``leg``, ``needs`` read from the tier file."""
-    # #1938: experimental's tests step reads the token, which no test here needs.
-    context = {'matrix': leg, 'needs': {'python-versions': {'outputs': live_outputs()}}, 'github': {'token': ''}}
+    # #1938: experimental's tests step reads the token and the watcher's interpreter, unwatched here.
+    context = {'matrix': leg, 'needs': {'python-versions': {'outputs': live_outputs()}}, 'github': {'token': ''},
+               'steps': {'watcher': {'outcome': 'skipped'}, 'watcher-python': {'outputs': {'python-path': ''}}}}
     return {key: re.sub(r'\$\{\{.*?\}\}', lambda match: stringify(evaluate_expression(match.group(0), context)),
                         str(value))
             for key, value in (step(where).get('env') or {}).items()}

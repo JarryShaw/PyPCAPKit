@@ -25,6 +25,7 @@ import os
 import pathlib
 import shutil
 import signal
+import subprocess  # nosec B404
 import sys
 import tempfile
 import threading
@@ -79,6 +80,34 @@ class FakeApi:
         return 200, {'etag': etag}, json.dumps(answer).encode()
 
 
+class FakeResponse:
+    """What :class:`FakeSession` answers: the parts of a :class:`requests.Response` the transport reads."""
+
+    def __init__(self, status: 'int', headers: 'Dict[str, str]', body: 'Any') -> 'None':
+        self.status_code = status
+        self.headers = headers
+        self.content = b'' if body is None else json.dumps(body).encode()
+
+
+class FakeSession:
+    """A :class:`requests.Session` answering from ``answers`` in turn, recording each GET.
+
+    An answer is ``(status, headers, body)`` or an exception to raise.
+
+    """
+
+    def __init__(self, answers: 'List[Any]') -> 'None':
+        self.answers = list(answers)
+        self.calls = []  # type: List[Tuple[str, Dict[str, Any]]]
+
+    def get(self, url: 'str', **kwargs: 'Any') -> 'FakeResponse':
+        self.calls.append((url, kwargs))
+        answer = self.answers.pop(0)
+        if isinstance(answer, BaseException):
+            raise answer
+        return FakeResponse(*answer)
+
+
 def push(sha: 'str' = OURS) -> 'superseded.Context':
     return superseded.Context('push', 'refs/heads/main', sha, REPO)
 
@@ -126,12 +155,54 @@ class TestTheGate(unittest.TestCase):
         self.assertIs(gate.get('continue-on-error'), None)
         self.assertTrue(all(entry.get('continue-on-error') is True for entry in gate['steps']), gate['steps'])
         check = next(entry for entry in gate['steps'] if entry.get('id') == 'check')
-        self.assertEqual(check['run'], 'python3 util/superseded.py check')
+        self.assertEqual(check['run'], 'python util/superseded.py check')
         self.assertEqual(check['env'], {'GH_TOKEN': '${{ github.token }}'})
         checkout = gate['steps'][0]
         self.assertTrue(checkout['uses'].startswith('actions/checkout@'))
-        self.assertIn('util/superseded.py', checkout['with']['sparse-checkout'])
+        for path in ('util/superseded.py', 'util/python_versions.py', '.github/python-versions.toml'):
+            with self.subTest(path=path):
+                self.assertIn(path, checkout['with']['sparse-checkout'])
         self.assertIs(checkout['with']['persist-credentials'], False)
+
+    def test_the_gate_checks_on_latest_with_requests(self) -> None:
+        """Round 3: ``latest``, read as every job reads it, set up, and requests installed before the check."""
+        ids = [entry.get('id') for entry in self.jobs[GATE]['steps']]
+        self.assertEqual(ids, [None, 'versions', 'python', 'requests', 'check'])
+        steps = {entry.get('id'): entry for entry in self.jobs[GATE]['steps']}
+        self.assertEqual(steps['versions']['run'], 'python3 util/python_versions.py --github-output')
+        setup = steps['python']
+        self.assertEqual(setup['uses'], job(NAME, 'experimental')['steps'][1]['uses'])
+        self.assertEqual(setup['with'], {'python-version': '${{ steps.versions.outputs.latest }}'})
+        self.assertEqual(steps['requests']['run'], 'python -m pip install requests')
+
+    def test_the_watcher_runs_on_a_cpython_of_its_own_with_requests(self) -> None:
+        """Round 3: ``latest``, outside the leg's environment, and requests in it alone."""
+        legs = job(NAME, 'experimental')
+        self.assertEqual(self.jobs['python-versions']['outputs']['latest'], '${{ steps.read.outputs.latest }}')
+        steps = {entry.get('id'): entry for entry in legs['steps']}
+        leg, own = steps['python'], steps['watcher-python']
+        self.assertEqual(own['uses'], leg['uses'])
+        self.assertEqual(own['with'], {'python-version': '${{ needs.python-versions.outputs.latest }}',
+                                       'update-environment': False})
+        self.assertIs(own.get('continue-on-error'), True)
+        # The leg's own setup-python, first, as before: its interpreter, its environment, its cache.
+        self.assertEqual(leg['with'], {'python-version': '${{ matrix.python-version }}', 'cache': 'pip'})
+        self.assertLess(legs['steps'].index(leg), legs['steps'].index(own))
+        install = steps['watcher']
+        self.assertEqual(install['env'], {'WATCHER_PYTHON': '${{ steps.watcher-python.outputs.python-path }}'})
+        self.assertEqual(install['run'], '"$WATCHER_PYTHON" -m pip install --no-cache-dir requests')
+        self.assertIs(install.get('continue-on-error'), True)
+        self.assertIn("steps.watcher-python.outcome == 'success'", install['if'])
+        tests = step(TESTS)
+        self.assertEqual(tests['env']['WATCHER'], '${{ steps.watcher.outcome }}')
+        self.assertEqual(tests['env']['WATCHER_PYTHON'], '${{ steps.watcher-python.outputs.python-path }}')
+        self.assertIn('set -- "$WATCHER_PYTHON" util/superseded.py watch ', tests['run'])
+        self.assertNotIn('/usr/bin/python3', tests['run'])
+        # Nothing the leg's interpreter runs installs requests.
+        for entry in legs['steps']:
+            if entry.get('id') != 'watcher':
+                with self.subTest(step=entry.get('name') or entry.get('uses')):
+                    self.assertNotIn('install requests', str(entry.get('run', '')))
 
     def test_every_other_job_needs_it_and_skips_on_its_output(self) -> None:
         others = [job_id for job_id in self.jobs if job_id != GATE]
@@ -235,6 +306,57 @@ class TestCheck(unittest.TestCase):
             with self.subTest(event=context.event, ref=context.ref):
                 self.assertEqual(self.verdict(context, {}).state, superseded.CURRENT)
                 self.assertEqual(self.api.requests, [])
+
+    def test_the_default_transport_is_a_requests_session(self) -> None:
+        """Round 3: one :class:`requests.Session`, a bounded timeout, the status returned, a 304 answered from the cache."""
+        session = FakeSession([(200, {'ETag': 'W/"1"'}, {'sha': NEWER}), (304, {'ETag': 'W/"1"'}, None)])
+        api = superseded.Api('token')
+        api.session = session  # type: ignore[assignment]
+        self.assertEqual(superseded.check(push(), api).state, superseded.SUPERSEDED)
+        self.assertEqual(superseded.check(push(), api).state, superseded.SUPERSEDED)
+        (url, first), (_, second) = session.calls
+        self.assertEqual(url, f'https://api.github.com/repos/{REPO}/commits/main')
+        self.assertEqual(first['timeout'], superseded.TIMEOUT)
+        self.assertEqual(first['headers']['Authorization'], 'Bearer token')
+        self.assertNotIn('If-None-Match', first['headers'])
+        self.assertEqual(second['headers']['If-None-Match'], 'W/"1"')
+        # The session is opened once and kept.
+        self.assertIs(api.session, session)
+
+    def test_a_requests_error_is_current(self) -> None:
+        import requests  # pylint: disable=import-outside-toplevel
+        for error in (requests.ConnectionError('reset'), requests.Timeout('slow'), requests.TooManyRedirects('loop')):
+            with self.subTest(error=type(error).__name__):
+                api = superseded.Api('token')
+                api.session = FakeSession([error])  # type: ignore[assignment]
+                verdict = superseded.check(push(), api)
+                self.assertEqual((verdict.state, verdict.error), (superseded.CURRENT, True))
+
+    def test_without_requests_everything_is_current(self) -> None:
+        """Round 3: a missing requests is one more failed request, not a crash."""
+        original = superseded.requests
+        superseded.requests = None  # type: ignore[assignment]
+        self.addCleanup(setattr, superseded, 'requests', original)
+        verdict = superseded.check(push(), superseded.Api('token'))
+        self.assertEqual((verdict.state, verdict.error), (superseded.CURRENT, True))
+        self.assertIn('requests is not installed', verdict.reason)
+        files, out = Files(self), io.StringIO()
+        self.assertEqual(superseded.main(['check'], env=files.env(), out=out), 0)
+        self.assertEqual(files.read(files.output), 'current=true\n')
+
+    def test_the_script_runs_where_requests_cannot_import(self) -> None:
+        """In an interpreter whose ``import requests`` fails, the gate answers current and exits 0."""
+        with tempfile.TemporaryDirectory() as tmp:
+            pathlib.Path(tmp, 'requests.py').write_text('raise ImportError("no requests here")\n', encoding='utf-8')
+            output = pathlib.Path(tmp, 'output')
+            env = {key: value for key, value in os.environ.items() if not key.startswith('GITHUB_')}
+            env.update(PYTHONPATH=tmp, GITHUB_EVENT_NAME='push', GITHUB_REF='refs/heads/main', GITHUB_SHA=OURS,
+                       GITHUB_REPOSITORY=REPO, GITHUB_OUTPUT=str(output), GITHUB_API_URL='http://127.0.0.1:9')
+            result = subprocess.run([sys.executable, str(ROOT / 'util' / 'superseded.py'), 'check'],  # nosec B603
+                                    env=env, capture_output=True, text=True, check=False, timeout=60)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn('requests is not installed', result.stdout)
+            self.assertEqual(output.read_text(encoding='utf-8'), 'current=true\n')
 
     def test_a_repeated_request_is_conditional(self) -> None:
         """``If-None-Match`` with the last ``ETag``; a 304 answers from the last body."""
@@ -554,7 +676,22 @@ class TestTheTestsStep(unittest.TestCase):
                         GITHUB_STEP_SUMMARY=str(self.tmp / 'summary.md'), GH_TOKEN='token',
                         GITHUB_API_URL=f'http://127.0.0.1:{self.server.server_address[1]}',
                         GITHUB_EVENT_NAME='push', GITHUB_REF='refs/heads/main', GITHUB_SHA=OURS,
-                        GITHUB_REPOSITORY=REPO, PATH=str(bindir) + os.pathsep + os.environ.get('PATH', ''))
+                        GITHUB_REPOSITORY=REPO, PATH=str(bindir) + os.pathsep + os.environ.get('PATH', ''),
+                        # `watcher-python` and its requests: this interpreter, which has requests.
+                        WATCHER='success', WATCHER_PYTHON=sys.executable)
+
+    def test_without_the_watchers_interpreter_the_tests_run_unwatched(self) -> None:
+        """Round 3: a failed `watcher-python` or requests install leaves the tests as they would run without #1938."""
+        bindir = pathlib.Path(self.env['PATH'].split(os.pathsep)[0])
+        (bindir / 'python').write_text('#!/bin/sh\nsleep 1.5\nexit 3\n', encoding='utf-8')
+        for outcome, path in (('failure', sys.executable), ('skipped', ''), ('success', '/nonexistent/python')):
+            with self.subTest(outcome=outcome, path=path):
+                env = dict(self.env, WATCHER=outcome, WATCHER_PYTHON=path)
+                # Superseded, so a watcher would have stopped the tests and exited 0.
+                result = sh(self.script(), env, DEFAULT)
+                self.assertEqual(result.returncode, 3, result.stderr)
+                self.assertIn('No watcher: its interpreter or requests did not install', result.stdout)
+                self.assertEqual(workflow_commands(result.stdout), [])
 
     def script(self) -> 'str':
         script = step(TESTS)['run']
@@ -622,7 +759,8 @@ class TestTheTestsStep(unittest.TestCase):
         capped = 'set -- prlimit --fsize=2147483648 timeout --signal=INT --kill-after=3m 110m python -m pytest "$@"\n'
         scoped = 'set -- scoped pcapkit-tests.scope "$@"\n'
         named = 'watched=pcapkit-tests.scope\n'
-        watched = 'set -- "$watcher" util/superseded.py watch --interval 60 --grace 30 --scope "$watched" -- "$@"\n'
+        watched = ('set -- "$WATCHER_PYTHON" util/superseded.py watch --interval 60 --grace 30 --scope "$watched" '
+                   '-- "$@"\n')
         self.assertLess(script.index(capped), script.index(scoped))
         self.assertLess(script.index(scoped), script.index(named))
         self.assertLess(script.index(named), script.index(watched))
@@ -630,7 +768,30 @@ class TestTheTestsStep(unittest.TestCase):
         # Named only where the probe passed, and the one name the tests' scope is started under.
         self.assertIn('if [ "$scope" = 12G ]; then\n', script[script.index('scope=none'):script.index(named)])
         self.assertEqual(script.count('pcapkit-tests.scope'), 2)
-        self.assertIn('watcher=/usr/bin/python3\n', script)
+        self.assertIn('if [ "$WATCHER" = success ] && [ -x "$WATCHER_PYTHON" ]; then\n', script)
+
+
+class TestTheUpdaterReadsTheWatchersLatest(unittest.TestCase):
+    """Round 3: util/update_python_versions.py reads where ``latest`` is set up, the watcher's included."""
+
+    @staticmethod
+    def workflows(runs_on: 'str', leg: 'bool' = True) -> 'Dict[str, Any]':
+        """One job setting up ``latest`` on ``runs_on``, after its leg's own version where ``leg``."""
+        steps = [{'id': 'v', 'run': 'python3 util/python_versions.py --github-output'},
+                 {'uses': 'actions/setup-python@v7', 'with': {'python-version': '${{ steps.v.outputs.latest }}'}}]
+        if leg:
+            steps.insert(1, {'uses': 'actions/setup-python@v7', 'with': {'python-version': '${{ matrix.python-version }}'}})
+        return {'w.yml': {'jobs': {'j': {'runs-on': runs_on, 'steps': steps}}}}
+
+    def test_a_matrix_jobs_latest_is_on_its_fallback_label(self) -> None:
+        from tests.project.test_python_versions_update_1660 import updater  # pylint: disable=import-outside-toplevel
+        module = updater()
+        labels = module.workflow_labels(self.workflows("${{ matrix.os || 'ubuntu-24.04' }}"))
+        self.assertEqual(labels['latest'], ['ubuntu-24.04'])
+        with self.assertRaisesRegex(ValueError, 'installs latest on .*which this cannot read'):
+            module.workflow_labels(self.workflows('${{ matrix.runner }}', leg=False))
+        # The real workflows, experimental's watcher among them, read as before.
+        self.assertIn('ubuntu-latest', module.workflow_labels(module.load_workflows(ROOT))['latest'])
 
 
 class TestTheDocsSayIt(unittest.TestCase):

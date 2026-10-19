@@ -47,8 +47,9 @@ The API is read with conditional requests: a ``304 Not Modified`` answer to an
 (docs.github.com, "Best practices for using the REST API"), and ``GITHUB_TOKEN``
 has a limit per repository that every concurrent leg's polling shares.
 
-The script needs nothing outside the standard library, so the workflow runs it
-on the runner's own ``python3`` rather than on the leg's interpreter.
+It fetches with :mod:`requests`, as util/ci_timing.py does. Without it the
+script still runs, and every request fails, so the commit counts as current:
+the gate writes ``current=true``, and the watcher runs the tests to the end.
 
 """
 
@@ -61,9 +62,12 @@ import signal
 import subprocess  # nosec B404
 import sys
 import time
-import urllib.error
-import urllib.request
 from typing import TYPE_CHECKING
+
+try:
+    import requests
+except ImportError:  # pragma: no cover -- every test interpreter has it
+    requests = None  # type: ignore[assignment]
 
 if TYPE_CHECKING:
     from types import FrameType
@@ -160,16 +164,6 @@ class Verdict:
         return f'Verdict({self.state!r}, {self.reason!r}, error={self.error!r})'
 
 
-def urllib_transport(url: 'str', headers: 'Dict[str, str]') -> 'Tuple[int, Dict[str, str], bytes]':
-    """The default transport: one GET, an HTTP error status returned rather than raised."""
-    request = urllib.request.Request(url, headers=headers)
-    try:
-        with urllib.request.urlopen(request, timeout=TIMEOUT) as response:  # nosec B310 -- the API's root, GITHUB_API_URL
-            return response.status, dict(response.headers.items()), response.read()
-    except urllib.error.HTTPError as error:
-        return error.code, dict(error.headers.items()) if error.headers else {}, error.read()
-
-
 class Api:
     """GET requests to the REST API, each repeated with its last ``ETag``.
 
@@ -182,15 +176,26 @@ class Api:
 
     def __init__(self, token: 'str', transport: 'Optional[Transport]' = None, base: 'str' = API) -> 'None':
         self.token = token
-        self.transport = transport or urllib_transport
+        self.transport = transport or self._get
         self.base = base.rstrip('/')
         self._cache = {}  # type: Dict[str, Tuple[str, Any]]
+        #: The connection :meth:`_get` reuses from one check to the next, opened on its first call.
+        self.session = None  # type: Optional[requests.Session]
+
+    def _get(self, url: 'str', headers: 'Dict[str, str]') -> 'Tuple[int, Dict[str, str], bytes]':
+        """The default transport: one GET, its status returned rather than raised, as a 304 is an answer."""
+        if requests is None:
+            raise ApiError('requests is not installed')
+        if self.session is None:
+            self.session = requests.Session()
+        response = self.session.get(url, timeout=TIMEOUT, headers=headers)
+        return response.status_code, {k.lower(): v for k, v in response.headers.items()}, response.content
 
     def get(self, path: 'str') -> 'Any':
         """``path``'s JSON, or the last copy where the API answers ``304 Not Modified``."""
         url = f'{self.base}/{path}'
         headers = {'Accept': 'application/vnd.github+json', 'X-GitHub-Api-Version': '2022-11-28',
-                   'User-Agent': 'pcapkit-superseded'}
+                   'User-Agent': 'PyPCAPKit-superseded'}
         if self.token:
             headers['Authorization'] = f'Bearer {self.token}'
         cached = self._cache.get(url)

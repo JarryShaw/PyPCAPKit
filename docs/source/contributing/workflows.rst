@@ -769,7 +769,8 @@ A superseded run is skipped or stopped, never cancelled (`#1938
 ``cancelled`` check against its commit, so a cancelled run marks the commit red.
 The workflow has no ``concurrency`` group either, since a group cancels its pending
 run once a newer one queues. Its first job, ``current`` ("Check the commit is still
-current"), runs :file:`util/superseded.py`'s ``check``. A push's commit is current
+current"), sets up ``latest`` and installs ``requests``, which the script fetches with,
+then runs :file:`util/superseded.py`'s ``check``. A push's commit is current
 while it is the head of ``main``; a pull request's while the pull request is open and
 its head is still the event's ``pull_request.head.sha``; any other event's always.
 Every other job needs ``current`` and skips where its output is ``false``, so a run
@@ -779,7 +780,12 @@ Each of those ``if:`` conditions opens with ``!cancelled()``, which drops the im
 ``current`` job runs the rest; the legs still need ``changes`` and ``python-versions``
 to succeed. ``Run unit tests`` runs its whole command -- the scope's ``sudo`` where
 there is one, then ``prlimit``, ``timeout`` and pytest -- under the script's ``watch``,
-outside the scope, which asks again every 60 seconds. Once the commit is superseded,
+outside the scope, which asks again every 60 seconds. The watcher runs on a CPython of
+its own, ``latest`` from a second setup-python step, ``watcher-python``, with
+``update-environment: false``, so the leg's ``PATH``, ``LD_LIBRARY_PATH`` and pip
+cache are as its own setup-python left them, and ``requests`` goes into that
+interpreter, never the leg's GraalPy or free-threaded build. The two steps are capped
+at 1 minute each, and where either fails the tests run unwatched. Once the commit is superseded,
 or the pull request merged or closed, it sends SIGTERM, then SIGKILL 30 seconds on:
 to ``pcapkit-tests.scope`` by name (``sudo -n systemctl kill``) where the tests run
 in it, since they run as the runner's user under a root-owned ``sudo`` and in
@@ -804,8 +810,10 @@ run from failing when a job fails" (`Workflow syntax
 <https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idcontinue-on-error>`__),
 though the leg's check run still reads ``failure``. A job past its
 ``timeout-minutes`` is cancelled, and that page does not say whether the job-level
-guard covers a cancellation. So setup-python, the install and the tests have caps
-of their own, of 5, 10 and 120 minutes, under the job's 140: a step at its cap
+guard covers a cancellation. So setup-python, the install, the watcher's setup-python
+and ``requests`` (`#1938 <https://github.com/JarryShaw/PyPCAPKit/issues/1938>`__,
+below) and the tests have caps of their own, of 5, 10, 1, 1 and 120 minutes, under
+the job's 140, which leaves 3 for the rest: a step at its cap
 fails rather than cancels, and the guard holds (actions/runner
 ``src/Runner.Worker/StepsRunner.cs:322-353``). The runner's ``has timed out`` error
 stays, changing no conclusion, as ``Process completed with exit code N.`` does.

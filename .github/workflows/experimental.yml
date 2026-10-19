@@ -43,11 +43,12 @@ jobs:
   # run's commit is still the head of main or of its open pull request, and
   # writes `current`; any other event, or an API it cannot read, is current.
   # Every other job needs this one and skips where `current` is `false`, so a
-  # superseded run's checks read `skipped`, which marks no commit red. Both
-  # steps are `continue-on-error`, so a step's failure leaves `current` empty,
-  # which runs the rest; each job's `if:` opens with `!cancelled()`, so a
-  # failure of the job itself, which replaces the implicit `success()`, runs
-  # the rest too.
+  # superseded run's checks read `skipped`, which marks no commit red. Every
+  # step is `continue-on-error`: without `latest`, setup-python or requests the
+  # check fails or answers current, so a step's failure leaves `current` empty
+  # or `true`, which runs the rest; each job's `if:` opens with `!cancelled()`,
+  # so a failure of the job itself, which replaces the implicit `success()`,
+  # runs the rest too.
   current:
     name: Check the commit is still current
     runs-on: ubuntu-latest
@@ -63,16 +64,37 @@ jobs:
         continue-on-error: true
         with:
           sparse-checkout: |
+            .github/python-versions.toml
+            util/python_versions.py
             util/superseded.py
           sparse-checkout-cone-mode: false
           persist-credentials: false
+
+      # #1660: `latest` from .github/python-versions.toml, read with the
+      # runner's own python3, for the interpreter util/superseded.py fetches
+      # with requests on.
+      - name: Read the Python versions
+        id: versions
+        continue-on-error: true
+        run: python3 util/python_versions.py --github-output
+
+      - uses: actions/setup-python@v7
+        id: python
+        continue-on-error: true
+        with:
+          python-version: ${{ steps.versions.outputs.latest }}
+
+      - name: Install requests
+        id: requests
+        continue-on-error: true
+        run: python -m pip install requests
 
       - name: Ask whether this run's commit is still current
         id: check
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
-        run: python3 util/superseded.py check
+        run: python util/superseded.py check
 
   # unit-tests.yml's job of the same name, reading the one output this file needs.
   python-versions:
@@ -83,6 +105,8 @@ jobs:
     timeout-minutes: 5
     outputs:
       experimental: ${{ steps.read.outputs.experimental }}
+      # #1938: the watcher's own interpreter, apart from the leg's.
+      latest: ${{ steps.read.outputs.latest }}
 
     steps:
       - uses: actions/checkout@v7
@@ -167,11 +191,12 @@ jobs:
   #
   # A job past its `timeout-minutes` is cancelled (same page,
   # `jobs.<job_id>.timeout-minutes`), and the page does not say whether the
-  # job-level guard covers that. So setup-python, the install and the tests
-  # carry caps of their own, 5, 10 and 120 minutes, under the job's 140: a step
-  # past its cap fails rather than cancels, and `continue-on-error` then applies
-  # as to any failure (actions/runner src/Runner.Worker/StepsRunner.cs:322-353,
-  # at 5f0b3ddcc). That leaves 5 minutes for the rest, which took at most 0.32,
+  # job-level guard covers that. So setup-python, the install, the watcher's
+  # setup-python and requests (#1938) and the tests carry caps of their own,
+  # 5, 10, 1, 1 and 120 minutes, under the job's 140: a step past its cap
+  # fails rather than cancels, and `continue-on-error` then applies as to any
+  # failure (actions/runner src/Runner.Worker/StepsRunner.cs:322-353, at
+  # 5f0b3ddcc). That leaves 3 minutes for the rest, which took at most 0.32,
   # setup-python included, on every uncovered leg of runs
   # 38569321543-38569522442.
   #
@@ -250,6 +275,35 @@ jobs:
         run: |
           nproc
           python -c "import os; print('cpu_count', os.cpu_count())"
+
+      # #1938: the interpreter `Run unit tests` runs util/superseded.py on, a
+      # CPython of its own: `latest`, never the leg's GraalPy or free-threaded
+      # build, which would also have to take requests. `update-environment:
+      # false` leaves PATH, `pythonLocation` and `LD_LIBRARY_PATH` as the leg's
+      # setup-python set them, so the tests see the leg's interpreter alone;
+      # this one is run by its `python-path`, and finds its own libpython by
+      # the rpath actions/python-versions builds with
+      # (builders/ubuntu-python-builder.psm1), since its soname is not the
+      # leg's. No `cache:` and `--no-cache-dir`, so the leg's pip cache is
+      # untouched. Each step has a cap of 1 minute (see the job's comment),
+      # and a failure leaves the tests to run unwatched.
+      - uses: actions/setup-python@v7
+        id: watcher-python
+        if: ${{ steps.install.outcome == 'success' }}
+        continue-on-error: true
+        timeout-minutes: 1
+        with:
+          python-version: ${{ needs.python-versions.outputs.latest }}
+          update-environment: false
+
+      - name: Install the watcher's requests
+        id: watcher
+        if: ${{ steps.install.outcome == 'success' && steps.watcher-python.outcome == 'success' }}
+        continue-on-error: true
+        timeout-minutes: 1
+        env:
+          WATCHER_PYTHON: ${{ steps.watcher-python.outputs.python-path }}
+        run: '"$WATCHER_PYTHON" -m pip install --no-cache-dir requests'
 
       # #1740: GraalPy's leg loses its runner 18-30 minutes into its tests ("The
       # runner has received a shutdown signal"), under a 120-minute cap. So every
@@ -379,8 +433,9 @@ jobs:
       # warning and exit 70, since the tests may run on until `timeout` ends
       # them. Otherwise it exits with the command's own status, so a failure on
       # a current commit reads as it would unwatched, and an API it cannot read
-      # counts as current. It runs on the runner's /usr/bin/python3, not the
-      # leg's interpreter: under GraalPy every process starts a VM of its own.
+      # counts as current. It runs on `watcher-python`, with requests; where
+      # that interpreter or its requests did not install, the tests run
+      # unwatched, as they would without #1938.
       - name: Run unit tests
         id: tests
         if: ${{ steps.install.outcome == 'success' }}
@@ -390,6 +445,8 @@ jobs:
           GRAAL_PYTHON_VM_ARGS: ${{ startsWith(matrix.python-version, 'graalpy') && '--vm.Xmx2g --vm.XX:+ExitOnOutOfMemoryError' || '' }}
           WORKERS: ${{ startsWith(matrix.python-version, 'graalpy') && '3' || 'auto' }}
           GH_TOKEN: ${{ github.token }}
+          WATCHER: ${{ steps.watcher.outcome }}
+          WATCHER_PYTHON: ${{ steps.watcher-python.outputs.python-path }}
         run: |
           tail -n +1 -F "$RUNNER_TEMP/resource-monitor.log" 2>/dev/null &
           monitor=$!
@@ -419,16 +476,18 @@ jobs:
             # A log line, not an annotation: on a lost runner this log is all that is left.
             echo "No 12G scope: the probe failed (${probe}), so the tests run uncapped."
           fi
-          watched=
-          if [ "$scope" = 12G ]; then
-            # `scoped` is a function, which the watcher runs through a shell.
-            export -f scoped
-            set -- bash -c '"$@"' bash "$@"
-            watched=pcapkit-tests.scope
+          if [ "$WATCHER" = success ] && [ -x "$WATCHER_PYTHON" ]; then
+            watched=
+            if [ "$scope" = 12G ]; then
+              # `scoped` is a function, which the watcher runs through a shell.
+              export -f scoped
+              set -- bash -c '"$@"' bash "$@"
+              watched=pcapkit-tests.scope
+            fi
+            set -- "$WATCHER_PYTHON" util/superseded.py watch --interval 60 --grace 30 --scope "$watched" -- "$@"
+          else
+            echo "No watcher: its interpreter or requests did not install (${WATCHER:-skipped}), so the tests run unwatched."
           fi
-          watcher=/usr/bin/python3
-          [ -x "$watcher" ] || watcher=python3
-          set -- "$watcher" util/superseded.py watch --interval 60 --grace 30 --scope "$watched" -- "$@"
           oom_kills() { awk '$1 == "oom_kill" { print $2 }' /proc/vmstat; }
           before=$(oom_kills)
           started=$SECONDS
