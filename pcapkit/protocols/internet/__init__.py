@@ -5,11 +5,11 @@
 
 .. module:: pcapkit.protocols.internet
 
-:mod:`pcapkit.protocols.internet` is collection of all protocols
-in internet layer, with detailed implementation and methods.
+:mod:`pcapkit.protocols.internet` is the collection of all protocols
+in the internet layer, with detailed implementation and methods.
 
 """
-# TODO: Implements ECN, ICMP, ICMPv6, IGMP, Shim6.
+# TODO: Implement ECN, ICMP, ICMPv6, IGMP, Shim6.
 
 # Base Class for Internet Layer
 from pcapkit.protocols.internet.internet import Internet

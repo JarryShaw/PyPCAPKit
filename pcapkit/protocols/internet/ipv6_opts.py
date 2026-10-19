@@ -6,7 +6,7 @@
 
 :mod:`pcapkit.protocols.internet.ipv6_opts` contains
 :class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`
-only, which implements extractor for Destination Options
+only, which implements the extractor for Destination Options
 for IPv6 (IPv6-Opts) [*]_, whose structure is described
 as below:
 
@@ -212,8 +212,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[Enum_Option, str | tuple[OptionParser, OptionConstructor]]: Option
-    #: code to method mapping, c.f. :meth:`_read_ipv6_opts` and/or
+    #: Option code to method mapping, see :meth:`_read_ipv6_opts` and/or
     #: :meth:`_make_ipv6_opts`. A :obj:`str` value names the methods
     #: ``_read_opt_${name}`` and ``_make_opt_${name}``, falling back to
     #: ``_read_opt_none`` / ``_make_opt_none`` when they do not exist; any other
@@ -429,7 +428,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             **kwargs: Arbitrary keyword arguments.
 
         See Also:
-            For construction argument, please refer to :meth:`self.make <IPv6_Opts.make>`.
+            For construction arguments, please refer to :meth:`self.make <IPv6_Opts.make>`.
 
         """
         #: bool: If the protocol is used as an IPv6 extension header.
@@ -488,7 +487,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Returns:
             Extracted IPv6-Opts option type field information (unknown option
-            action and change flag), c.f. [:rfc:`8200#section-4.2`].
+            action and change flag), see [:rfc:`8200#section-4.2`].
 
         """
         bin_ = bin(kind)[2:].zfill(8)
@@ -960,7 +959,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
         Note:
             An option whose QS function is neither of the two above has no
             defined layout, so the schema keeps it as an unassigned option and
-            it is parsed as one, c.f. :meth:`_read_opt_none`.
+            it is parsed as one, see :meth:`_read_opt_none`.
 
         """
         if isinstance(schema, Schema_UnassignedOption):
@@ -1874,7 +1873,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
 
         Returns:
             Constructed option schema; an unassigned option schema if ``opt``
-            is a Quick-Start option parsed as unassigned, c.f. :meth:`_read_opt_qs`.
+            is a Quick-Start option parsed as unassigned, see :meth:`_read_opt_qs`.
 
         """
         if isinstance(opt, Data_UnassignedOption):
@@ -2099,7 +2098,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             )
 
         # NOTE: ``nonce`` is packed by a NumberField whose width is this very
-        # ``len`` (c.f. pcapkit.protocols.schema.internet.ipv6_opts.ILNPOption),
+        # ``len`` (see pcapkit.protocols.schema.internet.ipv6_opts.ILNPOption),
         # so the declared octet count must be the ceiling of the bit length over
         # eight. ``bit_length() // 8`` floors, and ``math.ceil`` around an
         # integer division is a no-op, so any nonce whose bit length is not a
@@ -2218,7 +2217,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             reserved = opt.flags.reserved
             seq = opt.seq
 
-        # ``OptDataLenDFF`` is 3 per RFC 6971 Errata ID 3937, c.f. _read_opt_ip_dff.
+        # ``OptDataLenDFF`` is 3 per RFC 6971 Errata ID 3937, see _read_opt_ip_dff.
         return Schema_IPDFFOption(
             type=code,
             len=3,

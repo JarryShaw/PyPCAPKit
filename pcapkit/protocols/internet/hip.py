@@ -6,7 +6,7 @@
 
 :mod:`pcapkit.protocols.internet.hip` contains
 :class:`~pcapkit.protocols.internet.hip.HIP` only,
-which implements extractor for Host Identity
+which implements the extractor for Host Identity
 Protocol (HIP) [*]_, whose structure is described
 as below:
 
@@ -15,11 +15,11 @@ Octets      Bits        Name                    Description
 ======= ========= ====================== ==================================
   0           0   ``hip.next``              Next Header
   1           8   ``hip.length``            Header Length
-  2          16   ``hip.packet_fixed``      Reserved (``\\x00``)
+  2          16   ``hip.packet_fixed``      Fixed Bit (``0``)
   2          17   ``hip.type``              Packet Type
   3          24   ``hip.version``           Version
   3          28   ``hip.reserved``          Reserved
-  3          31   ``hip.version_fixed``     Reserved (``\\x01``)
+  3          31   ``hip.version_fixed``     Fixed Bit (``1``)
   4          32   ``hip.chksum``            Checksum
   6          48   ``hip.control``           Controls
   8          64   ``hip.shit``              Sender's Host Identity Tag
@@ -417,8 +417,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[Enum_Parameter, str | tuple[ParameterParser, ParameterConstructor]]: Parameter
-    #: code to method mapping, c.f. :meth:`_read_hip_param` and/or
+    #: Parameter code to method mapping, see :meth:`_read_hip_param` and/or
     #: :meth:`_make_hip_param`. A :obj:`str` value names the methods
     #: ``_read_param_${name}`` and ``_make_param_${name}``, falling back to
     #: ``_read_param_unassigned`` / ``_make_param_unassigned`` when they do not
@@ -766,7 +765,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             **kwargs: Arbitrary keyword arguments.
 
         See Also:
-            For construction argument, please refer to :meth:`self.make <HIP.make>`.
+            For construction arguments, please refer to :meth:`self.make <HIP.make>`.
 
         """
         #: bool: If the protocol is used as an IPv6 extension header.

@@ -5,7 +5,7 @@ MH - Mobility Header
 
 :mod:`pcapkit.protocols.internet.mh` contains
 :class:`~pcapkit.protocols.internet.mh.MH`,
-which implements extractor for Mobility Header
+which implements the extractor for Mobility Header
 (MH) [*]_, whose structure is described as below:
 
 ======= ========= ================== ===============================
@@ -24,16 +24,6 @@ Octets      Bits        Name                    Description
    ``pcapkit.protocols.internet.mh.NTPTimestamp``, with no alias; use
    :class:`pcapkit.protocols.data.internet.mh.NTPTimestamp` instead
    (:issue:`1886`).
-
-.. versionchanged:: 1.5.0
-
-   :class:`~pcapkit.protocols.data.internet.mh.NTPTimestamp` and
-   :class:`~pcapkit.protocols.data.internet.mh.PMIPv6Timestamp` are
-   :class:`~pcapkit.corekit.infoclass.Info` data models rather than named
-   tuples, so they no longer index, unpack, hash or compare equal to a
-   :obj:`tuple`, and the dumpers write them keyed by field, as
-   ``{"seconds": ..., "fraction": ...}``. For ``NTPTimestamp`` this is a
-   breaking change from 1.4.x (:issue:`1886`).
 
 .. autoclass:: pcapkit.protocols.internet.mh.MH
    :no-members:

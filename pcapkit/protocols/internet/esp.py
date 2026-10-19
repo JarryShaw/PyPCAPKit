@@ -6,7 +6,7 @@
 
 :mod:`pcapkit.protocols.internet.esp` contains
 :class:`~pcapkit.protocols.internet.esp.ESP`,
-which implements extractor for Encapsulating
+which implements the extractor for Encapsulating
 Security Payload (ESP) [*]_, whose structure is
 described as below:
 
@@ -16,7 +16,7 @@ Octets      Bits        Name                    Description
   0           0   ``esp.spi``             Security Parameters Index (SPI)
   4          32   ``esp.seq``             Sequence Number
   8          64   ``esp.payload_data``    Payload Data (variable, encrypted)
-  ?           ?                           Padding (0-255 bytes, encrypted)
+  ?           ?   ``esp.padding``         Padding (0-255 bytes, encrypted)
   ?           ?   ``esp.pad_len``         Pad Length (encrypted)
   ?           ?   ``esp.next``            Next Header (encrypted)
   ?           ?   ``esp.icv``             Integrity Check Value (ICV, variable)
@@ -197,7 +197,7 @@ if TYPE_CHECKING:
 
     from pcapkit.protocols.protocol import ProtocolBase
 
-#: Cached :mod:`cryptography` primitives, c.f. :func:`load_cryptography`.
+#: Cached :mod:`cryptography` primitives, see :func:`load_cryptography`.
 #: :data:`NotImplemented` means the import has not been attempted yet, and
 #: :data:`None` that it was attempted and |cryptography|_ is not installed, and
 #: a tuple holds the loaded primitives, so a missing dependency is not retried
@@ -209,10 +209,10 @@ def load_cryptography() -> 'Optional[tuple[Any, Any, Any, Type[Exception]]]':
     """Load the optional |cryptography|_ primitives.
 
     Returns:
-        A 4-tuple of ``(Cipher, algorithms, modes, InvalidTag)`` taken from
-        :mod:`cryptography.hazmat.primitives.ciphers` and
-        :mod:`cryptography.exceptions`, or :data:`None` when
-        |cryptography|_ is not installed.
+        A 4-tuple of ``(Cipher, algorithms, modes, InvalidTag)``, the first
+        three taken from :mod:`cryptography.hazmat.primitives.ciphers` and the
+        last being :exc:`cryptography.exceptions.InvalidTag`, or :data:`None`
+        when |cryptography|_ is not installed.
 
     Notes:
         The import is attempted at most once and the outcome is cached, so
@@ -296,8 +296,8 @@ class CipherSuite(Info):
 
     A member of :class:`Cipher <pcapkit.const.esp.cipher.Cipher>` records only
     that IANA registered the transform. This records how to apply it, and
-    membership of :data:`CIPHER_SUITES` is what "supported" means -- see the
-    module docstring.
+    membership of :data:`CIPHER_SUITES` is what "supported" means -- see
+    :ref:`esp-algorithm-support`.
 
     """
 
@@ -497,14 +497,14 @@ class SecurityAssociation:
         spi: Security Parameters Index the SA applies to; :data:`None`
             matches any SPI, which is convenient for a capture holding a
             single tunnel.
-        encryption: Encryption algorithm, c.f. :meth:`CipherSuite.get`. Must
+        encryption: Encryption algorithm, see :meth:`CipherSuite.get`. Must
             be one :mod:`pcapkit` implements; being in the IANA registry is
             not enough.
         encryption_key: Encryption keying material. For an AEAD suite this
             is the AES key followed by the 4-octet salt [:rfc:`4106` §8.1],
             unless ``salt`` is given separately.
         salt: AEAD salt, when not appended to ``encryption_key``.
-        integrity: Integrity algorithm, c.f. :meth:`IntegritySuite.get`. Must
+        integrity: Integrity algorithm, see :meth:`IntegritySuite.get`. Must
             be :attr:`Integrity.NONE <pcapkit.const.esp.integrity.Integrity.NONE>`
             for an AEAD suite, which provides its own.
         integrity_key: Integrity key.
@@ -1334,7 +1334,7 @@ class ESP(IPsec[Data_ESP, Schema_ESP], IPv6_Ext[Data_ESP, Schema_ESP],
             **kwargs: Arbitrary keyword arguments.
 
         See Also:
-            For construction argument, please refer to :meth:`self.make <ESP.make>`.
+            For construction arguments, please refer to :meth:`self.make <ESP.make>`.
 
         """
         #: bool: If the protocol is used as an IPv6 extension header.

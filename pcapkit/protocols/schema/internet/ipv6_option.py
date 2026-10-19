@@ -240,7 +240,7 @@ def pad_opt_data_len(pkt: 'dict[str, Any]') -> 'int':
 
     Note:
         A ``Pad1`` option is a single octet with neither an ``Opt Data Len``
-        field nor any option data (c.f. :rfc:`8200#section-4.2`), which is why
+        field nor any option data (see :rfc:`8200#section-4.2`), which is why
         the option's ``len`` field is declared as a
         :class:`~pcapkit.corekit.fields.misc.ConditionalField` and is skipped
         for it. A skipped conditional field is *recorded* in the packet data as

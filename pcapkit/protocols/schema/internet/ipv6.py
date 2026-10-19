@@ -85,7 +85,7 @@ class IPv6(Schema):
     payload: 'bytes' = PayloadField(length=lambda pkt: pkt['length'])
     #: Octets captured past the Payload Length (or a jumbogram's Jumbo Payload
     #: Length, see :meth:`post_process`), such as Ethernet minimum-frame
-    #: padding, c.f. :attr:`IPv4.trailer <pcapkit.protocols.schema.internet.ipv4.IPv4.trailer>`.
+    #: padding, see :attr:`IPv4.trailer <pcapkit.protocols.schema.internet.ipv4.IPv4.trailer>`.
     trailer: 'bytes' = PayloadField(default=b'')
 
     if TYPE_CHECKING:
@@ -167,7 +167,7 @@ def jumbogram_error(length: 'int', next: 'int', data: 'bytes',  # pylint: disabl
                     fragment: 'Optional[Callable[[], bool]]' = None) -> 'Optional[str]':
     """Name the error :rfc:`2675#section-3` has a receiver detect in an IPv6 packet, if any.
 
-    The four errors that section lists for a node that understands the Jumbo
+    The errors that section lists for a node that understands the Jumbo
     Payload option, each a packet the default engine rejects (:issue:`1687`):
 
     * a Payload Length of zero, a Next Header of Hop-by-Hop Options, and no

@@ -160,7 +160,7 @@ def quick_start_option_length(schema: 'Type[QSOption]') -> 'int':
     length = 0
     for name, field in schema.__fields__.items():
         # NOTE: A forward match consumes nothing and contributes no octets to
-        # ``bytes(schema)`` either, c.f. the ``ForwardMatchField`` branches of
+        # ``bytes(schema)`` either, see the ``ForwardMatchField`` branches of
         # :meth:`Schema.pack <pcapkit.protocols.schema.schema.Schema.pack>` and
         # :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`.
         if isinstance(field, ForwardMatchField):
@@ -371,7 +371,7 @@ class TSOption(Option, code=Enum_OptionNumber.TS):
         Raises:
             FieldValueError: If an entry of :attr:`ts_data` that the timestamp
                 flag makes an address is a :obj:`bool`, is not a valid IP
-                address, or is not IPv4 -- c.f.
+                address, or is not IPv4 -- see
                 :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`.
 
         Notes:

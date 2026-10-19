@@ -6,7 +6,7 @@
 
 :mod:`pcapkit.protocols.internet.ah` contains
 :class:`~pcapkit.protocols.internet.ah.AH` only,
-which implements extractor for Authentication
+which implements the extractor for Authentication
 Header (AH) [*]_, whose structure is described
 as below:
 
@@ -276,7 +276,7 @@ class AH(IPsec[Data_AH, Schema_AH], IPv6_Ext[Data_AH, Schema_AH],
             **kwargs: Arbitrary keyword arguments.
 
         See Also:
-            For construction argument, please refer to :meth:`self.make <AH.make>`.
+            For construction arguments, please refer to :meth:`self.make <AH.make>`.
 
         """
         #: bool: If the protocol is used as an IPv6 extension header.

@@ -6,7 +6,7 @@
 
 :mod:`pcapkit.protocols.internet.hopopt` contains
 :class:`~pcapkit.protocols.internet.hopopt.HOPOPT`
-only, which implements extractor for IPv6 Hop-by-Hop
+only, which implements the extractor for IPv6 Hop-by-Hop
 Options header (HOPOPT) [*]_, whose structure is
 described as below:
 
@@ -208,8 +208,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[Enum_Option, str | tuple[OptionParser, OptionConstructor]]: Option
-    #: code to method mapping, c.f. :meth:`_read_hopopt_options` and/or
+    #: Option code to method mapping, see :meth:`_read_hopopt_options` and/or
     #: :meth:`_make_hopopt_options`. A :obj:`str` value names the methods
     #: ``_read_opt_${name}`` and ``_make_opt_${name}``, falling back to
     #: ``_read_opt_none`` / ``_make_opt_none`` when they do not exist; any other
@@ -437,7 +436,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             **kwargs: Arbitrary keyword arguments.
 
         See Also:
-            For construction argument, please refer to :meth:`make`.
+            For construction arguments, please refer to :meth:`make`.
 
         """
         #: bool: If the protocol is used as an IPv6 extension header.
@@ -496,7 +495,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
 
         Returns:
             Extracted HOPOPT option type field information (unknown option
-            action and change flag), c.f. [:rfc:`8200#section-4.2`].
+            action and change flag), see [:rfc:`8200#section-4.2`].
 
         """
         bin_ = bin(kind)[2:].zfill(8)
@@ -972,7 +971,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         Note:
             An option whose QS function is neither of the two above has no
             defined layout, so the schema keeps it as an unassigned option and
-            it is parsed as one, c.f. :meth:`_read_opt_none`.
+            it is parsed as one, see :meth:`_read_opt_none`.
 
         """
         if isinstance(schema, Schema_UnassignedOption):
@@ -1886,7 +1885,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
 
         Returns:
             Constructed option schema; an unassigned option schema if ``opt``
-            is a Quick-Start option parsed as unassigned, c.f. :meth:`_read_opt_qs`.
+            is a Quick-Start option parsed as unassigned, see :meth:`_read_opt_qs`.
 
         """
         if isinstance(opt, Data_UnassignedOption):
@@ -2111,7 +2110,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             )
 
         # NOTE: ``nonce`` is packed by a NumberField whose width is this very
-        # ``len`` (c.f. pcapkit.protocols.schema.internet.hopopt.ILNPOption), so
+        # ``len`` (see pcapkit.protocols.schema.internet.hopopt.ILNPOption), so
         # the declared octet count must be the ceiling of the bit length over
         # eight. ``bit_length() // 8`` floors, and ``math.ceil`` around an
         # integer division is a no-op, so any nonce whose bit length is not a
@@ -2230,7 +2229,7 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
             reserved = opt.flags.reserved
             seq = opt.seq
 
-        # ``OptDataLenDFF`` is 3 per RFC 6971 Errata ID 3937, c.f. _read_opt_ip_dff.
+        # ``OptDataLenDFF`` is 3 per RFC 6971 Errata ID 3937, see _read_opt_ip_dff.
         return Schema_IPDFFOption(
             type=code,
             len=3,

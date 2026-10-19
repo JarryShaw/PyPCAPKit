@@ -5,7 +5,7 @@ IPv6-Opts - Destination Options for IPv6
 
 :mod:`pcapkit.protocols.internet.ipv6_opts` contains
 :class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`
-only, which implements extractor for Destination Options
+only, which implements the extractor for Destination Options
 for IPv6 (IPv6-Opts) [*]_, whose structure is described
 as below:
 
@@ -148,15 +148,7 @@ Header Schemas
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.RPLFlags
-   :members:
-   :show-inheritance:
-
 .. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.MPLOption
-   :members:
-   :show-inheritance:
-
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.MPLFlags
    :members:
    :show-inheritance:
 
@@ -180,10 +172,6 @@ Header Schemas
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.DFFFlags
-   :members:
-   :show-inheritance:
-
 Type Stubs
 ~~~~~~~~~~
 
@@ -196,17 +184,14 @@ Type Stubs
    :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.RPLFlags
-   :no-index:
    :members:
    :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.MPLFlags
-   :no-index:
    :members:
    :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.schema.internet.ipv6_opts.DFFFlags
-   :no-index:
    :members:
    :show-inheritance:
 

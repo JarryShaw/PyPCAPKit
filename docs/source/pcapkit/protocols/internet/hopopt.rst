@@ -5,7 +5,7 @@ HOPOPT - IPv6 Hop-by-Hop Options
 
 :mod:`pcapkit.protocols.internet.hopopt` contains
 :class:`~pcapkit.protocols.internet.hopopt.HOPOPT`
-only, which implements extractor for IPv6 Hop-by-Hop
+only, which implements the extractor for IPv6 Hop-by-Hop
 Options header (HOPOPT) [*]_, whose structure is
 described as below:
 
@@ -148,15 +148,7 @@ Header Schemas
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hopopt.RPLFlags
-   :members:
-   :show-inheritance:
-
 .. autoclass:: pcapkit.protocols.schema.internet.hopopt.MPLOption
-   :members:
-   :show-inheritance:
-
-.. autoclass:: pcapkit.protocols.schema.internet.hopopt.MPLFlags
    :members:
    :show-inheritance:
 
@@ -180,10 +172,6 @@ Header Schemas
    :members:
    :show-inheritance:
 
-.. autoclass:: pcapkit.protocols.schema.internet.hopopt.DFFFlags
-   :members:
-   :show-inheritance:
-
 Type Stubs
 ~~~~~~~~~~
 
@@ -196,17 +184,14 @@ Type Stubs
    :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.schema.internet.hopopt.RPLFlags
-   :no-index:
    :members:
    :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.schema.internet.hopopt.MPLFlags
-   :no-index:
    :members:
    :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.schema.internet.hopopt.DFFFlags
-   :no-index:
    :members:
    :show-inheritance:
 

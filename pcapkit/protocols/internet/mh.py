@@ -4,7 +4,7 @@
 
 :mod:`pcapkit.protocols.internet.mh` contains
 :class:`~pcapkit.protocols.internet.mh.MH`,
-which implements extractor for Mobility Header
+which implements the extractor for Mobility Header
 (MH) [*]_, whose structure is described as below:
 
 ======= ========= ================== ===============================
@@ -25,16 +25,6 @@ Octets      Bits        Name                    Description
    ``pcapkit.protocols.internet.mh.NTPTimestamp``, with no alias; use
    :class:`pcapkit.protocols.data.internet.mh.NTPTimestamp` instead
    (:issue:`1886`).
-
-.. versionchanged:: 1.5.0
-
-   :class:`~pcapkit.protocols.data.internet.mh.NTPTimestamp` and
-   :class:`~pcapkit.protocols.data.internet.mh.PMIPv6Timestamp` are
-   :class:`~pcapkit.corekit.infoclass.Info` data models rather than named
-   tuples, so they no longer index, unpack, hash or compare equal to a
-   :obj:`tuple`, and the dumpers write them keyed by field, as
-   ``{"seconds": ..., "fraction": ...}``. For ``NTPTimestamp`` this is a
-   breaking change from 1.4.x (:issue:`1886`).
 
 """
 import collections
@@ -556,7 +546,7 @@ __all__ = ['MH']
 class FastBindingAcknowledgmentStatus(EnumLookup, IntEnum):
     """[FastBindingAcknowledgmentStatus] Fast Binding Acknowledgment Status Codes.
 
-    Status values of the fast binding acknowledgment (FBack) message, c.f.,
+    Status values of the fast binding acknowledgment (FBack) message, see
     :rfc:`5568#section-6.2.3`. Values below ``128`` indicate that the fast
     binding update was accepted by the receiving node, values of ``128`` and
     above that it was rejected.
@@ -632,7 +622,7 @@ class IPv6AddressPrefixCode(EnumLookup, IntEnum):
     """[IPv6AddressPrefixCode] Mobility Header IPv6 Address/Prefix Option Codes.
 
     Option codes of the mobility header IPv6 address/prefix option, which
-    identify which address the option carries, c.f.,
+    identify which address the option carries, see
     :rfc:`5568#section-6.4.2`.
 
     Note:
@@ -696,7 +686,7 @@ class IPv6AddressPrefixCode(EnumLookup, IntEnum):
 class LocalizedRoutingStatus(EnumLookup, IntEnum):
     """[LocalizedRoutingStatus] Localized Routing Acknowledgment Status Codes.
 
-    Status values of the localized routing acknowledgment (LRA) message, c.f.,
+    Status values of the localized routing acknowledgment (LRA) message, see
     :rfc:`6705#section-10.2`. Values below ``128`` indicate that the initiation
     was processed successfully, values of ``128`` and above that it was rejected.
 
@@ -756,7 +746,7 @@ class LMAAddressCode(EnumLookup, IntEnum):
     """[LMAAddressCode] Local Mobility Anchor Address Option Codes.
 
     Option codes of the local mobility anchor address option, which say which
-    address family the option carries, c.f., :rfc:`5949#section-6.2.2`.
+    address family the option carries, see :rfc:`5949#section-6.2.2`.
 
     Note:
         :rfc:`5949#section-6.2.2` defines these values inline and IANA keeps no
@@ -1156,8 +1146,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[Enum_Packet, str | tuple[PacketParser, PacketConstructor]]: Message
-    #: type to method mapping. A :obj:`str` value names the methods
+    #: Message type to method mapping. A :obj:`str` value names the methods
     #: ``_read_msg_${name}`` and ``_make_msg_${name}``, falling back to
     #: ``_read_msg_unknown`` / ``_make_msg_unknown`` when they do not exist; any
     #: other value is a ``(parser, constructor)`` pair of callables.
@@ -1191,8 +1180,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         },
     )  # type: DefaultDict[Enum_Packet | int, str | tuple[PacketParser, PacketConstructor]]
 
-    #: DefaultDict[Enum_Option, str | tuple[OptionParser, OptionConstructor]]: Option
-    #: type to method mapping. A :obj:`str` value names the methods
+    #: Option type to method mapping. A :obj:`str` value names the methods
     #: ``_read_opt_${name}`` and ``_make_opt_${name}``, falling back to
     #: ``_read_opt_none`` / ``_make_opt_none`` when they do not exist; any other
     #: value is a ``(parser, constructor)`` pair of callables.
@@ -1273,8 +1261,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         },
     )  # type: DefaultDict[Enum_Option | int, str | tuple[OptionParser, OptionConstructor]]
 
-    #: DefaultDict[Enum_CGAExtension, str | tuple[ExtensionParser, ExtensionConstructor]]: CGA
-    #: extension type to method mapping. A :obj:`str` value names the
+    #: CGA extension type to method mapping. A :obj:`str` value names the
     #: methods ``_read_ext_${name}`` and ``_make_ext_${name}``, falling back to
     #: ``_read_ext_none`` / ``_make_ext_none`` when they do not exist; any other
     #: value is a ``(parser, constructor)`` pair of callables.
@@ -1605,7 +1592,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             **kwargs: Arbitrary keyword arguments.
 
         See Also:
-            For construction argument, please refer to :meth:`self.make <MH.make>`.
+            For construction arguments, please refer to :meth:`self.make <MH.make>`.
 
         """
         #: bool: If the protocol is used as an IPv6 extension header.
@@ -3684,7 +3671,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
            |                                                               |
            +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
 
-        The option code identifies which address the option carries, c.f.,
+        The option code identifies which address the option carries, see
         :class:`~pcapkit.protocols.internet.mh.IPv6AddressPrefixCode`. It, too,
         is defined inline by :rfc:`5568#section-6.4.2` with no IANA registry
         behind it, hence the enumeration is local to this module.
@@ -6957,8 +6944,8 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
     def _make_msg_fbu(self, message: 'Optional[Data_FastBindingUpdateMessage]' = None, *,
                       seq: 'int' = 0,
-                      ack: 'bool' = True,  # MUST be set, c.f., RFC 5568, section 6.2.2
-                      home: 'bool' = True,  # MUST be set, c.f., RFC 5568, section 6.2.2
+                      ack: 'bool' = True,  # MUST be set, see RFC 5568, section 6.2.2
+                      home: 'bool' = True,  # MUST be set, see RFC 5568, section 6.2.2
                       lla_compat: 'bool' = False,
                       key_mngt: 'bool' = False,
                       lifetime: 'int | timedelta' = 4,  # reasonable default value
@@ -7027,7 +7014,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Args:
             message: Message data model.
-            status: Status code, c.f.,
+            status: Status code, see
                 :class:`~pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus`.
             status_default: Default status code.
             status_namespace: Status code namespace.
@@ -7099,7 +7086,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
 
     def _make_msg_emh(self, message: 'Optional[Data_ExperimentalMessage]' = None, *,
-                      data: 'bytes' = b'\x00\x00',  # 2 bytes of padding, c.f., RFC 5096, section 3
+                      data: 'bytes' = b'\x00\x00',  # 2 bytes of padding, see RFC 5096, section 3
                       **kwargs: 'Any') -> 'Schema_ExperimentalMessage':
         """Make MH experimental mobility header message type.
 
@@ -7441,7 +7428,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             message: Message data model.
             seq: Sequence number.
             unsolicited: Unsolicited flag.
-            status: Status, c.f.,
+            status: Status, see
                 :class:`~pcapkit.protocols.internet.mh.LocalizedRoutingStatus`.
             status_default: Default status.
             status_namespace: Status namespace.
@@ -8198,7 +8185,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                 f'bool, not {identifier!r} -- pass int({identifier!r}) if the '
                 f'numeric value is what is wanted')
 
-        # NOTE: The wire format is chosen by ``subtype_val`` (c.f. ``mn_id_selector``),
+        # NOTE: The wire format is chosen by ``subtype_val`` (see ``mn_id_selector``),
         # not by the Python type of ``identifier``, so the width has to be taken from
         # the former. For the ``IPv6_Address`` subtype the schema always packs a fixed
         # 16-octet address (:class:`~pcapkit.corekit.fields.ipaddress.IPv6AddressField`
@@ -8243,7 +8230,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             id_len = 16
         elif isinstance(identifier, int):
             if subtype_val == Enum_MNIDSubtype.NAI:
-                # NOTE: NAI's field is a StringField (c.f. mn_id_selector), so an
+                # NOTE: NAI's field is a StringField (see mn_id_selector), so an
                 # int has to become text -- and unlike the numeric subtypes below,
                 # there is no non-arbitrary way to do that. str(identifier) packs
                 # and round-trips fine, but an NAI is a network access identifier
@@ -8257,7 +8244,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                     f'must be str, not int -- pass str({identifier!r}) if a '
                     f'decimal-digit NAI is really what is wanted')
             # NOTE: every other subtype's field is a
-            # BytesField(length=pkt['length'] - 1) (c.f. mn_id_selector) -- a
+            # BytesField(length=pkt['length'] - 1) (see mn_id_selector) -- a
             # numeric identifier, so unlike NAI there IS a non-arbitrary wire
             # form: its own minimal big-endian encoding. That is self-consistent
             # with the declared length by construction and round-trips exactly.
@@ -8272,7 +8259,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             id_len = max(1, math.ceil(identifier.bit_length() / 8))
             identifier = identifier.to_bytes(id_len, 'big')
         elif subtype_val == Enum_MNIDSubtype.NAI:
-            # NOTE: NAI's field is a StringField (c.f. mn_id_selector), which
+            # NOTE: NAI's field is a StringField (see mn_id_selector), which
             # calls ``identifier.encode(...)`` to pack -- so anything but a
             # genuine str leaks a bare stdlib exception: AttributeError for
             # bytes/list/dict (no ``.encode``), TypeError for float/None/an
@@ -8291,7 +8278,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             id_len = len(identifier)
         else:
             # NOTE: every other subtype's field is a
-            # BytesField(length=pkt['length'] - 1) (c.f. mn_id_selector),
+            # BytesField(length=pkt['length'] - 1) (see mn_id_selector),
             # which hands ``identifier`` to ``struct.pack('Ns', ...)``
             # unconverted -- so anything but bytes leaks a bare stdlib
             # exception: struct.error for str/list/dict (struct's ``s``
@@ -8378,7 +8365,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Args:
             type: Option type.
             option: Option data model.
-            timestamp: NTP timestamp, c.f., :rfc:`1305`.
+            timestamp: NTP timestamp, see :rfc:`1305`.
             interval: Moment to encode when neither ``option`` nor
                 ``timestamp`` is given (``option`` supplies its own
                 ``ntp_timestamp``); defaults to the current time.
@@ -8613,7 +8600,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Note:
             The ``length`` field counts the authenticator only, excluding the
-            SPI, c.f., :meth:`_read_opt_badf`.
+            SPI, see :meth:`_read_opt_badf`.
 
         """
         if option is not None:
@@ -8643,7 +8630,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Args:
             type: Option type.
             option: Option data model.
-            code: Option code, c.f.,
+            code: Option code, see
                 :class:`~pcapkit.protocols.internet.mh.IPv6AddressPrefixCode`.
             code_default: Default option code.
             code_namespace: Option code namespace.
@@ -9481,7 +9468,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Args:
             type: Option type.
             option: Option data model.
-            code: Option code, c.f.,
+            code: Option code, see
                 :class:`~pcapkit.protocols.internet.mh.LMAAddressCode`.
             code_default: Default option code.
             code_namespace: Option code namespace.

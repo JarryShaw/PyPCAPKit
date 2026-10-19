@@ -6,7 +6,7 @@
 
 :mod:`pcapkit.protocols.internet.ipv6_route` contains
 :class:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route`
-only, which implements extractor for Routing Header for IPv6
+only, which implements the extractor for Routing Header for IPv6
 (IPv6-Route) [*]_, whose structure is described as below:
 
 ======= ========= ==================== ===============================
@@ -121,8 +121,7 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[Enum_Routing, str | tuple[TypeParser, TypeConstructor]]: Type
-    #: code to method mapping. A :obj:`str` value names the methods
+    #: Type code to method mapping. A :obj:`str` value names the methods
     #: ``_read_data_type_${name}`` and ``_make_data_type_${name}``, falling back
     #: to ``_read_data_type_none`` / ``_make_data_type_none`` when they do not
     #: exist; any other value is a ``(parser, constructor)`` pair of callables.
@@ -306,7 +305,7 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             Constructed packet data.
 
         Raises:
-            FieldValueError: If ``dst`` is a :obj:`bool` (c.f.
+            FieldValueError: If ``dst`` is a :obj:`bool` (see
                 :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`).
 
         .. versionchanged:: 1.5.0
@@ -436,7 +435,7 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             (GitHub issue :issue:`505`).
 
         See Also:
-            For construction argument, please refer to :meth:`self.make <IPv6_Route.make>`.
+            For construction arguments, please refer to :meth:`self.make <IPv6_Route.make>`.
 
         """
         #: bool: If the protocol is used as an IPv6 extension header.
@@ -823,7 +822,7 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             Constructed route data schema.
 
         Raises:
-            FieldValueError: If an entry of ``ip`` is a :obj:`bool` (c.f.
+            FieldValueError: If an entry of ``ip`` is a :obj:`bool` (see
                 :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`).
             ProtocolError: If ``ip`` is empty.
 
