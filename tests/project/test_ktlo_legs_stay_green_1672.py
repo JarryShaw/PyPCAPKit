@@ -126,10 +126,11 @@ EXPERIMENTAL_CAPS = {'python': 5, 'install': 10, 'watcher-python': 1, 'watcher':
 #: ``experimental``'s own ``timeout-minutes`` (#1732), and ``test``'s, main's 45 again.
 EXPERIMENTAL_JOB_CAP = 140
 JOB_CAP = 45
-#: The job's minutes those caps leave for the rest of an experimental leg. Everything
-#: but the install and the tests took at most 0.32 minutes, setup-python included, on
-#: every uncovered leg of runs 38569321543, 38569429406 and 38569522442. #1938's two
-#: capped watcher steps took 2 of the 5 this was.
+#: The job's minutes those caps leave for the rest of an experimental leg: the steps
+#: without a cap of their own -- checkout, the parallelism report, the resource
+#: monitor, the uploads and the summaries. Everything but the install and the tests
+#: took at most 0.32 minutes, setup-python included, on every uncovered leg of runs
+#: 38569321543, 38569429406 and 38569522442.
 UNCAPPED_MINUTES = 3
 #: Those steps' cap on every other leg: the largest a step's ``timeout-minutes`` may be
 #: (docs.github.com, workflow-syntax, ``jobs.<job_id>.steps[*].timeout-minutes``).

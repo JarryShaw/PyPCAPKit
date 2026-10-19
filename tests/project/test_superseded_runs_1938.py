@@ -165,7 +165,7 @@ class TestTheGate(unittest.TestCase):
         self.assertIs(checkout['with']['persist-credentials'], False)
 
     def test_the_gate_checks_on_latest_with_requests(self) -> None:
-        """Round 3: ``latest``, read as every job reads it, set up, and requests installed before the check."""
+        """The gate reads ``latest`` as every job reads it, sets it up and installs requests before the check."""
         ids = [entry.get('id') for entry in self.jobs[GATE]['steps']]
         self.assertEqual(ids, [None, 'versions', 'python', 'requests', 'check'])
         steps = {entry.get('id'): entry for entry in self.jobs[GATE]['steps']}
@@ -176,7 +176,7 @@ class TestTheGate(unittest.TestCase):
         self.assertEqual(steps['requests']['run'], 'python -m pip install requests')
 
     def test_the_watcher_runs_on_a_cpython_of_its_own_with_requests(self) -> None:
-        """Round 3: ``latest``, outside the leg's environment, and requests in it alone."""
+        """The watcher runs on ``latest``, outside the leg's environment, and requests goes into it alone."""
         legs = job(NAME, 'experimental')
         self.assertEqual(self.jobs['python-versions']['outputs']['latest'], '${{ steps.read.outputs.latest }}')
         steps = {entry.get('id'): entry for entry in legs['steps']}
@@ -185,7 +185,7 @@ class TestTheGate(unittest.TestCase):
         self.assertEqual(own['with'], {'python-version': '${{ needs.python-versions.outputs.latest }}',
                                        'update-environment': False})
         self.assertIs(own.get('continue-on-error'), True)
-        # The leg's own setup-python, first, as before: its interpreter, its environment, its cache.
+        # The leg's own setup-python comes first: its interpreter, its environment, its cache.
         self.assertEqual(leg['with'], {'python-version': '${{ matrix.python-version }}', 'cache': 'pip'})
         self.assertLess(legs['steps'].index(leg), legs['steps'].index(own))
         install = steps['watcher']
@@ -213,7 +213,7 @@ class TestTheGate(unittest.TestCase):
             with self.subTest(job=job_id):
                 self.assertIn(GATE, needs)
                 self.assertIn(SKIPS_ON, body['if'])
-                # Round 2: no implicit `success()`, so a failed gate job skips nothing.
+                # No implicit `success()`, so a failed gate job skips nothing.
                 self.assertTrue(body['if'].startswith('${{ !cancelled() && '), body['if'])
 
     def run_if(self, job_id: 'str', current: 'str', code: 'str' = 'true', *, gate: 'str' = 'success',
@@ -308,7 +308,7 @@ class TestCheck(unittest.TestCase):
                 self.assertEqual(self.api.requests, [])
 
     def test_the_default_transport_is_a_requests_session(self) -> None:
-        """Round 3: one :class:`requests.Session`, a bounded timeout, the status returned, a 304 answered from the cache."""
+        """One :class:`requests.Session`, a bounded timeout, the status returned, a 304 answered from the cache."""
         session = FakeSession([(200, {'ETag': 'W/"1"'}, {'sha': NEWER}), (304, {'ETag': 'W/"1"'}, None)])
         api = superseded.Api('token')
         api.session = session  # type: ignore[assignment]
@@ -333,7 +333,7 @@ class TestCheck(unittest.TestCase):
                 self.assertEqual((verdict.state, verdict.error), (superseded.CURRENT, True))
 
     def test_without_requests_everything_is_current(self) -> None:
-        """Round 3: a missing requests is one more failed request, not a crash."""
+        """A missing requests is one more failed request, not a crash."""
         original = superseded.requests
         superseded.requests = None  # type: ignore[assignment]
         self.addCleanup(setattr, superseded, 'requests', original)
@@ -476,7 +476,7 @@ class TestWatch(unittest.TestCase):
                                       + body], pidfile
 
     def test_the_scoped_tests_are_stopped_through_the_scope(self) -> None:
-        """Round 2: under sudo a signal to the session is refused, so the scope's processes are killed by name."""
+        """Under sudo a signal to the session is refused, so the scope's processes are killed by name."""
         command, pidfile = self.pid_command('time.sleep(60)')
         calls = []  # type: List[List[str]]
 
@@ -508,7 +508,7 @@ class TestWatch(unittest.TestCase):
         self.assertEqual((code, calls), (0, []))
 
     def test_a_command_that_cannot_be_stopped_ends_the_watch_with_a_warning(self) -> None:
-        """Round 2: every wait is bounded; a stop that fails warns and exits STOP_FAILED, not 0."""
+        """Every wait is bounded; a stop that fails warns and exits STOP_FAILED, not 0."""
         command, pidfile = self.pid_command('time.sleep(60)')
         refused = []  # type: List[Tuple[int, int]]
         calls = []  # type: List[Any]
@@ -681,7 +681,7 @@ class TestTheTestsStep(unittest.TestCase):
                         WATCHER='success', WATCHER_PYTHON=sys.executable)
 
     def test_without_the_watchers_interpreter_the_tests_run_unwatched(self) -> None:
-        """Round 3: a failed `watcher-python` or requests install leaves the tests as they would run without #1938."""
+        """A failed `watcher-python` or requests install runs the tests unwatched, with their own status."""
         bindir = pathlib.Path(self.env['PATH'].split(os.pathsep)[0])
         (bindir / 'python').write_text('#!/bin/sh\nsleep 1.5\nexit 3\n', encoding='utf-8')
         for outcome, path in (('failure', sys.executable), ('skipped', ''), ('success', '/nonexistent/python')):
@@ -715,7 +715,7 @@ class TestTheTestsStep(unittest.TestCase):
         self.assertEqual((self.status()['exit'], self.status()['scope']), ('0', 'none'))
 
     def test_a_scoped_run_is_stopped_through_its_scope(self) -> None:
-        """Round 2: in the scope, ``timeout`` and pytest are out of the session's reach; ``systemctl kill`` is not.
+        """In the scope, ``timeout`` and pytest are out of the session's reach; ``systemctl kill`` is not.
 
         ``sudo`` is a stub that runs the scope's command and plays systemd for
         ``systemctl kill``, signalling the pid the tests wrote. The tests leave
@@ -772,7 +772,7 @@ class TestTheTestsStep(unittest.TestCase):
 
 
 class TestTheUpdaterReadsTheWatchersLatest(unittest.TestCase):
-    """Round 3: util/update_python_versions.py reads where ``latest`` is set up, the watcher's included."""
+    """util/update_python_versions.py reads where ``latest`` is set up, the watcher's included."""
 
     @staticmethod
     def workflows(runs_on: 'str', leg: 'bool' = True) -> 'Dict[str, Any]':
@@ -790,7 +790,7 @@ class TestTheUpdaterReadsTheWatchersLatest(unittest.TestCase):
         self.assertEqual(labels['latest'], ['ubuntu-24.04'])
         with self.assertRaisesRegex(ValueError, 'installs latest on .*which this cannot read'):
             module.workflow_labels(self.workflows('${{ matrix.runner }}', leg=False))
-        # The real workflows, experimental's watcher among them, read as before.
+        # The real workflows, experimental's watcher among them, are readable too.
         self.assertIn('ubuntu-latest', module.workflow_labels(module.load_workflows(ROOT))['latest'])
 
 
