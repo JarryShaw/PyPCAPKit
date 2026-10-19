@@ -13,10 +13,10 @@ import logging
 import os
 import pkgutil
 import re
+import sys
 import typing
 from typing import TYPE_CHECKING
 
-import aenum
 from docutils import nodes
 from sphinx import addnodes
 from sphinx.ext.autodoc.preserve_defaults import DefaultValue, update_default_value
@@ -53,7 +53,7 @@ from pcapkit.protocols.schema.schema import Schema
 
 if TYPE_CHECKING:
     from types import FunctionType, ModuleType
-    from typing import Any, Dict, List, Optional
+    from typing import Any, Dict, List, Optional, Set
     from docutils.nodes import document
     from sphinx.application import Sphinx
     from sphinx.config import Config
@@ -221,7 +221,7 @@ manpages_url = 'https://linux.die.net/man/{section}/{page}'
 todo_include_todos = True
 
 set_type_checking_flag = True
-# NB: ``typehints_formatter`` is set below, beside ``format_aenum_class``.
+# NB: ``typehints_formatter`` is set below, beside ``format_class``.
 typehints_fully_qualified = False
 always_document_param_types = False
 typehints_document_rtype = True
@@ -437,6 +437,9 @@ def bind_type_checking_names(app: 'Sphinx', env: 'BuildEnvironment',  # pylint: 
     it would be discarded, and the library would run those blocks again as reading
     reached them.
 
+    The walk also records each module's classes for :func:`format_class`, through
+    :func:`record_class_names`.
+
     One consequence is worth knowing before it is met as a mystery: making the
     annotations resolvable also makes a malformed one **fatal**. A quoted
     annotation with stray whitespace inside the quotes -- ``rank: ' int'``, the
@@ -466,6 +469,7 @@ def bind_type_checking_names(app: 'Sphinx', env: 'BuildEnvironment',  # pylint: 
             logger.info('skipped unimportable module %s: %s', info.name, exc)
             continue
         bind_guarded_names(app.config.autodoc_mock_imports, module)
+        record_class_names(module)
 
 
 #: Every name :mod:`builtins` binds -- ``dict``, ``set``, ``type`` and the rest.
@@ -586,40 +590,92 @@ def restore_enum_member_docstring(app: 'Sphinx', what: str, name: str,  # pylint
         lines[:] = original
 
 
-def format_aenum_class(annotation: 'Any', config: 'Config') -> 'Optional[str]':  # pylint: disable=unused-argument
-    """Name a class that :mod:`aenum` defines by its qualified name.
+#: The bare names of the classes the ``pcapkit`` modules bind, each with the
+#: qualified names of the classes bound under it; :func:`record_class_names`
+#: fills it as the build starts.
+CLASS_NAMES = {}  # type: Dict[str, Set[str]]
 
-    ``typehints_fully_qualified`` is off, so a class renders by its bare name, and
-    :mod:`aenum` publishes no inventory to link to. A union of an :mod:`aenum`
-    class and its standard library namesake therefore read ``IntEnum | IntEnum``:
-    the first linked to :class:`enum.IntEnum`, the second plain text
-    (:issue:`1858`). Qualifying the :mod:`aenum` one tells them apart.
 
-    The name is the one the package exports, ``aenum.IntEnum``, rather than the
-    ``aenum._enum`` module that defines the class. ``sphinx-autodoc-typehints``
-    3.15 renders ``Bases:`` lines too, so ``NumberField[IntEnum | IntEnum]``
-    reads apart there as well.
+def record_class_names(module: 'ModuleType') -> None:
+    """Note the classes one module binds, at runtime or in its ``if TYPE_CHECKING:`` block.
+
+    :func:`format_class` reads the record to tell which bare names more than one
+    class answers to.
+
+    Args:
+        module: The module, its guarded names already recorded by
+            :func:`resolve_type_guarded_imports`.
+
+    """
+    for value in (*vars(module).values(), *guarded_names(module).values()):
+        if isinstance(value, type) and isinstance(getattr(value, '__module__', None), str):
+            CLASS_NAMES.setdefault(value.__name__, set()).add(f'{value.__module__}.{value.__qualname__}')
+
+
+def exported_name(cls: type) -> str:
+    """The shortest dotted name a class is importable by, from the package down.
+
+    That is ``aenum.IntEnum`` for the class ``aenum._enum`` defines.
+
+    Args:
+        cls: The class.
+
+    Returns:
+        The qualified name.
+
+    """
+    parts = cls.__module__.split('.')
+    for end in range(1, len(parts)):
+        owner = '.'.join(parts[:end])
+        if getattr(sys.modules.get(owner), cls.__qualname__, None) is cls:
+            return f'{owner}.{cls.__qualname__}'
+    return f'{cls.__module__}.{cls.__qualname__}'
+
+
+def format_class(annotation: 'Any', config: 'Config') -> 'Optional[str]':  # pylint: disable=unused-argument
+    """Name a third-party class by its qualified name when its bare name is ambiguous.
+
+    ``typehints_fully_qualified`` is off, so a class renders by its bare name.
+    Two classes of one name therefore read the same: ``IntEnum | IntEnum`` for
+    the standard library's and ``aenum``'s (:issue:`1858`), and
+    ``Packet | Packet | Packet`` for those of ``scapy``, ``dpkt`` and ``pyshark``
+    (:issue:`1918`). A class from another distribution is qualified when
+    :data:`CLASS_NAMES` records another class of its name, and an ``aenum``
+    class always is, since each shadows a standard library one.
+    ``sphinx-autodoc-typehints`` 3.15 renders ``Bases:`` lines too, so
+    ``NumberField[IntEnum | IntEnum]`` reads apart there as well.
+
+    A package in :data:`intersphinx_mapping` gets a cross-reference, by the module
+    defining the class, as its inventory names it. Any other package has no
+    ``py:`` objects to link to (:issue:`934`), so it gets a literal, by the name
+    the package exports, ``aenum.IntEnum`` rather than ``aenum._enum.IntEnum``
+    (:issue:`1920`).
 
     Args:
         annotation: The type being rendered, or a part of one.
         config: Sphinx configuration.
 
     Returns:
-        A ``:py:class:`` role naming an :mod:`aenum` class, or :data:`None` to
-        leave anything else to the default rendering.
+        The markup naming such a class, or :data:`None` to leave anything else
+        to the default rendering.
 
     """
     module = getattr(annotation, '__module__', None)
-    if not isinstance(annotation, type) or not isinstance(module, str) or module.partition('.')[0] != 'aenum':
+    if not isinstance(annotation, type) or not isinstance(module, str):
         return None
-    name = annotation.__qualname__
-    owner = 'aenum' if getattr(aenum, name, None) is annotation else module
-    return f':py:class:`{owner}.{name}`'
+    package = module.partition('.')[0]
+    if package == 'pcapkit' or package in sys.stdlib_module_names:
+        return None
+    if package != 'aenum' and len(CLASS_NAMES.get(annotation.__name__, ())) < 2:
+        return None
+    if package in intersphinx_mapping:
+        return f':py:class:`{module}.{annotation.__qualname__}`'
+    return f'``{exported_name(annotation)}``'
 
 
 # NB: only one formatter can be configured, so any other formatter-based fix has
 # to share this one.
-typehints_formatter = format_aenum_class
+typehints_formatter = format_class
 
 #: A name followed by an attribute access or a call, in the source text of a default.
 DOTTED_HEAD = re.compile(r'(?<![\w.])([A-Za-z_]\w*)(?=[.(])')
@@ -691,6 +747,44 @@ def name_aliased_defaults(app: 'Sphinx', obj: 'Any', bound_method: bool) -> None
         obj.__signature__ = renamed
     except AttributeError:
         obj.__dict__['__signature__'] = renamed
+
+
+def sign_wrapped_function(app: 'Sphinx', obj: 'Any', bound_method: bool) -> None:  # pylint: disable=unused-argument
+    """Move a preserved signature off a ``functools.wraps`` wrapper, onto the function it wraps.
+
+    ``autodoc_preserve_defaults`` stores the signature on the documented object,
+    which for a decorated method is the wrapper. ``sphinx-autodoc-typehints``
+    stops unwrapping at a stated ``__signature__``, so it evaluated the
+    annotations in the decorator's module. The ``@seekset`` overload of
+    :meth:`~pcapkit.protocols.protocol.ProtocolBase._read_packet` then rendered
+    its return as the bare alias ``Data_Packet``, which only the protocol module
+    binds (:issue:`1917`).
+
+    Only a signature listing what the wrapped function takes is moved, so a
+    wrapper stating a signature of its own keeps it. Python reads the moved one
+    through the wrapper, so autodoc renders the same signature.
+
+    Args:
+        app: Sphinx application.
+        obj: The function or method whose signature autodoc is about to read.
+        bound_method: Whether it is read as a bound method.
+
+    """
+    wrapper = getattr(obj, '__func__', obj)
+    wrapped = inspect.unwrap(wrapper)
+    if wrapped is wrapper or not inspect.isfunction(wrapper) or not inspect.isfunction(wrapped):
+        return
+    signature = vars(wrapper).get('__signature__')
+    if not isinstance(signature, inspect.Signature) or '__signature__' in vars(wrapped):
+        return
+    # NB: autodoc rewrites the defaults only, so everything else has to match.
+    own = inspect.signature(wrapped)
+    if (signature.return_annotation != own.return_annotation
+            or [(param.name, param.kind, param.annotation) for param in signature.parameters.values()]
+            != [(param.name, param.kind, param.annotation) for param in own.parameters.values()]):
+        return
+    del wrapper.__signature__
+    wrapped.__signature__ = signature
 
 
 def passes_through(new: 'FunctionType') -> bool:
@@ -987,6 +1081,8 @@ def setup(app: 'Sphinx') -> None:
     # NB: after the ``update_defvalue`` that autodoc's legacy documenters connect
     # at the default 500; the current ones preserve the defaults before emitting.
     app.connect('autodoc-before-process-signature', name_aliased_defaults, priority=600)
+    # NB: after ``name_aliased_defaults``, which writes to the wrapper.
+    app.connect('autodoc-before-process-signature', sign_wrapped_function, priority=700)
     app.connect('viewcode-follow-imported', follow_builtins_alias)
     app.add_post_transform(DropTableWrapperIds)
     app.connect('doctree-read', resolve_builtins_exactly)
