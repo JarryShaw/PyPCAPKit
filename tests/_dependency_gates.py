@@ -649,9 +649,9 @@ DEPENDENCY_GATE_EXCLUSIONS = {
         dark={'test': ('sphinx', 'sphinx_autodoc_typehints'),
               'gate': ('sphinx', 'sphinx_autodoc_typehints')},
         reason=(
-            'The classes it gates (#1775, #1856, #1858-#1863 and the enum-value hook\'s) load '
-            'docs/source/conf.py and drive its hooks with the nodes and events Sphinx '
-            'itself builds, so they need Sphinx and the pinned sphinx-autodoc-typehints. '
+            'The classes it gates (#1775, #1856, #1858-#1863, #1917, #1918 and the enum-value '
+            'hook\'s) load docs/source/conf.py and drive its hooks with the nodes and events '
+            'Sphinx itself builds, so they need Sphinx and the pinned sphinx-autodoc-typehints. '
             'Only deploy-pages.yml installs those, from docs/requirements.txt, and that '
             'workflow builds the documentation rather than running pytest; no workflow '
             'installs the docs extra itself. The same argument declines it here as '
