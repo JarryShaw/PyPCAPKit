@@ -47,7 +47,8 @@ branches. :class:`~pcapkit.const.mh.cga_type.CGAType` keeps minting too, but
 for a different reason: its ``Tag_<hex>`` mint is not an IANA-style
 range at all (see its own module for why), so the ruling never touched it.
 
-GitHub issue #860 (step 2, PR 1) brought most of those classes onto
+GitHub issue #860 (step 2, PR 1) brought every one of those classes except
+:class:`~pcapkit.const.reg.apptype.apptype.AppType` onto
 :class:`~pcapkit.corekit.enum.EnumRegistry` and converted their branches --
 see :data:`BESPOKE_UNMINT_CONVERTED_REGISTRIES` and
 :class:`BespokeOpenVocabularyUnmintConvertedTests` below. Two distinct
@@ -1481,13 +1482,13 @@ class RulingConversionSourceTests(unittest.TestCase):
     converted both, so nothing is excluded here -- see its own docstring."""
 
     def test_no_reachable_gap_registries_no_longer_call_extend_enum(self) -> None:
-        # EtherType now belongs to RULING_CONVERTED_WITH_REACHABLE_GAP: its
+        # EtherType belongs to RULING_CONVERTED_WITH_REACHABLE_GAP: its
         # masked-branch exclusion (Old Xerox shadowed by the wider IEEE802.3
         # range) was fixed under GitHub issue #862, and its first converted
         # branch by source order is directly probeable like any other
-        # reachable-gap registry now. The `_MIXED_REGISTRIES` subtraction
+        # reachable-gap registry. The `_MIXED_REGISTRIES` subtraction
         # below is a defensive no-op -- neither mixed registry needs
-        # removing from `RCR - RG` any more (EtherType is already in RG;
+        # removing from `RCR - RG` (EtherType is already in RG;
         # Socket never appeared in RULING_CONVERTED_REGISTRIES to begin with)
         # -- kept so a mixed registry that regains a masked or absent branch
         # in the future does not silently inflate this count.
