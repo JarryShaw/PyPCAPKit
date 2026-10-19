@@ -7,7 +7,7 @@
 
 :mod:`pcapkit.protocols.link.loopback` contains
 :class:`~pcapkit.protocols.link.loopback.Loopback`
-only, which implements extractor for the BSD loopback
+only, which implements the extractor for the BSD loopback
 encapsulation [*]_ of ``LINKTYPE_NULL`` and ``LINKTYPE_LOOP``,
 whose structure is described as below:
 
@@ -117,12 +117,13 @@ class Loopback(Link[Data_Loopback, Schema_Loopback],
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[int, ModuleDescriptor[ProtocolBase] | ~typing.Type[ProtocolBase]]: Protocol index
-    #: mapping for decoding next layer,
-    #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
-    #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
-    #: Keyed by address family rather than by EtherType, so this class keeps a
-    #: registry of its own instead of sharing :attr:`Link.__proto__
+    #: Protocol index mapping for decoding next layer, see
+    #: :meth:`self._decode_next_layer
+    #: <pcapkit.protocols.protocol.Protocol._decode_next_layer>` &
+    #: :meth:`self._import_next_layer
+    #: <pcapkit.protocols.protocol.Protocol._import_next_layer>`. Keyed by
+    #: address family rather than by EtherType, so this class keeps a registry
+    #: of its own instead of sharing :attr:`Link.__proto__
     #: <pcapkit.protocols.link.link.Link.__proto__>`.
     __proto__ = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),

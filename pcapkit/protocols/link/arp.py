@@ -450,7 +450,7 @@ class ARP(Link[Data_ARP, Schema_ARP],
             packed, and anything else is returned as given.
 
         Raises:
-            FieldValueError: If ``addr`` is a :obj:`bool` (c.f.
+            FieldValueError: If ``addr`` is a :obj:`bool` (see
                 :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`).
             ProtocolError: If ``ptype`` is neither IPv4 nor IPv6 and ``addr``
                 is a :data:`str` that is not *hex* encoded.

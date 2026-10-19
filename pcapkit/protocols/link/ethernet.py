@@ -6,7 +6,7 @@
 
 :mod:`pcapkit.protocols.link.ethernet` contains
 :class:`~pcapkit.protocols.link.ethernet.Ethernet`
-only, which implements extractor for Ethernet
+only, which implements the extractor for Ethernet
 Protocol [*]_, whose structure is described as
 below:
 

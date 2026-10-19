@@ -108,7 +108,7 @@ class L2TP(Schema):
     )
     #: Payload of L2TP packet.
     payload: 'bytes' = PayloadField(length=l2tp_payload_length)
-    #: Octets captured past the Length field, c.f.
+    #: Octets captured past the Length field, see
     #: :attr:`IPv4.trailer <pcapkit.protocols.schema.internet.ipv4.IPv4.trailer>`.
     #: Always empty when the ``L`` flag is clear, since the payload then takes
     #: the rest of the datagram.

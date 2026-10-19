@@ -7,7 +7,7 @@
 
 :mod:`pcapkit.protocols.transport.sctp` contains
 :class:`~pcapkit.protocols.transport.sctp.SCTP` only,
-which implements extractor for Stream Control
+which implements the extractor for Stream Control
 Transmission Protocol (SCTP) [*]_, whose structure is
 described as below:
 
@@ -448,10 +448,11 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
     #: Payload protocol identifier of the first DATA chunk found in the packet.
     _ppid = None  # type: Optional[Enum_PayloadProtocolIdentifier]
 
-    #: DefaultDict[int, ModuleDescriptor[ProtocolBase] | ~typing.Type[ProtocolBase]]: Protocol
-    #: index mapping for decoding next layer, c.f.
-    #: :meth:`self._decode_next_layer <pcapkit.protocols.transport.sctp.SCTP._decode_next_layer>`
-    #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
+    #: Protocol index mapping for decoding next layer, see
+    #: :meth:`self._decode_next_layer
+    #: <pcapkit.protocols.transport.sctp.SCTP._decode_next_layer>` &
+    #: :meth:`self._import_next_layer
+    #: <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     #:
     #: Important:
     #:    Keyed by the DATA chunk's *payload protocol identifier* (PPID), **not**
@@ -469,8 +470,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         },
     )  # type: DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
 
-    #: DefaultDict[Enum_Chunk, str | tuple[ChunkParser, ChunkConstructor]]: Chunk
-    #: type to method mapping, c.f. :meth:`_read_sctp_chunks` and
+    #: Chunk type to method mapping, see :meth:`_read_sctp_chunks` and
     #: :meth:`_make_sctp_chunks`. Method names are expected to be referred to
     #: the class by ``_read_chunk_${name}`` and ``_make_chunk_${name}``, and if
     #: such name not found, the value should then be a method that can parse the
@@ -494,12 +494,11 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         },
     )  # type: DefaultDict[int, str | tuple[ChunkParser, ChunkConstructor]]
 
-    #: DefaultDict[Enum_Parameter, str | tuple[ParameterParser, ParameterConstructor]]: Chunk
-    #: parameter type to method mapping, c.f. :meth:`_read_sctp_parameters`
-    #: and :meth:`_make_sctp_parameters`. Method names are expected to be
-    #: referred to the class by ``_read_param_${name}`` and
-    #: ``_make_param_${name}``, and if such name not found, the value should then
-    #: be a method that can parse the parameter by itself.
+    #: Chunk parameter type to method mapping, see
+    #: :meth:`_read_sctp_parameters` and :meth:`_make_sctp_parameters`. Method
+    #: names are expected to be referred to the class by ``_read_param_${name}``
+    #: and ``_make_param_${name}``, and if such name not found, the value should
+    #: then be a method that can parse the parameter by itself.
     __parameter__ = collections.defaultdict(
         lambda: 'donone',
         {
@@ -514,12 +513,11 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         },
     )  # type: DefaultDict[int, str | tuple[ParameterParser, ParameterConstructor]]
 
-    #: DefaultDict[Enum_CauseCode, str | tuple[CauseParser, CauseConstructor]]: Error
-    #: cause code to method mapping, c.f. :meth:`_read_sctp_causes` and
-    #: :meth:`_make_sctp_causes`. Method names are expected to be referred to the
-    #: class by ``_read_cause_${name}`` and ``_make_cause_${name}``, and if such
-    #: name not found, the value should then be a method that can parse the error
-    #: cause by itself.
+    #: Error cause code to method mapping, see :meth:`_read_sctp_causes` and
+    #: :meth:`_make_sctp_causes`. Method names are expected to be referred to
+    #: the class by ``_read_cause_${name}`` and ``_make_cause_${name}``, and if
+    #: such name not found, the value should then be a method that can parse the
+    #: error cause by itself.
     __cause__ = collections.defaultdict(
         lambda: 'donone',
         {
