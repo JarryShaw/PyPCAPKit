@@ -751,7 +751,11 @@ Tests run completes without it, and with it ``Required checks passed``,
 (``coverage-comment.yml``, ``deploy-pages.yml``, ``cron-vendor.yml`` and
 ``cron-conda.yml``). It runs on Unit Tests' ``push`` and ``pull_request`` events,
 skips a docs-only pull request by the same ``changes`` script, and cancels a
-pull request's superseded run. The legs never
+superseded run, a pull request's or, unlike Unit Tests, a push to ``main``'s
+(`#1903 <https://github.com/JarryShaw/PyPCAPKit/issues/1903>`__): since nothing
+waits on the legs, ``main``'s newest commit is the one worth testing, whereas Unit
+Tests keeps a run per push for ``unittest-ordering``, which runs only there. Any
+other event keeps a concurrency group of its own, by run id. The legs never
 block, by the KTLO mechanics above: every step that can fail has
 ``continue-on-error: true``, their annotations are warnings, and ``Experimental
 summary``, the job's last step, reports each failed step. A failure no step

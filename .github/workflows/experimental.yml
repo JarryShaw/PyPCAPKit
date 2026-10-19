@@ -25,12 +25,17 @@ on:
 permissions:
   contents: read
 
-# Only pull-request runs may be superseded, as in unit-tests.yml: every other
-# event gets a group of its own, by run id, so a push is never cancelled while
-# pending behind the next one.
+# #1903, the owner's option 1: a run is superseded by the next one on its ref,
+# whether a pull request's or a push to main's. Nothing waits on these legs, so
+# main's newest commit is the one worth testing, and a merge wave no longer
+# queues a two-hour GraalPy leg per push. unit-tests.yml still gives each push
+# a run of its own, since its `unittest-ordering` leg runs only on main. Any
+# other event -- a push to another branch, should `on:` ever allow one, or a
+# trigger added later -- keeps a group of its own, by run id, and is never
+# cancelled.
 concurrency:
-  group: experimental-tests-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+  group: experimental-tests-${{ (github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')) && github.ref || github.run_id }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
 
 jobs:
   # unit-tests.yml's job of the same name, reading the one output this file needs.
