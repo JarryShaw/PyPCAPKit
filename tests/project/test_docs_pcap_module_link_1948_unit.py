@@ -59,8 +59,8 @@ NOTE_DOC = 'pcapkit/foundation/engines/3rdparty'
 #: A bare ``pcap`` literal, and not ``pcap.pcap`` or ``import pcap``.
 BARE = re.compile(r'``pcap``')
 
-#: Bare literals kept on purpose, by path. Each pattern must still match, so an
-#: entry cannot outlive the text it was written for.
+#: Bare literals kept on purpose, by path. Each pattern must match its file, so
+#: an entry cannot outlive the text it names.
 KEPT = {
     # The note the label marks: a link there would point at itself.
     NOTE_PAGE: (
@@ -305,7 +305,7 @@ class BuilderTests(unittest.TestCase):
         self.assertNotIn(f'#document-note#{LABEL}', html)
 
     def test_latex_without_the_note_writes_the_literal(self) -> 'None':
-        """latex has no URI for a page outside its document set, and the build used to die on it."""
+        """latex has no URI for a page outside its document set, so each link is written as its literal."""
         tex = (self.build('latex', with_note=False) / 'x.tex').read_text(encoding='utf-8')
         self.assertIn(r'\sphinxcode{\sphinxupquote{pcap}}', tex)
         self.assertNotIn(LABEL, tex)
