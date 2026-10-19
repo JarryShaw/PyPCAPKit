@@ -184,18 +184,22 @@ class FakeAPI:
         return json.dumps(body).encode(), headers
 
 
-def run_main(*argv: 'str', api: 'FakeAPI',
-             baseline: 'Optional[dict]' = None) -> 'tuple[int, str, dict, str]':
-    """``main`` against ``api``; returns the status, stdout, report.json and report.md."""
+def run_main(*argv: 'str', api: 'FakeAPI', baseline: 'Optional[dict]' = None,
+             stderr: 'Optional[io.StringIO]' = None, **options: 'Any') -> 'tuple[int, str, dict, str]':
+    """``main`` against ``api``; returns the status, stdout, report.json and report.md.
+
+    ``stderr``, if given, receives the progress lines; ``options`` go to ``main``.
+
+    """
     with tempfile.TemporaryDirectory() as tmp:
         out, md = os.path.join(tmp, 'report.json'), os.path.join(tmp, 'report.md')
         before = os.path.join(tmp, 'baseline.json')
         if baseline is not None:
             pathlib.Path(before).write_text(json.dumps(baseline), encoding='utf-8')
         stdout = io.StringIO()
-        with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(io.StringIO()):
+        with contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(stderr or io.StringIO()):
             status = ci_timing.main(['--repo', REPO, '--out', out, '--summary', md,
-                                     '--baseline', before, *argv], transport=api, now=NOW)
+                                     '--baseline', before, *argv], transport=api, now=NOW, **options)
         report = json.loads(pathlib.Path(out).read_text(encoding='utf-8')) if os.path.exists(out) else {}
         text = pathlib.Path(md).read_text(encoding='utf-8') if os.path.exists(md) else ''
     return status, stdout.getvalue(), report, text
@@ -735,6 +739,105 @@ class TestSampling(unittest.TestCase):
         _, _, report, _ = run_main(api=FakeAPI(inflate=ci_timing.LISTING_CAP))
         self.assertTrue(any('of which the API returned 3' in note for note in report['notes']), report['notes'])
 
+    def test_every_prefix_of_the_read_order_spans_the_window(self) -> 'None':
+        """#1930: a read stopped part way through still covers the whole window."""
+        for size in range(40):
+            order = ci_timing.prefix_order(list(range(size)))
+            with self.subTest(size=size):
+                self.assertEqual(sorted(order), list(range(size)))
+                self.assertEqual(order[:2], [0, size - 1][:size])
+                for count in range(2, size + 1):
+                    chosen = sorted(order[:count])
+                    widest = max(high - low for low, high in zip(chosen, chosen[1:]))
+                    # Each level of halving at most halves the widest gap.
+                    self.assertLessEqual(widest, 2 * (size - 1) / (count - 1) + 1, (count, chosen))
+
+    def test_the_groups_are_read_in_step(self) -> 'None':
+        """At any point each sample has had about the same share read; ``first`` leads."""
+        big = [{'id': n} for n in range(12)]
+        small = [{'id': 100 + n} for n in range(4)]
+        queue = ci_timing.read_order([big, small], first=[big[5], small[1]])
+        ids = [run['id'] for run in queue]
+        self.assertEqual(sorted(ids), sorted(run['id'] for run in big + small))
+        self.assertEqual(ids[:2], [5, 101])
+        for count in range(2, len(ids) + 1):
+            read = ids[2:count]
+            shares = [sum(1 for n in read if n in group) / len(group)
+                      for group in ({n for n in range(12)} - {5}, {100, 102, 103})]
+            self.assertLessEqual(abs(shares[0] - shares[1]), 0.5, (count, read))
+
+
+class _Clocked(FakeAPI):
+    """:class:`FakeAPI` with a clock that each job read moves on ``minutes``."""
+
+    def __init__(self, minutes: 'float') -> 'None':
+        super().__init__()
+        self.minutes, self.now = minutes, 0.0
+
+    def __call__(self, url: 'str', accept: 'str') -> 'tuple[bytes, dict[str, str]]':
+        if '/attempts/1/jobs' in url:
+            self.now += self.minutes * 60
+        return super().__call__(url, accept)
+
+    def clock(self) -> 'float':
+        return self.now
+
+
+def job_reads(api: 'FakeAPI') -> 'list[int]':
+    return [int(m.group(1)) for url, _ in api.requests if (m := re.search(r'/runs/(\d+)/attempts/1/jobs', url))]
+
+
+@unittest.skipUnless(HAS_LXML, NO_LXML)
+class TestBudget(unittest.TestCase):
+    """#1930: a run that runs out of time or calls reading jobs still writes a report."""
+
+    def test_a_spent_time_budget_still_writes_a_report(self) -> 'None':
+        # Ten minutes a read, 25 to spend: the third read starts at 20, the fourth would at 30.
+        api = _Clocked(10)
+        with mock.patch.object(ci_timing, 'MIN_SAMPLES', 1):
+            status, stdout, report, summary = run_main(
+                '--budget-minutes', '25', '--concurrency-hours', '1', api=api, clock=api.clock)
+        self.assertNotIn(status, (ci_timing.EXIT_API, ci_timing.EXIT_CRASH))
+        # The JUnit push leads, so ms per test keeps its jobs; then each event in turn.
+        self.assertEqual(job_reads(api), [PUSH_RUN, CANCELLED_RUN, PR_RUN])
+        self.assertEqual(report['window']['read']['unit-tests.yml']['read'], 3)
+        self.assertEqual(report['window']['read']['unit-tests.yml']['listed'], 4)
+        self.assertEqual(report['derived']['test_counts'][0]['run_id'], PUSH_RUN)
+        stopped = [note for note in report['notes'] if note.startswith('Jobs were read for 3 of the 4 runs')]
+        self.assertEqual(len(stopped), 1, report['notes'])
+        self.assertIn('25-minute budget (--budget-minutes) ran out', stopped[0])
+        self.assertIn(stopped[0], summary)
+        self.assertIn(f'::warning title=CI timing stopped early::{stopped[0]}', stdout)
+        # The runner pool is not measured on what is left over.
+        self.assertIsNone(report.get('concurrency'))
+        self.assertTrue(any('runner-pool measurement was skipped' in note for note in report['notes']))
+        self.assertFalse(any('/actions/runs?' in url for url, _ in api.requests))
+
+    def test_running_out_of_calls_reading_jobs_still_writes_a_report(self) -> 'None':
+        """Out of calls while listing, there is nothing to report; out while reading jobs, there is."""
+        whole = FakeAPI()
+        run_main(api=whole)
+        before = next(n for n, (url, _) in enumerate(whole.requests) if '/attempts/1/jobs' in url)
+        api = FakeAPI()
+        with mock.patch.object(ci_timing, 'MIN_SAMPLES', 1):
+            status, stdout, report, _ = run_main('--max-calls', str(before + 2), api=api)
+        self.assertNotIn(status, (ci_timing.EXIT_API, ci_timing.EXIT_CRASH), stdout)
+        self.assertEqual(len(api.requests), before + 2)
+        self.assertEqual(report['window']['read']['unit-tests.yml']['read'], 2)
+        self.assertTrue(any(note.startswith('Jobs were read for 2 of the 4 runs')
+                            and '(--max-calls)' in note for note in report['notes']), report['notes'])
+
+    def test_progress_goes_to_stderr(self) -> 'None':
+        """A run killed by a cap leaves a trail of how far it got."""
+        stderr = io.StringIO()
+        run_main(api=FakeAPI(), stderr=stderr)
+        lines = stderr.getvalue().splitlines()
+        self.assertTrue(lines)
+        self.assertTrue(all(line.startswith('[ci-timing ') for line in lines), lines)
+        self.assertTrue(any(line.endswith('unit-tests.yml: 4 runs listed, 4 sampled.') for line in lines), lines)
+        self.assertTrue(any('JUnit: run 37998639834, junit-unit-3.13' in line for line in lines), lines)
+        self.assertTrue(lines[-1].endswith('Jobs read for 4 of 4 runs.'), lines)
+
 
 class TestExitStatus(unittest.TestCase):
     """1 is a HARD finding; a failure to read or to run says so with a status of its own."""
@@ -1073,11 +1176,24 @@ class TestReviewWorkflow(unittest.TestCase):
 
     def test_the_job(self) -> 'None':
         specs = ci_timing.parse_workflow(self.text)
-        self.assertEqual([(spec['name'], spec['timeout']) for spec in specs], [('CI timing report', 15)])
+        self.assertEqual([(spec['name'], spec['timeout']) for spec in specs], [('CI timing report', 40)])
         self.assertIn('python util/ci_timing.py', self.code)
         # The upload and the baseline download name the same artifact.
         self.assertIn('name: ci-timing-report', self.code)
         self.assertIn('-n ci-timing-report', self.code)
+
+    def test_a_capped_run_still_publishes_its_report(self) -> 'None':
+        """#1930: the script's budget sits under its step's cap, which sits under the job's."""
+        job = ci_timing.parse_workflow(self.text)[0]
+        step = next(step for step in job['steps'] if step['name'] == 'Report CI timing')
+        budget = float(re.search(r'--budget-minutes (\d+)', self.code).group(1))
+        self.assertLess(budget, step['timeout'])
+        self.assertLess(step['timeout'], job['timeout'])
+        # Neither the summary nor the upload is skipped when a cap stops the job.
+        for name in ('Add the report to the job summary', 'Upload the report'):
+            with self.subTest(step=name):
+                self.assertRegex(self.code, rf"- name: {name}\n        if: \$\{{\{{ always\(\) \}}\}}\n")
+        self.assertNotIn('!cancelled()', self.code)
 
     def test_yaml_agrees(self) -> 'None':
         try:
@@ -1088,7 +1204,7 @@ class TestReviewWorkflow(unittest.TestCase):
         # PyYAML reads the bare key ``on`` as the boolean True.
         self.assertEqual(sorted(data[True]), ['schedule', 'workflow_dispatch'])
         self.assertEqual(data['permissions'], {'actions': 'read', 'contents': 'read'})
-        self.assertEqual(data['jobs']['report']['timeout-minutes'], 15)
+        self.assertEqual(data['jobs']['report']['timeout-minutes'], 40)
 
 
 if __name__ == '__main__':

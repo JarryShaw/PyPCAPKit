@@ -40,14 +40,26 @@ What is read, and the rules for reading it:
   for the newest :data:`JUNIT_RUNS` successful push runs. Each testcase's own
   ``time`` is used; a suite's ``tests=`` count includes subtests and is not.
 
-A default run makes about 690 API calls (estimate, for the week to 2026-10-09: 63
-listing pages, one per workflow per day and one more per further 100 runs, from
-that week's run counts, with Experimental Tests taken as Unit Tests' 10 since it
-runs on the same events; at most 300 + 300 job reads; 15 for artifacts; up to 12
-workflow reads), inside ``GITHUB_TOKEN``'s 1,000 per hour; ``--max-calls`` stops
-it before it can take more. ``--concurrency-hours`` adds the runner-pool
-measurement, which costs one call per run of every workflow in that window and is
-therefore off unless asked for.
+A default run made 677 API calls for the week to 2026-10-19, measured for #1930:
+49 listing pages, one per workflow per day and one more per further 100 runs; 601
+job reads, at most ``--runs`` per event plus :data:`JUNIT_RUNS` pushes for Unit
+Tests and ``--other-runs`` per other workflow, one more for a run past 100 jobs; 15
+for artifacts; up to 12 workflow reads. That is inside ``GITHUB_TOKEN``'s 1,000
+per hour, and ``--max-calls`` stops it before it can take more.
+
+**The time goes on the job reads**, which are made one at a time, as GitHub asks
+of an integration: 908 of that run's 993 seconds, and 734 on Unit Tests' runs
+alone, at 2.4 s for each page of about 100 jobs with their steps. The listings, the
+workflow files and the JUnit artifacts are therefore read first, and the job reads
+last, in an order every prefix of which spans each sample (:func:`read_order`).
+Once ``--budget-minutes`` is spent, or ``--max-calls``, no further run's jobs are
+read: the report is still written, on the runs read, and says so in a note and an
+annotation. Each step prints a progress line to stderr as it goes, so a run killed
+by its cap shows how far it got.
+
+``--concurrency-hours`` adds the runner-pool measurement, which costs one call per
+run of every workflow in that window and is therefore off unless asked for. It is
+skipped, or abandoned part way, once the budget is spent.
 
 It fetches with :mod:`requests` and parses JUnit XML with lxml (#1894), which
 the workflow installs, and needs nothing else outside the standard library.
@@ -201,6 +213,9 @@ TABLE_ROWS = 15
 TOP_TESTS = 30
 
 DEFAULT_MAX_CALLS = 900
+#: Minutes after which no further run's jobs are read; ci-timing.yml's step and job
+#: caps sit above it, so that the report is written, and uploaded, before either.
+DEFAULT_BUDGET_MINUTES = 30
 #: Transient failures retried, with these waits in seconds.
 RETRY_WAITS = (5, 20)
 #: A filtered run listing returns at most this many runs, whatever total_count says.
@@ -559,10 +574,63 @@ def spread(items: 'list[Any]', count: 'int') -> 'list[Any]':
     return [items[round(i * (len(items) - 1) / (count - 1))] for i in range(count)]
 
 
+def prefix_order(items: 'list[Any]') -> 'list[Any]':
+    """``items`` reordered so that every prefix of the result spans all of them.
+
+    The first and the last come first, then each gap's midpoint, a level of halving
+    at a time, so a read stopped part way through has still covered the whole window
+    rather than its newest days (#1930).
+
+    """
+    if len(items) <= 2:
+        return list(items)
+    order = [0, len(items) - 1]
+    gaps = collections.deque([(0, len(items) - 1)])
+    while gaps:
+        low, high = gaps.popleft()
+        if high - low < 2:
+            continue
+        middle = (low + high) // 2
+        order.append(middle)
+        gaps.extend(((low, middle), (middle, high)))
+    return [items[index] for index in order]
+
+
+def read_order(groups: 'Iterable[list[dict[str, Any]]]',
+               first: 'Iterable[dict[str, Any]]' = ()) -> 'list[dict[str, Any]]':
+    """The runs of every sample, in the order their jobs are read, each once.
+
+    ``first`` leads. The groups' runs follow, interleaved so that at any point each
+    group has had about the same share of its runs read, and those runs span its
+    window (:func:`prefix_order`). A read cut short by the budget therefore leaves a
+    smaller sample of every workflow, not a whole sample of some and none of others.
+
+    """
+    keyed = []  # type: list[tuple[float, int, dict[str, Any]]]
+    for group in groups:
+        ordered = prefix_order(group)
+        keyed += [(rank / len(ordered), len(keyed) + rank, run) for rank, run in enumerate(ordered)]
+    seen = set()  # type: set[int]
+    queue = []
+    for run in list(first) + [run for _, _, run in sorted(keyed, key=lambda item: item[:2])]:
+        if run['id'] not in seen:
+            seen.add(run['id'])
+            queue.append(run)
+    return queue
+
+
 def collect(client: 'Client', repo: 'str', *, now: 'datetime.datetime', days: 'float',
             runs: 'int' = 150, other_runs: 'int' = 60, junit_runs: 'int' = JUNIT_RUNS,
-            concurrency_hours: 'float' = 0) -> 'dict[str, Any]':
+            concurrency_hours: 'float' = 0, budget: 'float' = math.inf,
+            clock: 'Callable[[], float]' = time.monotonic,
+            progress: 'Optional[Callable[[str], None]]' = None) -> 'dict[str, Any]':
     """Everything the report is computed from, read from the API.
+
+    The run listings, the workflow files and the JUnit artifacts are read first, and
+    the job listings last, in :func:`read_order`. The job listings are what the time
+    goes on (see the module docstring), so they are what ``budget`` cuts short: once
+    it is spent, or the client's ``--max-calls`` is, no further run's jobs are read,
+    the runs not read leave the sample, and ``data['stopped']`` says why.
 
     Args:
         client: The API.
@@ -574,13 +642,26 @@ def collect(client: 'Client', repo: 'str', *, now: 'datetime.datetime', days: 'f
         junit_runs: Successful push runs whose JUnit artifacts are read.
         concurrency_hours: Hours of every workflow's runs to measure the runner pool
             over; 0 skips it.
+        budget: Seconds, from the call, after which no further jobs are read.
+        clock: Replaces :func:`time.monotonic`, for tests.
+        progress: Receives one line per step, so that a killed run leaves a trail.
 
     """
+    started = clock()
+
+    def say(message: 'str') -> 'None':
+        if progress is not None:
+            progress(f'[ci-timing {clock() - started:6.0f} s, {client.calls} calls] {message}')
+
     since = now - datetime.timedelta(days=days)
     base = f'/repos/{repo}/actions'
     data = {'repo': repo, 'since': iso(since), 'until': iso(now), 'days': days,
-            'workflows': {}, 'junit': [], 'concurrency': None, 'notes': []}  # type: dict[str, Any]
+            'workflows': {}, 'junit': [], 'concurrency': None, 'notes': [],
+            'stopped': None}  # type: dict[str, Any]
+    say(f'Reading {repo}, {iso(since)} to {iso(now)}; no jobs are read after '
+        f'{budget / 60:g} min.')
 
+    groups = []  # type: list[list[dict[str, Any]]]
     for workflow in (UNIT_TESTS,) + OTHER_WORKFLOWS:
         listed = [run for run in list_runs(client, f'{base}/workflows/{workflow}/runs', since, now,
                                            data['notes'], status='completed')
@@ -588,7 +669,8 @@ def collect(client: 'Client', repo: 'str', *, now: 'datetime.datetime', days: 'f
         if workflow == UNIT_TESTS:
             chosen = []  # type: list[dict[str, Any]]
             for event in ('pull_request', 'push'):
-                chosen += spread([run for run in listed if run.get('event') == event], runs)
+                groups.append(spread([run for run in listed if run.get('event') == event], runs))
+                chosen += groups[-1]
             # The pushes whose JUnit artifacts are read need their jobs read too.
             chosen += [run for run in listed if run.get('event') == 'push'
                        and run['conclusion'] == 'success'][:junit_runs]
@@ -596,8 +678,8 @@ def collect(client: 'Client', repo: 'str', *, now: 'datetime.datetime', days: 'f
                             key=lambda run: run['created_at'], reverse=True)
         else:
             chosen = spread(listed, other_runs)
-        for run in chosen:
-            run['jobs'] = list(client.paginate(f'{base}/runs/{run["id"]}/attempts/1/jobs', 'jobs'))
+            groups.append(chosen)
+        say(f'{workflow}: {len(listed)} runs listed, {len(chosen)} sampled.')
         counts = collections.Counter((run.get('event'), run['conclusion']) for run in listed)
         data['workflows'][workflow] = {
             'runs': chosen, 'specs': {},
@@ -622,8 +704,8 @@ def collect(client: 'Client', repo: 'str', *, now: 'datetime.datetime', days: 'f
             data['workflows'][workflow]['specs'][label] = (sha, text)
 
     pushes = [run for run in data['workflows'][UNIT_TESTS]['runs']
-              if run.get('event') == 'push' and run.get('conclusion') == 'success']
-    for run in pushes[:junit_runs]:
+              if run.get('event') == 'push' and run.get('conclusion') == 'success'][:junit_runs]
+    for run in pushes:
         artifacts = {item['name']: item for item in
                      client.paginate(f'{base}/runs/{run["id"]}/artifacts', 'artifacts')
                      if not item.get('expired')}
@@ -631,29 +713,70 @@ def collect(client: 'Client', repo: 'str', *, now: 'datetime.datetime', days: 'f
             artifact = artifacts.get(JUNIT_ARTIFACT.format(leg=leg))
             if artifact is None:
                 continue
-            archive = zipfile.ZipFile(io.BytesIO(client.fetch(artifact['archive_download_url'])[0]))
+            raw = client.fetch(artifact['archive_download_url'])[0]
+            say(f'JUnit: run {run["id"]}, {JUNIT_ARTIFACT.format(leg=leg)}, {len(raw) / 1e6:.2f} MB.')
+            archive = zipfile.ZipFile(io.BytesIO(raw))
             members = [name for name in archive.namelist() if name.endswith('.xml')]
             if members:
                 data['junit'].append({'run_id': run['id'], 'created_at': run['created_at'],
                                       'leg': leg, **parse_junit(archive.read(members[0]))})
     if not data['junit']:
         data['notes'].append(f'No {JUNIT_ARTIFACT.format(leg="*")} artifact in the newest '
-                             f'{min(len(pushes), junit_runs)} successful push runs, so there '
+                             f'{len(pushes)} successful push runs, so there '
                              'are no test-level timings.')
 
-    if concurrency_hours:
-        start = now - datetime.timedelta(hours=concurrency_hours)
-        spans = []  # type: list[tuple[datetime.datetime, datetime.datetime, str]]
-        for run in list_runs(client, f'{base}/runs', start, now, data['notes']):
-            for job in client.paginate(f'{base}/runs/{run["id"]}/jobs', 'jobs', filter='all'):
-                begun = parse_time(job.get('started_at'))
-                if not job.get('runner_name') or begun is None:
-                    continue
-                ended = parse_time(job.get('completed_at')) or now
-                labels = ' '.join(job.get('labels') or ())
-                spans.append((begun, ended, 'macos' if 'macos' in labels else 'other'))
-        data['concurrency'] = {'hours': concurrency_hours, **pool_concurrency(spans)}
+    # The JUnit pushes lead: ms per test needs their jobs as well as their artifacts.
+    queue = read_order(groups, first=pushes)
+    for done, run in enumerate(queue):
+        reason = None  # type: Optional[str]
+        if clock() - started >= budget:
+            reason = f'the {budget / 60:g}-minute budget (--budget-minutes) ran out'
+        else:
+            try:
+                run['jobs'] = list(client.paginate(f'{base}/runs/{run["id"]}/attempts/1/jobs', 'jobs'))
+            except BudgetExceeded as error:
+                reason = str(error)
+        if reason:
+            data['stopped'] = (f'Jobs were read for {done} of the {len(queue)} runs sampled: '
+                               f'{reason}. The rest are left out of the sample, which still '
+                               'spans the window.')
+            break
+        if (done + 1) % 25 == 0 or done + 1 == len(queue):
+            say(f'Jobs read for {done + 1} of {len(queue)} runs.')
+    if data['stopped']:
+        say(data['stopped'])
+        data['notes'].append(data['stopped'])
+        for info in data['workflows'].values():
+            info['runs'] = [run for run in info['runs'] if 'jobs' in run]
+
+    if concurrency_hours and data['stopped']:
+        data['notes'].append('The runner-pool measurement was skipped, the job reads having '
+                             'stopped short.')
+    elif concurrency_hours:
+        data['concurrency'] = _concurrency(client, base, now, concurrency_hours, data['notes'],
+                                           lambda: clock() - started >= budget)
+        say('Runner pool measured.' if data['concurrency'] else 'Runner pool not measured.')
     return data
+
+
+def _concurrency(client: 'Client', base: 'str', now: 'datetime.datetime', hours: 'float',
+                 notes: 'list[str]', spent: 'Callable[[], bool]') -> 'Optional[dict[str, Any]]':
+    """The runner pool over the last ``hours``, or ``None`` if the budget runs out first."""
+    start = now - datetime.timedelta(hours=hours)
+    spans = []  # type: list[tuple[datetime.datetime, datetime.datetime, str]]
+    for run in list_runs(client, f'{base}/runs', start, now, notes):
+        if spent():
+            notes.append('The runner-pool measurement was abandoned, the budget having run '
+                         'out part way through it.')
+            return None
+        for job in client.paginate(f'{base}/runs/{run["id"]}/jobs', 'jobs', filter='all'):
+            begun = parse_time(job.get('started_at'))
+            if not job.get('runner_name') or begun is None:
+                continue
+            ended = parse_time(job.get('completed_at')) or now
+            labels = ' '.join(job.get('labels') or ())
+            spans.append((begun, ended, 'macos' if 'macos' in labels else 'other'))
+    return {'hours': hours, **pool_concurrency(spans)}
 
 
 def parse_xml(raw: 'bytes') -> 'Any':
@@ -1204,13 +1327,18 @@ def summary(report: 'dict[str, Any]', findings: 'list[dict[str, str]]') -> 'str'
 
 
 def main(argv: 'Optional[list[str]]' = None, *, transport: 'Optional[Transport]' = None,
-         now: 'Optional[datetime.datetime]' = None) -> 'int':
+         now: 'Optional[datetime.datetime]' = None,
+         clock: 'Callable[[], float]' = time.monotonic) -> 'int':
     """Collect, analyse, evaluate, write. Returns the exit status.
+
+    Progress goes to stderr as it happens, and the report to stdout at the end.
 
     Args:
         argv: Command-line arguments.
         transport: Replaces the network, for tests.
         now: Replaces the current time, for tests.
+        clock: Replaces :func:`time.monotonic`, which ``--budget-minutes`` is
+            measured on, for tests.
 
     """
     parser = argparse.ArgumentParser(description=__doc__.split('\n', 1)[0])
@@ -1230,6 +1358,9 @@ def main(argv: 'Optional[list[str]]' = None, *, transport: 'Optional[Transport]'
     parser.add_argument('--summary', help='write the Markdown summary here')
     parser.add_argument('--max-calls', type=int, default=DEFAULT_MAX_CALLS,
                         help=f'API call budget (default: {DEFAULT_MAX_CALLS})')
+    parser.add_argument('--budget-minutes', type=float, default=DEFAULT_BUDGET_MINUTES,
+                        help='read no further jobs after this many minutes, and report on what '
+                             f'was read (default: {DEFAULT_BUDGET_MINUTES})')
     args = parser.parse_args(argv)
 
     token = os.environ.get('GH_TOKEN') or os.environ.get('GITHUB_TOKEN')
@@ -1246,7 +1377,9 @@ def main(argv: 'Optional[list[str]]' = None, *, transport: 'Optional[Transport]'
         try:
             data = collect(client, args.repo, now=moment, days=args.days, runs=args.runs,
                            other_runs=args.other_runs, junit_runs=args.junit_runs,
-                           concurrency_hours=args.concurrency_hours)
+                           concurrency_hours=args.concurrency_hours,
+                           budget=args.budget_minutes * 60, clock=clock,
+                           progress=lambda line: print(line, file=sys.stderr, flush=True))
         except (BudgetExceeded, OSError) as error:
             print(f'::error title=CI timing could not read the API::{error}. '
                   'No threshold was evaluated.')
@@ -1281,6 +1414,8 @@ def _report(args: 'argparse.Namespace', client: 'Client', data: 'dict[str, Any]'
         with open(args.summary, 'w', encoding='utf-8') as file:
             file.write(text)
     print(text)
+    if data.get('stopped'):
+        print(f"::warning title=CI timing stopped early::{data['stopped']}")
     for item in findings:
         kind = 'error' if item['level'] == 'hard' else 'warning'
         message = item['message'].replace('`', '').replace('%', '%25')
