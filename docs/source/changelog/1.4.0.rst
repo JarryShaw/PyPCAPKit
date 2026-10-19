@@ -13,7 +13,11 @@ a test suite.
   ``NameError: name 'Schema' is not defined`` (the import was type-checking-only),
   and past that, building a Window Scale or any Multipath TCP option, or passing
   a prebuilt option schema, raised too, and the TCP Fast Open cookie's length
-  check accepted lengths :rfc:`7413` rules out.
+  check accepted lengths :rfc:`7413` rules out. The same change fixed HOPOPT and
+  IPv6-Opts parsing, whose ``read`` took the schema class rather than the parsed
+  header and whose option readers could not take the ``options`` keyword they were
+  called with, and HTTP/2 construction, which computed a frame's length without its
+  flags.
 * **Changed** -- CI tests current Python versions again; every GitHub Actions
   job carries an explicit permissions block; the conda and cron release tooling
   was repaired, and Anaconda uploads use the official upload action.
