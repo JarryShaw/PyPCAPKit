@@ -345,8 +345,9 @@ Fixed
   because no registry overrode the ``_validate_value`` hook ``register`` calls. Each
   generated registry, ``AppType`` included, now overrides it with the check its
   ``_missing_`` makes, raising ``EnumValueError``. ``get(value, default)`` on a value
-  the hook refuses still returns ``default``, quietly since :issue:`1845` (under
-  ``pcapkit.corekit``) (:issue:`1792`, :pr:`1818`, :issue:`1816`, :pr:`1823`).
+  the hook refuses still returns ``default`` and logs nothing (:issue:`1792`,
+  :pr:`1818`, :issue:`1816`, :pr:`1823`; the quiet miss is :issue:`1845`,
+  :pr:`1873`, under ``pcapkit.corekit``).
 * ``Command.get`` refuses a key that is not a ``str`` with ``EnumValueError``, as
   ``Method.get`` does. ``get(b'\x01')`` minted a member keyed by ``bytes``, and
   ``get(-1)`` raised ``AttributeError`` whatever its ``default`` (:issue:`1824`,
