@@ -2,11 +2,11 @@
 """Pins the registry ``get`` overrides as documented API targets.
 
 GitHub issue #1921: ``Command.get``, ``Method.get``, ``OptionType.get``,
-``TransportProtocol.get`` and ``AppType.get`` carried ``:meta private:``, so
-autodoc left them off their pages and every ``:meth:`get``` naming one rendered
-as an unlinked ``get()`` chip. The owner ruled that the overrides are documented
-instead, since they carry contract the base
-:meth:`~pcapkit.corekit.enum.EnumLookup.get` does not describe.
+``TransportProtocol.get`` and ``AppType.get`` are documented rather than marked
+``:meta private:``, per the owner's ruling, because they carry contract the base
+:meth:`~pcapkit.corekit.enum.EnumLookup.get` does not describe. Autodoc leaves a
+private member off its page, so a ``:meth:`get``` naming one renders as an
+unlinked ``get()`` chip.
 
 Whether a reference resolves is a property of the built inventory, which the
 pull request checks in the rendered HTML. What this pins is the source-side
@@ -53,6 +53,23 @@ RELATIVE_MODULES = (
     'pcapkit.const.reg.apptype.udp',
     'pcapkit.const.reg.apptype.sctp',
     'pcapkit.const.reg.apptype.dccp',
+)
+
+#: Docstrings whose relative ``:meth:`get``` must be among the references found.
+RELATIVE_PINS = (
+    'pcapkit.const.ftp.command.Command.register',
+    'pcapkit.const.http.method.Method._missing_',
+    'pcapkit.const.pcapng.option_type.OptionType.register_alias',
+    'pcapkit.const.reg.apptype.apptype.AppType.get_all',
+    'pcapkit.const.reg.apptype.apptype.AppType.register',
+)
+
+#: ``(file, target)`` pairs that must be among the fully qualified references found.
+ABSOLUTE_PINS = (
+    ('pcapkit/vendor/http/method.py', 'pcapkit.const.ftp.command.Command.get'),
+    ('pcapkit/vendor/ftp/command.py', 'pcapkit.const.http.method.Method.get'),
+    ('pcapkit/protocols/schema/misc/pcapng.py',
+     'pcapkit.const.pcapng.option_type.OptionType.get'),
 )
 
 #: A ``:meth:`` role, with or without a title, capturing its target.
@@ -135,15 +152,15 @@ class OverrideDocstringTests(unittest.TestCase):
             with self.subTest(override=f'{modname}.{clsname}.get'):
                 cls = getattr(importlib.import_module(modname), clsname)
                 owner, func = raw_get(cls)
-                self.assertIs(owner, cls, f'{clsname} no longer overrides get')
+                self.assertIs(owner, cls, f'{clsname} does not override get')
                 self.assertTrue(func.__doc__, f'{clsname}.get has no docstring')
                 self.assertFalse(PRIVATE in func.__doc__, f'{clsname}.get is marked private')
 
     def test_templates_are_not_private(self) -> 'None':
         """The vendor templates' ``get`` docstrings carry no ``:meta private:``.
 
-        A tag left in a template comes back the next time the scripts
-        regenerate the const module, so the template is checked separately.
+        The scripts write a template's tag into the const module whenever they
+        regenerate it, so the template is checked separately.
 
         """
         for template in sorted({path for _, _, path in OVERRIDES}):
@@ -177,7 +194,7 @@ class ReferenceTargetTests(unittest.TestCase):
 
     def test_relative_references(self) -> 'None':
         """``:meth:`get``` in a registry docstring targets a documented override."""
-        hits = 0
+        hits = set()
         for modname in RELATIVE_MODULES:
             module = importlib.import_module(modname)
             for cls in vars(module).values():
@@ -186,14 +203,16 @@ class ReferenceTargetTests(unittest.TestCase):
                 for where, doc in docstrings(cls):
                     for match in METH.finditer(doc):
                         target = match.group('target')
-                        hits += self.check(f'{modname}.{where}', target,
-                                           resolve(target, module, cls))
-        self.assertTrue(hits, 'no relative reference to a get override was found')
+                        if self.check(f'{modname}.{where}', target,
+                                      resolve(target, module, cls)):
+                            hits.add(f'{modname}.{where}')
+        for pin in RELATIVE_PINS:
+            self.assertTrue(pin in hits, f'{pin} has no :meth:`get` reaching an override')
 
     def test_absolute_references(self) -> 'None':
         """A fully qualified ``:meth:`` to an override, in code or docs, is documented."""
         paths = sorted((ROOT / 'pcapkit').rglob('*.py')) + sorted((ROOT / 'docs').rglob('*.rst'))
-        hits = 0
+        hits = set()
         for path in paths:
             text = path.read_text(encoding='utf-8')
             for match in METH.finditer(text):
@@ -201,9 +220,11 @@ class ReferenceTargetTests(unittest.TestCase):
                 if not target.startswith('pcapkit.const.') or not target.endswith('.get'):
                     continue
                 line = text.count('\n', 0, match.start()) + 1
-                hits += self.check(f'{path.relative_to(ROOT)}:{line}', target,
-                                   resolve(target, None, None))
-        self.assertTrue(hits, 'no fully qualified reference to a get override was found')
+                relative = path.relative_to(ROOT).as_posix()
+                if self.check(f'{relative}:{line}', target, resolve(target, None, None)):
+                    hits.add((relative, target))
+        for pin in ABSOLUTE_PINS:
+            self.assertTrue(pin in hits, f'{pin[0]} has no :meth:`{pin[1]}` reaching an override')
 
 
 if __name__ == '__main__':

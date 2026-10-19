@@ -582,9 +582,11 @@ class {NAME}(EnumRegistry, StrEnum):
             and names no precedence among them, so :data:`__canonical__` supplies
             the one the rest of the world answers with. The others remain real,
             named members and are reached through :meth:`get_all`. A port
-            with no row resolves to an unregistered member that is not added
-            to the registry (:issue:`860`), named after the IANA range holding
-            the port, or ``unknown`` outside every range.
+            with no row of its own resolves to an unregistered member that is
+            not added to the registry (:issue:`860`). Its name is the label of
+            the IANA span holding the port, whatever that label is --
+            ``reserved``, ``unassigned``, or a service name such as ``swx`` --
+            or ``unknown`` when no span holds it.
 
         Raises:
             ValueError: If called on a class that holds no members, i.e. on
