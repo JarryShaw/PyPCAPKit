@@ -4,11 +4,10 @@
 #: `make fixtures PYTHON=../../.venv/bin/python`.
 PYTHON ?= python
 
-#: Timezone the reference reports are generated in. Pinned because pcapkit renders
-#: frame timestamps in the host's local zone, so an unpinned run rewrites every
-#: timestamp line with wherever it happened to be run. UTC is also the only zone in
-#: which PCAP-NG's `timestamp_epoch` comes out as the true UNIX epoch -- see the
-#: README for the reason.
+#: Timezone the reference reports are generated in. pcapkit renders timestamps in
+#: UTC, or in a PCAP-NG interface's own `if_tzone`, never in the host's zone (#361,
+#: #403), so the reports come out the same without it; the pin is belt-and-braces
+#: -- see the README.
 FIXTURE_TZ ?= UTC
 
 ## Build the reference reports in ../captures/. Git tracks none of them -- they

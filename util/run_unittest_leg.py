@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """Run one unit-tier directory under plain :mod:`unittest`, in a single process.
 
-GitHub issue #981: two test modules --
+GitHub issue #981: the test modules
 :mod:`tests.protocols.application.test_http_unit` and
-:mod:`tests.test_base_class_contract` -- each pass alone and :program:`pytest`
+:mod:`tests.test_base_class_contract` each pass alone and :program:`pytest`
 reports the whole run green when they are collected together, but plain
-:mod:`unittest` over the same two modules in one process fails some of their
+:mod:`unittest` over the same modules in one process fails some of their
 ``subTest`` cases. ``pytest-subtests`` is *not* why: that plugin is not
 installed in this project at all (absent from the ``test`` extra in
 ``pyproject.toml``), and plain :program:`pytest` (9.1.1 in this checkout)
@@ -32,7 +32,7 @@ and printed, with no autouse fixture smoothing the import table out from
 under it.
 
 A cheaper alternative exists, and is recorded here rather than left
-undocumented: running ``pytest --noconftest`` over just those same two
+undocumented: running ``pytest --noconftest`` over just those same
 modules, in that order, disables the very same autouse fixture directly and
 reproduces the identical ``subTest`` failures in about 70s on the pre-fix
 tree, under the exact :program:`pytest` version this CI already installs.
@@ -54,7 +54,7 @@ its timings, on different bases (a local serial run, and CI before and
 after it was sharded), are tabulated in that workflow's own comment rather than
 restated here. At the other end sit
 :mod:`tests.dumpkit` and :mod:`tests.interface`, small legs within a few
-seconds of each other in wall time (~39s and ~37s). Neither small leg is
+seconds of each other in wall time (~39s and ~38s). Neither small leg is
 :mod:`tests.const` (~268s), which is larger by test count as well.
 
 Peak RSS was measured for the three cheapest legs only, via

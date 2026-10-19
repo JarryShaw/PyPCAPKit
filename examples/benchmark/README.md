@@ -292,8 +292,9 @@ Pinned exactly:
 - every engine package, in `requirements-common.txt`, `requirements-pypcap.txt`
   and `requirements-pcap_ct.txt`. Note that `pcap-ct` and `libpcap` are
   pre-release-only projects, so `pip install pcap-ct` with no version resolves to
-  nothing at all -- an exact pre-release pin is honoured without `--pre`, which is
-  why the versions are spelled out;
+  whichever beta is newest, through pip's fallback to pre-releases for a project
+  with no final release -- an exact pre-release pin is honoured without `--pre`,
+  which is why the versions are spelled out;
 - `pcapkit`'s own runtime dependencies, because they are on the baseline's hot path
   and the baseline is what every ratio divides by.
 

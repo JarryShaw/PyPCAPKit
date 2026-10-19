@@ -13,7 +13,7 @@ name: "Lint"
 # own numbers, and vermin too, which had moved before the issue's own text said
 # it "was not re-checked". Only bandit held. A written-down count invites
 # exactly this, with no way to tell staleness from disagreement, so each step
-# writes its current count to the run summary instead; read the numbers there.
+# writes its result to the run summary instead; read the numbers there.
 #
 # pylint's R class is the one that moves without the code moving. Repeated runs
 # on an identical tree were measured to disagree on it, entirely through
@@ -54,7 +54,7 @@ name: "Lint"
 #
 # None of them is clean, so none can block: a job that is red the day
 # it lands teaches everyone to scroll past red, which costs more than the checks
-# are worth. Advisory steps keep the numbers visible (each writes its count to
+# are worth. Advisory steps keep the numbers visible (each writes its result to
 # the run summary) without that damage, and promoting one to blocking is a matter
 # of deleting its `continue-on-error` line once its count reaches zero.
 #

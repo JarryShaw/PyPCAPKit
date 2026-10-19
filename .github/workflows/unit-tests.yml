@@ -134,7 +134,7 @@ jobs:
           cache: pip
 
       # The DPKT extra is here so the tests gated on it (test_dpkt_unit.py,
-      # test_misc.py, test_extraction.py, test_core.py) actually execute
+      # test_misc.py, test_extraction.py and test_core.py among them) execute
       # instead of skipping -- see #729. It is a small, pure-Python
       # dependency (measured clean installs on 3.10-3.14), so it costs
       # nothing per leg and adds no new job or leg, unlike Scapy below.
@@ -1392,11 +1392,11 @@ jobs:
       matrix: ${{ fromJSON(needs.python-versions.outputs.pypcap-parity-ktlo) }}
     steps: *pypcap-parity-steps
 
-  # GitHub issue #981: two test modules
-  # (tests/protocols/application/test_http_unit.py and
-  # tests/test_base_class_contract.py) each pass alone, and pytest -- the
+  # GitHub issue #981: the test modules
+  # tests/protocols/application/test_http_unit.py and
+  # tests/test_base_class_contract.py each pass alone, and pytest -- the
   # runner every job above uses -- reports the combined run green, while
-  # plain unittest over the same two modules in one process fails some of
+  # plain unittest over the same modules in one process fails some of
   # their subTest cases. pytest-subtests is not why -- it is not even installed in
   # this project (absent from the `test` extra in pyproject.toml), and plain
   # pytest already reports a failed subTest as its own top-level SUBFAILED
@@ -1411,7 +1411,7 @@ jobs:
   # unittest.TextTestRunner -- that never loads conftest.py and so never
   # gets the reconciliation that hides the defect from pytest.
   #
-  # A cheaper, narrower alternative: `pytest --noconftest` over just those two
+  # A cheaper, narrower alternative: `pytest --noconftest` over just those
   # modules, in that order, disables that same autouse fixture directly and
   # reproduced the identical subTest failures in about 70s on the pre-fix
   # tree, under the pytest this CI already installs. Whether that single
@@ -1638,8 +1638,8 @@ jobs:
         with:
           python-version: ${{ steps.python-versions.outputs.latest }}
 
-      # No install step: the generator imports argparse, difflib, pathlib, re, sys
-      # and typing and nothing else, so it runs against a bare interpreter.
+      # No install step: the generator imports nothing outside the standard
+      # library, so it runs against a bare interpreter.
       # Verified with ``python -S``.
       - name: Check CHANGELOG.md is in step with its source entry
         shell: bash
@@ -1725,7 +1725,7 @@ jobs:
   # docs/ or a Markdown file, since a docs-only diff can still break those:
   # tests/project and the root-level modules, plus the modules elsewhere under
   # tests/ named in the second run step. tests/project/test_unit_tests_queue.py
-  # finds every module outside those two that names a docs/ or Markdown path
+  # finds every module outside those that names a docs/ or Markdown path
   # and fails until it is listed there, so a new reader cannot go unrun. Runs
   # only when `changes` says the diff is docs-only, so it never duplicates
   # `test` on a code change. It uses

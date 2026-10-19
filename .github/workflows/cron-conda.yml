@@ -576,16 +576,17 @@ jobs:
             echo EOF
           } >> "$GITHUB_OUTPUT"
 
-      # #1814: the package declares no run requirements, so the packages it
-      # vendors in `pcapkit/_extern` are all it has, and they once shipped as
-      # modules alone. This unpacks the package built for this runner and
-      # checks that every vendored distribution has every file its RECORD lists
-      # and imports from there, with no site-packages on the path, before
-      # anything is uploaded. #1822: it also fails unless the package, and every
-      # native binary in it, is for this runner's platform, so a relabelled
-      # package cannot pass on the runner that built it. setup-python's
-      # interpreter, not conda's: it is the matrix version the package was
-      # built for, which conda's base is not on 3.15.
+      # #1814: the package declares no run requirement but Python, so the
+      # packages it vendors in `pcapkit/_extern` are all it has, and package
+      # discovery on its own ships them as bare modules, without their data
+      # files. This unpacks the package built for this runner and checks that
+      # every vendored distribution has every file its RECORD lists and imports
+      # from there, with no site-packages on the path, before anything is
+      # uploaded. #1822: it also fails unless the package, and every native
+      # binary in it, is for this runner's platform, so a relabelled package
+      # cannot pass on the runner that built it. setup-python's interpreter, not
+      # conda's: it is the matrix version the package was built for, which
+      # conda's base is not on 3.15.
       - name: Smoke-test the vendored packages
         env:
           PCAPKIT_CONDA_PACKAGE: ${{ steps.conda_build.outputs.host_package }}

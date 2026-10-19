@@ -5,9 +5,10 @@
 -r requirements-common.txt
 
 # Both of these are pre-release-only projects -- every release ever published is a
-# beta -- so `pip install pcap-ct` with no version resolves to nothing at all. An
-# *exact* pre-release pin is honoured without `--pre`, which is why the versions
-# are spelled out here rather than left to a range plus a flag.
+# beta. pip falls back to pre-releases for a project with no final release, so
+# `pip install pcap-ct` with no version does resolve, but to whichever beta is
+# newest. An *exact* pre-release pin is honoured without `--pre`, which is why the
+# versions are spelled out here rather than left to a range plus a flag.
 #
 # Both publish `py3-none-any` wheels, so neither needs a compiler on any
 # architecture. They do need a system libpcap at *run* time: `libpcap`'s published

@@ -22,20 +22,13 @@ scripts cannot run at all on a fresh checkout. This module writes them, with
     FIN-completed stream and an RST-aborted one.
 
 ``http6.cap``
-    Read by ``examples/legacy_smoke/test_analyse.py``, which pretty-prints the
-    application layer :mod:`pcapkit` finds in each reassembled datagram. Two
+    Read by ``examples/legacy_smoke/test_analyse.py``, which extracts it with
+    ``tcp=True``, ``reasm_strict=True`` and ``reassembly=True`` and pretty-prints
+    the application layer :mod:`pcapkit` finds in each reassembled datagram. Two
     HTTP/1.1 connections over IPv6 to port 80: a page fetch whose response body
     spans three segments, and a conditional request for a stylesheet answered
     ``304 Not Modified`` with no body at all. Every datagram, requests and
     responses alike, analyses as HTTP.
-
-    That script does not run to completion even with this fixture in place, and
-    the reason is the script rather than the capture: it asks for ``tcp=True``
-    and ``reasm_strict=True`` but never for ``reassembly=True``, so reading
-    ``extraction.reassembly`` raises ``UnsupportedCall: 'Extractor(reassembly=
-    False)' object has no attribute 'reassembly'``. It extracts every frame
-    first, and adding that one keyword makes the rest of it work; the fixture
-    is built for the script as it will read once repaired.
 
 Every packet is built from protocol semantics: real handshakes, sequence and
 acknowledgement arithmetic that adds up, and checksums computed by
@@ -50,26 +43,26 @@ The layouts above are not arbitrary. These properties of
 look like for a datagram to come out of it at all:
 
 1. A buffer is keyed by the connection's four-tuple *including direction*, so
-   each direction is a datagram of its own.
+   each direction is a buffer of its own.
    :meth:`~pcapkit.foundation.reassembly.tcp.TCP.submit` runs on that
    direction's RST; once its FIN has been seen and every octet below the FIN
    has arrived; when a SYN, or a segment farther than ``__window__`` from the
    buffer, opens a new one on the same four-tuple; on a timeout, if one is
-   set; and, for whatever is still buffered, when the capture ends. So a
-   half-closed connection still yields a datagram per direction. Both ends of
-   every connection here close anyway, so that each datagram is submitted by
-   its own FIN or RST rather than by that final flush.
+   set; and, for whatever is still buffered, when the datagrams are read --
+   ``extraction.reassembly`` flushes every open buffer through
+   :meth:`~pcapkit.foundation.reassembly.reassembly.Reassembly.fetch`. So a
+   half-closed connection still yields the datagrams of both directions. Both
+   ends of every connection here close anyway, so that each datagram is
+   submitted by its own FIN or RST rather than by that final flush.
 2. Inside a buffer, fragments are keyed by the segment's *acknowledgement*
    number, so consecutive data segments merge only while the peer sends no
    data of its own. Both fixtures therefore keep each direction of each
    connection to a single HTTP message, and let the peer answer only with pure
    acknowledgements until that message is complete.
-3. A datagram counts as complete when no hole in the descriptor list falls
-   inside the octets that direction actually received. An ordered run of
-   segments leaves only the open-ended hole past the last octet, which is
-   outside the payload buffer and so does not count; an out-of-order segment
-   opens a hole in the middle, and the missing segment's arrival closes it
-   again.
+3. A datagram counts as complete when its payload buffer has no gap left:
+   each payload buffer tracks the holes among the octets it holds. An ordered
+   run of segments opens none; an out-of-order segment opens one in the
+   middle, and the missing segment's arrival closes it again.
 4. The payload of a complete datagram goes to
    :meth:`pcapkit.protocols.transport.transport.Transport.analyze`, which
    picks the application protocol from the two port numbers. Port 80 is what
@@ -93,8 +86,8 @@ indexed from the start of the direction's data, so with any real initial
 sequence number every slice started far beyond the end of the buffer, every
 fragment came out empty, and ``if data:`` discarded the datagram without a word.
 That is fixed -- ``submit`` converts each hole's absolute bounds into
-offsets into the buffer it is reading, and decides completeness from whether any
-hole survives that conversion -- and GitHub issue #349 records the whole of it.
+offsets into the buffer it is reading, and decides completeness from that
+payload buffer's own gap list -- and GitHub issue #349 records the whole of it.
 Regenerating these two fixtures to carry a permanently lost segment as well was
 considered and rejected: they are pinned byte-for-byte by the test suite, and a
 stream with a hole in it is cheaper to build segment by segment than to read out

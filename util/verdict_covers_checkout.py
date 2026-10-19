@@ -22,9 +22,9 @@ completes, bot commits included -- since #401 (bb900906b, 2026-09-15) they are
 pushed with a deploy key, not with ``GITHUB_TOKEN``, whose events "will not create
 a new workflow run" (GitHub, "Triggering a workflow from a workflow"). Every bot
 commit on ``main`` since has its own ``push`` run of ``Unit Tests``,
-f4f94bcad's being 38325349953; the ones before #401, 5d5d8af4d, 48bc11384 and
-e4d0823db, have none. The second case only saves waiting for that run where it
-cannot change the answer.
+f4f94bcad's being 38325349953, while 5d5d8af4d, 48bc11384 and e4d0823db,
+ancestors of bb900906b, have none. The second case only saves waiting for that
+run where it cannot change the answer.
 
 Run with ``VERDICT_SHA`` set, from the checkout. Writes ``verified=true`` or
 ``verified=false`` to ``$GITHUB_OUTPUT``, and exits non-zero only when it cannot

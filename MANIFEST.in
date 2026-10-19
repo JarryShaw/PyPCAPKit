@@ -11,7 +11,7 @@ prune docs
 prune examples/captures
 prune temp
 # The engine stubs mypy reads (#1878) check this tree and are not for shipping.
-# Not load-bearing today: ``global-include *.py`` does not match a ``.pyi``,
+# Not load-bearing: ``global-include *.py`` does not match a ``.pyi``,
 # measured by building an sdist without this line. It keeps them out should a
 # pattern above come to match one.
 prune typings
