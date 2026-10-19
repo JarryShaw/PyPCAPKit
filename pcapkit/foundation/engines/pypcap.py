@@ -38,12 +38,12 @@ if TYPE_CHECKING:
     from pcapkit.foundation.extraction import Extractor
 
     class _PyPCAPPackage(Protocol):
-        """:mod:`pcap`, as :class:`PyPCAP` reads it through :attr:`PyPCAP._expkg` (#1878)."""
+        """``pcap``, as :class:`PyPCAP` reads it through :attr:`PyPCAP._expkg` (#1878)."""
 
         @property
         def pcap(self) -> 'Type[Handle]': ...
 
-    #: A PyPCAP "frame": the ``(timestamp, bytes)`` pair that :class:`pcap.pcap`
+    #: A PyPCAP "frame": the ``(timestamp, bytes)`` pair that ``pcap.pcap``
     #: iteration yields. Deliberately *not* named ``Frame``, so that it is not
     #: mistaken for :class:`pcapkit.protocols.misc.pcap.frame.Frame`, which is
     #: what the built-in engines return.
@@ -76,7 +76,7 @@ class PyPCAP(EngineBase['RawFrame']):
        interface that does install there, and
        :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` is the engine for it.
 
-       Because `pcap-ct`_ installs the same top-level :mod:`pcap` module, this
+       Because `pcap-ct`_ installs the same top-level ``pcap`` module, this
        engine checks which distribution it got and refuses the other one rather
        than running under the wrong name -- see :meth:`__init__`.
 
@@ -87,12 +87,12 @@ class PyPCAP(EngineBase['RawFrame']):
         extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.
 
     Raises:
-        UnsupportedCall: If the installed :mod:`pcap` is `pcap-ct`_ rather than
+        UnsupportedCall: If the installed ``pcap`` is `pcap-ct`_ rather than
             upstream `PyPCAP`_.
 
     """
     if TYPE_CHECKING:
-        #: Engine extraction package, i.e. :mod:`pcap`.
+        #: Engine extraction package, i.e. ``pcap``.
         _expkg: '_PyPCAPPackage'
         #: Engine extraction temporary storage.
         _extmp: 'Iterator[RawFrame]'
@@ -100,7 +100,7 @@ class PyPCAP(EngineBase['RawFrame']):
         _dlink: 'Enum_LinkType'
         #: Closed flag, so that the handle is not closed twice.
         _closed: 'bool'
-        #: What the :mod:`pcap` import actually found, cf. :attr:`backend`.
+        #: What the ``pcap`` import actually found, cf. :attr:`backend`.
         _backend: '_pcap_backend.Probe'
 
     ##########################################################################
@@ -157,7 +157,7 @@ class PyPCAP(EngineBase['RawFrame']):
         distributions install happily and either could be the one in place.
 
         Returns:
-            A phrase naming the real cause, or :data:`None`. An absent :mod:`pcap`
+            A phrase naming the real cause, or :data:`None`. An absent ``pcap``
             returns :data:`None`, since the import test reports that case in its
             own words and duplicating it would produce two warnings for one
             problem.
@@ -181,7 +181,7 @@ class PyPCAP(EngineBase['RawFrame']):
     def backend(self) -> 'str':
         """The distribution, version and location this engine is driving.
 
-        More than one distribution provides :mod:`pcap`, so "the PyPCAP engine failed" is
+        More than one distribution provides ``pcap``, so "the PyPCAP engine failed" is
         not a complete statement of what ran. This says which one it was, e.g.
         ``pypcap 1.3.0 (/.../pcap.cpython-310-x86_64-linux-gnu.so)``.
 
@@ -196,14 +196,14 @@ class PyPCAP(EngineBase['RawFrame']):
         """Initialise the engine.
 
         Warns:
-            EngineWarning: If both distributions that provide :mod:`pcap` are
+            EngineWarning: If both distributions that provide ``pcap`` are
                 installed. Only one of them can win the import, so the other is
                 shadowed and unreachable -- a state worth naming, because
                 ``engine=`` then selects an engine that cannot run and nothing
                 else would say why.
 
         Raises:
-            UnsupportedCall: If the installed :mod:`pcap` is `pcap-ct`_ rather
+            UnsupportedCall: If the installed ``pcap`` is `pcap-ct`_ rather
                 than upstream `PyPCAP`_. This is the same condition
                 :meth:`unsupported_reason` reports, kept here as well because that
                 hook is only consulted by
@@ -252,11 +252,11 @@ class PyPCAP(EngineBase['RawFrame']):
     ##########################################################################
 
     def run(self) -> 'None':
-        """Call :class:`pcap.pcap` to extract PCAP files.
+        """Call ``pcap.pcap`` to extract PCAP files.
 
         This method assigns :attr:`self._expkg <PyPCAP._expkg>`
-        as :mod:`pcap` and :attr:`self._extmp <PyPCAP._extmp>`
-        as an iterator from :class:`pcap.pcap`.
+        as ``pcap`` and :attr:`self._extmp <PyPCAP._extmp>`
+        as an iterator from ``pcap.pcap``.
 
         Warns:
             AttributeWarning: Warns under the following circumstances:
@@ -330,7 +330,7 @@ class PyPCAP(EngineBase['RawFrame']):
         """Read frames with PyPCAP engine.
 
         Returns:
-            The ``(timestamp, bytes)`` pair as yielded by :class:`pcap.pcap`.
+            The ``(timestamp, bytes)`` pair as yielded by ``pcap.pcap``.
 
         See Also:
             Please refer to :meth:`PCAP.read_frame <pcapkit.foundation.engines.pcap.PCAP.read_frame>`
@@ -373,11 +373,11 @@ class PyPCAP(EngineBase['RawFrame']):
     def close(self) -> 'None':
         """Close engine.
 
-        This method closes the underlying :class:`pcap.pcap` handle. It is
+        This method closes the underlying ``pcap.pcap`` handle. It is
         idempotent, as :meth:`Extractor._cleanup
         <pcapkit.foundation.extraction.Extractor._cleanup>` and
         :meth:`Extractor.__exit__ <pcapkit.foundation.extraction.Extractor.__exit__>`
-        may both reach it, and :meth:`pcap.pcap.close` is not safe to call twice.
+        may both reach it, and ``pcap.pcap.close`` is not safe to call twice.
 
         """
         if self._closed or self._extmp is None:

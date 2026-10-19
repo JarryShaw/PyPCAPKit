@@ -63,7 +63,7 @@ TIMESTAMP_ATTR = '__pcapkit_timestamp__'
 #: Attribute a frame's record octets are stashed under.
 #:
 #: A `DPKT`_ packet keeps no copy of the octets it was parsed from, and
-#: serialising it again is not the same thing: :meth:`dpkt.ip.IP.__bytes__`
+#: serialising it again is not the same thing: ``dpkt.ip.IP.__bytes__``
 #: recomputes a zeroed checksum and length and writes them back into the
 #: packet, as do the transport layers beneath it. So the adapters below slice
 #: the wire octets out of this buffer instead, which
@@ -351,10 +351,10 @@ def _ipv6_ext_hdrs(ipv6: 'IP6') -> 'list[Any]':
         ipv6: DPKT IPv6 packet.
 
     Returns:
-        :attr:`dpkt.ip6.IP6.all_extension_headers` where `DPKT`_ recorded it,
+        ``dpkt.ip6.IP6.all_extension_headers`` where `DPKT`_ recorded it,
         which keeps the on-wire order and any header type that occurs twice;
-        otherwise the values of :attr:`~dpkt.ip6.IP6.extension_hdrs`, which
-        :meth:`dpkt.ip6.IP6.__len__` falls back to in the same way.
+        otherwise the values of ``dpkt.ip6.IP6.extension_hdrs``, which
+        ``dpkt.ip6.IP6.__len__`` falls back to in the same way.
 
     .. _DPKT: https://dpkt.readthedocs.io
 
@@ -370,20 +370,20 @@ def _wire_hdr_len(packet: 'Packet', payload: 'Packet') -> 'int':
 
     Args:
         packet: DPKT packet, i.e. one layer of a frame.
-        payload: That layer's payload, i.e. :attr:`packet.data <dpkt.dpkt.Packet.data>`.
+        payload: That layer's payload, i.e. ``packet.data``.
 
     Returns:
         The advance :meth:`~dpkt.dpkt.Packet.unpack` itself made to reach the
         payload.
 
         For IPv6 that is the fixed header plus each extension header's
-        :attr:`~dpkt.ip6.IP6ExtensionHeader.length`, which is what
+        ``dpkt.ip6.IP6ExtensionHeader.length``, which is what
         :meth:`dpkt.ip6.IP6.unpack` walks the buffer by. It cannot be taken from
-        ``len()``: :meth:`dpkt.ip6.IP6.__len__` sums ``len()`` of the extension
+        ``len()``: ``dpkt.ip6.IP6.__len__`` sums ``len()`` of the extension
         headers instead, and that is 12 octets plus the *rest of the frame* for
         an Authentication header -- :class:`dpkt.ip6.IP6AHHeader` trims only into
-        :attr:`~dpkt.ip6.IP6AHHeader.auth_data` and leaves
-        :attr:`~dpkt.dpkt.Packet.data` running to the end of the buffer -- and 8
+        ``dpkt.ip6.IP6AHHeader.auth_data`` and leaves
+        ``dpkt.dpkt.Packet.data`` running to the end of the buffer -- and 8
         octets short of the wire for a Routing header whose Hdr Ext Len is odd
         (:class:`dpkt.ip6.IP6RoutingHeader` keeps whole addresses only).
 
@@ -591,10 +591,10 @@ def ipv4_reassembly(packet: 'Packet', timestamp: 'float', *,
         The header and payload are sliced out of the record octets
         :class:`~pcapkit.foundation.engines.dpkt.DPKT` attached to the frame, so
         they are the captured ones. A packet built by hand carries no such
-        buffer, and its octets are then :mod:`dpkt`'s re-serialisation of it, in
+        buffer, and its octets are then ``dpkt``'s re-serialisation of it, in
         which a zeroed checksum or length comes back recomputed --
         :func:`attach_buffer` is what makes them the wire's again. They are that
-        re-serialisation too where :mod:`dpkt`'s own lengths misplace the layer
+        re-serialisation too where ``dpkt``'s own lengths misplace the layer
         in the record, as behind some stacks of VLAN tags (:issue:`1646`). The
         packet itself is left untouched either way.
 
@@ -678,10 +678,10 @@ def ipv6_reassembly(packet: 'Packet', timestamp: 'float', *,
         The header and payload are sliced out of the record octets
         :class:`~pcapkit.foundation.engines.dpkt.DPKT` attached to the frame, so
         they are the captured ones. A packet built by hand carries no such
-        buffer, and its octets are then :mod:`dpkt`'s re-serialisation of it, in
+        buffer, and its octets are then ``dpkt``'s re-serialisation of it, in
         which a zeroed checksum or length comes back recomputed --
         :func:`attach_buffer` is what makes them the wire's again. They are that
-        re-serialisation too where :mod:`dpkt`'s own lengths misplace the layer
+        re-serialisation too where ``dpkt``'s own lengths misplace the layer
         in the record, as behind some stacks of VLAN tags (:issue:`1646`). The
         packet itself is left untouched either way.
 
@@ -774,7 +774,7 @@ def tcp_reassembly(packet: 'Packet', timestamp: 'float', *,
     """Make data for TCP reassembly.
 
     A packet can be reassembled if its network layer carries a TCP layer
-    (:class:`dpkt.tcp.TCP`), behind any IPv6 extension headers :mod:`dpkt` decodes. TCP
+    (:class:`dpkt.tcp.TCP`), behind any IPv6 extension headers ``dpkt`` decodes. TCP
     in an IP-in-IP tunnel, or behind an AH or IPv6 extension header carried in IPv4, is
     not read.
 
@@ -793,10 +793,10 @@ def tcp_reassembly(packet: 'Packet', timestamp: 'float', *,
         The header and payload are sliced out of the record octets
         :class:`~pcapkit.foundation.engines.dpkt.DPKT` attached to the frame, so
         they are the captured ones. A packet built by hand carries no such
-        buffer, and its octets are then :mod:`dpkt`'s re-serialisation of it, in
+        buffer, and its octets are then ``dpkt``'s re-serialisation of it, in
         which a zeroed checksum or length comes back recomputed --
         :func:`attach_buffer` is what makes them the wire's again. They are that
-        re-serialisation too where :mod:`dpkt`'s own lengths misplace the layer
+        re-serialisation too where ``dpkt``'s own lengths misplace the layer
         in the record, as behind some stacks of VLAN tags (:issue:`1646`). The
         packet itself is left untouched either way.
 
@@ -850,7 +850,7 @@ def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
     """Trace packet flow for TCP.
 
     A packet can be traced if its network layer carries a TCP layer
-    (:class:`dpkt.tcp.TCP`), behind any IPv6 extension headers :mod:`dpkt` decodes. TCP
+    (:class:`dpkt.tcp.TCP`), behind any IPv6 extension headers ``dpkt`` decodes. TCP
     in an IP-in-IP tunnel, or behind an AH or IPv6 extension header carried in IPv4, is
     not read.
 
@@ -871,10 +871,10 @@ def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
         The header and payload are sliced out of the record octets
         :class:`~pcapkit.foundation.engines.dpkt.DPKT` attached to the frame, so
         they are the captured ones. A packet built by hand carries no such
-        buffer, and its octets are then :mod:`dpkt`'s re-serialisation of it, in
+        buffer, and its octets are then ``dpkt``'s re-serialisation of it, in
         which a zeroed checksum or length comes back recomputed --
         :func:`attach_buffer` is what makes them the wire's again. They are that
-        re-serialisation too where :mod:`dpkt`'s own lengths misplace the layer
+        re-serialisation too where ``dpkt``'s own lengths misplace the layer
         in the record, as behind some stacks of VLAN tags (:issue:`1646`). The
         packet itself is left untouched either way.
 

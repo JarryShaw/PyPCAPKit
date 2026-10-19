@@ -60,7 +60,7 @@ def packet2chain(packet: 'bytes', *, data_link: 'Enum_LinkType') -> 'str':
     """Fetch PyPCAP packet protocol chain.
 
     Args:
-        packet: Raw packet bytes, as returned by :class:`pcap.pcap` iteration.
+        packet: Raw packet bytes, as returned by ``pcap.pcap`` iteration.
         data_link: Data link type, from the capture handle.
 
     Returns:
@@ -81,8 +81,8 @@ def packet2dict(packet: 'bytes', timestamp: 'float', *,
     """Convert PyPCAP packet into :obj:`dict`.
 
     Args:
-        packet: Raw packet bytes, as returned by :class:`pcap.pcap` iteration.
-        timestamp: Timestamp of packet, as returned by :class:`pcap.pcap` iteration.
+        packet: Raw packet bytes, as returned by ``pcap.pcap`` iteration.
+        timestamp: Timestamp of packet, as returned by ``pcap.pcap`` iteration.
         data_link: Data link type, from the capture handle.
 
     Returns:

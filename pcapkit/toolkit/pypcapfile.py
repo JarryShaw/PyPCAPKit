@@ -36,7 +36,7 @@ cannot be used for it.
    stops at the network layer, which keeps the transport segment verbatim so that
    the header/payload split this module reports is exact. The transport header is
    decoded on demand below, using `PyPCAPFile`_'s own
-   :class:`~pcapfile.protocols.transport.tcp.TCP` class rather than a
+   ``pcapfile.protocols.transport.tcp.TCP`` class rather than a
    reimplementation.
 
 """
@@ -150,8 +150,8 @@ def _parse_ipv4_address(value: 'Any') -> 'IPv4Address':
     """Parse a raw PyPCAPFile IPv4 ``src``/``dst`` field.
 
     Args:
-        value: Raw value of an :attr:`IP.src <pcapfile.protocols.network.ip.IP.src>`
-            or :attr:`IP.dst <pcapfile.protocols.network.ip.IP.dst>` field.
+        value: Raw value of an ``IP.src``
+            or ``IP.dst`` field.
 
     Returns:
         The parsed address.
@@ -192,9 +192,8 @@ def _parse_mac_address(value: 'Any') -> 'str':
     """Parse a raw PyPCAPFile Ethernet ``src``/``dst`` field.
 
     Args:
-        value: Raw value of an :attr:`Ethernet.src
-            <pcapfile.protocols.linklayer.ethernet.Ethernet.src>` or
-            :attr:`Ethernet.dst <pcapfile.protocols.linklayer.ethernet.Ethernet.dst>`
+        value: Raw value of an ``Ethernet.src`` or
+            ``Ethernet.dst``
             field.
 
     Returns:
@@ -239,8 +238,8 @@ def _maybe_unhex(value: 'bytes') -> 'bytes':
 
     Note:
         The released `PyPCAPFile`_ (0.12.0) stores an IPv4 packet's options
-        (:attr:`IP.opt <pcapfile.protocols.network.ip.IP.opt>`) and payload
-        (:attr:`IP.payload <pcapfile.protocols.network.ip.IP.payload>`) as
+        (``IP.opt``) and payload
+        (``IP.payload``) as
         :func:`binascii.hexlify`'d ASCII text once decoding stops short of the
         transport layer -- which is exactly how
         :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile` calls it --
@@ -321,7 +320,7 @@ def _network(packet: 'Packet') -> 'Optional[IP]':
         packet: PyPCAPFile packet.
 
     Returns:
-        The decoded :class:`~pcapfile.protocols.network.ip.IP` layer, or
+        The decoded ``pcapfile.protocols.network.ip.IP`` layer, or
         :data:`None` when the frame was not decoded that far -- which is the
         case for every non-IPv4 frame, `PyPCAPFile`_ having no other network
         layer decoder -- or its header length (IHL) runs past the captured
@@ -389,7 +388,7 @@ def _capture_of(packet: 'Packet') -> 'tuple[int, Any]':
         anchor is alive, no packet of another capture has the same key.
 
     Note:
-        :attr:`pcap_packet.header <pcapfile.structs.pcap_packet.header>` is a
+        ``pcap_packet.header`` is a
         :mod:`ctypes` pointer to the savefile header. Each read of the field
         builds a new pointer object, but every one of them points at the same
         header, so the header's address is the key. The pointer object read
@@ -618,8 +617,8 @@ def _layer2dict(layer: 'Any') -> 'dict[str, Any]':
         layer: Decoded PyPCAPFile layer, or raw bytes.
 
     Note:
-        `PyPCAPFile`_'s own :class:`~pcapfile.protocols.linklayer.ethernet.Ethernet`
-        and :class:`~pcapfile.protocols.network.ip.IP` decoders hex-encode the
+        `PyPCAPFile`_'s own ``pcapfile.protocols.linklayer.ethernet.Ethernet``
+        and ``pcapfile.protocols.network.ip.IP`` decoders hex-encode the
         payload they retain rather than decoding it further (see
         :func:`_maybe_unhex`), so a raw payload reached by recursing *from* one of
         those classes is un-hexed before being reported here. Without that,
@@ -724,7 +723,7 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
     """Make data for IPv4 reassembly.
 
     A packet can be reassembled if it contains an IPv4 layer
-    (:class:`pcapfile.protocols.network.ip.IP`) whose header was captured whole (see
+    (``pcapfile.protocols.network.ip.IP``) whose header was captured whole (see
     :func:`_network`), and the **DF** flag is :data:`False`.
 
     Args:

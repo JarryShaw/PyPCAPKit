@@ -277,7 +277,7 @@ class SchemaMeta(abc.ABCMeta):
     #: Collisions of different kinds, all reserved:
     #:
     #: ``mcls``, ``name``, ``bases``, ``namespace`` collide with
-    #: :meth:`abc.ABCMeta.__new__` -- a *different* function from this one, one
+    #: ``abc.ABCMeta.__new__`` -- a *different* function from this one, one
     #: level up the ``super().__new__(...)`` call below. Before Python 3.11
     #: those are positional-or-keyword there (from 3.11 they are
     #: positional-only, ``def __new__(mcls, name, bases, namespace, /,
@@ -333,7 +333,7 @@ class SchemaMeta(abc.ABCMeta):
 
         Raises:
             SchemaError: If a class keyword in ``**kwargs`` collides with a
-                parameter of :meth:`abc.ABCMeta.__new__` or of
+                parameter of ``abc.ABCMeta.__new__`` or of
                 ``__init_subclass__`` -- see :attr:`_RESERVED_CLASS_KWARGS`.
 
         """
@@ -1196,8 +1196,10 @@ class _EnumRegistry(collections.defaultdict):
     """A registry :class:`collections.defaultdict` that never inserts a miss.
 
     :attr:`EnumSchema.registry` (and its class-level twin,
-    :attr:`EnumMeta.registry`) is read with a bare ``registry[code]`` at many
-    call sites across the schema layer, e.g. ``Option.registry[type]``. A
+    :attr:`EnumMeta.registry
+    <pcapkit.protocols.schema.schema.EnumMeta.registry>`) is read with a bare
+    ``registry[code]`` at many call sites across the schema layer, e.g.
+    ``Option.registry[type]``. A
     plain :class:`collections.defaultdict` inserts whatever
     :attr:`~collections.defaultdict.default_factory` returns the *first time*
     an unregistered ``code`` is looked up -- and since the registry lives on
@@ -1330,7 +1332,9 @@ class EnumSchema(Schema, Generic[_ET], metaclass=EnumMeta):
             mapping is served by ``EnumMeta.registry``.
 
         Important:
-            See :attr:`EnumMeta.registry`: the returned mapping is a
+            See :attr:`EnumMeta.registry
+            <pcapkit.protocols.schema.schema.EnumMeta.registry>`: the
+            returned mapping is a
             :class:`_EnumRegistry`, so looking up an unregistered ``code``
             returns the default schema without recording ``code`` as if it
             had been registered.

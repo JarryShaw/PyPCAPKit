@@ -31,7 +31,7 @@ if TYPE_CHECKING:
 
 __all__ = ['packet2dict', 'tcp_traceflow', 'ENCAP_TYPE_TO_LINKTYPE', 'FILTER_NAME_TO_LINKTYPE']
 
-#: ``frame.encap_type`` -- Wireshark's internal ``WTAP_ENCAP_*`` number, which :mod:`pyshark`
+#: ``frame.encap_type`` -- Wireshark's internal ``WTAP_ENCAP_*`` number, which ``pyshark``
 #: exposes as ``packet.frame_info.encap_type`` -- to the matching
 #: :class:`~pcapkit.const.reg.linktype.LinkType` member. This is :func:`tcp_traceflow`'s primary
 #: link-type source; ``FILTER_NAME_TO_LINKTYPE`` below is only its fallback.
@@ -51,7 +51,7 @@ __all__ = ['packet2dict', 'tcp_traceflow', 'ENCAP_TYPE_TO_LINKTYPE', 'FILTER_NAM
 #:     # key   := the frame.encap_type that `tshark -r out.pcap -c 1 -T pdml` then reports
 #:
 #: so each pair is one round trip through Wireshark's own ``wiretap/pcap-common.c``, in the read
-#: direction :mod:`pyshark` actually exercises. In the source, the trailing comment on each line
+#: direction ``pyshark`` actually exercises. In the source, the trailing comment on each line
 #: names the ``editcap -T`` encapsulation that produced it.
 #:
 #: What the sweep does **not** cover, since that bounds this table: of the 226 encapsulations
@@ -243,7 +243,7 @@ ENCAP_TYPE_TO_LINKTYPE = {
 #:   cannot be mapped at any size: ``user_dlt`` (16 DLTs), ``bluetooth`` (6), ``usb`` (5),
 #:   ``usbll`` (4), ``raw`` (3), and ``arcnet``, ``gfp``, ``i2c``, ``lapd``, ``mtp2``,
 #:   ``netanalyzer``, ``null``, ``ppp``, ``sll``, ``wlan``, ``wpan`` (2 each).
-#: * **Pseudo-protocols** -- ``fake-field-wrapper``, which :mod:`pyshark` reports as ``data`` and
+#: * **Pseudo-protocols** -- ``fake-field-wrapper``, which ``pyshark`` reports as ``data`` and
 #:   which was the root for 29 of the swept encapsulations (no dissector), and ``_ws.malformed``,
 #:   the root for the one capture ``tshark`` could not parse. Neither names a link type.
 #: * **Unswept** -- the 69 encapsulations ``editcap -T`` would not write as pcap from an Ethernet

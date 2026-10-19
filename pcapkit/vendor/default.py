@@ -583,8 +583,8 @@ class Vendor(metaclass=VendorMeta):
         to obtain it. That lets a caller resolve a crawler's destination
         *without* instantiating it, and so without triggering
         :meth:`Vendor.__init__`'s network fetch, render and write --
-        :func:`pcapkit.vendor.__main__.run`'s pre-run snapshot (GitHub issue
-        :issue:`872`) is exactly such a caller. Every crawler defined in this
+        the pre-run snapshot that ``run()`` in :mod:`pcapkit.vendor.__main__`
+        takes (GitHub issue :issue:`872`) is exactly such a caller. Every crawler defined in this
         codebase inherits this implementation unchanged; none overrides
         ``_dest_path``, so the classmethod is authoritative for all of them.
 

@@ -6,7 +6,7 @@
 
 :mod:`pcapkit.dumpkit.common` is the collection of common utility
 functions for :mod:`pcapkit.dumpkit` implementation, which is
-generally the customised hooks for :class:`dictdumper.Dumper`
+generally the customised hooks for :class:`dictdumper.dumper.Dumper`
 classes.
 
 """
@@ -233,7 +233,7 @@ def render_enum(o: 'enum.Enum | aenum.Enum') -> 'str':
         cannot be mistaken for a member name, since a Python identifier may not
         begin with a digit.
 
-        This is *not* an :mod:`aenum` quirk. A stdlib :class:`enum.IntFlag` built
+        This is *not* an ``aenum`` quirk. A stdlib :class:`enum.IntFlag` built
         from the same members answers ``name is None`` identically on CPython
         3.14.7, so the guard belongs here rather than in a choice of enumeration
         library.
@@ -498,7 +498,8 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                 way out reaches every string the writer will ever interpolate
                 raw, not merely the ones built directly in this method. The
                 one exception is a mapping *key*:
-                :meth:`~dictdumper.dumper.Dumper._append_dict` writes those
+                :meth:`~dictdumper.plist.PLIST._append_dict` and
+                :meth:`~dictdumper.json.JSON._append_object` write those
                 straight from the mapping without ever calling this method on
                 them, so both branches that hand the writer a mapping -- a
                 :class:`~pcapkit.corekit.multidict.MultiDict` and a plain

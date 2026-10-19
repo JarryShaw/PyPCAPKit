@@ -551,7 +551,7 @@ class AbsentType(Sentinel):
 
 
 #: AbsentType: Absent-versus-:obj:`None` sentinel for
-#: :func:`pcapkit.protocols.protocol._declared_keywords` to read a class's
+#: ``pcapkit.protocols.protocol._declared_keywords()`` to read a class's
 #: own ``__keywords__`` out of its :attr:`~object.__dict__`, where
 #: :obj:`None` is itself a meaningful value -- the opt-out that says the
 #: class cannot enumerate its keywords, cf.

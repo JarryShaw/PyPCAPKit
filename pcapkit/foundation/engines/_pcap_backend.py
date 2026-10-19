@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-"""Which distribution owns the :mod:`pcap` module?
+"""Which distribution owns the ``pcap`` module?
 =====================================================
 
 .. module:: pcapkit.foundation.engines._pcap_backend
 
-Unrelated PyPI distributions install a top-level module named :mod:`pcap`:
+Unrelated PyPI distributions install a top-level module named ``pcap``:
 
 * `PyPCAP`_ -- a Cython binding, shipped as a single extension module
   (:file:`pcap.cpython-*.so`), installable only up to Python 3.11.
@@ -51,7 +51,7 @@ if TYPE_CHECKING:
 PYPCAP = 'pypcap'
 #: Distribution name of `pcap-ct`_.
 PCAP_CT = 'pcap-ct'
-#: Every distribution known to provide :mod:`pcap`, in a fixed order so that
+#: Every distribution known to provide ``pcap``, in a fixed order so that
 #: messages naming several of them read the same way every time.
 DISTRIBUTIONS = (PYPCAP, PCAP_CT)
 #: The ``engine=`` string that drives each distribution. Kept here rather than in
@@ -65,7 +65,7 @@ ENGINE_NAMES = {
 
 @info_final
 class Probe(Info):
-    """What one attempt to import :mod:`pcap` found."""
+    """What one attempt to import ``pcap`` found."""
 
     #: Distribution that provided the imported module -- :data:`PYPCAP`,
     #: :data:`PCAP_CT`, or :data:`None` when the import did not succeed.
@@ -104,9 +104,9 @@ class Probe(Info):
 
 
 def identify(module: 'ModuleType') -> 'str':
-    """Which distribution does an imported :mod:`pcap` module come from?
+    """Which distribution does an imported ``pcap`` module come from?
 
-    `pcap-ct`_ ships :mod:`pcap` as a package whose ``__init__`` does
+    `pcap-ct`_ ships ``pcap`` as a package whose ``__init__`` does
     ``from ._pcap import *``, which binds the submodule as an attribute; upstream
     `PyPCAP`_ ships a single extension module, which has no such attribute. That
     is a structural difference rather than a cosmetic one, which is why it is
@@ -119,7 +119,7 @@ def identify(module: 'ModuleType') -> 'str':
       present on upstream ``pypcap`` 1.3.0 as well.
 
     Args:
-        module: An already-imported :mod:`pcap` module.
+        module: An already-imported ``pcap`` module.
 
     Returns:
         :data:`PCAP_CT` or :data:`PYPCAP`.
@@ -134,7 +134,7 @@ def identify(module: 'ModuleType') -> 'str':
 def installed_distributions() -> 'tuple[str, ...]':
     """Which of :data:`DISTRIBUTIONS` are installed, per package metadata.
 
-    Asked of the metadata rather than of :mod:`pcap` itself, because that is the
+    Asked of the metadata rather than of ``pcap`` itself, because that is the
     only way to see the distribution the import did *not* resolve to -- which is
     exactly the collision worth reporting.
 
@@ -190,7 +190,7 @@ def _purge() -> 'None':
 
 
 def probe() -> 'Probe':
-    """Import :mod:`pcap` and report what was found.
+    """Import ``pcap`` and report what was found.
 
     Not cached. The cost after a successful first call is a :data:`sys.modules`
     lookup, and a cache would make the answer depend on when it was first asked --
@@ -234,7 +234,7 @@ def probe() -> 'Probe':
 
 
 def wrong_backend_reason(wanted: 'str', found: 'Probe') -> 'Optional[str]':
-    """Why ``wanted`` cannot run, when some *other* distribution owns :mod:`pcap`.
+    """Why ``wanted`` cannot run, when some *other* distribution owns ``pcap``.
 
     Args:
         wanted: The distribution the calling engine drives -- :data:`PYPCAP` or

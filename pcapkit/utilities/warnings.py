@@ -14,7 +14,7 @@ Every warning :mod:`pcapkit` reports goes through :func:`warn`, which reports it
    ``pcapkit`` logger sees every complaint whatever the warning filters say;
 2. the standard :mod:`warnings` machinery, via :func:`warnings.warn`, subject to
    the filters -- so :func:`warnings.filterwarnings`,
-   :func:`warnings.catch_warnings`, :mod:`pytest`'s ``filterwarnings``,
+   :class:`warnings.catch_warnings`, :mod:`pytest`'s ``filterwarnings``,
    :option:`-W` and :envvar:`PYTHONWARNINGS` govern :mod:`pcapkit` warnings
    exactly as they govern any other library's (see below for the one wrinkle in
    naming a category on the command line).
@@ -118,7 +118,7 @@ def warn(message: 'Union[str, Warning]', category: 'Type[Warning]',
 
     The warning is reported once on the :data:`~pcapkit.utilities.logging.logger`
     logger, then once through :func:`warnings.warn`. The logger call does not
-    consult :data:`warnings.filters`, so a log-based consumer sees the complaint
+    consult ``warnings.filters``, so a log-based consumer sees the complaint
     even when the application has filtered the category out; the
     :func:`warnings.warn` call is filtered normally, so the application keeps
     full control of that channel -- including turning the warning into an error
@@ -259,8 +259,8 @@ class hold_warnings:  # pylint: disable=invalid-name
     have (:issue:`1580`).
 
     Note:
-        Nothing here touches :data:`warnings.filters` or a module's
-        ``__warningregistry__``; :func:`warnings.catch_warnings` would, which is
+        Nothing here touches ``warnings.filters`` or a module's
+        ``__warningregistry__``; :class:`warnings.catch_warnings` would, which is
         what made unrelated warnings re-fire up to v1.4.1 (see
         :class:`BaseWarning`).
 
@@ -336,7 +336,7 @@ class BaseWarning(UserWarning):
        The constructor has no side effects (:issue:`364`). In 1.4.x it called
        ``warnings.simplefilter('ignore', type(self))`` outside development
        mode, which inserted an entry at the front of the process-global
-       :data:`warnings.filters` -- overriding whatever the host application,
+       ``warnings.filters`` -- overriding whatever the host application,
        :option:`-W` or the test runner had configured, and invalidating every
        module's ``__warningregistry__`` so that unrelated warnings re-fired.
        It also logged the warning a second time under

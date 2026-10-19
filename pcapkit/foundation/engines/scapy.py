@@ -11,15 +11,15 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
 .. note::
 
-   Constructing this engine imports :mod:`scapy.all`, which is what populates
+   Constructing this engine imports ``scapy.all``, which is what populates
    `Scapy`_'s layer registries -- see :meth:`Scapy.__init__` for why anything
    narrower silently returns undissected frames.
 
-   One side effect is worth knowing about in advance: :mod:`scapy.all` loads
+   One side effect is worth knowing about in advance: ``scapy.all`` loads
    :mod:`scapy.layers.dcerpc`, which reaches `Scapy`_'s TLS layer and there
-   triggers a ``CryptographyDeprecationWarning`` from :mod:`cryptography` about
+   triggers a ``CryptographyDeprecationWarning`` from ``cryptography`` about
    finite-field Diffie-Hellman. It is emitted by any complete registry load, not
-   by :mod:`scapy.all` in particular, and it concerns a key-exchange code path
+   by ``scapy.all`` in particular, and it concerns a key-exchange code path
    :mod:`pcapkit` never executes -- but it subclasses :exc:`UserWarning`, not
    :exc:`DeprecationWarning`, so Python's default filters show it.
 
@@ -27,7 +27,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    to emit and the consumer's to silence, on the same footing as every other
    category (see :mod:`pcapkit.utilities.warnings`); hiding a third-party
    deprecation notice from inside a constructor would suppress the only advance
-   warning that a future :mod:`cryptography` release breaks `Scapy`_'s TLS layer.
+   warning that a future ``cryptography`` release breaks `Scapy`_'s TLS layer.
    To silence it, filter it as usual::
 
        import warnings
@@ -60,7 +60,7 @@ if TYPE_CHECKING:
     from pcapkit.foundation.extraction import Extractor
 
     class _ScapyPackage(Protocol):
-        """:mod:`scapy.all`, as :class:`Scapy` reads it through :attr:`Scapy._expkg` (#1878).
+        """``scapy.all``, as :class:`Scapy` reads it through :attr:`Scapy._expkg` (#1878).
 
         Typed by scapy itself, which ships its own type information.
 
@@ -126,7 +126,7 @@ def _reader_type() -> 'Type[PcapReader]':
     :func:`pcapkit.toolkit.scapy.attach_resolution` and
     :func:`pcapkit.toolkit.scapy.attach_linktype`: from the global header of a
     PCAP, and from the interface of each PCAP-NG packet block, which
-    :meth:`~scapy.utils.RawPcapNgReader._read_block` is the last place to see.
+    ``scapy.utils.RawPcapNgReader._read_block`` is the last place to see.
 
     The PCAP-NG subclass also starts each section with no interfaces, as the
     PCAP-NG specification defines a section: an interface ID counts the Interface
@@ -292,7 +292,7 @@ class Scapy(EngineBase['ScapyPacket']):
 
     """
     if TYPE_CHECKING:
-        #: Engine extraction package, i.e. :mod:`scapy.all`.
+        #: Engine extraction package, i.e. ``scapy.all``.
         _expkg: '_ScapyPackage'
         #: Engine extraction temporary storage.
         _extmp: 'Iterator[ScapyPacket]'
@@ -318,7 +318,7 @@ class Scapy(EngineBase['ScapyPacket']):
             extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.
 
         """
-        # NOTE: :mod:`scapy.all`, not :mod:`scapy.sendrecv`, and the difference is
+        # NOTE: ``scapy.all``, not :mod:`scapy.sendrecv`, and the difference is
         # load-bearing rather than cosmetic. Scapy dispatches on two registries that
         # exist only as *import side effects* of its layer modules: ``conf.l2types``,
         # mapping a capture's link type onto a link-layer class, and the
@@ -335,9 +335,9 @@ class Scapy(EngineBase['ScapyPacket']):
         # ``dhcp.pcapng`` still comes back as ``Ethernet / IP / UDP / Raw`` rather
         # than ``... / UDP / BOOTP / DHCP options``. Enumerating them here would also
         # go stale silently -- a link or payload type added by a later scapy would
-        # regress to ``Raw`` with no error -- whereas :mod:`scapy.all` defers to
+        # regress to ``Raw`` with no error -- whereas ``scapy.all`` defers to
         # ``conf.load_layers``, which scapy itself keeps current. The cost is the
-        # layer loading, not the façade: importing :mod:`scapy.layers.all` alone
+        # layer loading, not the façade: importing ``scapy.layers.all`` alone
         # measures the same, so there is no complete-but-cheaper option to prefer.
         #
         # This stays inside ``__init__`` rather than moving to module scope so that
@@ -363,7 +363,7 @@ class Scapy(EngineBase['ScapyPacket']):
         This method assigns :attr:`self._extmp <Scapy._extmp>` as an iterator
         from :func:`scapy.sendrecv.sniff`, reached through
         :attr:`self._expkg <Scapy._expkg>` -- which :meth:`__init__` binds to
-        :mod:`scapy.all`, since that is the import that populates the layer
+        ``scapy.all``, since that is the import that populates the layer
         registries ``sniff`` needs to dissect anything.
 
         The global header is parsed and dumped first, by

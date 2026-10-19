@@ -14,7 +14,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
 .. note::
 
-   Constructing this engine imports :mod:`scapy.all`, which populates `Scapy`_'s
+   Constructing this engine imports ``scapy.all``, which populates `Scapy`_'s
    layer registries -- ``conf.l2types`` and the ``bind_layers`` payload table,
    both of which exist only as import side effects of the layer modules.
    Importing a narrower submodule leaves them empty, and
@@ -26,9 +26,9 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    ``Ethernet / IP / UDP / Raw``, and such a list would go stale silently as
    `Scapy`_ gains layer types.
 
-   One side effect: :mod:`scapy.all` loads :mod:`scapy.layers.dcerpc`, which
+   One side effect: ``scapy.all`` loads :mod:`scapy.layers.dcerpc`, which
    reaches `Scapy`_'s TLS layer and there triggers a
-   ``CryptographyDeprecationWarning`` from :mod:`cryptography` about
+   ``CryptographyDeprecationWarning`` from ``cryptography`` about
    finite-field Diffie-Hellman. It concerns a key-exchange code path
    :mod:`pcapkit` never executes, but it subclasses :exc:`UserWarning` rather
    than :exc:`DeprecationWarning`, so Python's default filters show it.
@@ -193,7 +193,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
 .. important::
 
-   `pcap-ct`_ installs the same top-level :mod:`pcap` module as `PyPCAP`_. This
+   `pcap-ct`_ installs the same top-level ``pcap`` module as `PyPCAP`_. This
    engine therefore checks which of the two it got and raises
    :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` when it is `pcap-ct`_,
    naming ``engine='pcap_ct'`` in the message. Running `pcap-ct`_ under the
@@ -308,8 +308,8 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    interface rather than 1.3.0.
 
    Every attribute this engine touches -- the ``pcap.pcap(name=..., promisc=...)``
-   constructor, :meth:`~pcap.pcap.datalink`, ``snaplen``, iteration yielding
-   ``(timestamp, bytes)``, and :meth:`~pcap.pcap.close` -- is present on both and
+   constructor, ``pcap.pcap.datalink``, ``snaplen``, iteration yielding
+   ``(timestamp, bytes)``, and ``pcap.pcap.close`` -- is present on both and
    behaves identically, byte for byte and timestamp for timestamp, on
    ``pcap-ct`` 1.3.0b3 against ``pypcap`` 1.3.0 -- a statement about those
    versions, not a guarantee from upstream. ``PCAP_CT`` is therefore not
@@ -441,7 +441,7 @@ Backend Detection
 
 .. module:: pcapkit.foundation.engines._pcap_backend
 
-Unrelated PyPI distributions install a top-level module named :mod:`pcap` --
+Unrelated PyPI distributions install a top-level module named ``pcap`` --
 `PyPCAP`_, a Cython binding shipped as a single extension module, and `pcap-ct`_,
 a :mod:`ctypes` reimplementation shipped as a package. They therefore collide,
 and ``import pcap`` resolves to whichever the import system finds first.

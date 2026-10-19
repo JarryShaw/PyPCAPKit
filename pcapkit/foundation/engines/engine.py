@@ -291,14 +291,14 @@ class Engine(EngineBase[_T], Generic[_T]):
         Note:
             The keyword is ``engine`` rather than ``name`` because ``name``
             cannot be passed as a class keyword at all on Python 3.10:
-            :meth:`abc.ABCMeta.__new__` takes ``mcls``, ``name``, ``bases`` and
+            ``abc.ABCMeta.__new__`` takes ``mcls``, ``name``, ``bases`` and
             ``namespace`` as positional-*or-keyword* parameters
             before 3.11, so a class keyword by any of those names collides
             with one of them and the class statement raises :exc:`TypeError` from
             the metaclass before this method is reached. ``engine`` is outside
             that set, so the documented registration path works on every
             supported version. Measured on 3.10.21, 3.11.15 and 3.14.7; those
-            names are the whole of the :meth:`abc.ABCMeta.__new__` collision
+            names are the whole of the ``abc.ABCMeta.__new__`` collision
             surface. Separately, and for an unrelated reason that holds on every
             version, ``metaclass`` is not usable as a class keyword either: a
             ``class`` statement consumes it to choose the metaclass, so it never

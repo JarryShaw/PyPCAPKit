@@ -230,6 +230,8 @@ Internal Definitions
    :no-members:
    :show-inheritance:
 
+   .. autoproperty:: registry
+
 .. autoclass:: pcapkit.protocols.schema.schema._EnumRegistry
    :no-members:
    :show-inheritance:

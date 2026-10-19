@@ -66,3 +66,18 @@ following objects and functions:
      - Python 3.10
    * - :class:`types.UnionType`, or :data:`None` below it
      - Python 3.10
+
+.. function:: final(f)
+
+   :func:`typing.final` from Python 3.11 on, and ``typing_extensions.final``
+   below it. Both record ``__final__ = True`` on the decorated object at
+   runtime, which :class:`~pcapkit.corekit.infoclass.Info` and
+   :class:`~pcapkit.protocols.schema.schema.Schema` read to refuse a class
+   marked ``@final`` without :func:`~pcapkit.corekit.infoclass.info_final` or
+   :func:`~pcapkit.protocols.schema.schema.schema_final`. Plain
+   :func:`typing.final` records nothing below 3.11 (gh-90500).
+
+   .. versionchanged:: 1.5.0
+
+      Taken from ``typing_extensions`` below Python 3.11 rather than 3.8, so
+      that ``__final__`` is recorded on every supported version (:issue:`778`).

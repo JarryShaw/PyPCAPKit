@@ -32,7 +32,7 @@ cannot be used for it.
    Populating the registries before
    ``sniff`` is
    :class:`~pcapkit.foundation.engines.scapy.Scapy`'s job, and it does it by
-   importing :mod:`scapy.all` in its constructor.
+   importing ``scapy.all`` in its constructor.
 
 """
 import decimal
@@ -457,7 +457,7 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
     A packet can be reassembled if it contains an IPv4 layer
     (:class:`scapy.layers.inet.IP`) whose header -- as many octets as its IHL counts,
     and at least 20 -- lies inside the frame and every IP datagram carrying it (see
-    :func:`_within_datagrams`), and the **DF** (:attr:`scapy.layers.inet.IP.flags.DF`)
+    :func:`_within_datagrams`), and the **DF** (``scapy.layers.inet.IP.flags.DF``)
     flag is :data:`False`. A zero-length frame has none, though `Scapy`_ hands it back
     as an IPv4 layer of defaults at the ``RAW`` and ``IPV4`` link types (see
     :func:`_frame`).
