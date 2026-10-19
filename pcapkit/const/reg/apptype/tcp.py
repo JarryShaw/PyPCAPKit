@@ -906,7 +906,7 @@ class TCP(AppType):
     __registry__: 'MultiDict[int, TCP]' = MultiDict()
 
     #: The canonical service for each port IANA assigns more than one to, i.e.
-    #: what ``AppType.get()`` answers with.
+    #: what :meth:`AppType.get() <pcapkit.const.reg.apptype.apptype.AppType.get>` answers with.
     #: Taken from :file:`/etc/services`, which is what
     #: :func:`socket.getservbyport` reads -- IANA names no precedence among the
     #: services it registers on one port, and registry row order does not supply

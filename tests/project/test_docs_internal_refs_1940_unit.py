@@ -87,10 +87,6 @@ HELPERS = (
     ('pcapkit/vendor/reg.rst', 'pcapkit.vendor.reg.ethertype.EtherType._insert_range'),
 )
 
-#: Helpers in :data:`HELPERS` documented without a docstring of their own: the vendor
-#: template that generates their module is outside this change (#1920).
-UNDOCSTRINGED = frozenset({'pcapkit.const.reg.apptype.apptype.AppType.__eq__'})
-
 #: ``(source, literal, the role that replaced it)``. The first two are the
 #: examples #1940 names.
 CONVERTED = (
@@ -236,8 +232,6 @@ class HelperEntryTests(unittest.TestCase):
     def test_documented_functions_have_docstrings(self) -> 'None':
         """A helper's entry renders its docstring, so a function must have one of its own."""
         for _, path in HELPERS:
-            if path in UNDOCSTRINGED:
-                continue
             owner, _, name = path.rpartition('.')
             parent = _resolve(owner)
             obj = vars(parent).get(name) if isinstance(parent, type) else getattr(parent, name)
