@@ -16,7 +16,7 @@ walking many such values would accumulate without bound.
 
 Tier 1 touches only the shared ``get()`` template in :mod:`pcapkit.vendor.default`
 and the ``_missing_`` range-branch :meth:`~pcapkit.vendor.
-default.Vendor.process` assembles -- see that module for both hunks. It is
+default.Vendor.process` assembles -- see that module for those hunks. It is
 scoped to the registries that inherit both unmodified, which this module's
 :data:`REGISTRIES_WITH_UNASSIGNED_RANGES` and :data:`ALL_REGISTRIES` enumerate;
 the vendor files that replace the shared template wholesale (and whatever
@@ -47,7 +47,7 @@ branches. :class:`~pcapkit.const.mh.cga_type.CGAType` keeps minting too, but
 for a different reason: its ``Tag_<hex>`` mint is not an IANA-style
 range at all (see its own module for why), so the ruling never touched it.
 
-GitHub issue #860 (step 2, PR 1) brought all but one of those classes onto
+GitHub issue #860 (step 2, PR 1) brought most of those classes onto
 :class:`~pcapkit.corekit.enum.EnumRegistry` and converted their branches --
 see :data:`BESPOKE_UNMINT_CONVERTED_REGISTRIES` and
 :class:`BespokeOpenVocabularyUnmintConvertedTests` below. Two distinct
@@ -363,7 +363,7 @@ def _first_unassigned_value(cls: 'type') -> 'int':
 #: Private/Experimental Use``, ``Unspecified in the IANA registry``, and
 #: similar) rather than a name anyone assigned. Derived from the same AST walk
 #: that measured the modules still minting on ``main`` before this change:
-#: most of them are here, including the two *mixed* registries (:class:`~pcapkit.
+#: most of them are here, including the *mixed* registries (:class:`~pcapkit.
 #: const.reg.ethertype.EtherType` and :class:`~pcapkit.const.ipx.socket.
 #: Socket`, which convert some branches and keep minting others -- see
 #: :data:`ETHERTYPE_UNASSIGNED_PROBES` and :data:`IPX_SOCKET_UNASSIGNED_
@@ -1268,8 +1268,8 @@ class UnregisteredMemberNameIsBareTests(unittest.TestCase):
     ``%`` (the old ``'Unassigned_%d' % value`` shape, spelled out as a
     literal), or an equivalent ``%``-formatted :class:`~ast.BinOp` or
     f-string. It therefore covers every call site tier 1's follow-up
-    touched, every one tier 2's #775/#847 ruling added, and -- since #860
-    step 2's PR 1 -- those across :class:`~pcapkit.const.http.
+    touched, every one tier 2's #775/#847 ruling added, and those #860
+    step 2's PR 1 added across :class:`~pcapkit.const.http.
     status_code.StatusCode`, :class:`~pcapkit.const.ftp.return_code.
     ReturnCode`, :class:`~pcapkit.const.ftp.return_code.ResponseKind`,
     :class:`~pcapkit.const.ftp.return_code.GroupingInformation`,
@@ -1390,7 +1390,7 @@ class UnregisteredMemberNameIsBareTests(unittest.TestCase):
         self.assertGreaterEqual(call_count, 1065,
                                  f'expected at least 1065 _unregistered_member call sites, found {call_count}')
         # And that the exemption is actually earning its keep, rather than a
-        # dead carve-out nothing reaches any more: one per EtherType range
+        # dead carve-out nothing reaches: one per EtherType range
         # branch, plus Socket's one.
         self.assertEqual(exempt_hits, 53,
                           f'expected exactly 53 hex-suffixed-name exemptions to fire, found {exempt_hits}')
@@ -1476,8 +1476,8 @@ class RulingConversionSourceTests(unittest.TestCase):
     with no reachable gap (every in-bounds value already names a real member,
     so no lookup can exercise the branch either before or after this change)
     -- and, as a completeness check, for the wholly-converted registries:
-    none of their ``_missing_`` bodies may call :func:`~aenum.extend_enum`
-    any more. :data:`_MIXED_REGISTRIES` is empty, #775's final round having
+    none of their ``_missing_`` bodies may call :func:`~aenum.extend_enum`.
+    :data:`_MIXED_REGISTRIES` is empty, #775's final round having
     converted both, so nothing is excluded here -- see its own docstring."""
 
     def test_no_reachable_gap_registries_no_longer_call_extend_enum(self) -> None:

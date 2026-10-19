@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Tests for :class:`pcapkit.corekit.enum.EnumRegistry`, tier 2 of issue #775.
 
-Tier 1 (#838) removed the mint from the two sites in
+Tier 1 (#838) removed the mint from the sites in
 :data:`pcapkit.vendor.default.LINE` that the default-template registries
 inherit. It could not reach the crawlers that replace that template with
 their own, because each of those carries a hand-copied ``get()`` -- and none of

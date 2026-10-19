@@ -391,8 +391,8 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
     the shared base of every IPv6 extension header, *and* the concrete
     fallback parser for one this package does not implement.
 
-    That merge removes a safety net. Before it, each of the eight implemented
-    headers inherited :class:`~pcapkit.protocols.internet.internet.Internet`
+    That merge removes a safety net. Before it, each implemented
+    header inherited :class:`~pcapkit.protocols.internet.internet.Internet`
     directly, whose ``name``/``alias``/``protocol``/``length`` are generic or
     abstract and whose ``__index__`` is :func:`abc.abstractmethod` -- so
     forgetting one was loud. After it, the same omission silently inherits this
@@ -401,10 +401,10 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
     reads its length off a data model that is not its own, and ``__index__``
     raises instead of returning its IANA number.
 
-    The eight are correct only because all eight happen to shadow every
+    The implemented headers are correct only because each happens to shadow every
     one of those members. Nothing in the language enforces that, so this class
     does -- over every subclass discovered at runtime rather than a hard-coded
-    list, so a ninth added later is held to the same contract without anyone
+    list, so one added later is held to the same contract without anyone
     remembering to come back here.
     """
 

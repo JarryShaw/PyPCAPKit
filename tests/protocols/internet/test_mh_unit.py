@@ -1668,7 +1668,7 @@ class MHUnitTests(unittest.TestCase):
             # The int-value-miss subTests below reach ``_missing_`` on
             # ``key`` itself, whose error is quiet inside ``get``'s
             # ``_CaughtByCaller`` block (#1845), and no pcapkit error sets
-            # this any more (#362). Restored anyway, so a later test in the
+            # this (#362). Restored anyway, so a later test in the
             # same run cannot read truncated tracebacks because of this one.
             if hasattr(sys, 'tracebacklimit'):
                 del sys.tracebacklimit

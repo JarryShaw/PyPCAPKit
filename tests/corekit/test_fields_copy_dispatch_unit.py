@@ -16,7 +16,7 @@ what a profiler credits to ``builtins.getattr``.
 ``copier = getattr(cls, '__copy__', None); copier(x)`` is exactly
 ``x.__copy__()``, so calling it directly does not change *when* a field is
 copied or what the copy contains -- only the redundant lookup is removed. This
-module proves that: every one of those call sites now reaches
+module proves that: every one of those call sites reaches
 :meth:`FieldBase.__copy__` without ever calling :func:`copy.copy`.
 
 On the tree before this fix, every test below fails: each ``__call__``

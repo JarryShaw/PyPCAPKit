@@ -92,7 +92,7 @@ VENDOR_ROOT = pathlib.Path(__file__).resolve().parents[2] / 'pcapkit' / 'vendor'
 #: Only those crawlers are visible to this guard. Every other crawler that
 #: defines ``process()`` -- one that builds ``miss`` by ``.append()``, or never
 #: returns an ``(enum, miss)`` pair at all -- is invisible to it, not merely the
-#: two crawlers used as an example in :func:`_constant_miss_lines`'s docstring
+#: crawlers named as examples in :func:`_constant_miss_lines`'s docstring
 #: below. A crawler that assigns ``miss`` from a comprehension, from a variable,
 #: or under a different variable name entirely is skipped by construction too,
 #: same as one built by ``.append()``. Those are covered behaviourally, not
@@ -108,8 +108,8 @@ def _constant_miss_lines() -> 'dict[str, list[str]]':
     ``miss`` by ``.append()``, assigns it from a comprehension or a variable,
     or never returns an ``(enum, miss)`` pair at all, is absent from the
     returned mapping entirely -- not present with an empty list. That is
-    every other crawler module defining ``process()``, not just the two
-    examples this docstring used to single out
+    every other crawler module defining ``process()``, not just the
+    examples this docstring names
     (:mod:`pcapkit.vendor.reg.ethertype`, :mod:`pcapkit.vendor.ipx.socket`);
     see :data:`EXPECTED_CRAWLERS_WITH_CONSTANT_MISS_LINES` for the
     breakdown. They are covered behaviourally, not statically, by
