@@ -4,10 +4,10 @@
 The conda package declares no run requirement but Python.
 ``conda/pypcapkit/build.sh`` and ``bld.bat`` install every wheel that
 ``pip download -r conda/requirements.txt`` fetched into :file:`pcapkit/_extern`,
-which :file:`pcapkit/__init__.py` appends to :data:`sys.path`. So :file:`conda/requirements.txt` is the conda
-distribution's whole dependency list, and this script derives it from
-:file:`pyproject.toml` instead of leaving it to be edited by hand. Each package
-falls in exactly one of these classes:
+which :file:`pcapkit/__init__.py` appends to :data:`sys.path`. So
+:file:`conda/requirements.txt` is the conda distribution's whole dependency
+list, and this script derives it from :file:`pyproject.toml` instead of leaving
+it to be edited by hand. Each package falls in exactly one of these classes:
 
 ``needed``
     ``[project] dependencies`` and the ``all`` extra. A conda user has no

@@ -5,8 +5,8 @@
 PYTHON ?= python
 
 #: Timezone the reference reports are generated in. pcapkit renders timestamps in
-#: UTC, or in a PCAP-NG interface's own `if_tzone`, never in the host's zone (#357,
-#: #361), so the reports come out the same without it; the pin is belt-and-braces
+#: UTC, or in a PCAP-NG interface's own `if_tzone`, never in the host's zone (#361,
+#: #403), so the reports come out the same without it; the pin is belt-and-braces
 #: -- see the README.
 FIXTURE_TZ ?= UTC
 

@@ -13,7 +13,7 @@ name: "Lint"
 # own numbers, and vermin too, which had moved before the issue's own text said
 # it "was not re-checked". Only bandit held. A written-down count invites
 # exactly this, with no way to tell staleness from disagreement, so each step
-# writes its current result to the run summary instead; read the numbers there.
+# writes its result to the run summary instead; read the numbers there.
 #
 # pylint's R class is the one that moves without the code moving. Repeated runs
 # on an identical tree were measured to disagree on it, entirely through

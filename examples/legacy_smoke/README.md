@@ -118,8 +118,8 @@ thing that made them worth looking at.
 `TZ=UTC` is a belt-and-braces pin, not a requirement. `pcapkit` renders a frame
 timestamp in UTC, or in the zone a PCAP-NG interface declares in `if_tzone`, and
 never in the host's; PCAP-NG's `timestamp_epoch` is the UNIX epoch with no zone
-offset added (#357, #361). Measured by generating every report under `UTC`,
-`Asia/Shanghai` and `America/New_York`: they are identical. The host's zone did
-leak in before that fix, which is how these reports came to disagree with each
-other while they were still tracked, the PCAP reports having been generated at
-UTC-05:00 and `pcapng.txt` at UTC+08:00.
+offset added (#361, #403). Measured by generating every report under `UTC`,
+`Asia/Shanghai` and `America/New_York`: they are identical. The copies of these
+reports that #387 replaced show what the host's zone does when it leaks in: they
+disagree with each other, the PCAP reports rendering at UTC-05:00 and
+`pcapng.txt` at UTC+08:00, with its `timestamp_epoch` shifted by those 8 hours.
