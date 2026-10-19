@@ -430,7 +430,7 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
         # cannot recover data that was never in the buffer, only zero-fill for
         # it, and no field this large is legitimate to begin with. Honouring it
         # would allocate and zero-fill up to ``length`` octets on nothing but
-        # the packet's own say-so. C.f. #554.
+        # the packet's own say-so. Cf. #554.
         ceiling = config.MAX_ZERO_PAD_LENGTH
         if ceiling != -1 and length > ceiling and len(buffer) < length:
             raise FieldValueError(
@@ -442,7 +442,7 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
         # declared length just under :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH` passes it every
         # time it is declared, so 200 of them amplify 4,800 wire octets into
         # 50.0 MiB of retained zeros with the ceiling doing exactly what it was
-        # written to do. C.f. #573.
+        # written to do. Cf. #573.
         #
         # ``max(length, 0)`` is defensive rather than a case anything is known to
         # reach. :attr:`length` here resolves through :func:`struct.calcsize`, so

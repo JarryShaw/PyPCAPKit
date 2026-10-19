@@ -6,7 +6,7 @@
 
 :mod:`pcapkit.corekit.infoclass` contains :obj:`dict` like class
 :class:`~pcapkit.corekit.infoclass.Info`, which is originally
-designed to work alike :func:`dataclasses.dataclass` as introduced
+designed to work like :func:`dataclasses.dataclass` as introduced
 in :pep:`557`, and the immutable multi-mapping classes
 :class:`~pcapkit.corekit.infoclass.MultiInfo` and
 :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo` that a finalised

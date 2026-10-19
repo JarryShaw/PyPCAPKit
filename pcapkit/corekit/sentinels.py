@@ -201,7 +201,7 @@ class Sentinel(metaclass=SentinelMeta):
       :func:`copyreg._reconstructor` and so call :meth:`object.__new__`
       directly.
     * :meth:`__repr__` returns ``_name`` itself, as ``repr(None)`` is
-      ``'None'``. :func:`str` gives the same, since nothing here overrides
+      ``'None'``. :class:`str` gives the same, since nothing here overrides
       :meth:`object.__str__`.
     * :meth:`__setattr__` and :meth:`__delattr__` raise
       :exc:`AttributeError` for every name, as ``None.x = 1`` does, and
@@ -554,7 +554,7 @@ class AbsentType(Sentinel):
 #: :func:`pcapkit.protocols.protocol._declared_keywords` to read a class's
 #: own ``__keywords__`` out of its :attr:`~object.__dict__`, where
 #: :obj:`None` is itself a meaningful value -- the opt-out that says the
-#: class cannot enumerate its keywords, c.f.
+#: class cannot enumerate its keywords, cf.
 #: :attr:`ProtocolBase.__keywords__
 #: <pcapkit.protocols.protocol.ProtocolBase.__keywords__>`. Never leaves
 #: :mod:`pcapkit.protocols.protocol`, which imports it from here for exactly

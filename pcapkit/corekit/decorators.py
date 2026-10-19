@@ -180,7 +180,7 @@ def beholder(
             # NOTE: ``alias=proto`` matches what ``_import_next_layer`` passes, so
             # a payload that failed to parse still reports the code it arrived
             # with, which is what ``Data_Raw.protocol`` means. A plain integer has
-            # no ``name`` and still renders as ``Raw`` in the protochain, c.f.
+            # no ``name`` and still renders as ``Raw`` in the protochain, cf.
             # ``Raw.__post_init__``, so this only adds a name where the registry
             # key is an enumeration.
             #
@@ -289,7 +289,7 @@ def prepare(func: 'Callable[Concatenate[Type[R_prepare], bytes | IO[bytes], Opti
         if length == 0 and not declared_length:
             # Quiet: this is the frame reader's ordinary "no more packets"
             # signal, caught as such by
-            # ``pcapkit.foundation.extraction.Extractor`` and friends -- c.f.
+            # ``pcapkit.foundation.extraction.Extractor`` and friends -- cf.
             # ``pcapkit.protocols.protocol.ProtocolBase._read_unpack``'s
             # ``StructError(..., quiet=True, eof=True)`` for the same pattern.
             raise StreamEOFError('prepare: end of stream', quiet=True)

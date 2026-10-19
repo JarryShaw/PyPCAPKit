@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 __all__ = ['TSFlag']
 
-#: TS flag registry [:rfc:`719#section-3.1`].
+#: TS flag registry [:rfc:`791#section-3.1`].
 DATA = {
     0: 'Timestamp Only',
     1: 'IP with Timestamp',
@@ -38,7 +38,7 @@ class TSFlag(Vendor):
         """Fetch registry data.
 
         Returns:
-            Registry data (:data:`~pcapkit.vendor.ipv4.tos_pre.DATA`).
+            Registry data (:data:`~pcapkit.vendor.ipv4.ts_flag.DATA`).
 
         """
         return DATA

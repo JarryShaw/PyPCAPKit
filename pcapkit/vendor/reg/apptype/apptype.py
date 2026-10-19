@@ -49,7 +49,7 @@ _CACHE = {}  # type: dict[str, list[str]]
 #: The canonical service for each port IANA assigns more than one to, per
 #: transport protocol, as ``{transport: {port: service name}}``.
 #:
-#: IANA genuinely registers three services on TCP/80 -- ``http``, ``www`` and
+#: IANA genuinely registers more than one service on TCP/80 -- ``http``, ``www`` and
 #: ``www-http`` -- and gives no precedence among them, so the registry cannot
 #: derive which one a port lookup should answer with. Registry row order does not
 #: supply it either: taken alone it answers many of these pairs differently
@@ -800,10 +800,12 @@ class {NAME}(EnumRegistry, StrEnum):
 
         GitHub issue :issue:`807`'s third ask, deliberately scoped to **this**
         per-transport registry: ``TCP.register_alias(...)`` never touches
-        :class:`UDP`'s members, which is what keeps an alias registered on one
-        transport from leaking onto a transport IANA never assigned it -- e.g.
-        registering ``www`` as an alias of ``http`` on :class:`TCP` and
-        :class:`UDP` leaves it absent from :class:`SCTP`'s port 80, exactly as
+        :class:`~pcapkit.const.reg.apptype.udp.UDP`'s members, which is what
+        keeps an alias registered on one transport from leaking onto a
+        transport IANA never assigned it -- e.g. registering ``www`` as an alias
+        of ``http`` on :class:`~pcapkit.const.reg.apptype.tcp.TCP` and
+        :class:`~pcapkit.const.reg.apptype.udp.UDP` leaves it absent from
+        :class:`~pcapkit.const.reg.apptype.sctp.SCTP`'s port 80, exactly as
         IANA itself never registered it there.
 
         No new storage: the new member simply joins :data:`__registry__` at
@@ -998,7 +1000,7 @@ class {NAME}(AppType):
     __registry__: 'MultiDict[int, {NAME}]' = MultiDict()
 
     #: The canonical service for each port IANA assigns more than one to, i.e.
-    #: what :meth:`~pcapkit.const.reg.apptype.apptype.AppType.get` answers with.
+    #: what ``AppType.get()`` answers with.
     #: Taken from :file:`/etc/services`, which is what
     #: :func:`socket.getservbyport` reads -- IANA names no precedence among the
     #: services it registers on one port, and registry row order does not supply

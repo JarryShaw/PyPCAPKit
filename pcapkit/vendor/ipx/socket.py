@@ -100,12 +100,12 @@ DATA = {
     #   registration procedure reads "Not assigned by IANA".
     # * That standard itself, Appendix D, "Assigned well-known socket numbers",
     #   scanned at http://www.bitsavers.org/pdf/xerox/xns/standards/XSIS_028112-Internet_Transport_Protocols_198112.pdf
-    #   -- the same three functions, under a column headed "Well-Known Socket
+    #   -- the same functions, under a column headed "Well-Known Socket
     #   (octal)".
     #
     # The *names* are a different matter, and are the archived revision's own.
     # Both sources call socket 3 "Router Error" rather than "Error Handling
-    # Packet", and neither appends "Packet" to any of the three. That suffix
+    # Packet", and neither appends "Packet" to any of them. That suffix
     # looks like the adjacent packet-type registry bleeding in -- XSIS Appendix
     # E, "Assigned internet packet types", and the second table on the same IANA
     # page, which do use 1 Routing Information / 2 Echo / 3 Error as *packet*
@@ -258,7 +258,7 @@ RANGES = [
 #: of this set on that test, because a proprietary protocol may expose no name
 #: of its own, so the company name serves as its name. :issue:`775`'s final round
 #: converts it too, so this set does not decide *whether* a range registers --
-#: only *how its name is spelled*: these four keep the bare label with no hex
+#: only *how its name is spelled*: these keep the bare label with no hex
 #: suffix, since the label itself already says nothing was assigned, while
 #: ``Registered by Xerox`` keeps the hex-suffixed name it always rendered.
 UNASSIGNED_RANGE_NAMES = frozenset({

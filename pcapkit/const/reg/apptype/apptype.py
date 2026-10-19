@@ -2846,10 +2846,12 @@ class AppType(EnumRegistry, StrEnum):
 
         GitHub issue :issue:`807`'s third ask, deliberately scoped to **this**
         per-transport registry: ``TCP.register_alias(...)`` never touches
-        :class:`UDP`'s members, which is what keeps an alias registered on one
-        transport from leaking onto a transport IANA never assigned it -- e.g.
-        registering ``www`` as an alias of ``http`` on :class:`TCP` and
-        :class:`UDP` leaves it absent from :class:`SCTP`'s port 80, exactly as
+        :class:`~pcapkit.const.reg.apptype.udp.UDP`'s members, which is what
+        keeps an alias registered on one transport from leaking onto a
+        transport IANA never assigned it -- e.g. registering ``www`` as an alias
+        of ``http`` on :class:`~pcapkit.const.reg.apptype.tcp.TCP` and
+        :class:`~pcapkit.const.reg.apptype.udp.UDP` leaves it absent from
+        :class:`~pcapkit.const.reg.apptype.sctp.SCTP`'s port 80, exactly as
         IANA itself never registered it there.
 
         No new storage: the new member simply joins :data:`__registry__` at

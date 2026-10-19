@@ -20,7 +20,7 @@ knowable only to the caller.
 Rather than adding protocol specific keyword arguments to
 :class:`~pcapkit.foundation.extraction.Extractor`, such information is
 passed as a :class:`ContextRegistry` -- a mapping of protocol index ID
-(c.f. :meth:`Protocol.id <pcapkit.protocols.protocol.Protocol.id>`)
+(cf. :meth:`Protocol.id <pcapkit.protocols.protocol.Protocol.id>`)
 to a :class:`ProtocolContext` instance. The registry is handed to
 :class:`~pcapkit.foundation.extraction.Extractor` once, and is then
 propagated down the protocol stack by

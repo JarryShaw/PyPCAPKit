@@ -6,7 +6,7 @@
 
 :mod:`pcapkit.corekit.version` contains :obj:`tuple`
 like class :class:`~pcapkit.corekit.version.VersionInfo`,
-which is originally designed alike :class:`sys.version_info`.
+modelled on :data:`sys.version_info`.
 
 """
 import collections
@@ -15,7 +15,7 @@ __all__ = ['VersionInfo']
 
 
 class VersionInfo(collections.namedtuple('VersionInfo', ['major', 'minor'])):
-    """VersionInfo is alike :class:`sys.version_info`.
+    """VersionInfo is modelled on :data:`sys.version_info`.
 
     .. versionchanged:: 1.3.0
 

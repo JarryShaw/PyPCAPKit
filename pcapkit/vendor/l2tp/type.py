@@ -38,7 +38,7 @@ class Type(Vendor):
         """Fetch registry data.
 
         Returns:
-            TCP checksum options, i.e. :data:`~pcapkit.vendor.tcp.checksum.DATA`.
+            L2TP packet types, i.e. :data:`~pcapkit.vendor.l2tp.type.DATA`.
 
         """
         return DATA
