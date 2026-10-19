@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from typing import Any, Callable, Optional, Type
 
 __all__ = [
-    'stacklevel',
+    'stacklevel', 'CaughtByCaller',
 
     'BaseError',                                                    # Exception
     'DigitError', 'IntError', 'RealError', 'ComplexError',          # TypeError
@@ -158,7 +158,7 @@ def stacklevel() -> 'int':
 
 #: ContextVar[tuple[Type[BaseException], ...]]: The exception classes the
 #: :mod:`pcapkit` code running in this context has undertaken to catch itself,
-#: as declared by the innermost :class:`_CaughtByCaller` block. A
+#: as declared by the innermost :class:`CaughtByCaller` block. A
 #: :class:`BaseError` that is an instance of one of them is constructed quiet,
 #: whatever its own ``quiet`` says.
 #:
@@ -170,15 +170,19 @@ _caught_here = contextvars.ContextVar(
 )  # type: contextvars.ContextVar[tuple[Type[BaseException], ...]]
 
 
-class _CaughtByCaller:
+class CaughtByCaller:
     """Construct errors of the given classes quietly for the duration of a block.
 
-    For :mod:`pcapkit` code that is about to call something it does not own --
-    a generated :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value`
-    override, say -- and will catch the named exceptions itself. An error the
-    callee raises is then the quiet control flow it is at that call site,
-    without the callee having to pass ``quiet=True``, which it cannot know to
-    do (:issue:`1845`). Only the named classes are affected: anything else the
+    A :class:`BaseError` constructed inside the block that is an instance of one
+    of ``types`` behaves exactly as if it had been given ``quiet=True``: nothing
+    is logged and no exception hook is installed. Every other error stays loud.
+
+    Use it around a call into code the caller does not own -- a generated
+    :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value` override, say --
+    whose named exceptions the caller then catches itself. An error the callee
+    raises is then the quiet control flow it is at that call site, without the
+    callee having to pass ``quiet=True``, which it cannot know to do
+    (:issue:`1845`). Only the named classes are affected: anything else the
     callee raises escapes the caller and so stays loud.
 
     Given no classes, it declares that nothing is caught, which makes errors
@@ -188,7 +192,9 @@ class _CaughtByCaller:
 
     Re-entrant: on exit a block restores whatever the enclosing block declared.
     An instance holds the token of the one ``with`` it is entered by, so it is
-    built afresh for each.
+    built afresh for each. The declaration is per thread and per
+    :mod:`contextvars` context, so a block never quiets an error raised on
+    another thread.
 
     A class rather than :func:`contextlib.contextmanager`, because
     :meth:`EnumLookup.get <pcapkit.corekit.enum.EnumLookup.get>` enters one on
@@ -197,6 +203,8 @@ class _CaughtByCaller:
 
     Args:
         *types: Exception classes the caller catches.
+
+    .. versionadded:: 1.5.0
 
     """
 
@@ -236,7 +244,7 @@ class BaseError(Exception):
     catches it.
 
     An error is also quiet when it is constructed inside a
-    :class:`_CaughtByCaller` block naming one of its classes, which is how a
+    :class:`CaughtByCaller` block naming one of its classes, which is how a
     :mod:`pcapkit` caller marks as control flow an error raised by code that
     does not pass ``quiet=True`` itself. The effect is exactly that of
     ``quiet=True``.
@@ -276,7 +284,7 @@ class BaseError(Exception):
 
     def __init__(self, *args: 'Any', quiet: 'bool' = False, **kwargs: 'Any') -> 'None':
         # log error -- a quiet error emits nothing and mutates nothing, and so
-        # does one a :class:`_CaughtByCaller` block says its caller catches
+        # does one a :class:`CaughtByCaller` block says its caller catches
         if not quiet and not isinstance(self, _caught_here.get()):
             if DEVMODE:
                 logger.critical('%s: %s', type(self).__name__, str(self),

@@ -29,7 +29,7 @@ It is still an ordinary exception carrying its message, so ``except`` clauses an
 :func:`repr` are unaffected.
 
 An error is also quiet when it is constructed inside a
-:class:`~pcapkit.utilities.exceptions._CaughtByCaller` block naming one of its
+:class:`~pcapkit.utilities.exceptions.CaughtByCaller` block naming one of its
 classes. That is how :mod:`pcapkit` marks as control flow an error raised by
 code it calls but does not own, such as a generated ``_validate_value``
 override, which cannot know to pass ``quiet=True`` itself (:issue:`1845`).
@@ -54,7 +54,7 @@ override, which cannot know to pass ``quiet=True`` itself (:issue:`1845`).
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
 
-.. autoclass:: pcapkit.utilities.exceptions._CaughtByCaller
+.. autoclass:: pcapkit.utilities.exceptions.CaughtByCaller
    :no-members:
 
 :exc:`TypeError` Category

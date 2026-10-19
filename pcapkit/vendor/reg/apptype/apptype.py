@@ -109,7 +109,7 @@ from aenum import IntEnum, StrEnum, auto, extend_enum
 
 from pcapkit.corekit.enum import EnumLookup, EnumRegistry
 from pcapkit.corekit.sentinels import NO_DEFAULT
-from pcapkit.utilities.exceptions import EnumValueError
+from pcapkit.utilities.exceptions import CaughtByCaller, EnumValueError
 
 __all__ = ['TransportProtocol', '{NAME}']
 
@@ -785,7 +785,10 @@ class {NAME}(EnumRegistry, StrEnum):
                              f'({{", ".join(member.svc for member in existing)}}); use '
                              f'{{cls.__name__}}.register_alias() to add a further service name '
                              'for it')
-        cls._validate_value(port)
+        # NOTE: GitHub issue #1845. Declares that nothing is caught, so the
+        # rejection stays loud even inside a ``get`` block that would quiet it.
+        with CaughtByCaller():
+            cls._validate_value(port)
 
         identifier = cls._sanitize_identifier(name)
         if not identifier.isidentifier():

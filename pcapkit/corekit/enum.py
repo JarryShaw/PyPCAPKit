@@ -100,7 +100,7 @@ from typing import TYPE_CHECKING
 from aenum import extend_enum
 
 from pcapkit.corekit.sentinels import NO_DEFAULT
-from pcapkit.utilities.exceptions import BaseError, EnumKeyError, EnumValueError, _CaughtByCaller
+from pcapkit.utilities.exceptions import BaseError, CaughtByCaller, EnumKeyError, EnumValueError
 
 if TYPE_CHECKING:
     from typing import Any
@@ -200,7 +200,7 @@ class EnumLookup:
         :meth:`get`'s own ``except ValueError`` and falls back to ``default``
         just as any other unresolvable value does. It is also quiet:
         :meth:`get` always calls this hook inside a
-        :class:`~pcapkit.utilities.exceptions._CaughtByCaller` block for
+        :class:`~pcapkit.utilities.exceptions.CaughtByCaller` block for
         :exc:`ValueError`, so an override need not pass ``quiet=True`` for its
         rejection to log nothing there (:issue:`1845`). An override raising
         something outside that hierarchy would instead propagate past
@@ -342,7 +342,7 @@ class EnumLookup:
         given on :meth:`_validate_value` itself.
 
         The hook and ``cls(key)`` run inside a
-        :class:`~pcapkit.utilities.exceptions._CaughtByCaller` block for
+        :class:`~pcapkit.utilities.exceptions.CaughtByCaller` block for
         :exc:`ValueError`, because every :exc:`ValueError` they raise is this
         method's own lookup miss: caught here, then answered with ``default`` or
         raised to the caller as the miss. A loud
@@ -445,7 +445,7 @@ class EnumLookup:
             # this method's own lookup miss -- answered with ``default`` below,
             # or raised as the miss -- so a loud one is quiet here, whoever
             # constructed it.
-            with _CaughtByCaller(ValueError):
+            with CaughtByCaller(ValueError):
                 cls._validate_value(key)
                 return cls(key)  # type: ignore[call-arg]
         except ValueError as error:
@@ -546,7 +546,7 @@ class EnumRegistry(EnumLookup):
         hook, because there the rejection is a lookup miss for the caller to
         handle; here it refuses a mint the caller explicitly asked for, which
         is a fault to report. So this calls the hook in a
-        :class:`~pcapkit.utilities.exceptions._CaughtByCaller` block declaring
+        :class:`~pcapkit.utilities.exceptions.CaughtByCaller` block declaring
         that nothing is caught -- loud even if ``register`` is reached from
         inside a ``get`` (:issue:`1845`).
 
@@ -577,7 +577,7 @@ class EnumRegistry(EnumLookup):
                              f'to add a further name for it')
         # NOTE: GitHub issue #1845. Declares that nothing is caught, so the
         # rejection stays loud even inside a ``get`` block that would quiet it.
-        with _CaughtByCaller():
+        with CaughtByCaller():
             cls._validate_value(value)
         return cls._extend(value, name)
 

@@ -435,7 +435,7 @@ class ConstEnumBuiltinParityTests(unittest.TestCase):
         its constructor unless it is quiet, so it fires even for an exception
         that is caught and discarded. The base
         :meth:`~pcapkit.corekit.enum.EnumLookup.get` constructs its lookup inside
-        a ``_CaughtByCaller(ValueError)`` block (#1845), which quiets a
+        a ``CaughtByCaller(ValueError)`` block (#1845), which quiets a
         :exc:`ValueError` subclass there, but a direct ``cls(value)`` caught by
         its caller has no such block: a guard raising a
         :class:`~pcapkit.utilities.exceptions.BaseError` subclass would log once

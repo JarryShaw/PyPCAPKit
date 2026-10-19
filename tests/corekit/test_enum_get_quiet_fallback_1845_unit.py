@@ -10,7 +10,7 @@ on the way. The owner ruled ``get`` quiet for such a value, with a usable
 ``default`` or without one -- without, the miss is still raised, just not
 reported -- and kept ``register`` loud. The quiet path lives in
 :mod:`pcapkit.corekit`, so the generated overrides are untouched: ``get`` runs
-them inside a :class:`~pcapkit.utilities.exceptions._CaughtByCaller` block, which
+them inside a :class:`~pcapkit.utilities.exceptions.CaughtByCaller` block, which
 makes a :exc:`ValueError`-derived :class:`~pcapkit.utilities.exceptions.BaseError`
 constructed there quiet.
 
@@ -286,16 +286,16 @@ class MechanismTests(_HookGuard):
 
     def test_register_inside_a_quiet_block_stays_loud(self) -> 'None':
         with _records() as (_, module):
-            with exceptions._CaughtByCaller(ValueError):
+            with exceptions.CaughtByCaller(ValueError):
                 with self.assertRaises(EnumValueError):
                     ToSPrecedence.register(OUT_OF_RANGE, 'Block_1845')
         self.assertEqual(module.messages, [LOUD_RECORD])
 
     def test_blocks_nest_and_restore(self) -> 'None':
         with _records() as (_, module):
-            with exceptions._CaughtByCaller(ValueError):
+            with exceptions.CaughtByCaller(ValueError):
                 EnumValueError('outer, quiet')
-                with exceptions._CaughtByCaller():
+                with exceptions.CaughtByCaller():
                     EnumValueError('inner, loud')
                 EnumValueError('outer again, quiet')
                 IntError('not a ValueError, loud')

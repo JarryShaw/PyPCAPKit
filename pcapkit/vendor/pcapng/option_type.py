@@ -44,7 +44,7 @@ from typing import TYPE_CHECKING
 from aenum import StrEnum, extend_enum
 
 from pcapkit.corekit.enum import EnumRegistry
-from pcapkit.utilities.exceptions import EnumValueError
+from pcapkit.utilities.exceptions import CaughtByCaller, EnumValueError
 
 __all__ = ['{NAME}']
 
@@ -187,7 +187,10 @@ class {NAME}(EnumRegistry, StrEnum):
             if existing is not None:
                 raise ValueError(f'{{value!r}} is already registered on {{cls.__name__}} as '
                                  f'{{existing.name!r}} in namespace {{space!r}}')
-        cls._validate_value(value)
+        # NOTE: GitHub issue #1845. Declares that nothing is caught, so the
+        # rejection stays loud even inside a ``get`` block that would quiet it.
+        with CaughtByCaller():
+            cls._validate_value(value)
         try:
             return extend_enum(cls, name, value, name)
         except TypeError as error:
