@@ -277,7 +277,7 @@ class TransportProtocol(EnumLookup, IntEnum):
         # signature admits -- an unrecognised :class:`int` still reaches the
         # caller as a :exc:`ValueError`, now the base's own
         # :exc:`~pcapkit.utilities.exceptions.EnumValueError` since GitHub issue
-        # #923 rather than :mod:`aenum`'s bare one. It is not compatible for
+        # #923 rather than ``aenum``'s bare one. It is not compatible for
         # keys outside it: ``None``, a :class:`float` and an unhashable key
         # used to raise :exc:`AttributeError` from the ``key.lower()`` this
         # branch no longer reaches, and now raise :exc:`ValueError` (or, for a
@@ -289,12 +289,12 @@ class TransportProtocol(EnumLookup, IntEnum):
         return super().get(key, default)
 
     # NOTE: ``_missing_`` used to range-check ``value`` and then defer to
-    # :mod:`aenum`'s own ``Flag._missing_``, which is what composed an
+    # ``aenum``'s own ``Flag._missing_``, which is what composed an
     # unrecognised bit combination into a pseudo-member -- ``TransportProtocol(3)``
     # returning ``tcp|udp`` -- GitHub issue #647's guard against that composing
     # *anything*, including values no member declares. GitHub issue #808 removed
     # the ``IntFlag`` base once nothing built a composite, and with it the only
-    # reason this method existed: a plain :class:`~aenum.IntEnum` already raises
+    # reason this method existed: a plain ``aenum.IntEnum`` already raises
     # ``ValueError`` for a value no member declares, with no ``_missing_`` of
     # its own needed to get there, so declaring one here would only be
     # reproducing what the base class already does.
@@ -311,7 +311,7 @@ class {NAME}(EnumRegistry, StrEnum):
     :class:`~pcapkit.const.reg.apptype.udp.UDP`,
     :class:`~pcapkit.const.reg.apptype.sctp.SCTP` or
     :class:`~pcapkit.const.reg.apptype.dccp.DCCP`. Being memberless is also what
-    makes it subclassable at all, since :mod:`aenum` refuses to extend an
+    makes it subclassable at all, since |aenum|_ refuses to extend an
     enumeration that already has members.
 
     Note:
@@ -614,7 +614,7 @@ class {NAME}(EnumRegistry, StrEnum):
                     if member.svc == canonical:
                         return member
             # NOTE: IANA's oldest row, for a port whose collision postdates
-            # :data:`__canonical__` -- including one :func:`~aenum.extend_enum`
+            # :data:`__canonical__` -- including one ``aenum.extend_enum``
             # created, which must not displace what the registry already
             # answered with.
             return matched[0]
@@ -815,7 +815,7 @@ class {NAME}(EnumRegistry, StrEnum):
         IANA itself never registered it there.
 
         No new storage: the new member simply joins :data:`__registry__` at
-        ``port``, through the same :func:`~aenum.extend_enum` call
+        ``port``, through the same ``aenum.extend_enum`` call
         :meth:`register` uses to mint the first one. It is then reachable
         through :attr:`aliases` on every other member already on ``port``, and
         vice versa, with nothing further to keep in sync.

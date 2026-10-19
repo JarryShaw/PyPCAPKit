@@ -11,20 +11,20 @@ entry where the name is contract, and otherwise demote the role to a literal.
   (PyPCAP and pcap-ct), ``pcapfile`` (PyPCAPFile) and ``emoji`` publish no
   ``objects.inv`` with ``py:`` objects in it, so no role naming them can resolve.
   ``AenumRoleExclusionTests`` in :file:`test_conventions_doc_claims.py` checks
-  the conventions pages; this class checks every hand-written source under
-  :file:`docs/` and :file:`pcapkit/`.
+  the conventions pages; this class checks every source under :file:`docs/`
+  and :file:`pcapkit/`.
 * :class:`DeadTargetTests` -- targets in a package that has an inventory, but
   absent from that inventory because the role, the path or the name is wrong
   (#1919). Each is pinned in the form that fails to resolve.
 * :class:`DocumentedEntryTests` -- the names #1919 decided are contract, which
   have an entry rather than a demoted role.
 
-Scoped to hand-written sources. The class formatter in :file:`docs/source/conf.py`
-covers the generated half of #1920 by writing a literal for a package outside
+Scoped to source files. The class formatter in :file:`docs/source/conf.py`
+covers the build-time half of #1920 by writing a literal for a package outside
 ``intersphinx_mapping``; its output exists only at build time, so this scan reads
-the file's own source like any other. ``pcapkit/const/`` and the vendor
-templates that generate it are excluded, and are handled separately; the rest of
-``pcapkit/vendor/`` is scanned.
+the file's own source like any other. The generated modules under
+``pcapkit/const/`` are scanned along with the ``pcapkit/vendor/`` templates
+that generate them, so a role a template writes fails in both.
 
 """
 
@@ -35,14 +35,6 @@ import re
 import unittest
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
-
-#: Paths, relative to :data:`ROOT`, that the scan does not read -- see the module
-#: docstring for why each is out of scope.
-EXCLUDED = (
-    'pcapkit/vendor/pcapng/option_type.py',
-    'pcapkit/vendor/reg/apptype/apptype.py',
-    'pcapkit/const/',
-)
 
 #: Top-level packages with no ``py:`` objects in any published inventory, per the
 #: note beside ``intersphinx_mapping`` in :file:`docs/source/conf.py`.
@@ -55,16 +47,9 @@ ROLE = re.compile(
 
 
 def _sources() -> 'list[pathlib.Path]':
-    """Every hand-written ``.rst`` under :file:`docs/` and ``.py`` under :file:`pcapkit/`."""
-    paths = sorted((ROOT / 'docs').rglob('*.rst')) + sorted((ROOT / 'docs').rglob('*.py')) \
+    """Every ``.rst`` and ``.py`` under :file:`docs/` and ``.py`` under :file:`pcapkit/`."""
+    return sorted((ROOT / 'docs').rglob('*.rst')) + sorted((ROOT / 'docs').rglob('*.py')) \
         + sorted((ROOT / 'pcapkit').rglob('*.py'))
-    kept = []
-    for path in paths:
-        rel = path.relative_to(ROOT).as_posix()
-        if any(rel == ex or rel.startswith(ex) for ex in EXCLUDED):
-            continue
-        kept.append(path)
-    return kept
 
 
 def _roles() -> 'list[tuple[str, int, str, str]]':
@@ -100,11 +85,12 @@ class InventorylessPackageRoleTests(unittest.TestCase):
                          'pcapkit/corekit/enum.py',
                          'pcapkit/foundation/engines/pypcap.py',
                          'pcapkit/vendor/default.py',
+                         'pcapkit/vendor/pcapng/option_type.py',
+                         'pcapkit/vendor/reg/apptype/apptype.py',
+                         'pcapkit/const/pcapng/option_type.py',
+                         'pcapkit/const/reg/apptype/apptype.py',
                          'docs/source/conf.py'):
             self.assertIn(expected, names)
-        for excluded in EXCLUDED:
-            self.assertFalse(any(name == excluded or name.startswith(excluded)
-                                 for name in names), excluded)
 
     def test_the_target_parser_sees_through_an_explicit_title(self) -> 'None':
         """``:mod:`PyPCAP <pcap>``` names ``pcap`` even though its text does not."""

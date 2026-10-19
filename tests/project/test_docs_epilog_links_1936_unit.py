@@ -35,14 +35,6 @@ CONF = ROOT / 'docs' / 'source' / 'conf.py'
 #: it, so no one project page is its target, and it stays a literal.
 LINKED = ('aenum', 'cryptography', 'dpkt', 'emoji', 'pcapfile', 'pyshark')
 
-#: Paths, relative to :data:`ROOT`, whose literals the scan does not read: the
-#: generated constants and the vendor templates that generate them.
-EXCLUDED = (
-    'pcapkit/vendor/pcapng/option_type.py',
-    'pcapkit/vendor/reg/apptype/apptype.py',
-    'pcapkit/const/',
-)
-
 #: A list of literals that names engines, adapters or toolkits.
 ENGINE_LIST = re.compile(r'``\w+``(?:,\s+``\w+``)*(?:,?\s+(?:and|or)\s+``\w+``)?'
                          r'\s+(?:engines?|toolkits?|adapters?)\b')
@@ -162,7 +154,9 @@ class LinkedPackageTests(unittest.TestCase):
                          'docs/source/index.rst',
                          'pcapkit/corekit/enum.py',
                          'pcapkit/foundation/engines/pypcapfile.py',
-                         'pcapkit/toolkit/pyshark.py'):
+                         'pcapkit/toolkit/pyshark.py',
+                         'pcapkit/vendor/reg/apptype/apptype.py',
+                         'pcapkit/const/reg/apptype/apptype.py'):
             self.assertIn(expected, names)
         self.assertFalse(any(name.startswith('docs/source/changelog/') for name in names))
 
@@ -179,8 +173,6 @@ class LinkedPackageTests(unittest.TestCase):
         offenders = []
         for path in _sources():
             rel = _rel(path)
-            if any(rel == ex or rel.startswith(ex) for ex in EXCLUDED):
-                continue
             text = _rendered(path)
             spans = [m.span() for m in ENGINE_LIST.finditer(text)]
             spans += [m.span() for m in TABLE_CELL.finditer(text)]

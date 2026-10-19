@@ -118,13 +118,13 @@ class {NAME}(EnumRegistry, StrEnum):
         :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member` calls
         :class:`str`'s ``__new__`` directly on the raw ``value``, but
         {NAME} stores a *formatted* string (``'{{name}} [{{value}}]'``) as
-        its own :attr:`~aenum.Enum._value_`, not ``value`` itself, so that
+        its own ``aenum.Enum._value_``, not ``value`` itself, so that
         approach would build a member whose value looks nothing like this
         registry's real members.
 
         Deliberately does **not** add to :attr:`__members_ns__` either --
         that dict is this registry's own second lookup table, alongside
-        :attr:`~aenum.Enum._value2member_map_`, and growing it would defeat
+        ``aenum.Enum._value2member_map_``, and growing it would defeat
         the whole point of an *unregistered* member exactly as growing
         ``_value2member_map_`` would.
 
@@ -156,9 +156,9 @@ class {NAME}(EnumRegistry, StrEnum):
           files the member under the namespace that name's prefix gives
           (``if_rtaudit`` goes under ``if``), so ``name`` is passed through
           to it as well as used as the member's attribute name.
-        * :attr:`~aenum.Enum._value_` is the formatted ``'{{name}} [{{value}}]'``
+        * ``aenum.Enum._value_`` is the formatted ``'{{name}} [{{value}}]'``
           string, so the base's duplicate check against
-          :attr:`~aenum.Enum._value2member_map_` can never match an
+          ``aenum.Enum._value2member_map_`` can never match an
           :class:`int` code. The check runs against :attr:`__members_ns__`
           instead, the table :meth:`get` resolves codes through: both
           ``name``'s own namespace and ``opt``, whose codes are common to
@@ -202,7 +202,7 @@ class {NAME}(EnumRegistry, StrEnum):
 
         Overrides :meth:`~pcapkit.corekit.enum.EnumRegistry.register_alias`
         for the same reason as :meth:`register`: the base looks the
-        :class:`int` code up in :attr:`~aenum.Enum._value2member_map_`, whose
+        :class:`int` code up in ``aenum.Enum._value2member_map_``, whose
         keys are the formatted ``'{{name}} [{{value}}]'`` strings, so it could
         never find one.
 
@@ -234,7 +234,7 @@ class {NAME}(EnumRegistry, StrEnum):
             raise ValueError(f'{{value!r}} is not a registered {{cls.__name__}} in namespace '
                              f'{{namespace!r}} or opt; use {{cls.__name__}}.register() to mint one')
 
-        # NOTE: :func:`~aenum.extend_enum` builds a throwaway member through
+        # NOTE: ``aenum.extend_enum`` builds a throwaway member through
         # :meth:`__new__` to learn its value, and :meth:`__new__` files that
         # throwaway in :attr:`__members_ns__` over ``member``. The alias
         # resolves to ``member``, so ``member`` is put back.
