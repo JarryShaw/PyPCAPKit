@@ -2408,6 +2408,18 @@ class AppType(EnumRegistry, StrEnum):
 
     def __new__(cls, value: 'int', name: 'str' = '<null>',
                 proto: 'TransportProtocol' = TransportProtocol.undefined) -> 'Type[AppType]':
+        """Create a member from a registry row and add it to :attr:`__registry__`.
+
+        Args:
+            value: Port number.
+            name: Service name.
+            proto: Transport protocol carrying the service.
+
+        Raises:
+            ValueError: If called on the base registry, which holds no members
+                of its own, rather than on a per-transport subclass.
+
+        """
         temp = f'{name} [{value} - {proto.name}]'
 
         obj = str.__new__(cls, temp)
@@ -2453,6 +2465,8 @@ class AppType(EnumRegistry, StrEnum):
                      if member is not self)
 
     def __repr__(self) -> 'str':
+        """Show the member as ``<Registry.service: port [transport]>``, listing its
+        :attr:`aliases` before the closing bracket when it has any."""
         # NOTE: GitHub issue #807. The suffix below is the only difference from
         # the plain form GitHub issue #806 already fixed: it is appended only
         # when :attr:`aliases` is non-empty, so every member that does not
@@ -2468,6 +2482,8 @@ class AppType(EnumRegistry, StrEnum):
         return f'{base} (aliases: {", ".join(alias.svc for alias in aliases)})>'
 
     def __str__(self) -> 'str':
+        """Show the member as ``service [port - transport]``, followed by its
+        :attr:`aliases` when it has any."""
         # NOTE: same suffix as __repr__, for the same reason, and -- like that
         # suffix, and unlike everything else this formats -- never folded into
         # ``_value_``. GitHub issue #807's hard constraint: ``_value_`` is the
@@ -2487,6 +2503,7 @@ class AppType(EnumRegistry, StrEnum):
         return f'{base} (aliases: {", ".join(alias.svc for alias in aliases)})'
 
     def __int__(self) -> 'int':
+        """Convert the member to its port number."""
         return self.port
 
     def __lt__(self, other: 'AppType') -> 'bool':
@@ -2502,6 +2519,7 @@ class AppType(EnumRegistry, StrEnum):
         return self.port >= other
 
     def __eq__(self, other: 'Any') -> 'bool':
+        """Compare the member's port number with ``other``."""
         return self.port == other
 
     def __ne__(self, other: 'Any') -> 'bool':
@@ -2519,7 +2537,9 @@ class AppType(EnumRegistry, StrEnum):
                 every entry point rejects a non-port identically.
             proto: Transport protocol, as a member, its name, or a bare
                 :class:`int`. That last shape is not merely defensive: GitHub
-                issue :issue:`808` dropped ``TransportProtocol``'s ``IntFlag`` base, so
+                issue :issue:`808` dropped
+                :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`'s
+                ``IntFlag`` base, so
                 ``TransportProtocol.a | TransportProtocol.b`` -- built by hand,
                 the same as any caller passing a literal port-transport bitmask
                 -- falls through to ``int.__or__`` and returns a bare

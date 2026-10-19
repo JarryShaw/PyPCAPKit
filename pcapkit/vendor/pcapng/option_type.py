@@ -65,6 +65,14 @@ class {NAME}(EnumRegistry, StrEnum):
     __members_ns__: 'DefaultDict[str, dict[int, {NAME}]]' = defaultdict(dict)
 
     def __new__(cls, value: 'int', name: 'str' = 'opt_unknown') -> 'Type[{NAME}]':
+        """Create a member from a registry row and file it under its namespace.
+
+        Args:
+            value: Option code.
+            name: Option name, whose text before the first underscore is the
+                namespace it is filed under in :attr:`__members_ns__`.
+
+        """
         temp = '%s [%d]' % (name, value)
 
         obj = str.__new__(cls, temp)
