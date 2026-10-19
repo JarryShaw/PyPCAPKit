@@ -6,15 +6,12 @@
 
 .. important::
 
-   The ``emoji`` package is optional. Without it, importing this module
+   The |emoji|_ package is optional. Without it, importing this module
    warns :class:`~pcapkit.utilities.warnings.EmojiWarning` and the verbose
    messages print as plain text.
 
 :mod:`pcapkit.__main__` was originally the module file of
 |jspcapy|_, which is deprecated and merged with :mod:`pcapkit`.
-
-.. |jspcapy| replace:: ``jspcapy``
-.. _jspcapy: https://github.com/JarryShaw/jspcapy
 
 """
 import argparse

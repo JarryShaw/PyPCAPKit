@@ -24,8 +24,8 @@ a style preference**:
    does not grow, and a second lookup of the same value builds an equal but distinct
    object rather than handing back the first.
 
-``super()._missing_(value)`` -- *hand back to* ``aenum``
-   Neither of the above. For an ``aenum`` flag base this composes a pseudo-member and
+``super()._missing_(value)`` -- *hand back to* |aenum|_
+   Neither of the above. For an |aenum|_ flag base this composes a pseudo-member and
    caches it in ``_value2member_map_`` only, so ``__members__`` and iteration are
    unchanged but a second lookup returns the same object. For a plain enum it
    returns ``None`` and the lookup raises :exc:`ValueError`; the measured case is
@@ -61,7 +61,7 @@ Measured against the tree, by class:
   no unassigned value is left for ``super()._missing_`` (the line after the check is
   unreachable).
 
-Note that these are ``aenum`` classes: ``issubclass(Flags, enum.IntFlag)`` is ``False``
+Note that these are |aenum|_ classes: ``issubclass(Flags, enum.IntFlag)`` is ``False``
 against the standard library and ``True`` against ``aenum.IntFlag``, so a probe against
 ``enum`` answers about the wrong hierarchy.
 

@@ -124,7 +124,7 @@ that is not an HMAC needs more than a row --
 :class:`~pcapkit.protocols.internet.esp.IntegritySuite` records the digest as
 the name of a :mod:`hashlib` constructor, which AES-XCBC and AES-CMAC are not.
 And :func:`~pcapkit.protocols.internet.esp.load_cryptography` imports only the
-``ciphers`` submodules of ``cryptography``, so the AEAD and CMAC primitives
+``ciphers`` submodules of |cryptography|_, so the AEAD and CMAC primitives
 have to be added there before a cipher suite can reach them. Unsupported
 algorithms are refused loudly, when the Security Association is constructed
 rather than when a packet is read, so nothing decodes wrongly in the meantime.
@@ -582,9 +582,6 @@ and :meth:`~pcapkit.foundation.engines.engine.EngineBase.read_frame`; passing th
 still apply is the unified auxiliary tools in :mod:`pcapkit.toolkit`, where
 each engine has a matching module.
 
-.. _pypcap: https://github.com/pynetwork/pypcap
-.. _pypcapfile: https://github.com/kisom/pypcapfile
-
 Test Cases
 ----------
 
@@ -831,7 +828,7 @@ the SCTP packet alone. Note also that SCTP's CRC32c is a hand-rolled lookup tabl
 in :mod:`pcapkit.protocols.transport.sctp`, not a library call, so it is not
 precedent for a dependency either.
 
-**The cryptographic integrity checks** are where the ``cryptography``
+**The cryptographic integrity checks** are where the |cryptography|_
 dependency — introduced for ESP — genuinely buys something new, and half of that
 is already done. :class:`~pcapkit.protocols.internet.esp.ESP` **already verifies
 its ICV** when a Security Association is supplied, and deliberately reports a

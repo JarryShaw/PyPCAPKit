@@ -69,7 +69,7 @@ which is automatically generated from :class:`pcapkit.vendor.tcp.flags.Flags`.
 .. versionchanged:: 1.5.0
 
    A value outside the 16-bit field raises :exc:`ValueError`, where
-   ``aenum`` composed a pseudo-member for any integer.
+   |aenum|_ composed a pseudo-member for any integer.
 
 .. autoclass:: pcapkit.const.tcp.flags.Flags
    :members:

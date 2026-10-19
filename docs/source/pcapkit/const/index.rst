@@ -27,7 +27,7 @@ Some behave otherwise, and :ref:`mint-criterion` gives the full split:
 * :class:`~pcapkit.const.tcp.flags.Flags` and the Mobility Header flag
   registries, such as
   :class:`~pcapkit.const.mh.binding_ack_flag.BindingACKFlag`, hand back to
-  ``aenum``'s flag base, which caches the composed object in the value lookup
+  |aenum|_'s flag base, which caches the composed object in the value lookup
   table only: a second lookup returns the same object, while ``__members__``
   and iteration are unchanged.
 * :class:`~pcapkit.const.hip.transport.Transport`,

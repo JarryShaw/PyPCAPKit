@@ -109,10 +109,3 @@ Type Variables
    :type: typing.Any
 
    Frame type the extractor yields, as read by its engine.
-
-.. |pypcap| replace:: ``pypcap``
-.. _pypcap: https://github.com/pynetwork/pypcap
-.. |pcap-ct| replace:: ``pcap-ct``
-.. _pcap-ct: https://pypi.org/project/pcap-ct/
-.. |pypcapfile| replace:: ``pypcapfile``
-.. _pypcapfile: https://github.com/kisom/pypcapfile

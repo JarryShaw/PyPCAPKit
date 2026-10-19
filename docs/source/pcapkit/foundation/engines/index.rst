@@ -144,8 +144,8 @@ parser -- but the extraction then does not use the engine requested.
 | :class:`~pcapkit.foundation.engines.scapy.Scapy`                | overrides ``unsupported_reason()``                            |
 +-----------------------------------------------------------------+---------------------------------------------------------------+
 | :class:`~pcapkit.foundation.engines.pyshark.PyShark`            | Wireshark's :program:`tshark` binary -- on ``PATH``, or       |
-|                                                                 | wherever ``pyshark``'s :file:`config.ini` points -- **and**   |
-|                                                                 | Python **3.13 or older**: ``pyshark`` 0.6 builds its event    |
+|                                                                 | wherever |pyshark|_'s :file:`config.ini` points -- **and**    |
+|                                                                 | Python **3.13 or older**: |pyshark|_ 0.6 builds its event     |
 |                                                                 | loop with :func:`asyncio.get_event_loop`, which raises from   |
 |                                                                 | 3.14                                                          |
 +-----------------------------------------------------------------+---------------------------------------------------------------+
@@ -240,10 +240,3 @@ actually got, via
 
 .. _PCAP-NG: https://wiki.wireshark.org/Development/PcapNg
 .. _libpcap: https://pypi.org/project/libpcap/
-
-.. _Scapy: https://scapy.net
-.. _DPKT: https://dpkt.readthedocs.io
-.. _PyShark: https://kiminewt.github.io/pyshark
-.. _PyPCAP: https://github.com/pynetwork/pypcap
-.. _pcap-ct: https://pypi.org/project/pcap-ct/
-.. _PyPCAPFile: https://github.com/kisom/pypcapfile

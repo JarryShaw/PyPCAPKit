@@ -17,8 +17,6 @@ The reassembly and flow tracing adapters return the data their
 :mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame
 cannot be used for it.
 
-.. _Scapy: https://scapy.net
-
 .. warning::
 
    This module requires `Scapy`_ to be installed.
@@ -53,8 +51,6 @@ DPKT Tools
 The reassembly and flow tracing adapters return the data their
 :mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame
 cannot be used for it.
-
-.. _DPKT: https://dpkt.readthedocs.io
 
 .. autofunction:: pcapkit.toolkit.dpkt.ipv4_reassembly
 
@@ -106,8 +102,6 @@ The reassembly and flow tracing adapters return the data their
 :mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame
 cannot be used for it.
 
-.. _PyShark: https://kiminewt.github.io/pyshark
-
 .. note::
 
    Some :mod:`pcapkit` functions may not be available with the `PyShark`_ engine,
@@ -132,8 +126,6 @@ PyPCAP Tools
 .. module:: pcapkit.toolkit.pypcap
 
 :mod:`pcapkit.toolkit.pypcap` contains the adapters for the `PyPCAP`_ engine.
-
-.. _PyPCAP: https://github.com/pynetwork/pypcap
 
 .. note::
 
@@ -164,8 +156,6 @@ pcap-ct Tools
 .. module:: pcapkit.toolkit.pcap_ct
 
 :mod:`pcapkit.toolkit.pcap_ct` contains the adapters for the `pcap-ct`_ engine.
-
-.. _pcap-ct: https://pypi.org/project/pcap-ct/
 
 .. note::
 
@@ -204,8 +194,6 @@ PyPCAPFile Tools
 The reassembly and flow tracing adapters return the data their
 :mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame
 cannot be used for it.
-
-.. _PyPCAPFile: https://github.com/kisom/pypcapfile
 
 .. note::
 

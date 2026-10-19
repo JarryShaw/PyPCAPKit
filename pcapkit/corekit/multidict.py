@@ -8,8 +8,6 @@
 which are used to store multiple mappings of the same key. The implementation
 is inspired and based on the `Werkzeug`_ project.
 
-.. _Werkzeug: https://werkzeug.palletsprojects.com/
-
 """
 
 import copy

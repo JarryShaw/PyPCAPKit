@@ -10,8 +10,6 @@ Scapy Support
 This module contains the implementation for `Scapy`_ engine
 support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
-.. _Scapy: https://scapy.net
-
 .. note::
 
    Constructing this engine imports ``scapy.all``, which populates `Scapy`_'s
@@ -28,7 +26,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
    One side effect: ``scapy.all`` loads :mod:`scapy.layers.dcerpc`, which
    reaches `Scapy`_'s TLS layer and there triggers a
-   ``CryptographyDeprecationWarning`` from ``cryptography`` about
+   ``CryptographyDeprecationWarning`` from |cryptography|_ about
    finite-field Diffie-Hellman. It concerns a key-exchange code path
    :mod:`pcapkit` never executes, but it subclasses :exc:`UserWarning` rather
    than :exc:`DeprecationWarning`, so Python's default filters show it.
@@ -64,8 +62,6 @@ DPKT Support
 
 This module contains the implementation for `DPKT`_ engine
 support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
-
-.. _DPKT: https://dpkt.readthedocs.io
 
 .. note::
 
@@ -106,8 +102,6 @@ PyShark Support
 This module contains the implementation for `PyShark`_ engine
 support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
-.. _PyShark: https://kiminewt.github.io/pyshark
-
 .. important::
 
    `PyShark`_ has requirements beyond installing it, and none is
@@ -116,7 +110,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    :meth:`~pcapkit.foundation.engines.pyshark.PyShark.unsupported_reason` checks
    both up front.
 
-   **Python 3.13 or older.** ``pyshark`` 0.6 builds its event loop with
+   **Python 3.13 or older.** |pyshark|_ 0.6 builds its event loop with
    ``asyncio.get_event_loop_policy().get_event_loop()``. With no running loop,
    3.10 and 3.11 return a loop silently, 3.12 returns one with a
    :exc:`DeprecationWarning`, and **3.14 raises**
@@ -124,12 +118,12 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    3.13 is unchecked and expected to work, being on the deprecated-but-functional
    side of that change.
 
-   **Wireshark's** :program:`tshark` **binary.** ``pyshark`` shells out to it and
-   parses nothing itself. It need not be on :envvar:`PATH`: ``pyshark`` consults
+   **Wireshark's** :program:`tshark` **binary.** |pyshark|_ shells out to it and
+   parses nothing itself. It need not be on :envvar:`PATH`: |pyshark|_ consults
    ``tshark_path`` in its :file:`config.ini` first, then :envvar:`PATH` on POSIX,
    both Program Files directories on Windows, and
    :file:`/Applications/Wireshark.app` on macOS. The check delegates to
-   ``pyshark``'s own resolver for exactly that reason, so a correctly configured
+   |pyshark|_'s own resolver for exactly that reason, so a correctly configured
    install off :envvar:`PATH` is not refused.
 
 .. autoclass:: pcapkit.foundation.engines.pyshark.PyShark
@@ -156,8 +150,6 @@ PyPCAP Support
 
 This module contains the implementation for `PyPCAP`_ engine
 support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
-
-.. _PyPCAP: https://github.com/pynetwork/pypcap
 
 .. important::
 
@@ -247,7 +239,6 @@ pcap-ct Support
 This module contains the implementation for `pcap-ct`_ engine
 support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
-.. _pcap-ct: https://pypi.org/project/pcap-ct/
 .. _libpcap: https://pypi.org/project/libpcap/
 
 .. important::
@@ -392,8 +383,6 @@ PyPCAPFile Support
 
 This module contains the implementation for `PyPCAPFile`_ engine
 support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
-
-.. _PyPCAPFile: https://github.com/kisom/pypcapfile
 
 .. important::
 

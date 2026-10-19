@@ -9,8 +9,6 @@ The reassembly and flow tracing adapters return the data their
 :mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame
 cannot be used for it.
 
-.. _DPKT: https://dpkt.readthedocs.io
-
 """
 import copy
 import decimal
@@ -96,8 +94,6 @@ class RecordTimestamp:
     ``type(self)(str(self))``, with the constructor's defaults for the rest
     (:issue:`1647`).
 
-    .. _DPKT: https://dpkt.readthedocs.io
-
     """
 
     __slots__ = ()
@@ -134,8 +130,6 @@ class Timestamp(RecordTimestamp, float):
         resolution: Timestamp resolution of the record, in units per second.
         orig_len: Original length of the packet, or :data:`None` if unknown.
 
-    .. _DPKT: https://dpkt.readthedocs.io
-
     """
 
     __slots__ = ('exact', 'resolution', 'orig_len')
@@ -162,8 +156,6 @@ class DecimalTimestamp(RecordTimestamp, decimal.Decimal):
         resolution: Timestamp resolution of the record, in units per second.
         orig_len: Original length of the packet, or :data:`None` if unknown.
 
-    .. _DPKT: https://dpkt.readthedocs.io
-
     """
 
     __slots__ = ('exact', 'resolution', 'orig_len')
@@ -187,8 +179,6 @@ def attach_timestamp(packet: 'Packet', timestamp: 'float') -> 'None':
         packet: DPKT packet.
         timestamp: Capture timestamp of the packet, as `DPKT`_'s reader yielded it
             beside the record's octets.
-
-    .. _DPKT: https://dpkt.readthedocs.io
 
     """
     setattr(packet, TIMESTAMP_ATTR, timestamp)
@@ -236,10 +226,8 @@ def _capture_time(timestamp: 'float | Decimal') -> 'float':
         so can be an ulp off at a small ``tv_sec``:
         ``1.0036909999999999`` for ``1.003691`` (:issue:`1668`). A
         :class:`RecordTimestamp` is therefore read by its exact value. Any other
-        timestamp -- one passed by hand, or yielded by a ``dpkt`` whose reader
+        timestamp -- one passed by hand, or yielded by a |dpkt|_ whose reader
         the engine could not extend -- carries none, and is handed on as it is.
-
-    .. _DPKT: https://dpkt.readthedocs.io
 
     """
     if isinstance(timestamp, RecordTimestamp):
@@ -254,8 +242,6 @@ def attach_buffer(packet: 'Packet', buffer: 'bytes') -> 'None':
         packet: DPKT packet.
         buffer: Octets of the record the packet was parsed from, as `DPKT`_'s
             reader yielded them.
-
-    .. _DPKT: https://dpkt.readthedocs.io
 
     """
     setattr(packet, BUFFER_ATTR, bytes(buffer))
@@ -273,8 +259,6 @@ def packet2bytes(packet: 'Packet') -> 'bytes':
         than read by :class:`~pcapkit.foundation.engines.dpkt.DPKT` -- is
         serialised from a copy instead, so that `DPKT`_'s checksum and length
         recomputation never reaches the packet itself.
-
-    .. _DPKT: https://dpkt.readthedocs.io
 
     """
     buffer = getattr(packet, BUFFER_ATTR, None)
@@ -305,12 +289,10 @@ def packet2frame(packet: 'Packet', timestamp: 'float | Decimal', *,
         and both it and ``orig_len`` come from the reader:
         :class:`~pcapkit.foundation.engines.dpkt.DPKT` reads PCAP and PCAP-NG
         alike into a :class:`RecordTimestamp`. A timestamp that is not one
-        -- a packet built by hand, or read by a ``dpkt`` whose reader the engine
+        -- a packet built by hand, or read by a |dpkt|_ whose reader the engine
         could not extend -- is read as `DPKT`_ yields it: a
         :class:`~decimal.Decimal` counts nanoseconds and a :obj:`float`
         microseconds, and the octets are taken to be whole.
-
-    .. _DPKT: https://dpkt.readthedocs.io
 
     """
     stamp = getattr(packet, TIMESTAMP_ATTR, timestamp)
@@ -356,8 +338,6 @@ def _ipv6_ext_hdrs(ipv6: 'IP6') -> 'list[Any]':
         otherwise the values of ``dpkt.ip6.IP6.extension_hdrs``, which
         ``dpkt.ip6.IP6.__len__`` falls back to in the same way.
 
-    .. _DPKT: https://dpkt.readthedocs.io
-
     """
     ext_hdrs = getattr(ipv6, 'all_extension_headers', None)
     if ext_hdrs:
@@ -392,8 +372,6 @@ def _wire_hdr_len(packet: 'Packet', payload: 'Packet') -> 'int':
         Header Length, options included. An Ethernet frame's falls short of the
         wire where `DPKT`_ dropped some of its VLAN tags, which
         :func:`_layer2bytes` then finds (:issue:`1646`).
-
-    .. _DPKT: https://dpkt.readthedocs.io
 
     """
     if hasattr(packet, 'extension_hdrs'):
@@ -430,8 +408,6 @@ def _layer2bytes(packet: 'Packet', layer: 'Packet') -> 'tuple[bytes, bool]':
         header followed by an 802.1Q tag, which it keeps in place of the ISL
         one.
 
-    .. _DPKT: https://dpkt.readthedocs.io
-
     """
     buffer = getattr(packet, BUFFER_ATTR, None)
     if buffer is not None:
@@ -462,8 +438,6 @@ def _network(packet: 'Packet') -> 'Optional[IP | IP6]':
         frame of a raw-IP link type (:issue:`1548`); otherwise the IPv4 or IPv6
         payload of its link layer, which `DPKT`_ names ``ip`` or ``ip6`` -- a
         bare IP packet names neither -- or :data:`None` if it has none.
-
-    .. _DPKT: https://dpkt.readthedocs.io
 
     """
     import dpkt  # isort:skip
@@ -541,8 +515,6 @@ def packet2dict(packet: 'Packet', timestamp: 'float', *,
         data, as it keeps one `DPKT`_ cannot decode, has no header fields, so
         maps to an empty :obj:`dict`.
 
-    .. _DPKT: https://dpkt.readthedocs.io
-
     """
     def wrapper(packet: 'Packet') -> 'dict[str, Any]':
         dict_ = {}  # type: dict[str, Any]
@@ -591,10 +563,10 @@ def ipv4_reassembly(packet: 'Packet', timestamp: 'float', *,
         The header and payload are sliced out of the record octets
         :class:`~pcapkit.foundation.engines.dpkt.DPKT` attached to the frame, so
         they are the captured ones. A packet built by hand carries no such
-        buffer, and its octets are then ``dpkt``'s re-serialisation of it, in
+        buffer, and its octets are then |dpkt|_'s re-serialisation of it, in
         which a zeroed checksum or length comes back recomputed --
         :func:`attach_buffer` is what makes them the wire's again. They are that
-        re-serialisation too where ``dpkt``'s own lengths misplace the layer
+        re-serialisation too where |dpkt|_'s own lengths misplace the layer
         in the record, as behind some stacks of VLAN tags (:issue:`1646`). The
         packet itself is left untouched either way.
 
@@ -678,10 +650,10 @@ def ipv6_reassembly(packet: 'Packet', timestamp: 'float', *,
         The header and payload are sliced out of the record octets
         :class:`~pcapkit.foundation.engines.dpkt.DPKT` attached to the frame, so
         they are the captured ones. A packet built by hand carries no such
-        buffer, and its octets are then ``dpkt``'s re-serialisation of it, in
+        buffer, and its octets are then |dpkt|_'s re-serialisation of it, in
         which a zeroed checksum or length comes back recomputed --
         :func:`attach_buffer` is what makes them the wire's again. They are that
-        re-serialisation too where ``dpkt``'s own lengths misplace the layer
+        re-serialisation too where |dpkt|_'s own lengths misplace the layer
         in the record, as behind some stacks of VLAN tags (:issue:`1646`). The
         packet itself is left untouched either way.
 
@@ -760,8 +732,6 @@ def _tcp_flags(tcp: 'TCP') -> 'tuple[bool, bool, bool]':
         its position among the field's binary digits, every flag was one bit low
         with NS set, a SYN reading as a FIN (:issue:`1618`).
 
-    .. _DPKT: https://dpkt.readthedocs.io
-
     """
     from dpkt.tcp import TH_FIN, TH_RST, TH_SYN  # isort:skip
 
@@ -774,7 +744,7 @@ def tcp_reassembly(packet: 'Packet', timestamp: 'float', *,
     """Make data for TCP reassembly.
 
     A packet can be reassembled if its network layer carries a TCP layer
-    (:class:`dpkt.tcp.TCP`), behind any IPv6 extension headers ``dpkt`` decodes. TCP
+    (:class:`dpkt.tcp.TCP`), behind any IPv6 extension headers |dpkt|_ decodes. TCP
     in an IP-in-IP tunnel, or behind an AH or IPv6 extension header carried in IPv4, is
     not read.
 
@@ -793,10 +763,10 @@ def tcp_reassembly(packet: 'Packet', timestamp: 'float', *,
         The header and payload are sliced out of the record octets
         :class:`~pcapkit.foundation.engines.dpkt.DPKT` attached to the frame, so
         they are the captured ones. A packet built by hand carries no such
-        buffer, and its octets are then ``dpkt``'s re-serialisation of it, in
+        buffer, and its octets are then |dpkt|_'s re-serialisation of it, in
         which a zeroed checksum or length comes back recomputed --
         :func:`attach_buffer` is what makes them the wire's again. They are that
-        re-serialisation too where ``dpkt``'s own lengths misplace the layer
+        re-serialisation too where |dpkt|_'s own lengths misplace the layer
         in the record, as behind some stacks of VLAN tags (:issue:`1646`). The
         packet itself is left untouched either way.
 
@@ -850,7 +820,7 @@ def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
     """Trace packet flow for TCP.
 
     A packet can be traced if its network layer carries a TCP layer
-    (:class:`dpkt.tcp.TCP`), behind any IPv6 extension headers ``dpkt`` decodes. TCP
+    (:class:`dpkt.tcp.TCP`), behind any IPv6 extension headers |dpkt|_ decodes. TCP
     in an IP-in-IP tunnel, or behind an AH or IPv6 extension header carried in IPv4, is
     not read.
 
@@ -871,10 +841,10 @@ def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
         The header and payload are sliced out of the record octets
         :class:`~pcapkit.foundation.engines.dpkt.DPKT` attached to the frame, so
         they are the captured ones. A packet built by hand carries no such
-        buffer, and its octets are then ``dpkt``'s re-serialisation of it, in
+        buffer, and its octets are then |dpkt|_'s re-serialisation of it, in
         which a zeroed checksum or length comes back recomputed --
         :func:`attach_buffer` is what makes them the wire's again. They are that
-        re-serialisation too where ``dpkt``'s own lengths misplace the layer
+        re-serialisation too where |dpkt|_'s own lengths misplace the layer
         in the record, as behind some stacks of VLAN tags (:issue:`1646`). The
         packet itself is left untouched either way.
 

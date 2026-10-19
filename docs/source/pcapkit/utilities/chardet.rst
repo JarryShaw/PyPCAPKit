@@ -10,8 +10,6 @@ turning the bytes of a text field into a :obj:`str`. It is shared by
 :meth:`ProtocolBase.decode <pcapkit.protocols.protocol.Protocol.decode>`,
 which is why it lives here rather than beside either of them.
 
-.. _chardet: https://chardet.readthedocs.io
-
 .. autofunction:: pcapkit.utilities.chardet.detect
 
 The cache holds :data:`~pcapkit.utilities.config.DETECT_CACHE_SIZE` entries.

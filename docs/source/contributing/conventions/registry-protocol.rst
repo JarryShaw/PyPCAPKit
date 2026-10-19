@@ -105,7 +105,7 @@ What is easy to get wrong about it:
   With **no usable** ``default``, the rejection reaches the caller **unwrapped**.
   ``get`` re-raises a :exc:`ValueError` that is already a
   :exc:`~pcapkit.utilities.exceptions.BaseError` exactly as the override raised it,
-  and converts only ``aenum``'s and :mod:`enum`'s own "no member carries this
+  and converts only |aenum|_'s and :mod:`enum`'s own "no member carries this
   value". The consequence is the point of the discrimination rather than a side
   effect: the override's **own message** survives to the caller instead of being
   replaced by the base's. So an override should say in its message what it rejected
@@ -120,7 +120,7 @@ What is easy to get wrong about it:
    :class:`~pcapkit.corekit.enum.EnumLookup` was **phase 2** of
    :issue:`877`, and it is **complete**: the phase landed for every non-registry
    enumeration. **No enumeration remains outside the hierarchy**, measured by a
-   runtime walk over both the :mod:`enum` and ``aenum`` flavours.
+   runtime walk over both the :mod:`enum` and |aenum|_ flavours.
 
 Failed-Lookup Exceptions
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -189,7 +189,7 @@ installed, the interpreter's own unless an earlier loud error installed
   ``cls(key)`` in a block declaring that it catches :exc:`ValueError` itself, so the
   loud :exc:`~pcapkit.utilities.exceptions.EnumValueError` a generated override
   raises is constructed quietly without the override passing ``quiet=True``, and
-  the error ``get`` converts from ``aenum``'s own is raised quiet as well. An error
+  the error ``get`` converts from |aenum|_'s own is raised quiet as well. An error
   of any other class is not a lookup miss, and stays loud.
 * :meth:`~pcapkit.corekit.enum.EnumRegistry.register` **stays loud**, even when
   reached from inside such a block: refusing a mint the caller explicitly asked for
@@ -400,7 +400,7 @@ The population it covers is every :class:`~pcapkit.corekit.enum.EnumRegistry`
 subclass, every one of them under :mod:`pcapkit.const` and each either
 :class:`int`-valued (the flag registries among them) or ``aenum.StrEnum``-valued,
 plus every non-registry enumeration a runtime walk over both the :mod:`enum` and
-``aenum`` flavours finds, nested classes included -- such as ``FrameType.Flags`` in
+|aenum|_ flavours finds, nested classes included -- such as ``FrameType.Flags`` in
 :mod:`pcapkit.protocols.schema.application.httpv2` and its concrete per-frame
 subclasses.
 

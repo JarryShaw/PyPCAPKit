@@ -7,8 +7,6 @@
 This module contains the implementation for `PyPCAPFile`_ engine
 support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
-.. _PyPCAPFile: https://github.com/kisom/pypcapfile
-
 """
 import binascii
 import ctypes
@@ -54,7 +52,7 @@ if TYPE_CHECKING:
         def pcap_packet(self) -> 'Type[PCAPFilePacket]': ...
 
     class _PCAPFilePackage(Protocol):
-        """``pcapfile``, as :class:`PyPCAPFile` reads it through :attr:`PyPCAPFile._expkg` (#1878).
+        """|pcapfile|_, as :class:`PyPCAPFile` reads it through :attr:`PyPCAPFile._expkg` (#1878).
 
         Each attribute is a submodule, described by what the engine reads of it.
         mypy matches a module with a protocol at the top level only, so the
@@ -97,21 +95,19 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
     segment that :func:`~pcapkit.toolkit.pypcapfile.tcp_reassembly` needs in
     order to report an exact header/payload split.
 
-    .. _PyPCAPFile: https://github.com/kisom/pypcapfile
-
     Args:
         extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.
 
     """
     if TYPE_CHECKING:
-        #: Engine extraction package, i.e. ``pcapfile``.
+        #: Engine extraction package, i.e. |pcapfile|_.
         _expkg: '_PCAPFilePackage'
         #: Engine extraction temporary storage.
         _extmp: 'Iterator[PCAPFilePacket]'
         #: Data link layer protocol, from the savefile header.
         _dlink: 'Enum_LinkType'
         #: Link layer decoder for this savefile, or :data:`None` when
-        #: ``pcapfile`` has none for its link layer type.
+        #: |pcapfile|_ has none for its link layer type.
         _declf: 'Optional[Callable[..., Any]]'
 
     #: Number of layers to descend while decoding, i.e. link plus network. See
@@ -129,7 +125,7 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
 
         Consulted by :meth:`pcapkit.foundation.extraction.Extractor.run` *before*
         the import test, because the import test cannot answer this question.
-        ``pcapfile``'s top-level package imports perfectly well on Python 3.12
+        |pcapfile|_'s top-level package imports perfectly well on Python 3.12
         and newer -- it is ``pcapfile.linklayer`` that fails, and
         ``pcapfile.savefile`` imports it -- so a guard that only tries
         ``import pcapfile`` is satisfied and the :exc:`ModuleNotFoundError` then
@@ -140,7 +136,7 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
         The version is checked rather than the import attempted so that the answer
         does not depend on which of the package's submodules happens to be
         imported first, and so it is the same answer on a machine that has never
-        installed ``pcapfile`` at all.
+        installed |pcapfile|_ at all.
 
         Returns:
             A short phrase naming the limitation, or :data:`None`.
@@ -196,7 +192,7 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
         """Call ``pcapfile.savefile.load_savefile`` to extract PCAP files.
 
         This method assigns :attr:`self._expkg <PyPCAPFile._expkg>`
-        as ``pcapfile`` and :attr:`self._extmp <PyPCAPFile._extmp>`
+        as |pcapfile|_ and :attr:`self._extmp <PyPCAPFile._extmp>`
         as an iterator over the lazily generated savefile packets.
 
         ``pcapfile.savefile.load_savefile`` loads and validates the savefile
@@ -205,10 +201,10 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
         ``pcapfile.savefile._read_a_packet`` with ``layers=0``,
         :meth:`_read_records` does *not* hand back each frame's bytes verbatim --
         it hexlifies the whole frame into ASCII text and stops there, exactly as
-        ``pcapfile`` does for any layer at which it runs out of layers left to
+        |pcapfile|_ does for any layer at which it runs out of layers left to
         descend. It is :meth:`_decode` that un-hexlifies and then decodes each
         frame to :attr:`LAYERS` depth using ``pcapfile.linklayer.clookup`` --
-        the very call ``pcapfile`` makes internally. Doing it this way round is
+        the very call |pcapfile|_ makes internally. Doing it this way round is
         what lets the link layer type be inspected (and reported on) *before* the
         first frame is decoded.
 
@@ -219,14 +215,14 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
                   and/or :attr:`self.extractor._exptl <pcapkit.foundation.extraction.Extractor._exptl>`
                   is provided as the PyPCAPFile engine does not
                   support such operations.
-                * if IPv6 reassembly is enabled, as ``pcapfile`` has no IPv6
+                * if IPv6 reassembly is enabled, as |pcapfile|_ has no IPv6
                   decoder.
-                * if ``pcapfile`` has no decoder for the savefile's link layer
+                * if |pcapfile|_ has no decoder for the savefile's link layer
                   type, in which case frames are left undecoded.
 
         Raises:
             FormatError: If the file format is not supported, i.e., not a PCAP
-                file. ``pcapfile`` reads libpcap savefiles only.
+                file. |pcapfile|_ reads libpcap savefiles only.
 
         """
         from pcapkit.foundation.engines.pcap import PCAP  # isort:skip
@@ -330,13 +326,13 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
     ##########################################################################
 
     def _get_decoder(self, linktype: 'int') -> 'Optional[Callable[..., Any]]':
-        """Return the ``pcapfile`` link layer decoder for a link layer type.
+        """Return the |pcapfile|_ link layer decoder for a link layer type.
 
         Args:
             linktype: Link layer type code, from the savefile header.
 
         Returns:
-            The decoder class, or :data:`None` when ``pcapfile`` has none.
+            The decoder class, or :data:`None` when |pcapfile|_ has none.
 
         Warns:
             AttributeWarning: If no decoder is available, as frames will then be
@@ -372,11 +368,11 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
           than its capture length, so a zero-length record drops itself and every
           record after it, and a truncated final record is dropped (:issue:`1571`).
 
-        This reads each record in the byte order of the header ``pcapfile``
+        This reads each record in the byte order of the header |pcapfile|_
         loaded, into the ``pcapfile.structs.pcap_packet`` that function
         builds with ``layers=0`` -- the frame hexlified, pointing at the
         savefile's own header -- so :meth:`_decode` and
-        :mod:`pcapkit.toolkit.pypcapfile` see what ``pcapfile`` hands them.
+        :mod:`pcapkit.toolkit.pypcapfile` see what |pcapfile|_ hands them.
         It stops at a tail too short for a record header, and keeps a record
         whose capture length runs past the data: the capture length as declared,
         the octets present as the frame.
@@ -384,7 +380,7 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
         Args:
             file: The savefile, just past its header, where
                 ``pcapfile.savefile.load_savefile`` leaves it.
-            header: The savefile header ``pcapfile`` loaded.
+            header: The savefile header |pcapfile|_ loaded.
 
         Yields:
             Undecoded savefile packets, one per record.
@@ -429,7 +425,7 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
             decoded, or holds no octets at all.
 
         Warns:
-            AttributeWarning: If ``pcapfile`` could not decode the frame, e.g.
+            AttributeWarning: If |pcapfile|_ could not decode the frame, e.g.
                 because the capture is truncated. One bad frame should not abort
                 the extraction, but it should not pass silently either.
 

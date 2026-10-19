@@ -34,9 +34,6 @@ answers it with a throwaway, non-registering member instead (see
 stops two different unrecognised keys from aliasing onto the same member --
 the defect GitHub issue :issue:`880` exists to fix.
 
-.. |pycrate| replace:: ``pycrate``
-.. _pycrate: https://github.com/pycrate-org/pycrate
-
 """
 import collections
 import sys

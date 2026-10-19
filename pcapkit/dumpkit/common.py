@@ -233,7 +233,7 @@ def render_enum(o: 'enum.Enum | aenum.Enum') -> 'str':
         cannot be mistaken for a member name, since a Python identifier may not
         begin with a digit.
 
-        This is *not* an ``aenum`` quirk. A stdlib :class:`enum.IntFlag` built
+        This is *not* an |aenum|_ quirk. A stdlib :class:`enum.IntFlag` built
         from the same members answers ``name is None`` identically on CPython
         3.14.7, so the guard belongs here rather than in a choice of enumeration
         library.

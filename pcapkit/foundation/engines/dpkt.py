@@ -7,8 +7,6 @@
 This module contains the implementation for `DPKT`_ engine
 support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
-.. _DPKT: https://dpkt.readthedocs.io
-
 """
 import decimal
 import functools
@@ -80,7 +78,7 @@ if TYPE_CHECKING:
         def Loopback(self) -> 'Type[DPKTLoopback]': ...
 
     class _DPKTPackage(Protocol):
-        """``dpkt``, as :class:`DPKT` reads it through :attr:`DPKT._expkg` (#1878).
+        """|dpkt|_, as :class:`DPKT` reads it through :attr:`DPKT._expkg` (#1878).
 
         Each attribute is a submodule, described by what the engine reads of it.
         mypy matches a module with a protocol at the top level only, so the
@@ -130,8 +128,6 @@ class PCAPNGReader:
     Simple Packet Block too, and `DPKT`_ has no type for one, so that block is
     parsed with :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` as well
     (:issue:`1520`).
-
-    .. _DPKT: https://dpkt.readthedocs.io
 
     Args:
         file: Source PCAP-NG stream, positioned at its first Section Header Block.
@@ -308,14 +304,12 @@ def _pcap_reader() -> 'Type[PCAPReader]':
 
     Warns:
         DPKTWarning: If this `DPKT`_'s reader lacks the attributes the loop reads
-            -- they are private, and ``dpkt`` is not pinned. The reader then runs
+            -- they are private, and |dpkt|_ is not pinned. The reader then runs
             unchanged, and a traced PCAP record's original length is its captured
             length.
 
     Returns:
         The reader type.
-
-    .. _DPKT: https://dpkt.readthedocs.io
 
     """
     import dpkt  # isort:skip
@@ -396,8 +390,6 @@ def _loopback_protocol(base: 'Type[DPKTPacket]', ip: 'Type[DPKTPacket]', ip6: 'T
         `DPKT`_ module gets a class of its own instead of one holding stale
         classes.
 
-    .. _DPKT: https://dpkt.readthedocs.io
-
     """
     import dpkt  # isort:skip
 
@@ -435,14 +427,12 @@ class DPKT(EngineBase['DPKTPacket']):
     skips every other block without a warning. `DPKT`_'s own reader skips the
     Simple Packet Block too.
 
-    .. _DPKT: https://dpkt.readthedocs.io
-
     Args:
         extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.
 
     """
     if TYPE_CHECKING:
-        #: Engine extraction package, i.e. ``dpkt``.
+        #: Engine extraction package, i.e. |dpkt|_.
         _expkg: '_DPKTPackage'
         #: Engine extraction temporary storage.
         _extmp: 'Reader'
@@ -477,7 +467,7 @@ class DPKT(EngineBase['DPKTPacket']):
         """Call :class:`dpkt.pcap.Reader` to extract PCAP files.
 
         This method assigns :attr:`self._expkg <DPKT._expkg>`
-        as ``dpkt`` and :attr:`self._extmp <DPKT._extmp>`
+        as |dpkt|_ and :attr:`self._extmp <DPKT._extmp>`
         as an iterator from :class:`dpkt.pcap.Reader`, or from
         :class:`PCAPNGReader` for a PCAP-NG file.
 

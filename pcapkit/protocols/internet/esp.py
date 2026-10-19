@@ -96,7 +96,7 @@ rejected.
 ============================ =================== ============ ==================================
 Encryption                   :rfc:`8221` status   Implemented  Notes
 ============================ =================== ============ ==================================
-``ENCR_NULL``                MUST                yes          :rfc:`2410`; needs no ``cryptography``
+``ENCR_NULL``                MUST                yes          :rfc:`2410`; needs no |cryptography|_
 ``ENCR_AES_CBC``             MUST                yes          :rfc:`3602`; 128/192/256-bit keys
 ``ENCR_AES_GCM_16``          MUST                yes          :rfc:`4106`; 8-octet explicit IV
 ``ENCR_AES_GCM_8``           --                  yes          :rfc:`4106`, 8-octet ICV
@@ -155,9 +155,6 @@ Known Limitations
 * The ICV is *verified* but a failure is reported rather than raised, so
   that one bad packet does not abort a capture.
 
-.. |cryptography| replace:: ``cryptography``
-.. _cryptography: https://cryptography.io
-
 .. [*] https://en.wikipedia.org/wiki/IPsec
 
 .. versionadded:: 1.5.0
@@ -197,7 +194,7 @@ if TYPE_CHECKING:
 
     from pcapkit.protocols.protocol import ProtocolBase
 
-#: Cached ``cryptography`` primitives, see :func:`load_cryptography`.
+#: Cached |cryptography|_ primitives, see :func:`load_cryptography`.
 #: :data:`NotImplemented` means the import has not been attempted yet, and
 #: :data:`None` that it was attempted and |cryptography|_ is not installed, and
 #: a tuple holds the loaded primitives, so a missing dependency is not retried

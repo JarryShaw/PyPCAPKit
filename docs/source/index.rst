@@ -56,9 +56,6 @@ About
    There is a project called |jspcapy|_ that works on :mod:`pcapkit`, which is
    a command line tool for PCAP extraction.
 
-   .. |jspcapy| replace:: ``jspcapy``
-   .. _jspcapy: https://github.com/JarryShaw/jspcapy
-
    .. deprecated:: 0.8.0
 
       The |jspcapy|_ project is deprecated and has been merged into the
@@ -190,7 +187,7 @@ Engine              3.10     3.11     3.12     3.13         3.14     3.15 [*]_
 ================== ======== ======== ======== =========== ======== ===========
 
 .. [*] Inferred rather than measured: no 3.15 interpreter was available.
-.. [*] ``pyshark`` also needs Wireshark's :program:`tshark`, which was absent here,
+.. [*] |pyshark|_ also needs Wireshark's :program:`tshark`, which was absent here,
    so only the interpreter half of each verdict in this row was verified.
 
 ``pypcap`` and ``pypcapfile`` stop at 3.11, and ``pyshark`` at 3.13, for the
@@ -382,17 +379,17 @@ preflight described under `Engine Comparison`_.
    cleanly and then fails when used.
 
    - Drives Wireshark's :program:`tshark` binary. It need not be on ``PATH``:
-     ``pyshark`` looks at ``tshark_path`` in its :file:`config.ini` first, then
+     |pyshark|_ looks at ``tshark_path`` in its :file:`config.ini` first, then
      ``PATH`` on POSIX, both Program Files directories on Windows, and
      :file:`/Applications/Wireshark.app` on macOS. Install Wireshark (or just
      :program:`tshark`) from your platform's package manager.
-   - Requires Python **3.13 or older**. ``pyshark`` 0.6 builds its event loop
+   - Requires Python **3.13 or older**. |pyshark|_ 0.6 builds its event loop
      with ``asyncio.get_event_loop_policy().get_event_loop()``, and from Python
      **3.14** :func:`asyncio.get_event_loop` raises :exc:`RuntimeError` when there
      is no current event loop instead of quietly creating one. Measured: a loop is
      returned silently on 3.10 and 3.11, returned with a
      :exc:`DeprecationWarning` on 3.12, and refused on 3.14. 3.13 sits on the
-     deprecated-but-functional side of that change, and ``pyshark`` extracted a
+     deprecated-but-functional side of that change, and |pyshark|_ extracted a
      capture there.
 
 :class:`~pcapkit.foundation.engines.pypcap.PyPCAP`
@@ -457,7 +454,7 @@ preflight described under `Engine Comparison`_.
 
    Only the engines above carry extra constraints. :mod:`pcapkit` itself and
    its ``default``, ``dpkt`` and ``scapy`` engines need nothing beyond their
-   ``pip install`` -- ``dpkt`` 1.9.8 and ``scapy`` 2.7.0 were both measured
+   ``pip install`` -- |dpkt|_ 1.9.8 and ``scapy`` 2.7.0 were both measured
    reading a capture on Python 3.14. The ``scapy`` engine needs **scapy 2.6.0 or
    newer**, which the ``Scapy`` extra requires: 2.5.0 can drop a PCAP-NG
    interface's timestamp resolution, reading nanoseconds as microseconds
@@ -480,10 +477,4 @@ Indices and Tables
 * :ref:`search`
 
 .. _PCAP: https://en.wikipedia.org/wiki/Pcap
-.. _Scapy: https://scapy.net
-.. _DPKT: https://dpkt.readthedocs.io
-.. _PyShark: https://kiminewt.github.io/pyshark
-.. _PyPCAP: https://github.com/pynetwork/pypcap
-.. _pcap-ct: https://pypi.org/project/pcap-ct/
-.. _PyPCAPFile: https://github.com/kisom/pypcapfile
 .. _libpcap: https://www.tcpdump.org

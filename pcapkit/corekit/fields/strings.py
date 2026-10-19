@@ -132,9 +132,6 @@ class StringField(_TextField[str]):
     the text, such as a dumper writing it back out as UTF-8, sees an ordinary
     :obj:`str`. A length of ``-1`` is resolved to the number of *encoded* octets.
 
-    .. |chardet| replace:: ``chardet``
-    .. _chardet: https://chardet.readthedocs.io
-
     """
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]',

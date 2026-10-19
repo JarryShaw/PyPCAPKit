@@ -157,9 +157,6 @@ Data Models
    :members:
    :show-inheritance:
 
-.. |pycrate| replace:: ``pycrate``
-.. _pycrate: https://github.com/pycrate-org/pycrate
-
 .. rubric:: Footnotes
 
 .. [*] https://en.wikipedia.org/wiki/NG_Application_Protocol

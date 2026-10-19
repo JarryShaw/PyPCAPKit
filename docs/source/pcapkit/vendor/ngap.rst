@@ -47,6 +47,3 @@ which is automatically generating :class:`pcapkit.const.ngap.protocol_ie.Protoco
 
 .. [*] 3GPP TS 38.413
 .. [*] 3GPP TS 38.413
-
-.. |pycrate| replace:: ``pycrate``
-.. _pycrate: https://github.com/pycrate-org/pycrate

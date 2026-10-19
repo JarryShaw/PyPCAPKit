@@ -16,9 +16,6 @@ not seen answers through
 rather than raising or minting a permanent, shared-value
 member -- the same GitHub issue :issue:`880` ruling, applied to the sibling registry.
 
-.. |pycrate| replace:: ``pycrate``
-.. _pycrate: https://github.com/pycrate-org/pycrate
-
 """
 import collections
 import sys
