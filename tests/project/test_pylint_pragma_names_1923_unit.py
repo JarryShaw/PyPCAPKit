@@ -20,6 +20,7 @@ scans.
 """
 from __future__ import annotations
 
+import importlib.util
 import io
 import re
 import tokenize
@@ -91,13 +92,9 @@ KNOWN_MESSAGES = frozenset({
     'wrong-import-position',
 })
 
-try:
-    from pylint.exceptions import UnknownMessageError
-    from pylint.lint import PyLinter
-except ImportError:
-    HAS_PYLINT = False
-else:
-    HAS_PYLINT = True
+#: Whether :mod:`pylint` is importable, for the message-store lookup. Its CI
+#: coverage is recorded in :data:`tests._dependency_gates.DEPENDENCY_GATE_EXCLUSIONS`.
+HAS_PYLINT = importlib.util.find_spec('pylint') is not None
 
 
 def _names(comment: 'str') -> 'Iterator[str]':
@@ -170,6 +167,9 @@ class PragmaNameTests(unittest.TestCase):
 
     @unittest.skipUnless(HAS_PYLINT, 'pylint is not installed, so its message store cannot be read')
     def test_names_are_pylint_messages(self) -> None:
+        from pylint.exceptions import UnknownMessageError  # pylint: disable=import-outside-toplevel
+        from pylint.lint import PyLinter  # pylint: disable=import-outside-toplevel
+
         linter = PyLinter()
         linter.load_default_plugins()
         linter.load_plugin_modules(_plugins())

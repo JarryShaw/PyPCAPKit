@@ -199,6 +199,11 @@ MODULE_PROVIDERS = {
     # about 1.5s, against the ~238 MB and licence questions that keep ``NGAP``
     # out of ``all``.
     'isort': ('isort',),
+    # The linter ``HAS_PYLINT`` asks for, whose message store the #1923 pragma
+    # check reads. Like ``mypy`` above, no extra declares it: the Pipfile's
+    # ``[dev-packages]`` and lint.yml's direct install are what carry it, so the
+    # gate is dark on every pytest job and its exclusion says why.
+    'pylint': ('pylint',),
     # ``beautifulsoup4`` ships ``bs4``; ``html5lib`` is an *extra of* that
     # distribution, so ``beautifulsoup4`` alone does not provide it. That
     # distinction is the whole reason ``HAS_CRAWLER_DEPS`` is satisfied in CI
@@ -665,6 +670,24 @@ DEPENDENCY_GATE_EXCLUSIONS = {
             'installed, a developer checkout included, and skip visibly elsewhere, saying '
             'which condition failed. The directive-name and pin-agreement tests need '
             'nothing and run on every leg.'
+        ),
+    ),
+    'HAS_PYLINT': Exclusion(
+        dark={'test': ('pylint',), 'gate': ('pylint',)},
+        reason=(
+            'The method it gates (#1923) looks every pylint pragma name in pcapkit/ up in '
+            "pylint's own message store, with the plugins `make pylint` loads, so it needs "
+            'pylint, which no pytest job installs. pylint is a lint-tier tool, as mypy is: '
+            'a Pipfile [dev-packages] entry that `make pylint` resolves, and a direct '
+            '"pip install -U vermin pylint mypy bandit" in lint.yml, which runs no pytest; '
+            'no pyproject.toml extra declares it. The argument that declines HAS_MYPY above '
+            'declines it here: lint.yml already runs pylint over the whole package, and an '
+            'unknown pragma name shows there as W0012 unknown-option-value, so a pytest leg '
+            'that installed pylint would pay for a second copy of that check. What runs on '
+            'every leg instead is the ungated check in the same module, which holds each '
+            'pragma name to the pinned KNOWN_MESSAGES list; the lookup keeps that list '
+            'honest wherever pylint is importable, a developer checkout included, and skips '
+            'visibly elsewhere.'
         ),
     ),
     'HAS_DOCUTILS': Exclusion(
