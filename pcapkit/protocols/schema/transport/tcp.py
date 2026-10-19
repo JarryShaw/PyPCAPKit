@@ -898,7 +898,7 @@ class MPTCPJoinSYNACK(MPTCPJoin):
     })
     #: Address ID.
     addr_id: 'int' = UInt8Field()
-    #: Sender's truncated HMAC
+    #: Sender's truncated HMAC.
     hmac: 'bytes' = BytesField(length=8)
     #: Sender's random number.
     nonce: 'int' = UInt32Field()
@@ -953,7 +953,7 @@ class MPTCPDSS(MPTCP, code=Enum_MPTCPOption.DSS):
     #: Data sequence number.
     #:
     #: 4 octets when ``M`` is set, 8 when ``m`` is set as well, absent otherwise --
-    #: :rfc:`8684` section 3.3 figure 9. C.f. :func:`mptcp_dss_dsn_selector`.
+    #: :rfc:`8684` section 3.3 figure 9. See :func:`mptcp_dss_dsn_selector`.
     dsn: 'int' = SwitchField(
         selector=mptcp_dss_dsn_selector,
     )
@@ -967,7 +967,7 @@ class MPTCPDSS(MPTCP, code=Enum_MPTCPOption.DSS):
         UInt16Field(),
         lambda pkt: pkt['flags']['M'],
     )
-    #: Checksum (if negotiated, c.f. :func:`mptcp_dss_checksum`).
+    #: Checksum (if negotiated, see :func:`mptcp_dss_checksum`).
     checksum: 'bytes' = ConditionalField(
         BytesField(length=2),
         mptcp_dss_checksum,

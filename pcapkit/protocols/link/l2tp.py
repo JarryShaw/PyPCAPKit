@@ -44,7 +44,7 @@ to have a real :meth:`~pcapkit.protocols.protocol.Protocol.__index__`.
 
 Binding :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` at 115 instead does not
 work (:issue:`548`), and is recorded so it is not proposed again. Over IP the v3
-session header is, in :rfc:`3931` §4.1.1's own words, *"free of any restrictions
+session header is, in :rfc:`3931` §4.1.1.1's own words, *"free of any restrictions
 imposed by coexistence with L2TPv2 and L2F"* -- a data message opens with the raw
 32-bit Session ID and carries **no version nibble at all**, so there is nothing a
 v2 parser could test to recognise that the datagram is not its own. Measured,
@@ -60,7 +60,7 @@ the value 1 "to permit detection of L2F packets should they arrive intermixed
 with L2TP packets". L2F is a separate protocol with its own header. It is
 therefore to be implemented as ``L2F``, the canonical name, carrying ``L2TPv1``
 only as an alias in its :meth:`~pcapkit.protocols.protocol.Protocol.id` --
-the same relationship HTTP/3 has to QUIC. c.f.
+the same relationship HTTP/3 has to QUIC. See
 :meth:`HTTPv1.id <pcapkit.protocols.application.httpv1.HTTP.id>` for how a
 version-flavoured alias is spelled: canonical name first, alias second, since
 callers take element zero as canonical.
@@ -73,22 +73,23 @@ implemented -- but
 :meth:`L2TPv2.read <pcapkit.protocols.link.l2tpv2.L2TPv2.read>` does **check**
 it, and refuses anything other than ``2``. That is the half of the mechanism
 which is useful with no other version implemented: it keeps v3 traffic on port
-1701 (:rfc:`3931` §4.1.2 shares the port, so this is ordinary capture
+1701 (:rfc:`3931` §4.7.2 shares the port, so this is ordinary capture
 traffic rather than a corner case) from being reported as v2 with a tunnel and
 session ID read out of v3's Control Connection ID.
 
 When another version lands, the remaining half -- delegation rather than refusal
 -- already has a precedent in
 :class:`~pcapkit.protocols.application.http.HTTP`, which reads a version and
-delegates to a per-version class. L2TP is the easier case: HTTP has to
-*trial-parse* each candidate in
-:meth:`~pcapkit.protocols.application.http.HTTP._guess_version` because the wire
-format carries no version field, whereas L2TP states its version explicitly in
-those four bits. So a deterministic switch on ``Ver`` is enough, and no new
-registry is needed -- the class bound at UDP 1701 reads two octets, masks out the
-nibble, and hands the datagram to the matching class. Note the switch belongs on
+delegates to a per-version class. L2TP is the easier case:
+:meth:`~pcapkit.protocols.application.http.HTTP._guess_version` has to *infer*
+the version -- recognising the HTTP/2 preface or an HTTP/1 start line, else
+trial-parsing each candidate -- because HTTP's wire format carries no version
+field, whereas L2TP states its version explicitly in those four bits. So a
+deterministic switch on ``Ver`` is enough, and no new registry is needed -- the
+class bound at UDP 1701 reads two octets, masks out the nibble, and hands the
+datagram to the matching class. Note the switch belongs on
 the **UDP** path only: over IP protocol 115 there is no nibble to switch on, per
-the §4.1.1 note above.
+the §4.1.1.1 note above.
 
 .. [*] https://en.wikipedia.org/wiki/Layer_2_Tunneling_Protocol
 

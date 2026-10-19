@@ -871,7 +871,7 @@ def whole_chunks_length(data: 'bytes') -> 'int':
     Returns:
         Number of octets up to the end of the last chunk whose declared
         ``length`` octets are all present, with as much of its padding as there
-        is, c.f. :func:`padding_length`. A ``length`` below the four-octet chunk
+        is, see :func:`padding_length`. A ``length`` below the four-octet chunk
         header (:rfc:`9260#section-3.2`) delimits nothing, so the run stops
         there too; four zero octets would otherwise read as a DATA chunk.
 
@@ -957,7 +957,7 @@ class SCTP(Schema):
         type_name='type',
         registry=Chunk.registry,
     )
-    #: Octets captured after the last whole chunk, c.f. :class:`ChunkListField`
+    #: Octets captured after the last whole chunk, see :class:`ChunkListField`
     #: and :attr:`IPv4.trailer <pcapkit.protocols.schema.internet.ipv4.IPv4.trailer>`.
     trailer: 'bytes' = PayloadField(default=b'')
 

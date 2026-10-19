@@ -5,7 +5,7 @@
 .. module:: pcapkit.protocols.link.l2tpv2
 
 :mod:`pcapkit.protocols.link.l2tpv2` contains
-:class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` only, which implements extractor
+:class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` only, which implements the extractor
 for the Layer Two Tunnelling Protocol version 2 (L2TPv2) [*]_ as specified by
 :rfc:`2661` -- a 16-bit tunnel ID and a 16-bit session ID, with the version
 nibble reading ``2``. Its structure is described as below:
@@ -90,7 +90,7 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
 
     Only the :rfc:`2661` framing is read: :meth:`read` refuses a datagram whose
     version nibble is not ``2``, so a v3 datagram arriving on port 1701
-    (:rfc:`3931` §4.1.2 shares the port) degrades to
+    (:rfc:`3931` §4.7.2 shares the port) degrades to
     :class:`~pcapkit.protocols.misc.raw.Raw` instead of being reported as v2.
 
     .. versionadded:: 1.5.0
@@ -135,7 +135,7 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
 
         Always ``2``: :rfc:`2661` fixes the version nibble, and a datagram
         carrying any other value is a different protocol reached through a
-        different class. c.f. :class:`~pcapkit.protocols.link.l2tp.L2TP`.
+        different class. See :class:`~pcapkit.protocols.link.l2tp.L2TP`.
 
         This is enforced rather than merely asserted -- :meth:`read` refuses a
         datagram whose nibble is not ``2``, so this hard-coded answer cannot

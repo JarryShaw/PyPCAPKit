@@ -68,9 +68,11 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
     #: Layer of protocol.
     __layer__ = 'Link'  # type: Literal['Link']
 
-    #: DefaultDict[int, ModuleDescriptor[ProtocolBase] | ~typing.Type[ProtocolBase]]: Protocol index mapping for decoding next layer,
-    #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
-    #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
+    #: Protocol index mapping for decoding next layer, see
+    #: :meth:`self._decode_next_layer
+    #: <pcapkit.protocols.protocol.Protocol._decode_next_layer>` &
+    #: :meth:`self._import_next_layer
+    #: <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     __proto__ = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
         {
@@ -92,7 +94,7 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
             Enum_EtherType.Internet_Protocol_version_4:         ModuleDescriptor('pcapkit.protocols.internet.ipv4', 'IPv4'),
             Enum_EtherType.Internet_Protocol_version_6:         ModuleDescriptor('pcapkit.protocols.internet.ipv6', 'IPv6'),
 
-            # c.f., https://en.wikipedia.org/wiki/EtherType#Values
+            # see https://en.wikipedia.org/wiki/EtherType#Values
             0x8137:                                             ModuleDescriptor('pcapkit.protocols.internet.ipx',  'IPX'),
         },
     )  # type: DefaultDict[int | Enum_EtherType, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]

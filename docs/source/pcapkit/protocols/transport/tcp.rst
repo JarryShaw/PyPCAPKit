@@ -5,7 +5,7 @@ TCP - Transmission Control Protocol
 
 :mod:`pcapkit.protocols.transport.tcp` contains
 :class:`~pcapkit.protocols.transport.tcp.TCP` only,
-which implements extractor for Transmission Control
+which implements the extractor for Transmission Control
 Protocol (TCP) [*]_, whose structure is described as
 below:
 

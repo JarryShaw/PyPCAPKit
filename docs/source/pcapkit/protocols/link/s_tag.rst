@@ -4,7 +4,7 @@ S_Tag - 802.1ad Service VLAN Tag Type
 .. module:: pcapkit.protocols.link.s_tag
 
 :mod:`pcapkit.protocols.link.s_tag` contains
-:class:`~pcapkit.protocols.link.s_tag.S_Tag` only, which implements extractor for
+:class:`~pcapkit.protocols.link.s_tag.S_Tag` only, which implements the extractor for
 the 802.1ad Service VLAN Tag Type (S-Tag) [*]_, EtherType ``0x88A8``.
 
 Its structure, and all of its parsing and construction, come from

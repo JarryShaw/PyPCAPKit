@@ -5,7 +5,7 @@ UDP - User Datagram Protocol
 
 :mod:`pcapkit.protocols.transport.udp` contains
 :class:`~pcapkit.protocols.transport.udp.UDP` only,
-which implements extractor for User Datagram Protocol
+which implements the extractor for User Datagram Protocol
 (UDP) [*]_, whose structure is described as below:
 
 ======= ========= ===================== ===============================
@@ -13,7 +13,7 @@ Octets      Bits        Name                    Description
 ======= ========= ===================== ===============================
   0           0   ``udp.srcport``             Source Port
   2          16   ``udp.dstport``             Destination Port
-  4          32   ``udp.len``                 Length (header includes)
+  4          32   ``udp.len``                 Length (header included)
   6          48   ``udp.checksum``            Checksum
 ======= ========= ===================== ===============================
 

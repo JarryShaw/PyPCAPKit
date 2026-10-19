@@ -4,7 +4,7 @@ L2TPv2 - Layer Two Tunnelling Protocol version 2
 .. module:: pcapkit.protocols.link.l2tpv2
 
 :mod:`pcapkit.protocols.link.l2tpv2` contains
-:class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` only, which implements extractor
+:class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` only, which implements the extractor
 for the Layer Two Tunnelling Protocol version 2 (L2TPv2) [*]_ as specified by
 :rfc:`2661` -- a 16-bit tunnel ID and a 16-bit session ID, with the version nibble
 reading ``2``. It is dispatched from

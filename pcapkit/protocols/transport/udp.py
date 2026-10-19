@@ -7,7 +7,7 @@
 
 :mod:`pcapkit.protocols.transport.udp` contains
 :class:`~pcapkit.protocols.transport.udp.UDP` only,
-which implements extractor for User Datagram Protocol
+which implements the extractor for User Datagram Protocol
 (UDP) [*]_, whose structure is described as below:
 
 ======= ========= ===================== ===============================
@@ -15,7 +15,7 @@ Octets      Bits        Name                    Description
 ======= ========= ===================== ===============================
   0           0   ``udp.srcport``             Source Port
   2          16   ``udp.dstport``             Destination Port
-  4          32   ``udp.len``                 Length (header includes)
+  4          32   ``udp.len``                 Length (header included)
   6          48   ``udp.checksum``            Checksum
 ======= ========= ===================== ===============================
 
@@ -85,10 +85,11 @@ class UDP(Transport[Data_UDP, Schema_UDP],
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[int, ModuleDescriptor[ProtocolBase] | ~typing.Type[ProtocolBase]]: Protocol
-    #: index mapping for decoding next layer, c.f.
-    #: :meth:`self._decode_next_layer <pcapkit.protocols.transport.transport.Transport._decode_next_layer>`
-    #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
+    #: Protocol index mapping for decoding next layer, see
+    #: :meth:`self._decode_next_layer
+    #: <pcapkit.protocols.transport.transport.Transport._decode_next_layer>` &
+    #: :meth:`self._import_next_layer
+    #: <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     __proto__ = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
         {
@@ -101,7 +102,7 @@ class UDP(Transport[Data_UDP, Schema_UDP],
             #
             # The HTTP entries bind the version-dispatching
             # :class:`pcapkit.protocols.application.http.HTTP`, as TCP's table
-            # does. c.f. the note in the class docstring.
+            # does. See the note in the class docstring.
             80: ModuleDescriptor('pcapkit.protocols.application.http', 'HTTP'),
             8080: ModuleDescriptor('pcapkit.protocols.application.http', 'HTTP'),
 
@@ -110,7 +111,7 @@ class UDP(Transport[Data_UDP, Schema_UDP],
             # abstract L2TP base. IANA protocol number 115 (L2TPv3, RFC 3931)
             # stays unbound because that version has no class; once it has,
             # it takes 115 and this entry becomes a version switch on the Ver
-            # nibble. c.f. pcapkit.protocols.link.l2tp.
+            # nibble. See pcapkit.protocols.link.l2tp.
             1701: ModuleDescriptor('pcapkit.protocols.link.l2tpv2', 'L2TPv2'),
         },
     )

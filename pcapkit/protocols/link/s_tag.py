@@ -5,7 +5,7 @@
 .. module:: pcapkit.protocols.link.s_tag
 
 :mod:`pcapkit.protocols.link.s_tag` contains
-:class:`~pcapkit.protocols.link.s_tag.S_Tag` only, which implements extractor for
+:class:`~pcapkit.protocols.link.s_tag.S_Tag` only, which implements the extractor for
 the 802.1ad Service VLAN Tag Type (S-Tag) [*]_, EtherType ``0x88A8``. Its
 structure, and all of its parsing and construction, come from
 :class:`~pcapkit.protocols.link.vlan.VLAN`; this class adds only the tag's own
@@ -63,7 +63,7 @@ class S_Tag(VLAN, schema=Schema_VLAN, data=Data_VLAN):
         """Acronym of corresponding protocol."""
         return '802.1ad'
 
-    #: NOTE: c.f. :attr:`C_Tag.info_name <pcapkit.protocols.link.c_tag.C_Tag.info_name>`
+    #: NOTE: see :attr:`C_Tag.info_name <pcapkit.protocols.link.c_tag.C_Tag.info_name>`
     #: -- spelled out deliberately, since it is what keeps a stacked service tag
     #: and customer tag apart in the parsed info dict.
     @property

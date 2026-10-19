@@ -5,7 +5,7 @@
 .. module:: pcapkit.protocols.link.c_tag
 
 :mod:`pcapkit.protocols.link.c_tag` contains
-:class:`~pcapkit.protocols.link.c_tag.C_Tag` only, which implements extractor for
+:class:`~pcapkit.protocols.link.c_tag.C_Tag` only, which implements the extractor for
 the 802.1Q Customer VLAN Tag Type (C-Tag, formerly the Q-Tag) [*]_, EtherType
 ``0x8100``. Its structure, and all of its parsing and construction, come from
 :class:`~pcapkit.protocols.link.vlan.VLAN`; this class adds only the tag's own
@@ -41,7 +41,7 @@ __all__ = ['C_Tag']
 # resolves an omitted schema by looking the *subclass name* up in
 # :mod:`pcapkit.protocols.schema`, and assigns unconditionally -- so leaving them
 # off would silently bind ``Schema_Raw``/``Data_Raw`` rather than falling back to
-# the base class's pair. c.f. :class:`~pcapkit.protocols.application.rarp.RARP`, which
+# the base class's pair. See :class:`~pcapkit.protocols.application.rarp.RARP`, which
 # restates them for the same reason.
 class C_Tag(VLAN, schema=Schema_VLAN, data=Data_VLAN):
     """This class implements 802.1Q Customer VLAN Tag Type.
