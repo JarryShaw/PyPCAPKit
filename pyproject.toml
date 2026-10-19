@@ -287,7 +287,7 @@ docs = [
     # ``docs/source/conf.py`` imports that release's private modules and is
     # written against it alone (#1856). tests/project/test_docs_typehints_pin_1856_unit.py
     # fails when the pins differ.
-    "sphinx-autodoc-typehints==3.15.0", "sphinxext-opengraph", "sphinx-copybutton",
+    "sphinx-autodoc-typehints==3.17.2", "sphinxext-opengraph", "sphinx-copybutton",
     "sphinxcontrib-mermaid",
     "typing-extensions", "mypy-extensions",
 ]
