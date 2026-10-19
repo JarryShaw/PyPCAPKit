@@ -111,11 +111,11 @@ class Extractor(Generic[_P]):
         For supported engines, please refer to
         :meth:`~pcapkit.foundation.extraction.Extractor.run`.
 
-    .. versionchanged:: 1.1.1
+    .. versionchanged:: 1.1.1.post2
 
-       From ``1.1.1.post2``, ``strict`` is renamed ``reasm_strict``, with no
-       alias, and ``reasm_store`` is inserted after it, so a positional
-       argument from ``trace`` onwards moves one place along.
+       ``strict`` is renamed ``reasm_strict``, with no alias, and
+       ``reasm_store`` is inserted after it, so a positional argument from
+       ``trace`` onwards moves one place along.
 
     .. versionchanged:: 1.5.0
 

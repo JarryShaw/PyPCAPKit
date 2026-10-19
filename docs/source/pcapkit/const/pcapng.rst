@@ -61,7 +61,7 @@ Option Types
 This module contains the constant enumeration for **Option Types**,
 which is automatically generated from :class:`pcapkit.vendor.pcapng.option_type.OptionType`.
 
-.. versionchanged:: 1.1.0
+.. versionchanged:: 1.1.0.post1
 
    A member converts with :class:`int` to its option code, and compares,
    orders and hashes as that code.

@@ -157,11 +157,11 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
     Returns:
         An :class:`~pcapkit.foundation.extraction.Extractor` object.
 
-    .. versionchanged:: 1.1.1
+    .. versionchanged:: 1.1.1.post2
 
-       From ``1.1.1.post2``, ``strict`` is renamed ``reasm_strict``, with no
-       alias, and ``reasm_store`` is inserted after it, so a positional
-       argument from ``trace`` onwards moves one place along.
+       ``strict`` is renamed ``reasm_strict``, with no alias, and
+       ``reasm_store`` is inserted after it, so a positional argument from
+       ``trace`` onwards moves one place along.
 
     .. versionchanged:: 1.5.0
 
