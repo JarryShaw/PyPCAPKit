@@ -15,6 +15,9 @@ is the right target for it. The docs explain the collision in a note in
 * :class:`LinkHookTests` -- ``link_pcap_module`` in :file:`conf.py` points the
   target at the note's page from any other page. These need Sphinx and the
   pinned sphinx-autodoc-typehints, and skip without them, but run no build.
+* :class:`BuilderTests` -- the hook under real builders that spell a page's URI
+  differently: singlehtml as a fragment, latex not at all for a page its
+  document set leaves out. These build a scratch project, under the same gate.
 
 Only the text Sphinx renders is scanned, read as
 :file:`test_docs_epilog_links_1936_unit.py` reads it: ``.rst`` pages under
@@ -27,7 +30,10 @@ Only the text Sphinx renders is scanned, read as
 from __future__ import annotations
 
 import ast
+import io
+import pathlib
 import re
+import tempfile
 import unittest
 from typing import TYPE_CHECKING
 from unittest import mock
@@ -244,6 +250,65 @@ class LinkHookTests(unittest.TestCase):
         """The two sides of the link agree on the label."""
         self.assertEqual(self.conf.PCAP_MODULE_LABEL, LABEL)
         self.assertIn(f'.. _pcap: #{LABEL}\n', self.conf.rst_epilog)
+
+
+#: The scratch project :class:`BuilderTests` builds: a root page, a page that
+#: links the module, and the note, which is in the root's toctree only when
+#: asked for.
+PAGES = {
+    'index': 'Index\n=====\n\n.. toctree::\n\n%s\n',
+    'other': 'Other\n=====\n\nThe |pcap|_ module.\n',
+    'note': ':orphan:\n\nNote\n====\n\n.. _pcap-module:\n\n.. important::\n\n   The note.\n',
+}
+
+
+@unittest.skipUnless(HAS_SPHINX, SPHINX_SKIP_REASON)
+class BuilderTests(unittest.TestCase):
+    """``link_pcap_module`` under builders whose URIs are not one file per page."""
+
+    conf = None  # type: Any
+
+    @classmethod
+    def setUpClass(cls) -> 'None':
+        cls.conf = load_conf()
+
+    def build(self, builder: 'str', *, with_note: 'bool') -> 'pathlib.Path':
+        """Build :data:`PAGES` with ``builder``, failing on any warning, and return the output."""
+        # pylint: disable=import-outside-toplevel
+        from sphinx.application import Sphinx
+        from sphinx.util.docutils import docutils_namespace
+        tmp = tempfile.TemporaryDirectory()  # pylint: disable=consider-using-with
+        self.addCleanup(tmp.cleanup)
+        root = pathlib.Path(tmp.name)
+        src = root / 'src'
+        src.mkdir()
+        toctree = '   other\n   note' if with_note else '   other'
+        for name, text in PAGES.items():
+            (src / f'{name}.rst').write_text(text % toctree if name == 'index' else text, encoding='utf-8')
+        warnings = io.StringIO()
+        # NB: as sphinx-build does, so a second application in this process does
+        # not warn that the first registered its nodes already.
+        with docutils_namespace():
+            app = Sphinx(str(src), None, str(root / 'out'), str(root / 'doctrees'), builder,
+                         confoverrides={'project': 'x', 'rst_epilog': self.conf.rst_epilog,
+                                        'latex_documents': [('index', 'x.tex', 'X', 'x', 'manual')]},
+                         status=None, warning=warnings, freshenv=True)
+            app.connect('doctree-resolved', self.conf.link_pcap_module)
+            app.build()
+        self.assertEqual(warnings.getvalue(), '')
+        return root / 'out'
+
+    def test_singlehtml_keeps_the_bare_anchor(self) -> 'None':
+        """Every page is in one file there, so the anchor resolves and a page URI would add a second ``#``."""
+        html = (self.build('singlehtml', with_note=True) / 'index.html').read_text(encoding='utf-8')
+        self.assertIn(f'href="#{LABEL}"', html)
+        self.assertNotIn(f'#document-note#{LABEL}', html)
+
+    def test_latex_without_the_note_writes_the_literal(self) -> 'None':
+        """latex has no URI for a page outside its document set, and the build used to die on it."""
+        tex = (self.build('latex', with_note=False) / 'x.tex').read_text(encoding='utf-8')
+        self.assertIn(r'\sphinxcode{\sphinxupquote{pcap}}', tex)
+        self.assertNotIn(LABEL, tex)
 
 
 if __name__ == '__main__':

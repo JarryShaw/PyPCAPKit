@@ -19,6 +19,7 @@ from typing import TYPE_CHECKING
 
 from docutils import nodes
 from sphinx import addnodes
+from sphinx.errors import NoUri
 from sphinx.ext.autodoc.preserve_defaults import DefaultValue, update_default_value
 from sphinx.transforms.post_transforms import SphinxPostTransform
 from sphinx.util import logging as sphinx_logging
@@ -1084,6 +1085,14 @@ def link_pcap_module(app: 'Sphinx', doctree: 'document', docname: str) -> None:
     but renders its text as plain text rather than as the literal the other
     ``|pkg|_`` links are.
 
+    Two kinds of builder are left to themselves. One whose URI for the note's
+    page is itself a fragment, as singlehtml's ``#document-<docname>`` is, writes
+    every page into one output, where the bare anchor already resolves and a
+    second ``#`` would break it. One that raises :exc:`~sphinx.errors.NoUri` has
+    no page for the note, as latex has not when its document set leaves the note
+    out, so each link is replaced by its literal, as Sphinx replaces a
+    cross-reference with no URI.
+
     Args:
         app: Sphinx application.
         doctree: The resolved doctree of ``docname``.
@@ -1099,9 +1108,16 @@ def link_pcap_module(app: 'Sphinx', doctree: 'document', docname: str) -> None:
         sphinx_logging.getLogger(__name__).warning(
             'undefined label: %r, which |pcap|_ links to', PCAP_MODULE_LABEL, location=refs[0])
         return
-    uri = f'{app.builder.get_relative_uri(docname, target)}#{labelid}'
+    try:
+        page = app.builder.get_relative_uri(docname, target)
+    except NoUri:
+        for ref in refs:
+            ref.replace_self(ref.children)
+        return
+    if '#' in page:
+        return
     for ref in refs:
-        ref['refuri'] = uri
+        ref['refuri'] = f'{page}#{labelid}'
         ref['internal'] = True
 
 
