@@ -48,7 +48,9 @@ conversion is the mechanical rules below rather than a document converter:
      Sphinx accepts too -- become Markdown links to the RFC on the IETF
      datatracker, and every role in the ``extlinks`` table of
      ``docs/source/conf.py`` (``:issue:``, ``:pr:``, ``:wikipedia:`` ...),
-     mirrored in ``EXTLINKS``, becomes a link to that role's URL;
+     mirrored in ``EXTLINKS``, becomes a link to that role's URL, and the
+     Python-domain roles in ``PY_ROLES`` (``:class:``, ``:meth:`` ...) become
+     code spans of the name Sphinx displays -- ``:class:`~a.b.C``` is ```C```;
   3. ``double backtick`` literals become single-backtick code spans;
   4. ``*`` bullets become ``-`` bullets;
   5. ``[n]_`` / ``.. [n]`` footnotes become GitHub's ``[^n]`` / ``[^n]:``;
@@ -74,7 +76,7 @@ What it guards, exactly -- the claim is kept level with the code, because a guar
 believed to be broader than it is, is worse than no guard:
 
   * a ``double backtick`` literal rule 3 did not reach;
-  * an interpreted-text role, ``:mod:`x```, rule 2 does not know;
+  * an interpreted-text role, ``:ref:`x```, rule 2 does not know;
   * a directive or comment, any line opening ``..`` -- which also catches the
     ``.. _name: url`` target that a bare ``name_`` reference needs, so that form is
     covered through its definition rather than through the reference;
@@ -210,6 +212,24 @@ _EXTLINK_ROLE = re.compile(
 #: ``:issue:`the parsing bug <591>``` is the text *the parsing bug* linking to 591.
 _EXPLICIT_TITLE = re.compile(r'^(.+?)\s*(?<!\x00)<([^<]*?)>$', re.DOTALL)
 
+#: The Python-domain cross-reference roles rule 2 renders, each mapped to whether
+#: Sphinx's role is built with ``fix_parens`` -- ``sphinx.domains.python``
+#: (Sphinx 9.1.0) sets it on ``:func:`` and ``:meth:`` only, which is what puts
+#: ``()`` after the displayed name of a callable.
+PY_ROLES = {
+    'attr': False,
+    'class': False,
+    'data': False,
+    'exc': False,
+    'func': True,
+    'meth': True,
+    'mod': False,
+}  # type: dict[str, bool]
+
+#: Every :data:`PY_ROLES` role, bare or with its ``py:`` domain prefix.
+_PY_ROLE = re.compile(
+    r':(?:py:)?(' + '|'.join(sorted(PY_ROLES, key=len, reverse=True)) + r'):`([^`\n]+)`')
+
 #: Where the full rendered history lives. Must match ``[project.urls].changelog``
 #: in ``pyproject.toml`` -- ``MANIFEST.in`` prunes ``docs/``, so in a source
 #: distribution this is the only route from the shipped entry to the rest of the
@@ -239,7 +259,7 @@ _CODE_SPAN = re.compile(r'`[^`\n]*`')
 #: Stands in for one character of a masked code span. A *marker* rather than
 #: nothing, because the difference between a leftover role and prose about a role
 #: is precisely whether a code span follows the ``:name:`` or encloses it:
-#: ``:mod:`pcapkit.const``` is a role that escaped rule 2, and ```:mod:``` is a
+#: ``:ref:`changelog``` is a role that escaped rule 2, and ```:mod:``` is a
 #: sentence mentioning one.
 #:
 #: A span is masked character for character rather than collapsed to one marker,
@@ -467,6 +487,48 @@ def extlink(name: str, text: str,
     return f'[{title}]({url})'
 
 
+def py_role(name: str, text: str) -> str:
+    """Render one Python-domain role as a code span of the name Sphinx displays.
+
+    A code span rather than a link: the page that documents an object is known only
+    to a built ``objects.inv``, and this script runs where there is no
+    documentation build -- a source distribution prunes ``docs/`` altogether.
+
+    The displayed name follows Sphinx's ``XRefRole`` and ``PyXRefRole``
+    (Sphinx 9.1.0), so an entry names the same thing in the Markdown as in the
+    rendered documentation:
+
+    * an explicit ``title <target>`` displays *title*, as written;
+    * a leading ``!`` suppresses the link, and the rest displays as written;
+    * otherwise a leading ``.`` is dropped, and a leading ``~`` keeps only the
+      last dotted component -- ``~pcapkit.foundation.extraction.Extractor`` is
+      ``Extractor``;
+    * ``:func:`` and ``:meth:`` gain ``()`` unless the name already ends in it,
+      since ``add_function_parentheses`` is left at its default in
+      ``docs/source/conf.py``.
+
+    Args:
+        name: The role name, a key of :data:`PY_ROLES`.
+        text: The role content, between the backticks.
+
+    Returns:
+        A Markdown code span.
+
+    """
+    match = _EXPLICIT_TITLE.match(text)
+    if match:
+        title = match.group(1)
+    else:
+        title = text[1:] if text.startswith('!') else text
+        if PY_ROLES[name] and not title.endswith('()'):
+            title += '()'
+        if not text.startswith('!'):
+            title = title.lstrip('.')
+            if title.startswith('~'):
+                title = title[1:].rpartition('.')[2]
+    return f'`{title}`'
+
+
 def convert(rst: str) -> str:
     """Apply the conversion rules to one per-version entry.
 
@@ -528,9 +590,11 @@ def convert_traced(rst: str) -> tuple[str, list[tuple[int, int]]]:
                 continue
 
         # 2. the roles these entries use: ``:rfc:`` in both spellings Sphinx
-        #    accepts, and every role in :data:`EXTLINKS`.
+        #    accepts, every role in :data:`EXTLINKS`, and the Python-domain
+        #    roles in :data:`PY_ROLES`.
         line = _RFC_ROLE.sub(lambda match: rfc_link(match[1], match[2] or ''), line)
         line = _EXTLINK_ROLE.sub(lambda match: extlink(match[1], match[2]), line)
+        line = _PY_ROLE.sub(lambda match: py_role(match[1], match[2]), line)
         # 3. literals.
         line = re.sub(r'``([^`]+)``', r'`\1`', line)
         # 4. bullets, at any indent.

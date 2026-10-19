@@ -420,17 +420,102 @@ class ExtlinksRoleTests(ChangelogTreeMixin, unittest.TestCase):
 
     def test_an_unknown_role_is_still_fatal(self) -> None:
         # Shows the guard was not loosened; it is not evidence of new behaviour. The
-        # ``:mod:`` half passed before the change too -- only the ``:issue:`` half
+        # ``:ref:`` half passed before the change too -- only the ``:issue:`` half
         # failed without it, by being left unconverted.
         index = self.make_tree(
-            entry=ENTRY + '\nSee :issue:`29` and :mod:`pcapkit.const` for more.\n')
+            entry=ENTRY + '\nSee :issue:`29` and :ref:`changelog` for more.\n')
 
         with self.assertRaises(changelog_md.ResidualMarkupError) as error:
             changelog_md.render(index)
 
         self.assertIn('role', str(error.exception))
-        self.assertIn(':mod:', str(error.exception))
+        self.assertIn(':ref:', str(error.exception))
         self.assertNotIn(':issue:', str(error.exception))
+
+
+class PythonRoleTests(ChangelogTreeMixin, unittest.TestCase):
+    """Rule 2's Python-domain half: ``:class:``, ``:meth:`` and the rest become code spans.
+
+    #1941: the 1.5.0 entry links its names to the API, so each Python-domain role
+    has to reach the Markdown as the name Sphinx displays -- not as raw role text,
+    which the guard refuses, and not as the link target when the two differ.
+
+    """
+
+    def body(self, line: str) -> str:
+        return self.convert(ENTRY + f'\n{line}\n')
+
+    def test_each_role_becomes_a_code_span_of_its_name(self) -> None:
+        cases = {
+            ':class:`pcapkit.foundation.extraction.Extractor`':
+                '`pcapkit.foundation.extraction.Extractor`',
+            ':exc:`pcapkit.utilities.exceptions.ProtocolError`':
+                '`pcapkit.utilities.exceptions.ProtocolError`',
+            ':attr:`pcapkit.foundation.extraction.Extractor.engine`':
+                '`pcapkit.foundation.extraction.Extractor.engine`',
+            ':data:`pcapkit.interface.core.PCAPKit`': '`pcapkit.interface.core.PCAPKit`',
+            ':mod:`pcapkit.const`': '`pcapkit.const`',
+            ':meth:`pcapkit.foundation.extraction.Extractor.run`':
+                '`pcapkit.foundation.extraction.Extractor.run()`',
+            ':func:`pcapkit.interface.extract`': '`pcapkit.interface.extract()`',
+        }
+        # One assertion over every role rather than a ``subTest`` per role: under
+        # this repository's pytest a failing subtest leaves its parent ``PASSED``.
+        markdown = self.body('\n\n'.join(f'See {role} here.' for role in cases))
+        missing = [role for role, expected in cases.items()
+                   if f'See {expected} here.' not in markdown]
+
+        self.assertEqual(missing, [])
+        self.assertEqual(changelog_md.residual(markdown), [])
+
+    def test_a_tilde_keeps_only_the_last_component(self) -> None:
+        markdown = self.body(':class:`~pcapkit.foundation.extraction.Extractor` and '
+                             ':meth:`~pcapkit.foundation.extraction.Extractor.run`.')
+
+        self.assertIn('`Extractor` and `run()`.', markdown)
+        self.assertNotIn('pcapkit.foundation', markdown)
+
+    def test_a_leading_dot_is_dropped_from_the_name(self) -> None:
+        markdown = self.body(':exc:`.ProtocolError`, :meth:`.Extractor.run` and '
+                             ':class:`~.Extractor`.')
+
+        self.assertIn('`ProtocolError`, `Extractor.run()` and `Extractor`.', markdown)
+
+    def test_an_explicit_title_is_shown_as_written(self) -> None:
+        markdown = self.body(':meth:`AppType.get <pcapkit.const.reg.apptype.apptype.AppType.get>`'
+                             ' and :class:`TCP() <pcapkit.protocols.transport.tcp.TCP>`.')
+
+        self.assertIn('`AppType.get` and `TCP()`.', markdown)
+        self.assertNotIn('<pcapkit', markdown)
+
+    def test_a_callable_already_ending_in_parentheses_gains_no_more(self) -> None:
+        markdown = self.body(':meth:`.Extractor.run()` and :func:`!print`.')
+
+        self.assertIn('`Extractor.run()` and `print()`.', markdown)
+        self.assertNotIn('()()', markdown)
+
+    def test_a_suppressed_link_keeps_the_rest_as_written(self) -> None:
+        # Sphinx does no tilde or dot processing behind a ``!``.
+        markdown = self.body(':class:`!~pcapkit.Extractor`.')
+
+        self.assertIn('`~pcapkit.Extractor`.', markdown)
+
+    def test_the_domain_prefixed_spelling_is_converted_too(self) -> None:
+        markdown = self.body(':py:class:`~pcapkit.foundation.extraction.Extractor`.')
+
+        self.assertIn('`Extractor`.', markdown)
+        self.assertNotIn(':py:', markdown)
+
+    def test_a_role_entry_renders_without_residual_markup(self) -> None:
+        index = self.make_tree(
+            entry=ENTRY + '\n* raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`\n'
+                          '  from :meth:`.Extractor.run`.\n')
+
+        rendered = changelog_md.render(index)
+
+        self.assertIn('- raises `ProtocolError` from `Extractor.run()`.', rendered)
+        self.assertNotIn(':exc:', rendered)
+        self.assertNotIn(':meth:', rendered)
 
 
 class ResidualMarkupTests(ChangelogTreeMixin, unittest.TestCase):
@@ -445,7 +530,7 @@ class ResidualMarkupTests(ChangelogTreeMixin, unittest.TestCase):
         self.assertIn('directive', str(error.exception))
 
     def test_an_unconverted_role_is_fatal(self) -> None:
-        index = self.make_tree(entry=ENTRY + '\nSee :mod:`pcapkit.const` for more.\n')
+        index = self.make_tree(entry=ENTRY + '\nSee :ref:`changelog` for more.\n')
 
         with self.assertRaises(changelog_md.ResidualMarkupError) as error:
             changelog_md.render(index)
@@ -629,17 +714,17 @@ class ComplaintLocationTests(ChangelogTreeMixin, unittest.TestCase):
         return numbers
 
     def test_a_cited_line_holds_the_construct_it_was_cited_for(self) -> None:
-        entry = padded_entry('and then :data:`sys.modules` at the very end.')
+        entry = padded_entry('and then :term:`sys.modules` at the very end.')
 
         number, = self.cited(self.complaints(entry))
 
-        self.assertIn(':data:`sys.modules`', entry.split('\n')[number - 1],
+        self.assertIn(':term:`sys.modules`', entry.split('\n')[number - 1],
                       f'line {number} of the entry does not hold the cited construct')
 
     def test_a_cited_line_can_lie_past_the_end_of_the_converted_body(self) -> None:
         # The bound that made the old numbers provably wrong: they were counted in
         # the body, so they could never reach a construct written below it.
-        entry = padded_entry('and then :data:`sys.modules` at the very end.')
+        entry = padded_entry('and then :term:`sys.modules` at the very end.')
         body = changelog_md.convert(entry)
 
         number, = self.cited(self.complaints(entry))
@@ -653,20 +738,20 @@ class ComplaintLocationTests(ChangelogTreeMixin, unittest.TestCase):
 
     def test_constructs_joined_onto_one_line_keep_their_own_lines(self) -> None:
         entry = padded_entry(
-            'first :data:`sys.modules`,',
-            'then :func:`importlib.import_module`,',
-            'and last :class:`dict`.',
+            'first :term:`sys.modules`,',
+            'then :envvar:`importlib.import_module`,',
+            'and last :ref:`dict`.',
         )
         joined = [line for line in changelog_md.convert(entry).split('\n')
-                  if ':data:' in line]
+                  if ':term:' in line]
         self.assertEqual(len(joined), 1, 'the three roles were meant to be joined')
-        self.assertIn(':class:', joined[0], 'the three roles were meant to be joined')
+        self.assertIn(':ref:', joined[0], 'the three roles were meant to be joined')
 
         numbers = self.cited(self.complaints(entry))
 
         self.assertEqual(len(set(numbers)), 3,
                          f'three constructs on three source lines cited {numbers}')
-        for number, role in zip(numbers, (':data:', ':func:', ':class:')):
+        for number, role in zip(numbers, (':term:', ':envvar:', ':ref:')):
             self.assertIn(role, entry.split('\n')[number - 1],
                           f'line {number} does not hold {role}')
 
@@ -720,11 +805,11 @@ class ComplaintLocationTests(ChangelogTreeMixin, unittest.TestCase):
         # ``residual`` is callable on a bare string, and then there is nothing to map
         # through. It has to admit that rather than pass a body line number off as a
         # line of an entry -- which is precisely what #588 was.
-        markdown = changelog_md.convert(ENTRY + '\nSee :mod:`pcapkit.const` for more.\n')
+        markdown = changelog_md.convert(ENTRY + '\nSee :ref:`changelog` for more.\n')
 
         unmapped = changelog_md.residual(markdown)
         mapped = changelog_md.residual(
-            *changelog_md.convert_traced(ENTRY + '\nSee :mod:`pcapkit.const` for more.\n'))
+            *changelog_md.convert_traced(ENTRY + '\nSee :ref:`changelog` for more.\n'))
 
         self.assertEqual(len(unmapped), 1)
         self.assertTrue(unmapped[0].startswith('converted line '), unmapped[0])
