@@ -119,7 +119,4 @@ thing that made them worth looking at.
 timestamp in UTC, or in the zone a PCAP-NG interface declares in `if_tzone`, and
 never in the host's; PCAP-NG's `timestamp_epoch` is the UNIX epoch with no zone
 offset added (#361, #403). Measured by generating every report under `UTC`,
-`Asia/Shanghai` and `America/New_York`: they are identical. The copies of these
-reports that #387 replaced show what the host's zone does when it leaks in: they
-disagree with each other, the PCAP reports rendering at UTC-05:00 and
-`pcapng.txt` at UTC+08:00, with its `timestamp_epoch` shifted by those 8 hours.
+`Asia/Shanghai` and `America/New_York`: they are identical.
