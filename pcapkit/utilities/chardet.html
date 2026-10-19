@@ -504,12 +504,12 @@ which is why it lives here rather than beside either of them.</p>
 <dt class="sig sig-object py" id="pcapkit.utilities.chardet.detect">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.chardet.</span></span><span class="sig-name descname"><span class="pre">detect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/chardet.html#detect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.chardet.detect" title="Link to this definition">¶</a></dt>
 <dd><p>Detect the character set of <code class="docutils literal notranslate"><span class="pre">value</span></code>.</p>
-<p><a class="reference external" href="https://chardet.readthedocs.io/en/latest/api/index.html#chardet.detect" title="(in chardet v7.6)"><code class="xref py py-func docutils literal notranslate"><span class="pre">chardet.detect()</span></code></a> is a pure function of the bytes handed to it, and the
+<p><a class="reference external" href="https://chardet.readthedocs.io/en/latest/api/index.html#chardet.detect" title="(in chardet v7.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">chardet.detect()</span></code></a> is a pure function of the bytes handed to it, and the
 single most expensive step in turning a text field into a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a>. The
 strings a capture presents repeat heavily – an HTTP-heavy capture asked for
 the encoding of <code class="docutils literal notranslate"><span class="pre">b'Connection'</span></code> once per message and got the same answer
 every time – so the verdict is memoised rather than recomputed. The result is
-by construction the one <a class="reference external" href="https://chardet.readthedocs.io/en/latest/api/index.html#chardet.detect" title="(in chardet v7.6)"><code class="xref py py-func docutils literal notranslate"><span class="pre">chardet.detect()</span></code></a> would have returned.</p>
+by construction the one <a class="reference external" href="https://chardet.readthedocs.io/en/latest/api/index.html#chardet.detect" title="(in chardet v7.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">chardet.detect()</span></code></a> would have returned.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The cache is bounded by entry <em>count</em>, not by size, and it holds the bytes
@@ -522,7 +522,7 @@ rather than the footprint, which matters because
 may hand it a whole payload. Use <a class="reference external" href="https://docs.python.org/3/library/functools.html#functools.lru_cache.cache_clear" title="(in Python v3.15)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">detect.cache_clear</span></code></a> to release it in a long-running
 process.</p>
 <p>Alternatives were tried and rejected. Keying on a <em>prefix</em> is
-unsound, since <a class="reference external" href="https://chardet.readthedocs.io/en/latest/api/index.html#chardet.detect" title="(in chardet v7.6)"><code class="xref py py-func docutils literal notranslate"><span class="pre">chardet.detect()</span></code></a> is statistical over the whole
+unsound, since <a class="reference external" href="https://chardet.readthedocs.io/en/latest/api/index.html#chardet.detect" title="(in chardet v7.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">chardet.detect()</span></code></a> is statistical over the whole
 sequence: an ASCII header followed by a UTF-8, Latin-1 or CP1251 body is
 detected as <code class="docutils literal notranslate"><span class="pre">ascii</span></code> from its first 256 octets and correctly otherwise,
 three disagreements in six realistic cases. Keying on a digest bounds the

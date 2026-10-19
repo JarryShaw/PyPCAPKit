@@ -1254,7 +1254,11 @@ Tests run completes without it, and with it <code class="docutils literal notran
 (<code class="docutils literal notranslate"><span class="pre">coverage-comment.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">deploy-pages.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">cron-vendor.yml</span></code> and
 <code class="docutils literal notranslate"><span class="pre">cron-conda.yml</span></code>). It runs on Unit Tests’ <code class="docutils literal notranslate"><span class="pre">push</span></code> and <code class="docutils literal notranslate"><span class="pre">pull_request</span></code> events,
 skips a docs-only pull request by the same <code class="docutils literal notranslate"><span class="pre">changes</span></code> script, and cancels a
-pull request’s superseded run. The legs never
+superseded run, a pull request’s or, unlike Unit Tests, a push to <code class="docutils literal notranslate"><span class="pre">main</span></code>’s
+(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1903">#1903</a>): since nothing
+waits on the legs, <code class="docutils literal notranslate"><span class="pre">main</span></code>’s newest commit is the one worth testing, whereas Unit
+Tests keeps a run per push for <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>, which runs only there. Any
+other event keeps a concurrency group of its own, by run id. The legs never
 block, by the KTLO mechanics above: every step that can fail has
 <code class="docutils literal notranslate"><span class="pre">continue-on-error:</span> <span class="pre">true</span></code>, their annotations are warnings, and <code class="docutils literal notranslate"><span class="pre">Experimental</span>
 <span class="pre">summary</span></code>, the job’s last step, reports each failed step. A failure no step

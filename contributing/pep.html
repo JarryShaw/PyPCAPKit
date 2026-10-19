@@ -833,7 +833,7 @@ profiling found these wrong on the hot path, none of them the ones the thread
 predicted:</p>
 <ul class="simple">
 <li><p>character-set detection was uncached, and accounted for 30% of an HTTP
-extraction – 3011 <a class="reference external" href="https://chardet.readthedocs.io/en/latest/api/index.html#chardet.detect" title="(in chardet v7.6)"><code class="xref py py-func docutils literal notranslate"><span class="pre">chardet.detect()</span></code></a> calls over 163 distinct
+extraction – 3011 <a class="reference external" href="https://chardet.readthedocs.io/en/latest/api/index.html#chardet.detect" title="(in chardet v7.7)"><code class="xref py py-func docutils literal notranslate"><span class="pre">chardet.detect()</span></code></a> calls over 163 distinct
 bytestrings;</p></li>
 <li><p>every field of every protocol was copied through the generic
 <a class="reference external" href="https://docs.python.org/3/library/copy.html#copy.copy" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">copy.copy()</span></code></a> machinery, 63207 times per extraction;</p></li>

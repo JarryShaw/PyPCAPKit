@@ -514,7 +514,7 @@ cannot be used for it.</p>
 <span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.scapy.</span></span><span class="sig-name descname"><span class="pre">ipv4_reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/scapy.html#ipv4_reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.scapy.ipv4_reassembly" title="Link to this definition">¶</a></dt>
 <dd><p>Make data for IPv4 reassembly.</p>
 <p>A packet can be reassembled if it contains an IPv4 layer
-(<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html#scapy.layers.inet.IP" title="(in Scapy v2.8.0.post5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.layers.inet.IP</span></code></a>) whose header – as many octets as its IHL counts,
+(<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html#scapy.layers.inet.IP" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.layers.inet.IP</span></code></a>) whose header – as many octets as its IHL counts,
 and at least 20 – lies inside the frame and every IP datagram carrying it (see
 <code class="xref py py-func docutils literal notranslate"><span class="pre">_within_datagrams()</span></code>), and the <strong>DF</strong> (<code class="xref py py-attr docutils literal notranslate"><span class="pre">scapy.layers.inet.IP.flags.DF</span></code>)
 flag is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>. A zero-length frame has none, though <a class="reference external" href="https://scapy.net">Scapy</a> hands it back
@@ -523,7 +523,7 @@ as an IPv4 layer of defaults at the <code class="docutils literal notranslate"><
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – Scapy packet.</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – Scapy packet.</p></li>
 <li><p><strong>count</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Packet index. If not provided, defaults to <code class="docutils literal notranslate"><span class="pre">-1</span></code>.</p></li>
 </ul>
 </dd>
@@ -546,14 +546,14 @@ reassembled; otherwise <a class="reference external" href="https://docs.python.o
 <span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.scapy.</span></span><span class="sig-name descname"><span class="pre">ipv6_reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/scapy.html#ipv6_reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.scapy.ipv6_reassembly" title="Link to this definition">¶</a></dt>
 <dd><p>Make data for IPv6 reassembly.</p>
 <p>A packet can be reassembled if it contains an IPv6 layer
-(<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet6.html#scapy.layers.inet6.IPv6" title="(in Scapy v2.8.0.post5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.layers.inet6.IPv6</span></code></a>), in no later IPv4 fragment, and an IPv6 Fragment
+(<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet6.html#scapy.layers.inet6.IPv6" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.layers.inet6.IPv6</span></code></a>), in no later IPv4 fragment, and an IPv6 Fragment
 header (<span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.5"><strong>RFC 2460 Section 4.5</strong></a>, i.e.,
-<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet6.html#scapy.layers.inet6.IPv6ExtHdrFragment" title="(in Scapy v2.8.0.post5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.layers.inet6.IPv6ExtHdrFragment</span></code></a>) among the extension headers <a class="reference external" href="https://scapy.net">Scapy</a>
+<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet6.html#scapy.layers.inet6.IPv6ExtHdrFragment" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.layers.inet6.IPv6ExtHdrFragment</span></code></a>) among the extension headers <a class="reference external" href="https://scapy.net">Scapy</a>
 dissects in that layer’s own chain.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – Scapy packet.</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – Scapy packet.</p></li>
 <li><p><strong>count</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Packet index. If not provided, defaults to <code class="docutils literal notranslate"><span class="pre">-1</span></code>.</p></li>
 </ul>
 </dd>
@@ -588,7 +588,7 @@ packet of 6in6, is not taken.</p>
 <span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.scapy.</span></span><span class="sig-name descname"><span class="pre">tcp_reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/scapy.html#tcp_reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.scapy.tcp_reassembly" title="Link to this definition">¶</a></dt>
 <dd><p>Make data for TCP reassembly.</p>
 <p>A packet can be reassembled if it contains a TCP layer
-(<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html#scapy.layers.inet.TCP" title="(in Scapy v2.8.0.post5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.layers.inet.TCP</span></code></a>) whose fixed header lies inside its datagram, and
+(<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html#scapy.layers.inet.TCP" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.layers.inet.TCP</span></code></a>) whose fixed header lies inside its datagram, and
 whose Data Offset counts at least that header, in no later IPv4 fragment; or a TCP
 segment behind an AH or IPv6 extension header in IPv4, read off the octets. It is
 keyed by the IP layer that carries it – in an IP-in-IP tunnel, the innermost (see
@@ -596,7 +596,7 @@ keyed by the IP layer that carries it – in an IP-in-IP tunnel, the innermost (
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – Scapy packet.</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – Scapy packet.</p></li>
 <li><p><strong>count</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Packet index. If not provided, defaults to <code class="docutils literal notranslate"><span class="pre">-1</span></code>.</p></li>
 </ul>
 </dd>
@@ -618,12 +618,12 @@ reassembled; otherwise <a class="reference external" href="https://docs.python.o
 <dt class="sig sig-object py" id="pcapkit.toolkit.scapy.tcp_traceflow">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.scapy.</span></span><span class="sig-name descname"><span class="pre">tcp_traceflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/scapy.html#tcp_traceflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.scapy.tcp_traceflow" title="Link to this definition">¶</a></dt>
 <dd><p>Trace packet flow for TCP.</p>
-<p>A packet can be traced if it contains a TCP layer (<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html#scapy.layers.inet.TCP" title="(in Scapy v2.8.0.post5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.layers.inet.TCP</span></code></a>),
+<p>A packet can be traced if it contains a TCP layer (<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html#scapy.layers.inet.TCP" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.layers.inet.TCP</span></code></a>),
 on the terms <a class="reference internal" href="#pcapkit.toolkit.scapy.tcp_reassembly" title="pcapkit.toolkit.scapy.tcp_reassembly"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_reassembly()</span></code></a> sets.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – Scapy packet.</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – Scapy packet.</p></li>
 <li><p><strong>count</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Packet index. If not provided, defaults to <code class="docutils literal notranslate"><span class="pre">-1</span></code>.</p></li>
 </ul>
 </dd>
@@ -649,7 +649,7 @@ traced; otherwise <a class="reference external" href="https://docs.python.org/3/
 <dd><p>Fetch Scapy packet protocol chain.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – Scapy packet.</p>
+<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – Scapy packet.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
@@ -669,7 +669,7 @@ traced; otherwise <a class="reference external" href="https://docs.python.org/3/
 <dd><p>Convert Scapy packet into <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – Scapy packet.</p>
+<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – Scapy packet.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
@@ -695,7 +695,7 @@ lists, are converted recursively. The <code class="docutils literal notranslate"
 <dd><p>Report a Scapy packet to the flow tracer, with its PCAP frame record.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – Scapy packet.</p>
+<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – Scapy packet.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameRecord</span></code></span></p>
@@ -734,7 +734,7 @@ built by hand, is taken to count microseconds.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – Scapy packet.</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – Scapy packet.</p></li>
 <li><p><strong>resolution</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Timestamp resolution, in units per second: the PCAP global
 header’s, or the PCAP-NG interface’s the packet was captured on.</p></li>
 </ul>
@@ -749,7 +749,7 @@ header’s, or the PCAP-NG interface’s the packet was captured on.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post5)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – Scapy packet.</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – Scapy packet.</p></li>
 <li><p><strong>linktype</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – <code class="docutils literal notranslate"><span class="pre">LINKTYPE_*</span></code> number: the PCAP global header’s, or the
 PCAP-NG interface’s the packet was captured on.</p></li>
 </ul>
