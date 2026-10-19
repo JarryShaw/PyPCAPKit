@@ -149,7 +149,7 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
             return value
 
         from pcapkit.protocols.schema.schema import \
-            Schema  # pylint: disable=import-outside-top-level
+            Schema  # pylint: disable=import-outside-toplevel
 
         temp = []  # type: list[bytes]
         for item in value:

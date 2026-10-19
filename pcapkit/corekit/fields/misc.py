@@ -255,7 +255,7 @@ class PayloadField(FieldBase[_TP]):
     def protocol(self) -> 'Type[_TP]':
         """Payload protocol."""
         if self._protocol is None:
-            from pcapkit.protocols.misc.raw import Raw  # type: ignore[unreachable] # pylint: disable=import-outside-top-level # isort:skip
+            from pcapkit.protocols.misc.raw import Raw  # type: ignore[unreachable] # pylint: disable=import-outside-toplevel # isort:skip
             return Raw
         return self._protocol
 
@@ -275,7 +275,7 @@ class PayloadField(FieldBase[_TP]):
 
         """
         if isinstance(protocol, str):
-            from pcapkit.protocols import __proto__  # pylint: disable=import-outside-top-level
+            from pcapkit.protocols import __proto__  # pylint: disable=import-outside-toplevel
 
             # NOTE: The registry is keyed on the upper-cased class name, both
             # when it is seeded (``pcapkit/protocols/__init__.py:76``) and when
@@ -372,7 +372,7 @@ class PayloadField(FieldBase[_TP]):
             value = cast('_TP', self._default)
 
         from pcapkit.protocols.schema.schema import \
-            Schema  # pylint: disable=import-outside-top-level
+            Schema  # pylint: disable=import-outside-toplevel
         if isinstance(value, bytes):
             return value
         if isinstance(value, Schema):
@@ -728,7 +728,7 @@ class SchemaField(FieldBase[_TS]):
         # through ``from_dict`` hands that mapping back here; turn it into the
         # declared schema before packing it.
         from pcapkit.protocols.schema.schema import \
-            Schema  # pylint: disable=import-outside-top-level
+            Schema  # pylint: disable=import-outside-toplevel
         if isinstance(value, Mapping) and not isinstance(value, Schema):
             value = self._schema.from_dict(value)
 
