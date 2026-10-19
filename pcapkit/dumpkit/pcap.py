@@ -272,7 +272,7 @@ class PCAPIO(DumperBase):
         Notes:
             ``frame_info`` does not say which resolution its ``ts_usec`` is in.
             A PCAP frame carries its file's, and one converted from PCAP-NG
-            carries its interface's (c.f. :func:`~pcapkit.toolkit.pcapng.block2frame`),
+            carries its interface's (cf. :func:`~pcapkit.toolkit.pcapng.block2frame`),
             either of which may differ from this file's (:issue:`1500`).
             ``time_epoch`` settles it: the fraction is in whichever resolution
             truncates the frame's offset into its second to exactly that value.

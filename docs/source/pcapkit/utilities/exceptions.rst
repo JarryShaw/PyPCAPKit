@@ -13,8 +13,8 @@ Loud and Quiet Errors
 Raising a :class:`~pcapkit.utilities.exceptions.BaseError` is, by default, a
 **loud** act: the error is logged once at :data:`logging.CRITICAL` on the
 ``pcapkit`` logger (:data:`~pcapkit.utilities.logging.logger`), and outside development mode
-an exception hook is installed on :data:`sys.excepthook` and
-:data:`threading.excepthook`, the first time a loud error needs it, so the user
+an exception hook is installed on :func:`sys.excepthook` and
+:func:`threading.excepthook`, the first time a loud error needs it, so the user
 sees the exception line rather than a walk through :mod:`pcapkit`'s internals.
 That hook only shortens the printing of a
 :class:`~pcapkit.utilities.exceptions.BaseError` itself; every other exception
@@ -27,6 +27,12 @@ flow** and expects to catch itself -- the
 Such an error emits nothing on any channel and touches no process-global state.
 It is still an ordinary exception carrying its message, so ``except`` clauses and
 :func:`repr` are unaffected.
+
+An error is also quiet when it is constructed inside a
+:class:`~pcapkit.utilities.exceptions._CaughtByCaller` block naming one of its
+classes. That is how :mod:`pcapkit` marks as control flow an error raised by
+code it calls but does not own, such as a generated ``_validate_value``
+override, which cannot know to pass ``quiet=True`` itself (:issue:`1845`).
 
 .. versionchanged:: 1.5.0
 
@@ -47,6 +53,9 @@ It is still an ordinary exception carrying its message, so ``except`` clauses an
       flow.
    :param \*args: Arbitrary positional arguments.
    :param \*\*kwargs: Arbitrary keyword arguments.
+
+.. autoclass:: pcapkit.utilities.exceptions._CaughtByCaller
+   :no-members:
 
 :exc:`TypeError` Category
 -------------------------

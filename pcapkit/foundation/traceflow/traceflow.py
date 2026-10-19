@@ -248,7 +248,7 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
             RegistryWarning: If a different dumper is already registered for
                 ``format``; it is overwritten.
 
-        .. versionremoved:: 1.2.0
+        .. versionremoved:: 1.1.1.post2
 
            ``register``, which this replaces with no alias.
 

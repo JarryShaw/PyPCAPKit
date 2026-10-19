@@ -326,7 +326,7 @@ def _tcp_segment(tcp: 'TCP') -> 'tuple[bytes, bytes] | None':
 
     Returns:
         The header, as many octets as the Data Offset counts, and the payload
-        after it, up to the end of the datagrams that carry the segment, c.f.
+        after it, up to the end of the datagrams that carry the segment, cf.
         ``_within_datagrams()``; or :data:`None` if the datagrams hold fewer
         than the 20 octets of the fixed header, or the Data Offset counts fewer
         (:rfc:`9293#section-3.1`), as there is then no header to split off.

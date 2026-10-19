@@ -60,7 +60,7 @@ MOVED_NOTES = (
     ('http.rst', 'versionchanged:: 1.5.0', ':issue:`860`'),
     ('http.rst', 'versionchanged:: 1.5.0', ':issue:`908`'),
     ('ipv6.rst', 'versionchanged:: 1.5.0', ':issue:`925`'),
-    ('pcapng.rst', 'versionchanged:: 1.1.0', 'option code'),
+    ('pcapng.rst', 'versionchanged:: 1.1.0.post1', 'option code'),
     ('pcapng.rst', 'versionadded:: 1.5.0', ':issue:`886`'),
     ('reg.rst', 'versionchanged:: 1.1.1', 'port number'),
     ('reg.rst', 'versionchanged:: 1.5.0', ':issue:`732`'),

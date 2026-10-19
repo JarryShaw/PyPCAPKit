@@ -5,7 +5,7 @@
 .. module:: pcapkit.interface.core
 
 :mod:`pcapkit.interface.core` defines core user-oriented
-interfaces, variables, and etc., which wraps around the
+interfaces and variables, which wrap around the
 foundation classes from :mod:`pcapkit.foundation`.
 
 """
@@ -144,7 +144,7 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
 
         context: caller supplied parsing context for protocols that need
             information not carried on the wire, keyed by protocol index ID --
-            c.f. :mod:`pcapkit.corekit.context`. The motivating case is
+            cf. :mod:`pcapkit.corekit.context`. The motivating case is
             :class:`~pcapkit.protocols.internet.esp.ESP`, which needs the
             Security Association to find the trailer and decrypt the payload::
 
@@ -157,7 +157,7 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
     Returns:
         An :class:`~pcapkit.foundation.extraction.Extractor` object.
 
-    .. versionchanged:: 1.2.0
+    .. versionchanged:: 1.1.1.post2
 
        ``strict`` is renamed ``reasm_strict``, with no alias, and
        ``reasm_store`` is inserted after it, so a positional argument from

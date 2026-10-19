@@ -200,7 +200,7 @@ class PCAPNG(EngineBase[P_PCAPNG]):
         - check if the block is a packet block;
         - if not, save the block into the internal context storage and repeat;
         - if yes, save the related information into the internal context storage;
-        - write the parsed block into output file.
+        - write the parsed block into output file;
         - reassemble IP and/or TCP fragments;
         - trace TCP flows if any;
         - record frame information if any.
