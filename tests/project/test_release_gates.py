@@ -2378,10 +2378,11 @@ class TestEvidenceBasedGating(WorkflowMixin, unittest.TestCase):
         self.assertIn('pypi.org/pypi/pypcapkit/', block)
         self.assertIn("data.get('urls'", block)
 
-    def test_conda_evidence_checks_both_platforms(self) -> None:
+    def test_conda_evidence_checks_every_platform(self) -> None:
         block = self.jobs['version_check']
         self.assertIn('linux-64', block)
         self.assertIn('osx-64', block)
+        self.assertIn('osx-arm64', block)
 
 
 class TestGateExpressionsEvaluateCorrectly(WorkflowMixin, unittest.TestCase):

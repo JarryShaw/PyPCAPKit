@@ -1266,7 +1266,7 @@ class TestTheCountsAreOfTheReleasedTiers(ScratchRepository):
         files = [f'pypcapkit-{self.VERSION}-{tag}-none-any.whl' for tag in released['pypi-wheels'].split()]
         pypi = {'urls': [{'filename': name} for name in files + [f'pypcapkit-{self.VERSION}.tar.gz']]}
         conda = {'distributions': [{'attrs': {'subdir': platform, 'build': f'{build}_0'}}
-                                   for platform in ('linux-64', 'osx-64')
+                                   for platform in ('linux-64', 'osx-64', 'osx-arm64')
                                    for build in released['conda-builds'].split()]}
         step = 'Check PyPI publish completeness'
         self.assertEqual(self.complete(step, written['pypi-wheels'], '', pypi), 'true')

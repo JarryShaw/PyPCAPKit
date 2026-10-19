@@ -472,8 +472,8 @@ jobs:
           echo "http $status, found $count of $expected expected files for ${PCAPKIT_VERSION} on PyPI"
           echo "PCAPKIT_PYPI_COMPLETE=$complete" >> "$GITHUB_OUTPUT"
 
-      # Anaconda evidence, same shape as PyPI's above but for the ``conda``
-      # matrix (linux-64 and osx-64, each Python read above). Unlike PyPI's, this
+      # Anaconda evidence, same shape as PyPI's above but for the ``conda`` matrix
+      # (each platform its legs publish, each Python read above). Unlike PyPI's, this
       # endpoint reported ``cf-cache-status: DYNAMIC`` on every request checked
       # while writing this, i.e. not cached -- so there is no staleness direction to
       # reason about here. This is the job-level cost saver mirroring ``pypi``'s;
@@ -488,11 +488,11 @@ jobs:
         run: |
           set -euo pipefail
 
-          # linux-64 and osx-64, for each supported version. osx-arm64 is
-          # published too and not counted, as it was not when ``macos-latest``
-          # uploaded it beside the osx-64 package it converted (#1822).
+          # Each platform the ``conda`` legs publish, for each supported version.
+          export PCAPKIT_CONDA_SUBDIRS="linux-64 osx-64 osx-arm64"
+          read -r -a subdirs <<< "$PCAPKIT_CONDA_SUBDIRS"
           read -r -a builds <<< "$PCAPKIT_CONDA_BUILDS"
-          expected=$(( 2 * ${#builds[@]} ))
+          expected=$(( ${#subdirs[@]} * ${#builds[@]} ))
           # Same coupling risk, and the same fix, as the PyPI check above.
           status="$(curl -s --retry 3 --retry-connrefused \
             -o /tmp/anaconda_release.json -w '%{http_code}' \
@@ -507,7 +507,7 @@ jobs:
               "import json, os" \
               "with open('/tmp/anaconda_release.json') as f:" \
               "    data = json.load(f)" \
-              "platforms = {'linux-64', 'osx-64'}" \
+              "platforms = set(os.environ['PCAPKIT_CONDA_SUBDIRS'].split())" \
               "py_tags = set(os.environ['PCAPKIT_CONDA_BUILDS'].split())" \
               "seen = {" \
               "    (d.get('attrs', {}).get('subdir'), tag)" \
