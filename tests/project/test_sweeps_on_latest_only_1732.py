@@ -314,10 +314,13 @@ class TestTheExperimentalLegsAreAWorkflowOfTheirOwn(unittest.TestCase):
             return next(entry['run'] for entry in spec['jobs']['changes']['steps'] if entry.get('id') == 'classify')
         self.assertEqual(classify(self.own), classify(self.unit))
         spec = self.own['jobs']['experimental']
-        # #1938 adds `current`, the gate every job needs.
+        # #1938 adds `current`, the gate every job needs, and `!cancelled()`, so the two results stand in
+        # for the implicit `success()`.
         self.assertEqual(spec['needs'], ['current', 'changes', 'python-versions'])
         self.assertEqual(spec['if'],
-                         "${{ needs.current.outputs.current != 'false' && needs.changes.outputs.code != 'false' }}")
+                         "${{ !cancelled() && needs.changes.result == 'success' && "
+                         "needs.python-versions.result == 'success' && needs.current.outputs.current != 'false' && "
+                         "needs.changes.outputs.code != 'false' }}")
         self.assertIn("needs.changes.outputs.code != 'false'", self.unit['jobs']['test']['if'])
 
     def test_nothing_waits_on_it(self) -> None:

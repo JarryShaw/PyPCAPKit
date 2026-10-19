@@ -25,12 +25,22 @@ and a job-summary line, so every later job can skip on ``if:``. It exits 0.
 
 ``watch -- COMMAND...`` runs ``COMMAND`` in a session of its own and asks the
 same question every ``--interval`` seconds while it runs. Once the commit is
-superseded, it sends the session SIGTERM, then SIGKILL after ``--grace``
-seconds, writes the notice and the summary line, and exits 0. Otherwise it
-exits with ``COMMAND``'s own status, ``128 + N`` for a signal ``N`` as a shell
-reports it, so a test failure on a current commit reads as it did without the
-watcher. SIGINT, SIGTERM and SIGHUP sent to the watcher are passed on to
-``COMMAND``.
+superseded, it sends SIGTERM, then SIGKILL after ``--grace`` seconds, to the
+session or, with ``--scope UNIT``, to every process of that systemd scope
+(``sudo -n systemctl kill``): ``COMMAND`` then starts a root-owned ``sudo``, and
+the tests run in the scope as the runner's user, out of reach of a signal to
+the session's group (:func:`stop`). Where ``COMMAND`` exits, it writes the notice and the summary
+line and exits 0. Otherwise it exits with ``COMMAND``'s own status, ``128 + N``
+for a signal ``N`` as a shell reports it, so a test failure on a current commit
+reads as it did without the watcher. SIGINT, SIGTERM and SIGHUP sent to the
+watcher are passed on to ``COMMAND``.
+
+Every wait is bounded. Where ``COMMAND`` outlives SIGKILL by ``--kill-wait``
+seconds, the watcher writes a ``Superseded run not stopped`` warning and exits
+:data:`STOP_FAILED`, not 0: the tests may still be running, and holding the
+step's output open, until their own ``timeout`` or the step's cap ends them, so
+the step reports a failure -- a warning on these non-blocking legs -- rather
+than claiming it stopped them.
 
 The API is read with conditional requests: a ``304 Not Modified`` answer to an
 ``If-None-Match`` request does not count against the primary rate limit
@@ -70,8 +80,13 @@ CURRENT, SUPERSEDED = 'current', 'superseded'
 INTERVAL = 60.0
 #: Seconds between SIGTERM and SIGKILL once the commit is superseded.
 GRACE = 30.0
-#: Seconds one API request may take before it counts as failed.
+#: Seconds to wait for the command to exit after SIGKILL.
+KILL_WAIT = 15.0
+#: Seconds one API request, or one ``systemctl kill``, may take before it counts as failed.
 TIMEOUT = 15.0
+#: ``watch``'s status where the command outlives SIGKILL: sysexits.h's ``EX_SOFTWARE``,
+#: which neither pytest (0-5) nor ``timeout`` (124-137) exits with.
+STOP_FAILED = 70
 #: The signals ``watch`` passes on to its command.
 FORWARDED = (signal.SIGINT, signal.SIGTERM, signal.SIGHUP)
 
@@ -256,36 +271,84 @@ def exit_status(returncode: 'int') -> 'int':
 
 
 def signal_session(pid: 'int', signum: 'int') -> 'None':
-    """``signum`` to every process in ``pid``'s process group, where any is left."""
+    """``signum`` to every process in ``pid``'s process group that will take it.
+
+    A refusal is not an error here: under ``sudo`` the group's leader is root,
+    and the scope (:func:`stop`) is what reaches the tests there.
+
+    """
     try:
         os.killpg(pid, signum)
-    except ProcessLookupError:
-        pass
-    except PermissionError:
+    except OSError:
         try:
             os.kill(pid, signum)
         except OSError:
             pass
 
 
-def stop(child: 'subprocess.Popen[bytes]', grace: 'float') -> 'None':
-    """SIGTERM to ``child``'s session, SIGKILL ``grace`` seconds on, then to whatever outlived it."""
-    signal_session(child.pid, signal.SIGTERM)
+def run_command(argv: 'Sequence[str]') -> 'int':
+    """The default command runner: ``argv``'s exit status, ``-1`` where it could not run or finish in time."""
     try:
-        child.wait(timeout=grace)
+        return subprocess.run(list(argv), stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,  # nosec B603
+                              stderr=subprocess.DEVNULL, timeout=TIMEOUT, check=False).returncode
+    except (OSError, subprocess.SubprocessError):
+        return -1
+
+
+def scope_kill(scope: 'str', signum: 'int') -> 'List[str]':
+    """The command that sends ``signum`` to every process in the systemd unit ``scope``."""
+    return ['sudo', '-n', 'systemctl', 'kill', f'--signal={signal.Signals(signum).name}', scope]
+
+
+def ended(child: 'subprocess.Popen[bytes]', timeout: 'float') -> 'bool':
+    """Whether ``child`` has exited within ``timeout`` seconds."""
+    try:
+        child.wait(timeout=timeout)
     except subprocess.TimeoutExpired:
-        signal_session(child.pid, signal.SIGKILL)
-        child.wait()
-    # A worker that outlived the leader would hold the step's pipe open.
-    signal_session(child.pid, signal.SIGKILL)
+        return False
+    return True
+
+
+def stop(child: 'subprocess.Popen[bytes]', grace: 'float', *, scope: 'str' = '', kill_wait: 'float' = KILL_WAIT,
+         run: 'Callable[[Sequence[str]], int]' = run_command,
+         kill: 'Callable[[int, int], None]' = signal_session) -> 'bool':
+    """SIGTERM, then SIGKILL ``grace`` seconds on; whether ``child`` exited, each wait bounded.
+
+    Where the tests run in ``scope``, a systemd unit, each signal goes to every
+    process of it, through ``sudo``: they run as the runner's user under a
+    root-owned ``sudo``, and ``timeout`` puts them in a process group of its
+    own, so no signal to ``child``'s session reaches them. SIGTERM goes to the
+    scope alone there, since the session's shell would end at once and the
+    tests would lose their grace; SIGKILL goes to the session too. Where there
+    is no scope, ``child`` is ``timeout`` itself, its session's leader, and its
+    session is the tests.
+
+    """
+    for signum, wait in ((signal.SIGTERM, grace), (signal.SIGKILL, kill_wait)):
+        if scope:
+            run(scope_kill(scope, signum))
+        if not scope or signum == signal.SIGKILL:
+            kill(child.pid, signum)
+        if ended(child, wait):
+            # A process that outlived the leader would hold the step's pipe open.
+            if scope:
+                run(scope_kill(scope, signal.SIGKILL))
+            kill(child.pid, signal.SIGKILL)
+            return True
+    return False
 
 
 def watch(command: 'Sequence[str]', context: 'Context', api: 'Api', env: 'Mapping[str, str]', out: 'IO[str]', *,
-          interval: 'float' = INTERVAL, grace: 'float' = GRACE,
+          interval: 'float' = INTERVAL, grace: 'float' = GRACE, scope: 'str' = '', kill_wait: 'float' = KILL_WAIT,
+          run: 'Callable[[Sequence[str]], int]' = run_command, kill: 'Callable[[int, int], None]' = signal_session,
           clock: 'Callable[[], float]' = time.monotonic) -> 'int':
-    """Run ``command``, stopping it once ``context``'s commit is superseded."""
+    """Run ``command``, stopping it once ``context``'s commit is superseded.
+
+    :data:`STOP_FAILED` where it cannot be stopped: see the module's docstring.
+
+    """
     started = clock()
-    # A session of its own, so SIGKILL reaches every process the command started.
+    # A session of its own, so a signal to the group reaches every process the command started.
     child = subprocess.Popen(list(command), start_new_session=True)  # nosec B603 pylint: disable=consider-using-with
 
     def forward(signum: 'int', frame: 'Optional[FrameType]') -> 'None':  # pylint: disable=unused-argument
@@ -308,23 +371,40 @@ def watch(command: 'Sequence[str]', context: 'Context', api: 'Api', env: 'Mappin
             last_error = verdict.reason if verdict.error else ''
             if verdict.current:
                 continue
-            stop(child, grace)
-            elapsed = int(clock() - started)
-            report(verdict, f'The tests were stopped after {elapsed} s, and this step succeeds.', env, out)
-            return 0
+            if stop(child, grace, scope=scope, kill_wait=kill_wait, run=run, kill=kill):
+                elapsed = int(clock() - started)
+                report(verdict, f'The tests were stopped after {elapsed} s, and this step succeeds.', env, out)
+                return 0
+            where = f'the scope {scope} and ' if scope else ''
+            reason = (f'{verdict.reason}, but SIGTERM and SIGKILL to {where}the session of pid {child.pid} '
+                      f'did not end it within {int(grace + kill_wait)} s. The tests may run on until their timeout.')
+            print(f'::warning title=Superseded run not stopped::{escape(reason)}', file=out, flush=True)
+            summary = env.get('GITHUB_STEP_SUMMARY')
+            if summary:
+                try:
+                    with open(summary, 'a', encoding='utf-8') as file:
+                        print(f'- Superseded run not stopped: {reason}', file=file)
+                except OSError:
+                    pass
+            return STOP_FAILED
     finally:
         for signum, handler in previous.items():
             signal.signal(signum, handler)
 
 
 def main(argv: 'Optional[List[str]]' = None, *, env: 'Optional[Mapping[str, str]]' = None,
-         transport: 'Optional[Transport]' = None, out: 'Optional[IO[str]]' = None) -> 'int':
+         transport: 'Optional[Transport]' = None, out: 'Optional[IO[str]]' = None,
+         run: 'Callable[[Sequence[str]], int]' = run_command,
+         kill: 'Callable[[int, int], None]' = signal_session) -> 'int':
+    """The command line; ``transport``, ``run`` and ``kill`` replace the network, commands and signals in tests."""
     parser = argparse.ArgumentParser(description=__doc__.split('\n', 1)[0])
     commands = parser.add_subparsers(dest='action')
     commands.add_parser('check', help="the gate: write current=true or current=false to $GITHUB_OUTPUT")
     watcher = commands.add_parser('watch', help='run a command, stopping it once the commit is superseded')
     watcher.add_argument('--interval', type=float, default=INTERVAL, help='seconds between checks')
     watcher.add_argument('--grace', type=float, default=GRACE, help='seconds from SIGTERM to SIGKILL')
+    watcher.add_argument('--kill-wait', type=float, default=KILL_WAIT, help='seconds to wait after SIGKILL')
+    watcher.add_argument('--scope', default='', help='the systemd scope the command runs its tests in, if any')
     watcher.add_argument('command', nargs=argparse.REMAINDER, help='the command, after --')
     args = parser.parse_args(argv)
 
@@ -338,7 +418,8 @@ def main(argv: 'Optional[List[str]]' = None, *, env: 'Optional[Mapping[str, str]
         command = args.command[1:] if args.command[:1] == ['--'] else args.command
         if not command:
             parser.error('watch needs a command after --')
-        return watch(command, context, api, env, out, interval=args.interval, grace=args.grace)
+        return watch(command, context, api, env, out, interval=args.interval, grace=args.grace, scope=args.scope,
+                     kill_wait=args.kill_wait, run=run, kill=kill)
     parser.error('name an action: check or watch')
     return 2  # unreachable: parser.error exits
 

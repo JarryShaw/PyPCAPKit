@@ -44,8 +44,10 @@ jobs:
   # writes `current`; any other event, or an API it cannot read, is current.
   # Every other job needs this one and skips where `current` is `false`, so a
   # superseded run's checks read `skipped`, which marks no commit red. Both
-  # steps are `continue-on-error`, so this job always succeeds, and a failure
-  # leaves `current` empty, which runs the rest.
+  # steps are `continue-on-error`, so a step's failure leaves `current` empty,
+  # which runs the rest; each job's `if:` opens with `!cancelled()`, so a
+  # failure of the job itself, which replaces the implicit `success()`, runs
+  # the rest too.
   current:
     name: Check the commit is still current
     runs-on: ubuntu-latest
@@ -76,7 +78,7 @@ jobs:
   python-versions:
     name: Read the Python versions
     needs: current
-    if: ${{ needs.current.outputs.current != 'false' }}
+    if: ${{ !cancelled() && needs.current.outputs.current != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
@@ -102,7 +104,7 @@ jobs:
   changes:
     name: Classify changed files
     needs: current
-    if: ${{ needs.current.outputs.current != 'false' }}
+    if: ${{ !cancelled() && needs.current.outputs.current != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
@@ -189,7 +191,12 @@ jobs:
   # expected, blocks nothing, and leaves the caps as they are.
   experimental:
     name: Python ${{ matrix.python-version }} (experimental)
-    if: ${{ needs.current.outputs.current != 'false' && needs.changes.outputs.code != 'false' }}
+    # #1938: `!cancelled()` so a failed `current` skips nothing, and then the
+    # two results stand in for the implicit `success()` it replaces: a failed
+    # `changes` or `python-versions` still skips the legs.
+    if: >-
+      ${{ !cancelled() && needs.changes.result == 'success' && needs.python-versions.result == 'success'
+      && needs.current.outputs.current != 'false' && needs.changes.outputs.code != 'false' }}
     needs: [current, changes, python-versions]
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
     timeout-minutes: 140
@@ -356,17 +363,24 @@ jobs:
       # `replacing crashed worker`, xdist/dsession.py:78-80 at v3.8.0), for
       # `Containment summary`.
       #
-      # #1938: util/superseded.py's `watch` runs the capped command -- prlimit,
-      # timeout and pytest, in the scope where there is one -- in a session of
-      # its own and asks `current`'s question every 60 s. Once the commit is
-      # superseded it sends the session SIGTERM, SIGKILL 30 s on, writes a
-      # `Superseded` notice and a job-summary line, and exits 0, so the step
-      # succeeds and frees the runner. Otherwise it exits with the command's own
-      # status, so a failure on a current commit reads as it would unwatched,
-      # and an API it cannot read counts as current. It runs on the runner's /usr/bin/python3,
-      # not the leg's interpreter: under GraalPy every process starts a VM of its
-      # own. The scope's sudo keeps GH_TOKEN and the GITHUB_* variables it reads
-      # (`--preserve-env`); where one is missing it cannot tell, and the tests run on.
+      # #1938: util/superseded.py's `watch` runs the whole command -- the scope's
+      # sudo where there is one, then prlimit, timeout and pytest -- in a
+      # session of its own, outside the scope, and asks `current`'s question
+      # every 60 s. Once the commit is superseded it sends SIGTERM, SIGKILL 30 s
+      # on, to that session and, with `--scope`, to every process of
+      # pcapkit-tests.scope through `systemctl kill`: the scope's processes run
+      # as the runner's user under a root-owned sudo, which a signal to the
+      # session cannot pass. Ubuntu's own /etc/sudoers sets `use_pty` (sudo
+      # 1.9.9-1ubuntu2.7 and 1.9.15p5-3ubuntu5.24.04.4), and sudoers(5) says it
+      # has no effect where sudo has no terminal, as in a step; the scope is
+      # reached by name either way. Once the command exits it writes a
+      # `Superseded` notice and a job-summary line and exits 0, so the step
+      # succeeds and frees the runner; where it outlives SIGKILL by 15 s, a
+      # warning and exit 70, since the tests may run on until `timeout` ends
+      # them. Otherwise it exits with the command's own status, so a failure on
+      # a current commit reads as it would unwatched, and an API it cannot read
+      # counts as current. It runs on the runner's /usr/bin/python3, not the
+      # leg's interpreter: under GraalPy every process starts a VM of its own.
       - name: Run unit tests
         id: tests
         if: ${{ steps.install.outcome == 'success' }}
@@ -387,9 +401,6 @@ jobs:
             --ignore-glob='*_regression.py' \
             --ignore-glob='*roundtrip*'
           set -- prlimit --fsize=2147483648 timeout --signal=INT --kill-after=3m 110m python -m pytest "$@"
-          watcher=/usr/bin/python3
-          [ -x "$watcher" ] || watcher=python3
-          set -- "$watcher" util/superseded.py watch --interval 60 --grace 30 -- "$@"
           scoped() {
             unit=$1
             shift
@@ -408,6 +419,16 @@ jobs:
             # A log line, not an annotation: on a lost runner this log is all that is left.
             echo "No 12G scope: the probe failed (${probe}), so the tests run uncapped."
           fi
+          watched=
+          if [ "$scope" = 12G ]; then
+            # `scoped` is a function, which the watcher runs through a shell.
+            export -f scoped
+            set -- bash -c '"$@"' bash "$@"
+            watched=pcapkit-tests.scope
+          fi
+          watcher=/usr/bin/python3
+          [ -x "$watcher" ] || watcher=python3
+          set -- "$watcher" util/superseded.py watch --interval 60 --grace 30 --scope "$watched" -- "$@"
           oom_kills() { awk '$1 == "oom_kill" { print $2 }' /proc/vmstat; }
           before=$(oom_kills)
           started=$SECONDS

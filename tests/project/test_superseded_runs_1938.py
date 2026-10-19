@@ -35,7 +35,7 @@ from typing import TYPE_CHECKING
 
 from tests.project.test_python_matrix_tiers_1633 import job, workflow, workflow_commands
 from tests.project.test_python_versions_1660 import ROOT, prose
-from tests.project.test_release_gates import evaluate_condition
+from tests.project.test_release_gates import STATUS, calls_status_check, evaluate_condition
 from tests.project.test_resource_monitor_1740 import DEFAULT, TESTS, sh, step
 from util import superseded
 
@@ -142,22 +142,48 @@ class TestTheGate(unittest.TestCase):
             with self.subTest(job=job_id):
                 self.assertIn(GATE, needs)
                 self.assertIn(SKIPS_ON, body['if'])
+                # Round 2: no implicit `success()`, so a failed gate job skips nothing.
+                self.assertTrue(body['if'].startswith('${{ !cancelled() && '), body['if'])
 
-    def run_if(self, job_id: 'str', current: 'str', code: 'str' = 'true') -> 'bool':
-        context = {'needs': {GATE: {'outputs': {'current': current}, 'result': 'success'},
-                             'changes': {'outputs': {'code': code}, 'result': 'success'},
-                             'python-versions': {'outputs': {}, 'result': 'success'}}}
-        return evaluate_condition(self.jobs[job_id]['if'], context)
+    def run_if(self, job_id: 'str', current: 'str', code: 'str' = 'true', *, gate: 'str' = 'success',
+               versions: 'str' = 'success', changes: 'str' = 'success', cancelled: 'bool' = False) -> 'bool':
+        """Whether ``job_id`` runs, GitHub's implicit ``success()`` applied where its ``if:`` calls no status check."""
+        body = self.jobs[job_id]
+        needs = body['needs'] if isinstance(body['needs'], list) else [body['needs']]
+        results = {GATE: gate, 'changes': changes, 'python-versions': versions}
+        context = {'needs': {GATE: {'outputs': {'current': current}, 'result': gate},
+                             'changes': {'outputs': {'code': code}, 'result': changes},
+                             'python-versions': {'outputs': {}, 'result': versions}},
+                   STATUS: {'cancelled': cancelled, 'always': True,
+                            'success': not cancelled and all(results[name] == 'success' for name in needs),
+                            'failure': any(results[name] == 'failure' for name in needs)}}
+        runs = evaluate_condition(body['if'], context)
+        if not calls_status_check(body['if']):
+            runs = runs and bool(context[STATUS]['success'])  # type: ignore[index]
+        return runs
 
     def test_a_superseded_commit_skips_every_job_and_anything_else_runs_them(self) -> None:
         for job_id in ('python-versions', 'changes', 'experimental'):
             with self.subTest(job=job_id):
                 self.assertFalse(self.run_if(job_id, 'false'))
                 self.assertTrue(self.run_if(job_id, 'true'))
-                # A gate step that failed writes nothing; the run goes on as it did before the gate.
+                # A gate step that failed writes nothing; the run goes on as it would without the gate.
                 self.assertTrue(self.run_if(job_id, ''))
-        # A docs-only pull request still skips the legs, as before.
+                # So does a gate job that failed, or timed out, as a whole.
+                self.assertTrue(self.run_if(job_id, '', gate='failure'))
+                self.assertTrue(self.run_if(job_id, '', gate='cancelled'))
+                # A cancelled run stays cancelled.
+                self.assertFalse(self.run_if(job_id, 'true', cancelled=True))
+        # A docs-only pull request still skips the legs.
         self.assertFalse(self.run_if('experimental', 'true', code='false'))
+        # And the legs still need the jobs they read: `!cancelled()` drops only the implicit `success()`.
+        for job_id in ('changes', 'python-versions'):
+            for result in ('failure', 'skipped', 'cancelled'):
+                with self.subTest(needs=job_id, result=result):
+                    self.assertFalse(self.run_if('experimental', 'true', **{
+                        'versions' if job_id == 'python-versions' else 'changes': result}))
+        # Superseded: `changes` and `python-versions` skip, and the legs with them.
+        self.assertFalse(self.run_if('experimental', 'false', versions='skipped', changes='skipped'))
 
     def test_the_legs_and_the_tests_step_read_with_the_token(self) -> None:
         self.assertEqual(set(job(NAME, 'experimental')['permissions'].values()), {'read'})
@@ -297,13 +323,101 @@ SLEEPER = [sys.executable, '-c', 'import time; time.sleep(60)']
 class TestWatch(unittest.TestCase):
     """``watch``: the command's own status while current; stopped, a notice and 0 once superseded."""
 
-    def watch(self, command: 'List[str]', routes: 'Dict[str, Any]', grace: 'str' = '5',
-              **env: 'str') -> 'Tuple[int, str, Files, float]':
+    def watch(self, command: 'List[str]', routes: 'Dict[str, Any]', grace: 'str' = '5', *,
+              options: 'Tuple[str, ...]' = (), run: 'Optional[Callable[[Any], int]]' = None,
+              kill: 'Optional[Callable[[int, int], None]]' = None, **env: 'str') -> 'Tuple[int, str, Files, float]':
         files, out = Files(self), io.StringIO()
         started = time.monotonic()
-        code = superseded.main(['watch', '--interval', '0.2', '--grace', grace, '--', *command],
-                               env=files.env(**env), transport=FakeApi(routes), out=out)
+        extra = {}  # type: Dict[str, Any]
+        if run is not None:
+            extra['run'] = run
+        if kill is not None:
+            extra['kill'] = kill
+        code = superseded.main(['watch', '--interval', '0.2', '--grace', grace, *options, '--', *command],
+                               env=files.env(**env), transport=FakeApi(routes), out=out, **extra)
         return code, out.getvalue(), files, time.monotonic() - started
+
+    def pid_command(self, body: 'str') -> 'Tuple[List[str], pathlib.Path]':
+        """A command that writes its pid to a file, then runs ``body``; the pid is killed at cleanup."""
+        tmp = tempfile.TemporaryDirectory(prefix='pcapkit-1938-')  # pylint: disable=consider-using-with
+        self.addCleanup(tmp.cleanup)
+        pidfile = pathlib.Path(tmp.name, 'pid')
+
+        def cleanup() -> 'None':
+            if pidfile.exists():
+                try:
+                    os.kill(int(pidfile.read_text(encoding='utf-8')), signal.SIGKILL)
+                except (OSError, ValueError):
+                    pass
+        self.addCleanup(cleanup)
+        return [sys.executable, '-c', f'import os, signal, time; open({str(pidfile)!r}, "w").write(str(os.getpid())); '
+                                      + body], pidfile
+
+    def test_the_scoped_tests_are_stopped_through_the_scope(self) -> None:
+        """Round 2: under sudo a signal to the session is refused, so the scope's processes are killed by name."""
+        command, pidfile = self.pid_command('time.sleep(60)')
+        calls = []  # type: List[List[str]]
+
+        def run(argv: 'Any') -> 'int':
+            # systemd, as it kills every process of the scope.
+            calls.append(list(argv))
+            signum = getattr(signal, argv[4].split('=', 1)[1])
+            try:
+                os.kill(int(pidfile.read_text(encoding='utf-8')), signum)
+            except (OSError, ValueError):
+                pass
+            return 0
+
+        refused = []  # type: List[Tuple[int, int]]
+        code, out, _, elapsed = self.watch(command, main_at(NEWER), options=('--scope', 'pcapkit-tests.scope'),
+                                           run=run, kill=lambda pid, signum: refused.append((pid, signum)))
+        self.assertEqual(code, 0)
+        self.assertLess(elapsed, 30)
+        self.assertIn('::notice title=Superseded::main is at', out)
+        self.assertEqual(calls[0], ['sudo', '-n', 'systemctl', 'kill', '--signal=SIGTERM', 'pcapkit-tests.scope'])
+        # And a sweep, for whatever outlived the scope's main process.
+        self.assertEqual(calls[-1], ['sudo', '-n', 'systemctl', 'kill', '--signal=SIGKILL', 'pcapkit-tests.scope'])
+        # SIGTERM to the scope alone, so the tests keep their grace; the session only gets the sweep.
+        self.assertEqual([signum for _, signum in refused], [signal.SIGKILL])
+
+    def test_without_a_scope_nothing_runs_through_sudo(self) -> None:
+        calls = []  # type: List[Any]
+        code, _, _, _ = self.watch(SLEEPER, main_at(NEWER), run=lambda argv: calls.append(argv) or 0)
+        self.assertEqual((code, calls), (0, []))
+
+    def test_a_command_that_cannot_be_stopped_ends_the_watch_with_a_warning(self) -> None:
+        """Round 2: every wait is bounded; a stop that fails warns and exits STOP_FAILED, not 0."""
+        command, pidfile = self.pid_command('time.sleep(60)')
+        refused = []  # type: List[Tuple[int, int]]
+        calls = []  # type: List[Any]
+        code, out, files, elapsed = self.watch(
+            command, main_at(NEWER), grace='0.5', options=('--kill-wait', '0.5', '--scope', 'pcapkit-tests.scope'),
+            run=lambda argv: calls.append(list(argv)) or 1, kill=lambda pid, signum: refused.append((pid, signum)))
+        self.assertEqual(code, superseded.STOP_FAILED)
+        self.assertNotIn(code, (0, 1, 2, 3, 4, 5, 124, 125, 126, 127, 137))
+        self.assertLess(elapsed, 20)
+        self.assertEqual([signum for _, signum in refused], [signal.SIGKILL])
+        self.assertEqual([argv[4] for argv in calls], ['--signal=SIGTERM', '--signal=SIGKILL'])
+        commands = workflow_commands(out)
+        self.assertEqual(len(commands), 1, out)
+        self.assertTrue(commands[0].startswith(
+            f'::warning title=Superseded run not stopped::main is at {NEWER[:9]}, no longer at {OURS[:9]}, but SIGTERM '
+            'and SIGKILL to the scope pcapkit-tests.scope and the session of pid '), commands[0])
+        self.assertTrue(commands[0].endswith(' did not end it within 1 s. The tests may run on until their timeout.'),
+                        commands[0])
+        self.assertTrue(files.read(files.summary).startswith('- Superseded run not stopped: main is at'))
+        # It is still running: the watcher gave up on it rather than waiting.
+        os.kill(int(pidfile.read_text(encoding='utf-8')), 0)
+
+    def test_a_failing_systemctl_is_bounded(self) -> None:
+        """The default runner: a command that hangs past its timeout, or cannot start, is a failure."""
+        self.assertEqual(superseded.run_command(['/nonexistent/systemctl']), -1)
+        original = superseded.TIMEOUT
+        superseded.TIMEOUT = 0.5
+        self.addCleanup(setattr, superseded, 'TIMEOUT', original)
+        started = time.monotonic()
+        self.assertEqual(superseded.run_command([sys.executable, '-c', 'import time; time.sleep(30)']), -1)
+        self.assertLess(time.monotonic() - started, 10)
 
     def test_a_superseded_commit_stops_the_tests_and_exits_0_with_the_notice(self) -> None:
         code, out, files, elapsed = self.watch(SLEEPER, main_at(NEWER))
@@ -444,9 +558,13 @@ class TestTheTestsStep(unittest.TestCase):
 
     def script(self) -> 'str':
         script = step(TESTS)['run']
-        quick = script.replace('watch --interval 60 --grace 30 --', 'watch --interval 0.5 --grace 2 --')
+        quick = script.replace('watch --interval 60 --grace 30 ', 'watch --interval 0.5 --grace 2 --kill-wait 2 ')
         self.assertNotEqual(quick, script)
         return quick
+
+    def status(self) -> 'Dict[str, str]':
+        text = (self.temp / 'tests-status').read_text(encoding='utf-8')
+        return dict(line.split('=', 1) for line in text.splitlines())
 
     def test_a_superseded_run_stops_the_tests_and_the_step_succeeds(self) -> None:
         result = sh(self.script(), self.env, DEFAULT)
@@ -457,9 +575,37 @@ class TestTheTestsStep(unittest.TestCase):
         self.assertTrue(commands[0].startswith(
             f'::notice title=Superseded::main is at {NEWER[:9]}, no longer at {OURS[:9]}. '), commands[0])
         self.assertIn('- Superseded: main is at', (self.tmp / 'summary.md').read_text(encoding='utf-8'))
-        status = dict(line.split('=', 1) for line in (self.temp / 'tests-status').read_text(encoding='utf-8')
-                      .splitlines())
-        self.assertEqual((status['exit'], status['scope']), ('0', 'none'))
+        self.assertEqual((self.status()['exit'], self.status()['scope']), ('0', 'none'))
+
+    def test_a_scoped_run_is_stopped_through_its_scope(self) -> None:
+        """Round 2: in the scope, ``timeout`` and pytest are out of the session's reach; ``systemctl kill`` is not.
+
+        ``sudo`` is a stub that runs the scope's command and plays systemd for
+        ``systemctl kill``, signalling the pid the tests wrote. The tests leave
+        the session as the scoped ones are out of its reach, so only the scope's
+        kill can end them: without it, they hold the step's output for 60 s.
+
+        """
+        bindir = pathlib.Path(self.env['PATH'].split(os.pathsep)[0])
+        pidfile, calls = self.tmp / 'pid', self.tmp / 'systemctl'
+        (bindir / 'sudo').write_text(
+            '#!/bin/sh\n'
+            f'if [ "$2" = systemctl ]; then echo "$*" >> {calls}; '
+            f'[ -s {pidfile} ] && kill -s "${{4#--signal=SIG}}" "$(cat {pidfile})"; exit 0; fi\n'
+            'while [ "$#" -gt 0 ] && [ "$1" != -- ]; do shift; done\n'
+            '[ "$#" -gt 0 ] || exit 0\nshift\nexec "$@"\n', encoding='utf-8')
+        (bindir / 'python').write_text(f'#!/bin/sh\necho $$ > {pidfile}\necho collected\nexec setsid sleep 60\n',
+                                       encoding='utf-8')
+        started = time.monotonic()
+        result = sh(self.script(), self.env, DEFAULT)
+        self.assertLess(time.monotonic() - started, 30)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(self.status()['scope'], '12G')
+        commands = workflow_commands(result.stdout)
+        self.assertEqual(len(commands), 1, result.stdout)
+        self.assertTrue(commands[0].startswith('::notice title=Superseded::main is at '), commands[0])
+        self.assertEqual(calls.read_text(encoding='utf-8').splitlines()[0],
+                         '-n systemctl kill --signal=SIGTERM pcapkit-tests.scope')
 
     def test_a_current_run_keeps_the_tests_status(self) -> None:
         self.server.head = OURS
@@ -470,14 +616,20 @@ class TestTheTestsStep(unittest.TestCase):
         self.assertEqual(workflow_commands(result.stdout), [])
         self.assertFalse((self.tmp / 'summary.md').exists())
 
-    def test_the_watcher_wraps_the_capped_command_inside_the_scope(self) -> None:
-        """Every cap stays on pytest: the watcher runs prlimit, timeout and pytest, and the scope runs it."""
+    def test_the_watcher_runs_the_scope_and_names_it(self) -> None:
+        """Every cap stays on pytest, and the watcher runs outside the scope, which it names to ``--scope``."""
         script = step(TESTS)['run']
         capped = 'set -- prlimit --fsize=2147483648 timeout --signal=INT --kill-after=3m 110m python -m pytest "$@"\n'
-        watched = 'set -- "$watcher" util/superseded.py watch --interval 60 --grace 30 -- "$@"\n'
         scoped = 'set -- scoped pcapkit-tests.scope "$@"\n'
-        self.assertLess(script.index(capped), script.index(watched))
-        self.assertLess(script.index(watched), script.index(scoped))
+        named = 'watched=pcapkit-tests.scope\n'
+        watched = 'set -- "$watcher" util/superseded.py watch --interval 60 --grace 30 --scope "$watched" -- "$@"\n'
+        self.assertLess(script.index(capped), script.index(scoped))
+        self.assertLess(script.index(scoped), script.index(named))
+        self.assertLess(script.index(named), script.index(watched))
+        self.assertLess(script.index(watched), script.index('"$@" 2>&1 | tee "$RUNNER_TEMP/pytest.log"'))
+        # Named only where the probe passed, and the one name the tests' scope is started under.
+        self.assertIn('if [ "$scope" = 12G ]; then\n', script[script.index('scope=none'):script.index(named)])
+        self.assertEqual(script.count('pcapkit-tests.scope'), 2)
         self.assertIn('watcher=/usr/bin/python3\n', script)
 
 

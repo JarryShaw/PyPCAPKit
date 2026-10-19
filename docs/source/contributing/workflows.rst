@@ -773,16 +773,27 @@ current"), runs :file:`util/superseded.py`'s ``check``. A push's commit is curre
 while it is the head of ``main``; a pull request's while the pull request is open and
 its head is still the event's ``pull_request.head.sha``; any other event's always.
 Every other job needs ``current`` and skips where its output is ``false``, so a run
-superseded before it starts ends with ``skipped`` checks and a ``Superseded`` notice,
-and a failed ``current`` leaves the output empty, which runs the rest. ``Run unit
-tests`` runs its capped command -- ``prlimit``, ``timeout`` and pytest, in the scope
-where there is one -- under the script's ``watch``, which asks again every 60
-seconds. Once the commit is superseded, or the pull request merged or closed, it
-sends the command's session SIGTERM, then SIGKILL 30 seconds on, writes a
-``Superseded`` notice and a job-summary line, and exits 0, so the leg ends green and
-frees its runner. Otherwise the step ends with the tests' own status. An API the
-script cannot read counts as current, so it never stops the tests, and it asks with
-``If-None-Match``, as a ``304`` answer costs no rate limit.
+superseded before it starts ends with ``skipped`` checks and a ``Superseded`` notice.
+Each of those ``if:`` conditions opens with ``!cancelled()``, which drops the implicit
+``success()``, so a failed ``current`` step, which leaves the output empty, or a failed
+``current`` job runs the rest; the legs still need ``changes`` and ``python-versions``
+to succeed. ``Run unit tests`` runs its whole command -- the scope's ``sudo`` where
+there is one, then ``prlimit``, ``timeout`` and pytest -- under the script's ``watch``,
+outside the scope, which asks again every 60 seconds. Once the commit is superseded,
+or the pull request merged or closed, it sends SIGTERM, then SIGKILL 30 seconds on:
+to ``pcapkit-tests.scope`` by name (``sudo -n systemctl kill``) where the tests run
+in it, since they run as the runner's user under a root-owned ``sudo`` and in
+``timeout``'s own process group, and to the command's session otherwise. Ubuntu's
+``/etc/sudoers`` sets ``use_pty``, which sudoers(5) says has no effect where ``sudo``
+has no terminal, as in a step; the scope is reached by name either way. Once the
+command exits, the watcher writes a ``Superseded`` notice and a job-summary line and
+exits 0, so the leg ends green and frees its runner. Every wait is bounded: where the
+command outlives SIGKILL by 15 seconds, it writes a ``Superseded run not stopped``
+warning and exits 70, not 0, since the tests may run on, holding the step's output,
+until ``timeout`` or the step's cap ends them, and the failed step is then a warning
+like any other on these legs. Otherwise the step ends with the tests' own status. An
+API the script cannot read counts as current, so it never stops the tests, and it
+asks with ``If-None-Match``, as a ``304`` answer costs no rate limit.
 
 The legs never block, by the KTLO mechanics above: every step that can fail has
 ``continue-on-error: true``, their annotations are warnings, and ``Experimental
