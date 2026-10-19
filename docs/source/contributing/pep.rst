@@ -549,7 +549,7 @@ both of the following are worth knowing before reaching for them:
   works on every supported interpreter, verified on 3.10 and 3.14.
 
   A separate engine rather than a second backend because the two are **mutually
-  exclusive**: both distributions own the import name ``pcap``, and with both
+  exclusive**: both distributions own the import name |pcap|_, and with both
   installed ``pcap-ct`` wins the import while upstream's extension module is
   shadowed and unreachable. Each engine detects which backend it actually got and
   says so, rather than one ``engine=`` string silently meaning two different

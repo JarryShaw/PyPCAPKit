@@ -183,6 +183,8 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    expected to lift. Use
    :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` on 3.12 and newer.
 
+.. _pcap-module:
+
 .. important::
 
    `pcap-ct`_ installs the same top-level ``pcap`` module as `PyPCAP`_. This
@@ -435,7 +437,7 @@ Backend Detection
 
 .. module:: pcapkit.foundation.engines._pcap_backend
 
-Unrelated PyPI distributions install a top-level module named ``pcap`` --
+Unrelated PyPI distributions install a top-level module named |pcap|_ --
 `PyPCAP`_, a Cython binding shipped as a single extension module, and `pcap-ct`_,
 a :mod:`ctypes` reimplementation shipped as a package. They therefore collide,
 and ``import pcap`` resolves to whichever the import system finds first.

@@ -438,7 +438,7 @@ The available engines and the file formats they read:
 .. note::
 
    `PyPCAP`_ and `pcap-ct`_ are two distributions of one :manpage:`libpcap(3)`
-   interface, and both install a top-level ``pcap`` module, so they are two
+   interface, and both install a top-level |pcap|_ module, so they are two
    engines rather than one: ``engine='pypcap'`` and ``engine='pcap_ct'``. Upstream
    `PyPCAP`_ cannot be installed on Python 3.12 or newer, and `pcap-ct`_ can --
    which is why both exist. See

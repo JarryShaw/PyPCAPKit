@@ -173,7 +173,7 @@ one warning naming the actual cause and a fall back to the built-in parser.
 ``tshark``, :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile` its Python ceiling,
 :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` for a system ``libpcap``, and
 :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` and
-:class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` which distribution owns ``pcap``.
+:class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` which distribution owns |pcap|_.
 :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` deliberately has no Python ceiling
 check, even though upstream cannot be installed on 3.12 or newer: what matters is which
 distribution is present, and a version check would refuse a working build.
@@ -190,7 +190,7 @@ Choosing Between PyPCAP and PCAP_CT
 :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` and
 :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` read the same
 :manpage:`libpcap(3)` interface from two independent distributions, both of which
-install a top-level ``pcap`` module. They are separate engines because they
+install a top-level |pcap|_ module. They are separate engines because they
 are separate projects, with different authors, different install requirements
 and different interpreter coverage:
 
@@ -223,7 +223,7 @@ installed.** Pick on availability, not on features.
    otherwise be.
 
 **The two distributions collide, so install exactly one.** Both own the top-level
-``pcap`` module, and pip will happily install both -- on Python 3.10,
+|pcap|_ module, and pip will happily install both -- on Python 3.10,
 the ``pcap-ct`` package then wins the import and upstream's extension module is
 shadowed and unreachable. Each engine therefore detects which distribution it
 actually got, via
