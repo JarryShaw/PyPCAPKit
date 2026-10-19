@@ -50,7 +50,8 @@ PREFIX = '[monitor] '
 PROBES = ('free -m', 'df -h / "$GITHUB_WORKSPACE"', 'cat /proc/loadavg',
           'ps -eo pid,rss,vsz,etime,args --sort=-rss | head -6')
 #: The experimental job's caps and its check name, which the monitor leaves alone.
-CAPS = {'python': 5, 'install': 10, 'tests': 120}
+#: #1938 adds the watcher's interpreter and its requests, capped as the rest are.
+CAPS = {'python': 5, 'install': 10, 'watcher-python': 1, 'watcher': 1, 'tests': 120}
 CHECK_NAME = 'Python ${{ matrix.python-version }} (experimental)'
 #: A sample's first line, ``[monitor] <UTC time> sample <n>``.
 HEADER = re.compile(r'^\[monitor\] \d{4}-\d\d-\d\dT\d\d:\d\d:\d\dZ sample (\d+)$')
@@ -550,7 +551,7 @@ class TestItGatesNothing(unittest.TestCase):
         self.assertTrue(ci_timing.JUNIT_ARTIFACT.startswith('junit-'))
         self.assertEqual([path.name for path in sorted((ROOT / 'util').glob('*.py'))
                           if 'resource-monitor' in path.read_text(encoding='utf-8')], [])
-        self.assertEqual(list(workflow(EXPERIMENTAL[0])['jobs']), ['python-versions', 'changes', 'experimental'])
+        self.assertEqual(list(workflow(EXPERIMENTAL[0])['jobs']), ['current', 'python-versions', 'changes', 'experimental'])
 
 
 class TestTheDocsSayIt(unittest.TestCase):

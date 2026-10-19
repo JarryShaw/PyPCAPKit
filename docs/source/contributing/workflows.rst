@@ -758,13 +758,50 @@ Tests run completes without it, and with it ``Required checks passed``,
 ``unittest-ordering`` and the workflows that wait on Unit Tests completing
 (``coverage-comment.yml``, ``deploy-pages.yml``, ``cron-vendor.yml`` and
 ``cron-conda.yml``). It runs on Unit Tests' ``push`` and ``pull_request`` events,
-skips a docs-only pull request by the same ``changes`` script, and cancels a
-superseded run, a pull request's or, unlike Unit Tests, a push to ``main``'s
+skips a docs-only pull request by the same ``changes`` script, and lets a newer
+commit supersede a run, a pull request's or, unlike Unit Tests, a push to ``main``'s
 (`#1903 <https://github.com/JarryShaw/PyPCAPKit/issues/1903>`__): since nothing
 waits on the legs, ``main``'s newest commit is the one worth testing, whereas Unit
-Tests keeps a run per push for ``unittest-ordering``, which runs only there. Any
-other event keeps a concurrency group of its own, by run id. The legs never
-block, by the KTLO mechanics above: every step that can fail has
+Tests keeps a run per push for ``unittest-ordering``, which runs only there.
+
+A superseded run is skipped or stopped, never cancelled (`#1938
+<https://github.com/JarryShaw/PyPCAPKit/issues/1938>`__): GitHub counts a
+``cancelled`` check against its commit, so a cancelled run marks the commit red.
+The workflow has no ``concurrency`` group either, since a group cancels its pending
+run once a newer one queues. Its first job, ``current`` ("Check the commit is still
+current"), sets up ``latest`` and installs ``requests``, which the script fetches with,
+then runs :file:`util/superseded.py`'s ``check``. A push's commit is current
+while it is the head of ``main``; a pull request's while the pull request is open and
+its head is still the event's ``pull_request.head.sha``; any other event's always.
+Every other job needs ``current`` and skips where its output is ``false``, so a run
+superseded before it starts ends with ``skipped`` checks and a ``Superseded`` notice.
+Each of those ``if:`` conditions opens with ``!cancelled()``, which drops the implicit
+``success()``, so a failed ``current`` step, which leaves the output empty, or a failed
+``current`` job runs the rest; the legs still need ``changes`` and ``python-versions``
+to succeed. ``Run unit tests`` runs its whole command -- the scope's ``sudo`` where
+there is one, then ``prlimit``, ``timeout`` and pytest -- under the script's ``watch``,
+outside the scope, which asks again every 60 seconds. The watcher runs on a CPython of
+its own, ``latest`` from a second setup-python step, ``watcher-python``, with
+``update-environment: false``, so the leg's ``PATH``, ``LD_LIBRARY_PATH`` and pip
+cache are as its own setup-python left them, and ``requests`` goes into that
+interpreter, never the leg's GraalPy or free-threaded build. The two steps are capped
+at 1 minute each, and where either fails the tests run unwatched. Once the commit is superseded,
+or the pull request merged or closed, it sends SIGTERM, then SIGKILL 30 seconds on:
+to ``pcapkit-tests.scope`` by name (``sudo -n systemctl kill``) where the tests run
+in it, since they run as the runner's user under a root-owned ``sudo`` and in
+``timeout``'s own process group, and to the command's session otherwise. Ubuntu's
+``/etc/sudoers`` sets ``use_pty``, which sudoers(5) says has no effect where ``sudo``
+has no terminal, as in a step; the scope is reached by name either way. Once the
+command exits, the watcher writes a ``Superseded`` notice and a job-summary line and
+exits 0, so the leg ends green and frees its runner. Every wait is bounded: where the
+command outlives SIGKILL by 15 seconds, it writes a ``Superseded run not stopped``
+warning and exits 70, not 0, since the tests may run on, holding the step's output,
+until ``timeout`` or the step's cap ends them, and the failed step is then a warning
+like any other on these legs. Otherwise the step ends with the tests' own status. An
+API the script cannot read counts as current, so it never stops the tests, and it
+asks with ``If-None-Match``, as a ``304`` answer costs no rate limit.
+
+The legs never block, by the KTLO mechanics above: every step that can fail has
 ``continue-on-error: true``, their annotations are warnings, and ``Experimental
 summary``, the job's last step, reports each failed step. A failure no step
 contains, such as a lost runner, fails the job, and the job's own
@@ -773,8 +810,10 @@ run from failing when a job fails" (`Workflow syntax
 <https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idcontinue-on-error>`__),
 though the leg's check run still reads ``failure``. A job past its
 ``timeout-minutes`` is cancelled, and that page does not say whether the job-level
-guard covers a cancellation. So setup-python, the install and the tests have caps
-of their own, of 5, 10 and 120 minutes, under the job's 140: a step at its cap
+guard covers a cancellation. So setup-python, the install, the watcher's setup-python
+and ``requests`` (`#1938 <https://github.com/JarryShaw/PyPCAPKit/issues/1938>`__,
+below) and the tests have caps of their own, of 5, 10, 1, 1 and 120 minutes, under
+the job's 140, which leaves 3 for the rest: a step at its cap
 fails rather than cancels, and the guard holds (actions/runner
 ``src/Runner.Worker/StepsRunner.cs:322-353``). The runner's ``has timed out`` error
 stays, changing no conclusion, as ``Process completed with exit code N.`` does.

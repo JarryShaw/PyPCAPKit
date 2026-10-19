@@ -119,17 +119,19 @@ EXPERIMENTAL_SUMMARY_ENV = {'LEG': 'Python ${{ matrix.python-version }} (experim
 KTLO_REASON = 'KTLO legs never block (#1633), so this job still succeeds (#1672)'
 EXPERIMENTAL_REASON = 'Experimental legs never block (#1660), so this job still succeeds'
 #: ``experimental``'s steps with a ``timeout-minutes`` of their own (#1660), by ``id``:
-#: setup-python, the install and the tests. #1732: the tests' is GraalPy's unit tier
-#: less the round-trip sweeps, 88-113 minutes (estimate) from the 26% its leg reached
-#: in 25 (job 115915976024).
-EXPERIMENTAL_CAPS = {'python': 5, 'install': 10, 'tests': 120}
+#: setup-python, the install, the watcher's setup-python and requests (#1938) and the
+#: tests. #1732: the tests' is GraalPy's unit tier less the round-trip sweeps, 88-113
+#: minutes (estimate) from the 26% its leg reached in 25 (job 115915976024).
+EXPERIMENTAL_CAPS = {'python': 5, 'install': 10, 'watcher-python': 1, 'watcher': 1, 'tests': 120}
 #: ``experimental``'s own ``timeout-minutes`` (#1732), and ``test``'s, main's 45 again.
 EXPERIMENTAL_JOB_CAP = 140
 JOB_CAP = 45
-#: The job's minutes those caps leave for the rest of an experimental leg. Everything
-#: but the install and the tests took at most 0.32 minutes, setup-python included, on
-#: every uncovered leg of runs 38569321543, 38569429406 and 38569522442.
-UNCAPPED_MINUTES = 5
+#: The job's minutes those caps leave for the rest of an experimental leg: the steps
+#: without a cap of their own -- checkout, the parallelism report, the resource
+#: monitor, the uploads and the summaries. Everything but the install and the tests
+#: took at most 0.32 minutes, setup-python included, on every uncovered leg of runs
+#: 38569321543, 38569429406 and 38569522442.
+UNCAPPED_MINUTES = 3
 #: Those steps' cap on every other leg: the largest a step's ``timeout-minutes`` may be
 #: (docs.github.com, workflow-syntax, ``jobs.<job_id>.steps[*].timeout-minutes``).
 DOCUMENTED_MAXIMUM = 360
@@ -692,7 +694,8 @@ class TestASlowExperimentalLegTimesOutAStepNotTheJob(unittest.TestCase):
 
     def test_the_workflows_page_states_the_caps(self) -> None:
         page = prose(ROOT / 'docs' / 'source' / 'contributing' / 'workflows.rst')
-        self.assertEqual(re.findall(r'caps of their own, of (\d+), (\d+) and (\d+) minutes', page),
+        stated = re.findall(r'caps of their own, of ((?:\d+, )+\d+) and (\d+) minutes', page)
+        self.assertEqual([tuple(head.split(', ')) + (last,) for head, last in stated],
                          [tuple(str(cap) for cap in EXPERIMENTAL_CAPS.values())])
         self.assertEqual(re.findall(r"minutes, under the job's (\d+)", page), [str(EXPERIMENTAL_JOB_CAP)])
 

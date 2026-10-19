@@ -59,7 +59,8 @@ RUNTIME_SWEEPS = ('tests/foundation/traceflow/test_traceflow_reread_roundtrip_ru
 CONSUMERS = ('coverage-comment.yml', 'deploy-pages.yml', 'cron-vendor.yml', 'cron-conda.yml')
 #: Each job's ``timeout-minutes``, and its capped steps', by ``id``: ``test``'s are
 #: main's, ``experimental``'s are sized for GraalPy (88-113 minutes, estimate).
-CAPS = {JOB: (45, {}), EXPERIMENTAL: (140, {'python': 5, 'install': 10, 'tests': 120})}
+#: #1938 adds the watcher's interpreter and its requests, capped too.
+CAPS = {JOB: (45, {}), EXPERIMENTAL: (140, {'python': 5, 'install': 10, 'watcher-python': 1, 'watcher': 1, 'tests': 120})}
 #: The jobs whose result reaches a gate: ``required-checks`` and what it needs, and
 #: ``unittest-ordering``, which runs on main's pushes and gates publishing.
 GATING = ('required-checks', 'unittest-ordering')
@@ -97,7 +98,9 @@ def stringify(value: 'object') -> 'str':
 
 def step_env(leg: 'dict[str, Any]', where: 'tuple[str, str]' = JOB) -> 'dict[str, str]':
     """The step's ``env:`` on ``leg``, ``needs`` read from the tier file."""
-    context = {'matrix': leg, 'needs': {'python-versions': {'outputs': live_outputs()}}}
+    # #1938: experimental's tests step reads the token and the watcher's interpreter, unwatched here.
+    context = {'matrix': leg, 'needs': {'python-versions': {'outputs': live_outputs()}}, 'github': {'token': ''},
+               'steps': {'watcher': {'outcome': 'skipped'}, 'watcher-python': {'outputs': {'python-path': ''}}}}
     return {key: re.sub(r'\$\{\{.*?\}\}', lambda match: stringify(evaluate_expression(match.group(0), context)),
                         str(value))
             for key, value in (step(where).get('env') or {}).items()}
@@ -294,18 +297,18 @@ class TestTheExperimentalLegsAreAWorkflowOfTheirOwn(unittest.TestCase):
                 self.assertFalse([leg for leg in legs('unit-tests.yml', job_id) if is_experimental(leg)])
                 self.assertNotIn('experimental', str(spec.get('name')))
 
-    def test_the_same_events_and_its_own_concurrency(self) -> None:
-        """unit-tests.yml's push and pull_request, no ``workflow_call``, read-only, a group of its own.
+    def test_the_same_events_and_no_concurrency_group(self) -> None:
+        """unit-tests.yml's push and pull_request, no ``workflow_call``, read-only, sharing no group.
 
-        Which runs it supersedes is #1903's, evaluated in
-        :mod:`tests.project.test_experimental_concurrency_1903`.
+        #1938 drops its group, so a superseded run is skipped or stopped, not
+        cancelled: :mod:`tests.project.test_superseded_runs_1938`.
 
         """
         events = triggers(self.own)
         self.assertEqual(events, {key: value for key, value in triggers(self.unit).items() if key != 'workflow_call'})
         self.assertEqual(set(events), {'push', 'pull_request'})
         self.assertEqual(self.own['permissions'], {'contents': 'read'})
-        self.assertNotEqual(self.own['concurrency']['group'], self.unit['concurrency']['group'])
+        self.assertNotIn('concurrency', self.own)
 
     def test_it_skips_a_docs_only_diff_as_test_does(self) -> None:
         """unit-tests.yml's ``changes`` script, byte for byte, gating the job as it gates ``test``."""
@@ -313,8 +316,13 @@ class TestTheExperimentalLegsAreAWorkflowOfTheirOwn(unittest.TestCase):
             return next(entry['run'] for entry in spec['jobs']['changes']['steps'] if entry.get('id') == 'classify')
         self.assertEqual(classify(self.own), classify(self.unit))
         spec = self.own['jobs']['experimental']
-        self.assertEqual(spec['needs'], ['changes', 'python-versions'])
-        self.assertEqual(spec['if'], "${{ needs.changes.outputs.code != 'false' }}")
+        # #1938 adds `current`, the gate every job needs, and `!cancelled()`, so the two results stand in
+        # for the implicit `success()`.
+        self.assertEqual(spec['needs'], ['current', 'changes', 'python-versions'])
+        self.assertEqual(spec['if'],
+                         "${{ !cancelled() && needs.changes.result == 'success' && "
+                         "needs.python-versions.result == 'success' && needs.current.outputs.current != 'false' && "
+                         "needs.changes.outputs.code != 'false' }}")
         self.assertIn("needs.changes.outputs.code != 'false'", self.unit['jobs']['test']['if'])
 
     def test_nothing_waits_on_it(self) -> None:
