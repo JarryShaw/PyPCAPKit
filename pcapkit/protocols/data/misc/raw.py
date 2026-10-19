@@ -16,7 +16,7 @@ __all__ = ['Raw']
 class Raw(Protocol):
     """Raw packet is an unknown protocol.
 
-    .. versionchanged:: 1.3.3
+    .. versionchanged:: 1.3.1.post8
 
        ``packet`` is not a field of this class, so its constructor takes
        ``protocol`` and ``error`` only.
