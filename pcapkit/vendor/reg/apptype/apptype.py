@@ -180,7 +180,7 @@ class TransportProtocol(EnumLookup, IntEnum):
 
     @classmethod
     def get(cls, key: 'int | str', default: 'Any' = NO_DEFAULT) -> 'TransportProtocol':
-        """Backport support for original codes.
+        """Resolve ``key`` to a member, matching a name case-insensitively.
 
         Delegates to :meth:`~pcapkit.corekit.enum.EnumLookup.get` for GitHub
         issue :issue:`877`'s re-parenting, but keeps this override rather than dropping
@@ -253,7 +253,6 @@ class TransportProtocol(EnumLookup, IntEnum):
             EnumValueError: If ``key`` is a value no member carries and there
                 is no usable ``default``. A :exc:`ValueError`, from the base.
 
-        :meta private:
         """
         if isinstance(key, str):
             return super().get(key.lower(), default)
@@ -561,7 +560,7 @@ class {NAME}(EnumRegistry, StrEnum):
     @classmethod
     def get(cls, key: 'int', *,  # type: ignore[override] # pylint: disable=arguments-differ
             proto: 'TransportProtocol | str | int' = TransportProtocol.undefined) -> '{NAME}':
-        """Backport support for original codes.
+        """Resolve port ``key`` to the member for its canonical service.
 
         Args:
             key: Port number to look up.
@@ -582,7 +581,10 @@ class {NAME}(EnumRegistry, StrEnum):
             to some ports -- ``80`` carries ``http``, ``www`` and ``www-http`` --
             and names no precedence among them, so :data:`__canonical__` supplies
             the one the rest of the world answers with. The others remain real,
-            named members and are reached through :meth:`get_all`.
+            named members and are reached through :meth:`get_all`. A port
+            with no row resolves to an unregistered member that is not added
+            to the registry (:issue:`860`), named after the IANA range holding
+            the port, or ``unknown`` outside every range.
 
         Raises:
             ValueError: If called on a class that holds no members, i.e. on
@@ -599,7 +601,6 @@ class {NAME}(EnumRegistry, StrEnum):
                 them, not simply for being composite -- see
                 :meth:`_dispatch`.
 
-        :meta private:
         """
         owner = cls._dispatch(key, proto)
 

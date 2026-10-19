@@ -245,14 +245,27 @@ class {NAME}(EnumRegistry, StrEnum):
 
     @staticmethod
     def get(key: 'int | str', default: 'int' = -1, *, namespace: 'str' = 'opt') -> '{NAME}':
-        """Backport support for original codes.
+        """Resolve ``key`` to a member, by option code or by name.
+
+        An :class:`int` ``key`` is an option code, looked up in ``namespace``
+        overlaid on ``opt``, so a code the namespace assigns itself wins over
+        the generic one. A :class:`str` ``key`` is matched case-sensitively
+        against member names, then against member values.
 
         Args:
-            key: Key to get enum item.
-            default: Default value if not found.
-            namespace: Namespace of the enum item.
+            key: Option code, member name or member value to look up.
+            default: Option code of the unregistered member built when a
+                :class:`str` ``key`` matches nothing. Unused for an
+                :class:`int` ``key``.
+            namespace: Namespace to resolve an :class:`int` ``key`` in.
 
-        :meta private:
+        Returns:
+            The matching member. On a miss, an unregistered member, which is
+            not added to the lookup tables, so ``get`` never registers an
+            option (:issue:`860`). For an option code, in range or not, it is
+            named ``{{namespace}}_unknown``; for a string, it is named ``key``
+            and carries the option code ``default``.
+
         """
         if isinstance(key, int):
             temp_ns = {NAME}.__members_ns__.get('opt', {{}}).copy()
