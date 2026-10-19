@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -489,9 +490,6 @@
 
 <span class="sd">.. [*] See |tbtrim|_ project for Pythonic implementation.</span>
 
-<span class="sd">.. |tbtrim| replace:: ``tbtrim``</span>
-<span class="sd">.. _tbtrim: https://github.com/gousaiyang/tbtrim</span>
-
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">contextvars</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">inspect</span>
@@ -513,7 +511,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">'stacklevel'</span><span class="p">,</span>
+    <span class="s1">'stacklevel'</span><span class="p">,</span> <span class="s1">'CaughtByCaller'</span><span class="p">,</span>
 
     <span class="s1">'BaseError'</span><span class="p">,</span>                                                    <span class="c1"># Exception</span>
     <span class="s1">'DigitError'</span><span class="p">,</span> <span class="s1">'IntError'</span><span class="p">,</span> <span class="s1">'RealError'</span><span class="p">,</span> <span class="s1">'ComplexError'</span><span class="p">,</span>          <span class="c1"># TypeError</span>
@@ -643,7 +641,7 @@
 
 <span class="c1">#: ContextVar[tuple[Type[BaseException], ...]]: The exception classes the</span>
 <span class="c1">#: :mod:`pcapkit` code running in this context has undertaken to catch itself,</span>
-<span class="c1">#: as declared by the innermost :class:`_CaughtByCaller` block. A</span>
+<span class="c1">#: as declared by the innermost :class:`CaughtByCaller` block. A</span>
 <span class="c1">#: :class:`BaseError` that is an instance of one of them is constructed quiet,</span>
 <span class="c1">#: whatever its own ``quiet`` says.</span>
 <span class="c1">#:</span>
@@ -655,15 +653,21 @@
 <span class="p">)</span>  <span class="c1"># type: contextvars.ContextVar[tuple[Type[BaseException], ...]]</span>
 
 
-<span class="k">class</span><span class="w"> </span><span class="nc">_CaughtByCaller</span><span class="p">:</span>
+<div class="viewcode-block" id="CaughtByCaller">
+<a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.CaughtByCaller">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">CaughtByCaller</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Construct errors of the given classes quietly for the duration of a block.</span>
 
-<span class="sd">    For :mod:`pcapkit` code that is about to call something it does not own --</span>
-<span class="sd">    a generated :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value`</span>
-<span class="sd">    override, say -- and will catch the named exceptions itself. An error the</span>
-<span class="sd">    callee raises is then the quiet control flow it is at that call site,</span>
-<span class="sd">    without the callee having to pass ``quiet=True``, which it cannot know to</span>
-<span class="sd">    do (:issue:`1845`). Only the named classes are affected: anything else the</span>
+<span class="sd">    A :class:`BaseError` constructed inside the block that is an instance of one</span>
+<span class="sd">    of ``types`` behaves exactly as if it had been given ``quiet=True``: nothing</span>
+<span class="sd">    is logged and no exception hook is installed. Every other error stays loud.</span>
+
+<span class="sd">    Use it around a call into code the caller does not own -- a generated</span>
+<span class="sd">    :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value` override, say --</span>
+<span class="sd">    whose named exceptions the caller then catches itself. An error the callee</span>
+<span class="sd">    raises is then the quiet control flow it is at that call site, without the</span>
+<span class="sd">    callee having to pass ``quiet=True``, which it cannot know to do</span>
+<span class="sd">    (:issue:`1845`). Only the named classes are affected: anything else the</span>
 <span class="sd">    callee raises escapes the caller and so stays loud.</span>
 
 <span class="sd">    Given no classes, it declares that nothing is caught, which makes errors</span>
@@ -673,7 +677,9 @@
 
 <span class="sd">    Re-entrant: on exit a block restores whatever the enclosing block declared.</span>
 <span class="sd">    An instance holds the token of the one ``with`` it is entered by, so it is</span>
-<span class="sd">    built afresh for each.</span>
+<span class="sd">    built afresh for each. The declaration is per thread and per</span>
+<span class="sd">    :mod:`contextvars` context, so a block never quiets an error raised on</span>
+<span class="sd">    another thread.</span>
 
 <span class="sd">    A class rather than :func:`contextlib.contextmanager`, because</span>
 <span class="sd">    :meth:`EnumLookup.get &lt;pcapkit.corekit.enum.EnumLookup.get&gt;` enters one on</span>
@@ -682,6 +688,8 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        *types: Exception classes the caller catches.</span>
+
+<span class="sd">    .. versionadded:: 1.5.0</span>
 
 <span class="sd">    """</span>
 
@@ -696,7 +704,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_token</span> <span class="o">=</span> <span class="n">_caught_here</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_types</span><span class="p">)</span>  <span class="c1"># pylint: disable=attribute-defined-outside-init</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">exc_info</span><span class="p">:</span> <span class="s1">'object'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-        <span class="n">_caught_here</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_token</span><span class="p">)</span>
+        <span class="n">_caught_here</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_token</span><span class="p">)</span></div>
+
 
 
 <div class="viewcode-block" id="BaseError">
@@ -707,8 +716,8 @@
 <span class="sd">    A loud error -- the default -- is reported once, at</span>
 <span class="sd">    :data:`logging.CRITICAL` level, on the ``pcapkit`` logger</span>
 <span class="sd">    (:data:`~pcapkit.utilities.logging.logger`). Outside development mode it</span>
-<span class="sd">    also installs :func:`_excepthook` as :data:`sys.excepthook` and</span>
-<span class="sd">    :func:`_threading_excepthook` as :data:`threading.excepthook`, the first time</span>
+<span class="sd">    also installs :func:`_excepthook` as :func:`sys.excepthook` and</span>
+<span class="sd">    :func:`_threading_excepthook` as :func:`threading.excepthook`, the first time</span>
 <span class="sd">    a loud error needs them, so that error -- and every loud error reaching the</span>
 <span class="sd">    top level after it, on the main thread or any other -- prints its one-line</span>
 <span class="sd">    exception message rather than a walk through :mod:`pcapkit`'s internals.</span>
@@ -718,12 +727,12 @@
 <span class="sd">    :exc:`~pcapkit.utilities.exceptions.MissingKeyError` behind</span>
 <span class="sd">    :meth:`MultiDict.get &lt;pcapkit.corekit.multidict.MultiDict.get&gt;`. It is</span>
 <span class="sd">    therefore silent and free of side effects: nothing is logged, and neither</span>
-<span class="sd">    :data:`sys.excepthook` nor :data:`threading.excepthook` is touched. It is</span>
+<span class="sd">    :func:`sys.excepthook` nor :func:`threading.excepthook` is touched. It is</span>
 <span class="sd">    still a perfectly ordinary exception, carrying its message for whoever</span>
 <span class="sd">    catches it.</span>
 
 <span class="sd">    An error is also quiet when it is constructed inside a</span>
-<span class="sd">    :class:`_CaughtByCaller` block naming one of its classes, which is how a</span>
+<span class="sd">    :class:`CaughtByCaller` block naming one of its classes, which is how a</span>
 <span class="sd">    :mod:`pcapkit` caller marks as control flow an error raised by code that</span>
 <span class="sd">    does not pass ``quiet=True`` itself. The effect is exactly that of</span>
 <span class="sd">    ``quiet=True``.</span>
@@ -739,8 +748,8 @@
 <span class="sd">          installed before it first needed its own.</span>
 <span class="sd">        * The hooks are installed lazily, from here, rather than at import</span>
 <span class="sd">          time, so a program that imports :mod:`pcapkit` but never raises one of</span>
-<span class="sd">          its errors never has :data:`sys.excepthook` or</span>
-<span class="sd">          :data:`threading.excepthook` touched.</span>
+<span class="sd">          its errors never has :func:`sys.excepthook` or</span>
+<span class="sd">          :func:`threading.excepthook` touched.</span>
 <span class="sd">        * The hooks still do not cover *every* path an exception can take.</span>
 <span class="sd">          A traceback a caller formats itself with :mod:`traceback` -- rather</span>
 <span class="sd">          than letting it reach the top level uncaught -- passes through</span>
@@ -761,9 +770,25 @@
 
 <span class="sd">    """</span>
 
+<div class="viewcode-block" id="BaseError.__init__">
+<a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions.BaseError.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="n">quiet</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Log the error, unless it is quiet, and initialise the exception.</span>
+
+<span class="sd">        A loud error logs at ``CRITICAL`` and, unless ``PCAPKIT_DEVMODE`` is set,</span>
+<span class="sd">        installs the terse exception hooks; the class docstring says when an error is</span>
+<span class="sd">        quiet.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            *args: Arbitrary positional arguments.</span>
+<span class="sd">            quiet: If :data:`True`, the error is neither logged nor allowed to</span>
+<span class="sd">                install the exception hook; it is raised silently, as internal</span>
+<span class="sd">                control flow.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
+
+<span class="sd">        """</span>
         <span class="c1"># log error -- a quiet error emits nothing and mutates nothing, and so</span>
-        <span class="c1"># does one a :class:`_CaughtByCaller` block says its caller catches</span>
+        <span class="c1"># does one a :class:`CaughtByCaller` block says its caller catches</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">quiet</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_caught_here</span><span class="o">.</span><span class="n">get</span><span class="p">()):</span>
             <span class="k">if</span> <span class="n">DEVMODE</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="s1">'</span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span>
@@ -773,11 +798,12 @@
                 <span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="s1">'</span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
                 <span class="n">_install_excepthook</span><span class="p">()</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+</div>
 
 
 
 <span class="c1">#: Callable[[Type[BaseException], BaseException, Optional[TracebackType]], None]:</span>
-<span class="c1">#: Whatever :data:`sys.excepthook` was installed immediately before</span>
+<span class="c1">#: Whatever :func:`sys.excepthook` was installed immediately before</span>
 <span class="c1">#: :func:`_install_excepthook` last replaced it -- :data:`None` until that</span>
 <span class="c1">#: happens. This is what a non-:class:`BaseError` is delegated to from</span>
 <span class="c1">#: :func:`_excepthook`.</span>
@@ -787,7 +813,7 @@
 <span class="c1">#: :data:`None` in the very globals the already-installed :func:`_excepthook`</span>
 <span class="c1">#: still reads from on every call (a global lookup, not a value closed over at</span>
 <span class="c1">#: definition time). The old hook -- still installed, since a reload does not</span>
-<span class="c1">#: retroactively change what :data:`sys.excepthook` points at -- then falls</span>
+<span class="c1">#: retroactively change what :func:`sys.excepthook` points at -- then falls</span>
 <span class="c1">#: back to :data:`sys.__excepthook__` for a non-:class:`BaseError`, silently</span>
 <span class="c1">#: losing whatever had been captured before the reload (a host application's</span>
 <span class="c1">#: own hook, or ``tbtrim``'s). Measured: a delegate trimmed to one frame before</span>
@@ -800,14 +826,16 @@
 <span class="n">_previous_excepthook</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[Callable[..., None]]</span>
 
 <span class="c1">#: bool: Set for the duration of :func:`_excepthook`, so a re-entrant call -- the</span>
-<span class="c1">#: delegate somehow routing back through :data:`sys.excepthook` -- falls back to</span>
+<span class="c1">#: delegate somehow routing back through :func:`sys.excepthook` -- falls back to</span>
 <span class="c1">#: the interpreter's own hook rather than recursing or printing twice. A single</span>
 <span class="c1">#: shared flag is correct here, unlike the threading analogue below: nothing</span>
-<span class="c1">#: but the main thread's own unwind ever calls :data:`sys.excepthook`, so there</span>
+<span class="c1">#: but the main thread's own unwind ever calls :func:`sys.excepthook`, so there</span>
 <span class="c1">#: is no concurrent, unrelated invocation for one flag to be confused with.</span>
 <span class="n">_excepthook_running</span> <span class="o">=</span> <span class="kc">False</span>
 
 
+<div class="viewcode-block" id="_excepthook">
+<a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions._excepthook">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_excepthook</span><span class="p">(</span><span class="n">etype</span><span class="p">:</span> <span class="s1">'Type[BaseException]'</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'BaseException'</span><span class="p">,</span>
                 <span class="n">tb</span><span class="p">:</span> <span class="s1">'Optional[TracebackType]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Print a loud :class:`BaseError` tersely; chain through everything else.</span>
@@ -848,11 +876,12 @@
             <span class="n">delegate</span> <span class="o">=</span> <span class="n">_previous_excepthook</span> <span class="ow">or</span> <span class="n">sys</span><span class="o">.</span><span class="n">__excepthook__</span>
             <span class="n">delegate</span><span class="p">(</span><span class="n">etype</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">tb</span><span class="p">)</span>
     <span class="k">finally</span><span class="p">:</span>
-        <span class="n">_excepthook_running</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">_excepthook_running</span> <span class="o">=</span> <span class="kc">False</span></div>
+
 
 
 <span class="c1"># A generic, external marker -- "some pcapkit instance's hook is active" -- for</span>
-<span class="c1"># a caller that only has :data:`sys.excepthook` and no reference to a particular</span>
+<span class="c1"># a caller that only has :func:`sys.excepthook` and no reference to a particular</span>
 <span class="c1"># loaded copy of this module. Diagnostic only: :func:`_install_excepthook`'s own</span>
 <span class="c1"># guard below does *not* use this, and must not go back to doing so. The marker</span>
 <span class="c1"># is a plain :obj:`True`, identical on every reloaded copy of this function, so</span>
@@ -863,18 +892,18 @@
 
 
 <span class="c1">#: Callable[[ExceptHookArgs], object]: The thread analogue of</span>
-<span class="c1">#: ``_previous_excepthook`` -- whatever :data:`threading.excepthook` was</span>
+<span class="c1">#: ``_previous_excepthook`` -- whatever :func:`threading.excepthook` was</span>
 <span class="c1">#: installed immediately before :func:`_install_excepthook` last replaced it.</span>
 <span class="c1">#: Subject to the same reload caveat documented on ``_previous_excepthook``.</span>
 <span class="c1">#: Typed to return :class:`object` rather than :data:`None`, matching</span>
-<span class="c1">#: :data:`threading.excepthook` itself in typeshed -- unlike</span>
-<span class="c1">#: :data:`sys.excepthook`, which is typed as returning :data:`None`.</span>
+<span class="c1">#: :func:`threading.excepthook` itself in typeshed -- unlike</span>
+<span class="c1">#: :func:`sys.excepthook`, which is typed as returning :data:`None`.</span>
 <span class="n">_previous_threading_excepthook</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[Callable[..., object]]</span>
 
 <span class="c1">#: threading.local: Per-thread re-entrancy guard for</span>
 <span class="c1">#: :func:`_threading_excepthook`, kept separate from ``_excepthook_running``</span>
-<span class="c1">#: rather than shared with it. Unlike :data:`sys.excepthook`, which only ever</span>
-<span class="c1">#: fires once, on the main thread's own unwind, :data:`threading.excepthook`</span>
+<span class="c1">#: rather than shared with it. Unlike :func:`sys.excepthook`, which only ever</span>
+<span class="c1">#: fires once, on the main thread's own unwind, :func:`threading.excepthook`</span>
 <span class="c1">#: can genuinely be running in *two different threads at once* -- each with its</span>
 <span class="c1">#: own uncaught exception, entirely unrelated to the other. A single shared</span>
 <span class="c1">#: flag would make one thread's hook see the other's unrelated, concurrent</span>
@@ -884,13 +913,15 @@
 <span class="n">_threading_hook_state</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">local</span><span class="p">()</span>
 
 
+<div class="viewcode-block" id="_threading_excepthook">
+<a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions._threading_excepthook">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_threading_excepthook</span><span class="p">(</span><span class="n">args</span><span class="p">:</span> <span class="s1">'ExceptHookArgs'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Thread analogue of :func:`_excepthook`; same contract, one argument.</span>
 
-<span class="sd">    :data:`threading.excepthook` is called with a single</span>
-<span class="sd">    :class:`threading.ExceptHookArgs`, carrying ``exc_type``, ``exc_value``,</span>
+<span class="sd">    :func:`threading.excepthook` is called with a single</span>
+<span class="sd">    ``threading.ExceptHookArgs``, carrying ``exc_type``, ``exc_value``,</span>
 <span class="sd">    ``exc_traceback`` and ``thread`` -- not the three positional parameters</span>
-<span class="sd">    :data:`sys.excepthook` takes. Everything else here mirrors :func:`_excepthook`</span>
+<span class="sd">    :func:`sys.excepthook` takes. Everything else here mirrors :func:`_excepthook`</span>
 <span class="sd">    as closely as the default thread hook's own output allows: a loud</span>
 <span class="sd">    :class:`BaseError` prints the ``"Exception in thread ...:"`` header the</span>
 <span class="sd">    default hook always prints first -- the one piece of that output</span>
@@ -904,7 +935,7 @@
 <span class="sd">    hook's own printing at all.</span>
 
 <span class="sd">    This hook is needed because the interpreter's *default*</span>
-<span class="sd">    :data:`threading.excepthook` consults :data:`sys.tracebacklimit`, which</span>
+<span class="sd">    :func:`threading.excepthook` consults :data:`sys.tracebacklimit`, which</span>
 <span class="sd">    :class:`BaseError` does not set; without it a loud :class:`BaseError` raised</span>
 <span class="sd">    on a worker thread would print a full default traceback.</span>
 
@@ -929,18 +960,21 @@
             <span class="n">delegate</span> <span class="o">=</span> <span class="n">_previous_threading_excepthook</span> <span class="ow">or</span> <span class="n">default_threading_excepthook</span>
             <span class="n">delegate</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
     <span class="k">finally</span><span class="p">:</span>
-        <span class="n">_threading_hook_state</span><span class="o">.</span><span class="n">running</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">_threading_hook_state</span><span class="o">.</span><span class="n">running</span> <span class="o">=</span> <span class="kc">False</span></div>
+
 
 
 <span class="n">_threading_excepthook</span><span class="o">.</span><span class="n">installed_by_pcapkit</span> <span class="o">=</span> <span class="kc">True</span>  <span class="c1"># type: ignore[attr-defined]</span>
 
 
+<div class="viewcode-block" id="_install_excepthook">
+<a class="viewcode-back" href="../../../pcapkit/utilities/exceptions.html#pcapkit.utilities.exceptions._install_excepthook">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_install_excepthook</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Install :func:`_excepthook` and :func:`_threading_excepthook`, once each.</span>
 
 <span class="sd">    Called from :class:`BaseError`'s constructor rather than at import time, so</span>
 <span class="sd">    that a program that never raises a :mod:`pcapkit` error never has</span>
-<span class="sd">    :data:`sys.excepthook` or :data:`threading.excepthook` touched merely for</span>
+<span class="sd">    :func:`sys.excepthook` or :func:`threading.excepthook` touched merely for</span>
 <span class="sd">    having imported the package.</span>
 
 <span class="sd">    Idempotent for *this* module instance, independently for each hook: if a</span>
@@ -972,7 +1006,8 @@
     <span class="n">current_threading</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">excepthook</span>
     <span class="k">if</span> <span class="n">current_threading</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">_threading_excepthook</span><span class="p">:</span>
         <span class="n">_previous_threading_excepthook</span> <span class="o">=</span> <span class="n">current_threading</span>
-        <span class="n">threading</span><span class="o">.</span><span class="n">excepthook</span> <span class="o">=</span> <span class="n">_threading_excepthook</span>
+        <span class="n">threading</span><span class="o">.</span><span class="n">excepthook</span> <span class="o">=</span> <span class="n">_threading_excepthook</span></div>
+
 
 
 <span class="c1">##############################################################################</span>

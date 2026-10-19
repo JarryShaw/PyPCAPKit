@@ -5,7 +5,7 @@ Version Info
 
 :mod:`pcapkit.corekit.version` contains the :obj:`tuple`-like class
 :class:`~pcapkit.corekit.version.VersionInfo`, modelled on
-:class:`sys.version_info`.
+:data:`sys.version_info`.
 
 .. autoclass:: pcapkit.corekit.version.VersionInfo
    :no-members:

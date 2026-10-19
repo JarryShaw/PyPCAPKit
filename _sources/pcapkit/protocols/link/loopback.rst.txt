@@ -5,7 +5,7 @@ BSD Loopback Encapsulation
 
 :mod:`pcapkit.protocols.link.loopback` contains
 :class:`~pcapkit.protocols.link.loopback.Loopback`
-only, which implements extractor for the BSD loopback
+only, which implements the extractor for the BSD loopback
 encapsulation [*]_ of ``LINKTYPE_NULL`` and ``LINKTYPE_LOOP``,
 whose structure is described as below:
 

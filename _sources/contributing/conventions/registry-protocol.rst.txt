@@ -85,7 +85,8 @@ string-valued registries.
 :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` have no ``_missing_`` to
 copy from, because their constructor refuses every value no member carries, so the
 first checks its member type and the second the 8-bit Next Header field the type is
-sent in. The ``AppType`` transports inherit ``AppType``'s own.
+sent in. The :class:`~pcapkit.const.reg.apptype.apptype.AppType` transports inherit
+:class:`~pcapkit.const.reg.apptype.apptype.AppType`'s own.
 
 The check is the *range*, not everything ``_missing_`` decides. A value inside the range
 that matches neither a member nor an unassigned range -- ``CauseCode(0)``, say -- still
@@ -105,7 +106,7 @@ What is easy to get wrong about it:
   With **no usable** ``default``, the rejection reaches the caller **unwrapped**.
   ``get`` re-raises a :exc:`ValueError` that is already a
   :exc:`~pcapkit.utilities.exceptions.BaseError` exactly as the override raised it,
-  and converts only ``aenum``'s and :mod:`enum`'s own "no member carries this
+  and converts only |aenum|_'s and :mod:`enum`'s own "no member carries this
   value". The consequence is the point of the discrimination rather than a side
   effect: the override's **own message** survives to the caller instead of being
   replaced by the base's. So an override should say in its message what it rejected
@@ -120,7 +121,7 @@ What is easy to get wrong about it:
    :class:`~pcapkit.corekit.enum.EnumLookup` was **phase 2** of
    :issue:`877`, and it is **complete**: the phase landed for every non-registry
    enumeration. **No enumeration remains outside the hierarchy**, measured by a
-   runtime walk over both the :mod:`enum` and ``aenum`` flavours.
+   runtime walk over both the :mod:`enum` and |aenum|_ flavours.
 
 Failed-Lookup Exceptions
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -163,11 +164,12 @@ Which branch a key takes, and what each miss ends in:
 
 Do not "improve" on the shape by making both misses report identically. Converting
 one into the other is exactly what :issue:`923` retired, and it was retired in several
-places at once: ``TransportProtocol.get`` and ``Criticality.get`` had each turned the
-base's :exc:`KeyError` into a :exc:`ValueError`, and
-``FastBindingAcknowledgmentStatus.get`` raised
-:exc:`~pcapkit.utilities.exceptions.EnumValueError` for a name miss, so that the two
-ways of getting it wrong reported identically.
+places at once:
+:meth:`TransportProtocol.get <pcapkit.const.reg.apptype.apptype.TransportProtocol.get>`
+and ``Criticality.get`` had each turned the base's :exc:`KeyError` into a
+:exc:`ValueError`, and ``FastBindingAcknowledgmentStatus.get`` raised
+:exc:`~pcapkit.utilities.exceptions.EnumValueError` for a name miss, so that the two ways
+of getting it wrong reported identically.
 
 One more thing is not visible from the exception class, and it is deliberate:
 whether a miss is **reported**. **Every miss** ``get`` **reports is quiet** -- by name
@@ -180,8 +182,8 @@ installed, the interpreter's own unless an earlier loud error installed
 :mod:`pcapkit`'s.
 
 * **The name miss** is raised with ``quiet=True``. It is in-library control flow at
-  several call sites, and at ``Method.get`` it is part of a *successful* call --
-  that override catches it in order to mint.
+  several call sites, and at :meth:`Method.get <pcapkit.const.http.method.Method.get>` it
+  is part of a *successful* call -- that override catches it in order to mint.
 * **The value miss** is quiet with or without a usable ``default``. The owner ruled
   for that on :issue:`1845`, on the ground that ``get`` is mostly called from
   protocol parsing, where a value that does not resolve is input for the caller to
@@ -189,7 +191,7 @@ installed, the interpreter's own unless an earlier loud error installed
   ``cls(key)`` in a block declaring that it catches :exc:`ValueError` itself, so the
   loud :exc:`~pcapkit.utilities.exceptions.EnumValueError` a generated override
   raises is constructed quietly without the override passing ``quiet=True``, and
-  the error ``get`` converts from ``aenum``'s own is raised quiet as well. An error
+  the error ``get`` converts from |aenum|_'s own is raised quiet as well. An error
   of any other class is not a lookup miss, and stays loud.
 * :meth:`~pcapkit.corekit.enum.EnumRegistry.register` **stays loud**, even when
   reached from inside such a block: refusing a mint the caller explicitly asked for
@@ -239,10 +241,10 @@ delegation **silently succeeds**, so a ``@staticmethod`` override cannot even be
 relied on to fail loudly. Measured, every case, rather than reasoned about.
 :meth:`~pcapkit.corekit.enum.EnumLookup.get` is itself a ``@classmethod``. The
 precedent is :issue:`903`, which made
-``FEATCode.get`` a ``@classmethod def get(cls, key, default=NO_DEFAULT)`` ending in
-``return super().get(key, default)``;
-:issue:`908` followed it, which is
-what turned ``Method.get`` into a classmethod.
+:meth:`FEATCode.get <pcapkit.const.ftp.command.FEATCode.get>` a ``@classmethod def
+get(cls, key, default=NO_DEFAULT)`` ending in ``return super().get(key, default)``;
+:issue:`908` followed it, which is what turned
+:meth:`Method.get <pcapkit.const.http.method.Method.get>` into a classmethod.
 
 Callers cannot see the switch -- ``Method.get('X')`` binds identically either way --
 so there is no compatibility argument for keeping the ``@staticmethod``.
@@ -261,14 +263,14 @@ course: they should follow the house convention and not be loud.
 
 Both answers are on the issue deliberately, and the reversal is the ruling. What it
 settles is not the one keyword -- it is the tie-breaker. A loud
-:class:`~pcapkit.utilities.exceptions.BaseError` sets :data:`sys.tracebacklimit` to
-``0`` **process-wide**, the
-:issue:`362` hazard, so loudness is
+:class:`~pcapkit.utilities.exceptions.BaseError` logs a :data:`logging.CRITICAL`
+record, the :issue:`362` hazard, and outside development mode installs
+:mod:`pcapkit`'s exception hooks **process-wide**, so loudness is
 paid for by the whole library rather than by the override's own callers. The argument
 against changing them was that ``quiet=True`` exists on the base for a name miss
-inside a *successful* call at ``Method.get`` and these two had no such caller;
-uniformity beat it, because a per-class judgement about present callers cannot price
-a process-wide effect.
+inside a *successful* call at :meth:`Method.get <pcapkit.const.http.method.Method.get>`
+and these two had no such caller; uniformity beat it, because a per-class judgement about
+present callers cannot price a process-wide effect.
 
 **A signature the base advertises has to be honoured, not suppressed.** Re-parenting
 onto :class:`~pcapkit.corekit.enum.EnumLookup` gave those same two classes an
@@ -330,10 +332,10 @@ treats them as case-sensitive.
 And the reason a registry's spelling is never quietly normalised, from the same thread:
 an enumeration honours and keeps the original writing the registrar used, and
 case-insensitivity applies only to the selected registries where it makes logical sense
--- ``TransportProtocol`` being one -- or where the RFC documentation itself recognises
-the values as case-insensitive, FTP and HTTP commands being the candidates the owner
-named. Only FTP survived the audit below: :rfc:`9110#section-9.1` makes the HTTP method
-token case-sensitive outright.
+-- :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol` being one -- or where the
+RFC documentation itself recognises the values as case-insensitive, FTP and HTTP commands
+being the candidates the owner named. Only FTP survived the audit below:
+:rfc:`9110#section-9.1` makes the HTTP method token case-sensitive outright.
 
 So :meth:`~pcapkit.corekit.enum.EnumLookup.get` is **case-sensitive**, and that is the
 default every enumeration gets. Case-insensitivity is a per-class ``get`` override that
@@ -344,21 +346,19 @@ to make a lookup work -- which is what keeps
 ``R1_COUNTER = 129``, two IANA-registered HIP parameters differing only in case, both
 resolvable.
 
-And a folding override carries **only** the fold. ``TransportProtocol.get`` is the
-worked example: since
-:issue:`923` it lowers ``key``,
-forwards ``default`` verbatim and delegates to ``super().get()``, and that is all it
-does. It used to convert the base's name-miss :exc:`KeyError` into a
-:exc:`ValueError` as well, and :issue:`923`'s ruling retired that; the
-:issue:`808` refusal to extend the
-class at all is untouched by the retirement, since only the exception class moved.
-``Criticality.get`` went further and was deleted: conversion was the *only*
-thing it added over the base, so once that went there was nothing left for an
-override to hold, and the class inherits
-:meth:`~pcapkit.corekit.enum.EnumLookup.get` unchanged. **An override that would
-now be empty is deleted, not kept as a pass-through** -- a ``get`` that only calls
-``super().get()`` reads as though it were doing something, and the next reader has
-to diff it against the base to find out that it is not.
+And a folding override carries **only** the fold.
+:meth:`TransportProtocol.get <pcapkit.const.reg.apptype.apptype.TransportProtocol.get>` is
+the worked example: since :issue:`923` it lowers ``key``, forwards ``default`` verbatim
+and delegates to ``super().get()``, and that is all it does. It used to convert the base's
+name-miss :exc:`KeyError` into a :exc:`ValueError` as well, and :issue:`923`'s ruling
+retired that; the :issue:`808` refusal to extend the class at all is untouched by the
+retirement, since only the exception class moved. ``Criticality.get`` went further and was
+deleted: conversion was the *only* thing it added over the base, so once that went there
+was nothing left for an override to hold, and the class inherits
+:meth:`~pcapkit.corekit.enum.EnumLookup.get` unchanged. **An override that would now be
+empty is deleted, not kept as a pass-through** -- a ``get`` that only calls
+``super().get()`` reads as though it were doing something, and the next reader has to diff
+it against the base to find out that it is not.
 
 The Lenient Criterion, in Two Limbs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -367,9 +367,10 @@ The ruling above leaves one question open, and
 :issue:`903` settled it: does a
 specification have to state a **comparison rule** for a registry to be treated
 case-insensitively, or does it also count when the authorities merely **disagree
-about spelling**? The owner ruled for the lenient reading, with ``TransportProtocol``
-as the example given: upper and lower casings are used throughout the RFCs and IANA's
-own data, and that mixed usage is itself an indication of case-insensitivity.
+about spelling**? The owner ruled for the lenient reading, with
+:class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol` as the example given: upper
+and lower casings are used throughout the RFCs and IANA's own data, and that mixed usage
+is itself an indication of case-insensitivity.
 
 So the test a new registry has to pass has **two limbs**, and satisfying either one
 justifies case-insensitivity:
@@ -400,9 +401,9 @@ The population it covers is every :class:`~pcapkit.corekit.enum.EnumRegistry`
 subclass, every one of them under :mod:`pcapkit.const` and each either
 :class:`int`-valued (the flag registries among them) or ``aenum.StrEnum``-valued,
 plus every non-registry enumeration a runtime walk over both the :mod:`enum` and
-``aenum`` flavours finds, nested classes included -- such as ``FrameType.Flags`` in
-:mod:`pcapkit.protocols.schema.application.httpv2` and its concrete per-frame
-subclasses.
+|aenum|_ flavours finds, nested classes included -- such as
+:class:`FrameType.Flags <pcapkit.protocols.schema.application.httpv2.FrameType.Flags>` in
+:mod:`pcapkit.protocols.schema.application.httpv2` and its concrete per-frame subclasses.
 
 **The** :class:`int`\ **-valued tier is case-sensitive throughout, and the criterion
 is vacuous on it rather than merely unmet.** A registry whose values are numbers has
@@ -463,7 +464,7 @@ That leaves the classes with something to decide:
        key schedule"*, but those are a different document's secret names, not a
        second spelling of the log label.)
      - **case-sensitive** -- no override, conforms
-   * - ``TransportProtocol``
+   * - :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`
      - :rfc:`6335#section-8.1.1`
      - Nothing states a rule for the ``Transport Protocol`` field -- only *"limited
        to one or more of TCP, UDP, SCTP, and DCCP"*. Limb 2 carries it: the RFC and
@@ -476,9 +477,13 @@ That leaves the classes with something to decide:
      - --
      - Moot: its ``get`` takes a port number and refuses a non-:class:`int` outright,
        so there is no string to fold. It does inherit the row above through
-       ``_dispatch``, which resolves a ``proto`` string via ``TransportProtocol.get``.
+       ``_dispatch``, which resolves a ``proto`` string via
+       :meth:`TransportProtocol.get <pcapkit.const.reg.apptype.apptype.TransportProtocol.get>`.
      - **n/a** -- int-keyed
-   * - ``TCP``, ``UDP``, ``SCTP``, ``DCCP``
+   * - :class:`~pcapkit.const.reg.apptype.tcp.TCP`,
+       :class:`~pcapkit.const.reg.apptype.udp.UDP`,
+       :class:`~pcapkit.const.reg.apptype.sctp.SCTP`,
+       :class:`~pcapkit.const.reg.apptype.dccp.DCCP`
      - :rfc:`6335#section-5.1`
      - *"case is ignored for comparison purposes, so both "http" and "HTTP" denote
        the same service."* Limb 1, emphatically -- and these registries **derive every
@@ -486,7 +491,8 @@ That leaves the classes with something to decide:
        spelling (``tcpmux``); the *value* is a composite that embeds it
        (``'tcpmux [1 - tcp]'``), not the bare name.
      - **unimplemented** -- no service-name lookup exists to fold; see below
-   * - ``CommandType``, ``ConformanceRequirement``
+   * - :class:`~pcapkit.const.ftp.command.CommandType`,
+       :class:`~pcapkit.const.ftp.command.ConformanceRequirement`
      - :rfc:`959#section-4`, :rfc:`5797#section-2`
      - Limb 2 holds on measurement: the RFC and registry pages present the kind and
        conformance letters upper case (``A``/``P``/``S``, ``M``/``O``/``H``) while
@@ -497,64 +503,78 @@ That leaves the classes with something to decide:
    * - The :mod:`~pcapkit.protocols.internet.mh` and
        :mod:`~pcapkit.protocols.application.ngap` helper enumerations
      - IANA Mobility Header registries, 3GPP TS 38.413
-     - ``FastBindingAcknowledgmentStatus``, ``IPv6AddressPrefixCode``,
-       ``LMAAddressCode``, ``LocalizedRoutingStatus``, ``Criticality`` and ``PDUKind``.
-       **All but** ``PDUKind`` carry numeric codes, so the criterion is vacuous on them
-       exactly as for the :class:`int` tier above; ``PDUKind``'s are :class:`str` ASN.1
+     - :class:`~pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus`,
+       :class:`~pcapkit.protocols.internet.mh.IPv6AddressPrefixCode`,
+       :class:`~pcapkit.protocols.internet.mh.LMAAddressCode`,
+       :class:`~pcapkit.protocols.internet.mh.LocalizedRoutingStatus`,
+       :class:`~pcapkit.protocols.application.ngap.Criticality` and
+       :class:`~pcapkit.protocols.application.ngap.PDUKind`. **All but**
+       :class:`~pcapkit.protocols.application.ngap.PDUKind` carry numeric codes, so the
+       criterion is vacuous on them exactly as for the :class:`int` tier above;
+       :class:`~pcapkit.protocols.application.ngap.PDUKind`'s are :class:`str` ASN.1
        identifiers from 3GPP TS 38.413, and ASN.1 identifiers are case-significant by
-       construction, so it lands the same way for a different reason.
-       **None** of them defines a ``get`` of its own. Some did when this
-       audit was taken --
-       ``FastBindingAcknowledgmentStatus`` and ``IPv6AddressPrefixCode``, for
-       signature reasons (no ``default``, and an :class:`int`/:class:`str` dispatch)
-       rather than for case -- and both were deleted as redundant rather than widened,
-       on the ruling recorded in the section above and given in review of the widening
-       itself; each inherits ``get`` from
-       :class:`~pcapkit.corekit.enum.EnumLookup` unchanged. ``LMAAddressCode`` and
-       ``LocalizedRoutingStatus`` never carried a ``get`` at all, so they had no
-       string lookup to fold. ``Criticality`` had one when this audit was taken and no
-       longer does:
-       :issue:`877` re-parented it onto
+       construction, so it lands the same way for a different reason. **None** of them
+       defines a ``get`` of its own. Some did when this audit was taken --
+       :class:`~pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus` and
+       :class:`~pcapkit.protocols.internet.mh.IPv6AddressPrefixCode`, for signature
+       reasons (no ``default``, and an :class:`int`/:class:`str` dispatch) rather than for
+       case -- and both were deleted as redundant rather than widened, on the ruling
+       recorded in the section above and given in review of the widening itself; each
+       inherits ``get`` from :class:`~pcapkit.corekit.enum.EnumLookup` unchanged.
+       :class:`~pcapkit.protocols.internet.mh.LMAAddressCode` and
+       :class:`~pcapkit.protocols.internet.mh.LocalizedRoutingStatus` never carried a
+       ``get`` at all, so they had no string lookup to fold.
+       :class:`~pcapkit.protocols.application.ngap.Criticality` had one when this audit
+       was taken and no longer does: :issue:`877` re-parented it onto
        :class:`~pcapkit.corekit.enum.EnumLookup` and :issue:`923` retired the exception
-       conversion that was the override's only remaining job, so it inherits
-       ``get`` unchanged.
+       conversion that was the override's only remaining job, so it inherits ``get``
+       unchanged.
      - **case-sensitive** -- conforms
-   * - ``WireGuardKeyLabel``
+   * - :class:`~pcapkit.protocols.misc.pcapng.WireGuardKeyLabel`
      - ``draft-tuexen-opsawg-pcapng``
      - The draft names the labels outright (*"The key type is one of
-       LOCAL_STATIC_PRIVATE_KEY, ..."*) and, as for ``OptionType`` above, never
-       discusses their case. Both authorities write them upper case.
+       LOCAL_STATIC_PRIVATE_KEY, ..."*) and, as for
+       :class:`~pcapkit.const.pcapng.option_type.OptionType` above, never discusses their
+       case. Both authorities write them upper case.
      - **case-sensitive** -- no override, conforms
    * - Every other non-registry enumeration
      - --
      - Each is one of pcapkit's own discriminators and bit labels, with no registrar behind
-       them at all -- ``Completion``, ``ftp.Type``, ``httpv1.Type``, ``FinalisedState``,
-       ``ESPStatus``, ``PacketDirection``, ``PacketReception``, and the httpv2
-       ``Flags``.
+       them at all -- :class:`~pcapkit.foundation.reassembly.data.data.Completion`,
+       :class:`ftp.Type <pcapkit.protocols.application.ftp.Type>`,
+       :class:`httpv1.Type <pcapkit.protocols.application.httpv1.Type>`,
+       :class:`~pcapkit.corekit.infoclass.FinalisedState`,
+       :class:`~pcapkit.protocols.internet.esp.ESPStatus`,
+       :class:`~pcapkit.protocols.misc.pcapng.PacketDirection`,
+       :class:`~pcapkit.protocols.misc.pcapng.PacketReception`, and the httpv2
+       :class:`~pcapkit.protocols.schema.application.httpv2.FrameType.Flags`.
      - **case-sensitive** -- nothing to cite, nothing to change
 
 Rows the audit deliberately left open rather than acting on, because each is
 wider than a case fix:
 
-* **A service-name lookup on the** ``AppType`` **transport registries.** This is the
-  inverse of every other row: :rfc:`6335#section-5.1` *does* make service names
-  case-insensitive, and ``TCP``/``UDP``/``SCTP``/``DCCP`` take their member names from
-  that column -- but ``AppType.get`` refuses a non-:class:`int` key, so no service-name
-  lookup exists for the rule to apply to. Implementing one is new public API on a
-  registry of thousands of members where one name maps to many ports, which is a ``get_all``
-  design question rather than a case fold.
-* ``CommandType`` **and** ``ConformanceRequirement``. By parity with
-  ``TransportProtocol`` -- an :class:`int`-valued enumeration whose *names* are the
-  specification's own tokens -- the measured spelling disagreement above would make
-  these two case-insensitive. Nothing looks them up by string, though: the
-  crawler translates the CSV's lower-case letters to the upper-case member names at
-  generation time. Both classes inherit
-  :class:`~pcapkit.corekit.enum.EnumLookup`, since
-  :issue:`930` completed phase 2's
-  re-parenting, so a ``get`` exists on each, case-sensitive like the
-  base's own. Whether to fold case to match ``TransportProtocol``'s own override is a
-  design question for whoever writes the first string-keyed caller, not one this
-  audit settles.
+* **A service-name lookup on the** :class:`~pcapkit.const.reg.apptype.apptype.AppType`
+  **transport registries.** This is the inverse of every other row:
+  :rfc:`6335#section-5.1` *does* make service names case-insensitive, and
+  :class:`~pcapkit.const.reg.apptype.tcp.TCP`, :class:`~pcapkit.const.reg.apptype.udp.UDP`,
+  :class:`~pcapkit.const.reg.apptype.sctp.SCTP` and
+  :class:`~pcapkit.const.reg.apptype.dccp.DCCP` take their member names from that column -- but
+  :meth:`AppType.get <pcapkit.const.reg.apptype.apptype.AppType.get>` refuses a
+  non-:class:`int` key, so no service-name lookup exists for the rule to apply to.
+  Implementing one is new public API on a registry of thousands of members where one name
+  maps to many ports, which is a ``get_all`` design question rather than a case fold.
+* :class:`~pcapkit.const.ftp.command.CommandType` **and**
+  :class:`~pcapkit.const.ftp.command.ConformanceRequirement`. By parity with
+  :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol` -- an :class:`int`-valued
+  enumeration whose *names* are the specification's own tokens -- the measured spelling
+  disagreement above would make these two case-insensitive. Nothing looks them up by
+  string, though: the crawler translates the CSV's lower-case letters to the upper-case
+  member names at generation time. Both classes inherit
+  :class:`~pcapkit.corekit.enum.EnumLookup`, since :issue:`930` completed phase 2's
+  re-parenting, so a ``get`` exists on each, case-sensitive like the base's own. Whether
+  to fold case to match :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`'s
+  own override is a design question for whoever writes the first string-keyed caller, not
+  one this audit settles.
 
 One case fold also lives **outside** any ``get``, and so escapes this convention
 entirely: ``_resolve`` in :mod:`pcapkit.protocols.internet.esp` upper-cases its
@@ -595,14 +615,15 @@ rather than changing it.
    ``tests/corekit/test_enum_lookup_base_unit.py``'s own ``_Str``, a purpose-built
    closed set carrying ``angled = '<angled>'`` precisely so that the value
    fall-through can be measured on a class that defines no ``get``.
-   ``Command.get`` upper-cases its key
+   :meth:`Command.get <pcapkit.const.ftp.command.Command.get>` upper-cases its key
    before matching, which makes it look as though the base were case-insensitive --
    deliberately, since :rfc:`959#section-5` treats FTP command codes identically
-   regardless of case. ``Method.get`` does not fold case, as ruled on :issue:`896`:
-   :rfc:`9110#section-9.1` says the HTTP method token is case-sensitive, so
-   ``Method.get('get')`` does not resolve to
-   ``Method.GET`` -- it builds its own unregistered member, preserving the
-   caller's exact casing, the same way an unrecognised value always does.
+   regardless of case. :meth:`Method.get <pcapkit.const.http.method.Method.get>` does not
+   fold case, as ruled on :issue:`896`: :rfc:`9110#section-9.1` says the HTTP method token
+   is case-sensitive, so ``Method.get('get')`` does not resolve to
+   :attr:`Method.GET <pcapkit.const.http.method.Method.GET>` -- it builds its own
+   unregistered member, preserving the caller's exact casing, the same way an unrecognised
+   value always does.
 
 What does survive is narrower and deliberate: a **declared-but-unassigned** ``str``
 value resolves through ``cls(value)`` but not through ``get(value)``, because

@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -485,7 +486,7 @@
 
 <span class="sd">:mod:`pcapkit.protocols.internet.ipv6` contains</span>
 <span class="sd">:class:`~pcapkit.protocols.internet.ipv6.IPv6` only,</span>
-<span class="sd">which implements extractor for Internet Protocol</span>
+<span class="sd">which implements the extractor for Internet Protocol</span>
 <span class="sd">version 6 (IPv6) [*]_, whose structure is described</span>
 <span class="sd">as below:</span>
 
@@ -580,8 +581,8 @@
 
     <span class="c1">#: Extension header codes with a *dedicated* parser class in this</span>
     <span class="c1">#: package whose layout follows :rfc:`6564#section-4`'s generic ``next`` +</span>
-    <span class="c1">#: ``Hdr Ext Len`` format (see the module docstring of</span>
-    <span class="c1">#: :mod:`pcapkit.protocols.internet.ipv6_ext` for the exception table).</span>
+    <span class="c1">#: ``Hdr Ext Len`` format (see :ref:`ipv6-ext-length-rules` for the</span>
+    <span class="c1">#: exception table).</span>
     <span class="c1">#: When that dedicated parser raises, :meth:`_import_next_layer`</span>
     <span class="c1">#: substitutes :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`</span>
     <span class="c1">#: instead of letting the generic</span>
@@ -594,9 +595,8 @@
     <span class="c1">#: * :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6`</span>
     <span class="c1">#:   has no dedicated parser class in this package, so there is no "own</span>
     <span class="c1">#:   parser" for it to raise from. It reaches :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`</span>
-    <span class="c1">#:   by *direct* registration (see the bottom of</span>
-    <span class="c1">#:   :mod:`pcapkit.protocols.internet.ipv6_ext`), which already produces</span>
-    <span class="c1">#:   exactly this class.</span>
+    <span class="c1">#:   by *direct* registration (see :ref:`ipv6-ext-entry-paths`), which</span>
+    <span class="c1">#:   already produces exactly this class.</span>
     <span class="c1">#: * ``ESP`` *does* have a dedicated, registered parser</span>
     <span class="c1">#:   (:class:`~pcapkit.protocols.internet.esp.ESP`). It is excluded</span>
     <span class="c1">#:   because :rfc:`4303` places the real Next Header byte inside the</span>
@@ -728,7 +728,7 @@
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s2">"[IPv6] invalid version: </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">hextet</span><span class="p">[</span><span class="s1">'version'</span><span class="p">]</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
         <span class="c1"># NOTE: A receiver treats each of these as an error (:issue:`1687`), so</span>
-        <span class="c1"># the frame stops here, c.f. :meth:`IPv4.read</span>
+        <span class="c1"># the frame stops here, see :meth:`IPv4.read</span>
         <span class="c1"># &lt;pcapkit.protocols.internet.ipv4.IPv4.read&gt;`. A Fragment header beside</span>
         <span class="c1"># the Jumbo Payload option is caught on the walk, see</span>
         <span class="c1"># :meth:`_decode_next_layer`.</span>
@@ -749,7 +749,7 @@
         <span class="p">})</span>  <span class="c1"># type: Data_IPv6</span>
 
         <span class="c1"># NOTE: Octets captured past the Payload Length are kept as captured,</span>
-        <span class="c1"># c.f. :meth:`IPv4.read &lt;pcapkit.protocols.internet.ipv4.IPv4.read&gt;`</span>
+        <span class="c1"># see :meth:`IPv4.read &lt;pcapkit.protocols.internet.ipv4.IPv4.read&gt;`</span>
         <span class="c1"># (:issue:`1209`).</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">:</span>
             <span class="n">ipv6</span><span class="o">.</span><span class="n">__update__</span><span class="p">({</span>
@@ -757,7 +757,7 @@
             <span class="p">})</span>
 
         <span class="c1"># NOTE: A jumbogram's extent is its Jumbo Payload Length, not the zero</span>
-        <span class="c1"># Payload Length, c.f. :meth:`Schema_IPv6.post_process</span>
+        <span class="c1"># Payload Length, see :meth:`Schema_IPv6.post_process</span>
         <span class="c1"># &lt;pcapkit.protocols.schema.internet.ipv6.IPv6.post_process&gt;`</span>
         <span class="c1"># (:issue:`1434`); the check above leaves a zero one beside it.</span>
         <span class="n">jumbo</span> <span class="o">=</span> <span class="n">jumbo_payload_length</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">next</span><span class="p">,</span> <span class="n">rest</span><span class="p">)</span>
@@ -1001,7 +1001,7 @@
 
             <span class="c1"># NOTE: A header whose dedicated parser raised was parsed by</span>
             <span class="c1"># :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` instead,</span>
-            <span class="c1"># c.f. :meth:`_import_next_layer`, and written under that class's</span>
+            <span class="c1"># see :meth:`_import_next_layer`, and written under that class's</span>
             <span class="c1"># key rather than the dedicated one's. Rebuilding it with the</span>
             <span class="c1"># dedicated class would look for fields only that class parses</span>
             <span class="c1"># (:issue:`1473`), so the key decides the parser.</span>
@@ -1034,6 +1034,8 @@
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="n">info</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'offset'</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span>
 
+<div class="viewcode-block" id="IPv6._read_ip_hextet">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/ipv6.html#pcapkit.protocols.internet.ipv6.IPv6._read_ip_hextet">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_ip_hextet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[int, int, int]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Read the first four octets of IPv6.</span>
 
@@ -1047,7 +1049,8 @@
         <span class="n">_tcls</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">_htet</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">],</span> <span class="n">base</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>    <span class="c1"># traffic class</span>
         <span class="n">_flow</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">_htet</span><span class="p">[</span><span class="mi">3</span><span class="p">:],</span> <span class="n">base</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>     <span class="c1"># flow label</span>
 
-        <span class="k">return</span> <span class="p">(</span><span class="n">_vers</span><span class="p">,</span> <span class="n">_tcls</span><span class="p">,</span> <span class="n">_flow</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">_vers</span><span class="p">,</span> <span class="n">_tcls</span><span class="p">,</span> <span class="n">_flow</span><span class="p">)</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_ip_addr</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IPv6Address'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Read IP address.</span>
@@ -1265,20 +1268,21 @@
 <span class="sd">            rather than letting the exception reach the</span>
 <span class="sd">            :func:`~pcapkit.corekit.decorators.beholder` decorating this</span>
 <span class="sd">            method, which would substitute plain</span>
-<span class="sd">            :class:`~pcapkit.protocols.misc.raw.Raw` -- and ``Raw`` has no</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.raw.Raw` -- and :class:`~pcapkit.protocols.misc.raw.Raw` has no</span>
 <span class="sd">            ``next`` field, so it could not continue</span>
 <span class="sd">            :meth:`_decode_next_layer`'s walk. Every other exception --</span>
-<span class="sd">            including one raised by ``IPv6_Ext`` itself, or by ``ESP``'s own</span>
-<span class="sd">            dedicated parser -- still reaches ``beholder`` unchanged, giving a</span>
-<span class="sd">            plain ``Raw`` for that one layer. ``253`` and ``254`` have no</span>
-<span class="sd">            dedicated parser, so they reach plain ``Raw`` with no exception</span>
-<span class="sd">            involved; :meth:`_decode_next_layer` stops its walk structurally on</span>
-<span class="sd">            any layer whose info carries no ``next`` attribute, ``Raw``</span>
-<span class="sd">            included. ``ESP``'s info always carries a ``next`` (:data:`None`,</span>
-<span class="sd">            since :rfc:`4303` encrypts the real value), so neither this</span>
-<span class="sd">            substitution nor that structural check engages for it, and the walk</span>
-<span class="sd">            ends after it -- see :attr:`__generic_ext_codes__`'s docstring for</span>
-<span class="sd">            the full distinction.</span>
+<span class="sd">            including one raised by :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` itself,</span>
+<span class="sd">            or by :class:`~pcapkit.protocols.internet.esp.ESP`'s own dedicated parser -- still</span>
+<span class="sd">            reaches ``beholder`` unchanged, giving a plain :class:`~pcapkit.protocols.misc.raw.Raw`</span>
+<span class="sd">            for that one layer. ``253`` and ``254`` have no dedicated parser, so they reach plain</span>
+<span class="sd">            :class:`~pcapkit.protocols.misc.raw.Raw` with no exception involved;</span>
+<span class="sd">            :meth:`_decode_next_layer` stops its walk structurally on any layer whose info carries</span>
+<span class="sd">            no ``next`` attribute, :class:`~pcapkit.protocols.misc.raw.Raw` included.</span>
+<span class="sd">            :class:`~pcapkit.protocols.internet.esp.ESP`'s info always carries a ``next``</span>
+<span class="sd">            (:data:`None` unless its payload was decrypted, since :rfc:`4303` encrypts the real</span>
+<span class="sd">            value), so neither this substitution nor that structural check engages for it, and the</span>
+<span class="sd">            walk ends after it -- see :attr:`__generic_ext_codes__`'s docstring for the full</span>
+<span class="sd">            distinction.</span>
 
 <span class="sd">            The upper layer past a walk cut at :data:`EXTENSION_HEADER_LIMIT</span>
 <span class="sd">            &lt;pcapkit.utilities.config.EXTENSION_HEADER_LIMIT&gt;` is the</span>

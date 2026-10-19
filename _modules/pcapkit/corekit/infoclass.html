@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -485,7 +486,7 @@
 
 <span class="sd">:mod:`pcapkit.corekit.infoclass` contains :obj:`dict` like class</span>
 <span class="sd">:class:`~pcapkit.corekit.infoclass.Info`, which is originally</span>
-<span class="sd">designed to work alike :func:`dataclasses.dataclass` as introduced</span>
+<span class="sd">designed to work like :func:`dataclasses.dataclass` as introduced</span>
 <span class="sd">in :pep:`557`, and the immutable multi-mapping classes</span>
 <span class="sd">:class:`~pcapkit.corekit.infoclass.MultiInfo` and</span>
 <span class="sd">:class:`~pcapkit.corekit.infoclass.OrderedMultiInfo` that a finalised</span>
@@ -772,7 +773,19 @@
 
 <span class="sd">    """</span>
 
+<div class="viewcode-block" id="InfoMeta.__new__">
+<a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.InfoMeta.__new__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">bases</span><span class="p">:</span> <span class="s1">'tuple[type, ...]'</span><span class="p">,</span> <span class="n">attrs</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[Info]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Create the class, extending its :attr:`Info.__additional__` and</span>
+<span class="sd">        :attr:`Info.__excluded__` with every base's.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name: Class name.</span>
+<span class="sd">            bases: Base classes.</span>
+<span class="sd">            attrs: Class namespace.</span>
+<span class="sd">            **kwargs: Arbitrary keyword arguments, passed on to :class:`type`.</span>
+
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="s1">'__additional__'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
             <span class="n">attrs</span><span class="p">[</span><span class="s1">'__additional__'</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="s1">'__excluded__'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
@@ -785,6 +798,7 @@
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s1">'__excluded__'</span><span class="p">):</span>
                 <span class="n">attrs</span><span class="p">[</span><span class="s1">'__excluded__'</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">base</span><span class="o">.</span><span class="n">__excluded__</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">[</span><span class="s1">'__excluded__'</span><span class="p">])</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span></div>
+</div>
 
 
 
@@ -807,7 +821,7 @@
 <span class="sd">        accessing such renamed keys, the original key name should always be</span>
 <span class="sd">        used, i.e., such renaming is totally transparent to the user.</span>
 
-<span class="sd">    .. versionchanged:: 1.3.3</span>
+<span class="sd">    .. versionchanged:: 1.3.1.post8</span>
 
 <span class="sd">       Iterating an instance skips the names listed in :attr:`__excluded__`.</span>
 
@@ -1089,8 +1103,8 @@
 <span class="sd">        Args:</span>
 <span class="sd">            multi: If set to :obj:`True`, an iterator with a pair for each value</span>
 <span class="sd">                of each key, as :meth:`to_dict` writes them. Otherwise a view of</span>
-<span class="sd">                the pairs of the first value of each key, as</span>
-<span class="sd">                :meth:`Mapping.items &lt;collections.abc.Mapping.items&gt;` returns.</span>
+<span class="sd">                the pairs of the first value of each key, as the ``items``</span>
+<span class="sd">                method of :class:`collections.abc.Mapping` returns.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">multi</span><span class="p">:</span>
@@ -1241,6 +1255,8 @@
 
 
 
+<div class="viewcode-block" id="_ne">
+<a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass._ne">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_ne</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="s1">'OrderedMultiDict[Any, Any]'</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s1">'object'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""``self != other``, as the negation of ``self == other``.</span>
 
@@ -1253,7 +1269,8 @@
     <span class="n">result</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="fm">__eq__</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">result</span> <span class="ow">is</span> <span class="bp">NotImplemented</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">result</span>
-    <span class="k">return</span> <span class="ow">not</span> <span class="n">result</span>
+    <span class="k">return</span> <span class="ow">not</span> <span class="n">result</span></div>
+
 
 
 <div class="viewcode-block" id="_OrderedMultiDict">
@@ -1276,8 +1293,15 @@
 
     <span class="fm">__ne__</span> <span class="o">=</span> <span class="n">_ne</span>
 
+<div class="viewcode-block" id="_OrderedMultiDict.__repr__">
+<a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass._OrderedMultiDict.__repr__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Write the export as the :class:`~pcapkit.corekit.multidict.OrderedMultiDict`</span>
+<span class="sd">        it is, with every pair.</span>
+
+<span class="sd">        """</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">OrderedMultiDict</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">(</span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span><span class="si">!r}</span><span class="s1">)'</span></div>
+</div>
 
 
 
@@ -1318,28 +1342,45 @@
 
 <span class="sd">    """</span>
 
+<div class="viewcode-block" id="_MultiInfo.__new__">
+<a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass._MultiInfo.__new__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Self'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Create the instance with the empty multi-mapping :meth:`__update__` adds to."""</span>
         <span class="bp">self</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">)</span>
         <span class="c1"># NOTE: the multi-mapping class's own ``__init__``, which follows Info</span>
         <span class="c1"># and Mapping in the MRO, gives the empty storage -- including</span>
         <span class="c1"># OrderedMultiDict's bucket chain -- for ``__update__`` to add to.</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__writing</span><span class="p">():</span>  <span class="c1"># pylint: disable=protected-access</span>
             <span class="nb">super</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>  <span class="c1"># pylint: disable=bad-super-call</span>
-        <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mapping</span><span class="p">:</span> <span class="s1">'Optional[Mapping[Any, Any] | Iterable[tuple[Any, Any]]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=line-too-long,super-init-not-called</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">mapping</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__post_init__</span><span class="p">()</span>
 
+<div class="viewcode-block" id="_MultiInfo.__update__">
+<a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass._MultiInfo.__update__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">__update__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">:</span> <span class="s1">'Optional[Mapping[Any, Any] | Iterable[tuple[Any, Any]]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                    <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Add every pair to the multi-mapping, so that a repeated key keeps every value.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            dict_: Source pairs, as a mapping or an iterable of ``(key, value)`` pairs;</span>
+<span class="sd">                a list value of a mapping counts as one pair, and a</span>
+<span class="sd">                :class:`~pcapkit.corekit.multidict.MultiDict` gives every value of</span>
+<span class="sd">                each key.</span>
+<span class="sd">            **kwargs: More pairs, added after ``dict_``.</span>
+
+<span class="sd">        """</span>
         <span class="c1"># NOTE: every pair is *added*, as the multi-mapping's own constructor</span>
         <span class="c1"># and ``update`` do: a mapping's list values count as one pair each,</span>
         <span class="c1"># and a MultiDict gives every value of each key.</span>
         <span class="n">pairs</span> <span class="o">=</span> <span class="p">()</span> <span class="k">if</span> <span class="n">dict_</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">iter_multi_items</span><span class="p">(</span><span class="n">dict_</span><span class="p">)</span>  <span class="c1"># type: Iterable[tuple[Any, Any]]</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">__writing</span><span class="p">():</span>
             <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">chain</span><span class="p">(</span><span class="n">pairs</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()):</span>
-                <span class="nb">super</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>  <span class="c1"># type: ignore[misc] # pylint: disable=bad-super-call,no-member</span>
+                <span class="nb">super</span><span class="p">(</span><span class="n">Info</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>  <span class="c1"># type: ignore[misc] # pylint: disable=bad-super-call,no-member</span></div>
+
 
     <span class="nd">@contextlib</span><span class="o">.</span><span class="n">contextmanager</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">__writing</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Iterator[None]'</span><span class="p">:</span>
@@ -1362,10 +1403,23 @@
         <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s1"> object has no attribute </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1">'</span><span class="p">,</span>
                               <span class="n">quiet</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
+<div class="viewcode-block" id="_MultiInfo.__setattr__">
+<a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass._MultiInfo.__setattr__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
+<span class="w">        </span><span class="sd">"""Admit an attribute write only while :meth:`__new__` or :meth:`__update__` is writing.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            name: Attribute name.</span>
+<span class="sd">            value: Attribute value.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            UnsupportedCall: Outside those writes, as assignment to any :class:`Info` does.</span>
+
+<span class="sd">        """</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'_MultiInfo__open'</span><span class="p">):</span>
             <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="s2">"can't set attribute"</span><span class="p">)</span>
-        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+        <span class="nb">object</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_immutable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'NoReturn'</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s1"> object is immutable'</span><span class="p">)</span>
@@ -1444,6 +1498,8 @@
             <span class="k">return</span> <span class="n">result</span>
         <span class="k">return</span> <span class="ow">not</span> <span class="n">result</span>
 
+<div class="viewcode-block" id="MultiInfo.to_dict">
+<a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.MultiInfo.to_dict">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flat</span><span class="p">:</span> <span class="s1">'Optional[bool]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Return the contents as a plain mapping.</span>
 
@@ -1458,7 +1514,8 @@
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">flat</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">MultiDict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">MultiDict</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flat</span><span class="p">)</span>  <span class="c1"># type: ignore[call-overload]</span>
+        <span class="k">return</span> <span class="n">MultiDict</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flat</span><span class="p">)</span>  <span class="c1"># type: ignore[call-overload]</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="nf">listvalues</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Iterator[list[VT]]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Return an iterator of the :obj:`list` of all values of each key.</span>
@@ -1519,6 +1576,8 @@
     <span class="n">items</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="n">items</span>  <span class="c1"># type: ignore[assignment]</span>
     <span class="n">get</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="n">get</span>  <span class="c1"># type: ignore[assignment]</span>
 
+<div class="viewcode-block" id="OrderedMultiInfo.to_dict">
+<a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.OrderedMultiInfo.to_dict">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flat</span><span class="p">:</span> <span class="s1">'Optional[bool]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Return the contents as a plain mapping.</span>
 
@@ -1536,6 +1595,7 @@
         <span class="k">if</span> <span class="n">flat</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">_OrderedMultiDict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="n">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flat</span><span class="p">)</span>  <span class="c1"># type: ignore[call-overload]</span></div>
+</div>
 
 
 

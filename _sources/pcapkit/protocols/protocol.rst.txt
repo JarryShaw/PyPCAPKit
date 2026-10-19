@@ -12,7 +12,7 @@ new protocol stack; a new protocol in an existing layer subclasses that layer's
 base class -- :class:`~pcapkit.protocols.link.link.Link`,
 :class:`~pcapkit.protocols.internet.internet.Internet`,
 :class:`~pcapkit.protocols.transport.transport.Transport` or
-:class:`~pcapkit.protocols.application.application.Application` -- instead, c.f.
+:class:`~pcapkit.protocols.application.application.Application` -- instead; see
 :doc:`/ext`. The built-in protocol families, those layer classes included,
 derive from :class:`~pcapkit.protocols.protocol.ProtocolBase`, whose metaclass
 is :class:`~pcapkit.protocols.protocol.ProtocolMeta`; both are listed under
@@ -123,14 +123,14 @@ VLAN tags and IPv6 extension headers alike. What follows is kept as
 :class:`~pcapkit.protocols.misc.raw.Raw`, with one
 :exc:`~pcapkit.utilities.warnings.ProtocolWarning` (:issue:`1610`), and is
 marked :attr:`~pcapkit.protocols.protocol.Protocol._past_layer_limit`, so the
-default engine's TCP reassembly and flow tracing do not read a TCP segment
+:term:`default engine`'s TCP reassembly and flow tracing do not read a TCP segment
 there back out, as they do one the TCP parser rejected (:issue:`1518`). A
 protocol constructed from its own octets is not counted itself, so the count
 starts at the first layer it dissects. One chain of extension headers is also bounded on
 its own, by :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`.
 The ``pyshark``, ``scapy`` and ``pypcapfile`` engines dissect with their own
 parsers, which do not apply the frame's layer bound (:issue:`1609`). The
-``dpkt`` toolkit reads what ``dpkt`` decodes, which applies neither bound.
+``dpkt`` toolkit reads what |dpkt|_ decodes, which applies neither bound.
 
 Data Models
 -----------
@@ -262,6 +262,14 @@ Internal Definitions
 .. autoclass:: pcapkit.protocols.protocol.ProtocolMeta
    :no-members:
    :show-inheritance:
+
+.. autodata:: pcapkit.protocols.protocol.OUT_OF_BAND_KEYWORDS
+   :no-value:
+
+.. autodata:: pcapkit.protocols.protocol._KEYWORD_CONSUMERS
+   :no-value:
+
+.. autofunction:: pcapkit.protocols.protocol._declared_keywords
 
 Type Variables
 --------------

@@ -260,7 +260,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -392,6 +392,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -516,14 +517,14 @@ cannot be used for it.</p>
 <p>A packet can be reassembled if it contains an IPv4 layer
 (<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html#scapy.layers.inet.IP" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.layers.inet.IP</span></code></a>) whose header – as many octets as its IHL counts,
 and at least 20 – lies inside the frame and every IP datagram carrying it (see
-<code class="xref py py-func docutils literal notranslate"><span class="pre">_within_datagrams()</span></code>), and the <strong>DF</strong> (<code class="xref py py-attr docutils literal notranslate"><span class="pre">scapy.layers.inet.IP.flags.DF</span></code>)
+<a class="reference internal" href="#pcapkit.toolkit.scapy._within_datagrams" title="pcapkit.toolkit.scapy._within_datagrams"><code class="xref py py-func docutils literal notranslate"><span class="pre">_within_datagrams()</span></code></a>), and the <strong>DF</strong> (<code class="docutils literal notranslate"><span class="pre">scapy.layers.inet.IP.flags.DF</span></code>)
 flag is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>. A zero-length frame has none, though <a class="reference external" href="https://scapy.net">Scapy</a> hands it back
 as an IPv4 layer of defaults at the <code class="docutils literal notranslate"><span class="pre">RAW</span></code> and <code class="docutils literal notranslate"><span class="pre">IPV4</span></code> link types (see
-<code class="xref py py-func docutils literal notranslate"><span class="pre">_frame()</span></code>).</p>
+<a class="reference internal" href="#pcapkit.toolkit.scapy._frame" title="pcapkit.toolkit.scapy._frame"><code class="xref py py-func docutils literal notranslate"><span class="pre">_frame()</span></code></a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – Scapy packet.</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.packet.Packet</span></code></a></span>) – Scapy packet.</p></li>
 <li><p><strong>count</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Packet index. If not provided, defaults to <code class="docutils literal notranslate"><span class="pre">-1</span></code>.</p></li>
 </ul>
 </dd>
@@ -553,7 +554,7 @@ dissects in that layer’s own chain.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – Scapy packet.</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.packet.Packet</span></code></a></span>) – Scapy packet.</p></li>
 <li><p><strong>count</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Packet index. If not provided, defaults to <code class="docutils literal notranslate"><span class="pre">-1</span></code>.</p></li>
 </ul>
 </dd>
@@ -592,11 +593,11 @@ packet of 6in6, is not taken.</p>
 whose Data Offset counts at least that header, in no later IPv4 fragment; or a TCP
 segment behind an AH or IPv6 extension header in IPv4, read off the octets. It is
 keyed by the IP layer that carries it – in an IP-in-IP tunnel, the innermost (see
-<code class="xref py py-func docutils literal notranslate"><span class="pre">_tcp_carrier()</span></code>).</p>
+<a class="reference internal" href="#pcapkit.toolkit.scapy._tcp_carrier" title="pcapkit.toolkit.scapy._tcp_carrier"><code class="xref py py-func docutils literal notranslate"><span class="pre">_tcp_carrier()</span></code></a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – Scapy packet.</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.packet.Packet</span></code></a></span>) – Scapy packet.</p></li>
 <li><p><strong>count</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Packet index. If not provided, defaults to <code class="docutils literal notranslate"><span class="pre">-1</span></code>.</p></li>
 </ul>
 </dd>
@@ -623,7 +624,7 @@ on the terms <a class="reference internal" href="#pcapkit.toolkit.scapy.tcp_reas
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – Scapy packet.</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.packet.Packet</span></code></a></span>) – Scapy packet.</p></li>
 <li><p><strong>count</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Packet index. If not provided, defaults to <code class="docutils literal notranslate"><span class="pre">-1</span></code>.</p></li>
 </ul>
 </dd>
@@ -649,7 +650,7 @@ traced; otherwise <a class="reference external" href="https://docs.python.org/3/
 <dd><p>Fetch Scapy packet protocol chain.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – Scapy packet.</p>
+<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.packet.Packet</span></code></a></span>) – Scapy packet.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
@@ -669,14 +670,14 @@ traced; otherwise <a class="reference external" href="https://docs.python.org/3/
 <dd><p>Convert Scapy packet into <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – Scapy packet.</p>
+<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.packet.Packet</span></code></a></span>) – Scapy packet.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>A <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> mapping of packet data. Its <code class="docutils literal notranslate"><span class="pre">packet</span></code> is the octets of
-the frame (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_frame()</span></code>), none for a zero-length one. Each layer
+the frame (see <a class="reference internal" href="#pcapkit.toolkit.scapy._frame" title="pcapkit.toolkit.scapy._frame"><code class="xref py py-func docutils literal notranslate"><span class="pre">_frame()</span></code></a>), none for a zero-length one. Each layer
 carries only the fields
 set on it (for a dissected packet, those read from the wire, with no
 defaults filled in). Field values that are themselves
@@ -695,10 +696,10 @@ lists, are converted recursively. The <code class="docutils literal notranslate"
 <dd><p>Report a Scapy packet to the flow tracer, with its PCAP frame record.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – Scapy packet.</p>
+<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.packet.Packet</span></code></a></span>) – Scapy packet.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameRecord</span></code></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../foundation/traceflow/index.html#pcapkit.foundation.traceflow.data.data.FrameRecord" title="pcapkit.foundation.traceflow.data.data.FrameRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameRecord</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The <a class="reference internal" href="#pcapkit.toolkit.scapy.packet2dict" title="pcapkit.toolkit.scapy.packet2dict"><code class="xref py py-func docutils literal notranslate"><span class="pre">packet2dict()</span></code></a> mapping of the packet, which every trace format
@@ -715,7 +716,7 @@ the exact timestamp it reads the header’s resolution from.</p>
 <p>The octets are <code class="docutils literal notranslate"><span class="pre">packet.original</span></code>, which <a class="reference external" href="https://scapy.net">Scapy</a>’s readers keep as read,
 rather than <code class="docutils literal notranslate"><span class="pre">bytes(packet)</span></code>, which rebuilds them; for a packet not read
 from a capture, such as one built by hand, they are the octets it builds
-into (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_frame()</span></code>). <code class="docutils literal notranslate"><span class="pre">orig_len</span></code> is <code class="docutils literal notranslate"><span class="pre">packet.wirelen</span></code>, the
+into (see <a class="reference internal" href="#pcapkit.toolkit.scapy._frame" title="pcapkit.toolkit.scapy._frame"><code class="xref py py-func docutils literal notranslate"><span class="pre">_frame()</span></code></a>). <code class="docutils literal notranslate"><span class="pre">orig_len</span></code> is <code class="docutils literal notranslate"><span class="pre">packet.wirelen</span></code>, the
 record’s original length.</p>
 <p>The fraction in <code class="docutils literal notranslate"><span class="pre">frame_info.ts_usec</span></code> is in the capture’s own
 resolution. That resolution is the one
@@ -734,7 +735,7 @@ built by hand, is taken to count microseconds.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – Scapy packet.</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.packet.Packet</span></code></a></span>) – Scapy packet.</p></li>
 <li><p><strong>resolution</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Timestamp resolution, in units per second: the PCAP global
 header’s, or the PCAP-NG interface’s the packet was captured on.</p></li>
 </ul>
@@ -749,12 +750,181 @@ header’s, or the PCAP-NG interface’s the packet was captured on.</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – Scapy packet.</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.packet.Packet</span></code></a></span>) – Scapy packet.</p></li>
 <li><p><strong>linktype</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – <code class="docutils literal notranslate"><span class="pre">LINKTYPE_*</span></code> number: the PCAP global header’s, or the
 PCAP-NG interface’s the packet was captured on.</p></li>
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.toolkit.scapy._frame">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.scapy.</span></span><span class="sig-name descname"><span class="pre">_frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/scapy.html#_frame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.scapy._frame" title="Link to this definition">¶</a></dt>
+<dd><p>Return the octets of the frame a Scapy packet stands for.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.packet.Packet</span></code></a></span>) – Scapy packet.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>For a packet read from a capture, which every <a class="reference external" href="https://scapy.net">Scapy</a> reader gives a
+<code class="docutils literal notranslate"><span class="pre">wirelen</span></code>, the record’s original length, <code class="docutils literal notranslate"><span class="pre">packet.original</span></code>: the
+octets of the record, which the readers keep as read. For any other,
+such as one built by hand, <code class="docutils literal notranslate"><span class="pre">bytes(packet)</span></code>: the octets it builds into.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference external" href="https://scapy.net">Scapy</a> dissects a packet only from a non-empty string, so a
+zero-length frame comes back as the first layer its link type names,
+every field left to its default. <code class="docutils literal notranslate"><span class="pre">bytes()</span></code> of it builds a header out
+of nothing – 20 octets at <code class="docutils literal notranslate"><span class="pre">RAW</span></code> and <code class="docutils literal notranslate"><span class="pre">IPV4</span></code>, 14 at <code class="docutils literal notranslate"><span class="pre">ETHERNET</span></code> –
+where the record has none (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1676">#1676</a>).</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.toolkit.scapy._within_datagrams">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.scapy.</span></span><span class="sig-name descname"><span class="pre">_within_datagrams</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/scapy.html#_within_datagrams"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.scapy._within_datagrams" title="Link to this definition">¶</a></dt>
+<dd><p>Return the octets from <code class="docutils literal notranslate"><span class="pre">layer</span></code> on that lie inside every IP datagram carrying it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>layer</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.packet.Packet</span></code></a></span>) – A layer of a dissected Scapy packet.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The octets of <code class="docutils literal notranslate"><span class="pre">layer</span></code> and everything after it, up to the nearest end
+that the Total Length or Payload Length of an IP layer above it declares.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>When <a class="reference external" href="https://scapy.net">Scapy</a> dissects an IP layer, it files whatever follows the
+datagram’s declared length as a <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Padding" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Padding</span></code></a> layer –
+an Ethernet frame’s padding up to its 60-octet minimum, or a trailer
+such as an FCS – and <code class="docutils literal notranslate"><span class="pre">bytes()</span></code> of <em>any</em> layer above that one ends
+with it. Those octets are no part of the datagram (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1584">#1584</a>), so
+they are cut off here. An IPv4 Total Length of zero, as TCP
+segmentation offload leaves, declares nothing, so the datagram runs to
+the end of the frame (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1547">#1547</a>); an IPv6 Payload Length of zero
+gives way to a Jumbo Payload option (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1434">#1434</a>), whose length is
+read here rather than left to Scapy, which reads it in host byte order
+and adds the Hop-by-Hop Options header to it a second time.</p>
+<p>Every IP layer above <code class="docutils literal notranslate"><span class="pre">layer</span></code> bounds it, not only the nearest: a
+datagram tunnelled in IP may declare more than the one carrying it
+holds, or nothing at all. An IPv4 layer built by hand has no <code class="docutils literal notranslate"><span class="pre">ihl</span></code>
+until it is built, so one given a Total Length alone has its IHL read
+off the octets it builds into (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1676">#1676</a>).</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.toolkit.scapy._tcp_carrier">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.scapy.</span></span><span class="sig-name descname"><span class="pre">_tcp_carrier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/scapy.html#_tcp_carrier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.scapy._tcp_carrier" title="Link to this definition">¶</a></dt>
+<dd><p>Fetch the TCP segment of a Scapy packet, and the IP layer that carries it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.packet.Packet</span></code></a></span>) – Scapy packet.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html#scapy.layers.inet.IP" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.layers.inet.IP</span></code></a> | <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet6.html#scapy.layers.inet6.IPv6" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.layers.inet6.IPv6</span></code></a>, <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html#scapy.layers.inet.TCP" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.layers.inet.TCP</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><p>The nearest <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html#scapy.layers.inet.IP" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP</span></code></a> or
+<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet6.html#scapy.layers.inet6.IPv6" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6</span></code></a> layer above the packet’s TCP layer,
+that layer, and the segment’s header and payload (see
+<a class="reference internal" href="#pcapkit.toolkit.scapy._tcp_segment" title="pcapkit.toolkit.scapy._tcp_segment"><code class="xref py py-func docutils literal notranslate"><span class="pre">_tcp_segment()</span></code></a>); or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> if there is no such IP layer, or
+an IPv4 layer above it is a later fragment, whose data is a slice of
+the datagram’s payload with no upper-layer header in it
+(<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html#section-3.2"><strong>RFC 791 Section 3.2</strong></a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1617">#1617</a>).</p>
+<p>An IPv4 layer whose protocol names an AH or IPv6 extension header
+(<a class="reference internal" href="#pcapkit.toolkit.pypcapfile.IPV4_EXTENSION_HEADERS" title="pcapkit.toolkit.pypcapfile.IPV4_EXTENSION_HEADERS"><code class="xref py py-data docutils literal notranslate"><span class="pre">IPV4_EXTENSION_HEADERS</span></code></a>) has those
+headers stepped over in its octets, up to
+<a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.EXTENSION_HEADER_LIMIT" title="pcapkit.utilities.config.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a> of
+them in a row (see
+<a class="reference internal" href="#pcapkit.toolkit.pypcapfile._walk_extension_headers" title="pcapkit.toolkit.pypcapfile._walk_extension_headers"><code class="xref py py-func docutils literal notranslate"><span class="pre">_walk_extension_headers()</span></code></a>), and what
+follows them is dissected from the octets: a tunnel, walked on as
+above, or a TCP segment (see <a class="reference internal" href="#pcapkit.toolkit.scapy._tcp_behind_extension_headers" title="pcapkit.toolkit.scapy._tcp_behind_extension_headers"><code class="xref py py-func docutils literal notranslate"><span class="pre">_tcp_behind_extension_headers()</span></code></a>,
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1606">#1606</a>). In the datagram an ICMP error quotes, they are left as
+<a class="reference external" href="https://scapy.net">Scapy</a> dissects them.</p>
+</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The nearest is the innermost IP layer of an IP-in-IP tunnel
+(<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2003.html"><strong>RFC 2003</strong></a>, <span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2473.html"><strong>RFC 2473</strong></a>, <span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4213.html"><strong>RFC 4213</strong></a>), whose addresses are the TCP
+endpoints’ (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1581">#1581</a>). <code class="docutils literal notranslate"><span class="pre">packet['IP']</span></code> finds the outermost IPv4
+layer instead, which is the tunnel’s, or with IPv4 carried in IPv6 the
+inner one. The extension header layers <a class="reference external" href="https://scapy.net">Scapy</a> dissects between an
+IPv6 layer and its payload are not IP layers, so are stepped over.</p>
+<p>Inside IPv4, <a class="reference external" href="https://scapy.net">Scapy</a> dissects an AH alone of those headers, and behind
+one only IPv6 and, for a Next Header of <code class="docutils literal notranslate"><span class="pre">0</span></code>, IPv4, so the octets are
+read instead. It also dissects IPv6 and AH inside a later fragment,
+binding neither to a zero fragment offset as it binds TCP.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.toolkit.scapy._tcp_segment">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.scapy.</span></span><span class="sig-name descname"><span class="pre">_tcp_segment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tcp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/scapy.html#_tcp_segment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.scapy._tcp_segment" title="Link to this definition">¶</a></dt>
+<dd><p>Split the TCP segment <code class="docutils literal notranslate"><span class="pre">tcp</span></code> heads into its header and its payload.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tcp</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.inet.html#scapy.layers.inet.TCP" title="(in Scapy v2.8.0.post8)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.layers.inet.TCP</span></code></a></span>) – TCP layer of a dissected Scapy packet.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The header, as many octets as the Data Offset counts, and the payload
+after it, up to the end of the datagrams that carry the segment, cf.
+<code class="docutils literal notranslate"><span class="pre">_within_datagrams()</span></code>; or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> if the datagrams hold fewer
+than the 20 octets of the fixed header, or the Data Offset counts fewer
+(<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.1"><strong>RFC 9293 Section 3.1</strong></a>), as there is then no header to split off.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The Data Offset is read off the octets, which for a dissected layer
+carry the <code class="docutils literal notranslate"><span class="pre">dataofs</span></code> <a class="reference external" href="https://scapy.net">Scapy</a> read, and for a layer built by hand the
+one it builds, as it leaves <code class="docutils literal notranslate"><span class="pre">dataofs</span></code> <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> until then
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1676">#1676</a>).</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.toolkit.scapy._tcp_behind_extension_headers">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.scapy.</span></span><span class="sig-name descname"><span class="pre">_tcp_behind_extension_headers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">segment</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/scapy.html#_tcp_behind_extension_headers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.scapy._tcp_behind_extension_headers" title="Link to this definition">¶</a></dt>
+<dd><p>Split a TCP segment carried behind an AH or IPv6 extension header in IPv4.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>segment</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Raw octets from the TCP header on, as far as the IPv4 layer
+carrying it goes (see <a class="reference internal" href="#pcapkit.toolkit.scapy._tcp_carrier" title="pcapkit.toolkit.scapy._tcp_carrier"><code class="xref py py-func docutils literal notranslate"><span class="pre">_tcp_carrier()</span></code></a>).</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The header, as many octets as the Data Offset counts, and the payload
+after it; or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> if there are fewer than
+<a class="reference internal" href="../protocols/transport/tcp.html#pcapkit.protocols.schema.transport.tcp.TCP_MIN_HEADER_LEN" title="pcapkit.protocols.schema.transport.tcp.TCP_MIN_HEADER_LEN"><code class="xref py py-data docutils literal notranslate"><span class="pre">TCP_MIN_HEADER_LEN</span></code></a>
+octets, the Data Offset counts fewer or more than were captured, or
+pcapkit’s own TCP parser rejects the options (see
+<a class="reference internal" href="#pcapkit.toolkit.pypcapfile._default_accepts" title="pcapkit.toolkit.pypcapfile._default_accepts"><code class="xref py py-func docutils literal notranslate"><span class="pre">_default_accepts()</span></code></a>).</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference external" href="https://scapy.net">Scapy</a> dissects no TCP layer there (see <a class="reference internal" href="#pcapkit.toolkit.scapy._tcp_carrier" title="pcapkit.toolkit.scapy._tcp_carrier"><code class="xref py py-func docutils literal notranslate"><span class="pre">_tcp_carrier()</span></code></a>), so
+the segment is read off the octets, and its options are left to
+pcapkit’s parser to check.</p>
+</div>
 </dd></dl>
 
 </section>
@@ -775,7 +945,7 @@ one carried in IPv6 is not read – whose header was captured whole, and the <st
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – DPKT packet.</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.dpkt.Packet</span></code></a></span>) – DPKT packet.</p></li>
 <li><p><strong>timestamp</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – Capture timestamp of the packet, which drives the reassembly
 timeout. <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a>’s reader yields it beside the record’s octets rather
 than on the packet, so it is passed in – as <a class="reference internal" href="#pcapkit.toolkit.dpkt.tcp_traceflow" title="pcapkit.toolkit.dpkt.tcp_traceflow"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_traceflow()</span></code></a>
@@ -786,7 +956,7 @@ as a <a class="reference external" href="https://docs.python.org/3/builtins/func
 a nanosecond PCAP’s as a <a class="reference external" href="https://docs.python.org/3/library/decimal.html#decimal.Decimal" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Decimal</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1501">#1501</a>),
 and as the one nearest the exact value it carries, if any, where
 <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a>’s own may be an ulp off (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1668">#1668</a>; see
-<code class="xref py py-func docutils literal notranslate"><span class="pre">_capture_time()</span></code>).</p></li>
+<a class="reference internal" href="#pcapkit.toolkit.dpkt._capture_time" title="pcapkit.toolkit.dpkt._capture_time"><code class="xref py py-func docutils literal notranslate"><span class="pre">_capture_time()</span></code></a>).</p></li>
 <li><p><strong>count</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Packet index. If not provided, defaults to <code class="docutils literal notranslate"><span class="pre">-1</span></code>.</p></li>
 </ul>
 </dd>
@@ -803,10 +973,10 @@ reassembled; otherwise <a class="reference external" href="https://docs.python.o
 <p>The header and payload are sliced out of the record octets
 <a class="reference internal" href="../foundation/engines/3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT" title="pcapkit.foundation.engines.dpkt.DPKT"><code class="xref py py-class docutils literal notranslate"><span class="pre">DPKT</span></code></a> attached to the frame, so
 they are the captured ones. A packet built by hand carries no such
-buffer, and its octets are then <code class="xref py py-mod docutils literal notranslate"><span class="pre">dpkt</span></code>’s re-serialisation of it, in
+buffer, and its octets are then <a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a>’s re-serialisation of it, in
 which a zeroed checksum or length comes back recomputed –
 <a class="reference internal" href="#pcapkit.toolkit.dpkt.attach_buffer" title="pcapkit.toolkit.dpkt.attach_buffer"><code class="xref py py-func docutils literal notranslate"><span class="pre">attach_buffer()</span></code></a> is what makes them the wire’s again. They are that
-re-serialisation too where <code class="xref py py-mod docutils literal notranslate"><span class="pre">dpkt</span></code>’s own lengths misplace the layer
+re-serialisation too where <a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a>’s own lengths misplace the layer
 in the record, as behind some stacks of VLAN tags (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1646">#1646</a>). The
 packet itself is left untouched either way.</p>
 <p>The header is the IHL’s octets, and the payload ends at the Total
@@ -830,11 +1000,11 @@ with <code class="docutils literal notranslate"><span class="pre">packet</span><
 <dd><p>Make data for IPv6 reassembly.</p>
 <p>A packet can be reassembled if its network layer is IPv6 (<a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip6.IP6" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.ip6.IP6</span></code></a>) –
 one carried in IPv4 is not read – and has an IPv6 Fragment header
-(<span class="target" id="index-2"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.5"><strong>RFC 2460 Section 4.5</strong></a>, i.e., <a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip6.IP6FragmentHeader" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.ip6.IP6FragmentHeader</span></code></a>).</p>
+(<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.5"><strong>RFC 2460 Section 4.5</strong></a>, i.e., <a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip6.IP6FragmentHeader" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.ip6.IP6FragmentHeader</span></code></a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – DPKT packet.</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.dpkt.Packet</span></code></a></span>) – DPKT packet.</p></li>
 <li><p><strong>timestamp</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – Capture timestamp of the packet, which drives the reassembly
 timeout; <a class="reference internal" href="#pcapkit.toolkit.dpkt.packet2timestamp" title="pcapkit.toolkit.dpkt.packet2timestamp"><code class="xref py py-func docutils literal notranslate"><span class="pre">packet2timestamp()</span></code></a> reads it back off a stored frame.
 Handed on as a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a>, as for <a class="reference internal" href="#pcapkit.toolkit.dpkt.ipv4_reassembly" title="pcapkit.toolkit.dpkt.ipv4_reassembly"><code class="xref py py-func docutils literal notranslate"><span class="pre">ipv4_reassembly()</span></code></a>.</p></li>
@@ -854,10 +1024,10 @@ reassembled; otherwise <a class="reference external" href="https://docs.python.o
 <p>The header and payload are sliced out of the record octets
 <a class="reference internal" href="../foundation/engines/3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT" title="pcapkit.foundation.engines.dpkt.DPKT"><code class="xref py py-class docutils literal notranslate"><span class="pre">DPKT</span></code></a> attached to the frame, so
 they are the captured ones. A packet built by hand carries no such
-buffer, and its octets are then <code class="xref py py-mod docutils literal notranslate"><span class="pre">dpkt</span></code>’s re-serialisation of it, in
+buffer, and its octets are then <a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a>’s re-serialisation of it, in
 which a zeroed checksum or length comes back recomputed –
 <a class="reference internal" href="#pcapkit.toolkit.dpkt.attach_buffer" title="pcapkit.toolkit.dpkt.attach_buffer"><code class="xref py py-func docutils literal notranslate"><span class="pre">attach_buffer()</span></code></a> is what makes them the wire’s again. They are that
-re-serialisation too where <code class="xref py py-mod docutils literal notranslate"><span class="pre">dpkt</span></code>’s own lengths misplace the layer
+re-serialisation too where <a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a>’s own lengths misplace the layer
 in the record, as behind some stacks of VLAN tags (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1646">#1646</a>). The
 packet itself is left untouched either way.</p>
 </div>
@@ -876,13 +1046,13 @@ with <code class="docutils literal notranslate"><span class="pre">packet</span><
 <span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.dpkt.</span></span><span class="sig-name descname"><span class="pre">tcp_reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/dpkt.html#tcp_reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.dpkt.tcp_reassembly" title="Link to this definition">¶</a></dt>
 <dd><p>Make data for TCP reassembly.</p>
 <p>A packet can be reassembled if its network layer carries a TCP layer
-(<a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.tcp.TCP" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.tcp.TCP</span></code></a>), behind any IPv6 extension headers <code class="xref py py-mod docutils literal notranslate"><span class="pre">dpkt</span></code> decodes. TCP
+(<a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.tcp.TCP" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.tcp.TCP</span></code></a>), behind any IPv6 extension headers <a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a> decodes. TCP
 in an IP-in-IP tunnel, or behind an AH or IPv6 extension header carried in IPv4, is
 not read.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – DPKT packet.</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.dpkt.Packet</span></code></a></span>) – DPKT packet.</p></li>
 <li><p><strong>timestamp</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – Capture timestamp of the packet, which drives the reassembly
 timeout; <a class="reference internal" href="#pcapkit.toolkit.dpkt.packet2timestamp" title="pcapkit.toolkit.dpkt.packet2timestamp"><code class="xref py py-func docutils literal notranslate"><span class="pre">packet2timestamp()</span></code></a> reads it back off a stored frame.
 Handed on as a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a>, as for <a class="reference internal" href="#pcapkit.toolkit.dpkt.ipv4_reassembly" title="pcapkit.toolkit.dpkt.ipv4_reassembly"><code class="xref py py-func docutils literal notranslate"><span class="pre">ipv4_reassembly()</span></code></a>.</p></li>
@@ -902,10 +1072,10 @@ reassembled; otherwise <a class="reference external" href="https://docs.python.o
 <p>The header and payload are sliced out of the record octets
 <a class="reference internal" href="../foundation/engines/3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT" title="pcapkit.foundation.engines.dpkt.DPKT"><code class="xref py py-class docutils literal notranslate"><span class="pre">DPKT</span></code></a> attached to the frame, so
 they are the captured ones. A packet built by hand carries no such
-buffer, and its octets are then <code class="xref py py-mod docutils literal notranslate"><span class="pre">dpkt</span></code>’s re-serialisation of it, in
+buffer, and its octets are then <a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a>’s re-serialisation of it, in
 which a zeroed checksum or length comes back recomputed –
 <a class="reference internal" href="#pcapkit.toolkit.dpkt.attach_buffer" title="pcapkit.toolkit.dpkt.attach_buffer"><code class="xref py py-func docutils literal notranslate"><span class="pre">attach_buffer()</span></code></a> is what makes them the wire’s again. They are that
-re-serialisation too where <code class="xref py py-mod docutils literal notranslate"><span class="pre">dpkt</span></code>’s own lengths misplace the layer
+re-serialisation too where <a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a>’s own lengths misplace the layer
 in the record, as behind some stacks of VLAN tags (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1646">#1646</a>). The
 packet itself is left untouched either way.</p>
 </div>
@@ -924,13 +1094,13 @@ with <code class="docutils literal notranslate"><span class="pre">packet</span><
 <span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.dpkt.</span></span><span class="sig-name descname"><span class="pre">tcp_traceflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_link</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/dpkt.html#tcp_traceflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.dpkt.tcp_traceflow" title="Link to this definition">¶</a></dt>
 <dd><p>Trace packet flow for TCP.</p>
 <p>A packet can be traced if its network layer carries a TCP layer
-(<a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.tcp.TCP" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.tcp.TCP</span></code></a>), behind any IPv6 extension headers <code class="xref py py-mod docutils literal notranslate"><span class="pre">dpkt</span></code> decodes. TCP
+(<a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.tcp.TCP" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.tcp.TCP</span></code></a>), behind any IPv6 extension headers <a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a> decodes. TCP
 in an IP-in-IP tunnel, or behind an AH or IPv6 extension header carried in IPv4, is
 not read.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – DPKT packet.</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.dpkt.Packet</span></code></a></span>) – DPKT packet.</p></li>
 <li><p><strong>timestamp</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – Timestamp of the packet, handed on as a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a>, as for
 <a class="reference internal" href="#pcapkit.toolkit.dpkt.ipv4_reassembly" title="pcapkit.toolkit.dpkt.ipv4_reassembly"><code class="xref py py-func docutils literal notranslate"><span class="pre">ipv4_reassembly()</span></code></a>. The PCAP frame record is built from the
 exact timestamp attached by <a class="reference internal" href="#pcapkit.toolkit.dpkt.attach_timestamp" title="pcapkit.toolkit.dpkt.attach_timestamp"><code class="xref py py-func docutils literal notranslate"><span class="pre">attach_timestamp()</span></code></a>, if any; see
@@ -952,10 +1122,10 @@ traced; otherwise <a class="reference external" href="https://docs.python.org/3/
 <p>The header and payload are sliced out of the record octets
 <a class="reference internal" href="../foundation/engines/3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT" title="pcapkit.foundation.engines.dpkt.DPKT"><code class="xref py py-class docutils literal notranslate"><span class="pre">DPKT</span></code></a> attached to the frame, so
 they are the captured ones. A packet built by hand carries no such
-buffer, and its octets are then <code class="xref py py-mod docutils literal notranslate"><span class="pre">dpkt</span></code>’s re-serialisation of it, in
+buffer, and its octets are then <a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a>’s re-serialisation of it, in
 which a zeroed checksum or length comes back recomputed –
 <a class="reference internal" href="#pcapkit.toolkit.dpkt.attach_buffer" title="pcapkit.toolkit.dpkt.attach_buffer"><code class="xref py py-func docutils literal notranslate"><span class="pre">attach_buffer()</span></code></a> is what makes them the wire’s again. They are that
-re-serialisation too where <code class="xref py py-mod docutils literal notranslate"><span class="pre">dpkt</span></code>’s own lengths misplace the layer
+re-serialisation too where <a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a>’s own lengths misplace the layer
 in the record, as behind some stacks of VLAN tags (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1646">#1646</a>). The
 packet itself is left untouched either way.</p>
 </div>
@@ -974,7 +1144,7 @@ packet itself is left untouched either way.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – DPKT packet.</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.dpkt.Packet</span></code></a></span>) – DPKT packet.</p></li>
 <li><p><strong>timestamp</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – Capture timestamp of the packet, as <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a>’s reader yielded it
 beside the record’s octets.</p></li>
 </ul>
@@ -988,7 +1158,7 @@ beside the record’s octets.</p></li>
 <dd><p>Read back the capture timestamp of a DPKT packet.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – DPKT packet, as stored by
+<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.dpkt.Packet</span></code></a></span>) – DPKT packet, as stored by
 <a class="reference internal" href="../foundation/engines/3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT" title="pcapkit.foundation.engines.dpkt.DPKT"><code class="xref py py-class docutils literal notranslate"><span class="pre">DPKT</span></code></a>.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
@@ -1017,7 +1187,7 @@ subclass rather than a <a class="reference external" href="https://docs.python.o
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – DPKT packet.</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.dpkt.Packet</span></code></a></span>) – DPKT packet.</p></li>
 <li><p><strong>buffer</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Octets of the record the packet was parsed from, as <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a>’s
 reader yielded them.</p></li>
 </ul>
@@ -1031,7 +1201,7 @@ reader yielded them.</p></li>
 <dd><p>Fetch the octets of a DPKT packet without modifying it.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – DPKT packet.</p>
+<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.dpkt.Packet</span></code></a></span>) – DPKT packet.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
@@ -1053,7 +1223,7 @@ recomputation never reaches the packet itself.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – DPKT packet.</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.dpkt.Packet</span></code></a></span>) – DPKT packet.</p></li>
 <li><p><strong>timestamp</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/decimal.html#decimal.Decimal" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Decimal</span></code></a></span>) – Capture timestamp of the packet. The one attached by
 <a class="reference internal" href="#pcapkit.toolkit.dpkt.attach_timestamp" title="pcapkit.toolkit.dpkt.attach_timestamp"><code class="xref py py-func docutils literal notranslate"><span class="pre">attach_timestamp()</span></code></a>, if any, is preferred, since it is the value
 <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a>’s reader yielded.</p></li>
@@ -1061,7 +1231,7 @@ recomputation never reaches the packet itself.</p>
 </ul>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameRecord</span></code></span></p>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../foundation/traceflow/index.html#pcapkit.foundation.traceflow.data.data.FrameRecord" title="pcapkit.foundation.traceflow.data.data.FrameRecord"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameRecord</span></code></a></span></p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>The <a class="reference internal" href="#pcapkit.toolkit.dpkt.packet2dict" title="pcapkit.toolkit.dpkt.packet2dict"><code class="xref py py-func docutils literal notranslate"><span class="pre">packet2dict()</span></code></a> mapping of the packet, which every trace format
@@ -1076,7 +1246,7 @@ writes, and the exact timestamp it reads the header’s resolution from.</p>
 and both it and <code class="docutils literal notranslate"><span class="pre">orig_len</span></code> come from the reader:
 <a class="reference internal" href="../foundation/engines/3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT" title="pcapkit.foundation.engines.dpkt.DPKT"><code class="xref py py-class docutils literal notranslate"><span class="pre">DPKT</span></code></a> reads PCAP and PCAP-NG
 alike into a <a class="reference internal" href="#pcapkit.toolkit.dpkt.RecordTimestamp" title="pcapkit.toolkit.dpkt.RecordTimestamp"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordTimestamp</span></code></a>. A timestamp that is not one
-– a packet built by hand, or read by a <code class="docutils literal notranslate"><span class="pre">dpkt</span></code> whose reader the engine
+– a packet built by hand, or read by a <a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a> whose reader the engine
 could not extend – is read as <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a> yields it: a
 <a class="reference external" href="https://docs.python.org/3/library/decimal.html#decimal.Decimal" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Decimal</span></code></a> counts nanoseconds and a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a>
 microseconds, and the octets are taken to be whole.</p>
@@ -1096,14 +1266,14 @@ microseconds, and the octets are taken to be whole.</p>
 </dd>
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
 <dd class="field-odd"><p>Length of headers before IPv6 Fragment header
-<a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip6.IP6FragmentHeader" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.ip6.IP6FragmentHeader</span></code></a> (<span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.5"><strong>RFC 2460 Section 4.5</strong></a>).</p>
+<a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip6.IP6FragmentHeader" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.ip6.IP6FragmentHeader</span></code></a> (<span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.5"><strong>RFC 2460 Section 4.5</strong></a>).</p>
 </dd>
 </dl>
-<p>As specified in <span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.1"><strong>RFC 2460 Section 4.1</strong></a>, such a header may be a Hop-by-Hop Options
-header <a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip6.IP6HopOptsHeader" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.ip6.IP6HopOptsHeader</span></code></a> (<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.3"><strong>RFC 2460 Section 4.3</strong></a>), a Destination
-Options header <a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip6.IP6DstOptsHeader" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.ip6.IP6DstOptsHeader</span></code></a> (<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.6"><strong>RFC 2460 Section 4.6</strong></a>) or a
-Routing header <a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip6.IP6RoutingHeader" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.ip6.IP6RoutingHeader</span></code></a> (<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.4"><strong>RFC 2460 Section 4.4</strong></a>). An
-Authentication header (<span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4302.html"><strong>RFC 4302</strong></a>) reaches here as well, though, so the headers are
+<p>As specified in <span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.1"><strong>RFC 2460 Section 4.1</strong></a>, such a header may be a Hop-by-Hop Options
+header <a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip6.IP6HopOptsHeader" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.ip6.IP6HopOptsHeader</span></code></a> (<span class="target" id="index-10"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.3"><strong>RFC 2460 Section 4.3</strong></a>), a Destination
+Options header <a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip6.IP6DstOptsHeader" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.ip6.IP6DstOptsHeader</span></code></a> (<span class="target" id="index-11"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.6"><strong>RFC 2460 Section 4.6</strong></a>) or a
+Routing header <a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.ip6.IP6RoutingHeader" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.ip6.IP6RoutingHeader</span></code></a> (<span class="target" id="index-12"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2460.html#section-4.4"><strong>RFC 2460 Section 4.4</strong></a>). An
+Authentication header (<span class="target" id="index-13"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4302.html"><strong>RFC 4302</strong></a>) reaches here as well, though, so the headers are
 walked in the order they were parsed rather than looked up by a fixed list of types.
 Walking them is also what counts a repeated header type once per occurrence, and what leaves
 out one that sits <em>after</em> the Fragment header rather than before it.</p>
@@ -1115,7 +1285,7 @@ out one that sits <em>after</em> the Fragment header rather than before it.</p>
 <dd><p>Fetch DPKT packet protocol chain.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – DPKT packet.</p>
+<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.dpkt.Packet</span></code></a></span>) – DPKT packet.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
@@ -1134,7 +1304,7 @@ payload that is no layer, as in <a class="reference internal" href="#pcapkit.too
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a></span>) – DPKT packet.</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://dpkt.readthedocs.io/en/latest/api/api_auto.html#dpkt.dpkt.Packet" title="(in dpkt v1.9)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dpkt.dpkt.Packet</span></code></a></span>) – DPKT packet.</p></li>
 <li><p><strong>timestamp</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – Timestamp of packet.</p></li>
 <li><p><strong>data_link</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code></a></span>) – Data link type.</p></li>
 </ul>
@@ -1150,6 +1320,29 @@ layer of its own only where it is one, i.e. has the header fields a
 <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a>, e.g. <code class="docutils literal notranslate"><span class="pre">''</span></code> for VRRP’s. A frame the engine keeps as raw
 data, as it keeps one <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a> cannot decode, has no header fields, so
 maps to an empty <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.toolkit.dpkt._capture_time">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.dpkt.</span></span><span class="sig-name descname"><span class="pre">_capture_time</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/dpkt.html#_capture_time"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.dpkt._capture_time" title="Link to this definition">¶</a></dt>
+<dd><p>The capture timestamp reassembly and flow tracing are handed.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>timestamp</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/decimal.html#decimal.Decimal" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Decimal</span></code></a></span>) – Capture timestamp of the packet.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a> nearest the exact timestamp. <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a> reads a
+microsecond PCAP’s as <code class="docutils literal notranslate"><span class="pre">tv_sec</span> <span class="pre">+</span> <span class="pre">tv_usec</span> <span class="pre">/</span> <span class="pre">1e6</span></code>, which rounds twice,
+so can be an ulp off at a small <code class="docutils literal notranslate"><span class="pre">tv_sec</span></code>:
+<code class="docutils literal notranslate"><span class="pre">1.0036909999999999</span></code> for <code class="docutils literal notranslate"><span class="pre">1.003691</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1668">#1668</a>). A
+<a class="reference internal" href="#pcapkit.toolkit.dpkt.RecordTimestamp" title="pcapkit.toolkit.dpkt.RecordTimestamp"><code class="xref py py-class docutils literal notranslate"><span class="pre">RecordTimestamp</span></code></a> is therefore read by its exact value. Any other
+timestamp – one passed by hand, or yielded by a <a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a> whose reader
+the engine could not extend – carries none, and is handed on as it is.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1171,7 +1364,7 @@ so a stored frame’s timestamp is exactly what it was before – and also
 carries what would otherwise be lost. Reassembly and flow tracing are handed a plain
 <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">float</span></code></a> of it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1501">#1501</a>): of its exact value, since <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a>’s
 own for a microsecond PCAP rounds twice (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1668">#1668</a>; see
-<code class="xref py py-func docutils literal notranslate"><span class="pre">_capture_time()</span></code>).</p>
+<a class="reference internal" href="#pcapkit.toolkit.dpkt._capture_time" title="pcapkit.toolkit.dpkt._capture_time"><code class="xref py py-func docutils literal notranslate"><span class="pre">_capture_time()</span></code></a>).</p>
 <p>A copy, a deep copy and a pickle at any protocol all rebuild a timestamp
 from what its <a class="reference external" href="https://docs.python.org/3/library/pickle.html#object.__reduce__" title="(in Python v3.15)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__reduce__()</span></code></a> returns, so each keeps the exact
 timestamp, the resolution and the original length.
@@ -1251,13 +1444,13 @@ for lack of the corresponding <a class="reference external" href="https://kimine
 <span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pyshark.</span></span><span class="sig-name descname"><span class="pre">tcp_traceflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pyshark.html#tcp_traceflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pyshark.tcp_traceflow" title="Link to this definition">¶</a></dt>
 <dd><p>Trace packet flow for TCP.</p>
 <p>A packet can be traced if it contains a TCP layer with a whole fixed header (see
-<code class="xref py py-func docutils literal notranslate"><span class="pre">_has_fixed_header()</span></code>), keyed by the IP layer that carries it – in an IP-in-IP
-tunnel, the innermost (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_carrier()</span></code>) – if tshark reports both its addresses
-(see <code class="xref py py-func docutils literal notranslate"><span class="pre">_has_addresses()</span></code>).</p>
+<a class="reference internal" href="#pcapkit.toolkit.pyshark._has_fixed_header" title="pcapkit.toolkit.pyshark._has_fixed_header"><code class="xref py py-func docutils literal notranslate"><span class="pre">_has_fixed_header()</span></code></a>), keyed by the IP layer that carries it – in an IP-in-IP
+tunnel, the innermost (see <a class="reference internal" href="#pcapkit.toolkit.pyshark._carrier" title="pcapkit.toolkit.pyshark._carrier"><code class="xref py py-func docutils literal notranslate"><span class="pre">_carrier()</span></code></a>) – if tshark reports both its addresses
+(see <a class="reference internal" href="#pcapkit.toolkit.pyshark._has_addresses" title="pcapkit.toolkit.pyshark._has_addresses"><code class="xref py py-func docutils literal notranslate"><span class="pre">_has_addresses()</span></code></a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></span>) – PyShark packet.</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">pyshark.packet.packet.Packet</span></code></span>) – PyShark packet.</p></li>
 <li><p><strong>count</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Packet index. If not provided, defaults to <code class="docutils literal notranslate"><span class="pre">-1</span></code>. The engine
 passes its own frame count, not tshark’s <code class="docutils literal notranslate"><span class="pre">frame.number</span></code>, which
 also numbers records that are not packets (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1515">#1515</a>).</p></li>
@@ -1298,7 +1491,7 @@ the root layer’s name only, which gave the wrong DLT for <code class="docutils
 <dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.toolkit.pyshark.ENCAP_TYPE_TO_LINKTYPE">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pyshark.</span></span><span class="sig-name descname"><span class="pre">ENCAP_TYPE_TO_LINKTYPE</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><span class="pre">LinkType</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.toolkit.pyshark.ENCAP_TYPE_TO_LINKTYPE" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">frame.encap_type</span></code> – Wireshark’s internal <code class="docutils literal notranslate"><span class="pre">WTAP_ENCAP_*</span></code> number, which <code class="xref py py-mod docutils literal notranslate"><span class="pre">pyshark</span></code>
+<dd><p><code class="docutils literal notranslate"><span class="pre">frame.encap_type</span></code> – Wireshark’s internal <code class="docutils literal notranslate"><span class="pre">WTAP_ENCAP_*</span></code> number, which <a class="reference external" href="https://kiminewt.github.io/pyshark"><code class="docutils literal notranslate"><span class="pre">pyshark</span></code></a>
 exposes as <code class="docutils literal notranslate"><span class="pre">packet.frame_info.encap_type</span></code> – to the matching
 <a class="reference internal" href="../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code></a> member. This is <a class="reference internal" href="#pcapkit.toolkit.pyshark.tcp_traceflow" title="pcapkit.toolkit.pyshark.tcp_traceflow"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_traceflow()</span></code></a>’s primary
 link-type source; <code class="docutils literal notranslate"><span class="pre">FILTER_NAME_TO_LINKTYPE</span></code> below is only its fallback.</p>
@@ -1316,7 +1509,7 @@ table exists: <code class="docutils literal notranslate"><span class="pre">sll</
 </pre></div>
 </div>
 <p>so each pair is one round trip through Wireshark’s own <code class="docutils literal notranslate"><span class="pre">wiretap/pcap-common.c</span></code>, in the read
-direction <code class="xref py py-mod docutils literal notranslate"><span class="pre">pyshark</span></code> actually exercises. In the source, the trailing comment on each line
+direction <a class="reference external" href="https://kiminewt.github.io/pyshark"><code class="docutils literal notranslate"><span class="pre">pyshark</span></code></a> actually exercises. In the source, the trailing comment on each line
 names the <code class="docutils literal notranslate"><span class="pre">editcap</span> <span class="pre">-T</span></code> encapsulation that produced it.</p>
 <p>What the sweep does <strong>not</strong> cover, since that bounds this table: of the 226 encapsulations
 <code class="docutils literal notranslate"><span class="pre">editcap</span> <span class="pre">-T</span></code> accepts, 157 could be written as pcap from the Ethernet source above and the
@@ -1355,7 +1548,7 @@ and 0 for a <code class="docutils literal notranslate"><span class="pre">DLT_LOO
 cannot be mapped at any size: <code class="docutils literal notranslate"><span class="pre">user_dlt</span></code> (16 DLTs), <code class="docutils literal notranslate"><span class="pre">bluetooth</span></code> (6), <code class="docutils literal notranslate"><span class="pre">usb</span></code> (5),
 <code class="docutils literal notranslate"><span class="pre">usbll</span></code> (4), <code class="docutils literal notranslate"><span class="pre">raw</span></code> (3), and <code class="docutils literal notranslate"><span class="pre">arcnet</span></code>, <code class="docutils literal notranslate"><span class="pre">gfp</span></code>, <code class="docutils literal notranslate"><span class="pre">i2c</span></code>, <code class="docutils literal notranslate"><span class="pre">lapd</span></code>, <code class="docutils literal notranslate"><span class="pre">mtp2</span></code>,
 <code class="docutils literal notranslate"><span class="pre">netanalyzer</span></code>, <code class="docutils literal notranslate"><span class="pre">null</span></code>, <code class="docutils literal notranslate"><span class="pre">ppp</span></code>, <code class="docutils literal notranslate"><span class="pre">sll</span></code>, <code class="docutils literal notranslate"><span class="pre">wlan</span></code>, <code class="docutils literal notranslate"><span class="pre">wpan</span></code> (2 each).</p></li>
-<li><p><strong>Pseudo-protocols</strong> – <code class="docutils literal notranslate"><span class="pre">fake-field-wrapper</span></code>, which <code class="xref py py-mod docutils literal notranslate"><span class="pre">pyshark</span></code> reports as <code class="docutils literal notranslate"><span class="pre">data</span></code> and
+<li><p><strong>Pseudo-protocols</strong> – <code class="docutils literal notranslate"><span class="pre">fake-field-wrapper</span></code>, which <a class="reference external" href="https://kiminewt.github.io/pyshark"><code class="docutils literal notranslate"><span class="pre">pyshark</span></code></a> reports as <code class="docutils literal notranslate"><span class="pre">data</span></code> and
 which was the root for 29 of the swept encapsulations (no dissector), and <code class="docutils literal notranslate"><span class="pre">_ws.malformed</span></code>,
 the root for the one capture <code class="docutils literal notranslate"><span class="pre">tshark</span></code> could not parse. Neither names a link type.</p></li>
 <li><p><strong>Unswept</strong> – the 69 encapsulations <code class="docutils literal notranslate"><span class="pre">editcap</span> <span class="pre">-T</span></code> would not write as pcap from an Ethernet
@@ -1372,15 +1565,15 @@ Wireshark’s own registrations (<code class="docutils literal notranslate"><spa
 <code class="docutils literal notranslate"><span class="pre">WTAP_ENCAP_TOKEN_RING</span></code>).</p>
 </dd></dl>
 
-<section id="id10">
-<h3>Auxiliary Functions<a class="headerlink" href="#id10" title="Link to this heading">¶</a></h3>
+<section id="id2">
+<h3>Auxiliary Functions<a class="headerlink" href="#id2" title="Link to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.pyshark.packet2dict">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pyshark.</span></span><span class="sig-name descname"><span class="pre">packet2dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pyshark.html#packet2dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pyshark.packet2dict" title="Link to this definition">¶</a></dt>
 <dd><p>Convert PyShark packet into <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></span>) – PyShark packet.</p>
+<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">pyshark.packet.packet.Packet</span></code></span>) – PyShark packet.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
@@ -1393,6 +1586,91 @@ frame layer, is kept under its own <code class="docutils literal notranslate"><s
 no <code class="docutils literal notranslate"><span class="pre">frame</span></code> layer keeps PyShark’s <code class="docutils literal notranslate"><span class="pre">frame_info</span></code> at the top level.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.toolkit.pyshark._carrier">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pyshark.</span></span><span class="sig-name descname"><span class="pre">_carrier</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pyshark.html#_carrier"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pyshark._carrier" title="Link to this definition">¶</a></dt>
+<dd><p>Fetch the TCP layer of a PyShark packet and the IP layer that carries it.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">pyshark.packet.packet.Packet</span></code></span>) – PyShark packet.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The <code class="docutils literal notranslate"><span class="pre">ip</span></code> or <code class="docutils literal notranslate"><span class="pre">ipv6</span></code> layer nearest above the packet’s first <code class="docutils literal notranslate"><span class="pre">tcp</span></code>
+layer, and that TCP layer; <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> for either the packet lacks.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The nearest is the innermost IP layer of an IP-in-IP tunnel
+(<span class="target" id="index-14"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2003.html"><strong>RFC 2003</strong></a>, <span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2473.html"><strong>RFC 2473</strong></a>, <span class="target" id="index-16"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4213.html"><strong>RFC 4213</strong></a>), whose addresses are the TCP
+endpoints’. <code class="docutils literal notranslate"><span class="pre">packet.ip</span></code> is the first
+<code class="docutils literal notranslate"><span class="pre">ip</span></code> layer instead, which is the tunnel’s (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1581">#1581</a>).</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.toolkit.pyshark._has_fixed_header">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pyshark.</span></span><span class="sig-name descname"><span class="pre">_has_fixed_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">tcp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pyshark.html#_has_fixed_header"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pyshark._has_fixed_header" title="Link to this definition">¶</a></dt>
+<dd><p>Whether tshark dissected the whole fixed TCP header of a PyShark TCP layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>tcp</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – PyShark TCP layer.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Whether the layer carries <code class="docutils literal notranslate"><span class="pre">tcp.urgent_pointer</span></code>.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>A segment is traced only if its 20-octet fixed header
+(<span class="target" id="index-17"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.1"><strong>RFC 9293 Section 3.1</strong></a>) was captured and its Data Offset is at
+least 5. tshark omits fields in both other cases, measured with
+tshark 4.6.9 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1611">#1611</a>):</p>
+<ul class="simple">
+<li><p>a Data Offset below 5 stops the dissection at <code class="docutils literal notranslate"><span class="pre">tcp.hdr_len</span></code>, so
+<code class="docutils literal notranslate"><span class="pre">tcp.ack</span></code> and the <code class="docutils literal notranslate"><span class="pre">tcp.flags</span></code> fields are absent;</p></li>
+<li><p>a header cut at octet <em>k</em> keeps the fields that fit: no TCP layer
+below 4, the ports only below 14, and no <code class="docutils literal notranslate"><span class="pre">tcp.urgent_pointer</span></code>
+below 20.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">tcp.urgent_pointer</span></code> covers octets 18 and 19, the last of the fixed
+header. <code class="docutils literal notranslate"><span class="pre">dissect_tcp</span></code> in <code class="file docutils literal notranslate"><span class="pre">epan/dissectors/packet-tcp.c</span></code> adds
+it unconditionally once the Data Offset check passes, in 2.6.0, 3.0.0
+and 4.6.0, after every field <a class="reference internal" href="#pcapkit.toolkit.pyshark.tcp_traceflow" title="pcapkit.toolkit.pyshark.tcp_traceflow"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_traceflow()</span></code></a> reads.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.toolkit.pyshark._has_addresses">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pyshark.</span></span><span class="sig-name descname"><span class="pre">_has_addresses</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ip</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pyshark.html#_has_addresses"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pyshark._has_addresses" title="Link to this definition">¶</a></dt>
+<dd><p>Whether tshark reported both addresses of a PyShark IP layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ip</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – PyShark <code class="docutils literal notranslate"><span class="pre">ip</span></code> or <code class="docutils literal notranslate"><span class="pre">ipv6</span></code> layer.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Whether the layer carries its <code class="docutils literal notranslate"><span class="pre">src</span></code> and <code class="docutils literal notranslate"><span class="pre">dst</span></code> fields.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>tshark reports no <code class="docutils literal notranslate"><span class="pre">ip.dst</span></code> behind an LSRR or SSRR option whose route
+data is no whole number of addresses (“Suboption would go past end of
+option”), measured with tshark 4.6.9. Reading it raised a bare
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#AttributeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeError</span></code></a> out of <a class="reference internal" href="#pcapkit.toolkit.pyshark.tcp_traceflow" title="pcapkit.toolkit.pyshark.tcp_traceflow"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_traceflow()</span></code></a>, which ended the
+extraction (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1671">#1671</a>).</p>
+</div>
 </dd></dl>
 
 </section>
@@ -1490,8 +1768,8 @@ calling one fails with an explanatory
 </dl>
 </dd></dl>
 
-<section id="id15">
-<h3>Auxiliary Functions<a class="headerlink" href="#id15" title="Link to this heading">¶</a></h3>
+<section id="id3">
+<h3>Auxiliary Functions<a class="headerlink" href="#id3" title="Link to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.pypcap.packet2chain">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pypcap.</span></span><span class="sig-name descname"><span class="pre">packet2chain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_link</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pypcap.html#packet2chain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pypcap.packet2chain" title="Link to this definition">¶</a></dt>
@@ -1499,7 +1777,7 @@ calling one fails with an explanatory
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Raw packet bytes, as returned by <code class="xref py py-class docutils literal notranslate"><span class="pre">pcap.pcap</span></code> iteration.</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Raw packet bytes, as returned by <code class="docutils literal notranslate"><span class="pre">pcap.pcap</span></code> iteration.</p></li>
 <li><p><strong>data_link</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code></a></span>) – Data link type, from the capture handle.</p></li>
 </ul>
 </dd>
@@ -1524,8 +1802,8 @@ link layer type followed by <code class="docutils literal notranslate"><span cla
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Raw packet bytes, as returned by <code class="xref py py-class docutils literal notranslate"><span class="pre">pcap.pcap</span></code> iteration.</p></li>
-<li><p><strong>timestamp</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – Timestamp of packet, as returned by <code class="xref py py-class docutils literal notranslate"><span class="pre">pcap.pcap</span></code> iteration.</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Raw packet bytes, as returned by <code class="docutils literal notranslate"><span class="pre">pcap.pcap</span></code> iteration.</p></li>
+<li><p><strong>timestamp</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – Timestamp of packet, as returned by <code class="docutils literal notranslate"><span class="pre">pcap.pcap</span></code> iteration.</p></li>
 <li><p><strong>data_link</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code></a></span>) – Data link type, from the capture handle.</p></li>
 </ul>
 </dd>
@@ -1642,8 +1920,8 @@ that calling one fails with an explanatory
 </dl>
 </dd></dl>
 
-<section id="id22">
-<h3>Auxiliary Functions<a class="headerlink" href="#id22" title="Link to this heading">¶</a></h3>
+<section id="id4">
+<h3>Auxiliary Functions<a class="headerlink" href="#id4" title="Link to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.pcap_ct.packet2chain">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pcap_ct.</span></span><span class="sig-name descname"><span class="pre">packet2chain</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_link</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pcap_ct.html#packet2chain"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pcap_ct.packet2chain" title="Link to this definition">¶</a></dt>
@@ -1651,7 +1929,7 @@ that calling one fails with an explanatory
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Raw packet bytes, as returned by <code class="xref py py-class docutils literal notranslate"><span class="pre">pcap.pcap</span></code> iteration.</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Raw packet bytes, as returned by <code class="docutils literal notranslate"><span class="pre">pcap.pcap</span></code> iteration.</p></li>
 <li><p><strong>data_link</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code></a></span>) – Data link type, from the capture handle.</p></li>
 </ul>
 </dd>
@@ -1676,8 +1954,8 @@ link layer type followed by <code class="docutils literal notranslate"><span cla
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Raw packet bytes, as returned by <code class="xref py py-class docutils literal notranslate"><span class="pre">pcap.pcap</span></code> iteration.</p></li>
-<li><p><strong>timestamp</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – Timestamp of packet, as returned by <code class="xref py py-class docutils literal notranslate"><span class="pre">pcap.pcap</span></code> iteration.</p></li>
+<li><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Raw packet bytes, as returned by <code class="docutils literal notranslate"><span class="pre">pcap.pcap</span></code> iteration.</p></li>
+<li><p><strong>timestamp</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span>) – Timestamp of packet, as returned by <code class="docutils literal notranslate"><span class="pre">pcap.pcap</span></code> iteration.</p></li>
 <li><p><strong>data_link</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code></a></span>) – Data link type, from the capture handle.</p></li>
 </ul>
 </dd>
@@ -1724,8 +2002,8 @@ is left out without one.</p>
 <span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pypcapfile.</span></span><span class="sig-name descname"><span class="pre">ipv4_reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pypcapfile.html#ipv4_reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pypcapfile.ipv4_reassembly" title="Link to this definition">¶</a></dt>
 <dd><p>Make data for IPv4 reassembly.</p>
 <p>A packet can be reassembled if it contains an IPv4 layer
-(<code class="xref py py-class docutils literal notranslate"><span class="pre">pcapfile.protocols.network.ip.IP</span></code>) whose header was captured whole (see
-<code class="xref py py-func docutils literal notranslate"><span class="pre">_network()</span></code>), and the <strong>DF</strong> flag is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>.</p>
+(<code class="docutils literal notranslate"><span class="pre">pcapfile.protocols.network.ip.IP</span></code>) whose header was captured whole (see
+<a class="reference internal" href="#pcapkit.toolkit.pypcapfile._network" title="pcapkit.toolkit.pypcapfile._network"><code class="xref py py-func docutils literal notranslate"><span class="pre">_network()</span></code></a>), and the <strong>DF</strong> flag is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1776,7 +2054,7 @@ reassembled; otherwise <a class="reference external" href="https://docs.python.o
 <span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pypcapfile.</span></span><span class="sig-name descname"><span class="pre">tcp_reassembly</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pypcapfile.html#tcp_reassembly"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pypcapfile.tcp_reassembly" title="Link to this definition">¶</a></dt>
 <dd><p>Make data for TCP reassembly.</p>
 <p>A packet can be reassembled if it contains an IPv4 layer carrying a TCP segment (see
-<code class="xref py py-func docutils literal notranslate"><span class="pre">_transport()</span></code>); TCP over IPv6 cannot be, as <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> has no IPv6 decoder.</p>
+<a class="reference internal" href="#pcapkit.toolkit.pypcapfile._transport" title="pcapkit.toolkit.pypcapfile._transport"><code class="xref py py-func docutils literal notranslate"><span class="pre">_transport()</span></code></a>); TCP over IPv6 cannot be, as <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> has no IPv6 decoder.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1797,7 +2075,7 @@ reassembled; otherwise <a class="reference external" href="https://docs.python.o
 </dd>
 <dt class="field-odd">Warns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>AttributeWarning</strong> – If <code class="docutils literal notranslate"><span class="pre">packet</span></code> is an IPv6 packet straight over Ethernet
-whose Next Header is TCP (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_ipv6_carries_tcp()</span></code>), which is
+whose Next Header is TCP (see <a class="reference internal" href="#pcapkit.toolkit.pypcapfile._ipv6_carries_tcp" title="pcapkit.toolkit.pypcapfile._ipv6_carries_tcp"><code class="xref py py-func docutils literal notranslate"><span class="pre">_ipv6_carries_tcp()</span></code></a>), which is
 left out, and is the first such frame of its capture to reach either
 <a class="reference internal" href="#pcapkit.toolkit.pypcapfile.tcp_reassembly" title="pcapkit.toolkit.pypcapfile.tcp_reassembly"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_reassembly()</span></code></a> or <a class="reference internal" href="#pcapkit.toolkit.pypcapfile.tcp_traceflow" title="pcapkit.toolkit.pypcapfile.tcp_traceflow"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_traceflow()</span></code></a>. The rest of that
 capture’s such frames are left out without another warning.</p>
@@ -1814,7 +2092,7 @@ capture’s such frames are left out without another warning.</p>
 <span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pypcapfile.</span></span><span class="sig-name descname"><span class="pre">tcp_traceflow</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">data_link</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-1</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pypcapfile.html#tcp_traceflow"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pypcapfile.tcp_traceflow" title="Link to this definition">¶</a></dt>
 <dd><p>Trace packet flow for TCP.</p>
 <p>A packet can be traced if it contains an IPv4 layer carrying a TCP segment (see
-<code class="xref py py-func docutils literal notranslate"><span class="pre">_transport()</span></code>); TCP over IPv6 cannot be, as <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> has no IPv6 decoder.</p>
+<a class="reference internal" href="#pcapkit.toolkit.pypcapfile._transport" title="pcapkit.toolkit.pypcapfile._transport"><code class="xref py py-func docutils literal notranslate"><span class="pre">_transport()</span></code></a>); TCP over IPv6 cannot be, as <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> has no IPv6 decoder.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1836,7 +2114,7 @@ traced; otherwise <a class="reference external" href="https://docs.python.org/3/
 </dd>
 <dt class="field-odd">Warns<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>AttributeWarning</strong> – If <code class="docutils literal notranslate"><span class="pre">packet</span></code> is an IPv6 packet straight over Ethernet
-whose Next Header is TCP (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_ipv6_carries_tcp()</span></code>), which is
+whose Next Header is TCP (see <a class="reference internal" href="#pcapkit.toolkit.pypcapfile._ipv6_carries_tcp" title="pcapkit.toolkit.pypcapfile._ipv6_carries_tcp"><code class="xref py py-func docutils literal notranslate"><span class="pre">_ipv6_carries_tcp()</span></code></a>), which is
 left out, and is the first such frame of its capture to reach either
 <a class="reference internal" href="#pcapkit.toolkit.pypcapfile.tcp_reassembly" title="pcapkit.toolkit.pypcapfile.tcp_reassembly"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_reassembly()</span></code></a> or <a class="reference internal" href="#pcapkit.toolkit.pypcapfile.tcp_traceflow" title="pcapkit.toolkit.pypcapfile.tcp_traceflow"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_traceflow()</span></code></a>. The rest of that
 capture’s such frames are left out without another warning.</p>
@@ -1848,8 +2126,8 @@ capture’s such frames are left out without another warning.</p>
 </div>
 </dd></dl>
 
-<section id="id28">
-<h3>Auxiliary Functions<a class="headerlink" href="#id28" title="Link to this heading">¶</a></h3>
+<section id="id5">
+<h3>Auxiliary Functions<a class="headerlink" href="#id5" title="Link to this heading">¶</a></h3>
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.toolkit.pypcapfile.packet2timestamp">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pypcapfile.</span></span><span class="sig-name descname"><span class="pre">packet2timestamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pypcapfile.html#packet2timestamp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pypcapfile.packet2timestamp" title="Link to this definition">¶</a></dt>
@@ -1961,7 +2239,7 @@ see the module notes.</p>
 <p class="admonition-title">Note</p>
 <p>A frame <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> left undecoded is hex-encoded, as the engine reads
 it (see <a class="reference internal" href="../foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._read_records" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile._read_records"><code class="xref py py-meth docutils literal notranslate"><span class="pre">PyPCAPFile._read_records</span></code></a>), so
-it is un-hexed (see <code class="xref py py-func docutils literal notranslate"><span class="pre">_maybe_unhex()</span></code>) and reported as its octets,
+it is un-hexed (see <a class="reference internal" href="#pcapkit.toolkit.pypcapfile._maybe_unhex" title="pcapkit.toolkit.pypcapfile._maybe_unhex"><code class="xref py py-func docutils literal notranslate"><span class="pre">_maybe_unhex()</span></code></a>) and reported as its octets,
 not as twice as many characters of hex text (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1667">#1667</a>).</p>
 </div>
 </dd></dl>
@@ -1979,6 +2257,225 @@ not as twice as many characters of hex text (<a class="extlink-issue reference e
 <dt class="sig sig-object py" id="pcapkit.toolkit.pypcapfile.IPV4_FLAG_MF">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pypcapfile.</span></span><span class="sig-name descname"><span class="pre">IPV4_FLAG_MF</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#pcapkit.toolkit.pypcapfile.IPV4_FLAG_MF" title="Link to this definition">¶</a></dt>
 <dd><p>IPv4 <strong>MF</strong> (more fragments) bit, within the three-bit flags field.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.toolkit.pypcapfile.IPV4_EXTENSION_HEADERS">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pypcapfile.</span></span><span class="sig-name descname"><span class="pre">IPV4_EXTENSION_HEADERS</span></span><a class="headerlink" href="#pcapkit.toolkit.pypcapfile.IPV4_EXTENSION_HEADERS" title="Link to this definition">¶</a></dt>
+<dd><p>IP protocol numbers of the headers <a class="reference internal" href="#pcapkit.toolkit.pypcapfile._walk_extension_headers" title="pcapkit.toolkit.pypcapfile._walk_extension_headers"><code class="xref py py-func docutils literal notranslate"><span class="pre">_walk_extension_headers()</span></code></a> steps
+over inside IPv4: AH and the IPv6 Hop-by-Hop Options, Routing, Fragment,
+Destination Options, Mobility and HIP headers.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.toolkit.pypcapfile._walk_extension_headers">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pypcapfile.</span></span><span class="sig-name descname"><span class="pre">_walk_extension_headers</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protocol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pypcapfile.html#_walk_extension_headers"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pypcapfile._walk_extension_headers" title="Link to this definition">¶</a></dt>
+<dd><p>Step over the headers in <a class="reference internal" href="#pcapkit.toolkit.pypcapfile.IPV4_EXTENSION_HEADERS" title="pcapkit.toolkit.pypcapfile.IPV4_EXTENSION_HEADERS"><code class="xref py py-data docutils literal notranslate"><span class="pre">IPV4_EXTENSION_HEADERS</span></code></a> at the head of an IPv4 payload.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>protocol</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The IPv4 packet’s protocol number.</p></li>
+<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Raw octets of its payload.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The protocol number after the last of them, the octets from its header
+on, and how many headers were stepped over – <code class="docutils literal notranslate"><span class="pre">protocol</span></code>, <code class="docutils literal notranslate"><span class="pre">data</span></code> and
+<code class="docutils literal notranslate"><span class="pre">0</span></code> if <code class="docutils literal notranslate"><span class="pre">protocol</span></code> is none of them – or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> if one of them
+is cut short or rejected, or more than
+<a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.EXTENSION_HEADER_LIMIT" title="pcapkit.utilities.config.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a>
+follow in a row. An AH is <code class="docutils literal notranslate"><span class="pre">(Payload</span> <span class="pre">Length</span> <span class="pre">+</span> <span class="pre">2)</span> <span class="pre">*</span> <span class="pre">4</span></code> octets long
+(<span class="target" id="index-18"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4302.html#section-2.2"><strong>RFC 4302 Section 2.2</strong></a>), and no shorter than
+<a class="reference internal" href="../protocols/internet/ah.html#pcapkit.protocols.schema.internet.ah.AH_HEADER_LEN" title="pcapkit.protocols.schema.internet.ah.AH_HEADER_LEN"><code class="xref py py-data docutils literal notranslate"><span class="pre">AH_HEADER_LEN</span></code></a>;
+any other is read by <a class="reference internal" href="#pcapkit.toolkit.pypcapfile._default_extension_header" title="pcapkit.toolkit.pypcapfile._default_extension_header"><code class="xref py py-func docutils literal notranslate"><span class="pre">_default_extension_header()</span></code></a>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.toolkit.pypcapfile._default_extension_header">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pypcapfile.</span></span><span class="sig-name descname"><span class="pre">_default_extension_header</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protocol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pypcapfile.html#_default_extension_header"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pypcapfile._default_extension_header" title="Link to this definition">¶</a></dt>
+<dd><p>Read an extension header inside IPv4 with pcapkit’s own parser.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>protocol</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – The header’s protocol number, one of
+<a class="reference internal" href="#pcapkit.toolkit.pypcapfile.IPV4_EXTENSION_HEADERS" title="pcapkit.toolkit.pypcapfile.IPV4_EXTENSION_HEADERS"><code class="xref py py-data docutils literal notranslate"><span class="pre">IPV4_EXTENSION_HEADERS</span></code></a> other than AH.</p></li>
+<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Raw octets from the header on, as far as the IPv4 packet goes.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The header’s Next Header field and its length, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> if its
+parser raises anything at all, or fewer octets were captured than the
+header needs.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.toolkit.pypcapfile._default_accepts">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pypcapfile.</span></span><span class="sig-name descname"><span class="pre">_default_accepts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">header</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pypcapfile.html#_default_accepts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pypcapfile._default_accepts" title="Link to this definition">¶</a></dt>
+<dd><p>Test if pcapkit’s own IPv4 or TCP parser accepts a header.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – <code class="docutils literal notranslate"><span class="pre">'IPv4'</span></code> or <code class="docutils literal notranslate"><span class="pre">'TCP'</span></code>, the parser to ask.</p></li>
+<li><p><strong>header</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – The whole header, options included, and nothing after it.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a> if the parser raises anything at all; else <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The parser stops at its own layer, so nothing past the header is
+dissected. The answer depends on the octets alone, so the most recent
+answers are remembered, as many as the cache’s <code class="docutils literal notranslate"><span class="pre">maxsize</span></code>.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.toolkit.pypcapfile._network">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pypcapfile.</span></span><span class="sig-name descname"><span class="pre">_network</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pypcapfile.html#_network"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pypcapfile._network" title="Link to this definition">¶</a></dt>
+<dd><p>Fetch the decoded IPv4 layer of a PyPCAPFile packet, if any.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcap_packet</span></code></span>) – PyPCAPFile packet.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP</span></code> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The decoded <code class="docutils literal notranslate"><span class="pre">pcapfile.protocols.network.ip.IP</span></code> layer, or
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> when the frame was not decoded that far – which is the
+case for every non-IPv4 frame, <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> having no other network
+layer decoder – or its header length (IHL) runs past the captured
+octets (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1591">#1591</a>).</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> slices the header at its IHL however few octets there
+are, so a header cut short has fewer options than its IHL declares.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.toolkit.pypcapfile._transport">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pypcapfile.</span></span><span class="sig-name descname"><span class="pre">_transport</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ipv4</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pypcapfile.html#_transport"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pypcapfile._transport" title="Link to this definition">¶</a></dt>
+<dd><p>Fetch the verbatim TCP segment carried by a PyPCAPFile IPv4 packet.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>ipv4</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">IP</span></code></span>) – PyPCAPFile IPv4 packet.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The raw TCP segment, up to the packet’s Total Length, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>
+if the packet does not carry a TCP header. A later fragment carries
+none: from its offset on, its data is a slice of the datagram’s payload
+(<span class="target" id="index-19"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html#section-3.2"><strong>RFC 791 Section 3.2</strong></a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1576">#1576</a>). Nor does a segment too short
+for a header, or whose Data Offset is below 5 words (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1590">#1590</a>).</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> keeps every octet after the header as the payload, so a
+frame padded to the Ethernet minimum carries its padding there. The
+segment is cut at the Total Length to leave it out (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1577">#1577</a>). A
+Total Length of <code class="docutils literal notranslate"><span class="pre">0</span></code>, which TCP segmentation offload leaves in a
+capture taken on the sending host, keeps the rest of the frame
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1547">#1547</a>).</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.toolkit.pypcapfile._ipv6_carries_tcp">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pypcapfile.</span></span><span class="sig-name descname"><span class="pre">_ipv6_carries_tcp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pypcapfile.html#_ipv6_carries_tcp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pypcapfile._ipv6_carries_tcp" title="Link to this definition">¶</a></dt>
+<dd><p>Test if a PyPCAPFile frame is an IPv6 packet carrying TCP.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcap_packet</span></code></span>) – PyPCAPFile packet.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a> if the frame is IPv6 straight over Ethernet and its Next
+Header is TCP; otherwise <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">False</span></code></a>.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p><a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> leaves an IPv6 frame’s payload undecoded and hex-encoded
+(see <a class="reference internal" href="#pcapkit.toolkit.pypcapfile._maybe_unhex" title="pcapkit.toolkit.pypcapfile._maybe_unhex"><code class="xref py py-func docutils literal notranslate"><span class="pre">_maybe_unhex()</span></code></a>), so this reads the Next Header field of the
+raw IPv6 header and decodes nothing.</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.toolkit.pypcapfile._is_raw">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pypcapfile.</span></span><span class="sig-name descname"><span class="pre">_is_raw</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pypcapfile.html#_is_raw"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pypcapfile._is_raw" title="Link to this definition">¶</a></dt>
+<dd><p>Test if a decoded layer is in fact undecoded raw bytes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>layer</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Decoded layer, or raw bytes.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.toolkit.pypcapfile._maybe_unhex">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.toolkit.pypcapfile.</span></span><span class="sig-name descname"><span class="pre">_maybe_unhex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/toolkit/pypcapfile.html#_maybe_unhex"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.toolkit.pypcapfile._maybe_unhex" title="Link to this definition">¶</a></dt>
+<dd><p>Undo <a class="reference external" href="https://docs.python.org/3/library/binascii.html#binascii.hexlify" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">binascii.hexlify()</span></code></a>, if <code class="docutils literal notranslate"><span class="pre">value</span></code> looks hex-encoded.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Raw bytes, possibly hex-encoded.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">value</span></code> hex-decoded, if it is a valid even-length hex string;
+otherwise <code class="docutils literal notranslate"><span class="pre">value</span></code> itself, unchanged.</p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The released <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> (0.12.0) stores an IPv4 packet’s options
+(<code class="docutils literal notranslate"><span class="pre">IP.opt</span></code>) and payload
+(<code class="docutils literal notranslate"><span class="pre">IP.payload</span></code>) as
+<a class="reference external" href="https://docs.python.org/3/library/binascii.html#binascii.hexlify" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">binascii.hexlify()</span></code></a>’d ASCII text once decoding stops short of the
+transport layer – which is exactly how
+<a class="reference internal" href="../foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAPFile</span></code></a> calls it –
+rather than as the raw bytes this module otherwise assumes. Both forms
+are <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bytes</span></code></a>, hex-encoded or not, which is why <a class="reference internal" href="#pcapkit.toolkit.pypcapfile._is_raw" title="pcapkit.toolkit.pypcapfile._is_raw"><code class="xref py py-func docutils literal notranslate"><span class="pre">_is_raw()</span></code></a>
+cannot tell them apart, and falling back to the original value when
+it does not decode as hex is what keeps this a no-op for the raw,
+non-hex stand-ins used in unit tests.</p>
+<p>This is <strong>not</strong> a guarantee against every false positive, only a
+cheap and, in practice, reliable heuristic: a genuinely raw payload
+whose every byte happens to fall in the ASCII hex-digit range (e.g. a
+24-byte TCP header built entirely from digits and <code class="docutils literal notranslate"><span class="pre">A</span></code>-<code class="docutils literal notranslate"><span class="pre">F</span></code>) is
+indistinguishable from real hex text and gets silently halved. There
+is no way to tell the two forms apart from the bytes alone; this is
+acceptable here because that byte range is a small fraction of the
+possible values a real header or payload can take.</p>
+</div>
 </dd></dl>
 
 </section>
@@ -2051,19 +2548,19 @@ not as twice as many characters of hex text (<a class="extlink-issue reference e
 </ul>
 </li>
 <li><a class="reference internal" href="#module-pcapkit.toolkit.pyshark">PyShark Tools</a><ul>
-<li><a class="reference internal" href="#id10">Auxiliary Functions</a></li>
+<li><a class="reference internal" href="#id2">Auxiliary Functions</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-pcapkit.toolkit.pypcap">PyPCAP Tools</a><ul>
-<li><a class="reference internal" href="#id15">Auxiliary Functions</a></li>
+<li><a class="reference internal" href="#id3">Auxiliary Functions</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-pcapkit.toolkit.pcap_ct">pcap-ct Tools</a><ul>
-<li><a class="reference internal" href="#id22">Auxiliary Functions</a></li>
+<li><a class="reference internal" href="#id4">Auxiliary Functions</a></li>
 </ul>
 </li>
 <li><a class="reference internal" href="#module-pcapkit.toolkit.pypcapfile">PyPCAPFile Tools</a><ul>
-<li><a class="reference internal" href="#id28">Auxiliary Functions</a></li>
+<li><a class="reference internal" href="#id5">Auxiliary Functions</a></li>
 <li><a class="reference internal" href="#internal-definitions">Internal Definitions</a></li>
 </ul>
 </li>

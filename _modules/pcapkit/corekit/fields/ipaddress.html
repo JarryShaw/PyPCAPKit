@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -559,13 +560,15 @@
         <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">description</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">error</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
 
 
+<div class="viewcode-block" id="_reject_bool">
+<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/ipaddress.html#pcapkit.corekit.fields.ipaddress._reject_bool">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_reject_bool</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="s1">'object'</span><span class="p">,</span> <span class="n">description</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Reject a :obj:`bool` value before it reaches :mod:`ipaddress`.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        value: Value to check.</span>
 <span class="sd">        description: Human-readable description of what ``value`` is, used</span>
-<span class="sd">            to build the :exc:`FieldValueError` message.</span>
+<span class="sd">            to build the :exc:`~pcapkit.utilities.exceptions.FieldValueError` message.</span>
 
 <span class="sd">    Raises:</span>
 <span class="sd">        FieldValueError: If ``value`` is a :obj:`bool`.</span>
@@ -582,7 +585,7 @@
 <span class="sd">        :class:`~ipaddress.IPv4Address`'s version mismatches -- and that</span>
 <span class="sd">        asymmetry is exactly what let this slip past :issue:`469`'s otherwise</span>
 <span class="sd">        equivalent guard for :meth:`MH._make_opt_mn_id</span>
-<span class="sd">        &lt;pcapkit.protocols.internet.mh.MH._make_opt_mn_id&gt;` (c.f.</span>
+<span class="sd">        &lt;pcapkit.protocols.internet.mh.MH._make_opt_mn_id&gt;` (cf.</span>
 <span class="sd">        :issue:`491`).</span>
 
 <span class="sd">        Every caller checks this *before* dispatching on the value's type,</span>
@@ -593,13 +596,14 @@
 <span class="sd">        ``_make_*`` that must know the address family before it can build the</span>
 <span class="sd">        schema converts the argument itself and so never hands this module a</span>
 <span class="sd">        :obj:`bool` at all. :func:`parse_ip_address` is where those callers</span>
-<span class="sd">        reach this guard (c.f. :issue:`508`).</span>
+<span class="sd">        reach this guard (cf. :issue:`508`).</span>
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">description</span><span class="si">}</span><span class="s1">: must not be a bool, not </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1"> -- pass '</span>
-            <span class="sa">f</span><span class="s1">'int(</span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">) if the numeric value is what is wanted'</span><span class="p">)</span>
+            <span class="sa">f</span><span class="s1">'int(</span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">) if the numeric value is what is wanted'</span><span class="p">)</span></div>
+
 
 
 <div class="viewcode-block" id="parse_ip_address">
@@ -626,7 +630,7 @@
 <span class="sd">        The converted address.</span>
 
 <span class="sd">    Raises:</span>
-<span class="sd">        FieldValueError: If ``value`` is a :obj:`bool` (c.f.</span>
+<span class="sd">        FieldValueError: If ``value`` is a :obj:`bool` (cf.</span>
 <span class="sd">            :func:`_reject_bool`), is not a valid IP address, or is not of</span>
 <span class="sd">            ``version``.</span>
 
@@ -749,7 +753,7 @@
 <span class="sd">            Processed field value.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            FieldValueError: If ``value`` is a :obj:`bool` (c.f.</span>
+<span class="sd">            FieldValueError: If ``value`` is a :obj:`bool` (cf.</span>
 <span class="sd">                :func:`_reject_bool`), is not a valid IP address, or is the</span>
 <span class="sd">                wrong IP version for this field.</span>
 
@@ -863,6 +867,8 @@
 
 
 
+<div class="viewcode-block" id="_RawMaskIPv4Interface">
+<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/ipaddress.html#pcapkit.corekit.fields.ipaddress._RawMaskIPv4Interface">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">_RawMaskIPv4Interface</span><span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Interface</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""IPv4 interface whose mask is not a contiguous netmask.</span>
 
@@ -876,7 +882,7 @@
 <span class="sd">    in :attr:`netmask`, so :meth:`IPv4InterfaceField.pre_process` writes them</span>
 <span class="sd">    back unchanged.</span>
 
-<span class="sd">    :func:`str`, :func:`repr` and :mod:`pickle` use the ``address/mask``</span>
+<span class="sd">    :class:`str`, :func:`repr` and :mod:`pickle` use the ``address/mask``</span>
 <span class="sd">    form, which :meth:`IPv4InterfaceField.pre_process` packs back to the same</span>
 <span class="sd">    octets. The mask is dotted, except when it is hostmask-shaped (ones, then</span>
 <span class="sd">    zeros, read from the low bit): :func:`ipaddress.ip_interface` would read</span>
@@ -888,17 +894,21 @@
 <span class="sd">    sorts ``address/32``, then by mask, so the order stays total when mixed</span>
 <span class="sd">    with :class:`ipaddress.IPv4Interface` values.</span>
 
-<span class="sd">    Such a mask has no prefix length, so :attr:`network`, :attr:`with_prefixlen`</span>
-<span class="sd">    and the prefix length all describe the address alone (``/32``); only</span>
-<span class="sd">    :attr:`netmask`, :attr:`hostmask`, :attr:`with_netmask` and</span>
-<span class="sd">    :attr:`with_hostmask` carry the mask. :attr:`with_netmask` is always</span>
-<span class="sd">    dotted, so it is not the round-trip form; :func:`str` is.</span>
+<span class="sd">    Such a mask has no prefix length, so</span>
+<span class="sd">    :attr:`~ipaddress.IPv4Interface.network`,</span>
+<span class="sd">    :attr:`~ipaddress.IPv4Interface.with_prefixlen` and the prefix length all</span>
+<span class="sd">    describe the address alone (``/32``); only :attr:`netmask`,</span>
+<span class="sd">    :attr:`hostmask`, :attr:`~ipaddress.IPv4Interface.with_netmask` and</span>
+<span class="sd">    :attr:`~ipaddress.IPv4Interface.with_hostmask` carry the mask.</span>
+<span class="sd">    :attr:`~ipaddress.IPv4Interface.with_netmask` is always dotted, so it is</span>
+<span class="sd">    not the round-trip form; :class:`str` is.</span>
 
 <span class="sd">    """</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">address</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
         <span class="n">addr</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">mask</span> <span class="o">=</span> <span class="n">address</span><span class="o">.</span><span class="n">partition</span><span class="p">(</span><span class="s1">'/'</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span>
+        <span class="c1">#: Mask octets as given, which need not form a contiguous netmask.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">netmask</span> <span class="o">=</span> <span class="n">_parse_literal_mask</span><span class="p">(</span><span class="n">mask</span><span class="p">)</span>
 
     <span class="nd">@property</span>
@@ -937,7 +947,8 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__ge__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Interface</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Interface</span><span class="o">.</span><span class="fm">__ge__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">_interface_order</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">_interface_order</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_interface_order</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">_interface_order</span><span class="p">(</span><span class="n">other</span><span class="p">)</span></div>
+
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_is_netmask</span><span class="p">(</span><span class="n">mask</span><span class="p">:</span> <span class="s1">'IPv4Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
@@ -970,7 +981,7 @@
     <span class="k">return</span> <span class="ow">not</span> <span class="n">value</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">value</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 
 
-<span class="c1">#: Hex spelling of a literal mask, as :func:`str` writes a hostmask-shaped one.</span>
+<span class="c1">#: Hex spelling of a literal mask, as :class:`str` writes a hostmask-shaped one.</span>
 <span class="n">_HEX_MASK</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">'0[xX][0-9a-fA-F]</span><span class="si">{8}</span><span class="s1">'</span><span class="p">)</span>
 
 
@@ -1091,7 +1102,7 @@
 <span class="sd">            Processed field value.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            FieldValueError: If ``value`` is a :obj:`bool` (c.f.</span>
+<span class="sd">            FieldValueError: If ``value`` is a :obj:`bool` (cf.</span>
 <span class="sd">                :func:`_reject_bool`), is not a valid IP interface, or is the</span>
 <span class="sd">                wrong IP version for this field.</span>
 
@@ -1102,7 +1113,7 @@
 <span class="sd">            taken literally: a dotted mask that is neither a netmask nor a</span>
 <span class="sd">            hostmask, such as ``'10.0.0.1/255.0.255.0'``, or eight hex</span>
 <span class="sd">            digits, such as ``'10.0.0.1/0x000000ff'``. Those are the forms</span>
-<span class="sd">            :func:`str` gives a :class:`_RawMaskIPv4Interface`.</span>
+<span class="sd">            :class:`str` gives a :class:`_RawMaskIPv4Interface`.</span>
 
 <span class="sd">        """</span>
         <span class="n">_reject_bool</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'invalid IP interface'</span><span class="p">)</span>
@@ -1205,7 +1216,7 @@
 <span class="sd">            Processed field value.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            FieldValueError: If ``value`` is a :obj:`bool` (c.f.</span>
+<span class="sd">            FieldValueError: If ``value`` is a :obj:`bool` (cf.</span>
 <span class="sd">                :func:`_reject_bool`), is not a valid IP interface, or is the</span>
 <span class="sd">                wrong IP version for this field.</span>
 

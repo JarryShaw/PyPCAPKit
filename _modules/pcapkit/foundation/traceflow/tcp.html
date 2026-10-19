@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -820,6 +821,8 @@
         <span class="k">return</span> <span class="n">fpout</span> <span class="k">if</span> <span class="n">output</span> <span class="k">else</span> <span class="n">label</span></div>
 
 
+<div class="viewcode-block" id="TCP._unique_label">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.tcp.TCP._unique_label">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_unique_label</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">label</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make a new flow's label unique within this tracer.</span>
 
@@ -845,7 +848,8 @@
             <span class="n">count</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="n">unique</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">count</span><span class="si">}</span><span class="s1">'</span>
         <span class="n">used</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">unique</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">unique</span>
+        <span class="k">return</span> <span class="n">unique</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_reassembly</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[TCP_Reassembly]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Build the reassembler a new flow will feed, if analysis was asked for.</span>
@@ -883,6 +887,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_reasm_packet</span> <span class="o">=</span> <span class="n">Reasm_Packet</span>
         <span class="k">return</span> <span class="n">TCP_Reassembly</span><span class="p">(</span><span class="n">strict</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
+<div class="viewcode-block" id="TCP._make_segment">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.tcp.TCP._make_segment">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_segment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet[_AT]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Describe a traced packet the way the reassembler expects a segment.</span>
 
@@ -923,8 +929,11 @@
             <span class="n">header</span><span class="o">=</span><span class="n">packet</span><span class="o">.</span><span class="n">header</span><span class="p">,</span>                <span class="c1"># raw bytes type header</span>
             <span class="n">payload</span><span class="o">=</span><span class="n">packet</span><span class="o">.</span><span class="n">payload</span><span class="p">,</span>              <span class="c1"># raw bytearray type payload</span>
             <span class="n">timestamp</span><span class="o">=</span><span class="n">packet</span><span class="o">.</span><span class="n">timestamp</span><span class="p">,</span>          <span class="c1"># capture timestamp</span>
-        <span class="p">)</span>
+        <span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="TCP._ended">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/traceflow/tcp.html#pcapkit.foundation.traceflow.tcp.TCP._ended">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_ended</span><span class="p">(</span><span class="n">buffer</span><span class="p">:</span> <span class="s1">'Buffer[_AT]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Whether a flow's connection has been seen to end.</span>
@@ -943,7 +952,8 @@
 <span class="sd">        SYN-ACK, which is a question the flag alone cannot answer.</span>
 
 <span class="sd">        """</span>
-        <span class="k">return</span> <span class="n">buffer</span><span class="o">.</span><span class="n">reset</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="o">.</span><span class="n">fin</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span>
+        <span class="k">return</span> <span class="n">buffer</span><span class="o">.</span><span class="n">reset</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="o">.</span><span class="n">fin</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_finalise</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bufid</span><span class="p">:</span> <span class="s1">'BufferID'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Index'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Finalise a flow: report it, and stop tracing into it.</span>

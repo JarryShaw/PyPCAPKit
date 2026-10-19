@@ -244,8 +244,8 @@ rather than the event, so its gate can run whichever way the run was raised, onc
 ``workflow_run`` Edges
 ----------------------
 
-These edges come from grepping every ``on:`` block rather than from a
-hand-maintained list:
+Each edge cites the ``on:`` block it comes from, so grepping those blocks
+re-derives the list:
 
 * ``.github/workflows/cron-vendor.yml:14-16`` -- **Vendor Update** fires on
   completion of **Unit Tests**.
@@ -262,9 +262,9 @@ hand-maintained list:
 success, failure, or skipped -- and regardless of what triggered it,
 including a pull request's own run of Unit Tests. Every
 downstream workflow therefore re-checks ``github.event.workflow_run.event``
-and ``.head_branch`` (or, for Create Release and Coverage Comment, ``.conclusion``) itself before
-doing anything with an outward effect; none of the filtering happens in the
-``on:`` block.
+and ``.head_branch`` (or, for Create Release and Coverage Comment,
+``.conclusion``) itself before doing anything with an outward effect; none of
+the filtering happens in the ``on:`` block.
 
 Those checks say nothing about *which* commit was verified. A ``workflow_run``
 checks out ``github.sha``, ``main``'s tip when the event is raised, not
@@ -319,13 +319,13 @@ source entry) and ``python-versions``, which reads ``gate``'s version (see
 `Python Versions`_ below). It skips the rest -- the matrix jobs, ``test``,
 ``test-ktlo``, ``integration``, ``integration-ktlo``, ``engine-tests`` (a job per
 engine, each looping over its Python versions), ``pypcap-parity``,
-``pypcap-parity-ktlo`` and ``unittest-ordering``, each of which has already run once for this commit
-from Unit Tests' own ``push`` trigger (and, all but ``unittest-ordering``,
-which runs on ``main`` pushes only, from its ``pull_request`` trigger), so
-running any of them again per caller would
-test the same commit several times over -- the docs-only path's ``changes``
-and ``project-tests``, and ``required-checks`` (see `Required Status
-Checks`_ below), gated out by their own ``if:`` rather than by having
+``pypcap-parity-ktlo`` and ``unittest-ordering``, each of which has already run
+once for this commit from Unit Tests' own ``push`` trigger (and, all but
+``unittest-ordering``, which runs on ``main`` pushes only, from its
+``pull_request`` trigger), so running any of them again per caller would test
+the same commit several times over. It also skips the docs-only path's
+``changes`` and ``project-tests``, and ``required-checks`` (see `Required Status
+Checks`_ below), which are gated out by their own ``if:`` rather than by having
 already run. ``changelog`` carries no
 ``if:`` at all and runs on every path regardless -- deliberately, per its own
 comment (``unit-tests.yml:1612-1618``): ``create-release.yml`` feeds
@@ -491,12 +491,18 @@ its two-hour legs stay measured), a day per query because a filtered listing sto
 at 1,000 runs (Pages completed 1,154 in the week to 2026-10-09). It then reads the
 jobs of an evenly spaced sample -- 150 push and 150 pull-request runs of Unit Tests,
 60 runs of each other workflow -- and the summary says how many runs each sample
-holds and which span they cover. That is about 690 calls (estimate: 63 listing
-pages, one per workflow per day and one more per further 100 runs, by the week to
-2026-10-09's run counts with Experimental Tests taken as Unit Tests' 10, since it
-runs on the same events; at most 300 + 300 job reads; 15 for the JUnit artifacts;
-up to 12 workflow-file reads) of ``GITHUB_TOKEN``'s 1,000 an hour, on a read-only token
-(``actions: read``, ``contents: read``). A job is measured by its own outcome: one
+holds and which span they cover. For the week to 2026-10-19 that was 677 calls
+(`#1930 <https://github.com/JarryShaw/PyPCAPKit/issues/1930>`__: 49 listing pages,
+one per workflow per day and one more per further 100 runs; 601 job reads; 15 for
+the JUnit artifacts; 12 workflow-file reads) of ``GITHUB_TOKEN``'s 1,000 an hour, on
+a read-only token (``actions: read``, ``contents: read``). It took 16.6 minutes,
+908 seconds of it on the job reads, which the API answers at up to 2.4 s each and
+which are made one at a time. So they are read last, in an order every prefix of
+which spans each sample, and stop at ``--budget-minutes`` (30): the report is then
+written on the runs read, with a note saying so. The step's cap (35 minutes) and the
+job's (40) sit above that budget, and the summary and upload steps run on
+``always()``, so a report written before a cap stopped the job is still published.
+Progress goes to the log as the script runs. A job is measured by its own outcome: one
 cancelled at 95% of its cap or later timed out and counts, even in a run that reads
 ``cancelled`` for that reason; one cancelled earlier was superseded and does not. A
 step cap written as an expression differs by leg and reads as none.
@@ -584,7 +590,7 @@ fire while the pool stays saturated, and the JUnit timings are what show whether
 
 ``H1``, ``H2`` and ``H4`` on a non-blocking job are warnings, not HARD, so they do
 not fail the run (`#1732 <https://github.com/JarryShaw/PyPCAPKit/issues/1732>`__): on every job of :file:`experimental.yml`, which no
-required context names, on every KTLO leg, a job whose name ends in ``(KTLO)``
+required context names, on every :ref:`KTLO <ktlo-tier>` leg, a job whose name ends in ``(KTLO)``
 (`#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__), and on a job whose name ends in ``(experimental)`` in any workflow. That
 last covers the experimental legs that ran in :file:`unit-tests.yml` under
 ``test``'s 45-minute cap before the split. The finding keeps its ``H`` id and says it is non-blocking. A
@@ -680,10 +686,14 @@ triggers; the ``gate-only: true`` reusable calls documented above skip it via
 ``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:1939``),
 so it is never produced -- and never expected -- on those paths.
 
-Python versions come in two tiers (`#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__), and an experimental one (`#1660 <https://github.com/JarryShaw/PyPCAPKit/issues/1660>`__,
-below), declared in :file:`.github/python-versions.toml` (see `Python Versions`_).
+.. _ktlo-tier:
+
+Python versions are tiered -- supported and KTLO
+(`#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__), and experimental
+(`#1660 <https://github.com/JarryShaw/PyPCAPKit/issues/1660>`__, below) -- in
+:file:`.github/python-versions.toml` (see `Python Versions`_).
 The **supported** tier, 3.11-3.15, blocks: a failed leg fails ``Required checks passed`` or its own
-required ``Compat`` context. The **KTLO** tier -- end-of-life 3.7-3.10, still built and
+required ``Compat`` context. The **KTLO** (*keep the lights on*) tier -- end-of-life 3.7-3.10, still built and
 tested -- never blocks, is never a required context, and never shows a commit or a
 pull request red (`#1672 <https://github.com/JarryShaw/PyPCAPKit/issues/1672>`__). In ``unit-tests.yml`` the KTLO legs are jobs of their own
 since `#1738 <https://github.com/JarryShaw/PyPCAPKit/issues/1738>`__: ``test-ktlo``,
@@ -750,13 +760,50 @@ Tests run completes without it, and with it ``Required checks passed``,
 ``unittest-ordering`` and the workflows that wait on Unit Tests completing
 (``coverage-comment.yml``, ``deploy-pages.yml``, ``cron-vendor.yml`` and
 ``cron-conda.yml``). It runs on Unit Tests' ``push`` and ``pull_request`` events,
-skips a docs-only pull request by the same ``changes`` script, and cancels a
-superseded run, a pull request's or, unlike Unit Tests, a push to ``main``'s
+skips a docs-only pull request by the same ``changes`` script, and lets a newer
+commit supersede a run, a pull request's or, unlike Unit Tests, a push to ``main``'s
 (`#1903 <https://github.com/JarryShaw/PyPCAPKit/issues/1903>`__): since nothing
 waits on the legs, ``main``'s newest commit is the one worth testing, whereas Unit
-Tests keeps a run per push for ``unittest-ordering``, which runs only there. Any
-other event keeps a concurrency group of its own, by run id. The legs never
-block, by the KTLO mechanics above: every step that can fail has
+Tests keeps a run per push for ``unittest-ordering``, which runs only there.
+
+A superseded run is skipped or stopped, never cancelled (`#1938
+<https://github.com/JarryShaw/PyPCAPKit/issues/1938>`__): GitHub counts a
+``cancelled`` check against its commit, so a cancelled run marks the commit red.
+The workflow has no ``concurrency`` group either, since a group cancels its pending
+run once a newer one queues. Its first job, ``current`` ("Check the commit is still
+current"), sets up ``latest`` and installs ``requests``, which the script fetches with,
+then runs :file:`util/superseded.py`'s ``check``. A push's commit is current
+while it is the head of ``main``; a pull request's while the pull request is open and
+its head is still the event's ``pull_request.head.sha``; any other event's always.
+Every other job needs ``current`` and skips where its output is ``false``, so a run
+superseded before it starts ends with ``skipped`` checks and a ``Superseded`` notice.
+Each of those ``if:`` conditions opens with ``!cancelled()``, which drops the implicit
+``success()``, so a failed ``current`` step, which leaves the output empty, or a failed
+``current`` job runs the rest; the legs still need ``changes`` and ``python-versions``
+to succeed. ``Run unit tests`` runs its whole command -- the scope's ``sudo`` where
+there is one, then ``prlimit``, ``timeout`` and pytest -- under the script's ``watch``,
+outside the scope, which asks again every 60 seconds. The watcher runs on a CPython of
+its own, ``latest`` from a second setup-python step, ``watcher-python``, with
+``update-environment: false``, so the leg's ``PATH``, ``LD_LIBRARY_PATH`` and pip
+cache are as its own setup-python left them, and ``requests`` goes into that
+interpreter, never the leg's GraalPy or free-threaded build. The two steps are capped
+at 1 minute each, and where either fails the tests run unwatched. Once the commit is superseded,
+or the pull request merged or closed, it sends SIGTERM, then SIGKILL 30 seconds on:
+to ``pcapkit-tests.scope`` by name (``sudo -n systemctl kill``) where the tests run
+in it, since they run as the runner's user under a root-owned ``sudo`` and in
+``timeout``'s own process group, and to the command's session otherwise. Ubuntu's
+``/etc/sudoers`` sets ``use_pty``, which sudoers(5) says has no effect where ``sudo``
+has no terminal, as in a step; the scope is reached by name either way. Once the
+command exits, the watcher writes a ``Superseded`` notice and a job-summary line and
+exits 0, so the leg ends green and frees its runner. Every wait is bounded: where the
+command outlives SIGKILL by 15 seconds, it writes a ``Superseded run not stopped``
+warning and exits 70, not 0, since the tests may run on, holding the step's output,
+until ``timeout`` or the step's cap ends them, and the failed step is then a warning
+like any other on these legs. Otherwise the step ends with the tests' own status. An
+API the script cannot read counts as current, so it never stops the tests, and it
+asks with ``If-None-Match``, as a ``304`` answer costs no rate limit.
+
+The legs never block, by the KTLO mechanics above: every step that can fail has
 ``continue-on-error: true``, their annotations are warnings, and ``Experimental
 summary``, the job's last step, reports each failed step. A failure no step
 contains, such as a lost runner, fails the job, and the job's own
@@ -765,8 +812,10 @@ run from failing when a job fails" (`Workflow syntax
 <https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idcontinue-on-error>`__),
 though the leg's check run still reads ``failure``. A job past its
 ``timeout-minutes`` is cancelled, and that page does not say whether the job-level
-guard covers a cancellation. So setup-python, the install and the tests have caps
-of their own, of 5, 10 and 120 minutes, under the job's 140: a step at its cap
+guard covers a cancellation. So setup-python, the install, the watcher's setup-python
+and ``requests`` (`#1938 <https://github.com/JarryShaw/PyPCAPKit/issues/1938>`__,
+below) and the tests have caps of their own, of 5, 10, 1, 1 and 120 minutes, under
+the job's 140, which leaves 3 for the rest: a step at its cap
 fails rather than cancels, and the guard holds (actions/runner
 ``src/Runner.Worker/StepsRunner.cs:322-353``). The runner's ``has timed out`` error
 stays, changing no conclusion, as ``Process completed with exit code N.`` does.
@@ -786,8 +835,8 @@ holds ``roundtrip`` (``ROUNDTRIP_SWEEP_GLOB`` in :file:`tests/_tiers.py`), and
 ``integration`` too: off ``latest`` its legs leave out the
 ``*roundtrip*_runtime.py`` modules (``ROUNDTRIP_RUNTIME_GLOB``), dropping them from
 ``fixture_tier_paths()``'s selection and adding the glob as an ``--ignore-glob``,
-since pytest applies no ignore to a path it was handed. On 2026-10-14 they were 41 modules
-and 8% of the unit tier's time in a serial 3.14 run (86 of 1,031 s), and 10-11% on the
+since pytest applies no ignore to a path it was handed. On 2026-10-14 they took
+8% of the unit tier's time in a serial 3.14 run (86 of 1,031 s), and 10-11% on the
 3.14, 3.15 and 3.14t legs of run 38581834697, so the rest should take GraalPy 88-113
 minutes (estimate).
 

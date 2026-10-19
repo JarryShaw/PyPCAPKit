@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -524,9 +525,9 @@
 <span class="sd">:issue:`842`: ``get``, ``get_all``, ``register`` and ``register_alias`` are to</span>
 <span class="sd">exist on every const registry, so the abstraction is finished by moving them to</span>
 <span class="sd">the base class. The closed sets split off by :issue:`877` are outside that</span>
-<span class="sd">contract. ``AppType``'s sub-base class carries the overrides and dispatching</span>
-<span class="sd">logic it needs, and ``AppType``'s subclasses override again where their contracts</span>
-<span class="sd">differ.</span>
+<span class="sd">contract. :class:`~pcapkit.const.reg.apptype.apptype.AppType`'s sub-base class carries the overrides and dispatching</span>
+<span class="sd">logic it needs, and :class:`~pcapkit.const.reg.apptype.apptype.AppType`'s subclasses override again</span>
+<span class="sd">where their contracts differ.</span>
 
 <span class="sd">That is a tiered hierarchy, of which this module is **tier one**:</span>
 
@@ -537,7 +538,7 @@
 <span class="sd">   inheritance. So a registry under :mod:`pcapkit.const` gets all of them from</span>
 <span class="sd">   this module, apart from the</span>
 <span class="sd">   overrides below and a few hand-written ``get`` overrides.</span>
-<span class="sd">2. ``AppType``'s sub-base -- overrides each of them, routing the lookups</span>
+<span class="sd">2. :class:`~pcapkit.const.reg.apptype.apptype.AppType`'s sub-base -- overrides each of them, routing the lookups</span>
 <span class="sd">   through its ``_dispatch``, because a port lookup needs a transport protocol</span>
 <span class="sd">   to be answerable at all. Defined not in this module but in</span>
 <span class="sd">   :class:`pcapkit.const.reg.apptype.apptype.AppType` itself (GitHub issue</span>
@@ -548,11 +549,12 @@
 <span class="sd">   alias for the second. Plus ``_unregistered_member``, for its own extra</span>
 <span class="sd">   attributes (``svc``, ``port``, ``proto``) that the generic one below does</span>
 <span class="sd">   not know to set.</span>
-<span class="sd">3. The ``AppType`` transport subclasses -- ``TCP``, ``UDP``, ``SCTP``, ``DCCP``</span>
-<span class="sd">   -- need no override of their own at all: ``_dispatch``</span>
-<span class="sd">   already returns ``cls`` unchanged the moment ``cls.__registry__`` is not</span>
-<span class="sd">   :obj:`None`, which is true for exactly these subclasses, so tier 2's lookups</span>
-<span class="sd">   already answer correctly on each of them without a further layer.</span>
+<span class="sd">3. The :class:`~pcapkit.const.reg.apptype.apptype.AppType` transport subclasses --</span>
+<span class="sd">   :class:`~pcapkit.const.reg.apptype.tcp.TCP`, :class:`~pcapkit.const.reg.apptype.udp.UDP`,</span>
+<span class="sd">   :class:`~pcapkit.const.reg.apptype.sctp.SCTP`, :class:`~pcapkit.const.reg.apptype.dccp.DCCP` --</span>
+<span class="sd">   need no override of their own at all: ``_dispatch`` already returns ``cls`` unchanged the moment</span>
+<span class="sd">   ``cls.__registry__`` is not :obj:`None`, which is true for exactly these subclasses, so tier 2's</span>
+<span class="sd">   lookups already answer correctly on each of them without a further layer.</span>
 
 <span class="sd">Defining these methods here, rather than as generated *text* written out</span>
 <span class="sd">longhand in :data:`pcapkit.vendor.default.LINE` and copied into each crawler</span>
@@ -570,7 +572,7 @@
 
 <span class="sd">   The ``get`` each :mod:`pcapkit.const` enumeration carried as generated text</span>
 <span class="sd">   moves onto :class:`EnumLookup`, and :class:`EnumRegistry` adds ``register``,</span>
-<span class="sd">   which is how a member is minted at runtime: outside ``CGAType``, looking up</span>
+<span class="sd">   which is how a member is minted at runtime: outside :class:`~pcapkit.const.mh.cga_type.CGAType`, looking up</span>
 <span class="sd">   an unknown value does not mint one (:issue:`775`).</span>
 
 <span class="sd">"""</span>
@@ -579,7 +581,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">extend_enum</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NO_DEFAULT</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseError</span><span class="p">,</span> <span class="n">EnumKeyError</span><span class="p">,</span> <span class="n">EnumValueError</span><span class="p">,</span> <span class="n">_CaughtByCaller</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">BaseError</span><span class="p">,</span> <span class="n">CaughtByCaller</span><span class="p">,</span> <span class="n">EnumKeyError</span><span class="p">,</span> <span class="n">EnumValueError</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
@@ -600,13 +602,13 @@
 <span class="sd">    on top; a closed enumeration inherits this one directly and so is never</span>
 <span class="sd">    handed a ``register`` it would have to refuse.</span>
 
-<span class="sd">    This is a plain mix-in rather than an :class:`~aenum.Enum` subclass, because</span>
+<span class="sd">    This is a plain mix-in rather than an ``aenum.Enum`` subclass, because</span>
 <span class="sd">    an enumeration that already has members cannot be subclassed. Mixed in</span>
 <span class="sd">    *before* the member type -- ``class Foo(EnumRegistry, IntFlag)``, or</span>
 <span class="sd">    ``class Bar(EnumLookup, IntEnum)`` -- it contributes methods only, so</span>
-<span class="sd">    :mod:`aenum` still resolves the member data type from the enumeration base:</span>
-<span class="sd">    ``int`` for :class:`~aenum.IntEnum` and :class:`~aenum.IntFlag`, ``str`` for</span>
-<span class="sd">    :class:`~aenum.StrEnum`. That is what lets one base serve each of them, where a</span>
+<span class="sd">    |aenum|_ still resolves the member data type from the enumeration base:</span>
+<span class="sd">    ``int`` for ``aenum.IntEnum`` and ``aenum.IntFlag``, ``str`` for</span>
+<span class="sd">    ``aenum.StrEnum``. That is what lets one base serve each of them, where a</span>
 <span class="sd">    generated template fragment would have needed a separate rendering per</span>
 <span class="sd">    member type.</span>
 
@@ -615,20 +617,20 @@
 <span class="sd">    ``class Foo(EnumRegistry, IntFlag)`` resolves as ``Foo -&gt; EnumRegistry -&gt;</span>
 <span class="sd">    EnumLookup -&gt; IntFlag -&gt; int -&gt; ...``, so ``_member_type_`` still comes from</span>
 <span class="sd">    the enumeration base and not from anything in this module. Had this tier</span>
-<span class="sd">    subclassed :class:`~aenum.Enum` in order to "be an enum", it would have</span>
+<span class="sd">    subclassed ``aenum.Enum`` in order to "be an enum", it would have</span>
 <span class="sd">    become the member type itself and broken every one of these shapes at once.</span>
 
 <span class="sd">    The methods deliberately touch only ``_member_map_``, ``_member_names_`` and</span>
-<span class="sd">    ``_value2member_map_``, which both :mod:`enum` and :mod:`aenum` maintain, so</span>
-<span class="sd">    nothing on this tier depends on :mod:`aenum` internals at all -- the</span>
-<span class="sd">    :func:`~aenum.extend_enum` call in this module belongs to</span>
+<span class="sd">    ``_value2member_map_``, which both :mod:`enum` and |aenum|_ maintain, so</span>
+<span class="sd">    nothing on this tier depends on |aenum|_ internals at all -- the</span>
+<span class="sd">    ``aenum.extend_enum`` call in this module belongs to</span>
 <span class="sd">    :class:`EnumRegistry`, which is the tier that mutates.</span>
 
 <span class="sd">    """</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: The enumeration machinery's own lookup tables and member data type,</span>
-        <span class="c1">#: declared here because they are contributed by the :class:`~aenum.Enum`</span>
+        <span class="c1">#: declared here because they are contributed by the ``aenum.Enum``</span>
         <span class="c1">#: base this mix-in is combined with rather than by the mix-in itself.</span>
         <span class="n">_member_map_</span><span class="p">:</span> <span class="s1">'dict[str, Self]'</span>
         <span class="n">_member_names_</span><span class="p">:</span> <span class="s1">'list[str]'</span>
@@ -683,7 +685,7 @@
 <span class="sd">        :meth:`get`'s own ``except ValueError`` and falls back to ``default``</span>
 <span class="sd">        just as any other unresolvable value does. It is also quiet:</span>
 <span class="sd">        :meth:`get` always calls this hook inside a</span>
-<span class="sd">        :class:`~pcapkit.utilities.exceptions._CaughtByCaller` block for</span>
+<span class="sd">        :class:`~pcapkit.utilities.exceptions.CaughtByCaller` block for</span>
 <span class="sd">        :exc:`ValueError`, so an override need not pass ``quiet=True`` for its</span>
 <span class="sd">        rejection to log nothing there (:issue:`1845`). An override raising</span>
 <span class="sd">        something outside that hierarchy would instead propagate past</span>
@@ -753,15 +755,16 @@
 
 <span class="sd">        It never mints while resolving ``default``; ``key`` may still mint</span>
 <span class="sd">        through a ``_missing_`` that GitHub issue :issue:`775`'s ruling</span>
-<span class="sd">        deliberately kept minting, on ``CGAType``. Registering a member any other way is :meth:`register`'s job</span>
-<span class="sd">        and nobody else's, which is the ruling :issue:`775` exists to carry</span>
+<span class="sd">        deliberately kept minting, on :class:`~pcapkit.const.mh.cga_type.CGAType`. Registering a</span>
+<span class="sd">        member any other way is :meth:`~EnumRegistry.register`'s job and nobody else's, which is the ruling</span>
+<span class="sd">        :issue:`775` exists to carry</span>
 <span class="sd">        out: an unrecognised or unregistered value does not become a registered</span>
 <span class="sd">        member unless a user or caller explicitly creates one. A value inside a</span>
 <span class="sd">        registry's declared-but-unassigned range still resolves, through that</span>
-<span class="sd">        registry's own ``_missing_`` and :meth:`_unregistered_member`, to a</span>
+<span class="sd">        registry's own ``_missing_`` and :meth:`~EnumRegistry._unregistered_member`, to a</span>
 <span class="sd">        member that is deliberately absent from the lookup tables -- true</span>
-<span class="sd">        outside ``CGAType``, where such a value instead lands</span>
-<span class="sd">        in *both* tables, exactly as :meth:`register` would leave it -- for a</span>
+<span class="sd">        outside :class:`~pcapkit.const.mh.cga_type.CGAType`, where such a value instead lands</span>
+<span class="sd">        in *both* tables, exactly as :meth:`~EnumRegistry.register` would leave it -- for a</span>
 <span class="sd">        non-``str`` key; the ``str`` case is qualified below. Both describe</span>
 <span class="sd">        ``key`` resolution only. ``default`` never reaches ``_missing_`` on</span>
 <span class="sd">        either branch: a declared-but-unassigned ``default`` does not resolve</span>
@@ -789,7 +792,7 @@
 <span class="sd">        :class:`~pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`) mints on</span>
 <span class="sd">        any path, so no live witness exists in this tree.</span>
 <span class="sd">        :class:`~pcapkit.const.mh.cga_type.CGAType`, which still mints directly</span>
-<span class="sd">        via :func:`~aenum.extend_enum`, is :class:`int`-valued, so</span>
+<span class="sd">        via ``aenum.extend_enum``, is :class:`int`-valued, so</span>
 <span class="sd">        a ``str`` name could not reach its mint branch even if this restriction</span>
 <span class="sd">        did not exist; it is not an exception to it, just not reachable by it.</span>
 <span class="sd">        This is about a future ``str``-valued registry (or a present one whose</span>
@@ -805,7 +808,7 @@
 
 <span class="sd">        That restriction has a cost the paragraph above glosses over: a</span>
 <span class="sd">        *declared-but-unassigned* value -- the case resolved there through</span>
-<span class="sd">        ``_missing_`` and :meth:`_unregistered_member` without either lookup</span>
+<span class="sd">        ``_missing_`` and :meth:`~EnumRegistry._unregistered_member` without either lookup</span>
 <span class="sd">        table growing -- is for that exact reason invisible to the</span>
 <span class="sd">        ``_value2member_map_`` check above. Such a value resolves through</span>
 <span class="sd">        ``cls(value)`` but not through ``get(value)`` when ``value`` is a</span>
@@ -828,7 +831,7 @@
 <span class="sd">        given on :meth:`_validate_value` itself.</span>
 
 <span class="sd">        The hook and ``cls(key)`` run inside a</span>
-<span class="sd">        :class:`~pcapkit.utilities.exceptions._CaughtByCaller` block for</span>
+<span class="sd">        :class:`~pcapkit.utilities.exceptions.CaughtByCaller` block for</span>
 <span class="sd">        :exc:`ValueError`, because every :exc:`ValueError` they raise is this</span>
 <span class="sd">        method's own lookup miss: caught here, then answered with ``default`` or</span>
 <span class="sd">        raised to the caller as the miss. A loud</span>
@@ -840,7 +843,7 @@
 
 <span class="sd">        Both failure paths raise from :mod:`pcapkit.utilities.exceptions`</span>
 <span class="sd">        rather than a builtin, per the ruling recorded on GitHub issue</span>
-<span class="sd">        :issue:`923`: in-library code raises from ``pcapkit.utilities.exceptions``</span>
+<span class="sd">        :issue:`923`: in-library code raises from :mod:`pcapkit.utilities.exceptions`</span>
 <span class="sd">        rather than a builtin, and whether ``ValueError`` or ``KeyError`` applies</span>
 <span class="sd">        follows what stdlib's ``Enum`` raises in the same circumstance: a name</span>
 <span class="sd">        miss is :exc:`KeyError`-derived and a value miss :exc:`ValueError`-derived,</span>
@@ -858,10 +861,10 @@
 <span class="sd">          -- the interpreter's own, unless an earlier loud error installed</span>
 <span class="sd">          :mod:`pcapkit`'s. The name miss is</span>
 <span class="sd">          :exc:`~pcapkit.utilities.exceptions.EnumKeyError` with</span>
-<span class="sd">          ``quiet=True``, because it is in-library control flow -- at</span>
-<span class="sd">          :meth:`~pcapkit.const.http.method.Method.get` it is part of a</span>
-<span class="sd">          *successful* call, since that override catches it in order to build</span>
-<span class="sd">          an unregistered member. The value miss is quiet through the block</span>
+<span class="sd">          ``quiet=True``, because it is in-library control flow -- in the</span>
+<span class="sd">          ``get`` override of :class:`~pcapkit.const.http.method.Method` it is</span>
+<span class="sd">          part of a *successful* call, since that override catches it in order</span>
+<span class="sd">          to build an unregistered member. The value miss is quiet through the block</span>
 <span class="sd">          described above, as ruled on :issue:`1845` on the ground that this</span>
 <span class="sd">          method is mostly called from protocol parsing: a value it cannot</span>
 <span class="sd">          resolve is input for the caller to handle, not a fault to report. A</span>
@@ -876,7 +879,7 @@
 <span class="sd">          typically :exc:`~pcapkit.utilities.exceptions.EnumValueError` from a</span>
 <span class="sd">          subclass's :meth:`_validate_value` -- is re-raised as it stands rather</span>
 <span class="sd">          than wrapped, so the subclass's own message survives and no second</span>
-<span class="sd">          error is constructed. Only :mod:`aenum`'s and :mod:`enum`'s own "no</span>
+<span class="sd">          error is constructed. Only |aenum|_'s and :mod:`enum`'s own "no</span>
 <span class="sd">          member carries this value" is converted, into a quiet</span>
 <span class="sd">          :exc:`~pcapkit.utilities.exceptions.EnumValueError`. This is the same</span>
 <span class="sd">          discrimination :meth:`EnumField.post_process</span>
@@ -931,7 +934,7 @@
             <span class="c1"># this method's own lookup miss -- answered with ``default`` below,</span>
             <span class="c1"># or raised as the miss -- so a loud one is quiet here, whoever</span>
             <span class="c1"># constructed it.</span>
-            <span class="k">with</span> <span class="n">_CaughtByCaller</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
+            <span class="k">with</span> <span class="n">CaughtByCaller</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">):</span>
                 <span class="bp">cls</span><span class="o">.</span><span class="n">_validate_value</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
                 <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>  <span class="c1"># type: ignore[call-arg]</span>
         <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
@@ -950,13 +953,13 @@
 
 <span class="sd">        For a registry that maps one key to one member -- which is every</span>
 <span class="sd">        registry inheriting this base unmodified -- that tuple holds exactly one</span>
-<span class="sd">        entry, since an alias registered by :meth:`register_alias` is a second</span>
+<span class="sd">        entry, since an alias registered by :meth:`~EnumRegistry.register_alias` is a second</span>
 <span class="sd">        *name* for the canonical member rather than a second member. The method</span>
 <span class="sd">        still exists here, because ``get``, ``get_all``, ``register`` and</span>
 <span class="sd">        ``register_alias`` are all to exist on every const registry (GitHub</span>
 <span class="sd">        issue :issue:`842`), and it is where a registry with genuinely</span>
-<span class="sd">        several matches puts them: ``AppType`` overrides it to return every service IANA</span>
-<span class="sd">        assigns to a port.</span>
+<span class="sd">        several matches puts them: :class:`~pcapkit.const.reg.apptype.apptype.AppType` overrides it</span>
+<span class="sd">        to return every service IANA assigns to a port.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            key: Name or value to look up.</span>
@@ -1012,11 +1015,11 @@
 <span class="sd">        The caller-named path, and the only one that grows the registry:</span>
 <span class="sd">        it mints a new member on the class at runtime under the ``name`` the</span>
 <span class="sd">        caller specifies, so nothing has to be guessed (GitHub issue :issue:`842`).</span>
-<span class="sd">        Contrast :meth:`get` and ``_missing_``, which resolve without naming anything.</span>
+<span class="sd">        Contrast :meth:`~EnumLookup.get` and ``_missing_``, which resolve without naming anything.</span>
 
 <span class="sd">        Refuses a ``value`` that already has a member. Without this guard,</span>
-<span class="sd">        :func:`~aenum.extend_enum` does not mint anything for an already-taken</span>
-<span class="sd">        value -- :mod:`aenum` treats that as a request to *alias* the existing</span>
+<span class="sd">        ``aenum.extend_enum`` does not mint anything for an already-taken</span>
+<span class="sd">        value -- |aenum|_ treats that as a request to *alias* the existing</span>
 <span class="sd">        member under the caller's ``name`` instead, silently: the call returns</span>
 <span class="sd">        the *existing* member, ``name`` becomes reachable in ``__members__``</span>
 <span class="sd">        pointing at it, and ``_member_names_`` does not grow. That is</span>
@@ -1041,7 +1044,7 @@
 <span class="sd">        hook, because there the rejection is a lookup miss for the caller to</span>
 <span class="sd">        handle; here it refuses a mint the caller explicitly asked for, which</span>
 <span class="sd">        is a fault to report. So this calls the hook in a</span>
-<span class="sd">        :class:`~pcapkit.utilities.exceptions._CaughtByCaller` block declaring</span>
+<span class="sd">        :class:`~pcapkit.utilities.exceptions.CaughtByCaller` block declaring</span>
 <span class="sd">        that nothing is caught -- loud even if ``register`` is reached from</span>
 <span class="sd">        inside a ``get`` (:issue:`1845`).</span>
 
@@ -1060,7 +1063,7 @@
 <span class="sd">                :meth:`~EnumLookup._validate_value` rejects ``value``. The base</span>
 <span class="sd">                implementation of that hook accepts everything, so this cannot</span>
 <span class="sd">                arise on a registry that does not override it.</span>
-<span class="sd">            ValueError: If ``name`` is already taken. :mod:`aenum` reports that</span>
+<span class="sd">            ValueError: If ``name`` is already taken. |aenum|_ reports that</span>
 <span class="sd">                as :exc:`TypeError`; it is translated so that the ways one call</span>
 <span class="sd">                can fail are one exception type.</span>
 
@@ -1072,7 +1075,7 @@
                              <span class="sa">f</span><span class="s1">'to add a further name for it'</span><span class="p">)</span>
         <span class="c1"># NOTE: GitHub issue #1845. Declares that nothing is caught, so the</span>
         <span class="c1"># rejection stays loud even inside a ``get`` block that would quiet it.</span>
-        <span class="k">with</span> <span class="n">_CaughtByCaller</span><span class="p">():</span>
+        <span class="k">with</span> <span class="n">CaughtByCaller</span><span class="p">():</span>
             <span class="bp">cls</span><span class="o">.</span><span class="n">_validate_value</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_extend</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
 
@@ -1081,7 +1084,7 @@
 <a class="viewcode-back" href="../../../pcapkit/corekit/enum.html#pcapkit.corekit.enum.EnumRegistry._extend">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_extend</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Self'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""The raw :func:`~aenum.extend_enum` call, shared by :meth:`register`</span>
+<span class="w">        </span><span class="sd">"""The raw ``aenum.extend_enum`` call, shared by :meth:`register`</span>
 <span class="sd">        and :meth:`register_alias`.</span>
 
 <span class="sd">        Neither public method calls the other: :meth:`register` refuses an</span>
@@ -1101,7 +1104,7 @@
 <span class="sd">            The member now reachable under ``name``, new or existing.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            ValueError: If ``name`` is already taken. :mod:`aenum` reports that</span>
+<span class="sd">            ValueError: If ``name`` is already taken. |aenum|_ reports that</span>
 <span class="sd">                as :exc:`TypeError`; it is translated so that the ways one call</span>
 <span class="sd">                can fail are one exception type.</span>
 
@@ -1122,13 +1125,13 @@
 <span class="sd">        member's mapping -- so it needs an existing member to attach to, and this</span>
 <span class="sd">        refuses a value no member carries rather than falling through to</span>
 <span class="sd">        :meth:`register`. :issue:`842` settled on an alias always attaching to an</span>
-<span class="sd">        existing member, leaving open whether ``AppType`` or a concrete</span>
-<span class="sd">        enumeration might need to alias a value no member carries. ``AppType``'s</span>
+<span class="sd">        existing member, leaving open whether :class:`~pcapkit.const.reg.apptype.apptype.AppType` or a concrete</span>
+<span class="sd">        enumeration might need to alias a value no member carries. :class:`~pcapkit.const.reg.apptype.apptype.AppType`'s</span>
 <span class="sd">        override does not: it requires the port to already carry a member of that</span>
-<span class="sd">        very registry. What an alias means also differs away from ``AppType``: on</span>
-<span class="sd">        every other registry it is a custom name the caller opts into, not one</span>
-<span class="sd">        recorded by the IANA registrars. Minting under the name of an aliasing</span>
-<span class="sd">        call would manufacture exactly the unrecorded member :issue:`775` removes.</span>
+<span class="sd">        very registry. What an alias means also differs away from</span>
+<span class="sd">        :class:`~pcapkit.const.reg.apptype.apptype.AppType`: on every other registry it is a custom</span>
+<span class="sd">        name the caller opts into, not one recorded by the IANA registrars. Minting under the name</span>
+<span class="sd">        of an aliasing call would manufacture exactly the unrecorded member :issue:`775` removes.</span>
 
 <span class="sd">        Membership is tested against ``_value2member_map_`` rather than by</span>
 <span class="sd">        calling ``cls(value)``: a declared-but-unassigned value resolves through</span>
@@ -1142,8 +1145,8 @@
 <span class="sd">        would refuse this call outright -- :meth:`register` and</span>
 <span class="sd">        :meth:`register_alias` test ``value``'s membership for opposite</span>
 <span class="sd">        outcomes, so neither can be the other's implementation.</span>
-<span class="sd">        ``AppType``'s override differs: it mints a real member through</span>
-<span class="sd">        :func:`~aenum.extend_enum`, so its iteration grows too.</span>
+<span class="sd">        :class:`~pcapkit.const.reg.apptype.apptype.AppType`'s override differs: it mints a real member through</span>
+<span class="sd">        ``aenum.extend_enum``, so its iteration grows too.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            value: Value of the existing member to alias.</span>
@@ -1178,7 +1181,7 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ValueError: As :meth:`register_alias`. Names before the failing one</span>
-<span class="sd">                stay registered -- :func:`~aenum.extend_enum` has no transaction</span>
+<span class="sd">                stay registered -- ``aenum.extend_enum`` has no transaction</span>
 <span class="sd">                to roll back, and undoing it by hand would mean reaching further</span>
 <span class="sd">                into enumeration internals than anything else here does.</span>
 
@@ -1198,7 +1201,7 @@
 <span class="sd">        that does.</span>
 
 <span class="sd">        The member is constructed through ``cls._member_type_``, which</span>
-<span class="sd">        :mod:`aenum` sets from the enumeration base, so this serves ``int``- and</span>
+<span class="sd">        |aenum|_ sets from the enumeration base, so this serves ``int``- and</span>
 <span class="sd">        ``str``-valued registries alike without either having to say which it</span>
 <span class="sd">        is.</span>
 

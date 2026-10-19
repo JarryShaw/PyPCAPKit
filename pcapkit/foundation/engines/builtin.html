@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/foundation/engines/builtin.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="PCAP Support: pcapkit.foundation.engines.pcap is the PCAP extraction engine used by pcapkit.foundation.extraction.Extractor. PCAP-NG Support: pcapkit.foundation.engines.pcapng is the PCAP-NG extrac..." />
-<meta name="description" content="PCAP Support: pcapkit.foundation.engines.pcap is the PCAP extraction engine used by pcapkit.foundation.extraction.Extractor. PCAP-NG Support: pcapkit.foundation.engines.pcapng is the PCAP-NG extrac..." />
+<meta property="og:description" content="Together, the readers below are the default engine. PCAP Support: pcapkit.foundation.engines.pcap is the PCAP extraction engine used by pcapkit.foundation.extraction.Extractor. PCAP-NG Support: pca..." />
+<meta name="description" content="Together, the readers below are the default engine. PCAP Support: pcapkit.foundation.engines.pcap is the PCAP extraction engine used by pcapkit.foundation.extraction.Extractor. PCAP-NG Support: pca..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="3rd-Party Engines" href="3rdparty.html"><link rel="prev" title="Base Engine" href="engine.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -260,7 +260,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -392,6 +392,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -495,6 +496,7 @@
         <article role="main" id="furo-main-content">
           <section id="built-in-engines">
 <h1>Built-in Engines<a class="headerlink" href="#built-in-engines" title="Link to this heading">¶</a></h1>
+<p>Together, the readers below are the <a class="reference internal" href="../../../glossary.html#term-default-engine"><span class="xref std std-term">default engine</span></a>.</p>
 <section id="module-pcapkit.foundation.engines.pcap">
 <span id="pcap-support"></span><h2>PCAP Support<a class="headerlink" href="#module-pcapkit.foundation.engines.pcap" title="Link to this heading">¶</a></h2>
 <p><a class="reference internal" href="#module-pcapkit.foundation.engines.pcap" title="pcapkit.foundation.engines.pcap"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.engines.pcap</span></code></a> is the PCAP extraction engine used by
@@ -666,7 +668,7 @@ context storage.</p>
 <li><p>check if the block is a packet block;</p></li>
 <li><p>if not, save the block into the internal context storage and repeat;</p></li>
 <li><p>if yes, save the related information into the internal context storage;</p></li>
-<li><p>write the parsed block into output file.</p></li>
+<li><p>write the parsed block into output file;</p></li>
 <li><p>reassemble IP and/or TCP fragments;</p></li>
 <li><p>trace TCP flows if any;</p></li>
 <li><p>record frame information if any.</p></li>

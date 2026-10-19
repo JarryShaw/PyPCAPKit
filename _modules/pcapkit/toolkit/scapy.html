@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -488,8 +489,6 @@
 <span class="sd">:mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame</span>
 <span class="sd">cannot be used for it.</span>
 
-<span class="sd">.. _Scapy: https://scapy.net</span>
-
 <span class="sd">.. warning::</span>
 
 <span class="sd">   This module requires installed `Scapy`_ engine.</span>
@@ -511,7 +510,7 @@
 <span class="sd">   Populating the registries before</span>
 <span class="sd">   ``sniff`` is</span>
 <span class="sd">   :class:`~pcapkit.foundation.engines.scapy.Scapy`'s job, and it does it by</span>
-<span class="sd">   importing :mod:`scapy.all` in its constructor.</span>
+<span class="sd">   importing ``scapy.all`` in its constructor.</span>
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">decimal</span>
@@ -730,6 +729,8 @@
 
 
 
+<div class="viewcode-block" id="_frame">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.scapy._frame">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_frame</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the octets of the frame a Scapy packet stands for.</span>
 
@@ -753,9 +754,12 @@
     <span class="n">original</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="s1">'original'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="s1">'wirelen'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">original</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">)):</span>
         <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">original</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span></div>
 
 
+
+<div class="viewcode-block" id="_within_datagrams">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.scapy._within_datagrams">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_within_datagrams</span><span class="p">(</span><span class="n">layer</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the octets from ``layer`` on that lie inside every IP datagram carrying it.</span>
 
@@ -809,9 +813,12 @@
             <span class="c1"># IP header and ``layer``</span>
             <span class="n">end</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">end</span><span class="p">,</span> <span class="nb">max</span><span class="p">(</span><span class="n">length</span> <span class="o">-</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">carrier</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)),</span> <span class="mi">0</span><span class="p">))</span>
         <span class="n">carrier</span> <span class="o">=</span> <span class="n">carrier</span><span class="o">.</span><span class="n">underlayer</span>
-    <span class="k">return</span> <span class="n">data</span><span class="p">[:</span><span class="n">end</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">data</span><span class="p">[:</span><span class="n">end</span><span class="p">]</span></div>
 
 
+
+<div class="viewcode-block" id="_tcp_segment">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.scapy._tcp_segment">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_tcp_segment</span><span class="p">(</span><span class="n">tcp</span><span class="p">:</span> <span class="s1">'TCP'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[bytes, bytes] | None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Split the TCP segment ``tcp`` heads into its header and its payload.</span>
 
@@ -820,7 +827,7 @@
 
 <span class="sd">    Returns:</span>
 <span class="sd">        The header, as many octets as the Data Offset counts, and the payload</span>
-<span class="sd">        after it, up to the end of the datagrams that carry the segment, c.f.</span>
+<span class="sd">        after it, up to the end of the datagrams that carry the segment, cf.</span>
 <span class="sd">        ``_within_datagrams()``; or :data:`None` if the datagrams hold fewer</span>
 <span class="sd">        than the 20 octets of the fixed header, or the Data Offset counts fewer</span>
 <span class="sd">        (:rfc:`9293#section-3.1`), as there is then no header to split off.</span>
@@ -836,9 +843,12 @@
     <span class="n">hdr_len</span> <span class="o">=</span> <span class="p">(</span><span class="n">segment</span><span class="p">[</span><span class="n">TCP_DATA_OFFSET_OCTET</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span> <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">TCP_MIN_HEADER_LEN</span> <span class="k">else</span> <span class="mi">0</span>
     <span class="k">if</span> <span class="n">hdr_len</span> <span class="o">&lt;</span> <span class="n">TCP_MIN_HEADER_LEN</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">return</span> <span class="n">segment</span><span class="p">[:</span><span class="n">hdr_len</span><span class="p">],</span> <span class="n">segment</span><span class="p">[</span><span class="n">hdr_len</span><span class="p">:]</span>
+    <span class="k">return</span> <span class="n">segment</span><span class="p">[:</span><span class="n">hdr_len</span><span class="p">],</span> <span class="n">segment</span><span class="p">[</span><span class="n">hdr_len</span><span class="p">:]</span></div>
 
 
+
+<div class="viewcode-block" id="_tcp_behind_extension_headers">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.scapy._tcp_behind_extension_headers">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_tcp_behind_extension_headers</span><span class="p">(</span><span class="n">segment</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[bytes, bytes] | None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Split a TCP segment carried behind an AH or IPv6 extension header in IPv4.</span>
 
@@ -865,9 +875,12 @@
         <span class="k">return</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">hdr_len</span> <span class="o">&gt;</span> <span class="n">TCP_MIN_HEADER_LEN</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">_default_accepts</span><span class="p">(</span><span class="s1">'TCP'</span><span class="p">,</span> <span class="n">segment</span><span class="p">[:</span><span class="n">hdr_len</span><span class="p">]):</span>
         <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">return</span> <span class="n">segment</span><span class="p">[:</span><span class="n">hdr_len</span><span class="p">],</span> <span class="n">segment</span><span class="p">[</span><span class="n">hdr_len</span><span class="p">:]</span>
+    <span class="k">return</span> <span class="n">segment</span><span class="p">[:</span><span class="n">hdr_len</span><span class="p">],</span> <span class="n">segment</span><span class="p">[</span><span class="n">hdr_len</span><span class="p">:]</span></div>
 
 
+
+<div class="viewcode-block" id="_tcp_carrier">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.scapy._tcp_carrier">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_tcp_carrier</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[IP | IPv6, TCP, bytes, bytes] | None'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Fetch the TCP segment of a Scapy packet, and the IP layer that carries it.</span>
 
@@ -942,7 +955,8 @@
 
     <span class="k">if</span> <span class="n">carrier</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="p">(</span><span class="n">segment</span> <span class="o">:=</span> <span class="n">_tcp_segment</span><span class="p">(</span><span class="n">tcp</span><span class="p">))</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">return</span> <span class="n">carrier</span><span class="p">,</span> <span class="n">tcp</span><span class="p">,</span> <span class="o">*</span><span class="n">segment</span>
+    <span class="k">return</span> <span class="n">carrier</span><span class="p">,</span> <span class="n">tcp</span><span class="p">,</span> <span class="o">*</span><span class="n">segment</span></div>
+
 
 
 <div class="viewcode-block" id="ipv4_reassembly">
@@ -953,7 +967,7 @@
 <span class="sd">    A packet can be reassembled if it contains an IPv4 layer</span>
 <span class="sd">    (:class:`scapy.layers.inet.IP`) whose header -- as many octets as its IHL counts,</span>
 <span class="sd">    and at least 20 -- lies inside the frame and every IP datagram carrying it (see</span>
-<span class="sd">    :func:`_within_datagrams`), and the **DF** (:attr:`scapy.layers.inet.IP.flags.DF`)</span>
+<span class="sd">    :func:`_within_datagrams`), and the **DF** (``scapy.layers.inet.IP.flags.DF``)</span>
 <span class="sd">    flag is :data:`False`. A zero-length frame has none, though `Scapy`_ hands it back</span>
 <span class="sd">    as an IPv4 layer of defaults at the ``RAW`` and ``IPV4`` link types (see</span>
 <span class="sd">    :func:`_frame`).</span>

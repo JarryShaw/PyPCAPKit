@@ -5,7 +5,7 @@ HIP - Host Identity Protocol
 
 :mod:`pcapkit.protocols.internet.hip` contains
 :class:`~pcapkit.protocols.internet.hip.HIP` only,
-which implements extractor for Host Identity
+which implements the extractor for Host Identity
 Protocol (HIP) [*]_, whose structure is described
 as below:
 
@@ -14,11 +14,11 @@ Octets      Bits        Name                    Description
 ======= ========= ====================== ==================================
   0           0   ``hip.next``              Next Header
   1           8   ``hip.length``            Header Length
-  2          16   ``hip.packet_fixed``      Reserved (``\x00``)
+  2          16   ``hip.packet_fixed``      Fixed Bit (``0``)
   2          17   ``hip.type``              Packet Type
   3          24   ``hip.version``           Version
   3          28   ``hip.reserved``          Reserved
-  3          31   ``hip.version_fixed``     Reserved (``\x01``)
+  3          31   ``hip.version_fixed``     Fixed Bit (``1``)
   4          32   ``hip.chksum``            Checksum
   6          48   ``hip.control``           Controls
   8          64   ``hip.shit``              Sender's Host Identity Tag

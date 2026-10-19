@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -868,13 +869,13 @@
 <span class="sd">        is 4 octets, so a width lambda returning ``0`` for it would leave the</span>
 <span class="sd">        ``length`` octet counting 4 octets that were never packed.</span>
 
-<span class="sd">        The ``ConditionalField`` form could express this field correctly, since a</span>
-<span class="sd">        callable-length ``NumberField`` packs and unpacks both the 4- and the</span>
+<span class="sd">        The :class:`~pcapkit.corekit.fields.misc.ConditionalField` form could express this field correctly, since a</span>
+<span class="sd">        callable-length :class:`~pcapkit.corekit.fields.numbers.NumberField` packs and unpacks both the 4- and the</span>
 <span class="sd">        8-octet form, and wire *absence* is no obstacle:</span>
 <span class="sd">        :attr:`MPTCPDSS.ssn`, :attr:`MPTCPDSS.dl_len` and</span>
-<span class="sd">        :attr:`MPTCPDSS.checksum` are each a ``ConditionalField`` on the sibling</span>
+<span class="sd">        :attr:`MPTCPDSS.checksum` are each a :class:`~pcapkit.corekit.fields.misc.ConditionalField` on the sibling</span>
 <span class="sd">        ``M`` flag (the checksum on the option length as well). The</span>
-<span class="sd">        ``SwitchField`` form is kept for a narrower reason about</span>
+<span class="sd">        :class:`~pcapkit.corekit.fields.misc.SwitchField` form is kept for a narrower reason about</span>
 <span class="sd">        composition. A</span>
 <span class="sd">        :class:`~pcapkit.corekit.fields.misc.ConditionalField`'s ``length``</span>
 <span class="sd">        forwards to the wrapped field unconditionally, never consulting the</span>
@@ -883,8 +884,8 @@
 <span class="sd">        ``struct.error: bad char in struct format``. Nothing here meets that only</span>
 <span class="sd">        because :class:`Schema</span>
 <span class="sd">        &lt;pcapkit.protocols.schema.schema.Schema&gt;`'s ``pack`` and ``unpack``</span>
-<span class="sd">        special-case ``ConditionalField`` by type and skip the wrapped field</span>
-<span class="sd">        outright before any ``length`` is read. A ``SwitchField`` needs no such</span>
+<span class="sd">        special-case :class:`~pcapkit.corekit.fields.misc.ConditionalField` by type and skip the wrapped field</span>
+<span class="sd">        outright before any ``length`` is read. A :class:`~pcapkit.corekit.fields.misc.SwitchField` needs no such</span>
 <span class="sd">        special case: its selector always hands back an already-concrete field,</span>
 <span class="sd">        :class:`~pcapkit.corekit.fields.misc.NoValueField` included, so its</span>
 <span class="sd">        ``length`` is safe wherever it is read. Swapping the two would be a</span>
@@ -919,8 +920,9 @@
 
 <span class="sd">    Note:</span>
 <span class="sd">        Identical in shape to :func:`mptcp_dss_ack_selector`; see that function's</span>
-<span class="sd">        note for why a ``SwitchField`` is used in place of a</span>
-<span class="sd">        ``ConditionalField`` around a callable-length ``NumberField``.</span>
+<span class="sd">        note for why a :class:`~pcapkit.corekit.fields.misc.SwitchField` is used in place of a</span>
+<span class="sd">        :class:`~pcapkit.corekit.fields.misc.ConditionalField` around a callable-length</span>
+<span class="sd">        :class:`~pcapkit.corekit.fields.numbers.NumberField`.</span>
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'M'</span><span class="p">]:</span>
@@ -1532,7 +1534,7 @@
     <span class="p">})</span>
     <span class="c1">#: Address ID.</span>
     <span class="n">addr_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt8Field</span><span class="p">()</span>
-    <span class="c1">#: Sender's truncated HMAC</span>
+    <span class="c1">#: Sender's truncated HMAC.</span>
     <span class="n">hmac</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
     <span class="c1">#: Sender's random number.</span>
     <span class="n">nonce</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">()</span>
@@ -1593,7 +1595,7 @@
     <span class="c1">#: Data sequence number.</span>
     <span class="c1">#:</span>
     <span class="c1">#: 4 octets when ``M`` is set, 8 when ``m`` is set as well, absent otherwise --</span>
-    <span class="c1">#: :rfc:`8684` section 3.3 figure 9. C.f. :func:`mptcp_dss_dsn_selector`.</span>
+    <span class="c1">#: :rfc:`8684` section 3.3 figure 9. See :func:`mptcp_dss_dsn_selector`.</span>
     <span class="n">dsn</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">SwitchField</span><span class="p">(</span>
         <span class="n">selector</span><span class="o">=</span><span class="n">mptcp_dss_dsn_selector</span><span class="p">,</span>
     <span class="p">)</span>
@@ -1607,7 +1609,7 @@
         <span class="n">UInt16Field</span><span class="p">(),</span>
         <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'flags'</span><span class="p">][</span><span class="s1">'M'</span><span class="p">],</span>
     <span class="p">)</span>
-    <span class="c1">#: Checksum (if negotiated, c.f. :func:`mptcp_dss_checksum`).</span>
+    <span class="c1">#: Checksum (if negotiated, see :func:`mptcp_dss_checksum`).</span>
     <span class="n">checksum</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
         <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">2</span><span class="p">),</span>
         <span class="n">mptcp_dss_checksum</span><span class="p">,</span>

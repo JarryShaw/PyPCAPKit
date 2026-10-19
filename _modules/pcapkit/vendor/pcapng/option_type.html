@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -523,7 +524,7 @@
 <span class="s1">from aenum import StrEnum, extend_enum</span>
 
 <span class="s1">from pcapkit.corekit.enum import EnumRegistry</span>
-<span class="s1">from pcapkit.utilities.exceptions import EnumValueError</span>
+<span class="s1">from pcapkit.utilities.exceptions import CaughtByCaller, EnumValueError</span>
 
 <span class="s1">__all__ = ['</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">']</span>
 
@@ -544,6 +545,14 @@
 <span class="s1">    __members_ns__: 'DefaultDict[str, dict[int, </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">]]' = defaultdict(dict)</span>
 
 <span class="s1">    def __new__(cls, value: 'int', name: 'str' = 'opt_unknown') -&gt; 'Type[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">]':</span>
+<span class="s1">        """Create a member from a registry row and file it under its namespace.</span>
+
+<span class="s1">        Args:</span>
+<span class="s1">            value: Option code.</span>
+<span class="s1">            name: Option name, whose text before the first underscore is the</span>
+<span class="s1">                namespace it is filed under in :attr:`__members_ns__`.</span>
+
+<span class="s1">        """</span>
 <span class="s1">        temp = '%s [%d]' % (name, value)</span>
 
 <span class="s1">        obj = str.__new__(cls, temp)</span>
@@ -597,13 +606,13 @@
 <span class="s1">        :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member` calls</span>
 <span class="s1">        :class:`str`'s ``__new__`` directly on the raw ``value``, but</span>
 <span class="s1">        </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1"> stores a *formatted* string (``'</span><span class="se">{{</span><span class="s1">name</span><span class="se">}}</span><span class="s1"> [</span><span class="se">{{</span><span class="s1">value</span><span class="se">}}</span><span class="s1">]'``) as</span>
-<span class="s1">        its own :attr:`~aenum.Enum._value_`, not ``value`` itself, so that</span>
+<span class="s1">        its own ``aenum.Enum._value_``, not ``value`` itself, so that</span>
 <span class="s1">        approach would build a member whose value looks nothing like this</span>
 <span class="s1">        registry's real members.</span>
 
 <span class="s1">        Deliberately does **not** add to :attr:`__members_ns__` either --</span>
 <span class="s1">        that dict is this registry's own second lookup table, alongside</span>
-<span class="s1">        :attr:`~aenum.Enum._value2member_map_`, and growing it would defeat</span>
+<span class="s1">        ``aenum.Enum._value2member_map_``, and growing it would defeat</span>
 <span class="s1">        the whole point of an *unregistered* member exactly as growing</span>
 <span class="s1">        ``_value2member_map_`` would.</span>
 
@@ -635,9 +644,9 @@
 <span class="s1">          files the member under the namespace that name's prefix gives</span>
 <span class="s1">          (``if_rtaudit`` goes under ``if``), so ``name`` is passed through</span>
 <span class="s1">          to it as well as used as the member's attribute name.</span>
-<span class="s1">        * :attr:`~aenum.Enum._value_` is the formatted ``'</span><span class="se">{{</span><span class="s1">name</span><span class="se">}}</span><span class="s1"> [</span><span class="se">{{</span><span class="s1">value</span><span class="se">}}</span><span class="s1">]'``</span>
+<span class="s1">        * ``aenum.Enum._value_`` is the formatted ``'</span><span class="se">{{</span><span class="s1">name</span><span class="se">}}</span><span class="s1"> [</span><span class="se">{{</span><span class="s1">value</span><span class="se">}}</span><span class="s1">]'``</span>
 <span class="s1">          string, so the base's duplicate check against</span>
-<span class="s1">          :attr:`~aenum.Enum._value2member_map_` can never match an</span>
+<span class="s1">          ``aenum.Enum._value2member_map_`` can never match an</span>
 <span class="s1">          :class:`int` code. The check runs against :attr:`__members_ns__`</span>
 <span class="s1">          instead, the table :meth:`get` resolves codes through: both</span>
 <span class="s1">          ``name``'s own namespace and ``opt``, whose codes are common to</span>
@@ -666,7 +675,10 @@
 <span class="s1">            if existing is not None:</span>
 <span class="s1">                raise ValueError(f'</span><span class="se">{{</span><span class="s1">value!r</span><span class="se">}}</span><span class="s1"> is already registered on </span><span class="se">{{</span><span class="s1">cls.__name__</span><span class="se">}}</span><span class="s1"> as '</span>
 <span class="s1">                                 f'</span><span class="se">{{</span><span class="s1">existing.name!r</span><span class="se">}}</span><span class="s1"> in namespace </span><span class="se">{{</span><span class="s1">space!r</span><span class="se">}}</span><span class="s1">')</span>
-<span class="s1">        cls._validate_value(value)</span>
+<span class="s1">        # NOTE: GitHub issue #1845. Declares that nothing is caught, so the</span>
+<span class="s1">        # rejection stays loud even inside a ``get`` block that would quiet it.</span>
+<span class="s1">        with CaughtByCaller():</span>
+<span class="s1">            cls._validate_value(value)</span>
 <span class="s1">        try:</span>
 <span class="s1">            return extend_enum(cls, name, value, name)</span>
 <span class="s1">        except TypeError as error:</span>
@@ -678,7 +690,7 @@
 
 <span class="s1">        Overrides :meth:`~pcapkit.corekit.enum.EnumRegistry.register_alias`</span>
 <span class="s1">        for the same reason as :meth:`register`: the base looks the</span>
-<span class="s1">        :class:`int` code up in :attr:`~aenum.Enum._value2member_map_`, whose</span>
+<span class="s1">        :class:`int` code up in ``aenum.Enum._value2member_map_``, whose</span>
 <span class="s1">        keys are the formatted ``'</span><span class="se">{{</span><span class="s1">name</span><span class="se">}}</span><span class="s1"> [</span><span class="se">{{</span><span class="s1">value</span><span class="se">}}</span><span class="s1">]'`` strings, so it could</span>
 <span class="s1">        never find one.</span>
 
@@ -710,7 +722,7 @@
 <span class="s1">            raise ValueError(f'</span><span class="se">{{</span><span class="s1">value!r</span><span class="se">}}</span><span class="s1"> is not a registered </span><span class="se">{{</span><span class="s1">cls.__name__</span><span class="se">}}</span><span class="s1"> in namespace '</span>
 <span class="s1">                             f'</span><span class="se">{{</span><span class="s1">namespace!r</span><span class="se">}}</span><span class="s1"> or opt; use </span><span class="se">{{</span><span class="s1">cls.__name__</span><span class="se">}}</span><span class="s1">.register() to mint one')</span>
 
-<span class="s1">        # NOTE: :func:`~aenum.extend_enum` builds a throwaway member through</span>
+<span class="s1">        # NOTE: ``aenum.extend_enum`` builds a throwaway member through</span>
 <span class="s1">        # :meth:`__new__` to learn its value, and :meth:`__new__` files that</span>
 <span class="s1">        # throwaway in :attr:`__members_ns__` over ``member``. The alias</span>
 <span class="s1">        # resolves to ``member``, so ``member`` is put back.</span>
@@ -724,14 +736,27 @@
 
 <span class="s1">    @staticmethod</span>
 <span class="s1">    def get(key: 'int | str', default: 'int' = -1, *, namespace: 'str' = 'opt') -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>
-<span class="s1">        """Backport support for original codes.</span>
+<span class="s1">        """Resolve ``key`` to a member, by option code or by name.</span>
+
+<span class="s1">        An :class:`int` ``key`` is an option code, looked up in ``namespace``</span>
+<span class="s1">        overlaid on ``opt``, so a code the namespace assigns itself wins over</span>
+<span class="s1">        the generic one. A :class:`str` ``key`` is matched case-sensitively</span>
+<span class="s1">        against member names, then against member values.</span>
 
 <span class="s1">        Args:</span>
-<span class="s1">            key: Key to get enum item.</span>
-<span class="s1">            default: Default value if not found.</span>
-<span class="s1">            namespace: Namespace of the enum item.</span>
+<span class="s1">            key: Option code, member name or member value to look up.</span>
+<span class="s1">            default: Option code of the unregistered member built when a</span>
+<span class="s1">                :class:`str` ``key`` matches nothing. Unused for an</span>
+<span class="s1">                :class:`int` ``key``.</span>
+<span class="s1">            namespace: Namespace to resolve an :class:`int` ``key`` in.</span>
 
-<span class="s1">        :meta private:</span>
+<span class="s1">        Returns:</span>
+<span class="s1">            The matching member. On a miss, an unregistered member, which is</span>
+<span class="s1">            not added to the lookup tables, so ``get`` never registers an</span>
+<span class="s1">            option (:issue:`860`). For an option code, in range or not, it is</span>
+<span class="s1">            named ``</span><span class="se">{{</span><span class="s1">namespace</span><span class="se">}}</span><span class="s1">_unknown``; for a string, it is named ``key``</span>
+<span class="s1">            and carries the option code ``default``.</span>
+
 <span class="s1">        """</span>
 <span class="s1">        if isinstance(key, int):</span>
 <span class="s1">            temp_ns = </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">.__members_ns__.get('opt', </span><span class="se">{{}}</span><span class="s1">).copy()</span>

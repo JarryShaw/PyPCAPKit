@@ -260,7 +260,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -392,6 +392,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -512,7 +513,7 @@ channel</strong>:</p>
 <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code> logger sees every complaint whatever the warning filters say;</p></li>
 <li><p>the standard <a class="reference external" href="https://docs.python.org/3/library/warnings.html#module-warnings" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">warnings</span></code></a> machinery, via <a class="reference external" href="https://docs.python.org/3/library/warnings.html#warnings.warn" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">warnings.warn()</span></code></a>, subject to
 the filters – so <a class="reference external" href="https://docs.python.org/3/library/warnings.html#warnings.filterwarnings" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">warnings.filterwarnings()</span></code></a>,
-<code class="xref py py-func docutils literal notranslate"><span class="pre">warnings.catch_warnings()</span></code>, <code class="xref py py-mod docutils literal notranslate"><span class="pre">pytest</span></code>’s <code class="docutils literal notranslate"><span class="pre">filterwarnings</span></code>,
+<a class="reference external" href="https://docs.python.org/3/library/warnings.html#warnings.catch_warnings" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">warnings.catch_warnings</span></code></a>, <code class="xref py py-mod docutils literal notranslate"><span class="pre">pytest</span></code>’s <code class="docutils literal notranslate"><span class="pre">filterwarnings</span></code>,
 <a class="reference external" href="https://docs.python.org/3/using/cmdline.html#cmdoption-W" title="(in Python v3.15)"><code class="xref std std-option docutils literal notranslate"><span class="pre">-W</span></code></a> and <span class="target" id="index-0"></span><a class="reference external" href="https://docs.python.org/3/using/cmdline.html#envvar-PYTHONWARNINGS" title="(in Python v3.15)"><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PYTHONWARNINGS</span></code></a> govern <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> warnings
 exactly as they govern any other library’s (with one wrinkle in naming a
 category on the command line, noted below).</p></li>
@@ -533,7 +534,7 @@ layer’s are reported as above when the trial ends (<a class="extlink-issue ref
 <dd><p>Wrapper function of <a class="reference external" href="https://docs.python.org/3/library/warnings.html#warnings.warn" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">warnings.warn()</span></code></a>.</p>
 <p>The warning is reported once on the <a class="reference internal" href="logging.html#pcapkit.utilities.logging.logger" title="pcapkit.utilities.logging.logger"><code class="xref py py-data docutils literal notranslate"><span class="pre">logger</span></code></a>
 logger, then once through <a class="reference external" href="https://docs.python.org/3/library/warnings.html#warnings.warn" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">warnings.warn()</span></code></a>. The logger call does not
-consult <code class="xref py py-data docutils literal notranslate"><span class="pre">warnings.filters</span></code>, so a log-based consumer sees the complaint
+consult <code class="docutils literal notranslate"><span class="pre">warnings.filters</span></code>, so a log-based consumer sees the complaint
 even when the application has filtered the category out; the
 <a class="reference external" href="https://docs.python.org/3/library/warnings.html#warnings.warn" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">warnings.warn()</span></code></a> call is filtered normally, so the application keeps
 full control of that channel – including turning the warning into an error
@@ -605,8 +606,8 @@ header was not captured: the warnings describe a layer the result does not
 have (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1580">#1580</a>).</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Nothing here touches <code class="xref py py-data docutils literal notranslate"><span class="pre">warnings.filters</span></code> or a module’s
-<code class="docutils literal notranslate"><span class="pre">__warningregistry__</span></code>; <code class="xref py py-func docutils literal notranslate"><span class="pre">warnings.catch_warnings()</span></code> would, which is
+<p>Nothing here touches <code class="docutils literal notranslate"><span class="pre">warnings.filters</span></code> or a module’s
+<code class="docutils literal notranslate"><span class="pre">__warningregistry__</span></code>; <a class="reference external" href="https://docs.python.org/3/library/warnings.html#warnings.catch_warnings" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">warnings.catch_warnings</span></code></a> would, which is
 what made unrelated warnings re-fire up to v1.4.1 (see
 <a class="reference internal" href="#pcapkit.utilities.warnings.BaseWarning" title="pcapkit.utilities.warnings.BaseWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseWarning</span></code></a>).</p>
 <p>A block left while one opened inside it is still open – a generator
@@ -674,7 +675,7 @@ configured separately, through the <a class="reference external" href="https://d
 the first snippet above restores the 1.4.x quiet. In 1.4.x, constructing a
 <a class="reference internal" href="#pcapkit.utilities.warnings.BaseWarning" title="pcapkit.utilities.warnings.BaseWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">BaseWarning</span></code></a> installed an <code class="docutils literal notranslate"><span class="pre">ignore</span></code>
 filter for its own class, so a caller could not re-enable them. The filter
-went at the <em>front</em> of the process-global <code class="xref py py-data docutils literal notranslate"><span class="pre">warnings.filters</span></code>, so it
+went at the <em>front</em> of the process-global <code class="docutils literal notranslate"><span class="pre">warnings.filters</span></code>, so it
 also overrode the host application’s own configuration for those categories
 and made unrelated warnings re-fire (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/364">#364</a>).</p>
 </div>
@@ -691,7 +692,7 @@ built without ever being reported, and the two must not be confused.</p>
 <p><span class="versionmodified changed">Changed in version 1.5.0: </span>The constructor has no side effects (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/364">#364</a>). In 1.4.x it called
 <code class="docutils literal notranslate"><span class="pre">warnings.simplefilter('ignore',</span> <span class="pre">type(self))</span></code> outside development
 mode, which inserted an entry at the front of the process-global
-<code class="xref py py-data docutils literal notranslate"><span class="pre">warnings.filters</span></code> – overriding whatever the host application,
+<code class="docutils literal notranslate"><span class="pre">warnings.filters</span></code> – overriding whatever the host application,
 <a class="reference external" href="https://docs.python.org/3/using/cmdline.html#cmdoption-W" title="(in Python v3.15)"><code class="xref std std-option docutils literal notranslate"><span class="pre">-W</span></code></a> or the test runner had configured, and invalidating every
 module’s <code class="docutils literal notranslate"><span class="pre">__warningregistry__</span></code> so that unrelated warnings re-fired.
 It also logged the warning a second time under

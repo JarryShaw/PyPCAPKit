@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -648,6 +649,13 @@
 <span class="s1">        group: 'GroupingInformation'</span>
 
 <span class="s1">    def __new__(cls, value: 'int', description: 'Optional[str]' = None) -&gt; 'Type[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">]':</span>
+<span class="s1">        """Create a member, deriving its kind and group from the code's first two digits.</span>
+
+<span class="s1">        Args:</span>
+<span class="s1">            value: Three-digit return code.</span>
+<span class="s1">            description: Description of the return code.</span>
+
+<span class="s1">        """</span>
 <span class="s1">        obj = int.__new__(cls, value)</span>
 <span class="s1">        obj._value_ = value</span>
 
@@ -659,9 +667,11 @@
 <span class="s1">        return obj</span>
 
 <span class="s1">    def __repr__(self) -&gt; 'str':</span>
+<span class="s1">        """Show the return code, as ``&lt;ReturnCode [code]&gt;``."""</span>
 <span class="s1">        return f'&lt;</span><span class="se">{{</span><span class="s1">self.__class__.__name__</span><span class="se">}}</span><span class="s1"> [</span><span class="se">{{</span><span class="s1">self._value_</span><span class="se">}}</span><span class="s1">]&gt;'</span>
 
 <span class="s1">    def __str__(self) -&gt; 'str':</span>
+<span class="s1">        """Show the return code with its description, as ``[code] description``."""</span>
 <span class="s1">        return "[%s] %s" % (self._value_, self.description)</span>
 
 <span class="s1">    </span><span class="si">{</span><span class="n">ENUM</span><span class="si">}</span>

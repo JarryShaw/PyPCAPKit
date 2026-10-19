@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -600,7 +601,7 @@
 <span class="w">        </span><span class="sd">"""Reassembly procedure.</span>
 
 <span class="sd">        Arguments:</span>
-<span class="sd">            info: info dict of packets to be reassembled</span>
+<span class="sd">            info: :term:`info` record of packets to be reassembled</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            A completed datagram's buffer is freed, as in the</span>
@@ -791,6 +792,8 @@
             <span class="n">limit</span> <span class="o">=</span> <span class="n">IP_MAX_LENGTH</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_header_overhead</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">header</span><span class="p">))</span>
         <span class="k">return</span> <span class="mi">0</span> <span class="o">&lt;=</span> <span class="n">TDL</span> <span class="o">&lt;=</span> <span class="n">limit</span> <span class="ow">and</span> <span class="nb">all</span><span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">RCVBT</span><span class="p">[:(</span><span class="n">TDL</span> <span class="o">+</span> <span class="mi">7</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span><span class="p">])</span>
 
+<div class="viewcode-block" id="IP._detect_conflicts">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.IP._detect_conflicts">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_detect_conflicts</span><span class="p">(</span><span class="n">rcvbt</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">,</span> <span class="n">tdl</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">datagram</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">,</span> <span class="n">payload</span><span class="p">:</span> <span class="s1">'bytearray'</span><span class="p">,</span>
                            <span class="n">start</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">stop</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[tuple[int, int]]'</span><span class="p">:</span>
@@ -866,7 +869,8 @@
                 <span class="n">run_stop</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="n">conflicts</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">start</span> <span class="o">+</span> <span class="n">index</span><span class="p">,</span> <span class="n">start</span> <span class="o">+</span> <span class="n">run_stop</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
             <span class="n">index</span> <span class="o">=</span> <span class="n">run_stop</span>
-        <span class="k">return</span> <span class="n">conflicts</span>
+        <span class="k">return</span> <span class="n">conflicts</span></div>
+
 
 <div class="viewcode-block" id="IP.submit">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/reassembly/ip/ip.html#pcapkit.foundation.reassembly.ip.IP.submit">[docs]</a>

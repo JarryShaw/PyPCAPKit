@@ -260,7 +260,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -392,6 +392,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -526,7 +527,7 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.http.error_code.ErrorCode">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.http.error_code.</span></span><span class="sig-name descname"><span class="pre">ErrorCode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/http/error_code.html#ErrorCode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.http.error_code.ErrorCode" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
 <p>[ErrorCode] HTTP/2 Error Code</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.error_code.ErrorCode.NO_ERROR">
@@ -659,7 +660,7 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.http.frame.Frame">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.http.frame.</span></span><span class="sig-name descname"><span class="pre">Frame</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/http/frame.html#Frame"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.http.frame.Frame" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
 <p>[Frame] HTTP/2 Frame Type</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.frame.Frame.DATA">
@@ -788,22 +789,23 @@ same words (<a class="extlink-issue reference external" href="https://github.com
 <p>This module contains the constant enumeration for <strong>HTTP Method</strong>,
 which is automatically generated from <a class="reference internal" href="../vendor/http.html#pcapkit.vendor.http.method.Method" title="pcapkit.vendor.http.method.Method"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.vendor.http.method.Method</span></code></a>.</p>
 <div class="versionchanged">
-<p><span class="versionmodified changed">Changed in version 1.5.0: </span>Neither <code class="docutils literal notranslate"><span class="pre">Method._missing_</span></code> nor <code class="docutils literal notranslate"><span class="pre">Method.get()</span></code> mints a member
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a>): only IANA-registered values are members, and a new one is
-created through <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, which
-can supply the <code class="docutils literal notranslate"><span class="pre">safe</span></code> and <code class="docutils literal notranslate"><span class="pre">idempotent</span></code> a bare wire method verb carries
-neither of. A member’s <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> payload is its value, so
-<code class="docutils literal notranslate"><span class="pre">Method.GET</span> <span class="pre">==</span> <span class="pre">'GET'</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/870">#870</a>).</p>
-<p><code class="docutils literal notranslate"><span class="pre">Method.get()</span></code> matches <code class="docutils literal notranslate"><span class="pre">key</span></code> case-sensitively, as <span class="target" id="index-27"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html"><strong>RFC 9110</strong></a> makes the
-method token (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/896">#896</a>), and checks it against member values as well as
-names (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/908">#908</a>). A non-<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> <code class="docutils literal notranslate"><span class="pre">key</span></code> raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>
-(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/908">#908</a>): <code class="docutils literal notranslate"><span class="pre">get(42)</span></code> and <code class="docutils literal notranslate"><span class="pre">get(None)</span></code> raised <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#AttributeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeError</span></code></a>
-from <code class="docutils literal notranslate"><span class="pre">key.upper()</span></code>, and <code class="docutils literal notranslate"><span class="pre">get(b'GET')</span></code> raised <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a>.</p>
+<p><span class="versionmodified changed">Changed in version 1.5.0: </span>Neither <a class="reference internal" href="#pcapkit.const.http.method.Method._missing_" title="pcapkit.const.http.method.Method._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Method._missing_</span></code></a> nor
+<a class="reference internal" href="#pcapkit.const.http.method.Method.get" title="pcapkit.const.http.method.Method.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Method.get()</span></code></a> mints a member
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a>): only IANA-registered values are members, and a new one is created
+through <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, which can supply the
+<code class="docutils literal notranslate"><span class="pre">safe</span></code> and <code class="docutils literal notranslate"><span class="pre">idempotent</span></code> a bare wire method verb carries neither of. A member’s
+<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> payload is its value, so <code class="docutils literal notranslate"><span class="pre">Method.GET</span> <span class="pre">==</span> <span class="pre">'GET'</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/870">#870</a>).</p>
+<p><a class="reference internal" href="#pcapkit.const.http.method.Method.get" title="pcapkit.const.http.method.Method.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Method.get()</span></code></a> matches <code class="docutils literal notranslate"><span class="pre">key</span></code>
+case-sensitively, as <span class="target" id="index-27"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html"><strong>RFC 9110</strong></a> makes the method token (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/896">#896</a>), and checks it
+against member values as well as names (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/908">#908</a>). A non-<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> <code class="docutils literal notranslate"><span class="pre">key</span></code>
+raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/908">#908</a>): <code class="docutils literal notranslate"><span class="pre">get(42)</span></code> and <code class="docutils literal notranslate"><span class="pre">get(None)</span></code> raised
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#AttributeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeError</span></code></a> from <code class="docutils literal notranslate"><span class="pre">key.upper()</span></code>, and <code class="docutils literal notranslate"><span class="pre">get(b'GET')</span></code> raised
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a>.</p>
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.http.method.Method">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.http.method.</span></span><span class="sig-name descname"><span class="pre">Method</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/http/method.html#Method"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.http.method.Method" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.StrEnum</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="docutils literal notranslate"><span class="pre">aenum.StrEnum</span></code></p>
 <p>[Method] HTTP Method</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.method.Method.safe">
@@ -815,6 +817,24 @@ from <code class="docutils literal notranslate"><span class="pre">key.upper()</s
 <dt class="sig sig-object py" id="pcapkit.const.http.method.Method.idempotent">
 <span class="sig-name descname"><span class="pre">idempotent</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><span class="pre">bool</span></a></span><a class="headerlink" href="#pcapkit.const.http.method.Method.idempotent" title="Link to this definition">¶</a></dt>
 <dd><p>Idempotent method.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.http.method.Method.__new__">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">safe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idempotent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.const.http.method.Method.__new__" title="Link to this definition">¶</a></dt>
+<dd><p>Create a member from a registry row.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Method token, which is also the member’s value.</p></li>
+<li><p><strong>safe</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether the method is safe.</p></li>
+<li><p><strong>idempotent</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether the method is idempotent.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="#pcapkit.const.http.method.Method" title="pcapkit.const.http.method.Method"><code class="xref py py-class docutils literal notranslate"><span class="pre">Method</span></code></a>]</span></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1063,9 +1083,9 @@ from <code class="docutils literal notranslate"><span class="pre">key.upper()</s
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_unregistered_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/http/method.html#Method._unregistered_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.http.method.Method._unregistered_member" title="Link to this definition">¶</a></dt>
 <dd><p>Build a member absent from this registry’s own lookup tables.</p>
 <p>Leaves <a class="reference internal" href="#pcapkit.const.http.method.Method.safe" title="pcapkit.const.http.method.Method.safe"><code class="xref py py-attr docutils literal notranslate"><span class="pre">safe</span></code></a> and <a class="reference internal" href="#pcapkit.const.http.method.Method.idempotent" title="pcapkit.const.http.method.Method.idempotent"><code class="xref py py-attr docutils literal notranslate"><span class="pre">idempotent</span></code></a> at the same defaults
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> itself would, rather than missing entirely –
+<a class="reference internal" href="#pcapkit.const.http.method.Method.__new__" title="pcapkit.const.http.method.Method.__new__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code></a> itself would, rather than missing entirely –
 <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry._unregistered_member" title="pcapkit.corekit.enum.EnumRegistry._unregistered_member"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code></a>
-bypasses <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> (it calls <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>’s directly), so
+bypasses <a class="reference internal" href="#pcapkit.const.http.method.Method.__new__" title="pcapkit.const.http.method.Method.__new__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code></a> (it calls <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>’s directly), so
 those attributes would otherwise be absent. There is no more
 specific value to reconstruct them from – a bare wire method verb
 carries neither, which is exactly the owner’s reasoning for why
@@ -1083,7 +1103,7 @@ exactly what was observed on the wire, matching how a
 declared, never reformatted. Only <code class="xref py py-attr docutils literal notranslate"><span class="pre">name</span></code> – the
 identifier, not the value – is canonicalised.</p>
 <p>A <em>registered</em> member carries its value the same way:
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> passes <code class="docutils literal notranslate"><span class="pre">value</span></code> to <code class="docutils literal notranslate"><span class="pre">str.__new__</span></code>, as
+<a class="reference internal" href="#pcapkit.const.http.method.Method.__new__" title="pcapkit.const.http.method.Method.__new__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code></a> passes <code class="docutils literal notranslate"><span class="pre">value</span></code> to <code class="docutils literal notranslate"><span class="pre">str.__new__</span></code>, as
 <a class="reference internal" href="ftp.html#pcapkit.const.ftp.command.Command" title="pcapkit.const.ftp.command.Command"><code class="xref py py-class docutils literal notranslate"><span class="pre">Command</span></code></a>’s own
 <code class="docutils literal notranslate"><span class="pre">__new__</span></code> does (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/870">#870</a>), so both kinds of member
 carry their own value as real <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> content
@@ -1104,14 +1124,75 @@ placeholder label to fall back to.</p></li>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.http.method.Method.get">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">get</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">default</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/http/method.html#Method.get"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.http.method.Method.get" title="Link to this definition">¶</a></dt>
+<dd><p>Resolve <code class="docutils literal notranslate"><span class="pre">key</span></code> to a member, matching the method token case-sensitively.</p>
+<p>Delegates to <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> for the
+lookup itself, so <code class="docutils literal notranslate"><span class="pre">key</span></code> is checked against member values as well
+as names (GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/908">#908</a>). That is what resolves the two
+IANA methods whose member <em>name</em> differs from their <em>value</em> –
+<code class="docutils literal notranslate"><span class="pre">BASELINE_CONTROL</span></code> / <code class="docutils literal notranslate"><span class="pre">'BASELINE-CONTROL'</span></code> and
+<code class="docutils literal notranslate"><span class="pre">VERSION_CONTROL</span></code> / <code class="docutils literal notranslate"><span class="pre">'VERSION-CONTROL'</span></code>, a hyphen being unusable
+in a Python identifier – which <a class="reference internal" href="#pcapkit.const.http.method.Method._missing_" title="pcapkit.const.http.method.Method._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> (and so the
+constructor) also finds by value.</p>
+<p>It is a <code class="xref py py-class docutils literal notranslate"><span class="pre">classmethod</span></code>, as the base is, because a
+zero-argument <code class="docutils literal notranslate"><span class="pre">super()</span></code> needs a first argument to bind
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/908">#908</a>). <code class="docutils literal notranslate"><span class="pre">Method.get('X')</span></code> binds the same as it would on a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">staticmethod</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">default</span></code> does not follow the base’s <code class="docutils literal notranslate"><span class="pre">NO_DEFAULT</span></code> sentinel and
+value-only fallback: the base’s <code class="docutils literal notranslate"><span class="pre">default</span></code> must name a
+<em>registered</em> value (resolved through <code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code>), while
+this override’s <code class="docutils literal notranslate"><span class="pre">default</span></code> supplies the <em>value</em> of the
+unregistered member it builds on a miss.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>key</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Key to get enum item. Looked up case-<strong>sensitively</strong>,
+per <span class="target" id="index-74"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-9.1"><strong>RFC 9110 Section 9.1</strong></a> – the method token is
+case-sensitive, unlike
+<a class="reference internal" href="ftp.html#pcapkit.const.ftp.command.Command.get" title="pcapkit.const.ftp.command.Command.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a>’s equivalent override, which stays
+case-insensitive because <span class="target" id="index-75"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc959.html#section-5"><strong>RFC 959 Section 5</strong></a> says FTP
+command codes are not. Checked against both member names
+and values, via the base’s own precedence – name before
+value – so a value-only match such as
+<code class="docutils literal notranslate"><span class="pre">'BASELINE-CONTROL'</span></code> resolves too (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/908">#908</a>).</p></li>
+<li><p><strong>default</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Value for the unregistered member built when <code class="docutils literal notranslate"><span class="pre">key</span></code>
+matches neither a name nor a value. <code class="docutils literal notranslate"><span class="pre">None</span></code>, the
+default, uses <code class="docutils literal notranslate"><span class="pre">key</span></code> itself.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.http.method.Method" title="pcapkit.const.http.method.Method"><code class="xref py py-class docutils literal notranslate"><span class="pre">Method</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The member whose name or value is <code class="docutils literal notranslate"><span class="pre">key</span></code>. On a miss, an
+unregistered member named <code class="docutils literal notranslate"><span class="pre">key</span></code> upper-cased, with the value
+<code class="docutils literal notranslate"><span class="pre">default</span></code> (or <code class="docutils literal notranslate"><span class="pre">key</span></code>), which is not added to the lookup tables,
+so <code class="docutils literal notranslate"><span class="pre">get</span></code> never registers a method (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a>).</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><strong>ValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">key</span></code> is not a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>. This reaches the
+    caller from the base’s non-<code class="docutils literal notranslate"><span class="pre">str</span></code> branch, where
+    <a class="reference internal" href="#pcapkit.const.http.method.Method._validate_value" title="pcapkit.const.http.method.Method._validate_value"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_validate_value()</span></code></a> refuses it before <code class="docutils literal notranslate"><span class="pre">cls(key)</span></code> could
+    reach <code class="docutils literal notranslate"><span class="pre">_missing_</span></code>, and is <strong>not</strong> caught by
+    the miss fallback described under <em>Returns</em> – only a failed
+    lookup is. Raising is the intended behaviour for
+    <code class="docutils literal notranslate"><span class="pre">get(b'GET')</span></code> as well: a member whose name and
+    value were both the <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> object is not a thing
+    this registry should hand back.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.http.method.Method._validate_value">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_validate_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/http/method.html#Method._validate_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.http.method.Method._validate_value" title="Link to this definition">¶</a></dt>
 <dd><p>Reject <code class="docutils literal notranslate"><span class="pre">value</span></code> unless it is a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, as <a class="reference internal" href="#pcapkit.const.http.method.Method._missing_" title="pcapkit.const.http.method.Method._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> does.</p>
 <p>Overrides <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumLookup._validate_value" title="pcapkit.corekit.enum.EnumLookup._validate_value"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_validate_value()</span></code></a>
 with the check <a class="reference internal" href="#pcapkit.const.http.method.Method._missing_" title="pcapkit.const.http.method.Method._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> makes, and the message it raises, so
 <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> refuses exactly the
-values <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> refuses, in the same words (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1816">#1816</a>). Any
-<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> passes, since <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> and <a class="reference internal" href="#pcapkit.const.http.method.Method._missing_" title="pcapkit.const.http.method.Method._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> resolve
+values <a class="reference internal" href="#pcapkit.const.http.method.Method.get" title="pcapkit.const.http.method.Method.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> refuses, in the same words (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1816">#1816</a>). Any
+<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> passes, since <a class="reference internal" href="#pcapkit.const.http.method.Method.get" title="pcapkit.const.http.method.Method.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> and <a class="reference internal" href="#pcapkit.const.http.method.Method._missing_" title="pcapkit.const.http.method.Method._missing_"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_missing_()</span></code></a> resolve
 every one.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1133,14 +1214,32 @@ every one.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Value to get enum item. Matched case-insensitively against
 the canonical upper-case member names – deliberately unlike
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code>, which is case-<strong>sensitive</strong> per
-<span class="target" id="index-74"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-9.1"><strong>RFC 9110 Section 9.1</strong></a>. The split was ruled deliberate on
+<a class="reference internal" href="#pcapkit.const.http.method.Method.get" title="pcapkit.const.http.method.Method.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a>, which is case-<strong>sensitive</strong> per
+<span class="target" id="index-76"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-9.1"><strong>RFC 9110 Section 9.1</strong></a>. The split was ruled deliberate on
 GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/896">#896</a>; GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/908">#908</a> is the pointer between
 the two, so the two rationales are not left contradicting each
 other with nothing tying them together.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.http.method.Method" title="pcapkit.const.http.method.Method"><code class="xref py py-class docutils literal notranslate"><span class="pre">Method</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.http.method.Method.__new_member__">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__new_member__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">safe</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">idempotent</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.const.http.method.Method.__new_member__" title="Link to this definition">¶</a></dt>
+<dd><p>Create a member from a registry row.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Method token, which is also the member’s value.</p></li>
+<li><p><strong>safe</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether the method is safe.</p></li>
+<li><p><strong>idempotent</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether the method is idempotent.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="#pcapkit.const.http.method.Method" title="pcapkit.const.http.method.Method"><code class="xref py py-class docutils literal notranslate"><span class="pre">Method</span></code></a>]</span></p>
 </dd>
 </dl>
 </dd></dl>
@@ -1155,49 +1254,49 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.http.setting.Setting">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.http.setting.</span></span><span class="sig-name descname"><span class="pre">Setting</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/http/setting.html#Setting"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.http.setting.Setting" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
 <p>[Setting] HTTP/2 Settings</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.setting.Setting.Reserved_0x0000">
 <span class="sig-name descname"><span class="pre">Reserved_0x0000</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#pcapkit.const.http.setting.Setting.Reserved_0x0000" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">Reserved</span></code> [<span class="target" id="index-75"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html"><strong>RFC 9113</strong></a>]</p>
+<dd><p><code class="docutils literal notranslate"><span class="pre">Reserved</span></code> [<span class="target" id="index-77"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html"><strong>RFC 9113</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.setting.Setting.HEADER_TABLE_SIZE">
 <span class="sig-name descname"><span class="pre">HEADER_TABLE_SIZE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">1</span></span><a class="headerlink" href="#pcapkit.const.http.setting.Setting.HEADER_TABLE_SIZE" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">HEADER_TABLE_SIZE</span></code> [<span class="target" id="index-76"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html#section-6.5.2"><strong>RFC 9113 Section 6.5.2</strong></a>] (Initial Value: 4096)</p>
+<dd><p><code class="docutils literal notranslate"><span class="pre">HEADER_TABLE_SIZE</span></code> [<span class="target" id="index-78"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html#section-6.5.2"><strong>RFC 9113 Section 6.5.2</strong></a>] (Initial Value: 4096)</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.setting.Setting.ENABLE_PUSH">
 <span class="sig-name descname"><span class="pre">ENABLE_PUSH</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">2</span></span><a class="headerlink" href="#pcapkit.const.http.setting.Setting.ENABLE_PUSH" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">ENABLE_PUSH</span></code> [<span class="target" id="index-77"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html#section-6.5.2"><strong>RFC 9113 Section 6.5.2</strong></a>] (Initial Value: 1)</p>
+<dd><p><code class="docutils literal notranslate"><span class="pre">ENABLE_PUSH</span></code> [<span class="target" id="index-79"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html#section-6.5.2"><strong>RFC 9113 Section 6.5.2</strong></a>] (Initial Value: 1)</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.setting.Setting.MAX_CONCURRENT_STREAMS">
 <span class="sig-name descname"><span class="pre">MAX_CONCURRENT_STREAMS</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></span><a class="headerlink" href="#pcapkit.const.http.setting.Setting.MAX_CONCURRENT_STREAMS" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">MAX_CONCURRENT_STREAMS</span></code> [<span class="target" id="index-78"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html#section-6.5.2"><strong>RFC 9113 Section 6.5.2</strong></a>] (Initial Value:
+<dd><p><code class="docutils literal notranslate"><span class="pre">MAX_CONCURRENT_STREAMS</span></code> [<span class="target" id="index-80"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html#section-6.5.2"><strong>RFC 9113 Section 6.5.2</strong></a>] (Initial Value:
 infinite)</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.setting.Setting.INITIAL_WINDOW_SIZE">
 <span class="sig-name descname"><span class="pre">INITIAL_WINDOW_SIZE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">4</span></span><a class="headerlink" href="#pcapkit.const.http.setting.Setting.INITIAL_WINDOW_SIZE" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">INITIAL_WINDOW_SIZE</span></code> [<span class="target" id="index-79"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html#section-6.5.2"><strong>RFC 9113 Section 6.5.2</strong></a>] (Initial Value: 65535)</p>
+<dd><p><code class="docutils literal notranslate"><span class="pre">INITIAL_WINDOW_SIZE</span></code> [<span class="target" id="index-81"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html#section-6.5.2"><strong>RFC 9113 Section 6.5.2</strong></a>] (Initial Value: 65535)</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.setting.Setting.MAX_FRAME_SIZE">
 <span class="sig-name descname"><span class="pre">MAX_FRAME_SIZE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">5</span></span><a class="headerlink" href="#pcapkit.const.http.setting.Setting.MAX_FRAME_SIZE" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">MAX_FRAME_SIZE</span></code> [<span class="target" id="index-80"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html#section-6.5.2"><strong>RFC 9113 Section 6.5.2</strong></a>] (Initial Value: 16384)</p>
+<dd><p><code class="docutils literal notranslate"><span class="pre">MAX_FRAME_SIZE</span></code> [<span class="target" id="index-82"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html#section-6.5.2"><strong>RFC 9113 Section 6.5.2</strong></a>] (Initial Value: 16384)</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.setting.Setting.MAX_HEADER_LIST_SIZE">
 <span class="sig-name descname"><span class="pre">MAX_HEADER_LIST_SIZE</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">6</span></span><a class="headerlink" href="#pcapkit.const.http.setting.Setting.MAX_HEADER_LIST_SIZE" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">MAX_HEADER_LIST_SIZE</span></code> [<span class="target" id="index-81"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html#section-6.5.2"><strong>RFC 9113 Section 6.5.2</strong></a>] (Initial Value:
+<dd><p><code class="docutils literal notranslate"><span class="pre">MAX_HEADER_LIST_SIZE</span></code> [<span class="target" id="index-83"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9113.html#section-6.5.2"><strong>RFC 9113 Section 6.5.2</strong></a>] (Initial Value:
 infinite)</p>
 </dd></dl>
 
@@ -1210,13 +1309,13 @@ infinite)</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.setting.Setting.SETTINGS_ENABLE_CONNECT_PROTOCOL">
 <span class="sig-name descname"><span class="pre">SETTINGS_ENABLE_CONNECT_PROTOCOL</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">8</span></span><a class="headerlink" href="#pcapkit.const.http.setting.Setting.SETTINGS_ENABLE_CONNECT_PROTOCOL" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">SETTINGS_ENABLE_CONNECT_PROTOCOL</span></code> [<span class="target" id="index-82"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8441.html"><strong>RFC 8441</strong></a>] (Initial Value: 0)</p>
+<dd><p><code class="docutils literal notranslate"><span class="pre">SETTINGS_ENABLE_CONNECT_PROTOCOL</span></code> [<span class="target" id="index-84"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8441.html"><strong>RFC 8441</strong></a>] (Initial Value: 0)</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.setting.Setting.SETTINGS_NO_RFC7540_PRIORITIES">
 <span class="sig-name descname"><span class="pre">SETTINGS_NO_RFC7540_PRIORITIES</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">9</span></span><a class="headerlink" href="#pcapkit.const.http.setting.Setting.SETTINGS_NO_RFC7540_PRIORITIES" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">SETTINGS_NO_RFC7540_PRIORITIES</span></code> [<span class="target" id="index-83"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9218.html"><strong>RFC 9218</strong></a>] (Initial Value: 0)</p>
+<dd><p><code class="docutils literal notranslate"><span class="pre">SETTINGS_NO_RFC7540_PRIORITIES</span></code> [<span class="target" id="index-85"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9218.html"><strong>RFC 9218</strong></a>] (Initial Value: 0)</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1278,7 +1377,7 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.const.http.status_code.</span></span><span class="sig-name descname"><span class="pre">StatusCode</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">values</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/http/status_code.html#StatusCode"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode" title="Link to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
+<dd><p>Bases: <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, <code class="docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code></p>
 <p>[StatusCode] HTTP Status Code</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.message">
@@ -1286,28 +1385,56 @@ which is automatically generated from <a class="reference internal" href="../ven
 <dd><p>Status message.</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.__new__">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'(Unknown)'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.__new__" title="Link to this definition">¶</a></dt>
+<dd><p>Create a member from a registry row.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Status code.</p></li>
+<li><p><strong>message</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Status message.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="#pcapkit.const.http.status_code.StatusCode" title="pcapkit.const.http.status_code.StatusCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">StatusCode</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.__str__">
+<span class="sig-name descname"><span class="pre">__str__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/http/status_code.html#StatusCode.__str__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.__str__" title="Link to this definition">¶</a></dt>
+<dd><p>Show the status code with its message, as <code class="docutils literal notranslate"><span class="pre">[code]</span> <span class="pre">message</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_100">
 <span class="sig-name descname"><span class="pre">CODE_100</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">100</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_100" title="Link to this definition">¶</a></dt>
-<dd><p>Continue [<span class="target" id="index-84"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.2.1"><strong>RFC 9110 Section 15.2.1</strong></a>]</p>
+<dd><p>Continue [<span class="target" id="index-86"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.2.1"><strong>RFC 9110 Section 15.2.1</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_101">
 <span class="sig-name descname"><span class="pre">CODE_101</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">101</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_101" title="Link to this definition">¶</a></dt>
-<dd><p>Switching Protocols [<span class="target" id="index-85"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.2.2"><strong>RFC 9110 Section 15.2.2</strong></a>]</p>
+<dd><p>Switching Protocols [<span class="target" id="index-87"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.2.2"><strong>RFC 9110 Section 15.2.2</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_102">
 <span class="sig-name descname"><span class="pre">CODE_102</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">102</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_102" title="Link to this definition">¶</a></dt>
-<dd><p>Processing [<span class="target" id="index-86"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2518.html"><strong>RFC 2518</strong></a>]</p>
+<dd><p>Processing [<span class="target" id="index-88"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2518.html"><strong>RFC 2518</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_103">
 <span class="sig-name descname"><span class="pre">CODE_103</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">103</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_103" title="Link to this definition">¶</a></dt>
-<dd><p>Early Hints [<span class="target" id="index-87"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8297.html"><strong>RFC 8297</strong></a>]</p>
+<dd><p>Early Hints [<span class="target" id="index-89"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8297.html"><strong>RFC 8297</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1321,265 +1448,265 @@ registered 2025-09-15, expires 2026-11-13)
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_200">
 <span class="sig-name descname"><span class="pre">CODE_200</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">200</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_200" title="Link to this definition">¶</a></dt>
-<dd><p>OK [<span class="target" id="index-88"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.3.1"><strong>RFC 9110 Section 15.3.1</strong></a>]</p>
+<dd><p>OK [<span class="target" id="index-90"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.3.1"><strong>RFC 9110 Section 15.3.1</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_201">
 <span class="sig-name descname"><span class="pre">CODE_201</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">201</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_201" title="Link to this definition">¶</a></dt>
-<dd><p>Created [<span class="target" id="index-89"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.3.2"><strong>RFC 9110 Section 15.3.2</strong></a>]</p>
+<dd><p>Created [<span class="target" id="index-91"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.3.2"><strong>RFC 9110 Section 15.3.2</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_202">
 <span class="sig-name descname"><span class="pre">CODE_202</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">202</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_202" title="Link to this definition">¶</a></dt>
-<dd><p>Accepted [<span class="target" id="index-90"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.3.3"><strong>RFC 9110 Section 15.3.3</strong></a>]</p>
+<dd><p>Accepted [<span class="target" id="index-92"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.3.3"><strong>RFC 9110 Section 15.3.3</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_203">
 <span class="sig-name descname"><span class="pre">CODE_203</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">203</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_203" title="Link to this definition">¶</a></dt>
-<dd><p>Non-Authoritative Information [<span class="target" id="index-91"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.3.4"><strong>RFC 9110 Section 15.3.4</strong></a>]</p>
+<dd><p>Non-Authoritative Information [<span class="target" id="index-93"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.3.4"><strong>RFC 9110 Section 15.3.4</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_204">
 <span class="sig-name descname"><span class="pre">CODE_204</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">204</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_204" title="Link to this definition">¶</a></dt>
-<dd><p>No Content [<span class="target" id="index-92"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.3.5"><strong>RFC 9110 Section 15.3.5</strong></a>]</p>
+<dd><p>No Content [<span class="target" id="index-94"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.3.5"><strong>RFC 9110 Section 15.3.5</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_205">
 <span class="sig-name descname"><span class="pre">CODE_205</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">205</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_205" title="Link to this definition">¶</a></dt>
-<dd><p>Reset Content [<span class="target" id="index-93"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.3.6"><strong>RFC 9110 Section 15.3.6</strong></a>]</p>
+<dd><p>Reset Content [<span class="target" id="index-95"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.3.6"><strong>RFC 9110 Section 15.3.6</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_206">
 <span class="sig-name descname"><span class="pre">CODE_206</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">206</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_206" title="Link to this definition">¶</a></dt>
-<dd><p>Partial Content [<span class="target" id="index-94"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.3.7"><strong>RFC 9110 Section 15.3.7</strong></a>]</p>
+<dd><p>Partial Content [<span class="target" id="index-96"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.3.7"><strong>RFC 9110 Section 15.3.7</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_207">
 <span class="sig-name descname"><span class="pre">CODE_207</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">207</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_207" title="Link to this definition">¶</a></dt>
-<dd><p>Multi-Status [<span class="target" id="index-95"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4918.html"><strong>RFC 4918</strong></a>]</p>
+<dd><p>Multi-Status [<span class="target" id="index-97"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4918.html"><strong>RFC 4918</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_208">
 <span class="sig-name descname"><span class="pre">CODE_208</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">208</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_208" title="Link to this definition">¶</a></dt>
-<dd><p>Already Reported [<span class="target" id="index-96"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5842.html"><strong>RFC 5842</strong></a>]</p>
+<dd><p>Already Reported [<span class="target" id="index-98"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5842.html"><strong>RFC 5842</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_226">
 <span class="sig-name descname"><span class="pre">CODE_226</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">226</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_226" title="Link to this definition">¶</a></dt>
-<dd><p>IM Used [<span class="target" id="index-97"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3229.html"><strong>RFC 3229</strong></a>]</p>
+<dd><p>IM Used [<span class="target" id="index-99"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc3229.html"><strong>RFC 3229</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_300">
 <span class="sig-name descname"><span class="pre">CODE_300</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">300</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_300" title="Link to this definition">¶</a></dt>
-<dd><p>Multiple Choices [<span class="target" id="index-98"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.4.1"><strong>RFC 9110 Section 15.4.1</strong></a>]</p>
+<dd><p>Multiple Choices [<span class="target" id="index-100"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.4.1"><strong>RFC 9110 Section 15.4.1</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_301">
 <span class="sig-name descname"><span class="pre">CODE_301</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">301</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_301" title="Link to this definition">¶</a></dt>
-<dd><p>Moved Permanently [<span class="target" id="index-99"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.4.2"><strong>RFC 9110 Section 15.4.2</strong></a>]</p>
+<dd><p>Moved Permanently [<span class="target" id="index-101"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.4.2"><strong>RFC 9110 Section 15.4.2</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_302">
 <span class="sig-name descname"><span class="pre">CODE_302</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">302</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_302" title="Link to this definition">¶</a></dt>
-<dd><p>Found [<span class="target" id="index-100"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.4.3"><strong>RFC 9110 Section 15.4.3</strong></a>]</p>
+<dd><p>Found [<span class="target" id="index-102"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.4.3"><strong>RFC 9110 Section 15.4.3</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_303">
 <span class="sig-name descname"><span class="pre">CODE_303</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">303</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_303" title="Link to this definition">¶</a></dt>
-<dd><p>See Other [<span class="target" id="index-101"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.4.4"><strong>RFC 9110 Section 15.4.4</strong></a>]</p>
+<dd><p>See Other [<span class="target" id="index-103"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.4.4"><strong>RFC 9110 Section 15.4.4</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_304">
 <span class="sig-name descname"><span class="pre">CODE_304</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">304</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_304" title="Link to this definition">¶</a></dt>
-<dd><p>Not Modified [<span class="target" id="index-102"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.4.5"><strong>RFC 9110 Section 15.4.5</strong></a>]</p>
+<dd><p>Not Modified [<span class="target" id="index-104"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.4.5"><strong>RFC 9110 Section 15.4.5</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_305">
 <span class="sig-name descname"><span class="pre">CODE_305</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">305</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_305" title="Link to this definition">¶</a></dt>
-<dd><p>Use Proxy [<span class="target" id="index-103"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.4.6"><strong>RFC 9110 Section 15.4.6</strong></a>]</p>
+<dd><p>Use Proxy [<span class="target" id="index-105"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.4.6"><strong>RFC 9110 Section 15.4.6</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_306">
 <span class="sig-name descname"><span class="pre">CODE_306</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">306</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_306" title="Link to this definition">¶</a></dt>
-<dd><p>(Unused) [<span class="target" id="index-104"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.4.7"><strong>RFC 9110 Section 15.4.7</strong></a>]</p>
+<dd><p>(Unused) [<span class="target" id="index-106"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.4.7"><strong>RFC 9110 Section 15.4.7</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_307">
 <span class="sig-name descname"><span class="pre">CODE_307</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">307</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_307" title="Link to this definition">¶</a></dt>
-<dd><p>Temporary Redirect [<span class="target" id="index-105"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.4.8"><strong>RFC 9110 Section 15.4.8</strong></a>]</p>
+<dd><p>Temporary Redirect [<span class="target" id="index-107"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.4.8"><strong>RFC 9110 Section 15.4.8</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_308">
 <span class="sig-name descname"><span class="pre">CODE_308</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">308</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_308" title="Link to this definition">¶</a></dt>
-<dd><p>Permanent Redirect [<span class="target" id="index-106"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.4.9"><strong>RFC 9110 Section 15.4.9</strong></a>]</p>
+<dd><p>Permanent Redirect [<span class="target" id="index-108"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.4.9"><strong>RFC 9110 Section 15.4.9</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_400">
 <span class="sig-name descname"><span class="pre">CODE_400</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">400</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_400" title="Link to this definition">¶</a></dt>
-<dd><p>Bad Request [<span class="target" id="index-107"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.1"><strong>RFC 9110 Section 15.5.1</strong></a>]</p>
+<dd><p>Bad Request [<span class="target" id="index-109"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.1"><strong>RFC 9110 Section 15.5.1</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_401">
 <span class="sig-name descname"><span class="pre">CODE_401</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">401</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_401" title="Link to this definition">¶</a></dt>
-<dd><p>Unauthorized [<span class="target" id="index-108"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.2"><strong>RFC 9110 Section 15.5.2</strong></a>]</p>
+<dd><p>Unauthorized [<span class="target" id="index-110"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.2"><strong>RFC 9110 Section 15.5.2</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_402">
 <span class="sig-name descname"><span class="pre">CODE_402</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">402</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_402" title="Link to this definition">¶</a></dt>
-<dd><p>Payment Required [<span class="target" id="index-109"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.3"><strong>RFC 9110 Section 15.5.3</strong></a>]</p>
+<dd><p>Payment Required [<span class="target" id="index-111"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.3"><strong>RFC 9110 Section 15.5.3</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_403">
 <span class="sig-name descname"><span class="pre">CODE_403</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">403</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_403" title="Link to this definition">¶</a></dt>
-<dd><p>Forbidden [<span class="target" id="index-110"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.4"><strong>RFC 9110 Section 15.5.4</strong></a>]</p>
+<dd><p>Forbidden [<span class="target" id="index-112"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.4"><strong>RFC 9110 Section 15.5.4</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_404">
 <span class="sig-name descname"><span class="pre">CODE_404</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">404</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_404" title="Link to this definition">¶</a></dt>
-<dd><p>Not Found [<span class="target" id="index-111"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.5"><strong>RFC 9110 Section 15.5.5</strong></a>]</p>
+<dd><p>Not Found [<span class="target" id="index-113"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.5"><strong>RFC 9110 Section 15.5.5</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_405">
 <span class="sig-name descname"><span class="pre">CODE_405</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">405</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_405" title="Link to this definition">¶</a></dt>
-<dd><p>Method Not Allowed [<span class="target" id="index-112"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.6"><strong>RFC 9110 Section 15.5.6</strong></a>]</p>
+<dd><p>Method Not Allowed [<span class="target" id="index-114"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.6"><strong>RFC 9110 Section 15.5.6</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_406">
 <span class="sig-name descname"><span class="pre">CODE_406</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">406</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_406" title="Link to this definition">¶</a></dt>
-<dd><p>Not Acceptable [<span class="target" id="index-113"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.7"><strong>RFC 9110 Section 15.5.7</strong></a>]</p>
+<dd><p>Not Acceptable [<span class="target" id="index-115"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.7"><strong>RFC 9110 Section 15.5.7</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_407">
 <span class="sig-name descname"><span class="pre">CODE_407</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">407</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_407" title="Link to this definition">¶</a></dt>
-<dd><p>Proxy Authentication Required [<span class="target" id="index-114"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.8"><strong>RFC 9110 Section 15.5.8</strong></a>]</p>
+<dd><p>Proxy Authentication Required [<span class="target" id="index-116"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.8"><strong>RFC 9110 Section 15.5.8</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_408">
 <span class="sig-name descname"><span class="pre">CODE_408</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">408</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_408" title="Link to this definition">¶</a></dt>
-<dd><p>Request Timeout [<span class="target" id="index-115"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.9"><strong>RFC 9110 Section 15.5.9</strong></a>]</p>
+<dd><p>Request Timeout [<span class="target" id="index-117"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.9"><strong>RFC 9110 Section 15.5.9</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_409">
 <span class="sig-name descname"><span class="pre">CODE_409</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">409</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_409" title="Link to this definition">¶</a></dt>
-<dd><p>Conflict [<span class="target" id="index-116"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.10"><strong>RFC 9110 Section 15.5.10</strong></a>]</p>
+<dd><p>Conflict [<span class="target" id="index-118"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.10"><strong>RFC 9110 Section 15.5.10</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_410">
 <span class="sig-name descname"><span class="pre">CODE_410</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">410</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_410" title="Link to this definition">¶</a></dt>
-<dd><p>Gone [<span class="target" id="index-117"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.11"><strong>RFC 9110 Section 15.5.11</strong></a>]</p>
+<dd><p>Gone [<span class="target" id="index-119"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.11"><strong>RFC 9110 Section 15.5.11</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_411">
 <span class="sig-name descname"><span class="pre">CODE_411</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">411</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_411" title="Link to this definition">¶</a></dt>
-<dd><p>Length Required [<span class="target" id="index-118"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.12"><strong>RFC 9110 Section 15.5.12</strong></a>]</p>
+<dd><p>Length Required [<span class="target" id="index-120"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.12"><strong>RFC 9110 Section 15.5.12</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_412">
 <span class="sig-name descname"><span class="pre">CODE_412</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">412</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_412" title="Link to this definition">¶</a></dt>
-<dd><p>Precondition Failed [<span class="target" id="index-119"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.13"><strong>RFC 9110 Section 15.5.13</strong></a>]</p>
+<dd><p>Precondition Failed [<span class="target" id="index-121"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.13"><strong>RFC 9110 Section 15.5.13</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_413">
 <span class="sig-name descname"><span class="pre">CODE_413</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">413</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_413" title="Link to this definition">¶</a></dt>
-<dd><p>Content Too Large [<span class="target" id="index-120"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.14"><strong>RFC 9110 Section 15.5.14</strong></a>]</p>
+<dd><p>Content Too Large [<span class="target" id="index-122"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.14"><strong>RFC 9110 Section 15.5.14</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_414">
 <span class="sig-name descname"><span class="pre">CODE_414</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">414</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_414" title="Link to this definition">¶</a></dt>
-<dd><p>URI Too Long [<span class="target" id="index-121"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.15"><strong>RFC 9110 Section 15.5.15</strong></a>]</p>
+<dd><p>URI Too Long [<span class="target" id="index-123"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.15"><strong>RFC 9110 Section 15.5.15</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_415">
 <span class="sig-name descname"><span class="pre">CODE_415</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">415</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_415" title="Link to this definition">¶</a></dt>
-<dd><p>Unsupported Media Type [<span class="target" id="index-122"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.16"><strong>RFC 9110 Section 15.5.16</strong></a>]</p>
+<dd><p>Unsupported Media Type [<span class="target" id="index-124"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.16"><strong>RFC 9110 Section 15.5.16</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_416">
 <span class="sig-name descname"><span class="pre">CODE_416</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">416</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_416" title="Link to this definition">¶</a></dt>
-<dd><p>Range Not Satisfiable [<span class="target" id="index-123"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.17"><strong>RFC 9110 Section 15.5.17</strong></a>]</p>
+<dd><p>Range Not Satisfiable [<span class="target" id="index-125"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.17"><strong>RFC 9110 Section 15.5.17</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_417">
 <span class="sig-name descname"><span class="pre">CODE_417</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">417</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_417" title="Link to this definition">¶</a></dt>
-<dd><p>Expectation Failed [<span class="target" id="index-124"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.18"><strong>RFC 9110 Section 15.5.18</strong></a>]</p>
+<dd><p>Expectation Failed [<span class="target" id="index-126"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.18"><strong>RFC 9110 Section 15.5.18</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_418">
 <span class="sig-name descname"><span class="pre">CODE_418</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">418</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_418" title="Link to this definition">¶</a></dt>
-<dd><p>(Unused) [<span class="target" id="index-125"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.19"><strong>RFC 9110 Section 15.5.19</strong></a>]</p>
+<dd><p>(Unused) [<span class="target" id="index-127"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.19"><strong>RFC 9110 Section 15.5.19</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_421">
 <span class="sig-name descname"><span class="pre">CODE_421</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">421</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_421" title="Link to this definition">¶</a></dt>
-<dd><p>Misdirected Request [<span class="target" id="index-126"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.20"><strong>RFC 9110 Section 15.5.20</strong></a>]</p>
+<dd><p>Misdirected Request [<span class="target" id="index-128"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.20"><strong>RFC 9110 Section 15.5.20</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_422">
 <span class="sig-name descname"><span class="pre">CODE_422</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">422</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_422" title="Link to this definition">¶</a></dt>
-<dd><p>Unprocessable Content [<span class="target" id="index-127"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.21"><strong>RFC 9110 Section 15.5.21</strong></a>]</p>
+<dd><p>Unprocessable Content [<span class="target" id="index-129"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.21"><strong>RFC 9110 Section 15.5.21</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_423">
 <span class="sig-name descname"><span class="pre">CODE_423</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">423</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_423" title="Link to this definition">¶</a></dt>
-<dd><p>Locked [<span class="target" id="index-128"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4918.html"><strong>RFC 4918</strong></a>]</p>
+<dd><p>Locked [<span class="target" id="index-130"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4918.html"><strong>RFC 4918</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_424">
 <span class="sig-name descname"><span class="pre">CODE_424</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">424</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_424" title="Link to this definition">¶</a></dt>
-<dd><p>Failed Dependency [<span class="target" id="index-129"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4918.html"><strong>RFC 4918</strong></a>]</p>
+<dd><p>Failed Dependency [<span class="target" id="index-131"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4918.html"><strong>RFC 4918</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_425">
 <span class="sig-name descname"><span class="pre">CODE_425</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">425</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_425" title="Link to this definition">¶</a></dt>
-<dd><p>Too Early [<span class="target" id="index-130"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8470.html"><strong>RFC 8470</strong></a>]</p>
+<dd><p>Too Early [<span class="target" id="index-132"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8470.html"><strong>RFC 8470</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_426">
 <span class="sig-name descname"><span class="pre">CODE_426</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">426</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_426" title="Link to this definition">¶</a></dt>
-<dd><p>Upgrade Required [<span class="target" id="index-131"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.22"><strong>RFC 9110 Section 15.5.22</strong></a>]</p>
+<dd><p>Upgrade Required [<span class="target" id="index-133"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.5.22"><strong>RFC 9110 Section 15.5.22</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1591,13 +1718,13 @@ registered 2025-09-15, expires 2026-11-13)
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_428">
 <span class="sig-name descname"><span class="pre">CODE_428</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">428</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_428" title="Link to this definition">¶</a></dt>
-<dd><p>Precondition Required [<span class="target" id="index-132"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6585.html"><strong>RFC 6585</strong></a>]</p>
+<dd><p>Precondition Required [<span class="target" id="index-134"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6585.html"><strong>RFC 6585</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_429">
 <span class="sig-name descname"><span class="pre">CODE_429</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">429</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_429" title="Link to this definition">¶</a></dt>
-<dd><p>Too Many Requests [<span class="target" id="index-133"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6585.html"><strong>RFC 6585</strong></a>]</p>
+<dd><p>Too Many Requests [<span class="target" id="index-135"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6585.html"><strong>RFC 6585</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1609,67 +1736,67 @@ registered 2025-09-15, expires 2026-11-13)
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_431">
 <span class="sig-name descname"><span class="pre">CODE_431</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">431</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_431" title="Link to this definition">¶</a></dt>
-<dd><p>Request Header Fields Too Large [<span class="target" id="index-134"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6585.html"><strong>RFC 6585</strong></a>]</p>
+<dd><p>Request Header Fields Too Large [<span class="target" id="index-136"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6585.html"><strong>RFC 6585</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_451">
 <span class="sig-name descname"><span class="pre">CODE_451</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">451</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_451" title="Link to this definition">¶</a></dt>
-<dd><p>Unavailable For Legal Reasons [<span class="target" id="index-135"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7725.html"><strong>RFC 7725</strong></a>]</p>
+<dd><p>Unavailable For Legal Reasons [<span class="target" id="index-137"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc7725.html"><strong>RFC 7725</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_500">
 <span class="sig-name descname"><span class="pre">CODE_500</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">500</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_500" title="Link to this definition">¶</a></dt>
-<dd><p>Internal Server Error [<span class="target" id="index-136"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.6.1"><strong>RFC 9110 Section 15.6.1</strong></a>]</p>
+<dd><p>Internal Server Error [<span class="target" id="index-138"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.6.1"><strong>RFC 9110 Section 15.6.1</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_501">
 <span class="sig-name descname"><span class="pre">CODE_501</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">501</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_501" title="Link to this definition">¶</a></dt>
-<dd><p>Not Implemented [<span class="target" id="index-137"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.6.2"><strong>RFC 9110 Section 15.6.2</strong></a>]</p>
+<dd><p>Not Implemented [<span class="target" id="index-139"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.6.2"><strong>RFC 9110 Section 15.6.2</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_502">
 <span class="sig-name descname"><span class="pre">CODE_502</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">502</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_502" title="Link to this definition">¶</a></dt>
-<dd><p>Bad Gateway [<span class="target" id="index-138"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.6.3"><strong>RFC 9110 Section 15.6.3</strong></a>]</p>
+<dd><p>Bad Gateway [<span class="target" id="index-140"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.6.3"><strong>RFC 9110 Section 15.6.3</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_503">
 <span class="sig-name descname"><span class="pre">CODE_503</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">503</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_503" title="Link to this definition">¶</a></dt>
-<dd><p>Service Unavailable [<span class="target" id="index-139"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.6.4"><strong>RFC 9110 Section 15.6.4</strong></a>]</p>
+<dd><p>Service Unavailable [<span class="target" id="index-141"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.6.4"><strong>RFC 9110 Section 15.6.4</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_504">
 <span class="sig-name descname"><span class="pre">CODE_504</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">504</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_504" title="Link to this definition">¶</a></dt>
-<dd><p>Gateway Timeout [<span class="target" id="index-140"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.6.5"><strong>RFC 9110 Section 15.6.5</strong></a>]</p>
+<dd><p>Gateway Timeout [<span class="target" id="index-142"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.6.5"><strong>RFC 9110 Section 15.6.5</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_505">
 <span class="sig-name descname"><span class="pre">CODE_505</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">505</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_505" title="Link to this definition">¶</a></dt>
-<dd><p>HTTP Version Not Supported [<span class="target" id="index-141"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.6.6"><strong>RFC 9110 Section 15.6.6</strong></a>]</p>
+<dd><p>HTTP Version Not Supported [<span class="target" id="index-143"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9110.html#section-15.6.6"><strong>RFC 9110 Section 15.6.6</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_506">
 <span class="sig-name descname"><span class="pre">CODE_506</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">506</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_506" title="Link to this definition">¶</a></dt>
-<dd><p>Variant Also Negotiates [<span class="target" id="index-142"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2295.html"><strong>RFC 2295</strong></a>]</p>
+<dd><p>Variant Also Negotiates [<span class="target" id="index-144"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2295.html"><strong>RFC 2295</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_507">
 <span class="sig-name descname"><span class="pre">CODE_507</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">507</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_507" title="Link to this definition">¶</a></dt>
-<dd><p>Insufficient Storage [<span class="target" id="index-143"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4918.html"><strong>RFC 4918</strong></a>]</p>
+<dd><p>Insufficient Storage [<span class="target" id="index-145"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4918.html"><strong>RFC 4918</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_508">
 <span class="sig-name descname"><span class="pre">CODE_508</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">508</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_508" title="Link to this definition">¶</a></dt>
-<dd><p>Loop Detected [<span class="target" id="index-144"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5842.html"><strong>RFC 5842</strong></a>]</p>
+<dd><p>Loop Detected [<span class="target" id="index-146"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc5842.html"><strong>RFC 5842</strong></a>]</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1681,26 +1808,26 @@ registered 2025-09-15, expires 2026-11-13)
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_510">
 <span class="sig-name descname"><span class="pre">CODE_510</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">510</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_510" title="Link to this definition">¶</a></dt>
-<dd><p>Not Extended (OBSOLETED) [<span class="target" id="index-145"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2774.html"><strong>RFC 2774</strong></a>][Status change of HTTP experiments to
+<dd><p>Not Extended (OBSOLETED) [<span class="target" id="index-147"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2774.html"><strong>RFC 2774</strong></a>][Status change of HTTP experiments to
 Historic]</p>
 </dd></dl>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.CODE_511">
 <span class="sig-name descname"><span class="pre">CODE_511</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">511</span></span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.CODE_511" title="Link to this definition">¶</a></dt>
-<dd><p>Network Authentication Required [<span class="target" id="index-146"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6585.html"><strong>RFC 6585</strong></a>]</p>
+<dd><p>Network Authentication Required [<span class="target" id="index-148"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc6585.html"><strong>RFC 6585</strong></a>]</p>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode._unregistered_member">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_unregistered_member</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/http/status_code.html#StatusCode._unregistered_member"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode._unregistered_member" title="Link to this definition">¶</a></dt>
 <dd><p>Build a member absent from this registry’s own lookup tables.</p>
-<p>Reconstructs <a class="reference internal" href="#pcapkit.const.http.status_code.StatusCode.message" title="pcapkit.const.http.status_code.StatusCode.message"><code class="xref py py-attr docutils literal notranslate"><span class="pre">message</span></code></a> the same way <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> would,
+<p>Reconstructs <a class="reference internal" href="#pcapkit.const.http.status_code.StatusCode.message" title="pcapkit.const.http.status_code.StatusCode.message"><code class="xref py py-attr docutils literal notranslate"><span class="pre">message</span></code></a> the same way <a class="reference internal" href="#pcapkit.const.http.status_code.StatusCode.__new__" title="pcapkit.const.http.status_code.StatusCode.__new__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code></a> would,
 rather than leaving it unset –
 <a class="reference internal" href="../corekit/enum.html#pcapkit.corekit.enum.EnumRegistry._unregistered_member" title="pcapkit.corekit.enum.EnumRegistry._unregistered_member"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code></a>
-bypasses <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> entirely
+bypasses <a class="reference internal" href="#pcapkit.const.http.status_code.StatusCode.__new__" title="pcapkit.const.http.status_code.StatusCode.__new__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code></a> entirely
 (it calls <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>’s directly), so <a class="reference internal" href="#pcapkit.const.http.status_code.StatusCode.message" title="pcapkit.const.http.status_code.StatusCode.message"><code class="xref py py-attr docutils literal notranslate"><span class="pre">message</span></code></a> would
-otherwise be missing from the result and <code class="xref py py-meth docutils literal notranslate"><span class="pre">__str__()</span></code> would raise
+otherwise be missing from the result and <a class="reference internal" href="#pcapkit.const.http.status_code.StatusCode.__str__" title="pcapkit.const.http.status_code.StatusCode.__str__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__str__()</span></code></a> would raise
 on it.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -1743,7 +1870,7 @@ outside the registry to <code class="docutils literal notranslate"><span class="
 <dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode._missing_">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_missing_</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/const/http/status_code.html#StatusCode._missing_"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode._missing_" title="Link to this definition">¶</a></dt>
 <dd><p>Lookup function used when value is not found.</p>
-<p>A status code is three digits (<span class="target" id="index-147"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9112.html#section-4"><strong>RFC 9112 Section 4</strong></a>), so every value
+<p>A status code is three digits (<span class="target" id="index-149"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9112.html#section-4"><strong>RFC 9112 Section 4</strong></a>), so every value
 from 0 to 999 can arrive on the wire: one within the registry’s range
 resolves through its unassigned ranges, any other to <code class="docutils literal notranslate"><span class="pre">Unknown</span></code>.</p>
 <dl class="field-list simple">
@@ -1752,6 +1879,23 @@ resolves through its unassigned ranges, any other to <code class="docutils liter
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.const.http.status_code.StatusCode" title="pcapkit.const.http.status_code.StatusCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">StatusCode</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.const.http.status_code.StatusCode.__new_member__">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__new_member__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'(Unknown)'</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.const.http.status_code.StatusCode.__new_member__" title="Link to this definition">¶</a></dt>
+<dd><p>Create a member from a registry row.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Status code.</p></li>
+<li><p><strong>message</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Status message.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="#pcapkit.const.http.status_code.StatusCode" title="pcapkit.const.http.status_code.StatusCode"><code class="xref py py-class docutils literal notranslate"><span class="pre">StatusCode</span></code></a>]</span></p>
 </dd>
 </dl>
 </dd></dl>

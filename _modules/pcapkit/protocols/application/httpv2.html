@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -485,7 +486,7 @@
 
 <span class="sd">:mod:`pcapkit.protocols.application.httpv2` contains</span>
 <span class="sd">:class:`~pcapkit.protocols.application.httpv2.HTTP`</span>
-<span class="sd">only, which implements extractor for Hypertext Transfer</span>
+<span class="sd">only, which implements an extractor for Hypertext Transfer</span>
 <span class="sd">Protocol (HTTP/2) [*]_, whose structure is described as</span>
 <span class="sd">below:</span>
 
@@ -684,6 +685,8 @@
     <span class="c1"># Methods.</span>
     <span class="c1">##########################################################################</span>
 
+<div class="viewcode-block" id="HTTP.unpack">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP.unpack">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">unpack</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_HTTP'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Unpack (parse) packet data.</span>
 
@@ -711,14 +714,15 @@
 <span class="sd">            still drive it negative on a buffer that clears nine (e.g. a</span>
 <span class="sd">            ``GOAWAY`` frame at 9-16 octets, whose fixed ``stream`` and</span>
 <span class="sd">            ``error`` fields alone consume eight); the schema layer raises</span>
-<span class="sd">            :exc:`ProtocolError` for that itself.</span>
+<span class="sd">            :exc:`~pcapkit.utilities.exceptions.ProtocolError` for that itself.</span>
 
 <span class="sd">            ``length`` is resolved against :func:`len` only for *this*</span>
 <span class="sd">            method's own check, and the *original* argument -- ``None``</span>
 <span class="sd">            included -- is what is forwarded to :meth:`Protocol.unpack</span>
 <span class="sd">            &lt;pcapkit.protocols.protocol.ProtocolBase.unpack&gt;`. Collapsing</span>
 <span class="sd">            ``None`` to a concrete ``0`` would change what</span>
-<span class="sd">            :meth:`Schema.unpack`'s own ``prepare`` decorator does with an</span>
+<span class="sd">            :meth:`Schema.unpack &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;`'s own</span>
+<span class="sd">            ``prepare`` decorator does with an</span>
 <span class="sd">            exhausted stream: it raises</span>
 <span class="sd">            :exc:`~pcapkit.utilities.exceptions.StreamEOFError` (an</span>
 <span class="sd">            :exc:`EOFError`, the documented "no more packets" signal) only when</span>
@@ -745,7 +749,8 @@
             <span class="c1"># way, with no exhaustion signal to preserve.</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'HTTP/2: invalid format, packet (</span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1"> octet(s)) '</span>
                                 <span class="sa">f</span><span class="s1">'shorter than the 9-octet frame header'</span><span class="p">)</span>
-        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="HTTP.read">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/httpv2.html#pcapkit.protocols.application.httpv2.HTTP.read">[docs]</a>

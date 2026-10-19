@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -542,7 +543,7 @@
                    <span class="s1">'true'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">'false'</span><span class="p">:</span> <span class="kc">False</span><span class="p">,</span>
                    <span class="s1">'on'</span><span class="p">:</span> <span class="kc">True</span><span class="p">,</span> <span class="s1">'off'</span><span class="p">:</span> <span class="kc">False</span><span class="p">}</span>
 
-<span class="c1">#: What a recursion-bound limit risks once lifted, c.f. :issue:`1610`.</span>
+<span class="c1">#: What a recursion-bound limit risks once lifted, cf. :issue:`1610`.</span>
 <span class="n">_RECURSION_RISK</span> <span class="o">=</span> <span class="p">(</span><span class="s2">"each layer is dissected from inside the parse of the one before it, so a deep "</span>
                    <span class="s2">"frame may hit Python's recursion limit and raise RecursionError (#1610)"</span><span class="p">)</span>
 
@@ -680,7 +681,7 @@
 <span class="c1">#: header is a layer, so :data:`FRAME_LAYER_LIMIT` applies as well.</span>
 <span class="c1">#:</span>
 <span class="c1">#: Rebuilding a frame with :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data`</span>
-<span class="c1">#: stops where parsing it did, and warns once too (:issue:`1619`), c.f.</span>
+<span class="c1">#: stops where parsing it did, and warns once too (:issue:`1619`), cf.</span>
 <span class="c1">#: :meth:`Internet._make_payload</span>
 <span class="c1">#: &lt;pcapkit.protocols.internet.internet.Internet._make_payload&gt;`.</span>
 <span class="c1">#:</span>
@@ -795,9 +796,9 @@
 <span class="c1">#: ceiling is honoured however often it is declared. Measured for :issue:`573`, 200</span>
 <span class="c1">#: minimal PCAP-NG Decryption Secrets Blocks -- 4,800 wire octets, each block</span>
 <span class="c1">#: declaring ``secrets_length`` of 262,142 against two supplied octets through</span>
-<span class="c1">#: ``UnknownSecrets.data`` (``pcapkit/protocols/schema/misc/pcapng.py``) --</span>
-<span class="c1">#: retained 50.0 MiB, an amplification of 10,922x per block. Every individual</span>
-<span class="c1">#: field was under the ceiling, so nothing refused any of them.</span>
+<span class="c1">#: :attr:`UnknownSecrets.data &lt;pcapkit.protocols.schema.misc.pcapng.UnknownSecrets.data&gt;`</span>
+<span class="c1">#: (``pcapkit/protocols/schema/misc/pcapng.py``) -- retained 50.0 MiB, an amplification of 10,922x</span>
+<span class="c1">#: per block. Every individual field was under the ceiling, so nothing refused any of them.</span>
 <span class="c1">#:</span>
 <span class="c1">#: The sum therefore wants a budget, and this is the figure that makes one</span>
 <span class="c1">#: *safe*. A budget on its own is not: a capture cut short by its snapshot length</span>

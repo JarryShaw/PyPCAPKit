@@ -8,9 +8,10 @@ rules on what the test suite has to prove, and what a change has to bring to it.
 owner set the direction on :issue:`1203`, paraphrased here as on the other pages: every
 round trip the library offers must pass and match exactly, the tests must cover all of
 them, and the rules belong on a page rather than in review threads. :issue:`1202`
-extended round-trip coverage past the registries, to the :mod:`pcapkit.corekit` fields,
-schemas and ``Info``, the :mod:`pcapkit.foundation` reassembly, flow tracing, engines and
-registries, and the output formats.
+extended round-trip coverage past the :term:`registries <registry>`, to the
+:mod:`pcapkit.corekit` fields, schemas and ``Info``, the :mod:`pcapkit.foundation`
+reassembly, flow tracing, engines and :term:`registries <registry>`, and the output
+formats.
 
 Round-Trip Invariants
 ~~~~~~~~~~~~~~~~~~~~~

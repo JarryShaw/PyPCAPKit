@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -483,7 +484,7 @@
 
 <span class="sd">:mod:`pcapkit.protocols.internet.mh` contains</span>
 <span class="sd">:class:`~pcapkit.protocols.internet.mh.MH`,</span>
-<span class="sd">which implements extractor for Mobility Header</span>
+<span class="sd">which implements the extractor for Mobility Header</span>
 <span class="sd">(MH) [*]_, whose structure is described as below:</span>
 
 <span class="sd">======= ========= ================== ===============================</span>
@@ -504,16 +505,6 @@
 <span class="sd">   ``pcapkit.protocols.internet.mh.NTPTimestamp``, with no alias; use</span>
 <span class="sd">   :class:`pcapkit.protocols.data.internet.mh.NTPTimestamp` instead</span>
 <span class="sd">   (:issue:`1886`).</span>
-
-<span class="sd">.. versionchanged:: 1.5.0</span>
-
-<span class="sd">   :class:`~pcapkit.protocols.data.internet.mh.NTPTimestamp` and</span>
-<span class="sd">   :class:`~pcapkit.protocols.data.internet.mh.PMIPv6Timestamp` are</span>
-<span class="sd">   :class:`~pcapkit.corekit.infoclass.Info` data models rather than named</span>
-<span class="sd">   tuples, so they no longer index, unpack, hash or compare equal to a</span>
-<span class="sd">   :obj:`tuple`, and the dumpers write them keyed by field, as</span>
-<span class="sd">   ``{"seconds": ..., "fraction": ...}``. For ``NTPTimestamp`` this is a</span>
-<span class="sd">   breaking change from 1.4.x (:issue:`1886`).</span>
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
@@ -1037,7 +1028,7 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">FastBindingAcknowledgmentStatus</span><span class="p">(</span><span class="n">EnumLookup</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""[FastBindingAcknowledgmentStatus] Fast Binding Acknowledgment Status Codes.</span>
 
-<span class="sd">    Status values of the fast binding acknowledgment (FBack) message, c.f.,</span>
+<span class="sd">    Status values of the fast binding acknowledgment (FBack) message, see</span>
 <span class="sd">    :rfc:`5568#section-6.2.3`. Values below ``128`` indicate that the fast</span>
 <span class="sd">    binding update was accepted by the receiving node, values of ``128`` and</span>
 <span class="sd">    above that it was rejected.</span>
@@ -1119,7 +1110,7 @@
 <span class="w">    </span><span class="sd">"""[IPv6AddressPrefixCode] Mobility Header IPv6 Address/Prefix Option Codes.</span>
 
 <span class="sd">    Option codes of the mobility header IPv6 address/prefix option, which</span>
-<span class="sd">    identify which address the option carries, c.f.,</span>
+<span class="sd">    identify which address the option carries, see</span>
 <span class="sd">    :rfc:`5568#section-6.4.2`.</span>
 
 <span class="sd">    Note:</span>
@@ -1189,7 +1180,7 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">LocalizedRoutingStatus</span><span class="p">(</span><span class="n">EnumLookup</span><span class="p">,</span> <span class="n">IntEnum</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""[LocalizedRoutingStatus] Localized Routing Acknowledgment Status Codes.</span>
 
-<span class="sd">    Status values of the localized routing acknowledgment (LRA) message, c.f.,</span>
+<span class="sd">    Status values of the localized routing acknowledgment (LRA) message, see</span>
 <span class="sd">    :rfc:`6705#section-10.2`. Values below ``128`` indicate that the initiation</span>
 <span class="sd">    was processed successfully, values of ``128`` and above that it was rejected.</span>
 
@@ -1255,7 +1246,7 @@
 <span class="w">    </span><span class="sd">"""[LMAAddressCode] Local Mobility Anchor Address Option Codes.</span>
 
 <span class="sd">    Option codes of the local mobility anchor address option, which say which</span>
-<span class="sd">    address family the option carries, c.f., :rfc:`5949#section-6.2.2`.</span>
+<span class="sd">    address family the option carries, see :rfc:`5949#section-6.2.2`.</span>
 
 <span class="sd">    Note:</span>
 <span class="sd">        :rfc:`5949#section-6.2.2` defines these values inline and IANA keeps no</span>
@@ -1661,8 +1652,7 @@
     <span class="c1"># Defaults.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="c1">#: DefaultDict[Enum_Packet, str | tuple[PacketParser, PacketConstructor]]: Message</span>
-    <span class="c1">#: type to method mapping. A :obj:`str` value names the methods</span>
+    <span class="c1">#: Message type to method mapping. A :obj:`str` value names the methods</span>
     <span class="c1">#: ``_read_msg_${name}`` and ``_make_msg_${name}``, falling back to</span>
     <span class="c1">#: ``_read_msg_unknown`` / ``_make_msg_unknown`` when they do not exist; any</span>
     <span class="c1">#: other value is a ``(parser, constructor)`` pair of callables.</span>
@@ -1696,8 +1686,7 @@
         <span class="p">},</span>
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[Enum_Packet | int, str | tuple[PacketParser, PacketConstructor]]</span>
 
-    <span class="c1">#: DefaultDict[Enum_Option, str | tuple[OptionParser, OptionConstructor]]: Option</span>
-    <span class="c1">#: type to method mapping. A :obj:`str` value names the methods</span>
+    <span class="c1">#: Option type to method mapping. A :obj:`str` value names the methods</span>
     <span class="c1">#: ``_read_opt_${name}`` and ``_make_opt_${name}``, falling back to</span>
     <span class="c1">#: ``_read_opt_none`` / ``_make_opt_none`` when they do not exist; any other</span>
     <span class="c1">#: value is a ``(parser, constructor)`` pair of callables.</span>
@@ -1778,8 +1767,7 @@
         <span class="p">},</span>
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[Enum_Option | int, str | tuple[OptionParser, OptionConstructor]]</span>
 
-    <span class="c1">#: DefaultDict[Enum_CGAExtension, str | tuple[ExtensionParser, ExtensionConstructor]]: CGA</span>
-    <span class="c1">#: extension type to method mapping. A :obj:`str` value names the</span>
+    <span class="c1">#: CGA extension type to method mapping. A :obj:`str` value names the</span>
     <span class="c1">#: methods ``_read_ext_${name}`` and ``_make_ext_${name}``, falling back to</span>
     <span class="c1">#: ``_read_ext_none`` / ``_make_ext_none`` when they do not exist; any other</span>
     <span class="c1">#: value is a ``(parser, constructor)`` pair of callables.</span>
@@ -2127,7 +2115,7 @@
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        See Also:</span>
-<span class="sd">            For construction argument, please refer to :meth:`self.make &lt;MH.make&gt;`.</span>
+<span class="sd">            For construction arguments, please refer to :meth:`self.make &lt;MH.make&gt;`.</span>
 
 <span class="sd">        """</span>
         <span class="c1">#: bool: If the protocol is used as an IPv6 extension header.</span>
@@ -4350,7 +4338,7 @@
 <span class="sd">           |                                                               |</span>
 <span class="sd">           +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+</span>
 
-<span class="sd">        The option code identifies which address the option carries, c.f.,</span>
+<span class="sd">        The option code identifies which address the option carries, see</span>
 <span class="sd">        :class:`~pcapkit.protocols.internet.mh.IPv6AddressPrefixCode`. It, too,</span>
 <span class="sd">        is defined inline by :rfc:`5568#section-6.4.2` with no IANA registry</span>
 <span class="sd">        behind it, hence the enumeration is local to this module.</span>
@@ -7833,8 +7821,8 @@
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_msg_fbu">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_msg_fbu</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[Data_FastBindingUpdateMessage]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                       <span class="n">seq</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
-                      <span class="n">ack</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># MUST be set, c.f., RFC 5568, section 6.2.2</span>
-                      <span class="n">home</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># MUST be set, c.f., RFC 5568, section 6.2.2</span>
+                      <span class="n">ack</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># MUST be set, see RFC 5568, section 6.2.2</span>
+                      <span class="n">home</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>  <span class="c1"># MUST be set, see RFC 5568, section 6.2.2</span>
                       <span class="n">lla_compat</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                       <span class="n">key_mngt</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
                       <span class="n">lifetime</span><span class="p">:</span> <span class="s1">'int | timedelta'</span> <span class="o">=</span> <span class="mi">4</span><span class="p">,</span>  <span class="c1"># reasonable default value</span>
@@ -7906,7 +7894,7 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            message: Message data model.</span>
-<span class="sd">            status: Status code, c.f.,</span>
+<span class="sd">            status: Status code, see</span>
 <span class="sd">                :class:`~pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus`.</span>
 <span class="sd">            status_default: Default status code.</span>
 <span class="sd">            status_namespace: Status code namespace.</span>
@@ -7984,7 +7972,7 @@
 <div class="viewcode-block" id="MH._make_msg_emh">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_msg_emh">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_msg_emh</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">:</span> <span class="s1">'Optional[Data_ExperimentalMessage]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                      <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">,</span>  <span class="c1"># 2 bytes of padding, c.f., RFC 5096, section 3</span>
+                      <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00\x00</span><span class="s1">'</span><span class="p">,</span>  <span class="c1"># 2 bytes of padding, see RFC 5096, section 3</span>
                       <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_ExperimentalMessage'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MH experimental mobility header message type.</span>
 
@@ -8347,7 +8335,7 @@
 <span class="sd">            message: Message data model.</span>
 <span class="sd">            seq: Sequence number.</span>
 <span class="sd">            unsolicited: Unsolicited flag.</span>
-<span class="sd">            status: Status, c.f.,</span>
+<span class="sd">            status: Status, see</span>
 <span class="sd">                :class:`~pcapkit.protocols.internet.mh.LocalizedRoutingStatus`.</span>
 <span class="sd">            status_default: Default status.</span>
 <span class="sd">            status_namespace: Status namespace.</span>
@@ -9149,7 +9137,7 @@
                 <span class="sa">f</span><span class="s1">'bool, not </span><span class="si">{</span><span class="n">identifier</span><span class="si">!r}</span><span class="s1"> -- pass int(</span><span class="si">{</span><span class="n">identifier</span><span class="si">!r}</span><span class="s1">) if the '</span>
                 <span class="sa">f</span><span class="s1">'numeric value is what is wanted'</span><span class="p">)</span>
 
-        <span class="c1"># NOTE: The wire format is chosen by ``subtype_val`` (c.f. ``mn_id_selector``),</span>
+        <span class="c1"># NOTE: The wire format is chosen by ``subtype_val`` (see ``mn_id_selector``),</span>
         <span class="c1"># not by the Python type of ``identifier``, so the width has to be taken from</span>
         <span class="c1"># the former. For the ``IPv6_Address`` subtype the schema always packs a fixed</span>
         <span class="c1"># 16-octet address (:class:`~pcapkit.corekit.fields.ipaddress.IPv6AddressField`</span>
@@ -9194,7 +9182,7 @@
             <span class="n">id_len</span> <span class="o">=</span> <span class="mi">16</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">identifier</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">subtype_val</span> <span class="o">==</span> <span class="n">Enum_MNIDSubtype</span><span class="o">.</span><span class="n">NAI</span><span class="p">:</span>
-                <span class="c1"># NOTE: NAI's field is a StringField (c.f. mn_id_selector), so an</span>
+                <span class="c1"># NOTE: NAI's field is a StringField (see mn_id_selector), so an</span>
                 <span class="c1"># int has to become text -- and unlike the numeric subtypes below,</span>
                 <span class="c1"># there is no non-arbitrary way to do that. str(identifier) packs</span>
                 <span class="c1"># and round-trips fine, but an NAI is a network access identifier</span>
@@ -9208,7 +9196,7 @@
                     <span class="sa">f</span><span class="s1">'must be str, not int -- pass str(</span><span class="si">{</span><span class="n">identifier</span><span class="si">!r}</span><span class="s1">) if a '</span>
                     <span class="sa">f</span><span class="s1">'decimal-digit NAI is really what is wanted'</span><span class="p">)</span>
             <span class="c1"># NOTE: every other subtype's field is a</span>
-            <span class="c1"># BytesField(length=pkt['length'] - 1) (c.f. mn_id_selector) -- a</span>
+            <span class="c1"># BytesField(length=pkt['length'] - 1) (see mn_id_selector) -- a</span>
             <span class="c1"># numeric identifier, so unlike NAI there IS a non-arbitrary wire</span>
             <span class="c1"># form: its own minimal big-endian encoding. That is self-consistent</span>
             <span class="c1"># with the declared length by construction and round-trips exactly.</span>
@@ -9223,7 +9211,7 @@
             <span class="n">id_len</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">identifier</span><span class="o">.</span><span class="n">bit_length</span><span class="p">()</span> <span class="o">/</span> <span class="mi">8</span><span class="p">))</span>
             <span class="n">identifier</span> <span class="o">=</span> <span class="n">identifier</span><span class="o">.</span><span class="n">to_bytes</span><span class="p">(</span><span class="n">id_len</span><span class="p">,</span> <span class="s1">'big'</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">subtype_val</span> <span class="o">==</span> <span class="n">Enum_MNIDSubtype</span><span class="o">.</span><span class="n">NAI</span><span class="p">:</span>
-            <span class="c1"># NOTE: NAI's field is a StringField (c.f. mn_id_selector), which</span>
+            <span class="c1"># NOTE: NAI's field is a StringField (see mn_id_selector), which</span>
             <span class="c1"># calls ``identifier.encode(...)`` to pack -- so anything but a</span>
             <span class="c1"># genuine str leaks a bare stdlib exception: AttributeError for</span>
             <span class="c1"># bytes/list/dict (no ``.encode``), TypeError for float/None/an</span>
@@ -9242,7 +9230,7 @@
             <span class="n">id_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">identifier</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># NOTE: every other subtype's field is a</span>
-            <span class="c1"># BytesField(length=pkt['length'] - 1) (c.f. mn_id_selector),</span>
+            <span class="c1"># BytesField(length=pkt['length'] - 1) (see mn_id_selector),</span>
             <span class="c1"># which hands ``identifier`` to ``struct.pack('Ns', ...)``</span>
             <span class="c1"># unconverted -- so anything but bytes leaks a bare stdlib</span>
             <span class="c1"># exception: struct.error for str/list/dict (struct's ``s``</span>
@@ -9335,7 +9323,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            type: Option type.</span>
 <span class="sd">            option: Option data model.</span>
-<span class="sd">            timestamp: NTP timestamp, c.f., :rfc:`1305`.</span>
+<span class="sd">            timestamp: NTP timestamp, see :rfc:`1305`.</span>
 <span class="sd">            interval: Moment to encode when neither ``option`` nor</span>
 <span class="sd">                ``timestamp`` is given (``option`` supplies its own</span>
 <span class="sd">                ``ntp_timestamp``); defaults to the current time.</span>
@@ -9594,7 +9582,7 @@
 
 <span class="sd">        Note:</span>
 <span class="sd">            The ``length`` field counts the authenticator only, excluding the</span>
-<span class="sd">            SPI, c.f., :meth:`_read_opt_badf`.</span>
+<span class="sd">            SPI, see :meth:`_read_opt_badf`.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">option</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -9627,7 +9615,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            type: Option type.</span>
 <span class="sd">            option: Option data model.</span>
-<span class="sd">            code: Option code, c.f.,</span>
+<span class="sd">            code: Option code, see</span>
 <span class="sd">                :class:`~pcapkit.protocols.internet.mh.IPv6AddressPrefixCode`.</span>
 <span class="sd">            code_default: Default option code.</span>
 <span class="sd">            code_namespace: Option code namespace.</span>
@@ -10531,7 +10519,7 @@
 <span class="sd">        Args:</span>
 <span class="sd">            type: Option type.</span>
 <span class="sd">            option: Option data model.</span>
-<span class="sd">            code: Option code, c.f.,</span>
+<span class="sd">            code: Option code, see</span>
 <span class="sd">                :class:`~pcapkit.protocols.internet.mh.LMAAddressCode`.</span>
 <span class="sd">            code_default: Default option code.</span>
 <span class="sd">            code_namespace: Option code namespace.</span>

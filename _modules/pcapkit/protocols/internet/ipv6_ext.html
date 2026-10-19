@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -478,8 +479,8 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.protocols.internet.ipv6_ext</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">"""IPv6_Ext - IPv6 Extension Header</span>
-<span class="sd">====================================</span>
+<span class="sd">"""IPv6-Ext - IPv6 Extension Header</span>
+<span class="sd">================================</span>
 
 <span class="sd">.. module:: pcapkit.protocols.internet.ipv6_ext</span>
 
@@ -490,8 +491,8 @@
 <span class="sd">stands in for a header whose dedicated parser is unavailable or has failed.</span>
 <span class="sd">The class docstring separates these roles.</span>
 
-<span class="sd">Why this is safe in general</span>
-<span class="sd">----------------------------</span>
+<span class="sd">Length Rules</span>
+<span class="sd">------------</span>
 
 <span class="sd">:rfc:`6564#section-4` is Standards Track and says, with an RFC 2119</span>
 <span class="sd">**MUST**, that any IPv6 extension header defined from April 2012</span>
@@ -518,33 +519,32 @@
 <span class="sd">The exception table, verified against IANA's ``protocol-numbers-1.csv``</span>
 <span class="sd">*IPv6 Extension Header* column and each cited RFC:</span>
 
-<span class="sd">======================================================= ===========================================</span>
-<span class="sd">Header(s)                                                Length rule</span>
-<span class="sd">======================================================= ===========================================</span>
-<span class="sd">``HOPOPT``, ``IPv6-Route``, ``IPv6-Opts``, ``MH``,       ``(octet[1] + 1) * 8`` -- the :rfc:`6564`</span>
-<span class="sd">``HIP``, ``Shim6``                                       generic rule</span>
-<span class="sd">``IPv6-Frag``                                            constant ``8``; octet[1] is Reserved, not a</span>
-<span class="sd">                                                          length (:rfc:`8200#section-4.5`)</span>
-<span class="sd">``AH``                                                   ``(octet[1] + 2) * 4`` -- :rfc:`4302#section-2.2`</span>
-<span class="sd">                                                          counts in 4-octet units with a bias of 2,</span>
-<span class="sd">                                                          not :rfc:`6564`'s 8-octet units and bias of 1</span>
-<span class="sd">``ESP``                                                  terminal -- has a dedicated, registered parser</span>
-<span class="sd">                                                          (:class:`~pcapkit.protocols.internet.esp.ESP`),</span>
-<span class="sd">                                                          but its Next Header byte is inside the</span>
-<span class="sd">                                                          encrypted trailer (:rfc:`4303`), so its own</span>
-<span class="sd">                                                          info's ``next`` is :data:`None` rather than a</span>
-<span class="sd">                                                          value to continue on</span>
-<span class="sd">``253``, ``254``                                         terminal -- no dedicated parser exists, so no</span>
-<span class="sd">                                                          next header field is ever read at all, either</span>
-<span class="sd">======================================================= ===========================================</span>
+<span class="sd">===================================================================== =================================================</span>
+<span class="sd">Header(s)                                                             Length rule</span>
+<span class="sd">===================================================================== =================================================</span>
+<span class="sd">``HOPOPT``, ``IPv6-Route``, ``IPv6-Opts``, ``MH``, ``HIP``, ``Shim6`` ``(octet[1] + 1) * 8`` -- the :rfc:`6564`</span>
+<span class="sd">                                                                      generic rule</span>
+<span class="sd">``IPv6-Frag``                                                         constant ``8``; octet[1] is Reserved, not a</span>
+<span class="sd">                                                                      length (:rfc:`8200#section-4.5`)</span>
+<span class="sd">``AH``                                                                ``(octet[1] + 2) * 4`` -- :rfc:`4302#section-2.2`</span>
+<span class="sd">                                                                      counts in 4-octet units with a bias of 2,</span>
+<span class="sd">                                                                      not :rfc:`6564`'s 8-octet units and bias of 1</span>
+<span class="sd">``ESP``                                                               terminal -- has a dedicated, registered parser</span>
+<span class="sd">                                                                      (:class:`~pcapkit.protocols.internet.esp.ESP`),</span>
+<span class="sd">                                                                      but its Next Header byte is inside the</span>
+<span class="sd">                                                                      encrypted trailer (:rfc:`4303`), so the walk</span>
+<span class="sd">                                                                      cannot step past it on the wire</span>
+<span class="sd">``253``, ``254``                                                      terminal -- no dedicated parser exists, so no</span>
+<span class="sd">                                                                      next header field is ever read at all, either</span>
+<span class="sd">===================================================================== =================================================</span>
 
 <span class="sd">This table classifies by *wire format* alone, over every code</span>
 <span class="sd">:class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` enumerates,</span>
 <span class="sd">which match IANA's *IPv6 Extension Header Types* registry exactly (GitHub</span>
 <span class="sd">issue :issue:`925`).</span>
 
-<span class="sd">``Shim6`` conforms to it (:rfc:`5533`) but has no dedicated parser class; see</span>
-<span class="sd">"Entry paths" below for how it reaches this class by direct dispatch.</span>
+<span class="sd">``Shim6`` conforms to the generic rule (:rfc:`5533`) but has no dedicated parser class; see</span>
+<span class="sd">"Entry Paths" below for how it reaches this class by direct dispatch.</span>
 
 <span class="sd">:rfc:`8200#section-4.5` sets Encapsulating Security Payload aside: ESP is not</span>
 <span class="sd">an extension header, and the RFC lists it among upper-layer headers.</span>
@@ -556,23 +556,24 @@
 <span class="sd">enters :meth:`IPv6._decode_next_layer</span>
 <span class="sd">&lt;pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer&gt;`'s walk, being a</span>
 <span class="sd">real :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` member, but</span>
-<span class="sd">they part ways there. ``ESP`` resolves to its own dedicated parser, whose info</span>
-<span class="sd">carries a ``next`` of :data:`None`, so the walk ends the ordinary way with</span>
-<span class="sd">``ExtensionHeader(None)`` failing at the top of the next iteration. ``253``</span>
+<span class="sd">they part ways there. ``ESP`` resolves to its own dedicated parser, which</span>
+<span class="sd">decodes any plaintext it recovers itself and whose info carries a ``next`` of</span>
+<span class="sd">:data:`None` whenever the payload stays opaque, so the walk ends the ordinary</span>
+<span class="sd">way with ``ExtensionHeader(None)`` failing at the top of the next iteration. ``253``</span>
 <span class="sd">and ``254`` have no dedicated parser and resolve to plain</span>
 <span class="sd">:class:`~pcapkit.protocols.misc.raw.Raw`, whose info has no ``next``</span>
 <span class="sd">*attribute*. For these two, and any future IANA code without an</span>
 <span class="sd">implementation, the walk stops on a *structural* check (does the parsed layer</span>
 <span class="sd">carry a ``next`` at all?) rather than on a list of codes.</span>
 
-<span class="sd">Entry paths</span>
+<span class="sd">Entry Paths</span>
 <span class="sd">-----------</span>
 
 <span class="sd">This class is reached in these ways:</span>
 
 <span class="sd">1. **An unrecognised protocol number.** :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6`</span>
 <span class="sd">   is a real IANA extension header (:rfc:`5533`) with no dedicated parser, so</span>
-<span class="sd">   :meth:`pcapkit.protocols.internet.internet.Internet._lookup_next_layer`</span>
+<span class="sd">   :meth:`Internet._lookup_next_layer &lt;pcapkit.protocols.protocol.ProtocolBase._lookup_next_layer&gt;`</span>
 <span class="sd">   would default it to plain :class:`~pcapkit.protocols.misc.raw.Raw`. That</span>
 <span class="sd">   has no ``next`` field, so the walk in</span>
 <span class="sd">   :meth:`IPv6._decode_next_layer &lt;pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer&gt;`</span>
@@ -594,8 +595,8 @@
 <span class="sd">   catches the failure itself, one layer in from ``beholder``, and substitutes</span>
 <span class="sd">   this class: the bad header costs only itself, not the rest of the chain.</span>
 
-<span class="sd">The overrun guard</span>
-<span class="sd">-------------------</span>
+<span class="sd">The Overrun Guard</span>
+<span class="sd">-----------------</span>
 
 <span class="sd">The house convention for a declared length that does not fit what remains</span>
 <span class="sd">is warn-and-clip: emit a warning naming what was declared against what is</span>
@@ -666,9 +667,11 @@
 <span class="w">    </span><span class="sd">"""This class implements a generic IPv6 extension header parser, and is</span>
 <span class="sd">    the shared base of every IPv6 extension header in this package.</span>
 
-<span class="sd">    The module docstring has the RFC citations behind the length rules, the</span>
-<span class="sd">    ways this class is dispatched to, and why an overrun stops the walk rather</span>
-<span class="sd">    than clipping.</span>
+<span class="sd">    The module documentation has the RFC citations behind the</span>
+<span class="sd">    :ref:`length rules &lt;ipv6-ext-length-rules&gt;`, the</span>
+<span class="sd">    :ref:`ways this class is dispatched to &lt;ipv6-ext-entry-paths&gt;`, and</span>
+<span class="sd">    :ref:`why an overrun stops the walk &lt;ipv6-ext-overrun-guard&gt;` rather than</span>
+<span class="sd">    clipping.</span>
 
 <span class="sd">    .. rubric:: Base and Fallback Roles</span>
 
@@ -693,7 +696,8 @@
 <span class="sd">    It is generic in its data and schema types, like</span>
 <span class="sd">    :class:`~pcapkit.protocols.internet.ipsec.IPsec`, another base in this</span>
 <span class="sd">    package, so that a subclass keeps its *own* ``_PT``/``_ST`` instead of</span>
-<span class="sd">    inheriting this class's. ``AH`` and ``ESP`` therefore double-inherit two</span>
+<span class="sd">    inheriting this class's. :class:`~pcapkit.protocols.internet.ah.AH` and</span>
+<span class="sd">    :class:`~pcapkit.protocols.internet.esp.ESP` therefore double-inherit two</span>
 <span class="sd">    identically-parameterised generic bases, ``IPsec[…]`` and ``IPv6_Ext[…]``.</span>
 
 <span class="sd">    Warning:</span>
@@ -813,8 +817,8 @@
 <span class="sd">        their data models records the Next Header value under this name.</span>
 
 <span class="sd">        :data:`None` when the declared length would have overrun what remained</span>
-<span class="sd">        of the chain and the walk stopped instead of trusting it; see the</span>
-<span class="sd">        module docstring's "overrun guard" section.</span>
+<span class="sd">        of the chain and the walk stopped instead of trusting it; see</span>
+<span class="sd">        :ref:`ipv6-ext-overrun-guard`.</span>
 
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'_NextHeaderData'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="p">)</span><span class="o">.</span><span class="n">next</span>
@@ -915,7 +919,7 @@
 
         <span class="k">if</span> <span class="n">nominal</span> <span class="o">&gt;</span> <span class="n">length</span><span class="p">:</span>
             <span class="c1"># Warns like the house convention but stops rather than clips; see</span>
-            <span class="c1"># the module docstring's "overrun guard" section.</span>
+            <span class="c1"># the module docstring's "The Overrun Guard" section.</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'IPv6: extension header declares a length of </span><span class="si">{</span><span class="n">nominal</span><span class="si">}</span><span class="s1"> octet(s) with '</span>
                  <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1"> octet(s) left in the chain; stopping the walk instead of '</span>
                  <span class="sa">f</span><span class="s1">'skipping past it'</span><span class="p">,</span> <span class="n">SchemaWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
@@ -958,7 +962,8 @@
 <span class="sd">            next: Next header type.</span>
 <span class="sd">            len: Raw ``Hdr Ext Len`` octet to emit. The caller must size it,</span>
 <span class="sd">                since this class cannot know at construction time which</span>
-<span class="sd">                per-protocol rule (see the module docstring) it must satisfy.</span>
+<span class="sd">                per-protocol rule (see :ref:`ipv6-ext-length-rules`) it must</span>
+<span class="sd">                satisfy.</span>
 <span class="sd">            data: Header-specific content after the two fixed octets, emitted</span>
 <span class="sd">                verbatim ahead of ``payload``.</span>
 <span class="sd">            payload: Payload of current instance.</span>
@@ -983,11 +988,12 @@
 <span class="sd">            They are keyword-*only* because this class is also a base and each</span>
 <span class="sd">            subclass's ``make`` puts different names in the same positions. As</span>
 <span class="sd">            positional parameters they draw pylint ``arguments-renamed``</span>
-<span class="sd">            warnings (``ESP.make`` has ``spi``, ``seq`` and ``next`` where</span>
+<span class="sd">            warnings (:meth:`ESP.make &lt;pcapkit.protocols.internet.esp.ESP.make&gt;` has ``spi``, ``seq`` and ``next`` where</span>
 <span class="sd">            these have ``next``, ``len`` and ``data``) and mypy</span>
 <span class="sd">            ``[override]`` errors. With no positional parameters there is no</span>
 <span class="sd">            position to disagree about, and the allowlist is unaffected because</span>
-<span class="sd">            ``_declared_keywords`` collects ``KEYWORD_ONLY`` parameters too.</span>
+<span class="sd">            :func:`~pcapkit.protocols.protocol._declared_keywords` collects ``KEYWORD_ONLY``</span>
+<span class="sd">            parameters too.</span>
 <span class="sd">            Nothing calls a protocol's ``make`` positionally; ``__init__``</span>
 <span class="sd">            spreads ``**kwargs`` into it.</span>
 
@@ -1042,7 +1048,7 @@
 <span class="sd">                docstring's "Base and Fallback Roles") and ``version`` is not ``6``.</span>
 
 <span class="sd">        See Also:</span>
-<span class="sd">            For construction argument, please refer to :meth:`make`.</span>
+<span class="sd">            For construction arguments, please refer to :meth:`make`.</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            The version gate is scoped to the fallback role by the same</span>
@@ -1066,10 +1072,10 @@
 <span class="sd">            packet whose protocol byte is 140 would reach this class and walk</span>
 <span class="sd">            an IPv6-style extension-header chain out of an IPv4 payload,</span>
 <span class="sd">            reading ``IPv4:IPv6-Ext:...`` instead of the ``IPv4:Shim6`` that a</span>
-<span class="sd">            plain, non-continuing ``Raw`` gives. Rejecting here sends</span>
+<span class="sd">            plain, non-continuing :class:`~pcapkit.protocols.misc.raw.Raw` gives. Rejecting here sends</span>
 <span class="sd">            construction back through</span>
 <span class="sd">            :func:`~pcapkit.corekit.decorators.beholder` at the *caller's*</span>
-<span class="sd">            layer, which substitutes that same ``Raw``: the version-agnostic</span>
+<span class="sd">            layer, which substitutes that same :class:`~pcapkit.protocols.misc.raw.Raw`: the version-agnostic</span>
 <span class="sd">            behaviour, with no IPv4-specific code.</span>
 
 <span class="sd">        """</span>

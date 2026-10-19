@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -484,7 +485,7 @@
 <span class="sd">.. module:: pcapkit.interface.core</span>
 
 <span class="sd">:mod:`pcapkit.interface.core` defines core user-oriented</span>
-<span class="sd">interfaces, variables, and etc., which wraps around the</span>
+<span class="sd">interfaces and variables, which wrap around the</span>
 <span class="sd">foundation classes from :mod:`pcapkit.foundation`.</span>
 
 <span class="sd">"""</span>
@@ -625,7 +626,7 @@
 
 <span class="sd">        context: caller supplied parsing context for protocols that need</span>
 <span class="sd">            information not carried on the wire, keyed by protocol index ID --</span>
-<span class="sd">            c.f. :mod:`pcapkit.corekit.context`. The motivating case is</span>
+<span class="sd">            cf. :mod:`pcapkit.corekit.context`. The motivating case is</span>
 <span class="sd">            :class:`~pcapkit.protocols.internet.esp.ESP`, which needs the</span>
 <span class="sd">            Security Association to find the trailer and decrypt the payload::</span>
 
@@ -638,7 +639,7 @@
 <span class="sd">    Returns:</span>
 <span class="sd">        An :class:`~pcapkit.foundation.extraction.Extractor` object.</span>
 
-<span class="sd">    .. versionchanged:: 1.2.0</span>
+<span class="sd">    .. versionchanged:: 1.1.1.post2</span>
 
 <span class="sd">       ``strict`` is renamed ``reasm_strict``, with no alias, and</span>
 <span class="sd">       ``reasm_store`` is inserted after it, so a positional argument from</span>

@@ -260,7 +260,7 @@
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -392,6 +392,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -495,8 +496,9 @@
         <article role="main" id="furo-main-content">
           <section id="pypcapkit-comprehensive-network-packet-analysis-library">
 <h1>PyPCAPKit - Comprehensive Network Packet Analysis Library<a class="headerlink" href="#pypcapkit-comprehensive-network-packet-analysis-library" title="Link to this heading">¶</a></h1>
-<p>PyPCAPKit is an open source Python library for <a class="reference external" href="https://en.wikipedia.org/wiki/Pcap">PCAP</a> file extraction,
-construction and analysis.</p>
+<p>PyPCAPKit is an open source Python library for
+<a class="reference external" href="https://en.wikipedia.org/wiki/Pcap">PCAP</a> file extraction, construction and
+analysis.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>The whole project declares <strong>Python 3.6</strong> or later. CI supports 3.11 to 3.15, and
@@ -579,7 +581,7 @@ selected through <code class="docutils literal notranslate"><span class="pre">en
 spelled <code class="docutils literal notranslate"><span class="pre">'pcapkit'</span></code>) is <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s own parser and the only one with no
 third-party requirement.</p>
 <p><a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> and <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> are two independent distributions of the same
-<em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em> interface and both install a top-level <code class="docutils literal notranslate"><span class="pre">pcap</span></code> module,
+<em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em> interface and both install a top-level <a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcap-module"><code class="docutils literal notranslate"><span class="pre">pcap</span></code></a> module,
 so they are two engines rather than one: upstream <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> stops at Python 3.11,
 <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> covers 3.10 and newer. <strong>Install exactly one of them</strong> – with both
 present, <code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code> wins the import and the other becomes unselectable.</p>
@@ -590,22 +592,26 @@ present, <code class="docutils literal notranslate"><span class="pre">pcap-ct</s
 dissection at all, so they offer neither reassembly nor flow tracing, and
 <a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAPFile</span></code></a> has no IPv6 decoder,
 so IPv6 reassembly is unavailable. Each gap is announced with a warning or an
-exception rather than silently returning nothing, save that
-<a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAPFile</span></code></a> leaves TCP behind a
-VLAN tag, in a tunnel or behind an extension header (an IPv6 one, or AH in IPv4)
-out without one; that <a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT" title="pcapkit.foundation.engines.dpkt.DPKT"><code class="xref py py-class docutils literal notranslate"><span class="pre">DPKT</span></code></a> leaves
-TCP in an IP-in-IP tunnel or behind an AH or IPv6 extension header in IPv4, and
-IPv4 in IPv6 or IPv6 in IPv4, out without one; and
-<a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.scapy.Scapy" title="pcapkit.foundation.engines.scapy.Scapy"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scapy</span></code></a> reads IPv6 only as far as
-<a class="reference external" href="https://scapy.net">Scapy</a> dissects it, which leaves IPv6 behind some BSD loopback headers, and
-TCP and IPv6 fragments behind some IPv6 extension headers, out without one.
-<a class="reference internal" href="pcapkit/foundation/engines/index.html"><span class="doc">Engine Support</span></a> tabulates them.</p>
+exception rather than silently returning nothing, except for these, which pass
+without a warning:</p>
+<ul class="simple">
+<li><p><a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAPFile</span></code></a> leaves TCP behind a
+VLAN tag, in a tunnel or behind an extension header (an IPv6 one, or AH in
+IPv4) out of TCP reassembly and flow tracing;</p></li>
+<li><p><a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.dpkt.DPKT" title="pcapkit.foundation.engines.dpkt.DPKT"><code class="xref py py-class docutils literal notranslate"><span class="pre">DPKT</span></code></a> leaves TCP in an IP-in-IP
+tunnel or behind an AH or IPv6 extension header in IPv4 out of TCP reassembly
+and flow tracing, and IPv4 in IPv6 or IPv6 in IPv4 out of IP reassembly;</p></li>
+<li><p><a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.scapy.Scapy" title="pcapkit.foundation.engines.scapy.Scapy"><code class="xref py py-class docutils literal notranslate"><span class="pre">Scapy</span></code></a> reads IPv6 only as far as
+<a class="reference external" href="https://scapy.net">Scapy</a> dissects it, so IPv6 behind some BSD loopback headers, and TCP and
+IPv6 fragments behind some IPv6 extension headers, go undissected.</p></li>
+</ul>
+<p><a class="reference internal" href="pcapkit/foundation/engines/index.html"><span class="doc">Engine Support</span></a> tabulates them.</p>
 <p>Every engine also answers a preflight check –
 <a class="reference internal" href="pcapkit/foundation/engines/engine.html#pcapkit.foundation.engines.engine.EngineBase.unsupported_reason" title="pcapkit.foundation.engines.engine.EngineBase.unsupported_reason"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unsupported_reason()</span></code></a>, which
 <a class="reference internal" href="pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.run" title="pcapkit.foundation.extraction.Extractor.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Extractor.run</span></code></a> consults
 before anything is imported – so asking for one that cannot run in the current
 environment gives a single warning naming the actual cause (a Python version, a
-missing <strong class="program">tshark</strong>, a missing <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em>, the wrong <code class="docutils literal notranslate"><span class="pre">pcap</span></code>
+missing <strong class="program">tshark</strong>, a missing <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em>, the wrong <a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcap-module"><code class="docutils literal notranslate"><span class="pre">pcap</span></code></a>
 distribution) and a clean fall back, rather than an error from inside the
 third-party package.</p>
 <section id="engine-support-by-python-version">
@@ -691,7 +697,7 @@ and extracting a capture on 3.10 through 3.14; 3.15 remains inferred.</p>
 </aside>
 <aside class="footnote brackets" id="id4" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">†</a><span class="fn-bracket">]</span></span>
-<p><code class="docutils literal notranslate"><span class="pre">pyshark</span></code> also needs Wireshark’s <strong class="program">tshark</strong>, which was absent here,
+<p><a class="reference external" href="https://kiminewt.github.io/pyshark"><code class="docutils literal notranslate"><span class="pre">pyshark</span></code></a> also needs Wireshark’s <strong class="program">tshark</strong>, which was absent here,
 so only the interpreter half of each verdict in this row was verified.</p>
 </aside>
 </aside>
@@ -797,7 +803,8 @@ compared with a measured row.</p>
 </aside>
 <aside class="footnote brackets" id="id9" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">2</a><span class="fn-bracket">]</span></span>
-<p><a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> 1.3.0 is unsupported on Python 3.12+.</p>
+<p><a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> 1.3.0 does not build on Python 3.12+: its pre-generated
+<code class="file docutils literal notranslate"><span class="pre">pcap.c</span></code> does not compile against that C API.</p>
 </aside>
 <aside class="footnote brackets" id="id10" role="doc-footnote">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id7">3</a><span class="fn-bracket">]</span></span>
@@ -914,7 +921,7 @@ moved to the <code class="docutils literal notranslate"><span class="pre">dev</s
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
 <p><strong>Install only one of</strong> <code class="docutils literal notranslate"><span class="pre">pypcap</span></code> <strong>and</strong> <code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code>. Both own the top-level
-<code class="docutils literal notranslate"><span class="pre">pcap</span></code> module, and <code class="docutils literal notranslate"><span class="pre">pip</span></code> will install both without complaint. With both
+<a class="reference internal" href="pcapkit/foundation/engines/3rdparty.html#pcap-module"><code class="docutils literal notranslate"><span class="pre">pcap</span></code></a> module, and <code class="docutils literal notranslate"><span class="pre">pip</span></code> will install both without complaint. With both
 present the <code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code> package wins the import and <code class="docutils literal notranslate"><span class="pre">pypcap</span></code>’s extension
 module is shadowed and unreachable, so <code class="docutils literal notranslate"><span class="pre">engine='pypcap'</span></code> stops working –
 measured on Python 3.10. <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> detects that state and warns with an
@@ -932,17 +939,17 @@ preflight described under <a class="reference internal" href="#engine-comparison
 cleanly and then fails when used.</p>
 <ul class="simple">
 <li><p>Drives Wireshark’s <strong class="program">tshark</strong> binary. It need not be on <code class="docutils literal notranslate"><span class="pre">PATH</span></code>:
-<code class="docutils literal notranslate"><span class="pre">pyshark</span></code> looks at <code class="docutils literal notranslate"><span class="pre">tshark_path</span></code> in its <code class="file docutils literal notranslate"><span class="pre">config.ini</span></code> first, then
+<a class="reference external" href="https://kiminewt.github.io/pyshark"><code class="docutils literal notranslate"><span class="pre">pyshark</span></code></a> looks at <code class="docutils literal notranslate"><span class="pre">tshark_path</span></code> in its <code class="file docutils literal notranslate"><span class="pre">config.ini</span></code> first, then
 <code class="docutils literal notranslate"><span class="pre">PATH</span></code> on POSIX, both Program Files directories on Windows, and
 <code class="file docutils literal notranslate"><span class="pre">/Applications/Wireshark.app</span></code> on macOS. Install Wireshark (or just
 <strong class="program">tshark</strong>) from your platform’s package manager.</p></li>
-<li><p>Requires Python <strong>3.13 or older</strong>. <code class="docutils literal notranslate"><span class="pre">pyshark</span></code> 0.6 builds its event loop
+<li><p>Requires Python <strong>3.13 or older</strong>. <a class="reference external" href="https://kiminewt.github.io/pyshark"><code class="docutils literal notranslate"><span class="pre">pyshark</span></code></a> 0.6 builds its event loop
 with <code class="docutils literal notranslate"><span class="pre">asyncio.get_event_loop_policy().get_event_loop()</span></code>, and from Python
 <strong>3.14</strong> <a class="reference external" href="https://docs.python.org/3/library/asyncio-eventloop.html#asyncio.get_event_loop" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">asyncio.get_event_loop()</span></code></a> raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#RuntimeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RuntimeError</span></code></a> when there
 is no current event loop instead of quietly creating one. Measured: a loop is
 returned silently on 3.10 and 3.11, returned with a
 <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#DeprecationWarning" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">DeprecationWarning</span></code></a> on 3.12, and refused on 3.14. 3.13 sits on the
-deprecated-but-functional side of that change, and <code class="docutils literal notranslate"><span class="pre">pyshark</span></code> extracted a
+deprecated-but-functional side of that change, and <a class="reference external" href="https://kiminewt.github.io/pyshark"><code class="docutils literal notranslate"><span class="pre">pyshark</span></code></a> extracted a
 capture there.</p></li>
 </ul>
 </dd>
@@ -1005,7 +1012,7 @@ requires Python <strong>3.11 or older</strong> until 0.12.1 is published.</p>
 <p class="admonition-title">Note</p>
 <p>Only the engines above carry extra constraints. <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> itself and
 its <code class="docutils literal notranslate"><span class="pre">default</span></code>, <code class="docutils literal notranslate"><span class="pre">dpkt</span></code> and <code class="docutils literal notranslate"><span class="pre">scapy</span></code> engines need nothing beyond their
-<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code> – <code class="docutils literal notranslate"><span class="pre">dpkt</span></code> 1.9.8 and <code class="docutils literal notranslate"><span class="pre">scapy</span></code> 2.7.0 were both measured
+<code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span></code> – <a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a> 1.9.8 and <code class="docutils literal notranslate"><span class="pre">scapy</span></code> 2.7.0 were both measured
 reading a capture on Python 3.14. The <code class="docutils literal notranslate"><span class="pre">scapy</span></code> engine needs <strong>scapy 2.6.0 or
 newer</strong>, which the <code class="docutils literal notranslate"><span class="pre">Scapy</span></code> extra requires: 2.5.0 can drop a PCAP-NG
 interface’s timestamp resolution, reading nanoseconds as microseconds

@@ -13,8 +13,8 @@ Loud and Quiet Errors
 Raising a :class:`~pcapkit.utilities.exceptions.BaseError` is, by default, a
 **loud** act: the error is logged once at :data:`logging.CRITICAL` on the
 ``pcapkit`` logger (:data:`~pcapkit.utilities.logging.logger`), and outside development mode
-an exception hook is installed on :data:`sys.excepthook` and
-:data:`threading.excepthook`, the first time a loud error needs it, so the user
+an exception hook is installed on :func:`sys.excepthook` and
+:func:`threading.excepthook`, the first time a loud error needs it, so the user
 sees the exception line rather than a walk through :mod:`pcapkit`'s internals.
 That hook only shortens the printing of a
 :class:`~pcapkit.utilities.exceptions.BaseError` itself; every other exception
@@ -28,25 +28,30 @@ Such an error emits nothing on any channel and touches no process-global state.
 It is still an ordinary exception carrying its message, so ``except`` clauses and
 :func:`repr` are unaffected.
 
+An error is also quiet when it is constructed inside a
+:class:`~pcapkit.utilities.exceptions.CaughtByCaller` block naming one of its
+classes. That is how :mod:`pcapkit` marks as control flow an error raised by
+code it calls but does not own, such as a generated ``_validate_value``
+override, which cannot know to pass ``quiet=True`` itself (:issue:`1845`).
+
 .. versionchanged:: 1.5.0
 
    In 1.4.x, ``quiet=True`` logged at ``ERROR`` instead of ``CRITICAL`` rather
    than not logging, and :data:`sys.tracebacklimit` was set on both paths. A
-   single ``MultiDict.get()`` miss therefore produced an ``ERROR`` record -- one
-   per frame when parsing unfragmented IPv6 with reassembly enabled -- and
-   truncated the tracebacks of unrelated exceptions for the rest of the process.
-   Those records never corresponded to a fault; to observe internal lookup
+   single :meth:`MultiDict.get() <pcapkit.corekit.multidict.MultiDict.get>` miss therefore
+   produced an ``ERROR`` record -- one per frame when parsing unfragmented IPv6 with
+   reassembly enabled -- and truncated the tracebacks of unrelated exceptions for the rest
+   of the process. Those records never corresponded to a fault; to observe internal lookup
    misses, catch the exception rather than read the log (:issue:`362`).
 
 .. autoexception:: pcapkit.utilities.exceptions.BaseError
    :no-members:
    :show-inheritance:
 
-   :param quiet: If :data:`True`, the error is neither logged nor allowed to
-      install the exception hook; it is raised silently, as internal control
-      flow.
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
+   .. automethod:: __init__
+
+.. autoclass:: pcapkit.utilities.exceptions.CaughtByCaller
+   :no-members:
 
 :exc:`TypeError` Category
 -------------------------
@@ -288,9 +293,12 @@ Error Handling Utilities
 
 .. autofunction:: pcapkit.utilities.exceptions.stacklevel
 
+.. autofunction:: pcapkit.utilities.exceptions._install_excepthook
+
+.. autofunction:: pcapkit.utilities.exceptions._excepthook
+
+.. autofunction:: pcapkit.utilities.exceptions._threading_excepthook
+
 .. rubric:: Footnotes
 
 .. [*] See |tbtrim|_ project for a modern Pythonic implementation.
-
-.. |tbtrim| replace:: ``tbtrim``
-.. _tbtrim: https://github.com/gousaiyang/tbtrim

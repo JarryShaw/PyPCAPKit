@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -485,7 +486,7 @@
 
 <span class="sd">:mod:`pcapkit.protocols.internet.esp` contains</span>
 <span class="sd">:class:`~pcapkit.protocols.internet.esp.ESP`,</span>
-<span class="sd">which implements extractor for Encapsulating</span>
+<span class="sd">which implements the extractor for Encapsulating</span>
 <span class="sd">Security Payload (ESP) [*]_, whose structure is</span>
 <span class="sd">described as below:</span>
 
@@ -495,7 +496,7 @@
 <span class="sd">  0           0   ``esp.spi``             Security Parameters Index (SPI)</span>
 <span class="sd">  4          32   ``esp.seq``             Sequence Number</span>
 <span class="sd">  8          64   ``esp.payload_data``    Payload Data (variable, encrypted)</span>
-<span class="sd">  ?           ?                           Padding (0-255 bytes, encrypted)</span>
+<span class="sd">  ?           ?   ``esp.padding``         Padding (0-255 bytes, encrypted)</span>
 <span class="sd">  ?           ?   ``esp.pad_len``         Pad Length (encrypted)</span>
 <span class="sd">  ?           ?   ``esp.next``            Next Header (encrypted)</span>
 <span class="sd">  ?           ?   ``esp.icv``             Integrity Check Value (ICV, variable)</span>
@@ -575,7 +576,7 @@
 <span class="sd">============================ =================== ============ ==================================</span>
 <span class="sd">Encryption                   :rfc:`8221` status   Implemented  Notes</span>
 <span class="sd">============================ =================== ============ ==================================</span>
-<span class="sd">``ENCR_NULL``                MUST                yes          :rfc:`2410`; needs no ``cryptography``</span>
+<span class="sd">``ENCR_NULL``                MUST                yes          :rfc:`2410`; needs no |cryptography|_</span>
 <span class="sd">``ENCR_AES_CBC``             MUST                yes          :rfc:`3602`; 128/192/256-bit keys</span>
 <span class="sd">``ENCR_AES_GCM_16``          MUST                yes          :rfc:`4106`; 8-octet explicit IV</span>
 <span class="sd">``ENCR_AES_GCM_8``           --                  yes          :rfc:`4106`, 8-octet ICV</span>
@@ -634,9 +635,6 @@
 <span class="sd">* The ICV is *verified* but a failure is reported rather than raised, so</span>
 <span class="sd">  that one bad packet does not abort a capture.</span>
 
-<span class="sd">.. |cryptography| replace:: ``cryptography``</span>
-<span class="sd">.. _cryptography: https://cryptography.io</span>
-
 <span class="sd">.. [*] https://en.wikipedia.org/wiki/IPsec</span>
 
 <span class="sd">.. versionadded:: 1.5.0</span>
@@ -676,7 +674,7 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
 
-<span class="c1">#: Cached :mod:`cryptography` primitives, c.f. :func:`load_cryptography`.</span>
+<span class="c1">#: Cached |cryptography|_ primitives, see :func:`load_cryptography`.</span>
 <span class="c1">#: :data:`NotImplemented` means the import has not been attempted yet, and</span>
 <span class="c1">#: :data:`None` that it was attempted and |cryptography|_ is not installed, and</span>
 <span class="c1">#: a tuple holds the loaded primitives, so a missing dependency is not retried</span>
@@ -690,10 +688,10 @@
 <span class="w">    </span><span class="sd">"""Load the optional |cryptography|_ primitives.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        A 4-tuple of ``(Cipher, algorithms, modes, InvalidTag)`` taken from</span>
-<span class="sd">        :mod:`cryptography.hazmat.primitives.ciphers` and</span>
-<span class="sd">        :mod:`cryptography.exceptions`, or :data:`None` when</span>
-<span class="sd">        |cryptography|_ is not installed.</span>
+<span class="sd">        A 4-tuple of ``(Cipher, algorithms, modes, InvalidTag)``, the first</span>
+<span class="sd">        three taken from :mod:`cryptography.hazmat.primitives.ciphers` and the</span>
+<span class="sd">        last being :exc:`cryptography.exceptions.InvalidTag`, or :data:`None`</span>
+<span class="sd">        when |cryptography|_ is not installed.</span>
 
 <span class="sd">    Notes:</span>
 <span class="sd">        The import is attempted at most once and the outcome is cached, so</span>
@@ -726,6 +724,8 @@
 <span class="c1">##############################################################################</span>
 
 
+<div class="viewcode-block" id="_resolve">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/internet/esp.html#pcapkit.protocols.internet.esp._resolve">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_resolve</span><span class="p">(</span><span class="n">registry</span><span class="p">:</span> <span class="s1">'Type[Cipher] | Type[Integrity]'</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span>
              <span class="n">prefix</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Resolve ``value`` to a member of an IKEv2 transform registry.</span>
@@ -769,7 +769,8 @@
     <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">prefix</span><span class="si">}{</span><span class="n">name</span><span class="si">}</span><span class="s1">'</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">registry</span><span class="o">.</span><span class="n">__members__</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">registry</span><span class="p">[</span><span class="n">candidate</span><span class="p">]</span>
-    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown ESP </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1"> algorithm: </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+    <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'unknown ESP </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1"> algorithm: </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span></div>
+
 
 
 <div class="viewcode-block" id="CipherSuite">
@@ -780,8 +781,8 @@
 
 <span class="sd">    A member of :class:`Cipher &lt;pcapkit.const.esp.cipher.Cipher&gt;` records only</span>
 <span class="sd">    that IANA registered the transform. This records how to apply it, and</span>
-<span class="sd">    membership of :data:`CIPHER_SUITES` is what "supported" means -- see the</span>
-<span class="sd">    module docstring.</span>
+<span class="sd">    membership of :data:`CIPHER_SUITES` is what "supported" means -- see</span>
+<span class="sd">    :ref:`esp-algorithm-support`.</span>
 
 <span class="sd">    """</span>
 
@@ -996,14 +997,14 @@
 <span class="sd">        spi: Security Parameters Index the SA applies to; :data:`None`</span>
 <span class="sd">            matches any SPI, which is convenient for a capture holding a</span>
 <span class="sd">            single tunnel.</span>
-<span class="sd">        encryption: Encryption algorithm, c.f. :meth:`CipherSuite.get`. Must</span>
+<span class="sd">        encryption: Encryption algorithm, see :meth:`CipherSuite.get`. Must</span>
 <span class="sd">            be one :mod:`pcapkit` implements; being in the IANA registry is</span>
 <span class="sd">            not enough.</span>
 <span class="sd">        encryption_key: Encryption keying material. For an AEAD suite this</span>
 <span class="sd">            is the AES key followed by the 4-octet salt [:rfc:`4106` §8.1],</span>
 <span class="sd">            unless ``salt`` is given separately.</span>
 <span class="sd">        salt: AEAD salt, when not appended to ``encryption_key``.</span>
-<span class="sd">        integrity: Integrity algorithm, c.f. :meth:`IntegritySuite.get`. Must</span>
+<span class="sd">        integrity: Integrity algorithm, see :meth:`IntegritySuite.get`. Must</span>
 <span class="sd">            be :attr:`Integrity.NONE &lt;pcapkit.const.esp.integrity.Integrity.NONE&gt;`</span>
 <span class="sd">            for an AEAD suite, which provides its own.</span>
 <span class="sd">        integrity_key: Integrity key.</span>
@@ -1883,7 +1884,7 @@
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
 
 <span class="sd">        See Also:</span>
-<span class="sd">            For construction argument, please refer to :meth:`self.make &lt;ESP.make&gt;`.</span>
+<span class="sd">            For construction arguments, please refer to :meth:`self.make &lt;ESP.make&gt;`.</span>
 
 <span class="sd">        """</span>
         <span class="c1">#: bool: If the protocol is used as an IPv6 extension header.</span>

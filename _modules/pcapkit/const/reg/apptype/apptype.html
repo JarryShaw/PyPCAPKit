@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -496,7 +497,7 @@
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumLookup</span><span class="p">,</span> <span class="n">EnumRegistry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.sentinels</span><span class="w"> </span><span class="kn">import</span> <span class="n">NO_DEFAULT</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumValueError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">CaughtByCaller</span><span class="p">,</span> <span class="n">EnumValueError</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'TransportProtocol'</span><span class="p">,</span> <span class="s1">'AppType'</span><span class="p">]</span>
 
@@ -567,9 +568,11 @@
     <span class="c1">#: Datagram Congestion Control Protocol.</span>
     <span class="n">dccp</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'TransportProtocol'</span><span class="p">,</span> <span class="n">auto</span><span class="p">())</span>
 
+<div class="viewcode-block" id="TransportProtocol.get">
+<a class="viewcode-back" href="../../../../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.TransportProtocol.get">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">'int | str'</span><span class="p">,</span> <span class="n">default</span><span class="p">:</span> <span class="s1">'Any'</span> <span class="o">=</span> <span class="n">NO_DEFAULT</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'TransportProtocol'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Backport support for original codes.</span>
+<span class="w">        </span><span class="sd">"""Resolve ``key`` to a member, matching a name case-insensitively.</span>
 
 <span class="sd">        Delegates to :meth:`~pcapkit.corekit.enum.EnumLookup.get` for GitHub</span>
 <span class="sd">        issue :issue:`877`'s re-parenting, but keeps this override rather than dropping</span>
@@ -642,7 +645,6 @@
 <span class="sd">            EnumValueError: If ``key`` is a value no member carries and there</span>
 <span class="sd">                is no usable ``default``. A :exc:`ValueError`, from the base.</span>
 
-<span class="sd">        :meta private:</span>
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">default</span><span class="p">)</span>
@@ -667,7 +669,7 @@
         <span class="c1"># signature admits -- an unrecognised :class:`int` still reaches the</span>
         <span class="c1"># caller as a :exc:`ValueError`, now the base's own</span>
         <span class="c1"># :exc:`~pcapkit.utilities.exceptions.EnumValueError` since GitHub issue</span>
-        <span class="c1"># #923 rather than :mod:`aenum`'s bare one. It is not compatible for</span>
+        <span class="c1"># #923 rather than ``aenum``'s bare one. It is not compatible for</span>
         <span class="c1"># keys outside it: ``None``, a :class:`float` and an unhashable key</span>
         <span class="c1"># used to raise :exc:`AttributeError` from the ``key.lower()`` this</span>
         <span class="c1"># branch no longer reaches, and now raise :exc:`ValueError` (or, for a</span>
@@ -677,15 +679,16 @@
         <span class="c1"># passes ``proto.lower()``, always a :class:`str`. The new shape is</span>
         <span class="c1"># what every other ``EnumLookup`` subclass already does.</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">default</span><span class="p">)</span></div>
+</div>
 
 
     <span class="c1"># NOTE: ``_missing_`` used to range-check ``value`` and then defer to</span>
-    <span class="c1"># :mod:`aenum`'s own ``Flag._missing_``, which is what composed an</span>
+    <span class="c1"># ``aenum``'s own ``Flag._missing_``, which is what composed an</span>
     <span class="c1"># unrecognised bit combination into a pseudo-member -- ``TransportProtocol(3)``</span>
     <span class="c1"># returning ``tcp|udp`` -- GitHub issue #647's guard against that composing</span>
     <span class="c1"># *anything*, including values no member declares. GitHub issue #808 removed</span>
     <span class="c1"># the ``IntFlag`` base once nothing built a composite, and with it the only</span>
-    <span class="c1"># reason this method existed: a plain :class:`~aenum.IntEnum` already raises</span>
+    <span class="c1"># reason this method existed: a plain ``aenum.IntEnum`` already raises</span>
     <span class="c1"># ``ValueError`` for a value no member declares, with no ``_missing_`` of</span>
     <span class="c1"># its own needed to get there, so declaring one here would only be</span>
     <span class="c1"># reproducing what the base class already does.</span>
@@ -704,7 +707,7 @@
 <span class="sd">    :class:`~pcapkit.const.reg.apptype.udp.UDP`,</span>
 <span class="sd">    :class:`~pcapkit.const.reg.apptype.sctp.SCTP` or</span>
 <span class="sd">    :class:`~pcapkit.const.reg.apptype.dccp.DCCP`. Being memberless is also what</span>
-<span class="sd">    makes it subclassable at all, since :mod:`aenum` refuses to extend an</span>
+<span class="sd">    makes it subclassable at all, since |aenum|_ refuses to extend an</span>
 <span class="sd">    enumeration that already has members.</span>
 
 <span class="sd">    Note:</span>
@@ -2893,6 +2896,18 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span> <span class="o">=</span> <span class="s1">'&lt;null&gt;'</span><span class="p">,</span>
                 <span class="n">proto</span><span class="p">:</span> <span class="s1">'TransportProtocol'</span> <span class="o">=</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">undefined</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[AppType]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Create a member from a registry row and add it to :attr:`__registry__`.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            value: Port number.</span>
+<span class="sd">            name: Service name.</span>
+<span class="sd">            proto: Transport protocol carrying the service.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            ValueError: If called on the base registry, which holds no members</span>
+<span class="sd">                of its own, rather than on a per-transport subclass.</span>
+
+<span class="sd">        """</span>
         <span class="n">temp</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> [</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s1"> - </span><span class="si">{</span><span class="n">proto</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">]'</span>
 
         <span class="n">obj</span> <span class="o">=</span> <span class="nb">str</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">temp</span><span class="p">)</span>
@@ -2937,7 +2952,11 @@
         <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">member</span> <span class="k">for</span> <span class="n">member</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__registry__</span><span class="o">.</span><span class="n">getlist</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">port</span><span class="p">)</span>  <span class="c1"># type: ignore[union-attr]</span>
                      <span class="k">if</span> <span class="n">member</span> <span class="ow">is</span> <span class="ow">not</span> <span class="bp">self</span><span class="p">)</span>
 
+<div class="viewcode-block" id="AppType.__repr__">
+<a class="viewcode-back" href="../../../../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType.__repr__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Show the member as ``&lt;Registry.service: port [transport]&gt;``, listing its</span>
+<span class="sd">        :attr:`aliases` before the closing bracket when it has any."""</span>
         <span class="c1"># NOTE: GitHub issue #807. The suffix below is the only difference from</span>
         <span class="c1"># the plain form GitHub issue #806 already fixed: it is appended only</span>
         <span class="c1"># when :attr:`aliases` is non-empty, so every member that does not</span>
@@ -2950,9 +2969,14 @@
         <span class="n">aliases</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aliases</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">aliases</span><span class="p">:</span>
             <span class="k">return</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">base</span><span class="si">}</span><span class="s1">&gt;'</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">base</span><span class="si">}</span><span class="s1"> (aliases: </span><span class="si">{</span><span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">alias</span><span class="o">.</span><span class="n">svc</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">alias</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">aliases</span><span class="p">)</span><span class="si">}</span><span class="s1">)&gt;'</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">base</span><span class="si">}</span><span class="s1"> (aliases: </span><span class="si">{</span><span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">alias</span><span class="o">.</span><span class="n">svc</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">alias</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">aliases</span><span class="p">)</span><span class="si">}</span><span class="s1">)&gt;'</span></div>
 
+
+<div class="viewcode-block" id="AppType.__str__">
+<a class="viewcode-back" href="../../../../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType.__str__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Show the member as ``service [port - transport]``, followed by its</span>
+<span class="sd">        :attr:`aliases` when it has any."""</span>
         <span class="c1"># NOTE: same suffix as __repr__, for the same reason, and -- like that</span>
         <span class="c1"># suffix, and unlike everything else this formats -- never folded into</span>
         <span class="c1"># ``_value_``. GitHub issue #807's hard constraint: ``_value_`` is the</span>
@@ -2969,10 +2993,15 @@
         <span class="n">aliases</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">aliases</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">aliases</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">base</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">base</span><span class="si">}</span><span class="s1"> (aliases: </span><span class="si">{</span><span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">alias</span><span class="o">.</span><span class="n">svc</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">alias</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">aliases</span><span class="p">)</span><span class="si">}</span><span class="s1">)'</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">base</span><span class="si">}</span><span class="s1"> (aliases: </span><span class="si">{</span><span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">alias</span><span class="o">.</span><span class="n">svc</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">alias</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">aliases</span><span class="p">)</span><span class="si">}</span><span class="s1">)'</span></div>
 
+
+<div class="viewcode-block" id="AppType.__int__">
+<a class="viewcode-back" href="../../../../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType.__int__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__int__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span>
+<span class="w">        </span><span class="sd">"""Convert the member to its port number."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__lt__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s1">'AppType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">&lt;</span> <span class="n">other</span>
@@ -2986,8 +3015,12 @@
     <span class="k">def</span><span class="w"> </span><span class="fm">__ge__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s1">'AppType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">&gt;=</span> <span class="n">other</span>
 
+<div class="viewcode-block" id="AppType.__eq__">
+<a class="viewcode-back" href="../../../../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType.__eq__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">==</span> <span class="n">other</span>
+<span class="w">        </span><span class="sd">"""Compare the member's port number with ``other``."""</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">==</span> <span class="n">other</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__ne__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">port</span> <span class="o">!=</span> <span class="n">other</span>
@@ -3006,7 +3039,9 @@
 <span class="sd">                every entry point rejects a non-port identically.</span>
 <span class="sd">            proto: Transport protocol, as a member, its name, or a bare</span>
 <span class="sd">                :class:`int`. That last shape is not merely defensive: GitHub</span>
-<span class="sd">                issue :issue:`808` dropped ``TransportProtocol``'s ``IntFlag`` base, so</span>
+<span class="sd">                issue :issue:`808` dropped</span>
+<span class="sd">                :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`'s</span>
+<span class="sd">                ``IntFlag`` base, so</span>
 <span class="sd">                ``TransportProtocol.a | TransportProtocol.b`` -- built by hand,</span>
 <span class="sd">                the same as any caller passing a literal port-transport bitmask</span>
 <span class="sd">                -- falls through to ``int.__or__`` and returns a bare</span>
@@ -3091,10 +3126,12 @@
                          <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="AppType.get">
+<a class="viewcode-back" href="../../../../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType.get">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">get</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ</span>
             <span class="n">proto</span><span class="p">:</span> <span class="s1">'TransportProtocol | str | int'</span> <span class="o">=</span> <span class="n">TransportProtocol</span><span class="o">.</span><span class="n">undefined</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'AppType'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Backport support for original codes.</span>
+<span class="w">        </span><span class="sd">"""Resolve port ``key`` to the member for its canonical service.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            key: Port number to look up.</span>
@@ -3115,7 +3152,12 @@
 <span class="sd">            to some ports -- ``80`` carries ``http``, ``www`` and ``www-http`` --</span>
 <span class="sd">            and names no precedence among them, so :data:`__canonical__` supplies</span>
 <span class="sd">            the one the rest of the world answers with. The others remain real,</span>
-<span class="sd">            named members and are reached through :meth:`get_all`.</span>
+<span class="sd">            named members and are reached through :meth:`get_all`. A port</span>
+<span class="sd">            with no row of its own resolves to an unregistered member that is</span>
+<span class="sd">            not added to the registry (:issue:`860`). Its name is the label of</span>
+<span class="sd">            the IANA span holding the port, whatever that label is --</span>
+<span class="sd">            ``reserved``, ``unassigned``, or a service name such as ``swx`` --</span>
+<span class="sd">            or ``unknown`` when no span holds it.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ValueError: If called on a class that holds no members, i.e. on</span>
@@ -3132,7 +3174,6 @@
 <span class="sd">                them, not simply for being composite -- see</span>
 <span class="sd">                :meth:`_dispatch`.</span>
 
-<span class="sd">        :meta private:</span>
 <span class="sd">        """</span>
         <span class="n">owner</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_dispatch</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">proto</span><span class="p">)</span>
 
@@ -3144,7 +3185,7 @@
                     <span class="k">if</span> <span class="n">member</span><span class="o">.</span><span class="n">svc</span> <span class="o">==</span> <span class="n">canonical</span><span class="p">:</span>
                         <span class="k">return</span> <span class="n">member</span>
             <span class="c1"># NOTE: IANA's oldest row, for a port whose collision postdates</span>
-            <span class="c1"># :data:`__canonical__` -- including one :func:`~aenum.extend_enum`</span>
+            <span class="c1"># :data:`__canonical__` -- including one ``aenum.extend_enum``</span>
             <span class="c1"># created, which must not displace what the registry already</span>
             <span class="c1"># answered with.</span>
             <span class="k">return</span> <span class="n">matched</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
@@ -3167,7 +3208,8 @@
         <span class="n">ret</span> <span class="o">=</span> <span class="n">owner</span><span class="o">.</span><span class="n">_missing_</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">ret</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ret</span> <span class="o">=</span> <span class="n">owner</span><span class="o">.</span><span class="n">_unregistered_member</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s1">'unknown'</span><span class="p">,</span> <span class="n">owner</span><span class="o">.</span><span class="n">__transport__</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">ret</span>
+        <span class="k">return</span> <span class="n">ret</span></div>
+
 
 <div class="viewcode-block" id="AppType.get_all">
 <a class="viewcode-back" href="../../../../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType.get_all">[docs]</a>
@@ -3326,7 +3368,10 @@
                              <span class="sa">f</span><span class="s1">'(</span><span class="si">{</span><span class="s2">", "</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">member</span><span class="o">.</span><span class="n">svc</span><span class="w"> </span><span class="k">for</span><span class="w"> </span><span class="n">member</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">existing</span><span class="p">)</span><span class="si">}</span><span class="s1">); use '</span>
                              <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">.register_alias() to add a further service name '</span>
                              <span class="s1">'for it'</span><span class="p">)</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">_validate_value</span><span class="p">(</span><span class="n">port</span><span class="p">)</span>
+        <span class="c1"># NOTE: GitHub issue #1845. Declares that nothing is caught, so the</span>
+        <span class="c1"># rejection stays loud even inside a ``get`` block that would quiet it.</span>
+        <span class="k">with</span> <span class="n">CaughtByCaller</span><span class="p">():</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_validate_value</span><span class="p">(</span><span class="n">port</span><span class="p">)</span>
 
         <span class="n">identifier</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_sanitize_identifier</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">identifier</span><span class="o">.</span><span class="n">isidentifier</span><span class="p">():</span>
@@ -3347,14 +3392,16 @@
 
 <span class="sd">        GitHub issue :issue:`807`'s third ask, deliberately scoped to **this**</span>
 <span class="sd">        per-transport registry: ``TCP.register_alias(...)`` never touches</span>
-<span class="sd">        :class:`UDP`'s members, which is what keeps an alias registered on one</span>
-<span class="sd">        transport from leaking onto a transport IANA never assigned it -- e.g.</span>
-<span class="sd">        registering ``www`` as an alias of ``http`` on :class:`TCP` and</span>
-<span class="sd">        :class:`UDP` leaves it absent from :class:`SCTP`'s port 80, exactly as</span>
+<span class="sd">        :class:`~pcapkit.const.reg.apptype.udp.UDP`'s members, which is what</span>
+<span class="sd">        keeps an alias registered on one transport from leaking onto a</span>
+<span class="sd">        transport IANA never assigned it -- e.g. registering ``www`` as an alias</span>
+<span class="sd">        of ``http`` on :class:`~pcapkit.const.reg.apptype.tcp.TCP` and</span>
+<span class="sd">        :class:`~pcapkit.const.reg.apptype.udp.UDP` leaves it absent from</span>
+<span class="sd">        :class:`~pcapkit.const.reg.apptype.sctp.SCTP`'s port 80, exactly as</span>
 <span class="sd">        IANA itself never registered it there.</span>
 
 <span class="sd">        No new storage: the new member simply joins :data:`__registry__` at</span>
-<span class="sd">        ``port``, through the same :func:`~aenum.extend_enum` call</span>
+<span class="sd">        ``port``, through the same ``aenum.extend_enum`` call</span>
 <span class="sd">        :meth:`register` uses to mint the first one. It is then reachable</span>
 <span class="sd">        through :attr:`aliases` on every other member already on ``port``, and</span>
 <span class="sd">        vice versa, with nothing further to keep in sync.</span>

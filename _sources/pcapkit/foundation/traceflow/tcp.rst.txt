@@ -24,6 +24,10 @@ TCP flows from a series of packets and connections.
    .. autoattribute:: __callback_fn__
       :no-value:
 
+   .. automethod:: _make_segment
+   .. automethod:: _unique_label
+   .. automethod:: _ended
+
 Terminology
 -----------
 

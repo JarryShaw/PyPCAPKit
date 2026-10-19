@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -478,12 +479,12 @@
         <article role="main" id="furo-main-content">
           <h1>Source code for pcapkit.foundation.engines._pcap_backend</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
-<span class="sd">"""Which distribution owns the :mod:`pcap` module?</span>
+<span class="sd">"""Which distribution owns the |pcap|_ module?</span>
 <span class="sd">=====================================================</span>
 
 <span class="sd">.. module:: pcapkit.foundation.engines._pcap_backend</span>
 
-<span class="sd">Unrelated PyPI distributions install a top-level module named :mod:`pcap`:</span>
+<span class="sd">Unrelated PyPI distributions install a top-level module named |pcap|_:</span>
 
 <span class="sd">* `PyPCAP`_ -- a Cython binding, shipped as a single extension module</span>
 <span class="sd">  (:file:`pcap.cpython-*.so`), installable only up to Python 3.11.</span>
@@ -504,9 +505,6 @@
 <span class="sd">the answer, and a copy of the detection in each would be a chance to disagree.</span>
 <span class="sd">It is *only* detection -- nothing here is engine behaviour -- and it imports</span>
 <span class="sd">nothing from :mod:`pcapkit`, so it cannot introduce an import cycle.</span>
-
-<span class="sd">.. _PyPCAP: https://github.com/pynetwork/pypcap</span>
-<span class="sd">.. _pcap-ct: https://pypi.org/project/pcap-ct/</span>
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">importlib</span>
@@ -530,7 +528,7 @@
 <span class="n">PYPCAP</span> <span class="o">=</span> <span class="s1">'pypcap'</span>
 <span class="c1">#: Distribution name of `pcap-ct`_.</span>
 <span class="n">PCAP_CT</span> <span class="o">=</span> <span class="s1">'pcap-ct'</span>
-<span class="c1">#: Every distribution known to provide :mod:`pcap`, in a fixed order so that</span>
+<span class="c1">#: Every distribution known to provide |pcap|_, in a fixed order so that</span>
 <span class="c1">#: messages naming several of them read the same way every time.</span>
 <span class="n">DISTRIBUTIONS</span> <span class="o">=</span> <span class="p">(</span><span class="n">PYPCAP</span><span class="p">,</span> <span class="n">PCAP_CT</span><span class="p">)</span>
 <span class="c1">#: The ``engine=`` string that drives each distribution. Kept here rather than in</span>
@@ -546,7 +544,7 @@
 <a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines._pcap_backend.Probe">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">Probe</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""What one attempt to import :mod:`pcap` found."""</span>
+<span class="w">    </span><span class="sd">"""What one attempt to import |pcap|_ found."""</span>
 
     <span class="c1">#: Distribution that provided the imported module -- :data:`PYPCAP`,</span>
     <span class="c1">#: :data:`PCAP_CT`, or :data:`None` when the import did not succeed.</span>
@@ -591,9 +589,9 @@
 <div class="viewcode-block" id="identify">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines._pcap_backend.identify">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">identify</span><span class="p">(</span><span class="n">module</span><span class="p">:</span> <span class="s1">'ModuleType'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Which distribution does an imported :mod:`pcap` module come from?</span>
+<span class="w">    </span><span class="sd">"""Which distribution does an imported |pcap|_ module come from?</span>
 
-<span class="sd">    `pcap-ct`_ ships :mod:`pcap` as a package whose ``__init__`` does</span>
+<span class="sd">    `pcap-ct`_ ships |pcap|_ as a package whose ``__init__`` does</span>
 <span class="sd">    ``from ._pcap import *``, which binds the submodule as an attribute; upstream</span>
 <span class="sd">    `PyPCAP`_ ships a single extension module, which has no such attribute. That</span>
 <span class="sd">    is a structural difference rather than a cosmetic one, which is why it is</span>
@@ -606,13 +604,10 @@
 <span class="sd">      present on upstream ``pypcap`` 1.3.0 as well.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        module: An already-imported :mod:`pcap` module.</span>
+<span class="sd">        module: An already-imported |pcap|_ module.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        :data:`PCAP_CT` or :data:`PYPCAP`.</span>
-
-<span class="sd">    .. _PyPCAP: https://github.com/pynetwork/pypcap</span>
-<span class="sd">    .. _pcap-ct: https://pypi.org/project/pcap-ct/</span>
 
 <span class="sd">    """</span>
     <span class="k">return</span> <span class="n">PCAP_CT</span> <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="s1">'_pcap'</span><span class="p">)</span> <span class="k">else</span> <span class="n">PYPCAP</span></div>
@@ -624,7 +619,7 @@
 <span class="k">def</span><span class="w"> </span><span class="nf">installed_distributions</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="s1">'tuple[str, ...]'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Which of :data:`DISTRIBUTIONS` are installed, per package metadata.</span>
 
-<span class="sd">    Asked of the metadata rather than of :mod:`pcap` itself, because that is the</span>
+<span class="sd">    Asked of the metadata rather than of |pcap|_ itself, because that is the</span>
 <span class="sd">    only way to see the distribution the import did *not* resolve to -- which is</span>
 <span class="sd">    exactly the collision worth reporting.</span>
 
@@ -651,7 +646,7 @@
 <div class="viewcode-block" id="_purge">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines._pcap_backend._purge">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_purge</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Drop the ``pcap`` and ``libpcap`` module trees from :data:`sys.modules`.</span>
+<span class="w">    </span><span class="sd">"""Drop the |pcap|_ and ``libpcap`` module trees from :data:`sys.modules`.</span>
 
 <span class="sd">    Called after a failed import so that the *next* probe reproduces the same</span>
 <span class="sd">    failure. Without it a second attempt reports something else entirely, which</span>
@@ -669,8 +664,8 @@
 
 <span class="sd">    That message names neither the missing library nor the package it came from,</span>
 <span class="sd">    and it is what the user would otherwise be shown. ``libpcap`` is purged as</span>
-<span class="sd">    well as ``pcap`` because the residue is in whichever of the two got part-way:</span>
-<span class="sd">    purging only ``pcap`` moved the ``NameError`` from one to the other rather</span>
+<span class="sd">    well as |pcap|_ because the residue is in whichever of the two got part-way:</span>
+<span class="sd">    purging only |pcap|_ moved the ``NameError`` from one to the other rather</span>
 <span class="sd">    than removing it.</span>
 
 <span class="sd">    """</span>
@@ -686,7 +681,7 @@
 <div class="viewcode-block" id="probe">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines._pcap_backend.probe">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">probe</span><span class="p">()</span> <span class="o">-&gt;</span> <span class="s1">'Probe'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Import :mod:`pcap` and report what was found.</span>
+<span class="w">    </span><span class="sd">"""Import |pcap|_ and report what was found.</span>
 
 <span class="sd">    Not cached. The cost after a successful first call is a :data:`sys.modules`</span>
 <span class="sd">    lookup, and a cache would make the answer depend on when it was first asked --</span>
@@ -733,7 +728,7 @@
 <div class="viewcode-block" id="wrong_backend_reason">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines._pcap_backend.wrong_backend_reason">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">wrong_backend_reason</span><span class="p">(</span><span class="n">wanted</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">found</span><span class="p">:</span> <span class="s1">'Probe'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[str]'</span><span class="p">:</span>
-<span class="w">    </span><span class="sd">"""Why ``wanted`` cannot run, when some *other* distribution owns :mod:`pcap`.</span>
+<span class="w">    </span><span class="sd">"""Why ``wanted`` cannot run, when some *other* distribution owns |pcap|_.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        wanted: The distribution the calling engine drives -- :data:`PYPCAP` or</span>

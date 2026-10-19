@@ -2,6 +2,8 @@
 Built-in Engines
 ================
 
+Together, the readers below are the :term:`default engine`.
+
 PCAP Support
 ============
 

@@ -260,7 +260,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -392,6 +392,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -611,6 +612,48 @@ following objects and functions:</p>
 </tbody>
 </table>
 </div>
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.utilities.compat.final">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.compat.</span></span><span class="sig-name descname"><span class="pre">final</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">f</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/typing.html#final"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.compat.final" title="Link to this definition">¶</a></dt>
+<dd><p><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.final" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">typing.final()</span></code></a> from Python 3.11 on, and <code class="docutils literal notranslate"><span class="pre">typing_extensions.final</span></code>
+below it. Both record <code class="docutils literal notranslate"><span class="pre">__final__</span> <span class="pre">=</span> <span class="pre">True</span></code> on the decorated object at
+runtime, which <a class="reference internal" href="../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a> and
+<a class="reference internal" href="../protocols/index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a> read to refuse a class
+marked <code class="docutils literal notranslate"><span class="pre">&#64;final</span></code> without <a class="reference internal" href="../corekit/infoclass.html#pcapkit.corekit.infoclass.info_final" title="pcapkit.corekit.infoclass.info_final"><code class="xref py py-func docutils literal notranslate"><span class="pre">info_final()</span></code></a> or
+<a class="reference internal" href="../protocols/index.html#pcapkit.protocols.schema.schema.schema_final" title="pcapkit.protocols.schema.schema.schema_final"><code class="xref py py-func docutils literal notranslate"><span class="pre">schema_final()</span></code></a>. Plain
+<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.final" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">typing.final()</span></code></a> records nothing below 3.11 (gh-90500).</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.5.0: </span>Taken from <code class="docutils literal notranslate"><span class="pre">typing_extensions</span></code> below Python 3.11 rather than 3.8, so
+that <code class="docutils literal notranslate"><span class="pre">__final__</span></code> is recorded on every supported version (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/778">#778</a>).</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.utilities.compat.unquote">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.compat.</span></span><span class="sig-name descname"><span class="pre">unquote</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">string</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">encoding</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'utf-8'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'replace'</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/urllib/parse.html#unquote"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.compat.unquote" title="Link to this definition">¶</a></dt>
+<dd><p><a class="reference external" href="https://docs.python.org/3/library/urllib.parse.html#urllib.parse.unquote" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">urllib.parse.unquote()</span></code></a>, which accepts <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> from Python 3.9 on.
+Below 3.9, a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> <code class="docutils literal notranslate"><span class="pre">string</span></code> is unquoted to octets with
+<a class="reference external" href="https://docs.python.org/3/library/urllib.parse.html#urllib.parse.unquote_to_bytes" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">urllib.parse.unquote_to_bytes()</span></code></a> and then decoded with <code class="docutils literal notranslate"><span class="pre">encoding</span></code> and
+<code class="docutils literal notranslate"><span class="pre">errors</span></code>.</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.utilities.compat.default_threading_excepthook">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.compat.</span></span><span class="sig-name descname"><span class="pre">default_threading_excepthook</span></span><a class="headerlink" href="#pcapkit.utilities.compat.default_threading_excepthook" title="Link to this definition">¶</a></dt>
+<dd><p>The interpreter’s own default thread exception hook, even when
+<a class="reference external" href="https://docs.python.org/3/library/threading.html#threading.excepthook" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">threading.excepthook()</span></code></a> has been replaced:
+<a class="reference external" href="https://docs.python.org/3/library/threading.html#threading.__excepthook__" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">threading.__excepthook__</span></code></a> from Python 3.10 on, <code class="docutils literal notranslate"><span class="pre">_thread._excepthook</span></code>
+on 3.8 and 3.9, and <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> below 3.8, which has no thread exception hook.</p>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.utilities.compat.cached_property">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.compat.</span></span><span class="sig-name descname"><span class="pre">cached_property</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">func</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/functools.html#cached_property"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.compat.cached_property" title="Link to this definition">¶</a></dt>
+<dd><p><a class="reference external" href="https://docs.python.org/3/library/functools.html#functools.cached_property" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">functools.cached_property()</span></code></a> from Python 3.8 on. Below 3.8 it is a backport
+of CPython’s own implementation, kept verbatim so that it can be diffed against
+upstream.</p>
+</dd></dl>
+
 </section>
 </section>
 

@@ -5,7 +5,7 @@ IPX - Internetwork Packet Exchange
 
 :mod:`pcapkit.protocols.internet.ipx` contains
 :class:`~pcapkit.protocols.internet.ipx.IPX` only,
-which implements extractor for Internetwork Packet
+which implements the extractor for Internetwork Packet
 Exchange (IPX) [*]_, whose structure is described
 as below:
 

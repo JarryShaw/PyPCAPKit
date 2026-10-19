@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -528,7 +529,7 @@
 <span class="c1">#: The canonical service for each port IANA assigns more than one to, per</span>
 <span class="c1">#: transport protocol, as ``{transport: {port: service name}}``.</span>
 <span class="c1">#:</span>
-<span class="c1">#: IANA genuinely registers three services on TCP/80 -- ``http``, ``www`` and</span>
+<span class="c1">#: IANA genuinely registers more than one service on TCP/80 -- ``http``, ``www`` and</span>
 <span class="c1">#: ``www-http`` -- and gives no precedence among them, so the registry cannot</span>
 <span class="c1">#: derive which one a port lookup should answer with. Registry row order does not</span>
 <span class="c1">#: supply it either: taken alone it answers many of these pairs differently</span>
@@ -588,7 +589,7 @@
 
 <span class="s1">from pcapkit.corekit.enum import EnumLookup, EnumRegistry</span>
 <span class="s1">from pcapkit.corekit.sentinels import NO_DEFAULT</span>
-<span class="s1">from pcapkit.utilities.exceptions import EnumValueError</span>
+<span class="s1">from pcapkit.utilities.exceptions import CaughtByCaller, EnumValueError</span>
 
 <span class="s1">__all__ = ['TransportProtocol', '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">']</span>
 
@@ -659,7 +660,7 @@
 
 <span class="s1">    @classmethod</span>
 <span class="s1">    def get(cls, key: 'int | str', default: 'Any' = NO_DEFAULT) -&gt; 'TransportProtocol':</span>
-<span class="s1">        """Backport support for original codes.</span>
+<span class="s1">        """Resolve ``key`` to a member, matching a name case-insensitively.</span>
 
 <span class="s1">        Delegates to :meth:`~pcapkit.corekit.enum.EnumLookup.get` for GitHub</span>
 <span class="s1">        issue :issue:`877`'s re-parenting, but keeps this override rather than dropping</span>
@@ -732,7 +733,6 @@
 <span class="s1">            EnumValueError: If ``key`` is a value no member carries and there</span>
 <span class="s1">                is no usable ``default``. A :exc:`ValueError`, from the base.</span>
 
-<span class="s1">        :meta private:</span>
 <span class="s1">        """</span>
 <span class="s1">        if isinstance(key, str):</span>
 <span class="s1">            return super().get(key.lower(), default)</span>
@@ -757,7 +757,7 @@
 <span class="s1">        # signature admits -- an unrecognised :class:`int` still reaches the</span>
 <span class="s1">        # caller as a :exc:`ValueError`, now the base's own</span>
 <span class="s1">        # :exc:`~pcapkit.utilities.exceptions.EnumValueError` since GitHub issue</span>
-<span class="s1">        # #923 rather than :mod:`aenum`'s bare one. It is not compatible for</span>
+<span class="s1">        # #923 rather than ``aenum``'s bare one. It is not compatible for</span>
 <span class="s1">        # keys outside it: ``None``, a :class:`float` and an unhashable key</span>
 <span class="s1">        # used to raise :exc:`AttributeError` from the ``key.lower()`` this</span>
 <span class="s1">        # branch no longer reaches, and now raise :exc:`ValueError` (or, for a</span>
@@ -769,12 +769,12 @@
 <span class="s1">        return super().get(key, default)</span>
 
 <span class="s1">    # NOTE: ``_missing_`` used to range-check ``value`` and then defer to</span>
-<span class="s1">    # :mod:`aenum`'s own ``Flag._missing_``, which is what composed an</span>
+<span class="s1">    # ``aenum``'s own ``Flag._missing_``, which is what composed an</span>
 <span class="s1">    # unrecognised bit combination into a pseudo-member -- ``TransportProtocol(3)``</span>
 <span class="s1">    # returning ``tcp|udp`` -- GitHub issue #647's guard against that composing</span>
 <span class="s1">    # *anything*, including values no member declares. GitHub issue #808 removed</span>
 <span class="s1">    # the ``IntFlag`` base once nothing built a composite, and with it the only</span>
-<span class="s1">    # reason this method existed: a plain :class:`~aenum.IntEnum` already raises</span>
+<span class="s1">    # reason this method existed: a plain ``aenum.IntEnum`` already raises</span>
 <span class="s1">    # ``ValueError`` for a value no member declares, with no ``_missing_`` of</span>
 <span class="s1">    # its own needed to get there, so declaring one here would only be</span>
 <span class="s1">    # reproducing what the base class already does.</span>
@@ -791,7 +791,7 @@
 <span class="s1">    :class:`~pcapkit.const.reg.apptype.udp.UDP`,</span>
 <span class="s1">    :class:`~pcapkit.const.reg.apptype.sctp.SCTP` or</span>
 <span class="s1">    :class:`~pcapkit.const.reg.apptype.dccp.DCCP`. Being memberless is also what</span>
-<span class="s1">    makes it subclassable at all, since :mod:`aenum` refuses to extend an</span>
+<span class="s1">    makes it subclassable at all, since |aenum|_ refuses to extend an</span>
 <span class="s1">    enumeration that already has members.</span>
 
 <span class="s1">    Note:</span>
@@ -842,6 +842,18 @@
 
 <span class="s1">    def __new__(cls, value: 'int', name: 'str' = '&lt;null&gt;',</span>
 <span class="s1">                proto: 'TransportProtocol' = TransportProtocol.undefined) -&gt; 'Type[</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">]':</span>
+<span class="s1">        """Create a member from a registry row and add it to :attr:`__registry__`.</span>
+
+<span class="s1">        Args:</span>
+<span class="s1">            value: Port number.</span>
+<span class="s1">            name: Service name.</span>
+<span class="s1">            proto: Transport protocol carrying the service.</span>
+
+<span class="s1">        Raises:</span>
+<span class="s1">            ValueError: If called on the base registry, which holds no members</span>
+<span class="s1">                of its own, rather than on a per-transport subclass.</span>
+
+<span class="s1">        """</span>
 <span class="s1">        temp = f'</span><span class="se">{{</span><span class="s1">name</span><span class="se">}}</span><span class="s1"> [</span><span class="se">{{</span><span class="s1">value</span><span class="se">}}</span><span class="s1"> - </span><span class="se">{{</span><span class="s1">proto.name</span><span class="se">}}</span><span class="s1">]'</span>
 
 <span class="s1">        obj = str.__new__(cls, temp)</span>
@@ -887,6 +899,8 @@
 <span class="s1">                     if member is not self)</span>
 
 <span class="s1">    def __repr__(self) -&gt; 'str':</span>
+<span class="s1">        """Show the member as ``&lt;Registry.service: port [transport]&gt;``, listing its</span>
+<span class="s1">        :attr:`aliases` before the closing bracket when it has any."""</span>
 <span class="s1">        # NOTE: GitHub issue #807. The suffix below is the only difference from</span>
 <span class="s1">        # the plain form GitHub issue #806 already fixed: it is appended only</span>
 <span class="s1">        # when :attr:`aliases` is non-empty, so every member that does not</span>
@@ -902,6 +916,8 @@
 <span class="s1">        return f'</span><span class="se">{{</span><span class="s1">base</span><span class="se">}}</span><span class="s1"> (aliases: </span><span class="se">{{</span><span class="s1">", ".join(alias.svc for alias in aliases)</span><span class="se">}}</span><span class="s1">)&gt;'</span>
 
 <span class="s1">    def __str__(self) -&gt; 'str':</span>
+<span class="s1">        """Show the member as ``service [port - transport]``, followed by its</span>
+<span class="s1">        :attr:`aliases` when it has any."""</span>
 <span class="s1">        # NOTE: same suffix as __repr__, for the same reason, and -- like that</span>
 <span class="s1">        # suffix, and unlike everything else this formats -- never folded into</span>
 <span class="s1">        # ``_value_``. GitHub issue #807's hard constraint: ``_value_`` is the</span>
@@ -921,6 +937,7 @@
 <span class="s1">        return f'</span><span class="se">{{</span><span class="s1">base</span><span class="se">}}</span><span class="s1"> (aliases: </span><span class="se">{{</span><span class="s1">", ".join(alias.svc for alias in aliases)</span><span class="se">}}</span><span class="s1">)'</span>
 
 <span class="s1">    def __int__(self) -&gt; 'int':</span>
+<span class="s1">        """Convert the member to its port number."""</span>
 <span class="s1">        return self.port</span>
 
 <span class="s1">    def __lt__(self, other: '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">') -&gt; 'bool':</span>
@@ -936,6 +953,7 @@
 <span class="s1">        return self.port &gt;= other</span>
 
 <span class="s1">    def __eq__(self, other: 'Any') -&gt; 'bool':</span>
+<span class="s1">        """Compare the member's port number with ``other``."""</span>
 <span class="s1">        return self.port == other</span>
 
 <span class="s1">    def __ne__(self, other: 'Any') -&gt; 'bool':</span>
@@ -953,7 +971,9 @@
 <span class="s1">                every entry point rejects a non-port identically.</span>
 <span class="s1">            proto: Transport protocol, as a member, its name, or a bare</span>
 <span class="s1">                :class:`int`. That last shape is not merely defensive: GitHub</span>
-<span class="s1">                issue :issue:`808` dropped ``TransportProtocol``'s ``IntFlag`` base, so</span>
+<span class="s1">                issue :issue:`808` dropped</span>
+<span class="s1">                :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`'s</span>
+<span class="s1">                ``IntFlag`` base, so</span>
 <span class="s1">                ``TransportProtocol.a | TransportProtocol.b`` -- built by hand,</span>
 <span class="s1">                the same as any caller passing a literal port-transport bitmask</span>
 <span class="s1">                -- falls through to ``int.__or__`` and returns a bare</span>
@@ -1040,7 +1060,7 @@
 <span class="s1">    @classmethod</span>
 <span class="s1">    def get(cls, key: 'int', *,  # type: ignore[override] # pylint: disable=arguments-differ</span>
 <span class="s1">            proto: 'TransportProtocol | str | int' = TransportProtocol.undefined) -&gt; '</span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">':</span>
-<span class="s1">        """Backport support for original codes.</span>
+<span class="s1">        """Resolve port ``key`` to the member for its canonical service.</span>
 
 <span class="s1">        Args:</span>
 <span class="s1">            key: Port number to look up.</span>
@@ -1061,7 +1081,12 @@
 <span class="s1">            to some ports -- ``80`` carries ``http``, ``www`` and ``www-http`` --</span>
 <span class="s1">            and names no precedence among them, so :data:`__canonical__` supplies</span>
 <span class="s1">            the one the rest of the world answers with. The others remain real,</span>
-<span class="s1">            named members and are reached through :meth:`get_all`.</span>
+<span class="s1">            named members and are reached through :meth:`get_all`. A port</span>
+<span class="s1">            with no row of its own resolves to an unregistered member that is</span>
+<span class="s1">            not added to the registry (:issue:`860`). Its name is the label of</span>
+<span class="s1">            the IANA span holding the port, whatever that label is --</span>
+<span class="s1">            ``reserved``, ``unassigned``, or a service name such as ``swx`` --</span>
+<span class="s1">            or ``unknown`` when no span holds it.</span>
 
 <span class="s1">        Raises:</span>
 <span class="s1">            ValueError: If called on a class that holds no members, i.e. on</span>
@@ -1078,7 +1103,6 @@
 <span class="s1">                them, not simply for being composite -- see</span>
 <span class="s1">                :meth:`_dispatch`.</span>
 
-<span class="s1">        :meta private:</span>
 <span class="s1">        """</span>
 <span class="s1">        owner = cls._dispatch(key, proto)</span>
 
@@ -1090,7 +1114,7 @@
 <span class="s1">                    if member.svc == canonical:</span>
 <span class="s1">                        return member</span>
 <span class="s1">            # NOTE: IANA's oldest row, for a port whose collision postdates</span>
-<span class="s1">            # :data:`__canonical__` -- including one :func:`~aenum.extend_enum`</span>
+<span class="s1">            # :data:`__canonical__` -- including one ``aenum.extend_enum``</span>
 <span class="s1">            # created, which must not displace what the registry already</span>
 <span class="s1">            # answered with.</span>
 <span class="s1">            return matched[0]</span>
@@ -1261,7 +1285,10 @@
 <span class="s1">                             f'(</span><span class="se">{{</span><span class="s1">", ".join(member.svc for member in existing)</span><span class="se">}}</span><span class="s1">); use '</span>
 <span class="s1">                             f'</span><span class="se">{{</span><span class="s1">cls.__name__</span><span class="se">}}</span><span class="s1">.register_alias() to add a further service name '</span>
 <span class="s1">                             'for it')</span>
-<span class="s1">        cls._validate_value(port)</span>
+<span class="s1">        # NOTE: GitHub issue #1845. Declares that nothing is caught, so the</span>
+<span class="s1">        # rejection stays loud even inside a ``get`` block that would quiet it.</span>
+<span class="s1">        with CaughtByCaller():</span>
+<span class="s1">            cls._validate_value(port)</span>
 
 <span class="s1">        identifier = cls._sanitize_identifier(name)</span>
 <span class="s1">        if not identifier.isidentifier():</span>
@@ -1279,14 +1306,16 @@
 
 <span class="s1">        GitHub issue :issue:`807`'s third ask, deliberately scoped to **this**</span>
 <span class="s1">        per-transport registry: ``TCP.register_alias(...)`` never touches</span>
-<span class="s1">        :class:`UDP`'s members, which is what keeps an alias registered on one</span>
-<span class="s1">        transport from leaking onto a transport IANA never assigned it -- e.g.</span>
-<span class="s1">        registering ``www`` as an alias of ``http`` on :class:`TCP` and</span>
-<span class="s1">        :class:`UDP` leaves it absent from :class:`SCTP`'s port 80, exactly as</span>
+<span class="s1">        :class:`~pcapkit.const.reg.apptype.udp.UDP`'s members, which is what</span>
+<span class="s1">        keeps an alias registered on one transport from leaking onto a</span>
+<span class="s1">        transport IANA never assigned it -- e.g. registering ``www`` as an alias</span>
+<span class="s1">        of ``http`` on :class:`~pcapkit.const.reg.apptype.tcp.TCP` and</span>
+<span class="s1">        :class:`~pcapkit.const.reg.apptype.udp.UDP` leaves it absent from</span>
+<span class="s1">        :class:`~pcapkit.const.reg.apptype.sctp.SCTP`'s port 80, exactly as</span>
 <span class="s1">        IANA itself never registered it there.</span>
 
 <span class="s1">        No new storage: the new member simply joins :data:`__registry__` at</span>
-<span class="s1">        ``port``, through the same :func:`~aenum.extend_enum` call</span>
+<span class="s1">        ``port``, through the same ``aenum.extend_enum`` call</span>
 <span class="s1">        :meth:`register` uses to mint the first one. It is then reachable</span>
 <span class="s1">        through :attr:`aliases` on every other member already on ``port``, and</span>
 <span class="s1">        vice versa, with nothing further to keep in sync.</span>
@@ -1477,7 +1506,7 @@
 <span class="s1">    __registry__: 'MultiDict[int, </span><span class="si">{</span><span class="n">NAME</span><span class="si">}</span><span class="s1">]' = MultiDict()</span>
 
 <span class="s1">    #: The canonical service for each port IANA assigns more than one to, i.e.</span>
-<span class="s1">    #: what :meth:`~pcapkit.const.reg.apptype.apptype.AppType.get` answers with.</span>
+<span class="s1">    #: what :meth:`AppType.get() &lt;pcapkit.const.reg.apptype.apptype.AppType.get&gt;` answers with.</span>
 <span class="s1">    #: Taken from :file:`/etc/services`, which is what</span>
 <span class="s1">    #: :func:`socket.getservbyport` reads -- IANA names no precedence among the</span>
 <span class="s1">    #: services it registers on one port, and registry row order does not supply</span>
@@ -1579,7 +1608,8 @@
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">flag</span><span class="p">(</span><span class="n">protos</span><span class="p">:</span> <span class="s1">'Iterable[str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Render transport protocol names as a ``TransportProtocol`` expression.</span>
+<span class="w">        </span><span class="sd">"""Render transport protocol names as a</span>
+<span class="sd">        :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol` expression.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            protos: Transport protocol names.</span>

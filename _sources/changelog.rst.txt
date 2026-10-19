@@ -17,7 +17,8 @@
    so it has to keep existing, stay newest-first, and list exactly the pages
    the summary list does.
 
-   The preamble below is verbatim from the single-file changelog it replaces.
+   The preamble below is the single-file changelog's, which this page replaces,
+   with its notes set as ``.. note::`` admonitions.
 
 =========
 Changelog
@@ -25,11 +26,15 @@ Changelog
 
 All notable changes to PyPCAPKit are recorded here.
 
-   **Note** -- Versions before 1.5.0 are reconstructed from the git history, so
+.. note::
+
+   Versions before 1.5.0 are reconstructed from the git history, so
    they summarise each release rather than enumerate every change. The record
    starts at 0.13.0 (2018-12-08); the earlier 0.x releases are not covered.
 
-   **Note** -- Post-releases (``X.Y.Z.postN``) are, from 1.0.1 onwards, automated
+.. note::
+
+   Post-releases (``X.Y.Z.postN``) are, from 1.0.1 onwards, automated
    publications of the weekly registry refresh: a bot regenerates the vendor
    constant enumerations under ``pcapkit.const`` from the upstream IANA
    registries and bumps the version. They carry no library changes, and are

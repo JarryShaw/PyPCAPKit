@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/internet/esp.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.internet.esp contains ESP, which implements extractor for Encapsulating Security Payload (ESP)*, and the security association, algorithm and status types documented below. The ESP..." />
-<meta name="description" content="pcapkit.protocols.internet.esp contains ESP, which implements extractor for Encapsulating Security Payload (ESP)*, and the security association, algorithm and status types documented below. The ESP..." />
+<meta property="og:description" content="pcapkit.protocols.internet.esp contains ESP, which implements the extractor for Encapsulating Security Payload (ESP)*, and the security association, algorithm and status types documented below. The..." />
+<meta name="description" content="pcapkit.protocols.internet.esp contains ESP, which implements the extractor for Encapsulating Security Payload (ESP)*, and the security association, algorithm and status types documented below. The..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="HIP - Host Identity Protocol" href="hip.html"><link rel="prev" title="AH - Authentication Header" href="ah.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -260,7 +260,7 @@
 <li class="toctree-l4"><a class="reference internal" href="ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -392,6 +392,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -497,7 +498,7 @@
 <span id="esp-encapsulating-security-payload"></span><h1>ESP - Encapsulating Security Payload<a class="headerlink" href="#module-pcapkit.protocols.internet.esp" title="Link to this heading">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.protocols.internet.esp" title="pcapkit.protocols.internet.esp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.esp</span></code></a> contains
 <a class="reference internal" href="#pcapkit.protocols.internet.esp.ESP" title="pcapkit.protocols.internet.esp.ESP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ESP</span></code></a>,
-which implements extractor for Encapsulating
+which implements the extractor for Encapsulating
 Security Payload (ESP) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, and the security association, algorithm and
 status types documented below. The ESP structure is described as below:</p>
 <div class="table-wrapper docutils container">
@@ -704,10 +705,10 @@ encrypts the result under the Security Association matching
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>spi</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Security Parameters Index.</p></li>
 <li><p><strong>seq</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Sequence number.</p></li>
-<li><p><strong>next</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransType</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></a> | <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Next header type, written into the ESP trailer. Only used
+<li><p><strong>next</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><code class="xref py py-class docutils literal notranslate"><span class="pre">TransType</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></a> | <code class="docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Next header type, written into the ESP trailer. Only used
 when <code class="docutils literal notranslate"><span class="pre">encrypt</span></code> is <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a>.</p></li>
 <li><p><strong>next_default</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Default value of next header type.</p></li>
-<li><p><strong>next_namespace</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code>] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Namespace of next header type.</p></li>
+<li><p><strong>next_namespace</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<code class="docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code>] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Namespace of next header type.</p></li>
 <li><p><strong>next_reversed</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – If the namespace is reversed.</p></li>
 <li><p><strong>encrypt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – Whether to protect <code class="docutils literal notranslate"><span class="pre">payload</span></code>, as described above.</p></li>
 <li><p><strong>iv</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Explicit IV to use; a random one is generated when omitted.
@@ -857,7 +858,7 @@ expected case and does not warrant one.</p></li>
 </dl>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>For construction argument, please refer to <a class="reference internal" href="#pcapkit.protocols.internet.esp.ESP.make" title="pcapkit.protocols.internet.esp.ESP.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.make</span></code></a>.</p>
+<p>For construction arguments, please refer to <a class="reference internal" href="#pcapkit.protocols.internet.esp.ESP.make" title="pcapkit.protocols.internet.esp.ESP.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.make</span></code></a>.</p>
 </div>
 </dd></dl>
 
@@ -907,14 +908,14 @@ in <a class="reference internal" href="../../corekit/context.html#module-pcapkit
 <li><p><strong>spi</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Security Parameters Index the SA applies to; <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>
 matches any SPI, which is convenient for a capture holding a
 single tunnel.</p></li>
-<li><p><strong>encryption</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/esp.html#pcapkit.const.esp.cipher.Cipher" title="pcapkit.const.esp.cipher.Cipher"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cipher</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Encryption algorithm, c.f. <a class="reference internal" href="#pcapkit.protocols.internet.esp.CipherSuite.get" title="pcapkit.protocols.internet.esp.CipherSuite.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CipherSuite.get()</span></code></a>. Must
+<li><p><strong>encryption</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/esp.html#pcapkit.const.esp.cipher.Cipher" title="pcapkit.const.esp.cipher.Cipher"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cipher</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Encryption algorithm, see <a class="reference internal" href="#pcapkit.protocols.internet.esp.CipherSuite.get" title="pcapkit.protocols.internet.esp.CipherSuite.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CipherSuite.get()</span></code></a>. Must
 be one <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> implements; being in the IANA registry is
 not enough.</p></li>
 <li><p><strong>encryption_key</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Encryption keying material. For an AEAD suite this
 is the AES key followed by the 4-octet salt [<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc4106.html"><strong>RFC 4106</strong></a> §8.1],
 unless <code class="docutils literal notranslate"><span class="pre">salt</span></code> is given separately.</p></li>
 <li><p><strong>salt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – AEAD salt, when not appended to <code class="docutils literal notranslate"><span class="pre">encryption_key</span></code>.</p></li>
-<li><p><strong>integrity</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/esp.html#pcapkit.const.esp.integrity.Integrity" title="pcapkit.const.esp.integrity.Integrity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Integrity</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Integrity algorithm, c.f. <a class="reference internal" href="#pcapkit.protocols.internet.esp.IntegritySuite.get" title="pcapkit.protocols.internet.esp.IntegritySuite.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IntegritySuite.get()</span></code></a>. Must
+<li><p><strong>integrity</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/esp.html#pcapkit.const.esp.integrity.Integrity" title="pcapkit.const.esp.integrity.Integrity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Integrity</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Integrity algorithm, see <a class="reference internal" href="#pcapkit.protocols.internet.esp.IntegritySuite.get" title="pcapkit.protocols.internet.esp.IntegritySuite.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IntegritySuite.get()</span></code></a>. Must
 be <a class="reference internal" href="../../const/esp.html#pcapkit.const.esp.integrity.Integrity.NONE" title="pcapkit.const.esp.integrity.Integrity.NONE"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Integrity.NONE</span></code></a>
 for an AEAD suite, which provides its own.</p></li>
 <li><p><strong>integrity_key</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – Integrity key.</p></li>
@@ -1249,7 +1250,7 @@ are the same member. The registry spells the “no integrity algorithm”
 transform <code class="docutils literal notranslate"><span class="pre">NONE</span></code> rather than <code class="docutils literal notranslate"><span class="pre">AUTH_NONE</span></code>, and <a class="reference internal" href="../../const/esp.html#pcapkit.const.esp.integrity.Integrity.NONE" title="pcapkit.const.esp.integrity.Integrity.NONE"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Integrity.NONE</span></code></a> follows it.</p>
 </section>
 <section id="algorithm-support">
-<h2>Algorithm Support<a class="headerlink" href="#algorithm-support" title="Link to this heading">¶</a></h2>
+<span id="esp-algorithm-support"></span><h2>Algorithm Support<a class="headerlink" href="#algorithm-support" title="Link to this heading">¶</a></h2>
 <p>A registry enumerates what IANA assigned an ID to, which is far more than
 <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> implements. <strong>Registration is not support.</strong> A member of either
 enumeration says only that IANA assigned the transform an ID; what
@@ -1291,7 +1292,7 @@ registry lists is enumerated and rejected.</p>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ENCR_NULL</span></code></p></td>
 <td><p>MUST</p></td>
 <td><p>yes</p></td>
-<td><p><span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2410.html"><strong>RFC 2410</strong></a>; needs no <code class="docutils literal notranslate"><span class="pre">cryptography</span></code></p></td>
+<td><p><span class="target" id="index-15"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc2410.html"><strong>RFC 2410</strong></a>; needs no <a class="reference external" href="https://cryptography.io"><code class="docutils literal notranslate"><span class="pre">cryptography</span></code></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ENCR_AES_CBC</span></code></p></td>
 <td><p>MUST</p></td>
@@ -1395,6 +1396,110 @@ registry lists is enumerated and rejected.</p>
 </div>
 <p>“MD5, DES-MAC, KPDK-MD5” above covers <code class="docutils literal notranslate"><span class="pre">AUTH_HMAC_MD5_96</span></code>,
 <code class="docutils literal notranslate"><span class="pre">AUTH_HMAC_MD5_128</span></code>, <code class="docutils literal notranslate"><span class="pre">AUTH_DES_MAC</span></code> and <code class="docutils literal notranslate"><span class="pre">AUTH_KPDK_MD5</span></code>.</p>
+<p>Each implemented suite applies its algorithm with the parameters below, as
+<a class="reference internal" href="#pcapkit.protocols.internet.esp.CIPHER_SUITES" title="pcapkit.protocols.internet.esp.CIPHER_SUITES"><code class="xref py py-data docutils literal notranslate"><span class="pre">CIPHER_SUITES</span></code></a> and
+<a class="reference internal" href="#pcapkit.protocols.internet.esp.INTEGRITY_SUITES" title="pcapkit.protocols.internet.esp.INTEGRITY_SUITES"><code class="xref py py-data docutils literal notranslate"><span class="pre">INTEGRITY_SUITES</span></code></a> record them. Lengths
+and sizes are in octets.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Encryption</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">is_aead</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">iv_length</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">block_size</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">icv_length</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">key_sizes</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">salt_length</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">requires_cryptography</span></code></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ENCR_NULL</span></code></p></td>
+<td><p>no</p></td>
+<td><p>0</p></td>
+<td><p>1</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+<td><p>no</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ENCR_AES_CBC</span></code></p></td>
+<td><p>no</p></td>
+<td><p>16</p></td>
+<td><p>16</p></td>
+<td><p>0</p></td>
+<td><p>16, 24, 32</p></td>
+<td><p>0</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ENCR_AES_GCM_8</span></code></p></td>
+<td><p>yes</p></td>
+<td><p>8</p></td>
+<td><p>1</p></td>
+<td><p>8</p></td>
+<td><p>16, 24, 32</p></td>
+<td><p>4</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">ENCR_AES_GCM_12</span></code></p></td>
+<td><p>yes</p></td>
+<td><p>8</p></td>
+<td><p>1</p></td>
+<td><p>12</p></td>
+<td><p>16, 24, 32</p></td>
+<td><p>4</p></td>
+<td><p>yes</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">ENCR_AES_GCM_16</span></code></p></td>
+<td><p>yes</p></td>
+<td><p>8</p></td>
+<td><p>1</p></td>
+<td><p>16</p></td>
+<td><p>16, 24, 32</p></td>
+<td><p>4</p></td>
+<td><p>yes</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Integrity</p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">digest</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">icv_length</span></code></p></th>
+<th class="head"><p><code class="docutils literal notranslate"><span class="pre">key_size</span></code></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">NONE</span></code></p></td>
+<td><p><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a></p></td>
+<td><p>0</p></td>
+<td><p>0</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">AUTH_HMAC_SHA1_96</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">sha1</span></code></p></td>
+<td><p>12</p></td>
+<td><p>20</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">AUTH_HMAC_SHA2_256_128</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">sha256</span></code></p></td>
+<td><p>16</p></td>
+<td><p>32</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">AUTH_HMAC_SHA2_384_192</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">sha384</span></code></p></td>
+<td><p>24</p></td>
+<td><p>48</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">AUTH_HMAC_SHA2_512_256</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">sha512</span></code></p></td>
+<td><p>32</p></td>
+<td><p>64</p></td>
+</tr>
+</tbody>
+</table>
+</div>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.esp.CipherSuite">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.esp.</span></span><span class="sig-name descname"><span class="pre">CipherSuite</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cipher</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_aead</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iv_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">block_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">icv_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">key_sizes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">salt_length</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">requires_cryptography</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/esp.html#CipherSuite"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.esp.CipherSuite" title="Link to this definition">¶</a></dt>
@@ -1402,8 +1507,8 @@ registry lists is enumerated and rejected.</p>
 <p>Parameters of an ESP encryption algorithm <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> implements.</p>
 <p>A member of <a class="reference internal" href="../../const/esp.html#pcapkit.const.esp.cipher.Cipher" title="pcapkit.const.esp.cipher.Cipher"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cipher</span></code></a> records only
 that IANA registered the transform. This records how to apply it, and
-membership of <a class="reference internal" href="#pcapkit.protocols.internet.esp.CIPHER_SUITES" title="pcapkit.protocols.internet.esp.CIPHER_SUITES"><code class="xref py py-data docutils literal notranslate"><span class="pre">CIPHER_SUITES</span></code></a> is what “supported” means – see the
-module docstring.</p>
+membership of <a class="reference internal" href="#pcapkit.protocols.internet.esp.CIPHER_SUITES" title="pcapkit.protocols.internet.esp.CIPHER_SUITES"><code class="xref py py-data docutils literal notranslate"><span class="pre">CIPHER_SUITES</span></code></a> is what “supported” means – see
+<a class="reference internal" href="#esp-algorithm-support"><span class="std std-ref">Algorithm Support</span></a>.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.esp.CipherSuite.cipher">
 <span class="sig-name descname"><span class="pre">cipher</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/esp.html#pcapkit.const.esp.cipher.Cipher" title="pcapkit.const.esp.cipher.Cipher"><span class="pre">Cipher</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.esp.CipherSuite.cipher" title="Link to this definition">¶</a></dt>
@@ -1639,10 +1744,10 @@ e.g. because the optional <a class="reference external" href="https://cryptograp
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#Exception" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Exception</span></code></a>]] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>A 4-tuple of <code class="docutils literal notranslate"><span class="pre">(Cipher,</span> <span class="pre">algorithms,</span> <span class="pre">modes,</span> <span class="pre">InvalidTag)</span></code> taken from
-<a class="reference external" href="https://cryptography.io/en/latest/hazmat/primitives/symmetric-encryption/#module-cryptography.hazmat.primitives.ciphers" title="(in Cryptography v51.0.0-dev1)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cryptography.hazmat.primitives.ciphers</span></code></a> and
-<code class="xref py py-mod docutils literal notranslate"><span class="pre">cryptography.exceptions</span></code>, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> when
-<a class="reference external" href="https://cryptography.io"><code class="docutils literal notranslate"><span class="pre">cryptography</span></code></a> is not installed.</p>
+<dd class="field-even"><p>A 4-tuple of <code class="docutils literal notranslate"><span class="pre">(Cipher,</span> <span class="pre">algorithms,</span> <span class="pre">modes,</span> <span class="pre">InvalidTag)</span></code>, the first
+three taken from <a class="reference external" href="https://cryptography.io/en/latest/hazmat/primitives/symmetric-encryption/#module-cryptography.hazmat.primitives.ciphers" title="(in Cryptography v51.0.0-dev1)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">cryptography.hazmat.primitives.ciphers</span></code></a> and the
+last being <a class="reference external" href="https://cryptography.io/en/latest/hazmat/primitives/symmetric-encryption/#cryptography.exceptions.InvalidTag" title="(in Cryptography v51.0.0-dev1)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">cryptography.exceptions.InvalidTag</span></code></a>, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>
+when <a class="reference external" href="https://cryptography.io"><code class="docutils literal notranslate"><span class="pre">cryptography</span></code></a> is not installed.</p>
 </dd>
 </dl>
 <div class="admonition-notes admonition">
@@ -1650,6 +1755,55 @@ e.g. because the optional <a class="reference external" href="https://cryptograp
 <p>The import is attempted at most once and the outcome is cached, so
 that a capture full of ESP packets does not pay for a failing import
 on every frame.</p>
+</div>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.esp._CRYPTO">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.esp.</span></span><span class="sig-name descname"><span class="pre">_CRYPTO</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><span class="pre">Any</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.esp._CRYPTO" title="Link to this definition">¶</a></dt>
+<dd><p>Cached <a class="reference external" href="https://cryptography.io"><code class="docutils literal notranslate"><span class="pre">cryptography</span></code></a> primitives, see <a class="reference internal" href="#pcapkit.protocols.internet.esp.load_cryptography" title="pcapkit.protocols.internet.esp.load_cryptography"><code class="xref py py-func docutils literal notranslate"><span class="pre">load_cryptography()</span></code></a>.
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#NotImplemented" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">NotImplemented</span></code></a> means the import has not been attempted yet, and
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> that it was attempted and <a class="reference external" href="https://cryptography.io"><code class="docutils literal notranslate"><span class="pre">cryptography</span></code></a> is not installed, and
+a tuple holds the loaded primitives, so a missing dependency is not retried
+on every frame.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.esp._resolve">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.esp.</span></span><span class="sig-name descname"><span class="pre">_resolve</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">registry</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefix</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kind</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/internet/esp.html#_resolve"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.internet.esp._resolve" title="Link to this definition">¶</a></dt>
+<dd><p>Resolve <code class="docutils literal notranslate"><span class="pre">value</span></code> to a member of an IKEv2 transform registry.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>registry</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="../../const/esp.html#pcapkit.const.esp.cipher.Cipher" title="pcapkit.const.esp.cipher.Cipher"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cipher</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="../../const/esp.html#pcapkit.const.esp.integrity.Integrity" title="pcapkit.const.esp.integrity.Integrity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Integrity</span></code></a>]</span>) – <a class="reference internal" href="../../const/esp.html#pcapkit.const.esp.cipher.Cipher" title="pcapkit.const.esp.cipher.Cipher"><code class="xref py py-class docutils literal notranslate"><span class="pre">Cipher</span></code></a> or
+<a class="reference internal" href="../../const/esp.html#pcapkit.const.esp.integrity.Integrity" title="pcapkit.const.esp.integrity.Integrity"><code class="xref py py-class docutils literal notranslate"><span class="pre">Integrity</span></code></a>.</p></li>
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – A member of <code class="docutils literal notranslate"><span class="pre">registry</span></code>, an IKEv2 transform ID, or a
+transform name.</p></li>
+<li><p><strong>prefix</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Prefix the registry spells its names with, i.e. <code class="docutils literal notranslate"><span class="pre">'ENCR_'</span></code>
+or <code class="docutils literal notranslate"><span class="pre">'AUTH_'</span></code>.</p></li>
+<li><p><strong>kind</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Word naming the registry for the error message, i.e.
+<code class="docutils literal notranslate"><span class="pre">'encryption'</span></code> or <code class="docutils literal notranslate"><span class="pre">'integrity'</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The corresponding member of <code class="docutils literal notranslate"><span class="pre">registry</span></code>.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><strong>ProtocolError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">value</span></code> names nothing the registry holds.</p>
+</dd>
+</dl>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>Both enumerations carry each transform’s prefix-stripped spelling as
+an alias, so a plain lookup already accepts <code class="docutils literal notranslate"><span class="pre">'AES_CBC'</span></code> as well as
+<code class="docutils literal notranslate"><span class="pre">'ENCR_AES_CBC'</span></code>. <code class="docutils literal notranslate"><span class="pre">prefix</span></code> is still needed for the few names that
+are no Python identifier once stripped, and so have no alias –
+<code class="docutils literal notranslate"><span class="pre">ENCR_3DES</span></code> and <code class="docutils literal notranslate"><span class="pre">ENCR_3IDEA</span></code>.</p>
+<p>Resolution is deliberately separate from <em>support</em>: it answers only
+whether IANA registered the transform. See <a class="reference internal" href="#pcapkit.protocols.internet.esp.CipherSuite.get" title="pcapkit.protocols.internet.esp.CipherSuite.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">CipherSuite.get()</span></code></a>.</p>
 </div>
 </dd></dl>
 

@@ -5,7 +5,7 @@ IPv6-Frag - Fragment Header for IPv6
 
 :mod:`pcapkit.protocols.internet.ipv6_frag` contains
 :class:`~pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`
-only, which implements extractor for Fragment Header for
+only, which implements the extractor for Fragment Header for
 IPv6 (IPv6-Frag) [*]_, whose structure is described as
 below:
 

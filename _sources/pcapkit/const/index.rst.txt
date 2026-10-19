@@ -11,7 +11,7 @@ automatically generated from the :mod:`pcapkit.vendor` module.
 Unrecognised Values
 -------------------
 
-Nearly every registry below departs from :mod:`enum` in one deliberate way, and it
+Nearly every :term:`registry` below departs from :mod:`enum` in one deliberate way, and it
 is the behaviour to know about before using any of them: looking one up by a value
 it does not define does **not** raise. Its ``_missing_`` override returns a
 member-like object for a value inside the registry's valid range, named for the
@@ -27,7 +27,7 @@ Some behave otherwise, and :ref:`mint-criterion` gives the full split:
 * :class:`~pcapkit.const.tcp.flags.Flags` and the Mobility Header flag
   registries, such as
   :class:`~pcapkit.const.mh.binding_ack_flag.BindingACKFlag`, hand back to
-  ``aenum``'s flag base, which caches the composed object in the value lookup
+  |aenum|_'s flag base, which caches the composed object in the value lookup
   table only: a second lookup returns the same object, while ``__members__``
   and iteration are unchanged.
 * :class:`~pcapkit.const.hip.transport.Transport`,
@@ -40,9 +40,9 @@ That is what makes the enumerations usable against live capture data, where a
 protocol number assigned after this release was generated is a routine
 occurrence rather than an error. It also means an enumeration member is not a
 closed set: an unassigned value resolves to a member that is, apart from
-``CGAType``, absent from iteration and ``__members__``, and whether a repeat
-lookup returns the same object varies by registry, so compare such members by
-value, not identity.
+:class:`~pcapkit.const.mh.cga_type.CGAType`, absent from iteration and ``__members__``,
+and whether a repeat lookup returns the same object varies by registry, so compare such
+members by value, not identity.
 
 The common form of the override is generated -- see :mod:`pcapkit.vendor.default`,
 whose template emits it -- while the valid range and the names of the unassigned

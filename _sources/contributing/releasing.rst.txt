@@ -9,7 +9,7 @@ Release Process
    being different.
 
    The short version: **the only manual edit is bumping**
-   ``pcapkit.__version__``. Everything else -- the ``v*`` tag, the GitHub
+   :data:`pcapkit.__version__`. Everything else -- the ``v*`` tag, the GitHub
    Release, the PyPI and Anaconda uploads, the ``conda-*`` tag and its commit
    to ``main`` -- is produced by
    ``.github/workflows/create-release.yml`` and is never hand-made.
@@ -17,7 +17,7 @@ Release Process
 The One Manual Step
 -------------------
 
-Bumping ``pcapkit.__version__`` is done by :file:`util/bump_version.py`, whose
+Bumping :data:`pcapkit.__version__` is done by :file:`util/bump_version.py`, whose
 own docstring is the authority on what it does; summarised here rather than
 duplicated. Given the current version, it works out the next one under
 :pep:`440` -- a ``devN`` counter, a pre-release counter, a post-release
@@ -62,7 +62,7 @@ Either run the script, or move both fields by hand in the same commit.
 This is the **only** edit a person makes to get a release started -- the tag,
 the Release, and every upload are the workflow's job from here. Other
 checks run unconditionally on the same path, though none is a step in *this*
-process: the ``changelog`` job (``unit-tests.yml:1624-1643``) fails outright if
+process: the ``changelog`` job (``unit-tests.yml:1624-1650``) fails outright if
 ``CHANGELOG.md`` has drifted from its source entry under
 :file:`docs/source/changelog/`, and the release-body step warns, without
 failing, if that entry's heading still reads "unreleased"
@@ -80,7 +80,7 @@ a workaround for another:
    Pushing a tag matching ``v*`` yourself. This chooses **which commit** to
    release, not which version: ``version_check``'s checkout
    (``:298-302``) pins ``ref: ${{ github.sha }}``, which on this trigger is
-   the commit the pushed tag points at, and reads ``pcapkit.__version__`` out
+   the commit the pushed tag points at, and reads :data:`pcapkit.__version__` out
    of *that* tree (``:327``). Every downstream tag and release name is built
    from that output -- ``v${{ needs.version_check.outputs.PCAPKIT_VERSION }}``
    is ``github``'s ``tag_name`` at ``:719`` and the release ``pypi`` and
@@ -338,13 +338,13 @@ checks *is* the one it is about to create:
   exists.
 * ``pypi`` compares PyPI's file count for the version against the expected one
   -- a wheel per supported leg plus the sdist kept only on the 3.15 leg; the
-  KTLO legs' wheels (`#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__) are not counted. This job is
+  :ref:`KTLO <ktlo-tier>` legs' wheels (`#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__) are not counted. This job is
   already idempotent (``skip-existing: true`` on every upload step), so the
   check exists only to save the cost of the build matrix, not for correctness.
 * ``conda`` compares Anaconda's aggregate count against the expected one (the
-  ``linux-64`` and ``osx-64`` files for each Python version of its matrix; the
-  ``osx-arm64`` leg's are published but not counted,
-  `#1822 <https://github.com/JarryShaw/PyPCAPKit/issues/1822>`__) as the same
+  ``linux-64``, ``osx-64`` and ``osx-arm64`` files for each Python version of
+  its matrix, one platform per ``os`` leg,
+  `#1922 <https://github.com/JarryShaw/PyPCAPKit/issues/1922>`__) as the same
   kind of job-level cost saver, and *also*
   checks, per matrix leg, whether that leg's own platform/Python distribution
   is already there -- this second check is the actual correctness fix, because

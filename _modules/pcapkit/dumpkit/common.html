@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -485,7 +486,7 @@
 
 <span class="sd">:mod:`pcapkit.dumpkit.common` is the collection of common utility</span>
 <span class="sd">functions for :mod:`pcapkit.dumpkit` implementation, which is</span>
-<span class="sd">generally the customised hooks for :class:`dictdumper.Dumper`</span>
+<span class="sd">generally the customised hooks for :class:`dictdumper.dumper.Dumper`</span>
 <span class="sd">classes.</span>
 
 <span class="sd">"""</span>
@@ -591,7 +592,7 @@
 
 <span class="sd">           from pcapkit.foundation.registry.foundation import register_dumper</span>
 
-<span class="sd">           register_dumper('my_mixin', MyMixin, '.mine')</span>
+<span class="sd">           register_dumper('my_mixin', MyMixin, ext='.mine')</span>
 
 <span class="sd">    .. versionchanged:: 1.5.0</span>
 
@@ -723,7 +724,7 @@
 <span class="sd">        cannot be mistaken for a member name, since a Python identifier may not</span>
 <span class="sd">        begin with a digit.</span>
 
-<span class="sd">        This is *not* an :mod:`aenum` quirk. A stdlib :class:`enum.IntFlag` built</span>
+<span class="sd">        This is *not* an |aenum|_ quirk. A stdlib :class:`enum.IntFlag` built</span>
 <span class="sd">        from the same members answers ``name is None`` identically on CPython</span>
 <span class="sd">        3.14.7, so the guard belongs here rather than in a choice of enumeration</span>
 <span class="sd">        library.</span>
@@ -991,7 +992,8 @@
 <span class="sd">                way out reaches every string the writer will ever interpolate</span>
 <span class="sd">                raw, not merely the ones built directly in this method. The</span>
 <span class="sd">                one exception is a mapping *key*:</span>
-<span class="sd">                :meth:`~dictdumper.dumper.Dumper._append_dict` writes those</span>
+<span class="sd">                :meth:`~dictdumper.plist.PLIST._append_dict` and</span>
+<span class="sd">                :meth:`~dictdumper.json.JSON._append_object` write those</span>
 <span class="sd">                straight from the mapping without ever calling this method on</span>
 <span class="sd">                them, so both branches that hand the writer a mapping -- a</span>
 <span class="sd">                :class:`~pcapkit.corekit.multidict.MultiDict` and a plain</span>

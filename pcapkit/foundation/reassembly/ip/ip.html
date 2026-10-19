@@ -260,7 +260,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -392,6 +392,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -548,7 +549,7 @@ and IPv6.</p>
 <dd><p>Reassembly procedure.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>info</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Packet" title="pcapkit.foundation.reassembly.data.ip.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip._AT" title="pcapkit.foundation.reassembly.data.ip._AT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_AT</span></code></a>]</span>) – info dict of packets to be reassembled</p>
+<dd class="field-odd"><p><strong>info</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Packet" title="pcapkit.foundation.reassembly.data.ip.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a>[<a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip._AT" title="pcapkit.foundation.reassembly.data.ip._AT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">_AT</span></code></a>]</span>) – <a class="reference internal" href="../../../../glossary.html#term-info"><span class="xref std std-term">info</span></a> record of packets to be reassembled</p>
 </dd>
 </dl>
 <div class="admonition note">
@@ -590,6 +591,64 @@ from
 <dd class="field-odd"><p>Reassembled packets.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.ip.IP._detect_conflicts">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_detect_conflicts</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">rcvbt</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tdl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">datagram</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">payload</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">start</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stop</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../../_modules/pcapkit/foundation/reassembly/ip.html#IP._detect_conflicts"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.reassembly.ip.IP._detect_conflicts" title="Link to this definition">¶</a></dt>
+<dd><p>Find where an arriving fragment disagrees with already-received bytes.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>rcvbt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytearray" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytearray</span></code></a></span>) – this buffer’s <a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Buffer.RCVBT" title="pcapkit.foundation.reassembly.data.ip.Buffer.RCVBT"><code class="xref py py-attr docutils literal notranslate"><span class="pre">RCVBT</span></code></a>
+as it stood <em>before</em> the arriving fragment’s own bits are set,
+i.e. what earlier fragments had already claimed, in 8-octet
+blocks.</p></li>
+<li><p><strong>tdl</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – this buffer’s <a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Buffer.TDL" title="pcapkit.foundation.reassembly.data.ip.Buffer.TDL"><code class="xref py py-attr docutils literal notranslate"><span class="pre">TDL</span></code></a>
+as it stood <em>before</em> the arriving fragment’s own update –
+<code class="docutils literal notranslate"><span class="pre">-1</span></code> while the final fragment (<code class="docutils literal notranslate"><span class="pre">MF=0</span></code>) has not yet
+arrived.</p></li>
+<li><p><strong>datagram</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytearray" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytearray</span></code></a></span>) – this buffer’s data buffer, read <em>before</em> the arriving
+fragment’s payload is written into it.</p></li>
+<li><p><strong>payload</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytearray" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytearray</span></code></a></span>) – the arriving fragment’s payload.</p></li>
+<li><p><strong>start</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – absolute octet offset of <code class="docutils literal notranslate"><span class="pre">payload[0]</span></code> in <code class="docutils literal notranslate"><span class="pre">datagram</span></code>,
+i.e. this fragment’s <code class="docutils literal notranslate"><span class="pre">FO</span></code>.</p></li>
+<li><p><strong>stop</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – absolute octet offset one past <code class="docutils literal notranslate"><span class="pre">payload[-1]</span></code>, i.e.
+<code class="docutils literal notranslate"><span class="pre">start</span> <span class="pre">+</span> <span class="pre">len(payload)</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">(first,</span> <span class="pre">last)</span></code> absolute octet ranges, inclusive, where
+<code class="docutils literal notranslate"><span class="pre">datagram</span></code> and <code class="docutils literal notranslate"><span class="pre">payload</span></code> disagree over octets this buffer had
+already genuinely received.</p>
+</dd>
+</dl>
+<p><span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> marks receipt in 8-octet blocks (<code class="docutils literal notranslate"><span class="pre">RCVBT</span></code>), coarser than
+the octet granularity a conflict needs, so an octet is compared only if
+its block is marked. A fragment’s <code class="docutils literal notranslate"><span class="pre">FO</span></code> is <em>always</em> a multiple of 8 –
+it is wire-encoded in 8-octet units – and the <code class="docutils literal notranslate"><span class="pre">RCVBT</span></code> update in
+<a class="reference internal" href="#pcapkit.foundation.reassembly.ip.IP.reassembly" title="pcapkit.foundation.reassembly.ip.IP.reassembly"><code class="xref py py-meth docutils literal notranslate"><span class="pre">reassembly()</span></code></a> marks the blocks a fragment fills whole. Only the
+final fragment, held in full, also marks its partial last block, across
+its full 8 octets even though only the octets up to <code class="docutils literal notranslate"><span class="pre">tdl</span></code> were ever
+actually written, the rest still being <code class="docutils literal notranslate"><span class="pre">datagram</span></code>’s zero-fill.</p>
+<p>So once <code class="docutils literal notranslate"><span class="pre">tdl</span></code> is known, an octet at or past it is excluded here
+regardless of its block’s bit – comparing it would manufacture a
+conflict against a byte nothing ever really sent, over a distinction
+<a class="reference internal" href="#pcapkit.foundation.reassembly.ip.IP.submit" title="pcapkit.foundation.reassembly.ip.IP.submit"><code class="xref py py-meth docutils literal notranslate"><span class="pre">submit()</span></code></a> does not need
+anyway, since it never reports a payload past <code class="docutils literal notranslate"><span class="pre">tdl</span></code>. Before <code class="docutils literal notranslate"><span class="pre">tdl</span></code>
+is known (<code class="docutils literal notranslate"><span class="pre">tdl</span> <span class="pre">&lt;</span> <span class="pre">0</span></code>), every set <code class="docutils literal notranslate"><span class="pre">rcvbt</span></code> bit came from a non-final
+fragment’s whole block and is exact on its own, with nothing to clip.</p>
+<p>Any other partial last block – a non-final, truncated or clipped
+fragment’s – is written but left clear (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1567">#1567</a>), so its octets
+are deliberately not compared: a later fragment that overwrites them
+records no conflict, whether or not it agrees (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1585">#1585</a>). Telling
+which octets of a clear block were written would take receipt state per
+octet, which <code class="docutils literal notranslate"><span class="pre">RCVBT</span></code> does not keep. Linux never compares a non-final
+fragment’s partial block either: it trims an IPv4 one to a multiple of
+8 (<code class="docutils literal notranslate"><span class="pre">ip_frag_queue</span></code>) and drops an IPv6 one (<code class="docutils literal notranslate"><span class="pre">ip6_frag_queue</span></code>).</p>
 </dd></dl>
 
 </dd></dl>
@@ -654,8 +713,8 @@ from
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.ip.Packet.timestamp">
 <span class="sig-name descname"><span class="pre">timestamp</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.Packet.timestamp" title="Link to this definition">¶</a></dt>
 <dd><p>Capture timestamp of the fragment, in seconds since the Unix epoch. This
-is the <em>capture’s</em> clock, not the host’s: it is what drives the <span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-3.3.2"><strong>RFC 1122 Section 3.3.2</strong></a>
-and <span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> reassembly timeout, since an offline parser
+is the <em>capture’s</em> clock, not the host’s: it is what drives the <span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-3.3.2"><strong>RFC 1122 Section 3.3.2</strong></a>
+and <span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> reassembly timeout, since an offline parser
 replaying a file has no other notion of time passing.</p>
 </dd></dl>
 
@@ -708,7 +767,7 @@ replaying a file has no other notion of time passing.</p>
 <span class="sig-name descname"><span class="pre">timestamp</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><span class="pre">float</span></a></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.ip.Buffer.timestamp" title="Link to this definition">¶</a></dt>
 <dd><p>Capture timestamp of the <strong>first-arriving</strong> fragment of this datagram, in
 seconds since the Unix epoch. This is the origin of the reassembly timer:
-<span class="target" id="index-6"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> counts its 60 seconds “of the reception of the
+<span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> counts its 60 seconds “of the reception of the
 first-arriving fragment”, so a later fragment does not extend the
 deadline and this field is never revised once set.</p>
 </dd></dl>
@@ -813,13 +872,13 @@ place, and reading this attribute then runs it and keeps the result.</p>
 its length – on which two fragments disagreed, i.e. an arriving
 fragment overlapped octets already buffered but did not repeat them.
 Empty when the datagram never saw a contested octet.</p>
-<p><span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> resolves the disagreement itself: “In the case that two or
+<p><span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc791.html"><strong>RFC 791</strong></a> resolves the disagreement itself: “In the case that two or
 more fragments contain the same data either identically or through a
 partial overlap, this procedure will use the more recently arrived copy
 in the data buffer and datagram delivered.” So <a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Datagram.payload" title="pcapkit.foundation.reassembly.data.ip.Datagram.payload"><code class="xref py py-attr docutils literal notranslate"><span class="pre">payload</span></code></a> always
 holds whichever fragment arrived <em>last</em> over a contested range – the
 opposite resolution from TCP’s first-write-wins
-(<span class="target" id="index-8"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.10"><strong>RFC 9293 Section 3.10</strong></a>) – and this field is what lets a caller tell
+(<span class="target" id="index-9"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc9293.html#section-3.10"><strong>RFC 9293 Section 3.10</strong></a>) – and this field is what lets a caller tell
 a clean datagram from a contested one, since a resolved conflict does
 not, on its own, leave a hole for <code class="docutils literal notranslate"><span class="pre">completed</span></code> to report.</p>
 <p><a class="reference internal" href="#pcapkit.foundation.reassembly.data.ip.Buffer.RCVBT" title="pcapkit.foundation.reassembly.data.ip.Buffer.RCVBT"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Buffer.RCVBT</span></code></a>
@@ -835,7 +894,7 @@ for exactly that reason, even though a whole <code class="docutils literal notra
 it reads as “received”. Any other partial last block – a non-final,
 truncated or clipped fragment’s – is left unmarked, so a later fragment
 that overwrites its octets records no conflict. See
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">IP._detect_conflicts</span></code>.</p>
+<a class="reference internal" href="#pcapkit.foundation.reassembly.ip.IP._detect_conflicts" title="pcapkit.foundation.reassembly.ip.IP._detect_conflicts"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IP._detect_conflicts</span></code></a>.</p>
 </dd></dl>
 
 </dd></dl>

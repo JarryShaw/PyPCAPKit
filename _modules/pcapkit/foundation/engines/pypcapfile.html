@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -486,8 +487,6 @@
 <span class="sd">This module contains the implementation for `PyPCAPFile`_ engine</span>
 <span class="sd">support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.</span>
 
-<span class="sd">.. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
-
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">binascii</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ctypes</span>
@@ -516,24 +515,24 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extractor</span>
 
     <span class="k">class</span><span class="w"> </span><span class="nc">_PCAPFileLinkLayerModule</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">""":mod:`pcapfile.linklayer`, as :class:`PyPCAPFile` reads it."""</span>
+<span class="w">        </span><span class="sd">"""``pcapfile.linklayer``, as :class:`PyPCAPFile` reads it."""</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">clookup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ll_type</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[Type[PCAPFileEthernet]]'</span><span class="p">:</span> <span class="o">...</span>
 
     <span class="k">class</span><span class="w"> </span><span class="nc">_PCAPFileSavefileModule</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">""":mod:`pcapfile.savefile`, as :class:`PyPCAPFile` reads it."""</span>
+<span class="w">        </span><span class="sd">"""``pcapfile.savefile``, as :class:`PyPCAPFile` reads it."""</span>
 
         <span class="k">def</span><span class="w"> </span><span class="nf">load_savefile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">input_file</span><span class="p">:</span> <span class="s1">'NamedStream'</span><span class="p">,</span> <span class="n">layers</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span>
                           <span class="n">verbose</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="o">...</span><span class="p">,</span> <span class="n">lazy</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="o">...</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'PCAPFileSavefile'</span><span class="p">:</span> <span class="o">...</span>
 
     <span class="k">class</span><span class="w"> </span><span class="nc">_PCAPFileStructsModule</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">""":mod:`pcapfile.structs`, as :class:`PyPCAPFile` reads it."""</span>
+<span class="w">        </span><span class="sd">"""``pcapfile.structs``, as :class:`PyPCAPFile` reads it."""</span>
 
         <span class="nd">@property</span>
         <span class="k">def</span><span class="w"> </span><span class="nf">pcap_packet</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[PCAPFilePacket]'</span><span class="p">:</span> <span class="o">...</span>
 
     <span class="k">class</span><span class="w"> </span><span class="nc">_PCAPFilePackage</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">""":mod:`pcapfile`, as :class:`PyPCAPFile` reads it through :attr:`PyPCAPFile._expkg` (#1878).</span>
+<span class="w">        </span><span class="sd">"""|pcapfile|_, as :class:`PyPCAPFile` reads it through :attr:`PyPCAPFile._expkg` (#1878).</span>
 
 <span class="sd">        Each attribute is a submodule, described by what the engine reads of it.</span>
 <span class="sd">        mypy matches a module with a protocol at the top level only, so the</span>
@@ -578,21 +577,19 @@
 <span class="sd">    segment that :func:`~pcapkit.toolkit.pypcapfile.tcp_reassembly` needs in</span>
 <span class="sd">    order to report an exact header/payload split.</span>
 
-<span class="sd">    .. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
-
 <span class="sd">    Args:</span>
 <span class="sd">        extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.</span>
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="c1">#: Engine extraction package, i.e. :mod:`pcapfile`.</span>
+        <span class="c1">#: Engine extraction package, i.e. |pcapfile|_.</span>
         <span class="n">_expkg</span><span class="p">:</span> <span class="s1">'_PCAPFilePackage'</span>
         <span class="c1">#: Engine extraction temporary storage.</span>
         <span class="n">_extmp</span><span class="p">:</span> <span class="s1">'Iterator[PCAPFilePacket]'</span>
         <span class="c1">#: Data link layer protocol, from the savefile header.</span>
         <span class="n">_dlink</span><span class="p">:</span> <span class="s1">'Enum_LinkType'</span>
         <span class="c1">#: Link layer decoder for this savefile, or :data:`None` when</span>
-        <span class="c1">#: :mod:`pcapfile` has none for its link layer type.</span>
+        <span class="c1">#: |pcapfile|_ has none for its link layer type.</span>
         <span class="n">_declf</span><span class="p">:</span> <span class="s1">'Optional[Callable[..., Any]]'</span>
 
     <span class="c1">#: Number of layers to descend while decoding, i.e. link plus network. See</span>
@@ -601,7 +598,7 @@
 
     <span class="c1">#: First Python version `PyPCAPFile`_ does not work on, as a</span>
     <span class="c1">#: ``(major, minor)`` pair. Released 0.12.0 imports :mod:`imp` from</span>
-    <span class="c1">#: :mod:`pcapfile.linklayer`, and :mod:`imp` was removed in Python 3.12.</span>
+    <span class="c1">#: ``pcapfile.linklayer``, and :mod:`imp` was removed in Python 3.12.</span>
     <span class="n">PYTHON_CEILING</span> <span class="o">=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">12</span><span class="p">)</span>
 
 <div class="viewcode-block" id="PyPCAPFile.unsupported_reason">
@@ -612,9 +609,9 @@
 
 <span class="sd">        Consulted by :meth:`pcapkit.foundation.extraction.Extractor.run` *before*</span>
 <span class="sd">        the import test, because the import test cannot answer this question.</span>
-<span class="sd">        :mod:`pcapfile`'s top-level package imports perfectly well on Python 3.12</span>
-<span class="sd">        and newer -- it is :mod:`pcapfile.linklayer` that fails, and</span>
-<span class="sd">        :mod:`pcapfile.savefile` imports it -- so a guard that only tries</span>
+<span class="sd">        |pcapfile|_'s top-level package imports perfectly well on Python 3.12</span>
+<span class="sd">        and newer -- it is ``pcapfile.linklayer`` that fails, and</span>
+<span class="sd">        ``pcapfile.savefile`` imports it -- so a guard that only tries</span>
 <span class="sd">        ``import pcapfile`` is satisfied and the :exc:`ModuleNotFoundError` then</span>
 <span class="sd">        escapes from :meth:`__init__` as a hard error instead of degrading to the</span>
 <span class="sd">        default engine with a warning, which is what happens when the package is</span>
@@ -623,7 +620,7 @@
 <span class="sd">        The version is checked rather than the import attempted so that the answer</span>
 <span class="sd">        does not depend on which of the package's submodules happens to be</span>
 <span class="sd">        imported first, and so it is the same answer on a machine that has never</span>
-<span class="sd">        installed :mod:`pcapfile` at all.</span>
+<span class="sd">        installed |pcapfile|_ at all.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            A short phrase naming the limitation, or :data:`None`.</span>
@@ -659,7 +656,15 @@
     <span class="c1"># Data models.</span>
     <span class="c1">##########################################################################</span>
 
+<div class="viewcode-block" id="PyPCAPFile.__init__">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile.__init__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">extractor</span><span class="p">:</span> <span class="s1">'Extractor'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Import |pcapfile|_ and the submodules it reads savefiles with.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.</span>
+
+<span class="sd">        """</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">pcapfile</span>  <span class="c1"># isort:skip</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">pcapfile.linklayer</span>  <span class="c1"># isort:skip</span>
         <span class="kn">import</span><span class="w"> </span><span class="nn">pcapfile.savefile</span>  <span class="c1"># isort:skip</span>
@@ -670,7 +675,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_dlink</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Enum_LinkType'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_declf</span> <span class="o">=</span> <span class="kc">None</span>
 
-        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">extractor</span><span class="p">)</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">extractor</span><span class="p">)</span></div>
+
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Methods.</span>
@@ -679,22 +685,22 @@
 <div class="viewcode-block" id="PyPCAPFile.run">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile.run">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Call :func:`pcapfile.savefile.load_savefile` to extract PCAP files.</span>
+<span class="w">        </span><span class="sd">"""Call ``pcapfile.savefile.load_savefile`` to extract PCAP files.</span>
 
 <span class="sd">        This method assigns :attr:`self._expkg &lt;PyPCAPFile._expkg&gt;`</span>
-<span class="sd">        as :mod:`pcapfile` and :attr:`self._extmp &lt;PyPCAPFile._extmp&gt;`</span>
+<span class="sd">        as |pcapfile|_ and :attr:`self._extmp &lt;PyPCAPFile._extmp&gt;`</span>
 <span class="sd">        as an iterator over the lazily generated savefile packets.</span>
 
-<span class="sd">        :func:`pcapfile.savefile.load_savefile` loads and validates the savefile</span>
+<span class="sd">        ``pcapfile.savefile.load_savefile`` loads and validates the savefile</span>
 <span class="sd">        header. The records are then read by :meth:`_read_records`, not by the</span>
 <span class="sd">        packet generator it returns, which drops records (see there). Like</span>
-<span class="sd">        :func:`pcapfile.savefile._read_a_packet` with ``layers=0``,</span>
+<span class="sd">        ``pcapfile.savefile._read_a_packet`` with ``layers=0``,</span>
 <span class="sd">        :meth:`_read_records` does *not* hand back each frame's bytes verbatim --</span>
 <span class="sd">        it hexlifies the whole frame into ASCII text and stops there, exactly as</span>
-<span class="sd">        :mod:`pcapfile` does for any layer at which it runs out of layers left to</span>
+<span class="sd">        |pcapfile|_ does for any layer at which it runs out of layers left to</span>
 <span class="sd">        descend. It is :meth:`_decode` that un-hexlifies and then decodes each</span>
-<span class="sd">        frame to :attr:`LAYERS` depth using :func:`pcapfile.linklayer.clookup` --</span>
-<span class="sd">        the very call :mod:`pcapfile` makes internally. Doing it this way round is</span>
+<span class="sd">        frame to :attr:`LAYERS` depth using ``pcapfile.linklayer.clookup`` --</span>
+<span class="sd">        the very call |pcapfile|_ makes internally. Doing it this way round is</span>
 <span class="sd">        what lets the link layer type be inspected (and reported on) *before* the</span>
 <span class="sd">        first frame is decoded.</span>
 
@@ -705,14 +711,14 @@
 <span class="sd">                  and/or :attr:`self.extractor._exptl &lt;pcapkit.foundation.extraction.Extractor._exptl&gt;`</span>
 <span class="sd">                  is provided as the PyPCAPFile engine does not</span>
 <span class="sd">                  support such operations.</span>
-<span class="sd">                * if IPv6 reassembly is enabled, as :mod:`pcapfile` has no IPv6</span>
+<span class="sd">                * if IPv6 reassembly is enabled, as |pcapfile|_ has no IPv6</span>
 <span class="sd">                  decoder.</span>
-<span class="sd">                * if :mod:`pcapfile` has no decoder for the savefile's link layer</span>
+<span class="sd">                * if |pcapfile|_ has no decoder for the savefile's link layer</span>
 <span class="sd">                  type, in which case frames are left undecoded.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            FormatError: If the file format is not supported, i.e., not a PCAP</span>
-<span class="sd">                file. :mod:`pcapfile` reads libpcap savefiles only.</span>
+<span class="sd">                file. |pcapfile|_ reads libpcap savefiles only.</span>
 
 <span class="sd">        """</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.pcap</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCAP</span>  <span class="c1"># isort:skip</span>
@@ -822,13 +828,13 @@
 <div class="viewcode-block" id="PyPCAPFile._get_decoder">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcapfile.PyPCAPFile._get_decoder">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_decoder</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">linktype</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[Callable[..., Any]]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Return the :mod:`pcapfile` link layer decoder for a link layer type.</span>
+<span class="w">        </span><span class="sd">"""Return the |pcapfile|_ link layer decoder for a link layer type.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            linktype: Link layer type code, from the savefile header.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            The decoder class, or :data:`None` when :mod:`pcapfile` has none.</span>
+<span class="sd">            The decoder class, or :data:`None` when |pcapfile|_ has none.</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            AttributeWarning: If no decoder is available, as frames will then be</span>
@@ -855,7 +861,7 @@
                       <span class="n">header</span><span class="p">:</span> <span class="s1">'PCAPFileHeader'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Iterator[PCAPFilePacket]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Read the savefile's records, every one of them.</span>
 
-<span class="sd">        :func:`pcapfile.savefile._read_a_packet` (pypcapfile 0.12.0) drops</span>
+<span class="sd">        ``pcapfile.savefile._read_a_packet`` (pypcapfile 0.12.0) drops</span>
 <span class="sd">        records:</span>
 
 <span class="sd">        * It picks the byte order of each record header by testing</span>
@@ -867,19 +873,19 @@
 <span class="sd">          than its capture length, so a zero-length record drops itself and every</span>
 <span class="sd">          record after it, and a truncated final record is dropped (:issue:`1571`).</span>
 
-<span class="sd">        This reads each record in the byte order of the header :mod:`pcapfile`</span>
-<span class="sd">        loaded, into the :class:`pcapfile.structs.pcap_packet` that function</span>
+<span class="sd">        This reads each record in the byte order of the header |pcapfile|_</span>
+<span class="sd">        loaded, into the ``pcapfile.structs.pcap_packet`` that function</span>
 <span class="sd">        builds with ``layers=0`` -- the frame hexlified, pointing at the</span>
 <span class="sd">        savefile's own header -- so :meth:`_decode` and</span>
-<span class="sd">        :mod:`pcapkit.toolkit.pypcapfile` see what :mod:`pcapfile` hands them.</span>
+<span class="sd">        :mod:`pcapkit.toolkit.pypcapfile` see what |pcapfile|_ hands them.</span>
 <span class="sd">        It stops at a tail too short for a record header, and keeps a record</span>
 <span class="sd">        whose capture length runs past the data: the capture length as declared,</span>
 <span class="sd">        the octets present as the frame.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            file: The savefile, just past its header, where</span>
-<span class="sd">                :func:`pcapfile.savefile.load_savefile` leaves it.</span>
-<span class="sd">            header: The savefile header :mod:`pcapfile` loaded.</span>
+<span class="sd">                ``pcapfile.savefile.load_savefile`` leaves it.</span>
+<span class="sd">            header: The savefile header |pcapfile|_ loaded.</span>
 
 <span class="sd">        Yields:</span>
 <span class="sd">            Undecoded savefile packets, one per record.</span>
@@ -912,12 +918,12 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">_decode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'PCAPFilePacket'</span><span class="p">,</span> <span class="n">frnum</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'PCAPFilePacket'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Decode a raw savefile packet down to :attr:`LAYERS` depth.</span>
 
-<span class="sd">        A new :class:`pcapfile.structs.pcap_packet` is built rather than the</span>
+<span class="sd">        A new ``pcapfile.structs.pcap_packet`` is built rather than the</span>
 <span class="sd">        given one mutated, so that a decoding failure leaves the original intact.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            packet: Undecoded savefile packet, i.e. as loaded with ``layers=0``,</span>
-<span class="sd">                whose :attr:`packet.packet &lt;pcapfile.structs.pcap_packet.packet&gt;`</span>
+<span class="sd">                whose ``packet.packet``</span>
 <span class="sd">                is therefore the hexlified frame (see :meth:`run`), not the raw</span>
 <span class="sd">                bytes.</span>
 <span class="sd">            frnum: Frame number, for the warning message below.</span>
@@ -927,7 +933,7 @@
 <span class="sd">            decoded, or holds no octets at all.</span>
 
 <span class="sd">        Warns:</span>
-<span class="sd">            AttributeWarning: If :mod:`pcapfile` could not decode the frame, e.g.</span>
+<span class="sd">            AttributeWarning: If |pcapfile|_ could not decode the frame, e.g.</span>
 <span class="sd">                because the capture is truncated. One bad frame should not abort</span>
 <span class="sd">                the extraction, but it should not pass silently either.</span>
 
@@ -939,9 +945,10 @@
 
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># ``packet.packet`` is hexlified ASCII text, not raw bytes -- see</span>
-            <span class="c1"># :meth:`run`. ``self._declf`` (e.g. :class:`pcapfile.protocols</span>
-            <span class="c1"># .linklayer.ethernet.Ethernet`) unpacks its own header straight out</span>
-            <span class="c1"># of its first argument via :func:`struct.unpack`, so it must be</span>
+            <span class="c1"># :meth:`run`. ``self._declf`` (e.g.</span>
+            <span class="c1"># ``pcapfile.protocols.linklayer.ethernet.Ethernet``) unpacks its</span>
+            <span class="c1"># own header straight out of its first argument via</span>
+            <span class="c1"># :func:`struct.unpack`, so it must be</span>
             <span class="c1"># un-hexlified back to raw bytes first, or every field it decodes</span>
             <span class="c1"># comes out garbage despite raising nothing.</span>
             <span class="n">decoded</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_declf</span><span class="p">(</span><span class="n">binascii</span><span class="o">.</span><span class="n">unhexlify</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">packet</span><span class="p">),</span> <span class="n">layers</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">LAYERS</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>

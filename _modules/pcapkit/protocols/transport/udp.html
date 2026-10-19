@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -486,7 +487,7 @@
 
 <span class="sd">:mod:`pcapkit.protocols.transport.udp` contains</span>
 <span class="sd">:class:`~pcapkit.protocols.transport.udp.UDP` only,</span>
-<span class="sd">which implements extractor for User Datagram Protocol</span>
+<span class="sd">which implements the extractor for User Datagram Protocol</span>
 <span class="sd">(UDP) [*]_, whose structure is described as below:</span>
 
 <span class="sd">======= ========= ===================== ===============================</span>
@@ -494,7 +495,7 @@
 <span class="sd">======= ========= ===================== ===============================</span>
 <span class="sd">  0           0   ``udp.srcport``             Source Port</span>
 <span class="sd">  2          16   ``udp.dstport``             Destination Port</span>
-<span class="sd">  4          32   ``udp.len``                 Length (header includes)</span>
+<span class="sd">  4          32   ``udp.len``                 Length (header included)</span>
 <span class="sd">  6          48   ``udp.checksum``            Checksum</span>
 <span class="sd">======= ========= ===================== ===============================</span>
 
@@ -566,10 +567,11 @@
     <span class="c1"># Defaults.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="c1">#: DefaultDict[int, ModuleDescriptor[ProtocolBase] | ~typing.Type[ProtocolBase]]: Protocol</span>
-    <span class="c1">#: index mapping for decoding next layer, c.f.</span>
-    <span class="c1">#: :meth:`self._decode_next_layer &lt;pcapkit.protocols.transport.transport.Transport._decode_next_layer&gt;`</span>
-    <span class="c1">#: &amp; :meth:`self._import_next_layer &lt;pcapkit.protocols.protocol.Protocol._import_next_layer&gt;`.</span>
+    <span class="c1">#: Protocol index mapping for decoding next layer, see</span>
+    <span class="c1">#: :meth:`self._decode_next_layer</span>
+    <span class="c1">#: &lt;pcapkit.protocols.transport.transport.Transport._decode_next_layer&gt;` &amp;</span>
+    <span class="c1">#: :meth:`self._import_next_layer</span>
+    <span class="c1">#: &lt;pcapkit.protocols.protocol.Protocol._import_next_layer&gt;`.</span>
     <span class="n">__proto__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.raw'</span><span class="p">,</span> <span class="s1">'Raw'</span><span class="p">),</span>
         <span class="p">{</span>
@@ -582,7 +584,7 @@
             <span class="c1">#</span>
             <span class="c1"># The HTTP entries bind the version-dispatching</span>
             <span class="c1"># :class:`pcapkit.protocols.application.http.HTTP`, as TCP's table</span>
-            <span class="c1"># does. c.f. the note in the class docstring.</span>
+            <span class="c1"># does. See the note in the class docstring.</span>
             <span class="mi">80</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.http'</span><span class="p">,</span> <span class="s1">'HTTP'</span><span class="p">),</span>
             <span class="mi">8080</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.http'</span><span class="p">,</span> <span class="s1">'HTTP'</span><span class="p">),</span>
 
@@ -591,7 +593,7 @@
             <span class="c1"># abstract L2TP base. IANA protocol number 115 (L2TPv3, RFC 3931)</span>
             <span class="c1"># stays unbound because that version has no class; once it has,</span>
             <span class="c1"># it takes 115 and this entry becomes a version switch on the Ver</span>
-            <span class="c1"># nibble. c.f. pcapkit.protocols.link.l2tp.</span>
+            <span class="c1"># nibble. See pcapkit.protocols.link.l2tp.</span>
             <span class="mi">1701</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.link.l2tpv2'</span><span class="p">,</span> <span class="s1">'L2TPv2'</span><span class="p">),</span>
         <span class="p">},</span>
     <span class="p">)</span>

@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -523,7 +524,7 @@
 
 <span class="sd">Binding :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` at 115 instead does not</span>
 <span class="sd">work (:issue:`548`), and is recorded so it is not proposed again. Over IP the v3</span>
-<span class="sd">session header is, in :rfc:`3931` §4.1.1's own words, *"free of any restrictions</span>
+<span class="sd">session header is, in :rfc:`3931` §4.1.1.1's own words, *"free of any restrictions</span>
 <span class="sd">imposed by coexistence with L2TPv2 and L2F"* -- a data message opens with the raw</span>
 <span class="sd">32-bit Session ID and carries **no version nibble at all**, so there is nothing a</span>
 <span class="sd">v2 parser could test to recognise that the datagram is not its own. Measured,</span>
@@ -539,7 +540,7 @@
 <span class="sd">with L2TP packets". L2F is a separate protocol with its own header. It is</span>
 <span class="sd">therefore to be implemented as ``L2F``, the canonical name, carrying ``L2TPv1``</span>
 <span class="sd">only as an alias in its :meth:`~pcapkit.protocols.protocol.Protocol.id` --</span>
-<span class="sd">the same relationship HTTP/3 has to QUIC. c.f.</span>
+<span class="sd">the same relationship HTTP/3 has to QUIC. See</span>
 <span class="sd">:meth:`HTTPv1.id &lt;pcapkit.protocols.application.httpv1.HTTP.id&gt;` for how a</span>
 <span class="sd">version-flavoured alias is spelled: canonical name first, alias second, since</span>
 <span class="sd">callers take element zero as canonical.</span>
@@ -552,22 +553,23 @@
 <span class="sd">:meth:`L2TPv2.read &lt;pcapkit.protocols.link.l2tpv2.L2TPv2.read&gt;` does **check**</span>
 <span class="sd">it, and refuses anything other than ``2``. That is the half of the mechanism</span>
 <span class="sd">which is useful with no other version implemented: it keeps v3 traffic on port</span>
-<span class="sd">1701 (:rfc:`3931` §4.1.2 shares the port, so this is ordinary capture</span>
+<span class="sd">1701 (:rfc:`3931` §4.7.2 shares the port, so this is ordinary capture</span>
 <span class="sd">traffic rather than a corner case) from being reported as v2 with a tunnel and</span>
 <span class="sd">session ID read out of v3's Control Connection ID.</span>
 
 <span class="sd">When another version lands, the remaining half -- delegation rather than refusal</span>
 <span class="sd">-- already has a precedent in</span>
 <span class="sd">:class:`~pcapkit.protocols.application.http.HTTP`, which reads a version and</span>
-<span class="sd">delegates to a per-version class. L2TP is the easier case: HTTP has to</span>
-<span class="sd">*trial-parse* each candidate in</span>
-<span class="sd">:meth:`~pcapkit.protocols.application.http.HTTP._guess_version` because the wire</span>
-<span class="sd">format carries no version field, whereas L2TP states its version explicitly in</span>
-<span class="sd">those four bits. So a deterministic switch on ``Ver`` is enough, and no new</span>
-<span class="sd">registry is needed -- the class bound at UDP 1701 reads two octets, masks out the</span>
-<span class="sd">nibble, and hands the datagram to the matching class. Note the switch belongs on</span>
+<span class="sd">delegates to a per-version class. L2TP is the easier case:</span>
+<span class="sd">:meth:`~pcapkit.protocols.application.http.HTTP._guess_version` has to *infer*</span>
+<span class="sd">the version -- recognising the HTTP/2 preface or an HTTP/1 start line, else</span>
+<span class="sd">trial-parsing each candidate -- because HTTP's wire format carries no version</span>
+<span class="sd">field, whereas L2TP states its version explicitly in those four bits. So a</span>
+<span class="sd">deterministic switch on ``Ver`` is enough, and no new registry is needed -- the</span>
+<span class="sd">class bound at UDP 1701 reads two octets, masks out the nibble, and hands the</span>
+<span class="sd">datagram to the matching class. Note the switch belongs on</span>
 <span class="sd">the **UDP** path only: over IP protocol 115 there is no nibble to switch on, per</span>
-<span class="sd">the §4.1.1 note above.</span>
+<span class="sd">the §4.1.1.1 note above.</span>
 
 <span class="sd">.. [*] https://en.wikipedia.org/wiki/Layer_2_Tunneling_Protocol</span>
 

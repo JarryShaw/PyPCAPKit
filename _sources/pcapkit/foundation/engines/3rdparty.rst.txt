@@ -10,11 +10,9 @@ Scapy Support
 This module contains the implementation for `Scapy`_ engine
 support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
-.. _Scapy: https://scapy.net
-
 .. note::
 
-   Constructing this engine imports :mod:`scapy.all`, which populates `Scapy`_'s
+   Constructing this engine imports ``scapy.all``, which populates `Scapy`_'s
    layer registries -- ``conf.l2types`` and the ``bind_layers`` payload table,
    both of which exist only as import side effects of the layer modules.
    Importing a narrower submodule leaves them empty, and
@@ -26,9 +24,9 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    ``Ethernet / IP / UDP / Raw``, and such a list would go stale silently as
    `Scapy`_ gains layer types.
 
-   One side effect: :mod:`scapy.all` loads :mod:`scapy.layers.dcerpc`, which
+   One side effect: ``scapy.all`` loads :mod:`scapy.layers.dcerpc`, which
    reaches `Scapy`_'s TLS layer and there triggers a
-   ``CryptographyDeprecationWarning`` from :mod:`cryptography` about
+   ``CryptographyDeprecationWarning`` from |cryptography|_ about
    finite-field Diffie-Hellman. It concerns a key-exchange code path
    :mod:`pcapkit` never executes, but it subclasses :exc:`UserWarning` rather
    than :exc:`DeprecationWarning`, so Python's default filters show it.
@@ -64,8 +62,6 @@ DPKT Support
 
 This module contains the implementation for `DPKT`_ engine
 support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
-
-.. _DPKT: https://dpkt.readthedocs.io
 
 .. note::
 
@@ -106,8 +102,6 @@ PyShark Support
 This module contains the implementation for `PyShark`_ engine
 support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
-.. _PyShark: https://kiminewt.github.io/pyshark
-
 .. important::
 
    `PyShark`_ has requirements beyond installing it, and none is
@@ -116,7 +110,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    :meth:`~pcapkit.foundation.engines.pyshark.PyShark.unsupported_reason` checks
    both up front.
 
-   **Python 3.13 or older.** ``pyshark`` 0.6 builds its event loop with
+   **Python 3.13 or older.** |pyshark|_ 0.6 builds its event loop with
    ``asyncio.get_event_loop_policy().get_event_loop()``. With no running loop,
    3.10 and 3.11 return a loop silently, 3.12 returns one with a
    :exc:`DeprecationWarning`, and **3.14 raises**
@@ -124,12 +118,12 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    3.13 is unchecked and expected to work, being on the deprecated-but-functional
    side of that change.
 
-   **Wireshark's** :program:`tshark` **binary.** ``pyshark`` shells out to it and
-   parses nothing itself. It need not be on :envvar:`PATH`: ``pyshark`` consults
+   **Wireshark's** :program:`tshark` **binary.** |pyshark|_ shells out to it and
+   parses nothing itself. It need not be on :envvar:`PATH`: |pyshark|_ consults
    ``tshark_path`` in its :file:`config.ini` first, then :envvar:`PATH` on POSIX,
    both Program Files directories on Windows, and
    :file:`/Applications/Wireshark.app` on macOS. The check delegates to
-   ``pyshark``'s own resolver for exactly that reason, so a correctly configured
+   |pyshark|_'s own resolver for exactly that reason, so a correctly configured
    install off :envvar:`PATH` is not refused.
 
 .. autoclass:: pcapkit.foundation.engines.pyshark.PyShark
@@ -156,8 +150,6 @@ PyPCAP Support
 
 This module contains the implementation for `PyPCAP`_ engine
 support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
-
-.. _PyPCAP: https://github.com/pynetwork/pypcap
 
 .. important::
 
@@ -191,14 +183,17 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    expected to lift. Use
    :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` on 3.12 and newer.
 
+.. _pcap-module:
+
 .. important::
 
-   `pcap-ct`_ installs the same top-level :mod:`pcap` module as `PyPCAP`_. This
+   `pcap-ct`_ installs the same top-level ``pcap`` module as `PyPCAP`_. This
    engine therefore checks which of the two it got and raises
    :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` when it is `pcap-ct`_,
    naming ``engine='pcap_ct'`` in the message. Running `pcap-ct`_ under the
-   ``PyPCAP`` name would report an engine that is not the one in use, and the two
-   have different install requirements and different version coverage to report.
+   :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` name would report an engine that is
+   not the one in use, and the two have different install requirements and different
+   version coverage to report.
 
 .. important::
 
@@ -239,6 +234,8 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    .. autoattribute:: _dlink
    .. autoattribute:: _closed
 
+   .. automethod:: __init__
+
 pcap-ct Support
 ===============
 
@@ -247,7 +244,6 @@ pcap-ct Support
 This module contains the implementation for `pcap-ct`_ engine
 support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
-.. _pcap-ct: https://pypi.org/project/pcap-ct/
 .. _libpcap: https://pypi.org/project/libpcap/
 
 .. important::
@@ -268,7 +264,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
       pip install pypcapkit[PCAP_CT]
 
    Together these engines cover every interpreter the project supports, and
-   ``PCAP_CT`` covers all of it on its own:
+   :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` covers all of it on its own:
 
    =========================================================================  ==================
    Engine                                                                     Python
@@ -298,7 +294,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    extraction. :meth:`PCAP_CT.unsupported_reason
    <pcapkit.foundation.engines.pcap_ct.PCAP_CT.unsupported_reason>` detects it and
    reports it as an ordinary "engine unavailable", so the extraction falls back to
-   the default engine with a warning naming the missing library.
+   the :term:`default engine` with a warning naming the missing library.
 
 .. warning::
 
@@ -308,8 +304,8 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    interface rather than 1.3.0.
 
    Every attribute this engine touches -- the ``pcap.pcap(name=..., promisc=...)``
-   constructor, :meth:`~pcap.pcap.datalink`, ``snaplen``, iteration yielding
-   ``(timestamp, bytes)``, and :meth:`~pcap.pcap.close` -- is present on both and
+   constructor, ``pcap.pcap.datalink``, ``snaplen``, iteration yielding
+   ``(timestamp, bytes)``, and ``pcap.pcap.close`` -- is present on both and
    behaves identically, byte for byte and timestamp for timestamp, on
    ``pcap-ct`` 1.3.0b3 against ``pypcap`` 1.3.0 -- a statement about those
    versions, not a guarantee from upstream. ``PCAP_CT`` is therefore not
@@ -393,8 +389,6 @@ PyPCAPFile Support
 This module contains the implementation for `PyPCAPFile`_ engine
 support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
-.. _PyPCAPFile: https://github.com/kisom/pypcapfile
-
 .. important::
 
    `PyPCAPFile`_ is a pure Python savefile reader that decodes Ethernet, IPv4,
@@ -429,6 +423,8 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    .. autoattribute:: _dlink
    .. autoattribute:: _declf
 
+   .. automethod:: __init__
+
 Internal Definitions
 --------------------
 
@@ -441,7 +437,7 @@ Backend Detection
 
 .. module:: pcapkit.foundation.engines._pcap_backend
 
-Unrelated PyPI distributions install a top-level module named :mod:`pcap` --
+Unrelated PyPI distributions install a top-level module named |pcap|_ --
 `PyPCAP`_, a Cython binding shipped as a single extension module, and `pcap-ct`_,
 a :mod:`ctypes` reimplementation shipped as a package. They therefore collide,
 and ``import pcap`` resolves to whichever the import system finds first.

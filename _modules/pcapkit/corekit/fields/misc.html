@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -766,7 +767,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[_TP]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Payload protocol."""</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_protocol</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># type: ignore[unreachable] # pylint: disable=import-outside-top-level # isort:skip</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># type: ignore[unreachable] # pylint: disable=import-outside-toplevel # isort:skip</span>
             <span class="k">return</span> <span class="n">Raw</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_protocol</span>
 
@@ -786,7 +787,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">protocol</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">__proto__</span>  <span class="c1"># pylint: disable=import-outside-top-level</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">__proto__</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
 
             <span class="c1"># NOTE: The registry is keyed on the upper-cased class name, both</span>
             <span class="c1"># when it is seeded (``pcapkit/protocols/__init__.py:76``) and when</span>
@@ -888,7 +889,7 @@
             <span class="n">value</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'_TP'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default</span><span class="p">)</span>
 
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> \
-            <span class="n">Schema</span>  <span class="c1"># pylint: disable=import-outside-top-level</span>
+            <span class="n">Schema</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">value</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
@@ -1149,7 +1150,7 @@
 <span class="sd">        :class:`~collections.ChainMap` and not for :class:`dict`, the poisoning</span>
 <span class="sd">        observed in :issue:`439` came from ordinary code asking</span>
 <span class="sd">        :func:`isinstance` about a plain :class:`dict`, and :issue:`439` has</span>
-<span class="sd">        been fixed directly -- every :class:`Schema` subclass gets its own</span>
+<span class="sd">        been fixed directly -- every :class:`~pcapkit.protocols.schema.schema.Schema` subclass gets its own</span>
 <span class="sd">        ``_abc_impl``. Against that, swapping the ``ChainMap`` for a plain</span>
 <span class="sd">        literal on CPython 3.10 once moved</span>
 <span class="sd">        ``test_pcapng_remaining_constructor_branches_and_custom_dispatch``</span>
@@ -1277,7 +1278,7 @@
         <span class="c1"># through ``from_dict`` hands that mapping back here; turn it into the</span>
         <span class="c1"># declared schema before packing it.</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> \
-            <span class="n">Schema</span>  <span class="c1"># pylint: disable=import-outside-top-level</span>
+            <span class="n">Schema</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
             <span class="n">value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_schema</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
 

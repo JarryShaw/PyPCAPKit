@@ -5,7 +5,7 @@ Ethernet Protocol
 
 :mod:`pcapkit.protocols.link.ethernet` contains
 :class:`~pcapkit.protocols.link.ethernet.Ethernet`
-only, which implements extractor for Ethernet
+only, which implements the extractor for Ethernet
 Protocol [*]_, whose structure is described as
 below:
 
@@ -37,6 +37,8 @@ below:
    .. automethod:: _make_data
 
    .. automethod:: __index__
+
+   .. automethod:: _make_mac_addr
 
 Header Schemas
 --------------

@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -862,6 +863,8 @@
         <span class="p">}</span></div>
 
 
+<div class="viewcode-block" id="ARP._read_addr_resolve">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.ARP._read_addr_resolve">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_addr_resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">addr</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">htype</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Resolve hardware address according to protocol.</span>
 
@@ -881,8 +884,11 @@
                 <span class="n">_addr</span> <span class="o">=</span> <span class="s1">':'</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">textwrap</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="n">addr</span><span class="o">.</span><span class="n">hex</span><span class="p">(),</span> <span class="mi">2</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">_addr</span> <span class="o">=</span> <span class="n">addr</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">_addr</span>
+        <span class="k">return</span> <span class="n">_addr</span></div>
 
+
+<div class="viewcode-block" id="ARP._read_proto_resolve">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.ARP._read_proto_resolve">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_proto_resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">addr</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">ptype</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str | IPv4Address | IPv6Address'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Resolve protocol address according to protocol.</span>
 
@@ -894,15 +900,18 @@
 <span class="sd">            Protocol address. If ``ptype`` is ``0x0800`` (IPv4) and ``addr`` is</span>
 <span class="sd">            4 octets, an :class:`~ipaddress.IPv4Address`; if ``0x86dd`` (IPv6)</span>
 <span class="sd">            and 16 octets, an :class:`~ipaddress.IPv6Address`; otherwise, the</span>
-<span class="sd">            address as a hex :data:`str`.</span>
+<span class="sd">            address as a hex :class:`str`.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_4</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span> <span class="o">==</span> <span class="mi">4</span><span class="p">:</span>  <span class="c1"># IPv4</span>
             <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_6</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span> <span class="o">==</span> <span class="mi">16</span><span class="p">:</span>  <span class="c1"># IPv6</span>
             <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">addr</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">addr</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span></div>
 
+
+<div class="viewcode-block" id="ARP._make_addr_resolve">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.ARP._make_addr_resolve">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_addr_resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">addr</span><span class="p">:</span> <span class="s1">'str | bytes'</span><span class="p">,</span> <span class="n">htype</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Resolve hardware address according to protocol.</span>
 
@@ -914,14 +923,14 @@
 <span class="sd">            Hardware address packed as raw octets. If ``htype`` is ``1``, i.e.</span>
 <span class="sd">            MAC address, the ``:``- or ``-``-separated *hex* encoded MAC address</span>
 <span class="sd">            is validated and packed, one octet per group (an empty string packs</span>
-<span class="sd">            as no octets); otherwise, a :data:`str` is</span>
+<span class="sd">            as no octets); otherwise, a :class:`str` is</span>
 <span class="sd">            taken as the *hex* encoded address that :meth:`_read_addr_resolve`</span>
 <span class="sd">            returns, and :obj:`bytes` are returned as given.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            ProtocolError: If ``htype`` is ``1`` and ``addr`` is not a</span>
 <span class="sd">                well-formed MAC address, or if ``htype`` is not ``1`` and</span>
-<span class="sd">                ``addr`` is a :data:`str` that is not *hex* encoded.</span>
+<span class="sd">                ``addr`` is a :class:`str` that is not *hex* encoded.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">htype</span> <span class="o">==</span> <span class="n">Enum_Hardware</span><span class="o">.</span><span class="n">Ethernet</span><span class="p">:</span>
@@ -934,8 +943,11 @@
                 <span class="k">return</span> <span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">addr</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">':'</span><span class="p">,</span> <span class="s1">''</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'-'</span><span class="p">,</span> <span class="s1">''</span><span class="p">))</span>
             <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Invalid hardware address: </span><span class="si">{</span><span class="n">addr</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
-        <span class="k">return</span> <span class="n">addr</span>
+        <span class="k">return</span> <span class="n">addr</span></div>
 
+
+<div class="viewcode-block" id="ARP._make_proto_resolve">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.ARP._make_proto_resolve">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_proto_resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">addr</span><span class="p">:</span> <span class="s1">'IPv4Address | IPv6Address | str | bytes'</span><span class="p">,</span> <span class="n">ptype</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
                             <span class="n">plen</span><span class="p">:</span> <span class="s1">'Optional[int]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Resolve protocol address according to protocol.</span>
@@ -949,19 +961,19 @@
 <span class="sd">            Packed protocol address. If ``ptype`` is ``0x0800`` (IPv4) or</span>
 <span class="sd">            ``0x86dd`` (IPv6), and ``plen`` is either not given or 4 or 16</span>
 <span class="sd">            respectively, the address is validated and packed to 4 or 16</span>
-<span class="sd">            octets; otherwise, a :data:`str` is taken as the *hex* encoded</span>
+<span class="sd">            octets; otherwise, a :class:`str` is taken as the *hex* encoded</span>
 <span class="sd">            address that :meth:`_read_proto_resolve` returns, an</span>
 <span class="sd">            :class:`~ipaddress.IPv4Address`/:class:`~ipaddress.IPv6Address` is</span>
 <span class="sd">            packed, and anything else is returned as given.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            FieldValueError: If ``addr`` is a :obj:`bool` (c.f.</span>
+<span class="sd">            FieldValueError: If ``addr`` is a :obj:`bool` (see</span>
 <span class="sd">                :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`).</span>
 <span class="sd">            ProtocolError: If ``ptype`` is neither IPv4 nor IPv6 and ``addr``</span>
-<span class="sd">                is a :data:`str` that is not *hex* encoded.</span>
+<span class="sd">                is a :class:`str` that is not *hex* encoded.</span>
 
 <span class="sd">        Notes:</span>
-<span class="sd">            Through :func:`parse_ip_address` rather than</span>
+<span class="sd">            Through :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address` rather than</span>
 <span class="sd">            :class:`~ipaddress.IPv4Address`/:class:`~ipaddress.IPv6Address`</span>
 <span class="sd">            directly, because :obj:`bool` is an :class:`int` subclass that</span>
 <span class="sd">            either constructor accepts without complaint: ``addr=True`` would</span>
@@ -995,6 +1007,7 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">)):</span>
             <span class="k">return</span> <span class="n">addr</span><span class="o">.</span><span class="n">packed</span>
         <span class="k">return</span> <span class="n">addr</span></div>
+</div>
 
 
 

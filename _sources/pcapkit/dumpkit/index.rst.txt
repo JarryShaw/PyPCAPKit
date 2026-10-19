@@ -5,7 +5,7 @@ Dump Utilities
 .. module:: pcapkit.dumpkit
 
 :mod:`pcapkit.dumpkit` is the collection of :mod:`pcapkit`'s own dumpers,
-alike those in :mod:`dictdumper`.
+like those in :mod:`dictdumper`.
 
 .. toctree::
    :maxdepth: 2

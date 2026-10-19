@@ -321,6 +321,7 @@ Format and Mechanics
    use them, which do not re-export them (:issue:`1744`).
 *  **A verbatim upstream port is exempt from these conventions.**
    :ref:`sentinel-convention` already carries the case that settled it, the
-   ``cached_property`` backport in :file:`pcapkit/utilities/compat.py`: the value of a
+   :class:`~pcapkit.utilities.compat.cached_property` backport in
+   :file:`pcapkit/utilities/compat.py`: the value of a
    vendored copy is that it can still be diffed against upstream, and a house-style
    rewrite destroys that in exchange for nothing a reader ever sees.

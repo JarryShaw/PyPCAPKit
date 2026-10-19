@@ -5,7 +5,7 @@ IPv6 - Internet Protocol version 6
 
 :mod:`pcapkit.protocols.internet.ipv6` contains
 :class:`~pcapkit.protocols.internet.ipv6.IPv6` only,
-which implements extractor for Internet Protocol
+which implements the extractor for Internet Protocol
 version 6 (IPv6) [*]_, whose structure is described
 as below:
 
@@ -47,6 +47,8 @@ Octets      Bits        Name                    Description
 
    .. autoattribute:: __generic_ext_codes__
       :no-value:
+
+   .. automethod:: _read_ip_hextet
 
 Protocol Constants
 ------------------

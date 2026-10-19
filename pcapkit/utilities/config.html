@@ -260,7 +260,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -392,6 +392,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -695,7 +696,7 @@ Without the bound, a chain dissected header by header stops wherever
 Python’s recursion limit falls, which depends on the interpreter. Each
 header is a layer, so <a class="reference internal" href="#pcapkit.utilities.config.FRAME_LAYER_LIMIT" title="pcapkit.utilities.config.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a> applies as well.</p>
 <p>Rebuilding a frame with <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase.from_data" title="pcapkit.protocols.protocol.ProtocolBase.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">from_data()</span></code></a>
-stops where parsing it did, and warns once too (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1619">#1619</a>), c.f.
+stops where parsing it did, and warns once too (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1619">#1619</a>), cf.
 <a class="reference internal" href="../protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet._make_payload" title="pcapkit.protocols.internet.internet.Internet._make_payload"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Internet._make_payload</span></code></a>.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.5.0: </span>Moved from <code class="docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.internet.EXTENSION_HEADER_LIMIT</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1726">#1726</a>).</p>
@@ -835,9 +836,9 @@ many fields, so it leaves the <em>sum</em> unbounded: a declared length just und
 ceiling is honoured however often it is declared. Measured for <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/573">#573</a>, 200
 minimal PCAP-NG Decryption Secrets Blocks – 4,800 wire octets, each block
 declaring <code class="docutils literal notranslate"><span class="pre">secrets_length</span></code> of 262,142 against two supplied octets through
-<code class="docutils literal notranslate"><span class="pre">UnknownSecrets.data</span></code> (<code class="docutils literal notranslate"><span class="pre">pcapkit/protocols/schema/misc/pcapng.py</span></code>) –
-retained 50.0 MiB, an amplification of 10,922x per block. Every individual
-field was under the ceiling, so nothing refused any of them.</p>
+<a class="reference internal" href="../protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.UnknownSecrets.data" title="pcapkit.protocols.schema.misc.pcapng.UnknownSecrets.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">UnknownSecrets.data</span></code></a>
+(<code class="docutils literal notranslate"><span class="pre">pcapkit/protocols/schema/misc/pcapng.py</span></code>) – retained 50.0 MiB, an amplification of 10,922x
+per block. Every individual field was under the ceiling, so nothing refused any of them.</p>
 <p>The sum therefore wants a budget, and this is the figure that makes one
 <em>safe</em>. A budget on its own is not: a capture cut short by its snapshot length
 pads legitimately and must keep parsing (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/431">#431</a>, and the reasoning that

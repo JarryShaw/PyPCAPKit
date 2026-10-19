@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -518,7 +519,7 @@
 <span class="c1">#: contextvars.ContextVar[int]: Where the payload :meth:`Internet._make_payload`</span>
 <span class="c1">#: rebuilds sits in a chain of IPv6 extension headers, should it be one: one past</span>
 <span class="c1">#: the layer it is the payload of, as :meth:`Internet._next_exthdr_depth` places</span>
-<span class="c1">#: it while parsing, c.f. :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`.</span>
+<span class="c1">#: it while parsing, see :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`.</span>
 <span class="n">_exthdr_rebuilt</span> <span class="o">=</span> <span class="n">contextvars</span><span class="o">.</span><span class="n">ContextVar</span><span class="p">(</span><span class="s1">'_exthdr_rebuilt'</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
 
@@ -584,8 +585,8 @@
     <span class="c1">#: Layer of protocol.</span>
     <span class="n">__layer__</span> <span class="o">=</span> <span class="s1">'Internet'</span>  <span class="c1"># type: Literal['Internet']</span>
 
-    <span class="c1">#: DefaultDict[int, ModuleDescriptor[ProtocolBase] | ~typing.Type[ProtocolBase]]: Protocol index mapping for decoding next layer,</span>
-    <span class="c1">#: c.f. :meth:`self._decode_next_layer &lt;pcapkit.protocols.internet.internet.Internet._decode_next_layer&gt;`</span>
+    <span class="c1">#: Protocol index mapping for decoding next layer,</span>
+    <span class="c1">#: see :meth:`self._decode_next_layer &lt;pcapkit.protocols.internet.internet.Internet._decode_next_layer&gt;`</span>
     <span class="c1">#: &amp; :meth:`self._import_next_layer &lt;pcapkit.protocols.internet.internet.Internet._import_next_layer&gt;`.</span>
     <span class="n">__proto__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.raw'</span><span class="p">,</span> <span class="s1">'Raw'</span><span class="p">),</span>
@@ -611,7 +612,7 @@
             <span class="c1"># ``protocols.application`` and reports ``__layer__ = 'Application'``,</span>
             <span class="c1"># because a routing protocol computes the forwarding table rather</span>
             <span class="c1"># than forwarding packets -- the dispatch tier and the subpackage are</span>
-            <span class="c1"># deliberately decoupled, c.f.</span>
+            <span class="c1"># deliberately decoupled, see</span>
             <span class="c1"># :doc:`/contributing/conventions/protocol-layer-placement`.</span>
             <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">OSPFIGP</span><span class="p">:</span>         <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.application.ospf'</span><span class="p">,</span> <span class="s1">'OSPF'</span><span class="p">),</span>
         <span class="p">},</span>
@@ -619,7 +620,7 @@
 
     <span class="c1">#: int: How many IPv6 extension headers in a row the next layer follows:</span>
     <span class="c1">#: this layer's place in such a chain, or how many headers</span>
-    <span class="c1">#: :class:`~pcapkit.protocols.internet.ipv6.IPv6` walked, else ``0``, c.f.</span>
+    <span class="c1">#: :class:`~pcapkit.protocols.internet.ipv6.IPv6` walked, else ``0``, see</span>
     <span class="c1">#: :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` and :meth:`_next_exthdr_depth`.</span>
     <span class="n">_exthdr_depth</span> <span class="o">=</span> <span class="mi">0</span>
 
@@ -718,7 +719,7 @@
 <span class="sd">            _exthdr_depth (int): Where this layer is in a chain of IPv6</span>
 <span class="sd">                extension headers, counting from ``1``, or ``0`` if it is not</span>
 <span class="sd">                in one. Handed over by :meth:`_import_next_layer` while</span>
-<span class="sd">                parsing, c.f. :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`; a layer</span>
+<span class="sd">                parsing, see :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`; a layer</span>
 <span class="sd">                constructed instead, as :meth:`from_data` rebuilds one, takes it</span>
 <span class="sd">                from :meth:`_rebuilt_exthdr_depth` (:issue:`1619`).</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
@@ -774,7 +775,7 @@
 <span class="sd">            proto: next layer protocol index</span>
 <span class="sd">            extension: if the next layer is parsed as an extension header by</span>
 <span class="sd">                :class:`~pcapkit.protocols.internet.ipv6.IPv6`'s walk, which</span>
-<span class="sd">                counts the chain itself, c.f. :meth:`IPv6._decode_next_layer</span>
+<span class="sd">                counts the chain itself, see :meth:`IPv6._decode_next_layer</span>
 <span class="sd">                &lt;pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer&gt;`</span>
 
 <span class="sd">        Returns:</span>
@@ -833,7 +834,7 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: protocol data</span>
-<span class="sd">            exclude: keys of ``data`` that are not the payload, c.f.</span>
+<span class="sd">            exclude: keys of ``data`` that are not the payload, see</span>
 <span class="sd">                :meth:`ProtocolBase._make_payload</span>
 <span class="sd">                &lt;pcapkit.protocols.protocol.ProtocolBase._make_payload&gt;`</span>
 
@@ -862,7 +863,7 @@
 <span class="sd">            proto: next layer protocol index</span>
 <span class="sd">            file\_: payload of the current layer</span>
 <span class="sd">            length: valid (*non-padding*) length</span>
-<span class="sd">            extension: if is extension header, c.f. :meth:`_next_exthdr_depth`</span>
+<span class="sd">            extension: if is extension header, see :meth:`_next_exthdr_depth`</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            :class:`~pcapkit.protocols.misc.null.NoPayload` if there is</span>
@@ -986,7 +987,7 @@
 <span class="sd">            :class:`~pcapkit.protocols.misc.raw.Raw`, with one</span>
 <span class="sd">            :exc:`~pcapkit.utilities.warnings.ProtocolWarning` (:issue:`1604`).</span>
 <span class="sd">            Each header dissects the next one from here, so the chain's depth</span>
-<span class="sd">            is handed to the next layer, c.f. :meth:`_next_layer_class`.</span>
+<span class="sd">            is handed to the next layer, see :meth:`_next_layer_class`.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">payload</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>

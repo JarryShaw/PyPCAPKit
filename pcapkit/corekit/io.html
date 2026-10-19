@@ -260,7 +260,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -392,6 +392,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -708,12 +709,12 @@ should only access <code class="docutils literal notranslate"><span class="pre">
 <span class="sig-name descname"><span class="pre">seek</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">offset</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">whence</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">io.SEEK_SET</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/io.html#SeekableReader.seek"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.io.SeekableReader.seek" title="Link to this definition">¶</a></dt>
 <dd><p>Change the stream position to the given byte <code class="docutils literal notranslate"><span class="pre">offset</span></code>. <code class="docutils literal notranslate"><span class="pre">offset</span></code> is interpreted
 relative to the position indicated by <code class="docutils literal notranslate"><span class="pre">whence</span></code>. The default value for <code class="docutils literal notranslate"><span class="pre">whence</span></code> is
-<code class="xref py py-data docutils literal notranslate"><span class="pre">SEEK_SET</span></code>. Values for <code class="docutils literal notranslate"><span class="pre">whence</span></code> are:</p>
+<a class="reference external" href="https://docs.python.org/3/library/os.html#os.SEEK_SET" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">SEEK_SET</span></code></a>. Values for <code class="docutils literal notranslate"><span class="pre">whence</span></code> are:</p>
 <ul class="simple">
-<li><p><code class="xref py py-data docutils literal notranslate"><span class="pre">SEEK_SET</span></code> or <code class="docutils literal notranslate"><span class="pre">0</span></code> - start of the stream (the default); <code class="docutils literal notranslate"><span class="pre">offset</span></code> should
+<li><p><a class="reference external" href="https://docs.python.org/3/library/os.html#os.SEEK_SET" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">SEEK_SET</span></code></a> or <code class="docutils literal notranslate"><span class="pre">0</span></code> - start of the stream (the default); <code class="docutils literal notranslate"><span class="pre">offset</span></code> should
 be zero or positive</p></li>
-<li><p><code class="xref py py-data docutils literal notranslate"><span class="pre">SEEK_CUR</span></code> or <code class="docutils literal notranslate"><span class="pre">1</span></code> - current stream position; <code class="docutils literal notranslate"><span class="pre">offset</span></code> may be negative</p></li>
-<li><p><code class="xref py py-data docutils literal notranslate"><span class="pre">SEEK_END</span></code> or <code class="docutils literal notranslate"><span class="pre">2</span></code> - end of the stream; <code class="docutils literal notranslate"><span class="pre">offset</span></code> is usually negative</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/os.html#os.SEEK_CUR" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">SEEK_CUR</span></code></a> or <code class="docutils literal notranslate"><span class="pre">1</span></code> - current stream position; <code class="docutils literal notranslate"><span class="pre">offset</span></code> may be negative</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/os.html#os.SEEK_END" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">SEEK_END</span></code></a> or <code class="docutils literal notranslate"><span class="pre">2</span></code> - end of the stream; <code class="docutils literal notranslate"><span class="pre">offset</span></code> is usually negative</p></li>
 </ul>
 <p>Return the new absolute position.</p>
 <div class="admonition note">
@@ -726,23 +727,23 @@ caller that catches the error and reasonably takes the position to be unchanged
 would then read from the rejected offset instead, silently and without a second
 error.</p>
 <p>The negative check applies to every <code class="docutils literal notranslate"><span class="pre">whence</span></code>, rather than only
-<code class="xref py py-data docutils literal notranslate"><span class="pre">SEEK_SET</span></code> looking at its offset. An absolute position below zero
+<a class="reference external" href="https://docs.python.org/3/library/os.html#os.SEEK_SET" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">SEEK_SET</span></code></a> looking at its offset. An absolute position below zero
 cannot exist under any of them, and it is not the same failure as a position
 that has merely slid out of the window – which is ordinary, and recoverable
 with <code class="docutils literal notranslate"><span class="pre">buffer_save=True</span></code>. Reporting the first as <code class="docutils literal notranslate"><span class="pre">negative</span> <span class="pre">seek</span> <span class="pre">value</span></code> keeps
 the two distinguishable, and, being a property of the position rather than of
 the window, it holds with a saved buffer as well, which is exempt from the window
 check and would otherwise return a negative position as if the seek had worked.</p>
-<p>A non-seekable stream has no end until it is over, so <code class="xref py py-data docutils literal notranslate"><span class="pre">SEEK_END</span></code> is
-as far as <code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_ahead()</span></code> reads past the position: <code class="docutils literal notranslate"><span class="pre">_read_ahead_size</span></code>
+<p>A non-seekable stream has no end until it is over, so <a class="reference external" href="https://docs.python.org/3/library/os.html#os.SEEK_END" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">SEEK_END</span></code></a> is
+as far as <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader._read_ahead" title="pcapkit.corekit.io.SeekableReader._read_ahead"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_ahead()</span></code></a> reads past the position: <code class="docutils literal notranslate"><span class="pre">_read_ahead_size</span></code>
 octets, a buffer’s worth by default, or to the real end if that comes first.
 The frame readers measure what is left this way, and the engines set that size
 to the next record, so a record is measured whole, however long. The buffer’s far
 edge will not do as the end: once the buffer has filled it is just how far the
 stream has been read, so the first record ending there would be taken for the end
 of the capture (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1586">#1586</a>). The read slides the buffer, so a position before
-the one <code class="xref py py-data docutils literal notranslate"><span class="pre">SEEK_END</span></code> was sought from may then be refused, as
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_ahead()</span></code> says.</p>
+the one <a class="reference external" href="https://docs.python.org/3/library/os.html#os.SEEK_END" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">SEEK_END</span></code></a> was sought from may then be refused, as
+<a class="reference internal" href="#pcapkit.corekit.io.SeekableReader._read_ahead" title="pcapkit.corekit.io.SeekableReader._read_ahead"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_read_ahead()</span></code></a> says.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -784,7 +785,7 @@ for. It is also what CPython’s own read-only buffered readers do: both the
 accelerated <a class="reference external" href="https://docs.python.org/3/library/io.html#io.BufferedReader" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">io.BufferedReader</span></code></a> and the pure-Python
 <code class="docutils literal notranslate"><span class="pre">_pyio.BufferedReader</span></code> raise <a class="reference external" href="https://docs.python.org/3/library/io.html#io.UnsupportedOperation" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">io.UnsupportedOperation</span></code></a>, the latter from
 <code class="docutils literal notranslate"><span class="pre">_BufferedIOMixin.truncate</span></code>’s <code class="docutils literal notranslate"><span class="pre">_checkWritable()</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/645">#645</a>).</p>
-<p>Resizing the lookback buffer is reachable internally, as <code class="xref py py-meth docutils literal notranslate"><span class="pre">_truncate_buffer()</span></code>.
+<p>Resizing the lookback buffer is reachable internally, as <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader._truncate_buffer" title="pcapkit.corekit.io.SeekableReader._truncate_buffer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_truncate_buffer()</span></code></a>.
 It never touches the underlying stream – it resizes a private lookback window –
 which is why it stays, under a private name.</p>
 </div>
@@ -858,6 +859,76 @@ terminal/tty device).</p>
 </dl>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.corekit.io.SeekableReader._read_ahead_size">
+<span class="sig-name descname"><span class="pre">_read_ahead_size</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.corekit.io.SeekableReader._read_ahead_size" title="Link to this definition">¶</a></dt>
+<dd><p>Octets <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.seek" title="pcapkit.corekit.io.SeekableReader.seek"><code class="xref py py-meth docutils literal notranslate"><span class="pre">seek()</span></code></a> reads past the position to find the end of the stream;
+the buffer size by default.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.corekit.io.SeekableReader._read_ahead">
+<span class="sig-name descname"><span class="pre">_read_ahead</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/io.html#SeekableReader._read_ahead"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.io.SeekableReader._read_ahead" title="Link to this definition">¶</a></dt>
+<dd><p>Read the stream to <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader._read_ahead_size" title="pcapkit.corekit.io.SeekableReader._read_ahead_size"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_read_ahead_size</span></code></a> octets past the position.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>that many octets past the position, or the
+end of the stream if it ended first. <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.seek" title="pcapkit.corekit.io.SeekableReader.seek"><code class="xref py py-meth docutils literal notranslate"><span class="pre">seek()</span></code></a> takes this as the end.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
+</dd>
+</dl>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The buffer slides forward to make the room, so after this only the last
+<code class="docutils literal notranslate"><span class="pre">_buffer_size</span></code> less <code class="docutils literal notranslate"><span class="pre">_read_ahead_size</span></code> octets before the position can still
+be sought back to – none, at the default – unless <code class="docutils literal notranslate"><span class="pre">buffer_save</span></code> keeps them.
+It grows instead of sliding past the position itself, so a record longer than
+the buffer is held whole, as its reader seeks back to its first octet; a bogus
+length grows it only as far as the stream goes. A live stream holds the reader
+here until the octets arrive, which is why the engines set
+<a class="reference internal" href="#pcapkit.corekit.io.SeekableReader._read_ahead_size" title="pcapkit.corekit.io.SeekableReader._read_ahead_size"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_read_ahead_size</span></code></a> to the record they are about to read.</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.corekit.io.SeekableReader._truncate_buffer">
+<span class="sig-name descname"><span class="pre">_truncate_buffer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/io.html#SeekableReader._truncate_buffer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.io.SeekableReader._truncate_buffer" title="Link to this definition">¶</a></dt>
+<dd><p>Resize the lookback buffer to the given <code class="docutils literal notranslate"><span class="pre">size</span></code> in bytes (or the current position if
+<code class="docutils literal notranslate"><span class="pre">size</span></code> is not specified). The current stream position isn’t changed. This resizing can
+extend or reduce the current buffer size. In case of extension, the new area is
+zero-filled. The new buffer size is returned.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Nothing here writes to the underlying stream – <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.write" title="pcapkit.corekit.io.SeekableReader.write"><code class="xref py py-meth docutils literal notranslate"><span class="pre">write()</span></code></a> raises – so what
+this resizes is the buffer, not the stream behind it. That is why <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.truncate" title="pcapkit.corekit.io.SeekableReader.truncate"><code class="xref py py-meth docutils literal notranslate"><span class="pre">truncate()</span></code></a>
+refuses (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/645">#645</a>) while this remains: the operation is a private-window one,
+not an <a class="reference external" href="https://docs.python.org/3/library/io.html#io.IOBase" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">io.IOBase</span></code></a> write. The buffer is a sliding window over a stream that
+cannot be seeked: its octet 0 sits at absolute offset <code class="docutils literal notranslate"><span class="pre">_buffer_set</span></code>, its content
+occupies <code class="docutils literal notranslate"><span class="pre">[0:_buffer_cur]</span></code>, and everything past that is padding never read.</p>
+<p>As for which octets survive: an extension appends its zero octets at
+the <strong>tail</strong>, the new area being by definition the region past the old end. A
+reduction below the content keeps the <strong>most recent</strong> <code class="docutils literal notranslate"><span class="pre">size</span></code> octets and advances
+<code class="docutils literal notranslate"><span class="pre">_buffer_set</span></code> past the ones it drops, because what this holds is lookback: the
+octets it can still answer for are the ones just read, and the stream is already
+beyond them. Padding is never kept in preference to content either way.</p>
+<p>Advancing <code class="docutils literal notranslate"><span class="pre">_buffer_set</span></code> is what keeps <code class="docutils literal notranslate"><span class="pre">_buffer_set</span> <span class="pre">+</span> <span class="pre">_buffer_cur</span></code> equal to how far
+the stream has actually been consumed, which <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.seek" title="pcapkit.corekit.io.SeekableReader.seek"><code class="xref py py-meth docutils literal notranslate"><span class="pre">seek()</span></code></a> relies on to decide whether
+it may read ahead to fill a gap. A reduction that shrank the window without moving its
+base would leave that sum short of the stream, and the next forward <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.seek" title="pcapkit.corekit.io.SeekableReader.seek"><code class="xref py py-meth docutils literal notranslate"><span class="pre">seek()</span></code></a> would
+splice in octets from the wrong absolute offset without complaining.</p>
+<p>Octets dropped by a reduction are gone for good, since the stream cannot be rewound to
+re-supply them. A position left among them is then before the window, which
+<a class="reference internal" href="#pcapkit.corekit.io.SeekableReader.seek" title="pcapkit.corekit.io.SeekableReader.seek"><code class="xref py py-meth docutils literal notranslate"><span class="pre">seek()</span></code></a> refuses as it refuses any other.</p>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -906,7 +977,7 @@ open file not at all.</p>
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.io.</span></span><span class="sig-name descname"><span class="pre">NamedStream</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stream</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/io.html#NamedStream"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.io.NamedStream" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
 <p>Read-only proxy that gives a stream the <code class="docutils literal notranslate"><span class="pre">name</span></code> attribute.</p>
-<p><code class="xref py py-func docutils literal notranslate"><span class="pre">pcapfile.savefile.load_savefile()</span></code> dereferences <code class="docutils literal notranslate"><span class="pre">input_file.name</span></code>
+<p><code class="docutils literal notranslate"><span class="pre">pcapfile.savefile.load_savefile</span></code> dereferences <code class="docutils literal notranslate"><span class="pre">input_file.name</span></code>
 unconditionally, on the way into its trace helper. That is fine for the
 <a class="reference external" href="https://docs.python.org/3/library/io.html#io.BufferedReader" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">BufferedReader</span></code></a> <a class="reference internal" href="../foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>
 normally holds, but not for the <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader" title="pcapkit.corekit.io.SeekableReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">SeekableReader</span></code></a>

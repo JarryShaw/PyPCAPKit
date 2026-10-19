@@ -28,25 +28,36 @@ names, c.f., :rfc:`5797#section-3`.
 
 .. versionchanged:: 1.5.0
 
-   Neither ``Command._missing_`` nor ``Command.get()`` mints a member
-   (:issue:`860`): only IANA-registered values are members, and a new one is
-   created through :meth:`~pcapkit.const.ftp.command.Command.register`, which
-   can supply the ``feat``, ``desc``, ``type`` and ``conf`` a bare wire command
-   word carries none of. A minted member had each of them at its default.
+   Neither :meth:`Command._missing_ <pcapkit.const.ftp.command.Command._missing_>` nor
+   :meth:`Command.get() <pcapkit.const.ftp.command.Command.get>` mints a member
+   (:issue:`860`): only IANA-registered values are members, and a new one is created
+   through :meth:`~pcapkit.const.ftp.command.Command.register`, which can supply the
+   ``feat``, ``desc``, ``type`` and ``conf`` a bare wire command word carries none of. A
+   minted member had each of them at its default.
 
-   ``Command.get()`` refuses a non-:class:`str` ``key`` with
-   :exc:`~pcapkit.utilities.exceptions.EnumValueError`, with or without
-   ``default`` (:issue:`1824`). ``get(42)`` and ``get(None)`` raised
+   :meth:`Command.get() <pcapkit.const.ftp.command.Command.get>` refuses a
+   non-:class:`str` ``key`` with :exc:`~pcapkit.utilities.exceptions.EnumValueError`, with
+   or without ``default`` (:issue:`1824`). ``get(42)`` and ``get(None)`` raised
    :exc:`AttributeError` from ``key.upper()``, and ``get(b'ABOR')`` returned an
-   unregistered member whose name and value were both the :class:`bytes`
-   object.
+   unregistered member whose name and value were both the :class:`bytes` object.
 
 .. autoclass:: pcapkit.const.ftp.command.Command
    :members:
    :undoc-members:
    :show-inheritance:
+   :special-members: __new__, __repr__
 
 .. autoclass:: pcapkit.const.ftp.command.FEATCode
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.const.ftp.command.CommandType
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.const.ftp.command.ConformanceRequirement
    :members:
    :undoc-members:
    :show-inheritance:
@@ -60,6 +71,17 @@ This module contains the constant enumeration for **FTP Server Return Code**,
 which is automatically generated from :class:`pcapkit.vendor.ftp.return_code.ReturnCode`.
 
 .. autoclass:: pcapkit.const.ftp.return_code.ReturnCode
+   :members:
+   :undoc-members:
+   :show-inheritance:
+   :special-members: __new__, __repr__, __str__
+
+.. autoclass:: pcapkit.const.ftp.return_code.ResponseKind
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.const.ftp.return_code.GroupingInformation
    :members:
    :undoc-members:
    :show-inheritance:

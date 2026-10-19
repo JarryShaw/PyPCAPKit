@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -578,8 +579,10 @@
 <span class="n">_P</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_P'</span><span class="p">)</span>
 
 
-<span class="c1">#: Engines whose library opens the input by *path*, ``Extractor._ifnm``, rather</span>
-<span class="c1">#: than reading ``Extractor._ifile``, so they cannot take an unnamed stream.</span>
+<span class="c1">#: Engines whose library opens the input by *path*,</span>
+<span class="c1">#: :attr:`Extractor._ifnm &lt;pcapkit.foundation.extraction.Extractor._ifnm&gt;`, rather than reading</span>
+<span class="c1">#: :attr:`Extractor._ifile &lt;pcapkit.foundation.extraction.Extractor._ifile&gt;`, so they cannot take an</span>
+<span class="c1">#: unnamed stream.</span>
 <span class="n">_PATH_ENGINES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s1">'scapy'</span><span class="p">,</span> <span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcap'</span><span class="p">,</span> <span class="s1">'pcap_ct'</span><span class="p">})</span>
 
 
@@ -592,7 +595,7 @@
 <span class="sd">        For supported engines, please refer to</span>
 <span class="sd">        :meth:`~pcapkit.foundation.extraction.Extractor.run`.</span>
 
-<span class="sd">    .. versionchanged:: 1.2.0</span>
+<span class="sd">    .. versionchanged:: 1.1.1.post2</span>
 
 <span class="sd">       ``strict`` is renamed ``reasm_strict``, with no alias, and</span>
 <span class="sd">       ``reasm_store`` is inserted after it, so a positional argument from</span>
@@ -699,7 +702,7 @@
         <span class="n">_exptl</span><span class="p">:</span> <span class="s1">'Protocols'</span>
         <span class="c1">#: Extract til layer.</span>
         <span class="n">_exlyr</span><span class="p">:</span> <span class="s1">'Layers'</span>
-        <span class="c1">#: Caller supplied parsing context, c.f. :mod:`pcapkit.corekit.context`.</span>
+        <span class="c1">#: Caller supplied parsing context, cf. :mod:`pcapkit.corekit.context`.</span>
         <span class="n">_exctx</span><span class="p">:</span> <span class="s1">'ContextRegistry'</span>
         <span class="c1">#: Extraction engine name.</span>
         <span class="n">_exnam</span><span class="p">:</span> <span class="s1">'Engines'</span>
@@ -955,7 +958,7 @@
 <span class="sd">            ext: file extension</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            RegistryError: If ``dumper`` is not a class, or not a ``Dumper`` subclass.</span>
+<span class="sd">            RegistryError: If ``dumper`` is not a class, or not a :class:`~pcapkit.dumpkit.common.Dumper` subclass.</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            RegistryWarning: If a different dumper is already registered for</span>
@@ -1014,7 +1017,8 @@
 <span class="sd">                engine ``name`` shipped with</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            RegistryError: If ``engine`` is not a class, or not an ``Engine`` subclass.</span>
+<span class="sd">            RegistryError: If ``engine`` is not a class, or not an</span>
+<span class="sd">                :class:`~pcapkit.foundation.engines.engine.Engine` subclass.</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            RegistryWarning: If a different class is already registered under</span>
@@ -1051,6 +1055,8 @@
         <span class="bp">cls</span><span class="o">.</span><span class="n">_register_internal_engine</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">engine</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="Extractor._register_internal_engine">
+<a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._register_internal_engine">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_register_internal_engine</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">engine</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[EngineBase] | Type[EngineBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Register an engine for pcapkit's own use, bypassing the public guard.</span>
@@ -1065,7 +1071,7 @@
 <span class="sd">                :class:`~pcapkit.foundation.engines.engine.EngineBase` subclass</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            RegistryError: If ``engine`` is not an ``EngineBase`` subclass.</span>
+<span class="sd">            RegistryError: If ``engine`` is not an :class:`~pcapkit.foundation.engines.engine.EngineBase` subclass.</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            RegistryWarning: If a different class is already registered under</span>
@@ -1079,7 +1085,8 @@
         <span class="n">incumbent</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">__engine__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">incumbent</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">engine</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'engine </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> already registered, overwriting'</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">)</span>
-        <span class="bp">cls</span><span class="o">.</span><span class="n">__engine__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">engine</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">__engine__</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">engine</span></div>
+
 
 <div class="viewcode-block" id="Extractor.register_reassembly">
 <a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.register_reassembly">[docs]</a>
@@ -1111,7 +1118,8 @@
 <span class="sd">                ``protocol`` shipped with</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            RegistryError: If ``reassembly`` is not a class, or not a ``Reassembly`` subclass.</span>
+<span class="sd">            RegistryError: If ``reassembly`` is not a class, or not a</span>
+<span class="sd">                :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` subclass.</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            RegistryWarning: If a different class is already registered under</span>
@@ -1154,7 +1162,8 @@
 <span class="sd">                :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase` subclass</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            RegistryError: If ``reassembly`` is not a ``ReassemblyBase`` subclass.</span>
+<span class="sd">            RegistryError: If ``reassembly`` is not a</span>
+<span class="sd">                :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase` subclass.</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            RegistryWarning: If a different class is already registered under</span>
@@ -1200,7 +1209,8 @@
 <span class="sd">                ``protocol`` shipped with</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            RegistryError: If ``traceflow`` is not a class, or not a ``TraceFlow`` subclass.</span>
+<span class="sd">            RegistryError: If ``traceflow`` is not a class, or not a</span>
+<span class="sd">                :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` subclass.</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            RegistryWarning: If a different class is already registered under</span>
@@ -1243,7 +1253,8 @@
 <span class="sd">                :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase` subclass</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            RegistryError: If ``traceflow`` is not a ``TraceFlowBase`` subclass.</span>
+<span class="sd">            RegistryError: If ``traceflow`` is not a</span>
+<span class="sd">                :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase` subclass.</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            RegistryWarning: If a different class is already registered under</span>
@@ -1288,7 +1299,7 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            FormatError: If the selected engine cannot read the input's format --</span>
-<span class="sd">                for the default engine, if it is neither PCAP nor PCAP-NG -- or if</span>
+<span class="sd">                for the :term:`default engine`, if it is neither PCAP nor PCAP-NG -- or if</span>
 <span class="sd">                the built-in PCAP-NG engine reads a PCAP-NG input to PCAP output.</span>
 
 <span class="sd">        :rtype: None</span>
@@ -1326,7 +1337,7 @@
 
 <span class="sd">        An engine that is unknown, not installed, or rules itself out via</span>
 <span class="sd">        :meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`</span>
-<span class="sd">        is replaced by the default one, and :attr:`self._exnam</span>
+<span class="sd">        is replaced by the :term:`default engine`, and :attr:`self._exnam</span>
 <span class="sd">        &lt;pcapkit.foundation.extraction.Extractor._exnam&gt;` is updated to match.</span>
 <span class="sd">        :meth:`__init__` calls this before choosing the output format, so that</span>
 <span class="sd">        the choice reflects the engine that runs rather than the one requested.</span>
@@ -1715,7 +1726,7 @@
 
 <span class="sd">            context: caller supplied parsing context for protocols that need</span>
 <span class="sd">                information not carried on the wire, keyed by protocol index</span>
-<span class="sd">                ID -- c.f. :mod:`pcapkit.corekit.context`. Accepts a</span>
+<span class="sd">                ID -- cf. :mod:`pcapkit.corekit.context`. Accepts a</span>
 <span class="sd">                :class:`~pcapkit.corekit.context.ContextRegistry`, a single</span>
 <span class="sd">                :class:`~pcapkit.corekit.context.ProtocolContext`, a mapping,</span>
 <span class="sd">                or any iterable of contexts. The channel is honoured by the</span>
@@ -1737,7 +1748,7 @@
 <span class="sd">                engine first, which supports PCAP output.</span>
 
 <span class="sd">            pcapkit.utilities.warnings.EngineWarning: If the requested extraction</span>
-<span class="sd">                engine is not available, c.f. :meth:`run`.</span>
+<span class="sd">                engine is not available, cf. :meth:`run`.</span>
 <span class="sd">            pcapkit.utilities.warnings.AttributeWarning: If ``trace_analyse`` is</span>
 <span class="sd">                requested while the extraction engine is PyShark.</span>
 
@@ -2055,17 +2066,25 @@
         <span class="k">raise</span> <span class="n">CallableError</span><span class="p">(</span><span class="s2">"'Extractor(auto=True)' object is not callable"</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="Extractor.__enter__">
+<a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.__enter__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Extractor'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Uses :class:`Extractor` as a context manager."""</span>
-        <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
 
+
+<div class="viewcode-block" id="Extractor.__exit__">
+<a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.__exit__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">:</span> <span class="s1">'Type[BaseException] | None'</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">:</span> <span class="s1">'BaseException | None'</span><span class="p">,</span>
                  <span class="n">traceback</span><span class="p">:</span> <span class="s1">'TracebackType | None'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
 <span class="w">        </span><span class="sd">"""Close the input file when exits."""</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'closing </span><span class="si">%s</span><span class="s1"> on context exit after </span><span class="si">%d</span><span class="s1"> frame(s)'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifnm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frnum</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
+
+<div class="viewcode-block" id="Extractor.__del__">
+<a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.__del__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__del__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Release the input stream if this class still owns an open one.</span>
 
@@ -2103,12 +2122,15 @@
         <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
             <span class="c1"># Nothing useful can be reported from a finaliser, and raising here</span>
             <span class="c1"># would only produce an "Exception ignored in __del__" on stderr.</span>
-            <span class="k">pass</span>
+            <span class="k">pass</span></div>
+
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Utilities.</span>
     <span class="c1">##########################################################################</span>
 
+<div class="viewcode-block" id="Extractor._owns_input">
+<a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._owns_input">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_owns_input</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Whether the input stream is this class's to close.</span>
 
@@ -2147,8 +2169,11 @@
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'_flag_s'</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">True</span>
-        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ifile</span><span class="p">,</span> <span class="n">SeekableReader</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ifile</span><span class="p">,</span> <span class="n">SeekableReader</span><span class="p">)</span></div>
 
+
+<div class="viewcode-block" id="Extractor._note_eof_progress">
+<a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._note_eof_progress">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_note_eof_progress</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Record this end of stream, and say whether the input advanced to reach it.</span>
 
@@ -2211,7 +2236,8 @@
             <span class="k">return</span> <span class="kc">False</span>
 
         <span class="n">previous</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eof_mark</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eof_mark</span><span class="p">,</span> <span class="n">position</span>
-        <span class="k">return</span> <span class="n">previous</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">position</span> <span class="o">&gt;</span> <span class="n">previous</span>
+        <span class="k">return</span> <span class="n">previous</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">position</span> <span class="o">&gt;</span> <span class="n">previous</span></div>
+
 
 <div class="viewcode-block" id="Extractor._cleanup">
 <a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._cleanup">[docs]</a>

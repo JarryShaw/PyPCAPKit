@@ -23,7 +23,7 @@ channel**:
    ``pcapkit`` logger sees every complaint whatever the warning filters say;
 2. the standard :mod:`warnings` machinery, via :func:`warnings.warn`, subject to
    the filters -- so :func:`warnings.filterwarnings`,
-   :func:`warnings.catch_warnings`, :mod:`pytest`'s ``filterwarnings``,
+   :class:`warnings.catch_warnings`, :mod:`pytest`'s ``filterwarnings``,
    :option:`-W` and :envvar:`PYTHONWARNINGS` govern :mod:`pcapkit` warnings
    exactly as they govern any other library's (with one wrinkle in naming a
    category on the command line, noted below).
@@ -91,7 +91,7 @@ configured separately, through the :mod:`logging` module::
    the first snippet above restores the 1.4.x quiet. In 1.4.x, constructing a
    :class:`~pcapkit.utilities.warnings.BaseWarning` installed an ``ignore``
    filter for its own class, so a caller could not re-enable them. The filter
-   went at the *front* of the process-global :data:`warnings.filters`, so it
+   went at the *front* of the process-global ``warnings.filters``, so it
    also overrode the host application's own configuration for those categories
    and made unrelated warnings re-fire (:issue:`364`).
 

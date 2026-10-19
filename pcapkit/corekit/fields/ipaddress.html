@@ -260,7 +260,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -392,6 +392,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -594,8 +595,8 @@ raised (<a class="extlink-issue reference external" href="https://github.com/Jar
 <dd class="field-odd"><p>Processed field value.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">value</span></code> is a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> (c.f.
-    <code class="xref py py-func docutils literal notranslate"><span class="pre">_reject_bool()</span></code>), is not a valid IP interface, or is the
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">value</span></code> is a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> (cf.
+    <a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._reject_bool" title="pcapkit.corekit.fields.ipaddress._reject_bool"><code class="xref py py-func docutils literal notranslate"><span class="pre">_reject_bool()</span></code></a>), is not a valid IP interface, or is the
     wrong IP version for this field.</p>
 </dd>
 </dl>
@@ -607,7 +608,7 @@ means, so <code class="docutils literal notranslate"><span class="pre">'10.0.0.1
 taken literally: a dotted mask that is neither a netmask nor a
 hostmask, such as <code class="docutils literal notranslate"><span class="pre">'10.0.0.1/255.0.255.0'</span></code>, or eight hex
 digits, such as <code class="docutils literal notranslate"><span class="pre">'10.0.0.1/0x000000ff'</span></code>. Those are the forms
-<code class="xref py py-func docutils literal notranslate"><span class="pre">str()</span></code> gives a <code class="xref py py-class docutils literal notranslate"><span class="pre">_RawMaskIPv4Interface</span></code>.</p>
+<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> gives a <a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._RawMaskIPv4Interface" title="pcapkit.corekit.fields.ipaddress._RawMaskIPv4Interface"><code class="xref py py-class docutils literal notranslate"><span class="pre">_RawMaskIPv4Interface</span></code></a>.</p>
 </div>
 </dd></dl>
 
@@ -643,7 +644,7 @@ digits, such as <code class="docutils literal notranslate"><span class="pre">'10
 <p>The trailing four octets are a dotted netmask, as written by
 <a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv4InterfaceField.pre_process" title="pcapkit.corekit.fields.ipaddress.IPv4InterfaceField.pre_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">pre_process()</span></code></a> – not a prefix length as in
 <a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv6InterfaceField.post_process" title="pcapkit.corekit.fields.ipaddress.IPv6InterfaceField.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv6InterfaceField.post_process()</span></code></a>. When they are not a
-contiguous netmask, the value is a <code class="xref py py-class docutils literal notranslate"><span class="pre">_RawMaskIPv4Interface</span></code>
+contiguous netmask, the value is a <a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._RawMaskIPv4Interface" title="pcapkit.corekit.fields.ipaddress._RawMaskIPv4Interface"><code class="xref py py-class docutils literal notranslate"><span class="pre">_RawMaskIPv4Interface</span></code></a>
 that keeps them as given, rather than an interface the stdlib
 would reinterpret (<code class="docutils literal notranslate"><span class="pre">0.0.0.255</span></code> as the hostmask of <code class="docutils literal notranslate"><span class="pre">/24</span></code>).</p>
 </div>
@@ -689,8 +690,8 @@ would reinterpret (<code class="docutils literal notranslate"><span class="pre">
 <dd class="field-odd"><p>Processed field value.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">value</span></code> is a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> (c.f.
-    <code class="xref py py-func docutils literal notranslate"><span class="pre">_reject_bool()</span></code>), is not a valid IP interface, or is the
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">value</span></code> is a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> (cf.
+    <a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._reject_bool" title="pcapkit.corekit.fields.ipaddress._reject_bool"><code class="xref py py-func docutils literal notranslate"><span class="pre">_reject_bool()</span></code></a>), is not a valid IP interface, or is the
     wrong IP version for this field.</p>
 </dd>
 </dl>
@@ -767,8 +768,8 @@ one – <code class="docutils literal notranslate"><span class="pre">258</span><
 <dd class="field-odd"><p>The converted address.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">value</span></code> is a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> (c.f.
-    <code class="xref py py-func docutils literal notranslate"><span class="pre">_reject_bool()</span></code>), is not a valid IP address, or is not of
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">value</span></code> is a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> (cf.
+    <a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._reject_bool" title="pcapkit.corekit.fields.ipaddress._reject_bool"><code class="xref py py-func docutils literal notranslate"><span class="pre">_reject_bool()</span></code></a>), is not a valid IP address, or is not of
     <code class="docutils literal notranslate"><span class="pre">version</span></code>.</p>
 </dd>
 </dl>
@@ -795,7 +796,7 @@ of. A guard that has to be remembered per call site is a guard that
 will be forgotten at the next one.</p>
 <p>The <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> rejection is the <strong>first</strong> statement here, ahead of any
 dispatch on the value’s type, for the placement reason <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/469">#469</a>
-gives and <code class="xref py py-func docutils literal notranslate"><span class="pre">_reject_bool()</span></code> repeats.</p>
+gives and <a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._reject_bool" title="pcapkit.corekit.fields.ipaddress._reject_bool"><code class="xref py py-func docutils literal notranslate"><span class="pre">_reject_bool()</span></code></a> repeats.</p>
 <p>This raises <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FieldValueError</span></code></a> and not
 <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.ProtocolError" title="pcapkit.utilities.exceptions.ProtocolError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolError</span></code></a>, which is deliberate
 even though sibling guards for the same mistake –
@@ -878,8 +879,8 @@ specifically.</p>
 <dd class="field-odd"><p>Processed field value.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">value</span></code> is a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> (c.f.
-    <code class="xref py py-func docutils literal notranslate"><span class="pre">_reject_bool()</span></code>), is not a valid IP address, or is the
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">value</span></code> is a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> (cf.
+    <a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._reject_bool" title="pcapkit.corekit.fields.ipaddress._reject_bool"><code class="xref py py-func docutils literal notranslate"><span class="pre">_reject_bool()</span></code></a>), is not a valid IP address, or is the
     wrong IP version for this field.</p>
 </dd>
 </dl>
@@ -931,6 +932,95 @@ an integer value and accept the current packet as its only argument.</p></li>
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.ipaddress._RawMaskIPv4Interface">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.ipaddress.</span></span><span class="sig-name descname"><span class="pre">_RawMaskIPv4Interface</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">address</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/ipaddress.html#_RawMaskIPv4Interface"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.ipaddress._RawMaskIPv4Interface" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Interface" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Interface</span></code></a></p>
+<p>IPv4 interface whose mask is not a contiguous netmask.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>address</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Dotted address and mask, as <code class="docutils literal notranslate"><span class="pre">'a.b.c.d/m.m.m.m'</span></code> or
+<code class="docutils literal notranslate"><span class="pre">'a.b.c.d/0xXXXXXXXX'</span></code>; either way the mask is read literally.</p>
+</dd>
+</dl>
+<p><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Interface" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ipaddress.IPv4Interface</span></code></a> can only hold a prefix length, so it
+reads a hostmask-shaped mask such as <code class="docutils literal notranslate"><span class="pre">0.0.0.255</span></code> as <code class="docutils literal notranslate"><span class="pre">/24</span></code> and rejects
+a mask such as <code class="docutils literal notranslate"><span class="pre">255.0.255.0</span></code>. This class keeps the mask octets as given
+in <a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._RawMaskIPv4Interface.netmask" title="pcapkit.corekit.fields.ipaddress._RawMaskIPv4Interface.netmask"><code class="xref py py-attr docutils literal notranslate"><span class="pre">netmask</span></code></a>, so <a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv4InterfaceField.pre_process" title="pcapkit.corekit.fields.ipaddress.IPv4InterfaceField.pre_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv4InterfaceField.pre_process()</span></code></a> writes them
+back unchanged.</p>
+<p><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#repr" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">repr()</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/pickle.html#module-pickle" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pickle</span></code></a> use the <code class="docutils literal notranslate"><span class="pre">address/mask</span></code>
+form, which <a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.IPv4InterfaceField.pre_process" title="pcapkit.corekit.fields.ipaddress.IPv4InterfaceField.pre_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv4InterfaceField.pre_process()</span></code></a> packs back to the same
+octets. The mask is dotted, except when it is hostmask-shaped (ones, then
+zeros, read from the low bit): <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.ip_interface" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ipaddress.ip_interface()</span></code></a> would read
+such a dotted mask as a hostmask, so it is written as eight hex digits
+instead, e.g. <code class="docutils literal notranslate"><span class="pre">10.0.0.1/0x000000ff</span></code>. The stdlib rejects that hex form,
+so it never means anything else there.</p>
+<p>Equality and ordering use the mask too. An instance sorts as the stdlib
+sorts <code class="docutils literal notranslate"><span class="pre">address/32</span></code>, then by mask, so the order stays total when mixed
+with <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Interface" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ipaddress.IPv4Interface</span></code></a> values.</p>
+<p>Such a mask has no prefix length, so
+<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Interface.network" title="(in Python v3.15)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">network</span></code></a>,
+<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Interface.with_prefixlen" title="(in Python v3.15)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">with_prefixlen</span></code></a> and the prefix length all
+describe the address alone (<code class="docutils literal notranslate"><span class="pre">/32</span></code>); only <a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._RawMaskIPv4Interface.netmask" title="pcapkit.corekit.fields.ipaddress._RawMaskIPv4Interface.netmask"><code class="xref py py-attr docutils literal notranslate"><span class="pre">netmask</span></code></a>,
+<a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._RawMaskIPv4Interface.hostmask" title="pcapkit.corekit.fields.ipaddress._RawMaskIPv4Interface.hostmask"><code class="xref py py-attr docutils literal notranslate"><span class="pre">hostmask</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Interface.with_netmask" title="(in Python v3.15)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">with_netmask</span></code></a> and
+<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Interface.with_hostmask" title="(in Python v3.15)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">with_hostmask</span></code></a> carry the mask.
+<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Interface.with_netmask" title="(in Python v3.15)"><code class="xref py py-attr docutils literal notranslate"><span class="pre">with_netmask</span></code></a> is always dotted, so it is
+not the round-trip form; <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> is.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.ipaddress._RawMaskIPv4Interface.netmask">
+<span class="sig-name descname"><span class="pre">netmask</span></span><a class="headerlink" href="#pcapkit.corekit.fields.ipaddress._RawMaskIPv4Interface.netmask" title="Link to this definition">¶</a></dt>
+<dd><p>Mask octets as given, which need not form a contiguous netmask.</p>
+</dd></dl>
+
+<dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.ipaddress._RawMaskIPv4Interface.hostmask">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">hostmask</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.15)"><span class="pre">IPv4Address</span></a></span><a class="headerlink" href="#pcapkit.corekit.fields.ipaddress._RawMaskIPv4Interface.hostmask" title="Link to this definition">¶</a></dt>
+<dd><p>Bitwise inverse of <a class="reference internal" href="#pcapkit.corekit.fields.ipaddress._RawMaskIPv4Interface.netmask" title="pcapkit.corekit.fields.ipaddress._RawMaskIPv4Interface.netmask"><code class="xref py py-attr docutils literal notranslate"><span class="pre">netmask</span></code></a>.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.corekit.fields.ipaddress._reject_bool">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.fields.ipaddress.</span></span><span class="sig-name descname"><span class="pre">_reject_bool</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">description</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/corekit/fields/ipaddress.html#_reject_bool"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.fields.ipaddress._reject_bool" title="Link to this definition">¶</a></dt>
+<dd><p>Reject a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> value before it reaches <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#module-ipaddress" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">ipaddress</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></span>) – Value to check.</p></li>
+<li><p><strong>description</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Human-readable description of what <code class="docutils literal notranslate"><span class="pre">value</span></code> is, used
+to build the <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FieldValueError</span></code></a> message.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><strong>FieldValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">value</span></code> is a <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a>.</p>
+</dd>
+</dl>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> is an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a> subclass, and every conversion in this
+module ultimately calls <a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.ip_address" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ipaddress.ip_address()</span></code></a> or
+<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.ip_interface" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">ipaddress.ip_interface()</span></code></a>, both of which treat any <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>
+below <code class="docutils literal notranslate"><span class="pre">2**32</span></code> as IPv4 – so without this guard, <code class="docutils literal notranslate"><span class="pre">True</span></code>/<code class="docutils literal notranslate"><span class="pre">False</span></code>
+are silently accepted as <code class="docutils literal notranslate"><span class="pre">0.0.0.1</span></code>/<code class="docutils literal notranslate"><span class="pre">0.0.0.0</span></code> (or the equivalent
+interface) on an IPv4-typed field, with <strong>no exception and no
+warning</strong>. On an IPv6-typed field the same conversion happens to
+raise instead, because the resulting
+<a class="reference external" href="https://docs.python.org/3/library/ipaddress.html#ipaddress.IPv4Address" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv4Address</span></code></a>’s version mismatches – and that
+asymmetry is exactly what let this slip past <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/469">#469</a>’s otherwise
+equivalent guard for <a class="reference internal" href="../../protocols/internet/mh.html#pcapkit.protocols.internet.mh.MH._make_opt_mn_id" title="pcapkit.protocols.internet.mh.MH._make_opt_mn_id"><code class="xref py py-meth docutils literal notranslate"><span class="pre">MH._make_opt_mn_id</span></code></a> (cf.
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/491">#491</a>).</p>
+<p>Every caller checks this <em>before</em> dispatching on the value’s type,
+for the same placement reason <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/469">#469</a> gives: a correct check
+in the wrong position does not fire.</p>
+<p>Guarding the field classes is necessary but not sufficient, because a
+<code class="docutils literal notranslate"><span class="pre">_make_*</span></code> that must know the address family before it can build the
+schema converts the argument itself and so never hands this module a
+<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">bool</span></code></a> at all. <a class="reference internal" href="#pcapkit.corekit.fields.ipaddress.parse_ip_address" title="pcapkit.corekit.fields.ipaddress.parse_ip_address"><code class="xref py py-func docutils literal notranslate"><span class="pre">parse_ip_address()</span></code></a> is where those callers
+reach this guard (cf. <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/508">#508</a>).</p>
+</div>
 </dd></dl>
 
 </section>

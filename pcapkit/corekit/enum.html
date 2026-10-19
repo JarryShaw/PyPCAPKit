@@ -260,7 +260,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -392,6 +392,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -502,8 +503,9 @@ adds the <em>mutating</em> half every registry under <a class="reference interna
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.5.0: </span>The <code class="docutils literal notranslate"><span class="pre">get</span></code> each <a class="reference internal" href="../const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a> enumeration carried as generated text
 moves onto <a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup" title="pcapkit.corekit.enum.EnumLookup"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumLookup</span></code></a>, and <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a> adds <code class="docutils literal notranslate"><span class="pre">register</span></code>,
-which is how a member is minted at runtime: outside <code class="docutils literal notranslate"><span class="pre">CGAType</span></code>, looking up
-an unknown value does not mint one (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/775">#775</a>).</p>
+which is how a member is minted at runtime: outside
+<a class="reference internal" href="../const/mh.html#pcapkit.const.mh.cga_type.CGAType" title="pcapkit.const.mh.cga_type.CGAType"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGAType</span></code></a>, looking up an unknown value does not mint
+one (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/775">#775</a>).</p>
 </div>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.enum.EnumLookup">
@@ -515,13 +517,13 @@ everything an enumeration needs in order to be <em>read</em> by name or by value
 and nothing that could grow it. <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a> adds the mutating half
 on top; a closed enumeration inherits this one directly and so is never
 handed a <code class="docutils literal notranslate"><span class="pre">register</span></code> it would have to refuse.</p>
-<p>This is a plain mix-in rather than an <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code> subclass, because
+<p>This is a plain mix-in rather than an <code class="docutils literal notranslate"><span class="pre">aenum.Enum</span></code> subclass, because
 an enumeration that already has members cannot be subclassed. Mixed in
 <em>before</em> the member type – <code class="docutils literal notranslate"><span class="pre">class</span> <span class="pre">Foo(EnumRegistry,</span> <span class="pre">IntFlag)</span></code>, or
 <code class="docutils literal notranslate"><span class="pre">class</span> <span class="pre">Bar(EnumLookup,</span> <span class="pre">IntEnum)</span></code> – it contributes methods only, so
-<code class="xref py py-mod docutils literal notranslate"><span class="pre">aenum</span></code> still resolves the member data type from the enumeration base:
-<code class="docutils literal notranslate"><span class="pre">int</span></code> for <code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code> and <code class="xref py py-class docutils literal notranslate"><span class="pre">IntFlag</span></code>, <code class="docutils literal notranslate"><span class="pre">str</span></code> for
-<code class="xref py py-class docutils literal notranslate"><span class="pre">StrEnum</span></code>. That is what lets one base serve each of them, where a
+<a class="reference external" href="https://github.com/ethanfurman/aenum"><code class="docutils literal notranslate"><span class="pre">aenum</span></code></a> still resolves the member data type from the enumeration base:
+<code class="docutils literal notranslate"><span class="pre">int</span></code> for <code class="docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code> and <code class="docutils literal notranslate"><span class="pre">aenum.IntFlag</span></code>, <code class="docutils literal notranslate"><span class="pre">str</span></code> for
+<code class="docutils literal notranslate"><span class="pre">aenum.StrEnum</span></code>. That is what lets one base serve each of them, where a
 generated template fragment would have needed a separate rendering per
 member type.</p>
 <p>Because both tiers are plain classes, inserting this one <em>above</em>
@@ -529,12 +531,12 @@ member type.</p>
 <code class="docutils literal notranslate"><span class="pre">class</span> <span class="pre">Foo(EnumRegistry,</span> <span class="pre">IntFlag)</span></code> resolves as <code class="docutils literal notranslate"><span class="pre">Foo</span> <span class="pre">-&gt;</span> <span class="pre">EnumRegistry</span> <span class="pre">-&gt;</span>
 <span class="pre">EnumLookup</span> <span class="pre">-&gt;</span> <span class="pre">IntFlag</span> <span class="pre">-&gt;</span> <span class="pre">int</span> <span class="pre">-&gt;</span> <span class="pre">...</span></code>, so <code class="docutils literal notranslate"><span class="pre">_member_type_</span></code> still comes from
 the enumeration base and not from anything in this module. Had this tier
-subclassed <code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code> in order to “be an enum”, it would have
+subclassed <code class="docutils literal notranslate"><span class="pre">aenum.Enum</span></code> in order to “be an enum”, it would have
 become the member type itself and broken every one of these shapes at once.</p>
 <p>The methods deliberately touch only <code class="docutils literal notranslate"><span class="pre">_member_map_</span></code>, <code class="docutils literal notranslate"><span class="pre">_member_names_</span></code> and
-<code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code>, which both <a class="reference external" href="https://docs.python.org/3/library/enum.html#module-enum" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code></a> and <code class="xref py py-mod docutils literal notranslate"><span class="pre">aenum</span></code> maintain, so
-nothing on this tier depends on <code class="xref py py-mod docutils literal notranslate"><span class="pre">aenum</span></code> internals at all – the
-<code class="xref py py-func docutils literal notranslate"><span class="pre">extend_enum()</span></code> call in this module belongs to
+<code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code>, which both <a class="reference external" href="https://docs.python.org/3/library/enum.html#module-enum" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code></a> and <a class="reference external" href="https://github.com/ethanfurman/aenum"><code class="docutils literal notranslate"><span class="pre">aenum</span></code></a> maintain, so
+nothing on this tier depends on <a class="reference external" href="https://github.com/ethanfurman/aenum"><code class="docutils literal notranslate"><span class="pre">aenum</span></code></a> internals at all – the
+<code class="docutils literal notranslate"><span class="pre">aenum.extend_enum</span></code> call in this module belongs to
 <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry" title="pcapkit.corekit.enum.EnumRegistry"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumRegistry</span></code></a>, which is the tier that mutates.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.enum.EnumLookup._validate_value">
@@ -574,7 +576,7 @@ subclasses <a class="reference external" href="https://docs.python.org/3/builtin
 <a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a>’s own <code class="docutils literal notranslate"><span class="pre">except</span> <span class="pre">ValueError</span></code> and falls back to <code class="docutils literal notranslate"><span class="pre">default</span></code>
 just as any other unresolvable value does. It is also quiet:
 <a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> always calls this hook inside a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">_CaughtByCaller</span></code> block for
+<a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.CaughtByCaller" title="pcapkit.utilities.exceptions.CaughtByCaller"><code class="xref py py-class docutils literal notranslate"><span class="pre">CaughtByCaller</span></code></a> block for
 <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>, so an override need not pass <code class="docutils literal notranslate"><span class="pre">quiet=True</span></code> for its
 rejection to log nothing there (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1845">#1845</a>). An override raising
 something outside that hierarchy would instead propagate past
@@ -638,15 +640,16 @@ separate object – so two names for one assignment resolve to one
 enum.</p>
 <p>It never mints while resolving <code class="docutils literal notranslate"><span class="pre">default</span></code>; <code class="docutils literal notranslate"><span class="pre">key</span></code> may still mint
 through a <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> that GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/775">#775</a>’s ruling
-deliberately kept minting, on <code class="docutils literal notranslate"><span class="pre">CGAType</span></code>. Registering a member any other way is <code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code>’s job
-and nobody else’s, which is the ruling <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/775">#775</a> exists to carry
+deliberately kept minting, on <a class="reference internal" href="../const/mh.html#pcapkit.const.mh.cga_type.CGAType" title="pcapkit.const.mh.cga_type.CGAType"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGAType</span></code></a>. Registering a
+member any other way is <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>’s job and nobody else’s, which is the ruling
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/775">#775</a> exists to carry
 out: an unrecognised or unregistered value does not become a registered
 member unless a user or caller explicitly creates one. A value inside a
 registry’s declared-but-unassigned range still resolves, through that
-registry’s own <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code>, to a
+registry’s own <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> and <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry._unregistered_member" title="pcapkit.corekit.enum.EnumRegistry._unregistered_member"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code></a>, to a
 member that is deliberately absent from the lookup tables – true
-outside <code class="docutils literal notranslate"><span class="pre">CGAType</span></code>, where such a value instead lands
-in <em>both</em> tables, exactly as <code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code> would leave it – for a
+outside <a class="reference internal" href="../const/mh.html#pcapkit.const.mh.cga_type.CGAType" title="pcapkit.const.mh.cga_type.CGAType"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGAType</span></code></a>, where such a value instead lands
+in <em>both</em> tables, exactly as <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> would leave it – for a
 non-<code class="docutils literal notranslate"><span class="pre">str</span></code> key; the <code class="docutils literal notranslate"><span class="pre">str</span></code> case is qualified below. Both describe
 <code class="docutils literal notranslate"><span class="pre">key</span></code> resolution only. <code class="docutils literal notranslate"><span class="pre">default</span></code> never reaches <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> on
 either branch: a declared-but-unassigned <code class="docutils literal notranslate"><span class="pre">default</span></code> does not resolve
@@ -673,7 +676,7 @@ transport subclasses <a class="reference internal" href="../const/reg.html#pcapk
 <a class="reference internal" href="../const/pcapng.html#pcapkit.const.pcapng.tls_key_label.TLSKeyLabel" title="pcapkit.const.pcapng.tls_key_label.TLSKeyLabel"><code class="xref py py-class docutils literal notranslate"><span class="pre">TLSKeyLabel</span></code></a>) mints on
 any path, so no live witness exists in this tree.
 <a class="reference internal" href="../const/mh.html#pcapkit.const.mh.cga_type.CGAType" title="pcapkit.const.mh.cga_type.CGAType"><code class="xref py py-class docutils literal notranslate"><span class="pre">CGAType</span></code></a>, which still mints directly
-via <code class="xref py py-func docutils literal notranslate"><span class="pre">extend_enum()</span></code>, is <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>-valued, so
+via <code class="docutils literal notranslate"><span class="pre">aenum.extend_enum</span></code>, is <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>-valued, so
 a <code class="docutils literal notranslate"><span class="pre">str</span></code> name could not reach its mint branch even if this restriction
 did not exist; it is not an exception to it, just not reachable by it.
 This is about a future <code class="docutils literal notranslate"><span class="pre">str</span></code>-valued registry (or a present one whose
@@ -688,7 +691,7 @@ an already-registered value keeps <em>that side</em> non-minting on every
 name, value and <code class="docutils literal notranslate"><span class="pre">default</span></code> alike – is non-minting.</p>
 <p>That restriction has a cost the paragraph above glosses over: a
 <em>declared-but-unassigned</em> value – the case resolved there through
-<code class="docutils literal notranslate"><span class="pre">_missing_</span></code> and <code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code> without either lookup
+<code class="docutils literal notranslate"><span class="pre">_missing_</span></code> and <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry._unregistered_member" title="pcapkit.corekit.enum.EnumRegistry._unregistered_member"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code></a> without either lookup
 table growing – is for that exact reason invisible to the
 <code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code> check above. Such a value resolves through
 <code class="docutils literal notranslate"><span class="pre">cls(value)</span></code> but not through <code class="docutils literal notranslate"><span class="pre">get(value)</span></code> when <code class="docutils literal notranslate"><span class="pre">value</span></code> is a
@@ -709,7 +712,7 @@ catches an ordinary failed construction, and so falls back to <code class="docut
 on the same terms; the <code class="docutils literal notranslate"><span class="pre">str</span></code> path does not call the hook, for the reason
 given on <a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup._validate_value" title="pcapkit.corekit.enum.EnumLookup._validate_value"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_validate_value()</span></code></a> itself.</p>
 <p>The hook and <code class="docutils literal notranslate"><span class="pre">cls(key)</span></code> run inside a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">_CaughtByCaller</span></code> block for
+<a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.CaughtByCaller" title="pcapkit.utilities.exceptions.CaughtByCaller"><code class="xref py py-class docutils literal notranslate"><span class="pre">CaughtByCaller</span></code></a> block for
 <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>, because every <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> they raise is this
 method’s own lookup miss: caught here, then answered with <code class="docutils literal notranslate"><span class="pre">default</span></code> or
 raised to the caller as the miss. A loud
@@ -720,7 +723,7 @@ serve. An error of any other class is not a lookup miss and escapes
 this method as it was raised, so it stays loud.</p>
 <p>Both failure paths raise from <a class="reference internal" href="../utilities/exceptions.html#module-pcapkit.utilities.exceptions" title="pcapkit.utilities.exceptions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.exceptions</span></code></a>
 rather than a builtin, per the ruling recorded on GitHub issue
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a>: in-library code raises from <code class="docutils literal notranslate"><span class="pre">pcapkit.utilities.exceptions</span></code>
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/923">#923</a>: in-library code raises from <a class="reference internal" href="../utilities/exceptions.html#module-pcapkit.utilities.exceptions" title="pcapkit.utilities.exceptions"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.exceptions</span></code></a>
 rather than a builtin, and whether <code class="docutils literal notranslate"><span class="pre">ValueError</span></code> or <code class="docutils literal notranslate"><span class="pre">KeyError</span></code> applies
 follows what stdlib’s <code class="docutils literal notranslate"><span class="pre">Enum</span></code> raises in the same circumstance: a name
 miss is <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#KeyError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">KeyError</span></code></a>-derived and a value miss <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a>-derived,
@@ -737,10 +740,10 @@ exception; left uncaught, it is printed by whichever hook is installed
 – the interpreter’s own, unless an earlier loud error installed
 <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s. The name miss is
 <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumKeyError" title="pcapkit.utilities.exceptions.EnumKeyError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumKeyError</span></code></a> with
-<code class="docutils literal notranslate"><span class="pre">quiet=True</span></code>, because it is in-library control flow – at
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> it is part of a
-<em>successful</em> call, since that override catches it in order to build
-an unregistered member. The value miss is quiet through the block
+<code class="docutils literal notranslate"><span class="pre">quiet=True</span></code>, because it is in-library control flow – in the
+<code class="docutils literal notranslate"><span class="pre">get</span></code> override of <a class="reference internal" href="../const/http.html#pcapkit.const.http.method.Method" title="pcapkit.const.http.method.Method"><code class="xref py py-class docutils literal notranslate"><span class="pre">Method</span></code></a> it is
+part of a <em>successful</em> call, since that override catches it in order
+to build an unregistered member. The value miss is quiet through the block
 described above, as ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1845">#1845</a> on the ground that this
 method is mostly called from protocol parsing: a value it cannot
 resolve is input for the caller to handle, not a fault to report. A
@@ -755,7 +758,7 @@ that is already a <a class="reference internal" href="../utilities/exceptions.ht
 typically <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a> from a
 subclass’s <a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup._validate_value" title="pcapkit.corekit.enum.EnumLookup._validate_value"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_validate_value()</span></code></a> – is re-raised as it stands rather
 than wrapped, so the subclass’s own message survives and no second
-error is constructed. Only <code class="xref py py-mod docutils literal notranslate"><span class="pre">aenum</span></code>’s and <a class="reference external" href="https://docs.python.org/3/library/enum.html#module-enum" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code></a>’s own “no
+error is constructed. Only <a class="reference external" href="https://github.com/ethanfurman/aenum"><code class="docutils literal notranslate"><span class="pre">aenum</span></code></a>’s and <a class="reference external" href="https://docs.python.org/3/library/enum.html#module-enum" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">enum</span></code></a>’s own “no
 member carries this value” is converted, into a quiet
 <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.EnumValueError" title="pcapkit.utilities.exceptions.EnumValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EnumValueError</span></code></a>. This is the same
 discrimination <a class="reference internal" href="fields/numbers.html#pcapkit.corekit.fields.numbers.EnumField.post_process" title="pcapkit.corekit.fields.numbers.EnumField.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">EnumField.post_process</span></code></a> already
@@ -809,13 +812,13 @@ rejection loudly (<a class="extlink-issue reference external" href="https://gith
 <dd><p>Every member matching <code class="docutils literal notranslate"><span class="pre">key</span></code>, canonical first.</p>
 <p>For a registry that maps one key to one member – which is every
 registry inheriting this base unmodified – that tuple holds exactly one
-entry, since an alias registered by <code class="xref py py-meth docutils literal notranslate"><span class="pre">register_alias()</span></code> is a second
+entry, since an alias registered by <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register_alias" title="pcapkit.corekit.enum.EnumRegistry.register_alias"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register_alias()</span></code></a> is a second
 <em>name</em> for the canonical member rather than a second member. The method
 still exists here, because <code class="docutils literal notranslate"><span class="pre">get</span></code>, <code class="docutils literal notranslate"><span class="pre">get_all</span></code>, <code class="docutils literal notranslate"><span class="pre">register</span></code> and
 <code class="docutils literal notranslate"><span class="pre">register_alias</span></code> are all to exist on every const registry (GitHub
 issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/842">#842</a>), and it is where a registry with genuinely
-several matches puts them: <code class="docutils literal notranslate"><span class="pre">AppType</span></code> overrides it to return every service IANA
-assigns to a port.</p>
+several matches puts them: <a class="reference internal" href="../const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a> overrides it
+to return every service IANA assigns to a port.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>key</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Name or value to look up.</p>
@@ -864,10 +867,10 @@ still resolves past them to the enumeration base.</p>
 <p>The caller-named path, and the only one that grows the registry:
 it mints a new member on the class at runtime under the <code class="docutils literal notranslate"><span class="pre">name</span></code> the
 caller specifies, so nothing has to be guessed (GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/842">#842</a>).
-Contrast <code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code> and <code class="docutils literal notranslate"><span class="pre">_missing_</span></code>, which resolve without naming anything.</p>
+Contrast <a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a> and <code class="docutils literal notranslate"><span class="pre">_missing_</span></code>, which resolve without naming anything.</p>
 <p>Refuses a <code class="docutils literal notranslate"><span class="pre">value</span></code> that already has a member. Without this guard,
-<code class="xref py py-func docutils literal notranslate"><span class="pre">extend_enum()</span></code> does not mint anything for an already-taken
-value – <code class="xref py py-mod docutils literal notranslate"><span class="pre">aenum</span></code> treats that as a request to <em>alias</em> the existing
+<code class="docutils literal notranslate"><span class="pre">aenum.extend_enum</span></code> does not mint anything for an already-taken
+value – <a class="reference external" href="https://github.com/ethanfurman/aenum"><code class="docutils literal notranslate"><span class="pre">aenum</span></code></a> treats that as a request to <em>alias</em> the existing
 member under the caller’s <code class="docutils literal notranslate"><span class="pre">name</span></code> instead, silently: the call returns
 the <em>existing</em> member, <code class="docutils literal notranslate"><span class="pre">name</span></code> becomes reachable in <code class="docutils literal notranslate"><span class="pre">__members__</span></code>
 pointing at it, and <code class="docutils literal notranslate"><span class="pre">_member_names_</span></code> does not grow. That is
@@ -890,7 +893,7 @@ only the genuinely new value that is about to be minted.</p>
 hook, because there the rejection is a lookup miss for the caller to
 handle; here it refuses a mint the caller explicitly asked for, which
 is a fault to report. So this calls the hook in a
-<code class="xref py py-class docutils literal notranslate"><span class="pre">_CaughtByCaller</span></code> block declaring
+<a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.CaughtByCaller" title="pcapkit.utilities.exceptions.CaughtByCaller"><code class="xref py py-class docutils literal notranslate"><span class="pre">CaughtByCaller</span></code></a> block declaring
 that nothing is caught – loud even if <code class="docutils literal notranslate"><span class="pre">register</span></code> is reached from
 inside a <code class="docutils literal notranslate"><span class="pre">get</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1845">#1845</a>).</p>
 <dl class="field-list simple">
@@ -915,7 +918,7 @@ is the whole point – a generated name is a guess.</p></li>
     <a class="reference internal" href="#pcapkit.corekit.enum.EnumLookup._validate_value" title="pcapkit.corekit.enum.EnumLookup._validate_value"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_validate_value()</span></code></a> rejects <code class="docutils literal notranslate"><span class="pre">value</span></code>. The base
     implementation of that hook accepts everything, so this cannot
     arise on a registry that does not override it.</p></li>
-<li><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><strong>ValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">name</span></code> is already taken. <code class="xref py py-mod docutils literal notranslate"><span class="pre">aenum</span></code> reports that
+<li><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><strong>ValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">name</span></code> is already taken. <a class="reference external" href="https://github.com/ethanfurman/aenum"><code class="docutils literal notranslate"><span class="pre">aenum</span></code></a> reports that
     as <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a>; it is translated so that the ways one call
     can fail are one exception type.</p></li>
 </ul>
@@ -926,7 +929,7 @@ is the whole point – a generated name is a guess.</p></li>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.enum.EnumRegistry._extend">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">_extend</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/enum.html#EnumRegistry._extend"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.enum.EnumRegistry._extend" title="Link to this definition">¶</a></dt>
-<dd><p>The raw <code class="xref py py-func docutils literal notranslate"><span class="pre">extend_enum()</span></code> call, shared by <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>
+<dd><p>The raw <code class="docutils literal notranslate"><span class="pre">aenum.extend_enum</span></code> call, shared by <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>
 and <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register_alias" title="pcapkit.corekit.enum.EnumRegistry.register_alias"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register_alias()</span></code></a>.</p>
 <p>Neither public method calls the other: <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> refuses an
 already-registered <code class="docutils literal notranslate"><span class="pre">value</span></code> before it would ever reach here, and
@@ -950,7 +953,7 @@ this shared, ungated call is what keeps that behaviour available to
 <dd class="field-odd"><p>The member now reachable under <code class="docutils literal notranslate"><span class="pre">name</span></code>, new or existing.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><strong>ValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">name</span></code> is already taken. <code class="xref py py-mod docutils literal notranslate"><span class="pre">aenum</span></code> reports that
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><strong>ValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">name</span></code> is already taken. <a class="reference external" href="https://github.com/ethanfurman/aenum"><code class="docutils literal notranslate"><span class="pre">aenum</span></code></a> reports that
     as <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#TypeError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">TypeError</span></code></a>; it is translated so that the ways one call
     can fail are one exception type.</p>
 </dd>
@@ -965,13 +968,13 @@ this shared, ungated call is what keeps that behaviour available to
 member’s mapping – so it needs an existing member to attach to, and this
 refuses a value no member carries rather than falling through to
 <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>. <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/842">#842</a> settled on an alias always attaching to an
-existing member, leaving open whether <code class="docutils literal notranslate"><span class="pre">AppType</span></code> or a concrete
-enumeration might need to alias a value no member carries. <code class="docutils literal notranslate"><span class="pre">AppType</span></code>’s
+existing member, leaving open whether <a class="reference internal" href="../const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a> or a concrete
+enumeration might need to alias a value no member carries. <a class="reference internal" href="../const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a>’s
 override does not: it requires the port to already carry a member of that
-very registry. What an alias means also differs away from <code class="docutils literal notranslate"><span class="pre">AppType</span></code>: on
-every other registry it is a custom name the caller opts into, not one
-recorded by the IANA registrars. Minting under the name of an aliasing
-call would manufacture exactly the unrecorded member <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/775">#775</a> removes.</p>
+very registry. What an alias means also differs away from
+<a class="reference internal" href="../const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a>: on every other registry it is a custom
+name the caller opts into, not one recorded by the IANA registrars. Minting under the name
+of an aliasing call would manufacture exactly the unrecorded member <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/775">#775</a> removes.</p>
 <p>Membership is tested against <code class="docutils literal notranslate"><span class="pre">_value2member_map_</span></code> rather than by
 calling <code class="docutils literal notranslate"><span class="pre">cls(value)</span></code>: a declared-but-unassigned value resolves through
 <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> to an <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry._unregistered_member" title="pcapkit.corekit.enum.EnumRegistry._unregistered_member"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_unregistered_member()</span></code></a> that is deliberately
@@ -983,8 +986,8 @@ untouched. Calls <a class="reference internal" href="#pcapkit.corekit.enum.EnumR
 would refuse this call outright – <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a> and
 <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register_alias" title="pcapkit.corekit.enum.EnumRegistry.register_alias"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register_alias()</span></code></a> test <code class="docutils literal notranslate"><span class="pre">value</span></code>’s membership for opposite
 outcomes, so neither can be the other’s implementation.
-<code class="docutils literal notranslate"><span class="pre">AppType</span></code>’s override differs: it mints a real member through
-<code class="xref py py-func docutils literal notranslate"><span class="pre">extend_enum()</span></code>, so its iteration grows too.</p>
+<a class="reference internal" href="../const/reg.html#pcapkit.const.reg.apptype.apptype.AppType" title="pcapkit.const.reg.apptype.apptype.AppType"><code class="xref py py-class docutils literal notranslate"><span class="pre">AppType</span></code></a>’s override differs: it mints a real member through
+<code class="docutils literal notranslate"><span class="pre">aenum.extend_enum</span></code>, so its iteration grows too.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -1024,7 +1027,7 @@ outcomes, so neither can be the other’s implementation.
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><strong>ValueError</strong></a> – As <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register_alias" title="pcapkit.corekit.enum.EnumRegistry.register_alias"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register_alias()</span></code></a>. Names before the failing one
-    stay registered – <code class="xref py py-func docutils literal notranslate"><span class="pre">extend_enum()</span></code> has no transaction
+    stay registered – <code class="docutils literal notranslate"><span class="pre">aenum.extend_enum</span></code> has no transaction
     to roll back, and undoing it by hand would mean reaching further
     into enumeration internals than anything else here does.</p>
 </dd>
@@ -1040,7 +1043,7 @@ it resolves without anyone asking for a name, so that such a lookup does
 not grow the registry – contrast <a class="reference internal" href="#pcapkit.corekit.enum.EnumRegistry.register" title="pcapkit.corekit.enum.EnumRegistry.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">register()</span></code></a>, the explicit path
 that does.</p>
 <p>The member is constructed through <code class="docutils literal notranslate"><span class="pre">cls._member_type_</span></code>, which
-<code class="xref py py-mod docutils literal notranslate"><span class="pre">aenum</span></code> sets from the enumeration base, so this serves <code class="docutils literal notranslate"><span class="pre">int</span></code>- and
+<a class="reference external" href="https://github.com/ethanfurman/aenum"><code class="docutils literal notranslate"><span class="pre">aenum</span></code></a> sets from the enumeration base, so this serves <code class="docutils literal notranslate"><span class="pre">int</span></code>- and
 <code class="docutils literal notranslate"><span class="pre">str</span></code>-valued registries alike without either having to say which it
 is.</p>
 <dl class="field-list simple">

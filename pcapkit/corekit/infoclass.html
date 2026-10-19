@@ -260,7 +260,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -392,6 +392,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -518,12 +519,12 @@ attributes after initialisation</p></li>
 <p class="admonition-title">Important</p>
 <p><a class="reference internal" href="#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a> will attempt to rename keys with the same names as the
 class’s builtin methods, and store the mapping information in the
-<code class="xref py py-attr docutils literal notranslate"><span class="pre">__map__</span></code> and <code class="xref py py-attr docutils literal notranslate"><span class="pre">__map_reverse__</span></code> attributes. However, when
+<a class="reference internal" href="#pcapkit.corekit.infoclass.Info.__map__" title="pcapkit.corekit.infoclass.Info.__map__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__map__</span></code></a> and <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.__map_reverse__" title="pcapkit.corekit.infoclass.Info.__map_reverse__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__map_reverse__</span></code></a> attributes. However, when
 accessing such renamed keys, the original key name should always be
 used, i.e., such renaming is totally transparent to the user.</p>
 </div>
 <div class="versionchanged">
-<p><span class="versionmodified changed">Changed in version 1.3.3: </span>Iterating an instance skips the names listed in <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.__excluded__" title="pcapkit.corekit.infoclass.Info.__excluded__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__excluded__</span></code></a>.</p>
+<p><span class="versionmodified changed">Changed in version 1.3.1.post8: </span>Iterating an instance skips the names listed in <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.__excluded__" title="pcapkit.corekit.infoclass.Info.__excluded__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__excluded__</span></code></a>.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -547,11 +548,25 @@ subclass its key’s annotation names.</p></li>
 <dd><p>List of names to be excluded from <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> conversion.</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.corekit.infoclass.Info.__map__">
+<span class="sig-name descname"><span class="pre">__map__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.corekit.infoclass.Info.__map__" title="Link to this definition">¶</a></dt>
+<dd><p>Mapping of name conflicts with builtin methods (original names to
+transformed names).</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.corekit.infoclass.Info.__map_reverse__">
+<span class="sig-name descname"><span class="pre">__map_reverse__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><span class="pre">dict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.corekit.infoclass.Info.__map_reverse__" title="Link to this definition">¶</a></dt>
+<dd><p>Mapping of name conflicts with builtin methods (transformed names to
+original names).</p>
+</dd></dl>
+
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.infoclass.Info.__init_subclass__">
 <span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__init_subclass__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/infoclass.html#Info.__init_subclass__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.infoclass.Info.__init_subclass__" title="Link to this definition">¶</a></dt>
 <dd><p>Refuse to derive from a finalised info class.</p>
-<p><code class="xref py py-func docutils literal notranslate"><span class="pre">final()</span></code> is a promise to the type
+<p><a class="reference internal" href="../utilities/index.html#pcapkit.utilities.compat.final" title="pcapkit.utilities.compat.final"><code class="xref py py-func docutils literal notranslate"><span class="pre">final()</span></code></a> is a promise to the type
 checker and nothing more: it records <code class="docutils literal notranslate"><span class="pre">__final__</span></code> on the class and
 leaves the interpreter free to subclass it anyway. Every class
 <a class="reference internal" href="#pcapkit.corekit.infoclass.info_final" title="pcapkit.corekit.infoclass.info_final"><code class="xref py py-func docutils literal notranslate"><span class="pre">info_final()</span></code></a> finalises carries a generated <code class="docutils literal notranslate"><span class="pre">__init__</span></code> built
@@ -600,7 +615,7 @@ ancestors’ state, so a subclass of a <a class="reference internal" href="#pcap
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.InfoError" title="pcapkit.utilities.exceptions.InfoError"><strong>InfoError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">cls</span></code> was marked with
-    <code class="xref py py-func docutils literal notranslate"><span class="pre">final()</span></code> but never finalised by
+    <a class="reference internal" href="../utilities/index.html#pcapkit.utilities.compat.final" title="pcapkit.utilities.compat.final"><code class="xref py py-func docutils literal notranslate"><span class="pre">final()</span></code></a> but never finalised by
     <a class="reference internal" href="#pcapkit.corekit.infoclass.info_final" title="pcapkit.corekit.infoclass.info_final"><code class="xref py py-func docutils literal notranslate"><span class="pre">info_final()</span></code></a>, i.e. it carries <code class="docutils literal notranslate"><span class="pre">__final__</span></code> in its own
     <code class="docutils literal notranslate"><span class="pre">__dict__</span></code> without <a class="reference internal" href="#pcapkit.corekit.infoclass.FinalisedState.FINAL" title="pcapkit.corekit.infoclass.FinalisedState.FINAL"><code class="xref py py-attr docutils literal notranslate"><span class="pre">FinalisedState.FINAL</span></code></a>.</p>
 </dd>
@@ -624,8 +639,8 @@ ancestors’ state, so a subclass of a <a class="reference internal" href="#pcap
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>multi</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – If set to <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a>, an iterator with a pair for each value
 of each key, as <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.to_dict" title="pcapkit.corekit.infoclass.Info.to_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_dict()</span></code></a> writes them. Otherwise a view of
-the pairs of the first value of each key, as
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">Mapping.items</span></code> returns.</p>
+the pairs of the first value of each key, as the <code class="docutils literal notranslate"><span class="pre">items</span></code>
+method of <a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.abc.Mapping</span></code></a> returns.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.ItemsView" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ItemsView</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="docutils literal notranslate"><span class="pre">VT</span></code>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterator" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterator</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <code class="docutils literal notranslate"><span class="pre">VT</span></code>]]</span></p>
@@ -658,7 +673,7 @@ as is – see <a class="reference internal" href="#pcapkit.corekit.infoclass.Inf
 <a class="reference internal" href="multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a> value is stored
 as a <a class="reference internal" href="#pcapkit.corekit.infoclass.MultiInfo" title="pcapkit.corekit.infoclass.MultiInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiInfo</span></code></a> or <a class="reference internal" href="#pcapkit.corekit.infoclass.OrderedMultiInfo" title="pcapkit.corekit.infoclass.OrderedMultiInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiInfo</span></code></a> respectively, or
 as the subclass of either that the key’s annotation names, such as
-<code class="xref py py-class docutils literal notranslate"><span class="pre">Settings</span></code>.</p>
+<a class="reference internal" href="../protocols/application/httpv2.html#pcapkit.protocols.data.application.httpv2.Settings" title="pcapkit.protocols.data.application.httpv2.Settings"><code class="xref py py-class docutils literal notranslate"><span class="pre">Settings</span></code></a>.</p>
 <p>The rebuild is as unchecked as the rest of this method: a mapping whose
 keys are not the nested class’s own is accepted and becomes an instance
 carrying those keys, exactly as a direct call to the nested class’s own
@@ -751,11 +766,11 @@ time as well as caching already generated attributes.</p>
 <p>The decorator should only be used on the <em>final</em> class. Applying it
 with <code class="docutils literal notranslate"><span class="pre">_finalised=True</span></code> seals the class against <em>subclassing</em>, which
 <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.__init_subclass__" title="pcapkit.corekit.infoclass.Info.__init_subclass__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Info.__init_subclass__()</span></code></a> enforces, and marks it with
-<code class="xref py py-func docutils literal notranslate"><span class="pre">final()</span></code> – so <code class="docutils literal notranslate"><span class="pre">&#64;info_final</span></code> implies
+<a class="reference internal" href="../utilities/index.html#pcapkit.utilities.compat.final" title="pcapkit.utilities.compat.final"><code class="xref py py-func docutils literal notranslate"><span class="pre">final()</span></code></a> – so <code class="docutils literal notranslate"><span class="pre">&#64;info_final</span></code> implies
 <code class="docutils literal notranslate"><span class="pre">&#64;final</span></code> and there is never a reason to write both. Writing both is
 harmless in either order, though; what is not is <code class="docutils literal notranslate"><span class="pre">&#64;final</span></code> <em>without</em>
 this decorator, which <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.__new__" title="pcapkit.corekit.infoclass.Info.__new__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Info.__new__()</span></code></a> refuses – provided <code class="docutils literal notranslate"><span class="pre">&#64;final</span></code>
-is <code class="xref py py-func docutils literal notranslate"><span class="pre">final()</span></code> (or, on Python 3.11 and up,
+is <a class="reference internal" href="../utilities/index.html#pcapkit.utilities.compat.final" title="pcapkit.utilities.compat.final"><code class="xref py py-func docutils literal notranslate"><span class="pre">final()</span></code></a> (or, on Python 3.11 and up,
 <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.final" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">typing.final()</span></code></a> directly). Below 3.11, plain <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.final" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">typing.final()</span></code></a>
 does not set <code class="docutils literal notranslate"><span class="pre">__final__</span></code> at all (gh-90500), so a class marked with a
 user’s own <code class="docutils literal notranslate"><span class="pre">from</span> <span class="pre">typing</span> <span class="pre">import</span> <span class="pre">final</span></code> on 3.10 is not refused: there is
@@ -805,7 +820,7 @@ mutation, as <a class="reference internal" href="#pcapkit.corekit.infoclass.Info
 <a class="reference internal" href="#pcapkit.corekit.infoclass._MultiInfo" title="pcapkit.corekit.infoclass._MultiInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">_MultiInfo</span></code></a> for how it is both).</p>
 <p>A finalised <a class="reference internal" href="#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a> holds every
 <a class="reference internal" href="multidict.html#pcapkit.corekit.multidict.MultiDict" title="pcapkit.corekit.multidict.MultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDict</span></code></a> value as one of these, and
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">to_dict()</span></code> – its own and its holder’s – turns it back into a
+<a class="reference internal" href="#pcapkit.corekit.infoclass.MultiInfo.to_dict" title="pcapkit.corekit.infoclass.MultiInfo.to_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_dict()</span></code></a> – its own and its holder’s – turns it back into a
 <a class="reference internal" href="multidict.html#pcapkit.corekit.multidict.MultiDict" title="pcapkit.corekit.multidict.MultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDict</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -816,6 +831,24 @@ mutation, as <a class="reference internal" href="#pcapkit.corekit.infoclass.Info
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.5.0.</span></p>
 </div>
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.corekit.infoclass.MultiInfo.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/infoclass.html#MultiInfo.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.infoclass.MultiInfo.to_dict" title="Link to this definition">¶</a></dt>
+<dd><p>Return the contents as a plain mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>flat</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – If omitted, a plain <a class="reference internal" href="multidict.html#pcapkit.corekit.multidict.MultiDict" title="pcapkit.corekit.multidict.MultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDict</span></code></a>
+of every value, as <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.to_dict" title="pcapkit.corekit.infoclass.Info.to_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Info.to_dict()</span></code></a> writes this object.
+Otherwise <a class="reference internal" href="multidict.html#pcapkit.corekit.multidict.MultiDict.to_dict" title="pcapkit.corekit.multidict.MultiDict.to_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDict.to_dict</span></code></a>’s <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>, of
+the first value of each key if <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a>, or of the
+<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> of them if <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -828,7 +861,7 @@ an <a class="reference internal" href="multidict.html#pcapkit.corekit.multidict.
 order for an option list.</p>
 <p>A finalised <a class="reference internal" href="#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a> holds every
 <a class="reference internal" href="multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a> value as one of these,
-and <code class="xref py py-meth docutils literal notranslate"><span class="pre">to_dict()</span></code> – its own and its holder’s – turns it back into an
+and <a class="reference internal" href="#pcapkit.corekit.infoclass.OrderedMultiInfo.to_dict" title="pcapkit.corekit.infoclass.OrderedMultiInfo.to_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_dict()</span></code></a> – its own and its holder’s – turns it back into an
 <a class="reference internal" href="multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -839,6 +872,26 @@ and <code class="xref py py-meth docutils literal notranslate"><span class="pre"
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.5.0.</span></p>
 </div>
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.corekit.infoclass.OrderedMultiInfo.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">flat</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/infoclass.html#OrderedMultiInfo.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.infoclass.OrderedMultiInfo.to_dict" title="Link to this definition">¶</a></dt>
+<dd><p>Return the contents as a plain mapping.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>flat</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – If omitted, a plain
+<a class="reference internal" href="multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a> of every
+value, in order, as <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.to_dict" title="pcapkit.corekit.infoclass.Info.to_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Info.to_dict()</span></code></a> writes this object –
+the same <a class="reference internal" href="#pcapkit.corekit.infoclass._OrderedMultiDict" title="pcapkit.corekit.infoclass._OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">_OrderedMultiDict</span></code></a> it returns.
+Otherwise <a class="reference internal" href="multidict.html#pcapkit.corekit.multidict.MultiDict.to_dict" title="pcapkit.corekit.multidict.MultiDict.to_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">MultiDict.to_dict</span></code></a>’s <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>, of
+the first value of each key if <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">True</span></code></a>, or of the
+<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">list</span></code></a> of them if <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#False" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">False</span></code></a>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <section id="internal-definitions">
@@ -859,7 +912,7 @@ dictionary. They will be automatically populated from the class
 attributes of the <a class="reference internal" href="#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a> class and its base classes.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>This is implemented thru the <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> method, which will
+<p>This is implemented thru the <a class="reference internal" href="#pcapkit.corekit.infoclass.InfoMeta.__new__" title="pcapkit.corekit.infoclass.InfoMeta.__new__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code></a> method, which will
 inherit the additional and excluded field names from the base
 classes, as well as populating the additional and excluded field
 from the subclass attributes.</p>
@@ -880,6 +933,26 @@ from the subclass attributes.</p>
 </div>
 </li>
 </ul>
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.corekit.infoclass.InfoMeta.__new__">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bases</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/infoclass.html#InfoMeta.__new__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.infoclass.InfoMeta.__new__" title="Link to this definition">¶</a></dt>
+<dd><p>Create the class, extending its <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.__additional__" title="pcapkit.corekit.infoclass.Info.__additional__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Info.__additional__</span></code></a> and
+<a class="reference internal" href="#pcapkit.corekit.infoclass.Info.__excluded__" title="pcapkit.corekit.infoclass.Info.__excluded__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Info.__excluded__</span></code></a> with every base’s.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Class name.</p></li>
+<li><p><strong>bases</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#Ellipsis" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>]</span>) – Base classes.</p></li>
+<li><p><strong>attrs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Class namespace.</p></li>
+<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments, passed on to <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">type</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<a class="reference internal" href="#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a>]</span></p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -907,7 +980,7 @@ its own.</p>
 <dt class="sig sig-object py" id="pcapkit.corekit.infoclass.FinalisedState.FINAL">
 <span class="sig-name descname"><span class="pre">FINAL</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">3</span></span><a class="headerlink" href="#pcapkit.corekit.infoclass.FinalisedState.FINAL" title="Link to this definition">¶</a></dt>
 <dd><p>Finalised. A class reaching this state is also handed to
-<code class="xref py py-func docutils literal notranslate"><span class="pre">final()</span></code>, so a correctly finalised class
+<a class="reference internal" href="../utilities/index.html#pcapkit.utilities.compat.final" title="pcapkit.utilities.compat.final"><code class="xref py py-func docutils literal notranslate"><span class="pre">final()</span></code></a>, so a correctly finalised class
 carries <em>both</em> markers – and they answer two different questions, which
 is why both are read rather than one standing in for the other.
 <code class="docutils literal notranslate"><span class="pre">__final__</span></code> answers “may this be subclassed?”, for
@@ -936,12 +1009,12 @@ live in the multi-mapping rather than in <a class="reference external" href="htt
 <p>That is the whole carve-out from <a class="reference internal" href="#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a>, and it is confined to this
 class and its subclasses, <a class="reference internal" href="#pcapkit.corekit.infoclass.MultiInfo" title="pcapkit.corekit.infoclass.MultiInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiInfo</span></code></a> and <a class="reference internal" href="#pcapkit.corekit.infoclass.OrderedMultiInfo" title="pcapkit.corekit.infoclass.OrderedMultiInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiInfo</span></code></a>:</p>
 <ul class="simple">
-<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> gives the multi-mapping its empty storage, and
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">__update__()</span></code> <em>adds</em> every pair to it, so that the inherited
+<li><p><a class="reference internal" href="#pcapkit.corekit.infoclass._MultiInfo.__new__" title="pcapkit.corekit.infoclass._MultiInfo.__new__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code></a> gives the multi-mapping its empty storage, and
+<a class="reference internal" href="#pcapkit.corekit.infoclass._MultiInfo.__update__" title="pcapkit.corekit.infoclass._MultiInfo.__update__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__update__()</span></code></a> <em>adds</em> every pair to it, so that the inherited
 <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.from_dict" title="pcapkit.corekit.infoclass.Info.from_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Info.from_dict()</span></code></a> builds one; <a class="reference internal" href="#pcapkit.corekit.infoclass.info_final" title="pcapkit.corekit.infoclass.info_final"><code class="xref py py-func docutils literal notranslate"><span class="pre">info_final()</span></code></a> generates no
 <code class="docutils literal notranslate"><span class="pre">__init__</span></code> for such a class (it has no declared fields);</p></li>
-<li><p><code class="xref py py-meth docutils literal notranslate"><span class="pre">__setattr__()</span></code> admits the multi-mapping’s own bookkeeping, and
-only while <code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code> or <code class="xref py py-meth docutils literal notranslate"><span class="pre">__update__()</span></code> is writing;</p></li>
+<li><p><a class="reference internal" href="#pcapkit.corekit.infoclass._MultiInfo.__setattr__" title="pcapkit.corekit.infoclass._MultiInfo.__setattr__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__setattr__()</span></code></a> admits the multi-mapping’s own bookkeeping, and
+only while <a class="reference internal" href="#pcapkit.corekit.infoclass._MultiInfo.__new__" title="pcapkit.corekit.infoclass._MultiInfo.__new__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code></a> or <a class="reference internal" href="#pcapkit.corekit.infoclass._MultiInfo.__update__" title="pcapkit.corekit.infoclass._MultiInfo.__update__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__update__()</span></code></a> is writing;</p></li>
 <li><p>every mutator of the multi-mapping raises
 <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><code class="xref py py-exc docutils literal notranslate"><span class="pre">UnsupportedCall</span></code></a>, as assignment to
 an <a class="reference internal" href="#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a> does;</p></li>
@@ -954,6 +1027,54 @@ protocol back to their multi-mapping class, which <a class="reference internal" 
 <p>A key also reads as an attribute, giving its first value: a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">str</span></code></a> key
 by its name, an <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.Enum" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Enum</span></code></a> key by its member name. A name the
 class itself defines, such as <code class="docutils literal notranslate"><span class="pre">items</span></code>, is a method and not a key.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.corekit.infoclass._MultiInfo.__new__">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/infoclass.html#_MultiInfo.__new__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.infoclass._MultiInfo.__new__" title="Link to this definition">¶</a></dt>
+<dd><p>Create the instance with the empty multi-mapping <a class="reference internal" href="#pcapkit.corekit.infoclass._MultiInfo.__update__" title="pcapkit.corekit.infoclass._MultiInfo.__update__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__update__()</span></code></a> adds to.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Self" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Self</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.corekit.infoclass._MultiInfo.__update__">
+<span class="sig-name descname"><span class="pre">__update__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dict_</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/infoclass.html#_MultiInfo.__update__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.infoclass._MultiInfo.__update__" title="Link to this definition">¶</a></dt>
+<dd><p>Add every pair to the multi-mapping, so that a repeated key keeps every value.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>dict_</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Mapping" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mapping</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterable" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Iterable</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]] | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Source pairs, as a mapping or an iterable of <code class="docutils literal notranslate"><span class="pre">(key,</span> <span class="pre">value)</span></code> pairs;
+a list value of a mapping counts as one pair, and a
+<a class="reference internal" href="multidict.html#pcapkit.corekit.multidict.MultiDict" title="pcapkit.corekit.multidict.MultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">MultiDict</span></code></a> gives every value of
+each key.</p></li>
+<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – More pairs, added after <code class="docutils literal notranslate"><span class="pre">dict_</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.corekit.infoclass._MultiInfo.__setattr__">
+<span class="sig-name descname"><span class="pre">__setattr__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/infoclass.html#_MultiInfo.__setattr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.infoclass._MultiInfo.__setattr__" title="Link to this definition">¶</a></dt>
+<dd><p>Admit an attribute write only while <a class="reference internal" href="#pcapkit.corekit.infoclass._MultiInfo.__new__" title="pcapkit.corekit.infoclass._MultiInfo.__new__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code></a> or <a class="reference internal" href="#pcapkit.corekit.infoclass._MultiInfo.__update__" title="pcapkit.corekit.infoclass._MultiInfo.__update__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__update__()</span></code></a> is writing.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – Attribute name.</p></li>
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Attribute value.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – Outside those writes, as assignment to any <a class="reference internal" href="#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a> does.</p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -961,7 +1082,7 @@ class itself defines, such as <code class="docutils literal notranslate"><span c
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.infoclass.</span></span><span class="sig-name descname"><span class="pre">_OrderedMultiDict</span></span><span class="sig-paren">[</span><em class="sig-param"><span class="n"><span class="pre">KT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">VT</span></span></em><span class="sig-paren">]</span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mapping</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/infoclass.html#_OrderedMultiDict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.infoclass._OrderedMultiDict" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>[<a class="reference internal" href="#pcapkit.corekit.infoclass.KT" title="pcapkit.corekit.infoclass.KT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">KT</span></code></a>, <a class="reference internal" href="#pcapkit.corekit.infoclass.VT" title="pcapkit.corekit.infoclass.VT"><code class="xref py py-obj docutils literal notranslate"><span class="pre">VT</span></code></a>]</p>
 <p>The <a class="reference internal" href="multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a> that <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.to_dict" title="pcapkit.corekit.infoclass.Info.to_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Info.to_dict()</span></code></a> returns.</p>
-<p>It adds one method, <code class="xref py py-meth docutils literal notranslate"><span class="pre">__ne__()</span></code> (<code class="xref py py-func docutils literal notranslate"><span class="pre">_ne()</span></code>). The
+<p>It adds one method, <a class="reference internal" href="#pcapkit.corekit.infoclass._OrderedMultiDict.__ne__" title="pcapkit.corekit.infoclass._OrderedMultiDict.__ne__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__ne__()</span></code></a> (<a class="reference internal" href="#pcapkit.corekit.infoclass._ne" title="pcapkit.corekit.infoclass._ne"><code class="xref py py-func docutils literal notranslate"><span class="pre">_ne()</span></code></a>). The
 <a class="reference internal" href="multidict.html#module-pcapkit.corekit.multidict" title="pcapkit.corekit.multidict"><code class="xref py py-mod docutils literal notranslate"><span class="pre">multidict</span></code></a> classes are Werkzeug’s, kept verbatim,
 and Werkzeug’s <a class="reference internal" href="multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>
 defines <code class="docutils literal notranslate"><span class="pre">__eq__</span></code> but no <code class="docutils literal notranslate"><span class="pre">__ne__</span></code>: <code class="docutils literal notranslate"><span class="pre">!=</span></code> falls back to <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>’s,
@@ -969,8 +1090,50 @@ which compares the internal buckets, so two equal exports compared
 <code class="docutils literal notranslate"><span class="pre">!=</span></code> as well as <code class="docutils literal notranslate"><span class="pre">==</span></code> – and, since <code class="docutils literal notranslate"><span class="pre">__eq__</span></code> compares the values with
 <code class="docutils literal notranslate"><span class="pre">!=</span></code>, two exports holding a nested export compared unequal
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1484">#1484</a>). Its copies, deep copies and pickles stay of this class, as
-Werkzeug’s build them from <code class="docutils literal notranslate"><span class="pre">type(self)</span></code>, and <code class="xref py py-meth docutils literal notranslate"><span class="pre">__repr__()</span></code> writes it as
+Werkzeug’s build them from <code class="docutils literal notranslate"><span class="pre">type(self)</span></code>, and <a class="reference internal" href="#pcapkit.corekit.infoclass._OrderedMultiDict.__repr__" title="pcapkit.corekit.infoclass._OrderedMultiDict.__repr__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__repr__()</span></code></a> writes it as
 the <a class="reference internal" href="multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a> it is.</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.corekit.infoclass._OrderedMultiDict.__ne__">
+<span class="sig-name descname"><span class="pre">__ne__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pcapkit.corekit.infoclass._OrderedMultiDict.__ne__" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">self</span> <span class="pre">!=</span> <span class="pre">other</span></code>, as the negation of <code class="docutils literal notranslate"><span class="pre">self</span> <span class="pre">==</span> <span class="pre">other</span></code>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">__ne__</span></code> that <a class="reference internal" href="#pcapkit.corekit.infoclass._OrderedMultiDict" title="pcapkit.corekit.infoclass._OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">_OrderedMultiDict</span></code></a> and <a class="reference internal" href="#pcapkit.corekit.infoclass.OrderedMultiInfo" title="pcapkit.corekit.infoclass.OrderedMultiInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiInfo</span></code></a>
+add to Werkzeug’s <a class="reference internal" href="multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>. A
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#NotImplemented" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">NotImplemented</span></code></a> from <code class="docutils literal notranslate"><span class="pre">__eq__</span></code> is passed on, so that Python asks
+<code class="docutils literal notranslate"><span class="pre">other</span></code> in turn, exactly as it does for <code class="docutils literal notranslate"><span class="pre">==</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.corekit.infoclass._OrderedMultiDict.__repr__">
+<span class="sig-name descname"><span class="pre">__repr__</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/infoclass.html#_OrderedMultiDict.__repr__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.infoclass._OrderedMultiDict.__repr__" title="Link to this definition">¶</a></dt>
+<dd><p>Write the export as the <a class="reference internal" href="multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>
+it is, with every pair.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.corekit.infoclass._ne">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.infoclass.</span></span><span class="sig-name descname"><span class="pre">_ne</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">self</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">other</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/infoclass.html#_ne"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.infoclass._ne" title="Link to this definition">¶</a></dt>
+<dd><p><code class="docutils literal notranslate"><span class="pre">self</span> <span class="pre">!=</span> <span class="pre">other</span></code>, as the negation of <code class="docutils literal notranslate"><span class="pre">self</span> <span class="pre">==</span> <span class="pre">other</span></code>.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">__ne__</span></code> that <a class="reference internal" href="#pcapkit.corekit.infoclass._OrderedMultiDict" title="pcapkit.corekit.infoclass._OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">_OrderedMultiDict</span></code></a> and <a class="reference internal" href="#pcapkit.corekit.infoclass.OrderedMultiInfo" title="pcapkit.corekit.infoclass.OrderedMultiInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiInfo</span></code></a>
+add to Werkzeug’s <a class="reference internal" href="multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>. A
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#NotImplemented" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">NotImplemented</span></code></a> from <code class="docutils literal notranslate"><span class="pre">__eq__</span></code> is passed on, so that Python asks
+<code class="docutils literal notranslate"><span class="pre">other</span></code> in turn, exactly as it does for <code class="docutils literal notranslate"><span class="pre">==</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>

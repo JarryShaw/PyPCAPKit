@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -488,8 +489,6 @@
 <span class="sd">:mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame</span>
 <span class="sd">cannot be used for it.</span>
 
-<span class="sd">.. _DPKT: https://dpkt.readthedocs.io</span>
-
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">copy</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">decimal</span>
@@ -542,7 +541,7 @@
 <span class="c1">#: Attribute a frame's record octets are stashed under.</span>
 <span class="c1">#:</span>
 <span class="c1">#: A `DPKT`_ packet keeps no copy of the octets it was parsed from, and</span>
-<span class="c1">#: serialising it again is not the same thing: :meth:`dpkt.ip.IP.__bytes__`</span>
+<span class="c1">#: serialising it again is not the same thing: ``dpkt.ip.IP.__bytes__``</span>
 <span class="c1">#: recomputes a zeroed checksum and length and writes them back into the</span>
 <span class="c1">#: packet, as do the transport layers beneath it. So the adapters below slice</span>
 <span class="c1">#: the wire octets out of this buffer instead, which</span>
@@ -576,8 +575,6 @@
 <span class="sd">    class: the pure-Python :class:`~decimal.Decimal` copies a subclass as</span>
 <span class="sd">    ``type(self)(str(self))``, with the constructor's defaults for the rest</span>
 <span class="sd">    (:issue:`1647`).</span>
-
-<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
 
 <span class="sd">    """</span>
 
@@ -618,8 +615,6 @@
 <span class="sd">        resolution: Timestamp resolution of the record, in units per second.</span>
 <span class="sd">        orig_len: Original length of the packet, or :data:`None` if unknown.</span>
 
-<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
-
 <span class="sd">    """</span>
 
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'exact'</span><span class="p">,</span> <span class="s1">'resolution'</span><span class="p">,</span> <span class="s1">'orig_len'</span><span class="p">)</span>
@@ -649,8 +644,6 @@
 <span class="sd">        resolution: Timestamp resolution of the record, in units per second.</span>
 <span class="sd">        orig_len: Original length of the packet, or :data:`None` if unknown.</span>
 
-<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
-
 <span class="sd">    """</span>
 
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'exact'</span><span class="p">,</span> <span class="s1">'resolution'</span><span class="p">,</span> <span class="s1">'orig_len'</span><span class="p">)</span>
@@ -677,8 +670,6 @@
 <span class="sd">        packet: DPKT packet.</span>
 <span class="sd">        timestamp: Capture timestamp of the packet, as `DPKT`_'s reader yielded it</span>
 <span class="sd">            beside the record's octets.</span>
-
-<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
 
 <span class="sd">    """</span>
     <span class="nb">setattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">TIMESTAMP_ATTR</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span></div>
@@ -718,6 +709,8 @@
 
 
 
+<div class="viewcode-block" id="_capture_time">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.dpkt._capture_time">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_capture_time</span><span class="p">(</span><span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float | Decimal'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'float'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""The capture timestamp reassembly and flow tracing are handed.</span>
 
@@ -730,15 +723,14 @@
 <span class="sd">        so can be an ulp off at a small ``tv_sec``:</span>
 <span class="sd">        ``1.0036909999999999`` for ``1.003691`` (:issue:`1668`). A</span>
 <span class="sd">        :class:`RecordTimestamp` is therefore read by its exact value. Any other</span>
-<span class="sd">        timestamp -- one passed by hand, or yielded by a ``dpkt`` whose reader</span>
+<span class="sd">        timestamp -- one passed by hand, or yielded by a |dpkt|_ whose reader</span>
 <span class="sd">        the engine could not extend -- carries none, and is handed on as it is.</span>
-
-<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="n">RecordTimestamp</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">timestamp</span><span class="o">.</span><span class="n">exact</span><span class="p">)</span>
-    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">timestamp</span><span class="p">)</span></div>
+
 
 
 <div class="viewcode-block" id="attach_buffer">
@@ -750,8 +742,6 @@
 <span class="sd">        packet: DPKT packet.</span>
 <span class="sd">        buffer: Octets of the record the packet was parsed from, as `DPKT`_'s</span>
 <span class="sd">            reader yielded them.</span>
-
-<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
 
 <span class="sd">    """</span>
     <span class="nb">setattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">BUFFER_ATTR</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">buffer</span><span class="p">))</span></div>
@@ -772,8 +762,6 @@
 <span class="sd">        than read by :class:`~pcapkit.foundation.engines.dpkt.DPKT` -- is</span>
 <span class="sd">        serialised from a copy instead, so that `DPKT`_'s checksum and length</span>
 <span class="sd">        recomputation never reaches the packet itself.</span>
-
-<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
 
 <span class="sd">    """</span>
     <span class="n">buffer</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">BUFFER_ATTR</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -807,12 +795,10 @@
 <span class="sd">        and both it and ``orig_len`` come from the reader:</span>
 <span class="sd">        :class:`~pcapkit.foundation.engines.dpkt.DPKT` reads PCAP and PCAP-NG</span>
 <span class="sd">        alike into a :class:`RecordTimestamp`. A timestamp that is not one</span>
-<span class="sd">        -- a packet built by hand, or read by a ``dpkt`` whose reader the engine</span>
+<span class="sd">        -- a packet built by hand, or read by a |dpkt|_ whose reader the engine</span>
 <span class="sd">        could not extend -- is read as `DPKT`_ yields it: a</span>
 <span class="sd">        :class:`~decimal.Decimal` counts nanoseconds and a :obj:`float`</span>
 <span class="sd">        microseconds, and the octets are taken to be whole.</span>
-
-<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
 
 <span class="sd">    """</span>
     <span class="n">stamp</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">TIMESTAMP_ATTR</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">)</span>
@@ -854,12 +840,10 @@
 <span class="sd">        ipv6: DPKT IPv6 packet.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        :attr:`dpkt.ip6.IP6.all_extension_headers` where `DPKT`_ recorded it,</span>
+<span class="sd">        ``dpkt.ip6.IP6.all_extension_headers`` where `DPKT`_ recorded it,</span>
 <span class="sd">        which keeps the on-wire order and any header type that occurs twice;</span>
-<span class="sd">        otherwise the values of :attr:`~dpkt.ip6.IP6.extension_hdrs`, which</span>
-<span class="sd">        :meth:`dpkt.ip6.IP6.__len__` falls back to in the same way.</span>
-
-<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
+<span class="sd">        otherwise the values of ``dpkt.ip6.IP6.extension_hdrs``, which</span>
+<span class="sd">        ``dpkt.ip6.IP6.__len__`` falls back to in the same way.</span>
 
 <span class="sd">    """</span>
     <span class="n">ext_hdrs</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">ipv6</span><span class="p">,</span> <span class="s1">'all_extension_headers'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
@@ -873,20 +857,20 @@
 
 <span class="sd">    Args:</span>
 <span class="sd">        packet: DPKT packet, i.e. one layer of a frame.</span>
-<span class="sd">        payload: That layer's payload, i.e. :attr:`packet.data &lt;dpkt.dpkt.Packet.data&gt;`.</span>
+<span class="sd">        payload: That layer's payload, i.e. ``packet.data``.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        The advance :meth:`~dpkt.dpkt.Packet.unpack` itself made to reach the</span>
 <span class="sd">        payload.</span>
 
 <span class="sd">        For IPv6 that is the fixed header plus each extension header's</span>
-<span class="sd">        :attr:`~dpkt.ip6.IP6ExtensionHeader.length`, which is what</span>
+<span class="sd">        ``dpkt.ip6.IP6ExtensionHeader.length``, which is what</span>
 <span class="sd">        :meth:`dpkt.ip6.IP6.unpack` walks the buffer by. It cannot be taken from</span>
-<span class="sd">        ``len()``: :meth:`dpkt.ip6.IP6.__len__` sums ``len()`` of the extension</span>
+<span class="sd">        ``len()``: ``dpkt.ip6.IP6.__len__`` sums ``len()`` of the extension</span>
 <span class="sd">        headers instead, and that is 12 octets plus the *rest of the frame* for</span>
 <span class="sd">        an Authentication header -- :class:`dpkt.ip6.IP6AHHeader` trims only into</span>
-<span class="sd">        :attr:`~dpkt.ip6.IP6AHHeader.auth_data` and leaves</span>
-<span class="sd">        :attr:`~dpkt.dpkt.Packet.data` running to the end of the buffer -- and 8</span>
+<span class="sd">        ``dpkt.ip6.IP6AHHeader.auth_data`` and leaves</span>
+<span class="sd">        ``dpkt.dpkt.Packet.data`` running to the end of the buffer -- and 8</span>
 <span class="sd">        octets short of the wire for a Routing header whose Hdr Ext Len is odd</span>
 <span class="sd">        (:class:`dpkt.ip6.IP6RoutingHeader` keeps whole addresses only).</span>
 
@@ -895,8 +879,6 @@
 <span class="sd">        Header Length, options included. An Ethernet frame's falls short of the</span>
 <span class="sd">        wire where `DPKT`_ dropped some of its VLAN tags, which</span>
 <span class="sd">        :func:`_layer2bytes` then finds (:issue:`1646`).</span>
-
-<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="s1">'extension_hdrs'</span><span class="p">):</span>
@@ -933,8 +915,6 @@
 <span class="sd">        header followed by an 802.1Q tag, which it keeps in place of the ISL</span>
 <span class="sd">        one.</span>
 
-<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
-
 <span class="sd">    """</span>
     <span class="n">buffer</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">BUFFER_ATTR</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">buffer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -965,8 +945,6 @@
 <span class="sd">        frame of a raw-IP link type (:issue:`1548`); otherwise the IPv4 or IPv6</span>
 <span class="sd">        payload of its link layer, which `DPKT`_ names ``ip`` or ``ip6`` -- a</span>
 <span class="sd">        bare IP packet names neither -- or :data:`None` if it has none.</span>
-
-<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
 
 <span class="sd">    """</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">dpkt</span>  <span class="c1"># isort:skip</span>
@@ -1052,8 +1030,6 @@
 <span class="sd">        data, as it keeps one `DPKT`_ cannot decode, has no header fields, so</span>
 <span class="sd">        maps to an empty :obj:`dict`.</span>
 
-<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
-
 <span class="sd">    """</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">wrapper</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Any]'</span><span class="p">:</span>
         <span class="n">dict_</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[str, Any]</span>
@@ -1105,10 +1081,10 @@
 <span class="sd">        The header and payload are sliced out of the record octets</span>
 <span class="sd">        :class:`~pcapkit.foundation.engines.dpkt.DPKT` attached to the frame, so</span>
 <span class="sd">        they are the captured ones. A packet built by hand carries no such</span>
-<span class="sd">        buffer, and its octets are then :mod:`dpkt`'s re-serialisation of it, in</span>
+<span class="sd">        buffer, and its octets are then |dpkt|_'s re-serialisation of it, in</span>
 <span class="sd">        which a zeroed checksum or length comes back recomputed --</span>
 <span class="sd">        :func:`attach_buffer` is what makes them the wire's again. They are that</span>
-<span class="sd">        re-serialisation too where :mod:`dpkt`'s own lengths misplace the layer</span>
+<span class="sd">        re-serialisation too where |dpkt|_'s own lengths misplace the layer</span>
 <span class="sd">        in the record, as behind some stacks of VLAN tags (:issue:`1646`). The</span>
 <span class="sd">        packet itself is left untouched either way.</span>
 
@@ -1195,10 +1171,10 @@
 <span class="sd">        The header and payload are sliced out of the record octets</span>
 <span class="sd">        :class:`~pcapkit.foundation.engines.dpkt.DPKT` attached to the frame, so</span>
 <span class="sd">        they are the captured ones. A packet built by hand carries no such</span>
-<span class="sd">        buffer, and its octets are then :mod:`dpkt`'s re-serialisation of it, in</span>
+<span class="sd">        buffer, and its octets are then |dpkt|_'s re-serialisation of it, in</span>
 <span class="sd">        which a zeroed checksum or length comes back recomputed --</span>
 <span class="sd">        :func:`attach_buffer` is what makes them the wire's again. They are that</span>
-<span class="sd">        re-serialisation too where :mod:`dpkt`'s own lengths misplace the layer</span>
+<span class="sd">        re-serialisation too where |dpkt|_'s own lengths misplace the layer</span>
 <span class="sd">        in the record, as behind some stacks of VLAN tags (:issue:`1646`). The</span>
 <span class="sd">        packet itself is left untouched either way.</span>
 
@@ -1278,8 +1254,6 @@
 <span class="sd">        its position among the field's binary digits, every flag was one bit low</span>
 <span class="sd">        with NS set, a SYN reading as a FIN (:issue:`1618`).</span>
 
-<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
-
 <span class="sd">    """</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">dpkt.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TH_FIN</span><span class="p">,</span> <span class="n">TH_RST</span><span class="p">,</span> <span class="n">TH_SYN</span>  <span class="c1"># isort:skip</span>
 
@@ -1294,7 +1268,7 @@
 <span class="w">    </span><span class="sd">"""Make data for TCP reassembly.</span>
 
 <span class="sd">    A packet can be reassembled if its network layer carries a TCP layer</span>
-<span class="sd">    (:class:`dpkt.tcp.TCP`), behind any IPv6 extension headers :mod:`dpkt` decodes. TCP</span>
+<span class="sd">    (:class:`dpkt.tcp.TCP`), behind any IPv6 extension headers |dpkt|_ decodes. TCP</span>
 <span class="sd">    in an IP-in-IP tunnel, or behind an AH or IPv6 extension header carried in IPv4, is</span>
 <span class="sd">    not read.</span>
 
@@ -1313,10 +1287,10 @@
 <span class="sd">        The header and payload are sliced out of the record octets</span>
 <span class="sd">        :class:`~pcapkit.foundation.engines.dpkt.DPKT` attached to the frame, so</span>
 <span class="sd">        they are the captured ones. A packet built by hand carries no such</span>
-<span class="sd">        buffer, and its octets are then :mod:`dpkt`'s re-serialisation of it, in</span>
+<span class="sd">        buffer, and its octets are then |dpkt|_'s re-serialisation of it, in</span>
 <span class="sd">        which a zeroed checksum or length comes back recomputed --</span>
 <span class="sd">        :func:`attach_buffer` is what makes them the wire's again. They are that</span>
-<span class="sd">        re-serialisation too where :mod:`dpkt`'s own lengths misplace the layer</span>
+<span class="sd">        re-serialisation too where |dpkt|_'s own lengths misplace the layer</span>
 <span class="sd">        in the record, as behind some stacks of VLAN tags (:issue:`1646`). The</span>
 <span class="sd">        packet itself is left untouched either way.</span>
 
@@ -1373,7 +1347,7 @@
 <span class="w">    </span><span class="sd">"""Trace packet flow for TCP.</span>
 
 <span class="sd">    A packet can be traced if its network layer carries a TCP layer</span>
-<span class="sd">    (:class:`dpkt.tcp.TCP`), behind any IPv6 extension headers :mod:`dpkt` decodes. TCP</span>
+<span class="sd">    (:class:`dpkt.tcp.TCP`), behind any IPv6 extension headers |dpkt|_ decodes. TCP</span>
 <span class="sd">    in an IP-in-IP tunnel, or behind an AH or IPv6 extension header carried in IPv4, is</span>
 <span class="sd">    not read.</span>
 
@@ -1394,10 +1368,10 @@
 <span class="sd">        The header and payload are sliced out of the record octets</span>
 <span class="sd">        :class:`~pcapkit.foundation.engines.dpkt.DPKT` attached to the frame, so</span>
 <span class="sd">        they are the captured ones. A packet built by hand carries no such</span>
-<span class="sd">        buffer, and its octets are then :mod:`dpkt`'s re-serialisation of it, in</span>
+<span class="sd">        buffer, and its octets are then |dpkt|_'s re-serialisation of it, in</span>
 <span class="sd">        which a zeroed checksum or length comes back recomputed --</span>
 <span class="sd">        :func:`attach_buffer` is what makes them the wire's again. They are that</span>
-<span class="sd">        re-serialisation too where :mod:`dpkt`'s own lengths misplace the layer</span>
+<span class="sd">        re-serialisation too where |dpkt|_'s own lengths misplace the layer</span>
 <span class="sd">        in the record, as behind some stacks of VLAN tags (:issue:`1646`). The</span>
 <span class="sd">        packet itself is left untouched either way.</span>
 

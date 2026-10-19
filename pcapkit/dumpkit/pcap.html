@@ -260,7 +260,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -392,6 +392,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -506,7 +507,7 @@
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>fname</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – output file name</p></li>
-<li><p><strong>protocol</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></a> | <code class="xref py py-class docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – data link type</p></li>
+<li><p><strong>protocol</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></a> | <code class="docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – data link type</p></li>
 <li><p><strong>byteorder</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="s1"><span class="pre">'big'</span></span></code></span>, <span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="s1"><span class="pre">'little'</span></span></code></span>]</span>) – header byte order</p></li>
 <li><p><strong>nanosecond</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – nanosecond-resolution file flag</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – further global header fields, i.e. <code class="docutils literal notranslate"><span class="pre">version</span></code>, <code class="docutils literal notranslate"><span class="pre">thiszone</span></code>,
@@ -524,6 +525,112 @@ input’s values; 1.4.x wrote the defaults (<a class="extlink-issue reference ex
 <dt class="sig sig-object py" id="pcapkit.dumpkit.pcap.PCAPIO.kind">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">kind</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'pcap'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.dumpkit.pcap.PCAPIO.kind" title="Link to this definition">¶</a></dt>
 <dd><p>File format of current dumper.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.dumpkit.pcap.PCAPIO.__init__">
+<span class="sig-name descname"><span class="pre">__init__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">fname</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">protocol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">byteorder</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">sys.byteorder</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nanosecond</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/dumpkit/pcap.html#PCAPIO.__init__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.dumpkit.pcap.PCAPIO.__init__" title="Link to this definition">¶</a></dt>
+<dd><p>Initialise dumper.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>fname</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – output file name</p></li>
+<li><p><strong>protocol</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><code class="xref py py-class docutils literal notranslate"><span class="pre">LinkType</span></code></a> | <a class="reference external" href="https://docs.python.org/3/library/enum.html#enum.IntEnum" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IntEnum</span></code></a> | <code class="docutils literal notranslate"><span class="pre">aenum.IntEnum</span></code> | <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – data link type</p></li>
+<li><p><strong>byteorder</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Literal</span></code></a>[<span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="s1"><span class="pre">'big'</span></span></code></span>, <span class="highlight sphinx_autodoc_typehints-value"><code class="docutils literal notranslate"><span class="s1"><span class="pre">'little'</span></span></code></span>]</span>) – header byte order</p></li>
+<li><p><strong>nanosecond</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – nanosecond-resolution file flag</p></li>
+<li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – further global header fields, i.e. <code class="docutils literal notranslate"><span class="pre">version</span></code>,
+<code class="docutils literal notranslate"><span class="pre">thiszone</span></code>, <code class="docutils literal notranslate"><span class="pre">sigfigs</span></code> and <code class="docutils literal notranslate"><span class="pre">snaplen</span></code>, and arbitrary keyword
+arguments</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.dumpkit.pcap.PCAPIO._append_value">
+<span class="sig-name descname"><span class="pre">_append_value</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/dumpkit/pcap.html#PCAPIO._append_value"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.dumpkit.pcap.PCAPIO._append_value" title="Link to this definition">¶</a></dt>
+<dd><p>Call this function to write contents.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>value</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../protocols/misc/pcap.html#pcapkit.protocols.data.misc.pcap.frame.Frame" title="pcapkit.protocols.data.misc.pcap.frame.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code></a></span>) – content to be dumped</p></li>
+<li><p><strong>file</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IO</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]</span>) – output file</p></li>
+<li><p><strong>name</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – name of current content block</p></li>
+</ul>
+</dd>
+</dl>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p>A PCAP record is a 16-octet header followed by the packet octets, and
+both are already in hand: the header fields are <code class="docutils literal notranslate"><span class="pre">value.frame_info</span></code>,
+with the fraction in this file’s resolution (see
+<a class="reference internal" href="#pcapkit.dumpkit.pcap.PCAPIO._make_timestamp" title="pcapkit.dumpkit.pcap.PCAPIO._make_timestamp"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._make_timestamp</span></code></a>), and the octets are
+exactly <code class="docutils literal notranslate"><span class="pre">value.packet</span></code>. So this writes them directly, rather than
+handing them to
+<a class="reference internal" href="../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame" title="pcapkit.protocols.misc.pcap.frame.Frame"><code class="xref py py-class docutils literal notranslate"><span class="pre">Frame</span></code></a>, whose constructor
+packs the record and then <strong>dissects it again</strong> through the whole
+protocol stack to arrive at bytes it was given. That round trip
+measured about 82% of the cost of a flow-traced extraction – <code class="docutils literal notranslate"><span class="pre">http.pcap</span></code>,
+1117 frames, best of 7: 2319 ms with the rebuild against 1263 ms
+without, over a 1030 ms untraced baseline.</p>
+<p>Skipping it is not only cheaper. The re-dissection would re-emit
+every parse warning the frame had already produced once, and warn
+about payloads it has no business parsing at all – writing a
+3-octet payload would raise <code class="docutils literal notranslate"><span class="pre">SchemaWarning:</span> <span class="pre">packet</span> <span class="pre">length</span> <span class="pre">&lt;</span> <span class="pre">0:</span> <span class="pre">-3</span></code>
+from a dumper that only has to copy it.</p>
+<p><code class="docutils literal notranslate"><span class="pre">incl_len</span></code> is written as <code class="docutils literal notranslate"><span class="pre">len(value.packet)</span></code>, the octets that
+follow it, not as <code class="docutils literal notranslate"><span class="pre">value.frame_info.incl_len</span></code>. The two are equal
+for every record a file holds whole. A record whose captured length
+runs past the end of its file, or a PCAP-NG block whose captured
+length runs past the block (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1405">#1405</a>), is <em>kept as captured</em>
+by its reader: the declared length stays in <code class="docutils literal notranslate"><span class="pre">frame_info</span></code>, so the
+source rebuilds byte-exactly, and <code class="docutils literal notranslate"><span class="pre">packet</span></code> is the octets present.
+Copying that declared length would claim octets the trace does not
+hold, and a reader would run off the end of the file (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1541">#1541</a>).</p>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.dumpkit.pcap.PCAPIO._make_timestamp">
+<span class="sig-name descname"><span class="pre">_make_timestamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">frame_info</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">time_epoch</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/dumpkit/pcap.html#PCAPIO._make_timestamp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.dumpkit.pcap.PCAPIO._make_timestamp" title="Link to this definition">¶</a></dt>
+<dd><p>Record header seconds and fraction, in this file’s resolution.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>frame_info</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../protocols/misc/pcap.html#pcapkit.protocols.data.misc.pcap.frame.FrameInfo" title="pcapkit.protocols.data.misc.pcap.frame.FrameInfo"><code class="xref py py-class docutils literal notranslate"><span class="pre">FrameInfo</span></code></a></span>) – the frame’s record header fields</p></li>
+<li><p><strong>time_epoch</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/decimal.html#decimal.Decimal" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Decimal</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – the frame’s UNIX timestamp</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The <code class="docutils literal notranslate"><span class="pre">ts_sec</span></code> and <code class="docutils literal notranslate"><span class="pre">ts_usec</span></code> fields to write.</p>
+</dd>
+</dl>
+<div class="admonition-notes admonition">
+<p class="admonition-title">Notes</p>
+<p><code class="docutils literal notranslate"><span class="pre">frame_info</span></code> does not say which resolution its <code class="docutils literal notranslate"><span class="pre">ts_usec</span></code> is in.
+A PCAP frame carries its file’s, and one converted from PCAP-NG
+carries its interface’s (cf. <a class="reference internal" href="../toolkit/builtin.html#pcapkit.toolkit.pcapng.block2frame" title="pcapkit.toolkit.pcapng.block2frame"><code class="xref py py-func docutils literal notranslate"><span class="pre">block2frame()</span></code></a>),
+either of which may differ from this file’s (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1500">#1500</a>).
+<code class="docutils literal notranslate"><span class="pre">time_epoch</span></code> settles it: the fraction is in whichever resolution
+truncates the frame’s offset into its second to exactly that value.</p>
+<p>The fraction is written as is when that is this file’s resolution,
+so a record traced at its own resolution keeps its octets, and also
+when neither resolution fits, as for a frame built by hand. When it
+is the other resolution, the fraction is recomputed from
+<code class="docutils literal notranslate"><span class="pre">time_epoch</span></code> at this file’s – microseconds times 1000, or
+nanoseconds divided by 1000 and <strong>truncated</strong> rather than rounded.
+That is how <a class="reference internal" href="../toolkit/builtin.html#pcapkit.toolkit.pcapng.block2frame" title="pcapkit.toolkit.pcapng.block2frame"><code class="xref py py-func docutils literal notranslate"><span class="pre">block2frame()</span></code></a> and
+<a class="reference internal" href="../protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame.make" title="pcapkit.protocols.misc.pcap.frame.Frame.make"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Frame.make</span></code></a>
+reduce a timestamp to a fraction, and how libpcap scales a
+nanosecond file down (<code class="docutils literal notranslate"><span class="pre">sf-pcap.c</span></code>). It also keeps the second:
+999,999,999 ns truncates to 999,999 us, where rounding would reach
+a whole second. A recomputed fraction of a second or more is carried
+into <code class="docutils literal notranslate"><span class="pre">ts_sec</span></code>, so that multiplying by 1000 cannot overflow the
+field.</p>
+</div>
 </dd></dl>
 
 </dd></dl>

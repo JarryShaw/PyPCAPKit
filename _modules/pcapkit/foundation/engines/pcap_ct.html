@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -486,8 +487,6 @@
 <span class="sd">This module contains the implementation for `pcap-ct`_ engine</span>
 <span class="sd">support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.</span>
 
-<span class="sd">.. _pcap-ct: https://pypi.org/project/pcap-ct/</span>
-
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
@@ -510,13 +509,13 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extractor</span>
 
     <span class="k">class</span><span class="w"> </span><span class="nc">_PCAPCTPackage</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">""":mod:`pcap`, as :class:`PCAP_CT` reads it through :attr:`PCAP_CT._expkg` (#1878)."""</span>
+<span class="w">        </span><span class="sd">"""|pcap|_, as :class:`PCAP_CT` reads it through :attr:`PCAP_CT._expkg` (#1878)."""</span>
 
         <span class="nd">@property</span>
         <span class="k">def</span><span class="w"> </span><span class="nf">pcap</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[Handle]'</span><span class="p">:</span> <span class="o">...</span>
 
     <span class="c1">#: A `pcap-ct`_ "frame": the ``(timestamp, bytes)`` pair that</span>
-    <span class="c1">#: :class:`pcap.pcap` iteration yields. Deliberately *not* named ``Frame``,</span>
+    <span class="c1">#: ``pcap.pcap`` iteration yields. Deliberately *not* named ``Frame``,</span>
     <span class="c1">#: so that it is not mistaken for</span>
     <span class="c1">#: :class:`pcapkit.protocols.misc.pcap.frame.Frame`, which is what the</span>
     <span class="c1">#: built-in engines return.</span>
@@ -532,7 +531,7 @@
 <span class="sd">    the `libpcap`_ package, which supplies the :manpage:`libpcap(3)` bindings</span>
 <span class="sd">    (and ships a vendored copy of the library that it does not, by default, use</span>
 <span class="sd">    -- see the warning below). Both distributions install a</span>
-<span class="sd">    top-level :mod:`pcap` module and expose the same interface, so this engine is</span>
+<span class="sd">    top-level |pcap|_ module and expose the same interface, so this engine is</span>
 <span class="sd">    a sibling of :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` rather than a</span>
 <span class="sd">    replacement for it -- see :attr:`__engine_module__` for how the two are told</span>
 <span class="sd">    apart, and :doc:`the engine documentation</span>
@@ -565,7 +564,7 @@
 <span class="sd">       rely on it. Setting ``LIBPCAP = tcpdump`` in :file:`libpcap.cfg` selects the</span>
 <span class="sd">       vendored copy instead -- verified loading, and reporting libpcap 1.10.6.</span>
 
-<span class="sd">    Being the same interface, it has the same limits. Offline, :mod:`pcap` is a</span>
+<span class="sd">    Being the same interface, it has the same limits. Offline, |pcap|_ is a</span>
 <span class="sd">    savefile reader and nothing more: iteration yields the ``(timestamp, bytes)``</span>
 <span class="sd">    pair from :c:func:`pcap_next_ex` and no protocol dissection is performed.</span>
 <span class="sd">    Consequently this engine</span>
@@ -589,16 +588,14 @@
 <span class="sd">       ``pypcap`` 1.3.0), but that is a statement about the versions tested, not</span>
 <span class="sd">       a guarantee from upstream.</span>
 
-<span class="sd">    .. _pcap-ct: https://pypi.org/project/pcap-ct/</span>
 <span class="sd">    .. _libpcap: https://pypi.org/project/libpcap/</span>
-<span class="sd">    .. _PyPCAP: https://github.com/pynetwork/pypcap</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.</span>
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="c1">#: Engine extraction package, i.e. :mod:`pcap`.</span>
+        <span class="c1">#: Engine extraction package, i.e. |pcap|_.</span>
         <span class="n">_expkg</span><span class="p">:</span> <span class="s1">'_PCAPCTPackage'</span>
         <span class="c1">#: Capture handle, kept separately from the iterator it is read through</span>
         <span class="c1">#: so that :meth:`close` does not depend on ``iter(handle) is handle``.</span>
@@ -609,7 +606,7 @@
         <span class="n">_dlink</span><span class="p">:</span> <span class="s1">'Enum_LinkType'</span>
         <span class="c1">#: Closed flag, so that the handle is not closed twice.</span>
         <span class="n">_closed</span><span class="p">:</span> <span class="s1">'bool'</span>
-        <span class="c1">#: What the :mod:`pcap` import actually found, c.f. :attr:`backend`.</span>
+        <span class="c1">#: What the |pcap|_ import actually found, cf. :attr:`backend`.</span>
         <span class="n">_backend</span><span class="p">:</span> <span class="s1">'_pcap_backend.Probe'</span>
 
     <span class="c1">##########################################################################</span>
@@ -619,13 +616,13 @@
     <span class="c1">#: Engine name.</span>
     <span class="n">__engine_name__</span> <span class="o">=</span> <span class="s1">'PCAP_CT'</span>
 
-    <span class="c1">#: Engine module name. Note that this is ``pcap._pcap``, not ``pcap``:</span>
-    <span class="c1">#: `pcap-ct`_ and upstream `PyPCAP`_ both install a top-level :mod:`pcap`,</span>
+    <span class="c1">#: Engine module name. Note that this is ``pcap._pcap``, not |pcap|_:</span>
+    <span class="c1">#: `pcap-ct`_ and upstream `PyPCAP`_ both install a top-level |pcap|_,</span>
     <span class="c1">#: so importing that name cannot tell which of the two is present, and</span>
     <span class="c1">#: :meth:`Extractor.import_test</span>
     <span class="c1">#: &lt;pcapkit.foundation.extraction.Extractor.import_test&gt;` decides engine</span>
     <span class="c1">#: availability by import alone. ``pcap._pcap`` is the `pcap-ct`_</span>
-    <span class="c1">#: implementation module; upstream ships :mod:`pcap` as a single extension</span>
+    <span class="c1">#: implementation module; upstream ships |pcap|_ as a single extension</span>
     <span class="c1">#: module rather than a package, so the submodule import fails there and the</span>
     <span class="c1">#: two engines stay distinguishable.</span>
     <span class="n">__engine_module__</span> <span class="o">=</span> <span class="s1">'pcap._pcap'</span>
@@ -672,7 +669,7 @@
 <span class="sd">        Consulted by :meth:`pcapkit.foundation.extraction.Extractor.run` *before*</span>
 <span class="sd">        the import test, and it answers questions the import test cannot.</span>
 
-<span class="sd">        **Which distribution owns** :mod:`pcap`. Upstream `PyPCAP`_ owns that name</span>
+<span class="sd">        **Which distribution owns** |pcap|_. Upstream `PyPCAP`_ owns that name</span>
 <span class="sd">        just as legitimately, and ``import pcap._pcap`` -- what</span>
 <span class="sd">        :attr:`__engine_module__` names -- separates them only as long as upstream</span>
 <span class="sd">        keeps shipping a single extension module. Asking</span>
@@ -701,12 +698,10 @@
 <span class="sd">        which the import test then reports correctly on its own.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            A phrase naming the real cause, or :data:`None`. A :mod:`pcap` that is</span>
+<span class="sd">            A phrase naming the real cause, or :data:`None`. A |pcap|_ that is</span>
 <span class="sd">            merely absent returns :data:`None`, since the import test reports that</span>
 <span class="sd">            case in its own words.</span>
 
-<span class="sd">        .. _PyPCAP: https://github.com/pynetwork/pypcap</span>
-<span class="sd">        .. _pcap-ct: https://pypi.org/project/pcap-ct/</span>
 <span class="sd">        .. _libpcap: https://pypi.org/project/libpcap/</span>
 
 <span class="sd">        """</span>
@@ -726,7 +721,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">backend</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""The distribution, version and location this engine is driving.</span>
 
-<span class="sd">        More than one distribution provides :mod:`pcap`, so "the pcap-ct engine failed" is</span>
+<span class="sd">        More than one distribution provides |pcap|_, so "the pcap-ct engine failed" is</span>
 <span class="sd">        not a complete statement of what ran. This says which one it was, e.g.</span>
 <span class="sd">        ``pcap-ct 1.3.0b3 (/.../pcap/__init__.py)``.</span>
 
@@ -743,7 +738,7 @@
 <span class="w">        </span><span class="sd">"""Initialise the engine.</span>
 
 <span class="sd">        Warns:</span>
-<span class="sd">            EngineWarning: If both distributions that provide :mod:`pcap` are</span>
+<span class="sd">            EngineWarning: If both distributions that provide |pcap|_ are</span>
 <span class="sd">                installed. Only one of them can win the import -- measured on</span>
 <span class="sd">                Python 3.10 with both present, the ``pcap-ct`` package wins and</span>
 <span class="sd">                upstream's extension module is shadowed -- so the other is</span>
@@ -799,11 +794,11 @@
 <div class="viewcode-block" id="PCAP_CT.run">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pcap_ct.PCAP_CT.run">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Call :class:`pcap.pcap` to extract PCAP files.</span>
+<span class="w">        </span><span class="sd">"""Call ``pcap.pcap`` to extract PCAP files.</span>
 
 <span class="sd">        This method assigns :attr:`self._expkg &lt;PCAP_CT._expkg&gt;`</span>
-<span class="sd">        as :mod:`pcap`, :attr:`self._handle &lt;PCAP_CT._handle&gt;` as the</span>
-<span class="sd">        :class:`pcap.pcap` capture handle and :attr:`self._extmp</span>
+<span class="sd">        as |pcap|_, :attr:`self._handle &lt;PCAP_CT._handle&gt;` as the</span>
+<span class="sd">        ``pcap.pcap`` capture handle and :attr:`self._extmp</span>
 <span class="sd">        &lt;PCAP_CT._extmp&gt;` as an iterator over it.</span>
 
 <span class="sd">        Warns:</span>
@@ -909,7 +904,7 @@
 <span class="w">        </span><span class="sd">"""Read frames with pcap-ct engine.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            The ``(timestamp, bytes)`` pair as yielded by :class:`pcap.pcap`.</span>
+<span class="sd">            The ``(timestamp, bytes)`` pair as yielded by ``pcap.pcap``.</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            The timestamp is seconds since the epoch as a :class:`float`.</span>
@@ -923,8 +918,6 @@
 <span class="sd">        See Also:</span>
 <span class="sd">            Please refer to :meth:`PCAP.read_frame &lt;pcapkit.foundation.engines.pcap.PCAP.read_frame&gt;`</span>
 <span class="sd">            for more operational information.</span>
-
-<span class="sd">        .. _pcap-ct: https://pypi.org/project/pcap-ct/</span>
 
 <span class="sd">        """</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.toolkit.pcap_ct</span><span class="w"> </span><span class="kn">import</span> <span class="n">packet2dict</span>  <span class="c1"># isort:skip</span>
@@ -966,14 +959,14 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Close engine.</span>
 
-<span class="sd">        This method closes the underlying :class:`pcap.pcap` handle. It is</span>
+<span class="sd">        This method closes the underlying ``pcap.pcap`` handle. It is</span>
 <span class="sd">        idempotent, as :meth:`Extractor._cleanup</span>
 <span class="sd">        &lt;pcapkit.foundation.extraction.Extractor._cleanup&gt;` and</span>
 <span class="sd">        :meth:`Extractor.__exit__ &lt;pcapkit.foundation.extraction.Extractor.__exit__&gt;`</span>
 <span class="sd">        may both reach it.</span>
 
 <span class="sd">        Note:</span>
-<span class="sd">            ``pcap-ct`` 1.3.0b3's own :meth:`pcap.pcap.close` happens to tolerate</span>
+<span class="sd">            ``pcap-ct`` 1.3.0b3's own ``pcap.pcap.close`` happens to tolerate</span>
 <span class="sd">            a second call, where upstream ``pypcap`` 1.3.0 segfaults on one. The</span>
 <span class="sd">            :attr:`_closed &lt;PCAP_CT._closed&gt;` flag is kept regardless: it is not</span>
 <span class="sd">            this engine's business to depend on a pre-release's undocumented</span>

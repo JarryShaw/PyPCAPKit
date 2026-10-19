@@ -5,7 +5,7 @@ HTTP/1.* - Hypertext Transfer Protocol
 
 :mod:`pcapkit.protocols.application.httpv1` contains
 :class:`~pcapkit.protocols.application.httpv1.HTTP`,
-which implements extractor for Hypertext Transfer
+which implements an extractor for Hypertext Transfer
 Protocol (HTTP/1.*) [*]_, and its
 :class:`~pcapkit.protocols.application.httpv1.Type` enumeration. The
 structure of an HTTP/1.* message is described as below:

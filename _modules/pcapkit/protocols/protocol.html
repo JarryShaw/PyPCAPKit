@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -731,6 +732,8 @@
 <span class="n">_KEYWORD_CONSUMERS</span> <span class="o">=</span> <span class="p">(</span><span class="s1">'make'</span><span class="p">,</span> <span class="s1">'read'</span><span class="p">,</span> <span class="s1">'pack'</span><span class="p">,</span> <span class="s1">'unpack'</span><span class="p">,</span> <span class="s1">'__post_init__'</span><span class="p">,</span> <span class="s1">'__init__'</span><span class="p">)</span>
 
 
+<div class="viewcode-block" id="_declared_keywords">
+<a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol._declared_keywords">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_declared_keywords</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="s1">'type'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[frozenset[str]]'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Collect every keyword the protocol ``cls`` declares a parameter for.</span>
 
@@ -820,7 +823,8 @@
 
     <span class="n">declared</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">unchecked</span> <span class="k">else</span> <span class="nb">frozenset</span><span class="p">(</span><span class="n">names</span><span class="p">)</span>
     <span class="n">_DECLARED_KEYWORDS</span><span class="p">[</span><span class="bp">cls</span><span class="p">]</span> <span class="o">=</span> <span class="n">declared</span>
-    <span class="k">return</span> <span class="n">declared</span>
+    <span class="k">return</span> <span class="n">declared</span></div>
+
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_check_construction_keywords</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="s1">'type'</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">,</span>
@@ -892,13 +896,13 @@
 
 
 <span class="c1">#: contextvars.ContextVar[int]: How many layers of the frame being dissected</span>
-<span class="c1">#: come before the next one :meth:`ProtocolBase._parse_next_layer` parses, c.f.</span>
+<span class="c1">#: come before the next one :meth:`ProtocolBase._parse_next_layer` parses; see</span>
 <span class="c1">#: :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.</span>
 <span class="n">_frame_depth</span> <span class="o">=</span> <span class="n">contextvars</span><span class="o">.</span><span class="n">ContextVar</span><span class="p">(</span><span class="s1">'_frame_depth'</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
 
 <span class="c1">#: contextvars.ContextVar[bool]: Whether a payload is being rebuilt by</span>
 <span class="c1">#: :meth:`ProtocolBase._make_payload`, so that the layer it is rebuilt for</span>
-<span class="c1">#: parses the same octets again, c.f. :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.</span>
+<span class="c1">#: parses the same octets again; see :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.</span>
 <span class="n">_rebuilding</span> <span class="o">=</span> <span class="n">contextvars</span><span class="o">.</span><span class="n">ContextVar</span><span class="p">(</span><span class="s1">'_rebuilding'</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
 
@@ -993,9 +997,9 @@
     <span class="c1">#: :class:`~pcapkit.protocols.misc.raw.Raw`, and thus its layer is :obj:`None`.</span>
     <span class="n">__layer__</span><span class="p">:</span> <span class="s1">'Optional[Literal["Link", "Internet", "Transport", "Application"]]'</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="c1">#: Protocol index mapping for decoding next layer, c.f.</span>
+    <span class="c1">#: Protocol index mapping for decoding the next layer; see</span>
     <span class="c1">#: :meth:`self._decode_next_layer &lt;pcapkit.protocols.protocol.Protocol._decode_next_layer&gt;`</span>
-    <span class="c1">#: &amp; :meth:`self._import_next_layer &lt;pcapkit.protocols.protocol.Protocol._import_next_layer&gt;`.</span>
+    <span class="c1">#: and :meth:`self._import_next_layer &lt;pcapkit.protocols.protocol.Protocol._import_next_layer&gt;`.</span>
     <span class="c1">#: Each value is a :class:`~pcapkit.corekit.module.ModuleDescriptor` naming the</span>
     <span class="c1">#: module and class, or a :class:`Protocol` subclass.</span>
     <span class="n">__proto__</span><span class="p">:</span> <span class="s1">'DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]'</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
@@ -1013,7 +1017,7 @@
     <span class="c1">#: of declaring as a parameter, e.g. with ``kwargs.get('spam')`` in</span>
     <span class="c1">#: :meth:`read` -- as :meth:`ESP.read &lt;pcapkit.protocols.internet.esp.ESP.read&gt;`</span>
     <span class="c1">#: does with ``packet``.</span>
-    <span class="c1">#: ``_declared_keywords()`` finds keywords by</span>
+    <span class="c1">#: :func:`_declared_keywords` finds keywords by</span>
     <span class="c1">#: reading signatures, which cannot see such a name, so a protocol that</span>
     <span class="c1">#: consumes one names it here and the construction check of :meth:`__init__`</span>
     <span class="c1">#: accepts it. The union over the MRO is used, so a subclass need not repeat</span>
@@ -1049,7 +1053,7 @@
     <span class="c1">#: built without ``__init__``.</span>
     <span class="n">__reconstructing__</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="c1">#: Caller supplied parsing context, c.f. :mod:`pcapkit.corekit.context`.</span>
+    <span class="c1">#: Caller supplied parsing context; see :mod:`pcapkit.corekit.context`.</span>
     <span class="c1">#: :meth:`self.__init__ &lt;Protocol.__init__&gt;` replaces this with a real</span>
     <span class="c1">#: :class:`~pcapkit.corekit.context.ContextRegistry`; the class-level</span>
     <span class="c1">#: :data:`None` is what an instance built without ``__init__`` (e.g.</span>
@@ -1079,16 +1083,16 @@
 <span class="w">        </span><span class="sd">"""Acronym of current protocol."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
 
-    <span class="c1"># key name for the info dict</span>
+    <span class="c1"># key name for the data model</span>
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">info_name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Key name of the :attr:`info` dict."""</span>
+<span class="w">        </span><span class="sd">"""Key the enclosing layer's :term:`data model` holds :attr:`info` under."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
 
-    <span class="c1"># info dict of current instance</span>
+    <span class="c1"># data model of current instance</span>
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">info</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_PT'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Info dict of current instance."""</span>
+<span class="w">        </span><span class="sd">"""Parsed :term:`data model` of current instance."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span>
 
     <span class="c1"># binary packet data if current instance</span>
@@ -1156,12 +1160,12 @@
             <span class="p">)</span></div>
 
 
-    <span class="c1"># schema data</span>
+    <span class="c1"># header schema</span>
 <div class="viewcode-block" id="ProtocolBase.schema">
 <a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase.schema">[docs]</a>
     <span class="nd">@cached_property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">schema</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_ST'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Schema data of the protocol."""</span>
+<span class="w">        </span><span class="sd">"""Header :term:`schema` instance of the protocol."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span></div>
 
 
@@ -1403,9 +1407,6 @@
 <span class="sd">                :exc:`UnicodeDecodeError`. Other possible values are ``'ignore'`` and ``'replace'``</span>
 <span class="sd">                as well as any other name registered with :func:`codecs.register_error` that</span>
 <span class="sd">                can handle :exc:`UnicodeDecodeError`.</span>
-
-<span class="sd">        .. |chardet| replace:: ``chardet``</span>
-<span class="sd">        .. _chardet: https://chardet.readthedocs.io</span>
 
 <span class="sd">        """</span>
         <span class="n">charset</span> <span class="o">=</span> <span class="n">encoding</span> <span class="ow">or</span> <span class="n">detect</span><span class="p">(</span><span class="n">byte</span><span class="p">)</span>
@@ -1754,8 +1755,8 @@
 <span class="sd">                While parsing, it is republished as ``__packet__`` so that</span>
 <span class="sd">                :meth:`self.unpack &lt;Protocol.unpack&gt;` -- and through it the</span>
 <span class="sd">                schema -- can see it; see the note below.</span>
-<span class="sd">            __context__: Caller supplied parsing context (:attr:`self._exctx &lt;pcapkit.protocols.protocol.Protocol._exctx&gt;`),</span>
-<span class="sd">                c.f. :mod:`pcapkit.corekit.context`: a</span>
+<span class="sd">            __context__: Caller supplied parsing context (:attr:`self._exctx &lt;pcapkit.protocols.protocol.Protocol._exctx&gt;`;</span>
+<span class="sd">                see :mod:`pcapkit.corekit.context`): a</span>
 <span class="sd">                :class:`~pcapkit.corekit.context.ContextRegistry`, a</span>
 <span class="sd">                :class:`~pcapkit.corekit.context.ProtocolContext`, a mapping of</span>
 <span class="sd">                names to :class:`~pcapkit.corekit.context.ProtocolContext`, or an</span>
@@ -1895,7 +1896,7 @@
         <span class="c1"># post-init customisations</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__post_init__</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
 
-        <span class="c1"># inject packet payload to the info dict</span>
+        <span class="c1"># inject packet payload into the data model</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">packet</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">packet</span><span class="o">.</span><span class="n">payload</span><span class="p">)</span></div>
 
 
@@ -1955,7 +1956,7 @@
 <span class="sd">        This method is called when a subclass of :class:`Protocol` is defined.</span>
 <span class="sd">        It is used to set the :attr:`self.__schema__ &lt;pcapkit.protocols.protocol.Protocol.__schema__&gt;`</span>
 <span class="sd">        attribute of the subclass, and, if ``code`` is given, to register the</span>
-<span class="sd">        subclass into the next-layer dispatch registry (or registries) that</span>
+<span class="sd">        subclass into the next-layer dispatch :term:`registry` (or registries) that</span>
 <span class="sd">        ``code`` names -- e.g. :attr:`Link.__proto__</span>
 <span class="sd">        &lt;pcapkit.protocols.link.link.Link.__proto__&gt;`.</span>
 
@@ -1974,11 +1975,10 @@
 <span class="sd">        :class:`~pcapkit.dumpkit.common.Dumper`. Omitting ``code`` is a</span>
 <span class="sd">        deliberate way to decline registration, and what every built-in</span>
 <span class="sd">        protocol class does: the built-in dispatch tables (e.g.</span>
-<span class="sd">        ``Link.__proto__``) are populated by literal assignment in each layer</span>
-<span class="sd">        module, not by this hook. A subclass that declines can still be</span>
-<span class="sd">        registered later via the owning class's :meth:`register` classmethod or</span>
-<span class="sd">        the matching ``register_*`` helper in</span>
-<span class="sd">        :mod:`pcapkit.foundation.registry.protocols`.</span>
+<span class="sd">        :attr:`Link.__proto__ &lt;pcapkit.protocols.link.link.Link.__proto__&gt;`) are populated by</span>
+<span class="sd">        literal assignment in each layer module, not by this hook. A subclass that declines can</span>
+<span class="sd">        still be registered later via the owning class's :meth:`register` classmethod or the</span>
+<span class="sd">        matching ``register_*`` helper in :mod:`pcapkit.foundation.registry.protocols`.</span>
 
 <span class="sd">        ``code`` accepts:</span>
 
@@ -2553,8 +2553,8 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="c1"># Caught by the handler below, so this never escapes: it jumps</span>
                     <span class="c1"># to the shared "name is not in namespace" path. A pcapkit</span>
-                    <span class="c1"># exception here would log at CRITICAL for something handled</span>
-                    <span class="c1"># two lines later.</span>
+                    <span class="c1"># exception here would log at CRITICAL for something the</span>
+                    <span class="c1"># ``except`` below handles.</span>
                     <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
             <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">default</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -2576,7 +2576,7 @@
 <span class="sd">        matches if it is accompanied by an ``arg_namespace`` argument that</span>
 <span class="sd">        is :data:`None`, its current value is a :obj:`str` equal to</span>
 <span class="sd">        ``name``, and its default</span>
-<span class="sd">        value is an :class:`~enum.IntEnum` (or :class:`aenum.IntEnum`)</span>
+<span class="sd">        value is an :class:`~enum.IntEnum` (or ``aenum.IntEnum``)</span>
 <span class="sd">        member. The candidate namespace of a match is the class of that</span>
 <span class="sd">        default value.</span>
 
@@ -2813,7 +2813,7 @@
 <a class="viewcode-back" href="../../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase._lookup_registry">[docs]</a>
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_lookup_registry</span><span class="p">(</span><span class="n">registry</span><span class="p">:</span> <span class="s1">'DefaultDict[Any, _VT]'</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_VT'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Look up a dispatch registry entry without recording a miss.</span>
+<span class="w">        </span><span class="sd">"""Look up a dispatch :term:`registry` entry without recording a miss.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            registry: dispatch registry to read, i.e. :attr:`self.__proto__</span>
@@ -3089,7 +3089,7 @@
 <span class="w">    </span><span class="sd">"""User-facing abstract base class for third-party protocols.</span>
 
 <span class="sd">    Inherit it directly only to create a new protocol stack; a new protocol in</span>
-<span class="sd">    an existing layer subclasses that layer's base class instead, c.f.</span>
+<span class="sd">    an existing layer subclasses that layer's base class instead; see</span>
 <span class="sd">    :doc:`/ext`. The built-in protocol families do not derive from this class</span>
 <span class="sd">    but from :class:`ProtocolBase`, whose metaclass is :class:`ProtocolMeta`.</span>
 

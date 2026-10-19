@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -486,7 +487,7 @@
 
 <span class="sd">:mod:`pcapkit.protocols.misc.pcapng` contains</span>
 <span class="sd">:class:`~pcapkit.protocols.misc.pcapng.PCAPNG`,</span>
-<span class="sd">which implements extractor for PCAP-NG file format [*]_, and the</span>
+<span class="sd">which implements an extractor for PCAP-NG file format [*]_, and the</span>
 <span class="sd">:class:`~pcapkit.protocols.misc.pcapng.PacketDirection`,</span>
 <span class="sd">:class:`~pcapkit.protocols.misc.pcapng.PacketReception` and</span>
 <span class="sd">:class:`~pcapkit.protocols.misc.pcapng.WireGuardKeyLabel` enumerations.</span>
@@ -1189,6 +1190,7 @@
         <span class="c1">#: PCAP-NG block byte order.</span>
         <span class="n">_byte</span><span class="p">:</span> <span class="s1">'Literal["little", "big"]'</span>
 
+    <span class="c1">#: Blocks that carry a captured packet.</span>
     <span class="n">PACKET_TYPES</span> <span class="o">=</span> <span class="p">(</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Enhanced_Packet_Block</span><span class="p">,</span>
                     <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Simple_Packet_Block</span><span class="p">,</span>
                     <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Packet_Block</span><span class="p">)</span>
@@ -1223,9 +1225,9 @@
     <span class="c1"># Defaults.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="c1">#: Protocol index mapping for</span>
-    <span class="c1">#: decoding next layer, c.f. :meth:`self._decode_next_layer &lt;pcapkit.protocols.protocol.Protocol._decode_next_layer&gt;`</span>
-    <span class="c1">#: &amp; :meth:`self._import_next_layer &lt;pcapkit.protocols.protocol.Protocol._import_next_layer&gt;`.</span>
+    <span class="c1">#: Protocol index mapping for decoding the next layer; see</span>
+    <span class="c1">#: :meth:`self._decode_next_layer &lt;pcapkit.protocols.protocol.Protocol._decode_next_layer&gt;`</span>
+    <span class="c1">#: and :meth:`self._import_next_layer &lt;pcapkit.protocols.protocol.Protocol._import_next_layer&gt;`.</span>
     <span class="c1">#: Each value is a :class:`~pcapkit.corekit.module.ModuleDescriptor` naming the</span>
     <span class="c1">#: module and class, or a :class:`~pcapkit.protocols.protocol.Protocol` subclass.</span>
     <span class="n">__proto__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
@@ -1239,10 +1241,11 @@
         <span class="p">},</span>
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[Enum_LinkType | int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]</span>
 
-    <span class="c1">#: Block type to method mapping. Method names are expected to be referred</span>
-    <span class="c1">#: to the class by ``_read_block_${name}`` and/or ``_make_block_${name}``,</span>
-    <span class="c1">#: and if such name not found, the value should then be a method that can</span>
-    <span class="c1">#: parse the block by itself.</span>
+    <span class="c1">#: Block type to method mapping. A :obj:`str` value names the</span>
+    <span class="c1">#: ``_read_block_${name}`` and ``_make_block_${name}`` methods, which fall</span>
+    <span class="c1">#: back to ``_read_block_unknown`` and ``_make_block_unknown`` when not</span>
+    <span class="c1">#: defined, as an unregistered code does; any other value is a</span>
+    <span class="c1">#: ``(parser, constructor)`` pair of callables.</span>
     <span class="n">__block__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="s1">'unknown'</span><span class="p">,</span>
         <span class="p">{</span>
@@ -1260,10 +1263,11 @@
         <span class="p">},</span>
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[Enum_BlockType | int, str | tuple[BlockParser, BlockConstructor]]</span>
 
-    <span class="c1">#: Block option type to method mapping. Method names are expected to be</span>
-    <span class="c1">#: referred to the class by ``_read_option_${name}`` and/or ``_make_option_${name}``,</span>
-    <span class="c1">#: and if such name not found, the value should then be a method that can</span>
-    <span class="c1">#: parse the option by itself.</span>
+    <span class="c1">#: Block option type to method mapping. A :obj:`str` value names the</span>
+    <span class="c1">#: ``_read_option_${name}`` and ``_make_option_${name}`` methods, which fall</span>
+    <span class="c1">#: back to ``_read_option_unknown`` and ``_make_option_unknown`` when not</span>
+    <span class="c1">#: defined, as an unregistered code does; any other value is a</span>
+    <span class="c1">#: ``(parser, constructor)`` pair of callables.</span>
     <span class="n">__option__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="s1">'unknown'</span><span class="p">,</span>
         <span class="p">{</span>
@@ -1310,10 +1314,11 @@
         <span class="p">},</span>
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[Union[Enum_OptionType, Tuple[str, int]], str | tuple[OptionParser, OptionConstructor]]</span>
 
-    <span class="c1">#: Name Resolution Block record type to method mapping. Method names are expected</span>
-    <span class="c1">#: to be referred to the class by ``_read_record_${name}`` and/or ``_make_record_${name}``,</span>
-    <span class="c1">#: and if such name not found, the value should then be a method that can</span>
-    <span class="c1">#: parse the record by itself.</span>
+    <span class="c1">#: Name Resolution Block record type to method mapping. A :obj:`str` value</span>
+    <span class="c1">#: names the ``_read_record_${name}`` and ``_make_record_${name}`` methods,</span>
+    <span class="c1">#: which fall back to ``_read_record_unknown`` and ``_make_record_unknown``</span>
+    <span class="c1">#: when not defined, as an unregistered code does; any other value is a</span>
+    <span class="c1">#: ``(parser, constructor)`` pair of callables.</span>
     <span class="n">__record__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="s1">'unknown'</span><span class="p">,</span>
         <span class="p">{</span>
@@ -1323,10 +1328,11 @@
         <span class="p">},</span>
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[Enum_RecordType | int, str | tuple[RecordParser, RecordConstructor]]</span>
 
-    <span class="c1">#: Decryption secrets type to method mapping. Method names are expected to</span>
-    <span class="c1">#: be referred to the class by ``_read_secrets_${name}`` and/or ``_make_secrets_${name}``,</span>
-    <span class="c1">#: and if such name not found, the value should then be a method that can</span>
-    <span class="c1">#: parse the decryption secrets by itself.</span>
+    <span class="c1">#: Decryption secrets type to method mapping. A :obj:`str` value names the</span>
+    <span class="c1">#: ``_read_secrets_${name}`` and ``_make_secrets_${name}`` methods, which</span>
+    <span class="c1">#: fall back to ``_read_secrets_unknown`` and ``_make_secrets_unknown`` when</span>
+    <span class="c1">#: not defined, as an unregistered code does; any other value is a</span>
+    <span class="c1">#: ``(parser, constructor)`` pair of callables.</span>
     <span class="n">__secrets__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="s1">'unknown'</span><span class="p">,</span>
         <span class="p">{</span>
@@ -2034,9 +2040,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_info</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="n">_read</span><span class="o">=</span><span class="n">_read</span><span class="p">,</span> <span class="n">_seek_set</span><span class="o">=</span><span class="n">_seek_set</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="PCAPNG.__length_hint__">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG.__length_hint__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[12]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Return an estimated length for the object."""</span>
-        <span class="k">return</span> <span class="n">GENERIC_BLOCK_MINIMUM</span>  <span class="c1"># type: ignore[return-value]</span>
+        <span class="k">return</span> <span class="n">GENERIC_BLOCK_MINIMUM</span>  <span class="c1"># type: ignore[return-value]</span></div>
+
 
     <span class="c1"># NOTE: This is a hack to make the ``__index__`` method work both as a</span>
     <span class="c1"># class method and an instance method.</span>
@@ -2068,6 +2077,8 @@
     <span class="c1"># Utilities.</span>
     <span class="c1">##########################################################################</span>
 
+<div class="viewcode-block" id="PCAPNG._check_block_floor">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._check_block_floor">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_check_block_floor</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Reject a tail too short to hold any block at all.</span>
 
@@ -2124,7 +2135,8 @@
 
         <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="n">GENERIC_BLOCK_MINIMUM</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">StreamEOFError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: block truncated: </span><span class="si">{</span><span class="n">length</span><span class="si">}</span><span class="s1"> octet(s) left, '</span>
-                                 <span class="sa">f</span><span class="s1">'fewer than the </span><span class="si">{</span><span class="n">GENERIC_BLOCK_MINIMUM</span><span class="si">}</span><span class="s1"> a block needs'</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                                 <span class="sa">f</span><span class="s1">'fewer than the </span><span class="si">{</span><span class="n">GENERIC_BLOCK_MINIMUM</span><span class="si">}</span><span class="s1"> a block needs'</span><span class="p">,</span> <span class="n">quiet</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_captured</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">offset</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Count the octets left in the stream from ``offset`` on.</span>
@@ -2310,6 +2322,8 @@
             <span class="k">return</span> <span class="mi">0</span>
         <span class="k">return</span> <span class="n">tsoffset</span><span class="o">.</span><span class="n">offset</span>
 
+<div class="viewcode-block" id="PCAPNG._get_timezone">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._get_timezone">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_timezone</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interface_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'timezone'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Timezone of the current block.</span>
 
@@ -2341,7 +2355,8 @@
         <span class="c1"># hours or more) names no zone a datetime can be rendered in</span>
         <span class="k">if</span> <span class="n">tzone</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tzone</span><span class="o">.</span><span class="n">timezone</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span>
-        <span class="k">return</span> <span class="n">tzone</span><span class="o">.</span><span class="n">timezone</span>
+        <span class="k">return</span> <span class="n">tzone</span><span class="o">.</span><span class="n">timezone</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_linktype</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">interface_id</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Enum_LinkType'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Data link layer protocol type.</span>
@@ -2604,6 +2619,8 @@
             <span class="n">_addr</span> <span class="o">=</span> <span class="s1">':'</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">textwrap</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="n">addr</span><span class="o">.</span><span class="n">hex</span><span class="p">(),</span> <span class="mi">2</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">_addr</span>
 
+<div class="viewcode-block" id="PCAPNG._make_mac_addr">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_mac_addr">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_mac_addr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">addr</span><span class="p">:</span> <span class="s1">'str | bytes | bytearray'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make MAC address.</span>
 
@@ -2622,7 +2639,8 @@
 
         <span class="k">if</span> <span class="n">PAT_MAC_ADDR</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="n">_addr</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">_addr</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">b</span><span class="s1">':'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">b</span><span class="s1">'-'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
-        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'invalid MAC address: </span><span class="si">{</span><span class="n">addr</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'invalid MAC address: </span><span class="si">{</span><span class="n">addr</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span></div>
+
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_eui_addr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">addr</span><span class="p">:</span> <span class="s1">'str | bytes | bytearray'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make EUI address.</span>
@@ -3355,6 +3373,8 @@
                                        <span class="n">schema</span><span class="o">.</span><span class="n">captured_length</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span></div>
 
 
+<div class="viewcode-block" id="PCAPNG._read_block_short">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._read_block_short">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_block_short</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_EnhancedPacketBlock | Schema_PacketBlock | Schema_UnknownBlock'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
                           <span class="n">header</span><span class="p">:</span> <span class="s1">'Schema_PCAPNG'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Data_EnhancedPacketBlock | Data_PacketBlock'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Read a PCAP-NG EPB or packet block (obsolete) shorter than its fixed fields.</span>
@@ -3418,8 +3438,11 @@
                 <span class="k">if</span> <span class="n">header</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Packet_Block</span>
                 <span class="k">else</span> <span class="n">Data_EnhancedPacketBlock</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">))</span>  <span class="c1"># type: Data_EnhancedPacketBlock | Data_PacketBlock</span>
         <span class="n">data</span><span class="o">.</span><span class="n">__update__</span><span class="p">([(</span><span class="s1">'block_raw'</span><span class="p">,</span> <span class="n">body</span><span class="p">)])</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_linktype</span><span class="p">(</span><span class="n">interface_id</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_linktype</span><span class="p">(</span><span class="n">interface_id</span><span class="p">),</span> <span class="mi">0</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span></div>
 
+
+<div class="viewcode-block" id="PCAPNG._read_block_short_header">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._read_block_short_header">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_block_short_header</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema_SectionHeaderBlock | Schema_InterfaceDescriptionBlock | Schema_UnknownBlock'</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
         <span class="n">header</span><span class="p">:</span> <span class="s1">'Schema_PCAPNG'</span><span class="p">,</span>
@@ -3493,7 +3516,8 @@
                 <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_pcapng_options</span><span class="p">([]),</span>
             <span class="p">)</span>
         <span class="n">data</span><span class="o">.</span><span class="n">__update__</span><span class="p">([(</span><span class="s1">'block_raw'</span><span class="p">,</span> <span class="n">body</span><span class="p">)])</span>
-        <span class="k">return</span> <span class="n">data</span>
+        <span class="k">return</span> <span class="n">data</span></div>
+
 
 <div class="viewcode-block" id="PCAPNG._read_pcapng_options">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._read_pcapng_options">[docs]</a>
@@ -5310,6 +5334,8 @@
         <span class="p">),</span> <span class="n">block</span><span class="p">,</span> <span class="s1">'padding'</span><span class="p">,</span> <span class="s1">'padding_data'</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="PCAPNG._make_block_short">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_block_short">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_block_short</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">block</span><span class="p">:</span> <span class="s1">'Data_EnhancedPacketBlock | Data_PacketBlock | Data_SectionHeaderBlock | Data_InterfaceDescriptionBlock'</span><span class="p">,</span>  <span class="c1"># pylint: disable=line-too-long</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_UnknownBlock'</span><span class="p">:</span>
@@ -5324,7 +5350,8 @@
 <span class="sd">            Constructed block schema, the body written back verbatim.</span>
 
 <span class="sd">        """</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_block_unknown</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">block_raw</span><span class="p">)</span>  <span class="c1"># type: ignore[union-attr]</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_block_unknown</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">block</span><span class="o">.</span><span class="n">block_raw</span><span class="p">)</span>  <span class="c1"># type: ignore[union-attr]</span></div>
+
 
 <div class="viewcode-block" id="PCAPNG._make_block_nrb">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_block_nrb">[docs]</a>

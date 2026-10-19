@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -579,12 +580,12 @@
     <span class="c1">#   registration procedure reads "Not assigned by IANA".</span>
     <span class="c1"># * That standard itself, Appendix D, "Assigned well-known socket numbers",</span>
     <span class="c1">#   scanned at http://www.bitsavers.org/pdf/xerox/xns/standards/XSIS_028112-Internet_Transport_Protocols_198112.pdf</span>
-    <span class="c1">#   -- the same three functions, under a column headed "Well-Known Socket</span>
+    <span class="c1">#   -- the same functions, under a column headed "Well-Known Socket</span>
     <span class="c1">#   (octal)".</span>
     <span class="c1">#</span>
     <span class="c1"># The *names* are a different matter, and are the archived revision's own.</span>
     <span class="c1"># Both sources call socket 3 "Router Error" rather than "Error Handling</span>
-    <span class="c1"># Packet", and neither appends "Packet" to any of the three. That suffix</span>
+    <span class="c1"># Packet", and neither appends "Packet" to any of them. That suffix</span>
     <span class="c1"># looks like the adjacent packet-type registry bleeding in -- XSIS Appendix</span>
     <span class="c1"># E, "Assigned internet packet types", and the second table on the same IANA</span>
     <span class="c1"># page, which do use 1 Routing Information / 2 Echo / 3 Error as *packet*</span>
@@ -737,7 +738,7 @@
 <span class="c1">#: of this set on that test, because a proprietary protocol may expose no name</span>
 <span class="c1">#: of its own, so the company name serves as its name. :issue:`775`'s final round</span>
 <span class="c1">#: converts it too, so this set does not decide *whether* a range registers --</span>
-<span class="c1">#: only *how its name is spelled*: these four keep the bare label with no hex</span>
+<span class="c1">#: only *how its name is spelled*: these keep the bare label with no hex</span>
 <span class="c1">#: suffix, since the label itself already says nothing was assigned, while</span>
 <span class="c1">#: ``Registered by Xerox`` keeps the hex-suffixed name it always rendered.</span>
 <span class="n">UNASSIGNED_RANGE_NAMES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span>

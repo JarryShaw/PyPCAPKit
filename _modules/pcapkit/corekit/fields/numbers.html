@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -518,6 +519,8 @@
 <span class="n">_OUTSIDE_BITS</span> <span class="o">=</span> <span class="s1">'_outside_bits_'</span>
 
 
+<div class="viewcode-block" id="_CapturedInt">
+<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers._CapturedInt">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">_CapturedInt</span><span class="p">(</span><span class="nb">int</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""An :obj:`int` that also records the bits outside its field's</span>
 <span class="sd">    :attr:`~NumberField.bit_length` as they were captured.</span>
@@ -528,7 +531,8 @@
 <span class="sd">    semantics. See</span>
 <span class="sd">    GitHub issue :issue:`1488`.</span>
 
-<span class="sd">    """</span>
+<span class="sd">    """</span></div>
+
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_capture_key</span><span class="p">(</span><span class="n">field</span><span class="p">:</span> <span class="s1">'NumberField'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[int, int, bool, str]'</span><span class="p">:</span>
@@ -562,6 +566,8 @@
     <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="s1">'__dict__'</span><span class="p">,</span> <span class="p">{})</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_OUTSIDE_BITS</span><span class="p">)</span>
 
 
+<div class="viewcode-block" id="_outside_bits">
+<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers._outside_bits">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_outside_bits</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="n">field</span><span class="p">:</span> <span class="s1">'NumberField'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[int]'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return the captured bits ``value`` records outside ``field``'s</span>
 <span class="sd">    :attr:`~NumberField.bit_length`, or :data:`None`.</span>
@@ -580,9 +586,12 @@
     <span class="n">record</span> <span class="o">=</span> <span class="n">_capture_record</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">record</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">record</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span> <span class="o">!=</span> <span class="n">_capture_key</span><span class="p">(</span><span class="n">field</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">return</span> <span class="n">record</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">record</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span></div>
 
 
+
+<div class="viewcode-block" id="_with_outside_bits">
+<a class="viewcode-back" href="../../../../pcapkit/corekit/fields/numbers.html#pcapkit.corekit.fields.numbers._with_outside_bits">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_with_outside_bits</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="s1">'tuple[int, int, int, bool, str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Return ``value`` recording ``record`` as its captured bits outside</span>
 <span class="sd">    :attr:`~NumberField.bit_length`.</span>
@@ -597,7 +606,8 @@
 <span class="sd">    """</span>
     <span class="n">captured</span> <span class="o">=</span> <span class="n">_CapturedInt</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
     <span class="nb">setattr</span><span class="p">(</span><span class="n">captured</span><span class="p">,</span> <span class="n">_OUTSIDE_BITS</span><span class="p">,</span> <span class="n">record</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">captured</span>
+    <span class="k">return</span> <span class="n">captured</span></div>
+
 
 
 <div class="viewcode-block" id="NumberField">
@@ -844,7 +854,7 @@
 <span class="sd">            integer code for. The flag is therefore consulted **after** the</span>
 <span class="sd">            rebuild rather than before it, since deciding first and rebuilding</span>
 <span class="sd">            second would let the template and the value being returned</span>
-<span class="sd">            disagree. C.f. :issue:`591`.</span>
+<span class="sd">            disagree. Cf. :issue:`591`.</span>
 
 <span class="sd">            That width is a **ceiling** of the bit length over eight, and it is</span>
 <span class="sd">            written as one. ``math.ceil(value.bit_length() // 8)`` is not a</span>
@@ -1215,7 +1225,7 @@
 <span class="sd">        Notes:</span>
 <span class="sd">            The registry is consulted through its constructor, which raises for</span>
 <span class="sd">            a value no member and no ``_missing_`` rule accounts for. That raise</span>
-<span class="sd">            is :mod:`aenum`'s own bare :exc:`ValueError`: not one of</span>
+<span class="sd">            is |aenum|_'s own bare :exc:`ValueError`: not one of</span>
 <span class="sd">            :mod:`pcapkit.utilities.exceptions`, so a caller cannot tell it from</span>
 <span class="sd">            a bug of its own, and not an :exc:`EOFError`, so</span>
 <span class="sd">            :meth:`Extractor.record_frames</span>
@@ -1241,19 +1251,19 @@
 <span class="sd">            ``&lt;unassigned&gt;`` never takes -- and one an :class:`int`-keyed</span>
 <span class="sd">            dispatch registry looks up by value like any declared member. It is</span>
 <span class="sd">            built per value rather than grafted onto</span>
-<span class="sd">            the registry with :func:`aenum.extend_enum`, for two reasons: a</span>
+<span class="sd">            the registry with ``aenum.extend_enum``, for two reasons: a</span>
 <span class="sd">            capture carrying many distinct unassigned codes would otherwise grow</span>
 <span class="sd">            a process-global registry without bound, which is the growth</span>
 <span class="sd">            :meth:`ProtocolBase._lookup_registry</span>
 <span class="sd">            &lt;pcapkit.protocols.protocol.ProtocolBase._lookup_registry&gt;` exists</span>
 <span class="sd">            to avoid; and a stdlib :class:`enum.IntEnum` registry is then</span>
-<span class="sd">            handled exactly like an :class:`aenum.IntEnum` one.</span>
+<span class="sd">            handled exactly like an ``aenum.IntEnum`` one.</span>
 
 <span class="sd">            Only a *foreign* rejection is absorbed. A registry rejecting a value</span>
 <span class="sd">            with one of :mod:`pcapkit.utilities.exceptions` has made a</span>
 <span class="sd">            deliberate decision that this layer -- which sees only that the value</span>
 <span class="sd">            arrived in a field of some width -- is in no position to overrule, so</span>
-<span class="sd">            an in-library error propagates unchanged and it is only :mod:`aenum`'s</span>
+<span class="sd">            an in-library error propagates unchanged and it is only |aenum|_'s</span>
 <span class="sd">            and :mod:`enum`'s "no member has this value" that becomes a</span>
 <span class="sd">            pseudo-member. That is what keeps the fallback from being an</span>
 <span class="sd">            unconditional ``except ValueError: pass``.</span>
@@ -1283,7 +1293,7 @@
 <span class="sd">        .. versionchanged:: 1.5.0</span>
 
 <span class="sd">           A value the registry has no member for resolves to a nameless</span>
-<span class="sd">           pseudo-member, where :mod:`aenum`'s bare :exc:`ValueError` escaped</span>
+<span class="sd">           pseudo-member, where |aenum|_'s bare :exc:`ValueError` escaped</span>
 <span class="sd">           (:issue:`701`).</span>
 
 <span class="sd">        """</span>
@@ -1323,7 +1333,7 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            A single-member, throwaway :class:`enum.IntEnum` instance, built</span>
-<span class="sd">            fresh per call rather than :func:`~aenum.extend_enum`-ed onto</span>
+<span class="sd">            fresh per call rather than ``aenum.extend_enum``-ed onto</span>
 <span class="sd">            ``self._namespace``, per this method's own docstring above.</span>
 
 <span class="sd">        """</span>
@@ -1356,22 +1366,22 @@
 <span class="sd">        ``cls.__members_ns__[...] = ...`` line every registry in this package</span>
 <span class="sd">        uses to record a member it mints. No entry is added to</span>
 <span class="sd">        ``_member_map_`` or ``_value2member_map_`` either, since those are</span>
-<span class="sd">        only ever touched by the metaclass machinery :func:`aenum.extend_enum`</span>
+<span class="sd">        only ever touched by the metaclass machinery ``aenum.extend_enum``</span>
 <span class="sd">        drives, which this bypasses completely.</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            Building a member this way, rather than as some other type</span>
 <span class="sd">            altogether, is why :meth:`PortEnumField.post_process` and</span>
-<span class="sd">            :meth:`OptionEnumField.post_process</span>
-<span class="sd">            &lt;pcapkit.protocols.schema.misc.pcapng.OptionEnumField.post_process&gt;`</span>
+<span class="sd">            :meth:`OptionEnumField.post_process &lt;pcapkit.protocols.schema.misc.pcapng.OptionEnumField.post_process&gt;`</span>
 <span class="sd">            need this rather than :meth:`_pseudo_member`:</span>
 <span class="sd">            the result answers ``isinstance(result, AppType)`` truthfully,</span>
 <span class="sd">            which :meth:`PortEnumField.pre_process` tests before reading</span>
-<span class="sd">            ``.port`` off it, and ``Transport._make_port`` in</span>
-<span class="sd">            :mod:`pcapkit.protocols.transport.transport` before passing it</span>
-<span class="sd">            through unchanged (see ``test_a_member_is_still_an_apptype`` in</span>
-<span class="sd">            ``tests/const/test_const_apptype_split_unit.py``); a value that</span>
-<span class="sd">            fails them would be a defect of its own.</span>
+<span class="sd">            ``.port`` off it, and</span>
+<span class="sd">            :meth:`Transport._make_port &lt;pcapkit.protocols.transport.transport.Transport._make_port&gt;`</span>
+<span class="sd">            in :mod:`pcapkit.protocols.transport.transport` before passing it through unchanged (see</span>
+<span class="sd">            ``test_a_member_is_still_an_apptype`` in</span>
+<span class="sd">            ``tests/const/test_const_apptype_split_unit.py``); a value that fails them would be a</span>
+<span class="sd">            defect of its own.</span>
 
 <span class="sd">            The member this returns is absent from ``_value2member_map_``, so</span>
 <span class="sd">            a *value*-keyed lookup on it -- ``self._namespace(value)`` --</span>
@@ -1379,23 +1389,19 @@
 <span class="sd">            parse or reconstruction path does that to a value it just resolved</span>
 <span class="sd">            this way, which is what keeps this safe to return from</span>
 <span class="sd">            ``post_process``. A direct call to</span>
-<span class="sd">            :meth:`~pcapkit.const.reg.apptype.apptype.AppType.get` for the same port</span>
-<span class="sd">            does not come through here, and it does not mint either: it</span>
-<span class="sd">            builds an unregistered member of its own, through the registry's</span>
-<span class="sd">            ``_unregistered_member`` -- measured on this tree,</span>
-<span class="sd">            ``AppType.get(54321, proto=tcp)`` returns</span>
-<span class="sd">            ``&lt;TCP.unknown: 54321 [tcp]&gt;``, ``TCP.__members__`` does not</span>
-<span class="sd">            grow, and a second call with the same port returns an equal</span>
-<span class="sd">            member rather than the same one. Two</span>
-<span class="sd">            unregistered members for the same value also compare equal</span>
-<span class="sd">            without being identical, since</span>
+<span class="sd">            :meth:`AppType.get() &lt;pcapkit.const.reg.apptype.apptype.AppType.get&gt;` for the same port</span>
+<span class="sd">            does not come through here, and it does not mint either: it builds an unregistered</span>
+<span class="sd">            member of its own, through the registry's ``_unregistered_member`` -- measured on this</span>
+<span class="sd">            tree, ``AppType.get(54321, proto=tcp)`` returns ``&lt;TCP.unknown: 54321 [tcp]&gt;``,</span>
+<span class="sd">            ``TCP.__members__`` does not grow, and a second call with the same port returns an equal</span>
+<span class="sd">            member rather than the same one. Two unregistered members for the same value also</span>
+<span class="sd">            compare equal without being identical, since</span>
 <span class="sd">            :class:`~pcapkit.const.reg.apptype.apptype.AppType` and</span>
 <span class="sd">            :class:`~pcapkit.const.pcapng.option_type.OptionType` both define</span>
-<span class="sd">            ``__eq__``/``__hash__`` off an attribute (``.port`` /</span>
-<span class="sd">            ``.opt_value``) rather than object identity -- harmless for every</span>
-<span class="sd">            reader in this package, since none compares one with ``is`` or</span>
-<span class="sd">            keys a mapping on it expecting identity, but worth knowing before</span>
-<span class="sd">            reusing this elsewhere.</span>
+<span class="sd">            ``__eq__``/``__hash__`` off an attribute (``.port`` / ``.opt_value``) rather than object</span>
+<span class="sd">            identity -- harmless for every reader in this package, since none compares one with</span>
+<span class="sd">            ``is`` or keys a mapping on it expecting identity, but worth knowing before reusing this</span>
+<span class="sd">            elsewhere.</span>
 
 <span class="sd">            :mod:`pickle` and :func:`copy.copy`/:func:`copy.deepcopy` all</span>
 <span class="sd">            reduce an :class:`~enum.Enum` member through</span>
@@ -1574,7 +1580,7 @@
 
 <span class="sd">    Important:</span>
 <span class="sd">        This class is specifically designed for :class:`~pcapkit.const.reg.apptype.apptype.AppType`</span>
-<span class="sd">        as it is actually a :class:`~aenum.StrEnum` class.</span>
+<span class="sd">        as it is actually an ``aenum.StrEnum`` class.</span>
 
 <span class="sd">    .. versionadded:: 1.5.0</span>
 
@@ -1633,8 +1639,7 @@
 <span class="sd">            the port itself, when the registry declares none.</span>
 
 <span class="sd">        Notes:</span>
-<span class="sd">            This peeks at what</span>
-<span class="sd">            :meth:`~pcapkit.const.reg.apptype.apptype.AppType.get` itself would</span>
+<span class="sd">            This peeks at what :meth:`AppType.get() &lt;pcapkit.const.reg.apptype.apptype.AppType.get&gt;` itself would</span>
 <span class="sd">            consult -- the per-port rows via ``__registry__.getlist``, then the</span>
 <span class="sd">            documented IANA spans via</span>
 <span class="sd">            :meth:`~pcapkit.const.reg.apptype.apptype.AppType._missing_` -- and</span>
@@ -1644,13 +1649,12 @@
 <span class="sd">            :issue:`860`), and the registry does not grow either way</span>
 <span class="sd">            (:issue:`1774`). It exists because that member is not the one a</span>
 <span class="sd">            parse needs. ``get`` builds it through</span>
-<span class="sd">            ``AppType._unregistered_member``, which installs no</span>
-<span class="sd">            ``__reduce_ex__``, so ``pickle.loads(pickle.dumps(...))`` raises</span>
-<span class="sd">            ``ValueError: 'unknown [50000 - tcp]' is not a valid TCP``; and its</span>
-<span class="sd">            ``.name`` is ``'unknown'``, so it dumps as ``TCP::unknown [...]``</span>
-<span class="sd">            rather than as the ``TCP::&lt;unassigned&gt; [...]`` of every other</span>
-<span class="sd">            unassigned wire value. A genuine miss therefore builds its member</span>
-<span class="sd">            through :meth:`EnumField._unregistered_member` instead.</span>
+<span class="sd">            :meth:`AppType._unregistered_member &lt;pcapkit.const.reg.apptype.apptype.AppType._unregistered_member&gt;`,</span>
+<span class="sd">            which installs no ``__reduce_ex__``, so ``pickle.loads(pickle.dumps(...))`` raises</span>
+<span class="sd">            ``ValueError: 'unknown [50000 - tcp]' is not a valid TCP``; and its ``.name`` is</span>
+<span class="sd">            ``'unknown'``, so it dumps as ``TCP::unknown [...]`` rather than as the</span>
+<span class="sd">            ``TCP::&lt;unassigned&gt; [...]`` of every other unassigned wire value. A genuine miss</span>
+<span class="sd">            therefore builds its member through :meth:`EnumField._unregistered_member` instead.</span>
 
 <span class="sd">            That member carries the registry's own ``__transport__``, as</span>
 <span class="sd">            ``get``'s does, rather than ``self._proto``. The two are the same</span>
@@ -1664,19 +1668,17 @@
 <span class="sd">            :meth:`~pcapkit.const.reg.apptype.apptype.AppType._missing_`, which</span>
 <span class="sd">            raises a bare :exc:`ValueError` for it. That call sits inside an</span>
 <span class="sd">            ``except ValueError`` that absorbs a foreign miss, and</span>
-<span class="sd">            :meth:`~pcapkit.const.reg.apptype.apptype.AppType.get` rejects the</span>
-<span class="sd">            out-of-range case deliberately, so that it is never minted over -- a</span>
-<span class="sd">            catch keyed on exception type alone cannot see the difference</span>
-<span class="sd">            between that and a "no member has this value", so it would quietly</span>
-<span class="sd">            turn the rejection into a miss. Within the width, ``_missing_``</span>
-<span class="sd">            raises for no port of any per-transport registry: it returns a</span>
-<span class="sd">            member for a documented span and :data:`None` otherwise. Checking</span>
-<span class="sd">            the width first needs no exception-based distinction at all.</span>
-<span class="sd">            ``self.length`` is the field's own declared byte width (``2`` for</span>
-<span class="sd">            every caller of this class, hence ``0``-``65535``)</span>
-<span class="sd">            rather than a hard-coded ``65535`` borrowed from</span>
-<span class="sd">            :meth:`~pcapkit.const.reg.apptype.apptype.AppType._missing_`'s own guard,</span>
-<span class="sd">            so the two stay in lockstep by construction.</span>
+<span class="sd">            :meth:`AppType.get() &lt;pcapkit.const.reg.apptype.apptype.AppType.get&gt;` rejects the</span>
+<span class="sd">            out-of-range case deliberately, so that it is never minted over -- a catch keyed on</span>
+<span class="sd">            exception type alone cannot see the difference between that and a "no member has this</span>
+<span class="sd">            value", so it would quietly turn the rejection into a miss. Within the width,</span>
+<span class="sd">            ``_missing_`` raises for no port of any per-transport registry: it returns a member for</span>
+<span class="sd">            a documented span and :data:`None` otherwise. Checking the width first needs no</span>
+<span class="sd">            exception-based distinction at all. ``self.length`` is the field's own declared byte</span>
+<span class="sd">            width (``2`` for every caller of this class, hence ``0``-``65535``) rather than a</span>
+<span class="sd">            hard-coded ``65535`` borrowed from</span>
+<span class="sd">            :meth:`~pcapkit.const.reg.apptype.apptype.AppType._missing_`'s own guard, so the two</span>
+<span class="sd">            stay in lockstep by construction.</span>
 
 <span class="sd">        """</span>
         <span class="n">value</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="n">EnumField</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>

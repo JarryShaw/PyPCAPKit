@@ -260,7 +260,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -392,6 +392,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -551,8 +552,8 @@ carries a tracked <code class="docutils literal notranslate"><span class="pre">i
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>mypy types the engine packages that ship no types – <code class="docutils literal notranslate"><span class="pre">dpkt</span></code>, <code class="docutils literal notranslate"><span class="pre">pyshark</span></code>,
-<code class="docutils literal notranslate"><span class="pre">pcap</span></code> and <code class="docutils literal notranslate"><span class="pre">pcapfile</span></code> – from local stubs under <code class="file docutils literal notranslate"><span class="pre">typings/</span></code>, which
+<p>mypy types the engine packages that ship no types – <a class="reference external" href="https://dpkt.readthedocs.io"><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></a>, <a class="reference external" href="https://kiminewt.github.io/pyshark"><code class="docutils literal notranslate"><span class="pre">pyshark</span></code></a>,
+<a class="reference internal" href="../../pcapkit/foundation/engines/3rdparty.html#pcap-module"><code class="docutils literal notranslate"><span class="pre">pcap</span></code></a> and <a class="reference external" href="https://github.com/kisom/pypcapfile"><code class="docutils literal notranslate"><span class="pre">pcapfile</span></code></a> – from local stubs under <code class="file docutils literal notranslate"><span class="pre">typings/</span></code>, which
 <code class="file docutils literal notranslate"><span class="pre">mypy.ini</span></code> registers through <code class="docutils literal notranslate"><span class="pre">mypy_path</span></code> and which ship in neither the
 wheel nor the sdist (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1878">#1878</a>). <code class="docutils literal notranslate"><span class="pre">scapy</span></code> ships its own. A stub declares only
 what <a class="reference internal" href="../../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> uses and cites the version it was written against, so a name
@@ -780,13 +781,13 @@ carrying it are that kind:</p>
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/759">#759</a> raising one where a
 single-bit lookup used to return a member;</p></li>
 <li><p>a public attribute’s meaning –
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/618">#618</a> swapping <code class="docutils literal notranslate"><span class="pre">Frame.len</span></code>
-and <code class="docutils literal notranslate"><span class="pre">Frame.cap_len</span></code> between the PCAP and PCAP-NG readers;</p></li>
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/618">#618</a> swapping <a class="reference internal" href="../../pcapkit/protocols/misc/pcap.html#pcapkit.protocols.data.misc.pcap.frame.Frame.len" title="pcapkit.protocols.data.misc.pcap.frame.Frame.len"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Frame.len</span></code></a>
+and <a class="reference internal" href="../../pcapkit/protocols/misc/pcap.html#pcapkit.protocols.data.misc.pcap.frame.Frame.cap_len" title="pcapkit.protocols.data.misc.pcap.frame.Frame.cap_len"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Frame.cap_len</span></code></a>
+between the PCAP and PCAP-NG readers;</p></li>
 <li><p>a signature or a name a caller writes –
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/806">#806</a> retyping
-<code class="docutils literal notranslate"><span class="pre">AppType.proto</span></code> and giving <code class="docutils literal notranslate"><span class="pre">register_apptype</span></code> varargs,
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/778">#778</a> enforcing <code class="docutils literal notranslate"><span class="pre">&#64;final</span></code>
-at runtime;</p></li>
+<a class="reference internal" href="../../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType.proto" title="pcapkit.const.reg.apptype.apptype.AppType.proto"><code class="xref py py-attr docutils literal notranslate"><span class="pre">AppType.proto</span></code></a> and giving
+<code class="docutils literal notranslate"><span class="pre">register_apptype</span></code> varargs, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/778">#778</a> enforcing <code class="docutils literal notranslate"><span class="pre">&#64;final</span></code> at runtime;</p></li>
 <li><p>a path a caller or a script depends on – the change that named the examples
 directories apart.</p></li>
 </ul>

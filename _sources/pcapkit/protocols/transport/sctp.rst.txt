@@ -5,7 +5,7 @@ SCTP - Stream Control Transmission Protocol
 
 :mod:`pcapkit.protocols.transport.sctp` contains
 :class:`~pcapkit.protocols.transport.sctp.SCTP` only,
-which implements extractor for Stream Control
+which implements the extractor for Stream Control
 Transmission Protocol (SCTP) [*]_, whose structure is
 described as below:
 

@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -548,7 +549,7 @@
 <span class="c1">#:</span>
 <span class="c1">#: Be precise about what that means in practice, because nothing in this package</span>
 <span class="c1">#: calls :func:`_zero_pad_budget` -- so the bound as shipped is over everything a</span>
-<span class="c1">#: context has ever parsed, not over one ``Extractor`` run. It is still a bound,</span>
+<span class="c1">#: context has ever parsed, not over one :class:`~pcapkit.foundation.extraction.Extractor` run. It is still a bound,</span>
 <span class="c1">#: and still proportionate: total padding past</span>
 <span class="c1">#: :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL` stays within</span>
 <span class="c1">#: ``MAX_ZERO_PAD_LENGTH + ZERO_PAD_BUDGET_RATIO`` times the octets that</span>
@@ -577,7 +578,7 @@
 <span class="sd">    bound :meth:`FieldBase.unpack` enforces is over everything that context has</span>
 <span class="sd">    parsed. Entering this scope starts a fresh ledger and restores the previous</span>
 <span class="sd">    one afterwards, which is what makes the bound *per parse* -- per</span>
-<span class="sd">    ``Extractor`` run, per file, per frame -- for a caller that wants it that</span>
+<span class="sd">    :class:`~pcapkit.foundation.extraction.Extractor` run, per file, per frame -- for a caller that wants it that</span>
 <span class="sd">    way, and what makes it reproducible for a test.</span>
 
 <span class="sd">    Note that nothing in this package calls it: the layer that knows where</span>
@@ -605,8 +606,9 @@
 <span class="c1">#: ``f'{length}s'`` (see :mod:`pcapkit.corekit.fields.strings`,</span>
 <span class="c1">#: :mod:`~pcapkit.corekit.fields.misc`, :mod:`~pcapkit.corekit.fields.collections`</span>
 <span class="c1">#: and, before it gets byte-order-prefixed, :mod:`~pcapkit.corekit.fields.numbers`</span>
-<span class="c1">#: -- :meth:`NumberField.build_template &lt;pcapkit.corekit.fields.numbers.</span>
-<span class="c1">#: NumberField.build_template&gt;`'s ``else`` arm), so a negative resolved length</span>
+<span class="c1">#: --</span>
+<span class="c1">#: :meth:`NumberField.build_template &lt;pcapkit.corekit.fields.numbers.NumberField.build_template&gt;`'s</span>
+<span class="c1">#: ``else`` arm), so a negative resolved length</span>
 <span class="c1">#: always leaves that literal ``-`` immediately before the digits. What</span>
 <span class="c1">#: :class:`~pcapkit.corekit.fields.numbers.NumberField` adds is a byte-order</span>
 <span class="c1">#: prefix -- one of ``'@=&lt;&gt;!'`` -- *in front of* that whole template</span>
@@ -934,7 +936,7 @@
         <span class="c1"># cannot recover data that was never in the buffer, only zero-fill for</span>
         <span class="c1"># it, and no field this large is legitimate to begin with. Honouring it</span>
         <span class="c1"># would allocate and zero-fill up to ``length`` octets on nothing but</span>
-        <span class="c1"># the packet's own say-so. C.f. #554.</span>
+        <span class="c1"># the packet's own say-so. Cf. #554.</span>
         <span class="n">ceiling</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">MAX_ZERO_PAD_LENGTH</span>
         <span class="k">if</span> <span class="n">ceiling</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">length</span> <span class="o">&gt;</span> <span class="n">ceiling</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">buffer</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">length</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span>
@@ -946,7 +948,7 @@
         <span class="c1"># declared length just under :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH` passes it every</span>
         <span class="c1"># time it is declared, so 200 of them amplify 4,800 wire octets into</span>
         <span class="c1"># 50.0 MiB of retained zeros with the ceiling doing exactly what it was</span>
-        <span class="c1"># written to do. C.f. #573.</span>
+        <span class="c1"># written to do. Cf. #573.</span>
         <span class="c1">#</span>
         <span class="c1"># ``max(length, 0)`` is defensive rather than a case anything is known to</span>
         <span class="c1"># reach. :attr:`length` here resolves through :func:`struct.calcsize`, so</span>

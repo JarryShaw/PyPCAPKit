@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/link/loopback.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.link.loopback contains Loopback only, which implements extractor for the BSD loopback encapsulation* of LINKTYPE_NULL and LINKTYPE_LOOP, whose structure is described as below:,,,,..." />
-<meta name="description" content="pcapkit.protocols.link.loopback contains Loopback only, which implements extractor for the BSD loopback encapsulation* of LINKTYPE_NULL and LINKTYPE_LOOP, whose structure is described as below:,,,,..." />
+<meta property="og:description" content="pcapkit.protocols.link.loopback contains Loopback only, which implements the extractor for the BSD loopback encapsulation* of LINKTYPE_NULL and LINKTYPE_LOOP, whose structure is described as below:..." />
+<meta name="description" content="pcapkit.protocols.link.loopback contains Loopback only, which implements the extractor for the BSD loopback encapsulation* of LINKTYPE_NULL and LINKTYPE_LOOP, whose structure is described as below:..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="VLAN - 802.1Q/802.1ad VLAN Tag Types" href="vlan.html"><link rel="prev" title="L2TPv2 - Layer Two Tunnelling Protocol version 2" href="l2tpv2.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -260,7 +260,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -392,6 +392,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -497,7 +498,7 @@
 <span id="bsd-loopback-encapsulation"></span><h1>BSD Loopback Encapsulation<a class="headerlink" href="#module-pcapkit.protocols.link.loopback" title="Link to this heading">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.protocols.link.loopback" title="pcapkit.protocols.link.loopback"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.link.loopback</span></code></a> contains
 <a class="reference internal" href="#pcapkit.protocols.link.loopback.Loopback" title="pcapkit.protocols.link.loopback.Loopback"><code class="xref py py-class docutils literal notranslate"><span class="pre">Loopback</span></code></a>
-only, which implements extractor for the BSD loopback
+only, which implements the extractor for the BSD loopback
 encapsulation <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a> of <code class="docutils literal notranslate"><span class="pre">LINKTYPE_NULL</span></code> and <code class="docutils literal notranslate"><span class="pre">LINKTYPE_LOOP</span></code>,
 whose structure is described as below:</p>
 <div class="table-wrapper docutils container">
@@ -688,17 +689,11 @@ header types. <code class="docutils literal notranslate"><span class="pre">LINKT
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.link.loopback.Loopback.__proto__">
 <span class="sig-name descname"><span class="pre">__proto__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.DefaultDict" title="(in Python v3.15)"><span class="pre">DefaultDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><span class="pre">ModuleDescriptor</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.link.loopback.Loopback.__proto__" title="Link to this definition">¶</a></dt>
-<dd><p>Protocol index
-mapping for decoding next layer,
-c.f. <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._decode_next_layer</span></code></a>
-&amp; <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._import_next_layer</span></code></a>.
-Keyed by address family rather than by EtherType, so this class keeps a
-registry of its own instead of sharing <a class="reference internal" href="link.html#pcapkit.protocols.link.link.Link.__proto__" title="pcapkit.protocols.link.link.Link.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Link.__proto__</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>DefaultDict[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a>, <a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor">ModuleDescriptor</a>[<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase">ProtocolBase</a>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><em>Type</em></a>[<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase">ProtocolBase</a>]]</p>
-</dd>
-</dl>
+<dd><p>Protocol index mapping for decoding next layer, see
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._decode_next_layer</span></code></a> &amp;
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._import_next_layer</span></code></a>. Keyed by
+address family rather than by EtherType, so this class keeps a registry
+of its own instead of sharing <a class="reference internal" href="link.html#pcapkit.protocols.link.link.Link.__proto__" title="pcapkit.protocols.link.link.Link.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Link.__proto__</span></code></a>.</p>
 </dd></dl>
 
 </dd></dl>

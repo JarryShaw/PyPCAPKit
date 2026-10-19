@@ -260,7 +260,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -392,6 +392,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -557,8 +558,8 @@ neither has a port.</p>
 <p><span class="target" id="index-3"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html"><strong>RFC 1122</strong></a> settles this inside one document. It lists <strong>RARP in the application
 layer</strong> at <span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-1.1.3"><strong>RFC 1122 Section 1.1.3</strong></a>, among the <em>“support protocols, used for host
 name mapping, booting, and management”</em>, while <strong>ARP</strong> sits in the Link Layer chapter
-at <span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-2.3.2"><strong>RFC 1122 Section 2.3.2</strong></a>. Two sibling protocols, one frame format, one EtherType,
-two layers – decided on function alone.</p>
+at <span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-2.3.2"><strong>RFC 1122 Section 2.3.2</strong></a>. Sibling protocols sharing one frame format, each under
+its own EtherType, in different layers – decided on function alone.</p>
 <p>OSI says the same by construction. ITU-T X.200 §9.2.4.4 has a protocol declare its own
 layer in terms of <em>“functions which pertain to a particular layer”</em>, and clause 7
 defines every layer by its purpose rather than by what encapsulates it.</p>
@@ -566,7 +567,7 @@ defines every layer by its purpose rather than by what encapsulates it.</p>
 <section id="iana-assignments-carry-no-layer-claim">
 <h2>IANA Assignments Carry No Layer Claim<a class="headerlink" href="#iana-assignments-carry-no-layer-claim" title="Link to this heading">¶</a></h2>
 <p>Every registry this package dispatches on – <em>Protocol Numbers</em>, <em>Ether Types</em>,
-and <em>Service Name and Transport Protocol Port Number</em> – have <strong>no layer field</strong>.
+and <em>Service Name and Transport Protocol Port Number</em> – has <strong>no layer field</strong>.
 <em>Protocol Numbers</em> frames itself as identifying <em>“the next level protocol”</em>, i.e. the
 <strong>encapsulated</strong> one. A registry assignment is evidence of encapsulation and of
 nothing else.</p>
@@ -587,7 +588,7 @@ this page says so explicitly.</p>
 <strong>“APPLICATION LAYER - ROUTING PROTOCOLS”</strong>, with OSPF at §7.2.2, while
 <span class="target" id="index-7"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1812.html#section-4.1"><strong>RFC 1812 Section 4.1</strong></a> reads <em>“This chapter and chapter 5 discuss the protocols used
 at the Internet Layer: IP, ICMP, and IGMP.”</em> So a routing protocol is application-layer
-and the internet layer holds three protocols.</p>
+and the internet layer holds only IP, ICMP and IGMP.</p>
 <p><strong>X.200 does not contradict this, and must not be cited as though it did.</strong> X.200
 §7.5.2.1 says the Network Layer provides transport <em>“independence of routing and relay
 considerations”</em> – that is the network layer <strong>performing forwarding</strong> so transport
@@ -661,12 +662,12 @@ nothing about which registry reaches it, and the move did not touch any dispatch
 </thead>
 <tbody>
 <tr class="row-even"><td><p><a class="reference internal" href="../../pcapkit/protocols/application/ospf.html#pcapkit.protocols.application.ospf.OSPF" title="pcapkit.protocols.application.ospf.OSPF"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code></a></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">Internet.__proto__</span></code> by
+<td><p><a class="reference internal" href="../../pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet.__proto__" title="pcapkit.protocols.internet.internet.Internet.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Internet.__proto__</span></code></a> by
 <a class="reference internal" href="../../pcapkit/const/reg.html#pcapkit.const.reg.transtype.TransType.OSPFIGP" title="pcapkit.const.reg.transtype.TransType.OSPFIGP"><code class="xref py py-attr docutils literal notranslate"><span class="pre">OSPFIGP</span></code></a></p></td>
 <td><p><a class="reference internal" href="../../pcapkit/protocols/application/index.html#module-pcapkit.protocols.application" title="pcapkit.protocols.application"><code class="xref py py-mod docutils literal notranslate"><span class="pre">application</span></code></a></p></td>
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="../../pcapkit/protocols/application/rarp.html#pcapkit.protocols.application.rarp.RARP" title="pcapkit.protocols.application.rarp.RARP"><code class="xref py py-class docutils literal notranslate"><span class="pre">RARP</span></code></a></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">Link.__proto__</span></code> by EtherType</p></td>
+<td><p><a class="reference internal" href="../../pcapkit/protocols/link/link.html#pcapkit.protocols.link.link.Link.__proto__" title="pcapkit.protocols.link.link.Link.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Link.__proto__</span></code></a> by EtherType</p></td>
 <td><p><a class="reference internal" href="../../pcapkit/protocols/application/index.html#module-pcapkit.protocols.application" title="pcapkit.protocols.application"><code class="xref py py-mod docutils literal notranslate"><span class="pre">application</span></code></a></p></td>
 </tr>
 </tbody>
@@ -682,22 +683,31 @@ protocol number is refused.</p>
 <a class="reference internal" href="../../pcapkit/protocols/application/application.html#pcapkit.protocols.application.application.Application" title="pcapkit.protocols.application.application.Application"><code class="xref py py-class docutils literal notranslate"><span class="pre">Application</span></code></a> <strong>is not name-for-name.</strong>
 Counting the names in each class’s own namespace, whether new or overriding
 <a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>’s, and including those
-<code class="docutils literal notranslate"><span class="pre">ProtocolBase.__init_subclass__</span></code> sets there, <code class="docutils literal notranslate"><span class="pre">Link</span></code> has
-<code class="docutils literal notranslate"><span class="pre">__data__</span></code>, <code class="docutils literal notranslate"><span class="pre">__layer__</span></code>, <code class="docutils literal notranslate"><span class="pre">__post_init__</span></code>, <code class="docutils literal notranslate"><span class="pre">__proto__</span></code>,
-<code class="docutils literal notranslate"><span class="pre">__schema__</span></code>, <code class="docutils literal notranslate"><span class="pre">_read_protos</span></code>, <code class="docutils literal notranslate"><span class="pre">_shipped_proto</span></code>, <code class="docutils literal notranslate"><span class="pre">from_data</span></code>, <code class="docutils literal notranslate"><span class="pre">register</span></code> and
-<code class="docutils literal notranslate"><span class="pre">layer</span></code>, and <code class="docutils literal notranslate"><span class="pre">Application</span></code> has what they share (<code class="docutils literal notranslate"><span class="pre">__data__</span></code>, <code class="docutils literal notranslate"><span class="pre">__layer__</span></code>,
-<code class="docutils literal notranslate"><span class="pre">__post_init__</span></code>, <code class="docutils literal notranslate"><span class="pre">__schema__</span></code>, <code class="docutils literal notranslate"><span class="pre">from_data</span></code>, <code class="docutils literal notranslate"><span class="pre">layer</span></code>) plus <code class="docutils literal notranslate"><span class="pre">__index__</span></code>,
-<code class="docutils literal notranslate"><span class="pre">_decode_next_layer</span></code> and <code class="docutils literal notranslate"><span class="pre">_import_next_layer</span></code>.
-<code class="docutils literal notranslate"><span class="pre">Link</span></code> overrides names that <code class="docutils literal notranslate"><span class="pre">Application</span></code> does not – <code class="docutils literal notranslate"><span class="pre">__proto__</span></code>,
-<code class="docutils literal notranslate"><span class="pre">register</span></code>, <code class="docutils literal notranslate"><span class="pre">_read_protos</span></code> and <code class="docutils literal notranslate"><span class="pre">_shipped_proto</span></code>, the last set because <code class="docutils literal notranslate"><span class="pre">Link</span></code>
-defines its own <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> – but each also exists on <code class="docutils literal notranslate"><span class="pre">ProtocolBase</span></code>, so
-the strict difference <code class="docutils literal notranslate"><span class="pre">Link</span></code> minus <code class="docutils literal notranslate"><span class="pre">Application</span></code> minus <code class="docutils literal notranslate"><span class="pre">ProtocolBase</span></code> is <strong>empty</strong>
-and every one of them still resolves on <code class="docutils literal notranslate"><span class="pre">OSPF</span></code>. What changes is which registry it
-resolves <em>to</em>: <code class="docutils literal notranslate"><span class="pre">OSPF.__proto__</span></code> is <code class="docutils literal notranslate"><span class="pre">ProtocolBase.__proto__</span></code> rather than
-<code class="docutils literal notranslate"><span class="pre">Link.__proto__</span></code>, so OSPF does not see Link’s EtherType entries. That is inert –
-nothing reaches OSPF by EtherType, and a <code class="docutils literal notranslate"><span class="pre">-1</span></code> lookup misses in both registries alike
-and resolves to <a class="reference internal" href="../../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, inserting nothing on the miss.
-<code class="docutils literal notranslate"><span class="pre">RARP</span></code> keeps <code class="docutils literal notranslate"><span class="pre">Link</span></code>’s through <code class="docutils literal notranslate"><span class="pre">ARP</span></code>.</p>
+<a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase.__init_subclass__" title="pcapkit.protocols.protocol.ProtocolBase.__init_subclass__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">ProtocolBase.__init_subclass__</span></code></a>
+sets there, <a class="reference internal" href="../../pcapkit/protocols/link/link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a> has <code class="docutils literal notranslate"><span class="pre">__data__</span></code>, <code class="docutils literal notranslate"><span class="pre">__layer__</span></code>,
+<code class="docutils literal notranslate"><span class="pre">__post_init__</span></code>, <code class="docutils literal notranslate"><span class="pre">__proto__</span></code>, <code class="docutils literal notranslate"><span class="pre">__schema__</span></code>, <code class="docutils literal notranslate"><span class="pre">_read_protos</span></code>, <code class="docutils literal notranslate"><span class="pre">_shipped_proto</span></code>,
+<code class="docutils literal notranslate"><span class="pre">from_data</span></code>, <code class="docutils literal notranslate"><span class="pre">register</span></code> and <code class="docutils literal notranslate"><span class="pre">layer</span></code>, and
+<a class="reference internal" href="../../pcapkit/protocols/application/application.html#pcapkit.protocols.application.application.Application" title="pcapkit.protocols.application.application.Application"><code class="xref py py-class docutils literal notranslate"><span class="pre">Application</span></code></a> has what they share
+(<code class="docutils literal notranslate"><span class="pre">__data__</span></code>, <code class="docutils literal notranslate"><span class="pre">__layer__</span></code>, <code class="docutils literal notranslate"><span class="pre">__post_init__</span></code>, <code class="docutils literal notranslate"><span class="pre">__schema__</span></code>, <code class="docutils literal notranslate"><span class="pre">from_data</span></code>, <code class="docutils literal notranslate"><span class="pre">layer</span></code>)
+plus <code class="docutils literal notranslate"><span class="pre">__index__</span></code>, <code class="docutils literal notranslate"><span class="pre">_decode_next_layer</span></code> and <code class="docutils literal notranslate"><span class="pre">_import_next_layer</span></code>.
+<a class="reference internal" href="../../pcapkit/protocols/link/link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a> overrides names that
+<a class="reference internal" href="../../pcapkit/protocols/application/application.html#pcapkit.protocols.application.application.Application" title="pcapkit.protocols.application.application.Application"><code class="xref py py-class docutils literal notranslate"><span class="pre">Application</span></code></a> does not – <code class="docutils literal notranslate"><span class="pre">__proto__</span></code>,
+<code class="docutils literal notranslate"><span class="pre">register</span></code>, <code class="docutils literal notranslate"><span class="pre">_read_protos</span></code> and <code class="docutils literal notranslate"><span class="pre">_shipped_proto</span></code>, the last set because
+<a class="reference internal" href="../../pcapkit/protocols/link/link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a> defines its own <code class="docutils literal notranslate"><span class="pre">__proto__</span></code> – but each also
+exists on <a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a>, so the strict difference
+<a class="reference internal" href="../../pcapkit/protocols/link/link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a> minus
+<a class="reference internal" href="../../pcapkit/protocols/application/application.html#pcapkit.protocols.application.application.Application" title="pcapkit.protocols.application.application.Application"><code class="xref py py-class docutils literal notranslate"><span class="pre">Application</span></code></a> minus
+<a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> is <strong>empty</strong> and every one of them still
+resolves on <a class="reference internal" href="../../pcapkit/protocols/application/ospf.html#pcapkit.protocols.application.ospf.OSPF" title="pcapkit.protocols.application.ospf.OSPF"><code class="xref py py-class docutils literal notranslate"><span class="pre">OSPF</span></code></a>. What changes is which
+registry it resolves <em>to</em>: <code class="docutils literal notranslate"><span class="pre">OSPF.__proto__</span></code> is
+<a class="reference internal" href="../../pcapkit/protocols/protocol.html#pcapkit.protocols.protocol.ProtocolBase.__proto__" title="pcapkit.protocols.protocol.ProtocolBase.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ProtocolBase.__proto__</span></code></a> rather
+than <a class="reference internal" href="../../pcapkit/protocols/link/link.html#pcapkit.protocols.link.link.Link.__proto__" title="pcapkit.protocols.link.link.Link.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Link.__proto__</span></code></a>, so OSPF does not
+see Link’s EtherType entries. That is inert – nothing reaches OSPF by EtherType, and a
+<code class="docutils literal notranslate"><span class="pre">-1</span></code> lookup misses in both registries alike and resolves to
+<a class="reference internal" href="../../pcapkit/protocols/misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a>, inserting nothing on the miss.
+<a class="reference internal" href="../../pcapkit/protocols/application/rarp.html#pcapkit.protocols.application.rarp.RARP" title="pcapkit.protocols.application.rarp.RARP"><code class="xref py py-class docutils literal notranslate"><span class="pre">RARP</span></code></a> keeps
+<a class="reference internal" href="../../pcapkit/protocols/link/link.html#pcapkit.protocols.link.link.Link" title="pcapkit.protocols.link.link.Link"><code class="xref py py-class docutils literal notranslate"><span class="pre">Link</span></code></a>’s through
+<a class="reference internal" href="../../pcapkit/protocols/link/arp.html#pcapkit.protocols.link.arp.ARP" title="pcapkit.protocols.link.arp.ARP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ARP</span></code></a>.</p>
 </section>
 <section id="tie-break-order">
 <h2>Tie-Break Order<a class="headerlink" href="#tie-break-order" title="Link to this heading">¶</a></h2>

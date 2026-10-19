@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -488,8 +489,6 @@
 <span class="sd">:mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame</span>
 <span class="sd">cannot be used for it.</span>
 
-<span class="sd">.. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
-
 <span class="sd">.. important::</span>
 
 <span class="sd">   `PyPCAPFile`_ decodes Ethernet, IPv4, TCP and UDP and nothing else -- there</span>
@@ -515,7 +514,7 @@
 <span class="sd">   stops at the network layer, which keeps the transport segment verbatim so that</span>
 <span class="sd">   the header/payload split this module reports is exact. The transport header is</span>
 <span class="sd">   decoded on demand below, using `PyPCAPFile`_'s own</span>
-<span class="sd">   :class:`~pcapfile.protocols.transport.tcp.TCP` class rather than a</span>
+<span class="sd">   ``pcapfile.protocols.transport.tcp.TCP`` class rather than a</span>
 <span class="sd">   reimplementation.</span>
 
 <span class="sd">"""</span>
@@ -620,8 +619,6 @@
 <span class="sd">        off at a small ``timestamp``: ``1.0036909999999999`` for ``1.003691``</span>
 <span class="sd">        (:issue:`1668`).</span>
 
-<span class="sd">    .. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
-
 <span class="sd">    """</span>
     <span class="n">divisor</span> <span class="o">=</span> <span class="n">RESOLUTION</span><span class="p">[</span><span class="nb">bool</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">header</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">ns_resolution</span><span class="p">)]</span>
     <span class="k">return</span> <span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">*</span> <span class="n">divisor</span> <span class="o">+</span> <span class="n">packet</span><span class="o">.</span><span class="n">timestamp_us</span><span class="p">)</span> <span class="o">/</span> <span class="n">divisor</span></div>
@@ -632,8 +629,8 @@
 <span class="w">    </span><span class="sd">"""Parse a raw PyPCAPFile IPv4 ``src``/``dst`` field.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        value: Raw value of an :attr:`IP.src &lt;pcapfile.protocols.network.ip.IP.src&gt;`</span>
-<span class="sd">            or :attr:`IP.dst &lt;pcapfile.protocols.network.ip.IP.dst&gt;` field.</span>
+<span class="sd">        value: Raw value of an ``IP.src``</span>
+<span class="sd">            or ``IP.dst`` field.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        The parsed address.</span>
@@ -654,8 +651,6 @@
 <span class="sd">    Raises:</span>
 <span class="sd">        ProtocolError: If ``value`` cannot be parsed as an IPv4 address.</span>
 
-<span class="sd">    .. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
-
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
         <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'invalid PyPCAPFile IPv4 address: </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
@@ -674,9 +669,8 @@
 <span class="w">    </span><span class="sd">"""Parse a raw PyPCAPFile Ethernet ``src``/``dst`` field.</span>
 
 <span class="sd">    Args:</span>
-<span class="sd">        value: Raw value of an :attr:`Ethernet.src</span>
-<span class="sd">            &lt;pcapfile.protocols.linklayer.ethernet.Ethernet.src&gt;` or</span>
-<span class="sd">            :attr:`Ethernet.dst &lt;pcapfile.protocols.linklayer.ethernet.Ethernet.dst&gt;`</span>
+<span class="sd">        value: Raw value of an ``Ethernet.src`` or</span>
+<span class="sd">            ``Ethernet.dst``</span>
 <span class="sd">            field.</span>
 
 <span class="sd">    Returns:</span>
@@ -695,8 +689,6 @@
 <span class="sd">    Raises:</span>
 <span class="sd">        ProtocolError: If ``value`` cannot be parsed as a MAC address.</span>
 
-<span class="sd">    .. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
-
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">)):</span>
         <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'invalid PyPCAPFile MAC address: </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
@@ -709,6 +701,8 @@
         <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'invalid PyPCAPFile MAC address: </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
 
 
+<div class="viewcode-block" id="_maybe_unhex">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pypcapfile._maybe_unhex">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_maybe_unhex</span><span class="p">(</span><span class="n">value</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Undo :func:`binascii.hexlify`, if ``value`` looks hex-encoded.</span>
 
@@ -721,8 +715,8 @@
 
 <span class="sd">    Note:</span>
 <span class="sd">        The released `PyPCAPFile`_ (0.12.0) stores an IPv4 packet's options</span>
-<span class="sd">        (:attr:`IP.opt &lt;pcapfile.protocols.network.ip.IP.opt&gt;`) and payload</span>
-<span class="sd">        (:attr:`IP.payload &lt;pcapfile.protocols.network.ip.IP.payload&gt;`) as</span>
+<span class="sd">        (``IP.opt``) and payload</span>
+<span class="sd">        (``IP.payload``) as</span>
 <span class="sd">        :func:`binascii.hexlify`'d ASCII text once decoding stops short of the</span>
 <span class="sd">        transport layer -- which is exactly how</span>
 <span class="sd">        :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile` calls it --</span>
@@ -741,13 +735,12 @@
 <span class="sd">        acceptable here because that byte range is a small fraction of the</span>
 <span class="sd">        possible values a real header or payload can take.</span>
 
-<span class="sd">    .. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
-
 <span class="sd">    """</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">binascii</span><span class="o">.</span><span class="n">unhexlify</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
     <span class="k">except</span> <span class="n">binascii</span><span class="o">.</span><span class="n">Error</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">value</span>
+        <span class="k">return</span> <span class="n">value</span></div>
+
 
 
 <div class="viewcode-block" id="ipv4_header">
@@ -770,8 +763,6 @@
 <span class="sd">        ProtocolError: If ``ipv4.src`` or ``ipv4.dst`` cannot be parsed as an</span>
 <span class="sd">            IPv4 address.</span>
 
-<span class="sd">    .. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
-
 <span class="sd">    """</span>
     <span class="k">return</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span>
         <span class="s1">'!BBHHHBBHII'</span><span class="p">,</span>
@@ -789,6 +780,8 @@
 
 
 
+<div class="viewcode-block" id="_is_raw">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pypcapfile._is_raw">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_is_raw</span><span class="p">(</span><span class="n">layer</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Test if a decoded layer is in fact undecoded raw bytes.</span>
 
@@ -796,9 +789,12 @@
 <span class="sd">        layer: Decoded layer, or raw bytes.</span>
 
 <span class="sd">    """</span>
-    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">,</span> <span class="nb">memoryview</span><span class="p">))</span>
+    <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">layer</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">,</span> <span class="nb">memoryview</span><span class="p">))</span></div>
 
 
+
+<div class="viewcode-block" id="_network">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pypcapfile._network">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_network</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[IP]'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Fetch the decoded IPv4 layer of a PyPCAPFile packet, if any.</span>
 
@@ -806,7 +802,7 @@
 <span class="sd">        packet: PyPCAPFile packet.</span>
 
 <span class="sd">    Returns:</span>
-<span class="sd">        The decoded :class:`~pcapfile.protocols.network.ip.IP` layer, or</span>
+<span class="sd">        The decoded ``pcapfile.protocols.network.ip.IP`` layer, or</span>
 <span class="sd">        :data:`None` when the frame was not decoded that far -- which is the</span>
 <span class="sd">        case for every non-IPv4 frame, `PyPCAPFile`_ having no other network</span>
 <span class="sd">        layer decoder -- or its header length (IHL) runs past the captured</span>
@@ -815,8 +811,6 @@
 <span class="sd">    Note:</span>
 <span class="sd">        `PyPCAPFile`_ slices the header at its IHL however few octets there</span>
 <span class="sd">        are, so a header cut short has fewer options than its IHL declares.</span>
-
-<span class="sd">    .. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
 
 <span class="sd">    """</span>
     <span class="n">link</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">packet</span>
@@ -829,9 +823,12 @@
     <span class="k">if</span> <span class="n">payload</span><span class="o">.</span><span class="n">hl</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">&gt;</span> <span class="n">Schema_IPv4_Module</span><span class="o">.</span><span class="n">IPV4_HEADER_LEN</span> <span class="ow">and</span> <span class="p">(</span>
             <span class="n">Schema_IPv4_Module</span><span class="o">.</span><span class="n">IPV4_HEADER_LEN</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">_maybe_unhex</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">payload</span><span class="o">.</span><span class="n">opt</span><span class="p">)))</span> <span class="o">&lt;</span> <span class="n">payload</span><span class="o">.</span><span class="n">hl</span> <span class="o">*</span> <span class="mi">4</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">return</span> <span class="n">payload</span>
+    <span class="k">return</span> <span class="n">payload</span></div>
 
 
+
+<div class="viewcode-block" id="_ipv6_carries_tcp">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pypcapfile._ipv6_carries_tcp">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_ipv6_carries_tcp</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Test if a PyPCAPFile frame is an IPv6 packet carrying TCP.</span>
 
@@ -847,8 +844,6 @@
 <span class="sd">        (see :func:`_maybe_unhex`), so this reads the Next Header field of the</span>
 <span class="sd">        raw IPv6 header and decodes nothing.</span>
 
-<span class="sd">    .. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
-
 <span class="sd">    """</span>
     <span class="n">link</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">packet</span>
     <span class="k">if</span> <span class="n">_is_raw</span><span class="p">(</span><span class="n">link</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">link</span><span class="p">,</span> <span class="s1">'type'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">!=</span> <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_6</span><span class="p">:</span>
@@ -860,7 +855,8 @@
 
     <span class="n">data</span> <span class="o">=</span> <span class="n">_maybe_unhex</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">payload</span><span class="p">))</span>
     <span class="k">return</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="n">Module_IPv6</span><span class="o">.</span><span class="n">IPV6_HEADER_LEN</span>
-            <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="n">Module_IPv6</span><span class="o">.</span><span class="n">IPV6_NEXT_HEADER_OFFSET</span><span class="p">]</span> <span class="o">==</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">TCP</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="n">data</span><span class="p">[</span><span class="n">Module_IPv6</span><span class="o">.</span><span class="n">IPV6_NEXT_HEADER_OFFSET</span><span class="p">]</span> <span class="o">==</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">TCP</span><span class="p">)</span></div>
+
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_capture_of</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'Packet'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'tuple[int, Any]'</span><span class="p">:</span>
@@ -874,7 +870,7 @@
 <span class="sd">        anchor is alive, no packet of another capture has the same key.</span>
 
 <span class="sd">    Note:</span>
-<span class="sd">        :attr:`pcap_packet.header &lt;pcapfile.structs.pcap_packet.header&gt;` is a</span>
+<span class="sd">        ``pcap_packet.header`` is a</span>
 <span class="sd">        :mod:`ctypes` pointer to the savefile header. Each read of the field</span>
 <span class="sd">        builds a new pointer object, but every one of them points at the same</span>
 <span class="sd">        header, so the header's address is the key. The pointer object read</span>
@@ -924,6 +920,8 @@
          <span class="s1">'without another warning'</span><span class="p">,</span> <span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
 
 
+<div class="viewcode-block" id="_transport">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pypcapfile._transport">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_transport</span><span class="p">(</span><span class="n">ipv4</span><span class="p">:</span> <span class="s1">'IP'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[bytes]'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Fetch the verbatim TCP segment carried by a PyPCAPFile IPv4 packet.</span>
 
@@ -945,8 +943,6 @@
 <span class="sd">        capture taken on the sending host, keeps the rest of the frame</span>
 <span class="sd">        (:issue:`1547`).</span>
 
-<span class="sd">    .. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
-
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">p</span> <span class="o">!=</span> <span class="n">Enum_TransType</span><span class="o">.</span><span class="n">TCP</span> <span class="ow">or</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">off</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
@@ -961,9 +957,12 @@
     <span class="k">if</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">segment</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">Schema_TCP_Module</span><span class="o">.</span><span class="n">TCP_MIN_HEADER_LEN</span>
             <span class="ow">or</span> <span class="p">(</span><span class="n">segment</span><span class="p">[</span><span class="n">Schema_TCP_Module</span><span class="o">.</span><span class="n">TCP_DATA_OFFSET_OCTET</span><span class="p">]</span> <span class="o">&gt;&gt;</span> <span class="mi">4</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">&lt;</span> <span class="n">Schema_TCP_Module</span><span class="o">.</span><span class="n">TCP_MIN_HEADER_LEN</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">return</span> <span class="n">segment</span>
+    <span class="k">return</span> <span class="n">segment</span></div>
 
 
+
+<div class="viewcode-block" id="_default_accepts">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pypcapfile._default_accepts">[docs]</a>
 <span class="nd">@functools</span><span class="o">.</span><span class="n">lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">_default_accepts</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">header</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Test if pcapkit's own IPv4 or TCP parser accepts a header.</span>
@@ -986,9 +985,12 @@
         <span class="n">protocol</span><span class="p">(</span><span class="n">header</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">header</span><span class="p">),</span> <span class="n">protocol</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># as beholder does</span>
         <span class="k">return</span> <span class="kc">False</span>
-    <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
 
 
+
+<div class="viewcode-block" id="_default_extension_header">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pypcapfile._default_extension_header">[docs]</a>
 <span class="nd">@functools</span><span class="o">.</span><span class="n">lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">8</span><span class="p">)</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">_default_extension_header</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[tuple[int, int]]'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Read an extension header inside IPv4 with pcapkit's own parser.</span>
@@ -1014,9 +1016,12 @@
     <span class="n">nxt</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">info</span><span class="p">,</span> <span class="s1">'next'</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>  <span class="c1"># none on a header cut short, read as raw octets</span>
     <span class="k">if</span> <span class="n">nxt</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span>
-    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">nxt</span><span class="p">),</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span>
+    <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">nxt</span><span class="p">),</span> <span class="n">header</span><span class="o">.</span><span class="n">length</span></div>
 
 
+
+<div class="viewcode-block" id="_walk_extension_headers">
+<a class="viewcode-back" href="../../../pcapkit/toolkit/3rdparty.html#pcapkit.toolkit.pypcapfile._walk_extension_headers">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_walk_extension_headers</span><span class="p">(</span><span class="n">protocol</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[tuple[int, bytes, int]]'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Step over the headers in :data:`IPV4_EXTENSION_HEADERS` at the head of an IPv4 payload.</span>
 
@@ -1051,7 +1056,8 @@
         <span class="k">if</span> <span class="n">header</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="n">protocol</span><span class="p">,</span> <span class="n">data</span> <span class="o">=</span> <span class="n">header</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">data</span><span class="p">[</span><span class="n">header</span><span class="p">[</span><span class="mi">1</span><span class="p">]:]</span>
-    <span class="k">return</span> <span class="n">protocol</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">depth</span>
+    <span class="k">return</span> <span class="n">protocol</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="n">depth</span></div>
+
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_ethernet2dict</span><span class="p">(</span><span class="n">link</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Any]'</span><span class="p">:</span>
@@ -1103,8 +1109,8 @@
 <span class="sd">        layer: Decoded PyPCAPFile layer, or raw bytes.</span>
 
 <span class="sd">    Note:</span>
-<span class="sd">        `PyPCAPFile`_'s own :class:`~pcapfile.protocols.linklayer.ethernet.Ethernet`</span>
-<span class="sd">        and :class:`~pcapfile.protocols.network.ip.IP` decoders hex-encode the</span>
+<span class="sd">        `PyPCAPFile`_'s own ``pcapfile.protocols.linklayer.ethernet.Ethernet``</span>
+<span class="sd">        and ``pcapfile.protocols.network.ip.IP`` decoders hex-encode the</span>
 <span class="sd">        payload they retain rather than decoding it further (see</span>
 <span class="sd">        :func:`_maybe_unhex`), so a raw payload reached by recursing *from* one of</span>
 <span class="sd">        those classes is un-hexed before being reported here. Without that,</span>
@@ -1114,8 +1120,6 @@
 <span class="sd">        within the very same :obj:`dict`. Any other, unrecognised layer type's</span>
 <span class="sd">        raw payload is left untouched, since nothing here establishes that it is</span>
 <span class="sd">        `PyPCAPFile`_-hexlified rather than genuinely raw.</span>
-
-<span class="sd">    .. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">_is_raw</span><span class="p">(</span><span class="n">layer</span><span class="p">):</span>
@@ -1156,8 +1160,6 @@
 <span class="sd">        ends in ``Raw`` -- the transport segment is left undecoded on purpose,</span>
 <span class="sd">        see the module notes.</span>
 
-<span class="sd">    .. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
-
 <span class="sd">    """</span>
     <span class="n">layer</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">packet</span>
     <span class="k">if</span> <span class="n">_is_raw</span><span class="p">(</span><span class="n">layer</span><span class="p">):</span>
@@ -1196,8 +1198,6 @@
 <span class="sd">        it is un-hexed (see :func:`_maybe_unhex`) and reported as its octets,</span>
 <span class="sd">        not as twice as many characters of hex text (:issue:`1667`).</span>
 
-<span class="sd">    .. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
-
 <span class="sd">    """</span>
     <span class="n">frame</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">packet</span>
     <span class="k">if</span> <span class="n">_is_raw</span><span class="p">(</span><span class="n">frame</span><span class="p">):</span>
@@ -1217,7 +1217,7 @@
 <span class="w">    </span><span class="sd">"""Make data for IPv4 reassembly.</span>
 
 <span class="sd">    A packet can be reassembled if it contains an IPv4 layer</span>
-<span class="sd">    (:class:`pcapfile.protocols.network.ip.IP`) whose header was captured whole (see</span>
+<span class="sd">    (``pcapfile.protocols.network.ip.IP``) whose header was captured whole (see</span>
 <span class="sd">    :func:`_network`), and the **DF** flag is :data:`False`.</span>
 
 <span class="sd">    Args:</span>
@@ -1274,8 +1274,6 @@
 <span class="sd">    Raises:</span>
 <span class="sd">        UnsupportedCall: Always, as `PyPCAPFile`_ has no IPv6 decoder.</span>
 
-<span class="sd">    .. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
-
 <span class="sd">    """</span>
     <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="s1">'IPv6 reassembly is not supported by the PyPCAPFile engine: '</span>
                           <span class="s2">"'pypcapfile' has no IPv6 decoder, so no IPv6 fragment header "</span>
@@ -1312,8 +1310,6 @@
 
 <span class="sd">    See Also:</span>
 <span class="sd">        :class:`pcapkit.foundation.reassembly.tcp.TCP`</span>
-
-<span class="sd">    .. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
 
 <span class="sd">    """</span>
     <span class="n">ipv4</span> <span class="o">=</span> <span class="n">_network</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
@@ -1387,8 +1383,6 @@
 
 <span class="sd">    See Also:</span>
 <span class="sd">        :class:`pcapkit.foundation.traceflow.tcp.TCP`</span>
-
-<span class="sd">    .. _PyPCAPFile: https://github.com/kisom/pypcapfile</span>
 
 <span class="sd">    """</span>
     <span class="n">ipv4</span> <span class="o">=</span> <span class="n">_network</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>

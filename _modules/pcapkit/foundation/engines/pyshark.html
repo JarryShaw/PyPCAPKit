@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -486,8 +487,6 @@
 <span class="sd">This module contains the implementation for `PyShark`_ engine</span>
 <span class="sd">support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.</span>
 
-<span class="sd">.. _PyShark: https://kiminewt.github.io/pyshark</span>
-
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
@@ -510,7 +509,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extractor</span>
 
     <span class="k">class</span><span class="w"> </span><span class="nc">_PySharkPackage</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">""":mod:`pyshark`, as :class:`PyShark` reads it through :attr:`PyShark._expkg` (#1878)."""</span>
+<span class="w">        </span><span class="sd">"""|pyshark|_, as :class:`PyShark` reads it through :attr:`PyShark._expkg` (#1878)."""</span>
 
         <span class="nd">@property</span>
         <span class="k">def</span><span class="w"> </span><span class="nf">FileCapture</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[PySharkFileCapture]'</span><span class="p">:</span> <span class="o">...</span>
@@ -528,8 +527,6 @@
 <span class="sd">    no ``protocols``, and the frame layer is ``layers[0]``. By its source,</span>
 <span class="sd">    :program:`tshark` 4.2.2 roots a Sysdig event at ``syscall`` and a Netflix</span>
 <span class="sd">    custom block at ``bblog``, so those records have no ``frame`` layer.</span>
-
-<span class="sd">    .. _PyShark: https://kiminewt.github.io/pyshark</span>
 
 <span class="sd">    """</span>
     <span class="k">for</span> <span class="n">layer</span> <span class="ow">in</span> <span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">frame_info</span><span class="p">,</span> <span class="o">*</span><span class="n">packet</span><span class="o">.</span><span class="n">layers</span><span class="p">):</span>
@@ -552,8 +549,6 @@
 <span class="sd">    in 4.6.9. The summary line is not used, because it differs between those</span>
 <span class="sd">    versions. A record with no ``frame`` layer is not a packet either.</span>
 
-<span class="sd">    .. _PyShark: https://kiminewt.github.io/pyshark</span>
-
 <span class="sd">    """</span>
     <span class="n">frame</span> <span class="o">=</span> <span class="n">_frame_layer</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="s1">'encap_type'</span> <span class="ow">in</span> <span class="n">frame</span><span class="o">.</span><span class="n">field_names</span>
@@ -569,7 +564,7 @@
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="c1">#: Engine extraction package, i.e. :mod:`pyshark`.</span>
+        <span class="c1">#: Engine extraction package, i.e. |pyshark|_.</span>
         <span class="n">_expkg</span><span class="p">:</span> <span class="s1">'_PySharkPackage'</span>
         <span class="c1">#: Engine extraction temporary storage.</span>
         <span class="n">_extmp</span><span class="p">:</span> <span class="s1">'PySharkFileCapture'</span>
@@ -607,7 +602,7 @@
 <span class="sd">        when it is used, which without this hook escapes from :meth:`run` as a hard</span>
 <span class="sd">        error rather than degrading to the default engine with a warning.</span>
 
-<span class="sd">        **The interpreter.** ``pyshark`` 0.6 does</span>
+<span class="sd">        **The interpreter.** |pyshark|_ 0.6 does</span>
 <span class="sd">        ``asyncio.get_event_loop_policy().get_event_loop()`` at</span>
 <span class="sd">        :file:`pyshark/capture/capture.py:183`, in a fresh interpreter with no</span>
 <span class="sd">        running loop. Measured: 3.10 and 3.11 return a loop</span>
@@ -618,16 +613,16 @@
 <span class="sd">        deprecated-but-functional side of that progression, and that expectation</span>
 <span class="sd">        is the one thing here that is inferred rather than observed.</span>
 
-<span class="sd">        **The** :program:`tshark` **binary.** ``pyshark`` is a wrapper around</span>
+<span class="sd">        **The** :program:`tshark` **binary.** |pyshark|_ is a wrapper around</span>
 <span class="sd">        Wireshark's command-line tool and does no parsing itself, so it is useless</span>
-<span class="sd">        without it. The check delegates to ``pyshark``'s own</span>
+<span class="sd">        without it. The check delegates to |pyshark|_'s own</span>
 <span class="sd">        ``get_process_path()`` rather than calling :func:`shutil.which`, because</span>
 <span class="sd">        the two are not equivalent and ``which`` would refuse setups that work:</span>
-<span class="sd">        ``pyshark`` looks at ``tshark_path`` in its :file:`config.ini` *first*, and</span>
+<span class="sd">        |pyshark|_ looks at ``tshark_path`` in its :file:`config.ini` *first*, and</span>
 <span class="sd">        then at :envvar:`PATH` on POSIX, at both Program Files directories on</span>
 <span class="sd">        Windows, and at :file:`/Applications/Wireshark.app` on macOS. Asking</span>
-<span class="sd">        ``pyshark`` gets all of that for free and cannot disagree with what</span>
-<span class="sd">        ``pyshark`` will do a moment later.</span>
+<span class="sd">        |pyshark|_ gets all of that for free and cannot disagree with what</span>
+<span class="sd">        |pyshark|_ will do a moment later.</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            Deliberately **not cached**, and the cost was measured rather than</span>
@@ -646,8 +641,6 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            A short phrase naming the limitation, or :data:`None`.</span>
-
-<span class="sd">        .. _PyShark: https://kiminewt.github.io/pyshark</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">[:</span><span class="mi">2</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">PYTHON_CEILING</span><span class="p">:</span>
@@ -700,11 +693,11 @@
 <div class="viewcode-block" id="PyShark.run">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pyshark.PyShark.run">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Call :class:`pyshark.FileCapture` to extract PCAP files.</span>
+<span class="w">        </span><span class="sd">"""Call ``pyshark.FileCapture`` to extract PCAP files.</span>
 
 <span class="sd">        This method assigns :attr:`self._expkg &lt;PyShark._expkg&gt;`</span>
-<span class="sd">        as :mod:`pyshark` and :attr:`self._extmp &lt;PyShark._extmp&gt;`</span>
-<span class="sd">        as an iterator from :class:`pyshark.FileCapture`.</span>
+<span class="sd">        as |pyshark|_ and :attr:`self._extmp &lt;PyShark._extmp&gt;`</span>
+<span class="sd">        as an iterator from ``pyshark.FileCapture``.</span>
 
 <span class="sd">        The global header is parsed and dumped first, by</span>
 <span class="sd">        :meth:`self.extractor.record_header &lt;pcapkit.foundation.extraction.Extractor.record_header&gt;`.</span>

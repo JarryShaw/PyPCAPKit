@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -486,8 +487,6 @@
 <span class="sd">This module contains the implementation for `DPKT`_ engine</span>
 <span class="sd">support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.</span>
 
-<span class="sd">.. _DPKT: https://dpkt.readthedocs.io</span>
-
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">decimal</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
@@ -559,7 +558,7 @@
         <span class="k">def</span><span class="w"> </span><span class="nf">Loopback</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[DPKTLoopback]'</span><span class="p">:</span> <span class="o">...</span>
 
     <span class="k">class</span><span class="w"> </span><span class="nc">_DPKTPackage</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">""":mod:`dpkt`, as :class:`DPKT` reads it through :attr:`DPKT._expkg` (#1878).</span>
+<span class="w">        </span><span class="sd">"""|dpkt|_, as :class:`DPKT` reads it through :attr:`DPKT._expkg` (#1878).</span>
 
 <span class="sd">        Each attribute is a submodule, described by what the engine reads of it.</span>
 <span class="sd">        mypy matches a module with a protocol at the top level only, so the</span>
@@ -597,7 +596,7 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">PCAPNGReader</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""PCAP-NG reader for the DPKT engine, aware of every interface.</span>
 
-<span class="sd">    :class:`dpkt.pcapng.Reader` reads only the first Interface Description</span>
+<span class="sd">    ``dpkt.pcapng.Reader`` reads only the first Interface Description</span>
 <span class="sd">    Block (IDB) of a file, and applies its link type and timestamp resolution</span>
 <span class="sd">    to every packet (:issue:`1379`). This reader walks the blocks itself</span>
 <span class="sd">    instead: it parses each Section Header Block and IDB with :mod:`pcapkit`'s</span>
@@ -607,12 +606,10 @@
 <span class="sd">    blocks are still decoded by `DPKT`_.</span>
 
 <span class="sd">    It yields Enhanced Packet Blocks, (obsolete) Packet Blocks and Simple Packet</span>
-<span class="sd">    Blocks, and skips every other block. :class:`dpkt.pcapng.Reader` skips the</span>
+<span class="sd">    Blocks, and skips every other block. ``dpkt.pcapng.Reader`` skips the</span>
 <span class="sd">    Simple Packet Block too, and `DPKT`_ has no type for one, so that block is</span>
 <span class="sd">    parsed with :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` as well</span>
 <span class="sd">    (:issue:`1520`).</span>
-
-<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        file: Source PCAP-NG stream, positioned at its first Section Header Block.</span>
@@ -793,14 +790,12 @@
 
 <span class="sd">    Warns:</span>
 <span class="sd">        DPKTWarning: If this `DPKT`_'s reader lacks the attributes the loop reads</span>
-<span class="sd">            -- they are private, and ``dpkt`` is not pinned. The reader then runs</span>
+<span class="sd">            -- they are private, and |dpkt|_ is not pinned. The reader then runs</span>
 <span class="sd">            unchanged, and a traced PCAP record's original length is its captured</span>
 <span class="sd">            length.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        The reader type.</span>
-
-<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
 
 <span class="sd">    """</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">dpkt</span>  <span class="c1"># isort:skip</span>
@@ -814,7 +809,7 @@
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fileobj</span><span class="p">:</span> <span class="s1">'IO[bytes]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">fileobj</span><span class="p">)</span>
             <span class="n">missing</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">private</span> <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">)]</span>
-            <span class="c1">#: Whether to read with :meth:`dpkt.pcap.Reader.__iter__` unchanged.</span>
+            <span class="c1">#: Whether to read with ``dpkt.pcap.Reader.__iter__`` unchanged.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_upstream</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">missing</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">missing</span><span class="p">:</span>
                 <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s2">"dpkt </span><span class="si">{</span><span class="nb">getattr</span><span class="p">(</span><span class="n">dpkt</span><span class="p">,</span><span class="w"> </span><span class="s1">'__version__'</span><span class="p">,</span><span class="w"> </span><span class="s1">'(unknown version)'</span><span class="p">)</span><span class="si">}</span><span class="s2">: "</span>
@@ -823,7 +818,7 @@
                      <span class="s1">'PCAP record gives its captured length instead'</span><span class="p">,</span> <span class="n">DPKTWarning</span><span class="p">,</span>
                      <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
 
-        <span class="c1"># NOTE: the loop is :meth:`dpkt.pcap.Reader.__iter__`'s, over the stream</span>
+        <span class="c1"># NOTE: the loop is ``dpkt.pcap.Reader.__iter__``'s, over the stream</span>
         <span class="c1"># and the record header type that method reads them through. A generator,</span>
         <span class="c1"># so ``dpkt.pcap.Reader.__init__`` calling it runs none of it before</span>
         <span class="c1"># :attr:`_upstream` is set. The timestamp is a ``Decimal`` for a</span>
@@ -881,8 +876,6 @@
 <span class="sd">        `DPKT`_ module gets a class of its own instead of one holding stale</span>
 <span class="sd">        classes.</span>
 
-<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
-
 <span class="sd">    """</span>
     <span class="kn">import</span><span class="w"> </span><span class="nn">dpkt</span>  <span class="c1"># isort:skip</span>
 
@@ -915,21 +908,19 @@
 <span class="w">    </span><span class="sd">"""DPKT engine support.</span>
 
 <span class="sd">    A PCAP-NG file is read by :class:`PCAPNGReader` rather than by</span>
-<span class="sd">    :class:`dpkt.pcapng.Reader`, so each packet takes the link type and the</span>
+<span class="sd">    ``dpkt.pcapng.Reader``, so each packet takes the link type and the</span>
 <span class="sd">    timestamp resolution and offset of the interface it was captured on.</span>
 
 <span class="sd">    It reads the Enhanced, the Simple and the (obsolete) Packet Block, and</span>
 <span class="sd">    skips every other block without a warning. `DPKT`_'s own reader skips the</span>
 <span class="sd">    Simple Packet Block too.</span>
 
-<span class="sd">    .. _DPKT: https://dpkt.readthedocs.io</span>
-
 <span class="sd">    Args:</span>
 <span class="sd">        extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.</span>
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="c1">#: Engine extraction package, i.e. :mod:`dpkt`.</span>
+        <span class="c1">#: Engine extraction package, i.e. |dpkt|_.</span>
         <span class="n">_expkg</span><span class="p">:</span> <span class="s1">'_DPKTPackage'</span>
         <span class="c1">#: Engine extraction temporary storage.</span>
         <span class="n">_extmp</span><span class="p">:</span> <span class="s1">'Reader'</span>
@@ -966,7 +957,7 @@
 <span class="w">        </span><span class="sd">"""Call :class:`dpkt.pcap.Reader` to extract PCAP files.</span>
 
 <span class="sd">        This method assigns :attr:`self._expkg &lt;DPKT._expkg&gt;`</span>
-<span class="sd">        as :mod:`dpkt` and :attr:`self._extmp &lt;DPKT._extmp&gt;`</span>
+<span class="sd">        as |dpkt|_ and :attr:`self._extmp &lt;DPKT._extmp&gt;`</span>
 <span class="sd">        as an iterator from :class:`dpkt.pcap.Reader`, or from</span>
 <span class="sd">        :class:`PCAPNGReader` for a PCAP-NG file.</span>
 

@@ -17,8 +17,6 @@ The reassembly and flow tracing adapters return the data their
 :mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame
 cannot be used for it.
 
-.. _Scapy: https://scapy.net
-
 .. warning::
 
    This module requires `Scapy`_ to be installed.
@@ -44,6 +42,16 @@ Auxiliary Functions
 
 .. autofunction:: pcapkit.toolkit.scapy.attach_linktype
 
+.. autofunction:: pcapkit.toolkit.scapy._frame
+
+.. autofunction:: pcapkit.toolkit.scapy._within_datagrams
+
+.. autofunction:: pcapkit.toolkit.scapy._tcp_carrier
+
+.. autofunction:: pcapkit.toolkit.scapy._tcp_segment
+
+.. autofunction:: pcapkit.toolkit.scapy._tcp_behind_extension_headers
+
 DPKT Tools
 ==========
 
@@ -53,8 +61,6 @@ DPKT Tools
 The reassembly and flow tracing adapters return the data their
 :mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame
 cannot be used for it.
-
-.. _DPKT: https://dpkt.readthedocs.io
 
 .. autofunction:: pcapkit.toolkit.dpkt.ipv4_reassembly
 
@@ -83,6 +89,8 @@ Auxiliary Functions
 
 .. autofunction:: pcapkit.toolkit.dpkt.packet2dict
 
+.. autofunction:: pcapkit.toolkit.dpkt._capture_time
+
 Auxiliary Data
 --------------
 
@@ -106,8 +114,6 @@ The reassembly and flow tracing adapters return the data their
 :mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame
 cannot be used for it.
 
-.. _PyShark: https://kiminewt.github.io/pyshark
-
 .. note::
 
    Some :mod:`pcapkit` functions may not be available with the `PyShark`_ engine,
@@ -126,14 +132,18 @@ Auxiliary Functions
 
 .. autofunction:: pcapkit.toolkit.pyshark.packet2dict
 
+.. autofunction:: pcapkit.toolkit.pyshark._carrier
+
+.. autofunction:: pcapkit.toolkit.pyshark._has_fixed_header
+
+.. autofunction:: pcapkit.toolkit.pyshark._has_addresses
+
 PyPCAP Tools
 ============
 
 .. module:: pcapkit.toolkit.pypcap
 
 :mod:`pcapkit.toolkit.pypcap` contains the adapters for the `PyPCAP`_ engine.
-
-.. _PyPCAP: https://github.com/pynetwork/pypcap
 
 .. note::
 
@@ -164,8 +174,6 @@ pcap-ct Tools
 .. module:: pcapkit.toolkit.pcap_ct
 
 :mod:`pcapkit.toolkit.pcap_ct` contains the adapters for the `pcap-ct`_ engine.
-
-.. _pcap-ct: https://pypi.org/project/pcap-ct/
 
 .. note::
 
@@ -204,8 +212,6 @@ PyPCAPFile Tools
 The reassembly and flow tracing adapters return the data their
 :mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame
 cannot be used for it.
-
-.. _PyPCAPFile: https://github.com/kisom/pypcapfile
 
 .. note::
 
@@ -249,3 +255,22 @@ Internal Definitions
 .. autodata:: pcapkit.toolkit.pypcapfile.IPV4_FLAG_DF
 
 .. autodata:: pcapkit.toolkit.pypcapfile.IPV4_FLAG_MF
+
+.. autodata:: pcapkit.toolkit.pypcapfile.IPV4_EXTENSION_HEADERS
+   :no-value:
+
+.. autofunction:: pcapkit.toolkit.pypcapfile._walk_extension_headers
+
+.. autofunction:: pcapkit.toolkit.pypcapfile._default_extension_header
+
+.. autofunction:: pcapkit.toolkit.pypcapfile._default_accepts
+
+.. autofunction:: pcapkit.toolkit.pypcapfile._network
+
+.. autofunction:: pcapkit.toolkit.pypcapfile._transport
+
+.. autofunction:: pcapkit.toolkit.pypcapfile._ipv6_carries_tcp
+
+.. autofunction:: pcapkit.toolkit.pypcapfile._is_raw
+
+.. autofunction:: pcapkit.toolkit.pypcapfile._maybe_unhex

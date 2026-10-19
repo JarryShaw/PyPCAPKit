@@ -4,7 +4,7 @@ C_Tag - 802.1Q Customer VLAN Tag Type
 .. module:: pcapkit.protocols.link.c_tag
 
 :mod:`pcapkit.protocols.link.c_tag` contains
-:class:`~pcapkit.protocols.link.c_tag.C_Tag` only, which implements extractor for
+:class:`~pcapkit.protocols.link.c_tag.C_Tag` only, which implements the extractor for
 the 802.1Q Customer VLAN Tag Type (C-Tag) [*]_, EtherType
 ``0x8100``.
 

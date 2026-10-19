@@ -6,11 +6,15 @@ Extension-Header Base Classes
 Every IPv6 extension header in this package subclasses
 :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`. Some name a **second** base
 as well, and which ones do is a ruling rather than an accident. The owner ruled, in
-review of the rename that made ``IPv6_Ext`` the shared base
-(:issue:`917`), that a header usable
-*only* as an extension header inherits ``IPv6_Ext`` and nothing else -- ``IPv6_Frag``
-being the example -- while one that is usable as a standalone protocol in its own
-right inherits both ``IPv6_Ext`` and ``Internet`` (or ``IPsec``), as ``ESP`` does.
+review of the rename that made :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` the
+shared base (:issue:`917`), that a header usable *only* as an extension header inherits
+:class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` and nothing else --
+:class:`~pcapkit.protocols.internet.ipv6_frag.IPv6_Frag` being the example -- while one
+that is usable as a standalone protocol in its own right inherits both
+:class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` and
+:class:`~pcapkit.protocols.internet.internet.Internet` (or
+:class:`~pcapkit.protocols.internet.ipsec.IPsec`), as
+:class:`~pcapkit.protocols.internet.esp.ESP` does.
 
 The family as it stands:
 
@@ -26,21 +30,23 @@ The family as it stands:
        :class:`~pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`,
        :class:`~pcapkit.protocols.internet.ipv6_opts.IPv6_Opts`,
        :class:`~pcapkit.protocols.internet.mh.MH`
-     - ``IPv6_Ext``
+     - :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`
      - extension-header only
    * - :class:`~pcapkit.protocols.internet.ah.AH`,
        :class:`~pcapkit.protocols.internet.esp.ESP`
-     - ``IPsec``, ``IPv6_Ext``
+     - :class:`~pcapkit.protocols.internet.ipsec.IPsec`,
+       :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`
      - **also standalone**
    * - :class:`~pcapkit.protocols.internet.hip.HIP`
-     - ``IPv6_Ext``, ``Internet``
+     - :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`,
+       :class:`~pcapkit.protocols.internet.internet.Internet`
      - **also standalone**
 
 :class:`~pcapkit.protocols.internet.ipsec.IPsec` is itself an
 :class:`~pcapkit.protocols.internet.internet.Internet` subclass, which is the
-parenthetical ``IPsec`` alternative in the ruling: naming it satisfies the
-convention, and it is the right second base for a header whose standalone form is an
-IPsec one.
+parenthetical :class:`~pcapkit.protocols.internet.ipsec.IPsec` alternative in the ruling:
+naming it satisfies the convention, and it is the right second base for a header whose
+standalone form is an IPsec one.
 
 The Shared-Registry Trap
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -75,7 +81,7 @@ The IPv4-Payload Test
 So the census is read out of the specifications, on the owner's instruction: work
 through the RFCs to establish, for each defined IPv6 extension header, whether it is
 extension-header-only or a standalone protocol as well, and decide from that whether it
-inherits ``IPv6_Ext`` alone or names additional bases.
+inherits :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` alone or names additional bases.
 
 And the limb that decides is **whether a primary source shows the header carried
 directly as an IPv4 payload**:
@@ -108,17 +114,19 @@ class for it, so nothing implements the classification, but a future one inherit
    whether or not it can appear under IPv4 -- was put to the owner explicitly in
    review of :issue:`917` and not
    taken, so MH and ``Shim6`` stay extension-only. A header that is a protocol in its
-   own right but structurally cannot be an IPv4 payload names ``IPv6_Ext`` alone.
+   own right but structurally cannot be an IPv4 payload names
+   :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` alone.
 
 Explicit Base Declarations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Name the second base **explicitly**, even though it is already in the MRO.
+Name the second base **explicitly**, even where it is already in the MRO.
 :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` derives
 :class:`~pcapkit.protocols.internet.internet.Internet`, so every extension header
-reaches ``Internet`` transitively and an ``__mro__`` check cannot tell the two groups
-apart. The declaration is the only place the classification exists, which is why
-``tests/protocols/internet/test_ipv6_ext_unit.py`` pins it against ``__bases__``:
+reaches :class:`~pcapkit.protocols.internet.internet.Internet` transitively and an
+``__mro__`` check cannot tell the two groups apart. The declaration is the only place the
+classification exists, which is why ``tests/protocols/internet/test_ipv6_ext_unit.py``
+pins it against ``__bases__``:
 
 .. code-block:: python
 
@@ -168,12 +176,14 @@ inside the *encrypted* trailer, so with no key material there is nothing to cont
 on: ESP's own data model reports ``next`` as :obj:`None`, and
 :meth:`IPv6._decode_next_layer <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>`
 ends the ordinary way one iteration later. So ESP is absent from
-``IPv6.__generic_ext_codes__`` -- not because it lacks a parser, which it has, but
-because it cannot hand the walk a successor.
+:attr:`IPv6.__generic_ext_codes__ <pcapkit.protocols.internet.ipv6.IPv6.__generic_ext_codes__>`
+-- not because it lacks a parser, which it has, but because it cannot hand the walk a
+successor.
 
 The full reasoning, including how ESP's terminal case differs from 253/254's, is
 written where the code is and is deliberately not restated at length here: see the
-``#:`` comment on ``IPv6.__generic_ext_codes__``
+``#:`` comment on
+:attr:`IPv6.__generic_ext_codes__ <pcapkit.protocols.internet.ipv6.IPv6.__generic_ext_codes__>`
 (:file:`pcapkit/protocols/internet/ipv6.py`) and the module docstring of
 :mod:`pcapkit.protocols.internet.ipv6_ext`.
 

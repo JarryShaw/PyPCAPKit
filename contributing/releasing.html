@@ -260,7 +260,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -392,6 +392,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -502,14 +503,14 @@ what a maintainer is expected to touch by hand, what the workflow is
 expected to do unattended, and the precautions that follow from the two
 being different.</p>
 <p>The short version: <strong>the only manual edit is bumping</strong>
-<code class="docutils literal notranslate"><span class="pre">pcapkit.__version__</span></code>. Everything else – the <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag, the GitHub
+<a class="reference internal" href="../pcapkit/index.html#pcapkit.__version__" title="pcapkit.__version__"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.__version__</span></code></a>. Everything else – the <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag, the GitHub
 Release, the PyPI and Anaconda uploads, the <code class="docutils literal notranslate"><span class="pre">conda-*</span></code> tag and its commit
 to <code class="docutils literal notranslate"><span class="pre">main</span></code> – is produced by
 <code class="docutils literal notranslate"><span class="pre">.github/workflows/create-release.yml</span></code> and is never hand-made.</p>
 </div>
 <section id="the-one-manual-step">
 <h2>The One Manual Step<a class="headerlink" href="#the-one-manual-step" title="Link to this heading">¶</a></h2>
-<p>Bumping <code class="docutils literal notranslate"><span class="pre">pcapkit.__version__</span></code> is done by <code class="file docutils literal notranslate"><span class="pre">util/bump_version.py</span></code>, whose
+<p>Bumping <a class="reference internal" href="../pcapkit/index.html#pcapkit.__version__" title="pcapkit.__version__"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.__version__</span></code></a> is done by <code class="file docutils literal notranslate"><span class="pre">util/bump_version.py</span></code>, whose
 own docstring is the authority on what it does; summarised here rather than
 duplicated. Given the current version, it works out the next one under
 <span class="target" id="index-0"></span><a class="pep reference external" href="https://peps.python.org/pep-0440/"><strong>PEP 440</strong></a> – a <code class="docutils literal notranslate"><span class="pre">devN</span></code> counter, a pre-release counter, a post-release
@@ -551,7 +552,7 @@ Either run the script, or move both fields by hand in the same commit.</p>
 <p>This is the <strong>only</strong> edit a person makes to get a release started – the tag,
 the Release, and every upload are the workflow’s job from here. Other
 checks run unconditionally on the same path, though none is a step in <em>this</em>
-process: the <code class="docutils literal notranslate"><span class="pre">changelog</span></code> job (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1624-1643</span></code>) fails outright if
+process: the <code class="docutils literal notranslate"><span class="pre">changelog</span></code> job (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1624-1650</span></code>) fails outright if
 <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> has drifted from its source entry under
 <code class="file docutils literal notranslate"><span class="pre">docs/source/changelog/</span></code>, and the release-body step warns, without
 failing, if that entry’s heading still reads “unreleased”
@@ -567,7 +568,7 @@ a workaround for another:</p>
 <dt><code class="docutils literal notranslate"><span class="pre">push:</span> <span class="pre">tags:</span> <span class="pre">['v*']</span></code></dt><dd><p>Pushing a tag matching <code class="docutils literal notranslate"><span class="pre">v*</span></code> yourself. This chooses <strong>which commit</strong> to
 release, not which version: <code class="docutils literal notranslate"><span class="pre">version_check</span></code>’s checkout
 (<code class="docutils literal notranslate"><span class="pre">:298-302</span></code>) pins <code class="docutils literal notranslate"><span class="pre">ref:</span> <span class="pre">${{</span> <span class="pre">github.sha</span> <span class="pre">}}</span></code>, which on this trigger is
-the commit the pushed tag points at, and reads <code class="docutils literal notranslate"><span class="pre">pcapkit.__version__</span></code> out
+the commit the pushed tag points at, and reads <a class="reference internal" href="../pcapkit/index.html#pcapkit.__version__" title="pcapkit.__version__"><code class="xref py py-data docutils literal notranslate"><span class="pre">pcapkit.__version__</span></code></a> out
 of <em>that</em> tree (<code class="docutils literal notranslate"><span class="pre">:327</span></code>). Every downstream tag and release name is built
 from that output – <code class="docutils literal notranslate"><span class="pre">v${{</span> <span class="pre">needs.version_check.outputs.PCAPKIT_VERSION</span> <span class="pre">}}</span></code>
 is <code class="docutils literal notranslate"><span class="pre">github</span></code>’s <code class="docutils literal notranslate"><span class="pre">tag_name</span></code> at <code class="docutils literal notranslate"><span class="pre">:719</span></code> and the release <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and
@@ -804,13 +805,13 @@ checks <em>is</em> the one it is about to create:</p>
 exists.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">pypi</span></code> compares PyPI’s file count for the version against the expected one
 – a wheel per supported leg plus the sdist kept only on the 3.15 leg; the
-KTLO legs’ wheels (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1633">#1633</a>) are not counted. This job is
+<a class="reference internal" href="workflows.html#ktlo-tier"><span class="std std-ref">KTLO</span></a> legs’ wheels (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1633">#1633</a>) are not counted. This job is
 already idempotent (<code class="docutils literal notranslate"><span class="pre">skip-existing:</span> <span class="pre">true</span></code> on every upload step), so the
 check exists only to save the cost of the build matrix, not for correctness.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">conda</span></code> compares Anaconda’s aggregate count against the expected one (the
-<code class="docutils literal notranslate"><span class="pre">linux-64</span></code> and <code class="docutils literal notranslate"><span class="pre">osx-64</span></code> files for each Python version of its matrix; the
-<code class="docutils literal notranslate"><span class="pre">osx-arm64</span></code> leg’s are published but not counted,
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1822">#1822</a>) as the same
+<code class="docutils literal notranslate"><span class="pre">linux-64</span></code>, <code class="docutils literal notranslate"><span class="pre">osx-64</span></code> and <code class="docutils literal notranslate"><span class="pre">osx-arm64</span></code> files for each Python version of
+its matrix, one platform per <code class="docutils literal notranslate"><span class="pre">os</span></code> leg,
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1922">#1922</a>) as the same
 kind of job-level cost saver, and <em>also</em>
 checks, per matrix leg, whether that leg’s own platform/Python distribution
 is already there – this second check is the actual correctness fix, because

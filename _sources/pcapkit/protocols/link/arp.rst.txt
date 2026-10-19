@@ -54,6 +54,11 @@ below:
 
    .. automethod:: __index__
 
+   .. automethod:: _read_addr_resolve
+   .. automethod:: _read_proto_resolve
+   .. automethod:: _make_addr_resolve
+   .. automethod:: _make_proto_resolve
+
 .. autoclass:: pcapkit.protocols.link.arp.InARP
    :no-members:
    :show-inheritance:

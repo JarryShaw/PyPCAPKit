@@ -25,6 +25,14 @@ subclassed (:issue:`1842`).
 
 .. autoclass:: pcapkit.corekit.sentinels.Sentinel
 
+   .. automethod:: __new__
+   .. automethod:: __repr__
+   .. automethod:: __copy__
+   .. automethod:: __deepcopy__
+   .. automethod:: __reduce__
+   .. automethod:: __setattr__
+   .. automethod:: __delattr__
+
 .. autoclass:: pcapkit.corekit.sentinels.NullType
 .. autodata:: pcapkit.corekit.sentinels.NULL
 

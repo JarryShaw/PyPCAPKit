@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -486,7 +487,7 @@
 
 <span class="sd">:mod:`pcapkit.protocols.misc.pcap.frame` contains</span>
 <span class="sd">:class:`~pcapkit.protocols.misc.pcap.frame.Frame` only,</span>
-<span class="sd">which implements extractor for frame headers [*]_ of PCAP,</span>
+<span class="sd">which implements an extractor for frame headers [*]_ of PCAP,</span>
 <span class="sd">whose structure is described as below:</span>
 
 <span class="sd">.. code-block:: c</span>
@@ -581,9 +582,9 @@
     <span class="c1"># Defaults.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="c1">#: Protocol index mapping for</span>
-    <span class="c1">#: decoding next layer, c.f. :meth:`self._decode_next_layer &lt;pcapkit.protocols.protocol.Protocol._decode_next_layer&gt;`</span>
-    <span class="c1">#: &amp; :meth:`self._import_next_layer &lt;pcapkit.protocols.protocol.Protocol._import_next_layer&gt;`.</span>
+    <span class="c1">#: Protocol index mapping for decoding the next layer; see</span>
+    <span class="c1">#: :meth:`self._decode_next_layer &lt;pcapkit.protocols.protocol.Protocol._decode_next_layer&gt;`</span>
+    <span class="c1">#: and :meth:`self._import_next_layer &lt;pcapkit.protocols.protocol.Protocol._import_next_layer&gt;`.</span>
     <span class="c1">#: Each value is a :class:`~pcapkit.corekit.module.ModuleDescriptor` naming the</span>
     <span class="c1">#: module and class, or a :class:`~pcapkit.protocols.protocol.Protocol` subclass.</span>
     <span class="n">__proto__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
@@ -829,7 +830,7 @@
             <span class="c1"># on the tail of this record followed by the head of the next one.</span>
             <span class="c1"># So the start is recorded before the unpack, in</span>
             <span class="c1"># :meth:`self.__post_init__ &lt;__post_init__&gt;`, and seeked to</span>
-            <span class="c1"># absolutely, as the PCAP-NG reader does, c.f.</span>
+            <span class="c1"># absolutely, as the PCAP-NG reader does; see</span>
             <span class="c1"># :meth:`pcapkit.protocols.misc.pcapng.PCAPNG.read`.</span>
             <span class="n">seek_cur</span> <span class="o">=</span> <span class="n">_seek_set</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span> <span class="o">+</span> <span class="n">_ilen</span>
 
@@ -844,7 +845,7 @@
             <span class="c1"># running past its block (:issue:`1405`): ``incl_len`` and ``cap_len``</span>
             <span class="c1"># stay as declared, so the record rebuilds byte-exactly, and the</span>
             <span class="c1"># packet is the octets present. A writer must not copy the declared</span>
-            <span class="c1"># length, c.f. :meth:`PCAPIO._append_value</span>
+            <span class="c1"># length; see :meth:`PCAPIO._append_value</span>
             <span class="c1"># &lt;pcapkit.dumpkit.pcap.PCAPIO._append_value&gt;` (:issue:`1541`).</span>
             <span class="n">held</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span>
             <span class="k">if</span> <span class="n">held</span> <span class="o">&lt;</span> <span class="n">_ilen</span><span class="p">:</span>

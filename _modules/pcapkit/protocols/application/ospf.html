@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -485,7 +486,7 @@
 
 <span class="sd">:mod:`pcapkit.protocols.application.ospf` contains</span>
 <span class="sd">:class:`~pcapkit.protocols.application.ospf.OSPF` only,</span>
-<span class="sd">which implements extractor for Open Shortest Path</span>
+<span class="sd">which implements an extractor for Open Shortest Path</span>
 <span class="sd">First (OSPF) [*]_, whose structure is described</span>
 <span class="sd">as below:</span>
 
@@ -524,10 +525,10 @@
 
 <span class="sd">   ``pcapkit.protocols.link.ospf``, ``pcapkit.protocols.data.link.ospf`` and</span>
 <span class="sd">   ``pcapkit.protocols.schema.link.ospf``, the ``OSPF`` name that</span>
-<span class="sd">   ``pcapkit.protocols.link``, ``pcapkit.protocols.data.link`` and</span>
-<span class="sd">   ``pcapkit.protocols.schema.link`` each exported, and the</span>
+<span class="sd">   :mod:`pcapkit.protocols.link`, :mod:`pcapkit.protocols.data.link` and</span>
+<span class="sd">   :mod:`pcapkit.protocols.schema.link` each exported, and the</span>
 <span class="sd">   ``OSPF_CrytographicAuthentication`` name that</span>
-<span class="sd">   ``pcapkit.protocols.data.link`` and ``pcapkit.protocols.schema.link``</span>
+<span class="sd">   :mod:`pcapkit.protocols.data.link` and :mod:`pcapkit.protocols.schema.link`</span>
 <span class="sd">   exported, with no alias (:issue:`719`, :issue:`1090`).</span>
 
 <span class="sd">.. versionchanged:: 1.5.0</span>
@@ -597,7 +598,7 @@
     <span class="c1">#: :attr:`alias` are needed *during* :meth:`read` -- :meth:`self._decode_next_layer</span>
     <span class="c1">#: &lt;pcapkit.protocols.protocol.Protocol._decode_next_layer&gt;` builds the</span>
     <span class="c1">#: protocol chain out of :attr:`alias` -- and ``_info`` is not assigned until</span>
-    <span class="c1">#: :meth:`read` has returned. c.f. ``ARP._acnm`` on</span>
+    <span class="c1">#: :meth:`read` has returned. See ``ARP._acnm`` on</span>
     <span class="c1">#: :class:`~pcapkit.protocols.link.arp.ARP`, which has the same constraint.</span>
     <span class="n">_version</span><span class="p">:</span> <span class="s1">'int'</span>
 
@@ -871,6 +872,8 @@
         <span class="c1">#_addr = '.'.join(str(_) for _ in _byte)</span>
         <span class="k">return</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_address</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span>
 
+<div class="viewcode-block" id="OSPF._make_id_numbers">
+<a class="viewcode-back" href="../../../../pcapkit/protocols/application/ospf.html#pcapkit.protocols.application.ospf.OSPF._make_id_numbers">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_id_numbers</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="s1">'IPv4Address | str | bytes | bytearray'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make router and area IDs.</span>
 
@@ -881,16 +884,17 @@
 <span class="sd">            ID bytes.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            FieldValueError: If ``id`` is a :obj:`bool` (c.f.</span>
+<span class="sd">            FieldValueError: If ``id`` is a :obj:`bool` (see</span>
 <span class="sd">                :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`).</span>
 
 <span class="sd">        Notes:</span>
 <span class="sd">            Latent rather than live: nothing in this module calls this method</span>
 <span class="sd">            (:meth:`make` builds ``router_id``/``area_id`` straight from its</span>
 <span class="sd">            own arguments), so the only caller is a unit test. It is routed</span>
-<span class="sd">            through :func:`parse_ip_address` anyway, so that a future caller passing a</span>
-<span class="sd">            :obj:`bool` gets :exc:`~pcapkit.utilities.exceptions.FieldValueError`</span>
-<span class="sd">            rather than a silent ``0.0.0.1``.</span>
+<span class="sd">            through :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`</span>
+<span class="sd">            anyway, so that a future caller passing a :obj:`bool` gets</span>
+<span class="sd">            :exc:`~pcapkit.utilities.exceptions.FieldValueError` rather than a</span>
+<span class="sd">            silent ``0.0.0.1``.</span>
 
 <span class="sd">            The description below uses :attr:`self.__class__.__name__</span>
 <span class="sd">            &lt;type.__name__&gt;` rather than :attr:`self.alias</span>
@@ -901,7 +905,8 @@
 
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv4Address'</span><span class="p">,</span> <span class="n">parse_ip_address</span><span class="p">(</span>
-            <span class="nb">id</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: invalid ID'</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span><span class="o">.</span><span class="n">packed</span>
+            <span class="nb">id</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: invalid ID'</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span><span class="o">.</span><span class="n">packed</span></div>
+
 
 <div class="viewcode-block" id="OSPF._read_encrypt_auth">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/application/ospf.html#pcapkit.protocols.application.ospf.OSPF._read_encrypt_auth">[docs]</a>

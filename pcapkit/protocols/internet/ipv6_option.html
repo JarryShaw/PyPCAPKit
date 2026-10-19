@@ -260,7 +260,7 @@
 <li class="toctree-l4"><a class="reference internal" href="ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -392,6 +392,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -567,7 +568,7 @@ a <code class="docutils literal notranslate"><span class="pre">Pad1</span></code
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>A <code class="docutils literal notranslate"><span class="pre">Pad1</span></code> option is a single octet with neither an <code class="docutils literal notranslate"><span class="pre">Opt</span> <span class="pre">Data</span> <span class="pre">Len</span></code>
-field nor any option data (c.f. <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.2"><strong>RFC 8200 Section 4.2</strong></a>), which is why
+field nor any option data (see <span class="target" id="index-0"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.2"><strong>RFC 8200 Section 4.2</strong></a>), which is why
 the option’s <code class="docutils literal notranslate"><span class="pre">len</span></code> field is declared as a
 <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.ConditionalField" title="pcapkit.corekit.fields.misc.ConditionalField"><code class="xref py py-class docutils literal notranslate"><span class="pre">ConditionalField</span></code></a> and is skipped
 for it. A skipped conditional field is <em>recorded</em> in the packet data as

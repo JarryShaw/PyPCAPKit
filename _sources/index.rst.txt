@@ -5,8 +5,9 @@
 PyPCAPKit - Comprehensive Network Packet Analysis Library
 =========================================================
 
-PyPCAPKit is an open source Python library for `PCAP`_ file extraction,
-construction and analysis.
+PyPCAPKit is an open source Python library for
+`PCAP <https://en.wikipedia.org/wiki/Pcap>`__ file extraction, construction and
+analysis.
 
 .. important::
 
@@ -32,6 +33,7 @@ construction and analysis.
 
    ext
    demo
+   glossary
    changelog
 
 .. toctree::
@@ -55,9 +57,6 @@ About
 
    There is a project called |jspcapy|_ that works on :mod:`pcapkit`, which is
    a command line tool for PCAP extraction.
-
-   .. |jspcapy| replace:: ``jspcapy``
-   .. _jspcapy: https://github.com/JarryShaw/jspcapy
 
    .. deprecated:: 0.8.0
 
@@ -135,7 +134,7 @@ spelled ``'pcapkit'``) is :mod:`pcapkit`'s own parser and the only one with no
 third-party requirement.
 
 `PyPCAP`_ and `pcap-ct`_ are two independent distributions of the same
-:manpage:`libpcap(3)` interface and both install a top-level ``pcap`` module,
+:manpage:`libpcap(3)` interface and both install a top-level |pcap|_ module,
 so they are two engines rather than one: upstream `PyPCAP`_ stops at Python 3.11,
 `pcap-ct`_ covers 3.10 and newer. **Install exactly one of them** -- with both
 present, ``pcap-ct`` wins the import and the other becomes unselectable.
@@ -147,15 +146,19 @@ Speed is not free. Every third-party engine supports **less** than the
 dissection at all, so they offer neither reassembly nor flow tracing, and
 :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile` has no IPv6 decoder,
 so IPv6 reassembly is unavailable. Each gap is announced with a warning or an
-exception rather than silently returning nothing, save that
-:class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile` leaves TCP behind a
-VLAN tag, in a tunnel or behind an extension header (an IPv6 one, or AH in IPv4)
-out without one; that :class:`~pcapkit.foundation.engines.dpkt.DPKT` leaves
-TCP in an IP-in-IP tunnel or behind an AH or IPv6 extension header in IPv4, and
-IPv4 in IPv6 or IPv6 in IPv4, out without one; and
-:class:`~pcapkit.foundation.engines.scapy.Scapy` reads IPv6 only as far as
-`Scapy`_ dissects it, which leaves IPv6 behind some BSD loopback headers, and
-TCP and IPv6 fragments behind some IPv6 extension headers, out without one.
+exception rather than silently returning nothing, except for these, which pass
+without a warning:
+
+- :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile` leaves TCP behind a
+  VLAN tag, in a tunnel or behind an extension header (an IPv6 one, or AH in
+  IPv4) out of TCP reassembly and flow tracing;
+- :class:`~pcapkit.foundation.engines.dpkt.DPKT` leaves TCP in an IP-in-IP
+  tunnel or behind an AH or IPv6 extension header in IPv4 out of TCP reassembly
+  and flow tracing, and IPv4 in IPv6 or IPv6 in IPv4 out of IP reassembly;
+- :class:`~pcapkit.foundation.engines.scapy.Scapy` reads IPv6 only as far as
+  `Scapy`_ dissects it, so IPv6 behind some BSD loopback headers, and TCP and
+  IPv6 fragments behind some IPv6 extension headers, go undissected.
+
 :doc:`pcapkit/foundation/engines/index` tabulates them.
 
 Every engine also answers a preflight check --
@@ -163,7 +166,7 @@ Every engine also answers a preflight check --
 :meth:`Extractor.run <pcapkit.foundation.extraction.Extractor.run>` consults
 before anything is imported -- so asking for one that cannot run in the current
 environment gives a single warning naming the actual cause (a Python version, a
-missing :program:`tshark`, a missing :manpage:`libpcap(3)`, the wrong ``pcap``
+missing :program:`tshark`, a missing :manpage:`libpcap(3)`, the wrong |pcap|_
 distribution) and a clean fall back, rather than an error from inside the
 third-party package.
 
@@ -186,7 +189,7 @@ Engine              3.10     3.11     3.12     3.13         3.14     3.15 [*]_
 ================== ======== ======== ======== =========== ======== ===========
 
 .. [*] Inferred rather than measured: no 3.15 interpreter was available.
-.. [*] ``pyshark`` also needs Wireshark's :program:`tshark`, which was absent here,
+.. [*] |pyshark|_ also needs Wireshark's :program:`tshark`, which was absent here,
    so only the interpreter half of each verdict in this row was verified.
 
 ``pypcap`` and ``pypcapfile`` stop at 3.11, and ``pyshark`` at 3.13, for the
@@ -231,7 +234,8 @@ compared with a measured row.
 
 .. [1] `PyPCAPFile`_ 0.12.0 imports :mod:`imp`, which Python removed in 3.12.
 
-.. [2] `PyPCAP`_ 1.3.0 is unsupported on Python 3.12+.
+.. [2] `PyPCAP`_ 1.3.0 does not build on Python 3.12+: its pre-generated
+   :file:`pcap.c` does not compile against that C API.
 
 .. [3] `PyShark`_ 0.6 cannot create the implicit event loop it expects on Python
    3.14; it ran on 3.10--3.13.
@@ -356,7 +360,7 @@ plug-in functions, you may want to install the optional ones:
 .. warning::
 
    **Install only one of** ``pypcap`` **and** ``pcap-ct``. Both own the top-level
-   ``pcap`` module, and ``pip`` will install both without complaint. With both
+   |pcap|_ module, and ``pip`` will install both without complaint. With both
    present the ``pcap-ct`` package wins the import and ``pypcap``'s extension
    module is shadowed and unreachable, so ``engine='pypcap'`` stops working --
    measured on Python 3.10. :mod:`pcapkit` detects that state and warns with an
@@ -377,17 +381,17 @@ preflight described under `Engine Comparison`_.
    cleanly and then fails when used.
 
    - Drives Wireshark's :program:`tshark` binary. It need not be on ``PATH``:
-     ``pyshark`` looks at ``tshark_path`` in its :file:`config.ini` first, then
+     |pyshark|_ looks at ``tshark_path`` in its :file:`config.ini` first, then
      ``PATH`` on POSIX, both Program Files directories on Windows, and
      :file:`/Applications/Wireshark.app` on macOS. Install Wireshark (or just
      :program:`tshark`) from your platform's package manager.
-   - Requires Python **3.13 or older**. ``pyshark`` 0.6 builds its event loop
+   - Requires Python **3.13 or older**. |pyshark|_ 0.6 builds its event loop
      with ``asyncio.get_event_loop_policy().get_event_loop()``, and from Python
      **3.14** :func:`asyncio.get_event_loop` raises :exc:`RuntimeError` when there
      is no current event loop instead of quietly creating one. Measured: a loop is
      returned silently on 3.10 and 3.11, returned with a
      :exc:`DeprecationWarning` on 3.12, and refused on 3.14. 3.13 sits on the
-     deprecated-but-functional side of that change, and ``pyshark`` extracted a
+     deprecated-but-functional side of that change, and |pyshark|_ extracted a
      capture there.
 
 :class:`~pcapkit.foundation.engines.pypcap.PyPCAP`
@@ -452,7 +456,7 @@ preflight described under `Engine Comparison`_.
 
    Only the engines above carry extra constraints. :mod:`pcapkit` itself and
    its ``default``, ``dpkt`` and ``scapy`` engines need nothing beyond their
-   ``pip install`` -- ``dpkt`` 1.9.8 and ``scapy`` 2.7.0 were both measured
+   ``pip install`` -- |dpkt|_ 1.9.8 and ``scapy`` 2.7.0 were both measured
    reading a capture on Python 3.14. The ``scapy`` engine needs **scapy 2.6.0 or
    newer**, which the ``Scapy`` extra requires: 2.5.0 can drop a PCAP-NG
    interface's timestamp resolution, reading nanoseconds as microseconds
@@ -474,11 +478,4 @@ Indices and Tables
 * :ref:`modindex`
 * :ref:`search`
 
-.. _PCAP: https://en.wikipedia.org/wiki/Pcap
-.. _Scapy: https://scapy.net
-.. _DPKT: https://dpkt.readthedocs.io
-.. _PyShark: https://kiminewt.github.io/pyshark
-.. _PyPCAP: https://github.com/pynetwork/pypcap
-.. _pcap-ct: https://pypi.org/project/pcap-ct/
-.. _PyPCAPFile: https://github.com/kisom/pypcapfile
 .. _libpcap: https://www.tcpdump.org

@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -485,13 +486,13 @@
 
 <span class="sd">:mod:`pcapkit.protocols.internet.ipv4` contains</span>
 <span class="sd">:class:`~pcapkit.protocols.internet.ipv4.IPv4` only,</span>
-<span class="sd">which implements extractor for Internet Protocol</span>
+<span class="sd">which implements the extractor for Internet Protocol</span>
 <span class="sd">version 4 (IPv4) [*]_, whose structure is described</span>
 <span class="sd">as below:</span>
 
-<span class="sd">======= ========= ====================== =============================================</span>
+<span class="sd">======= ========= ======================= ============================================</span>
 <span class="sd">Octets      Bits        Name                    Description</span>
-<span class="sd">======= ========= ====================== =============================================</span>
+<span class="sd">======= ========= ======================= ============================================</span>
 <span class="sd">  0           0   ``ipv4.version``        Version (``4``)</span>
 <span class="sd">  0           4   ``ipv4.hdr_len``        Internet Header Length (IHL)</span>
 <span class="sd">  1           8   ``ipv4.tos.pre``        Precedence</span>
@@ -501,7 +502,7 @@
 <span class="sd">  1          14   ``ipv4.tos.ecn``        Explicit Congestion Notification (ECN)</span>
 <span class="sd">  2          16   ``ipv4.len``            Total Length</span>
 <span class="sd">  4          32   ``ipv4.id``             Identification</span>
-<span class="sd">  6          48                           Reserved Bit (must be ``\\x00``)</span>
+<span class="sd">  6          48   ``ipv4.flags.reserved`` Reserved Bit (must be ``0``)</span>
 <span class="sd">  6          49   ``ipv4.flags.df``       Don't Fragment (DF)</span>
 <span class="sd">  6          50   ``ipv4.flags.mf``       More Fragments (MF)</span>
 <span class="sd">  6          51   ``ipv4.offset``         Fragment Offset</span>
@@ -511,7 +512,7 @@
 <span class="sd">  12         96   ``ipv4.src``            Source IP Address</span>
 <span class="sd">  16        128   ``ipv4.dst``            Destination IP Address</span>
 <span class="sd">  20        160   ``ipv4.options``        IP Options (if IHL &gt; ``5``)</span>
-<span class="sd">======= ========= ====================== =============================================</span>
+<span class="sd">======= ========= ======================= ============================================</span>
 
 <span class="sd">.. [*] https://en.wikipedia.org/wiki/IPv4</span>
 
@@ -695,8 +696,7 @@
     <span class="c1"># Defaults.</span>
     <span class="c1">##########################################################################</span>
 
-    <span class="c1">#: DefaultDict[Enum_OptionNumber, str | tuple[OptionParser, OptionConstructor]]: Option</span>
-    <span class="c1">#: code to method mapping, c.f. :meth:`_read_ipv4_options` and/or</span>
+    <span class="c1">#: Option code to method mapping, see :meth:`_read_ipv4_options` and/or</span>
     <span class="c1">#: :meth:`_make_ipv4_options`. A :obj:`str` value names the methods</span>
     <span class="c1">#: ``_read_opt_${name}`` and ``_make_opt_${name}``, falling back to</span>
     <span class="c1">#: ``_read_opt_unassigned`` / ``_make_opt_unassigned`` when they do not</span>
@@ -977,7 +977,7 @@
 <span class="sd">            total_length: Total length of the packet, header included; computed</span>
 <span class="sd">                from the header and the payload when omitted.</span>
 <span class="sd">            padding: Octets after the End of Option List, written as is when</span>
-<span class="sd">                ``options`` is a container that carries an ``EOOL``, c.f.</span>
+<span class="sd">                ``options`` is a container that carries an ``EOOL``, see</span>
 <span class="sd">                :meth:`_make_ipv4_options`.</span>
 <span class="sd">            payload: Payload of the packet.</span>
 <span class="sd">            trailer: Octets after the packet, outside the Total Length, such as</span>
@@ -1863,7 +1863,7 @@
 <span class="sd">        Note:</span>
 <span class="sd">            An option whose QS function is neither of the two above has no</span>
 <span class="sd">            defined layout, so the schema keeps it as an unassigned option and</span>
-<span class="sd">            it is parsed as one, c.f. :meth:`_read_opt_unassigned`.</span>
+<span class="sd">            it is parsed as one, see :meth:`_read_opt_unassigned`.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">Schema_UnassignedOption</span><span class="p">):</span>
@@ -2688,7 +2688,7 @@
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constructed option schema. An unassigned option schema if ``option``</span>
-<span class="sd">            is a Quick-Start option parsed as unassigned, c.f. :meth:`_read_opt_qs`,</span>
+<span class="sd">            is a Quick-Start option parsed as unassigned, see :meth:`_read_opt_qs`,</span>
 <span class="sd">            or if ``func`` is neither of the assigned functions, in which case</span>
 <span class="sd">            the option takes the eight-octet layout of a Quick-Start Request.</span>
 

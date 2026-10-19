@@ -5,7 +5,7 @@ Application Layer
 .. module:: pcapkit.protocols.data.application
 .. module:: pcapkit.protocols.schema.application
 
-:mod:`pcapkit.protocols.application` is collection of all protocols in
+:mod:`pcapkit.protocols.application` is the collection of all protocols in
 application layer, with detailed implementation and methods. Layer is decided by
 function rather than encapsulation, see
 :doc:`/contributing/conventions/protocol-layer-placement`.
@@ -24,7 +24,7 @@ function rather than encapsulation, see
 
 .. todo::
 
-   Implements BGP, DHCP, DHCPv6, DNS, IMAP, LDAP, MQTT, NNTP, NTP, ONC:RPC,
+   Implement BGP, DHCP, DHCPv6, DNS, IMAP, LDAP, MQTT, NNTP, NTP, ONC:RPC,
    POP, RIP, RTP, SIP, SMTP, SNMP, SSH, TELNET, TLS/SSL, XMPP.
 
 Protocol Registry

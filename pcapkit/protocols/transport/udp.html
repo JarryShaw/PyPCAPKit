@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/protocols/transport/udp.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.protocols.transport.udp contains UDP only, which implements extractor for User Datagram Protocol (UDP)*, whose structure is described as below:,,,, Octets, Bits, Name, Description,,, 0, 0, ..." />
-<meta name="description" content="pcapkit.protocols.transport.udp contains UDP only, which implements extractor for User Datagram Protocol (UDP)*, whose structure is described as below:,,,, Octets, Bits, Name, Description,,, 0, 0, ..." />
+<meta property="og:description" content="pcapkit.protocols.transport.udp contains UDP only, which implements the extractor for User Datagram Protocol (UDP)*, whose structure is described as below:,,,, Octets, Bits, Name, Description,,, 0,..." />
+<meta name="description" content="pcapkit.protocols.transport.udp contains UDP only, which implements the extractor for User Datagram Protocol (UDP)*, whose structure is described as below:,,,, Octets, Bits, Name, Description,,, 0,..." />
 <link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html"><link rel="next" title="Application Layer" href="../application/index.html"><link rel="prev" title="TCP - Transmission Control Protocol" href="tcp.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -260,7 +260,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -392,6 +392,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -497,7 +498,7 @@
 <span id="udp-user-datagram-protocol"></span><h1>UDP - User Datagram Protocol<a class="headerlink" href="#module-pcapkit.protocols.transport.udp" title="Link to this heading">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.protocols.transport.udp" title="pcapkit.protocols.transport.udp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.protocols.transport.udp</span></code></a> contains
 <a class="reference internal" href="#pcapkit.protocols.transport.udp.UDP" title="pcapkit.protocols.transport.udp.UDP"><code class="xref py py-class docutils literal notranslate"><span class="pre">UDP</span></code></a> only,
-which implements extractor for User Datagram Protocol
+which implements the extractor for User Datagram Protocol
 (UDP) <a class="footnote-reference brackets" href="#id2" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a>, whose structure is described as below:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
@@ -522,7 +523,7 @@ which implements extractor for User Datagram Protocol
 <tr class="row-even"><td><p>4</p></td>
 <td><p>32</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">udp.len</span></code></p></td>
-<td><p>Length (header includes)</p></td>
+<td><p>Length (header included)</p></td>
 </tr>
 <tr class="row-odd"><td><p>6</p></td>
 <td><p>48</p></td>
@@ -687,15 +688,9 @@ instead.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.transport.udp.UDP.__proto__">
 <span class="sig-name descname"><span class="pre">__proto__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.DefaultDict" title="(in Python v3.15)"><span class="pre">DefaultDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><span class="pre">ModuleDescriptor</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.transport.udp.UDP.__proto__" title="Link to this definition">¶</a></dt>
-<dd><p>Protocol
-index mapping for decoding next layer, c.f.
-<a class="reference internal" href="transport.html#pcapkit.protocols.transport.transport.Transport._decode_next_layer" title="pcapkit.protocols.transport.transport.Transport._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._decode_next_layer</span></code></a>
-&amp; <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._import_next_layer</span></code></a>.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>DefaultDict[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a>, <a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor">ModuleDescriptor</a>[<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase">ProtocolBase</a>] | <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><em>Type</em></a>[<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase">ProtocolBase</a>]]</p>
-</dd>
-</dl>
+<dd><p>Protocol index mapping for decoding next layer, see
+<a class="reference internal" href="transport.html#pcapkit.protocols.transport.transport.Transport._decode_next_layer" title="pcapkit.protocols.transport.transport.Transport._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._decode_next_layer</span></code></a> &amp;
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.Protocol._import_next_layer" title="pcapkit.protocols.protocol.Protocol._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._import_next_layer</span></code></a>.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -755,7 +750,7 @@ negative, which takes the rest of the datagram.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.transport.udp.UDP.trailer">
 <span class="sig-name descname"><span class="pre">trailer</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PayloadField</span> <span class="pre">trailer&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.transport.udp.UDP.trailer" title="Link to this definition">¶</a></dt>
-<dd><p>Octets captured past the Length field, c.f.
+<dd><p>Octets captured past the Length field, see
 <a class="reference internal" href="../internet/ipv4.html#pcapkit.protocols.schema.internet.ipv4.IPv4.trailer" title="pcapkit.protocols.schema.internet.ipv4.IPv4.trailer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">IPv4.trailer</span></code></a>.</p>
 </dd></dl>
 

@@ -253,7 +253,7 @@
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ip.html">IP - Internet Protocol</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv4.html">IPv4 - Internet Protocol version 4</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6.html">IPv6 - Internet Protocol version 6</a></li>
-<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6_Ext - IPv6 Extension Header</a></li>
+<li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_ext.html">IPv6-Ext - IPv6 Extension Header</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_frag.html">IPv6-Frag - Fragment Header for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_opts.html">IPv6-Opts - Destination Options for IPv6</a></li>
 <li class="toctree-l4"><a class="reference internal" href="../../../../pcapkit/protocols/internet/ipv6_route.html">IPv6-Route - Routing Header for IPv6</a></li>
@@ -385,6 +385,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../../../../changelog.html">Changelog</a><input aria-label="Toggle navigation of Changelog" class="toctree-checkbox" id="toctree-checkbox-21" name="toctree-checkbox-21" role="switch" type="checkbox"/><label for="toctree-checkbox-21"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.5.0.html">1.5.0 – unreleased</a></li>
 <li class="toctree-l2"><a class="reference internal" href="../../../../changelog/1.4.1.html">1.4.1 – 2026-08-22</a></li>
@@ -635,7 +636,7 @@
             <span class="k">return</span> <span class="n">value</span>
 
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> \
-            <span class="n">Schema</span>  <span class="c1"># pylint: disable=import-outside-top-level</span>
+            <span class="n">Schema</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
 
         <span class="n">temp</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[bytes]</span>
         <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">value</span><span class="p">:</span>
@@ -697,7 +698,7 @@
         <span class="c1"># of :exc:`~pcapkit.utilities.exceptions.ProtocolError` from</span>
         <span class="c1"># :meth:`TCP._read_mode_sack</span>
         <span class="c1"># &lt;pcapkit.protocols.transport.tcp.TCP._read_mode_sack&gt;`, depending on</span>
-        <span class="c1"># unrelated things that ran earlier in the same process. C.f. #525.</span>
+        <span class="c1"># unrelated things that ran earlier in the same process. Cf. #525.</span>
         <span class="c1"># Importing at module level, once, for the life of this module object,</span>
         <span class="c1"># closes that off: ``SchemaField`` then stays whatever class this</span>
         <span class="c1"># module resolved at its own import time, regardless of what happens to</span>
@@ -713,7 +714,7 @@
         <span class="c1"># ``SACK`` option declaring more octets than the option area holds leaves</span>
         <span class="c1"># ``sack``'s ``ListField`` reading ``SACKBlock`` off an exhausted stream.</span>
         <span class="c1"># Remembering where the previous item ended is what bounds the iteration</span>
-        <span class="c1"># count, since it does not depend on what the schema reports. C.f. #431,</span>
+        <span class="c1"># count, since it does not depend on what the schema reports. Cf. #431,</span>
         <span class="c1"># which is the same defect in the ``OptionField`` subclass.</span>
         <span class="c1">#</span>
         <span class="c1"># ``start`` is where the field itself begins. The comparison needs stream</span>
@@ -798,8 +799,8 @@
 <span class="sd">        3. its length is a fixed integer rather than a callable, so that its width</span>
 <span class="sd">           does not depend on packet data the shortcut has not read.</span>
 
-<span class="sd">        All of that is true of every ``OptionField`` declared in this package. A</span>
-<span class="sd">        base schema registered from outside it -- c.f.</span>
+<span class="sd">        All of that is true of every :class:`~pcapkit.corekit.fields.collections.OptionField`</span>
+<span class="sd">        declared in this package. A base schema registered from outside it -- cf.</span>
 <span class="sd">        :mod:`pcapkit.foundation.registry` -- need not satisfy it, and is **not**</span>
 <span class="sd">        rejected: such a base schema is unpacked in full. It parses correctly and</span>
 <span class="sd">        pays the cost of the second parse. Only the shortcut is withheld, so a base schema whose type field</span>
@@ -929,7 +930,7 @@
         <span class="c1"># over-reads leaves ``length`` above zero with ``file`` already exhausted,</span>
         <span class="c1"># every field of the next option reads ``b''``, and an option that read</span>
         <span class="c1"># nothing reports ``len(data) == 0`` and leaves ``length`` untouched --</span>
-        <span class="c1"># which spins forever, with no exception and no diagnostic. C.f. #431.</span>
+        <span class="c1"># which spins forever, with no exception and no diagnostic. Cf. #431.</span>
         <span class="c1">#</span>
         <span class="c1"># Remembering where the previous option ended gives the loop a measure of</span>
         <span class="c1"># progress that does not depend on what a schema reports, and one octet of</span>
@@ -976,7 +977,7 @@
         <span class="c1"># octets with zeros, so the option would rebuild octets that were never</span>
         <span class="c1"># there: a HIP ``ACK`` declaring 256 octets with 4 present, or an MH</span>
         <span class="c1"># ``PadN`` declaring 3 with none. Nothing downstream can tell, because</span>
-        <span class="c1"># the schema records the zeros as values. C.f. #1325.</span>
+        <span class="c1"># the schema records the zeros as values. Cf. #1325.</span>
         <span class="c1">#</span>
         <span class="c1"># So the stream is read through a proxy that notes any short read, and</span>
         <span class="c1"># an option that began with at least one octet present and then read</span>

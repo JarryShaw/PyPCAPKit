@@ -29,6 +29,8 @@ only, which is the base class for all vendor crawlers.
    .. automethod:: _request
    .. automethod:: _dest_path
 
+   .. automethod:: __init__
+
 .. _vendor-variables:
 
 Environment Variables
@@ -87,3 +89,5 @@ Internal Definitions
    :rtype: str
 
 .. autofunction:: pcapkit.vendor.default.get_proxies
+
+.. autofunction:: pcapkit.vendor.default.stdin_is_interactive
