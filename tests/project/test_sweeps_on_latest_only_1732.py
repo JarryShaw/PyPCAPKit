@@ -295,15 +295,17 @@ class TestTheExperimentalLegsAreAWorkflowOfTheirOwn(unittest.TestCase):
                 self.assertNotIn('experimental', str(spec.get('name')))
 
     def test_the_same_events_and_its_own_concurrency(self) -> None:
-        """unit-tests.yml's push and pull_request, no ``workflow_call``, read-only, PR runs superseded."""
+        """unit-tests.yml's push and pull_request, no ``workflow_call``, read-only, a group of its own.
+
+        Which runs it supersedes is #1903's, evaluated in
+        :mod:`tests.project.test_experimental_concurrency_1903`.
+
+        """
         events = triggers(self.own)
         self.assertEqual(events, {key: value for key, value in triggers(self.unit).items() if key != 'workflow_call'})
         self.assertEqual(set(events), {'push', 'pull_request'})
         self.assertEqual(self.own['permissions'], {'contents': 'read'})
-        concurrency = self.own['concurrency']
-        self.assertEqual(concurrency['cancel-in-progress'], "${{ github.event_name == 'pull_request' }}")
-        self.assertIn("github.event_name == 'pull_request' && github.ref || github.run_id", concurrency['group'])
-        self.assertNotEqual(concurrency['group'], self.unit['concurrency']['group'])
+        self.assertNotEqual(self.own['concurrency']['group'], self.unit['concurrency']['group'])
 
     def test_it_skips_a_docs_only_diff_as_test_does(self) -> None:
         """unit-tests.yml's ``changes`` script, byte for byte, gating the job as it gates ``test``."""
