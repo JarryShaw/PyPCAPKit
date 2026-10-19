@@ -2,8 +2,8 @@
 """Tests for :class:`pcapkit.corekit.enum.EnumRegistry`, tier 2 of issue #775.
 
 Tier 1 (#838) removed the mint from the two sites in
-:data:`pcapkit.vendor.default.LINE` that the 107 default-template registries
-inherit. It could not reach the eleven crawlers that replace that template with
+:data:`pcapkit.vendor.default.LINE` that the default-template registries
+inherit. It could not reach the crawlers that replace that template with
 their own, because each of those carries a hand-copied ``get()`` -- and none of
 them carries ``register``, ``register_alias`` or ``get_all`` at all.
 
@@ -676,7 +676,7 @@ class UnregisteredMemberTests(unittest.TestCase):
         self.assertNotIn('unit_test_absent', _Str.__members__)
 
 
-#: Sample of the 107 default-template registries GitHub issue #775's tier 3
+#: Sample of the default-template registries GitHub issue #775's tier 3
 #: moved onto :class:`~pcapkit.corekit.enum.EnumRegistry`, chosen to cover
 #: the two shapes the census turned up in ``pcapkit/vendor/default.py``'s
 #: ``LINE`` template: a registry whose own ``_missing_`` mints directly via
@@ -714,9 +714,9 @@ GENERATED_SAMPLE = (
 #: custom ``__new__`` needed one. They stay excluded from *this* file's
 #: tier-3 sweep regardless, because the exclusion here is about their
 #: bespoke ``process()``/``get()`` shape not sharing the generated template,
-#: which conversion onto the base does not change -- unlike the 107
-#: :data:`GENERATED_SAMPLE` registries below, each of these five classes'
-#: (nine files') own ``_missing_`` stays bespoke rather than sharing the
+#: which conversion onto the base does not change -- unlike the
+#: default-template registries :data:`GENERATED_SAMPLE` samples above, each
+#: of these classes' own ``_missing_`` stays bespoke rather than sharing the
 #: generated template, and several also keep a bespoke
 #: ``_unregistered_member`` (``Command``, ``Method``, ``OptionType``,
 #: ``ReturnCode``, ``StatusCode``) or a bespoke ``get`` of their own
@@ -796,7 +796,7 @@ EXCLUDED_FROM_INTENUM_CENSUS = frozenset({
 
 
 class GeneratedTemplateSourceInheritsTests(unittest.TestCase):
-    """The 107 default-template registries must inherit the protocol too,
+    """The default-template registries must inherit the protocol too,
     not just the six bespoke ones :class:`GeneratedSourceInheritsTests`
     above (tier 2) already covers."""
 
@@ -976,7 +976,7 @@ class GeneratedMissingRangeParityTests(unittest.TestCase):
 class RegisterAlreadyRegisteredNowRaisesOnAGeneratedRegistryTests(unittest.TestCase):
     """The residue #855 disclosed and this tier's own instructions name:
     ``register()`` on an already-registered value used to silently alias
-    rather than mint or raise, on every one of the 107 generated registries
+    rather than mint or raise, on every one of the generated registries
     (they had no guard of their own -- only the six bespoke ones tier 2
     already fixed did). Measured directly, before and after, in the
     docstring below rather than only asserted.
@@ -1314,7 +1314,7 @@ class NoDefaultSentinelTests(unittest.TestCase):
     Before #857, ``default == NO_DEFAULT`` read a caller-supplied ``-1`` --
     or, worse, ``-1.0``, since ``-1.0 == -1`` -- as if no default had been
     supplied at all, so the caller's own fallback silently never took effect.
-    There is no live defect in :mod:`pcapkit.const` today (no registry's
+    There is no live defect in :mod:`pcapkit.const` (no registry's
     domain reaches ``-1``), so this batch pins the *clarity* fix: ``-1`` and
     ``-1.0`` are ordinary defaults now, indistinguishable from any other
     value a caller might pass.

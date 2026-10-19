@@ -954,7 +954,7 @@ class TestNonBlockingLegs(unittest.TestCase):
         self.assertFalse(ci_timing.non_blocking(workflow, 'Python 3.14t (experimental) extra'))
 
     def run_report(self, workflow: 'str', name: 'str', took: 'float') -> 'tuple[int, str]':
-        """``_report`` on five runs of one job taking ``took`` minutes, against the real file."""
+        """``_report`` on ``ci_timing.MIN_SAMPLES`` runs of one job taking ``took`` minutes, against the real file."""
         start = datetime.datetime(2026, 10, 9, 10, tzinfo=datetime.timezone.utc)
         runs = []
         for number in range(ci_timing.MIN_SAMPLES):

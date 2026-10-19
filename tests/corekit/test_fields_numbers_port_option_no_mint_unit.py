@@ -262,7 +262,7 @@ class PortEnumFieldBoundedFallbackTests(unittest.TestCase):
         Patches the TCP registry's ``_missing_`` to reject with one of
         :mod:`pcapkit.utilities.exceptions`, which a blanket
         ``except ValueError: pass`` would have swallowed. Nothing under
-        :mod:`pcapkit.const` actually raises one here today -- this is the
+        :mod:`pcapkit.const` actually raises one here -- this is the
         stand-in the fallback still has to respect regardless.
 
         """

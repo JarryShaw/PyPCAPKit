@@ -661,7 +661,7 @@ class VersionIndependentInvariantTests(unittest.TestCase):
     """Properties of a real sweep that hold on any Wireshark, not only 4.6.9.
 
     Where :class:`RealSweepTests` skips -- any Wireshark that is not
-    :data:`MEASURED_WIRESHARK_VERSION`, which is every CI leg today -- this
+    :data:`MEASURED_WIRESHARK_VERSION`, which is every CI leg -- this
     still runs the real sweep against whatever :program:`editcap`/
     :program:`tshark` *is* on ``PATH`` (224 accepted on CI's Ubuntu noble
     4.2.2, not the 226 :class:`RealSweepTests` requires) and checks structure

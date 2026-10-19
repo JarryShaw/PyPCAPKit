@@ -91,7 +91,7 @@ class TrackedCaptureTests(unittest.TestCase):
     def test_no_rendered_report_is_tracked(self) -> None:
         """:data:`RENDERED_REPORTS` by name, in case the suffix rule is relaxed.
 
-        Redundant with :meth:`test_every_tracked_file_is_an_input_capture` today
+        Redundant with :meth:`test_every_tracked_file_is_an_input_capture`
         and deliberately so: that test's reach depends on
         :data:`~tests._tiers.CAPTURE_SUFFIXES`, and a future ``.txt`` capture
         format would widen the suffix list and quietly let these back in.

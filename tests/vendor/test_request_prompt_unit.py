@@ -653,7 +653,7 @@ class ManualIntervenePromptTests(unittest.TestCase):
     def test_a_successful_fetch_never_consults_stdin(self) -> None:
         # The quiet direction, and the cheapest regression to introduce: a
         # precondition evaluated too early would make every crawler depend on
-        # having a terminal, breaking the CI job that works today.
+        # having a terminal, breaking the CI job, which has none.
         crawler = self._crawler()
         prompt, calls = _fake_input(_Runaway('input() was called on the happy path'))
 

@@ -83,7 +83,7 @@ from tests._support import reimport_once_per_class
 #: ``html5lib`` is the one that is actually missing on ``test``: ``requests`` and
 #: ``bs4`` have shipped in the ``test`` extra since #507, but only
 #: ``beautifulsoup4[html5lib]`` -- the ``vendor`` and ``dev`` extras -- provides a
-#: parser (``pyproject.toml:234``, and the note at ``:313-320`` saying so
+#: parser (``pyproject.toml:238``, and the note at ``:325-331`` saying so
 #: deliberately).
 VENDOR_DEPS = ('requests', 'bs4', 'html5lib')
 
@@ -93,7 +93,8 @@ VENDOR_DEPS = ('requests', 'bs4', 'html5lib')
 #:
 #: Consequence worth knowing: :class:`LinkTypeGeneratorLegacyOrderingTests` is the
 #: root-cause pin, and it runs only where the ``vendor`` extra is installed,
-#: which no CI job does since #849 -- so locally only.
+#: which no ``unit-tests.yml`` job does since #849 -- so locally, and in
+#: ``cron-vendor.yml`` only when a crawl changed a constant module (#1853).
 #: :class:`LinkType209ConstResolutionTests`
 #: needs no parser and so still guards the reported symptom everywhere.
 HAS_VENDOR_DEPS = all(importlib.util.find_spec(name) is not None for name in VENDOR_DEPS)

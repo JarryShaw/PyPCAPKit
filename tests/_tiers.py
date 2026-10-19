@@ -74,9 +74,9 @@ parametrised loop, but only once the call is reached.
 
 What neither catches, deliberately: a unit-tier module that opens a capture
 without going through :func:`~tests._support.sample_path` at all, e.g. by joining
-:file:`examples/captures/` and a name itself. No *unit-tier* module does this
-today -- :file:`tests/protocols/misc/test_pcapng_unit.py` was the last one and
-now reads ``sample_path('dhcp_big_endian.pcapng')`` inside the ``try``/``except
+:file:`examples/captures/` and a name itself. No *unit-tier* module does this:
+:file:`tests/protocols/misc/test_pcapng_unit.py` was the last one, and
+reads ``sample_path('dhcp_big_endian.pcapng')`` inside the ``try``/``except
 FileNotFoundError`` idiom :func:`explain` recommends. Only the *unit* tier is
 claimed there, deliberately: fixture-tier modules join the directory freely and
 are entitled to, e.g. :file:`tests/protocols/test_option_coverage_runtime.py`,
@@ -734,7 +734,7 @@ def skip_idiom_modules() -> 'tuple[pathlib.Path, ...]':
     :func:`audit_module` carries and for the same reason: a name computed at
     call time, e.g. ``sample_path(sample)`` in a parametrised loop, is
     invisible to a static pass. No module in the suite does this inside a
-    handled call today -- see ``test_every_handled_call_names_a_literal_capture``
+    handled call -- see ``test_every_handled_call_names_a_literal_capture``
     in :file:`tests/test_tier_guard.py`, which exists to catch the day one does,
     since such a call would silently drop out of this function's result and
     its fixture-backed coverage would quietly stop running anywhere.
@@ -771,12 +771,12 @@ def _enclosing_scope(tree: 'ast.Module', lineno: 'int') -> 'Optional[tuple[Optio
     carry that context as it goes. "Most tightly" is decided by span, so a
     helper function defined inside a test method and containing the line in
     question would win over the test method itself; nothing in this suite's
-    skip idiom does that today, but the rule is stated so a future one is
+    skip idiom does that, but the rule is stated so a future one is
     handled the same way :func:`sample_path_calls` already treats nesting.
 
     Returns:
         :data:`None` if no function definition contains ``lineno`` at all --
-        a module-level call, which does not happen in this suite today.
+        a module-level call, which does not happen in this suite.
 
     """
     best = None  # type: Optional[tuple[Optional[str], str, int]]
@@ -822,8 +822,8 @@ def skip_idiom_test_ids() -> 'tuple[str, ...]':
 
     Falls back to the *module* path when a handled call cannot be resolved to
     one enclosing function -- :func:`_enclosing_scope` returns :data:`None` for
-    a module-level call, which is not a shape this suite's skip idiom uses
-    today, but a fallback that still runs the file is safer than one that
+    a module-level call, which is not a shape this suite's skip idiom uses,
+    but a fallback that still runs the file is safer than one that
     drops the call's coverage entirely.
 
     Returns:

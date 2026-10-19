@@ -401,7 +401,7 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
     reads its length off a data model that is not its own, and ``__index__``
     raises instead of returning its IANA number.
 
-    The eight are correct today only because all eight happen to shadow every
+    The eight are correct only because all eight happen to shadow every
     one of those members. Nothing in the language enforces that, so this class
     does -- over every subclass discovered at runtime rather than a hard-coded
     list, so a ninth added later is held to the same contract without anyone

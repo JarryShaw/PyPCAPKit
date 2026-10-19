@@ -155,7 +155,7 @@ class OSPFUnitTests(unittest.TestCase):
         """A :obj:`bool` router/area ID must not be silently packed. See #540.
 
         Latent rather than live: nothing in this module calls ``_make_id_numbers``
-        today -- ``OSPF.make`` builds ``router_id``/``area_id`` from its own
+        -- ``OSPF.make`` builds ``router_id``/``area_id`` from its own
         arguments rather than through this helper -- so only a unit test (this one,
         and the pre-existing one above) reaches it. It is fixed alongside the three
         live sites anyway, so that it does not resurface the moment a future caller

@@ -255,8 +255,8 @@ class CitationFormattingTests(CitationTreeMixin, unittest.TestCase):
         ], f'unexpected lines moved: {moved!r}')
 
     def test_the_comment_header_survives(self) -> None:
-        # The real file opens with sixteen lines explaining why it omits ``doi``
-        # and ``orcid``. A YAML load-and-dump round trip would drop all of them,
+        # The real file opens with a comment block explaining why it omits ``doi``
+        # and ``orcid``. A YAML load-and-dump round trip would drop all of it,
         # which is why the rewrite is line-oriented.
         rewritten = bump_version.plan_citation(FIXTURE, '1.5.0b5', '2026-09-22')
 

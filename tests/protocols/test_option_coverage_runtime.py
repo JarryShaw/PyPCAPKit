@@ -3,7 +3,7 @@
 
 :file:`examples/generators/options.py` constructs one item of every option-like
 code the library registers, and writes the ones that survive a construct ->
-parse -> construct cycle into five captures. This module reads them back through
+parse -> construct cycle into a set of captures. This module reads them back through
 the public extraction interface.
 
 The point is not to re-assert the round trip --

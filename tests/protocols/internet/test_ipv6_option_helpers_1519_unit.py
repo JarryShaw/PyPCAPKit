@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """The IPv6 option helpers HOPOPT and IPv6-Opts share.
 
-GitHub issue #1519. The nine field helpers of the HOPOPT and IPv6-Opts option
+GitHub issue #1519. The field helpers of the HOPOPT and IPv6-Opts option
 schemas were two copies differing only in the error prefix and in which
 module's option schemas the selectors return. They now live once, in
 :mod:`pcapkit.protocols.schema.internet.ipv6_option`, and each header module

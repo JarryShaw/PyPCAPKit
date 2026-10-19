@@ -16,7 +16,7 @@ The same layers are also rebuilt from ``layer.info.to_dict()``, which
 ``from_dict``. Finally each capture is rebuilt whole, header and records or
 blocks, and compared with the file.
 
-A case that does not close today is listed in :data:`LAYER_GAPS` or
+A case that does not close is listed in :data:`LAYER_GAPS` or
 :data:`DICT_GAPS` with the issue that tracks it. Both tables are asserted in both
 directions: a listed case must still fail in the recorded way, a case not listed
 must pass, and every entry must name a case that exists.

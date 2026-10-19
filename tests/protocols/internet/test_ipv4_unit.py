@@ -564,7 +564,7 @@ class IPv4UnitTests(unittest.TestCase):
         of eight, which is checked here too. No shipped enumeration member has
         value ``8``, so that half was latent rather than reachable -- and it is
         the half that would have corrupted an option instead of raising, so it is
-        worth pinning even though nothing reaches it today.
+        worth pinning even though nothing reaches it.
 
         """
         from pcapkit.const.ipv4.option_number import OptionNumber

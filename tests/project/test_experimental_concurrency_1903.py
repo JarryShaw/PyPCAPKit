@@ -80,8 +80,8 @@ class TestExperimentalSupersedesOnMain(unittest.TestCase):
         self.own = Concurrency('experimental.yml')
 
     def test_the_cases_below_cover_every_trigger(self) -> None:
-        # Pushes to `main` and pull requests are all experimental.yml runs on
-        # today; the other events below are the guard for a trigger added later.
+        # Pushes to `main` and pull requests are all experimental.yml runs on;
+        # the other events below are the guard for a trigger added later.
         with open(WORKFLOWS / 'experimental.yml', encoding='utf-8') as file:
             spec = yaml.safe_load(file)
         on = spec.get('on', spec.get(True))

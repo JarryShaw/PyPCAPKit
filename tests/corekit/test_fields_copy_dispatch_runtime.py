@@ -8,7 +8,7 @@ going through :func:`copy.copy`. This module proves the thing that actually
 matters -- that swapping the dispatch did not move a single byte of what
 :func:`~pcapkit.interface.core.extract` produces.
 
-Every field of every protocol is copied through one of the eight call sites
+Every field of every protocol is copied through one of the call sites
 #730 named, once per field per packet, so a mistake in any of them is not
 confined to one protocol -- it is exactly the kind of change that wants a
 broad, mechanical check rather than a handful of hand-picked assertions. Each

@@ -45,9 +45,9 @@ an extra or emptying it is caught too.
 
 One thing this deliberately does not model, recorded here rather than left to
 be discovered: **environment markers.** ``PyPCAPFile = [ "pypcapfile;
-python_version < '3.12'" ]`` resolves to nothing on four of the five supported
-legs (3.12-3.15), so an install line carrying that extra would satisfy this module
-while only 3.11 and the KTLO legs ran the tests. :func:`requirement_key`
+python_version < '3.12'" ]`` resolves to nothing on every leg from 3.12 up,
+so an install line carrying that extra would satisfy this module while only the
+legs below 3.12 ran the tests. :func:`requirement_key`
 strips the marker and :func:`provided_by` ignores it; the marker text is kept
 on :class:`Requirement` so a diagnostic can say so.
 
@@ -195,7 +195,7 @@ MODULE_PROVIDERS = {
     # generated constants on a schedule rather than as a check -- so excluding
     # this flag would have left `make isort`'s verdict unverified everywhere,
     # which is the #766 complaint. Cost does not argue the other way either:
-    # isort is a pure-Python wheel and all four Makefile lines together measure
+    # isort is a pure-Python wheel and the Makefile's isort lines together measure
     # about 1.5s, against the ~238 MB and licence questions that keep ``NGAP``
     # out of ``all``.
     'isort': ('isort',),
@@ -1153,7 +1153,7 @@ def module_flag_requirements(path: 'pathlib.Path') -> 'dict[str, frozenset[str]]
 
     Public for the same reason :func:`module_gates` is: the shapes it has to
     understand are best pinned against source written to exercise them one at a
-    time, rather than against whichever of them the suite happens to use today.
+    time, rather than against whichever of them the suite happens to use.
 
     """
     try:
@@ -1535,7 +1535,7 @@ def pytest_jobs(workflow: 'Optional[pathlib.Path]' = None) -> 'tuple[Job, ...]':
         # `integration` job's names `fixture_tier_paths()`, so classifying on
         # the whole job section reads `gate` as an ignore-selection job and
         # credits it with reaching only the unit tier. Matching on the step name
-        # would work today and break the day a step is renamed.
+        # would work only until a step is renamed.
         steps = re.findall(r'(?ms)^      - name: [^\n]*\n(.*?)(?=^      - name:|\Z)', section)
         running = [step for step in steps if 'python -m pytest' in step]
         if len(running) != 1:

@@ -2,7 +2,7 @@
 """Shared harness for the foundation round-trip modules. C.f. #1202.
 
 The owner's rule is that every round trip the library promises passes and
-matches exactly. Three foundation paths make such a promise, and each has a
+matches exactly. Each foundation path that makes such a promise has a
 module beside this one that enumerates its cases:
 
 * reassembly recovers the payload its fragments or segments were cut from

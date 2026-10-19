@@ -22,7 +22,7 @@ assertions can never describe different things. See that module for why the
 enumeration is registry-driven and how the per-code arguments were chosen.
 
 What this module adds is the *judgement*: :data:`EXPECTED_FAILURES` records, case
-by case, which cycles do not close today and which defect stops each one. A case
+by case, which cycles do not close and which defect stops each one. A case
 absent from that table has to come back ``'OK'``.
 
 That table can only speak about cycles that *fail*, though, and a defect can

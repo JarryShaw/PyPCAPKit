@@ -669,7 +669,7 @@ class AppTypeSplitTests(unittest.TestCase):
         :mod:`pcapkit.vendor.reg.apptype.apptype` stops emitting the test -- and
         it returns silently, because a shadowed branch is unreachable rather than
         wrong. This asserts the invariant over every branch instead of over the two
-        spans that happen to collide today: a branch minting a member for a named
+        spans that happen to collide: a branch minting a member for a named
         transport protocol is claimed by that registry, and one minting for
         ``undefined`` claims nothing, since IANA's unassigned and reserved markers
         belong to whichever registry was asked.

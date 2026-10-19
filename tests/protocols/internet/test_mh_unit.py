@@ -103,7 +103,7 @@ class MHUnitTests(unittest.TestCase):
         sizes its extension area from ``pkt['length']`` -- a key the nested packet
         context does not carry -- so
         :meth:`~pcapkit.protocols.internet.mh.MH._read_cga_extensions` is
-        unreachable from bytes today. The sibling read site in
+        unreachable from bytes. The sibling read site in
         :meth:`~pcapkit.protocols.internet.mh.MH._make_cga_extensions` had the
         identical defect.
 
@@ -1665,10 +1665,11 @@ class MHUnitTests(unittest.TestCase):
         from pcapkit.utilities.exceptions import EnumKeyError, EnumValueError
 
         def _drop_tracebacklimit() -> None:
-            # The int-value-miss subTest below reaches the loud
-            # ``_missing_`` on ``key`` itself, which sets this process-wide
-            # -- restore it so a later test in the same run does not read
-            # truncated tracebacks because of what this one did.
+            # The int-value-miss subTests below reach ``_missing_`` on
+            # ``key`` itself, whose error is quiet inside ``get``'s
+            # ``_CaughtByCaller`` block (#1845), and no pcapkit error sets
+            # this any more (#362). Restored anyway, so a later test in the
+            # same run cannot read truncated tracebacks because of this one.
             if hasattr(sys, 'tracebacklimit'):
                 del sys.tracebacklimit
 

@@ -167,7 +167,7 @@ OTHER_SECTIONS = frozenset({
 #: does not verify the RFC. What it verifies is the *pairing*: that wherever one
 #: of these sentences is quoted, the citation introducing it names the section
 #: the sentence came from. That is the invariant #517 and #530 both broke, and
-#: it is checked at every site rather than pinned at the two that are currently
+#: it is checked at every site rather than pinned at the two that were
 #: wrong, so the next copy-paste of one of these paragraphs into a third module
 #: is checked when it lands rather than being read past.
 #:

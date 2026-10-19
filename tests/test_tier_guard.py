@@ -275,7 +275,7 @@ class EnclosingScopeTests(unittest.TestCase):
     :mod:`ast` tree and a line number, so it is pinned the same way
     :class:`AuditTests` pins :func:`~tests._tiers.audit_module`: against
     source written for the purpose, not against whatever the suite happens to
-    contain today.
+    contain.
 
     """
 
@@ -306,7 +306,7 @@ class EnclosingScopeTests(unittest.TestCase):
     def test_the_innermost_function_wins_over_its_enclosing_method(self) -> None:
         """A nested helper's line belongs to the helper, not the test method.
 
-        Not a shape the suite's own skip idiom uses today, but
+        Not a shape the suite's own skip idiom uses, but
         :func:`~tests._tiers.skip_idiom_test_ids` documents that "most tightly
         wrapping" is the rule, and this is what pins it.
 
@@ -1689,7 +1689,7 @@ class DependencyGateCoverageTests(unittest.TestCase):
         # collect tests/vendor/ at all -- the same reason they are absent from
         # HAS_VENDOR_DEPS above. engine-tests (#849) no longer reaches it
         # either: each matrix.engine cell now runs an explicit TEST_PATHS list
-        # and none of the five names tests/vendor/ -- see the HAS_MYPY
+        # and none of those lists names tests/vendor/ -- see the HAS_MYPY
         # exclusion's own reason for why that is a real, disclosed change
         # rather than a mistake here.
         for job in ('integration', 'pypcap-parity', 'engine-tests'):
@@ -1960,7 +1960,7 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
     """Break the install lines on a copy, and watch the guard fire.
 
     These are the only tests here that prove the guard is capable of failing at
-    all: every assertion in :class:`DependencyGateCoverageTests` passes today on
+    all: every assertion in :class:`DependencyGateCoverageTests` passes on
     a tree that is correct, and a wrong analysis would pass just as quietly on
     one that had been broken.
 
@@ -2439,7 +2439,7 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
         Both real findings above are the "resolved to something illegitimate"
         shape. The other shape -- resolved to more than one distribution even
         after narrowing to the legitimate set -- has no real workflow state
-        that produces it today (the legitimate set for both watched flags is
+        that produces it (the legitimate set for both watched flags is
         always a singleton), so it needs its own construction to reach.
 
         """
@@ -2546,7 +2546,7 @@ class DependencyGateDegradationTests(unittest.TestCase):
     def test_a_flag_no_extra_could_satisfy_is_not_reported_as_a_gap(self) -> None:
         """:data:`~tests._dependency_gates.NON_DISTRIBUTION_FLAGS`, exercised.
 
-        No flag in the suite is *gated* on something pip cannot install today --
+        No flag in the suite is *gated* on something pip cannot install --
         ``HAS_PROC_FD`` asks whether :file:`/proc/self/fd` exists and is consulted
         inline rather than through a decorator -- so this stands a real gated flag
         in for one, to pin that naming a flag there suppresses its gap instead of

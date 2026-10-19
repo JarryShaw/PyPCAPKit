@@ -794,8 +794,8 @@ def restore_modules_after(test: 'unittest.TestCase',
     Registered **once per test** however many times this is called, and the
     snapshot kept is the first one -- the only one taken before any of the loads
     wrote anything. That is what lets :func:`bootstrap_core_modules` announce
-    itself and then make seven :func:`load_module` calls without registering
-    eight cleanups to eight successively more polluted snapshots.
+    itself and then make a run of :func:`load_module` calls without registering
+    a cleanup per call, each to a successively more polluted snapshot.
 
     Registered with :meth:`~unittest.TestCase.addCleanup` rather than done in a
     ``tearDown``, for the reasons :func:`isolate_modules` gives: it runs even
@@ -1008,7 +1008,7 @@ def purge_modules(prefixes: Iterable[str]) -> None:
     test. Take the two together rather than reading the paragraph above as a promise
     that a purge leaves no trace -- under a runner that loads no ``conftest``, it
     does. Measured on ``b337cdbc2``: ``python -m unittest discover -s tests/corekit``
-    fails 5 of that class's identity subtests, because ``test_module`` sorts first
+    fails that class's identity subtests, because ``test_module`` sorts first
     and purges, while the same file alone passes and :program:`pytest` -- the
     supported runner, and what :file:`.github/workflows/unit-tests.yml` invokes --
     passes either way.

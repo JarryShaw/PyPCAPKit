@@ -60,7 +60,7 @@ own ``get`` is rendered from a template private to
 :mod:`pcapkit.vendor.http.method` itself (its own ``LINE`` lambda), not from
 the shared one in :mod:`pcapkit.vendor.default` -- so the parity check here
 renders that module's own template with a CSV fixture reconstructed from the
-40 members the committed file already declares, offline, and compares the
+members the committed file already declares, offline, and compares the
 result against the committed file byte for byte, rather than against a
 synthetic single-member sample.
 

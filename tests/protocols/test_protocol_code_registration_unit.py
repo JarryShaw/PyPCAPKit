@@ -13,7 +13,7 @@ gave :class:`~pcapkit.foundation.engines.engine.Engine`,
 :class:`~pcapkit.dumpkit.common.Dumper` (#557 renamed ``Engine``'s from
 ``name=``): omitting ``code`` leaves the
 subclass unregistered, which is exactly what every built-in protocol class
-does today, since the built-in dispatch tables are populated by literal
+does, since the built-in dispatch tables are populated by literal
 assignment in each layer module rather than by ``__init_subclass__``.
 
 Most tests here mock the destination classes' ``register`` classmethod (or

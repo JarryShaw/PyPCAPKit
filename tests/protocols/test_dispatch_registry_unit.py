@@ -3,12 +3,12 @@
 
 GitHub issue #496: the ``__proto__`` dispatch registries decide which
 :class:`~pcapkit.protocols.protocol.Protocol` subclass parses the next layer.
-#496 named seven of them; #904 took them to 39 entries by adding
-``Internet.__proto__[TransType.Shim6]``, and #1574 to 47 across eight tables by
-adding the loopback one. Nothing walked all of them.
+#496 named the original tables; #904 added
+``Internet.__proto__[TransType.Shim6]``, and #1574 added the loopback table.
+Nothing walked all of them.
 :file:`test_registry_runtime.py` checks that a table entry *resolves* to the
 right class object, and
-:file:`test_dispatch_bindings_unit.py` checks that eleven hand-picked codes
+:file:`test_dispatch_bindings_unit.py` checks that a hand-picked set of codes
 actually parse a packet into the class the table names -- the property that
 matters, since a resolvable entry whose target cannot parse a packet is
 exactly what shipped once: :class:`~pcapkit.protocols.application.ospf.OSPF` was
@@ -16,8 +16,8 @@ reachable from no table at all, per that module's own docstring.
 
 This module closes the gap the same way
 :file:`test_option_roundtrip_unit.py` closed it for the option/parameter
-registries: :func:`examples.generators.dispatch.cases` walks the eight
-``__proto__`` tables directly, so a code registered tomorrow gets a case here
+registries: :func:`examples.generators.dispatch.cases` walks every
+``__proto__`` table directly, so a code registered tomorrow gets a case here
 tomorrow -- or fails :meth:`DispatchRegistryTests
 .test_every_registered_code_has_a_case`, which is what makes the coverage
 self-maintaining rather than a snapshot of today's registries.
@@ -49,7 +49,7 @@ CASE_TIMEOUT = 30
 
 
 class Degrade(NamedTuple):
-    """One code known to degrade to :class:`~pcapkit.protocols.misc.raw.Raw` today."""
+    """One code known to degrade to :class:`~pcapkit.protocols.misc.raw.Raw`."""
 
     #: Substring the ``'error'`` value :func:`~examples.generators.dispatch.probe`
     #: found must contain, or ``''`` to assert only that dispatch is degraded.
@@ -92,7 +92,7 @@ def _load_generator() -> 'types.ModuleType':
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class DispatchRegistryTests(unittest.TestCase):
-    """One dispatch probe per entry across all seven ``__proto__`` registries."""
+    """One dispatch probe per entry across every ``__proto__`` registry."""
 
     #: The generator module, loaded once for the whole class. Loading it
     #: imports :mod:`pcapkit`, so it must happen after the purge in
@@ -105,7 +105,7 @@ class DispatchRegistryTests(unittest.TestCase):
         purge_modules(['pcapkit'])
         cls.dispatch = _load_generator()
 
-    #: Every case whose dispatch does not reach its registered target today,
+    #: Every case whose dispatch does not reach its registered target,
     #: and the recorded reason -- kept in the test rather than only in the
     #: generator so that a change to either is a change a reviewer sees next
     #: to the assertion it affects.
@@ -145,7 +145,7 @@ class DispatchRegistryTests(unittest.TestCase):
         """No registry entry is left without a case.
 
         This is what makes the coverage self-maintaining: registering a new
-        protocol against one of the seven tables and forgetting to add a case
+        protocol against one of the tables and forgetting to add a case
         for it fails here, rather than going unnoticed until the entry turns
         out not to be able to parse a packet.
 
@@ -213,7 +213,7 @@ class DispatchRegistryTests(unittest.TestCase):
                 )
 
     def test_cases_cover_every_table_named_in_the_issue(self) -> None:
-        """The enumeration finds all 47 entries, across the seven tables of #496 and #1574's loopback table.
+        """The enumeration finds every entry, across the tables of #496 and #1574's loopback table.
 
         A guard on the shape of the result rather than on any one case: if the
         registries grow or shrink without this module noticing, the per-family

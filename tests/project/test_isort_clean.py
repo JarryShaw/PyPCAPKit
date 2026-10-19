@@ -88,7 +88,7 @@ status was non-zero, the same as it would for any other line (no ``set -e``
 needed for this, and none is set). If only *one* of the two came back empty,
 though, the other's files would still reach ``isort`` in that same
 invocation, which would exit 0 having quietly sorted half the tree. Neither
-case is reachable today -- no path under :file:`pcapkit/const/` or
+case is reachable -- no path under :file:`pcapkit/const/` or
 :file:`pcapkit/vendor/` contains whitespace to break the expansion, and
 neither directory can be absent where ``make isort`` runs -- but it is the
 same shape of latent gap #765 itself was, so the third fix, now in place, is
