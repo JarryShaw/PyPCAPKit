@@ -855,7 +855,7 @@ class TestTheAnacondaCheckCountsTheFile(unittest.TestCase):
 
     def test_each_platform_needs_each_supported_build(self) -> None:
         builds = live_outputs()['conda-builds'].split()
-        every = [(platform, build) for platform in ('linux-64', 'osx-64') for build in builds]
+        every = [(platform, build) for platform in ('linux-64', 'osx-64', 'osx-arm64') for build in builds]
         ktlo = [('linux-64', 'py' + version.replace('.', ''))
                 for version in script().tier(script().load(), 'cpython', 'ktlo')]
         self.assertEqual(self.complete(every), 'true')

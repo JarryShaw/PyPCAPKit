@@ -342,9 +342,9 @@ checks *is* the one it is about to create:
   already idempotent (``skip-existing: true`` on every upload step), so the
   check exists only to save the cost of the build matrix, not for correctness.
 * ``conda`` compares Anaconda's aggregate count against the expected one (the
-  ``linux-64`` and ``osx-64`` files for each Python version of its matrix; the
-  ``osx-arm64`` leg's are published but not counted,
-  `#1822 <https://github.com/JarryShaw/PyPCAPKit/issues/1822>`__) as the same
+  ``linux-64``, ``osx-64`` and ``osx-arm64`` files for each Python version of
+  its matrix, one platform per ``os`` leg,
+  `#1922 <https://github.com/JarryShaw/PyPCAPKit/issues/1922>`__) as the same
   kind of job-level cost saver, and *also*
   checks, per matrix leg, whether that leg's own platform/Python distribution
   is already there -- this second check is the actual correctness fix, because
