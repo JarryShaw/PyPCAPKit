@@ -244,8 +244,8 @@ rather than the event, so its gate can run whichever way the run was raised, onc
 ``workflow_run`` Edges
 ----------------------
 
-These edges come from grepping every ``on:`` block rather than from a
-hand-maintained list:
+Each edge cites the ``on:`` block it comes from, so grepping those blocks
+re-derives the list:
 
 * ``.github/workflows/cron-vendor.yml:14-16`` -- **Vendor Update** fires on
   completion of **Unit Tests**.
@@ -262,9 +262,9 @@ hand-maintained list:
 success, failure, or skipped -- and regardless of what triggered it,
 including a pull request's own run of Unit Tests. Every
 downstream workflow therefore re-checks ``github.event.workflow_run.event``
-and ``.head_branch`` (or, for Create Release and Coverage Comment, ``.conclusion``) itself before
-doing anything with an outward effect; none of the filtering happens in the
-``on:`` block.
+and ``.head_branch`` (or, for Create Release and Coverage Comment,
+``.conclusion``) itself before doing anything with an outward effect; none of
+the filtering happens in the ``on:`` block.
 
 Those checks say nothing about *which* commit was verified. A ``workflow_run``
 checks out ``github.sha``, ``main``'s tip when the event is raised, not
@@ -319,13 +319,13 @@ source entry) and ``python-versions``, which reads ``gate``'s version (see
 `Python Versions`_ below). It skips the rest -- the matrix jobs, ``test``,
 ``test-ktlo``, ``integration``, ``integration-ktlo``, ``engine-tests`` (a job per
 engine, each looping over its Python versions), ``pypcap-parity``,
-``pypcap-parity-ktlo`` and ``unittest-ordering``, each of which has already run once for this commit
-from Unit Tests' own ``push`` trigger (and, all but ``unittest-ordering``,
-which runs on ``main`` pushes only, from its ``pull_request`` trigger), so
-running any of them again per caller would
-test the same commit several times over -- the docs-only path's ``changes``
-and ``project-tests``, and ``required-checks`` (see `Required Status
-Checks`_ below), gated out by their own ``if:`` rather than by having
+``pypcap-parity-ktlo`` and ``unittest-ordering``, each of which has already run
+once for this commit from Unit Tests' own ``push`` trigger (and, all but
+``unittest-ordering``, which runs on ``main`` pushes only, from its
+``pull_request`` trigger), so running any of them again per caller would test
+the same commit several times over. It also skips the docs-only path's
+``changes`` and ``project-tests``, and ``required-checks`` (see `Required Status
+Checks`_ below), which are gated out by their own ``if:`` rather than by having
 already run. ``changelog`` carries no
 ``if:`` at all and runs on every path regardless -- deliberately, per its own
 comment (``unit-tests.yml:1612-1618``): ``create-release.yml`` feeds
@@ -680,8 +680,10 @@ triggers; the ``gate-only: true`` reusable calls documented above skip it via
 ``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:1939``),
 so it is never produced -- and never expected -- on those paths.
 
-Python versions come in two tiers (`#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__), and an experimental one (`#1660 <https://github.com/JarryShaw/PyPCAPKit/issues/1660>`__,
-below), declared in :file:`.github/python-versions.toml` (see `Python Versions`_).
+Python versions are tiered -- supported and KTLO
+(`#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__), and experimental
+(`#1660 <https://github.com/JarryShaw/PyPCAPKit/issues/1660>`__, below) -- in
+:file:`.github/python-versions.toml` (see `Python Versions`_).
 The **supported** tier, 3.11-3.15, blocks: a failed leg fails ``Required checks passed`` or its own
 required ``Compat`` context. The **KTLO** tier -- end-of-life 3.7-3.10, still built and
 tested -- never blocks, is never a required context, and never shows a commit or a
@@ -786,8 +788,8 @@ holds ``roundtrip`` (``ROUNDTRIP_SWEEP_GLOB`` in :file:`tests/_tiers.py`), and
 ``integration`` too: off ``latest`` its legs leave out the
 ``*roundtrip*_runtime.py`` modules (``ROUNDTRIP_RUNTIME_GLOB``), dropping them from
 ``fixture_tier_paths()``'s selection and adding the glob as an ``--ignore-glob``,
-since pytest applies no ignore to a path it was handed. On 2026-10-14 they were 41 modules
-and 8% of the unit tier's time in a serial 3.14 run (86 of 1,031 s), and 10-11% on the
+since pytest applies no ignore to a path it was handed. On 2026-10-14 they took
+8% of the unit tier's time in a serial 3.14 run (86 of 1,031 s), and 10-11% on the
 3.14, 3.15 and 3.14t legs of run 38581834697, so the rest should take GraalPy 88-113
 minutes (estimate).
 

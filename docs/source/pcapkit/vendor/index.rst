@@ -4,8 +4,8 @@ Vendor Crawlers
 
 .. module:: pcapkit.vendor
 
-This module contains all web crawlers of :mod:`pcapkit`, which are
-automatically generating the :mod:`pcapkit.const` module's constant
+This module contains all web crawlers of :mod:`pcapkit`, which
+automatically generate the :mod:`pcapkit.const` module's constant
 enumerations.
 
 The crawlers need the ``vendor`` extra, ``pip install "pypcapkit[vendor]"``.

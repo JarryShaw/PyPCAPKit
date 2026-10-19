@@ -147,15 +147,19 @@ Speed is not free. Every third-party engine supports **less** than the
 dissection at all, so they offer neither reassembly nor flow tracing, and
 :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile` has no IPv6 decoder,
 so IPv6 reassembly is unavailable. Each gap is announced with a warning or an
-exception rather than silently returning nothing, save that
-:class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile` leaves TCP behind a
-VLAN tag, in a tunnel or behind an extension header (an IPv6 one, or AH in IPv4)
-out without one; that :class:`~pcapkit.foundation.engines.dpkt.DPKT` leaves
-TCP in an IP-in-IP tunnel or behind an AH or IPv6 extension header in IPv4, and
-IPv4 in IPv6 or IPv6 in IPv4, out without one; and
-:class:`~pcapkit.foundation.engines.scapy.Scapy` reads IPv6 only as far as
-`Scapy`_ dissects it, which leaves IPv6 behind some BSD loopback headers, and
-TCP and IPv6 fragments behind some IPv6 extension headers, out without one.
+exception rather than silently returning nothing, except for these, which pass
+without a warning:
+
+- :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile` leaves TCP behind a
+  VLAN tag, in a tunnel or behind an extension header (an IPv6 one, or AH in
+  IPv4) out of TCP reassembly and flow tracing;
+- :class:`~pcapkit.foundation.engines.dpkt.DPKT` leaves TCP in an IP-in-IP
+  tunnel or behind an AH or IPv6 extension header in IPv4 out of TCP reassembly
+  and flow tracing, and IPv4 in IPv6 or IPv6 in IPv4 out of IP reassembly;
+- :class:`~pcapkit.foundation.engines.scapy.Scapy` reads IPv6 only as far as
+  `Scapy`_ dissects it, so IPv6 behind some BSD loopback headers, and TCP and
+  IPv6 fragments behind some IPv6 extension headers, go undissected.
+
 :doc:`pcapkit/foundation/engines/index` tabulates them.
 
 Every engine also answers a preflight check --
@@ -231,7 +235,8 @@ compared with a measured row.
 
 .. [1] `PyPCAPFile`_ 0.12.0 imports :mod:`imp`, which Python removed in 3.12.
 
-.. [2] `PyPCAP`_ 1.3.0 is unsupported on Python 3.12+.
+.. [2] `PyPCAP`_ 1.3.0 does not build on Python 3.12+: its pre-generated
+   :file:`pcap.c` does not compile against that C API.
 
 .. [3] `PyShark`_ 0.6 cannot create the implicit event loop it expects on Python
    3.14; it ran on 3.10--3.13.

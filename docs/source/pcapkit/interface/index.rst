@@ -3,8 +3,8 @@ User Interface
 
 .. module:: pcapkit.interface
 
-:mod:`pcapkit.interface` defines several user-oriented
-interfaces, variables, and etc. These interfaces are
+:mod:`pcapkit.interface` defines the user-oriented
+interfaces and constants. These interfaces are
 designed to help and simplify the usage of :mod:`pcapkit`.
 
 .. toctree::
@@ -23,7 +23,7 @@ The helpers the registrars share live in the
 
 .. note::
 
-   Should you would like to have additional interfaces defined,
+   Should you wish to have additional interfaces defined,
    please feel free to open an issue on GitHub, or even better,
    submit a pull request. Your contribution is highly appreciated.
 

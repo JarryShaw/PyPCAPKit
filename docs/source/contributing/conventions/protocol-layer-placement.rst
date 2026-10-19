@@ -54,8 +54,8 @@ Why Function and Not Encapsulation
 :rfc:`1122` settles this inside one document. It lists **RARP in the application
 layer** at :rfc:`1122#section-1.1.3`, among the *"support protocols, used for host
 name mapping, booting, and management"*, while **ARP** sits in the Link Layer chapter
-at :rfc:`1122#section-2.3.2`. Two sibling protocols, one frame format, one EtherType,
-two layers -- decided on function alone.
+at :rfc:`1122#section-2.3.2`. Sibling protocols sharing one frame format, each under
+its own EtherType, in different layers -- decided on function alone.
 
 OSI says the same by construction. ITU-T X.200 §9.2.4.4 has a protocol declare its own
 layer in terms of *"functions which pertain to a particular layer"*, and clause 7
@@ -65,7 +65,7 @@ IANA Assignments Carry No Layer Claim
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Every registry this package dispatches on -- *Protocol Numbers*, *Ether Types*,
-and *Service Name and Transport Protocol Port Number* -- have **no layer field**.
+and *Service Name and Transport Protocol Port Number* -- has **no layer field**.
 *Protocol Numbers* frames itself as identifying *"the next level protocol"*, i.e. the
 **encapsulated** one. A registry assignment is evidence of encapsulation and of
 nothing else.
@@ -87,7 +87,7 @@ Routing Protocols: Control Plane, Not Data Plane
 **"APPLICATION LAYER - ROUTING PROTOCOLS"**, with OSPF at §7.2.2, while
 :rfc:`1812#section-4.1` reads *"This chapter and chapter 5 discuss the protocols used
 at the Internet Layer: IP, ICMP, and IGMP."* So a routing protocol is application-layer
-and the internet layer holds three protocols.
+and the internet layer holds only IP, ICMP and IGMP.
 
 **X.200 does not contradict this, and must not be cited as though it did.** X.200
 §7.5.2.1 says the Network Layer provides transport *"independence of routing and relay

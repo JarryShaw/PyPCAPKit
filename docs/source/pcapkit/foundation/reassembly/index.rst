@@ -4,9 +4,9 @@ Packets Reassembly
 
 .. module:: pcapkit.foundation.reassembly
 
-:mod:`pcapkit.foundation.reassembly` bases on algorithms described
-in :rfc:`791` and :rfc:`815`, implements datagram reassembly
-of IP and TCP packets.
+:mod:`pcapkit.foundation.reassembly` implements datagram reassembly
+of IP and TCP packets, based on the algorithms described in :rfc:`791`
+and :rfc:`815`.
 
 .. seealso::
 
@@ -22,7 +22,7 @@ of IP and TCP packets.
 
 All reassembly classes are implemented as :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase`
 subclasses, which are responsible for processing extracted packets and
-reassemble the datagrams to a nonfragmented packet. Below is a brief
+reassembling the datagrams into unfragmented packets. Below is a brief
 diagram of the class hierarchy of :mod:`pcapkit.foundation.reassembly`:
 
 .. mermaid::

@@ -113,7 +113,7 @@ class for it, so nothing implements the classification, but a future one inherit
 Explicit Base Declarations
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Name the second base **explicitly**, even though it is already in the MRO.
+Name the second base **explicitly**, even where it is already in the MRO.
 :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` derives
 :class:`~pcapkit.protocols.internet.internet.Internet`, so every extension header
 reaches ``Internet`` transitively and an ``__mro__`` check cannot tell the two groups

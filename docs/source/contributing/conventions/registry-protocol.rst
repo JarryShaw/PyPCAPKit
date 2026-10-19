@@ -261,9 +261,9 @@ course: they should follow the house convention and not be loud.
 
 Both answers are on the issue deliberately, and the reversal is the ruling. What it
 settles is not the one keyword -- it is the tie-breaker. A loud
-:class:`~pcapkit.utilities.exceptions.BaseError` sets :data:`sys.tracebacklimit` to
-``0`` **process-wide**, the
-:issue:`362` hazard, so loudness is
+:class:`~pcapkit.utilities.exceptions.BaseError` logs a :data:`logging.CRITICAL`
+record, the :issue:`362` hazard, and outside development mode installs
+:mod:`pcapkit`'s exception hooks **process-wide**, so loudness is
 paid for by the whole library rather than by the override's own callers. The argument
 against changing them was that ``quiet=True`` exists on the base for a name miss
 inside a *successful* call at ``Method.get`` and these two had no such caller;

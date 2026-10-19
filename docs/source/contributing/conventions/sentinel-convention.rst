@@ -145,7 +145,7 @@ the differences are **needs, not inconsistencies**:
    ``__reduce__`` returns its module-level name, so :mod:`pickle` stores a reference to
    that name and every protocol loads the same object back. A guarded ``__new__``
    alone would not do, since pickle protocols 0 and 1 rebuild through
-   :func:`copyreg._reconstructor`, which calls :meth:`object.__new__` directly. That
+   ``copyreg._reconstructor``, which calls :meth:`object.__new__` directly. That
    path also limits pickles written before :issue:`1842`: one of ``NO_VALUE``,
    ``NO_DEFAULT`` or ``ABSENT`` at protocol 0 or 1 still loads, but as a second
    instance, because nothing on the class can intercept it.
@@ -153,7 +153,7 @@ the differences are **needs, not inconsistencies**:
 ``__repr__``
    Every sentinel has it, from the base. It is the object's own name -- ``NULL``,
    ``NO_VALUE``, ``NO_DEFAULT``, ``ABSENT`` -- as ``repr(None)`` is ``'None'``, and
-   :func:`str` gives the same. That is what a signature, :func:`help` and a traceback
+   :class:`str` gives the same. That is what a signature, :func:`help` and a traceback
    show.
 
 ``__setattr__`` / ``__delattr__``
