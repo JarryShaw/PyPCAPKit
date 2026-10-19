@@ -119,13 +119,13 @@ class EnumLookup:
     on top; a closed enumeration inherits this one directly and so is never
     handed a ``register`` it would have to refuse.
 
-    This is a plain mix-in rather than an :class:`~aenum.Enum` subclass, because
+    This is a plain mix-in rather than an ``aenum.Enum`` subclass, because
     an enumeration that already has members cannot be subclassed. Mixed in
     *before* the member type -- ``class Foo(EnumRegistry, IntFlag)``, or
     ``class Bar(EnumLookup, IntEnum)`` -- it contributes methods only, so
-    :mod:`aenum` still resolves the member data type from the enumeration base:
-    ``int`` for :class:`~aenum.IntEnum` and :class:`~aenum.IntFlag`, ``str`` for
-    :class:`~aenum.StrEnum`. That is what lets one base serve each of them, where a
+    ``aenum`` still resolves the member data type from the enumeration base:
+    ``int`` for ``aenum.IntEnum`` and ``aenum.IntFlag``, ``str`` for
+    ``aenum.StrEnum``. That is what lets one base serve each of them, where a
     generated template fragment would have needed a separate rendering per
     member type.
 
@@ -134,20 +134,20 @@ class EnumLookup:
     ``class Foo(EnumRegistry, IntFlag)`` resolves as ``Foo -> EnumRegistry ->
     EnumLookup -> IntFlag -> int -> ...``, so ``_member_type_`` still comes from
     the enumeration base and not from anything in this module. Had this tier
-    subclassed :class:`~aenum.Enum` in order to "be an enum", it would have
+    subclassed ``aenum.Enum`` in order to "be an enum", it would have
     become the member type itself and broken every one of these shapes at once.
 
     The methods deliberately touch only ``_member_map_``, ``_member_names_`` and
-    ``_value2member_map_``, which both :mod:`enum` and :mod:`aenum` maintain, so
-    nothing on this tier depends on :mod:`aenum` internals at all -- the
-    :func:`~aenum.extend_enum` call in this module belongs to
+    ``_value2member_map_``, which both :mod:`enum` and ``aenum`` maintain, so
+    nothing on this tier depends on ``aenum`` internals at all -- the
+    ``aenum.extend_enum`` call in this module belongs to
     :class:`EnumRegistry`, which is the tier that mutates.
 
     """
 
     if TYPE_CHECKING:
         #: The enumeration machinery's own lookup tables and member data type,
-        #: declared here because they are contributed by the :class:`~aenum.Enum`
+        #: declared here because they are contributed by the ``aenum.Enum``
         #: base this mix-in is combined with rather than by the mix-in itself.
         _member_map_: 'dict[str, Self]'
         _member_names_: 'list[str]'
@@ -303,7 +303,7 @@ class EnumLookup:
         :class:`~pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`) mints on
         any path, so no live witness exists in this tree.
         :class:`~pcapkit.const.mh.cga_type.CGAType`, which still mints directly
-        via :func:`~aenum.extend_enum`, is :class:`int`-valued, so
+        via ``aenum.extend_enum``, is :class:`int`-valued, so
         a ``str`` name could not reach its mint branch even if this restriction
         did not exist; it is not an exception to it, just not reachable by it.
         This is about a future ``str``-valued registry (or a present one whose
@@ -390,7 +390,7 @@ class EnumLookup:
           typically :exc:`~pcapkit.utilities.exceptions.EnumValueError` from a
           subclass's :meth:`_validate_value` -- is re-raised as it stands rather
           than wrapped, so the subclass's own message survives and no second
-          error is constructed. Only :mod:`aenum`'s and :mod:`enum`'s own "no
+          error is constructed. Only ``aenum``'s and :mod:`enum`'s own "no
           member carries this value" is converted, into a quiet
           :exc:`~pcapkit.utilities.exceptions.EnumValueError`. This is the same
           discrimination :meth:`EnumField.post_process
@@ -520,8 +520,8 @@ class EnumRegistry(EnumLookup):
         Contrast :meth:`get` and ``_missing_``, which resolve without naming anything.
 
         Refuses a ``value`` that already has a member. Without this guard,
-        :func:`~aenum.extend_enum` does not mint anything for an already-taken
-        value -- :mod:`aenum` treats that as a request to *alias* the existing
+        ``aenum.extend_enum`` does not mint anything for an already-taken
+        value -- ``aenum`` treats that as a request to *alias* the existing
         member under the caller's ``name`` instead, silently: the call returns
         the *existing* member, ``name`` becomes reachable in ``__members__``
         pointing at it, and ``_member_names_`` does not grow. That is
@@ -565,7 +565,7 @@ class EnumRegistry(EnumLookup):
                 :meth:`~EnumLookup._validate_value` rejects ``value``. The base
                 implementation of that hook accepts everything, so this cannot
                 arise on a registry that does not override it.
-            ValueError: If ``name`` is already taken. :mod:`aenum` reports that
+            ValueError: If ``name`` is already taken. ``aenum`` reports that
                 as :exc:`TypeError`; it is translated so that the ways one call
                 can fail are one exception type.
 
@@ -583,7 +583,7 @@ class EnumRegistry(EnumLookup):
 
     @classmethod
     def _extend(cls, value: 'Any', name: 'str') -> 'Self':
-        """The raw :func:`~aenum.extend_enum` call, shared by :meth:`register`
+        """The raw ``aenum.extend_enum`` call, shared by :meth:`register`
         and :meth:`register_alias`.
 
         Neither public method calls the other: :meth:`register` refuses an
@@ -603,7 +603,7 @@ class EnumRegistry(EnumLookup):
             The member now reachable under ``name``, new or existing.
 
         Raises:
-            ValueError: If ``name`` is already taken. :mod:`aenum` reports that
+            ValueError: If ``name`` is already taken. ``aenum`` reports that
                 as :exc:`TypeError`; it is translated so that the ways one call
                 can fail are one exception type.
 
@@ -642,7 +642,7 @@ class EnumRegistry(EnumLookup):
         :meth:`register_alias` test ``value``'s membership for opposite
         outcomes, so neither can be the other's implementation.
         ``AppType``'s override differs: it mints a real member through
-        :func:`~aenum.extend_enum`, so its iteration grows too.
+        ``aenum.extend_enum``, so its iteration grows too.
 
         Args:
             value: Value of the existing member to alias.
@@ -674,7 +674,7 @@ class EnumRegistry(EnumLookup):
 
         Raises:
             ValueError: As :meth:`register_alias`. Names before the failing one
-                stay registered -- :func:`~aenum.extend_enum` has no transaction
+                stay registered -- ``aenum.extend_enum`` has no transaction
                 to roll back, and undoing it by hand would mean reaching further
                 into enumeration internals than anything else here does.
 
@@ -691,7 +691,7 @@ class EnumRegistry(EnumLookup):
         that does.
 
         The member is constructed through ``cls._member_type_``, which
-        :mod:`aenum` sets from the enumeration base, so this serves ``int``- and
+        ``aenum`` sets from the enumeration base, so this serves ``int``- and
         ``str``-valued registries alike without either having to say which it
         is.
 

@@ -31,7 +31,7 @@ if TYPE_CHECKING:
     from pcapkit.foundation.extraction import Extractor
 
     class _PySharkPackage(Protocol):
-        """:mod:`pyshark`, as :class:`PyShark` reads it through :attr:`PyShark._expkg` (#1878)."""
+        """``pyshark``, as :class:`PyShark` reads it through :attr:`PyShark._expkg` (#1878)."""
 
         @property
         def FileCapture(self) -> 'Type[PySharkFileCapture]': ...
@@ -88,7 +88,7 @@ class PyShark(EngineBase['PySharkPacket']):
 
     """
     if TYPE_CHECKING:
-        #: Engine extraction package, i.e. :mod:`pyshark`.
+        #: Engine extraction package, i.e. ``pyshark``.
         _expkg: '_PySharkPackage'
         #: Engine extraction temporary storage.
         _extmp: 'PySharkFileCapture'
@@ -214,11 +214,11 @@ class PyShark(EngineBase['PySharkPacket']):
     ##########################################################################
 
     def run(self) -> 'None':
-        """Call :class:`pyshark.FileCapture` to extract PCAP files.
+        """Call ``pyshark.FileCapture`` to extract PCAP files.
 
         This method assigns :attr:`self._expkg <PyShark._expkg>`
-        as :mod:`pyshark` and :attr:`self._extmp <PyShark._extmp>`
-        as an iterator from :class:`pyshark.FileCapture`.
+        as ``pyshark`` and :attr:`self._extmp <PyShark._extmp>`
+        as an iterator from ``pyshark.FileCapture``.
 
         The global header is parsed and dumped first, by
         :meth:`self.extractor.record_header <pcapkit.foundation.extraction.Extractor.record_header>`.

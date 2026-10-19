@@ -752,7 +752,7 @@ class OptionEnumField(EnumField):
             :meth:`EnumField._unregistered_member` is the only one of these
             that gets both right. :func:`copy.deepcopy` is not the difference: it
             succeeds on both kinds, since the standard library's
-            :class:`enum.Enum` (which :class:`aenum.Enum` subclasses) defines
+            :class:`enum.Enum` (which ``aenum.Enum`` subclasses) defines
             ``__copy__``/``__deepcopy__`` to return ``self`` outright, so
             deep-copying any member never reaches ``__reduce_ex__``.
 

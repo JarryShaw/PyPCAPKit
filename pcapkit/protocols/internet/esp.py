@@ -197,7 +197,7 @@ if TYPE_CHECKING:
 
     from pcapkit.protocols.protocol import ProtocolBase
 
-#: Cached :mod:`cryptography` primitives, see :func:`load_cryptography`.
+#: Cached ``cryptography`` primitives, see :func:`load_cryptography`.
 #: :data:`NotImplemented` means the import has not been attempted yet, and
 #: :data:`None` that it was attempted and |cryptography|_ is not installed, and
 #: a tuple holds the loaded primitives, so a missing dependency is not retried

@@ -27,7 +27,7 @@
 
    :mod:`pcapkit.toolkit.pypcap` is the same adapter for upstream `PyPCAP`_,
    kept apart from this module because the engines are: the distributions are
-   independent projects that happen to share the :mod:`pcap` module name, and
+   independent projects that happen to share the ``pcap`` module name, and
    each engine names its own adapter so that a change made for one cannot
    quietly alter the other.
 
@@ -61,7 +61,7 @@ def packet2chain(packet: 'bytes', *, data_link: 'Enum_LinkType') -> 'str':
     """Fetch pcap-ct packet protocol chain.
 
     Args:
-        packet: Raw packet bytes, as returned by :class:`pcap.pcap` iteration.
+        packet: Raw packet bytes, as returned by ``pcap.pcap`` iteration.
         data_link: Data link type, from the capture handle.
 
     Returns:
@@ -82,8 +82,8 @@ def packet2dict(packet: 'bytes', timestamp: 'float', *,
     """Convert pcap-ct packet into :obj:`dict`.
 
     Args:
-        packet: Raw packet bytes, as returned by :class:`pcap.pcap` iteration.
-        timestamp: Timestamp of packet, as returned by :class:`pcap.pcap` iteration.
+        packet: Raw packet bytes, as returned by ``pcap.pcap`` iteration.
+        timestamp: Timestamp of packet, as returned by ``pcap.pcap`` iteration.
         data_link: Data link type, from the capture handle.
 
     Returns:

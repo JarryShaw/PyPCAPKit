@@ -857,7 +857,7 @@ class PeekableStream:
 class NamedStream:
     """Read-only proxy that gives a stream the ``name`` attribute.
 
-    :func:`pcapfile.savefile.load_savefile` dereferences ``input_file.name``
+    ``pcapfile.savefile.load_savefile`` dereferences ``input_file.name``
     unconditionally, on the way into its trace helper. That is fine for the
     :class:`~io.BufferedReader` :class:`~pcapkit.foundation.extraction.Extractor`
     normally holds, but not for the :class:`~pcapkit.corekit.io.SeekableReader`

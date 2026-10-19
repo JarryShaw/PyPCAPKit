@@ -7,10 +7,14 @@
 :mod:`pcapkit.foundation.engines` is a collection of engines
 support for :mod:`pcapkit`, including but not limited to the
 built-in PCAP and `PCAP-NG`_ file support, :mod:`Scapy <scapy>`,
-:mod:`PyShark <pyshark>`, :mod:`DPKT <dpkt>`, :mod:`PyPCAP <pcap>`,
-`pcap-ct`_ and :mod:`PyPCAPFile <pcapfile>` 3rd party engine support.
+`PyShark`_, `DPKT`_, `PyPCAP`_, `pcap-ct`_ and `PyPCAPFile`_ 3rd party
+engine support.
 
+.. _PyShark: https://kiminewt.github.io/pyshark
+.. _DPKT: https://dpkt.readthedocs.io
+.. _PyPCAP: https://github.com/pynetwork/pypcap
 .. _pcap-ct: https://pypi.org/project/pcap-ct/
+.. _PyPCAPFile: https://github.com/kisom/pypcapfile
 
 .. _PCAP-NG: https://wiki.wireshark.org/Development/PcapNg
 

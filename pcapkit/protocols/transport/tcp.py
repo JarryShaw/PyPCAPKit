@@ -524,7 +524,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         # segment whose flags octet is all zero: the ``|=`` below is the only promotion and
         # never runs, and ``Enum_Flags.SYN in self._flags`` would raise ``TypeError:
         # argument of type 'int' is not a container or iterable``. A segment with any flag
-        # set would mask that. :class:`Enum_Flags` is an :class:`aenum.IntFlag` with no
+        # set would mask that. :class:`Enum_Flags` is an ``aenum.IntFlag`` with no
         # ``_missing_`` of its own, so ``Enum_Flags(0)`` is a valid flagless member that
         # compares equal to ``0`` and ORs as usual. This is the type :attr:`connection`
         # advertises.
@@ -644,7 +644,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         # self._flags`` would raise ``TypeError: argument of type 'int' is not a
         # container or iterable`` instead of reaching ``_make_mptcp_join``'s own
         # ``ProtocolError: ... invalid flags combination``. :class:`Enum_Flags` is an
-        # :class:`aenum.IntFlag`, so ``Enum_Flags(0)`` is a valid flagless member that
+        # ``aenum.IntFlag``, so ``Enum_Flags(0)`` is a valid flagless member that
         # compares equal to ``0`` and ORs as usual. :meth:`read` seeds itself the same
         # way, rather than relying on ``mptcp_data_selector`` rejecting a flagless
         # MP_JOIN before ``_read_mptcp_join`` runs, which would leave the ``TypeError``

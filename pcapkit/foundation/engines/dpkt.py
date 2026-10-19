@@ -80,7 +80,7 @@ if TYPE_CHECKING:
         def Loopback(self) -> 'Type[DPKTLoopback]': ...
 
     class _DPKTPackage(Protocol):
-        """:mod:`dpkt`, as :class:`DPKT` reads it through :attr:`DPKT._expkg` (#1878).
+        """``dpkt``, as :class:`DPKT` reads it through :attr:`DPKT._expkg` (#1878).
 
         Each attribute is a submodule, described by what the engine reads of it.
         mypy matches a module with a protocol at the top level only, so the
@@ -116,7 +116,7 @@ _LITTLE_BYTE_ORDER_OCTETS = BYTE_ORDER_MAGIC.to_bytes(4, 'little')
 class PCAPNGReader:
     """PCAP-NG reader for the DPKT engine, aware of every interface.
 
-    :class:`dpkt.pcapng.Reader` reads only the first Interface Description
+    ``dpkt.pcapng.Reader`` reads only the first Interface Description
     Block (IDB) of a file, and applies its link type and timestamp resolution
     to every packet (:issue:`1379`). This reader walks the blocks itself
     instead: it parses each Section Header Block and IDB with :mod:`pcapkit`'s
@@ -126,7 +126,7 @@ class PCAPNGReader:
     blocks are still decoded by `DPKT`_.
 
     It yields Enhanced Packet Blocks, (obsolete) Packet Blocks and Simple Packet
-    Blocks, and skips every other block. :class:`dpkt.pcapng.Reader` skips the
+    Blocks, and skips every other block. ``dpkt.pcapng.Reader`` skips the
     Simple Packet Block too, and `DPKT`_ has no type for one, so that block is
     parsed with :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` as well
     (:issue:`1520`).
@@ -329,7 +329,7 @@ def _pcap_reader() -> 'Type[PCAPReader]':
         def __init__(self, fileobj: 'IO[bytes]') -> 'None':
             super().__init__(fileobj)
             missing = [name for name in private if not hasattr(self, name)]
-            #: Whether to read with :meth:`dpkt.pcap.Reader.__iter__` unchanged.
+            #: Whether to read with ``dpkt.pcap.Reader.__iter__`` unchanged.
             self._upstream = bool(missing)
             if missing:
                 warn(f"dpkt {getattr(dpkt, '__version__', '(unknown version)')}: "
@@ -338,7 +338,7 @@ def _pcap_reader() -> 'Type[PCAPReader]':
                      'PCAP record gives its captured length instead', DPKTWarning,
                      stacklevel=stacklevel())
 
-        # NOTE: the loop is :meth:`dpkt.pcap.Reader.__iter__`'s, over the stream
+        # NOTE: the loop is ``dpkt.pcap.Reader.__iter__``'s, over the stream
         # and the record header type that method reads them through. A generator,
         # so ``dpkt.pcap.Reader.__init__`` calling it runs none of it before
         # :attr:`_upstream` is set. The timestamp is a ``Decimal`` for a
@@ -428,7 +428,7 @@ class DPKT(EngineBase['DPKTPacket']):
     """DPKT engine support.
 
     A PCAP-NG file is read by :class:`PCAPNGReader` rather than by
-    :class:`dpkt.pcapng.Reader`, so each packet takes the link type and the
+    ``dpkt.pcapng.Reader``, so each packet takes the link type and the
     timestamp resolution and offset of the interface it was captured on.
 
     It reads the Enhanced, the Simple and the (obsolete) Packet Block, and
@@ -442,7 +442,7 @@ class DPKT(EngineBase['DPKTPacket']):
 
     """
     if TYPE_CHECKING:
-        #: Engine extraction package, i.e. :mod:`dpkt`.
+        #: Engine extraction package, i.e. ``dpkt``.
         _expkg: '_DPKTPackage'
         #: Engine extraction temporary storage.
         _extmp: 'Reader'
@@ -477,7 +477,7 @@ class DPKT(EngineBase['DPKTPacket']):
         """Call :class:`dpkt.pcap.Reader` to extract PCAP files.
 
         This method assigns :attr:`self._expkg <DPKT._expkg>`
-        as :mod:`dpkt` and :attr:`self._extmp <DPKT._extmp>`
+        as ``dpkt`` and :attr:`self._extmp <DPKT._extmp>`
         as an iterator from :class:`dpkt.pcap.Reader`, or from
         :class:`PCAPNGReader` for a PCAP-NG file.
 

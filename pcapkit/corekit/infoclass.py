@@ -588,8 +588,8 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
         Args:
             multi: If set to :obj:`True`, an iterator with a pair for each value
                 of each key, as :meth:`to_dict` writes them. Otherwise a view of
-                the pairs of the first value of each key, as
-                :meth:`Mapping.items <collections.abc.Mapping.items>` returns.
+                the pairs of the first value of each key, as the ``items``
+                method of :class:`collections.abc.Mapping` returns.
 
         """
         if not multi:

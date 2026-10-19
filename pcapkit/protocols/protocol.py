@@ -216,7 +216,7 @@ def _raw_where_parsed(made: 'Any', parsed: 'Any') -> 'bool':
 #: therefore consumed by :meth:`ProtocolBase.__init__
 #: <pcapkit.protocols.protocol.ProtocolBase.__init__>` or by the schema layer
 #: instead of by a :meth:`make <pcapkit.protocols.protocol.Protocol.make>`. No
-#: signature declares them, so :func:`_declared_keywords` cannot find them and
+#: signature declares them, so ``_declared_keywords()`` cannot find them and
 #: they are listed here.
 #:
 #: ``packet`` is here because the library puts it there itself:
@@ -237,7 +237,7 @@ OUT_OF_BAND_KEYWORDS = frozenset({'_layer', '_protocol', '__context__',
                                   '__packet__', 'packet'})
 
 
-#: Cache for :func:`_declared_keywords`, keyed by protocol class. Signatures do
+#: Cache for ``_declared_keywords()``, keyed by protocol class. Signatures do
 #: not change after the class is created and the walk below is
 #: :math:`O(\\text{MRO} \\times \\text{methods})`, so it runs once per class
 #: rather than once per constructed packet.
@@ -367,7 +367,7 @@ def _check_construction_keywords(cls: 'type', kwargs: 'dict[str, Any]',
 
     Raises:
         UnsupportedCall: If ``strict`` and any keyword is not among those
-            :func:`_declared_keywords` collects for ``cls``.
+            ``_declared_keywords()`` collects for ``cls``.
 
     Warns:
         UnknownFieldWarning: The same finding when not ``strict``.
@@ -2008,7 +2008,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         matches if it is accompanied by an ``arg_namespace`` argument that
         is :data:`None`, its current value is a :obj:`str` equal to
         ``name``, and its default
-        value is an :class:`~enum.IntEnum` (or :class:`aenum.IntEnum`)
+        value is an :class:`~enum.IntEnum` (or ``aenum.IntEnum``)
         member. The candidate namespace of a match is the class of that
         default value.
 

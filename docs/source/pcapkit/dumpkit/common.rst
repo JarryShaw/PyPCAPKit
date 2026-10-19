@@ -4,7 +4,7 @@ Common Utilities
 .. module:: pcapkit.dumpkit.common
 
 :mod:`pcapkit.dumpkit.common` holds the utilities shared by
-:mod:`pcapkit.dumpkit`, chiefly customised hooks for :class:`dictdumper.Dumper`
+:mod:`pcapkit.dumpkit`, chiefly customised hooks for :class:`dictdumper.dumper.Dumper`
 classes.
 
 .. autofunction:: pcapkit.dumpkit.common.make_dumper

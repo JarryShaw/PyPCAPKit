@@ -129,7 +129,7 @@ def tcp_segment(frame: 'ProtocolBase') -> 'Optional[TCPSegment]':
         design (:issue:`1404`), so the segment arrives as
         :class:`~pcapkit.protocols.misc.raw.Raw`. The ports, numbers and flags
         are all in the fixed header, so the segment still belongs to its flow,
-        as it does for :mod:`dpkt`, :mod:`scapy` and Wireshark (:issue:`1518`).
+        as it does for ``dpkt``, :mod:`scapy` and Wireshark (:issue:`1518`).
         The header and payload are then the captured octets either side of the
         Data Offset. Inside a tunnel, this holds of the IP layer carrying the
         segment, as it does without one.
