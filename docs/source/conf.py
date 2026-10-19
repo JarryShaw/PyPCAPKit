@@ -1093,8 +1093,9 @@ def read_own_enum_new(obj: type, name: str, *defargs: 'Any') -> 'Any':
 
     Once the members are built, :mod:`enum` and ``aenum`` both put the enum
     machinery's ``__new__`` on the class and keep the class body's own as
-    ``_new_member_``, so ``:special-members: __new__`` documented the machinery's
-    constructor rather than the one a registry row is built with (:issue:`1940`).
+    ``_new_member_``. Without this getter, ``:special-members: __new__`` documents
+    the machinery's constructor rather than the one a registry row is built with
+    (:issue:`1940`).
 
     Args:
         obj: The enumeration class autodoc reads from.

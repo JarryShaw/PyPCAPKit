@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-"""Pins the library-internal references #1940 turned from literals into roles.
+"""Pins library-internal references in rendered text as roles with a documented target (#1940).
 
 A library-internal name written as a double-backtick literal in rendered prose
 never links, and neither does a role whose target has no documented entry. #1940
 converts those literals to Python-domain roles wherever the prose means the
-object, and gives every object such a reference names an entry -- the public
-classes that had none, and the private helpers and special methods that rendered
-text refers to -- so that each reference has a target.
+object, and every object such a reference names has an entry -- the public
+classes, and the private helpers and special methods that rendered text refers
+to -- so that each reference has a target.
 
-* :class:`DocumentedEntryTests` -- the public classes that gained an ``autoclass``.
+* :class:`DocumentedEntryTests` -- the public classes #1940 documents, each with an ``autoclass``.
 * :class:`HelperEntryTests` -- the private helpers and special methods that
   rendered text names, each declared on an API page.
 * :class:`ConvertedReferenceTests` -- a curated set of the converted references,
@@ -91,7 +91,7 @@ HELPERS = (
 #: template that generates their module is outside this change (#1920).
 UNDOCSTRINGED = frozenset({'pcapkit.const.reg.apptype.apptype.AppType.__eq__'})
 
-#: ``(source, literal it replaced, role now written)``. The first two are the
+#: ``(source, literal, the role that replaced it)``. The first two are the
 #: examples #1940 names.
 CONVERTED = (
     ('docs/source/contributing/conventions/registry-protocol.rst', '``AppType.get``',
@@ -202,7 +202,7 @@ def declared_anywhere() -> 'set[str]':
 
 
 class DocumentedEntryTests(unittest.TestCase):
-    """Each public class that had no inventory entry now has an ``autoclass``."""
+    """Each public class #1940 documents has an ``autoclass``."""
 
     def test_pages_declare_the_entries(self) -> 'None':
         for page, path in ENTRIES:
@@ -250,7 +250,7 @@ class HelperEntryTests(unittest.TestCase):
 
 
 class ConvertedReferenceTests(unittest.TestCase):
-    """A curated set of converted references stays a role, not a literal."""
+    """Each curated reference is a role, not a literal."""
 
     def test_literal_is_now_a_role(self) -> 'None':
         for source, literal, role in CONVERTED:
