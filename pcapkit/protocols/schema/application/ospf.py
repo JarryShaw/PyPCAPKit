@@ -95,8 +95,8 @@ class OSPF(Schema):
     #: Payload.
     payload: 'bytes' = PayloadField(length=lambda pkt: pkt['length'] - 24)
     #: Octets captured past the Packet Length, such as the message digest
-    #: that cryptographic authentication appends (:rfc:`2328#appendix-D.4.3`),
-    #: c.f. :attr:`IPv4.trailer <pcapkit.protocols.schema.internet.ipv4.IPv4.trailer>`.
+    #: that cryptographic authentication appends (:rfc:`2328#appendix-D.4.3`);
+    #: compare :attr:`IPv4.trailer <pcapkit.protocols.schema.internet.ipv4.IPv4.trailer>`.
     trailer: 'bytes' = PayloadField(default=b'')
 
     if TYPE_CHECKING:

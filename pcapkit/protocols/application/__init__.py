@@ -14,7 +14,7 @@ application layer.
 #       SSH, TELNET, TLS/SSL, XMPP.
 #
 # NB: NGAP's decoder below is an optional
-#     dependency, c.f. pcapkit.protocols.application.ngap. Importing the module
+#     dependency; see pcapkit.protocols.application.ngap. Importing the module
 #     is free -- ``pycrate`` is imported inside the parse path, not here.
 
 # Base Class for Application Layer

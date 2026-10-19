@@ -18,7 +18,7 @@ Global Header
 
 :mod:`pcapkit.protocols.misc.pcap.header` contains
 :class:`~pcapkit.protocols.misc.pcap.header.Header` only,
-which implements extractor for global headers [*]_
+which implements an extractor for global headers [*]_
 of PCAP, whose structure is described as below:
 
 .. code-block:: c
@@ -99,7 +99,7 @@ Frame Header
 
 :mod:`pcapkit.protocols.misc.pcap.frame` contains
 :class:`~pcapkit.protocols.misc.pcap.frame.Frame` only,
-which implements extractor for frame headers [*]_ of PCAP,
+which implements an extractor for frame headers [*]_ of PCAP,
 whose structure is described as below:
 
 .. code-block:: c

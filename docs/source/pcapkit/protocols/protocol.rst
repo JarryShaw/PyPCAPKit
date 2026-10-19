@@ -12,7 +12,7 @@ new protocol stack; a new protocol in an existing layer subclasses that layer's
 base class -- :class:`~pcapkit.protocols.link.link.Link`,
 :class:`~pcapkit.protocols.internet.internet.Internet`,
 :class:`~pcapkit.protocols.transport.transport.Transport` or
-:class:`~pcapkit.protocols.application.application.Application` -- instead, c.f.
+:class:`~pcapkit.protocols.application.application.Application` -- instead; see
 :doc:`/ext`. The built-in protocol families, those layer classes included,
 derive from :class:`~pcapkit.protocols.protocol.ProtocolBase`, whose metaclass
 is :class:`~pcapkit.protocols.protocol.ProtocolMeta`; both are listed under

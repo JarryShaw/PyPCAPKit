@@ -287,7 +287,7 @@ def nonnegative(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict[st
     Flooring rather than refusing is the choice :func:`bounded_area` makes too:
     a block read has no catch point above :meth:`FieldBase.unpack
     <pcapkit.corekit.fields.field.FieldBase.unpack>`, so one refusal aborts the
-    whole extraction rather than one block, so a capture cut short by its
+    whole extraction rather than one block, and a capture cut short by its
     snapshot length must keep parsing. The end of the file is the one case that is *not* a floor, since
     there no block is being read at all -- see :meth:`PCAPNG._check_block_floor
     <pcapkit.protocols.misc.pcapng.PCAPNG._check_block_floor>`, which reports it

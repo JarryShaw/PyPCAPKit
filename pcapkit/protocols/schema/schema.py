@@ -1217,6 +1217,20 @@ class _EnumRegistry(collections.defaultdict):
     """
 
     def __missing__(self, key: 'Any') -> 'Any':
+        """Return the fallback for an unregistered ``key``, without storing it.
+
+        Args:
+            key: Registry key that is not registered.
+
+        Returns:
+            What :attr:`~collections.defaultdict.default_factory` returns. The
+            registry is left as it was, so ``key`` stays unregistered.
+
+        Raises:
+            KeyError: If :attr:`~collections.defaultdict.default_factory` is
+                :data:`None`.
+
+        """
         if self.default_factory is None:
             raise KeyError(key)
         return self.default_factory()

@@ -7,7 +7,7 @@
 
 :mod:`pcapkit.protocols.misc.pcapng` contains
 :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`,
-which implements extractor for PCAP-NG file format [*]_, and the
+which implements an extractor for PCAP-NG file format [*]_, and the
 :class:`~pcapkit.protocols.misc.pcapng.PacketDirection`,
 :class:`~pcapkit.protocols.misc.pcapng.PacketReception` and
 :class:`~pcapkit.protocols.misc.pcapng.WireGuardKeyLabel` enumerations.
@@ -727,9 +727,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
     # Defaults.
     ##########################################################################
 
-    #: Protocol index mapping for
-    #: decoding next layer, c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
-    #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
+    #: Protocol index mapping for decoding the next layer; see
+    #: :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
+    #: and :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     #: Each value is a :class:`~pcapkit.corekit.module.ModuleDescriptor` naming the
     #: module and class, or a :class:`~pcapkit.protocols.protocol.Protocol` subclass.
     __proto__ = collections.defaultdict(
@@ -743,10 +743,11 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         },
     )  # type: DefaultDict[Enum_LinkType | int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
 
-    #: Block type to method mapping. Method names are expected to be referred
-    #: to the class by ``_read_block_${name}`` and/or ``_make_block_${name}``,
-    #: and if such name not found, the value should then be a method that can
-    #: parse the block by itself.
+    #: Block type to method mapping. A :obj:`str` value names the
+    #: ``_read_block_${name}`` and ``_make_block_${name}`` methods, which fall
+    #: back to ``_read_block_unknown`` and ``_make_block_unknown`` when not
+    #: defined, as an unregistered code does; any other value is a
+    #: ``(parser, constructor)`` pair of callables.
     __block__ = collections.defaultdict(
         lambda: 'unknown',
         {
@@ -764,10 +765,11 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         },
     )  # type: DefaultDict[Enum_BlockType | int, str | tuple[BlockParser, BlockConstructor]]
 
-    #: Block option type to method mapping. Method names are expected to be
-    #: referred to the class by ``_read_option_${name}`` and/or ``_make_option_${name}``,
-    #: and if such name not found, the value should then be a method that can
-    #: parse the option by itself.
+    #: Block option type to method mapping. A :obj:`str` value names the
+    #: ``_read_option_${name}`` and ``_make_option_${name}`` methods, which fall
+    #: back to ``_read_option_unknown`` and ``_make_option_unknown`` when not
+    #: defined, as an unregistered code does; any other value is a
+    #: ``(parser, constructor)`` pair of callables.
     __option__ = collections.defaultdict(
         lambda: 'unknown',
         {
@@ -814,10 +816,11 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         },
     )  # type: DefaultDict[Union[Enum_OptionType, Tuple[str, int]], str | tuple[OptionParser, OptionConstructor]]
 
-    #: Name Resolution Block record type to method mapping. Method names are expected
-    #: to be referred to the class by ``_read_record_${name}`` and/or ``_make_record_${name}``,
-    #: and if such name not found, the value should then be a method that can
-    #: parse the record by itself.
+    #: Name Resolution Block record type to method mapping. A :obj:`str` value
+    #: names the ``_read_record_${name}`` and ``_make_record_${name}`` methods,
+    #: which fall back to ``_read_record_unknown`` and ``_make_record_unknown``
+    #: when not defined, as an unregistered code does; any other value is a
+    #: ``(parser, constructor)`` pair of callables.
     __record__ = collections.defaultdict(
         lambda: 'unknown',
         {
@@ -827,10 +830,11 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         },
     )  # type: DefaultDict[Enum_RecordType | int, str | tuple[RecordParser, RecordConstructor]]
 
-    #: Decryption secrets type to method mapping. Method names are expected to
-    #: be referred to the class by ``_read_secrets_${name}`` and/or ``_make_secrets_${name}``,
-    #: and if such name not found, the value should then be a method that can
-    #: parse the decryption secrets by itself.
+    #: Decryption secrets type to method mapping. A :obj:`str` value names the
+    #: ``_read_secrets_${name}`` and ``_make_secrets_${name}`` methods, which
+    #: fall back to ``_read_secrets_unknown`` and ``_make_secrets_unknown`` when
+    #: not defined, as an unregistered code does; any other value is a
+    #: ``(parser, constructor)`` pair of callables.
     __secrets__ = collections.defaultdict(
         lambda: 'unknown',
         {

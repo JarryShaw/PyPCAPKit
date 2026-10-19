@@ -413,13 +413,13 @@ def _check_construction_keywords(cls: 'type', kwargs: 'dict[str, Any]',
 
 
 #: contextvars.ContextVar[int]: How many layers of the frame being dissected
-#: come before the next one :meth:`ProtocolBase._parse_next_layer` parses, c.f.
+#: come before the next one :meth:`ProtocolBase._parse_next_layer` parses; see
 #: :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.
 _frame_depth = contextvars.ContextVar('_frame_depth', default=0)
 
 #: contextvars.ContextVar[bool]: Whether a payload is being rebuilt by
 #: :meth:`ProtocolBase._make_payload`, so that the layer it is rebuilt for
-#: parses the same octets again, c.f. :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.
+#: parses the same octets again; see :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT`.
 _rebuilding = contextvars.ContextVar('_rebuilding', default=False)
 
 
@@ -509,9 +509,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     #: :class:`~pcapkit.protocols.misc.raw.Raw`, and thus its layer is :obj:`None`.
     __layer__: 'Optional[Literal["Link", "Internet", "Transport", "Application"]]' = None
 
-    #: Protocol index mapping for decoding next layer, c.f.
+    #: Protocol index mapping for decoding the next layer; see
     #: :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
-    #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
+    #: and :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     #: Each value is a :class:`~pcapkit.corekit.module.ModuleDescriptor` naming the
     #: module and class, or a :class:`Protocol` subclass.
     __proto__: 'DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]' = collections.defaultdict(
@@ -565,7 +565,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     #: built without ``__init__``.
     __reconstructing__: 'bool' = False
 
-    #: Caller supplied parsing context, c.f. :mod:`pcapkit.corekit.context`.
+    #: Caller supplied parsing context; see :mod:`pcapkit.corekit.context`.
     #: :meth:`self.__init__ <Protocol.__init__>` replaces this with a real
     #: :class:`~pcapkit.corekit.context.ContextRegistry`; the class-level
     #: :data:`None` is what an instance built without ``__init__`` (e.g.
@@ -1223,8 +1223,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                 While parsing, it is republished as ``__packet__`` so that
                 :meth:`self.unpack <Protocol.unpack>` -- and through it the
                 schema -- can see it; see the note below.
-            __context__: Caller supplied parsing context (:attr:`self._exctx <pcapkit.protocols.protocol.Protocol._exctx>`),
-                c.f. :mod:`pcapkit.corekit.context`: a
+            __context__: Caller supplied parsing context (:attr:`self._exctx <pcapkit.protocols.protocol.Protocol._exctx>`;
+                see :mod:`pcapkit.corekit.context`): a
                 :class:`~pcapkit.corekit.context.ContextRegistry`, a
                 :class:`~pcapkit.corekit.context.ProtocolContext`, a mapping of
                 names to :class:`~pcapkit.corekit.context.ProtocolContext`, or an
@@ -1986,8 +1986,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                 else:
                     # Caught by the handler below, so this never escapes: it jumps
                     # to the shared "name is not in namespace" path. A pcapkit
-                    # exception here would log at CRITICAL for something handled
-                    # two lines later.
+                    # exception here would log at CRITICAL for something the
+                    # ``except`` below handles.
                     raise KeyError(name)
             except KeyError as error:
                 if default is None:
@@ -2497,7 +2497,7 @@ class Protocol(ProtocolBase, Generic[_PT, _ST]):
     """User-facing abstract base class for third-party protocols.
 
     Inherit it directly only to create a new protocol stack; a new protocol in
-    an existing layer subclasses that layer's base class instead, c.f.
+    an existing layer subclasses that layer's base class instead; see
     :doc:`/ext`. The built-in protocol families do not derive from this class
     but from :class:`ProtocolBase`, whose metaclass is :class:`ProtocolMeta`.
 

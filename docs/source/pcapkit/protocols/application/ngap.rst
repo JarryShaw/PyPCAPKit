@@ -5,7 +5,7 @@ NGAP - NG Application Protocol
 
 :mod:`pcapkit.protocols.application.ngap` contains
 :class:`~pcapkit.protocols.application.ngap.NGAP`,
-which implements extractor for the NG Application Protocol
+which implements an extractor for the NG Application Protocol
 (NGAP) [*]_, as specified in 3GPP TS 38.413, and the enumerations its
 data models report with:
 :class:`~pcapkit.protocols.application.ngap.PDUKind`,
@@ -18,7 +18,7 @@ It runs over SCTP and is named by the DATA chunk's *payload protocol
 identifier* rather than by a port, so :class:`NGAP` is registered on
 :attr:`SCTP.__proto__ <pcapkit.protocols.transport.sctp.SCTP.__proto__>` under
 PPID 60 (``NG_Application_Protocol``) and PPID 66
-(``NGAP_over_DTLS_over_SCTP``), c.f.
+(``NGAP_over_DTLS_over_SCTP``); see
 :func:`pcapkit.foundation.registry.protocols.register_sctp`.
 
 An SCTP DATA chunk that names NGAP carries exactly one ``NGAP-PDU``, encoded

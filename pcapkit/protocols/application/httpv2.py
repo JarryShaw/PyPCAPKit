@@ -6,7 +6,7 @@
 
 :mod:`pcapkit.protocols.application.httpv2` contains
 :class:`~pcapkit.protocols.application.httpv2.HTTP`
-only, which implements extractor for Hypertext Transfer
+only, which implements an extractor for Hypertext Transfer
 Protocol (HTTP/2) [*]_, whose structure is described as
 below:
 

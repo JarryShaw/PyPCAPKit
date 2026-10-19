@@ -6,7 +6,7 @@ PCAP-NG File Format
 
 :mod:`pcapkit.protocols.misc.pcapng` contains
 :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`,
-which implements extractor for PCAP-NG file format [*]_, and the
+which implements an extractor for PCAP-NG file format [*]_, and the
 :class:`~pcapkit.protocols.misc.pcapng.PacketDirection`,
 :class:`~pcapkit.protocols.misc.pcapng.PacketReception` and
 :class:`~pcapkit.protocols.misc.pcapng.WireGuardKeyLabel` enumerations.
