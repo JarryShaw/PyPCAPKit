@@ -6,8 +6,6 @@
 
 :mod:`pcapkit.toolkit.pypcap` contains the adapters for the `PyPCAP`_ engine.
 
-.. _PyPCAP: https://github.com/pynetwork/pypcap
-
 .. important::
 
    `PyPCAP`_ is a thin :manpage:`libpcap(3)` binding: it hands back the
@@ -29,8 +27,6 @@
    independent reimplementation of this interface that
    :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` drives. Each engine names
    its own adapter, so a change made for one cannot quietly alter the other.
-
-.. _pcap-ct: https://pypi.org/project/pcap-ct/
 
 """
 from typing import TYPE_CHECKING
@@ -70,8 +66,6 @@ def packet2chain(packet: 'bytes', *, data_link: 'Enum_LinkType') -> 'str':
         As `PyPCAP`_ does not dissect the packet, the chain is only ever the
         link layer type followed by ``Raw``, e.g. ``ETHERNET:Raw``.
 
-    .. _PyPCAP: https://github.com/pynetwork/pypcap
-
     """
     return f'{data_link.name}:Raw'
 
@@ -91,8 +85,6 @@ def packet2dict(packet: 'bytes', timestamp: 'float', *,
     Note:
         The mapping carries the captured bytes verbatim rather than a decoded
         protocol tree, since `PyPCAP`_ does not decode anything.
-
-    .. _PyPCAP: https://github.com/pynetwork/pypcap
 
     """
     return {
@@ -115,8 +107,6 @@ def ipv4_reassembly(packet: 'bytes', *, count: 'int' = -1) -> 'IP_Packet[IPv4Add
     Raises:
         UnsupportedCall: Always, as `PyPCAP`_ provides no IPv4 layer to read.
 
-    .. _PyPCAP: https://github.com/pynetwork/pypcap
-
     """
     raise UnsupportedCall(f'IPv4 reassembly is not supported by the PyPCAP engine: {_NO_DISSECTION}')
 
@@ -131,8 +121,6 @@ def ipv6_reassembly(packet: 'bytes', *, count: 'int' = -1) -> 'IP_Packet[IPv6Add
     Raises:
         UnsupportedCall: Always, as `PyPCAP`_ provides no IPv6 layer to read.
 
-    .. _PyPCAP: https://github.com/pynetwork/pypcap
-
     """
     raise UnsupportedCall(f'IPv6 reassembly is not supported by the PyPCAP engine: {_NO_DISSECTION}')
 
@@ -146,8 +134,6 @@ def tcp_reassembly(packet: 'bytes', *, count: 'int' = -1) -> 'TCP_Packet | None'
 
     Raises:
         UnsupportedCall: Always, as `PyPCAP`_ provides no TCP layer to read.
-
-    .. _PyPCAP: https://github.com/pynetwork/pypcap
 
     """
     raise UnsupportedCall(f'TCP reassembly is not supported by the PyPCAP engine: {_NO_DISSECTION}')
@@ -165,8 +151,6 @@ def tcp_traceflow(packet: 'bytes', timestamp: 'float', *, data_link: 'Enum_LinkT
 
     Raises:
         UnsupportedCall: Always, as `PyPCAP`_ provides no TCP layer to read.
-
-    .. _PyPCAP: https://github.com/pynetwork/pypcap
 
     """
     raise UnsupportedCall(f'TCP flow tracing is not supported by the PyPCAP engine: {_NO_DISSECTION}')

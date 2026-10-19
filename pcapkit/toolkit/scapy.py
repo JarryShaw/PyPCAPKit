@@ -9,8 +9,6 @@ The reassembly and flow tracing adapters return the data their
 :mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame
 cannot be used for it.
 
-.. _Scapy: https://scapy.net
-
 .. warning::
 
    This module requires installed `Scapy`_ engine.

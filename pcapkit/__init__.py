@@ -8,17 +8,11 @@
 :mod:`pcapkit` is an independent open source library, using only
 `DictDumper`_ as its formatted output dumper.
 
-.. _DictDumper: https://dictdumper.jarryshaw.me
-
 Unlike popular PCAP file extractors, such as `Scapy`_,
 `DPKT`_ and `PyShark`_, :mod:`pcapkit` uses streaming
 strategy to read input files. That is to read frame by
 frame, decrease occupation on memory, as well as enhance
 efficiency in some way.
-
-.. _Scapy: https://scapy.net
-.. _DPKT: https://dpkt.readthedocs.io
-.. _PyShark: https://kiminewt.github.io/pyshark
 
 In :mod:`pcapkit`, all files can be described as the following
 components.

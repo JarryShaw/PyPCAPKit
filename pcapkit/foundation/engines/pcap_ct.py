@@ -7,8 +7,6 @@
 This module contains the implementation for `pcap-ct`_ engine
 support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
-.. _pcap-ct: https://pypi.org/project/pcap-ct/
-
 """
 import os
 from typing import TYPE_CHECKING, cast
@@ -108,9 +106,7 @@ class PCAP_CT(EngineBase['RawFrame']):
        ``pypcap`` 1.3.0), but that is a statement about the versions tested, not
        a guarantee from upstream.
 
-    .. _pcap-ct: https://pypi.org/project/pcap-ct/
     .. _libpcap: https://pypi.org/project/libpcap/
-    .. _PyPCAP: https://github.com/pynetwork/pypcap
 
     Args:
         extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.
@@ -222,8 +218,6 @@ class PCAP_CT(EngineBase['RawFrame']):
             merely absent returns :data:`None`, since the import test reports that
             case in its own words.
 
-        .. _PyPCAP: https://github.com/pynetwork/pypcap
-        .. _pcap-ct: https://pypi.org/project/pcap-ct/
         .. _libpcap: https://pypi.org/project/libpcap/
 
         """
@@ -431,8 +425,6 @@ class PCAP_CT(EngineBase['RawFrame']):
         See Also:
             Please refer to :meth:`PCAP.read_frame <pcapkit.foundation.engines.pcap.PCAP.read_frame>`
             for more operational information.
-
-        .. _pcap-ct: https://pypi.org/project/pcap-ct/
 
         """
         from pcapkit.toolkit.pcap_ct import packet2dict  # isort:skip

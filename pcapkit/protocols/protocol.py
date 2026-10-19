@@ -894,9 +894,6 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                 as well as any other name registered with :func:`codecs.register_error` that
                 can handle :exc:`UnicodeDecodeError`.
 
-        .. |chardet| replace:: ``chardet``
-        .. _chardet: https://chardet.readthedocs.io
-
         """
         charset = encoding or detect(byte)
         try:

@@ -7,18 +7,12 @@ Module Documentation
 :mod:`pcapkit` is an independent open source library, using only
 `DictDumper`_ as its formatted output dumper.
 
-.. _DictDumper: https://dictdumper.jarryshaw.me
-
 Unlike popular PCAP file extractors, such as `Scapy`_, `DPKT`_ and
 `PyShark`_, :mod:`pcapkit` tends to provide comprehensive
 support to all protocols, including but not limited to their
 parameters and/or options, etc. Therefore, :mod:`pcapkit` contains
 enumeration registries used by protocols, independent protocol
 schema definitions as well as various customisable interfaces.
-
-.. _Scapy: https://scapy.net
-.. _DPKT: https://dpkt.readthedocs.io
-.. _PyShark: https://kiminewt.github.io/pyshark
 
 .. toctree::
    :maxdepth: 1
@@ -61,16 +55,13 @@ Command Line Tool
 
 .. note::
 
-   The ``emoji`` package (the ``cli`` extra) decorates the ``-v`` output.
+   The |emoji|_ package (the ``cli`` extra) decorates the ``-v`` output.
    Without it, importing the module warns with
    :class:`~pcapkit.utilities.warnings.EmojiWarning` and the CLI prints plain
    text instead.
 
 :mod:`pcapkit.__main__` provides the CLI, merged in from the deprecated
 |jspcapy|_ project.
-
-.. |jspcapy| replace:: ``jspcapy``
-.. _jspcapy: https://github.com/JarryShaw/jspcapy
 
 .. code-block:: text
 

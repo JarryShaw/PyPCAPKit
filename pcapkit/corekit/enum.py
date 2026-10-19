@@ -123,7 +123,7 @@ class EnumLookup:
     an enumeration that already has members cannot be subclassed. Mixed in
     *before* the member type -- ``class Foo(EnumRegistry, IntFlag)``, or
     ``class Bar(EnumLookup, IntEnum)`` -- it contributes methods only, so
-    ``aenum`` still resolves the member data type from the enumeration base:
+    |aenum|_ still resolves the member data type from the enumeration base:
     ``int`` for ``aenum.IntEnum`` and ``aenum.IntFlag``, ``str`` for
     ``aenum.StrEnum``. That is what lets one base serve each of them, where a
     generated template fragment would have needed a separate rendering per
@@ -138,8 +138,8 @@ class EnumLookup:
     become the member type itself and broken every one of these shapes at once.
 
     The methods deliberately touch only ``_member_map_``, ``_member_names_`` and
-    ``_value2member_map_``, which both :mod:`enum` and ``aenum`` maintain, so
-    nothing on this tier depends on ``aenum`` internals at all -- the
+    ``_value2member_map_``, which both :mod:`enum` and |aenum|_ maintain, so
+    nothing on this tier depends on |aenum|_ internals at all -- the
     ``aenum.extend_enum`` call in this module belongs to
     :class:`EnumRegistry`, which is the tier that mutates.
 
@@ -390,7 +390,7 @@ class EnumLookup:
           typically :exc:`~pcapkit.utilities.exceptions.EnumValueError` from a
           subclass's :meth:`_validate_value` -- is re-raised as it stands rather
           than wrapped, so the subclass's own message survives and no second
-          error is constructed. Only ``aenum``'s and :mod:`enum`'s own "no
+          error is constructed. Only |aenum|_'s and :mod:`enum`'s own "no
           member carries this value" is converted, into a quiet
           :exc:`~pcapkit.utilities.exceptions.EnumValueError`. This is the same
           discrimination :meth:`EnumField.post_process
@@ -521,7 +521,7 @@ class EnumRegistry(EnumLookup):
 
         Refuses a ``value`` that already has a member. Without this guard,
         ``aenum.extend_enum`` does not mint anything for an already-taken
-        value -- ``aenum`` treats that as a request to *alias* the existing
+        value -- |aenum|_ treats that as a request to *alias* the existing
         member under the caller's ``name`` instead, silently: the call returns
         the *existing* member, ``name`` becomes reachable in ``__members__``
         pointing at it, and ``_member_names_`` does not grow. That is
@@ -565,7 +565,7 @@ class EnumRegistry(EnumLookup):
                 :meth:`~EnumLookup._validate_value` rejects ``value``. The base
                 implementation of that hook accepts everything, so this cannot
                 arise on a registry that does not override it.
-            ValueError: If ``name`` is already taken. ``aenum`` reports that
+            ValueError: If ``name`` is already taken. |aenum|_ reports that
                 as :exc:`TypeError`; it is translated so that the ways one call
                 can fail are one exception type.
 
@@ -603,7 +603,7 @@ class EnumRegistry(EnumLookup):
             The member now reachable under ``name``, new or existing.
 
         Raises:
-            ValueError: If ``name`` is already taken. ``aenum`` reports that
+            ValueError: If ``name`` is already taken. |aenum|_ reports that
                 as :exc:`TypeError`; it is translated so that the ways one call
                 can fail are one exception type.
 
@@ -691,7 +691,7 @@ class EnumRegistry(EnumLookup):
         that does.
 
         The member is constructed through ``cls._member_type_``, which
-        ``aenum`` sets from the enumeration base, so this serves ``int``- and
+        |aenum|_ sets from the enumeration base, so this serves ``int``- and
         ``str``-valued registries alike without either having to say which it
         is.
 

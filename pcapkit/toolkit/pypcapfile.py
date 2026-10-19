@@ -9,8 +9,6 @@ The reassembly and flow tracing adapters return the data their
 :mod:`pcapkit.foundation` counterpart consumes, or :data:`None` if the frame
 cannot be used for it.
 
-.. _PyPCAPFile: https://github.com/kisom/pypcapfile
-
 .. important::
 
    `PyPCAPFile`_ decodes Ethernet, IPv4, TCP and UDP and nothing else -- there
@@ -139,8 +137,6 @@ def packet2timestamp(packet: 'Packet') -> 'float':
         off at a small ``timestamp``: ``1.0036909999999999`` for ``1.003691``
         (:issue:`1668`).
 
-    .. _PyPCAPFile: https://github.com/kisom/pypcapfile
-
     """
     divisor = RESOLUTION[bool(packet.header[0].ns_resolution)]
     return (packet.timestamp * divisor + packet.timestamp_us) / divisor
@@ -171,8 +167,6 @@ def _parse_ipv4_address(value: 'Any') -> 'IPv4Address':
 
     Raises:
         ProtocolError: If ``value`` cannot be parsed as an IPv4 address.
-
-    .. _PyPCAPFile: https://github.com/kisom/pypcapfile
 
     """
     if not isinstance(value, bytes):
@@ -211,8 +205,6 @@ def _parse_mac_address(value: 'Any') -> 'str':
 
     Raises:
         ProtocolError: If ``value`` cannot be parsed as a MAC address.
-
-    .. _PyPCAPFile: https://github.com/kisom/pypcapfile
 
     """
     if not isinstance(value, (bytes, bytearray)):
@@ -258,8 +250,6 @@ def _maybe_unhex(value: 'bytes') -> 'bytes':
         acceptable here because that byte range is a small fraction of the
         possible values a real header or payload can take.
 
-    .. _PyPCAPFile: https://github.com/kisom/pypcapfile
-
     """
     try:
         return binascii.unhexlify(value)
@@ -284,8 +274,6 @@ def ipv4_header(ipv4: 'IP') -> 'bytes':
     Raises:
         ProtocolError: If ``ipv4.src`` or ``ipv4.dst`` cannot be parsed as an
             IPv4 address.
-
-    .. _PyPCAPFile: https://github.com/kisom/pypcapfile
 
     """
     return struct.pack(
@@ -330,8 +318,6 @@ def _network(packet: 'Packet') -> 'Optional[IP]':
         `PyPCAPFile`_ slices the header at its IHL however few octets there
         are, so a header cut short has fewer options than its IHL declares.
 
-    .. _PyPCAPFile: https://github.com/kisom/pypcapfile
-
     """
     link = packet.packet
     if _is_raw(link):
@@ -360,8 +346,6 @@ def _ipv6_carries_tcp(packet: 'Packet') -> 'bool':
         `PyPCAPFile`_ leaves an IPv6 frame's payload undecoded and hex-encoded
         (see :func:`_maybe_unhex`), so this reads the Next Header field of the
         raw IPv6 header and decodes nothing.
-
-    .. _PyPCAPFile: https://github.com/kisom/pypcapfile
 
     """
     link = packet.packet
@@ -458,8 +442,6 @@ def _transport(ipv4: 'IP') -> 'Optional[bytes]':
         Total Length of ``0``, which TCP segmentation offload leaves in a
         capture taken on the sending host, keeps the rest of the frame
         (:issue:`1547`).
-
-    .. _PyPCAPFile: https://github.com/kisom/pypcapfile
 
     """
     if ipv4.p != Enum_TransType.TCP or ipv4.off:
@@ -629,8 +611,6 @@ def _layer2dict(layer: 'Any') -> 'dict[str, Any]':
         raw payload is left untouched, since nothing here establishes that it is
         `PyPCAPFile`_-hexlified rather than genuinely raw.
 
-    .. _PyPCAPFile: https://github.com/kisom/pypcapfile
-
     """
     if _is_raw(layer):
         raw = bytes(layer)
@@ -668,8 +648,6 @@ def packet2chain(packet: 'Packet', *, data_link: 'Enum_LinkType') -> 'str':
         ends in ``Raw`` -- the transport segment is left undecoded on purpose,
         see the module notes.
 
-    .. _PyPCAPFile: https://github.com/kisom/pypcapfile
-
     """
     layer = packet.packet
     if _is_raw(layer):
@@ -704,8 +682,6 @@ def packet2dict(packet: 'Packet', *, data_link: 'Enum_LinkType') -> 'dict[str, A
         <pcapkit.foundation.engines.pypcapfile.PyPCAPFile._read_records>`), so
         it is un-hexed (see :func:`_maybe_unhex`) and reported as its octets,
         not as twice as many characters of hex text (:issue:`1667`).
-
-    .. _PyPCAPFile: https://github.com/kisom/pypcapfile
 
     """
     frame = packet.packet
@@ -777,8 +753,6 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
     Raises:
         UnsupportedCall: Always, as `PyPCAPFile`_ has no IPv6 decoder.
 
-    .. _PyPCAPFile: https://github.com/kisom/pypcapfile
-
     """
     raise UnsupportedCall('IPv6 reassembly is not supported by the PyPCAPFile engine: '
                           "'pypcapfile' has no IPv6 decoder, so no IPv6 fragment header "
@@ -812,8 +786,6 @@ def tcp_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'TCP_Packet | None
 
     See Also:
         :class:`pcapkit.foundation.reassembly.tcp.TCP`
-
-    .. _PyPCAPFile: https://github.com/kisom/pypcapfile
 
     """
     ipv4 = _network(packet)
@@ -884,8 +856,6 @@ def tcp_traceflow(packet: 'Packet', *, data_link: 'Enum_LinkType',
 
     See Also:
         :class:`pcapkit.foundation.traceflow.tcp.TCP`
-
-    .. _PyPCAPFile: https://github.com/kisom/pypcapfile
 
     """
     ipv4 = _network(packet)

@@ -116,8 +116,10 @@ class InventorylessPackageRoleTests(unittest.TestCase):
         """A reintroduced ``:mod:`pcap``` or ``:func:`~aenum.extend_enum``` fails here.
 
         Matched on the target's first dotted component, so ``pcapkit`` and
-        ``pcapng`` are not mistaken for ``pcap``. The plain double-backtick
-        literal is allowed: it is the form #934 part C prescribes for these roles.
+        ``pcapng`` are not mistaken for ``pcap``. The package itself is linked as
+        ``|pkg|_`` (#1936, pinned in :file:`test_docs_epilog_links_1936_unit.py`),
+        and a name below it is a plain double-backtick literal, the form #934
+        part C prescribes for these roles.
 
         """
         offenders = [f'{path}:{line}: :{role}:`{target}`'
@@ -125,8 +127,8 @@ class InventorylessPackageRoleTests(unittest.TestCase):
                      if target.split('.')[0] in INVENTORYLESS]
         self.assertEqual(offenders, [],
                          'these roles name a package whose objects.inv has no py: '
-                         'objects, so they can never resolve; per #934 part C, write '
-                         'them as double-backtick literals instead')
+                         'objects, so they can never resolve; write the package as '
+                         '|pkg|_ and a name below it as a double-backtick literal')
 
 
 class DeadTargetTests(unittest.TestCase):

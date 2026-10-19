@@ -50,7 +50,7 @@ class Completion(EnumLookup, StrEnum):
     state can be tested for without importing this class.
     :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` is the same kind of
     string enumeration, but it is generated like its :mod:`pcapkit.const.pcapng`
-    siblings (:issue:`886`), so it derives from ``aenum``'s own
+    siblings (:issue:`886`), so it derives from |aenum|_'s own
     ``StrEnum`` (via :class:`~pcapkit.corekit.enum.EnumRegistry`). The
     properties above hold for it, as ``aenum.StrEnum`` is a :class:`str`
     subclass, but ``isinstance``/``issubclass`` against

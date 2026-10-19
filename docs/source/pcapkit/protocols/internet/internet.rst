@@ -40,7 +40,7 @@ kept as :class:`~pcapkit.protocols.misc.raw.Raw`, with one
 :exc:`~pcapkit.utilities.warnings.ProtocolWarning` (:issue:`1604`). The
 ``pyshark`` engine leaves the walk to its own parser, which does not stop there,
 so it may still find the upper layer past it (:issue:`1609`). So may the
-``dpkt`` toolkit, which reads the chain as ``dpkt`` decodes it. So does the
+``dpkt`` toolkit, which reads the chain as |dpkt|_ decodes it. So does the
 ``scapy`` engine behind IPv6, where Scapy dissects each extension header itself;
 behind IPv4, its toolkit steps over them in the octets to find TCP, up to
 :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` of them in a row. The

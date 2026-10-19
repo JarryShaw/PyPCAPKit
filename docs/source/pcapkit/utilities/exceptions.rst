@@ -300,6 +300,3 @@ Error Handling Utilities
 .. rubric:: Footnotes
 
 .. [*] See |tbtrim|_ project for a modern Pythonic implementation.
-
-.. |tbtrim| replace:: ``tbtrim``
-.. _tbtrim: https://github.com/gousaiyang/tbtrim

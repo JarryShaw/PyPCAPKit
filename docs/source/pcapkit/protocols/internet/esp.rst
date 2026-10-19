@@ -163,9 +163,6 @@ Decryption requires the optional |cryptography|_ dependency
 without it; an SA that names an AES suite simply degrades to the opaque
 payload path, with a warning.
 
-.. |cryptography| replace:: ``cryptography``
-.. _cryptography: https://cryptography.io
-
 The supported set is anchored on the *mandatory to implement* algorithms of
 :rfc:`8221`. The tables below are the authority on what an SA may actually
 name; the rows marked ``yes`` are exactly the keys of
@@ -175,7 +172,7 @@ registry lists is enumerated and rejected.
 ============================ =================== ============ ==================================
 Encryption                   :rfc:`8221` status   Implemented  Notes
 ============================ =================== ============ ==================================
-``ENCR_NULL``                MUST                yes          :rfc:`2410`; needs no ``cryptography``
+``ENCR_NULL``                MUST                yes          :rfc:`2410`; needs no |cryptography|_
 ``ENCR_AES_CBC``             MUST                yes          :rfc:`3602`; 128/192/256-bit keys
 ``ENCR_AES_GCM_16``          MUST                yes          :rfc:`4106`; 8-octet explicit IV
 ``ENCR_AES_GCM_8``           --                  yes          :rfc:`4106`, 8-octet ICV

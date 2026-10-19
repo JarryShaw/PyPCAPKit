@@ -26,9 +26,6 @@ the answer, and a copy of the detection in each would be a chance to disagree.
 It is *only* detection -- nothing here is engine behaviour -- and it imports
 nothing from :mod:`pcapkit`, so it cannot introduce an import cycle.
 
-.. _PyPCAP: https://github.com/pynetwork/pypcap
-.. _pcap-ct: https://pypi.org/project/pcap-ct/
-
 """
 import importlib
 import importlib.metadata
@@ -123,9 +120,6 @@ def identify(module: 'ModuleType') -> 'str':
 
     Returns:
         :data:`PCAP_CT` or :data:`PYPCAP`.
-
-    .. _PyPCAP: https://github.com/pynetwork/pypcap
-    .. _pcap-ct: https://pypi.org/project/pcap-ct/
 
     """
     return PCAP_CT if hasattr(module, '_pcap') else PYPCAP

@@ -146,9 +146,6 @@ def get_proxies() -> 'dict[str, str]':
     :envvar:`PCAPKIT_HTTPS_PROXY`, if any, on every call, for the proxy
     settings of |requests|_.
 
-    .. |requests| replace:: ``requests``
-    .. _requests: https://requests.readthedocs.io
-
     Returns:
         Proxy settings for |requests|_.
 

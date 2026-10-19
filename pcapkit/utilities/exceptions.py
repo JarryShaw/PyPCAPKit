@@ -10,9 +10,6 @@ when exception raised on user's operation.
 
 .. [*] See |tbtrim|_ project for Pythonic implementation.
 
-.. |tbtrim| replace:: ``tbtrim``
-.. _tbtrim: https://github.com/gousaiyang/tbtrim
-
 """
 import contextvars
 import inspect

@@ -86,7 +86,3 @@ Extraction Engines
 
       :doc:`../foundation/engines/index` for the full engine list, what each one
       supports, and the installation prerequisites the third-party ones carry.
-
-.. _PyPCAP: https://github.com/pynetwork/pypcap
-.. _pcap-ct: https://pypi.org/project/pcap-ct
-.. _PyPCAPFile: https://github.com/kisom/pypcapfile

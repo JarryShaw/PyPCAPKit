@@ -13,9 +13,6 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    independent reimplementation of the same interface that installs on Python
    3.12 and newer, where upstream `PyPCAP`_ does not.
 
-.. _PyPCAP: https://github.com/pynetwork/pypcap
-.. _pcap-ct: https://pypi.org/project/pcap-ct/
-
 """
 import os
 from typing import TYPE_CHECKING, cast
@@ -79,9 +76,6 @@ class PyPCAP(EngineBase['RawFrame']):
        Because `pcap-ct`_ installs the same top-level ``pcap`` module, this
        engine checks which distribution it got and refuses the other one rather
        than running under the wrong name -- see :meth:`__init__`.
-
-    .. _PyPCAP: https://github.com/pynetwork/pypcap
-    .. _pcap-ct: https://pypi.org/project/pcap-ct/
 
     Args:
         extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.
@@ -162,9 +156,6 @@ class PyPCAP(EngineBase['RawFrame']):
             own words and duplicating it would produce two warnings for one
             problem.
 
-        .. _PyPCAP: https://github.com/pynetwork/pypcap
-        .. _pcap-ct: https://pypi.org/project/pcap-ct/
-
         """
         return cls._reason_for(_pcap_backend.probe())
 
@@ -213,9 +204,6 @@ class PyPCAP(EngineBase['RawFrame']):
                 work. Via ``Extractor`` the hook fires first and degrades to the
                 default engine with a warning, so this is a backstop rather than
                 the usual path.
-
-        .. _PyPCAP: https://github.com/pynetwork/pypcap
-        .. _pcap-ct: https://pypi.org/project/pcap-ct/
 
         """
         # NOTE: the probe comes *before* ``import pcap`` so that this engine and

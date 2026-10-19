@@ -7,8 +7,6 @@
 This module contains the implementation for `Scapy`_ engine
 support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
-.. _Scapy: https://scapy.net
-
 .. note::
 
    Constructing this engine imports ``scapy.all``, which is what populates
@@ -17,7 +15,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
    One side effect is worth knowing about in advance: ``scapy.all`` loads
    :mod:`scapy.layers.dcerpc`, which reaches `Scapy`_'s TLS layer and there
-   triggers a ``CryptographyDeprecationWarning`` from ``cryptography`` about
+   triggers a ``CryptographyDeprecationWarning`` from |cryptography|_ about
    finite-field Diffie-Hellman. It is emitted by any complete registry load, not
    by ``scapy.all`` in particular, and it concerns a key-exchange code path
    :mod:`pcapkit` never executes -- but it subclasses :exc:`UserWarning`, not
@@ -27,7 +25,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    to emit and the consumer's to silence, on the same footing as every other
    category (see :mod:`pcapkit.utilities.warnings`); hiding a third-party
    deprecation notice from inside a constructor would suppress the only advance
-   warning that a future ``cryptography`` release breaks `Scapy`_'s TLS layer.
+   warning that a future |cryptography|_ release breaks `Scapy`_'s TLS layer.
    To silence it, filter it as usual::
 
        import warnings
@@ -100,8 +98,6 @@ def _read_tsoffset(options: 'bytes', endian: 'str') -> 'int':
     Returns:
         The offset (option 14), a signed count of seconds; 0 without one.
 
-    .. _Scapy: https://scapy.net
-
     """
     while len(options) >= 4:
         code, length = struct.unpack(f'{endian}HH', options[:4])
@@ -159,8 +155,6 @@ def _reader_type() -> 'Type[PcapReader]':
     Raises:
         VersionError: If :class:`scapy.utils.PcapNgReader` lacks a method in
             :data:`_READER_HOOKS`, which these subclasses override.
-
-    .. _Scapy: https://scapy.net
 
     """
     from scapy.error import warning  # isort:skip

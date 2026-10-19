@@ -7,8 +7,6 @@
 This module contains the implementation for `PyShark`_ engine
 support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
-.. _PyShark: https://kiminewt.github.io/pyshark
-
 """
 import sys
 from typing import TYPE_CHECKING, cast
@@ -31,7 +29,7 @@ if TYPE_CHECKING:
     from pcapkit.foundation.extraction import Extractor
 
     class _PySharkPackage(Protocol):
-        """``pyshark``, as :class:`PyShark` reads it through :attr:`PyShark._expkg` (#1878)."""
+        """|pyshark|_, as :class:`PyShark` reads it through :attr:`PyShark._expkg` (#1878)."""
 
         @property
         def FileCapture(self) -> 'Type[PySharkFileCapture]': ...
@@ -49,8 +47,6 @@ def _frame_layer(packet: 'PySharkPacket') -> 'Optional[BaseLayer]':
     no ``protocols``, and the frame layer is ``layers[0]``. By its source,
     :program:`tshark` 4.2.2 roots a Sysdig event at ``syscall`` and a Netflix
     custom block at ``bblog``, so those records have no ``frame`` layer.
-
-    .. _PyShark: https://kiminewt.github.io/pyshark
 
     """
     for layer in (packet.frame_info, *packet.layers):
@@ -73,8 +69,6 @@ def _is_packet(packet: 'PySharkPacket') -> 'bool':
     in 4.6.9. The summary line is not used, because it differs between those
     versions. A record with no ``frame`` layer is not a packet either.
 
-    .. _PyShark: https://kiminewt.github.io/pyshark
-
     """
     frame = _frame_layer(packet)
     return frame is not None and 'encap_type' in frame.field_names
@@ -88,7 +82,7 @@ class PyShark(EngineBase['PySharkPacket']):
 
     """
     if TYPE_CHECKING:
-        #: Engine extraction package, i.e. ``pyshark``.
+        #: Engine extraction package, i.e. |pyshark|_.
         _expkg: '_PySharkPackage'
         #: Engine extraction temporary storage.
         _extmp: 'PySharkFileCapture'
@@ -124,7 +118,7 @@ class PyShark(EngineBase['PySharkPacket']):
         when it is used, which without this hook escapes from :meth:`run` as a hard
         error rather than degrading to the default engine with a warning.
 
-        **The interpreter.** ``pyshark`` 0.6 does
+        **The interpreter.** |pyshark|_ 0.6 does
         ``asyncio.get_event_loop_policy().get_event_loop()`` at
         :file:`pyshark/capture/capture.py:183`, in a fresh interpreter with no
         running loop. Measured: 3.10 and 3.11 return a loop
@@ -135,16 +129,16 @@ class PyShark(EngineBase['PySharkPacket']):
         deprecated-but-functional side of that progression, and that expectation
         is the one thing here that is inferred rather than observed.
 
-        **The** :program:`tshark` **binary.** ``pyshark`` is a wrapper around
+        **The** :program:`tshark` **binary.** |pyshark|_ is a wrapper around
         Wireshark's command-line tool and does no parsing itself, so it is useless
-        without it. The check delegates to ``pyshark``'s own
+        without it. The check delegates to |pyshark|_'s own
         ``get_process_path()`` rather than calling :func:`shutil.which`, because
         the two are not equivalent and ``which`` would refuse setups that work:
-        ``pyshark`` looks at ``tshark_path`` in its :file:`config.ini` *first*, and
+        |pyshark|_ looks at ``tshark_path`` in its :file:`config.ini` *first*, and
         then at :envvar:`PATH` on POSIX, at both Program Files directories on
         Windows, and at :file:`/Applications/Wireshark.app` on macOS. Asking
-        ``pyshark`` gets all of that for free and cannot disagree with what
-        ``pyshark`` will do a moment later.
+        |pyshark|_ gets all of that for free and cannot disagree with what
+        |pyshark|_ will do a moment later.
 
         Note:
             Deliberately **not cached**, and the cost was measured rather than
@@ -163,8 +157,6 @@ class PyShark(EngineBase['PySharkPacket']):
 
         Returns:
             A short phrase naming the limitation, or :data:`None`.
-
-        .. _PyShark: https://kiminewt.github.io/pyshark
 
         """
         if sys.version_info[:2] >= cls.PYTHON_CEILING:
@@ -217,7 +209,7 @@ class PyShark(EngineBase['PySharkPacket']):
         """Call ``pyshark.FileCapture`` to extract PCAP files.
 
         This method assigns :attr:`self._expkg <PyShark._expkg>`
-        as ``pyshark`` and :attr:`self._extmp <PyShark._extmp>`
+        as |pyshark|_ and :attr:`self._extmp <PyShark._extmp>`
         as an iterator from ``pyshark.FileCapture``.
 
         The global header is parsed and dumped first, by

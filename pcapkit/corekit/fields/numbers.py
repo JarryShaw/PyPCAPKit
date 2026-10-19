@@ -693,7 +693,7 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
         Notes:
             The registry is consulted through its constructor, which raises for
             a value no member and no ``_missing_`` rule accounts for. That raise
-            is ``aenum``'s own bare :exc:`ValueError`: not one of
+            is |aenum|_'s own bare :exc:`ValueError`: not one of
             :mod:`pcapkit.utilities.exceptions`, so a caller cannot tell it from
             a bug of its own, and not an :exc:`EOFError`, so
             :meth:`Extractor.record_frames
@@ -731,7 +731,7 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
             with one of :mod:`pcapkit.utilities.exceptions` has made a
             deliberate decision that this layer -- which sees only that the value
             arrived in a field of some width -- is in no position to overrule, so
-            an in-library error propagates unchanged and it is only ``aenum``'s
+            an in-library error propagates unchanged and it is only |aenum|_'s
             and :mod:`enum`'s "no member has this value" that becomes a
             pseudo-member. That is what keeps the fallback from being an
             unconditional ``except ValueError: pass``.
@@ -761,7 +761,7 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
         .. versionchanged:: 1.5.0
 
            A value the registry has no member for resolves to a nameless
-           pseudo-member, where ``aenum``'s bare :exc:`ValueError` escaped
+           pseudo-member, where |aenum|_'s bare :exc:`ValueError` escaped
            (:issue:`701`).
 
         """

@@ -26,9 +26,6 @@ issue :issue:`880` for the ruling.
 .. [*] 3GPP TS 38.413
 .. [*] 3GPP TS 38.413
 
-.. |pycrate| replace:: ``pycrate``
-.. _pycrate: https://github.com/pycrate-org/pycrate
-
 """
 
 from pcapkit.const.ngap.procedure_code import ProcedureCode as NGAP_ProcedureCode

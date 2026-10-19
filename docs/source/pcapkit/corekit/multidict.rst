@@ -6,8 +6,6 @@ Multi-Mapping Dictionary
 :mod:`pcapkit.corekit.multidict` contains dictionaries that store multiple
 values per key, based on the `Werkzeug`_ project.
 
-.. _Werkzeug: https://werkzeug.palletsprojects.com/
-
 .. autoclass:: pcapkit.corekit.multidict.MultiDict
    :no-members:
    :no-special-members: __init__

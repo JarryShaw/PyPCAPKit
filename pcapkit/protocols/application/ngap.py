@@ -93,9 +93,6 @@ Known Limitations
   vendor defined, so the generic conversion reports whatever ASN.1 shape the
   encoding declares and cannot name the fields.
 
-.. |pycrate| replace:: ``pycrate``
-.. _pycrate: https://github.com/pycrate-org/pycrate
-
 .. [*] https://en.wikipedia.org/wiki/NG_Application_Protocol
 
 """

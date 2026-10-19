@@ -444,13 +444,6 @@ The available engines and the file formats they read:
    which is why both exist. See
    :doc:`pcapkit/foundation/engines/index` for which to pick.
 
-.. _Scapy: https://scapy.net
-.. _DPKT: https://dpkt.readthedocs.io
-.. _PyShark: https://kiminewt.github.io/pyshark
-.. _PyPCAP: https://github.com/pynetwork/pypcap
-.. _pcap-ct: https://pypi.org/project/pcap-ct/
-.. _PyPCAPFile: https://github.com/kisom/pypcapfile
-
 Samples
 ~~~~~~~
 

@@ -130,7 +130,7 @@ starts at the first layer it dissects. One chain of extension headers is also bo
 its own, by :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`.
 The ``pyshark``, ``scapy`` and ``pypcapfile`` engines dissect with their own
 parsers, which do not apply the frame's layer bound (:issue:`1609`). The
-``dpkt`` toolkit reads what ``dpkt`` decodes, which applies neither bound.
+``dpkt`` toolkit reads what |dpkt|_ decodes, which applies neither bound.
 
 Data Models
 -----------

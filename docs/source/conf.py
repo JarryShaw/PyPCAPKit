@@ -175,9 +175,56 @@ intersphinx_mapping = {
 #     and *zero* ``py:`` objects (5-8 objects apiece), so no ``:mod:``,
 #     ``:class:`` or ``:func:`` cross-reference into them could ever resolve.
 #
-# Those packages are therefore referenced as plain external links instead, the
-# ``.. _PyPCAP: https://github.com/pynetwork/pypcap`` style used throughout
-# ``pcapkit/foundation/engines/3rdparty.rst``.
+# Those packages are therefore linked to their project pages instead, through
+# :data:`rst_epilog` below (:issue:`1936`).
+
+#: Every third-party project page the docs link to, defined once for all pages.
+#: Sphinx appends this to every source file, and so to every page autodoc
+#: assembles from docstrings, so a page or a docstring must not define these
+#: names again: a second substitution definition of one name is an error, and a
+#: second target of one name warns as soon as the two disagree on the URL.
+#:
+#: ``|pkg|_`` renders the import name as a literal linked to the project, for a
+#: package or module of a package with no ``py:`` objects to cross-reference,
+#: and `Name`_ links the project by its own name. Target names are
+#: case-insensitive, so `PyShark`_ and ``|pyshark|_`` share one target. A name
+#: below a package, such as ``dpkt.dpkt.Packet.data``, stays a plain literal,
+#: since it would link to the same project page. ``pcap`` has no substitution:
+#: `PyPCAP`_ and `pcap-ct`_ both install that module, so no one project page is
+#: the right target for it.
+rst_epilog = """
+.. |aenum| replace:: ``aenum``
+.. _aenum: https://github.com/ethanfurman/aenum
+.. |chardet| replace:: ``chardet``
+.. _chardet: https://chardet.readthedocs.io
+.. |cryptography| replace:: ``cryptography``
+.. _cryptography: https://cryptography.io
+.. _DictDumper: https://dictdumper.jarryshaw.me
+.. |dpkt| replace:: ``dpkt``
+.. _DPKT: https://dpkt.readthedocs.io
+.. |emoji| replace:: ``emoji``
+.. _emoji: https://carpedm20.github.io/emoji/docs/
+.. |jspcapy| replace:: ``jspcapy``
+.. _jspcapy: https://github.com/JarryShaw/jspcapy
+.. |pcap-ct| replace:: ``pcap-ct``
+.. _pcap-ct: https://pypi.org/project/pcap-ct/
+.. |pcapfile| replace:: ``pcapfile``
+.. _pcapfile: https://github.com/kisom/pypcapfile
+.. |pycrate| replace:: ``pycrate``
+.. _pycrate: https://github.com/pycrate-org/pycrate
+.. |pypcap| replace:: ``pypcap``
+.. _PyPCAP: https://github.com/pynetwork/pypcap
+.. |pypcapfile| replace:: ``pypcapfile``
+.. _PyPCAPFile: https://github.com/kisom/pypcapfile
+.. |pyshark| replace:: ``pyshark``
+.. _PyShark: https://kiminewt.github.io/pyshark
+.. |requests| replace:: ``requests``
+.. _requests: https://requests.readthedocs.io
+.. _Scapy: https://scapy.net
+.. |tbtrim| replace:: ``tbtrim``
+.. _tbtrim: https://github.com/gousaiyang/tbtrim
+.. _Werkzeug: https://werkzeug.palletsprojects.com/
+"""
 
 autodoc_default_options = {
     # 'members': True,
