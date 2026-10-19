@@ -3,7 +3,7 @@
 
 GitHub issue #1916. :meth:`~pcapkit.corekit.enum.EnumRegistry.register` runs
 :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value` inside a
-:class:`~pcapkit.utilities.exceptions._CaughtByCaller` block declaring that
+:class:`~pcapkit.utilities.exceptions.CaughtByCaller` block declaring that
 nothing is caught, so its rejection is logged even when an enclosing ``get``
 has quieted :exc:`ValueError` (#1845). The overrides on
 :class:`~pcapkit.const.reg.apptype.apptype.AppType` and
@@ -48,11 +48,11 @@ class RegisterLoudInQuietBlock1916Tests(unittest.TestCase):
     def assertLoudInsideQuietBlock(self, registry: 'type', call: 'Callable[[], object]',
                                    message: 'str') -> 'None':
         """Assert ``call`` raises ``message`` and logs it, inside a quiet block."""
-        from pcapkit.utilities.exceptions import EnumValueError, _CaughtByCaller
+        from pcapkit.utilities.exceptions import CaughtByCaller, EnumValueError
 
         members = dict(registry.__members__)  # type: ignore[attr-defined]
         with capture(logging.getLogger('pcapkit')) as package:
-            with _CaughtByCaller(ValueError):
+            with CaughtByCaller(ValueError):
                 with self.assertRaises(EnumValueError) as caught:
                     call()
         self.assertEqual(str(caught.exception), message)

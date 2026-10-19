@@ -44,7 +44,7 @@ from typing import TYPE_CHECKING
 from aenum import StrEnum, extend_enum
 
 from pcapkit.corekit.enum import EnumRegistry
-from pcapkit.utilities.exceptions import EnumValueError, _CaughtByCaller
+from pcapkit.utilities.exceptions import CaughtByCaller, EnumValueError
 
 __all__ = ['{NAME}']
 
@@ -189,7 +189,7 @@ class {NAME}(EnumRegistry, StrEnum):
                                  f'{{existing.name!r}} in namespace {{space!r}}')
         # NOTE: GitHub issue #1845. Declares that nothing is caught, so the
         # rejection stays loud even inside a ``get`` block that would quiet it.
-        with _CaughtByCaller():
+        with CaughtByCaller():
             cls._validate_value(value)
         try:
             return extend_enum(cls, name, value, name)
