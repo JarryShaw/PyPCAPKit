@@ -5,7 +5,7 @@ Link Layer
 .. module:: pcapkit.protocols.data.link
 .. module:: pcapkit.protocols.schema.link
 
-:mod:`pcapkit.protocols.link` is collection of all protocols in
+:mod:`pcapkit.protocols.link` is the collection of all protocols in
 link layer, with detailed implementation and methods.
 
 .. versionremoved:: 1.5.0
@@ -33,7 +33,7 @@ link layer, with detailed implementation and methods.
 
 .. todo::
 
-   Implements DSL, EAPOL, FDDI, ISDN, NDP, PPP.
+   Implement DSL, EAPOL, FDDI, ISDN, NDP, PPP.
 
 Protocol Registry
 -----------------

@@ -62,7 +62,7 @@ Either run the script, or move both fields by hand in the same commit.
 This is the **only** edit a person makes to get a release started -- the tag,
 the Release, and every upload are the workflow's job from here. Other
 checks run unconditionally on the same path, though none is a step in *this*
-process: the ``changelog`` job (``unit-tests.yml:1624-1643``) fails outright if
+process: the ``changelog`` job (``unit-tests.yml:1624-1650``) fails outright if
 ``CHANGELOG.md`` has drifted from its source entry under
 :file:`docs/source/changelog/`, and the release-body step warns, without
 failing, if that entry's heading still reads "unreleased"

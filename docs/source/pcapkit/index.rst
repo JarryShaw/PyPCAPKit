@@ -184,6 +184,6 @@ crawlers' :envvar:`PCAPKIT_VENDOR_RETRY`, :envvar:`PCAPKIT_CI_MODE`,
    every request. The tunable limits are new as variables (:issue:`1726`). A
    bad value of :envvar:`PCAPKIT_DEVMODE`, :envvar:`PCAPKIT_VERBOSE`,
    :envvar:`PCAPKIT_SPHINX`, :envvar:`PCAPKIT_CI_MODE` or
-   :envvar:`PCAPKIT_VENDOR_RETRY` now warns with
+   :envvar:`PCAPKIT_VENDOR_RETRY` warns with
    :exc:`~pcapkit.utilities.warnings.ConfigWarning` instead of being taken
    silently, or, for :envvar:`PCAPKIT_VENDOR_RETRY`, crashing the import.

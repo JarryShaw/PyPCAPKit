@@ -3,11 +3,10 @@ Engine Support
 
 .. module:: pcapkit.foundation.engines
 
-:mod:`pcapkit.foundation.engines` is a collection of engines
-support for :mod:`pcapkit`, including but not limited to the
-built-in PCAP and `PCAP-NG`_ file support, `Scapy`_, `PyShark`_,
-`DPKT`_, `PyPCAP`_, `pcap-ct`_ and `PyPCAPFile`_ 3rd party engine
-support.
+:mod:`pcapkit.foundation.engines` holds the extraction engines of
+:mod:`pcapkit`: the built-in PCAP and `PCAP-NG`_ readers, and the
+`Scapy`_, `PyShark`_, `DPKT`_, `PyPCAP`_, `pcap-ct`_ and `PyPCAPFile`_
+3rd party engines.
 
 .. seealso::
 
@@ -178,9 +177,9 @@ a working build.
 
 .. seealso::
 
-   :doc:`../../../index` covers the installation prerequisites in full,
-   including how ``pypcap``'s :file:`setup.py` looks for :file:`pcap.h` and why
-   a Homebrew ``libpcap`` is not always found.
+   The :doc:`project overview <../../../index>` covers the installation
+   prerequisites in full, including how ``pypcap``'s :file:`setup.py` looks
+   for :file:`pcap.h` and why a Homebrew ``libpcap`` is not always found.
 
 Choosing Between PyPCAP and PCAP_CT
 -----------------------------------
@@ -195,7 +194,7 @@ and different interpreter coverage:
 +---------------------------------------------------------------+---------------------+-------------------+---------------------------------------------------+
 | Engine (``engine=``)                                          | Distribution        | Python            | What it needs                                     |
 +===============================================================+=====================+===================+===================================================+
-| :class:`~pcapkit.foundation.engines.pypcap.PyPCAP`            | `PyPCAP`_ 1.3.0     | 3.10, 3.11 only   | to build: a C compiler, ``pcap.h`` and a system   |
+| :class:`~pcapkit.foundation.engines.pypcap.PyPCAP`            | `PyPCAP`_ 1.3.0     | 3.11 or older     | to build: a C compiler, ``pcap.h`` and a system   |
 | (``'pypcap'``)                                                | (stable)            |                   | libpcap -- no wheels are published                |
 +---------------------------------------------------------------+---------------------+-------------------+---------------------------------------------------+
 | :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT`          | `pcap-ct`_ 1.3.0b3  | 3.10 and newer    | to install: nothing -- ``py3-none-any`` wheels.   |

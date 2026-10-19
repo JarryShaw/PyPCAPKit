@@ -543,9 +543,9 @@ def save_enum_member_docstring(app: 'Sphinx', what: str, name: str,  # pylint: d
     registry member's docstring is the registry's own text, so the colon is
     usually a URL's: ``H.323 [http://standard.pictel.com/...]`` rendered as
     *Type:* ``H.323 [http`` above the description ``//standard.pictel.com/...``,
-    on 51 members. The bogus type was also parsed as a cross-reference, which is
-    where the ``http`` and ``Echo`` ``more than one target found`` warnings came
-    from.
+    and every member whose first docstring line holds a colon split the same
+    way. The bogus type was also parsed as a cross-reference, which is where the
+    ``http`` and ``Echo`` ``more than one target found`` warnings came from.
 
     Args:
         app: Sphinx application.

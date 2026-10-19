@@ -119,7 +119,7 @@ either, and are the one item on this list that is not simply a table entry: the
 high-order 32 bits are never transmitted, so recovering them is stateful, and
 they widen both the ICV coverage and the AEAD associated data.
 
-Some structural notes matter to anyone starting. Adding an integrity algorithm
+The structure limits what a new row can do. Adding an integrity algorithm
 that is not an HMAC needs more than a row --
 :class:`~pcapkit.protocols.internet.esp.IntegritySuite` records the digest as
 the name of a :mod:`hashlib` constructor, which AES-XCBC and AES-CMAC are not.
@@ -421,7 +421,7 @@ process inflates them by up to 73%, so each shape wants its own interpreter.
 Recursive Dissection, With a Depth Limit
 ----------------------------------------
 
-**Decided for now, open to revisit.** Each layer dissects the next from inside
+**Decided, open to revisit.** Each layer dissects the next from inside
 its own parse, so dissecting a frame recurses once per layer, at 9 to 12 Python
 frames a layer. Deep nesting -- IP in IP, stacked 802.1Q tags, long chains of
 IPv6 extension headers -- used to exhaust the recursion limit and leave the rest
@@ -537,10 +537,9 @@ both of the following are worth knowing before reaching for them:
   since May 2024. It does mean ``pip install pypcapkit[PyPCAP]`` can fail to
   build. Since there is no wheel to fall back on, the extra is kept **out of**
   ``all``: otherwise ``pip install pypcapkit[all]`` would demand a compiler and
-  the libpcap development files from every user, and would break the docs, conda
-  and release workflows -- all of which install ``.[all]`` or ``.[all,dev]`` --
-  on the macOS runner, where :file:`pcap.h` is present but no
-  ``libpcap.dylib`` is.
+  the libpcap development files from every user, and would break the docs
+  build, which installs ``.[all,dev]`` on the macOS runner, where :file:`pcap.h`
+  is present but no ``libpcap.dylib`` is.
 
   That is solved, though not by changing the ``PyPCAP`` extra. `pcap-ct
   <https://pypi.org/project/pcap-ct/>`__ re-implements the ``pypcap`` API in pure
@@ -571,8 +570,8 @@ keeping IPv4 and TCP. Each gap is announced through an
 :class:`~pcapkit.utilities.warnings.AttributeWarning` or an outright exception
 rather than by silently returning nothing, save that `pypcapfile`_ leaves TCP
 behind a VLAN tag, in a tunnel or behind an extension header (an IPv6 one, or AH
-in IPv4) out without one -- :doc:`/pcapkit/foundation/engines/index` tabulates
-them.
+in IPv4) out of TCP reassembly and flow tracing without a warning --
+:doc:`/pcapkit/foundation/engines/index` tabulates them.
 
 Adding a further engine does not mean adding handler methods to
 :class:`~pcapkit.foundation.extraction.Extractor`, as the thread describes. A new engine subclasses
@@ -808,8 +807,8 @@ These protocols parse a checksum or CRC field —
 :class:`~pcapkit.protocols.application.ospf.OSPF`,
 :class:`~pcapkit.protocols.transport.sctp.SCTP`,
 :class:`~pcapkit.protocols.transport.tcp.TCP` and
-:class:`~pcapkit.protocols.transport.udp.UDP` — and only one of them checks
-whether the value is *right*:
+:class:`~pcapkit.protocols.transport.udp.UDP` — and of them only SCTP checks
+whether the value is *right*, through
 :attr:`SCTP.checksum_valid <pcapkit.protocols.transport.sctp.SCTP.checksum_valid>`.
 For the others the field is recorded and never questioned, so a corrupted
 capture parses as cleanly as an intact one.
@@ -956,8 +955,9 @@ produced.
 
 That is why an ordinary commit does not publish: the version string has not
 moved, so each job's own check finds its target already there and every one of
-them skips, as does the full-suite release test gate ahead of them. Changing the version string is what flips every one of those checks, and
-the next push then tags and publishes. So:
+them skips, as does the full-suite release test gate ahead of them. Changing the
+version string is what flips every one of those checks, and the next push then
+tags and publishes. So:
 
 .. list-table::
    :header-rows: 1

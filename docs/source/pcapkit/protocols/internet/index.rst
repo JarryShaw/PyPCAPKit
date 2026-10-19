@@ -5,7 +5,7 @@ Internet Layer
 .. module:: pcapkit.protocols.data.internet
 .. module:: pcapkit.protocols.schema.internet
 
-:mod:`pcapkit.protocols.internet` is collection of all protocols in
+:mod:`pcapkit.protocols.internet` is the collection of all protocols in
 internet layer, with detailed implementation and methods.
 
 .. toctree::
@@ -30,7 +30,7 @@ internet layer, with detailed implementation and methods.
 
 .. todo::
 
-   Implements ECN, ICMP, ICMPv6, IGMP, Shim6.
+   Implement ECN, ICMP, ICMPv6, IGMP, Shim6.
 
 Protocol Registry
 -----------------
