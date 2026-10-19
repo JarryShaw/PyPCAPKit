@@ -272,6 +272,11 @@ Processing Status
 
 .. autofunction:: pcapkit.protocols.internet.esp.load_cryptography
 
+.. autodata:: pcapkit.protocols.internet.esp._CRYPTO
+   :no-value:
+
+.. autofunction:: pcapkit.protocols.internet.esp._resolve
+
 Header Schemas
 --------------
 

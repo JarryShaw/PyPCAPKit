@@ -181,7 +181,7 @@ What is left, and why:
   each carries: ``protocol`` on option 54, ``igmp_type`` and ``mld_type`` on 56
   and 57, and ``code`` on 60. Not the ``M`` flag on option 54, which selects the
   routing mode rather than the record format [:rfc:`7028#section-5.1.2`].
-  ``Raw`` is already what an unregistered dispatch falls back
+  :class:`~pcapkit.protocols.misc.raw.Raw` is already what an unregistered dispatch falls back
   to everywhere else in the package, so this makes the mobility header consistent
   with the rest rather than inventing a convention; and once a dissector for one
   of these formats exists, registering it needs no change at the option site.
@@ -200,8 +200,9 @@ What is left, and why:
   only ever called at a layer boundary and appends to the frame's protocol chain.
   An MLD address record inside a mobility option did not follow MH on the wire,
   so putting it in that chain would make ``layer=`` and ``protocol=`` limits
-  behave wrongly. Changing the parsed shape from :obj:`bytes` to ``Raw`` also
-  changes what existing captures dump to, so it is its own change.
+  behave wrongly. Changing the parsed shape from :obj:`bytes` to
+  :class:`~pcapkit.protocols.misc.raw.Raw` also changes what existing captures dump to, so
+  it is its own change.
 
 Wire-format traps are worth knowing before touching this code, since each
 looks like an ordinary field and is not:
@@ -280,7 +281,7 @@ complaint and yields nothing useful.
   -- the values in :attr:`SCTP.__proto__
   <pcapkit.protocols.transport.sctp.SCTP.__proto__>`: PPIDs 60 and 66, each to
   :class:`~pcapkit.protocols.application.ngap.NGAP`. Every other DATA chunk
-  payload is ``Raw`` until something calls
+  payload is :class:`~pcapkit.protocols.misc.raw.Raw` until something calls
   :func:`~pcapkit.foundation.registry.protocols.register_sctp`.
 
 How much of each registry is bound is measurable, so measure it rather than
@@ -296,7 +297,7 @@ Most of those want a dissector written and are covered by the stub list above.
 Some wanted only a table entry, because the dissector was already there:
 
 * **Done.** :class:`~pcapkit.protocols.application.ospf.OSPF` is bound at
-  ``TransType`` 89 (``OSPFIGP``) and
+  :class:`~pcapkit.const.reg.transtype.TransType` 89 (``OSPFIGP``) and
   :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2` at UDP port 1701.
   ``__index__`` raises on both, which is correct: neither is reached through a
   link-layer EtherType.
@@ -316,7 +317,7 @@ Some wanted only a table entry, because the dissector was already there:
   :class:`~pcapkit.protocols.link.vlan.VLAN`, which carries the shared tag
   layout; the split exists so that a Q-in-Q frame's two tags stay distinct in
   the parsed output.
-* **Done.** ``LinkType`` ``NULL`` and ``LOOP`` are bound to
+* **Done.** :class:`~pcapkit.const.reg.linktype.LinkType` ``NULL`` and ``LOOP`` are bound to
   :class:`~pcapkit.protocols.link.loopback.Loopback`, which reads the four-octet
   address family word and hands 2 to IPv4 and 24, 28 or 30 to IPv6
   (:issue:`1574`). ``RAW`` has no binding of its own: its bare IPv4 or IPv6 is
@@ -324,16 +325,15 @@ Some wanted only a table entry, because the dissector was already there:
 
 Follow-ups to the bindings above:
 
-* ``TransType`` 115 (``L2TP``) stays unbound, and the reason is structural: it
-  references :rfc:`3931`, i.e. L2TPv3 over IP, and
-  **there is no** ``L2TPv3`` **class for it to point at**. What exists is
-  :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2`, the :rfc:`2661` v2 framing,
-  reached over UDP 1701. So the binding waits on a v3 dissector, which is also
-  the first member of the family to carry an
-  :meth:`~pcapkit.protocols.protocol.Protocol.__index__` of its own -- 115
-  being that index. :mod:`pcapkit.protocols.link.l2tp` records what v3 needs, and
-  what ``L2F`` needs alongside it: the version nibble reading ``1`` selects L2F
-  [:rfc:`2341`], a separate protocol, not an earlier L2TP.
+* :class:`~pcapkit.const.reg.transtype.TransType` 115 (``L2TP``) stays unbound, and the
+  reason is structural: it references :rfc:`3931`, i.e. L2TPv3 over IP, and **there is
+  no** ``L2TPv3`` **class for it to point at**. What exists is
+  :class:`~pcapkit.protocols.link.l2tpv2.L2TPv2`, the :rfc:`2661` v2 framing, reached over
+  UDP 1701. So the binding waits on a v3 dissector, which is also the first member of the
+  family to carry an :meth:`~pcapkit.protocols.protocol.Protocol.__index__` of its own --
+  115 being that index. :mod:`pcapkit.protocols.link.l2tp` records what v3 needs, and what
+  ``L2F`` needs alongside it: the version nibble reading ``1`` selects L2F [:rfc:`2341`],
+  a separate protocol, not an earlier L2TP.
 * The :class:`~pcapkit.protocols.link.l2tp.L2TP` family lives under
   :mod:`pcapkit.protocols.link` and so reports ``layer == 'Link'``, although it
   is carried inside UDP. That is deliberate: a tunnelling protocol is placed by what
@@ -900,7 +900,7 @@ against the waves above in two deliberate steps:
 **The version string is the release button, so it is worth knowing exactly what
 each step does before editing it.** ``.github/workflows/create-release.yml`` is
 version-driven rather than tag-driven: its ``version_check`` job reads
-``pcapkit.__version__`` directly, derives ``PCAPKIT_PRERELEASE`` from
+:data:`pcapkit.__version__` directly, derives ``PCAPKIT_PRERELEASE`` from
 ``packaging.version.Version(...).is_prerelease``, and picks the Anaconda label
 from the same test.
 
@@ -1021,7 +1021,7 @@ or IPv6 by its version nibble (:issue:`1502`), so of the link types this
 section names only ``LINUX_SLL`` and ``LINUX_SLL2`` remain enumerated but
 unparsed. Neither ``NULL`` nor ``RAW`` is an honest stand-in for "unknown link
 type", which is why the toolkit raises for an unresolvable link-layer name
-instead of defaulting to ``LinkType.NULL``.
+instead of defaulting to :attr:`LinkType.NULL <pcapkit.const.reg.linktype.LinkType.NULL>`.
 
 **Wave 3 — the remaining protocols** from the same list, taken three or four at a
 time. QUIC, DSL, FDDI and ISDN come last: QUIC because it is really HTTP/3 over a
@@ -1039,13 +1039,13 @@ is wanted instead of
 sequenced *after* wave 2 rather than by preference: the multicast options embed
 :rfc:`3810` MLD, which rides in **ICMPv6**, and :rfc:`3376` **IGMP** records —
 both wave 2 deliverables. Landing the registry first would give a dispatch table
-with nothing but ``Raw`` to register. The counter-argument is real though, and
-worth weighing rather than dismissing: changing the parsed shape from
-:obj:`bytes` to ``Raw`` is the disruptive half, since it changes what existing
-captures dump to, so there is a case for taking that churn early and registering
-dissectors later. The remaining format, the :rfc:`6088` traffic selectors of
-:rfc:`6089` and :rfc:`7222`, has no wave at all — it is a registry of its own and
-nobody has claimed it.
+with nothing but :class:`~pcapkit.protocols.misc.raw.Raw` to register. The
+counter-argument is real though, and worth weighing rather than dismissing: changing the
+parsed shape from :obj:`bytes` to :class:`~pcapkit.protocols.misc.raw.Raw` is the
+disruptive half, since it changes what existing captures dump to, so there is a case for
+taking that churn early and registering dissectors later. The remaining format, the
+:rfc:`6088` traffic selectors of :rfc:`6089` and :rfc:`7222`, has no wave at all — it is a
+registry of its own and nobody has claimed it.
 
 **Wave 2 or 3 — per-entry coverage of the option and parameter registries.** The
 option, parameter, block and frame registries are *enumerated* but not
@@ -1130,11 +1130,11 @@ library gets swept deliberately, in strands:
   already *caused* defects rather than merely offended tidiness:
 
   - `#487 <https://github.com/JarryShaw/PyPCAPKit/issues/487>`__ existed because
-    ``IPv6_Route.make()`` computed ``Hdr Ext Len`` in **separate** branches with
-    different wrong units, and the read side computed the inverse elsewhere with
-    yet another. The fix was not new arithmetic but one helper per
-    direction, each documenting the :rfc:`8200#section-4.4` unit and saying what
-    its counterpart is.
+    :meth:`IPv6_Route.make() <pcapkit.protocols.internet.ipv6_route.IPv6_Route.make>`
+    computed ``Hdr Ext Len`` in **separate** branches with different wrong units, and the
+    read side computed the inverse elsewhere with yet another. The fix was not new
+    arithmetic but one helper per direction, each documenting the :rfc:`8200#section-4.4`
+    unit and saying what its counterpart is.
   - `#483 <https://github.com/JarryShaw/PyPCAPKit/issues/483>`__ was the scapy
     toolkit adapter passing a fragment offset unscaled where every sibling
     adapter scaled it. Every adapter restates the same field mapping, so a

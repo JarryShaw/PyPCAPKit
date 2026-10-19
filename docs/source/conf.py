@@ -21,7 +21,7 @@ from docutils import nodes
 from sphinx import addnodes
 from sphinx.ext.autodoc.preserve_defaults import DefaultValue, update_default_value
 from sphinx.transforms.post_transforms import SphinxPostTransform
-from sphinx.util.inspect import stringify_signature
+from sphinx.util.inspect import safe_getattr, stringify_signature
 
 # NB: private modules of ``sphinx-autodoc-typehints``, used deliberately -- see
 # ``bind_type_checking_names``, ``restore_class_signature`` and
@@ -1088,6 +1088,32 @@ def follow_builtins_alias(app: 'Sphinx', modname: 'Optional[str]',  # pylint: di
     return modname if getattr(value, '__module__', None) == 'builtins' else None
 
 
+def read_own_enum_new(obj: type, name: str, *defargs: 'Any') -> 'Any':
+    """Answer ``__new__`` on an enumeration with the one its own body defines.
+
+    Once the members are built, :mod:`enum` and ``aenum`` both put the enum
+    machinery's ``__new__`` on the class and keep the class body's own as
+    ``_new_member_``, so ``:special-members: __new__`` documented the machinery's
+    constructor rather than the one a registry row is built with (:issue:`1940`).
+
+    Args:
+        obj: The enumeration class autodoc reads from.
+        name: Attribute name.
+        *defargs: Default, as for :func:`getattr`.
+
+    Returns:
+        The class body's own ``__new__`` for ``name == '__new__'`` when there is one,
+        and otherwise what autodoc's own attribute getter answers.
+
+    """
+    if name == '__new__':
+        own = vars(obj).get('_new_member_')
+        func = getattr(own, '__func__', own)
+        if getattr(func, '__qualname__', None) == f'{obj.__qualname__}.__new__':
+            return func
+    return safe_getattr(obj, name, *defargs)
+
+
 # NB: handlers used to sit here -- ``remove_module_docstring``,
 # ``process_docstring``, ``process_fields`` and ``source_read`` -- each with its
 # ``app.connect`` call commented out in ``setup`` below, so none of them had run
@@ -1137,3 +1163,6 @@ def setup(app: 'Sphinx') -> None:
     # connects at the default 500.
     app.connect('autodoc-process-docstring', save_enum_member_docstring, priority=400)
     app.connect('autodoc-process-docstring', restore_enum_member_docstring, priority=600)
+    # NB: ``aenum``'s metaclass derives from the standard library's, and autodoc
+    # picks a getter by :func:`isinstance` on the class it reads, so one covers both.
+    app.add_autodoc_attrgetter(enum.EnumMeta, read_own_enum_new)

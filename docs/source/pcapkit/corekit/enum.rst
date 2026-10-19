@@ -12,8 +12,9 @@ adds the *mutating* half every registry under :mod:`pcapkit.const` inherits.
 
    The ``get`` each :mod:`pcapkit.const` enumeration carried as generated text
    moves onto :class:`EnumLookup`, and :class:`EnumRegistry` adds ``register``,
-   which is how a member is minted at runtime: outside ``CGAType``, looking up
-   an unknown value does not mint one (:issue:`775`).
+   which is how a member is minted at runtime: outside
+   :class:`~pcapkit.const.mh.cga_type.CGAType`, looking up an unknown value does not mint
+   one (:issue:`775`).
 
 .. autoclass:: pcapkit.corekit.enum.EnumLookup
    :members:

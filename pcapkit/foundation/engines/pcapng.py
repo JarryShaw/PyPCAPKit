@@ -338,12 +338,12 @@ class PCAPNG(EngineBase[P_PCAPNG]):
     def _block_name(self, kind: 'str') -> 'str':
         """Name the next non-packet block of the given kind.
 
-        The per-section context lists (e.g. ``Context.interfaces``) restart
-        with every Section Header Block, so numbering a block by their length
-        gives the first IDB of every section the same name. The output dumpers
-        key by name, so a repeated name overwrites the earlier block (#1256).
-        The number is therefore counted across the whole file instead; for a
-        single-section file it is the same number as before.
+        The per-section context lists (e.g.
+        :attr:`Context.interfaces <pcapkit.foundation.engines.pcapng.Context.interfaces>`) restart
+        with every Section Header Block, so numbering a block by their length gives the first IDB of
+        every section the same name. The output dumpers key by name, so a repeated name overwrites
+        the earlier block (#1256). The number is therefore counted across the whole file instead;
+        for a single-section file it is the same number as before.
 
         Args:
             kind: The kind of the block, e.g. ``'Interface Description'``.

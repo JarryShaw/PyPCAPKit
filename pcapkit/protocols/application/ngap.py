@@ -130,8 +130,8 @@ __all__ = ['NGAP', 'PDUKind', 'Criticality']
 _PYCRATE = NotImplemented  # type: Any
 
 #: Guards the module-level ``NGAP-PDU`` object returned by :func:`load_pycrate`.
-#: That object is *stateful*: :meth:`from_aper` stores the decoded value on it
-#: and :meth:`get_val` hands back the decoder's own containers rather than
+#: That object is *stateful*: ``from_aper`` stores the decoded value on it
+#: and ``get_val`` hands back the decoder's own containers rather than
 #: copies, so two decodes running concurrently through it would each see the
 #: other's tree. The lock is held across the conversion, not merely across the
 #: decode, for that second reason.
@@ -252,7 +252,7 @@ class Criticality(EnumLookup, IntEnum):
             value: Value to get enum item.
 
         Raises:
-            ValueError: Always. ``Criticality`` is an ``ENUMERATED`` with no
+            ValueError: Always. :class:`~pcapkit.protocols.application.ngap.Criticality` is an ``ENUMERATED`` with no
                 extension marker, so a fourth value cannot be encoded and a
                 lookup for one is a bug rather than a newer specification.
 

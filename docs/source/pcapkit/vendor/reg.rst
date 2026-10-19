@@ -39,7 +39,7 @@ This module contains the vendor crawler for **Ethertype IEEE 802 Numbers**,
 which is automatically generating :class:`pcapkit.const.reg.ethertype.EtherType`.
 
 .. autoclass:: pcapkit.vendor.reg.ethertype.EtherType
-   :members: FLAG, LINK
+   :members: FLAG, LINK, _insert_range
    :show-inheritance:
 
 Transport Layer Protocol Numbers

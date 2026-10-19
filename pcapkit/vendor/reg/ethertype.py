@@ -88,7 +88,7 @@ class EtherType(Vendor):
     def _insert_range(ranges: 'list[tuple[int, int, list[str]]]', entry: 'tuple[int, int, list[str]]') -> 'None':
         """Insert a range block ahead of the first already-placed range that fully contains it.
 
-        The generated :meth:`~EtherType._missing_` tests these ``if`` blocks in
+        The generated :meth:`~pcapkit.const.reg.ethertype.EtherType._missing_` tests these ``if`` blocks in
         list order and returns on the first match, so a range that is fully
         contained within an earlier, wider one would never be reached -- see
         GitHub issue :issue:`862`, where the source table lists ``0x0101-0x01FF``

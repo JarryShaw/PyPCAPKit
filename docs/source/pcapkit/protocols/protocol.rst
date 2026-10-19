@@ -263,6 +263,14 @@ Internal Definitions
    :no-members:
    :show-inheritance:
 
+.. autodata:: pcapkit.protocols.protocol.OUT_OF_BAND_KEYWORDS
+   :no-value:
+
+.. autodata:: pcapkit.protocols.protocol._KEYWORD_CONSUMERS
+   :no-value:
+
+.. autofunction:: pcapkit.protocols.protocol._declared_keywords
+
 Type Variables
 --------------
 

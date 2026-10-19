@@ -42,6 +42,16 @@ Auxiliary Functions
 
 .. autofunction:: pcapkit.toolkit.scapy.attach_linktype
 
+.. autofunction:: pcapkit.toolkit.scapy._frame
+
+.. autofunction:: pcapkit.toolkit.scapy._within_datagrams
+
+.. autofunction:: pcapkit.toolkit.scapy._tcp_carrier
+
+.. autofunction:: pcapkit.toolkit.scapy._tcp_segment
+
+.. autofunction:: pcapkit.toolkit.scapy._tcp_behind_extension_headers
+
 DPKT Tools
 ==========
 
@@ -78,6 +88,8 @@ Auxiliary Functions
 .. autofunction:: pcapkit.toolkit.dpkt.packet2chain
 
 .. autofunction:: pcapkit.toolkit.dpkt.packet2dict
+
+.. autofunction:: pcapkit.toolkit.dpkt._capture_time
 
 Auxiliary Data
 --------------
@@ -119,6 +131,12 @@ Auxiliary Functions
 -------------------
 
 .. autofunction:: pcapkit.toolkit.pyshark.packet2dict
+
+.. autofunction:: pcapkit.toolkit.pyshark._carrier
+
+.. autofunction:: pcapkit.toolkit.pyshark._has_fixed_header
+
+.. autofunction:: pcapkit.toolkit.pyshark._has_addresses
 
 PyPCAP Tools
 ============
@@ -237,3 +255,22 @@ Internal Definitions
 .. autodata:: pcapkit.toolkit.pypcapfile.IPV4_FLAG_DF
 
 .. autodata:: pcapkit.toolkit.pypcapfile.IPV4_FLAG_MF
+
+.. autodata:: pcapkit.toolkit.pypcapfile.IPV4_EXTENSION_HEADERS
+   :no-value:
+
+.. autofunction:: pcapkit.toolkit.pypcapfile._walk_extension_headers
+
+.. autofunction:: pcapkit.toolkit.pypcapfile._default_extension_header
+
+.. autofunction:: pcapkit.toolkit.pypcapfile._default_accepts
+
+.. autofunction:: pcapkit.toolkit.pypcapfile._network
+
+.. autofunction:: pcapkit.toolkit.pypcapfile._transport
+
+.. autofunction:: pcapkit.toolkit.pypcapfile._ipv6_carries_tcp
+
+.. autofunction:: pcapkit.toolkit.pypcapfile._is_raw
+
+.. autofunction:: pcapkit.toolkit.pypcapfile._maybe_unhex

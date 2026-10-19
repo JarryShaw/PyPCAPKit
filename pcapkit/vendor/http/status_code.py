@@ -57,6 +57,13 @@ class {NAME}(EnumRegistry, IntEnum):
         message: 'str'
 
     def __new__(cls, value: 'int', message: 'str' = '(Unknown)') -> 'Type[{NAME}]':
+        """Create a member from a registry row.
+
+        Args:
+            value: Status code.
+            message: Status message.
+
+        """
         obj = int.__new__(cls, value)
         obj._value_ = value
 
@@ -68,6 +75,7 @@ class {NAME}(EnumRegistry, IntEnum):
         return f'<{{self.__class__.__name__}} [{{self._value_}}]>'
 
     def __str__(self) -> 'str':
+        """Show the status code with its message, as ``[code] message``."""
         return "[%s] %s" % (self._value_, self.message)
 
     {ENUM}

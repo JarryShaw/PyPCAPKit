@@ -70,6 +70,10 @@ which is automatically generated from :class:`pcapkit.vendor.pcapng.option_type.
    :members:
    :undoc-members:
    :show-inheritance:
+   :special-members: __new__
+
+   .. autoattribute:: __members_ns__
+      :no-value:
 
 Record Types
 ============
@@ -133,7 +137,7 @@ which is automatically generated from :class:`pcapkit.vendor.pcapng.tls_key_labe
 
 .. versionadded:: 1.5.0
 
-   Moved here from ``pcapkit.protocols.misc.pcapng`` (:issue:`886`).
+   Moved here from :mod:`pcapkit.protocols.misc.pcapng` (:issue:`886`).
 
 .. autoclass:: pcapkit.const.pcapng.tls_key_label.TLSKeyLabel
    :members:

@@ -99,8 +99,10 @@ logger = get_logger(__name__)
 _P = TypeVar('_P')
 
 
-#: Engines whose library opens the input by *path*, ``Extractor._ifnm``, rather
-#: than reading ``Extractor._ifile``, so they cannot take an unnamed stream.
+#: Engines whose library opens the input by *path*,
+#: :attr:`Extractor._ifnm <pcapkit.foundation.extraction.Extractor._ifnm>`, rather than reading
+#: :attr:`Extractor._ifile <pcapkit.foundation.extraction.Extractor._ifile>`, so they cannot take an
+#: unnamed stream.
 _PATH_ENGINES = frozenset({'scapy', 'pyshark', 'pypcap', 'pcap_ct'})
 
 
@@ -472,7 +474,7 @@ class Extractor(Generic[_P]):
             ext: file extension
 
         Raises:
-            RegistryError: If ``dumper`` is not a class, or not a ``Dumper`` subclass.
+            RegistryError: If ``dumper`` is not a class, or not a :class:`~pcapkit.dumpkit.common.Dumper` subclass.
 
         Warns:
             RegistryWarning: If a different dumper is already registered for
@@ -528,7 +530,8 @@ class Extractor(Generic[_P]):
                 engine ``name`` shipped with
 
         Raises:
-            RegistryError: If ``engine`` is not a class, or not an ``Engine`` subclass.
+            RegistryError: If ``engine`` is not a class, or not an
+                :class:`~pcapkit.foundation.engines.engine.Engine` subclass.
 
         Warns:
             RegistryWarning: If a different class is already registered under
@@ -578,7 +581,7 @@ class Extractor(Generic[_P]):
                 :class:`~pcapkit.foundation.engines.engine.EngineBase` subclass
 
         Raises:
-            RegistryError: If ``engine`` is not an ``EngineBase`` subclass.
+            RegistryError: If ``engine`` is not an :class:`~pcapkit.foundation.engines.engine.EngineBase` subclass.
 
         Warns:
             RegistryWarning: If a different class is already registered under
@@ -622,7 +625,8 @@ class Extractor(Generic[_P]):
                 ``protocol`` shipped with
 
         Raises:
-            RegistryError: If ``reassembly`` is not a class, or not a ``Reassembly`` subclass.
+            RegistryError: If ``reassembly`` is not a class, or not a
+                :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly` subclass.
 
         Warns:
             RegistryWarning: If a different class is already registered under
@@ -664,7 +668,8 @@ class Extractor(Generic[_P]):
                 :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase` subclass
 
         Raises:
-            RegistryError: If ``reassembly`` is not a ``ReassemblyBase`` subclass.
+            RegistryError: If ``reassembly`` is not a
+                :class:`~pcapkit.foundation.reassembly.reassembly.ReassemblyBase` subclass.
 
         Warns:
             RegistryWarning: If a different class is already registered under
@@ -708,7 +713,8 @@ class Extractor(Generic[_P]):
                 ``protocol`` shipped with
 
         Raises:
-            RegistryError: If ``traceflow`` is not a class, or not a ``TraceFlow`` subclass.
+            RegistryError: If ``traceflow`` is not a class, or not a
+                :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` subclass.
 
         Warns:
             RegistryWarning: If a different class is already registered under
@@ -750,7 +756,8 @@ class Extractor(Generic[_P]):
                 :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase` subclass
 
         Raises:
-            RegistryError: If ``traceflow`` is not a ``TraceFlowBase`` subclass.
+            RegistryError: If ``traceflow`` is not a
+                :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlowBase` subclass.
 
         Warns:
             RegistryWarning: If a different class is already registered under

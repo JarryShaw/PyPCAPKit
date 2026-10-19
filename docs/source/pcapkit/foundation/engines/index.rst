@@ -85,9 +85,10 @@ their row says otherwise:
 |                                                                 | :exc:`~pcapkit.utilities.exceptions.FormatError` /            |
 |                                                                 | :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`          |
 +-----------------------------------------------------------------+---------------------------------------------------------------+
-| :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT`            | the same gaps as ``PyPCAP`` above -- it reads the same        |
-|                                                                 | interface, so no dissection, no reassembly and no flow        |
-|                                                                 | tracing, and PCAP savefiles on disk only                      |
+| :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT`            | the same gaps as                                              |
+|                                                                 | :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` above --   |
+|                                                                 | it reads the same interface, so no dissection, no reassembly  |
+|                                                                 | and no flow tracing, and PCAP savefiles on disk only          |
 +-----------------------------------------------------------------+---------------------------------------------------------------+
 | :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile`      | no IPv6 decoder, hence no IPv6 reassembly -- disabled with an |
 |                                                                 | :class:`~pcapkit.utilities.warnings.AttributeWarning`, and    |
@@ -168,12 +169,14 @@ A constraint that an import cannot reveal is enforced by overriding
 :meth:`Extractor.run <pcapkit.foundation.extraction.Extractor.run>` consults
 *before* the import test, so asking for an engine that cannot run here produces
 one warning naming the actual cause and a fall back to the built-in parser.
-``PyShark`` checks its Python ceiling and for ``tshark``, ``PyPCAPFile`` its
-Python ceiling, ``PCAP_CT`` for a system ``libpcap``, and ``PyPCAP`` and
-``PCAP_CT`` which distribution owns ``pcap``. ``PyPCAP`` deliberately has no
-Python ceiling check, even though upstream cannot be installed on 3.12 or newer:
-what matters is which distribution is present, and a version check would refuse
-a working build.
+:class:`~pcapkit.foundation.engines.pyshark.PyShark` checks its Python ceiling and for
+``tshark``, :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile` its Python ceiling,
+:class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` for a system ``libpcap``, and
+:class:`~pcapkit.foundation.engines.pypcap.PyPCAP` and
+:class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` which distribution owns ``pcap``.
+:class:`~pcapkit.foundation.engines.pypcap.PyPCAP` deliberately has no Python ceiling
+check, even though upstream cannot be installed on 3.12 or newer: what matters is which
+distribution is present, and a version check would refuse a working build.
 
 .. seealso::
 
@@ -209,16 +212,15 @@ installed.** Pick on availability, not on features.
 
 .. warning::
 
-   ``PCAP_CT`` needs no toolchain to *install*, but it does need a system
-   :manpage:`libpcap(3)` to *run*. `libpcap`_ ships a vendored
-   :file:`libpcap.so` and, as published, does not use it: its
-   :file:`libpcap.cfg` says ``LIBPCAP = None``, which sends the loader to
-   :func:`ctypes.util.find_library`. With no system library at all
-   ``import pcap`` raises :exc:`OSError` rather than :exc:`ImportError`;
-   :meth:`PCAP_CT.unsupported_reason
-   <pcapkit.foundation.engines.pcap_ct.PCAP_CT.unsupported_reason>` catches that
-   and turns it into an ordinary fall back to the default engine, instead of the
-   hard error it would otherwise be.
+   :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` needs no toolchain to *install*,
+   but it does need a system :manpage:`libpcap(3)` to *run*. `libpcap`_ ships a vendored
+   :file:`libpcap.so` and, as published, does not use it: its :file:`libpcap.cfg` says
+   ``LIBPCAP = None``, which sends the loader to :func:`ctypes.util.find_library`. With no
+   system library at all ``import pcap`` raises :exc:`OSError` rather than
+   :exc:`ImportError`; :meth:`PCAP_CT.unsupported_reason
+   <pcapkit.foundation.engines.pcap_ct.PCAP_CT.unsupported_reason>` catches that and turns
+   it into an ordinary fall back to the default engine, instead of the hard error it would
+   otherwise be.
 
 **The two distributions collide, so install exactly one.** Both own the top-level
 ``pcap`` module, and pip will happily install both -- on Python 3.10,

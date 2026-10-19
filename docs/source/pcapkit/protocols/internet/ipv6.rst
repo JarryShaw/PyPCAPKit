@@ -48,6 +48,8 @@ Octets      Bits        Name                    Description
    .. autoattribute:: __generic_ext_codes__
       :no-value:
 
+   .. automethod:: _read_ip_hextet
+
 Protocol Constants
 ------------------
 

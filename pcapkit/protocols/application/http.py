@@ -68,8 +68,8 @@ def _test_http2_frame(data: 'bytes') -> 'bool':
     """Test whether ``data`` opens with a frame header a conforming sender could write.
 
     This is a plausibility test for :meth:`HTTP._guess_version`'s fall-through
-    only. ``httpv2.HTTP`` itself parses every frame :rfc:`9113` lets a receiver
-    accept, which includes frames this test turns down.
+    only. :class:`httpv2.HTTP <pcapkit.protocols.application.httpv2.HTTP>` itself parses every frame
+    :rfc:`9113` lets a receiver accept, which includes frames this test turns down.
 
     Args:
         data: Payload, starting at the frame header.
@@ -214,7 +214,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
     #: the 24-octet HTTP/2 connection preface, when :meth:`_guess_version`
     #: identified one and parsed the frame that follows it. They belong to this
     #: packet's header rather than to its payload, so :meth:`read` adds them to
-    #: :attr:`length`; otherwise ``ProtocolBase.__init__``'s
+    #: :attr:`length`; otherwise :meth:`ProtocolBase.__init__ <pcapkit.protocols.protocol.ProtocolBase.__init__>`'s
     #: ``self._info.__update__(packet=self.packet.payload)`` would slice the
     #: payload from octet 9 of a buffer whose frame starts at octet 24 and report
     #: the tail of the preface as packet payload.
@@ -485,7 +485,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         Raises:
             ProtocolError: If no version in the family accepts the payload, or if
                 an identified version's own parser refuses it. Only a
-                ``ProtocolError`` from a trial parse falls through to the next
+                :exc:`~pcapkit.utilities.exceptions.ProtocolError` from a trial parse falls through to the next
                 version, and the final HTTP/2 trial also absorbs
                 :exc:`struct.error`; any other exception from either HTTP/1
                 arm, or from that HTTP/2 trial, propagates unconverted.
@@ -507,17 +507,16 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
             * **A mid-stream segment** -- a bare HTTP/2 frame header with no
               preface ahead of it, or an opaque HTTP/1 message body -- is
               genuinely undecidable from one payload, and the honest answer is
-              the ``Raw`` that an escaping ``ProtocolError`` becomes under
-              :func:`~pcapkit.corekit.decorators.beholder`. The nine-octet frame
-              header is therefore never used to *identify* HTTP/2 ahead of
-              HTTP/1: as identification it misfires on binary HTTP/1 bodies,
-              which is precisely how garbage text was classified HTTP/2 to begin
-              with. A bare frame is parsed as HTTP/2 only by the fall-through
-              below, and only if its header is one a conforming sender could
-              write (see ``_test_http2_frame()``): a frame type :rfc:`9113`
-              defines, no undefined flag, and a stream that type may be sent on.
-              Nine zero octets -- a ``DATA`` frame on stream 0, a protocol error
-              under :rfc:`9113#section-6.1` -- are not guessed as HTTP/2.
+              the :class:`~pcapkit.protocols.misc.raw.Raw` that an escaping
+              :exc:`~pcapkit.utilities.exceptions.ProtocolError` becomes under
+              :func:`~pcapkit.corekit.decorators.beholder`. The nine-octet frame header is therefore
+              never used to *identify* HTTP/2 ahead of HTTP/1: as identification it misfires on
+              binary HTTP/1 bodies, which is precisely how garbage text was classified HTTP/2 to
+              begin with. A bare frame is parsed as HTTP/2 only by the fall-through below, and only
+              if its header is one a conforming sender could write (see ``_test_http2_frame()``): a
+              frame type :rfc:`9113` defines, no undefined flag, and a stream that type may be sent
+              on. Nine zero octets -- a ``DATA`` frame on stream 0, a protocol error under
+              :rfc:`9113#section-6.1` -- are not guessed as HTTP/2.
 
         """
         # NOTE: Positive identification, before any parse attempt. The preface is

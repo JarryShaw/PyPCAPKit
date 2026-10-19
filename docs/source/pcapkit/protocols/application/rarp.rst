@@ -36,7 +36,7 @@ Octets      Bits        Name                    Description
 .. versionremoved:: 1.5.0
 
    ``pcapkit.protocols.link.rarp``, and the ``RARP`` and ``DRARP`` names
-   that ``pcapkit.protocols.link`` exported, with no alias (:issue:`719`).
+   that :mod:`pcapkit.protocols.link` exported, with no alias (:issue:`719`).
 
 .. autoclass:: pcapkit.protocols.application.rarp.RARP
    :no-members:

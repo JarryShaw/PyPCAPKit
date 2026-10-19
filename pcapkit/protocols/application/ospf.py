@@ -45,10 +45,10 @@ as below:
 
    ``pcapkit.protocols.link.ospf``, ``pcapkit.protocols.data.link.ospf`` and
    ``pcapkit.protocols.schema.link.ospf``, the ``OSPF`` name that
-   ``pcapkit.protocols.link``, ``pcapkit.protocols.data.link`` and
-   ``pcapkit.protocols.schema.link`` each exported, and the
+   :mod:`pcapkit.protocols.link`, :mod:`pcapkit.protocols.data.link` and
+   :mod:`pcapkit.protocols.schema.link` each exported, and the
    ``OSPF_CrytographicAuthentication`` name that
-   ``pcapkit.protocols.data.link`` and ``pcapkit.protocols.schema.link``
+   :mod:`pcapkit.protocols.data.link` and :mod:`pcapkit.protocols.schema.link`
    exported, with no alias (:issue:`719`, :issue:`1090`).
 
 .. versionchanged:: 1.5.0
@@ -395,9 +395,10 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
             Latent rather than live: nothing in this module calls this method
             (:meth:`make` builds ``router_id``/``area_id`` straight from its
             own arguments), so the only caller is a unit test. It is routed
-            through :func:`parse_ip_address` anyway, so that a future caller passing a
-            :obj:`bool` gets :exc:`~pcapkit.utilities.exceptions.FieldValueError`
-            rather than a silent ``0.0.0.1``.
+            through :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`
+            anyway, so that a future caller passing a :obj:`bool` gets
+            :exc:`~pcapkit.utilities.exceptions.FieldValueError` rather than a
+            silent ``0.0.0.1``.
 
             The description below uses :attr:`self.__class__.__name__
             <type.__name__>` rather than :attr:`self.alias

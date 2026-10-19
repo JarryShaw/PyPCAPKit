@@ -140,6 +140,13 @@ class ReturnCode(EnumRegistry, IntEnum):
         group: 'GroupingInformation'
 
     def __new__(cls, value: 'int', description: 'Optional[str]' = None) -> 'Type[ReturnCode]':
+        """Create a member, deriving its kind and group from the code's first two digits.
+
+        Args:
+            value: Three-digit return code.
+            description: Description of the return code.
+
+        """
         obj = int.__new__(cls, value)
         obj._value_ = value
 
@@ -151,9 +158,11 @@ class ReturnCode(EnumRegistry, IntEnum):
         return obj
 
     def __repr__(self) -> 'str':
+        """Show the return code, as ``<ReturnCode [code]>``."""
         return f'<{self.__class__.__name__} [{self._value_}]>'
 
     def __str__(self) -> 'str':
+        """Show the return code with its description, as ``[code] description``."""
         return "[%s] %s" % (self._value_, self.description)
 
     #: Restart marker replay. In this case, the text is exact and not left to the

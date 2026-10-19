@@ -93,7 +93,7 @@ This class is reached in these ways:
 
 1. **An unrecognised protocol number.** :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6`
    is a real IANA extension header (:rfc:`5533`) with no dedicated parser, so
-   :meth:`pcapkit.protocols.internet.internet.Internet._lookup_next_layer`
+   :meth:`Internet._lookup_next_layer <pcapkit.protocols.protocol.ProtocolBase._lookup_next_layer>`
    would default it to plain :class:`~pcapkit.protocols.misc.raw.Raw`. That
    has no ``next`` field, so the walk in
    :meth:`IPv6._decode_next_layer <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>`
@@ -214,7 +214,8 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
     It is generic in its data and schema types, like
     :class:`~pcapkit.protocols.internet.ipsec.IPsec`, another base in this
     package, so that a subclass keeps its *own* ``_PT``/``_ST`` instead of
-    inheriting this class's. ``AH`` and ``ESP`` therefore double-inherit two
+    inheriting this class's. :class:`~pcapkit.protocols.internet.ah.AH` and
+    :class:`~pcapkit.protocols.internet.esp.ESP` therefore double-inherit two
     identically-parameterised generic bases, ``IPsec[…]`` and ``IPv6_Ext[…]``.
 
     Warning:
@@ -500,11 +501,12 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
             They are keyword-*only* because this class is also a base and each
             subclass's ``make`` puts different names in the same positions. As
             positional parameters they draw pylint ``arguments-renamed``
-            warnings (``ESP.make`` has ``spi``, ``seq`` and ``next`` where
+            warnings (:meth:`ESP.make <pcapkit.protocols.internet.esp.ESP.make>` has ``spi``, ``seq`` and ``next`` where
             these have ``next``, ``len`` and ``data``) and mypy
             ``[override]`` errors. With no positional parameters there is no
             position to disagree about, and the allowlist is unaffected because
-            ``_declared_keywords`` collects ``KEYWORD_ONLY`` parameters too.
+            :func:`~pcapkit.protocols.protocol._declared_keywords` collects ``KEYWORD_ONLY``
+            parameters too.
             Nothing calls a protocol's ``make`` positionally; ``__init__``
             spreads ``**kwargs`` into it.
 
@@ -580,10 +582,10 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
             packet whose protocol byte is 140 would reach this class and walk
             an IPv6-style extension-header chain out of an IPv4 payload,
             reading ``IPv4:IPv6-Ext:...`` instead of the ``IPv4:Shim6`` that a
-            plain, non-continuing ``Raw`` gives. Rejecting here sends
+            plain, non-continuing :class:`~pcapkit.protocols.misc.raw.Raw` gives. Rejecting here sends
             construction back through
             :func:`~pcapkit.corekit.decorators.beholder` at the *caller's*
-            layer, which substitutes that same ``Raw``: the version-agnostic
+            layer, which substitutes that same :class:`~pcapkit.protocols.misc.raw.Raw`: the version-agnostic
             behaviour, with no IPv4-specific code.
 
         """

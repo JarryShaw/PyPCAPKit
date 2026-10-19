@@ -60,6 +60,14 @@ Internal Definitions
 
 .. autofunction:: pcapkit.corekit.fields.numbers._reduce_unregistered_member
 
+.. autoclass:: pcapkit.corekit.fields.numbers._CapturedInt
+   :no-members:
+   :show-inheritance:
+
+.. autofunction:: pcapkit.corekit.fields.numbers._outside_bits
+
+.. autofunction:: pcapkit.corekit.fields.numbers._with_outside_bits
+
 Type Variables
 --------------
 

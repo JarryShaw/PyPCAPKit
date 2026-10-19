@@ -38,6 +38,9 @@ Internal Definitions
    :members:
    :show-inheritance:
 
+.. autodata:: pcapkit.corekit.fields.field._RE_NEGATIVE_LENGTH_TEMPLATE
+   :no-value:
+
 Type Variables
 --------------
 

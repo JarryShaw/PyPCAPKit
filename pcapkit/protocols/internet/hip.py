@@ -285,9 +285,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
     carries its equivalent messages over UDP port 434 (:rfc:`5944`) rather
     than as protocol 135.
 
-    ``Internet`` is already reached transitively through ``IPv6_Ext``; naming
-    it records the classification, so a reader can tell a deliberate standalone
-    protocol from a header that merely inherits one.
+    :class:`~pcapkit.protocols.internet.internet.Internet` is already reached transitively through
+    :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`; naming it records the classification, so
+    a reader can tell a deliberate standalone protocol from a header that merely inherits one.
 
     This class parses the following HIP parameters, which are registered in the
     :attr:`self.__parameter__ <pcapkit.protocols.internet.hip.HIP.__parameter__>`

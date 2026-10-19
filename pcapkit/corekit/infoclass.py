@@ -286,6 +286,16 @@ class InfoMeta(abc.ABCMeta):
     """
 
     def __new__(cls, name: 'str', bases: 'tuple[type, ...]', attrs: 'dict[str, Any]', **kwargs: 'Any') -> 'Type[Info]':
+        """Create the class, extending its :attr:`Info.__additional__` and
+        :attr:`Info.__excluded__` with every base's.
+
+        Args:
+            name: Class name.
+            bases: Base classes.
+            attrs: Class namespace.
+            **kwargs: Arbitrary keyword arguments, passed on to :class:`type`.
+
+        """
         if '__additional__' not in attrs:
             attrs['__additional__'] = []
         if '__excluded__' not in attrs:
@@ -766,6 +776,10 @@ class _OrderedMultiDict(OrderedMultiDict[KT, VT]):
     __ne__ = _ne
 
     def __repr__(self) -> 'str':
+        """Write the export as the :class:`~pcapkit.corekit.multidict.OrderedMultiDict`
+        it is, with every pair.
+
+        """
         return f'{OrderedMultiDict.__name__}({list(self.items(multi=True))!r})'
 
 
@@ -805,6 +819,7 @@ class _MultiInfo(Info[VT], Generic[KT, VT]):
     """
 
     def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'Self':  # pylint: disable=unused-argument
+        """Create the instance with the empty multi-mapping :meth:`__update__` adds to."""
         self = super().__new__(cls)
         # NOTE: the multi-mapping class's own ``__init__``, which follows Info
         # and Mapping in the MRO, gives the empty storage -- including
@@ -819,6 +834,16 @@ class _MultiInfo(Info[VT], Generic[KT, VT]):
 
     def __update__(self, dict_: 'Optional[Mapping[Any, Any] | Iterable[tuple[Any, Any]]]' = None,
                    **kwargs: 'Any') -> 'None':
+        """Add every pair to the multi-mapping, so that a repeated key keeps every value.
+
+        Args:
+            dict_: Source pairs, as a mapping or an iterable of ``(key, value)`` pairs;
+                a list value of a mapping counts as one pair, and a
+                :class:`~pcapkit.corekit.multidict.MultiDict` gives every value of
+                each key.
+            **kwargs: More pairs, added after ``dict_``.
+
+        """
         # NOTE: every pair is *added*, as the multi-mapping's own constructor
         # and ``update`` do: a mapping's list values count as one pair each,
         # and a MultiDict gives every value of each key.
@@ -849,6 +874,16 @@ class _MultiInfo(Info[VT], Generic[KT, VT]):
                               quiet=True)
 
     def __setattr__(self, name: 'str', value: 'Any') -> 'None':  # type: ignore[override]
+        """Admit an attribute write only while :meth:`__new__` or :meth:`__update__` is writing.
+
+        Args:
+            name: Attribute name.
+            value: Attribute value.
+
+        Raises:
+            UnsupportedCall: Outside those writes, as assignment to any :class:`Info` does.
+
+        """
         if not self.__dict__.get('_MultiInfo__open'):
             raise UnsupportedCall("can't set attribute")
         object.__setattr__(self, name, value)

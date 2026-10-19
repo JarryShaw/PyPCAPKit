@@ -168,11 +168,11 @@ nothing about which registry reaches it, and the move did not touch any dispatch
      - Dispatched from
      - Subpackage
    * - :class:`~pcapkit.protocols.application.ospf.OSPF`
-     - ``Internet.__proto__`` by
+     - :attr:`Internet.__proto__ <pcapkit.protocols.internet.internet.Internet.__proto__>` by
        :attr:`~pcapkit.const.reg.transtype.TransType.OSPFIGP`
      - :mod:`~pcapkit.protocols.application`
    * - :class:`~pcapkit.protocols.application.rarp.RARP`
-     - ``Link.__proto__`` by EtherType
+     - :attr:`Link.__proto__ <pcapkit.protocols.link.link.Link.__proto__>` by EtherType
      - :mod:`~pcapkit.protocols.application`
 
 Nothing else needs overriding. :class:`~pcapkit.protocols.application.application.Application`
@@ -186,22 +186,31 @@ protocol number is refused.
 :class:`~pcapkit.protocols.application.application.Application` **is not name-for-name.**
 Counting the names in each class's own namespace, whether new or overriding
 :class:`~pcapkit.protocols.protocol.ProtocolBase`'s, and including those
-``ProtocolBase.__init_subclass__`` sets there, ``Link`` has
-``__data__``, ``__layer__``, ``__post_init__``, ``__proto__``,
-``__schema__``, ``_read_protos``, ``_shipped_proto``, ``from_data``, ``register`` and
-``layer``, and ``Application`` has what they share (``__data__``, ``__layer__``,
-``__post_init__``, ``__schema__``, ``from_data``, ``layer``) plus ``__index__``,
-``_decode_next_layer`` and ``_import_next_layer``.
-``Link`` overrides names that ``Application`` does not -- ``__proto__``,
-``register``, ``_read_protos`` and ``_shipped_proto``, the last set because ``Link``
-defines its own ``__proto__`` -- but each also exists on ``ProtocolBase``, so
-the strict difference ``Link`` minus ``Application`` minus ``ProtocolBase`` is **empty**
-and every one of them still resolves on ``OSPF``. What changes is which registry it
-resolves *to*: ``OSPF.__proto__`` is ``ProtocolBase.__proto__`` rather than
-``Link.__proto__``, so OSPF does not see Link's EtherType entries. That is inert --
-nothing reaches OSPF by EtherType, and a ``-1`` lookup misses in both registries alike
-and resolves to :class:`~pcapkit.protocols.misc.raw.Raw`, inserting nothing on the miss.
-``RARP`` keeps ``Link``'s through ``ARP``.
+:meth:`ProtocolBase.__init_subclass__ <pcapkit.protocols.protocol.ProtocolBase.__init_subclass__>`
+sets there, :class:`~pcapkit.protocols.link.link.Link` has ``__data__``, ``__layer__``,
+``__post_init__``, ``__proto__``, ``__schema__``, ``_read_protos``, ``_shipped_proto``,
+``from_data``, ``register`` and ``layer``, and
+:class:`~pcapkit.protocols.application.application.Application` has what they share
+(``__data__``, ``__layer__``, ``__post_init__``, ``__schema__``, ``from_data``, ``layer``)
+plus ``__index__``, ``_decode_next_layer`` and ``_import_next_layer``.
+:class:`~pcapkit.protocols.link.link.Link` overrides names that
+:class:`~pcapkit.protocols.application.application.Application` does not -- ``__proto__``,
+``register``, ``_read_protos`` and ``_shipped_proto``, the last set because
+:class:`~pcapkit.protocols.link.link.Link` defines its own ``__proto__`` -- but each also
+exists on :class:`~pcapkit.protocols.protocol.ProtocolBase`, so the strict difference
+:class:`~pcapkit.protocols.link.link.Link` minus
+:class:`~pcapkit.protocols.application.application.Application` minus
+:class:`~pcapkit.protocols.protocol.ProtocolBase` is **empty** and every one of them still
+resolves on :class:`~pcapkit.protocols.application.ospf.OSPF`. What changes is which
+registry it resolves *to*: ``OSPF.__proto__`` is
+:attr:`ProtocolBase.__proto__ <pcapkit.protocols.protocol.ProtocolBase.__proto__>` rather
+than :attr:`Link.__proto__ <pcapkit.protocols.link.link.Link.__proto__>`, so OSPF does not
+see Link's EtherType entries. That is inert -- nothing reaches OSPF by EtherType, and a
+``-1`` lookup misses in both registries alike and resolves to
+:class:`~pcapkit.protocols.misc.raw.Raw`, inserting nothing on the miss.
+:class:`~pcapkit.protocols.application.rarp.RARP` keeps
+:class:`~pcapkit.protocols.link.link.Link`'s through
+:class:`~pcapkit.protocols.link.arp.ARP`.
 
 Tie-Break Order
 ~~~~~~~~~~~~~~~

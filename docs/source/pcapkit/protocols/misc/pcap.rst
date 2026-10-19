@@ -59,6 +59,8 @@ of PCAP, whose structure is described as below:
 
    .. automethod:: _make_data
 
+   .. automethod:: _read_protos
+
 Header Schemas
 --------------
 

@@ -100,7 +100,7 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
             what "following a TCP stream" means elsewhere. :data:`False`
             restores one stream per direction.
         trace_analyse: whether each traced flow reassembles its application
-            layer, so that ``Index.packet`` can be read off
+            layer, so that :attr:`Index.packet <pcapkit.foundation.traceflow.data.tcp.Index.packet>` can be read off
             :attr:`Extractor.trace <pcapkit.foundation.extraction.Extractor.trace>`.
             Off by default, and independent of the ``conversations`` this
             function returns -- those come from the TCP reassembly this function

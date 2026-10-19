@@ -52,6 +52,12 @@ Internal Definitions
    :members:
    :show-inheritance:
 
+.. autoclass:: pcapkit.corekit.fields.ipaddress._RawMaskIPv4Interface
+   :members:
+   :show-inheritance:
+
+.. autofunction:: pcapkit.corekit.fields.ipaddress._reject_bool
+
 Type Variables
 ~~~~~~~~~~~~~~
 

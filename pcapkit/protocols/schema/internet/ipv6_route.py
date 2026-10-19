@@ -53,12 +53,11 @@ def ipv6_route_data_length(hdr_ext_len: 'int') -> 'int':
     i.e. the total on-the-wire header is ``8 + 8 * hdr_ext_len`` octets. Of
     that, the 4 octets of ``next``/``length``/``type``/``seg_left`` are not
     part of the type-specific data, so the data itself -- what
-    :func:`ipv6_route_data_selector` hands to the nested ``RoutingType``
-    schema -- is ``4 + 8 * hdr_ext_len`` octets. This is the single place
-    that arithmetic is done on the read side; see
-    :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_hdr_ext_len`
-    for its inverse on the write side. Dropping the ``4 +`` would leave the data
-    length 4 octets short.
+    :func:`ipv6_route_data_selector` hands to the nested
+    :class:`~pcapkit.protocols.schema.internet.ipv6_route.RoutingType` schema -- is ``4 + 8 *
+    hdr_ext_len`` octets. This is the single place that arithmetic is done on the read side; see
+    :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_hdr_ext_len` for its inverse on
+    the write side. Dropping the ``4 +`` would leave the data length 4 octets short.
 
     Args:
         hdr_ext_len: raw ``Hdr Ext Len`` field value, as read off the wire.

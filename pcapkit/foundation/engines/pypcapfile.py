@@ -172,6 +172,12 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
     ##########################################################################
 
     def __init__(self, extractor: 'Extractor') -> 'None':
+        """Import |pcapfile|_ and the submodules it reads savefiles with.
+
+        Args:
+            extractor: :class:`~pcapkit.foundation.extraction.Extractor` instance.
+
+        """
         import pcapfile  # isort:skip
         import pcapfile.linklayer  # isort:skip
         import pcapfile.savefile  # isort:skip

@@ -42,10 +42,10 @@ as below:
 
    ``pcapkit.protocols.link.ospf``, ``pcapkit.protocols.data.link.ospf`` and
    ``pcapkit.protocols.schema.link.ospf``, the ``OSPF`` name that
-   ``pcapkit.protocols.link``, ``pcapkit.protocols.data.link`` and
-   ``pcapkit.protocols.schema.link`` each exported, and the
+   :mod:`pcapkit.protocols.link`, :mod:`pcapkit.protocols.data.link` and
+   :mod:`pcapkit.protocols.schema.link` each exported, and the
    ``OSPF_CrytographicAuthentication`` name that
-   ``pcapkit.protocols.data.link`` and ``pcapkit.protocols.schema.link``
+   :mod:`pcapkit.protocols.data.link` and :mod:`pcapkit.protocols.schema.link`
    exported, with no alias (:issue:`719`, :issue:`1090`).
 
 .. versionchanged:: 1.5.0
@@ -77,6 +77,8 @@ as below:
    .. automethod:: _make_encrypt_auth
 
    .. automethod:: __index__
+
+   .. automethod:: _make_id_numbers
 
 Header Schemas
 --------------

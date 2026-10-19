@@ -24,7 +24,7 @@ This module contains the vendor crawler for **FTP Command**,
 which is automatically generating :class:`pcapkit.const.ftp.command.Command`.
 
 .. autoclass:: pcapkit.vendor.ftp.command.Command
-   :members: LINK
+   :members: LINK, process
    :show-inheritance:
 
 FTP Server Return Code

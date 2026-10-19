@@ -283,6 +283,20 @@ class BaseError(Exception):
     """
 
     def __init__(self, *args: 'Any', quiet: 'bool' = False, **kwargs: 'Any') -> 'None':
+        """Log the error, unless it is quiet, and initialise the exception.
+
+        A loud error logs at ``CRITICAL`` and, unless ``PCAPKIT_DEVMODE`` is set,
+        installs the terse exception hooks; the class docstring says when an error is
+        quiet.
+
+        Args:
+            *args: Arbitrary positional arguments.
+            quiet: If :data:`True`, the error is neither logged nor allowed to
+                install the exception hook; it is raised silently, as internal
+                control flow.
+            **kwargs: Arbitrary keyword arguments.
+
+        """
         # log error -- a quiet error emits nothing and mutates nothing, and so
         # does one a :class:`CaughtByCaller` block says its caller catches
         if not quiet and not isinstance(self, _caught_here.get()):
@@ -408,7 +422,7 @@ def _threading_excepthook(args: 'ExceptHookArgs') -> 'None':
     """Thread analogue of :func:`_excepthook`; same contract, one argument.
 
     :func:`threading.excepthook` is called with a single
-    :class:`threading.ExceptHookArgs`, carrying ``exc_type``, ``exc_value``,
+    ``threading.ExceptHookArgs``, carrying ``exc_type``, ``exc_value``,
     ``exc_traceback`` and ``thread`` -- not the three positional parameters
     :func:`sys.excepthook` takes. Everything else here mirrors :func:`_excepthook`
     as closely as the default thread hook's own output allows: a loud

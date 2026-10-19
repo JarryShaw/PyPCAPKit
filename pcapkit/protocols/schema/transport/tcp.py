@@ -333,13 +333,13 @@ def mptcp_dss_ack_selector(pkt: 'dict[str, Any]') -> 'Field':
         is 4 octets, so a width lambda returning ``0`` for it would leave the
         ``length`` octet counting 4 octets that were never packed.
 
-        The ``ConditionalField`` form could express this field correctly, since a
-        callable-length ``NumberField`` packs and unpacks both the 4- and the
+        The :class:`~pcapkit.corekit.fields.misc.ConditionalField` form could express this field correctly, since a
+        callable-length :class:`~pcapkit.corekit.fields.numbers.NumberField` packs and unpacks both the 4- and the
         8-octet form, and wire *absence* is no obstacle:
         :attr:`MPTCPDSS.ssn`, :attr:`MPTCPDSS.dl_len` and
-        :attr:`MPTCPDSS.checksum` are each a ``ConditionalField`` on the sibling
+        :attr:`MPTCPDSS.checksum` are each a :class:`~pcapkit.corekit.fields.misc.ConditionalField` on the sibling
         ``M`` flag (the checksum on the option length as well). The
-        ``SwitchField`` form is kept for a narrower reason about
+        :class:`~pcapkit.corekit.fields.misc.SwitchField` form is kept for a narrower reason about
         composition. A
         :class:`~pcapkit.corekit.fields.misc.ConditionalField`'s ``length``
         forwards to the wrapped field unconditionally, never consulting the
@@ -348,8 +348,8 @@ def mptcp_dss_ack_selector(pkt: 'dict[str, Any]') -> 'Field':
         ``struct.error: bad char in struct format``. Nothing here meets that only
         because :class:`Schema
         <pcapkit.protocols.schema.schema.Schema>`'s ``pack`` and ``unpack``
-        special-case ``ConditionalField`` by type and skip the wrapped field
-        outright before any ``length`` is read. A ``SwitchField`` needs no such
+        special-case :class:`~pcapkit.corekit.fields.misc.ConditionalField` by type and skip the wrapped field
+        outright before any ``length`` is read. A :class:`~pcapkit.corekit.fields.misc.SwitchField` needs no such
         special case: its selector always hands back an already-concrete field,
         :class:`~pcapkit.corekit.fields.misc.NoValueField` included, so its
         ``length`` is safe wherever it is read. Swapping the two would be a
@@ -381,8 +381,9 @@ def mptcp_dss_dsn_selector(pkt: 'dict[str, Any]') -> 'Field':
 
     Note:
         Identical in shape to :func:`mptcp_dss_ack_selector`; see that function's
-        note for why a ``SwitchField`` is used in place of a
-        ``ConditionalField`` around a callable-length ``NumberField``.
+        note for why a :class:`~pcapkit.corekit.fields.misc.SwitchField` is used in place of a
+        :class:`~pcapkit.corekit.fields.misc.ConditionalField` around a callable-length
+        :class:`~pcapkit.corekit.fields.numbers.NumberField`.
 
     """
     if not pkt['flags']['M']:

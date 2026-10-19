@@ -24,16 +24,16 @@ derives from it mechanically -- title-case each underscore-separated word and ap
      - Type
      - Defined in
    * - ``NULL``
-     - ``NullType``
+     - :class:`~pcapkit.corekit.sentinels.NullType`
      - :mod:`pcapkit.corekit.sentinels`
    * - ``NO_VALUE``
-     - ``NoValueType``
+     - :class:`~pcapkit.corekit.sentinels.NoValueType`
      - :mod:`pcapkit.corekit.sentinels`
    * - ``NO_DEFAULT``
-     - ``NoDefaultType``
+     - :class:`~pcapkit.corekit.sentinels.NoDefaultType`
      - :mod:`pcapkit.corekit.sentinels`
    * - ``ABSENT``
-     - ``AbsentType``
+     - :class:`~pcapkit.corekit.sentinels.AbsentType`
      - :mod:`pcapkit.corekit.sentinels`
 
 GitHub issue :issue:`911`'s housing ruling -- one module for all of them -- is why the table
@@ -47,7 +47,7 @@ Where a sentinel name already exists and already follows SCREAMING_SNAKE, keep i
 renaming a published sentinel again costs every caller for no further gain.
 
 ``ABSENT`` carries no leading underscore even though it is private -- it is read in
-``_declared_keywords`` and discarded there, never leaving
+:func:`~pcapkit.protocols.protocol._declared_keywords` and discarded there, never leaving
 :mod:`pcapkit.protocols.protocol`. The owner ruled on :issue:`937` that dropping the
 underscore is fine so long as the documentation states that the type and the object are
 private and not for public use, which is what this page and
@@ -103,7 +103,8 @@ appears in a signature, in :func:`help` output and in a traceback. Compare what
    in an early draft of :mod:`pcapkit.corekit.enum` and was wrong.
 
 **Ported code is exempt.** ``_NOT_FOUND = object()`` at
-:file:`pcapkit/utilities/compat.py`, line 73, sits inside the ``cached_property``
+:file:`pcapkit/utilities/compat.py`, line 73, sits inside the
+:class:`~pcapkit.utilities.compat.cached_property`
 backport taken for interpreters below 3.8, which tracks CPython's own
 :mod:`functools` implementation down to that name. It is **not** to be converted: the
 value of a vendored backport is that it can still be diffed against upstream, and a
@@ -113,8 +114,8 @@ ever sees. The rule above is for sentinels this package writes itself.
 Per-Sentinel Dunder Methods
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Most of the protocol is shared and lives on ``Sentinel``. Where the sentinels differ,
-the differences are **needs, not inconsistencies**:
+Most of the protocol is shared and lives on :class:`~pcapkit.corekit.sentinels.Sentinel`.
+Where the sentinels differ, the differences are **needs, not inconsistencies**:
 
 ``__new__`` returning a cached instance
    Every sentinel has it, from the base, and returns the instance the metaclass made as
@@ -163,8 +164,8 @@ the differences are **needs, not inconsistencies**:
    :exc:`TypeError` as ``type(None).x = 1`` does, so neither ``_name`` nor the cached
    instance can be swapped out. It also refuses to let a concrete sentinel type be
    subclassed, by a ``class`` statement or by ``register``, as ``type(None)`` cannot be;
-   ``Sentinel`` itself stays subclassable, being abstract. The owner asked for this in
-   review of the change for :issue:`1842`: a sentinel's repr and its other behaviour
-   follow Python's own singletons, :obj:`None`, :obj:`Ellipsis` and
-   :obj:`NotImplemented`.
+   :class:`~pcapkit.corekit.sentinels.Sentinel` itself stays subclassable, being abstract.
+   The owner asked for this in review of the change for :issue:`1842`: a sentinel's repr
+   and its other behaviour follow Python's own singletons, :obj:`None`, :obj:`Ellipsis`
+   and :obj:`NotImplemented`.
 

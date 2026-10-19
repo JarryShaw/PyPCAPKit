@@ -693,6 +693,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         #: PCAP-NG block byte order.
         _byte: 'Literal["little", "big"]'
 
+    #: Blocks that carry a captured packet.
     PACKET_TYPES = (Enum_BlockType.Enhanced_Packet_Block,
                     Enum_BlockType.Simple_Packet_Block,
                     Enum_BlockType.Packet_Block)

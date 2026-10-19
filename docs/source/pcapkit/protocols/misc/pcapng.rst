@@ -206,6 +206,17 @@ which implements an extractor for PCAP-NG file format [*]_, and the
    .. automethod:: __post_init__
    .. automethod:: __index__
 
+   .. autoattribute:: PACKET_TYPES
+   .. autoattribute:: SHORT_HEADER_TYPES
+   .. automethod:: _get_timezone
+   .. automethod:: _read_block_short
+   .. automethod:: _read_block_short_header
+   .. automethod:: _make_block_short
+   .. automethod:: _make_mac_addr
+
+   .. automethod:: _check_block_floor
+   .. automethod:: __length_hint__
+
 Auxiliary Data
 --------------
 
@@ -304,6 +315,7 @@ Header Schemas
 .. autoclass:: pcapkit.protocols.schema.misc.pcapng.Option
    :members:
    :show-inheritance:
+   :special-members: __enum__
 
 .. autoclass:: pcapkit.protocols.schema.misc.pcapng._OPT_Option
    :members:
@@ -525,6 +537,14 @@ Header Schemas
    :members:
    :show-inheritance:
 
+.. autoclass:: pcapkit.protocols.schema.misc.pcapng.OptionEnumField
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.schema.misc.pcapng.OptionAreaField
+   :members:
+   :show-inheritance:
+
 Type Stubs
 ----------
 
@@ -555,6 +575,12 @@ shared with the PCAP frame header and documented in
 .. autofunction:: pcapkit.protocols.schema.misc.pcapng.shb_byteorder_callback
 .. autofunction:: pcapkit.protocols.schema.misc.pcapng.pcapng_block_selector
 .. autofunction:: pcapkit.protocols.schema.misc.pcapng.dsb_secrets_selector
+
+.. autofunction:: pcapkit.protocols.schema.misc.pcapng.nonnegative
+.. autofunction:: pcapkit.protocols.schema.misc.pcapng.bounded_option
+.. autofunction:: pcapkit.protocols.schema.misc.pcapng.bounded_area
+.. autofunction:: pcapkit.protocols.schema.misc.pcapng.captured_area
+.. autofunction:: pcapkit.protocols.schema.misc.pcapng._spb_data_length
 
 Data Models
 -----------

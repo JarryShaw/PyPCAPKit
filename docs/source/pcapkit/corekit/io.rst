@@ -45,6 +45,10 @@ stream, and :class:`~pcapkit.corekit.io.NamedStream`, which gives a stream a
    .. automethod:: fileno
    .. automethod:: isatty
 
+   .. autoattribute:: _read_ahead_size
+   .. automethod:: _read_ahead
+   .. automethod:: _truncate_buffer
+
 .. autoclass:: pcapkit.corekit.io.PeekableStream
    :no-members:
 

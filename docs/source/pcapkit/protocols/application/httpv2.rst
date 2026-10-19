@@ -78,6 +78,8 @@ Octets      Bits        Name                    Description
    .. autoattribute:: __frame__
       :no-value:
 
+   .. automethod:: unpack
+
 Header Schemas
 --------------
 
@@ -205,6 +207,10 @@ Data Models
    :show-inheritance:
 
 .. autoclass:: pcapkit.protocols.data.application.httpv2.SettingsFrame
+   :members:
+   :show-inheritance:
+
+.. autoclass:: pcapkit.protocols.data.application.httpv2.Settings
    :members:
    :show-inheritance:
 

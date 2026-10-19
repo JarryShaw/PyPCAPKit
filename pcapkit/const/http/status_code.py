@@ -32,6 +32,13 @@ class StatusCode(EnumRegistry, IntEnum):
         message: 'str'
 
     def __new__(cls, value: 'int', message: 'str' = '(Unknown)') -> 'Type[StatusCode]':
+        """Create a member from a registry row.
+
+        Args:
+            value: Status code.
+            message: Status message.
+
+        """
         obj = int.__new__(cls, value)
         obj._value_ = value
 
@@ -43,6 +50,7 @@ class StatusCode(EnumRegistry, IntEnum):
         return f'<{self.__class__.__name__} [{self._value_}]>'
 
     def __str__(self) -> 'str':
+        """Show the status code with its message, as ``[code] message``."""
         return "[%s] %s" % (self._value_, self.message)
 
     #: Continue [:rfc:`9110#section-15.2.1`]

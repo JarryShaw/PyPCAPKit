@@ -226,6 +226,8 @@ Internal Definitions
    :no-members:
    :show-inheritance:
 
+   .. automethod:: __prepare__
+
 .. autoclass:: pcapkit.protocols.schema.schema.EnumMeta
    :no-members:
    :show-inheritance:

@@ -9,7 +9,7 @@ Release Process
    being different.
 
    The short version: **the only manual edit is bumping**
-   ``pcapkit.__version__``. Everything else -- the ``v*`` tag, the GitHub
+   :data:`pcapkit.__version__`. Everything else -- the ``v*`` tag, the GitHub
    Release, the PyPI and Anaconda uploads, the ``conda-*`` tag and its commit
    to ``main`` -- is produced by
    ``.github/workflows/create-release.yml`` and is never hand-made.
@@ -17,7 +17,7 @@ Release Process
 The One Manual Step
 -------------------
 
-Bumping ``pcapkit.__version__`` is done by :file:`util/bump_version.py`, whose
+Bumping :data:`pcapkit.__version__` is done by :file:`util/bump_version.py`, whose
 own docstring is the authority on what it does; summarised here rather than
 duplicated. Given the current version, it works out the next one under
 :pep:`440` -- a ``devN`` counter, a pre-release counter, a post-release
@@ -80,7 +80,7 @@ a workaround for another:
    Pushing a tag matching ``v*`` yourself. This chooses **which commit** to
    release, not which version: ``version_check``'s checkout
    (``:298-302``) pins ``ref: ${{ github.sha }}``, which on this trigger is
-   the commit the pushed tag points at, and reads ``pcapkit.__version__`` out
+   the commit the pushed tag points at, and reads :data:`pcapkit.__version__` out
    of *that* tree (``:327``). Every downstream tag and release name is built
    from that output -- ``v${{ needs.version_check.outputs.PCAPKIT_VERSION }}``
    is ``github``'s ``tag_name`` at ``:719`` and the release ``pypi`` and

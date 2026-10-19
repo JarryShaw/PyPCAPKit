@@ -10,9 +10,9 @@ a ``_missing_`` override, which decides what happens when a value has no member.
 MRO, so they carry no declared-but-unassigned range to resolve. The rest define one
 themselves, except the transport subclasses of
 :class:`~pcapkit.const.reg.apptype.apptype.AppType`, which inherit
-``AppType._missing_`` (:file:`pcapkit/const/reg/apptype/apptype.py`). The
-behaviours below follow from it, and which one a given range gets is a **design decision, not
-a style preference**:
+:meth:`AppType._missing_ <pcapkit.const.reg.apptype.apptype.AppType._missing_>`
+(:file:`pcapkit/const/reg/apptype/apptype.py`). The behaviours below follow from it, and
+which one a given range gets is a **design decision, not a style preference**:
 
 ``extend_enum(cls, name, value)`` -- *mint*
    Creates a real, permanent member on the class. It is installed in
@@ -35,31 +35,47 @@ Measured against the tree, by class:
 
 * **Mints**: :class:`~pcapkit.const.mh.cga_type.CGAType` alone, whose values are 128-bit
   CGA extension tags rather than an IANA-style range of codes.
-* **Unmint**: the bulk of the registries. The transport subclasses (``TCP``, ``UDP``,
-  ``SCTP``, ``DCCP``) inherit the method; every other registry here calls
-  ``_unregistered_member`` itself, though ``AppType`` never gets there: it holds no
+* **Unmint**: the bulk of the registries. The transport subclasses
+  (:class:`~pcapkit.const.reg.apptype.tcp.TCP`,
+  :class:`~pcapkit.const.reg.apptype.udp.UDP`,
+  :class:`~pcapkit.const.reg.apptype.sctp.SCTP`,
+  :class:`~pcapkit.const.reg.apptype.dccp.DCCP`) inherit the method; every other registry
+  here calls ``_unregistered_member`` itself, though
+  :class:`~pcapkit.const.reg.apptype.apptype.AppType` never gets there: it holds no
   members and raises for every value through its ``cls.__registry__ is None`` guard.
 
   **Some of the rest can never reach the call either**, because every range they declare is
-  already covered by their own members -- ``ToSDelay`` declares ``0..1`` and has members
-  ``[0, 1]``, so its ``_unregistered_member`` call is dead code. Those found are
-  ``ipv4.option_class``, ``ipv4.tos_del``, ``ipv4.tos_ecn``, ``ipv4.tos_pre``,
-  ``ipv4.tos_rel``, ``ipv4.tos_thr``, ``ipv6.option_action``, ``ipv6.seed_id``,
-  ``ipv6.smf_dpd_mode``, ``l2tp.type``, ``mh.dhcp_support_mode`` and
-  ``vlan.priority_level``. The ``str``-valued ``ftp.command.Command``,
-  ``ftp.command.FEATCode`` and ``http.method.Method`` were not probed, so that list is a
-  floor.
+  already covered by their own members -- :class:`~pcapkit.const.ipv4.tos_del.ToSDelay`
+  declares ``0..1`` and has members ``[0, 1]``, so its ``_unregistered_member`` call is
+  dead code. Those found are :mod:`ipv4.option_class <pcapkit.const.ipv4.option_class>`,
+  :mod:`ipv4.tos_del <pcapkit.const.ipv4.tos_del>`,
+  :mod:`ipv4.tos_ecn <pcapkit.const.ipv4.tos_ecn>`,
+  :mod:`ipv4.tos_pre <pcapkit.const.ipv4.tos_pre>`,
+  :mod:`ipv4.tos_rel <pcapkit.const.ipv4.tos_rel>`,
+  :mod:`ipv4.tos_thr <pcapkit.const.ipv4.tos_thr>`,
+  :mod:`ipv6.option_action <pcapkit.const.ipv6.option_action>`,
+  :mod:`ipv6.seed_id <pcapkit.const.ipv6.seed_id>`,
+  :mod:`ipv6.smf_dpd_mode <pcapkit.const.ipv6.smf_dpd_mode>`,
+  :mod:`l2tp.type <pcapkit.const.l2tp.type>`,
+  :mod:`mh.dhcp_support_mode <pcapkit.const.mh.dhcp_support_mode>` and
+  :mod:`vlan.priority_level <pcapkit.const.vlan.priority_level>`. The ``str``-valued
+  :class:`ftp.command.Command <pcapkit.const.ftp.command.Command>`,
+  :class:`ftp.command.FEATCode <pcapkit.const.ftp.command.FEATCode>` and
+  :class:`http.method.Method <pcapkit.const.http.method.Method>` were not probed, so that
+  list is a floor.
 * **Cache in the value table only**: :class:`~pcapkit.const.tcp.flags.Flags` and the
   Mobility Header flag registries, such as
   :class:`~pcapkit.const.mh.binding_ack_flag.BindingACKFlag`. They range-check and hand
   back to ``super()._missing_``, which for an ``aenum.IntFlag`` reaches
   ``_create_pseudo_member_`` and ends in
   ``cls._value2member_map_.setdefault(value, pseudo_member)``.
-* **Raise for any unknown value**: ``AppType``, ``ExtensionHeader``, ``TLSKeyLabel``
-  and :class:`~pcapkit.const.hip.transport.Transport`. ``Transport`` raises
-  from its own range check: its declared range ``0..3`` is exactly its member set, so
-  no unassigned value is left for ``super()._missing_`` (the line after the check is
-  unreachable).
+* **Raise for any unknown value**: :class:`~pcapkit.const.reg.apptype.apptype.AppType`,
+  :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader`,
+  :class:`~pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` and
+  :class:`~pcapkit.const.hip.transport.Transport`.
+  :class:`~pcapkit.const.hip.transport.Transport` raises from its own range check: its
+  declared range ``0..3`` is exactly its member set, so no unassigned value is left for
+  ``super()._missing_`` (the line after the check is unreachable).
 
 Note that these are |aenum|_ classes: ``issubclass(Flags, enum.IntFlag)`` is ``False``
 against the standard library and ``True`` against ``aenum.IntFlag``, so a probe against
@@ -68,10 +84,10 @@ against the standard library and ``True`` against ``aenum.IntFlag``, so a probe 
 The mint criterion below therefore applies only to the registries that unmint, where it
 decides the *name* an unregistered member carries -- the registrar's own label suffixed
 with the individual code, or the bare block label on its own -- not whether it
-registers. In the others it never runs: ``CGAType`` names its tag from the value,
-the flag registries compose a name from their members' bits, and those that
-raise name nothing. The crawlers that generate the ranges record that narrowing in
-their own comments: :file:`pcapkit/vendor/reg/ethertype.py`'s ``UNASSIGNED_ROW_NAMES``
+registers. In the others it never runs: :class:`~pcapkit.const.mh.cga_type.CGAType` names
+its tag from the value, the flag registries compose a name from their members' bits, and
+those that raise name nothing. The crawlers that generate the ranges record that narrowing
+in their own comments: :file:`pcapkit/vendor/reg/ethertype.py`'s ``UNASSIGNED_ROW_NAMES``
 and :file:`pcapkit/vendor/ipx/socket.py`'s ``UNASSIGNED_RANGE_NAMES``.
 
 .. mermaid::
@@ -96,10 +112,9 @@ The test, paraphrased from the maintainer's ruling: does the upstream registry t
 the label as the final, concrete assigned name, or only as a notation for a human
 reading the table?
 
-Settled in review of the ``Socket._missing_`` branch-order fix
-(:issue:`841`) and reaffirmed
-on :issue:`775` as a core concept of
-the ruling.
+Settled in review of the
+:meth:`Socket._missing_ <pcapkit.const.ipx.socket.Socket._missing_>` branch-order fix
+(:issue:`841`) and reaffirmed on :issue:`775` as a core concept of the ruling.
 
 So the question to ask of a range is **what the upstream registry actually did**, not
 what the generated code happens to look like:
@@ -146,10 +161,10 @@ Suffixed Company Names
 
 The ethertype case looks like an exception to the rule and is not. The maintainer's
 reasoning, settled on :issue:`775` after
-being raised in review of the same ``Socket._missing_`` fix
-(:issue:`841`): a proprietary protocol
-will never have a public name, so the company name is what serves that purpose in its
-place.
+being raised in review of the same
+:meth:`Socket._missing_ <pcapkit.const.ipx.socket.Socket._missing_>` fix (:issue:`841`): a
+proprietary protocol will never have a public name, so the company name is what serves
+that purpose in its place.
 
 So the company name is not a note *about* the code -- it is the best name that will ever
 exist *for* it, which makes it the final concrete assigned name under the test above.
@@ -187,12 +202,14 @@ only ``ast.Name`` nodes finds every mint and no unmint at all:
 
 .. note::
 
-   The walk reads each file's own ``_missing_``, so it reports ``AppType`` as an
-   unmint although it raises, prints nothing for the flag registries and
-   ``Transport`` (they call neither function) nor for ``ExtensionHeader`` and
-   ``TLSKeyLabel`` (they define no ``_missing_``), and does not see the
-   transport subclasses, which inherit theirs. Reconcile it against a runtime probe
-   for the split in the list above.
+   The walk reads each file's own ``_missing_``, so it reports
+   :class:`~pcapkit.const.reg.apptype.apptype.AppType` as an unmint although it raises,
+   prints nothing for the flag registries and
+   :class:`~pcapkit.const.hip.transport.Transport` (they call neither function) nor for
+   :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` and
+   :class:`~pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` (they define no
+   ``_missing_``), and does not see the transport subclasses, which inherit theirs.
+   Reconcile it against a runtime probe for the split in the list above.
 
 .. warning::
 

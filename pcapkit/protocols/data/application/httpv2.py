@@ -170,8 +170,10 @@ class Settings(OrderedMultiInfo['Setting', int]):
 
     An identifier may repeat, and the values apply in order, so the last one
     wins (:rfc:`9113#section-6.5`). Every entry is kept in wire order, as
-    :meth:`getlist` and ``items(multi=True)`` show and the rebuild writes, but
-    indexing, :meth:`get`, :meth:`values`, ``items()`` and ``to_dict(flat=True)``
+    :meth:`~pcapkit.corekit.multidict.MultiDict.getlist` and ``items(multi=True)``
+    show and the rebuild writes, but indexing,
+    :meth:`~pcapkit.corekit.multidict.MultiDict.get`,
+    :meth:`~pcapkit.corekit.multidict.MultiDict.values`, ``items()`` and ``to_dict(flat=True)``
     answer with the *last* value of each identifier rather than the first.
 
     It is immutable, as an
