@@ -396,7 +396,9 @@ class TestTheContainmentRuns(unittest.TestCase):
                       run)
         self.assertIn('args: -m pytest -q -n 3 --dist load', result.stdout)
         self.assertIn(f'heap {HEAP}\n', result.stdout)
-        self.assertIn(f' GRAAL_PYTHON_VM_ARGS={HEAP} prlimit ', run)
+        # #1938: the scope runs util/superseded.py's watcher, and the watcher the capped command.
+        self.assertRegex(run, rf' GRAAL_PYTHON_VM_ARGS={re.escape(HEAP)} \S*python3 util/superseded\.py watch '
+                              r'--interval 60 --grace 30 -- prlimit ')
         self.assertRegex(result.stdout, rf'Max file size +{FSIZE} +{FSIZE} +bytes')
         self.assertEqual(workflow_commands(result.stdout), [])
         status = self.status()
@@ -550,7 +552,7 @@ class TestItGatesNothing(unittest.TestCase):
         self.assertTrue(ci_timing.JUNIT_ARTIFACT.startswith('junit-'))
         self.assertEqual([path.name for path in sorted((ROOT / 'util').glob('*.py'))
                           if 'resource-monitor' in path.read_text(encoding='utf-8')], [])
-        self.assertEqual(list(workflow(EXPERIMENTAL[0])['jobs']), ['python-versions', 'changes', 'experimental'])
+        self.assertEqual(list(workflow(EXPERIMENTAL[0])['jobs']), ['current', 'python-versions', 'changes', 'experimental'])
 
 
 class TestTheDocsSayIt(unittest.TestCase):

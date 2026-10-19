@@ -1,12 +1,14 @@
 # -*- coding: utf-8 -*-
 """#1903: a newer run on ``main`` supersedes Experimental Tests' older one.
 
-Every push to ``main`` used to get a concurrency group of its own, by run id, so
-a merge wave queued a GraalPy leg of up to two hours per commit and held runners
-that the open pull requests' CI then waited behind. The owner chose option 1: in
-experimental.yml only, a push to ``main`` joins one group per ref and cancels the
-run in progress, as a pull request's run already did. Nothing waits on these legs
-(#1732), so the newest commit's run is enough.
+A group per push queues a GraalPy leg of up to two hours per commit in a merge
+wave, holding runners the open pull requests' CI then waits behind. The owner
+chose option 1: in experimental.yml only, a push to ``main`` is superseded by
+the next one, as a pull request's run is. Nothing waits on these legs (#1732),
+so the newest commit's run is enough. #1938 keeps that rule and drops the
+cancelling: experimental.yml has no group (:class:`TestExperimentalHasNoGroup`),
+and its gate and watcher skip or stop a superseded run instead, which
+:mod:`tests.project.test_superseded_runs_1938` pins.
 
 unit-tests.yml keeps a group per push, because its ``unittest-ordering`` leg runs
 only on ``main`` and a cancelled run there would leave a commit with no ordering
@@ -32,7 +34,6 @@ from tests.project.test_release_gates import evaluate_condition, evaluate_expres
 WORKFLOWS = _tiers.ROOT / '.github' / 'workflows'
 
 MAIN = 'refs/heads/main'
-PULL = 'refs/pull/1903/merge'
 
 #: One ``${{ }}`` interpolation in a ``group:`` value, its body captured.
 _INTERPOLATION = re.compile(r'\$\{\{(.*?)\}\}', re.S)
@@ -73,45 +74,17 @@ class Concurrency:
         return evaluate_condition(value, run)
 
 
-class TestExperimentalSupersedesOnMain(unittest.TestCase):
-    """experimental.yml: a pull request's and ``main``'s runs are superseded per ref."""
+class TestExperimentalHasNoGroup(unittest.TestCase):
+    """#1938: experimental.yml has no group, so nothing of it is ever cancelled.
 
-    def setUp(self) -> None:
-        self.own = Concurrency('experimental.yml')
+    A newer commit still supersedes a run, by #1903's rule, through a gate and a
+    watcher: :mod:`tests.project.test_superseded_runs_1938`.
 
-    def test_the_cases_below_cover_every_trigger(self) -> None:
-        # Pushes to `main` and pull requests are all experimental.yml runs on;
-        # the other events below are the guard for a trigger added later.
+    """
+
+    def test_no_concurrency_block(self) -> None:
         with open(WORKFLOWS / 'experimental.yml', encoding='utf-8') as file:
-            spec = yaml.safe_load(file)
-        on = spec.get('on', spec.get(True))
-        self.assertEqual(set(on), {'push', 'pull_request'})
-        self.assertEqual(on['push'], {'branches': ['main']})
-
-    def test_pushes_to_main_share_one_cancelling_group(self) -> None:
-        """#1903: the next push's run cancels the one in progress."""
-        first, second = context('push', MAIN, '1'), context('push', MAIN, '2')
-        self.assertEqual(self.own.group(first), f'experimental-tests-{MAIN}')
-        self.assertEqual(self.own.group(first), self.own.group(second))
-        self.assertTrue(self.own.cancels(second))
-
-    def test_a_pull_request_still_shares_one_per_ref(self) -> None:
-        first, second = context('pull_request', PULL, '1'), context('pull_request', PULL, '2')
-        self.assertEqual(self.own.group(first), f'experimental-tests-{PULL}')
-        self.assertEqual(self.own.group(first), self.own.group(second))
-        self.assertTrue(self.own.cancels(second))
-        other = context('pull_request', 'refs/pull/1904/merge', '3')
-        self.assertNotEqual(self.own.group(other), self.own.group(first))
-        self.assertNotEqual(self.own.group(first), self.own.group(context('push', MAIN, '1')))
-
-    def test_any_other_run_gets_a_group_of_its_own_and_is_never_cancelled(self) -> None:
-        """Including a dispatch or schedule on ``main``, which must not join the pushes' group."""
-        for event_name, ref in (('push', 'refs/heads/feature'), ('schedule', MAIN),
-                                ('workflow_dispatch', MAIN), ('workflow_run', MAIN)):
-            with self.subTest(event_name=event_name, ref=ref):
-                run = context(event_name, ref, '38497299656')
-                self.assertEqual(self.own.group(run), 'experimental-tests-38497299656')
-                self.assertFalse(self.own.cancels(run))
+            self.assertNotIn('concurrency', yaml.safe_load(file))
 
 
 class TestUnitTestsKeepsARunPerCommit(unittest.TestCase):

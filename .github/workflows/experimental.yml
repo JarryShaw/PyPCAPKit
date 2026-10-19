@@ -25,22 +25,58 @@ on:
 permissions:
   contents: read
 
-# #1903, the owner's option 1: a run is superseded by the next one on its ref,
-# whether a pull request's or a push to main's. Nothing waits on these legs, so
-# main's newest commit is the one worth testing, and a merge wave no longer
-# queues a two-hour GraalPy leg per push. unit-tests.yml still gives each push
-# a run of its own, since its `unittest-ordering` leg runs only on main. Any
-# other event -- a push to another branch, should `on:` ever allow one, or a
-# trigger added later -- keeps a group of its own, by run id, and is never
-# cancelled.
-concurrency:
-  group: experimental-tests-${{ (github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main')) && github.ref || github.run_id }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' || (github.event_name == 'push' && github.ref == 'refs/heads/main') }}
+# #1903 has a newer commit supersede a run, a pull request's or a push to
+# main's: nothing waits on these legs, so the newest commit is the one worth
+# testing. #1938, the owner's choice: a superseded run is skipped or stopped,
+# never cancelled, since GitHub counts a cancelled check against its commit and
+# marks it red. So there is no `concurrency:` block at all: without
+# `cancel-in-progress` a group still holds one pending run and cancels it once
+# a newer one arrives (docs.github.com, "Control the concurrency of workflows
+# and jobs"), and `queue: max` would hold a new commit's run behind the
+# superseded one until that one stops. Instead `current` skips every other job
+# of a run whose commit is superseded before it starts, and `Run unit tests`
+# stops one superseded while its tests run; util/superseded.py holds the rule
+# for both. A run whose commit stays current is unaffected.
 
 jobs:
+  # #1938: the gate. util/superseded.py's `check` asks the API whether this
+  # run's commit is still the head of main or of its open pull request, and
+  # writes `current`; any other event, or an API it cannot read, is current.
+  # Every other job needs this one and skips where `current` is `false`, so a
+  # superseded run's checks read `skipped`, which marks no commit red. Both
+  # steps are `continue-on-error`, so this job always succeeds, and a failure
+  # leaves `current` empty, which runs the rest.
+  current:
+    name: Check the commit is still current
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      current: ${{ steps.check.outputs.current }}
+
+    steps:
+      - uses: actions/checkout@v7
+        continue-on-error: true
+        with:
+          sparse-checkout: |
+            util/superseded.py
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Ask whether this run's commit is still current
+        id: check
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 util/superseded.py check
+
   # unit-tests.yml's job of the same name, reading the one output this file needs.
   python-versions:
     name: Read the Python versions
+    needs: current
+    if: ${{ needs.current.outputs.current != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
@@ -65,6 +101,8 @@ jobs:
   # pull_request run.
   changes:
     name: Classify changed files
+    needs: current
+    if: ${{ needs.current.outputs.current != 'false' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     outputs:
@@ -151,11 +189,15 @@ jobs:
   # expected, blocks nothing, and leaves the caps as they are.
   experimental:
     name: Python ${{ matrix.python-version }} (experimental)
-    if: ${{ needs.changes.outputs.code != 'false' }}
-    needs: [changes, python-versions]
+    if: ${{ needs.current.outputs.current != 'false' && needs.changes.outputs.code != 'false' }}
+    needs: [current, changes, python-versions]
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
     timeout-minutes: 140
     continue-on-error: true
+    # #1938: `Run unit tests` reads the pull request, as `current` does.
+    permissions:
+      contents: read
+      pull-requests: read
     # #1672: every annotation a failing step writes is a warning.
     env:
       ANNOTATION_LEVEL: warning
@@ -313,6 +355,18 @@ jobs:
       # crashed, by xdist's `[gwN] node down:` lines (under `-q` it prints no
       # `replacing crashed worker`, xdist/dsession.py:78-80 at v3.8.0), for
       # `Containment summary`.
+      #
+      # #1938: util/superseded.py's `watch` runs the capped command -- prlimit,
+      # timeout and pytest, in the scope where there is one -- in a session of
+      # its own and asks `current`'s question every 60 s. Once the commit is
+      # superseded it sends the session SIGTERM, SIGKILL 30 s on, writes a
+      # `Superseded` notice and a job-summary line, and exits 0, so the step
+      # succeeds and frees the runner. Otherwise it exits with the command's own
+      # status, so a failure on a current commit reads as it would unwatched,
+      # and an API it cannot read counts as current. It runs on the runner's /usr/bin/python3,
+      # not the leg's interpreter: under GraalPy every process starts a VM of its
+      # own. The scope's sudo keeps GH_TOKEN and the GITHUB_* variables it reads
+      # (`--preserve-env`); where one is missing it cannot tell, and the tests run on.
       - name: Run unit tests
         id: tests
         if: ${{ steps.install.outcome == 'success' }}
@@ -321,6 +375,7 @@ jobs:
         env:
           GRAAL_PYTHON_VM_ARGS: ${{ startsWith(matrix.python-version, 'graalpy') && '--vm.Xmx2g --vm.XX:+ExitOnOutOfMemoryError' || '' }}
           WORKERS: ${{ startsWith(matrix.python-version, 'graalpy') && '3' || 'auto' }}
+          GH_TOKEN: ${{ github.token }}
         run: |
           tail -n +1 -F "$RUNNER_TEMP/resource-monitor.log" 2>/dev/null &
           monitor=$!
@@ -332,6 +387,9 @@ jobs:
             --ignore-glob='*_regression.py' \
             --ignore-glob='*roundtrip*'
           set -- prlimit --fsize=2147483648 timeout --signal=INT --kill-after=3m 110m python -m pytest "$@"
+          watcher=/usr/bin/python3
+          [ -x "$watcher" ] || watcher=python3
+          set -- "$watcher" util/superseded.py watch --interval 60 --grace 30 -- "$@"
           scoped() {
             unit=$1
             shift

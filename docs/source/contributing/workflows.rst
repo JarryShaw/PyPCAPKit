@@ -758,13 +758,33 @@ Tests run completes without it, and with it ``Required checks passed``,
 ``unittest-ordering`` and the workflows that wait on Unit Tests completing
 (``coverage-comment.yml``, ``deploy-pages.yml``, ``cron-vendor.yml`` and
 ``cron-conda.yml``). It runs on Unit Tests' ``push`` and ``pull_request`` events,
-skips a docs-only pull request by the same ``changes`` script, and cancels a
-superseded run, a pull request's or, unlike Unit Tests, a push to ``main``'s
+skips a docs-only pull request by the same ``changes`` script, and lets a newer
+commit supersede a run, a pull request's or, unlike Unit Tests, a push to ``main``'s
 (`#1903 <https://github.com/JarryShaw/PyPCAPKit/issues/1903>`__): since nothing
 waits on the legs, ``main``'s newest commit is the one worth testing, whereas Unit
-Tests keeps a run per push for ``unittest-ordering``, which runs only there. Any
-other event keeps a concurrency group of its own, by run id. The legs never
-block, by the KTLO mechanics above: every step that can fail has
+Tests keeps a run per push for ``unittest-ordering``, which runs only there.
+
+A superseded run is skipped or stopped, never cancelled (`#1938
+<https://github.com/JarryShaw/PyPCAPKit/issues/1938>`__): GitHub counts a
+``cancelled`` check against its commit, so a cancelled run marks the commit red.
+The workflow has no ``concurrency`` group either, since a group cancels its pending
+run once a newer one queues. Its first job, ``current`` ("Check the commit is still
+current"), runs :file:`util/superseded.py`'s ``check``. A push's commit is current
+while it is the head of ``main``; a pull request's while the pull request is open and
+its head is still the event's ``pull_request.head.sha``; any other event's always.
+Every other job needs ``current`` and skips where its output is ``false``, so a run
+superseded before it starts ends with ``skipped`` checks and a ``Superseded`` notice,
+and a failed ``current`` leaves the output empty, which runs the rest. ``Run unit
+tests`` runs its capped command -- ``prlimit``, ``timeout`` and pytest, in the scope
+where there is one -- under the script's ``watch``, which asks again every 60
+seconds. Once the commit is superseded, or the pull request merged or closed, it
+sends the command's session SIGTERM, then SIGKILL 30 seconds on, writes a
+``Superseded`` notice and a job-summary line, and exits 0, so the leg ends green and
+frees its runner. Otherwise the step ends with the tests' own status. An API the
+script cannot read counts as current, so it never stops the tests, and it asks with
+``If-None-Match``, as a ``304`` answer costs no rate limit.
+
+The legs never block, by the KTLO mechanics above: every step that can fail has
 ``continue-on-error: true``, their annotations are warnings, and ``Experimental
 summary``, the job's last step, reports each failed step. A failure no step
 contains, such as a lost runner, fails the job, and the job's own

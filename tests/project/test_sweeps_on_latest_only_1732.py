@@ -97,7 +97,8 @@ def stringify(value: 'object') -> 'str':
 
 def step_env(leg: 'dict[str, Any]', where: 'tuple[str, str]' = JOB) -> 'dict[str, str]':
     """The step's ``env:`` on ``leg``, ``needs`` read from the tier file."""
-    context = {'matrix': leg, 'needs': {'python-versions': {'outputs': live_outputs()}}}
+    # #1938: experimental's tests step reads the token, which no test here needs.
+    context = {'matrix': leg, 'needs': {'python-versions': {'outputs': live_outputs()}}, 'github': {'token': ''}}
     return {key: re.sub(r'\$\{\{.*?\}\}', lambda match: stringify(evaluate_expression(match.group(0), context)),
                         str(value))
             for key, value in (step(where).get('env') or {}).items()}
@@ -294,18 +295,18 @@ class TestTheExperimentalLegsAreAWorkflowOfTheirOwn(unittest.TestCase):
                 self.assertFalse([leg for leg in legs('unit-tests.yml', job_id) if is_experimental(leg)])
                 self.assertNotIn('experimental', str(spec.get('name')))
 
-    def test_the_same_events_and_its_own_concurrency(self) -> None:
-        """unit-tests.yml's push and pull_request, no ``workflow_call``, read-only, a group of its own.
+    def test_the_same_events_and_no_concurrency_group(self) -> None:
+        """unit-tests.yml's push and pull_request, no ``workflow_call``, read-only, sharing no group.
 
-        Which runs it supersedes is #1903's, evaluated in
-        :mod:`tests.project.test_experimental_concurrency_1903`.
+        #1938 drops its group, so a superseded run is skipped or stopped, not
+        cancelled: :mod:`tests.project.test_superseded_runs_1938`.
 
         """
         events = triggers(self.own)
         self.assertEqual(events, {key: value for key, value in triggers(self.unit).items() if key != 'workflow_call'})
         self.assertEqual(set(events), {'push', 'pull_request'})
         self.assertEqual(self.own['permissions'], {'contents': 'read'})
-        self.assertNotEqual(self.own['concurrency']['group'], self.unit['concurrency']['group'])
+        self.assertNotIn('concurrency', self.own)
 
     def test_it_skips_a_docs_only_diff_as_test_does(self) -> None:
         """unit-tests.yml's ``changes`` script, byte for byte, gating the job as it gates ``test``."""
@@ -313,8 +314,10 @@ class TestTheExperimentalLegsAreAWorkflowOfTheirOwn(unittest.TestCase):
             return next(entry['run'] for entry in spec['jobs']['changes']['steps'] if entry.get('id') == 'classify')
         self.assertEqual(classify(self.own), classify(self.unit))
         spec = self.own['jobs']['experimental']
-        self.assertEqual(spec['needs'], ['changes', 'python-versions'])
-        self.assertEqual(spec['if'], "${{ needs.changes.outputs.code != 'false' }}")
+        # #1938 adds `current`, the gate every job needs.
+        self.assertEqual(spec['needs'], ['current', 'changes', 'python-versions'])
+        self.assertEqual(spec['if'],
+                         "${{ needs.current.outputs.current != 'false' && needs.changes.outputs.code != 'false' }}")
         self.assertIn("needs.changes.outputs.code != 'false'", self.unit['jobs']['test']['if'])
 
     def test_nothing_waits_on_it(self) -> None:
