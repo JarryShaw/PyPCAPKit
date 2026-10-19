@@ -671,9 +671,17 @@ class ScratchRepository(WorkflowMixin, unittest.TestCase):
     def setUp(self) -> None:
         self.tmp = pathlib.Path(tempfile.mkdtemp(prefix='pcapkit-1634-'))
         self.addCleanup(shutil.rmtree, self.tmp, True)
+        # #1644, #1906: no automatic maintenance in any repository here, before the
+        # first git command. A file, since a push to a local path strips GIT_CONFIG_*
+        # from receive-pack, whose detached repack of origin otherwise deletes the
+        # loose objects checkout()'s local clone is copying.
+        config = self.tmp / 'gitconfig'
+        config.write_text('[maintenance]\n\tauto = false\n\tautoDetach = false\n'
+                          '[gc]\n\tauto = 0\n\tautoDetach = false\n'
+                          '[receive]\n\tautogc = false\n', encoding='utf-8')
         self.env = {
             'PATH': os.environ.get('PATH', ''), 'HOME': str(self.tmp), 'LC_ALL': 'C',
-            'GIT_CONFIG_GLOBAL': os.devnull, 'GIT_CONFIG_NOSYSTEM': '1', 'GIT_TERMINAL_PROMPT': '0',
+            'GIT_CONFIG_GLOBAL': str(config), 'GIT_CONFIG_NOSYSTEM': '1', 'GIT_TERMINAL_PROMPT': '0',
             'GIT_AUTHOR_NAME': 'test', 'GIT_AUTHOR_EMAIL': 'test@example.invalid',
             'GIT_COMMITTER_NAME': 'test', 'GIT_COMMITTER_EMAIL': 'test@example.invalid',
         }
@@ -742,6 +750,27 @@ class ScratchRepository(WorkflowMixin, unittest.TestCase):
                 break
         assert result is not None
         return subprocess.CompletedProcess(result.args, result.returncode, '\n'.join(output), '')
+
+    def test_no_git_here_starts_automatic_maintenance(self) -> None:
+        """#1906: after each class's ``setUp``, a commit, pushes and :meth:`checkout` start no maintenance.
+
+        receive-pack starts it in ``origin`` after a push, detached by default;
+        on git 2.55.0 its repack deleted a loose object :meth:`checkout`'s local
+        clone was copying. trace2 reaches receive-pack where ``GIT_CONFIG_*`` does not.
+
+        """
+        trace = self.tmp / 'trace2.json'
+        self.env['GIT_TRACE2_EVENT'] = str(trace)
+        sha = self.commit(self.VERSION, '1', 'traced')
+        self.push(sha, 'refs/heads/traced')
+        self.push(sha, 'refs/tags/traced')
+        self.checkout(sha)
+        events = [json.loads(line) for line in trace.read_text(encoding='utf-8').splitlines()]
+        self.assertTrue(any('receive-pack' in ' '.join(event.get('argv', ())) for event in events
+                            if event.get('event') == 'start'), 'the trace never reached receive-pack')
+        started = [event['argv'] for event in events if event.get('event') == 'child_start'
+                   and {'maintenance', 'gc'} & set(event.get('argv', ()))]
+        self.assertEqual(started, [])
 
 
 class TestTagJobScripts(ScratchRepository):
@@ -1026,10 +1055,6 @@ class TestTheOwnerStep(ScratchRepository):
 
     def setUp(self) -> None:
         super().setUp()
-        # #1644: no automatic maintenance to race the scratch directory's removal.
-        self.env.update({'GIT_CONFIG_COUNT': '3', 'GIT_CONFIG_KEY_0': 'maintenance.auto', 'GIT_CONFIG_VALUE_0': 'false',
-                         'GIT_CONFIG_KEY_1': 'gc.auto', 'GIT_CONFIG_VALUE_1': '0',
-                         'GIT_CONFIG_KEY_2': 'gc.autoDetach', 'GIT_CONFIG_VALUE_2': 'false'})
         self.output = self.tmp / 'github-output'
         self.env['GITHUB_OUTPUT'] = str(self.output)
         self.run_sha = self.commit(self.VERSION, '0')
@@ -1124,10 +1149,6 @@ class TestTheCountsAreOfTheReleasedTiers(ScratchRepository):
 
     def setUp(self) -> None:
         super().setUp()
-        # #1644: no automatic maintenance to race the scratch directory's removal.
-        self.env.update({'GIT_CONFIG_COUNT': '3', 'GIT_CONFIG_KEY_0': 'maintenance.auto', 'GIT_CONFIG_VALUE_0': 'false',
-                         'GIT_CONFIG_KEY_1': 'gc.auto', 'GIT_CONFIG_VALUE_1': '0',
-                         'GIT_CONFIG_KEY_2': 'gc.autoDetach', 'GIT_CONFIG_VALUE_2': 'false'})
         self.bin = self.tmp / 'bin'
         self.bin.mkdir()
         for name, text in (('python3', f'#!/bin/sh\nexec "{sys.executable}" "$@"\n'), ('curl', FAKE_CURL)):
