@@ -1657,23 +1657,10 @@ class MHUnitTests(unittest.TestCase):
         call. This test fails with the ``TypeError`` above against the tree at
         382375811, before either ruling landed.
         """
-        import sys
-
         from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
                                                    IPv6AddressPrefixCode, LMAAddressCode,
                                                    LocalizedRoutingStatus)
         from pcapkit.utilities.exceptions import EnumKeyError, EnumValueError
-
-        def _drop_tracebacklimit() -> None:
-            # The int-value-miss subTests below reach ``_missing_`` on
-            # ``key`` itself, whose error is quiet inside ``get``'s
-            # ``_CaughtByCaller`` block (#1845), and no pcapkit error sets
-            # this (#362). Restored anyway, so a later test in the
-            # same run cannot read truncated tracebacks because of this one.
-            if hasattr(sys, 'tracebacklimit'):
-                del sys.tracebacklimit
-
-        self.addCleanup(_drop_tracebacklimit)
 
         classes = (FastBindingAcknowledgmentStatus, IPv6AddressPrefixCode,
                    LMAAddressCode, LocalizedRoutingStatus)
