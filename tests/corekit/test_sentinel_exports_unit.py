@@ -239,6 +239,38 @@ def _sentinel_section() -> 'str':
     return path.read_text(encoding='utf-8')
 
 
+#: A "Type" cell: the class name as a literal, or a ``:class:`` role whose target
+#: is that class in :data:`CANONICAL_MODULE`, with or without the leading ``~``.
+_TYPE_CELL = re.compile(r'``(?P<literal>\w+)``|:class:`~?%s\.(?P<role>\w+)`'
+                        % re.escape(CANONICAL_MODULE))
+
+#: A "Defined in" cell: the module name as a literal, or a ``:mod:`` role naming it.
+_MODULE_CELL = re.compile(r'``(?P<literal>[\w.]+)``|:mod:`(?P<role>[\w.]+)`')
+
+
+def _cell_name(pattern: 're.Pattern[str]', cell: 'str') -> 'str | None':
+    """The name a table cell spells, in either markup form; :obj:`None` otherwise."""
+    match = pattern.fullmatch(cell)
+    if match is None:
+        return None
+    return match.group('literal') or match.group('role')
+
+
+def _sentinel_table(section: 'str') -> 'dict[str, tuple[str | None, str | None]]':
+    """The sentinel list-table, as ``{instance: (type name, defining module)}``.
+
+    The instance cell is a literal. The type and module cells are each read
+    through :func:`_cell_name`, so a cell in neither markup form, or one whose
+    role points outside :data:`CANONICAL_MODULE`, reads as :obj:`None`.
+
+    """
+    # The list-table's body: the block after its options, up to the next blank line.
+    table = section.split('.. list-table::', 1)[1].split('\n\n')[1]
+    rows = re.findall(r'(?m)^   \* - ``(\w+)``\n     - (.+)\n     - (.+)$', table)
+    return {instance: (_cell_name(_TYPE_CELL, type_cell), _cell_name(_MODULE_CELL, module_cell))
+            for instance, type_cell, module_cell in rows}
+
+
 class SentinelExportTests(_ReimportCase):
     """``__all__`` names the object and not the type, in the canonical module only."""
 
@@ -377,34 +409,34 @@ class SentinelPopulationTests(_ReimportCase):
                 self.assertRegex(name, pattern)
 
     def test_conventions_doc_lists_every_sentinel_in_the_tree(self) -> 'None':
-        """The doc once stated a count and listed that many; ``_Absent`` was missing.
+        """Every sentinel has a row naming its type and defining module, and no more.
 
         Asserting the names, because a row missing from the table is the defect, and
-        the page now states no count for a row to disagree with (#1103's ruling,
-        #1811). The table's instance column is read back against every singleton
-        :data:`CANONICAL_MODULE` defines, both ways, so a sentinel added there without
-        a row, or a row left for one removed, fails here. The "Defined in" column
-        names :data:`CANONICAL_MODULE` for every row, since GitHub issue #911's
-        housing move gave every sentinel the same defining module -- checked once,
-        outside the loop, rather than once per row against a value that no longer
-        varies.
+        the page states no count for a row to disagree with (#1103's ruling, #1811).
+        Each sentinel's row is read cell by cell through :func:`_sentinel_table`: its
+        "Type" cell names the sentinel's own type class, and its "Defined in" cell
+        names :data:`CANONICAL_MODULE`, which GitHub issue #911's housing ruling
+        makes the defining module of every sentinel. Either cell may be a literal or
+        the matching role, since both render the same name. The table's instance
+        column is then read back against every singleton :data:`CANONICAL_MODULE`
+        defines, both ways, so a sentinel added there without a row, or a row left
+        for one removed, fails here.
 
         """
         section = _sentinel_section()
+        table = _sentinel_table(section)
 
         for name, _, type_ in _sentinels():
             with self.subTest(sentinel=name):
-                self.assertIn(f'``{name}``', section)
-                self.assertIn(f'``{type_.__name__}``', section)
-        self.assertIn(CANONICAL_MODULE, section)
+                self.assertIn(name, table, f'the sentinel table has no ``{name}`` row')
+                self.assertEqual(table[name], (type_.__name__, CANONICAL_MODULE),
+                                 f'the ``{name}`` row does not name {type_.__name__} '
+                                 f'in {CANONICAL_MODULE}')
 
         canonical = importlib.import_module(CANONICAL_MODULE)
         defined = {name for name, value in vars(canonical).items()
                    if not isinstance(value, type) and type(value).__module__ == CANONICAL_MODULE}
-        # The list-table's body: the block after its options, up to the next blank line.
-        table = section.split('.. list-table::', 1)[1].split('\n\n')[1]
-        rows = set(re.findall(r'(?m)^   \* - ``(\w+)``$', table))
-        self.assertEqual(rows, defined)
+        self.assertEqual(set(table), defined)
         self.assertNotIn('The three sentinels deliberately differ', section)
 
     def test_conventions_doc_records_that_only_the_object_is_exported(self) -> 'None':
