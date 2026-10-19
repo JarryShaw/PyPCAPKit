@@ -140,7 +140,7 @@ class PyPCAP(EngineBase['RawFrame']):
         the import test, because the import test cannot answer this question:
         ``import pcap`` succeeds when `pcap-ct`_ is installed and upstream
         `PyPCAP`_ is not, so the guard is satisfied and this engine would run on a
-        distribution it does not drive -- reporting ``PyPCAP`` for work that
+        distribution it does not drive -- reporting :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` for work that
         ``pcap-ct`` did.
 
         The condition is deliberately *not* a Python version ceiling, even though
@@ -200,10 +200,10 @@ class PyPCAP(EngineBase['RawFrame']):
                 hook is only consulted by
                 :meth:`Extractor.run <pcapkit.foundation.extraction.Extractor.run>`;
                 constructing the engine directly bypasses it, and running
-                `pcap-ct`_ under the ``PyPCAP`` name would misreport what did the
-                work. Via ``Extractor`` the hook fires first and degrades to the
-                default engine with a warning, so this is a backstop rather than
-                the usual path.
+                `pcap-ct`_ under the :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` name would
+                misreport what did the work. Via :class:`~pcapkit.foundation.extraction.Extractor`
+                the hook fires first and degrades to the default engine with a warning, so this is a
+                backstop rather than the usual path.
 
         """
         # NOTE: the probe comes *before* ``import pcap`` so that this engine and

@@ -834,38 +834,36 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
         Note:
             Building a member this way, rather than as some other type
             altogether, is why :meth:`PortEnumField.post_process` and
-            ``OptionEnumField.post_process`` (in
-            :mod:`pcapkit.protocols.schema.misc.pcapng`) need this rather than :meth:`_pseudo_member`:
+            :meth:`OptionEnumField.post_process <pcapkit.protocols.schema.misc.pcapng.OptionEnumField.post_process>`
+            need this rather than :meth:`_pseudo_member`:
             the result answers ``isinstance(result, AppType)`` truthfully,
             which :meth:`PortEnumField.pre_process` tests before reading
-            ``.port`` off it, and ``Transport._make_port`` in
-            :mod:`pcapkit.protocols.transport.transport` before passing it
-            through unchanged (see ``test_a_member_is_still_an_apptype`` in
-            ``tests/const/test_const_apptype_split_unit.py``); a value that
-            fails them would be a defect of its own.
+            ``.port`` off it, and
+            :meth:`Transport._make_port <pcapkit.protocols.transport.transport.Transport._make_port>`
+            in :mod:`pcapkit.protocols.transport.transport` before passing it through unchanged (see
+            ``test_a_member_is_still_an_apptype`` in
+            ``tests/const/test_const_apptype_split_unit.py``); a value that fails them would be a
+            defect of its own.
 
             The member this returns is absent from ``_value2member_map_``, so
             a *value*-keyed lookup on it -- ``self._namespace(value)`` --
             still raises. Nothing on the
             parse or reconstruction path does that to a value it just resolved
             this way, which is what keeps this safe to return from
-            ``post_process``. A direct call to ``AppType.get()`` for the same
-            port does not come through here, and it does not mint either: it
-            builds an unregistered member of its own, through the registry's
-            ``_unregistered_member`` -- measured on this tree,
-            ``AppType.get(54321, proto=tcp)`` returns
-            ``<TCP.unknown: 54321 [tcp]>``, ``TCP.__members__`` does not
-            grow, and a second call with the same port returns an equal
-            member rather than the same one. Two
-            unregistered members for the same value also compare equal
-            without being identical, since
+            ``post_process``. A direct call to
+            :meth:`AppType.get() <pcapkit.const.reg.apptype.apptype.AppType.get>` for the same port
+            does not come through here, and it does not mint either: it builds an unregistered
+            member of its own, through the registry's ``_unregistered_member`` -- measured on this
+            tree, ``AppType.get(54321, proto=tcp)`` returns ``<TCP.unknown: 54321 [tcp]>``,
+            ``TCP.__members__`` does not grow, and a second call with the same port returns an equal
+            member rather than the same one. Two unregistered members for the same value also
+            compare equal without being identical, since
             :class:`~pcapkit.const.reg.apptype.apptype.AppType` and
             :class:`~pcapkit.const.pcapng.option_type.OptionType` both define
-            ``__eq__``/``__hash__`` off an attribute (``.port`` /
-            ``.opt_value``) rather than object identity -- harmless for every
-            reader in this package, since none compares one with ``is`` or
-            keys a mapping on it expecting identity, but worth knowing before
-            reusing this elsewhere.
+            ``__eq__``/``__hash__`` off an attribute (``.port`` / ``.opt_value``) rather than object
+            identity -- harmless for every reader in this package, since none compares one with
+            ``is`` or keys a mapping on it expecting identity, but worth knowing before reusing this
+            elsewhere.
 
             :mod:`pickle` and :func:`copy.copy`/:func:`copy.deepcopy` all
             reduce an :class:`~enum.Enum` member through
@@ -1088,7 +1086,7 @@ class PortEnumField(EnumField):
             the port itself, when the registry declares none.
 
         Notes:
-            This peeks at what ``AppType.get()`` itself would
+            This peeks at what :meth:`AppType.get() <pcapkit.const.reg.apptype.apptype.AppType.get>` itself would
             consult -- the per-port rows via ``__registry__.getlist``, then the
             documented IANA spans via
             :meth:`~pcapkit.const.reg.apptype.apptype.AppType._missing_` -- and
@@ -1098,13 +1096,12 @@ class PortEnumField(EnumField):
             :issue:`860`), and the registry does not grow either way
             (:issue:`1774`). It exists because that member is not the one a
             parse needs. ``get`` builds it through
-            ``AppType._unregistered_member``, which installs no
-            ``__reduce_ex__``, so ``pickle.loads(pickle.dumps(...))`` raises
-            ``ValueError: 'unknown [50000 - tcp]' is not a valid TCP``; and its
-            ``.name`` is ``'unknown'``, so it dumps as ``TCP::unknown [...]``
-            rather than as the ``TCP::<unassigned> [...]`` of every other
-            unassigned wire value. A genuine miss therefore builds its member
-            through :meth:`EnumField._unregistered_member` instead.
+            :meth:`AppType._unregistered_member <pcapkit.const.reg.apptype.apptype.AppType._unregistered_member>`,
+            which installs no ``__reduce_ex__``, so ``pickle.loads(pickle.dumps(...))`` raises
+            ``ValueError: 'unknown [50000 - tcp]' is not a valid TCP``; and its ``.name`` is
+            ``'unknown'``, so it dumps as ``TCP::unknown [...]`` rather than as the
+            ``TCP::<unassigned> [...]`` of every other unassigned wire value. A genuine miss
+            therefore builds its member through :meth:`EnumField._unregistered_member` instead.
 
             That member carries the registry's own ``__transport__``, as
             ``get``'s does, rather than ``self._proto``. The two are the same
@@ -1118,19 +1115,17 @@ class PortEnumField(EnumField):
             :meth:`~pcapkit.const.reg.apptype.apptype.AppType._missing_`, which
             raises a bare :exc:`ValueError` for it. That call sits inside an
             ``except ValueError`` that absorbs a foreign miss, and
-            ``AppType.get()`` rejects the out-of-range case deliberately, so
-            that it is never minted over -- a
-            catch keyed on exception type alone cannot see the difference
-            between that and a "no member has this value", so it would quietly
-            turn the rejection into a miss. Within the width, ``_missing_``
-            raises for no port of any per-transport registry: it returns a
-            member for a documented span and :data:`None` otherwise. Checking
-            the width first needs no exception-based distinction at all.
-            ``self.length`` is the field's own declared byte width (``2`` for
-            every caller of this class, hence ``0``-``65535``)
-            rather than a hard-coded ``65535`` borrowed from
-            :meth:`~pcapkit.const.reg.apptype.apptype.AppType._missing_`'s own guard,
-            so the two stay in lockstep by construction.
+            :meth:`AppType.get() <pcapkit.const.reg.apptype.apptype.AppType.get>` rejects the
+            out-of-range case deliberately, so that it is never minted over -- a catch keyed on
+            exception type alone cannot see the difference between that and a "no member has this
+            value", so it would quietly turn the rejection into a miss. Within the width,
+            ``_missing_`` raises for no port of any per-transport registry: it returns a member for
+            a documented span and :data:`None` otherwise. Checking the width first needs no
+            exception-based distinction at all. ``self.length`` is the field's own declared byte
+            width (``2`` for every caller of this class, hence ``0``-``65535``) rather than a
+            hard-coded ``65535`` borrowed from
+            :meth:`~pcapkit.const.reg.apptype.apptype.AppType._missing_`'s own guard, so the two
+            stay in lockstep by construction.
 
         """
         value = super(EnumField, self).post_process(value, packet)

@@ -389,7 +389,7 @@ class ARP(Link[Data_ARP, Schema_ARP],
             Protocol address. If ``ptype`` is ``0x0800`` (IPv4) and ``addr`` is
             4 octets, an :class:`~ipaddress.IPv4Address`; if ``0x86dd`` (IPv6)
             and 16 octets, an :class:`~ipaddress.IPv6Address`; otherwise, the
-            address as a hex :data:`str`.
+            address as a hex :class:`str`.
 
         """
         if ptype == Enum_EtherType.Internet_Protocol_version_4 and len(addr) == 4:  # IPv4
@@ -409,14 +409,14 @@ class ARP(Link[Data_ARP, Schema_ARP],
             Hardware address packed as raw octets. If ``htype`` is ``1``, i.e.
             MAC address, the ``:``- or ``-``-separated *hex* encoded MAC address
             is validated and packed, one octet per group (an empty string packs
-            as no octets); otherwise, a :data:`str` is
+            as no octets); otherwise, a :class:`str` is
             taken as the *hex* encoded address that :meth:`_read_addr_resolve`
             returns, and :obj:`bytes` are returned as given.
 
         Raises:
             ProtocolError: If ``htype`` is ``1`` and ``addr`` is not a
                 well-formed MAC address, or if ``htype`` is not ``1`` and
-                ``addr`` is a :data:`str` that is not *hex* encoded.
+                ``addr`` is a :class:`str` that is not *hex* encoded.
 
         """
         if htype == Enum_Hardware.Ethernet:
@@ -444,7 +444,7 @@ class ARP(Link[Data_ARP, Schema_ARP],
             Packed protocol address. If ``ptype`` is ``0x0800`` (IPv4) or
             ``0x86dd`` (IPv6), and ``plen`` is either not given or 4 or 16
             respectively, the address is validated and packed to 4 or 16
-            octets; otherwise, a :data:`str` is taken as the *hex* encoded
+            octets; otherwise, a :class:`str` is taken as the *hex* encoded
             address that :meth:`_read_proto_resolve` returns, an
             :class:`~ipaddress.IPv4Address`/:class:`~ipaddress.IPv6Address` is
             packed, and anything else is returned as given.
@@ -453,10 +453,10 @@ class ARP(Link[Data_ARP, Schema_ARP],
             FieldValueError: If ``addr`` is a :obj:`bool` (see
                 :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`).
             ProtocolError: If ``ptype`` is neither IPv4 nor IPv6 and ``addr``
-                is a :data:`str` that is not *hex* encoded.
+                is a :class:`str` that is not *hex* encoded.
 
         Notes:
-            Through :func:`parse_ip_address` rather than
+            Through :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address` rather than
             :class:`~ipaddress.IPv4Address`/:class:`~ipaddress.IPv6Address`
             directly, because :obj:`bool` is an :class:`int` subclass that
             either constructor accepts without complaint: ``addr=True`` would

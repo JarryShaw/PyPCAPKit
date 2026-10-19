@@ -112,6 +112,10 @@ Auxiliary Functions
 
 .. autofunction:: pcapkit.protocols.application.ngap.load_pycrate
 
+.. autofunction:: pcapkit.protocols.application.ngap._convert
+
+.. autofunction:: pcapkit.protocols.application.ngap._revert
+
 Auxiliary Data
 --------------
 
@@ -122,6 +126,12 @@ Auxiliary Data
 .. autoclass:: pcapkit.protocols.application.ngap.Criticality
    :members:
    :show-inheritance:
+
+.. autodata:: pcapkit.protocols.application.ngap._PYCRATE
+   :no-value:
+
+.. autodata:: pcapkit.protocols.application.ngap._PDU_LOCK
+   :no-value:
 
 Header Schemas
 --------------

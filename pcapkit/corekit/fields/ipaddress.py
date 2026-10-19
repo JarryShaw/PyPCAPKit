@@ -86,7 +86,7 @@ def _reject_bool(value: 'object', description: str) -> 'None':
     Args:
         value: Value to check.
         description: Human-readable description of what ``value`` is, used
-            to build the :exc:`FieldValueError` message.
+            to build the :exc:`~pcapkit.utilities.exceptions.FieldValueError` message.
 
     Raises:
         FieldValueError: If ``value`` is a :obj:`bool`.
@@ -385,17 +385,21 @@ class _RawMaskIPv4Interface(ipaddress.IPv4Interface):
     sorts ``address/32``, then by mask, so the order stays total when mixed
     with :class:`ipaddress.IPv4Interface` values.
 
-    Such a mask has no prefix length, so :attr:`network`, :attr:`with_prefixlen`
-    and the prefix length all describe the address alone (``/32``); only
-    :attr:`netmask`, :attr:`hostmask`, :attr:`with_netmask` and
-    :attr:`with_hostmask` carry the mask. :attr:`with_netmask` is always
-    dotted, so it is not the round-trip form; :class:`str` is.
+    Such a mask has no prefix length, so
+    :attr:`~ipaddress.IPv4Interface.network`,
+    :attr:`~ipaddress.IPv4Interface.with_prefixlen` and the prefix length all
+    describe the address alone (``/32``); only :attr:`netmask`,
+    :attr:`hostmask`, :attr:`~ipaddress.IPv4Interface.with_netmask` and
+    :attr:`~ipaddress.IPv4Interface.with_hostmask` carry the mask.
+    :attr:`~ipaddress.IPv4Interface.with_netmask` is always dotted, so it is
+    not the round-trip form; :class:`str` is.
 
     """
 
     def __init__(self, address: 'str') -> 'None':
         addr, _, mask = address.partition('/')
         super().__init__(addr)
+        #: Mask octets as given, which need not form a contiguous netmask.
         self.netmask = _parse_literal_mask(mask)
 
     @property

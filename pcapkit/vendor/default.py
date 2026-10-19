@@ -552,11 +552,11 @@ class Vendor(metaclass=VendorMeta):
         ``vendor/reg/apptype/tcp.py`` to ``vendor/const/apptype/tcp.py``,
         *inside* ``vendor/`` itself rather than under ``pcapkit/const/``.
 
-        ``pcapkit.vendor`` is imported here, inside the method, rather than at
+        :mod:`pcapkit.vendor` is imported here, inside the method, rather than at
         module scope: it imports *this* module while it is still initialising
         (see ``pcapkit/vendor/__init__.py``), so a module-level import would have
         to reason about that partial state. By the time any concrete
-        :class:`Vendor` subclass is instantiated, ``pcapkit.vendor`` has always
+        :class:`Vendor` subclass is instantiated, :mod:`pcapkit.vendor` has always
         finished importing.
 
         That relative-path mirroring is only safe once the module is confirmed
@@ -569,7 +569,7 @@ class Vendor(metaclass=VendorMeta):
         from a module that never sits under ``vendor/`` at all, resolves
         :mod:`pcapkit.vendor` from wherever it is installed while
         ``inspect.getfile(cls)`` names a file elsewhere entirely --  and
-        ``Vendor.__init__`` then opens that path with ``'w'``, silently
+        :meth:`Vendor.__init__ <pcapkit.vendor.default.Vendor.__init__>` then opens that path with ``'w'``, silently
         truncating whatever :attr:`~Vendor.__module__` actually names instead of
         raising. So the escape is rejected outright, rather than trusted to
         produce a harmless-looking wrong path.

@@ -145,9 +145,9 @@ class ProcedureCode(Vendor):
         identifier verbatim (``'id-AMFConfigurationUpdate'``), and a private
         ``_val`` holding the assigned integer. None of these has a public
         accessor that survives this far:
-        :meth:`~pycrate_asn1rt.asnobj.ASN1Obj.get_typeref`
+        ``pycrate_asn1rt.asnobj.ASN1Obj.get_typeref``
         resolves to the *referenced type object* rather than its
-        ``(module, name)`` pair, and that object's own :meth:`get_name` reads
+        ``(module, name)`` pair, and that object's own ``get_name`` reads
         :obj:`None` here despite :func:`repr` showing the name -- measured
         against pycrate 0.8.1. Reading the private attributes directly is
         therefore the only way to recover what this crawler needs, which is a

@@ -81,3 +81,23 @@ following objects and functions:
 
       Taken from ``typing_extensions`` below Python 3.11 rather than 3.8, so
       that ``__final__`` is recorded on every supported version (:issue:`778`).
+
+.. function:: unquote(string, encoding='utf-8', errors='replace')
+
+   :func:`urllib.parse.unquote`, which accepts :class:`bytes` from Python 3.9 on.
+   Below 3.9, a :class:`bytes` ``string`` is unquoted to octets with
+   :func:`urllib.parse.unquote_to_bytes` and then decoded with ``encoding`` and
+   ``errors``.
+
+.. data:: default_threading_excepthook
+
+   The interpreter's own default thread exception hook, even when
+   :func:`threading.excepthook` has been replaced:
+   :data:`threading.__excepthook__` from Python 3.10 on, ``_thread._excepthook``
+   on 3.8 and 3.9, and :data:`None` below 3.8, which has no thread exception hook.
+
+.. class:: cached_property(func)
+
+   :func:`functools.cached_property` from Python 3.8 on. Below 3.8 it is a backport
+   of CPython's own implementation, kept verbatim so that it can be diffed against
+   upstream.

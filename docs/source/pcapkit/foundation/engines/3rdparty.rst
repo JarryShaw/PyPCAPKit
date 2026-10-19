@@ -189,8 +189,9 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    engine therefore checks which of the two it got and raises
    :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` when it is `pcap-ct`_,
    naming ``engine='pcap_ct'`` in the message. Running `pcap-ct`_ under the
-   ``PyPCAP`` name would report an engine that is not the one in use, and the two
-   have different install requirements and different version coverage to report.
+   :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` name would report an engine that is
+   not the one in use, and the two have different install requirements and different
+   version coverage to report.
 
 .. important::
 
@@ -231,6 +232,8 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    .. autoattribute:: _dlink
    .. autoattribute:: _closed
 
+   .. automethod:: __init__
+
 pcap-ct Support
 ===============
 
@@ -259,7 +262,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
       pip install pypcapkit[PCAP_CT]
 
    Together these engines cover every interpreter the project supports, and
-   ``PCAP_CT`` covers all of it on its own:
+   :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` covers all of it on its own:
 
    =========================================================================  ==================
    Engine                                                                     Python
@@ -417,6 +420,8 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    .. autoattribute:: _extmp
    .. autoattribute:: _dlink
    .. autoattribute:: _declf
+
+   .. automethod:: __init__
 
 Internal Definitions
 --------------------

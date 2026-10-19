@@ -32,6 +32,8 @@ which tells whether a payload opens with an HTTP/1.* start line.
 
    .. autoattribute:: _preface_length
 
+   .. automethod:: from_data
+
 .. autofunction:: pcapkit.protocols.application.http.test_start_line
 
 .. autodata:: pcapkit.protocols.application.http._HTTP2_PREFACE

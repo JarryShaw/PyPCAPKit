@@ -33,6 +33,14 @@ class Method(EnumRegistry, StrEnum):
 
     def __new__(cls, value: 'str', safe: 'bool' = False,
                 idempotent: 'bool' = False) -> 'Type[Method]':
+        """Create a member from a registry row.
+
+        Args:
+            value: Method token, which is also the member's value.
+            safe: Whether the method is safe.
+            idempotent: Whether the method is idempotent.
+
+        """
         obj = str.__new__(cls, value)
         obj._value_ = value
 

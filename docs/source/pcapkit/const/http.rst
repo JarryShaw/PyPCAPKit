@@ -57,23 +57,25 @@ which is automatically generated from :class:`pcapkit.vendor.http.method.Method`
 
 .. versionchanged:: 1.5.0
 
-   Neither ``Method._missing_`` nor ``Method.get()`` mints a member
-   (:issue:`860`): only IANA-registered values are members, and a new one is
-   created through :meth:`~pcapkit.corekit.enum.EnumRegistry.register`, which
-   can supply the ``safe`` and ``idempotent`` a bare wire method verb carries
-   neither of. A member's :class:`str` payload is its value, so
-   ``Method.GET == 'GET'`` (:issue:`870`).
+   Neither :meth:`Method._missing_ <pcapkit.const.http.method.Method._missing_>` nor
+   :meth:`Method.get() <pcapkit.const.http.method.Method.get>` mints a member
+   (:issue:`860`): only IANA-registered values are members, and a new one is created
+   through :meth:`~pcapkit.corekit.enum.EnumRegistry.register`, which can supply the
+   ``safe`` and ``idempotent`` a bare wire method verb carries neither of. A member's
+   :class:`str` payload is its value, so ``Method.GET == 'GET'`` (:issue:`870`).
 
-   ``Method.get()`` matches ``key`` case-sensitively, as :rfc:`9110` makes the
-   method token (:issue:`896`), and checks it against member values as well as
-   names (:issue:`908`). A non-:class:`str` ``key`` raises :exc:`ValueError`
-   (:issue:`908`): ``get(42)`` and ``get(None)`` raised :exc:`AttributeError`
-   from ``key.upper()``, and ``get(b'GET')`` raised :exc:`TypeError`.
+   :meth:`Method.get() <pcapkit.const.http.method.Method.get>` matches ``key``
+   case-sensitively, as :rfc:`9110` makes the method token (:issue:`896`), and checks it
+   against member values as well as names (:issue:`908`). A non-:class:`str` ``key``
+   raises :exc:`ValueError` (:issue:`908`): ``get(42)`` and ``get(None)`` raised
+   :exc:`AttributeError` from ``key.upper()``, and ``get(b'GET')`` raised
+   :exc:`TypeError`.
 
 .. autoclass:: pcapkit.const.http.method.Method
    :members:
    :undoc-members:
    :show-inheritance:
+   :special-members: __new__
 
 HTTP/2 Settings
 ===============
@@ -100,6 +102,7 @@ which is automatically generated from :class:`pcapkit.vendor.http.status_code.St
    :members:
    :undoc-members:
    :show-inheritance:
+   :special-members: __new__, __str__
 
 .. rubric:: Footnotes
 

@@ -38,21 +38,17 @@ override, which cannot know to pass ``quiet=True`` itself (:issue:`1845`).
 
    In 1.4.x, ``quiet=True`` logged at ``ERROR`` instead of ``CRITICAL`` rather
    than not logging, and :data:`sys.tracebacklimit` was set on both paths. A
-   single ``MultiDict.get()`` miss therefore produced an ``ERROR`` record -- one
-   per frame when parsing unfragmented IPv6 with reassembly enabled -- and
-   truncated the tracebacks of unrelated exceptions for the rest of the process.
-   Those records never corresponded to a fault; to observe internal lookup
+   single :meth:`MultiDict.get() <pcapkit.corekit.multidict.MultiDict.get>` miss therefore
+   produced an ``ERROR`` record -- one per frame when parsing unfragmented IPv6 with
+   reassembly enabled -- and truncated the tracebacks of unrelated exceptions for the rest
+   of the process. Those records never corresponded to a fault; to observe internal lookup
    misses, catch the exception rather than read the log (:issue:`362`).
 
 .. autoexception:: pcapkit.utilities.exceptions.BaseError
    :no-members:
    :show-inheritance:
 
-   :param quiet: If :data:`True`, the error is neither logged nor allowed to
-      install the exception hook; it is raised silently, as internal control
-      flow.
-   :param \*args: Arbitrary positional arguments.
-   :param \*\*kwargs: Arbitrary keyword arguments.
+   .. automethod:: __init__
 
 .. autoclass:: pcapkit.utilities.exceptions.CaughtByCaller
    :no-members:
@@ -296,6 +292,12 @@ Error Handling Utilities
 ------------------------
 
 .. autofunction:: pcapkit.utilities.exceptions.stacklevel
+
+.. autofunction:: pcapkit.utilities.exceptions._install_excepthook
+
+.. autofunction:: pcapkit.utilities.exceptions._excepthook
+
+.. autofunction:: pcapkit.utilities.exceptions._threading_excepthook
 
 .. rubric:: Footnotes
 

@@ -38,6 +38,8 @@ below:
 
    .. automethod:: __index__
 
+   .. automethod:: _make_mac_addr
+
 Header Schemas
 --------------
 

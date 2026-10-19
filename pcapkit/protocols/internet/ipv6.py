@@ -763,20 +763,21 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             rather than letting the exception reach the
             :func:`~pcapkit.corekit.decorators.beholder` decorating this
             method, which would substitute plain
-            :class:`~pcapkit.protocols.misc.raw.Raw` -- and ``Raw`` has no
+            :class:`~pcapkit.protocols.misc.raw.Raw` -- and :class:`~pcapkit.protocols.misc.raw.Raw` has no
             ``next`` field, so it could not continue
             :meth:`_decode_next_layer`'s walk. Every other exception --
-            including one raised by ``IPv6_Ext`` itself, or by ``ESP``'s own
-            dedicated parser -- still reaches ``beholder`` unchanged, giving a
-            plain ``Raw`` for that one layer. ``253`` and ``254`` have no
-            dedicated parser, so they reach plain ``Raw`` with no exception
-            involved; :meth:`_decode_next_layer` stops its walk structurally on
-            any layer whose info carries no ``next`` attribute, ``Raw``
-            included. ``ESP``'s info always carries a ``next`` (:data:`None`
-            unless its payload was decrypted, since :rfc:`4303` encrypts the
-            real value), so neither this substitution nor that structural
-            check engages for it, and the walk ends after it -- see
-            :attr:`__generic_ext_codes__`'s docstring for the full distinction.
+            including one raised by :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` itself,
+            or by :class:`~pcapkit.protocols.internet.esp.ESP`'s own dedicated parser -- still
+            reaches ``beholder`` unchanged, giving a plain :class:`~pcapkit.protocols.misc.raw.Raw`
+            for that one layer. ``253`` and ``254`` have no dedicated parser, so they reach plain
+            :class:`~pcapkit.protocols.misc.raw.Raw` with no exception involved;
+            :meth:`_decode_next_layer` stops its walk structurally on any layer whose info carries
+            no ``next`` attribute, :class:`~pcapkit.protocols.misc.raw.Raw` included.
+            :class:`~pcapkit.protocols.internet.esp.ESP`'s info always carries a ``next``
+            (:data:`None` unless its payload was decrypted, since :rfc:`4303` encrypts the real
+            value), so neither this substitution nor that structural check engages for it, and the
+            walk ends after it -- see :attr:`__generic_ext_codes__`'s docstring for the full
+            distinction.
 
             The upper layer past a walk cut at :data:`EXTENSION_HEADER_LIMIT
             <pcapkit.utilities.config.EXTENSION_HEADER_LIMIT>` is the

@@ -310,9 +310,9 @@ MAX_ZERO_PAD_LENGTH = read_limit('MAX_ZERO_PAD_LENGTH', 0x40_000, risk=(
 #: ceiling is honoured however often it is declared. Measured for :issue:`573`, 200
 #: minimal PCAP-NG Decryption Secrets Blocks -- 4,800 wire octets, each block
 #: declaring ``secrets_length`` of 262,142 against two supplied octets through
-#: ``UnknownSecrets.data`` (``pcapkit/protocols/schema/misc/pcapng.py``) --
-#: retained 50.0 MiB, an amplification of 10,922x per block. Every individual
-#: field was under the ceiling, so nothing refused any of them.
+#: :attr:`UnknownSecrets.data <pcapkit.protocols.schema.misc.pcapng.UnknownSecrets.data>`
+#: (``pcapkit/protocols/schema/misc/pcapng.py``) -- retained 50.0 MiB, an amplification of 10,922x
+#: per block. Every individual field was under the ceiling, so nothing refused any of them.
 #:
 #: The sum therefore wants a budget, and this is the figure that makes one
 #: *safe*. A budget on its own is not: a capture cut short by its snapshot length

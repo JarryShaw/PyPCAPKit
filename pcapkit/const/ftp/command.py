@@ -218,7 +218,7 @@ class CommandType(EnumLookup, IntFlag):
     issue :issue:`930`, finishing :issue:`877`'s phase 2. Pure re-parenting as far as
     ``get``/``get_all`` are concerned -- this class defines no ``get`` of its
     own to reconcile with the base -- and its own :meth:`_missing_` range
-    guard below is untouched, since :class:`EnumLookup` does not touch that
+    guard below is untouched, since :class:`~pcapkit.corekit.enum.EnumLookup` does not touch that
     hook.
 
     """
@@ -280,6 +280,16 @@ class Command(EnumRegistry, StrEnum):
     def __new__(cls, name: 'str', feat: 'Optional[FEATCode]' = None,
                 desc: 'Optional[str]' = None, type: 'CommandType' = CommandType.undefined,
                 conf: 'ConformanceRequirement' = ConformanceRequirement.O) -> 'Type[Command]':
+        """Create a member from a registry row.
+
+        Args:
+            name: Command word, which is also the member's value.
+            feat: Feature code of the ``FEAT`` response line for the command.
+            desc: Brief description of the command.
+            type: Kind of command, based on :rfc:`959#section-4`.
+            conf: Expectation for support in modern FTP implementations.
+
+        """
         obj = str.__new__(cls, name)
         obj._value_ = name
 
@@ -291,6 +301,7 @@ class Command(EnumRegistry, StrEnum):
         return obj
 
     def __repr__(self) -> 'str':
+        """Show the member with its description, as ``<Command.NAME: description>``."""
         return f'<{self.__class__.__name__}.{self._name_}: {self.desc}>'
 
     #: Abort [:rfc:`959`]
@@ -570,7 +581,7 @@ class Command(EnumRegistry, StrEnum):
         ``super()`` needs a first argument to bind. ``Command.get('X')`` binds
         the same as it would on a :class:`staticmethod`.
 
-        ``default`` is not forwarded on that path, as ``Method.get`` does not
+        ``default`` is not forwarded on that path, as :meth:`Method.get <pcapkit.const.http.method.Method.get>` does not
         forward its own: here it supplies the *value* of the unregistered
         member built on a name miss, while the base's ``default`` must name a
         *registered* value. A refused ``key`` therefore raises whatever

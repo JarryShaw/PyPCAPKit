@@ -470,7 +470,7 @@ class NoDefaultType(Sentinel):
     .. note::
 
        Reloading :mod:`pcapkit.corekit.enum` alone does not produce a fresh
-       :data:`NO_DEFAULT`. That module does not define ``NoDefaultType``; it
+       :data:`NO_DEFAULT`. That module does not define :class:`~pcapkit.corekit.sentinels.NoDefaultType`; it
        reads :data:`NO_DEFAULT` off this module once, at its own import time,
        into its own module global, and a reload just re-runs that read,
        which -- so long as this module has not *also* been reloaded --
@@ -551,7 +551,7 @@ class AbsentType(Sentinel):
 
 
 #: AbsentType: Absent-versus-:obj:`None` sentinel for
-#: ``pcapkit.protocols.protocol._declared_keywords()`` to read a class's
+#: :func:`pcapkit.protocols.protocol._declared_keywords` to read a class's
 #: own ``__keywords__`` out of its :attr:`~object.__dict__`, where
 #: :obj:`None` is itself a meaningful value -- the opt-out that says the
 #: class cannot enumerate its keywords, cf.

@@ -28,12 +28,16 @@ values per key, based on the `Werkzeug`_ project.
    .. automethod:: poplist
    .. automethod:: popitemlist
 
+   .. automethod:: deepcopy
+
 .. autoclass:: pcapkit.corekit.multidict.OrderedMultiDict
    :no-members:
    :no-special-members: __init__
    :show-inheritance:
 
    .. automethod:: deepcopy
+
+   .. automethod:: items
 
 Type Variables
 --------------

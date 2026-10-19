@@ -129,6 +129,18 @@ class DeferredPacket:
         return value
 
     def __getattr__(self, name: 'str') -> 'Any':
+        """Resolve ``packet`` on first access; any other missing name raises.
+
+        Args:
+            name: Attribute name, reached only when it is absent from ``__dict__``.
+
+        Returns:
+            The resolved ``packet``, through :meth:`__analyse__`.
+
+        Raises:
+            AttributeError: If ``name`` is not ``packet``.
+
+        """
         # NOTE: reached only for names absent from ``__dict__``, which ``packet``
         # always is -- see ``__additional__`` in the module docstring. Everything
         # else has to raise, or a typo would silently answer with the resolved

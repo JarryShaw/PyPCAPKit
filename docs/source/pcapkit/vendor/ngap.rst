@@ -28,7 +28,7 @@ This module contains the vendor crawler for **NGAP Elementary Procedure Codes**,
 which is automatically generating :class:`pcapkit.const.ngap.procedure_code.ProcedureCode`.
 
 .. autoclass:: pcapkit.vendor.ngap.procedure_code.ProcedureCode
-   :members: FLAG
+   :members: FLAG, _request
    :show-inheritance:
 
 NGAP Protocol IE Identifiers

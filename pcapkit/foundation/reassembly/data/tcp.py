@@ -158,7 +158,7 @@ class HoleDescriptor(Info):
 
        ``HoleDiscriptor``, and its re-export
        ``pcapkit.foundation.reassembly.data.TCP_HoleDiscriptor``, with no
-       alias; import ``HoleDescriptor`` and ``TCP_HoleDescriptor`` instead.
+       alias; import :class:`~pcapkit.foundation.reassembly.data.tcp.HoleDescriptor` and ``TCP_HoleDescriptor`` instead.
 
     """
 

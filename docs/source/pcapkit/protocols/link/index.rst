@@ -12,8 +12,8 @@ link layer, with detailed implementation and methods.
 
    ``pcapkit.protocols.link.OSPF``, ``pcapkit.protocols.link.RARP`` and
    ``pcapkit.protocols.link.DRARP``, and ``OSPF`` and
-   ``OSPF_CrytographicAuthentication`` in ``pcapkit.protocols.data.link`` and
-   ``pcapkit.protocols.schema.link``, with no alias. The protocols moved to
+   ``OSPF_CrytographicAuthentication`` in :mod:`pcapkit.protocols.data.link` and
+   :mod:`pcapkit.protocols.schema.link`, with no alias. The protocols moved to
    :mod:`pcapkit.protocols.application` (:issue:`719`); see
    :class:`~pcapkit.protocols.application.ospf.OSPF` and
    :class:`~pcapkit.protocols.application.rarp.RARP`.

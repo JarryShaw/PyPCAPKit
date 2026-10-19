@@ -412,7 +412,7 @@ def _register_name(protocol: 'Type[ProtocolBase]', *targets: 'tuple[type, Any]')
 #: lets ``code=`` infer a destination from a key's own type, per :issue:`514`. It
 #: is the same targeting :func:`register_ethertype`, :func:`register_transtype`,
 #: :func:`register_linktype` and :func:`register_sctp` hard-code by hand, in one
-#: table so :func:`register_protocol_code` can consult it. ``LinkType`` naming
+#: table so :func:`register_protocol_code` can consult it. :class:`~pcapkit.const.reg.linktype.LinkType` naming
 #: more than one class is deliberate, not ambiguous -- :func:`register_linktype`
 #: already fans out to each of them.
 _CODE_DESTINATIONS: 'dict[type, tuple[Type[ProtocolBase], ...]]' = {
@@ -514,10 +514,10 @@ def register_protocol_code(protocol: 'Type[ProtocolBase]', code: 'Any') -> 'None
         v3 that is genuinely reachable both ways: :rfc:`3931` §4.1.1 puts it
         directly over IP on protocol 115 and §4.1.2 puts it over UDP on port
         1701. :class:`L2TPv2 <pcapkit.protocols.link.l2tpv2.L2TPv2>` answers on
-        port 1701 only, and registering *it* at ``TransType.L2TP`` would point
-        the :rfc:`2661` parser at a v3-over-IP header -- see
-        :class:`~pcapkit.protocols.link.l2tp.L2TP` and GitHub issue :issue:`548` for
-        what that produced when measured.
+        port 1701 only, and registering *it* at
+        :attr:`TransType.L2TP <pcapkit.const.reg.transtype.TransType.L2TP>` would point the
+        :rfc:`2661` parser at a v3-over-IP header -- see :class:`~pcapkit.protocols.link.l2tp.L2TP`
+        and GitHub issue :issue:`548` for what that produced when measured.
 
     Args:
         protocol: Protocol class to register.

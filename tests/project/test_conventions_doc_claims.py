@@ -724,8 +724,8 @@ class AenumRoleExclusionTests(unittest.TestCase):
     #: The qualified sentinel references part B's fix relies on: the role,
     #: the dotted target, and how many times that exact pairing has to appear.
     QUALIFIED_SENTINEL_REFS = (
-        (':class:', '~pcapkit.corekit.sentinels.AbsentType', 2),
-        (':class:', '~pcapkit.corekit.sentinels.NoValueType', 1),
+        (':class:', '~pcapkit.corekit.sentinels.AbsentType', 3),
+        (':class:', '~pcapkit.corekit.sentinels.NoValueType', 2),
         (':data:', '~pcapkit.corekit.sentinels.ABSENT', 1),
     )
 
@@ -1077,7 +1077,7 @@ class GetOverrideContractTests(unittest.TestCase):
         row = page[start:page.index('\n   * - ', start)]
         for klass in helpers:
             with self.subTest(named=klass.__name__):
-                self.assertIn(f'``{klass.__name__}``', row,
+                self.assertIn(f':class:`~{klass.__module__}.{klass.__name__}`', row,
                               'the audit table\'s helper row no longer names this helper')
 
         for klass in helpers:

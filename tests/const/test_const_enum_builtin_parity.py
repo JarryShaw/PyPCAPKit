@@ -1337,7 +1337,8 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
             with self.subTest(vendor=vendor_name):
                 source = inspect.getsource(importlib.import_module(vendor_name))
                 repr_def = source[source.index("def __repr__(self) -> 'str':"):]
-                repr_line = repr_def.splitlines()[1]
+                repr_line = next(line for line in repr_def.splitlines()[1:]
+                                 if line.strip().startswith('return'))
                 self.assertNotIn('%', repr_line,
                                   f'{vendor_name} template still emits a %-formatted __repr__; '
                                   f'see GitHub issue #818')

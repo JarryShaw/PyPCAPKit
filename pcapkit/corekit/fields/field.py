@@ -69,7 +69,7 @@ _T = TypeVar('_T')
 #:
 #: Be precise about what that means in practice, because nothing in this package
 #: calls :func:`_zero_pad_budget` -- so the bound as shipped is over everything a
-#: context has ever parsed, not over one ``Extractor`` run. It is still a bound,
+#: context has ever parsed, not over one :class:`~pcapkit.foundation.extraction.Extractor` run. It is still a bound,
 #: and still proportionate: total padding past
 #: :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL` stays within
 #: ``MAX_ZERO_PAD_LENGTH + ZERO_PAD_BUDGET_RATIO`` times the octets that
@@ -98,7 +98,7 @@ def _zero_pad_budget() -> 'Iterator[list[int]]':
     bound :meth:`FieldBase.unpack` enforces is over everything that context has
     parsed. Entering this scope starts a fresh ledger and restores the previous
     one afterwards, which is what makes the bound *per parse* -- per
-    ``Extractor`` run, per file, per frame -- for a caller that wants it that
+    :class:`~pcapkit.foundation.extraction.Extractor` run, per file, per frame -- for a caller that wants it that
     way, and what makes it reproducible for a test.
 
     Note that nothing in this package calls it: the layer that knows where
@@ -126,8 +126,9 @@ def _zero_pad_budget() -> 'Iterator[list[int]]':
 #: ``f'{length}s'`` (see :mod:`pcapkit.corekit.fields.strings`,
 #: :mod:`~pcapkit.corekit.fields.misc`, :mod:`~pcapkit.corekit.fields.collections`
 #: and, before it gets byte-order-prefixed, :mod:`~pcapkit.corekit.fields.numbers`
-#: -- :meth:`NumberField.build_template <pcapkit.corekit.fields.numbers.
-#: NumberField.build_template>`'s ``else`` arm), so a negative resolved length
+#: --
+#: :meth:`NumberField.build_template <pcapkit.corekit.fields.numbers.NumberField.build_template>`'s
+#: ``else`` arm), so a negative resolved length
 #: always leaves that literal ``-`` immediately before the digits. What
 #: :class:`~pcapkit.corekit.fields.numbers.NumberField` adds is a byte-order
 #: prefix -- one of ``'@=<>!'`` -- *in front of* that whole template

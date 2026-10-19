@@ -305,13 +305,11 @@ def nonnegative(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict[st
         That distinction is what keeps the decryption-secrets payloads --
         :attr:`UnknownSecrets.data`, :attr:`TLSKeyLog.data` and
         :attr:`WireGuardKeyLog.data` -- out of this. They read ``__length__``
-        *whole* rather than subtracting from it, and ``Schema.pack`` leaves it at
-        ``-1`` for "unknown", so flooring them packs nothing at all. On the
-        parsing path their
-        ``__length__`` is the length the enclosing
-        :class:`~pcapkit.corekit.fields.misc.SchemaField` declared from a 32-bit
-        ``secrets_length``, which cannot be negative, so there is nothing there to
-        floor.
+        *whole* rather than subtracting from it, and
+        :meth:`Schema.pack <pcapkit.protocols.schema.schema.Schema.pack>` leaves it at ``-1`` for
+        "unknown", so flooring them packs nothing at all. On the parsing path their ``__length__``
+        is the length the enclosing :class:`~pcapkit.corekit.fields.misc.SchemaField` declared from
+        a 32-bit ``secrets_length``, which cannot be negative, so there is nothing there to floor.
 
     """
     def callback(pkt: 'dict[str, Any]') -> 'int':
@@ -421,13 +419,13 @@ def bounded_area(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict[s
 
     :func:`bounded_option` refuses a payload that runs past the area, and the
     area is sized from the block's declared Block Total Length. Nothing checks
-    that length against the file: ``BlockType.post_process`` compares
-    ``length`` only against its own trailing copy. A block declaring 1,000,000
-    octets while holding 36 would therefore size its option area at 999,964,
-    read the trailing Block Total Length into it, and leave that field to be
-    zero-filled. Clamping the area to ``__length__`` keeps the trailing length
-    out of the area, so the area holds exactly the octets the block was handed
-    for it, whatever it declared.
+    that length against the file:
+    :meth:`BlockType.post_process <pcapkit.protocols.schema.misc.pcapng.BlockType.post_process>`
+    compares ``length`` only against its own trailing copy. A block declaring 1,000,000 octets while
+    holding 36 would therefore size its option area at 999,964, read the trailing Block Total Length
+    into it, and leave that field to be zero-filled. Clamping the area to ``__length__`` keeps the
+    trailing length out of the area, so the area holds exactly the octets the block was handed for
+    it, whatever it declared.
 
     This is a no-op on every well-formed block rather than a second guess at the
     area. At the option field the only field still to come is the trailing Block
@@ -729,14 +727,15 @@ class OptionEnumField(EnumField):
             This replicates the read-only membership test
             :meth:`~pcapkit.const.pcapng.option_type.OptionType.get` itself runs
             first, and calls it only once that test finds the code declared. An
-            undeclared option type gets :meth:`EnumField._unregistered_member`
+            undeclared option type gets
+            :meth:`EnumField._unregistered_member <pcapkit.corekit.fields.numbers.EnumField._unregistered_member>`
             instead of ``get()``'s own miss path, for pickle-safety: that method
             carries its own ``__reduce_ex__``, so a member built this way
             round-trips through :mod:`pickle` -- see its own docstring -- which
             the override of
             :meth:`~pcapkit.const.pcapng.option_type.OptionType._unregistered_member`,
             the miss path, does not. The override's
-            :attr:`~pcapkit.const.pcapng.option_type.OptionType._value_` is the
+            :attr:`~enum.Enum._value_` is the
             *formatted* display string (``'opt_unknown [8888]'``, not ``8888``),
             so ``pickle.dumps`` on one succeeds but ``pickle.loads`` of the result
             raises ``ValueError``: the default reduction reconstructs through
@@ -749,7 +748,8 @@ class OptionEnumField(EnumField):
             :attr:`~pcapkit.const.pcapng.option_type.OptionType.opt_value` are
             never set -- which is *why* the override exists, choosing to render
             correctly over round-tripping correctly.
-            :meth:`EnumField._unregistered_member` is the only one of these
+            :meth:`EnumField._unregistered_member <pcapkit.corekit.fields.numbers.EnumField._unregistered_member>`
+            is the only one of these
             that gets both right. :func:`copy.deepcopy` is not the difference: it
             succeeds on both kinds, since the standard library's
             :class:`enum.Enum` (which ``aenum.Enum`` subclasses) defines

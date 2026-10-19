@@ -608,7 +608,7 @@ def nested_packet_context(packet: 'dict[str, Any]') -> 'dict[str, Any]':
         :class:`~collections.ChainMap` and not for :class:`dict`, the poisoning
         observed in :issue:`439` came from ordinary code asking
         :func:`isinstance` about a plain :class:`dict`, and :issue:`439` has
-        been fixed directly -- every :class:`Schema` subclass gets its own
+        been fixed directly -- every :class:`~pcapkit.protocols.schema.schema.Schema` subclass gets its own
         ``_abc_impl``. Against that, swapping the ``ChainMap`` for a plain
         literal on CPython 3.10 once moved
         ``test_pcapng_remaining_constructor_branches_and_custom_dispatch``

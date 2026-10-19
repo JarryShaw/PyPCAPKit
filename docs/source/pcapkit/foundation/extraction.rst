@@ -102,6 +102,13 @@ and extracts parameters from a PCAP file.
    .. automethod:: __next__
    .. automethod:: __call__
 
+   .. automethod:: __enter__
+   .. automethod:: __exit__
+   .. automethod:: __del__
+   .. automethod:: _register_internal_engine
+   .. automethod:: _owns_input
+   .. automethod:: _note_eof_progress
+
 Type Variables
 --------------
 

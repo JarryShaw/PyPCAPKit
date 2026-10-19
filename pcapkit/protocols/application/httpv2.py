@@ -230,14 +230,15 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             still drive it negative on a buffer that clears nine (e.g. a
             ``GOAWAY`` frame at 9-16 octets, whose fixed ``stream`` and
             ``error`` fields alone consume eight); the schema layer raises
-            :exc:`ProtocolError` for that itself.
+            :exc:`~pcapkit.utilities.exceptions.ProtocolError` for that itself.
 
             ``length`` is resolved against :func:`len` only for *this*
             method's own check, and the *original* argument -- ``None``
             included -- is what is forwarded to :meth:`Protocol.unpack
             <pcapkit.protocols.protocol.ProtocolBase.unpack>`. Collapsing
             ``None`` to a concrete ``0`` would change what
-            :meth:`Schema.unpack`'s own ``prepare`` decorator does with an
+            :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`'s own
+            ``prepare`` decorator does with an
             exhausted stream: it raises
             :exc:`~pcapkit.utilities.exceptions.StreamEOFError` (an
             :exc:`EOFError`, the documented "no more packets" signal) only when

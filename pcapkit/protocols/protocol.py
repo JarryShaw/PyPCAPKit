@@ -216,7 +216,7 @@ def _raw_where_parsed(made: 'Any', parsed: 'Any') -> 'bool':
 #: therefore consumed by :meth:`ProtocolBase.__init__
 #: <pcapkit.protocols.protocol.ProtocolBase.__init__>` or by the schema layer
 #: instead of by a :meth:`make <pcapkit.protocols.protocol.Protocol.make>`. No
-#: signature declares them, so ``_declared_keywords()`` cannot find them and
+#: signature declares them, so :func:`_declared_keywords` cannot find them and
 #: they are listed here.
 #:
 #: ``packet`` is here because the library puts it there itself:
@@ -237,7 +237,7 @@ OUT_OF_BAND_KEYWORDS = frozenset({'_layer', '_protocol', '__context__',
                                   '__packet__', 'packet'})
 
 
-#: Cache for ``_declared_keywords()``, keyed by protocol class. Signatures do
+#: Cache for :func:`_declared_keywords`, keyed by protocol class. Signatures do
 #: not change after the class is created and the walk below is
 #: :math:`O(\\text{MRO} \\times \\text{methods})`, so it runs once per class
 #: rather than once per constructed packet.
@@ -367,7 +367,7 @@ def _check_construction_keywords(cls: 'type', kwargs: 'dict[str, Any]',
 
     Raises:
         UnsupportedCall: If ``strict`` and any keyword is not among those
-            ``_declared_keywords()`` collects for ``cls``.
+            :func:`_declared_keywords` collects for ``cls``.
 
     Warns:
         UnknownFieldWarning: The same finding when not ``strict``.
@@ -529,7 +529,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     #: of declaring as a parameter, e.g. with ``kwargs.get('spam')`` in
     #: :meth:`read` -- as :meth:`ESP.read <pcapkit.protocols.internet.esp.ESP.read>`
     #: does with ``packet``.
-    #: ``_declared_keywords()`` finds keywords by
+    #: :func:`_declared_keywords` finds keywords by
     #: reading signatures, which cannot see such a name, so a protocol that
     #: consumes one names it here and the construction check of :meth:`__init__`
     #: accepts it. The union over the MRO is used, so a subclass need not repeat
@@ -1434,11 +1434,10 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         :class:`~pcapkit.dumpkit.common.Dumper`. Omitting ``code`` is a
         deliberate way to decline registration, and what every built-in
         protocol class does: the built-in dispatch tables (e.g.
-        ``Link.__proto__``) are populated by literal assignment in each layer
-        module, not by this hook. A subclass that declines can still be
-        registered later via the owning class's :meth:`register` classmethod or
-        the matching ``register_*`` helper in
-        :mod:`pcapkit.foundation.registry.protocols`.
+        :attr:`Link.__proto__ <pcapkit.protocols.link.link.Link.__proto__>`) are populated by
+        literal assignment in each layer module, not by this hook. A subclass that declines can
+        still be registered later via the owning class's :meth:`register` classmethod or the
+        matching ``register_*`` helper in :mod:`pcapkit.foundation.registry.protocols`.
 
         ``code`` accepts:
 

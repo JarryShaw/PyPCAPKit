@@ -40,9 +40,9 @@ That is what makes the enumerations usable against live capture data, where a
 protocol number assigned after this release was generated is a routine
 occurrence rather than an error. It also means an enumeration member is not a
 closed set: an unassigned value resolves to a member that is, apart from
-``CGAType``, absent from iteration and ``__members__``, and whether a repeat
-lookup returns the same object varies by registry, so compare such members by
-value, not identity.
+:class:`~pcapkit.const.mh.cga_type.CGAType`, absent from iteration and ``__members__``,
+and whether a repeat lookup returns the same object varies by registry, so compare such
+members by value, not identity.
 
 The common form of the override is generated -- see :mod:`pcapkit.vendor.default`,
 whose template emits it -- while the valid range and the names of the unassigned

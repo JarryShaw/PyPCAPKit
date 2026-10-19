@@ -305,8 +305,8 @@ class OptionField(ListField, Generic[_TS]):
         3. its length is a fixed integer rather than a callable, so that its width
            does not depend on packet data the shortcut has not read.
 
-        All of that is true of every ``OptionField`` declared in this package. A
-        base schema registered from outside it -- cf.
+        All of that is true of every :class:`~pcapkit.corekit.fields.collections.OptionField`
+        declared in this package. A base schema registered from outside it -- cf.
         :mod:`pcapkit.foundation.registry` -- need not satisfy it, and is **not**
         rejected: such a base schema is unpacked in full. It parses correctly and
         pays the cost of the second parse. Only the shortcut is withheld, so a base schema whose type field

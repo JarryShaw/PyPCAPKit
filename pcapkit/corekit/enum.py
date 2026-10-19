@@ -45,9 +45,9 @@ The registry tier's own shape is the earlier design settled in GitHub issue
 :issue:`842`: ``get``, ``get_all``, ``register`` and ``register_alias`` are to
 exist on every const registry, so the abstraction is finished by moving them to
 the base class. The closed sets split off by :issue:`877` are outside that
-contract. ``AppType``'s sub-base class carries the overrides and dispatching
-logic it needs, and ``AppType``'s subclasses override again where their contracts
-differ.
+contract. :class:`~pcapkit.const.reg.apptype.apptype.AppType`'s sub-base class carries the overrides and dispatching
+logic it needs, and :class:`~pcapkit.const.reg.apptype.apptype.AppType`'s subclasses override again
+where their contracts differ.
 
 That is a tiered hierarchy, of which this module is **tier one**:
 
@@ -58,7 +58,7 @@ That is a tiered hierarchy, of which this module is **tier one**:
    inheritance. So a registry under :mod:`pcapkit.const` gets all of them from
    this module, apart from the
    overrides below and a few hand-written ``get`` overrides.
-2. ``AppType``'s sub-base -- overrides each of them, routing the lookups
+2. :class:`~pcapkit.const.reg.apptype.apptype.AppType`'s sub-base -- overrides each of them, routing the lookups
    through its ``_dispatch``, because a port lookup needs a transport protocol
    to be answerable at all. Defined not in this module but in
    :class:`pcapkit.const.reg.apptype.apptype.AppType` itself (GitHub issue
@@ -69,11 +69,12 @@ That is a tiered hierarchy, of which this module is **tier one**:
    alias for the second. Plus ``_unregistered_member``, for its own extra
    attributes (``svc``, ``port``, ``proto``) that the generic one below does
    not know to set.
-3. The ``AppType`` transport subclasses -- ``TCP``, ``UDP``, ``SCTP``, ``DCCP``
-   -- need no override of their own at all: ``_dispatch``
-   already returns ``cls`` unchanged the moment ``cls.__registry__`` is not
-   :obj:`None`, which is true for exactly these subclasses, so tier 2's lookups
-   already answer correctly on each of them without a further layer.
+3. The :class:`~pcapkit.const.reg.apptype.apptype.AppType` transport subclasses --
+   :class:`~pcapkit.const.reg.apptype.tcp.TCP`, :class:`~pcapkit.const.reg.apptype.udp.UDP`,
+   :class:`~pcapkit.const.reg.apptype.sctp.SCTP`, :class:`~pcapkit.const.reg.apptype.dccp.DCCP` --
+   need no override of their own at all: ``_dispatch`` already returns ``cls`` unchanged the moment
+   ``cls.__registry__`` is not :obj:`None`, which is true for exactly these subclasses, so tier 2's
+   lookups already answer correctly on each of them without a further layer.
 
 Defining these methods here, rather than as generated *text* written out
 longhand in :data:`pcapkit.vendor.default.LINE` and copied into each crawler
@@ -91,7 +92,7 @@ to a given member's mapping.
 
    The ``get`` each :mod:`pcapkit.const` enumeration carried as generated text
    moves onto :class:`EnumLookup`, and :class:`EnumRegistry` adds ``register``,
-   which is how a member is minted at runtime: outside ``CGAType``, looking up
+   which is how a member is minted at runtime: outside :class:`~pcapkit.const.mh.cga_type.CGAType`, looking up
    an unknown value does not mint one (:issue:`775`).
 
 """
@@ -267,15 +268,16 @@ class EnumLookup:
 
         It never mints while resolving ``default``; ``key`` may still mint
         through a ``_missing_`` that GitHub issue :issue:`775`'s ruling
-        deliberately kept minting, on ``CGAType``. Registering a member any other way is :meth:`register`'s job
-        and nobody else's, which is the ruling :issue:`775` exists to carry
+        deliberately kept minting, on :class:`~pcapkit.const.mh.cga_type.CGAType`. Registering a
+        member any other way is :meth:`~EnumRegistry.register`'s job and nobody else's, which is the ruling
+        :issue:`775` exists to carry
         out: an unrecognised or unregistered value does not become a registered
         member unless a user or caller explicitly creates one. A value inside a
         registry's declared-but-unassigned range still resolves, through that
-        registry's own ``_missing_`` and :meth:`_unregistered_member`, to a
+        registry's own ``_missing_`` and :meth:`~EnumRegistry._unregistered_member`, to a
         member that is deliberately absent from the lookup tables -- true
-        outside ``CGAType``, where such a value instead lands
-        in *both* tables, exactly as :meth:`register` would leave it -- for a
+        outside :class:`~pcapkit.const.mh.cga_type.CGAType`, where such a value instead lands
+        in *both* tables, exactly as :meth:`~EnumRegistry.register` would leave it -- for a
         non-``str`` key; the ``str`` case is qualified below. Both describe
         ``key`` resolution only. ``default`` never reaches ``_missing_`` on
         either branch: a declared-but-unassigned ``default`` does not resolve
@@ -319,7 +321,7 @@ class EnumLookup:
 
         That restriction has a cost the paragraph above glosses over: a
         *declared-but-unassigned* value -- the case resolved there through
-        ``_missing_`` and :meth:`_unregistered_member` without either lookup
+        ``_missing_`` and :meth:`~EnumRegistry._unregistered_member` without either lookup
         table growing -- is for that exact reason invisible to the
         ``_value2member_map_`` check above. Such a value resolves through
         ``cls(value)`` but not through ``get(value)`` when ``value`` is a
@@ -354,7 +356,7 @@ class EnumLookup:
 
         Both failure paths raise from :mod:`pcapkit.utilities.exceptions`
         rather than a builtin, per the ruling recorded on GitHub issue
-        :issue:`923`: in-library code raises from ``pcapkit.utilities.exceptions``
+        :issue:`923`: in-library code raises from :mod:`pcapkit.utilities.exceptions`
         rather than a builtin, and whether ``ValueError`` or ``KeyError`` applies
         follows what stdlib's ``Enum`` raises in the same circumstance: a name
         miss is :exc:`KeyError`-derived and a value miss :exc:`ValueError`-derived,
@@ -461,13 +463,13 @@ class EnumLookup:
 
         For a registry that maps one key to one member -- which is every
         registry inheriting this base unmodified -- that tuple holds exactly one
-        entry, since an alias registered by :meth:`register_alias` is a second
+        entry, since an alias registered by :meth:`~EnumRegistry.register_alias` is a second
         *name* for the canonical member rather than a second member. The method
         still exists here, because ``get``, ``get_all``, ``register`` and
         ``register_alias`` are all to exist on every const registry (GitHub
         issue :issue:`842`), and it is where a registry with genuinely
-        several matches puts them: ``AppType`` overrides it to return every service IANA
-        assigns to a port.
+        several matches puts them: :class:`~pcapkit.const.reg.apptype.apptype.AppType` overrides it
+        to return every service IANA assigns to a port.
 
         Args:
             key: Name or value to look up.
@@ -517,7 +519,7 @@ class EnumRegistry(EnumLookup):
         The caller-named path, and the only one that grows the registry:
         it mints a new member on the class at runtime under the ``name`` the
         caller specifies, so nothing has to be guessed (GitHub issue :issue:`842`).
-        Contrast :meth:`get` and ``_missing_``, which resolve without naming anything.
+        Contrast :meth:`~EnumLookup.get` and ``_missing_``, which resolve without naming anything.
 
         Refuses a ``value`` that already has a member. Without this guard,
         ``aenum.extend_enum`` does not mint anything for an already-taken
@@ -621,13 +623,13 @@ class EnumRegistry(EnumLookup):
         member's mapping -- so it needs an existing member to attach to, and this
         refuses a value no member carries rather than falling through to
         :meth:`register`. :issue:`842` settled on an alias always attaching to an
-        existing member, leaving open whether ``AppType`` or a concrete
-        enumeration might need to alias a value no member carries. ``AppType``'s
+        existing member, leaving open whether :class:`~pcapkit.const.reg.apptype.apptype.AppType` or a concrete
+        enumeration might need to alias a value no member carries. :class:`~pcapkit.const.reg.apptype.apptype.AppType`'s
         override does not: it requires the port to already carry a member of that
-        very registry. What an alias means also differs away from ``AppType``: on
-        every other registry it is a custom name the caller opts into, not one
-        recorded by the IANA registrars. Minting under the name of an aliasing
-        call would manufacture exactly the unrecorded member :issue:`775` removes.
+        very registry. What an alias means also differs away from
+        :class:`~pcapkit.const.reg.apptype.apptype.AppType`: on every other registry it is a custom
+        name the caller opts into, not one recorded by the IANA registrars. Minting under the name
+        of an aliasing call would manufacture exactly the unrecorded member :issue:`775` removes.
 
         Membership is tested against ``_value2member_map_`` rather than by
         calling ``cls(value)``: a declared-but-unassigned value resolves through
@@ -641,7 +643,7 @@ class EnumRegistry(EnumLookup):
         would refuse this call outright -- :meth:`register` and
         :meth:`register_alias` test ``value``'s membership for opposite
         outcomes, so neither can be the other's implementation.
-        ``AppType``'s override differs: it mints a real member through
+        :class:`~pcapkit.const.reg.apptype.apptype.AppType`'s override differs: it mints a real member through
         ``aenum.extend_enum``, so its iteration grows too.
 
         Args:

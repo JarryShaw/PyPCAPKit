@@ -284,7 +284,7 @@ class SchemaMeta(abc.ABCMeta):
     #: **kwargs)``), so a class keyword spelled the same as any of them binds
     #: that parameter twice: ``TypeError: ABCMeta.__new__() got multiple
     #: values for argument '...'``. ``namespace`` collided this way, which is why
-    #: :mod:`pcapkit.protocols.schema.misc.pcapng`'s ``Option`` subclasses
+    #: :mod:`pcapkit.protocols.schema.misc.pcapng`'s :class:`~pcapkit.protocols.schema.misc.pcapng.Option` subclasses
     #: spell it ``ns=`` instead.
     #:
     #: ``cls`` collides one level *later*: every ``__init_subclass__`` is an
@@ -1329,7 +1329,7 @@ class EnumSchema(Schema, Generic[_ET], metaclass=EnumMeta):
 
         Note:
             This property answers on an instance; on the class, the same
-            mapping is served by ``EnumMeta.registry``.
+            mapping is served by :attr:`EnumMeta.registry <pcapkit.protocols.schema.schema.EnumMeta.registry>`.
 
         Important:
             See :attr:`EnumMeta.registry
