@@ -7,7 +7,7 @@
 
 :mod:`pcapkit.protocols.misc.pcap.frame` contains
 :class:`~pcapkit.protocols.misc.pcap.frame.Frame` only,
-which implements extractor for frame headers [*]_ of PCAP,
+which implements an extractor for frame headers [*]_ of PCAP,
 whose structure is described as below:
 
 .. code-block:: c
@@ -100,9 +100,9 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
     # Defaults.
     ##########################################################################
 
-    #: Protocol index mapping for
-    #: decoding next layer, c.f. :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
-    #: & :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
+    #: Protocol index mapping for decoding the next layer; see
+    #: :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
+    #: and :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     #: Each value is a :class:`~pcapkit.corekit.module.ModuleDescriptor` naming the
     #: module and class, or a :class:`~pcapkit.protocols.protocol.Protocol` subclass.
     __proto__ = collections.defaultdict(
@@ -334,7 +334,7 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             # on the tail of this record followed by the head of the next one.
             # So the start is recorded before the unpack, in
             # :meth:`self.__post_init__ <__post_init__>`, and seeked to
-            # absolutely, as the PCAP-NG reader does, c.f.
+            # absolutely, as the PCAP-NG reader does; see
             # :meth:`pcapkit.protocols.misc.pcapng.PCAPNG.read`.
             seek_cur = _seek_set + self.length + _ilen
 
@@ -349,7 +349,7 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             # running past its block (:issue:`1405`): ``incl_len`` and ``cap_len``
             # stay as declared, so the record rebuilds byte-exactly, and the
             # packet is the octets present. A writer must not copy the declared
-            # length, c.f. :meth:`PCAPIO._append_value
+            # length; see :meth:`PCAPIO._append_value
             # <pcapkit.dumpkit.pcap.PCAPIO._append_value>` (:issue:`1541`).
             held = len(self._data) - self.length
             if held < _ilen:

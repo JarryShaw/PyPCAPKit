@@ -6,7 +6,7 @@
 
 :mod:`pcapkit.protocols.misc.raw` contains
 :class:`~pcapkit.protocols.misc.raw.Raw` only, which implements
-extractor for unknown protocol, and constructs a
+an extractor for unknown protocols, and constructs a
 :class:`~pcapkit.protocols.protocol.Protocol` like object.
 
 """
@@ -114,8 +114,8 @@ class Raw(ProtocolBase[Data_Raw, Schema_Raw],
                       length: 'Optional[int]' = None, **kwargs: 'Any') -> 'None':
         """Post initialisation hook.
 
-        Would :mod:`pcapkit` encounter malformed packets, the original parsing
-        error instance will be provided as in ``error``.
+        When :mod:`pcapkit` meets a malformed packet, the original parsing
+        error instance is given as ``error``.
 
         Args:
             file: Source packet stream.

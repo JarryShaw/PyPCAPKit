@@ -6,7 +6,7 @@
 
 :mod:`pcapkit.protocols.misc.pcap.header` contains
 :class:`~pcapkit.protocols.misc.pcap.header.Header` only,
-which implements extractor for global headers [*]_
+which implements an extractor for global headers [*]_
 of PCAP, whose structure is described as below:
 
 .. code-block:: c

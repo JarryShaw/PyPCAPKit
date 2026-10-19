@@ -6,7 +6,7 @@
 
 :mod:`pcapkit.protocols.application.ospf` contains
 :class:`~pcapkit.protocols.application.ospf.OSPF` only,
-which implements extractor for Open Shortest Path
+which implements an extractor for Open Shortest Path
 First (OSPF) [*]_, whose structure is described
 as below:
 
@@ -116,7 +116,7 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
     #: :attr:`alias` are needed *during* :meth:`read` -- :meth:`self._decode_next_layer
     #: <pcapkit.protocols.protocol.Protocol._decode_next_layer>` builds the
     #: protocol chain out of :attr:`alias` -- and ``_info`` is not assigned until
-    #: :meth:`read` has returned. c.f. ``ARP._acnm`` on
+    #: :meth:`read` has returned. See ``ARP._acnm`` on
     #: :class:`~pcapkit.protocols.link.arp.ARP`, which has the same constraint.
     _version: 'int'
 
@@ -388,7 +388,7 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
             ID bytes.
 
         Raises:
-            FieldValueError: If ``id`` is a :obj:`bool` (c.f.
+            FieldValueError: If ``id`` is a :obj:`bool` (see
                 :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`).
 
         Notes:

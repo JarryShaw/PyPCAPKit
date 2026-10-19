@@ -5,7 +5,7 @@ Raw Packet Data
 
 :mod:`pcapkit.protocols.misc.raw` contains
 :class:`~pcapkit.protocols.misc.raw.Raw` only, which implements
-extractor for unknown protocol, and constructs a
+an extractor for unknown protocols, and constructs a
 :class:`~pcapkit.protocols.protocol.Protocol` like object.
 
 .. autoclass:: pcapkit.protocols.misc.raw.Raw
