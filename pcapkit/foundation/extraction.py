@@ -800,7 +800,7 @@ class Extractor(Generic[_P]):
 
         Raises:
             FormatError: If the selected engine cannot read the input's format --
-                for the default engine, if it is neither PCAP nor PCAP-NG -- or if
+                for the :term:`default engine`, if it is neither PCAP nor PCAP-NG -- or if
                 the built-in PCAP-NG engine reads a PCAP-NG input to PCAP output.
 
         :rtype: None
@@ -837,7 +837,7 @@ class Extractor(Generic[_P]):
 
         An engine that is unknown, not installed, or rules itself out via
         :meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`
-        is replaced by the default one, and :attr:`self._exnam
+        is replaced by the :term:`default engine`, and :attr:`self._exnam
         <pcapkit.foundation.extraction.Extractor._exnam>` is updated to match.
         :meth:`__init__` calls this before choosing the output format, so that
         the choice reflects the engine that runs rather than the one requested.

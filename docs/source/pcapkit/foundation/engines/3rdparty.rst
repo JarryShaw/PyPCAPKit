@@ -294,7 +294,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    extraction. :meth:`PCAP_CT.unsupported_reason
    <pcapkit.foundation.engines.pcap_ct.PCAP_CT.unsupported_reason>` detects it and
    reports it as an ordinary "engine unavailable", so the extraction falls back to
-   the default engine with a warning naming the missing library.
+   the :term:`default engine` with a warning naming the missing library.
 
 .. warning::
 

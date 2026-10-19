@@ -123,7 +123,7 @@ VLAN tags and IPv6 extension headers alike. What follows is kept as
 :class:`~pcapkit.protocols.misc.raw.Raw`, with one
 :exc:`~pcapkit.utilities.warnings.ProtocolWarning` (:issue:`1610`), and is
 marked :attr:`~pcapkit.protocols.protocol.Protocol._past_layer_limit`, so the
-default engine's TCP reassembly and flow tracing do not read a TCP segment
+:term:`default engine`'s TCP reassembly and flow tracing do not read a TCP segment
 there back out, as they do one the TCP parser rejected (:issue:`1518`). A
 protocol constructed from its own octets is not counted itself, so the count
 starts at the first layer it dissects. One chain of extension headers is also bounded on
