@@ -139,7 +139,7 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import TypedDict
 
     class ANSIKeyLengthTest(TypedDict):
-        """Length test for ASN.1 encoded data, c.f.,
+        """Length test for ASN.1 encoded data, see
         :attr:`CGAParameter.public_key_test`."""
 
         len: int
@@ -408,7 +408,7 @@ def pad_opt_data_len(pkt: 'dict[str, Any]') -> 'int':
 
     Note:
         A ``Pad1`` option is a single octet with neither an ``Option Length``
-        field nor any option data (c.f. :rfc:`6275#section-6.2.2`), which is
+        field nor any option data (see :rfc:`6275#section-6.2.2`), which is
         why :attr:`Option.length` is declared as a
         :class:`~pcapkit.corekit.fields.misc.ConditionalField` and is skipped
         for it. A skipped conditional field is *recorded* in the packet data as
@@ -826,9 +826,9 @@ class AuthOption(Option, code=Enum_Option.AUTH_OPTION_TYPE):
 class MesgIDOption(Option, code=Enum_Option.MESG_ID_OPTION_TYPE):
     """Header schema for Mobility Message Replay Protection options."""
 
-    #: Timestamp (seconds since January 1st, 1900, c.f., :rfc:`1305`).
+    #: Timestamp (seconds since January 1st, 1900, see :rfc:`1305`).
     seconds: 'int' = UInt32Field()
-    #: Timestamp fractions (1/2**32 seconds per unit, c.f., :rfc:`1305`).
+    #: Timestamp fractions (1/2**32 seconds per unit, see :rfc:`1305`).
     fraction: 'int' = UInt32Field()
 
     def post_process(self, packet: 'dict[str, Any]') -> 'MesgIDOption':
@@ -844,7 +844,7 @@ class MesgIDOption(Option, code=Enum_Option.MESG_ID_OPTION_TYPE):
         self = super().post_process(packet)
 
         # convert timestamp to datetime
-        # c.f., http://tickelton.gitlab.io/articles/ntp-timestamps/
+        # see http://tickelton.gitlab.io/articles/ntp-timestamps/
         ts_sec = self.seconds - 2_208_988_800  # 70 years
         ts_frac = self.fraction / 2**32  # fraction of a second
 
@@ -967,7 +967,7 @@ class CGAParameter(Schema):
 class CGAParametersOption(Option, code=Enum_Option.CGA_Parameters):
     """Header schema for CGA Parameters options."""
 
-    #: CGA parameters, c.f., :rfc:`3972`.
+    #: CGA parameters, see :rfc:`3972`.
     parameters: 'list[CGAParameter]' = ListField(
         length=lambda pkt: pkt['length'],
         item_type=SchemaField(schema=CGAParameter),
@@ -1071,7 +1071,7 @@ class IPv6AddressPrefixOption(Option, code=Enum_Option.Mobility_Header_IPv6_Addr
 
     """
 
-    #: Option code, c.f.,
+    #: Option code, see
     #: :class:`pcapkit.protocols.internet.mh.IPv6AddressPrefixCode`.
     code: 'int' = UInt8Field()
     #: Prefix length.
@@ -1482,7 +1482,7 @@ class LMAAddressOption(Option, code=Enum_Option.Local_Mobility_Anchor_Address_Op
 
     """
 
-    #: Option code, c.f.,
+    #: Option code, see
     #: :class:`pcapkit.protocols.internet.mh.LMAAddressCode`.
     code: 'int' = UInt8Field()
     #: Reserved.
@@ -2830,7 +2830,7 @@ class FastBindingAcknowledgmentMessage(Packet, code=Enum_Packet.Fast_Binding_Ack
 
     """
 
-    #: Status, c.f.,
+    #: Status, see
     #: :class:`pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus`.
     status: 'int' = UInt8Field()
     #: Flags.
@@ -3092,7 +3092,7 @@ class LocalizedRoutingAcknowledgmentMessage(
         'U': (0, 1),
         'reserved': (1, 7),
     })
-    #: Status, c.f.,
+    #: Status, see
     #: :class:`pcapkit.protocols.internet.mh.LocalizedRoutingStatus`.
     status: 'int' = UInt8Field()
     #: Lifetime, in seconds.

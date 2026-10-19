@@ -39,7 +39,7 @@ __all__ = ['Internet']
 #: contextvars.ContextVar[int]: Where the payload :meth:`Internet._make_payload`
 #: rebuilds sits in a chain of IPv6 extension headers, should it be one: one past
 #: the layer it is the payload of, as :meth:`Internet._next_exthdr_depth` places
-#: it while parsing, c.f. :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`.
+#: it while parsing, see :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`.
 _exthdr_rebuilt = contextvars.ContextVar('_exthdr_rebuilt', default=0)
 
 
@@ -103,8 +103,8 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
     #: Layer of protocol.
     __layer__ = 'Internet'  # type: Literal['Internet']
 
-    #: DefaultDict[int, ModuleDescriptor[ProtocolBase] | ~typing.Type[ProtocolBase]]: Protocol index mapping for decoding next layer,
-    #: c.f. :meth:`self._decode_next_layer <pcapkit.protocols.internet.internet.Internet._decode_next_layer>`
+    #: Protocol index mapping for decoding next layer,
+    #: see :meth:`self._decode_next_layer <pcapkit.protocols.internet.internet.Internet._decode_next_layer>`
     #: & :meth:`self._import_next_layer <pcapkit.protocols.internet.internet.Internet._import_next_layer>`.
     __proto__ = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
@@ -130,7 +130,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             # ``protocols.application`` and reports ``__layer__ = 'Application'``,
             # because a routing protocol computes the forwarding table rather
             # than forwarding packets -- the dispatch tier and the subpackage are
-            # deliberately decoupled, c.f.
+            # deliberately decoupled, see
             # :doc:`/contributing/conventions/protocol-layer-placement`.
             Enum_TransType.OSPFIGP:         ModuleDescriptor('pcapkit.protocols.application.ospf', 'OSPF'),
         },
@@ -138,7 +138,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
 
     #: int: How many IPv6 extension headers in a row the next layer follows:
     #: this layer's place in such a chain, or how many headers
-    #: :class:`~pcapkit.protocols.internet.ipv6.IPv6` walked, else ``0``, c.f.
+    #: :class:`~pcapkit.protocols.internet.ipv6.IPv6` walked, else ``0``, see
     #: :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT` and :meth:`_next_exthdr_depth`.
     _exthdr_depth = 0
 
@@ -231,7 +231,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             _exthdr_depth (int): Where this layer is in a chain of IPv6
                 extension headers, counting from ``1``, or ``0`` if it is not
                 in one. Handed over by :meth:`_import_next_layer` while
-                parsing, c.f. :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`; a layer
+                parsing, see :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`; a layer
                 constructed instead, as :meth:`from_data` rebuilds one, takes it
                 from :meth:`_rebuilt_exthdr_depth` (:issue:`1619`).
             **kwargs: Arbitrary keyword arguments.
@@ -285,7 +285,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             proto: next layer protocol index
             extension: if the next layer is parsed as an extension header by
                 :class:`~pcapkit.protocols.internet.ipv6.IPv6`'s walk, which
-                counts the chain itself, c.f. :meth:`IPv6._decode_next_layer
+                counts the chain itself, see :meth:`IPv6._decode_next_layer
                 <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>`
 
         Returns:
@@ -338,7 +338,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
 
         Args:
             data: protocol data
-            exclude: keys of ``data`` that are not the payload, c.f.
+            exclude: keys of ``data`` that are not the payload, see
                 :meth:`ProtocolBase._make_payload
                 <pcapkit.protocols.protocol.ProtocolBase._make_payload>`
 
@@ -364,7 +364,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             proto: next layer protocol index
             file\_: payload of the current layer
             length: valid (*non-padding*) length
-            extension: if is extension header, c.f. :meth:`_next_exthdr_depth`
+            extension: if is extension header, see :meth:`_next_exthdr_depth`
 
         Returns:
             :class:`~pcapkit.protocols.misc.null.NoPayload` if there is
@@ -482,7 +482,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
             :class:`~pcapkit.protocols.misc.raw.Raw`, with one
             :exc:`~pcapkit.utilities.warnings.ProtocolWarning` (:issue:`1604`).
             Each header dissects the next one from here, so the chain's depth
-            is handed to the next layer, c.f. :meth:`_next_layer_class`.
+            is handed to the next layer, see :meth:`_next_layer_class`.
 
         """
         if payload is None:

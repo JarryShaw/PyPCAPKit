@@ -6,7 +6,7 @@
 
 :mod:`pcapkit.protocols.internet.ipv6_frag` contains
 :class:`~pcapkit.protocols.internet.ipv6_frag.IPv6_Frag`
-only, which implements extractor for Fragment Header for
+only, which implements the extractor for Fragment Header for
 IPv6 (IPv6-Frag) [*]_, whose structure is described as
 below:
 
@@ -239,7 +239,7 @@ class IPv6_Frag(IPv6_Ext[Data_IPv6_Frag, Schema_IPv6_Frag],
             **kwargs: Arbitrary keyword arguments.
 
         See Also:
-            For construction argument, please refer to :meth:`self.make <IPv6_Frag.make>`.
+            For construction arguments, please refer to :meth:`self.make <IPv6_Frag.make>`.
 
         """
         #: bool: If the protocol is used as an IPv6 extension header.

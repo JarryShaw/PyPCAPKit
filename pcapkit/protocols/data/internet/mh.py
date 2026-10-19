@@ -986,7 +986,7 @@ class AuthOption(Option):
 
 @info_final
 class NTPTimestamp(Data):
-    """Data model for NTP timestamp format, c.f., :rfc:`1305`.
+    """Data model for NTP timestamp format, see :rfc:`1305`.
 
     .. versionchanged:: 1.5.0
 
@@ -1017,7 +1017,7 @@ class MesgIDOption(Option):
 
     #: Timestamp.
     timestamp: 'dt_type'
-    #: NTP timestamp, c.f., :rfc:`1305`.
+    #: NTP timestamp, see :rfc:`1305`.
     ntp_timestamp: 'NTPTimestamp'
 
     if TYPE_CHECKING:
@@ -1123,7 +1123,7 @@ class CGAParameter(Data):
 class CGAParametersOption(Option):
     """Data model for CGA Parameters option."""
 
-    #: CGA parameters, c.f., :rfc:`3972`.
+    #: CGA parameters, see :rfc:`3972`.
     parameters: 'tuple[CGAParameter, ...]'
 
     if TYPE_CHECKING:
@@ -1199,7 +1199,7 @@ class BADFOption(Option):
 class IPv6AddressPrefixOption(Option):
     """Data model for MH Mobility Header IPv6 Address/Prefix option."""
 
-    #: Option code, c.f., :rfc:`5568#section-6.4.2`. The codes are defined inline
+    #: Option code, see :rfc:`5568#section-6.4.2`. The codes are defined inline
     #: by the RFC with no IANA registry behind them, so this field carries the
     #: module-local
     #: :class:`~pcapkit.protocols.internet.mh.IPv6AddressPrefixCode`.
@@ -1289,22 +1289,13 @@ class LinkLocalAddressOption(Option):
 
 @info_final
 class PMIPv6Timestamp(Data):
-    """Data model for Proxy Mobile IPv6 timestamp format, c.f., :rfc:`5213#section-8.8`.
+    """Data model for Proxy Mobile IPv6 timestamp format, see :rfc:`5213#section-8.8`.
 
     Note:
         This is **not** an :rfc:`1305` NTP timestamp, which is why it is a type of
         its own rather than a reuse of :class:`NTPTimestamp`. It counts from the
         UNIX epoch rather than NTP's 1900 one, and splits its 64 bits 48/16
         rather than 32/32, so each field means something different in the two.
-
-    .. versionchanged:: 1.5.0
-
-       An :class:`~pcapkit.corekit.infoclass.Info` data model in this module,
-       rather than the named tuple in :mod:`pcapkit.protocols.internet.mh` it
-       was in the 1.5.0 pre-releases (:issue:`1886`). It no longer indexes,
-       unpacks, hashes, orders, compares equal to a :obj:`tuple`, or has
-       ``_replace`` and ``_asdict``. The dumpers write it keyed by field, as
-       ``{"seconds": ..., "fraction": ...}``.
 
     """
 
@@ -1599,7 +1590,7 @@ class ContextRequestOption(Option):
 class LMAAddressOption(Option):
     """Data model for MH Local Mobility Anchor Address option."""
 
-    #: Option code, c.f., :rfc:`5949#section-6.2.2`. The codes are defined inline
+    #: Option code, see :rfc:`5949#section-6.2.2`. The codes are defined inline
     #: by the RFC with no IANA registry behind them, so this field carries the
     #: module-local :class:`~pcapkit.protocols.internet.mh.LMAAddressCode`.
     code: 'LMAAddressCode'

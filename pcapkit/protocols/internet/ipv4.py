@@ -6,13 +6,13 @@
 
 :mod:`pcapkit.protocols.internet.ipv4` contains
 :class:`~pcapkit.protocols.internet.ipv4.IPv4` only,
-which implements extractor for Internet Protocol
+which implements the extractor for Internet Protocol
 version 4 (IPv4) [*]_, whose structure is described
 as below:
 
-======= ========= ====================== =============================================
+======= ========= ======================= ============================================
 Octets      Bits        Name                    Description
-======= ========= ====================== =============================================
+======= ========= ======================= ============================================
   0           0   ``ipv4.version``        Version (``4``)
   0           4   ``ipv4.hdr_len``        Internet Header Length (IHL)
   1           8   ``ipv4.tos.pre``        Precedence
@@ -22,7 +22,7 @@ Octets      Bits        Name                    Description
   1          14   ``ipv4.tos.ecn``        Explicit Congestion Notification (ECN)
   2          16   ``ipv4.len``            Total Length
   4          32   ``ipv4.id``             Identification
-  6          48                           Reserved Bit (must be ``\\x00``)
+  6          48   ``ipv4.flags.reserved`` Reserved Bit (must be ``0``)
   6          49   ``ipv4.flags.df``       Don't Fragment (DF)
   6          50   ``ipv4.flags.mf``       More Fragments (MF)
   6          51   ``ipv4.offset``         Fragment Offset
@@ -32,7 +32,7 @@ Octets      Bits        Name                    Description
   12         96   ``ipv4.src``            Source IP Address
   16        128   ``ipv4.dst``            Destination IP Address
   20        160   ``ipv4.options``        IP Options (if IHL > ``5``)
-======= ========= ====================== =============================================
+======= ========= ======================= ============================================
 
 .. [*] https://en.wikipedia.org/wiki/IPv4
 
@@ -214,8 +214,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
     # Defaults.
     ##########################################################################
 
-    #: DefaultDict[Enum_OptionNumber, str | tuple[OptionParser, OptionConstructor]]: Option
-    #: code to method mapping, c.f. :meth:`_read_ipv4_options` and/or
+    #: Option code to method mapping, see :meth:`_read_ipv4_options` and/or
     #: :meth:`_make_ipv4_options`. A :obj:`str` value names the methods
     #: ``_read_opt_${name}`` and ``_make_opt_${name}``, falling back to
     #: ``_read_opt_unassigned`` / ``_make_opt_unassigned`` when they do not
@@ -491,7 +490,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             total_length: Total length of the packet, header included; computed
                 from the header and the payload when omitted.
             padding: Octets after the End of Option List, written as is when
-                ``options`` is a container that carries an ``EOOL``, c.f.
+                ``options`` is a container that carries an ``EOOL``, see
                 :meth:`_make_ipv4_options`.
             payload: Payload of the packet.
             trailer: Octets after the packet, outside the Total Length, such as
@@ -1317,7 +1316,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         Note:
             An option whose QS function is neither of the two above has no
             defined layout, so the schema keeps it as an unassigned option and
-            it is parsed as one, c.f. :meth:`_read_opt_unassigned`.
+            it is parsed as one, see :meth:`_read_opt_unassigned`.
 
         """
         if isinstance(schema, Schema_UnassignedOption):
@@ -2094,7 +2093,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
 
         Returns:
             Constructed option schema. An unassigned option schema if ``option``
-            is a Quick-Start option parsed as unassigned, c.f. :meth:`_read_opt_qs`,
+            is a Quick-Start option parsed as unassigned, see :meth:`_read_opt_qs`,
             or if ``func`` is neither of the assigned functions, in which case
             the option takes the eight-octet layout of a Quick-Start Request.
 

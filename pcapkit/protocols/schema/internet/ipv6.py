@@ -85,7 +85,7 @@ class IPv6(Schema):
     payload: 'bytes' = PayloadField(length=lambda pkt: pkt['length'])
     #: Octets captured past the Payload Length (or a jumbogram's Jumbo Payload
     #: Length, see :meth:`post_process`), such as Ethernet minimum-frame
-    #: padding, c.f. :attr:`IPv4.trailer <pcapkit.protocols.schema.internet.ipv4.IPv4.trailer>`.
+    #: padding, see :attr:`IPv4.trailer <pcapkit.protocols.schema.internet.ipv4.IPv4.trailer>`.
     trailer: 'bytes' = PayloadField(default=b'')
 
     if TYPE_CHECKING:

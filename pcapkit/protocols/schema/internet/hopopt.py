@@ -435,17 +435,17 @@ class SMFHashBasedDPDOption(SMFDPDOption, code=Enum_SMFDPDMode.H_DPD):
 class PDMOption(Option, code=Enum_Option.PDM):
     """Header schema for HOPOPT performance and diagnostic metrics (PDM) options."""
 
-    #: Scale delta time last received (DTLR).
+    #: Scale delta time last received (ScaleDTLR).
     scaledtlr: 'int' = UInt8Field()
-    #: Scale delta time last sent (DTLS).
+    #: Scale delta time last sent (ScaleDTLS).
     scaledtls: 'int' = UInt8Field()
-    #: Packet sequence number (PSN) this packet.
+    #: Packet sequence number (PSN) this packet (PSNTP).
     psntp: 'int' = UInt16Field()
-    #: Packet sequence number (PSN) last received.
+    #: Packet sequence number (PSN) last received (PSNLR).
     psnlr: 'int' = UInt16Field()
-    #: Delta time last received (DTLR).
+    #: Delta time last received (DeltaTLR).
     deltatlr: 'int' = UInt16Field()
-    #: Delta time last sent (DTLS).
+    #: Delta time last sent (DeltaTLS).
     deltatls: 'int' = UInt16Field()
 
     if TYPE_CHECKING:

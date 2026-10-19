@@ -5,7 +5,7 @@ ESP - Encapsulating Security Payload
 
 :mod:`pcapkit.protocols.internet.esp` contains
 :class:`~pcapkit.protocols.internet.esp.ESP`,
-which implements extractor for Encapsulating
+which implements the extractor for Encapsulating
 Security Payload (ESP) [*]_, and the security association, algorithm and
 status types documented below. The ESP structure is described as below:
 
@@ -132,6 +132,8 @@ are the same member. The registry spells the "no integrity algorithm"
 transform ``NONE`` rather than ``AUTH_NONE``, and :attr:`Integrity.NONE
 <pcapkit.const.esp.integrity.Integrity.NONE>` follows it.
 
+.. _esp-algorithm-support:
+
 Algorithm Support
 -----------------
 
@@ -205,6 +207,31 @@ MD5, DES-MAC, KPDK-MD5       MUST NOT            **no**       registered, delibe
 
 "MD5, DES-MAC, KPDK-MD5" above covers ``AUTH_HMAC_MD5_96``,
 ``AUTH_HMAC_MD5_128``, ``AUTH_DES_MAC`` and ``AUTH_KPDK_MD5``.
+
+Each implemented suite applies its algorithm with the parameters below, as
+:data:`~pcapkit.protocols.internet.esp.CIPHER_SUITES` and
+:data:`~pcapkit.protocols.internet.esp.INTEGRITY_SUITES` record them. Lengths
+and sizes are in octets.
+
+========================== =========== ============== ============== ============== ============== =============== =========================
+Encryption                 ``is_aead`` ``iv_length``  ``block_size`` ``icv_length`` ``key_sizes``  ``salt_length`` ``requires_cryptography``
+========================== =========== ============== ============== ============== ============== =============== =========================
+``ENCR_NULL``              no          0              1              0              0              0               no
+``ENCR_AES_CBC``           no          16             16             0              16, 24, 32     0               yes
+``ENCR_AES_GCM_8``         yes         8              1              8              16, 24, 32     4               yes
+``ENCR_AES_GCM_12``        yes         8              1              12             16, 24, 32     4               yes
+``ENCR_AES_GCM_16``        yes         8              1              16             16, 24, 32     4               yes
+========================== =========== ============== ============== ============== ============== =============== =========================
+
+========================== ============== ============== ==============
+Integrity                  ``digest``     ``icv_length`` ``key_size``
+========================== ============== ============== ==============
+``NONE``                   :data:`None`   0              0
+``AUTH_HMAC_SHA1_96``      ``sha1``       12             20
+``AUTH_HMAC_SHA2_256_128`` ``sha256``     16             32
+``AUTH_HMAC_SHA2_384_192`` ``sha384``     24             48
+``AUTH_HMAC_SHA2_512_256`` ``sha512``     32             64
+========================== ============== ============== ==============
 
 .. autoclass:: pcapkit.protocols.internet.esp.CipherSuite
    :members:

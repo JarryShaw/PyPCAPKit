@@ -6,7 +6,7 @@
 
 :mod:`pcapkit.protocols.internet.ipv6` contains
 :class:`~pcapkit.protocols.internet.ipv6.IPv6` only,
-which implements extractor for Internet Protocol
+which implements the extractor for Internet Protocol
 version 6 (IPv6) [*]_, whose structure is described
 as below:
 
@@ -99,8 +99,8 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
 
     #: Extension header codes with a *dedicated* parser class in this
     #: package whose layout follows :rfc:`6564#section-4`'s generic ``next`` +
-    #: ``Hdr Ext Len`` format (see the module docstring of
-    #: :mod:`pcapkit.protocols.internet.ipv6_ext` for the exception table).
+    #: ``Hdr Ext Len`` format (see :ref:`ipv6-ext-length-rules` for the
+    #: exception table).
     #: When that dedicated parser raises, :meth:`_import_next_layer`
     #: substitutes :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`
     #: instead of letting the generic
@@ -113,9 +113,8 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
     #: * :attr:`~pcapkit.const.ipv6.extension_header.ExtensionHeader.Shim6`
     #:   has no dedicated parser class in this package, so there is no "own
     #:   parser" for it to raise from. It reaches :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`
-    #:   by *direct* registration (see the bottom of
-    #:   :mod:`pcapkit.protocols.internet.ipv6_ext`), which already produces
-    #:   exactly this class.
+    #:   by *direct* registration (see :ref:`ipv6-ext-entry-paths`), which
+    #:   already produces exactly this class.
     #: * ``ESP`` *does* have a dedicated, registered parser
     #:   (:class:`~pcapkit.protocols.internet.esp.ESP`). It is excluded
     #:   because :rfc:`4303` places the real Next Header byte inside the
@@ -245,7 +244,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             raise ProtocolError(f"[IPv6] invalid version: {schema.hextet['version']}")
 
         # NOTE: A receiver treats each of these as an error (:issue:`1687`), so
-        # the frame stops here, c.f. :meth:`IPv4.read
+        # the frame stops here, see :meth:`IPv4.read
         # <pcapkit.protocols.internet.ipv4.IPv4.read>`. A Fragment header beside
         # the Jumbo Payload option is caught on the walk, see
         # :meth:`_decode_next_layer`.
@@ -266,7 +265,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         })  # type: Data_IPv6
 
         # NOTE: Octets captured past the Payload Length are kept as captured,
-        # c.f. :meth:`IPv4.read <pcapkit.protocols.internet.ipv4.IPv4.read>`
+        # see :meth:`IPv4.read <pcapkit.protocols.internet.ipv4.IPv4.read>`
         # (:issue:`1209`).
         if schema.trailer:
             ipv6.__update__({
@@ -274,7 +273,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             })
 
         # NOTE: A jumbogram's extent is its Jumbo Payload Length, not the zero
-        # Payload Length, c.f. :meth:`Schema_IPv6.post_process
+        # Payload Length, see :meth:`Schema_IPv6.post_process
         # <pcapkit.protocols.schema.internet.ipv6.IPv6.post_process>`
         # (:issue:`1434`); the check above leaves a zero one beside it.
         jumbo = jumbo_payload_length(schema.next, rest)
@@ -505,7 +504,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
 
             # NOTE: A header whose dedicated parser raised was parsed by
             # :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` instead,
-            # c.f. :meth:`_import_next_layer`, and written under that class's
+            # see :meth:`_import_next_layer`, and written under that class's
             # key rather than the dedicated one's. Rebuilding it with the
             # dedicated class would look for fields only that class parses
             # (:issue:`1473`), so the key decides the parser.
@@ -773,11 +772,11 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             dedicated parser, so they reach plain ``Raw`` with no exception
             involved; :meth:`_decode_next_layer` stops its walk structurally on
             any layer whose info carries no ``next`` attribute, ``Raw``
-            included. ``ESP``'s info always carries a ``next`` (:data:`None`,
-            since :rfc:`4303` encrypts the real value), so neither this
-            substitution nor that structural check engages for it, and the walk
-            ends after it -- see :attr:`__generic_ext_codes__`'s docstring for
-            the full distinction.
+            included. ``ESP``'s info always carries a ``next`` (:data:`None`
+            unless its payload was decrypted, since :rfc:`4303` encrypts the
+            real value), so neither this substitution nor that structural
+            check engages for it, and the walk ends after it -- see
+            :attr:`__generic_ext_codes__`'s docstring for the full distinction.
 
             The upper layer past a walk cut at :data:`EXTENSION_HEADER_LIMIT
             <pcapkit.utilities.config.EXTENSION_HEADER_LIMIT>` is the

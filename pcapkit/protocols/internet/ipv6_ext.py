@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
-"""IPv6_Ext - IPv6 Extension Header
-====================================
+"""IPv6-Ext - IPv6 Extension Header
+================================
 
 .. module:: pcapkit.protocols.internet.ipv6_ext
 
@@ -11,8 +11,8 @@ every IPv6 extension header in this package and a **generic** extractor that
 stands in for a header whose dedicated parser is unavailable or has failed.
 The class docstring separates these roles.
 
-Why this is safe in general
-----------------------------
+Length Rules
+------------
 
 :rfc:`6564#section-4` is Standards Track and says, with an RFC 2119
 **MUST**, that any IPv6 extension header defined from April 2012
@@ -39,33 +39,32 @@ instead.)
 The exception table, verified against IANA's ``protocol-numbers-1.csv``
 *IPv6 Extension Header* column and each cited RFC:
 
-======================================================= ===========================================
-Header(s)                                                Length rule
-======================================================= ===========================================
-``HOPOPT``, ``IPv6-Route``, ``IPv6-Opts``, ``MH``,       ``(octet[1] + 1) * 8`` -- the :rfc:`6564`
-``HIP``, ``Shim6``                                       generic rule
-``IPv6-Frag``                                            constant ``8``; octet[1] is Reserved, not a
-                                                          length (:rfc:`8200#section-4.5`)
-``AH``                                                   ``(octet[1] + 2) * 4`` -- :rfc:`4302#section-2.2`
-                                                          counts in 4-octet units with a bias of 2,
-                                                          not :rfc:`6564`'s 8-octet units and bias of 1
-``ESP``                                                  terminal -- has a dedicated, registered parser
-                                                          (:class:`~pcapkit.protocols.internet.esp.ESP`),
-                                                          but its Next Header byte is inside the
-                                                          encrypted trailer (:rfc:`4303`), so its own
-                                                          info's ``next`` is :data:`None` rather than a
-                                                          value to continue on
-``253``, ``254``                                         terminal -- no dedicated parser exists, so no
-                                                          next header field is ever read at all, either
-======================================================= ===========================================
+===================================================================== =================================================
+Header(s)                                                             Length rule
+===================================================================== =================================================
+``HOPOPT``, ``IPv6-Route``, ``IPv6-Opts``, ``MH``, ``HIP``, ``Shim6`` ``(octet[1] + 1) * 8`` -- the :rfc:`6564`
+                                                                      generic rule
+``IPv6-Frag``                                                         constant ``8``; octet[1] is Reserved, not a
+                                                                      length (:rfc:`8200#section-4.5`)
+``AH``                                                                ``(octet[1] + 2) * 4`` -- :rfc:`4302#section-2.2`
+                                                                      counts in 4-octet units with a bias of 2,
+                                                                      not :rfc:`6564`'s 8-octet units and bias of 1
+``ESP``                                                               terminal -- has a dedicated, registered parser
+                                                                      (:class:`~pcapkit.protocols.internet.esp.ESP`),
+                                                                      but its Next Header byte is inside the
+                                                                      encrypted trailer (:rfc:`4303`), so the walk
+                                                                      cannot step past it on the wire
+``253``, ``254``                                                      terminal -- no dedicated parser exists, so no
+                                                                      next header field is ever read at all, either
+===================================================================== =================================================
 
 This table classifies by *wire format* alone, over every code
 :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` enumerates,
 which match IANA's *IPv6 Extension Header Types* registry exactly (GitHub
 issue :issue:`925`).
 
-``Shim6`` conforms to it (:rfc:`5533`) but has no dedicated parser class; see
-"Entry paths" below for how it reaches this class by direct dispatch.
+``Shim6`` conforms to the generic rule (:rfc:`5533`) but has no dedicated parser class; see
+"Entry Paths" below for how it reaches this class by direct dispatch.
 
 :rfc:`8200#section-4.5` sets Encapsulating Security Payload aside: ESP is not
 an extension header, and the RFC lists it among upper-layer headers.
@@ -77,16 +76,17 @@ is reachable through this class, by construction; see
 enters :meth:`IPv6._decode_next_layer
 <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>`'s walk, being a
 real :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` member, but
-they part ways there. ``ESP`` resolves to its own dedicated parser, whose info
-carries a ``next`` of :data:`None`, so the walk ends the ordinary way with
-``ExtensionHeader(None)`` failing at the top of the next iteration. ``253``
+they part ways there. ``ESP`` resolves to its own dedicated parser, which
+decodes any plaintext it recovers itself and whose info carries a ``next`` of
+:data:`None` whenever the payload stays opaque, so the walk ends the ordinary
+way with ``ExtensionHeader(None)`` failing at the top of the next iteration. ``253``
 and ``254`` have no dedicated parser and resolve to plain
 :class:`~pcapkit.protocols.misc.raw.Raw`, whose info has no ``next``
 *attribute*. For these two, and any future IANA code without an
 implementation, the walk stops on a *structural* check (does the parsed layer
 carry a ``next`` at all?) rather than on a list of codes.
 
-Entry paths
+Entry Paths
 -----------
 
 This class is reached in these ways:
@@ -115,8 +115,8 @@ This class is reached in these ways:
    catches the failure itself, one layer in from ``beholder``, and substitutes
    this class: the bad header costs only itself, not the rest of the chain.
 
-The overrun guard
--------------------
+The Overrun Guard
+-----------------
 
 The house convention for a declared length that does not fit what remains
 is warn-and-clip: emit a warning naming what was declared against what is
@@ -185,9 +185,11 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
     """This class implements a generic IPv6 extension header parser, and is
     the shared base of every IPv6 extension header in this package.
 
-    The module docstring has the RFC citations behind the length rules, the
-    ways this class is dispatched to, and why an overrun stops the walk rather
-    than clipping.
+    The module documentation has the RFC citations behind the
+    :ref:`length rules <ipv6-ext-length-rules>`, the
+    :ref:`ways this class is dispatched to <ipv6-ext-entry-paths>`, and
+    :ref:`why an overrun stops the walk <ipv6-ext-overrun-guard>` rather than
+    clipping.
 
     .. rubric:: Base and Fallback Roles
 
@@ -332,8 +334,8 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
         their data models records the Next Header value under this name.
 
         :data:`None` when the declared length would have overrun what remained
-        of the chain and the walk stopped instead of trusting it; see the
-        module docstring's "overrun guard" section.
+        of the chain and the walk stopped instead of trusting it; see
+        :ref:`ipv6-ext-overrun-guard`.
 
         """
         return cast('_NextHeaderData', self._info).next
@@ -432,7 +434,7 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
 
         if nominal > length:
             # Warns like the house convention but stops rather than clips; see
-            # the module docstring's "overrun guard" section.
+            # the module docstring's "The Overrun Guard" section.
             warn(f'IPv6: extension header declares a length of {nominal} octet(s) with '
                  f'{length} octet(s) left in the chain; stopping the walk instead of '
                  f'skipping past it', SchemaWarning, stacklevel=stacklevel())
@@ -472,7 +474,8 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
             next: Next header type.
             len: Raw ``Hdr Ext Len`` octet to emit. The caller must size it,
                 since this class cannot know at construction time which
-                per-protocol rule (see the module docstring) it must satisfy.
+                per-protocol rule (see :ref:`ipv6-ext-length-rules`) it must
+                satisfy.
             data: Header-specific content after the two fixed octets, emitted
                 verbatim ahead of ``payload``.
             payload: Payload of current instance.
@@ -553,7 +556,7 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
                 docstring's "Base and Fallback Roles") and ``version`` is not ``6``.
 
         See Also:
-            For construction argument, please refer to :meth:`make`.
+            For construction arguments, please refer to :meth:`make`.
 
         Note:
             The version gate is scoped to the fallback role by the same
