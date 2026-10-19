@@ -576,9 +576,9 @@ jobs:
             echo EOF
           } >> "$GITHUB_OUTPUT"
 
-      # #1814: the package declares no run requirements, so the packages it
-      # vendors in `pcapkit/_extern` are all it has, and they once shipped as
-      # modules alone. This unpacks the package built for this runner and
+      # #1814: the package declares no run requirement but Python, so the
+      # packages it vendors in `pcapkit/_extern` are all it has, and they once
+      # shipped as modules alone. This unpacks the package built for this runner and
       # checks that every vendored distribution has every file its RECORD lists
       # and imports from there, with no site-packages on the path, before
       # anything is uploaded. #1822: it also fails unless the package, and every

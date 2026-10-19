@@ -143,9 +143,10 @@ crypto = [ "cryptography>=3.4" ]
 # ``crypto`` core addons ``all`` bundles it with.
 #
 # No version floor: NGAP has shipped precompiled in ``pycrate_asn1dir`` for many
-# releases and the two entry points used here (``NGAP_PDU.from_aper`` and
-# ``to_aper``) are long-standing. Verified against 0.8.1, which is pure Python
-# with no compiled extension, so there is no toolchain prerequisite either.
+# releases and the entry points used here (``NGAP_PDU.from_aper`` and
+# ``to_aper`` among them) are long-standing. Verified against 0.8.1, which is
+# pure Python with no compiled extension, so there is no toolchain prerequisite
+# either.
 NGAP = [ "pycrate" ]
 # for normal users
 DPKT = [ "dpkt" ]

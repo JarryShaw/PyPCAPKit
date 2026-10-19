@@ -772,10 +772,10 @@ class Outcome(NamedTuple):
     #: renamed-on-the-wire class (RARP reporting itself as ``'ARP'``) from a
     #: wrong one -- but wrong here, because :class:`~pcapkit.protocols.misc.raw.Raw`
     #: itself constructs with ``alias=`` set to the *dispatching* code's own
-    #: name (pcapkit/protocols/misc/raw.py:152), so a mis-pointed registry
-    #: entry still renders its original code's name and would satisfy the
-    #: string check while no instance of the pinned class exists anywhere in
-    #: the chain.
+    #: name (``Raw.__post_init__``, pcapkit/protocols/misc/raw.py), so a
+    #: mis-pointed registry entry still renders its original code's name and
+    #: would satisfy the string check while no instance of the pinned class
+    #: exists anywhere in the chain.
     reached: 'bool'
     #: Exception type and message, if building or extracting the envelope
     #: raised outright rather than merely dispatching somewhere else. Empty
@@ -878,8 +878,8 @@ def probe(case: 'Case') -> 'Outcome':
     # on Type.id(). That is deliberate there (RARP reports itself as 'ARP' for
     # some ``oper`` values, and is still the RARP class), but it is exactly
     # the loophole that let a mis-pointed registry entry through here: several
-    # dissectors -- Raw chief among them, in
-    # pcapkit/protocols/misc/raw.py:152 -- construct with ``alias=`` set to
+    # dissectors -- Raw chief among them, in ``Raw.__post_init__``
+    # (pcapkit/protocols/misc/raw.py) -- construct with ``alias=`` set to
     # the *dispatching* code's own name, so a code named ``AH`` retargeted at
     # Raw still renders as ``'...:AH'`` and still satisfies ``AH in
     # protochain`` on the string alone, even though no AH instance exists

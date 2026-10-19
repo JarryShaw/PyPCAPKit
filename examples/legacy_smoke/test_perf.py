@@ -2,7 +2,7 @@
 """Benchmark ``pcapkit.extract`` across engines with pyperf.
 
 ``pyperf`` is not a pcapkit dependency -- it is a benchmarking harness this one demo
-uses -- so it will not be present in a plain ``pip install pcapkit`` environment.
+uses -- so it will not be present in a plain ``pip install pypcapkit`` environment.
 When it is missing the demo says how to get it and stops there rather than dying on
 an import traceback.
 

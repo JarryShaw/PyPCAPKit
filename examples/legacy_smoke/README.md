@@ -115,12 +115,11 @@ found by reading the file rather than by anything breaking. Generating them on d
 means the copy on your disk describes the tree you are standing in, which was the only
 thing that made them worth looking at.
 
-`TZ=UTC` **is not decoration.** `pcapkit` renders frame timestamps in the host's
-local zone, so an unpinned run rewrites every timestamp line in every report with
-wherever it happened to be run -- which is how these reports came to disagree with
-each other while they were still tracked, the PCAP reports having been generated at
-UTC-05:00 and `pcapng.txt` at UTC+08:00. Pinning UTC makes the output reproducible on
-any host, so two runs can be diffed against each other. It also happens to be the only
-zone in which PCAP-NG's `timestamp_epoch` is the true UNIX epoch:
-`PCAPNG._read_timestamp` adds the zone's UTC offset to the value it returns, so a
-report generated anywhere else bakes in that offset.
+`TZ=UTC` is a belt-and-braces pin, not a requirement. `pcapkit` renders a frame
+timestamp in UTC, or in the zone a PCAP-NG interface declares in `if_tzone`, and
+never in the host's; PCAP-NG's `timestamp_epoch` is the UNIX epoch with no zone
+offset added (#357, #361). Measured by generating every report under `UTC`,
+`Asia/Shanghai` and `America/New_York`: they are identical. The host's zone did
+leak in before that fix, which is how these reports came to disagree with each
+other while they were still tracked, the PCAP reports having been generated at
+UTC-05:00 and `pcapng.txt` at UTC+08:00.
