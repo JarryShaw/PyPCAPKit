@@ -571,7 +571,7 @@ class TestDocsOnlyPathRunsEveryDocsReader(unittest.TestCase):
     def listed(self) -> 'set[str]':
         """The modules project-tests' second run step names."""
         script = step(job('project-tests'), 'Run the other tests that read docs/ or Markdown')
-        command = re.search(r'(?m)^        run: python -m unittest -v (.+)$', script)
+        command = re.search(r'(?m)^        run: python util/cap_file_size.py python -m unittest -v (.+)$', script)
         self.assertIsNotNone(command)
         return set(command.group(1).split())  # type: ignore[union-attr]
 
@@ -597,7 +597,7 @@ class TestDocsOnlyPathRunsEveryDocsReader(unittest.TestCase):
 #: citation matches -- so moving a job without renumbering the prose fails here.
 CITATIONS: 'dict[str, list[tuple[str, Optional[str]]]]' = {
     'docs/source/contributing/releasing.rst': [
-        ('  gate:', 'run: python -m pytest -q -n auto --dist load'),
+        ('  gate:', 'run: python util/cap_file_size.py python -m pytest -q -n auto --dist load'),
         ('  changelog:', 'fi'),
     ],
     'docs/source/contributing/workflows.rst': [

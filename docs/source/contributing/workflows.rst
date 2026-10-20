@@ -1009,6 +1009,32 @@ those pins drive read the tier file on the runner's own ``python3``, and
 :file:`tests/project/test_python_versions_1660.py` checks those skips in a child
 interpreter that cannot import ``tomllib``.
 
+File Size Caps (`#1969 <https://github.com/JarryShaw/PyPCAPKit/issues/1969>`__)
+-------------------------------------------------------------------------------
+
+A test that writes without bound fills the runner's disk rather than failing: `#1372
+<https://github.com/JarryShaw/PyPCAPKit/issues/1372>`__'s ``out.json`` grew to
+several gigabytes on every run. So every pytest and unittest command in
+:file:`.github/workflows/unit-tests.yml` runs as ``python util/cap_file_size.py
+python -m ...``: ``test``'s ``Run unit tests``; ``integration``'s,
+``pypcap-parity``'s and ``gate``'s ``Run full test suite``; the KTLO twins of
+``test``, ``integration`` and ``pypcap-parity``, which share their steps; the
+engine cells that ``engine-tests``' ``Write the per-cell script`` writes;
+``unittest-ordering``'s cells; and each run step of ``project-tests``.
+
+``util/cap_file_size.py`` sets ``RLIMIT_FSIZE``, soft and hard, to 2 GiB, or keeps
+a lower hard limit, and execs the command, so the step's exit status and
+``continue-on-error`` behave as before and every process the command starts
+inherits the cap. A write past it raises ``OSError: [Errno 27] File too large`` in
+Python, since CPython ignores ``SIGXFSZ``, so the test errors; any other program is
+killed by the signal, whose default action the script restores before it execs.
+``experimental.yml``'s legs get the same 2 GiB through ``prlimit --fsize`` (see
+above).
+
+:file:`tests/project/test_file_size_caps_1969.py` fails when a command in
+``unit-tests.yml`` runs pytest, unittest or :file:`util/run_unittest_leg.py`
+without the script, and runs the script against a small limit.
+
 Python Versions
 ---------------
 

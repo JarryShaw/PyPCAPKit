@@ -255,9 +255,9 @@ jobs:
           if [ "$COVERAGE" = "true" ]; then
             # Logs every measured process and its parent, for the check below.
             COVERAGE_DEBUG=pid,process COVERAGE_DEBUG_FILE="$PWD/coverage-processes.log" \
-            python -m coverage run --rcfile=.github/coverage.toml -m pytest "$@"
+            python util/cap_file_size.py python -m coverage run --rcfile=.github/coverage.toml -m pytest "$@"
           else
-            python -m pytest "$@"
+            python util/cap_file_size.py python -m pytest "$@"
           fi
 
       # The table goes to the job summary. The numbers also go to an artifact
@@ -615,7 +615,7 @@ jobs:
           echo "Fixture-dependent selection: $selection"
           # shellcheck disable=SC2086
           set -- $selection
-          python -m pytest -q -n auto --dist load \
+          python util/cap_file_size.py python -m pytest -q -n auto --dist load \
             --durations=30 --durations-min=1.0 --junitxml="$RUNNER_TEMP/junit.xml" "$@"
 
       # See the `test` job's step of the same name.
@@ -1051,7 +1051,7 @@ jobs:
           esac
           echo "Running: $TEST_PATHS"
           # shellcheck disable=SC2086
-          if ! python -m pytest -q -n auto --dist load $TEST_PATHS; then
+          if ! python util/cap_file_size.py python -m pytest -q -n auto --dist load $TEST_PATHS; then
             echo "::${ANNOTATION_LEVEL} title=$ENGINE tests failed on Python $PY::See the 'Python $PY ($ENGINE)' group in this step's log."
             exit 1
           fi
@@ -1368,7 +1368,7 @@ jobs:
             exit 1
           fi
           echo "Fixture-dependent selection: $selection"
-          python -m pytest -q -n auto --dist load $selection
+          python util/cap_file_size.py python -m pytest -q -n auto --dist load $selection
 
       # #1672: see the `test` job's step of the same name.
       - name: KTLO summary
@@ -1622,7 +1622,7 @@ jobs:
       # under the job's 45 so a hang reports as this step timing out.
       - name: Run tests/${{ matrix.leg }} and the root-level modules under plain unittest
         timeout-minutes: 20
-        run: python util/run_unittest_leg.py ${{ matrix.leg }} ${{ matrix.exclude }} --verbose
+        run: python util/cap_file_size.py python util/run_unittest_leg.py ${{ matrix.leg }} ${{ matrix.exclude }} --verbose
 
   # ``CHANGELOG.md`` is generated from the newest entry under
   # ``docs/source/changelog/`` by ``util/changelog_md.py``, so it falls out of step
@@ -1800,16 +1800,16 @@ jobs:
 
       # `test`'s pytest flags, with the pins as the selection. A selection that
       # cannot be computed, or is empty, fails the step rather than letting a
-      # bare `pytest` run the whole suite. `ulimit -f` caps any file a test
-      # writes at 2 GiB (bash counts 1024-byte blocks), as experimental.yml's
-      # `prlimit --fsize` does. The step cap is several times the run's
-      # length, under the job's 20.
+      # bare `pytest` run the whole suite. The step cap is several times the
+      # run's length, under the job's 20. #1969: every pytest and unittest
+      # command in this file runs under util/cap_file_size.py, which caps any
+      # file a test writes at 2 GiB, as experimental.yml's `prlimit --fsize`
+      # does; tests/project/test_file_size_caps_1969.py pins that.
       - name: Run the project pins
         if: ${{ needs.changes.outputs.code != 'false' }}
         timeout-minutes: 10
         shell: bash
         run: |
-          ulimit -f 2097152
           if ! pins=$(python -c "from tests._tiers import project_pin_paths; print(' '.join(project_pin_paths()))"); then
             echo "::error title=Could not compute the project pins::tests._tiers.project_pin_paths() failed -- see the traceback above."
             exit 1
@@ -1820,18 +1820,18 @@ jobs:
           fi
           # shellcheck disable=SC2086
           set -- $pins
-          python -m pytest -q -n auto --dist load \
+          python util/cap_file_size.py python -m pytest -q -n auto --dist load \
             --durations=30 --durations-min=1.0 --junitxml="$RUNNER_TEMP/junit.xml" "$@"
 
       - name: Run tests/project and the root-level modules under plain unittest
         if: ${{ needs.changes.outputs.code == 'false' }}
         timeout-minutes: 15
-        run: python util/run_unittest_leg.py project --verbose
+        run: python util/cap_file_size.py python util/run_unittest_leg.py project --verbose
 
       - name: Run the other tests that read docs/ or Markdown
         if: ${{ needs.changes.outputs.code == 'false' }}
         timeout-minutes: 5
-        run: python -m unittest -v tests.corekit.test_sentinel_exports_unit tests.utilities.test_config_unit tests.vendor.test_vendor_variables_1726_unit
+        run: python util/cap_file_size.py python -m unittest -v tests.corekit.test_sentinel_exports_unit tests.utilities.test_config_unit tests.vendor.test_vendor_variables_1726_unit
 
   # The verdict a shipping workflow asks for: the full suite, fixtures and
   # all, on one interpreter. It is deliberately not the matrix -- the matrix
@@ -1909,7 +1909,7 @@ jobs:
       # scope here. `--dist load` is pinned explicitly; see the `test` job
       # above for why.
       - name: Run full test suite
-        run: python -m pytest -q -n auto --dist load
+        run: python util/cap_file_size.py python -m pytest -q -n auto --dist load
 
   # Ruleset 23497679's required_status_checks requires these contexts: this
   # job's `Required checks passed`, and a `Compat Python` one per supported version,

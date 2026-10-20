@@ -323,8 +323,9 @@ class WorkflowAgreementTests(unittest.TestCase):
 #: The experimental legs' workflow (#1732), whose unit-tier step leaves the ``LATEST`` tier out too.
 EXPERIMENTAL_WORKFLOW = _tiers.ROOT / '.github' / 'workflows' / 'experimental.yml'
 #: A ``python`` that writes each argument on a line of ``$ARGS_FILE``, and hands a
-#: ``-c`` to the real one, which is how the steps ask tests/_tiers.py for the pins.
-PYTHON_STUB = ('#!/bin/sh\nif [ "$1" = -c ]; then exec "$REAL_PYTHON" "$@"; fi\n'
+#: ``-c`` to the real one, which is how the steps ask tests/_tiers.py for the pins, and
+#: util/cap_file_size.py, which execs this stub with the command it caps (#1969).
+PYTHON_STUB = ('#!/bin/sh\ncase "$1" in -c|util/cap_file_size.py) exec "$REAL_PYTHON" "$@";; esac\n'
                'printf \'%s\\n\' "$@" > "$ARGS_FILE"\n')
 
 

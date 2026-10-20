@@ -73,8 +73,9 @@ GATING = ('required-checks', 'unittest-ordering')
 #: The unit tier's own flags, which every leg passes.
 TIER_FLAGS = ('--ignore=tests/integration', '--ignore-glob=*_runtime.py', '--ignore-glob=*_regression.py')
 #: A ``python`` that writes each argument on a line of ``$ARGS_FILE``, and hands a
-#: ``-c`` to the real one, which is how the steps ask tests/_tiers.py.
-STUB = ('#!/bin/sh\nif [ "$1" = -c ]; then exec "$REAL_PYTHON" "$@"; fi\n'
+#: ``-c`` to the real one, which is how the steps ask tests/_tiers.py, and
+#: util/cap_file_size.py, which execs this stub with the command it caps (#1969).
+STUB = ('#!/bin/sh\ncase "$1" in -c|util/cap_file_size.py) exec "$REAL_PYTHON" "$@";; esac\n'
         'printf \'%s\\n\' "$@" > "$ARGS_FILE"\n')
 #: A directory holding sweeps, hand-picked round trips, and modules that only import
 #: the sweeps' harnesses' packet builders, for :class:`TestTheIgnoresAreTheLatestTier`.
