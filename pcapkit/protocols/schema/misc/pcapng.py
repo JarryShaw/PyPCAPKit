@@ -627,6 +627,34 @@ def _cut_last_line(schema: 'Schema', index: 'int', lines: 'list[str]',
     return '__short_read__' in schema.__dict__ or (packet is not None and _secrets_cut(packet))
 
 
+def _malformed_line_message(kind: 'str', labels: 'Callable[[str], Any]', line: 'str') -> 'str':
+    """Report a key log line that does not parse, without quoting what it holds.
+
+    Args:
+        kind: Name of the key log, e.g. ``'TLS'``.
+        labels: Enumeration of the key log's labels, called on the upper-cased
+            first field of the line.
+        line: The line that does not parse.
+
+    Returns:
+        A warning message naming the line's label, when that is one ``labels``
+        knows, and eliding its values. The line itself is never quoted, since
+        it carries key material (:issue:`1985`); nor is an unrecognised label,
+        which may be key material too.
+
+    """
+    fields = line.split()
+    try:
+        name = labels(fields[0].upper()).name if fields else None
+    except ValueError:
+        name = None
+    if name is None:
+        return (f'PCAP-NG: invalid {kind} key log line with an unrecognised label; '
+                'line elided, kept as captured')
+    return (f'PCAP-NG: invalid {kind} key log line for label {name!r}; '
+            'values elided, line kept as captured')
+
+
 def dsb_secrets_selector(packet: 'dict[str, Any]') -> 'Field':
     """Selector function for :attr:`DecryptionSecretsBlock.secrets_data` field.
 
@@ -2305,10 +2333,11 @@ class TLSKeyLog(DSBSecrets, code=Enum_SecretsType.TLS_Key_Log):
         A line that does not parse -- an unknown label, a field that is not
         hexadecimal, a wrong number of fields, or the first octets of an entry
         cut inside the block's padding -- is left out of :attr:`entries` and
-        reported as a :class:`~pcapkit.utilities.warnings.ProtocolWarning`,
-        wherever it sits in the log (:issue:`1985`). Refusing it would abort
-        the whole extraction rather than this one line, as :func:`nonnegative`
-        explains, and :attr:`data` keeps the log text verbatim, so the line is
+        reported as a :class:`~pcapkit.utilities.warnings.ProtocolWarning`
+        that names its label and elides its values (see
+        :func:`_malformed_line_message`), wherever it sits in the log
+        (:issue:`1985`). Refusing it would abort the whole extraction rather
+        than this one line, as :func:`nonnegative` explains, and :attr:`data` keeps the log text verbatim, so the line is
         still kept as captured and the block rebuilds octet for octet. A last
         line the capture or the block cut is left out silently (see
         :func:`_cut_last_line`), since the cut is reported already.
@@ -2331,7 +2360,7 @@ class TLSKeyLog(DSBSecrets, code=Enum_SecretsType.TLS_Key_Log):
             except ValueError:
                 if _cut_last_line(self, index, lines, packet):
                     break
-                warn(f'PCAP-NG: invalid TLS key log format: {line!r}; line kept as captured',
+                warn(_malformed_line_message('TLS', Enum_TLSKeyLabel, line),
                      ProtocolWarning, stacklevel=stacklevel())
                 continue
             entries[label_enum].add(random_octets, secret_octets)
@@ -2378,14 +2407,14 @@ class WireGuardKeyLog(DSBSecrets, code=Enum_SecretsType.WireGuard_Key_Log):
             fields = line.strip().split()
             try:
                 if len(fields) != 3 or fields[1] != '=':
-                    raise ValueError(line)
+                    raise ValueError('not a WireGuard key log line')
                 label, _, secret = fields
                 label_enum = WireGuardKeyLabel(label.upper())
                 entries.add(label_enum, base64.b64decode(secret))
             except ValueError:
                 if _cut_last_line(self, index, lines, packet):
                     break
-                warn(f'PCAP-NG: invalid WireGuard key log format: {line!r}; line kept as captured',
+                warn(_malformed_line_message('WireGuard', WireGuardKeyLabel, line),
                      ProtocolWarning, stacklevel=stacklevel())
 
         self.entries = entries

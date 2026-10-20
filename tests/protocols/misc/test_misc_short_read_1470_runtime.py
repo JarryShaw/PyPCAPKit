@@ -219,15 +219,17 @@ class TestKeyLogLines(unittest.TestCase):
         module = importlib.import_module('pcapkit.protocols.schema.misc.pcapng')
         for schema, text, message in (
             ('TLSKeyLog', b'CLIENT_RANDOM abcd\n',
-             "PCAP-NG: invalid TLS key log format: 'CLIENT_RANDOM abcd'; line kept as captured"),
-            ('WireGuardKeyLog', b'LOCAL_STATIC_PRIVATE_KEY = Q\n',
-             "PCAP-NG: invalid WireGuard key log format: 'LOCAL_STATIC_PRIVATE_KEY = Q'; "
-             'line kept as captured'),
+             "PCAP-NG: invalid TLS key log line for label 'CLIENT_RANDOM'; "
+             'values elided, line kept as captured'),
+            ('WireGuardKeyLog', b'LOCAL_STATIC_PRIVATE_KEY = QUFBQ\n',
+             "PCAP-NG: invalid WireGuard key log line for label 'LOCAL_STATIC_PRIVATE_KEY'; "
+             'values elided, line kept as captured'),
         ):
             with self.subTest(schema=schema):
                 with self.assertWarns(ProtocolWarning) as caught:
                     parsed = getattr(module, schema).unpack(text, len(text))
                 self.assertEqual(str(caught.warning), message)
+                self.assertNotIn(text.split()[-1].decode(), message)
                 self.assertEqual(len(parsed.entries), 0)
                 self.assertEqual(parsed.data, text.decode())
 

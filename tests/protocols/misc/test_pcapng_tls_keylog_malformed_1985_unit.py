@@ -38,14 +38,29 @@ TLS_LINE2 = b'SERVER_HANDSHAKE_TRAFFIC_SECRET ' + b'12' * 32 + b' ' + b'34' * 32
 WG_KEY = bytes(range(32))
 WG_LINE = b'LOCAL_STATIC_PRIVATE_KEY = ' + base64.b64encode(WG_KEY) + b'\n'
 
-#: Malformed TLS key log lines, each followed by a newline.
+#: Malformed TLS key log lines, each followed by a newline, and the label the
+#: warning names for each, if any.
 TLS_MALFORMED = (
-    b'NOT_A_LABEL aa bb\n',
-    b'CLIENT_RANDOM zz yy\n',
-    b'garbage\n',
-    b'CLIENT_RANDOM ' + b'ab' * 32 + b'\n',
-    b'\xff\xfe junk\n',
+    (b'NOT_A_LABEL aa bb\n', None),
+    (b'CLIENT_RANDOM zz yy\n', 'CLIENT_RANDOM'),
+    (b'garbage\n', None),
+    (b'CLIENT_RANDOM ' + b'ab' * 32 + b'\n', 'CLIENT_RANDOM'),
+    (b'CLIENT_RANDOM zz ' + b'cd' * 48 + b'\n', 'CLIENT_RANDOM'),
+    (b'client_random ' + b'ab' * 32 + b' ' + b'cd' * 48 + b' extra\n', 'CLIENT_RANDOM'),
+    (b'\xff\xfe junk\n', None),
 )
+
+#: Malformed WireGuard key log lines, and the label the warning names for each, if any.
+WG_MALFORMED = (
+    (b'BOGUS = AAAA\n', None),
+    (b'LOCAL_STATIC_PRIVATE_KEY AAAA\n', 'LOCAL_STATIC_PRIVATE_KEY'),
+    (b'LOCAL_STATIC_PRIVATE_KEY = Q\n', 'LOCAL_STATIC_PRIVATE_KEY'),
+    (b'LOCAL_STATIC_PRIVATE_KEY == ' + base64.b64encode(WG_KEY) + b'\n', 'LOCAL_STATIC_PRIVATE_KEY'),
+    (b'NOT_A_KEY = ' + base64.b64encode(WG_KEY) + b'\n', None),
+)
+
+#: Key material the test inputs carry, which no warning may quote.
+KEY_MATERIAL = ('ab' * 32, 'cd' * 48, '12' * 32, '34' * 32, base64.b64encode(WG_KEY).decode())
 
 
 class TestPCAPNGKeyLogMalformedLine(PCAPNGTestCase):
@@ -78,11 +93,25 @@ class TestPCAPNGKeyLogMalformedLine(PCAPNGTestCase):
             self.assertEqual(self._parse(octets).__header__.pack().hex(), octets.hex())  # type: ignore[attr-defined]
             self.assertRebuilds(octets)
 
-    def assertKeyLogLine(self, messages: 'list[str]', kind: 'str', line: 'bytes') -> None:  # pylint: disable=invalid-name
-        """Assert ``messages`` report ``line`` of a ``kind`` key log kept as captured."""
-        text = line.rstrip(b'\n').decode('ascii', errors='replace')
-        self.assertIn(f'PCAP-NG: invalid {kind} key log format: {text!r}; line kept as captured',
-                      messages)
+    def assertKeyLogLine(self, messages: 'list[str]', kind: 'str',  # pylint: disable=invalid-name
+                         label: 'str | None', line: 'bytes') -> None:
+        """Assert ``messages`` report ``line`` of a ``kind`` key log by ``label`` alone."""
+        if label is None:
+            expected = (f'PCAP-NG: invalid {kind} key log line with an unrecognised label; '
+                        'line elided, kept as captured')
+        else:
+            expected = (f'PCAP-NG: invalid {kind} key log line for label {label!r}; '
+                        'values elided, line kept as captured')
+        self.assertIn(expected, messages)
+        # NOTE: neither the line's values, nor a label the key log does not
+        # know, nor any key material of the log is quoted.
+        fields = line.decode('ascii', errors='replace').split()
+        if label is not None:
+            fields = fields[1:]
+        for text in messages:
+            for value in (*fields, *KEY_MATERIAL):
+                if len(value) >= 4:
+                    self.assertNotIn(value, text)
 
     def _tls_entries(self, octets: 'bytes') -> 'list[tuple[str, bytes, bytes]]':
         secrets = self._parse_quietly(octets).info.secrets_data  # type: ignore[attr-defined]
@@ -91,25 +120,25 @@ class TestPCAPNGKeyLogMalformedLine(PCAPNGTestCase):
                 for random, secret in entry.items(multi=True)]
 
     def test_malformed_first_line(self) -> None:
-        for line in TLS_MALFORMED:
+        for line, label in TLS_MALFORMED:
             with self.subTest(line=line):
                 secrets = line + TLS_LINE
                 octets = _dsb(TLS_KEY_LOG, len(secrets), secrets)
                 frames, messages = self._extract(octets)
                 self.assertEqual(frames, [FRAME, FRAME])
-                self.assertKeyLogLine(messages, 'TLS', line)
+                self.assertKeyLogLine(messages, 'TLS', label, line)
                 self.assertEqual(self._tls_entries(octets),
                                  [('CLIENT_RANDOM', b'\xab' * 32, b'\xcd' * 48)])
                 self.assertRebuildsQuietly(octets)
 
     def test_malformed_middle_line(self) -> None:
-        for line in TLS_MALFORMED:
+        for line, label in TLS_MALFORMED:
             with self.subTest(line=line):
                 secrets = TLS_LINE + line + TLS_LINE2
                 octets = _dsb(TLS_KEY_LOG, len(secrets), secrets)
                 frames, messages = self._extract(octets)
                 self.assertEqual(frames, [FRAME, FRAME])
-                self.assertKeyLogLine(messages, 'TLS', line)
+                self.assertKeyLogLine(messages, 'TLS', label, line)
                 self.assertEqual(self._tls_entries(octets),
                                  [('CLIENT_RANDOM', b'\xab' * 32, b'\xcd' * 48),
                                   ('SERVER_HANDSHAKE_TRAFFIC_SECRET', b'\x12' * 32, b'\x34' * 32)])
@@ -123,7 +152,7 @@ class TestPCAPNGKeyLogMalformedLine(PCAPNGTestCase):
         frames, messages = self._extract(octets)
         self.assertEqual(frames, [FRAME, FRAME])
         self.assertFalse(any('runs past the block' in text for text in messages), messages)
-        self.assertKeyLogLine(messages, 'TLS', b'CLIENT_RA\x00')
+        self.assertKeyLogLine(messages, 'TLS', None, b'CLIENT_RA\x00')
         self.assertEqual(self._tls_entries(octets), [('CLIENT_RANDOM', b'\xab' * 32, b'\xcd' * 48)])
         self.assertEqual(self._parse_quietly(octets).info.secrets_length, len(secrets) + 1)  # type: ignore[attr-defined]
         self.assertRebuildsQuietly(octets)
@@ -131,13 +160,13 @@ class TestPCAPNGKeyLogMalformedLine(PCAPNGTestCase):
     def test_malformed_wireguard_line(self) -> None:
         from pcapkit.protocols.misc.pcapng import WireGuardKeyLabel
 
-        for line in (b'BOGUS = AAAA\n', b'LOCAL_STATIC_PRIVATE_KEY AAAA\n', b'LOCAL_STATIC_PRIVATE_KEY = Q\n'):
+        for line, label in WG_MALFORMED:
             for secrets in (line + WG_LINE, WG_LINE + line + WG_LINE):
                 with self.subTest(secrets=secrets):
                     octets = _dsb(WIREGUARD_KEY_LOG, len(secrets), secrets)
                     frames, messages = self._extract(octets)
                     self.assertEqual(frames, [FRAME, FRAME])
-                    self.assertKeyLogLine(messages, 'WireGuard', line)
+                    self.assertKeyLogLine(messages, 'WireGuard', label, line)
                     entries = self._parse_quietly(octets).info.secrets_data.entries  # type: ignore[attr-defined]
                     self.assertEqual(list(entries.items(multi=True)),
                                      [(WireGuardKeyLabel.LOCAL_STATIC_PRIVATE_KEY, WG_KEY)]
@@ -181,7 +210,7 @@ class TestPCAPNGKeyLogMalformedLine(PCAPNGTestCase):
                 octets = _dsb(secrets_type, len(secrets), secrets)
                 frames, messages = self._extract(octets)
                 self.assertEqual(frames, [FRAME, FRAME])
-                self.assertFalse(any('key log format' in text for text in messages), messages)
+                self.assertFalse(any('key log line' in text for text in messages), messages)
                 self.assertRebuildsQuietly(octets)
         self.assertEqual(self._tls_entries(_dsb(TLS_KEY_LOG, len(cases[0][1]), cases[0][1])),
                          [('CLIENT_RANDOM', b'\xab' * 32, b'\xcd' * 48),

@@ -1623,10 +1623,13 @@ class PCAPNGUnitTests(unittest.TestCase):
         wg = schema_pcapng.WireGuardKeyLog(data='# comment\n\nPRESHARED_KEY = a2V5')
         wg.post_process({})
         self.assertEqual(wg.entries.getlist(WireGuardKeyLabel.PRESHARED_KEY), [b'key'])
-        with self.assertWarns(ProtocolWarning):
+        with self.assertWarns(ProtocolWarning) as caught:
             wg = schema_pcapng.WireGuardKeyLog(data='PRESHARED_KEY != a2V5')
             wg.post_process({})
         self.assertEqual(len(wg.entries), 0)
+        self.assertEqual(str(caught.warning), "PCAP-NG: invalid WireGuard key log line for label "
+                                              "'PRESHARED_KEY'; values elided, line kept as captured")
+        self.assertNotIn('a2V5', str(caught.warning))
 
     def test_pcapng_block_readers_cover_container_blocks(self) -> None:
         from pcapkit.const.pcapng.block_type import BlockType
