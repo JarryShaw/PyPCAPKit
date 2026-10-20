@@ -28,6 +28,9 @@ import unittest
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): hand-picked round-trip cases, not a sweep.
+__tier__ = 'ALL'
+
 #: TCP header without its offset/flags octets: ports 1234 and 80, sequence 1,
 #: acknowledgement 2; the window, checksum and urgent pointer follow them.
 HEAD = bytes.fromhex('04d2' '0050' '00000001' '00000002')

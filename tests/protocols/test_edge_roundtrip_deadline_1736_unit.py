@@ -27,6 +27,10 @@ from tests.protocols._edge_roundtrip import Case, MakeCase
 if TYPE_CHECKING:
     from typing import Iterator
 
+#: Test tier (#1958): tests the deadline of the edge-case harness, which only the
+#: edge-case sweeps use.
+__tier__ = 'LATEST'
+
 ETHERNET = 'pcapkit.protocols.link.ethernet:Ethernet'
 MACS = bytes.fromhex('0123456789ab') + bytes.fromhex('fedcba987654')
 

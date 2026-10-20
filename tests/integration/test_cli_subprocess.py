@@ -24,6 +24,10 @@ from tests._support import sample_path
 from tests._tiers import ROOT
 from tests.integration._helpers import HAS_EMOJI, HAS_RUNTIME, EndToEndTestCase
 
+#: Test tier (#1958): runs ``python -m pcapkit`` and the console script, whose lookup
+#: varies by interpreter.
+__tier__ = 'ALL'
+
 #: How long a single CLI run is allowed to take. The captures used here are two
 #: to twenty-six frames, so this is a hang guard rather than a budget.
 TIMEOUT = 120

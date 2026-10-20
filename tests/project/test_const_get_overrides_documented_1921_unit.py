@@ -28,6 +28,9 @@ from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from typing import Any, Iterator, Optional
 
+#: Test tier (#1958): checks the constant modules' docstrings against the docs pages.
+__tier__ = 'LATEST'
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 #: The directive that hides a member from autodoc.

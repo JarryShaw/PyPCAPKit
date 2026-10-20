@@ -84,6 +84,9 @@ import unittest
 
 import aenum
 
+#: Test tier (#1958): checks the conventions pages' claims against the tree.
+__tier__ = 'LATEST'
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 #: The directory GitHub issue #918 part 2 split the single-page

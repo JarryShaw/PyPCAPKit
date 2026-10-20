@@ -92,6 +92,9 @@ from tests._tiers import ROOT
 if TYPE_CHECKING:
     from typing import Any, Optional
 
+#: Test tier (#1958): a sweep over every registered option code.
+__tier__ = 'LATEST'
+
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 

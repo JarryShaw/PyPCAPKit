@@ -29,6 +29,10 @@ from tests.integration._helpers import HAS_DPKT, HAS_RUNTIME, HAS_SCAPY, EndToEn
 if TYPE_CHECKING:
     from typing import Any
 
+#: Test tier (#1958): compares the engines, whose releases vary by interpreter, on
+#: hand-picked captures.
+__tier__ = 'ALL'
+
 #: Next Header value of the IPv6 Fragment header (:rfc:`8200#section-4.5`).
 NH_IPV6_FRAG = 44
 #: Next Header value of UDP, which is what ``ipv6.pcap``'s fragments carry.

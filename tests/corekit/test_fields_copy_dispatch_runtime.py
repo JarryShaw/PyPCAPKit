@@ -39,6 +39,10 @@ import unittest
 
 from tests._support import reimport_once_per_class, sample_path
 
+#: Test tier (#1958): a sweep over every record of every classic-PCAP capture; its
+#: ``_unit`` sibling pins the mechanism on every leg.
+__tier__ = 'LATEST'
+
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 

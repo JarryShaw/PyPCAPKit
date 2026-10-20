@@ -43,6 +43,10 @@ import pathlib
 import textwrap
 import unittest
 
+#: Test tier (#1958): checks what the docs claim about the package against its code, a
+#: question about the tree.
+__tier__ = 'LATEST'
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 

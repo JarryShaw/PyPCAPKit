@@ -16,6 +16,10 @@ import importlib.util
 import os
 import unittest
 
+#: Test tier (#1958): checks the names ``pcapkit.all`` exports, a question about the
+#: tree; test_public_api.py imports the package on every leg.
+__tier__ = 'LATEST'
+
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 

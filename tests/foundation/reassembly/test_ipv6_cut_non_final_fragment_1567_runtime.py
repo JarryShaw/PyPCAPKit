@@ -27,6 +27,10 @@ from tests._support import close_extractor, reimport_once_per_class
 if TYPE_CHECKING:
     from typing import Any
 
+#: Test tier (#1958): one capture through each engine, whose releases vary by
+#: interpreter.
+__tier__ = 'ALL'
+
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 ENGINES = ('default',) + tuple(name for name in ('dpkt', 'scapy') if importlib.util.find_spec(name) is not None)

@@ -27,6 +27,9 @@ import warnings
 from tests._support import reimport_once_per_class
 from tests.foundation import _roundtrip as wire
 
+#: Test tier (#1958): hand-picked chain lengths for #1619, not a sweep.
+__tier__ = 'ALL'
+
 #: The TCP segment every chain ends in.
 SEGMENT = wire.tcp(b'payload', seq=1)
 

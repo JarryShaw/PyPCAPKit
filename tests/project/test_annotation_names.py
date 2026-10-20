@@ -49,6 +49,10 @@ from tests._tiers import ROOT
 if TYPE_CHECKING:
     from typing import Iterator, Optional
 
+#: Test tier (#1958): checks the AST of the package's sources, the same text on every
+#: leg.
+__tier__ = 'LATEST'
+
 #: Package directory whose annotations are checked.
 PACKAGE = ROOT / 'pcapkit'
 

@@ -95,6 +95,10 @@ import unittest
 
 from tests._tiers import ROOT
 
+#: Test tier (#1958): checks that modules purge and reimport cleanly, which is the
+#: interpreter's import system.
+__tier__ = 'ALL'
+
 #: Selections that failed before #660 was fixed, each as (label, files). The
 #: polluting file comes first in every one, because that is the order that broke.
 POLLUTING_ORDERS = [

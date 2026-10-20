@@ -174,6 +174,10 @@ import tempfile
 import unittest
 from unittest import mock
 
+#: Test tier (#1958): exercises pcapkit.vendor, which users run on any supported
+#: interpreter.
+__tier__ = 'ALL'
+
 #: Same gate the rest of :file:`tests/vendor/` uses. Importing
 #: :mod:`pcapkit.vendor.__main__` imports :mod:`pcapkit.vendor` (for its
 #: ``vendor_module`` default-target-list fallback), which imports every

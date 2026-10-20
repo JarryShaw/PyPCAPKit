@@ -16,6 +16,10 @@ import unittest
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): checks where the decorators live and that their old path is
+#: gone, a question about the tree.
+__tier__ = 'LATEST'
+
 #: Where the decorators live.
 NEW_PATH = 'pcapkit.corekit.decorators'
 

@@ -23,6 +23,9 @@ import unittest
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): hand-picked round-trip cases, not a sweep.
+__tier__ = 'ALL'
+
 #: Destination MAC, source MAC, EtherType (IPv4) and a short payload.
 FRAMES = {
     'nontrivial': bytes.fromhex('0123456789ab' 'fedcba987654' '0800') + b'payload',

@@ -48,6 +48,9 @@ except ImportError:  # pragma: no cover
 if TYPE_CHECKING:
     from typing import Any, Optional
 
+#: Test tier (#1958): drives util/conda_vendor.py, which runs on one interpreter.
+__tier__ = 'LATEST'
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / 'util' / 'conda_vendor.py'
 NO_TOMLLIB = 'tomllib, which reads pyproject.toml and .github/python-versions.toml, needs Python 3.11+'

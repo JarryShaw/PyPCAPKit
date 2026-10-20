@@ -76,6 +76,10 @@ import ast
 import pathlib
 import unittest
 
+#: Test tier (#1958): checks the vendor templates' ``_missing_`` bodies against the
+#: generated lookups.
+__tier__ = 'LATEST'
+
 #: Root of the vendor crawler package, as a path rather than an import, so this
 #: module reads the same tree it is checked out in regardless of which
 #: ``pcapkit`` an editable install happens to resolve.

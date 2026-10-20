@@ -59,6 +59,9 @@ from tests.foundation._roundtrip import Gap, Outcome
 if TYPE_CHECKING:
     from typing import Any, Callable
 
+#: Test tier (#1958): a sweep that overrides and restores every public registrar.
+__tier__ = 'LATEST'
+
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None
                   for name in ('tbtrim', 'aenum', 'chardet', 'dictdumper'))
 

@@ -40,6 +40,9 @@ import urllib3
 
 from tests._support import PCAPNG_GENERATOR, scale_timeout
 
+#: Test tier (#1958): drives the PCAP-NG generator's download retry with HTTP mocked.
+__tier__ = 'LATEST'
+
 #: URL the stubbed getter is asked for.
 URL = 'https://example.invalid/many_interfaces.pcapng.1'
 #: Fake current time, a whole second so an HTTP-date maps to it exactly.

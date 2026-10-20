@@ -30,6 +30,10 @@ import types
 import unittest
 from unittest import mock
 
+#: Test tier (#1958): checks what a stub build through setup.py leaves behind; every
+#: leg's install runs setup.py for real.
+__tier__ = 'LATEST'
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 

@@ -30,6 +30,10 @@ from tests._support import reimport_once_per_class
 if TYPE_CHECKING:
     from typing import Any
 
+#: Test tier (#1958): renders constant modules from recorded data and compares them
+#: with the committed files, which the vendor scripts regenerate on one interpreter.
+__tier__ = 'LATEST'
+
 #: Repository root, i.e. the grandparent of the directory holding this file.
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 

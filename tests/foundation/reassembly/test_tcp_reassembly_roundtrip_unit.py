@@ -23,6 +23,9 @@ from ipaddress import ip_address
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): hand-picked round-trip cases, not a sweep.
+__tier__ = 'ALL'
+
 BUFID = (ip_address('192.0.2.1'), 12345, ip_address('198.51.100.2'), 443)
 
 

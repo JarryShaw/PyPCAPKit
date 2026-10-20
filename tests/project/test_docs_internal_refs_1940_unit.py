@@ -40,6 +40,10 @@ from tests.project.test_docs_ambiguous_xrefs_1775_unit import HAS_SPHINX, SPHINX
 if TYPE_CHECKING:
     from typing import Any, Iterator
 
+#: Test tier (#1958): checks the docs' cross-reference roles, partly through
+#: docs/source/conf.py.
+__tier__ = 'LATEST'
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 DOCS = ROOT / 'docs' / 'source'
 

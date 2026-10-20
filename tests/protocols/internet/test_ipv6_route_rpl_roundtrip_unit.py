@@ -27,6 +27,9 @@ import warnings
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): a sweep over every cut and every compression of an RPL route.
+__tier__ = 'LATEST'
+
 SRC = ipaddress.IPv6Address('2001:db8::1').packed
 DST = ipaddress.IPv6Address('2001:db8:aa:bb:cc:dd:ee:ff').packed
 

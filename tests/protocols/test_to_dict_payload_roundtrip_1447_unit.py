@@ -23,6 +23,9 @@ import warnings
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): hand-picked round-trip cases, not a sweep.
+__tier__ = 'ALL'
+
 MAC = bytes.fromhex('0123456789ab' 'fedcba987654')
 SRC4, DST4 = bytes([192, 0, 2, 1]), bytes([192, 0, 2, 2])
 SRC6 = bytes.fromhex('20010db8' + '00' * 11 + '01')

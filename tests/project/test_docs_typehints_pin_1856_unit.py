@@ -37,6 +37,10 @@ from tests.project.test_docs_ambiguous_xrefs_1775_unit import (HAS_SPHINX, SPHIN
 if TYPE_CHECKING:
     from typing import Any
 
+#: Test tier (#1958): checks docs/source/conf.py against the docs build's pins, which
+#: run on one interpreter.
+__tier__ = 'LATEST'
+
 
 class PinAgreementTests(unittest.TestCase):
     """The ``docs`` extra installs the release :file:`docs/requirements.txt` pins."""

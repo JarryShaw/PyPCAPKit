@@ -8,6 +8,10 @@ import types
 import unittest
 from unittest import mock
 
+#: Test tier (#1958): loads setup.py under the running interpreter, as every leg's
+#: install does.
+__tier__ = 'ALL'
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 

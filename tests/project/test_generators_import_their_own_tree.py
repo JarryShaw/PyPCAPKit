@@ -34,6 +34,10 @@ import tempfile
 import unittest
 from unittest import mock
 
+#: Test tier (#1958): checks that each generator imports its own tree; make_samples.py
+#: runs the generators on every integration leg.
+__tier__ = 'LATEST'
+
 #: Repository root.
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 #: Directory holding the generators.

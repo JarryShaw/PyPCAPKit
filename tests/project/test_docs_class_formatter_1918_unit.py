@@ -31,6 +31,10 @@ from tests.project.test_docs_ambiguous_xrefs_1775_unit import HAS_SPHINX, SPHINX
 if TYPE_CHECKING:
     from typing import Any
 
+#: Test tier (#1958): drives a hook of docs/source/conf.py, which the docs build runs
+#: on one interpreter.
+__tier__ = 'LATEST'
+
 HAS_SCAPY = importlib.util.find_spec('scapy') is not None
 HAS_DPKT = importlib.util.find_spec('dpkt') is not None
 HAS_PYSHARK = importlib.util.find_spec('pyshark') is not None

@@ -22,6 +22,10 @@ import unittest
 from tests._support import sample_path
 from tests.integration._helpers import HAS_DPKT, HAS_RUNTIME, HAS_SCAPY, EndToEndTestCase
 
+#: Test tier (#1958): compares the engines, whose releases vary by interpreter, on
+#: hand-picked captures.
+__tier__ = 'ALL'
+
 #: Captures every engine is run over, with the frame count each must report.
 #: All are small: the point is what each engine reports, not throughput.
 PARITY_CAPTURES = {

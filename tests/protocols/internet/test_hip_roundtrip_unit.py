@@ -25,6 +25,9 @@ import unittest
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): hand-picked round-trip cases, not a sweep.
+__tier__ = 'ALL'
+
 
 def packet(params: bytes = b'', controls: bytes = b'\x00\x00') -> bytes:
     """Return a HIPv2 I1 packet carrying ``params`` (already 8-octet aligned)."""

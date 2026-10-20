@@ -49,6 +49,10 @@ except ImportError:  # pragma: no cover
 if TYPE_CHECKING:
     from typing import Any, Optional
 
+#: Test tier (#1958): checks the conda jobs' matrices and drives their scripts
+#: offline.
+__tier__ = 'LATEST'
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 WORKFLOWS = ROOT / '.github' / 'workflows'
 FIXTURES = pathlib.Path(__file__).resolve().parent / 'python_versions_fixtures'

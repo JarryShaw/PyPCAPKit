@@ -31,6 +31,10 @@ from tests.project.test_docs_class_signature_1860_unit import app_for, emit
 if TYPE_CHECKING:
     from typing import Any, Callable
 
+#: Test tier (#1958): drives a hook of docs/source/conf.py, which the docs build runs
+#: on one interpreter.
+__tier__ = 'LATEST'
+
 #: The event the alias hook answers.
 EVENT = 'autodoc-before-process-signature'
 

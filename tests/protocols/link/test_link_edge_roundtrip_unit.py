@@ -18,6 +18,9 @@ import unittest
 from tests.protocols import _edge_roundtrip as edge
 from tests.protocols._edge_roundtrip import Case, MakeCase, Reject
 
+#: Test tier (#1958): the #1202 edge-case table for the link layer, every case of it.
+__tier__ = 'LATEST'
+
 ETHERNET = 'pcapkit.protocols.link.ethernet:Ethernet'
 C_TAG = 'pcapkit.protocols.link.c_tag:C_Tag'
 S_TAG = 'pcapkit.protocols.link.s_tag:S_Tag'

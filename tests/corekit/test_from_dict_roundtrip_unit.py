@@ -28,6 +28,9 @@ import unittest
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): hand-picked round-trip cases, not a sweep.
+__tier__ = 'ALL'
+
 #: PCAP-NG blocks, little-endian, one per block schema that claims a type code.
 #: Each nests its body in :attr:`PCAPNG.block
 #: <pcapkit.protocols.schema.misc.pcapng.PCAPNG.block>`, which is the

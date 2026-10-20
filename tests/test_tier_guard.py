@@ -28,6 +28,11 @@ only by a job that does not install ``cryptography`` is a test that never runs
 and never says so -- #729 and #738 were that defect, and #745 is the ticket for
 stopping the third instance.
 
+The test tiers of #1958 are checked here too (:class:`TestTierTests`): every test
+module resolves to exactly one, ``ALL`` or ``LATEST``, a malformed ``__tier__``
+fails, and :class:`WorkflowAgreementTests` runs the steps that leave the ``LATEST``
+tier out.
+
 This module is itself unit-tier, so it reads no capture at all: the violating
 modules it needs are written into a temporary directory and audited by path.
 
@@ -47,6 +52,10 @@ import unittest
 import unittest.mock
 
 from tests import _dependency_gates, _tiers
+
+#: Test tier (#1958): tests/conftest.py runs this guard at collection on every leg,
+#: with that leg's own ast module.
+__tier__ = 'ALL'
 
 #: The unit-tier workflow job, for :class:`WorkflowAgreementTests`. Absent from a
 #: source distribution, which is why that test skips rather than fails.
@@ -191,10 +200,10 @@ class WorkflowAgreementTests(unittest.TestCase):
         The point of failure this catches: somebody adds a fourth
         fixture-dependent naming convention to the workflow and the guard goes
         on classifying those modules as unit-tier, flagging their perfectly
-        legal capture reads. The globs that are not a tier's are
-        :data:`~tests._tiers.ROUNDTRIP_SWEEP_GLOB` and
-        :data:`~tests._tiers.ROUNDTRIP_RUNTIME_GLOB`, which only the legs other
-        than ``latest`` add (#1732), each a constant of its own.
+        legal capture reads. No other glob is left: the round-trip sweeps
+        (#1732) are left out by test tier (#1958), module by module, rather
+        than by a name glob, so a glob here is a tier's or it is unaccounted
+        for.
 
         """
         if not WORKFLOW.is_file():
@@ -204,34 +213,9 @@ class WorkflowAgreementTests(unittest.TestCase):
         globs = set(re.findall(r"--ignore-glob='([^']+)'", text))
         directories = set(re.findall(r'--ignore=tests/(\S+)', text))
 
-        self.assertEqual(globs, {f'*{suffix}' for suffix in _tiers.FIXTURE_TIER_SUFFIXES}
-                         | {_tiers.ROUNDTRIP_SWEEP_GLOB, _tiers.ROUNDTRIP_RUNTIME_GLOB})
+        self.assertEqual(globs, {f'*{suffix}' for suffix in _tiers.FIXTURE_TIER_SUFFIXES})
         self.assertEqual(directories, set(_tiers.FIXTURE_TIER_DIRS))
-
-    def test_a_roundtrip_sweep_stays_in_the_unit_tier(self) -> None:
-        """#1732: the sweeps are a selection within the unit tier, not a tier.
-
-        So the tier guard keeps auditing them, and ``latest`` runs them; a module
-        outside the unit tier is no sweep even when its name says round trip.
-
-        """
-        cases = {
-            'tests/protocols/test_option_roundtrip_unit.py': True,
-            'tests/protocols/misc/test_pcapng_roundtrip2_unit.py': True,
-            'tests/protocols/test_to_dict_payload_roundtrip_1447_unit.py': True,
-            'tests/protocols/test_capture_roundtrip_runtime.py': False,
-            'tests/integration/test_roundtrip_end_to_end.py': False,
-            'tests/foundation/registry/test_registry_symmetry_unit.py': False,
-            'tests/corekit/test_multidict.py': False,
-            'examples/roundtrip/test_example.py': False,
-        }
-        for relative, expected in cases.items():
-            with self.subTest(module=relative):
-                self.assertIs(_tiers.is_roundtrip_sweep(relative), expected)
-                if expected:
-                    self.assertTrue(_tiers.is_unit_tier(relative))
-        self.assertIs(_tiers.is_roundtrip_sweep(_tiers.ROOT / 'tests/protocols/test_option_roundtrip_unit.py'),
-                      True)
+        self.assertNotIn('roundtrip', text)
 
     def test_integration_job_selects_positively_by_asking_tiers_for_it(self) -> None:
         """The ``integration`` job's selection runs the other direction, so it
@@ -271,15 +255,16 @@ class WorkflowAgreementTests(unittest.TestCase):
         self.assertIn('pytest', run_block)
 
     @unittest.skipIf(shutil.which('bash') is None, 'the steps are bash scripts')
-    def test_the_legs_leave_out_exactly_the_pins_project_tests_runs(self) -> None:
-        """#1954: run as bash runs them, ``test`` ignores each project pin and ``project-tests`` runs each.
+    def test_the_legs_leave_out_exactly_the_latest_tier_or_the_pins(self) -> None:
+        """#1958: run as bash runs them, the ``test`` legs but ``latest`` ignore each ``LATEST`` module.
 
-        Both steps ask :data:`~tests._tiers.PROJECT_PINS_SELECTOR` at run time, so
-        they cannot drift from :func:`~tests._tiers.is_project_pin`; what can is
-        how each uses the answer, which is what running them checks. Off
-        ``latest`` too, where the sweeps' glob is added after the pins.
-        experimental.yml asks in a step of its own, under the runner's
-        ``python3``; its legs run in
+        ``latest`` ignores each project pin (#1954), which ``project-tests`` runs,
+        and runs the rest of the ``LATEST`` tier itself. Every step asks
+        :data:`~tests._tiers.LATEST_TIER_SELECTOR` or
+        :data:`~tests._tiers.PROJECT_PINS_SELECTOR` at run time, so none can drift
+        from :func:`~tests._tiers.module_tier`; what can is how each uses the
+        answer, which is what running them checks. experimental.yml asks in a step
+        of its own, under the runner's ``python3``; its legs run in
         :file:`tests/project/test_sweeps_on_latest_only_1732.py`.
 
         """
@@ -287,36 +272,55 @@ class WorkflowAgreementTests(unittest.TestCase):
             self.skipTest(f'{WORKFLOW} is not present, e.g. in a source distribution')
         text = WORKFLOW.read_text(encoding='utf-8')
         pins = list(_tiers.project_pin_paths())
+        latest = list(_tiers.latest_tier_paths())
         self.assertTrue(pins)
-        for sweeps in ('true', 'false'):
-            with self.subTest(sweeps=sweeps):
-                self.assertEqual(leg_pin_ignores(text, sweeps), pins)
+        self.assertLess(len(pins), len(latest))
+        self.assertEqual(leg_ignores(text, 'true'), pins)
+        self.assertEqual(leg_ignores(text, 'false'), latest)
         self.assertEqual(project_pins_run(text), pins)
-        for workflow, job, step in ((WORKFLOW, 'test', 'Run unit tests'),
-                                    (WORKFLOW, 'project-tests', 'Run the project pins'),
-                                    (EXPERIMENTAL_WORKFLOW, 'experimental', 'List the project pins')):
-            with self.subTest(job=job):
+        for workflow, job, step, selector in (
+                (WORKFLOW, 'test', 'Run unit tests', _tiers.PROJECT_PINS_SELECTOR),
+                (WORKFLOW, 'test', 'Run unit tests', _tiers.LATEST_TIER_SELECTOR),
+                (WORKFLOW, 'project-tests', 'Run the project pins', _tiers.PROJECT_PINS_SELECTOR),
+                (EXPERIMENTAL_WORKFLOW, 'experimental', 'List the LATEST tier',
+                 _tiers.LATEST_TIER_SELECTOR.replace('python -c', 'python3 -c'))):
+            with self.subTest(job=job, selector=selector):
                 script = run_script(job_section(workflow.read_text(encoding='utf-8'), job), step)
-                self.assertIn(_tiers.PROJECT_PINS_SELECTOR.replace('python -c', 'python3 -c')
-                              if job == 'experimental' else _tiers.PROJECT_PINS_SELECTOR, script)
-        # The experimental legs ignore what that step printed, as `test` does.
+                self.assertIn(selector, script)
+        # The experimental legs ignore what that step printed, as `test`'s legs but `latest` do.
         tests = step_run_block(job_section(EXPERIMENTAL_WORKFLOW.read_text(encoding='utf-8'), 'experimental'),
                                'Run unit tests')
-        self.assertIn('PINS: ${{ steps.pins.outputs.paths }}', tests)
-        self.assertIn('for pin in $PINS; do\n            set -- "$@" --ignore="$pin"', tests)
+        self.assertIn('LATEST_TIER: ${{ steps.tier.outputs.paths }}', tests)
+        self.assertIn('for module in $LATEST_TIER; do\n            set -- "$@" --ignore="$module"', tests)
 
     @unittest.skipIf(shutil.which('bash') is None, 'the steps are bash scripts')
-    def test_a_leg_that_stops_ignoring_the_pins_is_caught(self) -> None:
-        """The check above, against a ``test`` step that computes the pins and then drops them."""
+    def test_a_leg_that_stops_ignoring_the_latest_tier_is_caught(self) -> None:
+        """The check above, against a ``test`` step that computes the list and then drops it."""
         if not WORKFLOW.is_file():
             self.skipTest(f'{WORKFLOW} is not present, e.g. in a source distribution')
         text = WORKFLOW.read_text(encoding='utf-8')
-        loop = 'set -- "$@" --ignore="$pin"'
+        loop = 'set -- "$@" --ignore="$module"'
         self.assertEqual(text.count(loop), 1, 'the loop this test removes has been reworded')
-        self.assertEqual(leg_pin_ignores(text.replace(loop, ':'), 'true'), [])
+        for latest in ('true', 'false'):
+            with self.subTest(latest=latest):
+                self.assertEqual(leg_ignores(text.replace(loop, ':'), latest), [])
+
+    @unittest.skipIf(shutil.which('bash') is None, 'the steps are bash scripts')
+    def test_a_leg_that_asks_for_the_wrong_list_is_caught(self) -> None:
+        """Off ``latest``, the pins alone are not the ``LATEST`` tier; on it, the tier is not the pins."""
+        if not WORKFLOW.is_file():
+            self.skipTest(f'{WORKFLOW} is not present, e.g. in a source distribution')
+        text = WORKFLOW.read_text(encoding='utf-8')
+        latest = _tiers.LATEST_TIER_SELECTOR.split('"', 1)[1]
+        pins = _tiers.PROJECT_PINS_SELECTOR.split('"', 1)[1]
+        self.assertEqual(text.count(latest), 1)
+        self.assertEqual(text.count(pins), 2)  # the `test` step's and `project-tests`'s
+        self.assertNotEqual(leg_ignores(text.replace(latest, pins), 'false'), list(_tiers.latest_tier_paths()))
+        swapped = text.replace(pins, latest, 1)
+        self.assertNotEqual(leg_ignores(swapped, 'true'), list(_tiers.project_pin_paths()))
 
 
-#: The experimental legs' workflow (#1732), whose unit-tier step leaves the pins out too.
+#: The experimental legs' workflow (#1732), whose unit-tier step leaves the ``LATEST`` tier out too.
 EXPERIMENTAL_WORKFLOW = _tiers.ROOT / '.github' / 'workflows' / 'experimental.yml'
 #: A ``python`` that writes each argument on a line of ``$ARGS_FILE``, and hands a
 #: ``-c`` to the real one, which is how the steps ask tests/_tiers.py for the pins.
@@ -354,11 +358,12 @@ def stubbed_argv(script: 'str', env: 'dict[str, str]') -> 'list[str]':
         return record.read_text(encoding='utf-8').splitlines()
 
 
-def leg_pin_ignores(text: 'str', sweeps: 'str') -> 'list[str]':
-    """The ``tests/project`` paths a ``test`` leg's ``Run unit tests`` step ``--ignore``\\ s."""
+def leg_ignores(text: 'str', latest: 'str') -> 'list[str]':
+    """The modules a ``test`` leg's ``Run unit tests`` step ``--ignore``\\ s, ``latest`` or not."""
     script = run_script(job_section(text, 'test'), 'Run unit tests')
-    argv = stubbed_argv(script, {'ANNOTATION_LEVEL': 'error', 'COVERAGE': 'false', 'SWEEPS': sweeps})
-    return [arg.split('=', 1)[1] for arg in argv if arg.startswith(f'--ignore=tests/{_tiers.PROJECT_PINS_DIR}/')]
+    argv = stubbed_argv(script, {'ANNOTATION_LEVEL': 'error', 'COVERAGE': 'false', 'LATEST': latest})
+    return [arg.split('=', 1)[1] for arg in argv
+            if arg.startswith('--ignore=') and arg != f'--ignore=tests/{next(iter(_tiers.FIXTURE_TIER_DIRS))}']
 
 
 def project_pins_run(text: 'str') -> 'list[str]':
@@ -447,7 +452,159 @@ class ProjectPinRuleTests(unittest.TestCase):
                 self.assertFalse(_tiers.varies_by_interpreter(module))
         for module in rest:
             with self.subTest(module=module):
-                self.assertTrue(_tiers.varies_by_interpreter(module))
+                self.assertTrue(_tiers.varies_by_interpreter(module) or _tiers.module_tier(module) == _tiers.TIER_ALL)
+        # #1958: every pin is in the LATEST tier, which the other legs leave out.
+        self.assertEqual(set(pins) - set(_tiers.latest_tier_paths()), set())
+
+    def test_a_module_that_marks_itself_all_is_no_pin(self) -> None:
+        """#1958: the marker wins here too, and a ``LATEST`` marker does not make a pin of a module that varies."""
+        cases = {
+            'text alone': ('TEXT = "pcapkit"\n', True),
+            'text, marked ALL': ("TEXT = 'pcapkit'\n__tier__ = 'ALL'\n", False),
+            'text, marked LATEST': ("TEXT = 'pcapkit'\n__tier__ = 'LATEST'\n", True),
+            'pcapkit, marked LATEST': ("import pcapkit\n__tier__ = 'LATEST'\n", False),
+        }
+        for label, (source, expected) in cases.items():
+            with self.subTest(case=label), tempfile.TemporaryDirectory(prefix='pcapkit-pin-tier-') as temp:
+                root = pathlib.Path(temp).resolve()
+                (root / _tiers.PROJECT_PINS_DIR).mkdir()
+                path = write_module(root / _tiers.PROJECT_PINS_DIR, 'test_probe.py', source)
+                with unittest.mock.patch.object(_tiers, 'TESTS_ROOT', root):
+                    self.assertIs(_tiers.is_project_pin(path), expected)
+
+
+class TestTierTests(unittest.TestCase):
+    """#1958: every test module has exactly one test tier, and the marker is checked."""
+
+    def tier_of(self, source: 'str', name: 'str' = 'test_probe.py') -> 'str':
+        """The tier of a module holding ``source``, under a temporary :file:`tests/`."""
+        with tempfile.TemporaryDirectory(prefix='pcapkit-test-tier-') as temp:
+            path = write_module(pathlib.Path(temp), name, source)
+            with unittest.mock.patch.object(_tiers, 'TESTS_ROOT', pathlib.Path(temp).resolve()):
+                return _tiers.module_tier(path)
+
+    def test_every_module_resolves_to_exactly_one_tier(self) -> None:
+        """The two tiers partition the test modules, and the ``LATEST`` list is the one tier."""
+        modules = _tiers.suite_modules()
+        self.assertEqual(list(modules), sorted(set(modules)))
+        tiers = {}  # type: dict[str, list[str]]
+        for module in modules:
+            with self.subTest(module=module):
+                tier = _tiers.module_tier(module)
+                self.assertIn(tier, _tiers.TIERS)
+                self.assertEqual(_tiers.module_tier(_tiers.ROOT / module), tier)
+                tiers.setdefault(tier, []).append(module)
+        self.assertEqual(set(tiers), set(_tiers.TIERS))
+        self.assertEqual(list(_tiers.latest_tier_paths()), tiers[_tiers.TIER_LATEST])
+        self.assertEqual(sorted(tiers[_tiers.TIER_ALL] + tiers[_tiers.TIER_LATEST]), list(modules))
+        found = sorted(path.relative_to(_tiers.ROOT).as_posix() for path in _tiers.TESTS_ROOT.rglob('test_*.py'))
+        self.assertEqual(list(modules), found)
+
+    def test_a_marker_wins_over_the_rule(self) -> None:
+        cases = {
+            'the rule, exercising pcapkit': ('import pcapkit\n', _tiers.TIER_ALL),
+            'the rule, reading text': ('TEXT = "pcapkit"\n', _tiers.TIER_LATEST),
+            'a sweep, marked': ("import pcapkit\n__tier__ = 'LATEST'\n", _tiers.TIER_LATEST),
+            'an interpreter-bound guard, marked': ("import ast\n__tier__ = 'ALL'\n", _tiers.TIER_ALL),
+            'annotated': ("import pcapkit\n__tier__: str = 'LATEST'\n", _tiers.TIER_LATEST),
+        }
+        for label, (source, expected) in cases.items():
+            with self.subTest(case=label):
+                self.assertEqual(self.tier_of(source), expected)
+
+    def test_an_invalid_marker_fails(self) -> None:
+        cases = {
+            'not a tier': "__tier__ = 'PERIODIC'\n",
+            'lower case': "__tier__ = 'latest'\n",
+            'not a string': '__tier__ = 1\n',
+            'not a literal': "TIER = 'ALL'\n__tier__ = TIER\n",
+            'assigned twice': "__tier__ = 'ALL'\n__tier__ = 'LATEST'\n",
+            'assigned conditionally': "import sys\nif sys.version_info < (3, 12):\n    __tier__ = 'ALL'\n",
+            'assigned in a function': "def test():\n    __tier__ = 'ALL'\n",
+            'annotated without a value': '__tier__: str\n',
+        }
+        for label, source in cases.items():
+            with self.subTest(case=label):
+                with self.assertRaises(_tiers.InvalidTierError) as caught:
+                    self.tier_of(source)
+                self.assertIn('test_probe.py', str(caught.exception))
+                self.assertIn(_tiers.TIER_MARKER, str(caught.exception))
+
+    def test_only_a_test_module_has_a_tier(self) -> None:
+        for path in ('tests/_support.py', 'tests/_tiers.py', 'util/ci_timing.py', 'tests/project',
+                     'tests/project/test_no_such_module.py'):
+            with self.subTest(path=path):
+                with self.assertRaises(ValueError):
+                    _tiers.module_tier(path)
+
+    def test_every_marker_states_a_reason(self) -> None:
+        """A ``__tier__`` the rule would also give says why it is there, as one that overrules it does."""
+        for module in _tiers.suite_modules():
+            if _tiers.declared_tier(module) is None:
+                continue
+            lines = (_tiers.ROOT / module).read_text(encoding='utf-8').splitlines()
+            index = next(number for number, line in enumerate(lines) if line.startswith(_tiers.TIER_MARKER))
+            with self.subTest(module=module):
+                self.assertTrue(lines[index - 1].startswith('#: '), lines[index - 1])
+                comment = []
+                for line in reversed(lines[:index]):
+                    if not line.startswith('#: '):
+                        break
+                    comment.insert(0, line)
+                self.assertTrue(comment[0].startswith('#: Test tier (#1958): '), comment[0])
+
+    def test_the_sweeps_and_the_pins_are_latest_and_the_hand_picked_round_trips_are_not(self) -> None:
+        """The owner's rulings on #1958, paraphrased: hand-picked round trips run on every leg, sweeps on ``latest``."""
+        for module, tier in {
+                'tests/protocols/test_option_roundtrip_unit.py': _tiers.TIER_LATEST,
+                'tests/protocols/test_capture_roundtrip_runtime.py': _tiers.TIER_LATEST,
+                'tests/protocols/test_dispatch_reachability_unit.py': _tiers.TIER_LATEST,
+                'tests/protocols/transport/test_tcp_ns_flag_roundtrip_unit.py': _tiers.TIER_ALL,
+                'tests/corekit/test_from_dict_roundtrip_unit.py': _tiers.TIER_ALL,
+                'tests/project/test_isort_clean.py': _tiers.TIER_LATEST,
+                'tests/project/test_public_api.py': _tiers.TIER_ALL,
+                'tests/test_tier_guard.py': _tiers.TIER_ALL,
+        }.items():
+            with self.subTest(module=module):
+                self.assertEqual(_tiers.module_tier(module), tier)
+        self.assertEqual(set(_tiers.project_pin_paths()) - set(_tiers.latest_tier_paths()), set())
+
+    def test_the_fixture_selection_splits_by_tier(self) -> None:
+        """``fixture_tier_paths('ALL')`` is the whole selection less its ``LATEST`` entries."""
+        everything = _tiers.fixture_tier_paths()
+        selected = _tiers.fixture_tier_paths(_tiers.TIER_ALL)
+        latest = set(_tiers.latest_tier_paths())
+        self.assertEqual(list(selected), sorted(set(selected)))
+        dropped = [entry for entry in everything if entry not in selected]
+        self.assertTrue(dropped)
+        for entry in dropped:
+            with self.subTest(entry=entry):
+                module = entry.partition('::')[0]
+                self.assertTrue(module in latest or (_tiers.ROOT / module).is_dir())
+        for entry in selected:
+            with self.subTest(entry=entry):
+                module = entry.partition('::')[0]
+                self.assertNotIn(module, latest)
+                self.assertTrue(entry in everything or any(module.startswith(other.rstrip('/') + '/')
+                                                           for other in everything))
+        with self.assertRaises(ValueError):
+            _tiers.fixture_tier_paths('NIGHTLY')
+
+    def test_a_directory_holding_a_latest_module_is_split(self) -> None:
+        """pytest ignores no path it was handed, so the ``ALL`` selection names a mixed directory's modules."""
+        integration = f'tests/{next(iter(_tiers.FIXTURE_TIER_DIRS))}'
+        members = [path for path in _tiers.suite_modules() if path.startswith(integration + '/')]
+        self.assertIn(integration, _tiers.fixture_tier_paths(_tiers.TIER_ALL))
+        marked = members[0]
+        _tiers.fixture_tier_paths.cache_clear()
+        self.addCleanup(_tiers.fixture_tier_paths.cache_clear)
+        real = _tiers.module_tier
+        with unittest.mock.patch.object(_tiers, 'module_tier',
+                                        lambda path: _tiers.TIER_LATEST if path == marked else real(path)):
+            selected = _tiers.fixture_tier_paths(_tiers.TIER_ALL)
+        self.assertNotIn(integration, selected)
+        self.assertNotIn(marked, selected)
+        self.assertEqual([entry for entry in selected if entry.startswith(integration + '/')], members[1:])
 
 
 class EnclosingScopeTests(unittest.TestCase):
@@ -1766,6 +1923,27 @@ class DependencyGateSelectionTests(unittest.TestCase):
                                          1, 'ESPProtocolTests', None)
         self.assertTrue(_dependency_gates.job_reaches(job, inside))
         self.assertFalse(_dependency_gates.job_reaches(job, outside))
+
+    def test_a_fixture_tier_job_with_no_latest_leg_reaches_the_all_tier_alone(self) -> None:
+        """#1958: ``pypcap-parity`` asks for the ``ALL`` tier on each leg; ``integration``, on ``latest``, for both."""
+        jobs = {job.name: job for job in _dependency_gates.pytest_jobs() if job.selection == 'fixture-tier'}
+        self.assertEqual({name: job.tier for name, job in jobs.items()},
+                         {'integration': None, 'pypcap-parity': _tiers.TIER_ALL})
+        sweep = _dependency_gates.Gate('HAS_DPKT', 'tests/protocols/test_capture_roundtrip_runtime.py',
+                                       1, 'CaptureRoundTripTests', None)
+        engines = _dependency_gates.Gate('HAS_PYPCAP', 'tests/foundation/engines/test_new_engine_parity_runtime.py',
+                                         1, 'NewEngineParityTests', None)
+        self.assertEqual(_tiers.module_tier(sweep.module), _tiers.TIER_LATEST)
+        self.assertTrue(_dependency_gates.job_reaches(jobs['integration'], sweep))
+        self.assertFalse(_dependency_gates.job_reaches(jobs['pypcap-parity'], sweep))
+        self.assertTrue(_dependency_gates.job_reaches(jobs['pypcap-parity'], engines))
+
+        # A parity step that asks for every tier is read as reaching every tier.
+        doctored = doctored_workflow(self, "fixture_tier_paths('ALL')))\"); then",
+                                     "fixture_tier_paths()))\"); then")
+        parity = next(job for job in _dependency_gates.pytest_jobs(doctored) if job.name == 'pypcap-parity')
+        self.assertIsNone(parity.tier)
+        self.assertTrue(_dependency_gates.job_reaches(parity, sweep))
 
 
 class DependencyGateCoverageTests(unittest.TestCase):

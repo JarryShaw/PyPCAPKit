@@ -26,6 +26,9 @@ from tests._support import reimport_once_per_class
 if TYPE_CHECKING:
     from typing import Any
 
+#: Test tier (#1958): hand-picked round-trip cases, not a sweep.
+__tier__ = 'ALL'
+
 H = bytes.fromhex
 
 

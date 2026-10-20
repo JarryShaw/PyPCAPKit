@@ -24,6 +24,9 @@ import warnings
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): a sweep that rebuilds every cut of each extension header.
+__tier__ = 'LATEST'
+
 HOP, TCP, DST, AH, NONXT, HIP = 0, 6, 60, 51, 59, 139
 
 #: A TCP header and one octet of data.

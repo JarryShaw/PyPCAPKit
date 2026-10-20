@@ -72,6 +72,9 @@ import unittest
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): exercises the link-type lookups.
+__tier__ = 'ALL'
+
 #: The crawler dependencies :class:`LinkTypeGeneratorLegacyOrderingTests` needs to
 #: parse its fixture. Spelled exactly as
 #: :data:`tests.vendor.test_request_prompt_unit.VENDOR_DEPS` so this file reaches

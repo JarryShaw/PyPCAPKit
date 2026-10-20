@@ -40,6 +40,9 @@ from tests.corekit._roundtrip import (OK, KnownFailureTable, Outcome, describe, 
 if TYPE_CHECKING:
     from typing import Any, Callable
 
+#: Test tier (#1958): a sweep over every corekit field class.
+__tier__ = 'LATEST'
+
 
 class FieldCase(NamedTuple):
     """One field and the inputs it is round-tripped on."""

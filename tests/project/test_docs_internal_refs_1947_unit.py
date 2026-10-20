@@ -28,6 +28,10 @@ from tests.project.test_docs_internal_refs_1940_unit import (DOCS, ROLE, ROOT, _
 if TYPE_CHECKING:
     from typing import Any
 
+#: Test tier (#1958): checks the references in the vendor templates and the generated
+#: constant modules.
+__tier__ = 'LATEST'
+
 TRANSPORT_PROTOCOL = ':class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`'
 APPTYPE_GET = ':meth:`AppType.get() <pcapkit.const.reg.apptype.apptype.AppType.get>`'
 

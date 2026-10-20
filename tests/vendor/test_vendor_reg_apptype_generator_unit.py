@@ -123,6 +123,9 @@ lint tier, not to a pytest install line.
 import importlib.util
 import unittest
 
+#: Test tier (#1958): checks the shape of the AppType generator's source.
+__tier__ = 'LATEST'
+
 __all__ = ['AppTypeGeneratorShapeTests']
 
 #: Whether :mod:`mypy` is importable, for the one test that runs it. A visible

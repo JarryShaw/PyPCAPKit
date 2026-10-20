@@ -35,6 +35,10 @@ from tests._tiers import ROOT
 if TYPE_CHECKING:
     from typing import Any
 
+#: Test tier (#1958): tests examples/generators/options.py, which make_samples.py runs
+#: on every integration leg.
+__tier__ = 'LATEST'
+
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 HAS_SCAPY = importlib.util.find_spec('scapy') is not None

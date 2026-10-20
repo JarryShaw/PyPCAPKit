@@ -75,6 +75,9 @@ import unittest
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): exercises ``Method.get`` as well as its regeneration pin.
+__tier__ = 'ALL'
+
 
 def _reconstruct_fixture_csv() -> 'str':
     """Rebuild the IANA-shaped CSV that reproduces the committed generated

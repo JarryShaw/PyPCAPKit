@@ -1,31 +1,37 @@
 # -*- coding: utf-8 -*-
-"""#1732: the round-trip sweeps run on ``latest`` alone.
+"""#1732 and #1958: the ``LATEST`` test tier runs on ``latest`` alone.
 
-The owner's ruling, paraphrased: run a subset, and the round-trip sweeps need run
-only on the latest version. So ``test``'s ``Run unit tests`` step adds
-:data:`~tests._tiers.ROUNDTRIP_SWEEP_GLOB` as one more ``--ignore-glob`` on every
-leg whose version is not ``latest`` -- the KTLO and older supported legs -- as
+The owner's ruling on #1732, paraphrased: run a subset, and the round-trip sweeps
+need run only on the latest version. #1958 makes that subset a test tier rather
+than a name glob: :func:`tests._tiers.module_tier` puts each module in ``ALL`` or
+``LATEST``, by the module's own ``__tier__`` or by the rule, and the owner's
+rulings there, paraphrased, keep the hand-picked round trips on every leg and send
+only the real sweeps, with the modules whose answer no interpreter changes, to
+``latest``. So ``test``'s ``Run unit tests`` step passes each module
+:func:`~tests._tiers.latest_tier_paths` prints as an ``--ignore`` on every leg whose
+version is not ``latest`` -- the KTLO and older supported legs -- as
 ``experimental``'s does on each of its legs, and ``latest``, the coverage leg, keeps
-the whole unit tier. The owner later ruled that the subset covers ``integration``
-too: off ``latest``, its ``Run full test suite`` drops the modules
-:data:`~tests._tiers.ROUNDTRIP_RUNTIME_GLOB` names, :class:`TestTheIntegrationSubset`.
+the whole unit tier less the project pins (#1954). ``integration`` does the same
+with the fixture tier: off ``latest``, its ``Run full test suite`` asks for
+:func:`~tests._tiers.fixture_tier_paths`'s ``ALL`` part, and ``pypcap-parity``, none
+of whose legs is ``latest``, asks for it on each, :class:`TestTheIntegrationSubset`.
 
 :class:`TestTheStepSelectsByLeg` runs the step's script on each leg the tier file
 gives either job, with a ``python`` on ``PATH`` that records its arguments, so what
 is checked is the selection bash builds, not what the text appears to say.
-:class:`TestTheGlobIsTheSweeps` asks pytest itself what the glob ignores.
+:class:`TestTheIgnoresAreTheLatestTier` asks pytest itself what those ignores leave
+out.
 
-The owner's second ruling, option 2: nothing waits on the experimental legs, which
-with the caps GraalPy needs run for up to two hours. A job of unit-tests.yml would
-still hold its run in progress, and with it every ``workflow_run`` consumer of
-"Unit Tests", so they are a workflow of their own, experimental.yml:
-:class:`TestTheExperimentalLegsAreAWorkflowOfTheirOwn`.
+The owner's second ruling on #1732, option 2: nothing waits on the experimental
+legs, which with the caps GraalPy needs run for up to two hours. A job of
+unit-tests.yml would still hold its run in progress, and with it every
+``workflow_run`` consumer of "Unit Tests", so they are a workflow of their own,
+experimental.yml: :class:`TestTheExperimentalLegsAreAWorkflowOfTheirOwn`.
 
 """
 
 from __future__ import annotations
 
-import fnmatch
 import os
 import pathlib
 import re
@@ -42,19 +48,19 @@ from tests.project.test_python_versions_1660 import ROOT, live_outputs, prose
 from tests.project.test_release_gates import NULL, evaluate_expression
 
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Any, Optional
+
+#: Test tier (#1958): checks the workflows' tier selections.
+__tier__ = 'LATEST'
 
 #: The jobs and step that run the unit tier: ``test``, and the experimental legs' own (#1732).
 JOB = ('unit-tests.yml', 'test')
 EXPERIMENTAL = ('experimental.yml', 'experimental')
 STEP = 'Run unit tests'
-#: The job and step that run the fixture tier, which the subset covers too (#1732).
+#: The jobs and step that run the fixture tier, which the tiers cover too (#1732, #1958).
 INTEGRATION = ('unit-tests.yml', 'integration')
+PARITY = ('unit-tests.yml', 'pypcap-parity')
 INTEGRATION_STEP = 'Run full test suite'
-#: The fixture tier's round-trip sweeps, by path, as the owner's ruling counted them.
-RUNTIME_SWEEPS = ('tests/foundation/traceflow/test_traceflow_reread_roundtrip_runtime.py',
-                  'tests/protocols/test_capture_roundtrip_runtime.py',
-                  'tests/protocols/test_declared_length_roundtrip_runtime.py')
 #: Every workflow that waits on "Unit Tests" completing, with ``workflow_run``.
 CONSUMERS = ('coverage-comment.yml', 'deploy-pages.yml', 'cron-vendor.yml', 'cron-conda.yml')
 #: Each job's ``timeout-minutes``, and its capped steps', by ``id``: ``test``'s are
@@ -64,23 +70,21 @@ CAPS = {JOB: (45, {}), EXPERIMENTAL: (140, {'python': 5, 'install': 10, 'watcher
 #: The jobs whose result reaches a gate: ``required-checks`` and what it needs, and
 #: ``unittest-ordering``, which runs on main's pushes and gates publishing.
 GATING = ('required-checks', 'unittest-ordering')
-#: The flag that leaves the sweeps out, as pytest receives it once bash has run.
-SWEEP_FLAG = f'--ignore-glob={_tiers.ROUNDTRIP_SWEEP_GLOB}'
 #: The unit tier's own flags, which every leg passes.
 TIER_FLAGS = ('--ignore=tests/integration', '--ignore-glob=*_runtime.py', '--ignore-glob=*_regression.py')
 #: A ``python`` that writes each argument on a line of ``$ARGS_FILE``, and hands a
-#: ``-c`` to the real one, which is how ``integration`` asks tests/_tiers.py.
+#: ``-c`` to the real one, which is how the steps ask tests/_tiers.py.
 STUB = ('#!/bin/sh\nif [ "$1" = -c ]; then exec "$REAL_PYTHON" "$@"; fi\n'
         'printf \'%s\\n\' "$@" > "$ARGS_FILE"\n')
-#: A directory holding round-trip sweeps and modules that only import their
-#: harnesses' packet builders, for :class:`TestTheGlobIsTheSweeps` to collect.
+#: A directory holding sweeps, hand-picked round trips, and modules that only import
+#: the sweeps' harnesses' packet builders, for :class:`TestTheIgnoresAreTheLatestTier`.
 PROBE = 'tests/protocols/internet'
 #: ``$RUNNER_TEMP``, which only names the JUnit file here, so one value for every leg.
 RUNNER_TEMP = '/home/runner/work/_temp'
 
 
 def step(where: 'tuple[str, str]' = JOB) -> 'dict[str, Any]':
-    name = INTEGRATION_STEP if where == INTEGRATION else STEP
+    name = STEP if where in (JOB, EXPERIMENTAL) else INTEGRATION_STEP
     found = [entry for entry in job(*where)['steps'] if entry.get('name') == name]
     if len(found) != 1:
         raise AssertionError(f'expected one {name!r} step in {where}, found {len(found)}')
@@ -99,17 +103,17 @@ def stringify(value: 'object') -> 'str':
 def step_env(leg: 'dict[str, Any]', where: 'tuple[str, str]' = JOB) -> 'dict[str, str]':
     """The step's ``env:`` on ``leg``, ``needs`` read from the tier file."""
     # #1938: experimental's tests step reads the token and the watcher's interpreter, unwatched here.
-    # #1954: and the project pins its own step lists, as that step prints them.
+    # #1958: and the LATEST tier its own step lists, as that step prints it.
     context = {'matrix': leg, 'needs': {'python-versions': {'outputs': live_outputs()}}, 'github': {'token': ''},
                'steps': {'watcher': {'outcome': 'skipped'}, 'watcher-python': {'outputs': {'python-path': ''}},
-                         'pins': {'outputs': {'paths': ' '.join(_tiers.project_pin_paths())}}}}
+                         'tier': {'outputs': {'paths': ' '.join(_tiers.latest_tier_paths())}}}}
     return {key: re.sub(r'\$\{\{.*?\}\}', lambda match: stringify(evaluate_expression(match.group(0), context)),
                         str(value))
             for key, value in (step(where).get('env') or {}).items()}
 
 
-def run_step(leg: 'dict[str, Any]', where: 'tuple[str, str]' = JOB) -> 'list[str]':
-    """The arguments the step of job ``where`` hands ``python`` on ``leg``."""
+def run_step(leg: 'dict[str, Any]', where: 'tuple[str, str]' = JOB, script: 'Optional[str]' = None) -> 'list[str]':
+    """The arguments the step of job ``where`` hands ``python`` on ``leg``; ``script`` replaces its ``run:``."""
     with tempfile.TemporaryDirectory() as temp:
         stub = pathlib.Path(temp, 'python')
         stub.write_text(STUB, encoding='utf-8')
@@ -125,11 +129,13 @@ def run_step(leg: 'dict[str, Any]', where: 'tuple[str, str]' = JOB) -> 'list[str
         record = pathlib.Path(temp, 'args')
         env = dict(os.environ, **step_env(leg, where), ARGS_FILE=str(record), RUNNER_TEMP=str(runner_temp),
                    REAL_PYTHON=sys.executable, PATH=temp + os.pathsep + os.environ.get('PATH', ''))
-        # From the root, as the runner runs it: ``integration`` imports tests/_tiers.py.
-        result = subprocess.run(['bash', '-e', '-c', step(where)['run']], env=env, cwd=ROOT,  # nosec B603 B607
-                                capture_output=True, text=True, check=False, timeout=60)
+        env.setdefault('ANNOTATION_LEVEL', 'error')
+        env.pop('PYTHONSAFEPATH', None)  # the runner sets none, and it would hide tests/ from `-c`
+        # From the root, as the runner runs it: the steps import tests/_tiers.py.
+        result = subprocess.run(['bash', '-e', '-c', script or step(where)['run']], env=env,  # nosec B603 B607
+                                cwd=ROOT, capture_output=True, text=True, check=False, timeout=120)
         if result.returncode:
-            raise AssertionError(f'the step failed on {leg}: {result.stderr}')
+            raise AssertionError(f'the step failed on {leg}: {result.stdout[-2000:]}{result.stderr[-2000:]}')
         return [arg.replace(str(runner_temp), RUNNER_TEMP) for arg in record.read_text(encoding='utf-8').splitlines()]
 
 
@@ -139,6 +145,11 @@ def pytest_args(argv: 'list[str]') -> 'list[str]':
         if argv[index:index + 2] == ['-m', 'pytest']:
             return argv[index + 2:]
     raise AssertionError(f'no `-m pytest` in {argv}')
+
+
+def ignored(argv: 'list[str]') -> 'list[str]':
+    """The modules the arguments ``--ignore``, less the unit tier's own flags."""
+    return [arg.split('=', 1)[1] for arg in pytest_args(argv) if arg.startswith('--ignore=') and arg not in TIER_FLAGS]
 
 
 @unittest.skipIf(shutil.which('bash') is None, 'the step is a bash script')
@@ -152,16 +163,20 @@ class TestTheStepSelectsByLeg(unittest.TestCase):
                     for where in (JOB, EXPERIMENTAL) for leg in legs(*where)}
         assert len(cls.runs) == len(legs(*JOB)) + len(legs(*EXPERIMENTAL)), 'a version runs in both jobs'
 
-    def test_only_latest_runs_the_sweeps(self) -> None:
+    def test_only_latest_runs_the_latest_tier(self) -> None:
+        """Every other leg ignores each ``LATEST`` module; ``latest`` ignores the project pins alone."""
         self.assertIn(self.latest, self.runs)
         self.assertTrue(any(is_experimental(leg) for leg, _ in self.runs.values()))
+        tier, pins = list(_tiers.latest_tier_paths()), list(_tiers.project_pin_paths())
+        self.assertLess(set(pins), set(tier))
         for version, (_, argv) in self.runs.items():
             with self.subTest(python=version):
-                self.assertEqual(SWEEP_FLAG in pytest_args(argv), version != self.latest)
+                self.assertEqual(ignored(argv), pins if version == self.latest else tier)
+                self.assertFalse([arg for arg in argv if 'roundtrip' in arg and arg.startswith('--ignore-glob')])
 
     def test_latest_keeps_the_unit_tier_less_the_pins_under_coverage(self) -> None:
-        """Coverage is measured over the selection it was before #1732, less the project pins,
-        which import no pcapkit and run in ``project-tests`` (#1954)."""
+        """Coverage is measured over the whole unit tier, less the project pins, which
+        import no pcapkit and run in ``project-tests`` (#1954)."""
         leg, argv = self.runs[self.latest]
         self.assertIs(leg.get('coverage'), True)
         self.assertEqual(argv[:4], ['-m', 'coverage', 'run', '--rcfile=.github/coverage.toml'])
@@ -171,8 +186,10 @@ class TestTheStepSelectsByLeg(unittest.TestCase):
         self.assertEqual(flags, list(TIER_FLAGS) + pins)
 
     def test_every_other_leg_runs_the_rest(self) -> None:
-        """The same selection as ``latest``, the sweeps' glob last, and no coverage."""
-        expected = pytest_args(self.runs[self.latest][1]) + [SWEEP_FLAG]
+        """The same selection as ``latest``, the ``LATEST`` tier ignored in place of the pins, and no coverage."""
+        pins = {f'--ignore={pin}' for pin in _tiers.project_pin_paths()}
+        expected = ([arg for arg in pytest_args(self.runs[self.latest][1]) if arg not in pins]
+                    + [f'--ignore={module}' for module in _tiers.latest_tier_paths()])
         for version, (leg, argv) in self.runs.items():
             if version == self.latest:
                 continue
@@ -187,9 +204,18 @@ class TestTheStepSelectsByLeg(unittest.TestCase):
                 self.assertEqual(argv[:2], ['-m', 'pytest'])
                 self.assertEqual(pytest_args(argv), want)
 
+    def test_a_step_that_ignores_the_pins_alone_off_latest_is_caught(self) -> None:
+        """The check above fails when a leg off ``latest`` leaves out the pins rather than the tier."""
+        script = step(JOB)['run']
+        latest = _tiers.LATEST_TIER_SELECTOR.split('"', 1)[1]
+        self.assertEqual(script.count(latest), 1)
+        doctored = script.replace(latest, _tiers.PROJECT_PINS_SELECTOR.split('"', 1)[1])
+        leg = next(leg for leg in legs(*JOB) if leg['python-version'] != self.latest)
+        self.assertNotEqual(ignored(run_step(leg, JOB, doctored)), list(_tiers.latest_tier_paths()))
 
-class TestTheGlobIsTheSweeps(unittest.TestCase):
-    """What the glob leaves out, by pytest's own collection."""
+
+class TestTheIgnoresAreTheLatestTier(unittest.TestCase):
+    """What the ``LATEST`` ignores leave out, by pytest's own collection."""
 
     def collect(self, *extra: 'str') -> 'set[str]':
         result = subprocess.run([sys.executable, '-m', 'pytest', '--collect-only', '-q', '-p', 'no:cacheprovider',
@@ -198,41 +224,45 @@ class TestTheGlobIsTheSweeps(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout[-2000:] + result.stderr[-2000:])
         return {line.split('::', 1)[0] for line in result.stdout.splitlines() if '::' in line}
 
-    def test_pytest_ignores_exactly_the_sweeps(self) -> None:
-        """Run from the root, as CI runs it: the modules the glob drops are :func:`~tests._tiers.is_roundtrip_sweep`'s."""
+    def test_pytest_leaves_out_exactly_the_latest_modules(self) -> None:
+        """Run from the root, as CI runs it: the modules the ignores drop are the ``LATEST`` ones."""
         everything = self.collect()
-        rest = self.collect(SWEEP_FLAG)
-        sweeps = {module for module in everything if _tiers.is_roundtrip_sweep(module)}
-        self.assertTrue(sweeps)
-        self.assertEqual(everything - rest, sweeps)
-        # A module that imports a sweep's harness for its packet builders is no sweep.
+        rest = self.collect(*(f'--ignore={module}' for module in _tiers.latest_tier_paths()))
+        latest = {module for module in everything if _tiers.module_tier(module) == _tiers.TIER_LATEST}
+        self.assertTrue(latest)
+        self.assertEqual(everything - rest, latest)
+        # A hand-picked round trip stays, and so does a module that imports a sweep's harness.
+        self.assertTrue([module for module in rest if 'roundtrip' in module])
         builders = [module for module in rest if 'tests.foundation import _roundtrip'
                     in (ROOT / module).read_text(encoding='utf-8')]
-        self.assertTrue(builders, f'no module under {PROBE} imports the harness without being a sweep')
+        self.assertTrue(builders, f'no module under {PROBE} imports the harness without being LATEST')
 
-    def test_the_sweeps_are_the_modules_named_for_a_round_trip(self) -> None:
-        """Every unit-tier test module whose name holds ``roundtrip``.
+    def test_the_tier_is_no_name_rule(self) -> None:
+        """#1958: a name says nothing about the tier; ``LATEST`` sweeps go by other names too."""
+        modules = _tiers.suite_modules()
+        named = [module for module in modules if 'roundtrip' in module.rsplit('/', 1)[1]]
+        latest = set(_tiers.latest_tier_paths())
+        self.assertTrue([module for module in named if module not in latest])
+        self.assertTrue([module for module in named if module in latest])
+        self.assertTrue([module for module in latest if module not in named and 'tests/project/' not in module])
 
-        That takes in every module that builds a table on the #1202 protocol-edge
-        or corekit harness. The foundation harness's registry module is named for
-        symmetry, so it runs on every leg; it took 1.8 s on 3.14 (measured).
-
-        """
-        modules = sorted(path.relative_to(ROOT).as_posix() for path in (ROOT / 'tests').rglob('test_*.py'))
-        sweeps = [module for module in modules if _tiers.is_roundtrip_sweep(module)]
-        self.assertEqual(sweeps, [module for module in modules
-                                  if 'roundtrip' in module.rsplit('/', 1)[1] and _tiers.is_unit_tier(module)])
+    def test_every_module_on_a_sweep_harness_is_latest(self) -> None:
+        """The #1202 edge-case and corekit tables build every case they list, so their users are sweeps."""
+        modules = _tiers.suite_modules()
         for harness in ('tests/protocols/_edge_roundtrip.py', 'tests/corekit/_roundtrip.py'):
             users = [module for module in modules if _tiers.is_unit_tier(module) and re.search(
                 rf'^from {re.escape(harness[:-3].replace("/", "."))} import .*\b(?:Case|KnownFailureTable)\b',
                 (ROOT / module).read_text(encoding='utf-8'), re.M)]
             with self.subTest(harness=harness):
                 self.assertTrue(users)
-                self.assertEqual([module for module in users if module not in sweeps], [])
+                self.assertEqual([module for module in users if _tiers.module_tier(module) != _tiers.TIER_LATEST],
+                                 [])
 
 
+@unittest.skipIf(shutil.which('bash') is None, 'the step is a bash script')
 class TestTheIntegrationSubset(unittest.TestCase):
-    """#1732: ``integration`` runs the fixture tier's round-trip sweeps on ``latest`` alone.
+    """#1958: ``integration`` runs the fixture tier's ``LATEST`` modules on ``latest`` alone, and
+    ``pypcap-parity``, with no ``latest`` leg, never does.
 
     Each leg from the tier file, through the step's own script, with
     tests/_tiers.py really asked for the selection.
@@ -243,6 +273,7 @@ class TestTheIntegrationSubset(unittest.TestCase):
     def setUpClass(cls) -> None:
         cls.latest = live_outputs()['latest']
         cls.selection = list(_tiers.fixture_tier_paths())
+        cls.all = list(_tiers.fixture_tier_paths(_tiers.TIER_ALL))
         cls.runs = {leg['python-version']: pytest_args(run_step(leg, INTEGRATION)) for leg in legs(*INTEGRATION)}
 
     @staticmethod
@@ -250,28 +281,37 @@ class TestTheIntegrationSubset(unittest.TestCase):
         return ['-q', '-n', 'auto', '--dist', 'load', '--durations=30', '--durations-min=1.0',
                 f'--junitxml={RUNNER_TEMP}/junit.xml']
 
-    def test_the_glob_names_the_three_runtime_sweeps(self) -> None:
-        """On disk and in the selection: the three modules the ruling counted."""
-        glob = _tiers.ROUNDTRIP_RUNTIME_GLOB
-        on_disk = sorted(path.relative_to(ROOT).as_posix() for path in (ROOT / 'tests').rglob('test_*.py')
-                         if fnmatch.fnmatch(path.relative_to(ROOT).as_posix(), glob))
-        self.assertEqual(on_disk, list(RUNTIME_SWEEPS))
-        self.assertEqual(sorted({arg.split('::', 1)[0] for arg in self.selection
-                                 if fnmatch.fnmatch(arg.split('::', 1)[0], glob)}), list(RUNTIME_SWEEPS))
+    def test_the_all_selection_leaves_out_the_latest_modules(self) -> None:
+        latest = [module for module in _tiers.latest_tier_paths() if not _tiers.is_unit_tier(module)]
+        self.assertTrue(latest)
+        modules = [{entry.split('::', 1)[0] for entry in entries} for entries in (self.selection, self.all)]
+        self.assertEqual(sorted(modules[0] - modules[1]), latest)
 
     def test_only_latest_runs_them(self) -> None:
-        """``latest`` passes the whole selection; every other leg drops them and adds the glob."""
+        """``latest`` passes the whole selection; every other leg its ``ALL`` part."""
         self.assertIn(self.latest, self.runs)
         self.assertGreater(len(self.runs), 1)
-        flag = f'--ignore-glob={_tiers.ROUNDTRIP_RUNTIME_GLOB}'
-        rest = [arg for arg in self.selection if arg.split('::', 1)[0] not in RUNTIME_SWEEPS]
-        self.assertLess(len(rest), len(self.selection))
+        self.assertLess(len(self.all), len(self.selection))
         for version, args in self.runs.items():
             with self.subTest(python=version):
-                if version == self.latest:
-                    self.assertEqual(args, self.flags() + self.selection)
-                else:
-                    self.assertEqual(args, self.flags() + rest + [flag])
+                self.assertEqual(args, self.flags() + (self.selection if version == self.latest else self.all))
+
+    def test_a_leg_that_asks_for_every_tier_off_latest_is_caught(self) -> None:
+        script = step(INTEGRATION)['run']
+        self.assertEqual(script.count("fixture_tier_paths('ALL')"), 1)
+        leg = next(leg for leg in legs(*INTEGRATION) if leg['python-version'] != self.latest)
+        args = pytest_args(run_step(leg, INTEGRATION, script.replace("fixture_tier_paths('ALL')",
+                                                                    'fixture_tier_paths()')))
+        self.assertNotEqual(args, self.flags() + self.all)
+
+    def test_the_parity_legs_run_the_all_tier(self) -> None:
+        """None of ``pypcap-parity``'s legs is ``latest``, so each asks for the ``ALL`` part alone."""
+        found = legs(*PARITY) + legs('unit-tests.yml', 'pypcap-parity-ktlo')
+        self.assertTrue(found)
+        self.assertNotIn(self.latest, [leg['python-version'] for leg in found])
+        self.assertIn(_tiers.FIXTURE_ALL_TIER_SELECTOR, step(PARITY)['run'])
+        self.assertEqual(pytest_args(run_step(legs(*PARITY)[0], PARITY)),
+                         ['-q', '-n', 'auto', '--dist', 'load'] + self.all)
 
 
 def triggers(spec: 'dict[str, Any]') -> 'dict[str, Any]':
@@ -411,9 +451,13 @@ class TestTheExperimentalLegsAreAWorkflowOfTheirOwn(unittest.TestCase):
 
 class TestTheDocsSayIt(unittest.TestCase):
 
-    def test_the_workflows_page_names_the_glob_and_the_leg(self) -> None:
+    def test_the_workflows_page_states_the_tiers(self) -> None:
         page = prose(ROOT / 'docs' / 'source' / 'contributing' / 'workflows.rst')
-        self.assertIn(f"every leg but ``latest`` adds ``--ignore-glob='{_tiers.ROUNDTRIP_SWEEP_GLOB}'``", page)
+        for phrase in ('``module_tier()``', "``__tier__ = 'LATEST'``", '``latest_tier_paths()``', "``fixture_tier_paths('ALL')``",
+                       '``ALL``', '``LATEST``', '#1958'):
+            with self.subTest(phrase=phrase):
+                self.assertIn(phrase, page)
+        self.assertNotIn('roundtrip*', page)
 
 
 if __name__ == '__main__':

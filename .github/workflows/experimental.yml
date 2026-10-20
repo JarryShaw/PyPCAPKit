@@ -203,8 +203,8 @@ jobs:
   # The tests' 120: GraalPy 25.4's tests step reached 26% of the unit tier's
   # tests at its old 25-minute cap (job 115915976024; setup-python took 0.7
   # minutes, the install 3.3). Those tests hold 20-26% of the tier's time, and
-  # the tier less the round-trip sweeps, which this job never runs (see `Run
-  # unit tests`), holds 3.5-4.5 times as much, by per-module times from a local
+  # the tier less the round-trip sweeps, which this job did not run then (see
+  # `Run unit tests`), held 3.5-4.5 times as much, by per-module times from a local
   # 3.14 run and the 3.14, 3.15 and 3.14t legs of run 38581834697: 88-113
   # minutes on GraalPy (estimate). 3.14t, which shares the caps, took 5.8
   # minutes over the whole unit tier in that run.
@@ -242,19 +242,20 @@ jobs:
         id: checkout
         continue-on-error: true
 
-      # #1954: the project pins run once per push, in unit-tests.yml's
-      # `project-tests`, so these legs leave them out, as `test`'s do. The
-      # runner's own `python3` asks tests/_tiers.py, which needs only the
-      # standard library, before setup-python puts the leg's interpreter on
-      # PATH, so GraalPy does not parse the tree. Where it fails, the tests
-      # run the pins too, and `Experimental summary` names this step.
-      - name: List the project pins
-        id: pins
+      # #1958: these legs run the `ALL` test tier alone, as `test`'s legs but
+      # `latest` do, so they leave out every `LATEST` module -- the project
+      # pins (#1954) and the round-trip sweeps (#1732) among them. The runner's
+      # own `python3` asks tests/_tiers.py, which needs only the standard
+      # library, before setup-python puts the leg's interpreter on PATH, so
+      # GraalPy does not parse the tree. Where it fails, the tests run the
+      # `LATEST` tier too, and `Experimental summary` names this step.
+      - name: List the LATEST tier
+        id: tier
         if: ${{ steps.checkout.outcome == 'success' }}
         continue-on-error: true
         run: |
-          pins=$(python3 -c "from tests._tiers import project_pin_paths; print(' '.join(project_pin_paths()))")
-          echo "paths=$pins" >> "$GITHUB_OUTPUT"
+          latest=$(python3 -c "from tests._tiers import latest_tier_paths; print(' '.join(latest_tier_paths()))")
+          echo "paths=$latest" >> "$GITHUB_OUTPUT"
 
       - uses: actions/setup-python@v7
         id: python
@@ -380,7 +381,7 @@ jobs:
 
       # unit-tests.yml `test`'s selection on every leg but `latest`: no
       # experimental version is `latest`, which util/python_versions.py holds to
-      # a supported CPython, so the round-trip sweeps (#1732) are always left out
+      # a supported CPython, so the `LATEST` test tier (#1958) is always left out
       # here. #1740: `tail -F` copies the resource monitor's samples into this
       # step's log as they are taken, and stops with the step.
       #
@@ -461,7 +462,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           WATCHER: ${{ steps.watcher.outcome }}
           WATCHER_PYTHON: ${{ steps.watcher-python.outputs.python-path }}
-          PINS: ${{ steps.pins.outputs.paths }}
+          LATEST_TIER: ${{ steps.tier.outputs.paths }}
         run: |
           tail -n +1 -F "$RUNNER_TEMP/resource-monitor.log" 2>/dev/null &
           monitor=$!
@@ -471,11 +472,10 @@ jobs:
             --ignore=tests/integration \
             --ignore-glob='*_runtime.py' \
             --ignore-glob='*_regression.py'
-          # #1954: the project pins, from `List the project pins`.
-          for pin in $PINS; do
-            set -- "$@" --ignore="$pin"
+          # #1958: the `LATEST` tier, from `List the LATEST tier`.
+          for module in $LATEST_TIER; do
+            set -- "$@" --ignore="$module"
           done
-          set -- "$@" --ignore-glob='*roundtrip*'
           set -- prlimit --fsize=2147483648 timeout --signal=INT --kill-after=3m 110m python -m pytest "$@"
           scoped() {
             unit=$1

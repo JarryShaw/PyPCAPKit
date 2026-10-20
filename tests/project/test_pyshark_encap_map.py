@@ -65,6 +65,9 @@ import unittest
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 
+#: Test tier (#1958): drives util/pyshark_encap_map.py, which runs on one interpreter.
+__tier__ = 'LATEST'
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 

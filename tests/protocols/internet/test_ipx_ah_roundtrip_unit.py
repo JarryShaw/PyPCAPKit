@@ -25,6 +25,9 @@ import warnings
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): hand-picked round-trip cases, not a sweep.
+__tier__ = 'ALL'
+
 #: Checksum, length, hop count, type, destination and source, then payload.
 IPX_PACKETS = {
     'all-zero': bytes.fromhex('0000' '001e') + bytes(26),

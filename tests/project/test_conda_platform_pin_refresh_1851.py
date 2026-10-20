@@ -60,6 +60,9 @@ except ImportError:  # pragma: no cover
 if TYPE_CHECKING:
     from typing import Any, Optional
 
+#: Test tier (#1958): drives util/conda_vendor.py, which runs on one interpreter.
+__tier__ = 'LATEST'
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 WORKFLOW = ROOT / '.github' / 'workflows' / 'cron-conda.yml'
 #: The conda Pythons the stand-ins are built for; the matcher takes any list.
