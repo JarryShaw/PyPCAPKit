@@ -10,6 +10,10 @@ from unittest import mock
 
 from tests._support import load_module, reimport_once_per_class
 
+#: Test tier (#1958): exercises pickling and copying, whose protocols differ by
+#: interpreter.
+__tier__ = 'ALL'
+
 
 class ModuleDescriptorTests(unittest.TestCase):
     def setUp(self) -> None:

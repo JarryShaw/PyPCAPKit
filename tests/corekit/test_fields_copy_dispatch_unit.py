@@ -41,6 +41,10 @@ if TYPE_CHECKING:
 
     from pcapkit.corekit.fields.field import FieldBase
 
+#: Test tier (#1958): exercises pickling and copying, whose protocols differ by
+#: interpreter.
+__tier__ = 'ALL'
+
 
 class FieldCallUsesCopyDunderDirectlyTests(unittest.TestCase):
     """Every ``__call__`` in :mod:`pcapkit.corekit.fields` calls ``self.__copy__()``.

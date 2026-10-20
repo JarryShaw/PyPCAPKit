@@ -23,6 +23,10 @@ import unittest
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): exercises pickling and copying, whose protocols differ by
+#: interpreter.
+__tier__ = 'ALL'
+
 #: What :class:`_CopiesItself` returns from its own ``__deepcopy__``.
 _COPIED = 'the stream copied itself'
 

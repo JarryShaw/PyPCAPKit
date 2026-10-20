@@ -30,6 +30,10 @@ from tests.utilities._harness import capture
 if TYPE_CHECKING:
     from typing import Callable
 
+#: Test tier (#1958): exercises threading, locking or warning and exception hooks, which
+#: differ by interpreter.
+__tier__ = 'ALL'
+
 
 class RegisterLoudInQuietBlock1916Tests(unittest.TestCase):
     """``register`` on a generated registry logs its rejection inside a quiet block."""

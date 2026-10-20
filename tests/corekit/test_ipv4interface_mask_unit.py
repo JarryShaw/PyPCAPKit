@@ -26,6 +26,10 @@ import unittest
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): exercises pickling and copying, whose protocols differ by
+#: interpreter.
+__tier__ = 'ALL'
+
 #: Address ``10.0.0.1`` followed by four mask octets.
 MASKS = {
     'hostmask /24': '0a000001' '000000ff',

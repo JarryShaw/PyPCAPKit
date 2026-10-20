@@ -915,30 +915,57 @@ and fixture-dependent tiers, which decide what a module may read and so which jo
 collects it; a test tier decides on which of that job's legs it runs.
 
 ``module_tier()`` in :file:`tests/_tiers.py` decides, in one place, for every
-``tests/**/test_*.py``:
+``tests/**/test_*.py``. ``ALL`` is a curated, opt-in list (#1958, #1963): short enough
+to save time on every leg, the same on every leg so QA stays consistent, and enough
+on its own to validate a change on each interpreter, while ``latest`` runs the whole
+suite as the gate.
 
-* **The marker.** A module may state its tier outright with a module-level
-  ``__tier__ = 'ALL'`` or ``__tier__ = 'LATEST'``, read by AST, under a ``#:``
-  comment that gives the reason. It wins over the rule. It is a module constant
-  rather than a pytest marker, so ``unittest-ordering``'s plain ``unittest`` runs
-  read the same module. A value that is not one of the two string literals, or a
-  marker assigned twice or anywhere but at the module's top level, fails the tier
-  guard.
-* **The rule.** Otherwise a module is ``LATEST`` when its run does not vary by
-  interpreter, by the same AST test as the project pins below: it reads the
-  repository's text, a workflow or the docs, or drives a ``util/`` script, and
-  neither imports ``pcapkit`` nor compares the Python version. Everything that
-  exercises ``pcapkit`` is ``ALL``.
+* **The marker.** A module joins ``ALL`` with a module-level ``__tier__ = 'ALL'``,
+  read by AST, under a ``#: Test tier (#1958): <reason>`` comment. It is a module
+  constant rather than a pytest marker, so ``unittest-ordering``'s plain
+  ``unittest`` runs read the same module. A value that is not ``'ALL'`` or
+  ``'LATEST'``, or a marker assigned twice or anywhere but at the module's top
+  level, fails the tier guard.
+* **The default.** A module that states no tier is ``LATEST``, so a new module runs
+  on ``latest`` until it says why every leg needs it. ``__tier__ = 'LATEST'`` is
+  optional, and records why a module someone might expect on every leg is not; a
+  module that compares ``sys.version_info``, ``sys.implementation`` or
+  ``sys.maxsize``, reads
+  ``sys.flags``, calls ``sysconfig.get_config_var()`` or probes :mod:`sys` with
+  ``hasattr``/``getattr`` has to state its tier either way, so a version gate never
+  lands on ``latest`` alone by omission. The check is syntactic and best-effort: an
+  alias, a flag imported from ``pcapkit.utilities.compat`` or a gate in a helper is
+  not seen, and such a module states its tier by hand.
 
-The marker says what the AST cannot see. Each real sweep -- a round trip over every
-class or registry entry a table enumerates, every offset of a packet or every
-capture -- is marked ``LATEST``, as the owner ruled on #1732 and #1958; the
-hand-picked round trips, whatever their names, run on ``ALL``, and so do the #1202
-edge-case tables, whose cases are each written out by hand. A module that imports ``pcapkit`` only to read its text or
-structure, or that drives a docs hook or a generator other legs already run, is
-marked ``LATEST``; one that the rule would send to ``latest`` but that depends on
-the interpreter, such as the tier guard itself, which :file:`tests/conftest.py` runs at
-collection on every leg, is marked ``ALL``.
+A module opts in when it exercises behaviour that can differ between interpreters
+or versions:
+
+* compat shims and version or implementation gates;
+* C-accelerated versus pure paths, and code sensitive to garbage collection, weak
+  references or finalisation;
+* ``int``, ``bytes`` and ``struct`` edge cases, and ``sys.maxsize`` or recursion
+  limits;
+* pickling and copying, metaclass and ABC machinery, and enum mechanics;
+* stream and buffer semantics, threading and locking, and the warning and
+  exception hooks;
+* a third-party engine whose installable releases vary by interpreter, such as
+  ``pypcap`` and ``pypcapfile``, which install below 3.12 only, and Scapy, which the
+  ``integration`` and ``pypcap-parity`` legs install on every interpreter and a
+  ``test`` leg off ``latest`` skips;
+* the hand-picked round trips, whatever their names, and the #1202 edge-case
+  tables, whose cases are each written out by hand, as the owner ruled on #1958;
+  and
+* the smoke slice: a representative module per protocol family and per package,
+  so each leg still drives the main parse and build paths.
+
+Everything else is ``LATEST``: the per-protocol field-by-field tests, whose
+behaviour is interpreter-independent pure Python, each real sweep -- a round trip
+over every class or registry entry a table enumerates, every offset of a packet or
+every capture, as the owner ruled on #1732 and #1958 -- and the docs, project and
+structure tests. The vendor extra is installed on ``latest`` alone and the crawlers
+are pure Python, so the vendor modules are ``LATEST``, each saying so, but for the
+file-restore and environment-variable tests, which stay on every leg. The tier guard itself is ``ALL``, since :file:`tests/conftest.py`
+runs it at collection on every leg.
 
 Which legs run which tier:
 

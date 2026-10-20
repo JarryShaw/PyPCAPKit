@@ -20,6 +20,10 @@ from tests._support import reimport_once_per_class
 if TYPE_CHECKING:
     from typing import Any
 
+#: Test tier (#1958): exercises pickling and copying, whose protocols differ by
+#: interpreter.
+__tier__ = 'ALL'
+
 #: An unassigned port on all four transports, in none of ``_missing_``'s spans.
 PORT = 50000
 

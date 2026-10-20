@@ -31,6 +31,10 @@ try:
 except ImportError:  # pragma: no cover - not POSIX
     resource = None  # type: ignore[assignment]
 
+#: Test tier (#1958): gates on GraalPy's sys.implementation, so it has to run on that
+#: leg.
+__tier__ = 'ALL'
+
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 

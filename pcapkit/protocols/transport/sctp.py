@@ -633,7 +633,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         # NOTE: With no packet length field, octets after the last whole chunk
         # cannot be told apart from a chunk cut short, so they are kept as
-        # captured rather than rejected (:issue:`1468`).
+        # captured rather than rejected (#1468).
         if schema.trailer:
             sctp.__update__([
                 ('trailer', schema.trailer),

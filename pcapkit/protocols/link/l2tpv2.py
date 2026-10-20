@@ -200,7 +200,7 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
         # neither: an :rfc:`3931` §4.1.1 L2TPv3-over-IP datagram would otherwise
         # yield ``version=4``, ``tunnelid=0x5678`` and ``sessionid=0xff03``, read
         # out of the top half of a Session ID and the first two octets of the PPP
-        # frame behind it (:issue:`548`). This is also what keeps the hard-coded
+        # frame behind it (#548). This is also what keeps the hard-coded
         # ``Literal[2]`` of ``version`` true, instead of disagreeing with
         # ``info.version`` on the same datagram.
         if _flag['version'] != 2:
@@ -238,7 +238,7 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
 
         # NOTE: Octets captured past the Length field belong to this layer,
         # since its own length field is what leaves them out of the payload,
-        # and the rebuild keeps them as captured (:issue:`1455`).
+        # and the rebuild keeps them as captured (#1455).
         if schema.trailer:
             l2tp.__update__([
                 ('trailer', schema.trailer),
@@ -331,7 +331,7 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
         # NOTE: An explicit ``total_length`` is not checked against the octets
         # at hand, so that a ``from_data`` rebuild of a capture truncated by
         # snaplen keeps the length the sender declared, as UDP does
-        # (:issue:`1155`).
+        # (#1155).
         if length_flag and total_length is None:
             total_length = 6 + 2 * (1 + 2 * seq + (offset is not None)) + (offset or 0) + len(payload)
 
@@ -430,7 +430,7 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
             # NOTE: Passed as ``total_length`` since ``length`` is the parse
             # length :class:`~pcapkit.protocols.protocol.ProtocolBase` takes, so
             # under that key it never reached :meth:`make`, and the rebuild
-            # dropped both the Length field and the ``L`` flag (:issue:`1172`).
+            # dropped both the Length field and the ``L`` flag (#1172).
             'total_length': data.length,
             # NOTE: Passed so that a control message captured without ``L``
             # rebuilds as captured, rather than gaining the Length field
@@ -443,6 +443,6 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
             'offset': data.offset,
             'padding': data.get('padding'),
             'payload': cls._make_payload(data),
-            # NOTE: And the octets captured past the Length field (:issue:`1455`).
+            # NOTE: And the octets captured past the Length field (#1455).
             'trailer': data.get('trailer', b''),
         }

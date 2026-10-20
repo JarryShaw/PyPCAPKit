@@ -73,6 +73,10 @@ from aenum import IntEnum, IntFlag
 
 from tests._support import ISOLATED_PREFIXES, purge_modules, restore_modules, snapshot_modules
 
+#: Test tier (#1958): exercises metaclass, ABC or enum machinery, which differs by
+#: interpreter.
+__tier__ = 'ALL'
+
 #: An integer no wire field in the library is wide enough to carry, so every
 #: registry that bounds its own domain rejects it. Deliberately far outside the
 #: ``0..0xFF`` range the Mobility Header flag registries check, because a value

@@ -81,6 +81,9 @@ from tests._support import (MAX_TIMEOUT, PCAPNG_GENERATOR, TIMEOUT_SCALE_ENV,
 if TYPE_CHECKING:
     from typing import Iterator
 
+#: Test tier (#1958): branches on the running interpreter's version or implementation.
+__tier__ = 'ALL'
+
 #: Seconds a :class:`TimeLimitTests` body spins waiting for the deadline before it
 #: gives up and fails by name: ten times the one-second deadline those tests arm,
 #: so a deadline that fires at all, its repeat included, lands well inside it.

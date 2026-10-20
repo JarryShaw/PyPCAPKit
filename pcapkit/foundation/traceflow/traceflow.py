@@ -163,7 +163,7 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
 
     # Read-only copy of ``__output__`` as shipped. :meth:`register_dumper`
     # handed the dumper a format shipped with restores this entry, so an
-    # override can be undone (:issue:`1363`).
+    # override can be undone (#1363).
     _shipped_output = types.MappingProxyType(dict(__output__))
 
     ##########################################################################

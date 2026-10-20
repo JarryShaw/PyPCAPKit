@@ -148,6 +148,10 @@ from pcapkit.utilities.exceptions import EnumKeyError, EnumValueError
 from pcapkit.utilities.logging import logger
 from tests.utilities._harness import capture
 
+#: Test tier (#1958): exercises threading, locking or warning and exception hooks, which
+#: differ by interpreter.
+__tier__ = 'ALL'
+
 __all__ = [
     'ReparentedBasesTests', 'GetByNameAndValueTests', 'FailedLookupTests',
     'InheritedQuietnessTests', 'NoMintingTests', 'AllSevenInheritTheBareClassmethodTests',

@@ -28,6 +28,10 @@ from unittest import mock
 
 from tests._support import close_extractor, reimport_once_per_class, sample_path
 
+#: Test tier (#1958): drives a third-party engine whose installable releases vary by
+#: interpreter.
+__tier__ = 'ALL'
+
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 

@@ -29,6 +29,10 @@ from tests._support import purge_modules
 from tests.utilities import _unrelated_warning
 from tests.utilities._harness import bootstrap, capture
 
+#: Test tier (#1958): exercises the warning machinery itself, which free-threaded builds
+#: make context-aware.
+__tier__ = 'ALL'
+
 #: Every warning category the module exports, by name.
 CATEGORY_NAMES = [
     'BaseWarning',

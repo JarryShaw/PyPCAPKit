@@ -47,10 +47,12 @@ So this module answers, cheaply and without needing the fixtures themselves:
   for real, and the complete pytest selection the fixture-dependent tier needs
   in order to still exercise them.
 * :func:`module_tier` -- which *test tier* does this module run in (#1958):
-  ``ALL``, on every leg, or ``LATEST``, on ``latest`` alone? A ``__tier__``
-  constant in the module (:func:`declared_tier`) answers first, and
-  :func:`rule_tier` otherwise. :func:`latest_tier_paths` lists the ``LATEST``
-  modules, which every leg but ``latest`` leaves out.
+  ``ALL``, on every leg, or ``LATEST``, on ``latest`` alone? ``ALL`` is opt-in:
+  a module is in it only when it says so with ``__tier__ = 'ALL'``
+  (:func:`declared_tier`), and :data:`DEFAULT_TIER`, ``LATEST``, otherwise.
+  :func:`all_tier_paths` and :func:`latest_tier_paths` list the two tiers; every
+  leg but ``latest`` leaves the second out. See "The curated ``ALL`` tier" below
+  for which modules opt in.
 * :func:`is_project_pin` and :func:`project_pin_paths` -- which
   :file:`tests/project` modules give one answer on every interpreter, and so run
   once per push, in the ``project-tests`` job, rather than on every leg (#1954)?
@@ -114,6 +116,47 @@ handled" idiom -- an :func:`os.path.isfile` check and a skip -- on top of the
 capture reads go through :func:`~tests._support.sample_path`, and that is the door
 with the lock on it.
 
+The curated ``ALL`` tier
+------------------------
+
+``ALL`` is a tailored list rather than whatever a rule guesses (#1958, #1963): it
+is what every leg off ``latest`` runs, so it has to be short enough to save time,
+the same on every leg so QA stays consistent, and enough on its own to validate a
+change on each interpreter. ``latest`` runs the whole suite, and is the gate.
+
+A module opts in with ``__tier__ = 'ALL'`` when it exercises behaviour that can
+differ between interpreters or versions:
+
+* compat shims and ``sys.version_info`` or ``sys.implementation`` gates;
+* C-accelerated versus pure paths, and code sensitive to garbage collection,
+  weak references or finalisation;
+* ``int``, ``bytes`` and :mod:`struct` edge cases, and ``sys.maxsize`` or
+  recursion limits;
+* pickling and copying, metaclass and ABC machinery, and enum mechanics;
+* stream and buffer semantics, threading and locking, and the warning and
+  exception hooks;
+* a third-party engine whose installable releases vary by interpreter, which
+  ``latest`` alone could not cover;
+* the hand-picked round trips, the ``*_edge_roundtrip_unit`` tables among them,
+  which the owner ruled run on ``ALL`` as part of QA; and
+* the smoke slice: a representative module per protocol family and per
+  package, so each leg still drives the main parse and build paths.
+
+Everything else is ``LATEST`` by default: the per-protocol field-by-field tests,
+whose behaviour is interpreter-independent pure Python, the real sweeps, and the
+docs, project and structure tests. A module that branches on the interpreter
+itself (:func:`branches_on_interpreter`, a syntactic, best-effort check) has to
+state its tier either way, so a version gate never lands on ``latest`` alone by
+omission; a ``LATEST`` marker is otherwise optional, and records why a module
+someone might expect on every leg is not.
+
+Scapy is opted in like the other third-party engines: the ``integration`` and
+``pypcap-parity`` legs install it on every interpreter, and a ``test`` leg off
+``latest``, which does not, skips it. The vendor extra is installed on ``latest``
+alone, and the crawlers are pure Python over ``requests`` and ``bs4``, so the vendor
+modules are ``LATEST``, each saying so, but for the file-restore and
+environment-variable tests, which stay on every leg.
+
 Nothing here imports :mod:`tests._support` -- the dependency runs the other way,
 and adding the reverse edge would make it a cycle. Nothing here imports
 :mod:`pcapkit`, :mod:`pytest` or any optional engine either, so the guard is
@@ -141,7 +184,8 @@ __all__ = [
     'ROOT', 'TESTS_ROOT', 'SAMPLE_ROOT', 'REGENERATE_SAMPLES_CMD', 'UNIT_TIER_SELECTION',
     'FIXTURE_TIER_SUFFIXES', 'FIXTURE_TIER_DIRS', 'FIXTURE_TIER_SELECTOR',
     'TIER_ALL', 'TIER_LATEST', 'TIERS', 'TIER_MARKER', 'LATEST_TIER_SELECTOR', 'FIXTURE_ALL_TIER_SELECTOR',
-    'InvalidTierError', 'suite_modules', 'declared_tier', 'rule_tier', 'module_tier', 'latest_tier_paths',
+    'InvalidTierError', 'DEFAULT_TIER', 'suite_modules', 'declared_tier', 'branches_on_interpreter', 'module_tier',
+    'all_tier_paths', 'latest_tier_paths',
     'PROJECT_PINS_DIR', 'PROJECT_PINS_SELECTOR', 'PROJECT_PIN_PACKAGE', 'LOADABLE_DIRS',
     'varies_by_interpreter', 'is_project_pin', 'project_pin_paths',
     'is_unit_tier', 'committed_captures', 'committed_capture_names',
@@ -195,6 +239,9 @@ TIER_ALL = 'ALL'
 TIER_LATEST = 'LATEST'
 #: Every test tier, the values a :data:`TIER_MARKER` may take.
 TIERS = (TIER_ALL, TIER_LATEST)
+#: The tier of a module that states none: ``ALL`` is opt-in (#1958, #1963), so a
+#: new module runs on ``latest``, the gate, until it says why every leg needs it.
+DEFAULT_TIER = TIER_LATEST
 #: The module-level constant that states a module's test tier outright, e.g.
 #: ``__tier__ = 'LATEST'``, read by AST in :func:`declared_tier`. A constant rather
 #: than a pytest marker, so plain :mod:`unittest` runs see the same module.
@@ -282,7 +329,7 @@ class TierGuardWarning(UserWarning):
 class InvalidTierError(ValueError):
     """A test module's :data:`TIER_MARKER` cannot be read as one of :data:`TIERS`.
 
-    Raised rather than ignored: a marker that silently fell back to the rule would
+    Raised rather than ignored: a marker that silently fell back to the default would
     put the module on legs its author ruled it off, or the other way round.
 
     """
@@ -896,7 +943,7 @@ def declared_tier(path: 'pathlib.Path | str') -> 'Optional[str]':
 
     Read by AST, never by importing the module: one module-level statement,
     ``__tier__ = 'ALL'`` or ``__tier__ = 'LATEST'``, the value a string literal.
-    A module that does not parse states nothing here, and :func:`rule_tier`
+    A module that does not parse states nothing here, and :data:`DEFAULT_TIER`
     answers for it.
 
     Args:
@@ -912,19 +959,56 @@ def declared_tier(path: 'pathlib.Path | str') -> 'Optional[str]':
     return _declared_tier(_test_module(path))
 
 
-def rule_tier(path: 'pathlib.Path | str') -> 'str':
-    """The test tier the rule gives the module at ``path`` (#1958).
+#: Attributes of :mod:`sys` whose mere use asks which build is running, compared or not:
+#: ``sys.flags.context_aware_warnings``, ``sys._is_gil_enabled()``.
+_BUILD_FACTS = frozenset({'flags', '_is_gil_enabled'})
+#: Builtins that probe :mod:`sys` for an attribute, e.g. ``hasattr(sys, 'tracebacklimit')``.
+_PROBES = frozenset({'hasattr', 'getattr'})
 
-    :data:`TIER_LATEST` when its run does not :func:`vary by interpreter
-    <varies_by_interpreter>` -- it reads the repository's text, a workflow or the
-    docs, or drives a ``util/`` script, and imports no ``pcapkit`` -- since one run
-    on ``latest`` is then every leg's answer. :data:`TIER_ALL` for everything
-    else, which is everything that exercises ``pcapkit``. What the AST cannot
-    see -- that a module is a sweep over every case of a table or every capture,
-    that one which imports ``pcapkit`` still answers a question about the
-    repository, or that one which imports nothing still depends on the
-    interpreter -- is stated with :data:`TIER_MARKER` instead; see
-    :func:`module_tier`.
+
+def _probes_interpreter(node: 'ast.AST') -> 'bool':
+    """Whether ``node`` asks the running interpreter something outside a comparison.
+
+    ``sys.flags`` or ``sys._is_gil_enabled``, a comparison with ``sys.maxsize``, a
+    ``sysconfig.get_config_var()`` call such as ``Py_GIL_DISABLED``'s, or a
+    ``hasattr``/``getattr`` probe of :mod:`sys`.
+
+    """
+    if isinstance(node, ast.Attribute):
+        return node.attr in _BUILD_FACTS and isinstance(node.value, ast.Name) and node.value.id == 'sys'
+    if isinstance(node, ast.Compare):
+        return any(isinstance(part, ast.Attribute) and part.attr == 'maxsize' and isinstance(part.value, ast.Name)
+                   and part.value.id == 'sys' for operand in [node.left] + list(node.comparators)
+                   for part in ast.walk(operand))
+    if not isinstance(node, ast.Call):
+        return False
+    func = node.func
+    if isinstance(func, ast.Attribute) and func.attr == 'get_config_var':
+        return isinstance(func.value, ast.Name) and func.value.id == 'sysconfig'
+    if isinstance(func, ast.Name) and func.id == 'get_config_var':
+        return True
+    return (isinstance(func, ast.Name) and func.id in _PROBES and bool(node.args)
+            and isinstance(node.args[0], ast.Name) and node.args[0].id == 'sys')
+
+
+def branches_on_interpreter(path: 'pathlib.Path | str') -> 'bool':
+    """Whether the test module at ``path`` itself asks which interpreter is running (#1958).
+
+    By its own AST alone, unlike :func:`varies_by_interpreter`, which follows what
+    the module runs: a comparison of ``sys.version_info``, ``sys.implementation``,
+    ``platform.python_version()`` or the like; a use of ``sys.flags`` or
+    ``sys._is_gil_enabled``; a comparison with ``sys.maxsize``; a
+    ``sysconfig.get_config_var()`` call, such as
+    ``Py_GIL_DISABLED``'s; or a ``hasattr``/``getattr`` probe of :mod:`sys`, anywhere
+    in it. Such a module has to state its tier with :data:`TIER_MARKER`, so a
+    version gate never runs on ``latest`` alone just because nobody opted it in to
+    ``ALL``. A module that does not parse branches on nothing here.
+
+    The detection is syntactic and best-effort, not proof that a module is
+    interpreter-independent: it does not see :mod:`sys` under an alias, a probe of
+    any other module, a flag imported from :mod:`pcapkit.utilities.compat` or
+    another helper, or a gate in code the module imports. A module that relies on
+    any of those states its tier by hand.
 
     Args:
         path: Path to a test module, absolute or relative to :data:`ROOT`.
@@ -933,18 +1017,21 @@ def rule_tier(path: 'pathlib.Path | str') -> 'str':
         ValueError: ``path`` is not a test module under :file:`tests/`.
 
     """
-    return TIER_ALL if varies_by_interpreter(_test_module(path)) else TIER_LATEST
+    tree = _parse_module(_test_module(path))
+    return tree is not None and any(_compares_interpreter(node) or _probes_interpreter(node)
+                                    for node in ast.walk(tree))
 
 
 def module_tier(path: 'pathlib.Path | str') -> 'str':
     """The test tier of the module at ``path``: :data:`TIER_ALL` or :data:`TIER_LATEST` (#1958).
 
-    Its :func:`declared_tier` where it states one, its :func:`rule_tier`
-    otherwise, so every test module has exactly one. ``ALL`` modules run on every
-    leg; ``LATEST`` ones on ``latest`` alone, which is also the coverage leg, the
-    ``gate`` job's interpreter, and every ``unittest-ordering`` cell's. Within a
-    tier, the unit and fixture-dependent tiers still decide which job collects a
-    module.
+    Its :func:`declared_tier` where it states one, :data:`DEFAULT_TIER` otherwise,
+    so every test module has exactly one and ``ALL`` is opt-in: see "The curated
+    ``ALL`` tier" in this module's docstring for which modules opt in. ``ALL``
+    modules run on every leg; ``LATEST`` ones on ``latest`` alone, which is also
+    the coverage leg, the ``gate`` job's interpreter, and every
+    ``unittest-ordering`` cell's. Within a tier, the unit and fixture-dependent
+    tiers still decide which job collects a module.
 
     Args:
         path: Path to a test module, absolute or relative to :data:`ROOT`.
@@ -954,8 +1041,18 @@ def module_tier(path: 'pathlib.Path | str') -> 'str':
         InvalidTierError: Its marker is malformed; see :func:`declared_tier`.
 
     """
-    candidate = _test_module(path)
-    return _declared_tier(candidate) or rule_tier(candidate)
+    return _declared_tier(_test_module(path)) or DEFAULT_TIER
+
+
+@functools.lru_cache(maxsize=1)
+def all_tier_paths() -> 'tuple[str, ...]':
+    """Every :data:`TIER_ALL` test module, relative to :data:`ROOT`, sorted.
+
+    The curated tier every leg runs: the complement of :func:`latest_tier_paths`
+    within :func:`suite_modules`, and each of them marked ``__tier__ = 'ALL'``.
+
+    """
+    return tuple(path for path in suite_modules() if module_tier(path) == TIER_ALL)
 
 
 @functools.lru_cache(maxsize=1)

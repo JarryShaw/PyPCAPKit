@@ -146,6 +146,10 @@ from __future__ import annotations
 
 import unittest
 
+#: Test tier (#1958): exercises integer, bytes and struct edge cases, whose limits
+#: differ by interpreter.
+__tier__ = 'ALL'
+
 #: Header fields shared by the constructed TCP segments here, matching
 #: :data:`examples.generators.options.TCP_BASE` and
 #: :data:`tests.protocols.transport.test_tcp_mptcp_subtype_unit.TCP_BASE`.

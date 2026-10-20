@@ -21,6 +21,10 @@ import warnings
 
 from tests._support import close_extractor, reimport_once_per_class
 
+#: Test tier (#1958): a record whose claimed length runs towards the interpreter's size
+#: limit, which differs by implementation (sys.maxsize, #1963).
+__tier__ = 'ALL'
+
 #: Little-endian global header: v2.4, Ethernet.
 GLOBAL = bytes.fromhex('d4c3b2a1' '0200' '0400' '00000000' '00000000' 'ffff0000' '01000000')
 #: Sixty octets of packet data, none of them zero.

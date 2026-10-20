@@ -419,7 +419,7 @@ class PacketReception(EnumLookup, enum.IntEnum):
 # closed, hand-picked set, so the TLS key label enumeration is the generated
 # :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`, imported above as
 # ``Enum_TLSKeyLabel`` like its :mod:`pcapkit.const.pcapng` siblings. This
-# module does not re-export it under the unaliased name (:issue:`1744`).
+# module does not re-export it under the unaliased name (#1744).
 # :class:`WireGuardKeyLabel` below stays hand-written: it is a closed set
 # (draft-ietf-opsawg-pcapng-06 section 4.7's "is one of" four names), not a
 # registry, so filing it under :mod:`pcapkit.const` would misrepresent it as
@@ -1251,7 +1251,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                     packet.setdefault('snaplen', interfaces[0].snaplen)
             # NOTE: A zero snaplen handed in, e.g. interface 0's passed through,
             # means no limit as well; kept, it reads as a limit of no octets and
-            # the block's padding becomes packet data (:issue:`1558`).
+            # the block's padding becomes packet data (#1558).
             if 'snaplen' in packet and not packet['snaplen']:
                 del packet['snaplen']
             self.__header__ = cast('Schema_PCAPNG', self.__schema__.unpack(self._file, length, packet))  # type: ignore[call-arg,misc]
@@ -1332,7 +1332,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         # :class:`~pcapkit.protocols.schema.misc.pcapng.OptionAreaField`), and
         # parses as no options. The octets are kept on the block as
         # ``options_raw`` or ``records_raw``, which the block's ``make`` writes
-        # back verbatim (:issue:`1325`).
+        # back verbatim (#1325).
         for name in ('records', 'options'):
             area = getattr(schema.block, name, None)
             if isinstance(area, list) and len(area) == 1 and isinstance(area[0], bytes):
@@ -1380,7 +1380,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                 # its first octets, so the block cannot be rebuilt from them at
                 # the length it declares. The octets captured are kept as
                 # ``__truncated_raw__`` instead, which :meth:`__post_init__` parses
-                # again in place of building the block (:issue:`1470`).
+                # again in place of building the block (#1470).
                 block.__update__([('__truncated_raw__', self._data)])
 
             # move backward to the beginning of next block
@@ -1484,7 +1484,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         # NOTE: A block the capture ended inside rebuilds as the octets that
         # were captured, parsed again as they were the first time (see
-        # :meth:`read`), rather than at the length it declares (:issue:`1470`).
+        # :meth:`read`), rather than at the length it declares (#1470).
         block = kwargs.get('block')
         if file is None and isinstance(block, collections.abc.Mapping) and '__truncated_raw__' in block:
             file = bytes(block['__truncated_raw__'])
@@ -2258,7 +2258,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             section_length=schema.section_length,
             options=self._read_pcapng_options(schema.options),
         )
-        # NOTE: The octets after ``opt_endofopt``, if any (:issue:`1437`).
+        # NOTE: The octets after ``opt_endofopt``, if any (#1437).
         self._read_padding(schema, data, 'padding', 'padding_opts', nonzero=False)
         return data
 
@@ -2303,9 +2303,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             snaplen=schema.snaplen,
             options=self._read_pcapng_options(schema.options),
         )
-        # NOTE: The reserved octets, if they are not all zeros (:issue:`1437`).
+        # NOTE: The reserved octets, if they are not all zeros (#1437).
         self._read_padding(schema, data, 'reserved')
-        # NOTE: The octets after ``opt_endofopt``, if any (:issue:`1437`).
+        # NOTE: The octets after ``opt_endofopt``, if any (#1437).
         self._read_padding(schema, data, 'padding', 'padding_opts', nonzero=False)
         return data
 
@@ -2370,13 +2370,13 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options=self._read_pcapng_options(schema.options),
         )
         # NOTE: The padding of the packet data to 32 bits, if it is not all
-        # zeros (:issue:`1437`).
+        # zeros (#1437).
         self._read_padding(schema, data, 'padding_data')
-        # NOTE: The octets after ``opt_endofopt``, if any (:issue:`1437`).
+        # NOTE: The octets after ``opt_endofopt``, if any (#1437).
         self._read_padding(schema, data, 'padding_opts', 'padding_opts', nonzero=False)
 
         # NOTE: A captured length running past the block is kept as declared,
-        # and the packet data is the octets the block holds (:issue:`1405`).
+        # and the packet data is the octets the block holds (#1405).
         if schema.captured_len > len(schema.packet_data):
             warn(f'PCAP-NG: [Block {header.type}] captured length {schema.captured_len} runs past '
                  f'the block, which holds {len(schema.packet_data)} octet(s); kept as captured',
@@ -2426,11 +2426,11 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             original_len=schema.original_len,
         )
         # NOTE: The padding of the packet data to 32 bits, if it is not all
-        # zeros (:issue:`1437`).
+        # zeros (#1437).
         self._read_padding(schema, data, 'padding', 'padding_data')
 
         # NOTE: A block holding more packet data than the snaplen of interface 0
-        # allows keeps the excess (:issue:`1384`); the specification says the
+        # allows keeps the excess (#1384); the specification says the
         # snaplen determines the length, so the excess is reported.
         snaplen = self._ctx.interfaces[0].snaplen if self._ctx is not None and self._ctx.interfaces else 0
         if snaplen and data.captured_len > snaplen:
@@ -2438,7 +2438,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                  f'exceeds the snaplen of {snaplen}; kept as captured',
                  ProtocolWarning, stacklevel=stacklevel())
         # NOTE: Likewise for more packet data than the original length, padding
-        # aside (:issue:`1414`).
+        # aside (#1414).
         if data.captured_len > (data.original_len + 3) // 4 * 4:
             warn(f'PCAP-NG: [Block {header.type}] packet data of {data.captured_len} octet(s) '
                  f'exceeds the original length of {data.original_len}; kept as captured',
@@ -2492,7 +2492,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             records=self._read_nrb_records(schema.records),
             options=self._read_pcapng_options(schema.options),
         )
-        # NOTE: The octets after ``opt_endofopt``, if any (:issue:`1437`).
+        # NOTE: The octets after ``opt_endofopt``, if any (#1437).
         self._read_padding(schema, data, 'padding', 'padding_opts', nonzero=False)
         return data
 
@@ -2544,7 +2544,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             timestamp_epoch=timestamp_epoch,
             options=self._read_pcapng_options(schema.options),
         )
-        # NOTE: The octets after ``opt_endofopt``, if any (:issue:`1437`).
+        # NOTE: The octets after ``opt_endofopt``, if any (#1437).
         self._read_padding(schema, data, 'padding', 'padding_opts', nonzero=False)
         return data
 
@@ -2583,13 +2583,13 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         # NOTE: A malformed entry is kept as the octets captured, as one
         # :obj:`bytes` item, and parses as no entries. The octets are kept on
         # the block as ``entry_raw``, which the block's ``make`` writes back
-        # verbatim (:issue:`1406`).
+        # verbatim (#1406).
         kept = len(entries) == 1 and isinstance(entries[0], bytes)
         data = Data_SystemdJournalExportBlock(
             type=header.type,
             length=schema.length,
             # NOTE: each entry as an OrderedMultiInfo, which ``Info`` does not
-            # do for a mapping held in a tuple (:issue:`1484`).
+            # do for a mapping held in a tuple (#1484).
             data=() if kept else tuple(OrderedMultiInfo(entry) for entry in entries),  # type: ignore[arg-type]
         )
         if kept:
@@ -2653,9 +2653,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options=self._read_pcapng_options(schema.options),
         )
         # NOTE: The padding of the secrets to 32 bits, if it is not all zeros
-        # (:issue:`1437`).
+        # (#1437).
         self._read_padding(schema, data, 'padding_data')
-        # NOTE: The octets after ``opt_endofopt``, if any (:issue:`1437`).
+        # NOTE: The octets after ``opt_endofopt``, if any (#1437).
         self._read_padding(schema, data, 'padding_opts', 'padding_opts', nonzero=False)
         return data
 
@@ -2769,13 +2769,13 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             options=self._read_pcapng_options(schema.options),
         )
         # NOTE: The padding of the packet data to 32 bits, if it is not all
-        # zeros (:issue:`1437`).
+        # zeros (#1437).
         self._read_padding(schema, data, 'padding_data')
-        # NOTE: The octets after ``opt_endofopt``, if any (:issue:`1437`).
+        # NOTE: The octets after ``opt_endofopt``, if any (#1437).
         self._read_padding(schema, data, 'padding_opts', 'padding_opts', nonzero=False)
 
         # NOTE: A captured length running past the block is kept as declared,
-        # and the packet data is the octets the block holds (:issue:`1405`).
+        # and the packet data is the octets the block holds (#1405).
         if schema.captured_length > len(schema.packet_data):
             warn(f'PCAP-NG: [Block {header.type}] captured length {schema.captured_length} runs past '
                  f'the block, which holds {len(schema.packet_data)} octet(s); kept as captured',
@@ -2969,7 +2969,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             else:
                 meth = name[0]
             data = meth(schema, options=options)
-            # NOTE: The padding to 32 bits, if it is not all zeros (:issue:`1437`).
+            # NOTE: The padding to 32 bits, if it is not all zeros (#1437).
             self._read_padding(schema, data)
 
             # record option data
@@ -4086,7 +4086,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             else:
                 meth = name[0]
             data = meth(schema, records=records)
-            # NOTE: The padding to 32 bits, if it is not all zeros (:issue:`1437`).
+            # NOTE: The padding to 32 bits, if it is not all zeros (#1437).
             self._read_padding(schema, data)
 
             # record option data
@@ -4203,7 +4203,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         secrets = Data_TLSKeyLog(
             # NOTE: each label's entries as an OrderedMultiInfo, which ``Info``
-            # does not do for a mapping held in a dict (:issue:`1484`).
+            # does not do for a mapping held in a dict (#1484).
             entries={label: OrderedMultiInfo(entry) for (label, entry) in schema.entries.items()},
         )
         # NOTE: the log text is kept as well, since :attr:`entries` holds
@@ -4552,7 +4552,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             original_len = block.original_len
             packet_data = self._make_packet_data(block)
             # NOTE: The data model's ``captured_len`` already bounds the data,
-            # including a block that kept octets past the snaplen (:issue:`1384`).
+            # including a block that kept octets past the snaplen (#1384).
             captured_len = block.captured_len
         else:
             if original_len is None:

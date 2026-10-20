@@ -19,6 +19,10 @@ import unittest
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): exercises integer, bytes and struct edge cases, whose limits
+#: differ by interpreter.
+__tier__ = 'ALL'
+
 #: Datagram octets, with no zero octet in them, so a hole shows.
 DATA = (bytes(range(1, 256)) * 258)[:65536]
 

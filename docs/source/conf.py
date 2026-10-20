@@ -178,7 +178,7 @@ intersphinx_mapping = {
 #     ``:class:`` or ``:func:`` cross-reference into them could ever resolve.
 #
 # Those packages are therefore linked to their project pages instead, through
-# :data:`rst_epilog` below (:issue:`1936`).
+# :data:`rst_epilog` below (#1936).
 
 #: The label on the note in :file:`pcapkit/foundation/engines/3rdparty.rst` that
 #: says which distribution installs the ``pcap`` module, which ``|pcap|_`` links
@@ -254,7 +254,7 @@ autodoc_typehints = 'signature'
 # NB: a default renders as its source text rather than its ``repr()``. By value,
 # every ``byteorder=sys.byteorder`` showed the build host's ``'little'``, and the
 # ``corekit.fields`` pages showed ``default=<pcapkit.corekit.sentinels.NoValueType
-# object>`` and ``callback=<function NumberField.<lambda>>`` (:issue:`1859`).
+# object>`` and ``callback=<function NumberField.<lambda>>`` (#1859).
 autodoc_preserve_defaults = True
 #autodoc_member_order = 'bysource'
 #autodoc_member_order = 'alphabetic'

@@ -311,7 +311,7 @@ class Extractor(Generic[_P]):
 
     # Read-only copies of the registries as shipped. A public registrar
     # handed the built-in a name shipped with restores this entry, so an
-    # override can be undone (:issue:`1363`).
+    # override can be undone (#1363).
     _shipped_output = types.MappingProxyType(dict(__output__))
     _shipped_engine = types.MappingProxyType(dict(__engine__))
     _shipped_reassembly = types.MappingProxyType(dict(__reassembly__))
@@ -1466,7 +1466,7 @@ class Extractor(Generic[_P]):
         if len(self._magic) < 4:
             # NOTE: ``peek`` makes at most one read of the stream, which a pipe or a
             # raw stream may answer with fewer than four octets, so a short peek is
-            # not a short file. Read them instead, and seek back (:issue:`1586`).
+            # not a short file. Read them instead, and seek back (#1586).
             position = self._ifile.tell()
             self._magic = self._ifile.read(4)
             self._ifile.seek(position, os.SEEK_SET)

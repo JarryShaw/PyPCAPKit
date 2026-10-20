@@ -23,6 +23,10 @@ import unittest
 
 from tests.corekit._roundtrip import skip_without_runtime
 
+#: Test tier (#1958): depends on garbage collection, weak references or object
+#: finalisation.
+__tier__ = 'ALL'
+
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 #: Parent and child, by ``module:qualname``; ``synthetic`` is declared in the script.

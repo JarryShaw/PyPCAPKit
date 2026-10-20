@@ -520,14 +520,20 @@ class TestTierTests(unittest.TestCase):
                 tiers.setdefault(tier, []).append(module)
         self.assertEqual(set(tiers), set(_tiers.TIERS))
         self.assertEqual(list(_tiers.latest_tier_paths()), tiers[_tiers.TIER_LATEST])
+        self.assertEqual(list(_tiers.all_tier_paths()), tiers[_tiers.TIER_ALL])
         self.assertEqual(sorted(tiers[_tiers.TIER_ALL] + tiers[_tiers.TIER_LATEST]), list(modules))
+        for module in tiers[_tiers.TIER_ALL]:
+            with self.subTest(module=module):
+                self.assertEqual(_tiers.declared_tier(module), _tiers.TIER_ALL)
         found = sorted(path.relative_to(_tiers.ROOT).as_posix() for path in _tiers.TESTS_ROOT.rglob('test_*.py'))
         self.assertEqual(list(modules), found)
 
-    def test_a_marker_wins_over_the_rule(self) -> None:
+    def test_all_is_opt_in(self) -> None:
+        """#1963: ``ALL`` is a curated list, so only a marker puts a module in it."""
         cases = {
-            'the rule, exercising pcapkit': ('import pcapkit\n', _tiers.TIER_ALL),
-            'the rule, reading text': ('TEXT = "pcapkit"\n', _tiers.TIER_LATEST),
+            'no marker, exercising pcapkit': ('import pcapkit\n', _tiers.TIER_LATEST),
+            'no marker, reading text': ('TEXT = "pcapkit"\n', _tiers.TIER_LATEST),
+            'opted in, exercising pcapkit': ("import pcapkit\n__tier__ = 'ALL'\n", _tiers.TIER_ALL),
             'a sweep, marked': ("import pcapkit\n__tier__ = 'LATEST'\n", _tiers.TIER_LATEST),
             'an interpreter-bound guard, marked': ("import ast\n__tier__ = 'ALL'\n", _tiers.TIER_ALL),
             'annotated': ("import pcapkit\n__tier__: str = 'LATEST'\n", _tiers.TIER_LATEST),
@@ -554,6 +560,42 @@ class TestTierTests(unittest.TestCase):
                 self.assertIn('test_probe.py', str(caught.exception))
                 self.assertIn(_tiers.TIER_MARKER, str(caught.exception))
 
+    def test_a_module_that_branches_on_the_interpreter_states_its_tier(self) -> None:
+        """A version gate is never ``LATEST`` by omission: such a module says which tier it is in.
+
+        Detection is syntactic and best-effort: :mod:`sys` under an alias, a flag imported
+        from :mod:`pcapkit.utilities.compat`, or a gate in an imported helper is not seen.
+
+        """
+        cases = {
+            'a version gate': ('import sys\nNEW = sys.version_info >= (3, 12)\n', True),
+            'an implementation gate': ('import sys\nGRAAL = sys.implementation.name == "graalpy"\n', True),
+            'a bare import': ('from sys import version_info\nOLD = version_info < (3, 9)\n', True),
+            'pcapkit alone': ('import pcapkit\n', False),
+            'a version only read': ('import sys\nprint(sys.version_info)\n', False),
+            'a build flag': ('import sys\nAWARE = sys.flags.context_aware_warnings\n', True),
+            'the GIL probe': ('import sys\nGIL = sys._is_gil_enabled()\n', True),
+            'a config var': ('import sysconfig\nFT = sysconfig.get_config_var("Py_GIL_DISABLED")\n', True),
+            'hasattr on sys': ('import sys\nSET = hasattr(sys, "tracebacklimit")\n', True),
+            'getattr on sys': ('import sys\nLIMIT = getattr(sys, "tracebacklimit", None)\n', True),
+            'getattr on another object': ('import os\nSEP = getattr(os, "sep")\n', False),
+            'a size limit': ('import sys\nBIG = 1 << 40 > sys.maxsize\n', True),
+            'a size limit only read': ('import sys\nprint(sys.maxsize)\n', False),
+        }
+        for label, (source, expected) in cases.items():
+            with self.subTest(case=label), tempfile.TemporaryDirectory(prefix='pcapkit-test-tier-') as temp:
+                path = write_module(pathlib.Path(temp), 'test_probe.py', source)
+                with unittest.mock.patch.object(_tiers, 'TESTS_ROOT', pathlib.Path(temp).resolve()):
+                    self.assertIs(_tiers.branches_on_interpreter(path), expected)
+        for module in _tiers.suite_modules():
+            if _tiers.branches_on_interpreter(module):
+                with self.subTest(module=module):
+                    self.assertIsNotNone(_tiers.declared_tier(module),
+                                         f'{module} branches on the interpreter; state its tier with '
+                                         f"{_tiers.TIER_MARKER} = {_tiers.TIER_ALL!r} or {_tiers.TIER_LATEST!r} "
+                                         '(the check is syntactic and best-effort: aliases, probes of other '
+                                         'modules and flags imported from compat are not seen)')
+
     def test_only_a_test_module_has_a_tier(self) -> None:
         for path in ('tests/_support.py', 'tests/_tiers.py', 'util/ci_timing.py', 'tests/project',
                      'tests/project/test_no_such_module.py'):
@@ -562,7 +604,7 @@ class TestTierTests(unittest.TestCase):
                     _tiers.module_tier(path)
 
     def test_every_marker_states_a_reason(self) -> None:
-        """A ``__tier__`` the rule would also give says why it is there, as one that overrules it does."""
+        """Every ``__tier__`` says why it is there, under a ``#: Test tier (#1958):`` comment."""
         for module in _tiers.suite_modules():
             if _tiers.declared_tier(module) is None:
                 continue
@@ -620,13 +662,17 @@ class TestTierTests(unittest.TestCase):
         """pytest ignores no path it was handed, so the ``ALL`` selection names a mixed directory's modules."""
         integration = f'tests/{next(iter(_tiers.FIXTURE_TIER_DIRS))}'
         members = [path for path in _tiers.suite_modules() if path.startswith(integration + '/')]
-        self.assertIn(integration, _tiers.fixture_tier_paths(_tiers.TIER_ALL))
-        marked = members[0]
         _tiers.fixture_tier_paths.cache_clear()
         self.addCleanup(_tiers.fixture_tier_paths.cache_clear)
         real = _tiers.module_tier
         with unittest.mock.patch.object(_tiers, 'module_tier',
-                                        lambda path: _tiers.TIER_LATEST if path == marked else real(path)):
+                                        lambda path: _tiers.TIER_ALL if path in members else real(path)):
+            self.assertIn(integration, _tiers.fixture_tier_paths(_tiers.TIER_ALL))
+        _tiers.fixture_tier_paths.cache_clear()
+        marked = members[0]
+        with unittest.mock.patch.object(_tiers, 'module_tier',
+                                        lambda path: _tiers.TIER_LATEST if path == marked
+                                        else _tiers.TIER_ALL if path in members else real(path)):
             selected = _tiers.fixture_tier_paths(_tiers.TIER_ALL)
         self.assertNotIn(integration, selected)
         self.assertNotIn(marked, selected)

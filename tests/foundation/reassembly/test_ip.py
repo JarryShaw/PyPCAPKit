@@ -6,6 +6,10 @@ import unittest
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): the representative smoke slice for its package's main parse and
+#: build paths.
+__tier__ = 'ALL'
+
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 

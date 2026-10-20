@@ -73,6 +73,10 @@ from tests.utilities._harness import capture
 if TYPE_CHECKING:
     from typing import Any
 
+#: Test tier (#1958): exercises threading, locking or warning and exception hooks, which
+#: differ by interpreter.
+__tier__ = 'ALL'
+
 __all__ = [
     'EnumKeyErrorClassTests', 'BaseGetProvenanceTests', 'BaseGetQuietnessTests',
     'MethodStillMintsTests', 'TransportProtocolCaseFoldingTests',

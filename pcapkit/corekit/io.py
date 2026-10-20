@@ -515,7 +515,7 @@ class SeekableReader(io.BufferedReader):
                 #
                 # The gap is waited for and the rest is not, and the position is
                 # the target, or the end of the stream if that comes first -- not
-                # wherever an over-asking read happened to stop (:issue:`1586`).
+                # wherever an over-asking read happened to stop (#1586).
                 tmp_gap = min(self._tell - tmp_end, self._buffer_size)
                 tmp_len = min(max(tmp_gap, self._buffer_size // 4), self._buffer_size)
 

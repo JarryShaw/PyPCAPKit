@@ -346,11 +346,11 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
 
             # NOTE: A record whose ``incl_len`` runs past the end of the data is
             # kept as captured, as the PCAP-NG reader keeps a captured length
-            # running past its block (:issue:`1405`): ``incl_len`` and ``cap_len``
+            # running past its block (#1405): ``incl_len`` and ``cap_len``
             # stay as declared, so the record rebuilds byte-exactly, and the
             # packet is the octets present. A writer must not copy the declared
             # length; see :meth:`PCAPIO._append_value
-            # <pcapkit.dumpkit.pcap.PCAPIO._append_value>` (:issue:`1541`).
+            # <pcapkit.dumpkit.pcap.PCAPIO._append_value>` (#1541).
             held = len(self._data) - self.length
             if held < _ilen:
                 warn(f'PCAP: [Frame {self._fnum}] captured length {_ilen} runs past the data, '

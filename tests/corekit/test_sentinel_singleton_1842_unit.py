@@ -42,6 +42,10 @@ from tests._support import reimport_once_per_class
 if TYPE_CHECKING:
     from typing import Any, Callable
 
+#: Test tier (#1958): exercises pickling and copying, whose protocols differ by
+#: interpreter.
+__tier__ = 'ALL'
+
 #: Where every sentinel is defined.
 CANONICAL_MODULE = 'pcapkit.corekit.sentinels'
 

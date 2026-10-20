@@ -234,8 +234,8 @@ jobs:
         # timings, uploaded by the last step of this job.
         #
         # #1958, the test tiers: tests/_tiers.py's module_tier() puts every test
-        # module in `ALL` or `LATEST`, by the `__tier__` constant a module states
-        # or by the rule where it states none, and `LATEST` runs on `latest`
+        # module in `ALL`, a curated list each stating `__tier__ = 'ALL'` (#1963),
+        # or else in `LATEST`, and `LATEST` runs on `latest`
         # alone, which is also the coverage leg, so coverage keeps its
         # selection. Every other leg -- `test-ktlo`'s too, as it runs these
         # steps -- passes each module latest_tier_paths() prints as an

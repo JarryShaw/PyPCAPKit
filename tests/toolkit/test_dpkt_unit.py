@@ -12,6 +12,10 @@ import warnings
 
 from tests._support import close_extractor, reimport_once_per_class, sample_path
 
+#: Test tier (#1958): the representative smoke slice for its package's main parse and
+#: build paths.
+__tier__ = 'ALL'
+
 HAS_DPKT = importlib.util.find_spec('dpkt') is not None
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)

@@ -56,6 +56,10 @@ from unittest import mock
 
 from tests._support import sample_path
 
+#: Test tier (#1958): depends on garbage collection, weak references or object
+#: finalisation.
+__tier__ = 'ALL'
+
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 

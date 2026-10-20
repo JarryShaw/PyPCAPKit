@@ -540,7 +540,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
         # NOTE: A Data Offset declaring more header than was captured leaves the
         # missing octets to read as zeros, which ``from_data`` then rebuilds;
-        # rejecting it keeps the octets as captured inside the parent (:issue:`1404`).
+        # rejecting it keeps the octets as captured inside the parent (#1404).
         if len(self) < tcp.hdr_len:
             raise ProtocolError(f'{self.alias}: header length {tcp.hdr_len} runs past the end of '
                                 f'the data ({len(self)} octets)')

@@ -23,6 +23,10 @@ from unittest import mock
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): exercises pickling and copying, whose protocols differ by
+#: interpreter.
+__tier__ = 'ALL'
+
 SHARED = 'pcapkit.protocols.schema.internet.ipv6_option'
 
 #: Each header's schema module, and the prefix its errors carry.

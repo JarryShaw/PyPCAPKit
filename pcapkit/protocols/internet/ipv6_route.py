@@ -367,7 +367,7 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
         # NOTE: An explicit ``hdr_ext_len`` is written as given, so that a
         # ``from_data`` rebuild of a header the capture cut short keeps the
         # length the sender declared instead of the one that was recorded
-        # (:issue:`1457`), the same as IPv6's ``payload_length``.
+        # (#1457), the same as IPv6's ``payload_length``.
         if hdr_ext_len is not None:
             length = hdr_ext_len
 
@@ -488,7 +488,7 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
             # NOTE: ``data.length`` is the parsed header length in octets,
             # passed through as ``Hdr Ext Len`` rather than left to ``make`` to
             # recompute, so that a truncated capture rebuilds with the length
-            # that was on the wire (:issue:`1457`).
+            # that was on the wire (#1457).
             'hdr_ext_len': (data.length - 8) // 8,
             'payload': cls._make_payload(data),
         }

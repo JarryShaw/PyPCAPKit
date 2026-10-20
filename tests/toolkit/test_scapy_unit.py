@@ -13,6 +13,11 @@ from unittest import mock
 
 from tests._support import close_extractor, purge_modules, reimport_once_per_class
 
+#: Test tier (#1958): drives Scapy, whose installable releases vary by interpreter; the
+#: integration and pypcap-parity legs install it on every interpreter, and a test leg
+#: off latest skips it.
+__tier__ = 'ALL'
+
 HAS_SCAPY = importlib.util.find_spec('scapy') is not None
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)

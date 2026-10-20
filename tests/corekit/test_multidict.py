@@ -5,6 +5,10 @@ import unittest
 
 from tests._support import bootstrap_core_modules, reimport_once_per_class
 
+#: Test tier (#1958): exercises pickling and copying, whose protocols differ by
+#: interpreter.
+__tier__ = 'ALL'
+
 
 class MultiDictTests(unittest.TestCase):
     def setUp(self) -> None:
