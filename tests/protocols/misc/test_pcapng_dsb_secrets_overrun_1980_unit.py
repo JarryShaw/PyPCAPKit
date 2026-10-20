@@ -89,6 +89,19 @@ class TestPCAPNGDSBSecretsOverrun(PCAPNGTestCase):
         self.assertEqual(parsed.info.secrets_data.data, b'abcd')  # type: ignore[attr-defined]
         self.assertEqual(parsed.__header__.pack().hex(), octets.hex())  # type: ignore[attr-defined]
 
+    def test_overrun_rebuilds(self) -> None:
+        """The data model rebuilds the declared ``secrets_length``, as an EPB does its ``captured_len``."""
+        # NOTE: no ZigBee key here: one shorter than its fixed width rebuilds at
+        # full width whatever its secrets_length says, overrun or not.
+        for secrets_type in (TLS_KEY_LOG, UNKNOWN_SECRETS):
+            for secrets_length in (0xFFFF_FFF0, 5):
+                with self.subTest(secrets_type=hex(secrets_type), secrets_length=secrets_length):
+                    octets = _dsb(secrets_type, secrets_length, b'abcd')
+                    with warnings.catch_warnings():
+                        warnings.simplefilter('ignore')
+                        self.assertEqual(self._parse(octets).__header__.pack().hex(), octets.hex())
+                        self.assertRebuilds(octets)
+
     def test_cut_key_log_keeps_its_entries(self) -> None:
         """A key log the block ends inside keeps the lines before the cut one."""
         secrets = KEY_LOG + b'CLIENT_RA'
@@ -103,6 +116,9 @@ class TestPCAPNGDSBSecretsOverrun(PCAPNGTestCase):
         self.assertEqual(sum(len(entries) for entries in parsed.info.secrets_data.entries.values()),  # type: ignore[attr-defined]
                          1)
         self.assertEqual(parsed.__header__.pack().hex(), octets.hex())  # type: ignore[attr-defined]
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            self.assertRebuilds(octets)
 
     def test_well_formed_blocks_are_unchanged(self) -> None:
         cases = (
