@@ -3,13 +3,14 @@
 
 ``Commit changes`` in :file:`.github/workflows/cron-vendor.yml` ran ``git commit
 -am``, which stages modified and deleted tracked files and never an untracked
-one. ``tj-actions/verify-changed-files@v17`` reports untracked files too (the
-``??`` entries of ``git status -u --porcelain``), so a crawl that generated a
-module for a new registry bumped the version and left the module out of the
-commit. Every later crawl found it untracked again, and bumped again.
+one. ``Verify Changed files`` reports untracked files too (the ``??`` entries of
+``git status -u --porcelain``), so a crawl that generated a module for a new
+registry bumped the version and left the module out of the commit. Every later
+crawl found it untracked again, and bumped again.
 
-:class:`TestTheBumpCommitStep` runs that step's script in a throwaway repository
-the way the runner runs it, with ``${{ }}`` substituted first. The second test
+:class:`TestTheBumpCommitStep` runs that step's script, and ``Verify Changed
+files``', in a throwaway repository the way the runner runs them, with ``${{ }}``
+substituted first. The second test
 classifies a new module with :file:`util/vendor_code_changed.py` and walks the
 steps, which shows ``Commit documentation changes``, still ``-a`` alone, never
 sees one. The harness is #1674's, from
@@ -78,10 +79,11 @@ class TestTheBumpCommitStep(WorkflowMixin, ScratchRepository):
         self.commit('chore(const): the package marker', HUMAN)
         self.base = self.git('rev-parse', 'HEAD')
 
-    def reported(self) -> 'list[str]':
-        """What ``verify-changed-files@v17`` reports: its ``entrypoint.sh`` with no
-        ``files`` pattern, so ``git diff --diff-filter=ACMUXTR``, the ``??`` lines
-        of ``git status -u --porcelain`` and ``git ls-files --deleted``, de-duplicated.
+    def v17(self) -> 'list[str]':
+        """What ``tj-actions/verify-changed-files@v17``, which ``Verify Changed
+        files`` replaced (#1968), reported: its ``entrypoint.sh`` with no ``files``
+        pattern, so ``git diff --diff-filter=ACMUXTR``, the ``??`` lines of ``git
+        status -u --porcelain`` and ``git ls-files --deleted``, de-duplicated.
 
         """
         tracked = self.git('diff', '--diff-filter=ACMUXTR', '--name-only').splitlines()
@@ -89,6 +91,28 @@ class TestTheBumpCommitStep(WorkflowMixin, ScratchRepository):
                      if line.startswith('?? ')]
         deleted = self.git('ls-files', '--deleted').splitlines()
         return sorted(set(tracked + untracked + deleted) - {''})
+
+    def reported(self) -> 'list[str]':
+        """``Verify Changed files``' ``changed_files``, run as the runner runs it and
+        split on spaces as its readers split it, after checking it agrees with
+        :meth:`v17` on this tree.
+
+        """
+        path = self.root / 'verify.sh'
+        path.write_text(block_scalar_after(step_block(self.block, 'Verify Changed files'), _RUN_LITERAL),
+                        encoding='utf-8')
+        output = self.root / 'verify.output'
+        output.write_text('', encoding='utf-8')
+        result = subprocess.run(['bash', '-e', str(path)], cwd=self.repo,
+                                env=dict(self.env, GITHUB_OUTPUT=str(output)),
+                                capture_output=True, text=True, check=False,
+                                timeout=scale_timeout(60))
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        outputs = dict(line.split('=', 1) for line in output.read_text(encoding='utf-8').splitlines())
+        changed = outputs.get('changed_files', '').split()
+        self.assertEqual(outputs['files_changed'], 'true' if changed else 'false', outputs)
+        self.assertEqual(changed, self.v17())
+        return changed
 
     def classify(self, paths: 'list[str]') -> 'tuple[tuple[str, dict[str, object]], str]':
         """``Classify Changed files``' outcome and outputs, from the script itself,

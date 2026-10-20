@@ -21,7 +21,7 @@ on:
     branches: [main]
 
 permissions:
-  contents: write
+  contents: read
 
 # Deliberately still keyed on the ref, unlike the validation workflows. This one
 # publishes a *latest state* rather than a verdict on a commit, so coalescing is
@@ -173,9 +173,56 @@ jobs:
           # disable Jekyll
           touch docs/build/html/.nojekyll
 
+      # `.nojekyll` is hidden, and upload-artifact leaves hidden files out unless
+      # told otherwise.
+      - name: Upload the built site
+        if: ${{ github.event_name != 'pull_request' }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: pages-html
+          path: docs/build/html
+          include-hidden-files: true
+          retention-days: 1
+
+  # #1968: the push to `gh-pages`, split out of `deploy-pages` so that the job
+  # running the tree's own code, a pull request's included, holds only the
+  # top-level `contents: read`. This job runs no project code, and never on a
+  # pull request. It needs `contents: write` to push `gh-pages`, and `actions:
+  # read` to download the site `deploy-pages` uploaded in this run. That job's
+  # result is checked explicitly, under `!cancelled()`: `unit-tests` or `verdict`
+  # always skips, and a skip anywhere in the chain skips a job left with the
+  # implicit `success()` (#1632). Its own group keeps one push to `gh-pages` at
+  # a time.
+  publish-pages:
+    name: Publish to gh-pages
+    needs: [ deploy-pages ]
+    if: >-
+      !cancelled() && needs.deploy-pages.result == 'success' &&
+      github.event_name != 'pull_request'
+    concurrency:
+      group: publish-pages-${{ github.ref }}
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      actions: read
+      contents: write
+    steps:
+      # The deploy action pushes from a checkout of this repository.
+      - name: Checkout 🛎️
+        uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+
+      - name: Download the built site
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --name pages-html
+          --dir docs/build/html
+
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4
-        if: ${{ github.event_name != 'pull_request' }}
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages # The branch the action should deploy to.

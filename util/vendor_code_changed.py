@@ -2,7 +2,8 @@
 """Whether a Vendor Update regeneration changed code, or only comments and docstrings.
 
 :file:`.github/workflows/cron-vendor.yml` runs ``pcapkit-vendor`` and isort, then
-``tj-actions/verify-changed-files``. Without this script any changed file would
+lists the changed files with ``git status`` in its ``Verify Changed files`` step.
+Without this script any changed file would
 bump the version, and every bump starts a release. Of the bumps 1.5.0b5 to b12,
 all but b5 and b8 changed only comments or docstrings by this script's rule: b9 a draft
 becoming RFC 10049, b10 and b11 reference formatting (#1664). The owner's ruling
@@ -25,15 +26,15 @@ time, except as a docstring, which sets ``__doc__``. Names, values, ``__all__``,
 imports and every other expression stay in the dump. Any other path is *code*:
 a new file, a deleted one, a non-Python file, a file outside the generated tree,
 a mode or type change, or a file that does not parse. So is a path that is
-listed but cannot be read, such as one ``verify-changed-files`` quoted or
-escaped, and one identical to ``HEAD``. Only a positive finding that a file
+listed but cannot be read, such as one ``git status`` quoted, and one
+identical to ``HEAD``. Only a positive finding that a file
 differs in comments or docstrings alone spares the bump.
 
 The source is parsed as bytes, so a coding cookie still decides how its string
 literals decode.
 
 Paths are the arguments, or else ``$CHANGED_FILES`` split on whitespace, the
-separator ``verify-changed-files`` uses. Writes ``code_changed=true`` or
+separator that step uses. Writes ``code_changed=true`` or
 ``code_changed=false`` to ``$GITHUB_OUTPUT``. Exits non-zero, writing nothing,
 only when it has no paths to judge, and the workflow then bumps.
 
