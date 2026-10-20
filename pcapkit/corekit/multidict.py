@@ -6,13 +6,13 @@
 
 :mod:`pcapkit.corekit.multidict` contains multi-mapping dictionary classes,
 which are used to store multiple mappings of the same key. The implementation
-is ported from the `Werkzeug`_ project, as of its release 3.1.9.
+is ported from `Werkzeug`_ 3.1.9, ``werkzeug/datastructures/structures.py``.
 
 """
 
-import collections.abc
+import collections.abc as cabc
 import copy
-from typing import TYPE_CHECKING, Generic, TypeVar, cast, overload
+from typing import TYPE_CHECKING, Generic, TypeVar, overload
 
 from pcapkit.utilities.exceptions import MissingKeyError, UnsupportedCall
 
@@ -37,25 +37,19 @@ _VT = TypeVar('_VT')
 
 
 class _omd_bucket(Generic[_KT, _VT]):
-    """Wraps values in the :class:`OrderedMultiDict`.
-
-    This makes it possible to keep an order over multiple different keys. It
-    requires a lot of extra memory and slows down access a lit, but makes it
-    possible to access elements in ``O(1)`` and iterate in ``O(n)``
-
+    """Wraps values in the :class:`OrderedMultiDict`.  This makes it
+    possible to keep an order over multiple different keys.  It requires
+    a lot of extra memory and slows down access a lot, but makes it
+    possible to access elements in O(1) and iterate in O(n).
     """
-    prev: 'Optional[_omd_bucket]'
-    next: 'Optional[_omd_bucket]'
-    key: '_KT'
-    value: '_VT'
 
-    __slots__ = ('prev', 'key', 'value', 'next')
+    __slots__ = ("prev", "key", "value", "next")
 
-    def __init__(self, omd: 'OrderedMultiDict', key: '_KT', value: '_VT') -> 'None':
-        self.prev = omd._last_bucket
-        self.key = key
-        self.value = value
-        self.next = None
+    def __init__(self, omd: 'OrderedMultiDict[_KT, _VT]', key: '_KT', value: '_VT') -> 'None':
+        self.prev: 'Optional[_omd_bucket[_KT, _VT]]' = omd._last_bucket
+        self.key: '_KT' = key
+        self.value: '_VT' = value
+        self.next: 'Optional[_omd_bucket[_KT, _VT]]' = None
 
         if omd._first_bucket is None:
             omd._first_bucket = self
@@ -63,7 +57,7 @@ class _omd_bucket(Generic[_KT, _VT]):
             omd._last_bucket.next = self
         omd._last_bucket = self
 
-    def unlink(self, omd: 'OrderedMultiDict') -> 'None':
+    def unlink(self, omd: 'OrderedMultiDict[_KT, _VT]') -> 'None':
         if self.prev:
             self.prev.next = self.next
         if self.next:
@@ -92,16 +86,10 @@ _missing = _Missing()
 def iter_multi_items(mapping: 'MultiDict[_KT, _VT] | Mapping[_KT, _VT | list[_VT] | tuple[_VT, ...] | set[_VT]] | Iterable[tuple[_KT, _VT]]') -> 'Iterator[tuple[_KT, _VT]]':  # pylint: disable=line-too-long
     """Iterates over the items of a mapping yielding keys and values
     without dropping any from more complex structures.
-
-    .. versionchanged:: 1.5.0
-
-       Takes any :class:`~collections.abc.Mapping`, not only a :obj:`dict`, and
-       yields each value of a :obj:`set` value, as Werkzeug 3.1 does.
-
     """
     if isinstance(mapping, MultiDict):
         yield from mapping.items(multi=True)
-    elif isinstance(mapping, collections.abc.Mapping):
+    elif isinstance(mapping, cabc.Mapping):
         for key, value in mapping.items():
             if isinstance(value, (list, tuple, set)):
                 for v in value:
@@ -119,44 +107,48 @@ def iter_multi_items(mapping: 'MultiDict[_KT, _VT] | Mapping[_KT, _VT | list[_VT
 
 class MultiDict(dict, Generic[_KT, _VT]):
     """A :class:`MultiDict` is a dictionary subclass customized to deal with
-    multiple values for the same key.
+    multiple values for the same key which is for example used by the parsing
+    functions in the wrappers.  This is necessary because some HTML form
+    elements pass multiple values for the same key.
 
-    :class:`MultiDict` implements all standard dictionary methods. Internally,
-    it saves all values for a key as a list, but the standard :obj:`dict`
+    :class:`MultiDict` implements all standard dictionary methods.
+    Internally, it saves all values for a key as a list, but the standard dict
     access methods will only return the first value for a key. If you want to
-    gain access to the other values, too, you have to use the :meth:`getlist`
-    and similar methods.
+    gain access to the other values, too, you have to use the `list` methods as
+    explained below.
 
-    Args:
-        mapping: The initial value for the :class:`MultiDict`. Either a
-            :class:`MultiDict`, a regular :class:`~collections.abc.Mapping`, an
-            iterable of ``(key, value)`` tuples, or :obj:`None`.
+    Basic Usage:
 
-    It behaves like a normal :obj:`dict` thus all :obj:`dict` functions will
-    only return the first value when multiple values for one key are found.
+    >>> d = MultiDict([('a', 'b'), ('a', 'c')])
+    >>> d
+    MultiDict([('a', 'b'), ('a', 'c')])
+    >>> d['a']
+    'b'
+    >>> d.getlist('a')
+    ['b', 'c']
+    >>> 'a' in d
+    True
 
-    See Also:
-        The class is ported from the `Werkzeug`_ project, release 3.1.9 (cf.
-        ``werkzeug.datastructures.MultiDict``).
+    It behaves like a normal dict thus all dict functions will only return the
+    first value when multiple values for one key are found.
 
-    .. versionchanged:: 1.5.0
+    A :class:`MultiDict` can be constructed from an iterable of
+    ``(key, value)`` tuples, a dict, a :class:`MultiDict` or from Werkzeug 0.2
+    onwards some keyword parameters.
 
-       Implements the ``|`` and ``|=`` operators, takes any
-       :class:`~collections.abc.Mapping` and :obj:`set` values, and calls
-       :obj:`dict` through :func:`super`, as Werkzeug 3.1 does.
-
+    :param mapping: the initial value for the :class:`MultiDict`.  Either a
+                    regular dict, an iterable of ``(key, value)`` tuples
+                    or `None`.
     """
 
     def __init__(self, mapping: 'Optional[MultiDict[_KT, _VT] | Mapping[_KT, _VT | list[_VT] | tuple[_VT, ...] | set[_VT]] | Iterable[tuple[_KT, _VT]]]' = None) -> 'None':  # pylint: disable=line-too-long
         if mapping is None:
             super().__init__()
         elif isinstance(mapping, MultiDict):
-            # NOTE: a dict, as the other branches pass, where Werkzeug passes pairs.
-            # GraalPy's ``dict.__init__`` stores pairs through the overridden
-            # ``__setitem__``, which wraps each list in another (:issue:`1963`); a
-            # dict it copies as is. CPython stores either as is.
+            # NOTE: a dict, not pairs: GraalPy's dict.__init__ stores pairs
+            # through __setitem__, wrapping each list in another (:issue:`1963`).
             super().__init__({k: vs[:] for k, vs in mapping.lists()})
-        elif isinstance(mapping, collections.abc.Mapping):
+        elif isinstance(mapping, cabc.Mapping):
             tmp = {}  # type: dict[_KT, list[_VT]]
             for key, value in mapping.items():
                 if isinstance(value, (list, tuple, set)):
@@ -174,57 +166,50 @@ class MultiDict(dict, Generic[_KT, _VT]):
                 tmp.setdefault(key, []).append(value)
             super().__init__(tmp)
 
-    def __getstate__(self) -> 'dict[_KT, list[_VT]]':
+    def __getstate__(self) -> 'Any':
         return dict(self.lists())
 
-    def __setstate__(self, value: 'Mapping[_KT, list[_VT]] | Iterable[tuple[_KT, list[_VT]]]') -> 'None':
+    def __setstate__(self, value: 'Any') -> 'None':
         super().clear()
-        # NOTE: made a dict first, where Werkzeug passes ``value`` on as is: given
-        # pairs, GraalPy's ``dict.update`` stores them through the overridden
-        # ``__setitem__``, as its ``dict.__init__`` does (:issue:`1963`).
+        # NOTE: a dict, not pairs, as in __init__ (GraalPy, :issue:`1963`).
         super().update(dict(value))
 
-    def __iter__(self) -> 'Iterator[_KT]':
-        # NOTE: https://github.com/python/cpython/issues/87412 -- without this
-        # override, ``dict(md)`` takes the value lists directly instead of calling
-        # :meth:`__getitem__` for the first value of each key.
+    def __iter__(self) -> 'Iterator[_KT]':  # pylint: disable=useless-parent-delegation
+        # https://github.com/python/cpython/issues/87412
+        # If __iter__ is not overridden, Python uses a fast path for dict(md),
+        # taking the data directly and getting lists of values, rather than
+        # calling __getitem__ and getting only the first value.
         return super().__iter__()
 
     def __getitem__(self, key: '_KT') -> '_VT':
-        """Return the first data value for this key.
+        """Return the first data value for this key;
+        raises KeyError if not found.
 
-        Args:
-            key: The key to be looked up.
-
-        Raises:
-            KeyError: if the key does not exist.
-
+        :param key: The key to be looked up.
+        :raise KeyError: if the key does not exist.
         """
+
         if key in self:
             lst = super().__getitem__(key)
             if len(lst) > 0:
-                return lst[0]
+                return lst[0]  # type: ignore[no-any-return]
         raise MissingKeyError(key, quiet=True)
 
     def __setitem__(self, key: '_KT', value: '_VT') -> 'None':
         """Like :meth:`add` but removes an existing key first.
 
-        Args:
-            key: The key for the value.
-            value: The value to set.
-
+        :param key: the key for the value.
+        :param value: the value to set.
         """
         super().__setitem__(key, [value])
 
     def add(self, key: '_KT', value: '_VT') -> 'None':
         """Adds a new value for the key.
 
-        Args:
-            key: The key for the value.
-            value: The value to add.
-
+        :param key: the key for the value.
+        :param value: the value to add.
         """
-        super().setdefault(key, []).append(value)  # type: ignore[arg-type,attr-defined]
+        super().setdefault(key, []).append(value)
 
     @overload
     def get(self, key: '_KT') -> '_VT | _T': ...
@@ -238,17 +223,11 @@ class MultiDict(dict, Generic[_KT, _VT]):
             return default
 
     def getlist(self, key: '_KT') -> 'list[_VT]':
-        """Return the list of items for a given key.
+        """Return the list of items for a given key. If that key is not in the
+        `MultiDict`, the return value will be an empty list.
 
-        If that key is not in the :class:`MultiDict`, the return value
-        will be an empty list.
-
-        Args:
-            key: The key to be looked up.
-
-        Returns:
-            A :obj:`list` of all the values for the key.
-
+        :param key: The key to be looked up.
+        :return: a :class:`list` of all the values for the key.
         """
         try:
             rv = super().__getitem__(key)  # type: list[_VT]
@@ -257,66 +236,72 @@ class MultiDict(dict, Generic[_KT, _VT]):
         return list(rv)
 
     def setlist(self, key: '_KT', new_list: 'Iterable[_VT]') -> 'None':
-        """Remove the old values for a key and add new ones.
+        """Remove the old values for a key and add new ones.  Note that the list
+        you pass the values in will be shallow-copied before it is inserted in
+        the dictionary.
 
-        Notes:
-            The list you pass the values in will be shallow-copied before it is
-            inserted in the dictionary.
+        >>> d = MultiDict()
+        >>> d.setlist('foo', ['1', '2'])
+        >>> d['foo']
+        '1'
+        >>> d.getlist('foo')
+        ['1', '2']
 
-        Args:
-            key: The key for which the values are set.
-            new_list: An iterable with the new values for the key. Old values
-                are removed first.
-
+        :param key: The key for which the values are set.
+        :param new_list: An iterable with the new values for the key.  Old values
+                         are removed first.
         """
         super().__setitem__(key, list(new_list))
 
-    def setdefault(self, key: '_KT', default: 'Optional[_VT]' = None) -> '_VT':
-        """If key is in the dictionary, returns its value.
+    @overload  # type: ignore[override]
+    def setdefault(self, key: '_KT') -> 'None': ...
+    @overload
+    def setdefault(self, key: '_KT', default: '_VT') -> '_VT': ...
 
-        If not, set it to default and return default.
+    def setdefault(self, key: '_KT', default: 'Optional[_VT]' = None) -> 'Optional[_VT]':
+        """Returns the value for the key if it is in the dict, otherwise it
+        returns `default` and sets that value for `key`.
 
-        Args:
-            key: The key to be looked up.
-            default: The value to be set.
-
-        Returns:
-            The value of the key.
-
+        :param key: The key to be looked up.
+        :param default: The default value to be returned if the key is not
+                        in the dict.  If not further specified it's `None`.
         """
         if key not in self:
-            self[key] = cast('_VT', default)
+            self[key] = default  # type: ignore[assignment]
 
         return self[key]
 
     def setlistdefault(self, key: '_KT', default_list: 'Optional[Iterable[_VT]]' = None) -> 'list[_VT]':
-        """Like :meth:`setdefault` but sets multiple values.
+        """Like `setdefault` but sets multiple values.  The list returned
+        is not a copy, but the list that is actually used internally.  This
+        means that you can put new values into the dict by appending items
+        to the list:
 
-        The list returned is not a copy, but the list that is actually used
-        internally. This means that you can put new values into the
-        :class:`dict <MultiDict>` by appending items to the list.
+        >>> d = MultiDict({"foo": 1})
+        >>> d.setlistdefault("foo").extend([2, 3])
+        >>> d.getlist("foo")
+        [1, 2, 3]
 
-        Args:
-            key: The key to be looked up.
-            default_list: An iterable of default values. It is either copied
-                (in case it was a :obj:`list`) or converted into a :obj:`list`
-                before returned.
-
+        :param key: The key to be looked up.
+        :param default_list: An iterable of default values.  It is either copied
+                             (in case it was a list) or converted into a list
+                             before returned.
+        :return: a :class:`list`
         """
         if key not in self:
             super().__setitem__(key, list(default_list or ()))
 
-        return cast('list[_VT]', super().__getitem__(key))
+        return super().__getitem__(key)  # type: ignore[no-any-return]
 
     def items(self, multi: 'bool' = False) -> 'Iterable[tuple[_KT, _VT]]':  # type: ignore[override]
-        """Return an interator of ``(key, value)`` paris.
+        """Return an iterator of ``(key, value)`` pairs.
 
-        Args:
-            multi: If set to :obj:`True` the iterator returned will have a pair
-                for each value of each key. Otherwise it will only contain
-                pairs for the first value of each key.
-
+        :param multi: If set to `True` the iterator returned will have a pair
+                      for each value of each key.  Otherwise it will only
+                      contain pairs for the first value of each key.
         """
+        values: 'list[_VT]'
+
         for key, values in super().items():
             if multi:
                 for value in values:
@@ -324,29 +309,38 @@ class MultiDict(dict, Generic[_KT, _VT]):
             else:
                 yield key, values[0]
 
-    def lists(self) -> 'Iterator[tuple[_KT, list[_VT]]]':
-        """Return an iterator of ``(key, values)`` pairs, where ``values`` is
-        the :obj:`list` of all values associated with the key."""
+    def lists(self) -> 'Iterable[tuple[_KT, list[_VT]]]':
+        """Return a iterator of ``(key, values)`` pairs, where values is the list
+        of all values associated with the key."""
+        values: 'list[_VT]'
+
         for key, values in super().items():
             yield key, list(values)
 
-    def values(self) -> 'Iterator[_VT]':  # type: ignore[override]
+    def values(self) -> 'Iterable[_VT]':  # type: ignore[override]
         """Returns an iterator of the first value on every key's value list."""
+        values: 'list[_VT]'
+
         for values in super().values():
             yield values[0]
 
-    def listvalues(self) -> 'Iterator[list[_VT]]':
-        """Return an iterator of all values associated with a key. Zipping
-        :meth:`keys` and this is the same as calling :meth:`lists`."""
-        return super().values()  # type: ignore[return-value]
+    def listvalues(self) -> 'Iterable[list[_VT]]':
+        """Return an iterator of all values associated with a key.  Zipping
+        :meth:`keys` and this is the same as calling :meth:`lists`:
 
-    def copy(self) -> 'MultiDict[_KT, _VT]':
+        >>> d = MultiDict({"foo": [1, 2, 3]})
+        >>> zip(d.keys(), d.listvalues()) == d.lists()
+        True
+        """
+        return super().values()
+
+    def copy(self) -> 'Self':
         """Return a shallow copy of this object."""
         return self.__class__(self)
 
-    def deepcopy(self, memo: 'Optional[dict]' = None) -> 'MultiDict[_KT, _VT]':
+    def deepcopy(self, memo: 'Any' = None) -> 'Self':
         """Return a deep copy of this object."""
-        return self.__class__(copy.deepcopy(self.to_dict(flat=False), memo=memo))
+        return self.__class__(copy.deepcopy(self.to_dict(flat=False), memo))
 
     @overload
     def to_dict(self, flat: 'Literal[True]' = ...) -> 'dict[_KT, _VT]': ...
@@ -354,40 +348,42 @@ class MultiDict(dict, Generic[_KT, _VT]):
     def to_dict(self, flat: 'Literal[False]') -> 'dict[_KT, list[_VT]]': ...
 
     def to_dict(self, flat: 'bool' = True) -> 'dict[_KT, _VT] | dict[_KT, list[_VT]]':
-        """Return the contents as regular :obj:`dict`.
+        """Return the contents as regular dict.  If `flat` is `True` the
+        returned dict will only have the first item present, if `flat` is
+        `False` all values will be returned as lists.
 
-        If ``flat`` is :obj:`True` the returned :obj:`dict` will only have the
-        first item present, if ``flat`` is :obj:`False` all values will be
-        returned as lists.
-
-        Args:
-            flat: If set to :obj:`False` the :obj:`dict` returned will have
-                lists with all the values in it. Otherwise it will only contain
-                the first value for each key.
-
+        :param flat: If set to `False` the dict returned will have lists
+                     with all the values in it.  Otherwise it will only
+                     contain the first value for each key.
+        :return: a :class:`dict`
         """
         if flat:
             return dict(self.items())
         return dict(self.lists())
 
     def update(self, mapping: 'MultiDict[_KT, _VT] | Mapping[_KT, _VT | list[_VT] | tuple[_VT, ...] | set[_VT]] | Iterable[tuple[_KT, _VT]]') -> 'None':  # type: ignore[override] # pylint: disable=line-too-long
-        """:meth:`update` extends rather than replaces existing key lists.
+        """update() extends rather than replaces existing key lists:
 
-        If the value :obj:`list` for a key in ``other_dict`` is empty, no new
-        values will be added to the :obj:`dict` and the key will not be
-        created.
+        >>> a = MultiDict({'x': 1})
+        >>> b = MultiDict({'x': 2, 'y': 3})
+        >>> a.update(b)
+        >>> a
+        MultiDict([('y', 3), ('x', 1), ('x', 2)])
 
-        Args:
-            mapping: The extending value for the :class:`MultiDict`. Either a
-                :class:`MultiDict`, a regular :class:`~collections.abc.Mapping`,
-                or an iterable of ``(key, value)`` tuples.
+        If the value list for a key in ``other_dict`` is empty, no new values
+        will be added to the dict and the key will not be created:
 
+        >>> x = {'empty_list': []}
+        >>> y = MultiDict()
+        >>> y.update(x)
+        >>> y
+        MultiDict([])
         """
         for key, value in iter_multi_items(mapping):
             self.add(key, value)
 
     def __or__(self, other: 'Mapping[_KT, _VT | list[_VT] | tuple[_VT, ...] | set[_VT]]') -> 'MultiDict[_KT, _VT]':  # type: ignore[override] # pylint: disable=line-too-long
-        if not isinstance(other, collections.abc.Mapping):
+        if not isinstance(other, cabc.Mapping):
             return NotImplemented
 
         rv = self.copy()
@@ -395,7 +391,7 @@ class MultiDict(dict, Generic[_KT, _VT]):
         return rv
 
     def __ior__(self, other: 'Mapping[_KT, _VT | list[_VT] | tuple[_VT, ...] | set[_VT]] | Iterable[tuple[_KT, _VT]]') -> 'Self':  # type: ignore[override,misc] # pylint: disable=line-too-long
-        if not isinstance(other, (collections.abc.Mapping, collections.abc.Iterable)):
+        if not isinstance(other, (cabc.Mapping, cabc.Iterable)):
             return NotImplemented
 
         self.update(other)
@@ -404,20 +400,26 @@ class MultiDict(dict, Generic[_KT, _VT]):
     @overload
     def pop(self, key: '_KT') -> '_VT': ...
     @overload
-    def pop(self, key: '_KT', default: '_VT | _T' = ...) -> '_VT | _T': ...
+    def pop(self, key: '_KT', default: '_VT') -> '_VT': ...  # pylint: disable=arguments-differ
+    @overload
+    def pop(self, key: '_KT', default: '_T') -> '_VT | _T': ...  # pylint: disable=arguments-differ
 
     def pop(self, key: '_KT', default: '_VT | _T' = _missing) -> '_VT | _T':  # type: ignore[assignment,misc]
-        """Pop the first item for a :obj:`list` on the :obj:`dict`.
+        """Pop the first item for a list on the dict.  Afterwards the
+        key is removed from the dict, so additional values are discarded:
 
-        Afterwards the ``key`` is removed from the :obj:`dict`, so additional
-        values are discarded.
+        >>> d = MultiDict({"foo": [1, 2, 3]})
+        >>> d.pop("foo")
+        1
+        >>> "foo" in d
+        False
 
-        Args:
-            key: The key to pop.
-            default: If provided the value to return if the key was not in the
-                dictionary.
-
+        :param key: the key to pop.
+        :param default: if provided the value to return if the key was
+                        not in the dictionary.
         """
+        lst: 'list[_VT]'
+
         try:
             lst = super().pop(key)
 
@@ -432,85 +434,66 @@ class MultiDict(dict, Generic[_KT, _VT]):
             raise MissingKeyError(key) from None
 
     def popitem(self) -> 'tuple[_KT, _VT]':
-        """Pop an item from the :obj:`dict`."""
+        """Pop an item from the dict."""
+        item: 'tuple[_KT, list[_VT]]'
+
         try:
             item = super().popitem()
 
-            if len(item[1]) == 0:  # type: ignore[arg-type]
+            if len(item[1]) == 0:
                 raise MissingKeyError(item[0])
 
-            return (item[0], item[1][0])  # type: ignore[index,return-value]
+            return item[0], item[1][0]
         except KeyError as e:
             raise MissingKeyError(e.args[0]) from None
 
     def poplist(self, key: '_KT') -> 'list[_VT]':
-        """Pop the :obj:`list` for a key from the :obj:`dict`.
-
-        If the key is not in the :obj:`dict` an empty :obj:`list` is returned.
-
-        Notes:
-            If the key does no longer exist a :obj:`list` is returned instead
-            of raising an error.
-
-        Args:
-            key: The key to pop.
-
+        """Pop the list for a key from the dict.  If the key is not in the dict
+        an empty list is returned.
         """
-        return super().pop(key, [])
+        return super().pop(key, [])  # type: ignore[no-any-return]
 
     def popitemlist(self) -> 'tuple[_KT, list[_VT]]':
-        """Pop a ``(key, list)`` :obj:`tuple` from the :obj:`dict`."""
+        """Pop a ``(key, list)`` tuple from the dict."""
         try:
-            return super().popitem()  # type: ignore[return-value]
+            return super().popitem()
         except KeyError as e:
             raise MissingKeyError(e.args[0]) from None
 
-    def __copy__(self) -> 'MultiDict[_KT, _VT]':
+    def __copy__(self) -> 'Self':
         return self.copy()
 
-    def __deepcopy__(self, memo: 'Optional[dict]' = None) -> 'MultiDict[_KT, _VT]':
+    def __deepcopy__(self, memo: 'Any') -> 'Self':
         return self.deepcopy(memo=memo)
 
     def __repr__(self) -> 'str':
-        return f'{type(self).__name__}({list(self.items(multi=True))!r})'
+        return f"{type(self).__name__}({list(self.items(multi=True))!r})"
 
 
 class OrderedMultiDict(MultiDict[_KT, _VT]):
-    """Works like a regular :class:`MultiDict` but preserves the order of the
-    fields.
+    """Works like a regular :class:`MultiDict` but preserves the
+    order of the fields.  To convert the ordered multi dict into a
+    list you can use the :meth:`items` method and pass it ``multi=True``.
 
-    Args:
-        mapping: The initial value for the :class:`MultiDict`. Either a
-            :class:`MultiDict`, a regular :class:`~collections.abc.Mapping`, an
-            iterable of ``(key, value)`` tuples, or :obj:`None`.
+    In general an :class:`OrderedMultiDict` is an order of magnitude
+    slower than a :class:`MultiDict`.
 
-    To convert the ordered multi dict into a :obj:`list` you can us the
-    :meth:`items` method and pass it ``multi=True``.
+    .. admonition:: note
 
-    In general an :class:`OrderedMultiDict` is an order of magnitude slower
-    than a :class:`MultiDict`.
-
-    Notes:
-        Due to a limitation in Python you cannot convert an ordered multi dict
-        into a regular :obj:`dict` by using ``dict(multidict)``. Instead you
-        have to use the :meth:`to_dict` method, otherwise the internal bucket
-        objects are exposed.
-
-    Werkzeug 3.1 deprecates its ``OrderedMultiDict``, to be removed in 3.2; this
-    port keeps the class, without the :exc:`DeprecationWarning`.
-
+       Due to a limitation in Python you cannot convert an ordered
+       multi dict into a regular dict by using ``dict(multidict)``.
+       Instead you have to use the :meth:`to_dict` method, otherwise
+       the internal bucket objects are exposed.
     """
-    _first_bucket: 'Optional[_omd_bucket[_KT, _VT]]'
-    _last_bucket: 'Optional[_omd_bucket[_KT, _VT]]'
 
     def __init__(self, mapping: 'Optional[MultiDict[_KT, _VT] | Mapping[_KT, _VT | list[_VT] | tuple[_VT, ...] | set[_VT]] | Iterable[tuple[_KT, _VT]]]' = None) -> 'None':  # pylint: disable=line-too-long
         super().__init__()
-        self._first_bucket = None
-        self._last_bucket = None
+        self._first_bucket: 'Optional[_omd_bucket[_KT, _VT]]' = None
+        self._last_bucket: 'Optional[_omd_bucket[_KT, _VT]]' = None
         if mapping is not None:
             self.update(mapping)
 
-    def __eq__(self, other: 'Any') -> 'bool':
+    def __eq__(self, other: 'object') -> 'bool':
         if not isinstance(other, MultiDict):
             return NotImplemented
         if isinstance(other, OrderedMultiDict):
@@ -554,13 +537,13 @@ class OrderedMultiDict(MultiDict[_KT, _VT]):
         """
         return self.__class__(copy.deepcopy(list(self.items(multi=True)), memo=memo))
 
-    def __reduce_ex__(self, protocol: 'SupportsIndex') -> 'tuple[type, tuple[list[tuple[_KT, _VT]]]]':
+    def __reduce_ex__(self, protocol: 'SupportsIndex') -> 'Any':
         return type(self), (list(self.items(multi=True)),)
 
-    def __getstate__(self) -> 'list[tuple[_KT, _VT]]':  # type: ignore[override]
+    def __getstate__(self) -> 'Any':
         return list(self.items(multi=True))
 
-    def __setstate__(self, values: 'Iterable[tuple[_KT, _VT]]') -> 'None':  # type: ignore[override]
+    def __setstate__(self, values: 'Any') -> 'None':
         self.clear()
 
         for key, value in values:
@@ -568,7 +551,7 @@ class OrderedMultiDict(MultiDict[_KT, _VT]):
 
     def __getitem__(self, key: '_KT') -> '_VT':
         if key in self:
-            return dict.__getitem__(self, key)[0].value
+            return dict.__getitem__(self, key)[0].value  # type: ignore[no-any-return]
         raise MissingKeyError(key, quiet=True)
 
     def __setitem__(self, key: '_KT', value: '_VT') -> 'None':
@@ -578,31 +561,31 @@ class OrderedMultiDict(MultiDict[_KT, _VT]):
     def __delitem__(self, key: '_KT') -> 'None':
         self.pop(key)
 
-    def keys(self) -> 'Iterator[_KT]':  # type: ignore[override]
+    def keys(self) -> 'Iterable[_KT]':  # type: ignore[override]
         return (key for key, _ in self.items())
 
     def __iter__(self) -> 'Iterator[_KT]':
         return iter(self.keys())
 
-    def values(self) -> 'Iterator[_VT]':  # type: ignore[override]
-        return (value for _, value in self.items())
+    def values(self) -> 'Iterable[_VT]':  # type: ignore[override]
+        return (value for key, value in self.items())
 
-    def items(self, multi: 'bool' = False) -> 'Iterator[tuple[_KT, _VT]]':  # type: ignore[override]
+    def items(self, multi: 'bool' = False) -> 'Iterable[tuple[_KT, _VT]]':  # type: ignore[override]
         ptr = self._first_bucket
         if multi:
             while ptr is not None:
                 yield ptr.key, ptr.value
                 ptr = ptr.next
         else:
-            returned_keys = set()  # type: 'set[_KT]'
+            returned_keys = set()
             while ptr is not None:
                 if ptr.key not in returned_keys:
                     returned_keys.add(ptr.key)
                     yield ptr.key, ptr.value
                 ptr = ptr.next
 
-    def lists(self) -> 'Iterator[tuple[_KT, list[_VT]]]':
-        returned_keys = set()  # type: 'set[_KT]'
+    def lists(self) -> 'Iterable[tuple[_KT, list[_VT]]]':
+        returned_keys = set()
         ptr = self._first_bucket
         while ptr is not None:
             if ptr.key not in returned_keys:
@@ -610,14 +593,16 @@ class OrderedMultiDict(MultiDict[_KT, _VT]):
                 returned_keys.add(ptr.key)
             ptr = ptr.next
 
-    def listvalues(self) -> 'Iterator[list[_VT]]':
-        for _, values in self.lists():
+    def listvalues(self) -> 'Iterable[list[_VT]]':
+        for _key, values in self.lists():
             yield values
 
     def add(self, key: '_KT', value: '_VT') -> 'None':
-        dict.setdefault(self, key, []).append(_omd_bucket(self, key, value))  # type: ignore[arg-type,attr-defined]
+        dict.setdefault(self, key, []).append(_omd_bucket(self, key, value))  # type: ignore[misc]
 
     def getlist(self, key: '_KT') -> 'list[_VT]':
+        rv: 'list[_omd_bucket[_KT, _VT]]'
+
         try:
             rv = dict.__getitem__(self, key)
         except KeyError:
@@ -629,15 +614,15 @@ class OrderedMultiDict(MultiDict[_KT, _VT]):
         for value in new_list:
             self.add(key, value)
 
-    def setlistdefault(self, key: '_KT', default_list: 'Optional[Iterable[_VT]]' = None) -> 'NoReturn':
-        raise UnsupportedCall('setlistdefault is unsupported for ordered multi dicts')
+    def setlistdefault(self, key: 'Any', default_list: 'Any' = None) -> 'NoReturn':
+        raise UnsupportedCall("setlistdefault is unsupported for ordered multi dicts")
 
     def update(self, mapping: 'MultiDict[_KT, _VT] | Mapping[_KT, _VT | list[_VT] | tuple[_VT, ...] | set[_VT]] | Iterable[tuple[_KT, _VT]]') -> 'None':  # type: ignore[override] # pylint: disable=line-too-long
         for key, value in iter_multi_items(mapping):
             self.add(key, value)
 
     def poplist(self, key: '_KT') -> 'list[_VT]':
-        buckets = dict.pop(self, key, [])  # type: list[_omd_bucket[_KT, _VT]]
+        buckets: 'Iterable[_omd_bucket[_KT, _VT]]' = dict.pop(self, key, [])
         for bucket in buckets:
             bucket.unlink(self)
         return [x.value for x in buckets]
@@ -645,11 +630,15 @@ class OrderedMultiDict(MultiDict[_KT, _VT]):
     @overload
     def pop(self, key: '_KT') -> '_VT': ...
     @overload
-    def pop(self, key: '_KT', default: '_VT | _T' = ...) -> '_VT | _T': ...
+    def pop(self, key: '_KT', default: '_VT') -> '_VT': ...  # pylint: disable=arguments-differ
+    @overload
+    def pop(self, key: '_KT', default: '_T') -> '_VT | _T': ...  # pylint: disable=arguments-differ
 
     def pop(self, key: '_KT', default: '_VT | _T' = _missing) -> '_VT | _T':  # type: ignore[assignment,misc]
+        buckets: 'list[_omd_bucket[_KT, _VT]]'
+
         try:
-            buckets = dict.pop(self, key)  # type: list[_omd_bucket[_KT, _VT]]
+            buckets = dict.pop(self, key)
         except KeyError:
             if default is not _missing:
                 return default
@@ -662,10 +651,13 @@ class OrderedMultiDict(MultiDict[_KT, _VT]):
         return buckets[0].value
 
     def popitem(self) -> 'tuple[_KT, _VT]':
+        key: '_KT'
+        buckets: 'list[_omd_bucket[_KT, _VT]]'
+
         try:
-            key, buckets = cast('tuple[_KT, list[_omd_bucket[_KT, _VT]]]', dict.popitem(self))
+            key, buckets = dict.popitem(self)
         except KeyError as e:
-            raise MissingKeyError(str(e)) from None
+            raise MissingKeyError(e.args[0]) from None
 
         for bucket in buckets:
             bucket.unlink(self)
@@ -673,10 +665,13 @@ class OrderedMultiDict(MultiDict[_KT, _VT]):
         return key, buckets[0].value
 
     def popitemlist(self) -> 'tuple[_KT, list[_VT]]':
+        key: '_KT'
+        buckets: 'list[_omd_bucket[_KT, _VT]]'
+
         try:
-            key, buckets = cast('tuple[_KT, list[_omd_bucket[_KT, _VT]]]', dict.popitem(self))
+            key, buckets = dict.popitem(self)
         except KeyError as e:
-            raise MissingKeyError(str(e)) from None
+            raise MissingKeyError(e.args[0]) from None
 
         for bucket in buckets:
             bucket.unlink(self)
