@@ -832,7 +832,7 @@ the same commit several times over. It also skips <code class="docutils literal 
 Checks</a> below), which are gated out by their own <code class="docutils literal notranslate"><span class="pre">if:</span></code> rather than by having
 already run. <code class="docutils literal notranslate"><span class="pre">changelog</span></code> carries no
 <code class="docutils literal notranslate"><span class="pre">if:</span></code> at all and runs on every path regardless – deliberately, per its own
-comment (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1663-1669</span></code>): <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code> feeds
+comment (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1569-1575</span></code>): <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code> feeds
 <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> to the GitHub Release body, so the release path is exactly
 where a drifted file must not go unchecked. Confirmed on run <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/actions/runs/36210743295">36210743295</a> (a
 schedule-triggered GitHub Pages run): both <code class="docutils literal notranslate"><span class="pre">Changelog</span> <span class="pre">drift</span></code> and <code class="docutils literal notranslate"><span class="pre">Gate</span>
@@ -952,8 +952,11 @@ and re-importing pcapkit, one module’s peak RSS was 4.17 GiB under the default
 killed the runner. <code class="docutils literal notranslate"><span class="pre">sigterm</span> <span class="pre">=</span> <span class="pre">true</span></code> and a <code class="docutils literal notranslate"><span class="pre">pytest_sessionfinish</span></code> hook in
 <code class="file docutils literal notranslate"><span class="pre">tests/conftest.py</span></code> that saves each xdist worker’s data early keep a
 worker that dies during shutdown from losing its file
-(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1423">#1423</a>). The leg then
-writes the total and a per-package table to the job summary and uploads the HTML
+(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1423">#1423</a>). The leg’s
+<code class="docutils literal notranslate"><span class="pre">Report</span> <span class="pre">coverage</span></code> step then runs <code class="file docutils literal notranslate"><span class="pre">util/coverage_report.py</span></code>, which fails,
+posting no total, unless the controller and every xdist worker saved a data file
+(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1387">#1387</a>), and otherwise
+writes the total and a per-package table to the job summary. The leg uploads the HTML
 report as the <code class="docutils literal notranslate"><span class="pre">coverage-html</span></code> artifact (30 days), with the bare numbers as the
 <code class="docutils literal notranslate"><span class="pre">coverage-summary</span></code> artifact and the per-process debug log as
 <code class="docutils literal notranslate"><span class="pre">coverage-processes-log</span></code>.</p>
@@ -1143,7 +1146,7 @@ grepping every workflow file for its name:</p>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code></p></td>
 <td><p>job <code class="docutils literal notranslate"><span class="pre">required-checks</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">unit-tests.yml:2037</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1904</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.11</span></code></p></td>
 <td><p>job <code class="docutils literal notranslate"><span class="pre">compatibility</span></code>, matrix leg <code class="docutils literal notranslate"><span class="pre">3.11</span></code></p></td>
@@ -1172,21 +1175,21 @@ grepping every workflow file for its name:</p>
 which added <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.15</span></code> and removed <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.10</span></code>. Moving a version
 between the tiers below means editing the ruleset in the same change.</p>
 <p><code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code> is defined by exactly one job
-(<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:2037</span></code>). <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span></code> is defined by one, the
+(<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1904</span></code>). <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span></code> is defined by one, the
 <code class="docutils literal notranslate"><span class="pre">compatibility</span></code> job in <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code> (<code class="docutils literal notranslate"><span class="pre">:60</span></code>), whose matrix
 (<code class="docutils literal notranslate"><span class="pre">:74</span></code>) comes from <code class="file docutils literal notranslate"><span class="pre">.github/python-versions.toml</span></code>: the required legs
 are its supported tier (<code class="docutils literal notranslate"><span class="pre">python-versions.toml:20-24</span></code>), and its KTLO legs
 (<code class="docutils literal notranslate"><span class="pre">python-versions.toml:16-19</span></code>) have names ending in <code class="docutils literal notranslate"><span class="pre">(KTLO)</span></code>, so no required
 context matches one. A comment at
-<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1949</span></code> mentions the string without defining it.</p>
+<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1816</span></code> mentions the string without defining it.</p>
 <p><code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code> is an aggregate, not a single check run. The ruleset
 requires it and the <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.11</span></code>-<code class="docutils literal notranslate"><span class="pre">3.15</span></code> legs, nothing else, as
-<code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s own comment (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1948-1958</span></code>) records. It
+<code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s own comment (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1815-1825</span></code>) records. It
 <code class="docutils literal notranslate"><span class="pre">needs:</span></code> the gating jobs of <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> – <code class="docutils literal notranslate"><span class="pre">test</span></code>, <code class="docutils literal notranslate"><span class="pre">integration</span></code>,
 <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> and <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code>, plus <code class="docutils literal notranslate"><span class="pre">project-tests</span></code>, the one run of
 the project pins, and <code class="docutils literal notranslate"><span class="pre">changes</span></code> for the docs-only path – and checks each
 result explicitly
-(<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:2036-2092</span></code>). Rulesets match check names literally, with no
+(<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1903-1959</span></code>). Rulesets match check names literally, with no
 wildcard, so requiring the matrix cells one by one would mean editing the
 ruleset whenever a matrix changes; the aggregate keeps the required list fixed.
 It accepts the gating jobs as <code class="docutils literal notranslate"><span class="pre">skipped</span></code> only on a docs-only pull request, where
@@ -1195,7 +1198,7 @@ It accepts the gating jobs as <code class="docutils literal notranslate"><span c
 <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>, and a job cannot <code class="docutils literal notranslate"><span class="pre">needs:</span></code> a job in another
 workflow file. This job runs on Unit Tests’ own <code class="docutils literal notranslate"><span class="pre">push</span></code>/<code class="docutils literal notranslate"><span class="pre">pull_request</span></code>
 triggers; the <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code> reusable calls documented above skip it via
-<code class="docutils literal notranslate"><span class="pre">if:</span> <span class="pre">${{</span> <span class="pre">always()</span> <span class="pre">&amp;&amp;</span> <span class="pre">inputs.gate-only</span> <span class="pre">!=</span> <span class="pre">true</span> <span class="pre">}}</span></code> (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:2039</span></code>),
+<code class="docutils literal notranslate"><span class="pre">if:</span> <span class="pre">${{</span> <span class="pre">always()</span> <span class="pre">&amp;&amp;</span> <span class="pre">inputs.gate-only</span> <span class="pre">!=</span> <span class="pre">true</span> <span class="pre">}}</span></code> (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1906</span></code>),
 so it is never produced – and never expected – on those paths.</p>
 <p id="ktlo-tier">Python versions are tiered – supported and KTLO
 (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1633">#1633</a>), and experimental
@@ -1215,14 +1218,15 @@ and keeps its legs’ check names, <code class="docutils literal notranslate"><s
 with supported legs. Every job holding KTLO legs works the same way:</p>
 <ul class="simple">
 <li><p>Every step that can fail on a KTLO leg has an <code class="docutils literal notranslate"><span class="pre">id</span></code> and
-<code class="docutils literal notranslate"><span class="pre">continue-on-error:</span> <span class="pre">${{</span> <span class="pre">matrix.ktlo</span> <span class="pre">==</span> <span class="pre">true</span> <span class="pre">}}</span></code> (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:443-460</span></code>),
+<code class="docutils literal notranslate"><span class="pre">continue-on-error:</span> <span class="pre">${{</span> <span class="pre">matrix.ktlo</span> <span class="pre">==</span> <span class="pre">true</span> <span class="pre">}}</span></code> (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:367-384</span></code>),
 unless it is masked on every leg, as the timings uploads are. Its <code class="docutils literal notranslate"><span class="pre">outcome</span></code> is
 then <code class="docutils literal notranslate"><span class="pre">failure</span></code> but its <code class="docutils literal notranslate"><span class="pre">conclusion</span></code> <code class="docutils literal notranslate"><span class="pre">success</span></code>, so the job, its check run
 and <code class="docutils literal notranslate"><span class="pre">required-checks</span></code> read <code class="docutils literal notranslate"><span class="pre">success</span></code>. A step that needs an earlier one’s work
 waits on that step’s <code class="docutils literal notranslate"><span class="pre">outcome</span></code>: a leg that cannot install stops there, and a
 <code class="docutils literal notranslate"><span class="pre">pypi</span></code> leg stops at its first failure.</p></li>
 <li><p>The last step, <code class="docutils literal notranslate"><span class="pre">KTLO</span> <span class="pre">summary</span></code>, runs on KTLO legs only and reports each failed
-<code class="docutils literal notranslate"><span class="pre">outcome</span></code> as a warning and a job-summary line. A step’s own annotations take
+<code class="docutils literal notranslate"><span class="pre">outcome</span></code> as a warning and a job-summary line, through
+<code class="file docutils literal notranslate"><span class="pre">util/leg_summary.py</span></code> (see <a class="reference internal" href="#workflow-scripts-1967">Workflow Scripts (#1967)</a>). A step’s own annotations take
 <code class="docutils literal notranslate"><span class="pre">ANNOTATION_LEVEL</span></code>: <code class="docutils literal notranslate"><span class="pre">warning</span></code> on a KTLO leg, <code class="docutils literal notranslate"><span class="pre">error</span></code> on a supported one.
 <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code>’ KTLO cells, a step of their own with <code class="docutils literal notranslate"><span class="pre">continue-on-error:</span> <span class="pre">true</span></code>,
 report the same way.</p></li>
@@ -1568,6 +1572,45 @@ above).</p>
 <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> runs pytest, unittest or <code class="file docutils literal notranslate"><span class="pre">util/run_unittest_leg.py</span></code>
 without the script, and runs the script against a small limit.</p>
 </section>
+<section id="workflow-scripts-1967">
+<h2>Workflow Scripts (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1967">#1967</a>)<a class="headerlink" href="#workflow-scripts-1967" title="Link to this heading">¶</a></h2>
+<p>Shell that several steps repeat lives in a <code class="file docutils literal notranslate"><span class="pre">util/</span></code> script, which the steps
+run, rather than in a composite action: a composite action’s inner steps cannot
+take <code class="docutils literal notranslate"><span class="pre">timeout-minutes</span></code>, so each calling step keeps its own, with its <code class="docutils literal notranslate"><span class="pre">shell:</span></code>,
+<code class="docutils literal notranslate"><span class="pre">if:</span></code>, <code class="docutils literal notranslate"><span class="pre">env:</span></code> and <code class="docutils literal notranslate"><span class="pre">continue-on-error</span></code>. Each script’s docstring says what it
+does; each has tests under <code class="file docutils literal notranslate"><span class="pre">tests/project/</span></code> that run it.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Script</p></th>
+<th class="head"><p>Run by</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">util/leg_summary.py</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">KTLO</span> <span class="pre">summary</span></code> in <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">test</span></code>, <code class="docutils literal notranslate"><span class="pre">integration</span></code> and
+<code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> (and so their KTLO twins) and <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>’s
+<code class="docutils literal notranslate"><span class="pre">compatibility</span></code>, as <code class="docutils literal notranslate"><span class="pre">leg_summary.py</span> <span class="pre">ktlo</span></code>; <code class="docutils literal notranslate"><span class="pre">Experimental</span> <span class="pre">summary</span></code> in
+<code class="docutils literal notranslate"><span class="pre">experimental.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">experimental</span></code>, as <code class="docutils literal notranslate"><span class="pre">leg_summary.py</span> <span class="pre">experimental</span></code>.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/classify_changes.py</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Classify</span> <span class="pre">the</span> <span class="pre">diff</span></code> in the <code class="docutils literal notranslate"><span class="pre">changes</span></code> job of <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> and of
+<code class="docutils literal notranslate"><span class="pre">experimental.yml</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">util/coverage_report.py</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Report</span> <span class="pre">coverage</span></code> in <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">test</span></code>, on the coverage leg.</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The summaries run on the image’s <code class="docutils literal notranslate"><span class="pre">/usr/bin/python3</span></code> rather than the leg’s
+interpreter, which may have failed to set up or be too broken to run anything, so
+they need only the standard library, as <code class="docutils literal notranslate"><span class="pre">classify_changes.py</span></code> does on the
+runner’s <code class="docutils literal notranslate"><span class="pre">python3</span></code>. Both <code class="docutils literal notranslate"><span class="pre">changes</span></code> jobs check out on every event, since the
+script is in the tree. <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">pypi</span></code> job keeps its own copy of
+the KTLO summary’s shell until its shell moves to scripts too; a project pin runs
+that copy and the script on the same steps and requires the same output.</p>
+</section>
 <section id="action-pins-1968">
 <span id="action-pins"></span><h2>Action Pins (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1968">#1968</a>)<a class="headerlink" href="#action-pins-1968" title="Link to this heading">¶</a></h2>
 <p>A tag or a branch is a reference its owner can move, so every <code class="docutils literal notranslate"><span class="pre">uses:</span></code> of an
@@ -1672,13 +1715,29 @@ proposal.</p>
 <p>These jobs declare a deployment <code class="docutils literal notranslate"><span class="pre">environment:</span></code> and can therefore pause for an
 approval, in <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code> and <code class="docutils literal notranslate"><span class="pre">cron-python-versions.yml</span></code>:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">github</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">github-release</span></code> (<code class="docutils literal notranslate"><span class="pre">create-release.yml:618</span></code>)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">tag</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">conda-tag</span></code> (<code class="docutils literal notranslate"><span class="pre">create-release.yml:806</span></code>)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">pypi</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">pypi</span></code> (<code class="docutils literal notranslate"><span class="pre">create-release.yml:969</span></code>)</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">conda</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">anaconda</span></code> (<code class="docutils literal notranslate"><span class="pre">create-release.yml:1207</span></code>)</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">github</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">github-release</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">tag</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">conda-tag</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pypi</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">pypi</span></code></p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">conda</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">anaconda</span></code></p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">pr</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">github-release</span></code>, for the release App’s key (see
 <a class="reference internal" href="#python-versions">Python Versions</a>)</p></li>
 </ul>
+<p><code class="docutils literal notranslate"><span class="pre">ANACONDA_TOKEN</span></code> is a secret of the <code class="docutils literal notranslate"><span class="pre">anaconda</span></code> environment, and the
+<code class="docutils literal notranslate"><span class="pre">PYPCAPKIT</span></code> token and <code class="docutils literal notranslate"><span class="pre">PYPCAPKIT_ACTIONS_DEPLOY_KEY</span></code> are secrets of
+<code class="docutils literal notranslate"><span class="pre">conda-tag</span></code>. GitHub gives an environment’s secrets only to a job that names
+it, so the scheduled jobs reading them name it too
+(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1968">#1968</a>):</p>
+<ul class="simple">
+<li><p>Conda Update’s <code class="docutils literal notranslate"><span class="pre">conda-update</span></code> and <code class="docutils literal notranslate"><span class="pre">conda-tag</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">conda-tag</span></code></p></li>
+<li><p>Conda Update’s <code class="docutils literal notranslate"><span class="pre">conda-dist</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">anaconda</span></code></p></li>
+<li><p>Vendor Update’s <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">conda-tag</span></code></p></li>
+</ul>
+<p>A required reviewer on <code class="docutils literal notranslate"><span class="pre">conda-tag</span></code> or <code class="docutils literal notranslate"><span class="pre">anaconda</span></code> would therefore hold every
+scheduled bump for an approval, besides the release-graph reason
+<a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a> gives for keeping them without one. Each run of these jobs
+also records a deployment to its environment.
+<code class="file docutils literal notranslate"><span class="pre">tests/project/test_secret_environments_1968.py</span></code> checks that every job
+reading one of these secrets names the environment holding it.</p>
 <p>No other workflow in scope here declares one – including
 <code class="docutils literal notranslate"><span class="pre">deploy-pages.yml</span></code>, whose <code class="docutils literal notranslate"><span class="pre">publish-pages</span></code> job pushes straight to the
 <code class="docutils literal notranslate"><span class="pre">gh-pages</span></code> branch via <code class="docutils literal notranslate"><span class="pre">JamesIves/github-pages-deploy-action</span></code> rather than
@@ -1765,6 +1824,7 @@ repeating it here.</p>
 <li><a class="reference internal" href="#test-tiers">Test Tiers</a></li>
 <li><a class="reference internal" href="#project-pins">Project Pins</a></li>
 <li><a class="reference internal" href="#file-size-caps-1969">File Size Caps (#1969)</a></li>
+<li><a class="reference internal" href="#workflow-scripts-1967">Workflow Scripts (#1967)</a></li>
 <li><a class="reference internal" href="#action-pins-1968">Action Pins (#1968)</a></li>
 <li><a class="reference internal" href="#dependency-updates-1968">Dependency Updates (#1968)</a></li>
 <li><a class="reference internal" href="#python-versions">Python Versions</a></li>

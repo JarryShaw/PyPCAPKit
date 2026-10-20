@@ -821,6 +821,52 @@
 
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">held_body</span><span class="p">(</span><span class="n">framing</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Callable[[dict[str, Any]], int]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Bound a block body read as one field to the octets the stream holds.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        framing: Octets the block's fixed fields span, both copies of the Block</span>
+<span class="sd">            Total Length included.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A callback returning the block's Block Total Length less ``framing``,</span>
+<span class="sd">        never below zero, and never past what is left of the stream.</span>
+
+<span class="sd">    The bodies of :class:`UnknownBlock`, :class:`CustomBlock` and</span>
+<span class="sd">    :class:`SystemdJournalExportBlock` are each one</span>
+<span class="sd">    :class:`~pcapkit.corekit.fields.strings.BytesField` spanning the whole</span>
+<span class="sd">    block, so a Block Total Length that runs past the end of the file is one</span>
+<span class="sd">    field declaring that many octets. Unbounded, that field is zero-filled</span>
+<span class="sd">    within :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH`, and past it</span>
+<span class="sd">    :meth:`FieldBase.unpack &lt;pcapkit.corekit.fields.field.FieldBase.unpack&gt;`</span>
+<span class="sd">    raises :exc:`~pcapkit.utilities.exceptions.FieldValueError` from inside the</span>
+<span class="sd">    block's schema, where :meth:`PCAPNG.read</span>
+<span class="sd">    &lt;pcapkit.protocols.misc.pcapng.PCAPNG.read&gt;` cannot keep the block as</span>
+<span class="sd">    captured, so the whole extraction ends (:issue:`1984`). The other block</span>
+<span class="sd">    types read their bodies field by field, so none of them declares that much</span>
+<span class="sd">    in one field.</span>
+
+<span class="sd">    Bounded, the body is the octets the file actually holds, whatever the</span>
+<span class="sd">    block declares, and :meth:`PCAPNG.read</span>
+<span class="sd">    &lt;pcapkit.protocols.misc.pcapng.PCAPNG.read&gt;` reports the truncation as it</span>
+<span class="sd">    does for every other block type. On a well-formed block the stream holds</span>
+<span class="sd">    the body and the trailing Block Total Length, so this is a no-op; on the</span>
+<span class="sd">    packing path :meth:`Schema.pack</span>
+<span class="sd">    &lt;pcapkit.protocols.schema.schema.Schema.pack&gt;` leaves ``__length__`` at</span>
+<span class="sd">    ``-1`` for "unknown", and the declared span is kept.</span>
+
+<span class="sd">    """</span>
+    <span class="n">floored</span> <span class="o">=</span> <span class="n">nonnegative</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="n">framing</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">callback</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+        <span class="n">nominal</span> <span class="o">=</span> <span class="n">floored</span><span class="p">(</span><span class="n">pkt</span><span class="p">)</span>
+        <span class="n">remaining</span> <span class="o">=</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__length__'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">remaining</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">remaining</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">nominal</span>
+        <span class="k">return</span> <span class="nb">min</span><span class="p">(</span><span class="n">nominal</span><span class="p">,</span> <span class="n">remaining</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">callback</span>
+
+
 <div class="viewcode-block" id="bounded_option">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.bounded_option">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">bounded_option</span><span class="p">(</span><span class="n">length</span><span class="p">:</span> <span class="s1">'Callable[[dict[str, Any]], int]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Callable[[dict[str, Any]], int]'</span><span class="p">:</span>
@@ -1146,6 +1192,34 @@
     <span class="k">return</span> <span class="s1">'__short_read__'</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="vm">__dict__</span> <span class="ow">or</span> <span class="p">(</span><span class="n">packet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_secrets_cut</span><span class="p">(</span><span class="n">packet</span><span class="p">))</span>
 
 
+<span class="k">def</span><span class="w"> </span><span class="nf">_malformed_line_message</span><span class="p">(</span><span class="n">kind</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">labels</span><span class="p">:</span> <span class="s1">'Callable[[str], Any]'</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Report a key log line that does not parse, without quoting what it holds.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        kind: Name of the key log, e.g. ``'TLS'``.</span>
+<span class="sd">        labels: Enumeration of the key log's labels, called on the upper-cased</span>
+<span class="sd">            first field of the line.</span>
+<span class="sd">        line: The line that does not parse.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A warning message naming the line's label, when that is one ``labels``</span>
+<span class="sd">        knows, and eliding its values. The line itself is never quoted, since</span>
+<span class="sd">        it carries key material (:issue:`1985`); nor is an unrecognised label,</span>
+<span class="sd">        which may be key material too.</span>
+
+<span class="sd">    """</span>
+    <span class="n">fields</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">labels</span><span class="p">(</span><span class="n">fields</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span><span class="o">.</span><span class="n">name</span> <span class="k">if</span> <span class="n">fields</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: invalid </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1"> key log line with an unrecognised label; '</span>
+                <span class="s1">'line elided, kept as captured'</span><span class="p">)</span>
+    <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: invalid </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1"> key log line for label </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1">; '</span>
+            <span class="s1">'values elided, line kept as captured'</span><span class="p">)</span>
+
+
 <div class="viewcode-block" id="dsb_secrets_selector">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.dsb_secrets_selector">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">dsb_secrets_selector</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Field'</span><span class="p">:</span>
@@ -1445,7 +1519,7 @@
     <span class="c1">#: Block total length.</span>
     <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
     <span class="c1">#: Block body (including padding).</span>
-    <span class="n">body</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">nonnegative</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="n">GENERIC_BLOCK_MINIMUM</span><span class="p">))</span>
+    <span class="n">body</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">held_body</span><span class="p">(</span><span class="n">GENERIC_BLOCK_MINIMUM</span><span class="p">))</span>
     <span class="c1">#: Block total length.</span>
     <span class="n">length2</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
 
@@ -2826,7 +2900,7 @@
     <span class="c1">#: Block total length.</span>
     <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
     <span class="c1">#: Journal entry.</span>
-    <span class="n">entry</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">nonnegative</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="n">GENERIC_BLOCK_MINIMUM</span><span class="p">))</span>
+    <span class="n">entry</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">held_body</span><span class="p">(</span><span class="n">GENERIC_BLOCK_MINIMUM</span><span class="p">))</span>
     <span class="c1">#: Block total length.</span>
     <span class="n">length2</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
 
@@ -3062,6 +3136,18 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Revised schema.</span>
 
+<span class="sd">        A line that does not parse -- an unknown label, a field that is not</span>
+<span class="sd">        hexadecimal, a wrong number of fields, or the first octets of an entry</span>
+<span class="sd">        cut inside the block's padding -- is left out of :attr:`entries` and</span>
+<span class="sd">        reported as a :class:`~pcapkit.utilities.warnings.ProtocolWarning`</span>
+<span class="sd">        that names its label and elides its values (see</span>
+<span class="sd">        :func:`_malformed_line_message`), wherever it sits in the log</span>
+<span class="sd">        (:issue:`1985`). Refusing it would abort the whole extraction rather</span>
+<span class="sd">        than this one line, as :func:`nonnegative` explains, and :attr:`data` keeps the log text verbatim, so the line is</span>
+<span class="sd">        still kept as captured and the block rebuilds octet for octet. A last</span>
+<span class="sd">        line the capture or the block cut is left out silently (see</span>
+<span class="sd">        :func:`_cut_last_line`), since the cut is reported already.</span>
+
 <span class="sd">        """</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.pcapng.tls_key_label</span><span class="w"> </span><span class="kn">import</span> <span class="n">TLSKeyLabel</span> <span class="k">as</span> <span class="n">Enum_TLSKeyLabel</span>
 
@@ -3074,12 +3160,16 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">label</span><span class="p">,</span> <span class="n">random</span><span class="p">,</span> <span class="n">secret</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
                 <span class="n">label_enum</span> <span class="o">=</span> <span class="n">Enum_TLSKeyLabel</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
-                <span class="n">entries</span><span class="p">[</span><span class="n">label_enum</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">random</span><span class="p">),</span>
-                                        <span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">secret</span><span class="p">))</span>
-            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+                <span class="c1"># NOTE: both values are decoded before ``entries`` is touched, so</span>
+                <span class="c1"># a line that does not parse leaves no empty bucket behind (#1985).</span>
+                <span class="n">random_octets</span><span class="p">,</span> <span class="n">secret_octets</span> <span class="o">=</span> <span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">random</span><span class="p">),</span> <span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">secret</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">_cut_last_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">lines</span><span class="p">,</span> <span class="n">packet</span><span class="p">):</span>
                     <span class="k">break</span>
-                <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'invalid TLS key log format: </span><span class="si">{</span><span class="n">line</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
+                <span class="n">warn</span><span class="p">(</span><span class="n">_malformed_line_message</span><span class="p">(</span><span class="s1">'TLS'</span><span class="p">,</span> <span class="n">Enum_TLSKeyLabel</span><span class="p">,</span> <span class="n">line</span><span class="p">),</span>
+                     <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+                <span class="k">continue</span>
+            <span class="n">entries</span><span class="p">[</span><span class="n">label_enum</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">random_octets</span><span class="p">,</span> <span class="n">secret_octets</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">entries</span> <span class="o">=</span> <span class="n">entries</span>
         <span class="k">return</span> <span class="bp">self</span></div>
@@ -3113,6 +3203,10 @@
 <span class="sd">        Returns:</span>
 <span class="sd">            Revised schema.</span>
 
+<span class="sd">        A line that does not parse is left out of :attr:`entries`, reported and</span>
+<span class="sd">        kept as captured in :attr:`data`, as :meth:`TLSKeyLog.post_process`</span>
+<span class="sd">        describes (:issue:`1985`).</span>
+
 <span class="sd">        """</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">WireGuardKeyLabel</span>
 
@@ -3125,16 +3219,15 @@
             <span class="n">fields</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">fields</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">3</span> <span class="ow">or</span> <span class="n">fields</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="s1">'='</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'invalid WireGuard key log format: </span><span class="si">{</span><span class="n">line</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">'not a WireGuard key log line'</span><span class="p">)</span>
                 <span class="n">label</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">secret</span> <span class="o">=</span> <span class="n">fields</span>
                 <span class="n">label_enum</span> <span class="o">=</span> <span class="n">WireGuardKeyLabel</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
                 <span class="n">entries</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">label_enum</span><span class="p">,</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">secret</span><span class="p">))</span>
-            <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
+            <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">_cut_last_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">lines</span><span class="p">,</span> <span class="n">packet</span><span class="p">):</span>
                     <span class="k">break</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">FieldValueError</span><span class="p">):</span>
-                    <span class="k">raise</span>
-                <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'invalid WireGuard key log format: </span><span class="si">{</span><span class="n">line</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
+                <span class="n">warn</span><span class="p">(</span><span class="n">_malformed_line_message</span><span class="p">(</span><span class="s1">'WireGuard'</span><span class="p">,</span> <span class="n">WireGuardKeyLabel</span><span class="p">,</span> <span class="n">line</span><span class="p">),</span>
+                     <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">entries</span> <span class="o">=</span> <span class="n">entries</span>
         <span class="k">return</span> <span class="bp">self</span></div>
@@ -3299,8 +3392,8 @@
     <span class="c1"># NOTE: both custom block types span the same fixed fields, so the one</span>
     <span class="c1"># entry stands for both.</span>
     <span class="c1">#: Custom data (incl. padding and options).</span>
-    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">nonnegative</span><span class="p">(</span>
-        <span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Custom_Block_that_rewriters_can_copy_into_new_files</span><span class="p">]))</span>
+    <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">held_body</span><span class="p">(</span>
+        <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Custom_Block_that_rewriters_can_copy_into_new_files</span><span class="p">]))</span>
     <span class="c1">#: Block total length.</span>
     <span class="n">length2</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
 

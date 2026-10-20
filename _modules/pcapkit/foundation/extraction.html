@@ -500,6 +500,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">types</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">weakref</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">dictdumper.dumper</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dumper</span>
@@ -584,6 +585,35 @@
 <span class="c1">#: :attr:`Extractor._ifile &lt;pcapkit.foundation.extraction.Extractor._ifile&gt;`, so they cannot take an</span>
 <span class="c1">#: unnamed stream.</span>
 <span class="n">_PATH_ENGINES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s1">'scapy'</span><span class="p">,</span> <span class="s1">'pyshark'</span><span class="p">,</span> <span class="s1">'pypcap'</span><span class="p">,</span> <span class="s1">'pcap_ct'</span><span class="p">})</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_release_input</span><span class="p">(</span><span class="n">ifile</span><span class="p">:</span> <span class="s1">'IO[bytes]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Close an input stream from a finaliser, if it is still open.</span>
+
+<span class="sd">    The one close both backstops of :issue:`606` perform --</span>
+<span class="sd">    :meth:`Extractor.__del__ &lt;pcapkit.foundation.extraction.Extractor.__del__&gt;`</span>
+<span class="sd">    and the :class:`weakref.finalize` held in</span>
+<span class="sd">    :attr:`Extractor._finalizer &lt;pcapkit.foundation.extraction.Extractor._finalizer&gt;`.</span>
+<span class="sd">    It takes the stream rather than the extractor, so that a finaliser built on</span>
+<span class="sd">    it holds no reference that would keep the extractor alive; deciding whether</span>
+<span class="sd">    the stream is the extractor's to close is the caller's business, cf.</span>
+<span class="sd">    :meth:`Extractor._owns_input &lt;pcapkit.foundation.extraction.Extractor._owns_input&gt;`.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        ifile: The stream to close.</span>
+
+<span class="sd">    Note:</span>
+<span class="sd">        A finaliser must not raise, so the close is guarded: that is what a close</span>
+<span class="sd">        during interpreter shutdown can fail at.</span>
+
+<span class="sd">    """</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">ifile</span><span class="o">.</span><span class="n">closed</span><span class="p">:</span>
+            <span class="n">ifile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
+        <span class="c1"># Nothing useful can be reported from a finaliser, and raising here</span>
+        <span class="c1"># would only produce an "Exception ignored in __del__" on stderr.</span>
+        <span class="k">pass</span>
 
 
 <div class="viewcode-block" id="Extractor">
@@ -711,6 +741,12 @@
 
         <span class="c1">#: Input file object.</span>
         <span class="n">_ifile</span><span class="p">:</span> <span class="s1">'BufferedReader'</span>
+        <span class="c1">#: Backstop that closes :attr:`_ifile` when the extractor is collected</span>
+        <span class="c1">#: before :meth:`_cleanup` has run, registered only when the stream is</span>
+        <span class="c1">#: this class's own to close (:issue:`1997`), else :data:`None`.</span>
+        <span class="c1">#: :meth:`__del__` alone is not enough, as GraalPy never calls it; a</span>
+        <span class="c1">#: :class:`weakref.finalize` runs there and on CPython alike.</span>
+        <span class="n">_finalizer</span><span class="p">:</span> <span class="s1">'Optional[weakref.finalize]'</span>
         <span class="c1">#: Output writer. It holds the writer class until :meth:`_open_output`</span>
         <span class="c1">#: replaces it with the writer, or under split mode with a factory.</span>
         <span class="n">_ofile</span><span class="p">:</span> <span class="s1">'Dumper | Type[Dumper]'</span>
@@ -1956,6 +1992,15 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'input stream has no peek(), wrapping it in PeekableStream'</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'BufferedReader'</span><span class="p">,</span> <span class="n">PeekableStream</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="p">))</span>
 
+        <span class="c1"># NOTE: the #606 backstop for an extraction abandoned before EOF. GraalPy</span>
+        <span class="c1"># never calls ``__del__``, so it is a ``weakref.finalize`` as well (#1997).</span>
+        <span class="c1"># It closes over the stream alone -- a reference to ``self`` would keep</span>
+        <span class="c1"># the extractor alive for as long as the finaliser is -- and it is only</span>
+        <span class="c1"># registered for a stream this class owns, so a caller's is never closed.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_finalizer</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_owns_input</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_finalizer</span> <span class="o">=</span> <span class="n">weakref</span><span class="o">.</span><span class="n">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_release_input</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_q</span><span class="p">:</span>
             <span class="n">output</span><span class="p">,</span> <span class="n">ext</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__output__</span><span class="p">[</span><span class="n">fmt</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">ext</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -2080,6 +2125,7 @@
 <span class="w">        </span><span class="sd">"""Close the input file when exits."""</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'closing </span><span class="si">%s</span><span class="s1"> on context exit after </span><span class="si">%d</span><span class="s1"> frame(s)'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifnm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frnum</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_detach_finalizer</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
 
@@ -2095,6 +2141,13 @@
 <span class="sd">        interpreter collects it, and CPython announces that with a</span>
 <span class="sd">        ``ResourceWarning`` raised wherever collection happens to run, which can be</span>
 <span class="sd">        far from the code that abandoned the handle (:issue:`606`).</span>
+
+<span class="sd">        GraalPy never calls this method, so the same close is also registered as</span>
+<span class="sd">        the :class:`weakref.finalize` in :attr:`_finalizer`, which runs on either</span>
+<span class="sd">        interpreter (:issue:`1997`). This method stays for whoever calls it</span>
+<span class="sd">        directly, a subclass extending it through :func:`super` among them, and</span>
+<span class="sd">        both are safe to run for one stream: whichever comes second finds it</span>
+<span class="sd">        already closed.</span>
 
 <span class="sd">        This is a backstop and not the recommended route: collection is not</span>
 <span class="sd">        deterministic, and :class:`Extractor` takes part in a reference cycle</span>
@@ -2115,14 +2168,7 @@
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_owns_input</span><span class="p">():</span>
             <span class="k">return</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">ifile</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">'_ifile'</span><span class="p">]</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">ifile</span><span class="o">.</span><span class="n">closed</span><span class="p">:</span>
-                <span class="n">ifile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="k">except</span> <span class="p">(</span><span class="ne">OSError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>  <span class="c1"># pragma: no cover</span>
-            <span class="c1"># Nothing useful can be reported from a finaliser, and raising here</span>
-            <span class="c1"># would only produce an "Exception ignored in __del__" on stderr.</span>
-            <span class="k">pass</span></div>
+        <span class="n">_release_input</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">'_ifile'</span><span class="p">])</span></div>
 
 
     <span class="c1">##########################################################################</span>
@@ -2135,7 +2181,8 @@
 <span class="w">        </span><span class="sd">"""Whether the input stream is this class's to close.</span>
 
 <span class="sd">        The one place the ownership rule of :issue:`610` is written down, so that</span>
-<span class="sd">        :meth:`_cleanup` and :meth:`__del__` cannot drift apart on it.</span>
+<span class="sd">        :meth:`_cleanup`, :meth:`__del__` and the registration of</span>
+<span class="sd">        :attr:`_finalizer` cannot drift apart on it.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            :data:`True` when the input stream was opened by this class and is</span>
@@ -2171,6 +2218,20 @@
             <span class="k">return</span> <span class="kc">True</span>
         <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ifile</span><span class="p">,</span> <span class="n">SeekableReader</span><span class="p">)</span></div>
 
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_detach_finalizer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Unregister :attr:`_finalizer`, once the input has been closed on purpose.</span>
+
+<span class="sd">        A finished extraction then leaves nothing registered against its stream:</span>
+<span class="sd">        neither a second close at collection nor a reference that keeps the stream</span>
+<span class="sd">        alive until the extractor is collected.</span>
+
+<span class="sd">        """</span>
+        <span class="c1"># NOTE: read through ``__dict__``, as ``_owns_input`` does, for an</span>
+        <span class="c1"># instance whose constructor did not get as far as registering one.</span>
+        <span class="n">finalizer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'_finalizer'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">finalizer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">finalizer</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
 
 <div class="viewcode-block" id="Extractor._note_eof_progress">
 <a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._note_eof_progress">[docs]</a>
@@ -2278,6 +2339,7 @@
         <span class="c1"># supplied and still needs *is* closed.</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_owns_input</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_detach_finalizer</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 </div>
 

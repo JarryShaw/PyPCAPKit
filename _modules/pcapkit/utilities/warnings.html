@@ -1041,7 +1041,10 @@
 <span class="sd">    level then runs past the outermost frame, and the warning is attributed to</span>
 <span class="sd">    ``&lt;sys&gt;:0``. This counts frames as :func:`warnings.warn` does, and</span>
 <span class="sd">    :mod:`logging` does from Python 3.11; on earlier versions the log record is</span>
-<span class="sd">    attributed to a frame inside the import.</span>
+<span class="sd">    attributed to a frame inside the import. GraalPy names the bootstrap's frames</span>
+<span class="sd">    ``&lt;frozen _frozen_importlib&gt;`` and ``&lt;frozen _frozen_importlib_external&gt;``,</span>
+<span class="sd">    which its :func:`warnings.warn` leaves out too, so those are not counted</span>
+<span class="sd">    either (:issue:`1963`).</span>
 
 <span class="sd">    """</span>
     <span class="n">pcapkit</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s1">pcapkit</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">sep</span><span class="si">}</span><span class="s1">'</span>
@@ -1051,7 +1054,8 @@
         <span class="n">frame</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_back</span> <span class="k">if</span> <span class="n">frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>  <span class="c1"># the caller, level 1</span>
         <span class="k">while</span> <span class="n">frame</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">filename</span> <span class="o">=</span> <span class="n">frame</span><span class="o">.</span><span class="n">f_code</span><span class="o">.</span><span class="n">co_filename</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="s1">'importlib'</span> <span class="ow">in</span> <span class="n">filename</span> <span class="ow">and</span> <span class="s1">'_bootstrap'</span> <span class="ow">in</span> <span class="n">filename</span><span class="p">):</span>
+            <span class="n">graalpy_bootstrap</span> <span class="o">=</span> <span class="n">filename</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'&lt;frozen _frozen_importlib'</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="s1">'importlib'</span> <span class="ow">in</span> <span class="n">filename</span> <span class="ow">and</span> <span class="p">(</span><span class="s1">'_bootstrap'</span> <span class="ow">in</span> <span class="n">filename</span> <span class="ow">or</span> <span class="n">graalpy_bootstrap</span><span class="p">)):</span>
                 <span class="n">level</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="n">outermost</span> <span class="o">=</span> <span class="n">level</span>
                 <span class="k">if</span> <span class="n">pcapkit</span> <span class="ow">in</span> <span class="n">filename</span><span class="p">:</span>

@@ -72,6 +72,7 @@ and extracts parameters from a PCAP file.
    .. autoattribute:: _flag_s
 
    .. autoattribute:: _ifile
+   .. autoattribute:: _finalizer
    .. autoattribute:: _ofile
    .. autoattribute:: _ifnm
    .. autoattribute:: _ofnm

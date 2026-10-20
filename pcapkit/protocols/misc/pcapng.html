@@ -6730,6 +6730,17 @@ only the outer one is the miss-safe
 <dd class="field-odd"><p>Revised schema.</p>
 </dd>
 </dl>
+<p>A line that does not parse – an unknown label, a field that is not
+hexadecimal, a wrong number of fields, or the first octets of an entry
+cut inside the block’s padding – is left out of <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.TLSKeyLog.entries" title="pcapkit.protocols.schema.misc.pcapng.TLSKeyLog.entries"><code class="xref py py-attr docutils literal notranslate"><span class="pre">entries</span></code></a> and
+reported as a <a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.ProtocolWarning" title="pcapkit.utilities.warnings.ProtocolWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolWarning</span></code></a>
+that names its label and elides its values (see
+<code class="xref py py-func docutils literal notranslate"><span class="pre">_malformed_line_message()</span></code>), wherever it sits in the log
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1985">#1985</a>). Refusing it would abort the whole extraction rather
+than this one line, as <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.nonnegative" title="pcapkit.protocols.schema.misc.pcapng.nonnegative"><code class="xref py py-func docutils literal notranslate"><span class="pre">nonnegative()</span></code></a> explains, and <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.TLSKeyLog.data" title="pcapkit.protocols.schema.misc.pcapng.TLSKeyLog.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code></a> keeps the log text verbatim, so the line is
+still kept as captured and the block rebuilds octet for octet. A last
+line the capture or the block cut is left out silently (see
+<code class="xref py py-func docutils literal notranslate"><span class="pre">_cut_last_line()</span></code>), since the cut is reported already.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -6766,6 +6777,9 @@ only the outer one is the miss-safe
 <dd class="field-odd"><p>Revised schema.</p>
 </dd>
 </dl>
+<p>A line that does not parse is left out of <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.WireGuardKeyLog.entries" title="pcapkit.protocols.schema.misc.pcapng.WireGuardKeyLog.entries"><code class="xref py py-attr docutils literal notranslate"><span class="pre">entries</span></code></a>, reported and
+kept as captured in <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.WireGuardKeyLog.data" title="pcapkit.protocols.schema.misc.pcapng.WireGuardKeyLog.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">data</span></code></a>, as <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.TLSKeyLog.post_process" title="pcapkit.protocols.schema.misc.pcapng.TLSKeyLog.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TLSKeyLog.post_process()</span></code></a>
+describes (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1985">#1985</a>).</p>
 </dd></dl>
 
 <dl class="py attribute">
