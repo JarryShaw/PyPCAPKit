@@ -88,6 +88,7 @@ KNOWN_MESSAGES = frozenset({
     'unused-argument',
     'unused-import',
     'unused-wildcard-import',
+    'useless-parent-delegation',
     'wildcard-import',
     'wrong-import-position',
 })

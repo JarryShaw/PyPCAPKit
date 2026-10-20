@@ -4756,6 +4756,8 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
         """
         if importlib.util.find_spec('resource') is None:  # pragma: no cover
             self.skipTest('the resource module is unavailable on this platform')
+        if sys.implementation.name == 'graalpy':  # pragma: no cover
+            self.skipTest('GraalPy has no resource.setrlimit to cap the subprocess with (#1963)')
 
         source = textwrap.dedent('''
             import io, json, resource, struct, sys, warnings
