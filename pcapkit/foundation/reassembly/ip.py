@@ -161,7 +161,7 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         # initialise buffer with BUFID; ``RCVBT`` holds one entry per 8-octet
         # block of the data buffer, its partial last block included -- 8191
         # covered octets 0 to 65527 only, so a fragment reaching octet 65528,
-        # e.g. at the largest Fragment Offset, indexed past it (:issue:`1565`)
+        # e.g. at the largest Fragment Offset, indexed past it (#1565)
         if BUFID not in self._buffer:
             self._buffer[BUFID] = Buffer(
                 TDL=-1,                              # Total Data Length
@@ -190,11 +190,11 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         #
         # A Total Length of 0 declares nothing. It is what TCP segmentation
         # offload leaves in a capture taken on the sending host, and the
-        # datagram then runs to the end of the captured frame (:issue:`1547`).
+        # datagram then runs to the end of the captured frame (#1547).
         # Wireshark ("presumed TSO") substitutes that length for the field
         # before it reassembles anything, and so does this, whatever **MF** and
         # the offset say: an unfragmented one is then whole rather than ``-IHL``
-        # octets long (:issue:`1555`). Linux's BIG TCP zeroes the field
+        # octets long (#1555). Linux's BIG TCP zeroes the field
         # precisely because the datagram, header included, outgrows the 65535
         # octets it can declare -- and such a datagram never completes in a
         # buffer of that length (:meth:`_is_complete`). So the buffer grows past
@@ -247,7 +247,7 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         #
         # * a truncated fragment's, since the octets after the cut are missing.
         #   That includes one clipped by the data buffer's end, whose octets
-        #   past it cannot be held, so it counts as cut there (:issue:`1566`).
+        #   past it cannot be held, so it counts as cut there (#1566).
         # * a non-final fragment's. :rfc:`791#section-3.2` and
         #   :rfc:`8200#section-4.5` make every fragment but the last carry a
         #   multiple of 8 octets, so one that ends mid-block was cut or is
@@ -255,7 +255,7 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
         #   complete the datagram with zeros in their place. This is the only
         #   way a cut shows when the length is not declared: under Total
         #   Length 0, and on IPv6, whose adapters derive it from the captured
-        #   payload (:issue:`1567`).
+        #   payload (#1567).
         start = FO // 8
         if held == length and not MF:
             stop = (FO + held + 7) // 8
@@ -441,7 +441,7 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
                 data.append(bytes(byte))
             # Report it even with no run received, its payload ``()``, as
             # ``strict=False`` reports it with an empty payload: ``index``
-            # still says which frames were its fragments (:issue:`1566`).
+            # still says which frames were its fragments (#1566).
             packet = Datagram(
                 completed=completion,
                 id=DatagramID(

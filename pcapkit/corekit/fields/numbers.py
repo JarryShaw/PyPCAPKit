@@ -781,7 +781,7 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
                     return member
                 # NOTE: A registry member is shared, so the captured bits
                 # outside ``bit_length`` go on an unregistered copy of it
-                # rather than on the member itself (:issue:`1488`).
+                # rather than on the member itself (#1488).
                 attrs = {key: val for key, val in vars(member).items()
                          if key not in ('_name_', '_value_', '__reduce_ex__')}
                 attrs[_OUTSIDE_BITS] = record
@@ -1066,7 +1066,7 @@ class PortEnumField(EnumField):
         # NOTE: imported here rather than at module level, as
         # :mod:`pcapkit.const` itself imports :mod:`pcapkit.corekit`; and tested
         # against AppType rather than ``self._namespace``, as the
-        # per-transport copies this class replaced did (:issue:`1516`).
+        # per-transport copies this class replaced did (#1516).
         from pcapkit.const.reg.apptype import AppType  # pylint: disable=import-outside-toplevel
 
         if isinstance(value, AppType):

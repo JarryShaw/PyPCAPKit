@@ -138,7 +138,7 @@ class _Registries(dict):
         return dict.__ne__(self, other)
 
     # NOTE: dict union is :pep:`584`, Python 3.9 and up, so a registry has it
-    # from 3.9 only, as :obj:`dict` does (GitHub issue :issue:`1694`): before
+    # from 3.9 only, as :obj:`dict` does (GitHub issue #1694): before
     # 3.9, ``|`` and ``|=`` raise dict's :exc:`TypeError` and import nothing.
     # ``|=`` stays dict's own, since it updates in place and reads no value.
     if sys.version_info >= (3, 9):  # pragma: no branch -- Python 3.9 and up

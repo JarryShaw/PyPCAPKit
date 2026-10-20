@@ -853,7 +853,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
             # NOTE: The trailing padding (:rfc:`7401#section-5.2.1`) is kept on
             # the data model only when it is not all zeros -- the form a fresh
-            # build writes -- so that a rebuild reproduces it (:issue:`1223`).
+            # build writes -- so that a rebuild reproduces it (#1223).
             # :meth:`_make_hip_param` writes it back.
             padding = schema.__dict__.get('padding')
             if isinstance(padding, bytes) and any(padding):

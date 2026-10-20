@@ -93,7 +93,7 @@ class Application(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable
         super().__post_init__(file, length, **kwargs)  # type: ignore[arg-type]
 
         # NOTE: A header the data ends inside keeps that in its ``info``, so
-        # that :meth:`from_data` rebuilds only what was captured (:issue:`1458`).
+        # that :meth:`from_data` rebuilds only what was captured (#1458).
         keep_short_read(self)
 
         # ``read`` may have dispatched the undissected remainder through

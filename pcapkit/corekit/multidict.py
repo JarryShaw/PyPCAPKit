@@ -146,7 +146,7 @@ class MultiDict(dict, Generic[_KT, _VT]):
             super().__init__()
         elif isinstance(mapping, MultiDict):
             # NOTE: a dict, not pairs: GraalPy's dict.__init__ stores pairs
-            # through __setitem__, wrapping each list in another (:issue:`1963`).
+            # through __setitem__, wrapping each list in another (#1963).
             super().__init__({k: vs[:] for k, vs in mapping.lists()})
         elif isinstance(mapping, cabc.Mapping):
             tmp = {}  # type: dict[_KT, list[_VT]]
@@ -171,7 +171,7 @@ class MultiDict(dict, Generic[_KT, _VT]):
 
     def __setstate__(self, value: 'Any') -> 'None':
         super().clear()
-        # NOTE: a dict, not pairs, as in __init__ (GraalPy, :issue:`1963`).
+        # NOTE: a dict, not pairs, as in __init__ (GraalPy, #1963).
         super().update(dict(value))
 
     def __iter__(self) -> 'Iterator[_KT]':  # pylint: disable=useless-parent-delegation

@@ -184,7 +184,7 @@ class UDP(Transport[Data_UDP, Schema_UDP],
 
         # NOTE: Octets captured past the Length field belong to this layer,
         # since its own length field is what leaves them out of the payload,
-        # and the rebuild keeps them as captured (:issue:`1461`).
+        # and the rebuild keeps them as captured (#1461).
         if schema.trailer:
             udp.__update__([
                 ('trailer', schema.trailer),
@@ -228,7 +228,7 @@ class UDP(Transport[Data_UDP, Schema_UDP],
         # NOTE: An explicit ``total_length`` is written as given, so that a
         # ``from_data`` rebuild of a capture truncated by snaplen keeps the
         # length the sender declared instead of the one that was recorded
-        # (:issue:`1155`). Computed from the octets at hand otherwise, which is
+        # (#1155). Computed from the octets at hand otherwise, which is
         # what a plain ``UDP(payload=...)`` wants.
         if total_length is None:
             total_length = 8 + len(payload)
@@ -283,9 +283,9 @@ class UDP(Transport[Data_UDP, Schema_UDP],
             'checksum': data.checksum,
             # NOTE: The parsed length is passed through rather than left to
             # ``make`` to recompute, so that a truncated capture rebuilds with
-            # the length that was on the wire (:issue:`1155`).
+            # the length that was on the wire (#1155).
             'total_length': data.len,
             'payload': cls._make_payload(data),
-            # NOTE: And the octets captured past the Length field (:issue:`1461`).
+            # NOTE: And the octets captured past the Length field (#1461).
             'trailer': data.get('trailer', b''),
         }

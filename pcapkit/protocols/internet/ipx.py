@@ -123,7 +123,7 @@ class IPX(Internet[Data_IPX, Schema_IPX],
         # NOTE: Octets captured past the Packet Length belong to this layer,
         # since its own length field is what leaves them out of the payload: an
         # Ethernet carrier hands the whole rest of its frame here, padding
-        # included, and the rebuild keeps them as captured (:issue:`1433`).
+        # included, and the rebuild keeps them as captured (#1433).
         if schema.trailer:
             ipx.__update__([
                 ('trailer', schema.trailer),
@@ -230,7 +230,7 @@ class IPX(Internet[Data_IPX, Schema_IPX],
             'dst': cls._make_ipx_address(data.dst),
             'src': cls._make_ipx_address(data.src),
             'payload': cls._make_payload(data),
-            # NOTE: And the octets captured past the Packet Length (:issue:`1433`).
+            # NOTE: And the octets captured past the Packet Length (#1433).
             'trailer': data.get('trailer', b''),
         }
 
