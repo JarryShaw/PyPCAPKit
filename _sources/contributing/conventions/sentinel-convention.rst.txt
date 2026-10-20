@@ -162,7 +162,10 @@ Where the sentinels differ, the differences are **needs, not inconsistencies**:
    name, as ``None.x = 1`` does. ``__slots__`` is empty, so there is no ``__dict__`` to
    reach round them either. The metaclass does the same for the type, raising
    :exc:`TypeError` as ``type(None).x = 1`` does, so neither ``_name`` nor the cached
-   instance can be swapped out. It also refuses to let a concrete sentinel type be
+   instance can be swapped out. It lets through only ``_abc_negative_cache`` and
+   ``_abc_negative_cache_version``, which ``_py_abc``, the fallback ``abc`` uses
+   without the C ``_abc`` module, rebinds during an :func:`isinstance` check
+   (:issue:`1960`). It also refuses to let a concrete sentinel type be
    subclassed, by a ``class`` statement or by ``register``, as ``type(None)`` cannot be;
    :class:`~pcapkit.corekit.sentinels.Sentinel` itself stays subclassable, being abstract.
    The owner asked for this in review of the change for :issue:`1842`: a sentinel's repr

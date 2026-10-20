@@ -766,7 +766,8 @@ SYN’s header and counts as having seen it.</p></li>
       ISN &lt;- PSN;
       put data from fragment into data buffer with BUFID
          [from octet fragment.first to octet fragment.last];
-      HDL &lt;- [one hole from PSN + fragment.len to infinity];
+      HDL &lt;- [one hole from PSN + fragment.len to infinity,
+              i.e. HOLE_OPEN_BOUND];
    } ELSE {
       put data from fragment into data buffer with BUFID
          [from octet fragment.first to octet fragment.last];
@@ -1209,8 +1210,9 @@ covers <code class="docutils literal notranslate"><span class="pre">last</span> 
 <a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.Fragment.raw" title="pcapkit.foundation.reassembly.data.tcp.Fragment.raw"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Fragment.raw</span></code></a>: the descriptor list is kept once per buffer ID,
 across every acknowledgement number’s payload buffer, and describes the
 stream as a whole. It decides when a stream whose FIN has been seen is
-whole; a hole whose <code class="docutils literal notranslate"><span class="pre">first</span></code> is <code class="docutils literal notranslate"><span class="pre">-sys.maxsize</span></code> stands for whatever
-preceded a capture that missed the handshake, and does not count.</p>
+whole. A hole whose <code class="docutils literal notranslate"><span class="pre">first</span></code> is <code class="docutils literal notranslate"><span class="pre">-HOLE_OPEN_BOUND</span></code> stands for whatever
+preceded a capture that missed the handshake, and does not count; one
+whose <code class="docutils literal notranslate"><span class="pre">last</span></code> is <a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.HOLE_OPEN_BOUND" title="pcapkit.foundation.reassembly.data.tcp.HOLE_OPEN_BOUND"><code class="xref py py-data docutils literal notranslate"><span class="pre">HOLE_OPEN_BOUND</span></code></a> is still open above.</p>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.5.0: </span>Replaces the misspelt <code class="docutils literal notranslate"><span class="pre">HoleDiscriptor</span></code>.</p>
 </div>
@@ -1231,6 +1233,23 @@ alias; import <a class="reference internal" href="#pcapkit.foundation.reassembly
 <dd><p>Sequence number of the last missing octet, inclusive.</p>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.tcp.HOLE_OPEN_BOUND">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.reassembly.data.tcp.</span></span><span class="sig-name descname"><span class="pre">HOLE_OPEN_BOUND</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">9223372036854775807</span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.tcp.HOLE_OPEN_BOUND" title="Link to this definition">¶</a></dt>
+<dd><p>Open bound of the <a class="reference internal" href="#pcapkit.foundation.reassembly.data.tcp.HoleDescriptor" title="pcapkit.foundation.reassembly.data.tcp.HoleDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">HoleDescriptor</span></code></a> list. A hole whose <code class="docutils literal notranslate"><span class="pre">last</span></code> is
+this value is still open above, and one whose <code class="docutils literal notranslate"><span class="pre">first</span></code> is its negation
+stands for whatever preceded a capture that missed the handshake.</p>
+<p>It is <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">**</span> <span class="pre">63</span> <span class="pre">-</span> <span class="pre">1</span></code> on every platform, not <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.maxsize" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.maxsize</span></code></a>, which is
+<code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">**</span> <span class="pre">31</span> <span class="pre">-</span> <span class="pre">1</span></code> on GraalPy and 32-bit builds and so falls inside the
+<code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">**</span> <span class="pre">32</span></code> sequence space. The unwrapped sequence line reaches it only
+after <code class="docutils literal notranslate"><span class="pre">2</span> <span class="pre">**</span> <span class="pre">31</span></code> wraps. It stays an <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a>, like the descriptor’s
+own fields, and in both signs fits a standard JSON number and a
+<a class="reference external" href="https://docs.python.org/3/library/plistlib.html#module-plistlib" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">plistlib</span></code></a> integer, which <a class="reference external" href="https://docs.python.org/3/library/math.html#math.inf" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">math.inf</span></code></a> does not.</p>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.5.0.</span></p>
+</div>
 </dd></dl>
 
 <dl class="py class">

@@ -537,6 +537,17 @@
 <span class="c1">#: every attribute write.</span>
 <span class="n">_FROZEN</span> <span class="o">=</span> <span class="s1">'_frozen'</span>
 
+<span class="c1">#: frozenset[str]: The cache names ``_py_abc``, the pure-Python fallback</span>
+<span class="c1">#: ``abc`` uses where the C ``_abc`` module is missing, rebinds on a class</span>
+<span class="c1">#: while an :func:`isinstance` or :func:`issubclass` check runs against it</span>
+<span class="c1">#: (:issue:`1960`). A frozen sentinel type still lets these through, and only</span>
+<span class="c1">#: where its own :attr:`~object.__dict__` already holds the name, which only</span>
+<span class="c1">#: that fallback's ``ABCMeta.__new__`` puts there. Each can only make</span>
+<span class="c1">#: a check answer "no" or look again, never "yes". ``_abc_registry`` and</span>
+<span class="c1">#: ``_abc_cache`` are left out, being set only while the type is built, and</span>
+<span class="c1">#: replacing either could make a check answer "yes".</span>
+<span class="n">_PY_ABC_CACHE</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">({</span><span class="s1">'_abc_negative_cache'</span><span class="p">,</span> <span class="s1">'_abc_negative_cache_version'</span><span class="p">})</span>
+
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_not_a_base</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="s1">'type'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'TypeError'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""The error deriving from ``cls`` raises, worded as for ``type(None)``."""</span>
@@ -566,7 +577,10 @@
 <span class="sd">    * Every sentinel type is immutable once its ``class`` statement has run.</span>
 <span class="sd">      Setting or deleting any attribute on it raises :exc:`TypeError`, as</span>
 <span class="sd">      ``type(None).x = 1`` does, so ``_name``, ``_instance`` and the methods</span>
-<span class="sd">      every sentinel inherits stay as they were defined.</span>
+<span class="sd">      every sentinel inherits stay as they were defined. The one exception is</span>
+<span class="sd">      ``_abc_negative_cache`` and ``_abc_negative_cache_version``, which</span>
+<span class="sd">      ``_py_abc``, the fallback ``abc`` uses without the C ``_abc``</span>
+<span class="sd">      module, rebinds during an :func:`isinstance` check (:issue:`1960`).</span>
 
 <span class="sd">    A concrete sentinel type also gets ``__final__`` set to :obj:`True` here.</span>
 <span class="sd">    :func:`~pcapkit.utilities.compat.final` would record the same, but a class</span>
@@ -621,10 +635,12 @@
 <span class="sd">            value: Attribute value.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            TypeError: Once the ``class`` statement of ``cls`` has run.</span>
+<span class="sd">            TypeError: Once the ``class`` statement of ``cls`` has run, unless</span>
+<span class="sd">                ``name`` is one of the ``_py_abc`` caches in ``_PY_ABC_CACHE``</span>
+<span class="sd">                that ``cls`` already holds.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_FROZEN</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">_FROZEN</span><span class="p">)</span> <span class="ow">and</span> <span class="ow">not</span> <span class="p">(</span><span class="n">name</span> <span class="ow">in</span> <span class="n">_PY_ABC_CACHE</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'cannot set </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1"> attribute of immutable type </span><span class="si">{</span><span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__setattr__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
 

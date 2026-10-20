@@ -81,7 +81,8 @@ Algorithm
          ISN <- PSN;
          put data from fragment into data buffer with BUFID
             [from octet fragment.first to octet fragment.last];
-         HDL <- [one hole from PSN + fragment.len to infinity];
+         HDL <- [one hole from PSN + fragment.len to infinity,
+                 i.e. HOLE_OPEN_BOUND];
       } ELSE {
          put data from fragment into data buffer with BUFID
             [from octet fragment.first to octet fragment.last];
@@ -359,6 +360,8 @@ Data Models
 .. autoclass:: pcapkit.foundation.reassembly.data.tcp.HoleDescriptor
    :members:
    :show-inheritance:
+
+.. autodata:: pcapkit.foundation.reassembly.data.tcp.HOLE_OPEN_BOUND
 
 .. autoclass:: pcapkit.foundation.reassembly.data.tcp.Fragment
    :members:

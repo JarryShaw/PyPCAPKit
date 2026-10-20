@@ -826,12 +826,13 @@ engine, each looping over its Python versions), <code class="docutils literal no
 once for this commit from Unit Tests’ own <code class="docutils literal notranslate"><span class="pre">push</span></code> trigger (and, all but
 <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>, which runs on <code class="docutils literal notranslate"><span class="pre">main</span></code> pushes only, from its
 <code class="docutils literal notranslate"><span class="pre">pull_request</span></code> trigger), so running any of them again per caller would test
-the same commit several times over. It also skips the docs-only path’s
-<code class="docutils literal notranslate"><span class="pre">changes</span></code> and <code class="docutils literal notranslate"><span class="pre">project-tests</span></code>, and <code class="docutils literal notranslate"><span class="pre">required-checks</span></code> (see <a class="reference internal" href="#required-status-checks">Required Status
+the same commit several times over. It also skips <code class="docutils literal notranslate"><span class="pre">changes</span></code>,
+<code class="docutils literal notranslate"><span class="pre">project-tests</span></code>, whose project pins <code class="docutils literal notranslate"><span class="pre">gate</span></code>’s full suite runs too (see
+<a class="reference internal" href="#project-pins">Project Pins</a> below), and <code class="docutils literal notranslate"><span class="pre">required-checks</span></code> (see <a class="reference internal" href="#required-status-checks">Required Status
 Checks</a> below), which are gated out by their own <code class="docutils literal notranslate"><span class="pre">if:</span></code> rather than by having
 already run. <code class="docutils literal notranslate"><span class="pre">changelog</span></code> carries no
 <code class="docutils literal notranslate"><span class="pre">if:</span></code> at all and runs on every path regardless – deliberately, per its own
-comment (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1612-1618</span></code>): <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code> feeds
+comment (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1634-1640</span></code>): <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code> feeds
 <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> to the GitHub Release body, so the release path is exactly
 where a drifted file must not go unchecked. Confirmed on run <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/actions/runs/36210743295">36210743295</a> (a
 schedule-triggered GitHub Pages run): both <code class="docutils literal notranslate"><span class="pre">Changelog</span> <span class="pre">drift</span></code> and <code class="docutils literal notranslate"><span class="pre">Gate</span>
@@ -1142,7 +1143,7 @@ grepping every workflow file for its name:</p>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code></p></td>
 <td><p>job <code class="docutils literal notranslate"><span class="pre">required-checks</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1937</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">unit-tests.yml:2003</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.11</span></code></p></td>
 <td><p>job <code class="docutils literal notranslate"><span class="pre">compatibility</span></code>, matrix leg <code class="docutils literal notranslate"><span class="pre">3.11</span></code></p></td>
@@ -1171,29 +1172,30 @@ grepping every workflow file for its name:</p>
 which added <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.15</span></code> and removed <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.10</span></code>. Moving a version
 between the tiers below means editing the ruleset in the same change.</p>
 <p><code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code> is defined by exactly one job
-(<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1937</span></code>). <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span></code> is defined by one, the
+(<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:2003</span></code>). <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span></code> is defined by one, the
 <code class="docutils literal notranslate"><span class="pre">compatibility</span></code> job in <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code> (<code class="docutils literal notranslate"><span class="pre">:60</span></code>), whose matrix
 (<code class="docutils literal notranslate"><span class="pre">:74</span></code>) comes from <code class="file docutils literal notranslate"><span class="pre">.github/python-versions.toml</span></code>: the required legs
 are its supported tier (<code class="docutils literal notranslate"><span class="pre">python-versions.toml:20-24</span></code>), and its KTLO legs
 (<code class="docutils literal notranslate"><span class="pre">python-versions.toml:16-19</span></code>) have names ending in <code class="docutils literal notranslate"><span class="pre">(KTLO)</span></code>, so no required
 context matches one. A comment at
-<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1849</span></code> mentions the string without defining it.</p>
+<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1915</span></code> mentions the string without defining it.</p>
 <p><code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code> is an aggregate, not a single check run. The ruleset
 requires it and the <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.11</span></code>-<code class="docutils literal notranslate"><span class="pre">3.15</span></code> legs, nothing else, as
-<code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s own comment (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1848-1858</span></code>) records. It
+<code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s own comment (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1914-1924</span></code>) records. It
 <code class="docutils literal notranslate"><span class="pre">needs:</span></code> the gating jobs of <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> – <code class="docutils literal notranslate"><span class="pre">test</span></code>, <code class="docutils literal notranslate"><span class="pre">integration</span></code>,
-<code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> and <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code>, plus <code class="docutils literal notranslate"><span class="pre">changes</span></code> and <code class="docutils literal notranslate"><span class="pre">project-tests</span></code>
-for the docs-only path – and checks each result explicitly
-(<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1936-1990</span></code>). Rulesets match check names literally, with no
+<code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> and <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code>, plus <code class="docutils literal notranslate"><span class="pre">project-tests</span></code>, the one run of
+the project pins, and <code class="docutils literal notranslate"><span class="pre">changes</span></code> for the docs-only path – and checks each
+result explicitly
+(<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:2002-2058</span></code>). Rulesets match check names literally, with no
 wildcard, so requiring the matrix cells one by one would mean editing the
 ruleset whenever a matrix changes; the aggregate keeps the required list fixed.
 It accepts the gating jobs as <code class="docutils literal notranslate"><span class="pre">skipped</span></code> only on a docs-only pull request, where
-<code class="docutils literal notranslate"><span class="pre">project-tests</span></code> – every test that reads <code class="docutils literal notranslate"><span class="pre">docs/</span></code> or Markdown – must pass
-instead. The <code class="docutils literal notranslate"><span class="pre">Compat</span></code> legs stay required separately because they come from
+<code class="docutils literal notranslate"><span class="pre">project-tests</span></code> runs every test that reads <code class="docutils literal notranslate"><span class="pre">docs/</span></code> or Markdown as well;
+<code class="docutils literal notranslate"><span class="pre">project-tests</span></code> must pass on every diff. The <code class="docutils literal notranslate"><span class="pre">Compat</span></code> legs stay required separately because they come from
 <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>, and a job cannot <code class="docutils literal notranslate"><span class="pre">needs:</span></code> a job in another
 workflow file. This job runs on Unit Tests’ own <code class="docutils literal notranslate"><span class="pre">push</span></code>/<code class="docutils literal notranslate"><span class="pre">pull_request</span></code>
 triggers; the <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code> reusable calls documented above skip it via
-<code class="docutils literal notranslate"><span class="pre">if:</span> <span class="pre">${{</span> <span class="pre">always()</span> <span class="pre">&amp;&amp;</span> <span class="pre">inputs.gate-only</span> <span class="pre">!=</span> <span class="pre">true</span> <span class="pre">}}</span></code> (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1939</span></code>),
+<code class="docutils literal notranslate"><span class="pre">if:</span> <span class="pre">${{</span> <span class="pre">always()</span> <span class="pre">&amp;&amp;</span> <span class="pre">inputs.gate-only</span> <span class="pre">!=</span> <span class="pre">true</span> <span class="pre">}}</span></code> (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:2005</span></code>),
 so it is never produced – and never expected – on those paths.</p>
 <p id="ktlo-tier">Python versions are tiered – supported and KTLO
 (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1633">#1633</a>), and experimental
@@ -1213,7 +1215,7 @@ and keeps its legs’ check names, <code class="docutils literal notranslate"><s
 with supported legs. Every job holding KTLO legs works the same way:</p>
 <ul class="simple">
 <li><p>Every step that can fail on a KTLO leg has an <code class="docutils literal notranslate"><span class="pre">id</span></code> and
-<code class="docutils literal notranslate"><span class="pre">continue-on-error:</span> <span class="pre">${{</span> <span class="pre">matrix.ktlo</span> <span class="pre">==</span> <span class="pre">true</span> <span class="pre">}}</span></code> (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:406-423</span></code>),
+<code class="docutils literal notranslate"><span class="pre">continue-on-error:</span> <span class="pre">${{</span> <span class="pre">matrix.ktlo</span> <span class="pre">==</span> <span class="pre">true</span> <span class="pre">}}</span></code> (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:424-441</span></code>),
 unless it is masked on every leg, as the timings uploads are. Its <code class="docutils literal notranslate"><span class="pre">outcome</span></code> is
 then <code class="docutils literal notranslate"><span class="pre">failure</span></code> but its <code class="docutils literal notranslate"><span class="pre">conclusion</span></code> <code class="docutils literal notranslate"><span class="pre">success</span></code>, so the job, its check run
 and <code class="docutils literal notranslate"><span class="pre">required-checks</span></code> read <code class="docutils literal notranslate"><span class="pre">success</span></code>. A step that needs an earlier one’s work
@@ -1324,18 +1326,15 @@ job, and none on a step. Promoting one whose leg stays green is a hand edit, whi
 and a <code class="docutils literal notranslate"><span class="pre">Compat</span></code> leg.</p>
 <p>The tests’ 120 minutes are sized for GraalPy, the slowest of the legs that share
 them: its leg reached 26% of the unit tier in 25 minutes (job 115915976024), where
-3.14t’s ran the whole tier in 5.8 (run 38581834697). By the owner’s ruling the
-round-trip sweeps run on <code class="docutils literal notranslate"><span class="pre">latest</span></code> alone: every leg but <code class="docutils literal notranslate"><span class="pre">latest</span></code> adds
-<code class="docutils literal notranslate"><span class="pre">--ignore-glob='*roundtrip*'</span></code>, which leaves out each unit-tier module whose path
-holds <code class="docutils literal notranslate"><span class="pre">roundtrip</span></code> (<code class="docutils literal notranslate"><span class="pre">ROUNDTRIP_SWEEP_GLOB</span></code> in <code class="file docutils literal notranslate"><span class="pre">tests/_tiers.py</span></code>), and
-<code class="docutils literal notranslate"><span class="pre">latest</span></code>, the coverage leg, runs them as before. The subset covers
-<code class="docutils literal notranslate"><span class="pre">integration</span></code> too: off <code class="docutils literal notranslate"><span class="pre">latest</span></code> its legs leave out the
-<code class="docutils literal notranslate"><span class="pre">*roundtrip*_runtime.py</span></code> modules (<code class="docutils literal notranslate"><span class="pre">ROUNDTRIP_RUNTIME_GLOB</span></code>), dropping them from
-<code class="docutils literal notranslate"><span class="pre">fixture_tier_paths()</span></code>’s selection and adding the glob as an <code class="docutils literal notranslate"><span class="pre">--ignore-glob</span></code>,
-since pytest applies no ignore to a path it was handed. On 2026-10-14 they took
-8% of the unit tier’s time in a serial 3.14 run (86 of 1,031 s), and 10-11% on the
-3.14, 3.15 and 3.14t legs of run 38581834697, so the rest should take GraalPy 88-113
-minutes (estimate).</p>
+3.14t’s ran the whole tier in 5.8 (run 38581834697). The experimental legs run the
+<code class="docutils literal notranslate"><span class="pre">ALL</span></code> test tier alone, as every leg but <code class="docutils literal notranslate"><span class="pre">latest</span></code> does (see <a class="reference internal" href="#test-tiers">Test Tiers</a> below):
+<code class="docutils literal notranslate"><span class="pre">List</span> <span class="pre">the</span> <span class="pre">LATEST</span> <span class="pre">tier</span></code> asks <code class="docutils literal notranslate"><span class="pre">latest_tier_paths()</span></code> on the runner’s own <code class="docutils literal notranslate"><span class="pre">python3</span></code>,
+before setup-python, so GraalPy does not parse the tree, and <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">unit</span> <span class="pre">tests</span></code>
+passes each module it printed as an <code class="docutils literal notranslate"><span class="pre">--ignore</span></code>. The
+round-trip sweeps of <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1732">#1732</a>
+took 8% of the unit tier’s time in a serial 3.14 run (86 of 1,031 s), and 10-11% on
+the 3.14, 3.15 and 3.14t legs of run 38581834697, so the rest should take GraalPy
+88-113 minutes (estimate).</p>
 <p>GraalPy’s leg still loses its runner 18-30 minutes into its tests, with <code class="docutils literal notranslate"><span class="pre">The</span> <span class="pre">runner</span>
 <span class="pre">has</span> <span class="pre">received</span> <span class="pre">a</span> <span class="pre">shutdown</span> <span class="pre">signal</span></code> (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1740">#1740</a>),
 so each experimental leg samples its runner while the tests run. <code class="docutils literal notranslate"><span class="pre">Start</span> <span class="pre">the</span> <span class="pre">resource</span>
@@ -1396,6 +1395,112 @@ KTLO summary’s script, still warns of every failed step, <code class="docutils
 workers rather than 4, GraalPy’s tests should take about 117-151 minutes (an inference
 from the 88-113 above, not measured), so its leg may end on the 110-minute timeout as a
 warning: that is expected, blocks nothing, and leaves the caps as they are.</p>
+</section>
+<section id="test-tiers">
+<h2>Test Tiers<a class="headerlink" href="#test-tiers" title="Link to this heading">¶</a></h2>
+<p>Every test module runs in one of two <em>test tiers</em> (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1958">#1958</a>): <code class="docutils literal notranslate"><span class="pre">ALL</span></code>, which runs on every
+leg, and <code class="docutils literal notranslate"><span class="pre">LATEST</span></code>, which runs on <code class="docutils literal notranslate"><span class="pre">latest</span></code> alone. They are orthogonal to the unit
+and fixture-dependent tiers, which decide what a module may read and so which job
+collects it; a test tier decides on which of that job’s legs it runs.</p>
+<p><code class="docutils literal notranslate"><span class="pre">module_tier()</span></code> in <code class="file docutils literal notranslate"><span class="pre">tests/_tiers.py</span></code> decides, in one place, for every
+<code class="docutils literal notranslate"><span class="pre">tests/**/test_*.py</span></code>:</p>
+<ul class="simple">
+<li><p><strong>The marker.</strong> A module may state its tier outright with a module-level
+<code class="docutils literal notranslate"><span class="pre">__tier__</span> <span class="pre">=</span> <span class="pre">'ALL'</span></code> or <code class="docutils literal notranslate"><span class="pre">__tier__</span> <span class="pre">=</span> <span class="pre">'LATEST'</span></code>, read by AST, under a <code class="docutils literal notranslate"><span class="pre">#:</span></code>
+comment that gives the reason. It wins over the rule. It is a module constant
+rather than a pytest marker, so <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>’s plain <code class="docutils literal notranslate"><span class="pre">unittest</span></code> runs
+read the same module. A value that is not one of the two string literals, or a
+marker assigned twice or anywhere but at the module’s top level, fails the tier
+guard.</p></li>
+<li><p><strong>The rule.</strong> Otherwise a module is <code class="docutils literal notranslate"><span class="pre">LATEST</span></code> when its run does not vary by
+interpreter, by the same AST test as the project pins below: it reads the
+repository’s text, a workflow or the docs, or drives a <code class="docutils literal notranslate"><span class="pre">util/</span></code> script, and
+neither imports <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code> nor compares the Python version. Everything that
+exercises <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code> is <code class="docutils literal notranslate"><span class="pre">ALL</span></code>.</p></li>
+</ul>
+<p>The marker says what the AST cannot see. Each real sweep – a round trip over every
+class or registry entry a table enumerates, every offset of a packet or every
+capture – is marked <code class="docutils literal notranslate"><span class="pre">LATEST</span></code>, as the owner ruled on #1732 and #1958; the
+hand-picked round trips, whatever their names, run on <code class="docutils literal notranslate"><span class="pre">ALL</span></code>, and so do the #1202
+edge-case tables, whose cases are each written out by hand. A module that imports <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code> only to read its text or
+structure, or that drives a docs hook or a generator other legs already run, is
+marked <code class="docutils literal notranslate"><span class="pre">LATEST</span></code>; one that the rule would send to <code class="docutils literal notranslate"><span class="pre">latest</span></code> but that depends on
+the interpreter, such as the tier guard itself, which <code class="file docutils literal notranslate"><span class="pre">tests/conftest.py</span></code> runs at
+collection on every leg, is marked <code class="docutils literal notranslate"><span class="pre">ALL</span></code>.</p>
+<p>Which legs run which tier:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Leg</p></th>
+<th class="head"><p>Tiers</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">test</span></code> on <code class="docutils literal notranslate"><span class="pre">latest</span></code>, the coverage leg</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ALL</span></code> and <code class="docutils literal notranslate"><span class="pre">LATEST</span></code>, less the project pins</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">project-tests</span></code></p></td>
+<td><p>the project pins</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">test</span></code> off <code class="docutils literal notranslate"><span class="pre">latest</span></code>, <code class="docutils literal notranslate"><span class="pre">test-ktlo</span></code>, <code class="docutils literal notranslate"><span class="pre">experimental</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ALL</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">integration</span></code> on <code class="docutils literal notranslate"><span class="pre">latest</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ALL</span></code> and <code class="docutils literal notranslate"><span class="pre">LATEST</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">integration</span></code> off <code class="docutils literal notranslate"><span class="pre">latest</span></code>, <code class="docutils literal notranslate"><span class="pre">integration-ktlo</span></code>, <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code>,
+<code class="docutils literal notranslate"><span class="pre">pypcap-parity-ktlo</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ALL</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">gate</span></code>, <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">ALL</span></code> and <code class="docutils literal notranslate"><span class="pre">LATEST</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Each leg asks <code class="file docutils literal notranslate"><span class="pre">tests/_tiers.py</span></code> at run time, so no workflow lists a tier: a
+<code class="docutils literal notranslate"><span class="pre">test</span></code> leg off <code class="docutils literal notranslate"><span class="pre">latest</span></code> passes each module <code class="docutils literal notranslate"><span class="pre">latest_tier_paths()</span></code> prints as an
+<code class="docutils literal notranslate"><span class="pre">--ignore</span></code>, and an <code class="docutils literal notranslate"><span class="pre">integration</span></code> or <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> leg off <code class="docutils literal notranslate"><span class="pre">latest</span></code> runs
+<code class="docutils literal notranslate"><span class="pre">fixture_tier_paths('ALL')</span></code>, which drops each <code class="docutils literal notranslate"><span class="pre">LATEST</span></code> path and node ID and
+replaces a directory holding a <code class="docutils literal notranslate"><span class="pre">LATEST</span></code> module by its <code class="docutils literal notranslate"><span class="pre">ALL</span></code> ones, since pytest
+applies no ignore to a path it was handed. <code class="file docutils literal notranslate"><span class="pre">tests/test_tier_guard.py</span></code> checks
+that every module resolves to exactly one tier and runs the steps to check what each
+does with the answer, and <code class="file docutils literal notranslate"><span class="pre">tests/project/test_sweeps_on_latest_only_1732.py</span></code>
+does the same for every leg the tier file gives.</p>
+<p>The project pins stay in a job of their own rather than joining the <code class="docutils literal notranslate"><span class="pre">latest</span></code> leg:
+<code class="docutils literal notranslate"><span class="pre">project-tests</span></code> runs in parallel with the coverage leg, the slowest of <code class="docutils literal notranslate"><span class="pre">test</span></code>’s,
+rather than lengthening it under coverage, and it is also the job that runs the docs
+readers on a docs-only diff.</p>
+</section>
+<section id="project-pins">
+<h2>Project Pins<a class="headerlink" href="#project-pins" title="Link to this heading">¶</a></h2>
+<p>The <em>project pins</em> run once per push (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1954">#1954</a>): the modules under
+<code class="file docutils literal notranslate"><span class="pre">tests/project</span></code> whose run does not vary by interpreter, as they read the
+repository’s text or drive a <code class="docutils literal notranslate"><span class="pre">util/</span></code> script. <code class="docutils literal notranslate"><span class="pre">is_project_pin()</span></code> in
+<code class="file docutils literal notranslate"><span class="pre">tests/_tiers.py</span></code> decides, by the AST of each module and of the repository
+code it runs: a module is a pin unless it, a module it takes names from, or a file
+it runs by path imports <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code>, or compares <code class="docutils literal notranslate"><span class="pre">sys.version_info</span></code> or
+<code class="docutils literal notranslate"><span class="pre">sys.implementation</span></code>. A computed import, or a <code class="docutils literal notranslate"><span class="pre">.py</span></code> name computed for a
+loader or a child process, counts as importing it, and so does a file that does
+not parse. Every pin is in the <code class="docutils literal notranslate"><span class="pre">LATEST</span></code> test tier (see <a class="reference internal" href="#test-tiers">Test Tiers</a> above),
+and a <code class="docutils literal notranslate"><span class="pre">tests/project</span></code> module marked <code class="docutils literal notranslate"><span class="pre">__tier__</span> <span class="pre">=</span> <span class="pre">'ALL'</span></code> is no pin. The modules
+that import <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code> are no pins either; those the tiers send to <code class="docutils literal notranslate"><span class="pre">latest</span></code> run
+on <code class="docutils literal notranslate"><span class="pre">test</span></code>’s <code class="docutils literal notranslate"><span class="pre">latest</span></code> leg, under coverage.</p>
+<p><code class="docutils literal notranslate"><span class="pre">project-tests</span></code> runs the pins under pytest, with <code class="docutils literal notranslate"><span class="pre">test</span></code>’s flags, on <code class="docutils literal notranslate"><span class="pre">latest</span></code>,
+on every pull request and every push to <code class="docutils literal notranslate"><span class="pre">main</span></code>, and <code class="docutils literal notranslate"><span class="pre">required-checks</span></code> needs it.
+Every <code class="docutils literal notranslate"><span class="pre">test</span></code>, <code class="docutils literal notranslate"><span class="pre">test-ktlo</span></code> and <code class="docutils literal notranslate"><span class="pre">experimental</span></code> leg passes each pin as an
+<code class="docutils literal notranslate"><span class="pre">--ignore</span></code>, <code class="docutils literal notranslate"><span class="pre">latest</span></code>’s coverage leg included, which measures only <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code>.
+<code class="docutils literal notranslate"><span class="pre">latest</span></code> asks <code class="docutils literal notranslate"><span class="pre">project_pin_paths()</span></code> at run time, and every other leg
+<code class="docutils literal notranslate"><span class="pre">latest_tier_paths()</span></code>, which holds each pin, as <code class="docutils literal notranslate"><span class="pre">integration</span></code> asks for its
+selection, so no workflow lists the pins, and <code class="file docutils literal notranslate"><span class="pre">tests/test_tier_guard.py</span></code> runs
+the steps to check what each does with the answer. Under <code class="docutils literal notranslate"><span class="pre">gate-only</span></code>, <code class="docutils literal notranslate"><span class="pre">gate</span></code>’s
+full suite runs the pins with everything else. <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>’s <code class="docutils literal notranslate"><span class="pre">project</span></code>
+cell keeps them, as it asks how a module runs in one interpreter, in file order and
+without xdist, which is a question about the module rather than the Python version.</p>
+<p>A pin’s skip where <code class="docutils literal notranslate"><span class="pre">tomllib</span></code> is missing, before 3.11, runs on no leg: the scripts
+those pins drive read the tier file on the runner’s own <code class="docutils literal notranslate"><span class="pre">python3</span></code>, and
+<code class="file docutils literal notranslate"><span class="pre">tests/project/test_python_versions_1660.py</span></code> checks those skips in a child
+interpreter that cannot import <code class="docutils literal notranslate"><span class="pre">tomllib</span></code>.</p>
 </section>
 <section id="python-versions">
 <h2>Python Versions<a class="headerlink" href="#python-versions" title="Link to this heading">¶</a></h2>
@@ -1465,9 +1570,15 @@ approval, in <code class="docutils literal notranslate"><span class="pre">create
 <a class="reference internal" href="#python-versions">Python Versions</a>)</p></li>
 </ul>
 <p>No other workflow in scope here declares one – including
-<code class="docutils literal notranslate"><span class="pre">deploy-pages.yml</span></code>, whose <code class="docutils literal notranslate"><span class="pre">deploy-pages</span></code> job pushes straight to the
+<code class="docutils literal notranslate"><span class="pre">deploy-pages.yml</span></code>, whose <code class="docutils literal notranslate"><span class="pre">publish-pages</span></code> job pushes straight to the
 <code class="docutils literal notranslate"><span class="pre">gh-pages</span></code> branch via <code class="docutils literal notranslate"><span class="pre">JamesIves/github-pages-deploy-action</span></code> rather than
-through an <code class="docutils literal notranslate"><span class="pre">environment:</span></code>-gated deployment. Of these environments, only
+through an <code class="docutils literal notranslate"><span class="pre">environment:</span></code>-gated deployment. Its <code class="docutils literal notranslate"><span class="pre">deploy-pages</span></code> job builds
+the site, a pull request’s included, with <code class="docutils literal notranslate"><span class="pre">contents:</span> <span class="pre">read</span></code>, and uploads it
+for <code class="docutils literal notranslate"><span class="pre">publish-pages</span></code>, which alone holds <code class="docutils literal notranslate"><span class="pre">contents:</span> <span class="pre">write</span></code> and never runs on
+a pull request. Its <code class="docutils literal notranslate"><span class="pre">Check</span> <span class="pre">gh-pages</span> <span class="pre">holds</span> <span class="pre">no</span> <span class="pre">newer</span> <span class="pre">build</span></code> step skips the
+deploy when <code class="docutils literal notranslate"><span class="pre">gh-pages</span></code> already holds the build of a commit this run’s commit
+is behind, so a build that finishes late cannot replace newer documentation
+(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1968">#1968</a>). Of these environments, only
 <code class="docutils literal notranslate"><span class="pre">github-release</span></code> carries a required reviewer; <a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a>
 covers why one approval on that single environment is enough to gate the
 whole release graph, and is the page to read for the reasoning rather than
@@ -1541,6 +1652,8 @@ repeating it here.</p>
 <li><a class="reference internal" href="#ci-timing-review-1538">CI Timing Review (#1538)</a></li>
 <li><a class="reference internal" href="#work-kept-off-the-pull-request-queue-1538">Work Kept Off the Pull-Request Queue (#1538)</a></li>
 <li><a class="reference internal" href="#required-status-checks">Required Status Checks</a></li>
+<li><a class="reference internal" href="#test-tiers">Test Tiers</a></li>
+<li><a class="reference internal" href="#project-pins">Project Pins</a></li>
 <li><a class="reference internal" href="#python-versions">Python Versions</a></li>
 <li><a class="reference internal" href="#deployment-environment">Deployment <code class="docutils literal notranslate"><span class="pre">environment:</span></code></a></li>
 </ul>

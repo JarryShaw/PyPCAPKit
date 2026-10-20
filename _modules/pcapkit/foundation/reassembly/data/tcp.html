@@ -490,7 +490,7 @@
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">'Packet'</span><span class="p">,</span> <span class="s1">'DatagramID'</span><span class="p">,</span> <span class="s1">'Datagram'</span><span class="p">,</span> <span class="s1">'HoleDescriptor'</span><span class="p">,</span>
-    <span class="s1">'Fragment'</span><span class="p">,</span> <span class="s1">'Buffer'</span><span class="p">,</span> <span class="s1">'BufferID'</span><span class="p">,</span>
+    <span class="s1">'Fragment'</span><span class="p">,</span> <span class="s1">'Buffer'</span><span class="p">,</span> <span class="s1">'BufferID'</span><span class="p">,</span> <span class="s1">'HOLE_OPEN_BOUND'</span><span class="p">,</span>
 <span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -505,6 +505,20 @@
 
 <span class="c1">#: Buffer ID.</span>
 <span class="n">BufferID</span><span class="p">:</span> <span class="s1">'TypeAlias'</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">_AT</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">_AT</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span>
+
+<span class="c1">#: Open bound of the :class:`HoleDescriptor` list. A hole whose ``last`` is</span>
+<span class="c1">#: this value is still open above, and one whose ``first`` is its negation</span>
+<span class="c1">#: stands for whatever preceded a capture that missed the handshake.</span>
+<span class="c1">#:</span>
+<span class="c1">#: It is ``2 ** 63 - 1`` on every platform, not :data:`sys.maxsize`, which is</span>
+<span class="c1">#: ``2 ** 31 - 1`` on GraalPy and 32-bit builds and so falls inside the</span>
+<span class="c1">#: ``2 ** 32`` sequence space. The unwrapped sequence line reaches it only</span>
+<span class="c1">#: after ``2 ** 31`` wraps. It stays an :class:`int`, like the descriptor's</span>
+<span class="c1">#: own fields, and in both signs fits a standard JSON number and a</span>
+<span class="c1">#: :mod:`plistlib` integer, which :data:`math.inf` does not.</span>
+<span class="c1">#:</span>
+<span class="c1">#: .. versionadded:: 1.5.0</span>
+<span class="n">HOLE_OPEN_BOUND</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">63</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
 
 
 <div class="viewcode-block" id="Packet">
@@ -638,8 +652,9 @@
 <span class="sd">    :attr:`Fragment.raw`: the descriptor list is kept once per buffer ID,</span>
 <span class="sd">    across every acknowledgement number's payload buffer, and describes the</span>
 <span class="sd">    stream as a whole. It decides when a stream whose FIN has been seen is</span>
-<span class="sd">    whole; a hole whose ``first`` is ``-sys.maxsize`` stands for whatever</span>
-<span class="sd">    preceded a capture that missed the handshake, and does not count.</span>
+<span class="sd">    whole. A hole whose ``first`` is ``-HOLE_OPEN_BOUND`` stands for whatever</span>
+<span class="sd">    preceded a capture that missed the handshake, and does not count; one</span>
+<span class="sd">    whose ``last`` is :data:`HOLE_OPEN_BOUND` is still open above.</span>
 
 <span class="sd">    .. versionadded:: 1.5.0</span>
 

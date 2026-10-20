@@ -490,12 +490,11 @@
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.data</span><span class="w"> </span><span class="kn">import</span> <span class="n">Completion</span><span class="p">,</span> <span class="n">Deferred</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">Buffer</span><span class="p">,</span> <span class="n">BufferID</span><span class="p">,</span> <span class="n">Datagram</span><span class="p">,</span> <span class="n">DatagramID</span><span class="p">,</span>
-                                                    <span class="n">Fragment</span><span class="p">,</span> <span class="n">HoleDescriptor</span><span class="p">,</span> <span class="n">Packet</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">HOLE_OPEN_BOUND</span><span class="p">,</span> <span class="n">Buffer</span><span class="p">,</span> <span class="n">BufferID</span><span class="p">,</span> <span class="n">Datagram</span><span class="p">,</span>
+                                                    <span class="n">DatagramID</span><span class="p">,</span> <span class="n">Fragment</span><span class="p">,</span> <span class="n">HoleDescriptor</span><span class="p">,</span> <span class="n">Packet</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.reassembly</span><span class="w"> </span><span class="kn">import</span> <span class="n">ReassemblyBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.transport.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span> <span class="k">as</span> <span class="n">TCP_Protocol</span>
 
@@ -721,7 +720,7 @@
                     <span class="c1"># everything from the octet after this segment onwards is</span>
                     <span class="c1"># still missing</span>
                     <span class="n">first</span><span class="o">=</span><span class="n">PSN</span> <span class="o">+</span> <span class="n">info</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>
-                    <span class="n">last</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">,</span>
+                    <span class="n">last</span><span class="o">=</span><span class="n">HOLE_OPEN_BOUND</span><span class="p">,</span>
                 <span class="p">),</span>
             <span class="p">]</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">ANCHORED</span><span class="p">:</span>
@@ -730,7 +729,7 @@
                 <span class="c1"># marks this one hole as "before the capture began" rather than</span>
                 <span class="c1"># as data missing from the stream; it is what lets a segment</span>
                 <span class="c1"># arriving *below* this one leave a real hole between the two.</span>
-                <span class="n">hdl</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">HoleDescriptor</span><span class="p">(</span><span class="n">first</span><span class="o">=-</span><span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">,</span> <span class="n">last</span><span class="o">=</span><span class="n">PSN</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="n">hdl</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">HoleDescriptor</span><span class="p">(</span><span class="n">first</span><span class="o">=-</span><span class="n">HOLE_OPEN_BOUND</span><span class="p">,</span> <span class="n">last</span><span class="o">=</span><span class="n">PSN</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span> <span class="o">=</span> <span class="n">Buffer</span><span class="p">(</span>
                 <span class="n">hdl</span><span class="o">=</span><span class="n">hdl</span><span class="p">,</span>
                 <span class="n">hdr</span><span class="o">=</span><span class="n">HDR</span><span class="p">,</span>
@@ -836,7 +835,7 @@
 <span class="sd">            with the sentinel hole that a buffer begun without a SYN carries.</span>
 
 <span class="sd">        """</span>
-        <span class="k">return</span> <span class="ow">not</span> <span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">hdl</span> <span class="ow">and</span> <span class="n">buf</span><span class="o">.</span><span class="n">hdl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">first</span> <span class="o">==</span> <span class="o">-</span><span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">)</span>
+        <span class="k">return</span> <span class="ow">not</span> <span class="p">(</span><span class="n">buf</span><span class="o">.</span><span class="n">hdl</span> <span class="ow">and</span> <span class="n">buf</span><span class="o">.</span><span class="n">hdl</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">first</span> <span class="o">==</span> <span class="o">-</span><span class="n">HOLE_OPEN_BOUND</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_stream_whole</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">BUFID</span><span class="p">:</span> <span class="s1">'BufferID'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Whether a stream has seen its FIN and every octet below it.</span>
@@ -851,7 +850,7 @@
 
 <span class="sd">        """</span>
         <span class="k">for</span> <span class="n">hole</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span><span class="o">.</span><span class="n">hdl</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">hole</span><span class="o">.</span><span class="n">first</span> <span class="o">!=</span> <span class="o">-</span><span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span> <span class="ow">or</span> <span class="n">hole</span><span class="o">.</span><span class="n">last</span> <span class="o">==</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">hole</span><span class="o">.</span><span class="n">first</span> <span class="o">!=</span> <span class="o">-</span><span class="n">HOLE_OPEN_BOUND</span> <span class="ow">or</span> <span class="n">hole</span><span class="o">.</span><span class="n">last</span> <span class="o">==</span> <span class="n">HOLE_OPEN_BOUND</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="kc">True</span>
 
