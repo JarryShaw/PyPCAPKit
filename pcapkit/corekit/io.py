@@ -205,7 +205,7 @@ class SeekableReader(io.BufferedReader):
 
         # NOTE: ``-1`` sets no limit of its own, but one read still goes no further
         # than :data:`sys.maxsize`, past which it raises :exc:`OverflowError`
-        # rather than coming back short (:issue:`1975`).
+        # rather than coming back short (#1975).
         limit = sys.maxsize if config.READ_CHUNK == -1 else config.READ_CHUNK
         chunks = []  # type: list[bytes]
         count = 0

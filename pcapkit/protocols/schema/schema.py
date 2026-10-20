@@ -1075,7 +1075,7 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
                 # can go, :data:`sys.maxsize`; past it the read raises
                 # :exc:`OverflowError` rather than coming back short, which is
                 # how every other overrun is reported. No stream holds more than
-                # that, so the bounded read is the same short read (:issue:`1975`).
+                # that, so the bounded read is the same short read (#1975).
                 payload = data.read(min(length, sys.maxsize))
                 self.__buffer__[field.name] = payload
 
@@ -1108,7 +1108,7 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
 
             length = field.length
 
-            # NOTE: bounded as the payload read above is (:issue:`1975`).
+            # NOTE: bounded as the payload read above is (#1975).
             byte = data.read(min(length, sys.maxsize))
             self.__buffer__[field.name] = byte
             if not isinstance(field, ForwardMatchField):

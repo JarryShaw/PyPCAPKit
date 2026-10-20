@@ -1353,7 +1353,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             #
             # NOTE: Asked for no further than one read can go, :data:`sys.maxsize`,
             # past which the read raises :exc:`OverflowError` instead of coming
-            # back short as the truncation handling below expects (:issue:`1975`).
+            # back short as the truncation handling below expects (#1975).
             self._data = self._read_fileng(min(schema.block.length, sys.maxsize))
 
             # NOTE: Block Total Length is cross-checked against its own trailing
@@ -1640,7 +1640,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         current = self._file.tell()
         self._file.seek(offset + 8, io.SEEK_SET)
-        # NOTE: bounded as :meth:`read` bounds the block's read (:issue:`1975`).
+        # NOTE: bounded as :meth:`read` bounds the block's read (#1975).
         body = self._read_fileng(min(header.block.length - GENERIC_BLOCK_MINIMUM, sys.maxsize))
         self._file.seek(current, io.SEEK_SET)
 
