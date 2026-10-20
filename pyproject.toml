@@ -15,7 +15,10 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pypcapkit"
-dynamic = [ "version", "readme" ]
+# ``readme`` is static, not supplied by ``setup.py`` (#1968): Dependabot replaces
+# ``setup.py`` with a stub that passes no long description, so a dynamic one fails
+# to build the Pipfile's editable ``pypcapkit`` and every pip update job with it.
+dynamic = [ "version" ]
 authors = [
     { name="Jarry Shaw", email="jarryshaw@icloud.com" },
 ]
@@ -58,6 +61,7 @@ license = { text="BSD 3-Clause License" }
 # besides. The ``PCAP_CT`` extra needs 3.10 regardless.
 requires-python = ">=3.6, <4"
 description = "PyPCAPKit: comprehensive network packet analysis library"
+readme = { file = "README.md", content-type = "text/markdown" }
 keywords = [ "network", "pcap", "packet" ]
 classifiers = [
     "Development Status :: 5 - Production/Stable",

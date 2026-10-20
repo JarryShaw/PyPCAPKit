@@ -19,7 +19,11 @@ are not actions fetched by tag, so they are left alone.
 * :class:`TestDependabotCoversEveryManifest` checks the owner's ruling on #1968:
   ``pip`` over the root, :file:`docs` and :file:`examples/benchmark`, and
   neither :file:`conda` nor a ``docker`` entry, as Dependabot cannot update
-  either.
+  either; and the root job's ``exclude-paths`` skips
+  :file:`conda/requirements.txt`, which it would otherwise read.
+* :class:`TestDependabotCanBuildTheEditable` checks :file:`pyproject.toml`
+  declares its readme statically, as Dependabot's stub :file:`setup.py` supplies
+  none.
 * :class:`TestPyUpOpensNoUpdates` checks :file:`.pyup.yml` turns PyUp's update
   pull requests off, as Dependabot opens them.
 
@@ -30,6 +34,11 @@ from __future__ import annotations
 import re
 import unittest
 from typing import TYPE_CHECKING
+
+try:
+    import tomllib
+except ImportError:  # pragma: no cover
+    tomllib = None  # type: ignore[assignment]
 
 from tests import _workflows
 from tests._tiers import ROOT
@@ -168,6 +177,16 @@ class TestDependabotCoversEveryManifest(unittest.TestCase):
             with self.subTest(ecosystem=ecosystem):
                 self.assertNotIn('/conda', directories(entry))
 
+    def test_the_root_job_skips_the_conda_requirements(self) -> None:
+        """The ``/`` job reads requirements files one directory down, :file:`conda` included.
+
+        dependabot-core's ``SharedFileFetcher.req_files_for_dir`` fetches them, and
+        ``FileFetchers::Base.filter_excluded`` drops an entry whose path from the
+        repository root matches ``exclude-paths``; without it the job checked
+        :file:`conda/requirements.txt`'s cryptography pin.
+        """
+        self.assertIn('conda/requirements.txt', updates()['pip'].get('exclude-paths') or [])
+
     def test_there_is_no_docker_entry(self) -> None:
         """Dependabot reads a ``FROM`` that names its image; the benchmark's is an ``ARG``.
 
@@ -181,6 +200,27 @@ class TestDependabotCoversEveryManifest(unittest.TestCase):
             with self.subTest(ecosystem=ecosystem):
                 self.assertEqual(entry['schedule'], {'interval': 'weekly'})
                 self.assertEqual(len({'directory', 'directories'} & set(entry)), 1)
+
+
+class TestDependabotCanBuildTheEditable(unittest.TestCase):
+    """The Pipfile's editable ``pypcapkit`` builds under Dependabot's stub :file:`setup.py`.
+
+    Dependabot's ``SetupFileSanitizer`` replaces :file:`setup.py` with
+    ``setup(name=..., version="0.0.1", ...)``, which passes no long
+    description. A ``readme`` left in ``dynamic`` then fails the build, and every
+    root pip update with it.
+    """
+
+    def setUp(self) -> None:
+        if tomllib is None:  # pragma: no cover
+            self.skipTest('tomllib needs Python 3.11')
+        self.project = tomllib.loads((ROOT / 'pyproject.toml').read_text(encoding='utf-8'))['project']
+
+    def test_the_readme_is_not_dynamic(self) -> None:
+        self.assertNotIn('readme', self.project.get('dynamic', []))
+
+    def test_the_readme_is_the_markdown_file(self) -> None:
+        self.assertEqual(self.project['readme'], {'file': 'README.md', 'content-type': 'text/markdown'})
 
 
 class TestPyUpOpensNoUpdates(unittest.TestCase):
