@@ -57,6 +57,17 @@ if TYPE_CHECKING:
 #: every attribute write.
 _FROZEN = '_frozen'
 
+#: frozenset[str]: The cache names ``_py_abc``, the pure-Python fallback
+#: :mod:`abc` uses where the C ``_abc`` module is missing, rebinds on a class
+#: while an :func:`isinstance` or :func:`issubclass` check runs against it
+#: (:issue:`1960`). A frozen sentinel type still lets these through, and only
+#: where its own :attr:`~object.__dict__` already holds the name, which only
+#: that fallback's :meth:`~abc.ABCMeta.__new__` puts there. Each can only make
+#: a check answer "no" or look again, never "yes". ``_abc_registry`` and
+#: ``_abc_cache`` are left out, being set only while the type is built, and
+#: replacing either could make a check answer "yes".
+_PY_ABC_CACHE = frozenset({'_abc_negative_cache', '_abc_negative_cache_version'})
+
 
 def _not_a_base(cls: 'type') -> 'TypeError':
     """The error deriving from ``cls`` raises, worded as for ``type(None)``."""
@@ -84,7 +95,10 @@ class SentinelMeta(abc.ABCMeta):
     * Every sentinel type is immutable once its ``class`` statement has run.
       Setting or deleting any attribute on it raises :exc:`TypeError`, as
       ``type(None).x = 1`` does, so ``_name``, ``_instance`` and the methods
-      every sentinel inherits stay as they were defined.
+      every sentinel inherits stay as they were defined. The one exception is
+      ``_abc_negative_cache`` and ``_abc_negative_cache_version``, which
+      ``_py_abc``, the fallback :mod:`abc` uses without the C ``_abc``
+      module, rebinds during an :func:`isinstance` check (:issue:`1960`).
 
     A concrete sentinel type also gets ``__final__`` set to :obj:`True` here.
     :func:`~pcapkit.utilities.compat.final` would record the same, but a class
@@ -139,10 +153,12 @@ class SentinelMeta(abc.ABCMeta):
             value: Attribute value.
 
         Raises:
-            TypeError: Once the ``class`` statement of ``cls`` has run.
+            TypeError: Once the ``class`` statement of ``cls`` has run, unless
+                ``name`` is one of the ``_py_abc`` caches in ``_PY_ABC_CACHE``
+                that ``cls`` already holds.
 
         """
-        if cls.__dict__.get(_FROZEN):
+        if cls.__dict__.get(_FROZEN) and not (name in _PY_ABC_CACHE and name in cls.__dict__):
             raise TypeError(f'cannot set {name!r} attribute of immutable type {cls.__name__!r}')
         super().__setattr__(name, value)
 
