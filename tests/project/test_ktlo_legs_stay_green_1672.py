@@ -18,7 +18,9 @@ line; and a step's own annotations take the job's ``ANNOTATION_LEVEL``.
 ``continue-on-error`` step's failed ``outcome`` concluding ``success`` -- so each
 step's failure is tried on every leg instead of read off the text. Expressions go
 through :mod:`tests.project.test_release_gates`'s evaluator, and the scripts that
-write annotations are executed.
+write annotations are executed. Both summaries run :file:`util/leg_summary.py`
+(#1967), and :file:`create-release.yml`'s ``pypi`` keeps an inline copy of its
+shell, which is run against the script on the same steps.
 
 #1660 added an experimental tier, free-threaded CPython and GraalPy, as legs of
 ``test`` only; #1732 moved them to a job of their own, ``experimental``, which
@@ -40,6 +42,7 @@ import pathlib
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 from typing import TYPE_CHECKING, NamedTuple
@@ -51,6 +54,7 @@ from tests.project.test_python_matrix_tiers_1633 import (EXPERIMENTAL_GUARD, EXP
                                                          workflow_commands)
 from tests.project.test_python_versions_1660 import ROOT, live_outputs, prose, resolve
 from tests.project.test_release_gates import NULL, STATUS, evaluate_condition, evaluate_expression
+from util.leg_summary import REASONS
 
 if TYPE_CHECKING:
     from typing import Any, Optional
@@ -118,6 +122,15 @@ EXPERIMENTAL_SUMMARY_ENV = {'LEG': 'Python ${{ matrix.python-version }} (experim
 #: Why each summary's warning says the job still succeeds; the scripts differ in nothing else.
 KTLO_REASON = 'KTLO legs never block (#1633), so this job still succeeds (#1672)'
 EXPERIMENTAL_REASON = 'Experimental legs never block (#1660), so this job still succeeds'
+#: Each summary's command (#1967): the image's interpreter, not the leg's, which may
+#: have failed to set up.
+IMAGE_PYTHON = '/usr/bin/python3'
+SUMMARY_RUN = f'{IMAGE_PYTHON} util/leg_summary.py ktlo'
+EXPERIMENTAL_SUMMARY_RUN = f'{IMAGE_PYTHON} util/leg_summary.py experimental'
+#: The ``KTLO summary`` that keeps its shell inline until #1967's ``create-release.yml`` step.
+INLINE_SUMMARY = ('create-release.yml', 'pypi')
+#: A ``util/`` script a ``run:`` invokes, whose own annotations are the step's.
+UTIL_SCRIPT = re.compile(r'\butil/[\w-]+\.py\b')
 #: ``experimental``'s steps with a ``timeout-minutes`` of their own (#1660), by ``id``:
 #: setup-python, the install, the watcher's setup-python and requests (#1938) and the
 #: tests. #1732: the tests' is GraalPy's unit tier less the round-trip sweeps, 88-113
@@ -272,8 +285,16 @@ def scenarios(name: 'str', job_id: 'str', spec: 'dict[str, Any]',
 
 
 def commands(script: 'str') -> 'set[str]':
-    """The workflow commands ``script`` writes."""
-    return set(COMMAND.findall(script))
+    """The workflow commands ``script`` writes, and each ``util/`` script it runs (#1967)."""
+    found = set(COMMAND.findall(script))
+    for path in set(UTIL_SCRIPT.findall(script)):
+        found |= set(COMMAND.findall((ROOT / path).read_text(encoding='utf-8')))
+    return found
+
+
+def run_summary(script: 'str', env: 'dict[str, str]') -> 'subprocess.CompletedProcess[str]':
+    """A summary step's ``run:`` in the checkout, on this interpreter in place of the image's."""
+    return bash(script.replace(IMAGE_PYTHON, sys.executable), env, ROOT)
 
 
 def bash(script: 'str', env: 'dict[str, str]', cwd: 'pathlib.Path') -> 'subprocess.CompletedProcess[str]':
@@ -329,7 +350,6 @@ class TestNoKTLOFailureTurnsAJobRed(unittest.TestCase):
         KTLO's to report.
 
         """
-        scripts = set()
         for name, job_id in KTLO_JOBS:
             spec = job(name, job_id)
             summary = summary_step(spec)
@@ -339,7 +359,8 @@ class TestNoKTLOFailureTurnsAJobRed(unittest.TestCase):
                 self.assertEqual(summary.get('continue-on-error'), KTLO_GUARD)
                 self.assertEqual(summary.get('shell'), 'bash')
                 self.assertEqual(summary.get('env'), SUMMARY_ENV)
-            scripts.add(summary['run'])
+                if (name, job_id) != INLINE_SUMMARY:
+                    self.assertEqual(summary['run'], SUMMARY_RUN)
             blocking = BLOCKS_EVERY_LEG.get((name, job_id), ())
             for leg in filter(is_ktlo, legs(name, job_id)):
                 for index, _, record in scenarios(name, job_id, spec, leg):
@@ -350,7 +371,6 @@ class TestNoKTLOFailureTurnsAJobRed(unittest.TestCase):
                         self.assertNotEqual(record[-1].outcome, 'skipped')
                         if step.get('continue-on-error') is not True:
                             self.assertIn('id', step)
-        self.assertEqual(len(scripts), 1, f'the copies of {SUMMARY!r} have drifted apart')
 
 
 class TestAKTLOFailureIsAWarning(unittest.TestCase):
@@ -397,16 +417,18 @@ class TestAKTLOFailureIsAWarning(unittest.TestCase):
 
     def summary(self, steps: 'dict[str, str]') -> 'tuple[subprocess.CompletedProcess[str], str]':
         """``KTLO summary`` on 3.7, given each step's ``outcome``; its result and job summary."""
-        if shutil.which('jq') is None:  # pragma: no cover
-            self.skipTest('jq, on every Ubuntu runner image, is needed to run KTLO summary')
-        script = summary_step(job('unit-tests.yml', 'test'))['run']
+        return self.run_summary(summary_step(job('unit-tests.yml', 'test'))['run'], steps)
+
+    def run_summary(self, script: 'str', steps: 'dict[str, str]',
+                    inline: 'bool' = False) -> 'tuple[subprocess.CompletedProcess[str], str]':
+        """``script``, a ``KTLO summary``'s ``run:``, given each step's ``outcome``."""
         context = {key: {'outputs': {}, 'outcome': outcome,
                          'conclusion': 'success' if outcome == 'failure' else outcome}
                    for key, outcome in steps.items()}
         page = self.tmp / 'summary.md'
         page.write_text('', encoding='utf-8')
-        result = bash(script, {'LEG': LEG_37, 'STEPS': json.dumps(context, indent=2),
-                               'GITHUB_STEP_SUMMARY': str(page)}, self.tmp)
+        env = {'LEG': LEG_37, 'STEPS': json.dumps(context, indent=2), 'GITHUB_STEP_SUMMARY': str(page)}
+        result = bash(script, env, self.tmp) if inline else run_summary(script, env)
         return result, page.read_text(encoding='utf-8')
 
     def test_the_summary_warns_once_per_failed_step(self) -> None:
@@ -435,6 +457,21 @@ class TestAKTLOFailureIsAWarning(unittest.TestCase):
         self.assertEqual(workflow_commands(result.stdout), [])
         self.assertEqual(page, '')
         self.assertIn(f'{LEG_37}: no step failed.', result.stdout)
+
+    def test_the_inline_release_copy_reports_as_the_script_does(self) -> None:
+        """``pypi``'s ``KTLO summary`` keeps its shell (#1967), so it must not drift from the script."""
+        if shutil.which('jq') is None:  # pragma: no cover
+            self.skipTest('jq, on every Ubuntu runner image, is needed to run the inline KTLO summary')
+        inline = summary_step(job(*INLINE_SUMMARY))['run']
+        self.assertNotIn('leg_summary.py', inline)
+        for steps in ({'checkout': 'success', 'python': 'success', 'tests': 'success'},
+                      {'checkout': 'success', 'python': 'success', 'install': 'failure', 'tests': 'skipped'},
+                      {'checkout': 'failure', 'python': 'failure', 'install': 'skipped'}):
+            with self.subTest(steps=steps):
+                script, script_page = self.run_summary(SUMMARY_RUN, steps)
+                shell, shell_page = self.run_summary(inline, steps, inline=True)
+                self.assertEqual((script.returncode, script.stdout, script_page),
+                                 (shell.returncode, shell.stdout, shell_page))
 
     def engine_cell(self, py: 'str', level: 'Optional[str]') -> 'subprocess.CompletedProcess[str]':
         """``engine-tests``'s cell script for Scapy on ``py``, whose extra fails to install.
@@ -592,10 +629,10 @@ class TestAnExperimentalLegIsNonBlockingTheSameWay(unittest.TestCase):
                     self.assertNotEqual(record[self.position].outcome, 'skipped')
                     if step.get('continue-on-error') is not True:
                         self.assertIn('id', step)
-        # One script with the KTLO summary's, so a fix to either reaches both.
-        self.assertIn(EXPERIMENTAL_REASON, self.summary['run'])
-        self.assertEqual(self.summary['run'].replace(EXPERIMENTAL_REASON, KTLO_REASON),
-                         summary_step(job('unit-tests.yml', 'test'))['run'])
+        # One script with the KTLO summary's, so a fix to either reaches both (#1967).
+        self.assertEqual(self.summary['run'], EXPERIMENTAL_SUMMARY_RUN)
+        self.assertEqual(summary_step(job('unit-tests.yml', 'test'))['run'], SUMMARY_RUN)
+        self.assertEqual(REASONS, {'ktlo': KTLO_REASON, 'experimental': EXPERIMENTAL_REASON})
 
     def test_each_step_names_the_leg_by_its_tier(self) -> None:
         """``LEG`` in an annotation's title: ``(experimental, non-blocking)``."""
@@ -620,8 +657,8 @@ class TestAnExperimentalLegIsNonBlockingTheSameWay(unittest.TestCase):
                 self.assertLessEqual(commands(step.get('run', '')), KTLO_COMMANDS)
 
     def test_the_summary_warns_once_per_failed_step(self) -> None:
-        if shutil.which('bash') is None or shutil.which('jq') is None:  # pragma: no cover
-            self.skipTest('bash and jq, on every Ubuntu runner image, are needed to run the summary')
+        if shutil.which('bash') is None:  # pragma: no cover
+            self.skipTest('bash is needed to run the summary step')
         with tempfile.TemporaryDirectory(prefix='pcapkit-1660-') as tmp:
             for leg in self.legs:
                 name = leg_label(leg)
@@ -634,8 +671,8 @@ class TestAnExperimentalLegIsNonBlockingTheSameWay(unittest.TestCase):
                            for key, outcome in steps.items()}
                 with self.subTest(python=leg['python-version']):
                     self.assertEqual(interpolate(self.summary['env']['LEG'], {'matrix': leg}), name)
-                    result = bash(self.summary['run'], {'LEG': name, 'STEPS': json.dumps(context),
-                                                        'GITHUB_STEP_SUMMARY': str(page)}, pathlib.Path(tmp))
+                    result = run_summary(self.summary['run'], {'LEG': name, 'STEPS': json.dumps(context),
+                                                               'GITHUB_STEP_SUMMARY': str(page)})
                     self.assertEqual(result.returncode, 0, result.stderr)
                     self.assertEqual(workflow_commands(result.stdout), [
                         f'::warning title=install failed on {title}::{EXPERIMENTAL_REASON}; '

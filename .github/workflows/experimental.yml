@@ -121,10 +121,11 @@ jobs:
         id: read
         run: python3 util/python_versions.py --github-output
 
-  # unit-tests.yml's `changes`, whose comment says how a file is classified; the
-  # script is the same, byte for byte (tests/project/test_sweeps_on_latest_only_1732.py
-  # pins it). This workflow is never called, so its own pull_request run is every
-  # pull_request run.
+  # unit-tests.yml's `changes`: both run util/classify_changes.py, whose docstring
+  # says how a file is classified (#1967), with the same step
+  # (tests/project/test_sweeps_on_latest_only_1732.py pins it). This workflow is
+  # never called, so its own pull_request run is every pull_request run. Every
+  # event checks out, as the script is in the tree.
   changes:
     name: Classify changed files
     needs: current
@@ -136,7 +137,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        if: ${{ github.event_name == 'pull_request' }}
         with:
           fetch-depth: 2
 
@@ -144,41 +144,7 @@ jobs:
         id: classify
         env:
           OWN_PR: ${{ github.event_name == 'pull_request' }}
-        run: |
-          python3 - <<'PY'
-          import os
-          import subprocess
-
-          CODE_DIRS = ('.github/', 'pcapkit/', 'tests/', 'util/', 'examples/')
-
-          def is_docs(path):
-              if path.startswith(CODE_DIRS):
-                  return False
-              return path.startswith('docs/') or path.endswith('.md')
-
-          code = 'true'
-          if os.environ['OWN_PR'] != 'true':
-              print("Not this workflow's own pull_request run: everything runs.")
-          else:
-              # -z: names are NUL-terminated, so a name holding whitespace
-              # (or one git would otherwise quote) stays one path.
-              diff = subprocess.run(['git', 'diff', '--name-only', '-z', '--no-renames', 'HEAD^1', 'HEAD'],
-                                    capture_output=True, text=True)
-              files = [path for path in diff.stdout.split('\0') if path]
-              if diff.returncode != 0 or not files:
-                  print(f'::warning title=Could not list the changed files::git diff exited {diff.returncode} '
-                        f'with {len(files)} files: {diff.stderr.strip()}. Treating the diff as code.')
-              else:
-                  code_files = [path for path in files if not is_docs(path)]
-                  print(f'{len(files)} changed files, {len(code_files)} of them code:')
-                  for path in files:
-                      print(f"  {'code' if path in code_files else 'docs'}  {path}")
-                  if not code_files:
-                      code = 'false'
-          print(f'code={code}')
-          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as file:
-              print(f'code={code}', file=file)
-          PY
+        run: python3 util/classify_changes.py
 
   # Its legs never block, by the KTLO mechanics: every step that can fail has
   # `continue-on-error: true`, so the job concludes success, and `Experimental
@@ -624,7 +590,8 @@ jobs:
           echo "$LEG: tests exited ${code} after ${elapsed} s, scope ${scope}, ${oom} OOM kill(s), ${errors} MemoryError line(s), ${crashed:-0} worker(s) down; ${last}."
 
       # #1660: an experimental leg's report, as unit-tests.yml `test`'s `KTLO
-      # summary` is a KTLO leg's, and for the same reasons.
+      # summary` is a KTLO leg's, and for the same reasons: the same script,
+      # util/leg_summary.py, words its warning for this tier (#1967).
       - name: Experimental summary
         if: ${{ !cancelled() }}
         continue-on-error: true
@@ -632,13 +599,4 @@ jobs:
         env:
           LEG: Python ${{ matrix.python-version }} (experimental, non-blocking)
           STEPS: ${{ toJSON(steps) }}
-        run: |
-          failed=$(jq -r 'to_entries[] | select(.value.outcome == "failure") | .key' <<< "$STEPS")
-          if [ -z "$failed" ]; then
-            echo "$LEG: no step failed."
-            exit 0
-          fi
-          while IFS= read -r id; do
-            echo "::warning title=${id} failed on ${LEG//,/%2C}::Experimental legs never block (#1660), so this job still succeeds; see the ${id} step's log."
-            echo "- ${LEG}: step \`${id}\` failed; non-blocking, so this job still succeeds." >> "$GITHUB_STEP_SUMMARY"
-          done <<< "$failed"
+        run: /usr/bin/python3 util/leg_summary.py experimental

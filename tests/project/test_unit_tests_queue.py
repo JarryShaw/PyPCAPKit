@@ -15,9 +15,9 @@ These fail silently if they drift, so they are pinned here:
   ``engine-tests``'s KTLO cells stay non-blocking through a step-level
   ``continue-on-error`` rather than a job-level one (#1633), and the job has no
   ``DPKT`` cell (#1538).
-* The classifier, the engine cell loops and the apt retry are executed too: the
-  classifier against a scratch merge commit, the others with their commands
-  stubbed on ``PATH``.
+* The classifier, :file:`util/classify_changes.py` (#1967), the engine cell loops
+  and the apt retry are executed too: the classifier against a scratch merge
+  commit, the others with their commands stubbed on ``PATH``.
 * Every test outside :file:`tests/project` that reads ``docs/`` or Markdown is
   run by ``project-tests``, so a docs-only PR cannot break it unseen.
 
@@ -30,11 +30,13 @@ extra of :file:`pyproject.toml`; the same split
 from __future__ import annotations
 
 import ast
+import importlib.util
 import os
 import pathlib
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
 import textwrap
 import unittest
@@ -47,6 +49,10 @@ if TYPE_CHECKING:
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 WORKFLOW = ROOT / '.github' / 'workflows' / 'unit-tests.yml'
+#: The ``changes`` classifier, which ``Classify the diff`` runs (#1967).
+CLASSIFIER = ROOT / 'util' / 'classify_changes.py'
+#: ``Classify the diff``'s command, as the job's checkout root runs it.
+CLASSIFY_RUN = '        run: python3 util/classify_changes.py\n'
 
 #: The legs a docs-only pull request may skip.
 LEGS = ('test', 'integration', 'engine-tests', 'pypcap-parity')
@@ -156,15 +162,14 @@ class TestRequiredChecksSkips(unittest.TestCase):
 
 
 class TestChangesClassifier(unittest.TestCase):
-    """``is_docs`` from the ``changes`` job, executed on sample paths."""
+    """``is_docs`` from the ``changes`` job's script, executed on sample paths."""
 
     def setUp(self) -> None:
-        script = run_block(job('changes'))
-        source = textwrap.dedent(script.split("<<'PY'\n", 1)[1].split("\ncode = 'true'", 1)[0])
-        namespace = {}  # type: dict[str, object]
-        exec(compile(source, f'{WORKFLOW}:changes', 'exec'), namespace)  # pylint: disable=exec-used
-        is_docs = namespace['is_docs']
-        self.is_docs = is_docs  # type: Callable[[str], bool]  # type: ignore[assignment]
+        spec = importlib.util.spec_from_file_location('classify_changes', CLASSIFIER)
+        assert spec is not None and spec.loader is not None
+        module = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(module)
+        self.is_docs = module.is_docs  # type: Callable[[str], bool]
 
     def test_docs_and_markdown_are_docs(self) -> None:
         """``docs/**`` and top-level Markdown are docs."""
@@ -185,9 +190,17 @@ class TestChangesClassifier(unittest.TestCase):
     def test_only_this_workflows_own_pull_request_is_classified(self) -> None:
         """Other events, and callers, always run everything."""
         section = job('changes')
-        self.assertIn("github.event_name == 'pull_request' && github.workflow == 'Unit Tests'",
+        self.assertIn("OWN_PR: ${{ github.event_name == 'pull_request' && github.workflow == 'Unit Tests' }}",
                       section)
-        self.assertIn("'--no-renames'", section)
+        self.assertIn("'--no-renames'", CLASSIFIER.read_text(encoding='utf-8'))
+
+    def test_the_step_runs_the_script_in_a_checkout(self) -> None:
+        """#1967: the script is in the tree, so every event checks out, with the merge's first parent."""
+        section = job('changes')
+        self.assertEqual(section.count(CLASSIFY_RUN), 1)
+        checkout = section.split('      - uses: actions/checkout@', 1)[1].split('\n      - ', 1)[0]
+        self.assertNotIn('if:', checkout)
+        self.assertIn('fetch-depth: 2', checkout)
 
 
 class TestJobGating(unittest.TestCase):
@@ -332,7 +345,7 @@ class TestClassifierAgainstARealMerge(_Scratch):
         super().setUp()
         if shutil.which('git') is None:  # pragma: no cover
             self.skipTest('git is not available')
-        self.script = run_block(job('changes'))
+        self.assertIn(CLASSIFY_RUN, job('changes'))
         self.repo = self.tmp / 'repo'
         self.repo.mkdir()
         self.git('init', '-q', '-b', 'main')
@@ -372,8 +385,9 @@ class TestClassifierAgainstARealMerge(_Scratch):
     def classify(self, own_pr: 'str' = 'true', cwd: 'Optional[pathlib.Path]' = None) -> 'str':
         """Run the classifier and return the line it wrote to ``GITHUB_OUTPUT``."""
         output = self.tmp / 'output'
-        status = bash(self.script, {'OWN_PR': own_pr, 'GITHUB_OUTPUT': str(output)},
-                      cwd=str(cwd or self.repo))
+        status = subprocess.run([sys.executable, str(CLASSIFIER)],
+                                env=dict(os.environ, OWN_PR=own_pr, GITHUB_OUTPUT=str(output)),
+                                cwd=str(cwd or self.repo), check=False, capture_output=True, text=True).returncode
         self.assertEqual(status, 0)
         return output.read_text(encoding='utf-8').strip()
 

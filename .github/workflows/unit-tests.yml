@@ -279,7 +279,9 @@ jobs:
             python util/cap_file_size.py python -m pytest "$@"
           fi
 
-      # The table goes to the job summary. The numbers also go to an artifact
+      # util/coverage_report.py (#1967): it fails, posting no number, unless every
+      # measured process saved its data (#1387), then combines it. The table goes
+      # to the job summary. The numbers also go to an artifact
       # that coverage-comment.yml renders as a PR comment once this run
       # completes; that comment cannot be posted from here, because this file is
       # also a reusable workflow and its callers grant only `contents: read`.
@@ -292,78 +294,7 @@ jobs:
           SHA: ${{ github.sha }}
           PYTHON: ${{ matrix.python-version }}
           TESTS_OUTCOME: ${{ steps.tests.outcome }}
-        run: |
-          set -euo pipefail
-          # #1387: a worker killed before its atexit save leaves no .coverage.*
-          # file, and combine then reports the rest as the whole. So fail, and
-          # post no number, unless the controller and every xdist worker (its
-          # direct children in the log above) left one.
-          python - <<'PY'
-          import glob, os, re, sys
-          parent, cmd, atexit_ = {}, {}, {}
-          log = 'coverage-processes.log'
-          for line in open(log, errors='replace').readlines() if os.path.exists(log) else []:
-              if m := re.match(r' *(\d+)\.\w+: New process(: cmd| parent pid): (.*)', line):
-                  (parent if m[2] == ' parent pid' else cmd)[m[1]] = m[3]
-              elif m := re.match(r' *(\d+)\.\w+: (atexit|sigterm): pid: \d+, (.*)', line):
-                  atexit_[m[1]] = f'{m[2]}: {m[3]}'
-          root = [p for p, c in cmd.items() if "'run', '--rcfile=.github/coverage.toml'" in c]
-          workers = sorted(p for p, q in parent.items() if root and q == root[0])
-          saved = set(re.findall(r'\.pid(\d+)\.', ' '.join(glob.glob('.coverage.*'))))
-          missing = [p for p in root + workers if p not in saved]
-          print(f'controller {root}, {len(workers)} xdist workers, missing data: {missing}')
-          # #1423: which process it was, and whether coverage's atexit handler ran
-          # in it at all -- a pid with no `atexit:` line died on a signal before
-          # saving, one with such a line reached the save and lost it afterwards.
-          # Those are different bugs, and the log that distinguishes them is kept
-          # as an artifact by the step below rather than only read here.
-          for p in missing:
-              print(f'  pid {p}: cmd {cmd.get(p, "<no cmd line logged>")}')
-              print(f'  pid {p}: {atexit_.get(p, "no atexit/sigterm entry -- died before saving")}')
-          if len(root) != 1 or not workers or missing:
-              why = f'no data file from pid {missing}' if missing else 'the process log is missing or unreadable'
-              with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as summary:
-                  print(f'**Coverage not reported:** {why} (#1387); a total would under-count.',
-                        file=summary)
-              print(f'::error::Coverage data is incomplete: {why}.')
-              sys.exit(1)
-          PY
-          python -m coverage combine --rcfile=.github/coverage.toml
-          python -m coverage report --rcfile=.github/coverage.toml
-          python -m coverage html --rcfile=.github/coverage.toml -d coverage-html
-          python -m coverage json --rcfile=.github/coverage.toml -o coverage.json
-          mkdir -p coverage-comment
-          # Writes the numbers as JSON for coverage-comment.yml, which renders
-          # its own Markdown from them rather than posting text from this run.
-          python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
-          import collections, json, os
-          data = json.load(open('coverage.json'))
-          keys = ('num_statements', 'missing_lines', 'num_branches', 'num_partial_branches',
-                  'covered_lines', 'covered_branches')
-          packages = collections.defaultdict(collections.Counter)
-          for path, info in data['files'].items():
-              parts = path.split('/')
-              name = '/'.join(parts[:2]) if len(parts) > 2 else 'pcapkit (top level)'
-              packages[name].update({k: info['summary'][k] for k in keys})
-          def pct(c):
-              total = c['num_statements'] + c['num_branches']
-              return 100.0 * (c['covered_lines'] + c['covered_branches']) / total if total else 100.0
-          rows = [[name, c['num_statements'], c['missing_lines'], c['num_branches'],
-                   c['num_partial_branches'], round(pct(c), 2)] for name, c in sorted(packages.items())]
-          total = round(data['totals']['percent_covered'], 2)
-          tests = os.environ['TESTS_OUTCOME']
-          json.dump({'total': total, 'tests': tests, 'packages': rows, 'python': os.environ['PYTHON']},
-                    open('coverage-comment/coverage-summary.json', 'w'))
-          status = '' if tests == 'success' else f' -- **tests {tests}**, so this is partial'
-          print(f"**Coverage: {total:.2f}%**{status} (unit tier, Python {os.environ['PYTHON']}, `{os.environ['SHA'][:9]}`)")
-          print()
-          print('| Package | Statements | Missed | Branches | Partial | Cover |')
-          print('|---|--:|--:|--:|--:|--:|')
-          for row in rows:
-              print('| `{}` | {} | {} | {} | {} | {:.2f}% |'.format(*row))
-          print()
-          print('Per-file detail: the `coverage-html` artifact of this run.')
-          PY
+        run: python util/coverage_report.py
 
       # #1423: the guard above fires on runs whose tests all pass, and the only
       # record of what became of the lost process is this log -- it carries each
@@ -410,14 +341,16 @@ jobs:
           retention-days: 14
 
       # #1672: the KTLO leg's report, and the last step of every KTLO matrix
-      # job, in one script. Each step above that can fail on a KTLO leg has an
-      # `id` and `continue-on-error: ${{ matrix.ktlo == true }}`, so its failure
-      # leaves the job, and `required-checks`, at success. This step makes the
-      # failure visible again: one warning and one job-summary line per failed
-      # step. `toJSON(steps)` holds each step above with an `id`, and its
-      # `outcome` is the result before `continue-on-error` applied. jq is on
-      # every Ubuntu runner image. A step masked on every leg, as the timings
-      # upload is, is not KTLO's to report. Not removable here: the error the
+      # job, in one script, util/leg_summary.py (#1967). Each step above that
+      # can fail on a KTLO leg has an `id` and `continue-on-error: ${{
+      # matrix.ktlo == true }}`, so its failure leaves the job, and
+      # `required-checks`, at success. This step makes the failure visible
+      # again: one warning and one job-summary line per failed step.
+      # `toJSON(steps)` holds each step above with an `id`, and its `outcome` is
+      # the result before `continue-on-error` applied. It runs on the image's
+      # /usr/bin/python3, not the leg's, which may have failed to set up. A
+      # step masked on every leg, as the timings upload is, is not KTLO's to
+      # report. Not removable here: the error the
       # runner itself records for a failed `run:` step, `Process completed with
       # exit code N.`, whatever its `continue-on-error` (actions/runner
       # src/Runner.Worker/Handlers/ScriptHandler.cs:354, at 5f0b3ddcc), and an
@@ -429,16 +362,7 @@ jobs:
         env:
           LEG: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}
           STEPS: ${{ toJSON(steps) }}
-        run: |
-          failed=$(jq -r 'to_entries[] | select(.value.outcome == "failure") | .key' <<< "$STEPS")
-          if [ -z "$failed" ]; then
-            echo "$LEG: no step failed."
-            exit 0
-          fi
-          while IFS= read -r id; do
-            echo "::warning title=${id} failed on ${LEG//,/%2C}::KTLO legs never block (#1633), so this job still succeeds (#1672); see the ${id} step's log."
-            echo "- ${LEG}: step \`${id}\` failed; non-blocking, so this job still succeeds." >> "$GITHUB_STEP_SUMMARY"
-          done <<< "$failed"
+        run: /usr/bin/python3 util/leg_summary.py ktlo
 
   # The KTLO tier (#1633): end-of-life versions that still build and test but
   # never block. #1738, the owner's option A: their legs are this job's, not
@@ -665,16 +589,7 @@ jobs:
         env:
           LEG: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}
           STEPS: ${{ toJSON(steps) }}
-        run: |
-          failed=$(jq -r 'to_entries[] | select(.value.outcome == "failure") | .key' <<< "$STEPS")
-          if [ -z "$failed" ]; then
-            echo "$LEG: no step failed."
-            exit 0
-          fi
-          while IFS= read -r id; do
-            echo "::warning title=${id} failed on ${LEG//,/%2C}::KTLO legs never block (#1633), so this job still succeeds (#1672); see the ${id} step's log."
-            echo "- ${LEG}: step \`${id}\` failed; non-blocking, so this job still succeeds." >> "$GITHUB_STEP_SUMMARY"
-          done <<< "$failed"
+        run: /usr/bin/python3 util/leg_summary.py ktlo
 
   # `integration`'s KTLO legs, apart for the reasons on `test-ktlo` (#1738).
   integration-ktlo:
@@ -1407,16 +1322,7 @@ jobs:
         env:
           LEG: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}
           STEPS: ${{ toJSON(steps) }}
-        run: |
-          failed=$(jq -r 'to_entries[] | select(.value.outcome == "failure") | .key' <<< "$STEPS")
-          if [ -z "$failed" ]; then
-            echo "$LEG: no step failed."
-            exit 0
-          fi
-          while IFS= read -r id; do
-            echo "::warning title=${id} failed on ${LEG//,/%2C}::KTLO legs never block (#1633), so this job still succeeds (#1672); see the ${id} step's log."
-            echo "- ${LEG}: step \`${id}\` failed; non-blocking, so this job still succeeds." >> "$GITHUB_STEP_SUMMARY"
-          done <<< "$failed"
+        run: /usr/bin/python3 util/leg_summary.py ktlo
 
   # `pypcap-parity`'s KTLO legs, apart for the reasons on `test-ktlo` (#1738).
   # Same apt set and cache key; `pypcap-parity`'s supported leg saves it.
@@ -1702,22 +1608,18 @@ jobs:
 
   # Which of a pull request's changed files are code. This decides
   # whether the expensive legs run at all (see `required-checks` for how their
-  # skips are then judged), so it fails safe: anything it cannot classify is
-  # code.
-  #
-  # A file is docs iff it is under `docs/` or ends in `.md`, and is not under
-  # `.github/`, `pcapkit/`, `tests/`, `util/` or `examples/` -- so a Markdown
-  # file in one of those (a PR template, a test fixture) is code, and so is
-  # every other file (`pyproject.toml`, `setup.py`, ...). The diff is the PR
-  # merge commit against its first parent, which is exactly what merging would
-  # add; `--no-renames` lists both sides of a rename, so moving a code file
-  # under `docs/` is still a code change.
+  # skips are then judged). util/classify_changes.py, which experimental.yml's
+  # `changes` runs too (#1967), says how a file is classified, and fails safe:
+  # anything it cannot classify is code.
   #
   # Only this workflow's own `pull_request` run is classified. Every other
   # event reports `code: true`, including a `workflow_call` from a caller
   # triggered by a pull request: inside a called workflow `github.event_name`
   # is the caller's, but `github.workflow` is the caller's name too (see the
   # concurrency comment at the top), and no caller is named "Unit Tests".
+  # Every event checks out, as the script is in the tree; only the pull
+  # request's merge commit needs its first parent, but `fetch-depth: 2` costs
+  # the others one commit.
   changes:
     name: Classify changed files
     if: ${{ inputs.gate-only != true }}
@@ -1728,7 +1630,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        if: ${{ github.event_name == 'pull_request' && github.workflow == 'Unit Tests' }}
         with:
           fetch-depth: 2
 
@@ -1736,41 +1637,7 @@ jobs:
         id: classify
         env:
           OWN_PR: ${{ github.event_name == 'pull_request' && github.workflow == 'Unit Tests' }}
-        run: |
-          python3 - <<'PY'
-          import os
-          import subprocess
-
-          CODE_DIRS = ('.github/', 'pcapkit/', 'tests/', 'util/', 'examples/')
-
-          def is_docs(path):
-              if path.startswith(CODE_DIRS):
-                  return False
-              return path.startswith('docs/') or path.endswith('.md')
-
-          code = 'true'
-          if os.environ['OWN_PR'] != 'true':
-              print("Not this workflow's own pull_request run: everything runs.")
-          else:
-              # -z: names are NUL-terminated, so a name holding whitespace
-              # (or one git would otherwise quote) stays one path.
-              diff = subprocess.run(['git', 'diff', '--name-only', '-z', '--no-renames', 'HEAD^1', 'HEAD'],
-                                    capture_output=True, text=True)
-              files = [path for path in diff.stdout.split('\0') if path]
-              if diff.returncode != 0 or not files:
-                  print(f'::warning title=Could not list the changed files::git diff exited {diff.returncode} '
-                        f'with {len(files)} files: {diff.stderr.strip()}. Treating the diff as code.')
-              else:
-                  code_files = [path for path in files if not is_docs(path)]
-                  print(f'{len(files)} changed files, {len(code_files)} of them code:')
-                  for path in files:
-                      print(f"  {'code' if path in code_files else 'docs'}  {path}")
-                  if not code_files:
-                      code = 'false'
-          print(f'code={code}')
-          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as file:
-              print(f'code={code}', file=file)
-          PY
+        run: python3 util/classify_changes.py
 
   # #1954, the owner's option 3: the project pins, once per push. They are the
   # tests/project modules whose run does not vary by interpreter -- each reads
