@@ -16,6 +16,12 @@ are not actions fetched by tag, so they are left alone.
   composite action under :file:`.github`, since YAML drops the comment.
 * :class:`TestDependabotUpdatesTheActions` checks :file:`.github/dependabot.yml`
   watches the ``github-actions`` ecosystem from the repository root.
+* :class:`TestDependabotCoversEveryManifest` checks the owner's ruling on #1968:
+  ``pip`` over the root, :file:`docs`, :file:`conda` and
+  :file:`examples/benchmark`, and ``docker`` over the benchmark's
+  :file:`Dockerfile`.
+* :class:`TestPyUpOpensNoUpdates` checks :file:`.pyup.yml` turns PyUp's update
+  pull requests off, now that Dependabot opens them.
 
 """
 
@@ -30,6 +36,7 @@ from tests._tiers import ROOT
 
 if TYPE_CHECKING:
     import pathlib
+    from typing import Any
 
 #: Test tier (#1958): checks the workflow files and Dependabot's configuration, a
 #: question about the tree.
@@ -42,6 +49,23 @@ PIN = re.compile(r'[0-9a-f]{40}')
 COMMENT = re.compile(r'\s+# v\d[\w.-]*\s*')
 #: The Dependabot configuration.
 DEPENDABOT = ROOT / '.github' / 'dependabot.yml'
+#: PyUp's configuration.
+PYUP = ROOT / '.pyup.yml'
+#: The directories the ``pip`` entry watches, in the owner's ruling on #1968.
+PIP_DIRECTORIES = ['/', '/docs', '/conda', '/examples/benchmark']
+#: The directories the ``docker`` entry watches.
+DOCKER_DIRECTORIES = ['/examples/benchmark']
+
+
+def updates() -> 'dict[str, dict[str, Any]]':
+    """The entries of :file:`.github/dependabot.yml`, by ecosystem."""
+    document = _workflows.loads(DEPENDABOT.read_text(encoding='utf-8'))
+    return {entry['package-ecosystem']: entry for entry in document['updates']}
+
+
+def directories(entry: 'dict[str, Any]') -> 'list[str]':
+    """What an entry watches, whichever of ``directory`` and ``directories`` it uses."""
+    return list(entry['directories']) if 'directories' in entry else [entry['directory']]
 
 
 def files() -> 'list[pathlib.Path]':
@@ -125,6 +149,52 @@ class TestDependabotUpdatesTheActions(unittest.TestCase):
         self.assertIsNotNone(entry)
         self.assertRegex(entry.group(0), r'(?m)^\s*directory:\s*"/"')  # type: ignore[union-attr]
         self.assertRegex(entry.group(0), r'(?m)^\s*interval:\s*"\w+"')  # type: ignore[union-attr]
+
+
+
+class TestDependabotCoversEveryManifest(unittest.TestCase):
+    """Dependabot watches the docs, conda and benchmark pins, and the benchmark image."""
+
+    def test_pip_watches_the_root_docs_conda_and_the_benchmark(self) -> None:
+        self.assertEqual(directories(updates()['pip']), PIP_DIRECTORIES)
+
+    def test_each_pip_directory_holds_a_manifest(self) -> None:
+        for directory in PIP_DIRECTORIES:
+            with self.subTest(directory=directory):
+                here = ROOT / directory.lstrip('/')
+                self.assertTrue(sorted(here.glob('*requirements*.txt')) or (here / 'pyproject.toml').is_file())
+
+    def test_docker_watches_the_benchmark_dockerfile(self) -> None:
+        entry = updates().get('docker')
+        self.assertIsNotNone(entry)
+        self.assertEqual(directories(entry), DOCKER_DIRECTORIES)  # type: ignore[arg-type]
+        for directory in DOCKER_DIRECTORIES:
+            with self.subTest(directory=directory):
+                self.assertTrue((ROOT / directory.lstrip('/') / 'Dockerfile').is_file())
+
+    def test_every_entry_is_weekly_and_names_one_kind_of_directory(self) -> None:
+        """The schema takes ``directory`` or ``directories``, never both."""
+        for ecosystem, entry in updates().items():
+            with self.subTest(ecosystem=ecosystem):
+                self.assertEqual(entry['schedule'], {'interval': 'weekly'})
+                self.assertEqual(len({'directory', 'directories'} & set(entry)), 1)
+
+
+class TestPyUpOpensNoUpdates(unittest.TestCase):
+    """PyUp's update pull requests are off, and nothing in its file turns one back on."""
+
+    def test_the_global_update_is_off(self) -> None:
+        config = _workflows.loads(PYUP.read_text(encoding='utf-8'))
+        self.assertIs(config.get('update'), False)
+
+    def test_no_requirements_file_overrides_it(self) -> None:
+        """A listed file takes its own ``update``, which defaults to ``all``."""
+        config = _workflows.loads(PYUP.read_text(encoding='utf-8'))
+        for item in config.get('requirements') or []:
+            with self.subTest(item=item):
+                self.assertIsInstance(item, dict)
+                (options,) = item.values()
+                self.assertIs(options.get('update'), False)
 
 
 if __name__ == '__main__':

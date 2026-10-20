@@ -1102,6 +1102,34 @@ and when :file:`.github/dependabot.yml` drops the ``github-actions`` ecosystem.
 ``pinned()`` and ``versions()`` in :file:`tests/_workflows.py` read a pin, for a test
 that names a particular action.
 
+Dependency Updates (`#1968 <https://github.com/JarryShaw/PyPCAPKit/issues/1968>`__)
+-----------------------------------------------------------------------------------
+
+Dependabot opens every dependency bump, weekly, from :file:`.github/dependabot.yml`
+(the owner's ruling on #1968):
+
+* ``pip`` over ``/``, ``/docs``, ``/conda`` and ``/examples/benchmark``. The docs
+  build pins Sphinx and sphinx-autodoc-typehints exactly in
+  :file:`docs/requirements.txt`, and Dependabot proposes bumps to both pins; the
+  owner accepted that, so each bump is reviewed against the docs build rather than
+  held back. :file:`conda/requirements.txt` is also what Conda Update's ``Update
+  requirements.txt`` job rewrites through :file:`util/conda_vendor.py`, so that job's
+  next run supersedes a Dependabot bump there. The benchmark's
+  :file:`requirements-*.txt` files are watched because nothing else moves them.
+* ``docker`` over ``/examples/benchmark``. Dependabot reads only a ``FROM`` line
+  that names its image, and the benchmark's :file:`Dockerfile` takes its base image
+  through ``ARG PYTHON_IMAGE``, whose digests live in
+  :file:`examples/benchmark/python-images.txt`. So this entry proposes nothing until
+  a ``FROM`` names an image itself, and those digests are still moved by hand.
+* ``github-actions`` over ``/``, per `Action Pins`_ above.
+
+PyUp, which opened the same kind of bump before, opens none: :file:`.pyup.yml` sets
+``update: False`` and lists no ``requirements:``. A file listed there takes its own
+``update``, which defaults to ``all``, so the list would override the global
+setting. Deleting :file:`.pyup.yml` would not stop the bot either, as without it
+PyUp runs on its defaults. The PyUp App's installation, and the
+``pyup.io/safety-ci`` commit status it posts, are repository settings.
+
 Python Versions
 ---------------
 

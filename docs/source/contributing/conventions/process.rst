@@ -158,12 +158,15 @@ it is a record that the owner asserted it.
 Some paths are automated, and each is worth knowing about because a label they set has
 had no human judgement behind it:
 
-*  **dependabot** puts ``dependencies``, ``python`` and ``github_actions`` on its own
-   pull requests, and only those: :file:`.github/dependabot.yml` configures the
-   ``pip`` and ``github-actions`` ecosystems and no ``labels:`` key, so each bump
-   takes dependabot's defaults -- ``dependencies`` always, with ``python`` on a
-   ``pip`` bump and ``github_actions`` on a workflow bump. On anyone else's pull
-   request ``github_actions`` is **hand-applied like the rest**.
+*  **dependabot** puts ``dependencies``, ``python``, ``github_actions`` and ``docker``
+   on its own pull requests, and only those: :file:`.github/dependabot.yml`
+   configures the ``pip``, ``github-actions`` and ``docker`` ecosystems and no
+   ``labels:`` key, so each bump takes dependabot's defaults -- ``dependencies``
+   always, with ``python`` on a ``pip`` bump, ``github_actions`` on a workflow bump
+   and ``docker`` on a base-image bump, which dependabot creates if the repository
+   lacks it. On anyone else's pull request ``github_actions`` is **hand-applied like
+   the rest**. PyUp opens no pull requests here: :file:`.pyup.yml` sets
+   ``update: False``.
 *  **The issue templates** apply an issue-kind label from their front matter, before
    anyone reads the issue -- :file:`.github/ISSUE_TEMPLATE/bug_report.md` carries
    ``labels: bug`` and :file:`.github/ISSUE_TEMPLATE/feature_request.md` carries
@@ -274,8 +277,8 @@ top of a review already in progress, and the second verdict then arrives against
 the first was never given. Separating the two makes *which pull requests still need a
 reviewer* answerable from the board rather than from memory of what was dispatched.
 
-**Scope.** ``dependencies``, ``python`` and ``github_actions`` are dependabot's on
-its own pull requests, per above. ``github_actions`` scopes a change to the workflows,
+**Scope.** ``dependencies``, ``python``, ``github_actions`` and ``docker`` are
+dependabot's on its own pull requests, per above. ``github_actions`` scopes a change to the workflows,
 and on any other pull request it is hand-applied.
 
 The ``breaking`` Label
