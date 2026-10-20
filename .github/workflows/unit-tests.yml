@@ -142,10 +142,12 @@ jobs:
       # crypto (cryptography) and NGAP (pycrate) join it for the same reason,
       # covering #738's remaining HAS_CRYPTO gate (test_esp_unit.py) and its
       # HAS_PYCRATE gate (test_ngap_unit.py), both plain
-      # unit-tier. `cli` (emoji) is deliberately NOT added here: its only
+      # unit-tier. `cli` (emoji) is deliberately not on this line: its only
       # HAS_EMOJI-gated tests are in tests/integration/test_cli_subprocess.py,
       # which this job ignores wholesale, so installing it here would unlock
-      # nothing. cryptography is the one compiled wheel of the two; measured
+      # nothing. The `latest` leg gets it from the whole-suite step below
+      # (#1958), whose set every `latest` job shares, and there too it unlocks
+      # nothing in this job. cryptography is the one compiled wheel of the two; measured
       # clean installs on 3.10-3.14 (manylinux wheels, no build step). pycrate
       # is pure Python but its distribution is large (~238MB, see the NGAP
       # extra's comment in pyproject.toml) -- still cheap in wall time, just not
@@ -517,10 +519,12 @@ jobs:
       # selection (tests/_tiers.py's fixture_tier_paths()) always includes the
       # whole of tests/integration/ -- which is where every HAS_EMOJI-gated
       # method lives (test_cli_subprocess.py). `crypto` and `NGAP`
-      # are deliberately NOT added here: test_esp_unit.py and test_ngap_unit.py
+      # are deliberately not on this line: test_esp_unit.py and test_ngap_unit.py
       # are plain unit-tier and never enter this job's selection, so installing
       # cryptography/pycrate here would unlock nothing -- they are already
-      # covered, on every Python version, by the `test` job above.
+      # covered, on every Python version, by the `test` job above. The `latest`
+      # leg gets both from the whole-suite step below (#1958), whose set every
+      # `latest` job shares, and there too they unlock nothing in this job.
       # PyPCAPFile is NOT added here either, even though this job's selection
       # also reaches test_new_engine_parity_runtime.py's HAS_PYPCAPFILE
       # methods -- see the `test` job's comment above for the bug that used to
