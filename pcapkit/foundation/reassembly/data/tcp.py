@@ -10,7 +10,7 @@ from pcapkit.utilities.compat import Tuple
 
 __all__ = [
     'Packet', 'DatagramID', 'Datagram', 'HoleDescriptor',
-    'Fragment', 'Buffer', 'BufferID',
+    'Fragment', 'Buffer', 'BufferID', 'HOLE_OPEN_BOUND',
 ]
 
 if TYPE_CHECKING:
@@ -25,6 +25,20 @@ _AT = TypeVar('_AT', 'IPv4Address', 'IPv6Address')
 
 #: Buffer ID.
 BufferID: 'TypeAlias' = Tuple[_AT, int, _AT, int]
+
+#: Open bound of the :class:`HoleDescriptor` list. A hole whose ``last`` is
+#: this value is still open above, and one whose ``first`` is its negation
+#: stands for whatever preceded a capture that missed the handshake.
+#:
+#: It is ``2 ** 63 - 1`` on every platform, not :data:`sys.maxsize`, which is
+#: ``2 ** 31 - 1`` on GraalPy and 32-bit builds and so falls inside the
+#: ``2 ** 32`` sequence space. The unwrapped sequence line reaches it only
+#: after ``2 ** 31`` wraps. It stays an :class:`int`, like the descriptor's
+#: own fields, and in both signs fits a standard JSON number and a
+#: :mod:`plistlib` integer, which :data:`math.inf` does not.
+#:
+#: .. versionadded:: 1.5.0
+HOLE_OPEN_BOUND = (1 << 63) - 1
 
 
 @info_final
@@ -147,8 +161,9 @@ class HoleDescriptor(Info):
     :attr:`Fragment.raw`: the descriptor list is kept once per buffer ID,
     across every acknowledgement number's payload buffer, and describes the
     stream as a whole. It decides when a stream whose FIN has been seen is
-    whole; a hole whose ``first`` is ``-sys.maxsize`` stands for whatever
-    preceded a capture that missed the handshake, and does not count.
+    whole. A hole whose ``first`` is ``-HOLE_OPEN_BOUND`` stands for whatever
+    preceded a capture that missed the handshake, and does not count; one
+    whose ``last`` is :data:`HOLE_OPEN_BOUND` is still open above.
 
     .. versionadded:: 1.5.0
 

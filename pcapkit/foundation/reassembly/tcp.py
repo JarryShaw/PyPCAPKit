@@ -10,12 +10,11 @@ which reconstructs fragmented TCP packets back to origin.
 
 """
 import math
-import sys
 from typing import TYPE_CHECKING
 
 from pcapkit.foundation.reassembly.data.data import Completion, Deferred
-from pcapkit.foundation.reassembly.data.tcp import (Buffer, BufferID, Datagram, DatagramID,
-                                                    Fragment, HoleDescriptor, Packet)
+from pcapkit.foundation.reassembly.data.tcp import (HOLE_OPEN_BOUND, Buffer, BufferID, Datagram,
+                                                    DatagramID, Fragment, HoleDescriptor, Packet)
 from pcapkit.foundation.reassembly.reassembly import ReassemblyBase
 from pcapkit.protocols.transport.tcp import TCP as TCP_Protocol
 
@@ -237,7 +236,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
                     # everything from the octet after this segment onwards is
                     # still missing
                     first=PSN + info.len,
-                    last=sys.maxsize,
+                    last=HOLE_OPEN_BOUND,
                 ),
             ]
             if not ANCHORED:
@@ -246,7 +245,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
                 # marks this one hole as "before the capture began" rather than
                 # as data missing from the stream; it is what lets a segment
                 # arriving *below* this one leave a real hole between the two.
-                hdl.insert(0, HoleDescriptor(first=-sys.maxsize, last=PSN - 1))
+                hdl.insert(0, HoleDescriptor(first=-HOLE_OPEN_BOUND, last=PSN - 1))
             self._buffer[BUFID] = Buffer(
                 hdl=hdl,
                 hdr=HDR,
@@ -351,7 +350,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
             with the sentinel hole that a buffer begun without a SYN carries.
 
         """
-        return not (buf.hdl and buf.hdl[0].first == -sys.maxsize)
+        return not (buf.hdl and buf.hdl[0].first == -HOLE_OPEN_BOUND)
 
     def _stream_whole(self, BUFID: 'BufferID') -> 'bool':
         """Whether a stream has seen its FIN and every octet below it.
@@ -366,7 +365,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
 
         """
         for hole in self._buffer[BUFID].hdl:
-            if hole.first != -sys.maxsize or hole.last == sys.maxsize:
+            if hole.first != -HOLE_OPEN_BOUND or hole.last == HOLE_OPEN_BOUND:
                 return False
         return True
 
