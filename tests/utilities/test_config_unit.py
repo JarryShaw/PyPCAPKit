@@ -590,5 +590,47 @@ class ImportTimeTests(unittest.TestCase):
                 self.assertIn(f"ConfigWarning: PCAPKIT_{name}={text!r}", result.stderr)
 
 
+class ImporterStacklevelTests(unittest.TestCase):
+    """GitHub issue #1963: the importer's level leaves out the bootstrap, however it is named.
+
+    CPython names :mod:`importlib`'s bootstrap frames ``<frozen importlib._bootstrap>``
+    and ``<frozen importlib._bootstrap_external>``, GraalPy ``<frozen _frozen_importlib>``
+    and ``<frozen _frozen_importlib_external>``, and each one's :func:`warnings.warn`
+    leaves its own out. Counting GraalPy's ran the level past the outermost frame,
+    so the import-time warnings above named ``<sys>:0`` there.
+
+    """
+
+    def level_under(self, bootstrap: str) -> int:
+        """The level a :mod:`pcapkit` frame gets, imported through ``bootstrap`` frames.
+
+        The chain is that of an import: this test, a bootstrap frame, a package
+        body, a bootstrap frame, then the reporting module. Leaving the bootstrap
+        out, the test is the third frame.
+
+        """
+        pcapkit_warnings = importlib.import_module('pcapkit.utilities.warnings')
+        namespace = {'_importer_stacklevel': getattr(pcapkit_warnings, '_importer_stacklevel')}
+        package = os.path.join(os.sep, 'site-packages', 'pcapkit', 'probe_1963.py')
+        reporter = ('def report():\n    return _importer_stacklevel()\n'
+                    'def body():\n    return load_inner()\n')
+        importer = ('def load_inner():\n    return report()\n'
+                    'def load_outer():\n    return body()\n')
+        exec(compile(reporter, package, 'exec'), namespace)  # nosec: B102  # pylint: disable=exec-used
+        exec(compile(importer, bootstrap, 'exec'), namespace)  # nosec: B102  # pylint: disable=exec-used
+        return namespace['load_outer']()
+
+    def test_each_interpreters_bootstrap_frames_are_left_out(self) -> None:
+        """Both CPython's names and GraalPy's leave the test the third frame."""
+        for bootstrap in ('<frozen importlib._bootstrap>', '<frozen importlib._bootstrap_external>',
+                          '<frozen _frozen_importlib>', '<frozen _frozen_importlib_external>'):
+            with self.subTest(bootstrap=bootstrap):
+                self.assertEqual(self.level_under(bootstrap), 3)
+
+    def test_any_other_frame_is_counted(self) -> None:
+        """The control: frames named otherwise are counted, so the level is one further out."""
+        self.assertEqual(self.level_under('<string>'), 4)
+
+
 if __name__ == '__main__':
     unittest.main()

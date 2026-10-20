@@ -81,6 +81,12 @@ if TYPE_CHECKING:
 #: Test tier (#1958): checks the guard in xdist workers on each leg's interpreter.
 __tier__ = 'ALL'
 
+#: Why the nested-session probes skip GraalPy (#1963): each starts a whole
+#: ``pytest -n`` session of fresh GraalPy interpreters, which took minutes a test
+#: on the experimental leg while the other workers idled. What they pin is the
+#: guard's xdist handling, which no interpreter changes, so the CPython legs cover it.
+SKIP_NESTED_ON_GRAALPY = 'a nested pytest-xdist session is too slow on GraalPy (#1963)'
+
 #: Capture name the probe module in :class:`XdistSubprocessTests` reads. Not
 #: tracked by git -- see :func:`tests._tiers.committed_captures` -- so it is a
 #: tier violation regardless of what ``make samples`` has built locally.
@@ -177,6 +183,7 @@ def _child_environ() -> 'dict[str, str]':
 
 @unittest.skipUnless(importlib.util.find_spec('xdist') is not None,
                       'pytest-xdist not installed')
+@unittest.skipIf(sys.implementation.name == 'graalpy', SKIP_NESTED_ON_GRAALPY)
 class XdistSubprocessTests(unittest.TestCase):
     """End-to-end reproduction: a real violation, a real ``pytest`` subprocess.
 
@@ -300,6 +307,7 @@ _CRASH_PLUGIN_SOURCE = textwrap.dedent(f"""
 
 @unittest.skipUnless(importlib.util.find_spec('xdist') is not None,
                       'pytest-xdist not installed')
+@unittest.skipIf(sys.implementation.name == 'graalpy', SKIP_NESTED_ON_GRAALPY)
 class ProbeWorkerCrashTests(unittest.TestCase):
     """A worker dying mid-probe fails that one test, not the session (#1756).
 
