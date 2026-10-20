@@ -4,6 +4,9 @@
 # https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
 #
 # Dependabot replaces PyUp's update pull requests (#1968); `.pyup.yml` turns those off.
+# Left out (#1968): conda/requirements.txt, which Conda Update's `Refresh the
+# platform pins` and `Setup Conda Distribution` steps write, and the benchmark's
+# image digests, which its Dockerfile takes from examples/benchmark/python-images.txt.
 
 version: 2
 updates:
@@ -11,18 +14,11 @@ updates:
     directories: # Location of package manifests; `directories` replaces `directory`
       - "/"
       - "/docs" # Pins Sphinx and sphinx-autodoc-typehints deliberately, bumps included
-      - "/conda"
       - "/examples/benchmark" # Nothing else updates the benchmark's pins
     schedule:
       interval: "weekly"
 
   - package-ecosystem: "github-actions" # Every `uses:` under .github/workflows
     directory: "/" # Dependabot reads .github/workflows from the repository root
-    schedule:
-      interval: "weekly"
-
-  - package-ecosystem: "docker" # The benchmark's Dockerfile
-    directories:
-      - "/examples/benchmark"
     schedule:
       interval: "weekly"

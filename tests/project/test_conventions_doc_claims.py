@@ -1488,7 +1488,7 @@ class ProcessConventionTests(unittest.TestCase):
         ecosystems = re.findall(r'package-ecosystem:\s*"([^"]+)"', dependabot)
 
         self.assertEqual(
-            ecosystems, ['pip', 'github-actions', 'docker'],
+            ecosystems, ['pip', 'github-actions'],
             'dependabot now watches a different set of ecosystems, so the page\'s claim '
             f'about which labels it applies needs re-deriving: {ecosystems}')
         # Derived rather than pinned to one phrasing. The previous form asserted the
@@ -1515,8 +1515,7 @@ class ProcessConventionTests(unittest.TestCase):
         # compare the same -- and locating the clause is asserted rather than assumed, so
         # a rewording that this can no longer read fails loudly instead of passing.
         ECOSYSTEM_LABELS = {'pip': {'dependencies', 'python'},
-                            'github-actions': {'dependencies', 'github_actions'},
-                            'docker': {'dependencies', 'docker'}}
+                            'github-actions': {'dependencies', 'github_actions'}}
         expected = set().union(*(ECOSYSTEM_LABELS[eco] for eco in ecosystems))
 
         # `findall`, not `search`: a first-match-only read checks one attributing

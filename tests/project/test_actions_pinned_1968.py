@@ -17,11 +17,11 @@ are not actions fetched by tag, so they are left alone.
 * :class:`TestDependabotUpdatesTheActions` checks :file:`.github/dependabot.yml`
   watches the ``github-actions`` ecosystem from the repository root.
 * :class:`TestDependabotCoversEveryManifest` checks the owner's ruling on #1968:
-  ``pip`` over the root, :file:`docs`, :file:`conda` and
-  :file:`examples/benchmark`, and ``docker`` over the benchmark's
-  :file:`Dockerfile`.
+  ``pip`` over the root, :file:`docs` and :file:`examples/benchmark`, and
+  neither :file:`conda` nor a ``docker`` entry, as Dependabot cannot update
+  either.
 * :class:`TestPyUpOpensNoUpdates` checks :file:`.pyup.yml` turns PyUp's update
-  pull requests off, now that Dependabot opens them.
+  pull requests off, as Dependabot opens them.
 
 """
 
@@ -52,9 +52,7 @@ DEPENDABOT = ROOT / '.github' / 'dependabot.yml'
 #: PyUp's configuration.
 PYUP = ROOT / '.pyup.yml'
 #: The directories the ``pip`` entry watches, in the owner's ruling on #1968.
-PIP_DIRECTORIES = ['/', '/docs', '/conda', '/examples/benchmark']
-#: The directories the ``docker`` entry watches.
-DOCKER_DIRECTORIES = ['/examples/benchmark']
+PIP_DIRECTORIES = ['/', '/docs', '/examples/benchmark']
 
 
 def updates() -> 'dict[str, dict[str, Any]]':
@@ -153,9 +151,9 @@ class TestDependabotUpdatesTheActions(unittest.TestCase):
 
 
 class TestDependabotCoversEveryManifest(unittest.TestCase):
-    """Dependabot watches the docs, conda and benchmark pins, and the benchmark image."""
+    """Dependabot watches the docs and benchmark pins, and nothing it cannot update."""
 
-    def test_pip_watches_the_root_docs_conda_and_the_benchmark(self) -> None:
+    def test_pip_watches_the_root_docs_and_the_benchmark(self) -> None:
         self.assertEqual(directories(updates()['pip']), PIP_DIRECTORIES)
 
     def test_each_pip_directory_holds_a_manifest(self) -> None:
@@ -164,13 +162,18 @@ class TestDependabotCoversEveryManifest(unittest.TestCase):
                 here = ROOT / directory.lstrip('/')
                 self.assertTrue(sorted(here.glob('*requirements*.txt')) or (here / 'pyproject.toml').is_file())
 
-    def test_docker_watches_the_benchmark_dockerfile(self) -> None:
-        entry = updates().get('docker')
-        self.assertIsNotNone(entry)
-        self.assertEqual(directories(entry), DOCKER_DIRECTORIES)  # type: ignore[arg-type]
-        for directory in DOCKER_DIRECTORIES:
-            with self.subTest(directory=directory):
-                self.assertTrue((ROOT / directory.lstrip('/') / 'Dockerfile').is_file())
+    def test_conda_is_not_watched(self) -> None:
+        """Conda Update's ``Refresh the platform pins`` and ``Setup Conda Distribution`` write it."""
+        for ecosystem, entry in updates().items():
+            with self.subTest(ecosystem=ecosystem):
+                self.assertNotIn('/conda', directories(entry))
+
+    def test_there_is_no_docker_entry(self) -> None:
+        """Dependabot reads a ``FROM`` that names its image; the benchmark's is an ``ARG``.
+
+        Its digests live in :file:`examples/benchmark/python-images.txt`.
+        """
+        self.assertNotIn('docker', updates())
 
     def test_every_entry_is_weekly_and_names_one_kind_of_directory(self) -> None:
         """The schema takes ``directory`` or ``directories``, never both."""

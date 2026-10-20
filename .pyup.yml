@@ -1,7 +1,7 @@
 # pyup.io config file
 # see https://pyup.io/docs/configuration/ for all available options
 #
-# Dependabot opens the dependency updates now (#1968, see .github/dependabot.yml),
+# Dependabot opens the dependency updates (#1968, see .github/dependabot.yml),
 # so PyUp opens none. `update: False` is the global default every requirements file
 # falls back to. No `requirements:` list is kept, because a file listed there takes
 # its own `update`, which defaults to `all` and would override this. Deleting the
