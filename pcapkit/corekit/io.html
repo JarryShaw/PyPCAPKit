@@ -501,7 +501,8 @@
 <a class="reference external" href="https://docs.python.org/3/library/io.html#io.BufferedReader" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">io.BufferedReader</span></code></a>, and the stream proxies:
 <a class="reference internal" href="#pcapkit.corekit.io.PeekableStream" title="pcapkit.corekit.io.PeekableStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">PeekableStream</span></code></a>, which adds <code class="docutils literal notranslate"><span class="pre">peek</span></code> to a seekable
 stream, and <a class="reference internal" href="#pcapkit.corekit.io.NamedStream" title="pcapkit.corekit.io.NamedStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">NamedStream</span></code></a>, which gives a stream a
-<code class="docutils literal notranslate"><span class="pre">name</span></code>.</p>
+<code class="docutils literal notranslate"><span class="pre">name</span></code>; and <a class="reference internal" href="#pcapkit.corekit.io.advance" title="pcapkit.corekit.io.advance"><code class="xref py py-func docutils literal notranslate"><span class="pre">advance()</span></code></a>, which moves a stream past
+more octets than one read or seek can take.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.io.SeekableReader">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.io.</span></span><span class="sig-name descname"><span class="pre">SeekableReader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">io.DEFAULT_BUFFER_SIZE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">stream_closing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/io.html#SeekableReader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.io.SeekableReader" title="Link to this definition">¶</a></dt>
@@ -1012,6 +1013,30 @@ a single byte was read.</p>
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.corekit.io.advance">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.io.</span></span><span class="sig-name descname"><span class="pre">advance</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">file</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">count</span></span></em>, <em class="sig-param"><span class="positional-only-separator o"><abbr title="Positional-only parameter separator (PEP 570)"><span class="pre">/</span></abbr></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/io.html#advance"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.io.advance" title="Link to this definition">¶</a></dt>
+<dd><p>Move <code class="docutils literal notranslate"><span class="pre">file</span></code> forward by <code class="docutils literal notranslate"><span class="pre">count</span></code> octets, however many one read or seek can take.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>file</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IO</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]</span>) – Stream to move.</p></li>
+<li><p><strong>count</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Octets to move past, counted from the position.</p></li>
+</ul>
+</dd>
+</dl>
+<p>A frame reader asks for a record no further than one read can go,
+<a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.maxsize" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.maxsize</span></code></a>, so a record the file really holds past that is read only
+as far as the limit; the next record still starts where this one declares it
+ends (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1975">#1975</a>). A seekable stream gets there by relative seeks, none
+longer than <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.maxsize" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.maxsize</span></code></a>, and may land past its end, as an absolute seek
+would. A <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader" title="pcapkit.corekit.io.SeekableReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">SeekableReader</span></code></a>, or a stream that cannot seek, reads the
+octets and discards them, no more than
+<a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.READ_CHUNK" title="pcapkit.utilities.config.READ_CHUNK"><code class="xref py py-data docutils literal notranslate"><span class="pre">READ_CHUNK</span></code></a> at a time, and stops at the end
+of the stream: a <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader" title="pcapkit.corekit.io.SeekableReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">SeekableReader</span></code></a> seek reads at most a buffer’s worth
+past what it holds, so a longer one would stop short of the target.</p>
 </dd></dl>
 
 </section>

@@ -489,10 +489,12 @@
 <span class="sd">implementation to :class:`io.BufferedReader`, and the stream proxies</span>
 <span class="sd">:class:`~pcapkit.corekit.io.PeekableStream`, which adds ``peek`` to a</span>
 <span class="sd">seekable stream, and :class:`~pcapkit.corekit.io.NamedStream`, which gives</span>
-<span class="sd">a stream a ``name``.</span>
+<span class="sd">a stream a ``name``, as well as :func:`~pcapkit.corekit.io.advance`, which moves</span>
+<span class="sd">a stream past more octets than one read or seek can take.</span>
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
@@ -507,7 +509,7 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Buffer</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'SeekableReader'</span><span class="p">,</span> <span class="s1">'PeekableStream'</span><span class="p">,</span> <span class="s1">'NamedStream'</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'SeekableReader'</span><span class="p">,</span> <span class="s1">'PeekableStream'</span><span class="p">,</span> <span class="s1">'NamedStream'</span><span class="p">,</span> <span class="s1">'advance'</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="SeekableReader">
@@ -684,11 +686,14 @@
         <span class="n">minimum</span> <span class="o">=</span> <span class="n">size</span> <span class="k">if</span> <span class="n">minimum</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">minimum</span>
         <span class="n">read</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="p">,</span> <span class="s1">'read1'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">read</span><span class="p">)</span>
 
-        <span class="n">limit</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">READ_CHUNK</span>
+        <span class="c1"># NOTE: ``-1`` sets no limit of its own, but one read still goes no further</span>
+        <span class="c1"># than :data:`sys.maxsize`, whatever the setting, past which it raises</span>
+        <span class="c1"># :exc:`OverflowError` rather than coming back short (#1975).</span>
+        <span class="n">limit</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span> <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">READ_CHUNK</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="nb">min</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">READ_CHUNK</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">)</span>
         <span class="n">chunks</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[bytes]</span>
         <span class="n">count</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">chunk</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="n">size</span> <span class="o">-</span> <span class="n">count</span> <span class="k">if</span> <span class="n">limit</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="nb">min</span><span class="p">(</span><span class="n">size</span> <span class="o">-</span> <span class="n">count</span><span class="p">,</span> <span class="n">limit</span><span class="p">))</span>
+            <span class="n">chunk</span> <span class="o">=</span> <span class="n">read</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">size</span> <span class="o">-</span> <span class="n">count</span><span class="p">,</span> <span class="n">limit</span><span class="p">))</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">chunk</span><span class="p">:</span>
                 <span class="k">break</span>
             <span class="n">chunks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chunk</span><span class="p">)</span>
@@ -1369,6 +1374,49 @@
                         <span class="n">buf</span> <span class="o">+=</span> <span class="n">buf_tmp</span>
         <span class="k">return</span> <span class="n">buf</span></div>
 </div>
+
+
+
+<span class="c1">#: Octets :func:`advance` reads and discards at a time when</span>
+<span class="c1">#: :data:`~pcapkit.utilities.config.READ_CHUNK` sets no limit.</span>
+<span class="n">_DISCARD_CHUNK</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">20</span>
+
+
+<div class="viewcode-block" id="advance">
+<a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.advance">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">advance</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="s1">'IO[bytes]'</span><span class="p">,</span> <span class="n">count</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="o">/</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Move ``file`` forward by ``count`` octets, however many one read or seek can take.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        file: Stream to move.</span>
+<span class="sd">        count: Octets to move past, counted from the position.</span>
+
+<span class="sd">    A frame reader asks for a record no further than one read can go,</span>
+<span class="sd">    :data:`sys.maxsize`, so a record the file really holds past that is read only</span>
+<span class="sd">    as far as the limit; the next record still starts where this one declares it</span>
+<span class="sd">    ends (:issue:`1975`). A seekable stream gets there by relative seeks, none</span>
+<span class="sd">    longer than :data:`sys.maxsize`, and may land past its end, as an absolute seek</span>
+<span class="sd">    would. A :class:`SeekableReader`, or a stream that cannot seek, reads the</span>
+<span class="sd">    octets and discards them, no more than</span>
+<span class="sd">    :data:`~pcapkit.utilities.config.READ_CHUNK` at a time, and stops at the end</span>
+<span class="sd">    of the stream: a :class:`SeekableReader` seek reads at most a buffer's worth</span>
+<span class="sd">    past what it holds, so a longer one would stop short of the target.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">SeekableReader</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">file</span><span class="o">.</span><span class="n">seekable</span><span class="p">():</span>
+        <span class="n">chunk</span> <span class="o">=</span> <span class="n">_DISCARD_CHUNK</span> <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">READ_CHUNK</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="n">config</span><span class="o">.</span><span class="n">READ_CHUNK</span>
+        <span class="n">chunk</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">)</span>
+        <span class="k">while</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">buf</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">chunk</span><span class="p">))</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">buf</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="n">count</span> <span class="o">-=</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">)</span>
+        <span class="k">return</span>
+
+    <span class="k">while</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">)</span>
+        <span class="n">file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">step</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_CUR</span><span class="p">)</span>
+        <span class="n">count</span> <span class="o">-=</span> <span class="n">step</span></div>
 
 
 

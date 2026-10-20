@@ -636,11 +636,13 @@ it is a record that the owner asserted it.</p>
 <p>Some paths are automated, and each is worth knowing about because a label they set has
 had no human judgement behind it:</p>
 <ul class="simple">
-<li><p><strong>dependabot</strong> puts <code class="docutils literal notranslate"><span class="pre">dependencies</span></code> and <code class="docutils literal notranslate"><span class="pre">python</span></code> on its own pull requests, and
-only those: <code class="file docutils literal notranslate"><span class="pre">.github/dependabot.yml</span></code> configures only the <code class="docutils literal notranslate"><span class="pre">pip</span></code>
-ecosystem, so it never opens a workflow bump here. <code class="docutils literal notranslate"><span class="pre">github_actions</span></code> exists as a
-label but is <strong>hand-applied like the rest</strong> – naming it as dependabot’s would tell
-a reader the opposite of this section’s point.</p></li>
+<li><p><strong>dependabot</strong> puts <code class="docutils literal notranslate"><span class="pre">dependencies</span></code>, <code class="docutils literal notranslate"><span class="pre">python</span></code> and <code class="docutils literal notranslate"><span class="pre">github_actions</span></code> on its own
+pull requests, and only those: <code class="file docutils literal notranslate"><span class="pre">.github/dependabot.yml</span></code> configures the
+<code class="docutils literal notranslate"><span class="pre">pip</span></code> and <code class="docutils literal notranslate"><span class="pre">github-actions</span></code> ecosystems and no <code class="docutils literal notranslate"><span class="pre">labels:</span></code> key, so each bump
+takes dependabot’s defaults – <code class="docutils literal notranslate"><span class="pre">dependencies</span></code> always, with <code class="docutils literal notranslate"><span class="pre">python</span></code> on a
+<code class="docutils literal notranslate"><span class="pre">pip</span></code> bump and <code class="docutils literal notranslate"><span class="pre">github_actions</span></code> on a workflow bump. On anyone else’s pull
+request <code class="docutils literal notranslate"><span class="pre">github_actions</span></code> is <strong>hand-applied like the rest</strong>. PyUp opens no pull requests here: <code class="file docutils literal notranslate"><span class="pre">.pyup.yml</span></code> sets
+<code class="docutils literal notranslate"><span class="pre">update:</span> <span class="pre">False</span></code>.</p></li>
 <li><p><strong>The issue templates</strong> apply an issue-kind label from their front matter, before
 anyone reads the issue – <code class="file docutils literal notranslate"><span class="pre">.github/ISSUE_TEMPLATE/bug_report.md</span></code> carries
 <code class="docutils literal notranslate"><span class="pre">labels:</span> <span class="pre">bug</span></code> and <code class="file docutils literal notranslate"><span class="pre">.github/ISSUE_TEMPLATE/feature_request.md</span></code> carries
@@ -760,10 +762,9 @@ ways. A sweep that treats pending as “needs a reviewer dispatched” will disp
 top of a review already in progress, and the second verdict then arrives against a head
 the first was never given. Separating the two makes <em>which pull requests still need a
 reviewer</em> answerable from the board rather than from memory of what was dispatched.</p>
-<p><strong>Scope.</strong> <code class="docutils literal notranslate"><span class="pre">dependencies</span></code> and <code class="docutils literal notranslate"><span class="pre">python</span></code> are dependabot’s, per above.
-<code class="docutils literal notranslate"><span class="pre">github_actions</span></code> is the same kind of label – it scopes a change to the workflows –
-but nothing applies it automatically, because dependabot is not configured for that
-ecosystem here.</p>
+<p><strong>Scope.</strong> <code class="docutils literal notranslate"><span class="pre">dependencies</span></code>, <code class="docutils literal notranslate"><span class="pre">python</span></code> and <code class="docutils literal notranslate"><span class="pre">github_actions</span></code> are dependabot’s on
+its own pull requests, per above. <code class="docutils literal notranslate"><span class="pre">github_actions</span></code> scopes a change to the
+workflows, and on any other pull request it is hand-applied.</p>
 </section>
 <section id="the-breaking-label">
 <h2>The <code class="docutils literal notranslate"><span class="pre">breaking</span></code> Label<a class="headerlink" href="#the-breaking-label" title="Link to this heading">¶</a></h2>

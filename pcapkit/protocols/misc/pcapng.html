@@ -5392,7 +5392,7 @@ with one blank line between entries.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.DecryptionSecretsBlock.secrets_data">
 <span class="sig-name descname"><span class="pre">secrets_data</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.DSBSecrets" title="pcapkit.protocols.schema.misc.pcapng.DSBSecrets"><span class="pre">DSBSecrets</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;SwitchField</span> <span class="pre">secrets_data&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.DecryptionSecretsBlock.secrets_data" title="Link to this definition">¶</a></dt>
-<dd><p>Secrets data.</p>
+<dd><p>Secrets data, bounded by the block (see <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.secrets_area" title="pcapkit.protocols.schema.misc.pcapng.secrets_area"><code class="xref py py-func docutils literal notranslate"><span class="pre">secrets_area()</span></code></a>).</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -5417,6 +5417,33 @@ with one blank line between entries.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.DecryptionSecretsBlock.length2">
 <span class="sig-name descname"><span class="pre">length2</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt32Field</span> <span class="pre">length2&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.DecryptionSecretsBlock.length2" title="Link to this definition">¶</a></dt>
 <dd><p>Block total length.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.DecryptionSecretsBlock.post_process">
+<span class="sig-name descname"><span class="pre">post_process</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/misc/pcapng.html#DecryptionSecretsBlock.post_process"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.DecryptionSecretsBlock.post_process" title="Link to this definition">¶</a></dt>
+<dd><p>Revise <code class="docutils literal notranslate"><span class="pre">schema</span></code> data after unpacking process.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Unpacked data.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema" title="pcapkit.protocols.schema.schema.Schema"><code class="xref py py-class docutils literal notranslate"><span class="pre">Schema</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Revised schema.</p>
+</dd>
+</dl>
+<p>A <code class="docutils literal notranslate"><span class="pre">secrets_length</span></code> running past the block is kept as declared, and
+the secrets are the octets the block holds (see <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.secrets_area" title="pcapkit.protocols.schema.misc.pcapng.secrets_area"><code class="xref py py-func docutils literal notranslate"><span class="pre">secrets_area()</span></code></a>),
+so this reports the overrun as a
+<a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.ProtocolWarning" title="pcapkit.utilities.warnings.ProtocolWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolWarning</span></code></a> and carries on to
+the next block (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1980">#1980</a>).</p>
+<p>The report is made on the unpacking path only, where <code class="docutils literal notranslate"><span class="pre">__length__</span></code> is
+what is left of the stream. <a class="reference internal" href="../index.html#pcapkit.protocols.schema.schema.Schema.pack" title="pcapkit.protocols.schema.schema.Schema.pack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.pack</span></code></a> seeds it as <code class="docutils literal notranslate"><span class="pre">-1</span></code>, and
+rebuilding a block already reported is no new overrun. The lengths are
+read from the schema rather than from <code class="docutils literal notranslate"><span class="pre">packet</span></code>, since packing the
+option area rebinds <code class="docutils literal notranslate"><span class="pre">packet['length']</span></code> to each option’s own length.</p>
 </dd></dl>
 
 </dd></dl>
@@ -7269,7 +7296,9 @@ does not read at all.</p>
 <dd class="field-odd"><p>A <a class="reference internal" href="../../corekit/fields/misc.html#pcapkit.corekit.fields.misc.SchemaField" title="pcapkit.corekit.fields.misc.SchemaField"><code class="xref py py-class docutils literal notranslate"><span class="pre">SchemaField</span></code></a> wrapped instance of
 the <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.DSBSecrets" title="pcapkit.protocols.schema.misc.pcapng.DSBSecrets"><code class="xref py py-class docutils literal notranslate"><span class="pre">DSBSecrets</span></code></a> subclass
 registered for <code class="docutils literal notranslate"><span class="pre">secrets_type</span></code>, or of
-<a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.UnknownSecrets" title="pcapkit.protocols.schema.misc.pcapng.UnknownSecrets"><code class="xref py py-class docutils literal notranslate"><span class="pre">UnknownSecrets</span></code></a> if none is.</p>
+<a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.UnknownSecrets" title="pcapkit.protocols.schema.misc.pcapng.UnknownSecrets"><code class="xref py py-class docutils literal notranslate"><span class="pre">UnknownSecrets</span></code></a> if none is,
+spanning the octets of <code class="docutils literal notranslate"><span class="pre">secrets_length</span></code> that the block holds (see
+<a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.secrets_area" title="pcapkit.protocols.schema.misc.pcapng.secrets_area"><code class="xref py py-func docutils literal notranslate"><span class="pre">secrets_area()</span></code></a>).</p>
 </dd>
 </dl>
 <div class="admonition seealso">
@@ -7457,6 +7486,33 @@ rebuild could not be byte-exact. Bounded, the block keeps its declared
 captured length and exactly the octets it holds, and the padding and option
 area are sized from those octets rather than from the declared length
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1405">#1405</a>).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.secrets_area">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.misc.pcapng.</span></span><span class="sig-name descname"><span class="pre">secrets_area</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/misc/pcapng.html#secrets_area"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.secrets_area" title="Link to this definition">¶</a></dt>
+<dd><p>Bound a Decryption Secrets Block’s Secrets Data to the octets the block holds.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Unpacked data so far, with <code class="docutils literal notranslate"><span class="pre">length</span></code> and <code class="docutils literal notranslate"><span class="pre">secrets_length</span></code>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The declared <code class="docutils literal notranslate"><span class="pre">secrets_length</span></code>, never past the block’s Block Total
+Length less its 20 framing octets, and never below zero.</p>
+</dd>
+</dl>
+<p><code class="docutils literal notranslate"><span class="pre">secrets_length</span></code> is a 32-bit wire field. Read as declared, a length past
+the block read the trailing Block Total Length and the blocks after it as
+secrets, and past <a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH" title="pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH"><code class="xref py py-data docutils literal notranslate"><span class="pre">MAX_ZERO_PAD_LENGTH</span></code></a> the
+read raised <a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.FieldValueError" title="pcapkit.utilities.exceptions.FieldValueError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">FieldValueError</span></code></a> from inside
+the block’s schema, which ended the whole extraction (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1980">#1980</a>). This
+is the Secrets Data counterpart of <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.captured_area" title="pcapkit.protocols.schema.misc.pcapng.captured_area"><code class="xref py py-func docutils literal notranslate"><span class="pre">captured_area()</span></code></a>: the block keeps its
+declared <code class="docutils literal notranslate"><span class="pre">secrets_length</span></code>, the secrets are the octets the block holds, and
+the padding and option area are sized from those octets.
+<a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.DecryptionSecretsBlock.post_process" title="pcapkit.protocols.schema.misc.pcapng.DecryptionSecretsBlock.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">DecryptionSecretsBlock.post_process()</span></code></a> reports the overrun.</p>
 </dd></dl>
 
 <dl class="py function">

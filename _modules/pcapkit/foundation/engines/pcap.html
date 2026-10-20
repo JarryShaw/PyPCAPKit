@@ -489,6 +489,7 @@
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">SeekableReader</span>
@@ -728,7 +729,10 @@
         <span class="n">size</span> <span class="o">=</span> <span class="n">RECORD_HEADER_LEN</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">head</span><span class="p">)</span> <span class="o">==</span> <span class="n">RECORD_HEADER_LEN</span><span class="p">:</span>
             <span class="n">size</span> <span class="o">+=</span> <span class="nb">int</span><span class="o">.</span><span class="n">from_bytes</span><span class="p">(</span><span class="n">head</span><span class="p">[</span><span class="mi">8</span><span class="p">:</span><span class="mi">12</span><span class="p">],</span> <span class="bp">self</span><span class="o">.</span><span class="n">_gbhdr</span><span class="o">.</span><span class="n">byteorder</span><span class="p">)</span>
-        <span class="n">ifile</span><span class="o">.</span><span class="n">_read_ahead_size</span> <span class="o">=</span> <span class="n">size</span></div>
+        <span class="c1"># NOTE: No buffer holds more than :data:`sys.maxsize` octets, so a record</span>
+        <span class="c1"># longer than that is read ahead only so far; the reader moves past the</span>
+        <span class="c1"># rest itself (#1975).</span>
+        <span class="n">ifile</span><span class="o">.</span><span class="n">_read_ahead_size</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">)</span></div>
 
 </pre></div>
         </article>

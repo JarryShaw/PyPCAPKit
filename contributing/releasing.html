@@ -707,8 +707,9 @@ spends a GitHub App’s token instead (<a class="reference internal" href="#the-
 nothing in this workflow calls Update a release, so by the docs nothing
 re-checks the target (unmeasured).
 <code class="docutils literal notranslate"><span class="pre">cron-conda.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">conda-dist</span></code> does: it attaches packages with
-<code class="docutils literal notranslate"><span class="pre">ncipollo/release-action&#64;v1.21.0</span></code> and <code class="docutils literal notranslate"><span class="pre">allowUpdates:</span> <span class="pre">true</span></code>, which updates
-the release before uploading (<code class="docutils literal notranslate"><span class="pre">src/Action.ts:53-66,107-120</span></code>). It therefore
+<code class="docutils literal notranslate"><span class="pre">ncipollo/release-action</span></code> v1.21.0, pinned to its commit, and
+<code class="docutils literal notranslate"><span class="pre">allowUpdates:</span> <span class="pre">true</span></code>, which updates the release before uploading
+(<code class="docutils literal notranslate"><span class="pre">src/Action.ts:53-66,107-120</span></code>). It therefore
 names the default branch – <code class="docutils literal notranslate"><span class="pre">github.ref_name</span></code> whichever trigger raised it – as
 <code class="docutils literal notranslate"><span class="pre">commit</span></code>, which that update sends as <code class="docutils literal notranslate"><span class="pre">target_commitish</span></code>
 (<code class="docutils literal notranslate"><span class="pre">src/Releases.ts:150-174</span></code>), so the rule checks <code class="docutils literal notranslate"><span class="pre">main</span></code> itself; the tag
@@ -738,10 +739,11 @@ the release with a GitHub App installation token, which Create a release
 accepts for a target that changes a workflow file when it has the “Workflows”
 repository permission (write). “Mint the release App’s token”
 (<code class="docutils literal notranslate"><span class="pre">create-release.yml:692-700</span></code>) runs
-<code class="docutils literal notranslate"><span class="pre">actions/create-github-app-token&#64;v3</span></code> with <code class="docutils literal notranslate"><span class="pre">permission-contents:</span> <span class="pre">write</span></code> and
-<code class="docutils literal notranslate"><span class="pre">permission-workflows:</span> <span class="pre">write</span></code> and no <code class="docutils literal notranslate"><span class="pre">owner</span></code> or <code class="docutils literal notranslate"><span class="pre">repositories</span></code>, so the
-token is “scoped to only the current repository” and revoked in the action’s
-<code class="docutils literal notranslate"><span class="pre">post</span></code> step (v3.3.0’s README). Only Create Release spends it (<code class="docutils literal notranslate"><span class="pre">:736</span></code>).
+<code class="docutils literal notranslate"><span class="pre">actions/create-github-app-token</span></code> v3.3.0, pinned to its commit, with
+<code class="docutils literal notranslate"><span class="pre">permission-contents:</span> <span class="pre">write</span></code> and <code class="docutils literal notranslate"><span class="pre">permission-workflows:</span> <span class="pre">write</span></code> and no
+<code class="docutils literal notranslate"><span class="pre">owner</span></code> or <code class="docutils literal notranslate"><span class="pre">repositories</span></code>, so the token is “scoped to only the current
+repository” and revoked in the action’s <code class="docutils literal notranslate"><span class="pre">post</span></code> step (v3.3.0’s README). Only
+Create Release spends it (<code class="docutils literal notranslate"><span class="pre">:736</span></code>).
 While <code class="docutils literal notranslate"><span class="pre">vars.RELEASE_APP_CLIENT_ID</span></code> is unset, which reads as “an empty
 string”, the step skips and Create Release spends <code class="docutils literal notranslate"><span class="pre">GITHUB_TOKEN</span></code>, so the
 workflow keeps working, refusals included, until the App exists. A PAT would

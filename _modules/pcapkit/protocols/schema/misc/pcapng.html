@@ -1010,9 +1010,75 @@
     <span class="n">framing</span> <span class="o">=</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Enhanced_Packet_Block</span><span class="p">]</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">callback</span><span class="p">(</span><span class="n">pkt</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="n">framing</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">_held_octets</span><span class="p">(</span><span class="n">pkt</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">],</span> <span class="n">framing</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">callback</span></div>
 
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_held_octets</span><span class="p">(</span><span class="n">declared</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">framing</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Bound a declared length to the octets its block holds.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        declared: Length a field of the block declares, e.g. ``captured_len``.</span>
+<span class="sd">        length: The block's own Block Total Length.</span>
+<span class="sd">        framing: Octets the block's fixed fields span, both copies of the Block</span>
+<span class="sd">            Total Length included.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        ``declared``, never past ``length`` less ``framing``, and never below</span>
+<span class="sd">        zero. Shared by :func:`captured_area` and :func:`secrets_area`.</span>
+
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">min</span><span class="p">(</span><span class="n">declared</span><span class="p">,</span> <span class="n">length</span> <span class="o">-</span> <span class="n">framing</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="secrets_area">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.secrets_area">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">secrets_area</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Bound a Decryption Secrets Block's Secrets Data to the octets the block holds.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: Unpacked data so far, with ``length`` and ``secrets_length``.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        The declared ``secrets_length``, never past the block's Block Total</span>
+<span class="sd">        Length less its 20 framing octets, and never below zero.</span>
+
+<span class="sd">    ``secrets_length`` is a 32-bit wire field. Read as declared, a length past</span>
+<span class="sd">    the block read the trailing Block Total Length and the blocks after it as</span>
+<span class="sd">    secrets, and past :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH` the</span>
+<span class="sd">    read raised :exc:`~pcapkit.utilities.exceptions.FieldValueError` from inside</span>
+<span class="sd">    the block's schema, which ended the whole extraction (:issue:`1980`). This</span>
+<span class="sd">    is the Secrets Data counterpart of :func:`captured_area`: the block keeps its</span>
+<span class="sd">    declared ``secrets_length``, the secrets are the octets the block holds, and</span>
+<span class="sd">    the padding and option area are sized from those octets.</span>
+<span class="sd">    :meth:`DecryptionSecretsBlock.post_process` reports the overrun.</span>
+
+<span class="sd">    """</span>
+    <span class="k">return</span> <span class="n">_held_octets</span><span class="p">(</span><span class="n">packet</span><span class="p">[</span><span class="s1">'secrets_length'</span><span class="p">],</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'length'</span><span class="p">],</span>
+                        <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Decryption_Secrets_Block</span><span class="p">])</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_secrets_cut</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Tell whether a key log's enclosing block holds less than it declares.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: Unpacked data of the key log secrets schema, whose ``__packet__``</span>
+<span class="sd">            is the enclosing Decryption Secrets Block's.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Whether that block's ``secrets_length`` runs past the block, so that</span>
+<span class="sd">        :func:`secrets_area` cut the key log at the block's end (:issue:`1980`).</span>
+
+<span class="sd">    """</span>
+    <span class="n">block</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__packet__'</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="n">declared</span><span class="p">,</span> <span class="n">length</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'secrets_length'</span><span class="p">),</span> <span class="n">block</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'length'</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">declared</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="n">declared</span> <span class="o">&gt;</span> <span class="n">secrets_area</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="pcapng_block_selector">
@@ -1055,23 +1121,29 @@
 
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_cut_last_line</span><span class="p">(</span><span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">lines</span><span class="p">:</span> <span class="s1">'list[str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_cut_last_line</span><span class="p">(</span><span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">lines</span><span class="p">:</span> <span class="s1">'list[str]'</span><span class="p">,</span>
+                   <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[dict[str, Any]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Tell whether a key log line that did not parse is one the capture cut.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        schema: Key log secrets schema, just unpacked.</span>
 <span class="sd">        index: Index of the line in ``lines``.</span>
 <span class="sd">        lines: Lines of the key log.</span>
+<span class="sd">        packet: Unpacked data of ``schema``, if any.</span>
 
 <span class="sd">    Returns:</span>
 <span class="sd">        Whether ``lines[index]`` is the last line of a key log the data ended</span>
 <span class="sd">        inside, which :meth:`Schema.unpack</span>
 <span class="sd">        &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;` records as</span>
-<span class="sd">        ``__short_read__``. Such a line is only the first octets of an entry,</span>
-<span class="sd">        and the log text, kept verbatim, still rebuilds it (:issue:`1470`).</span>
+<span class="sd">        ``__short_read__``, or that the enclosing block ended inside, as</span>
+<span class="sd">        :func:`secrets_area` bounds it (:issue:`1980`). Such a line is only the</span>
+<span class="sd">        first octets of an entry, and the log text, kept verbatim, still</span>
+<span class="sd">        rebuilds it (:issue:`1470`).</span>
 
 <span class="sd">    """</span>
-    <span class="k">return</span> <span class="n">index</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span> <span class="ow">and</span> <span class="s1">'__short_read__'</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="vm">__dict__</span>
+    <span class="k">if</span> <span class="n">index</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="s1">'__short_read__'</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="vm">__dict__</span> <span class="ow">or</span> <span class="p">(</span><span class="n">packet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_secrets_cut</span><span class="p">(</span><span class="n">packet</span><span class="p">))</span>
 
 
 <div class="viewcode-block" id="dsb_secrets_selector">
@@ -1086,7 +1158,9 @@
 <span class="sd">        A :class:`~pcapkit.corekit.fields.misc.SchemaField` wrapped instance of</span>
 <span class="sd">        the :class:`~pcapkit.protocols.schema.misc.pcapng.DSBSecrets` subclass</span>
 <span class="sd">        registered for ``secrets_type``, or of</span>
-<span class="sd">        :class:`~pcapkit.protocols.schema.misc.pcapng.UnknownSecrets` if none is.</span>
+<span class="sd">        :class:`~pcapkit.protocols.schema.misc.pcapng.UnknownSecrets` if none is,</span>
+<span class="sd">        spanning the octets of ``secrets_length`` that the block holds (see</span>
+<span class="sd">        :func:`secrets_area`).</span>
 
 <span class="sd">    See Also:</span>
 <span class="sd">        * :class:`pcapkit.const.pcapng.secrets_type.SecretsType`</span>
@@ -1095,7 +1169,7 @@
 <span class="sd">    """</span>
     <span class="n">secrets_type</span> <span class="o">=</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'secrets_type'</span><span class="p">]</span>  <span class="c1"># type: int</span>
     <span class="n">schema</span> <span class="o">=</span> <span class="n">DSBSecrets</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="n">secrets_type</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">packet</span><span class="p">[</span><span class="s1">'secrets_length'</span><span class="p">],</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">SchemaField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">secrets_area</span><span class="p">(</span><span class="n">packet</span><span class="p">),</span> <span class="n">schema</span><span class="o">=</span><span class="n">schema</span><span class="p">)</span></div>
 
 
 
@@ -3003,7 +3077,7 @@
                 <span class="n">entries</span><span class="p">[</span><span class="n">label_enum</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">random</span><span class="p">),</span>
                                         <span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">secret</span><span class="p">))</span>
             <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">_cut_last_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">lines</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">_cut_last_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">lines</span><span class="p">,</span> <span class="n">packet</span><span class="p">):</span>
                     <span class="k">break</span>
                 <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'invalid TLS key log format: </span><span class="si">{</span><span class="n">line</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">error</span>
 
@@ -3056,7 +3130,7 @@
                 <span class="n">label_enum</span> <span class="o">=</span> <span class="n">WireGuardKeyLabel</span><span class="p">(</span><span class="n">label</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
                 <span class="n">entries</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">label_enum</span><span class="p">,</span> <span class="n">base64</span><span class="o">.</span><span class="n">b64decode</span><span class="p">(</span><span class="n">secret</span><span class="p">))</span>
             <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">_cut_last_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">lines</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">_cut_last_line</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">,</span> <span class="n">lines</span><span class="p">,</span> <span class="n">packet</span><span class="p">):</span>
                     <span class="k">break</span>
                 <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">error</span><span class="p">,</span> <span class="n">FieldValueError</span><span class="p">):</span>
                     <span class="k">raise</span>
@@ -3138,18 +3212,18 @@
     <span class="n">secrets_type</span><span class="p">:</span> <span class="s1">'Enum_SecretsType'</span> <span class="o">=</span> <span class="n">EnumField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">4</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">Enum_SecretsType</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
     <span class="c1">#: Secrets length.</span>
     <span class="n">secrets_length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
-    <span class="c1">#: Secrets data.</span>
+    <span class="c1">#: Secrets data, bounded by the block (see :func:`secrets_area`).</span>
     <span class="n">secrets_data</span><span class="p">:</span> <span class="s1">'DSBSecrets'</span> <span class="o">=</span> <span class="n">SwitchField</span><span class="p">(</span>
         <span class="n">selector</span><span class="o">=</span><span class="n">dsb_secrets_selector</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="c1">#: Padding.</span>
-    <span class="n">padding_data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'secrets_length'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
+    <span class="n">padding_data</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">PaddingField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">secrets_area</span><span class="p">(</span><span class="n">pkt</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
     <span class="c1">#: Options.</span>
     <span class="n">options</span><span class="p">:</span> <span class="s1">'list[Option]'</span> <span class="o">=</span> <span class="n">OptionAreaField</span><span class="p">(</span>
         <span class="c1"># NOTE: see EnhancedPacketBlock.options on why the padding is recomputed</span>
         <span class="c1"># here instead of being read back from ``padding_data``.</span>
         <span class="n">length</span><span class="o">=</span><span class="n">nonnegative</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'length'</span><span class="p">]</span> <span class="o">-</span> <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Decryption_Secrets_Block</span><span class="p">]</span>
-                           <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'secrets_length'</span><span class="p">]</span> <span class="o">-</span> <span class="p">(</span><span class="mi">4</span> <span class="o">-</span> <span class="n">pkt</span><span class="p">[</span><span class="s1">'secrets_length'</span><span class="p">]</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">),</span>
+                           <span class="o">-</span> <span class="p">(</span><span class="n">secrets_area</span><span class="p">(</span><span class="n">pkt</span><span class="p">)</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span> <span class="o">//</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">4</span><span class="p">),</span>
         <span class="n">base_schema</span><span class="o">=</span><span class="n">_DSB_Option</span><span class="p">,</span>
         <span class="n">type_name</span><span class="o">=</span><span class="s1">'type'</span><span class="p">,</span>
         <span class="n">registry</span><span class="o">=</span><span class="n">Option</span><span class="o">.</span><span class="n">registry</span><span class="p">[</span><span class="s1">'dsb'</span><span class="p">],</span>
@@ -3160,6 +3234,40 @@
         <span class="n">length</span><span class="o">=</span><span class="n">nonnegative</span><span class="p">(</span><span class="k">lambda</span> <span class="n">pkt</span><span class="p">:</span> <span class="n">pkt</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__option_padding__'</span><span class="p">,</span> <span class="mi">0</span><span class="p">)))</span>
     <span class="c1">#: Block total length.</span>
     <span class="n">length2</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
+
+<div class="viewcode-block" id="DecryptionSecretsBlock.post_process">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.DecryptionSecretsBlock.post_process">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">post_process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Revise ``schema`` data after unpacking process.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            packet: Unpacked data.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Revised schema.</span>
+
+<span class="sd">        A ``secrets_length`` running past the block is kept as declared, and</span>
+<span class="sd">        the secrets are the octets the block holds (see :func:`secrets_area`),</span>
+<span class="sd">        so this reports the overrun as a</span>
+<span class="sd">        :class:`~pcapkit.utilities.warnings.ProtocolWarning` and carries on to</span>
+<span class="sd">        the next block (:issue:`1980`).</span>
+
+<span class="sd">        The report is made on the unpacking path only, where ``__length__`` is</span>
+<span class="sd">        what is left of the stream. :meth:`Schema.pack</span>
+<span class="sd">        &lt;pcapkit.protocols.schema.schema.Schema.pack&gt;` seeds it as ``-1``, and</span>
+<span class="sd">        rebuilding a block already reported is no new overrun. The lengths are</span>
+<span class="sd">        read from the schema rather than from ``packet``, since packing the</span>
+<span class="sd">        option area rebinds ``packet['length']`` to each option's own length.</span>
+
+<span class="sd">        """</span>
+        <span class="n">held</span> <span class="o">=</span> <span class="n">_held_octets</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">secrets_length</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
+                            <span class="n">BLOCK_MINIMUM</span><span class="p">[</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Decryption_Secrets_Block</span><span class="p">])</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">secrets_length</span> <span class="o">&gt;</span> <span class="n">held</span> <span class="ow">and</span> <span class="n">packet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'__length__'</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Block </span><span class="si">{</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Decryption_Secrets_Block</span><span class="si">}</span><span class="s1">] secrets length '</span>
+                 <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">secrets_length</span><span class="si">}</span><span class="s1"> runs past the block, which holds </span><span class="si">{</span><span class="n">held</span><span class="si">}</span><span class="s1"> octet(s); '</span>
+                 <span class="s1">'kept as captured'</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">post_process</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span></div>
+
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">secrets_type</span><span class="p">:</span> <span class="s1">'Enum_SecretsType'</span><span class="p">,</span>

@@ -547,6 +547,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumLookup</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.strings</span><span class="w"> </span><span class="kn">import</span> <span class="n">DecodedString</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.infoclass</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiInfo</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">advance</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.version</span><span class="w"> </span><span class="kn">import</span> <span class="n">VersionInfo</span>
@@ -1873,7 +1874,12 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">_seek_set</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
 
             <span class="c1">#: bytes: Raw block data.</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span><span class="p">)</span>
+            <span class="c1">#</span>
+            <span class="c1"># NOTE: Asked for no further than one read can go, :data:`sys.maxsize`,</span>
+            <span class="c1"># past which the read raises :exc:`OverflowError` instead of coming</span>
+            <span class="c1"># back short as the truncation handling below expects (#1975).</span>
+            <span class="n">bound</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">bound</span><span class="p">)</span>
 
             <span class="c1"># NOTE: Block Total Length is cross-checked against its own trailing</span>
             <span class="c1"># copy and never against the file, so on a capture cut short it runs</span>
@@ -1906,8 +1912,15 @@
                 <span class="c1"># again in place of building the block (#1470).</span>
                 <span class="n">block</span><span class="o">.</span><span class="n">__update__</span><span class="p">([(</span><span class="s1">'__truncated_raw__'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)])</span>
 
-            <span class="c1"># move backward to the beginning of next block</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">seek_cur</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
+            <span class="c1"># NOTE: A read that came back whole at the bound stopped there, not</span>
+            <span class="c1"># at the end of the file: the block runs on past it, and the next one</span>
+            <span class="c1"># starts where its Block Total Length says, so the stream is moved</span>
+            <span class="c1"># over the rest (#1975).</span>
+            <span class="k">if</span> <span class="n">read</span> <span class="o">==</span> <span class="n">bound</span> <span class="o">&lt;</span> <span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span><span class="p">:</span>
+                <span class="n">advance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="n">bound</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="c1"># move backward to the beginning of next block</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">seek_cur</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
 
             <span class="c1">#: io.BytesIO: Source packet stream.</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_file</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span>
@@ -2175,7 +2188,8 @@
 
         <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">offset</span> <span class="o">+</span> <span class="mi">8</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
-        <span class="n">body</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="n">GENERIC_BLOCK_MINIMUM</span><span class="p">)</span>
+        <span class="c1"># NOTE: bounded as :meth:`read` bounds the block's read (#1975).</span>
+        <span class="n">body</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_fileng</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">header</span><span class="o">.</span><span class="n">block</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="n">GENERIC_BLOCK_MINIMUM</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">))</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">current</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">Data_UnknownBlock</span><span class="p">(</span>
@@ -5505,9 +5519,11 @@
 <span class="sd">            Constructed block schema.</span>
 
 <span class="sd">        """</span>
+        <span class="n">declared</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: Optional[int]</span>
         <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">secrets_type_val</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">secrets_type</span>
             <span class="n">secrets_data</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">secrets_data</span>
+            <span class="n">declared</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">secrets_length</span>
             <span class="n">options</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_block_area</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="s1">'options'</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">secrets_type_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_index</span><span class="p">(</span><span class="n">secrets_type</span><span class="p">,</span> <span class="n">secrets_type_default</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="n">secrets_type_namespace</span><span class="p">,</span>  <span class="c1"># type: ignore[assignment]</span>
@@ -5534,8 +5550,29 @@
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [DSB] secrets </span><span class="si">{</span><span class="n">secrets_type_val</span><span class="si">}</span><span class="s1"> invalid format'</span><span class="p">)</span>
         <span class="c1"># NOTE: Secrets Length excludes the padding to the next 32-bit boundary,</span>
         <span class="c1"># which ``padding_data`` writes and the block length has to include.</span>
-        <span class="n">secrets_length</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">secrets_data_val</span><span class="p">)</span>
-        <span class="n">secrets_padded</span> <span class="o">=</span> <span class="n">secrets_length</span> <span class="o">+</span> <span class="o">-</span><span class="n">secrets_length</span> <span class="o">%</span> <span class="mi">4</span>
+        <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">secrets_data_val</span><span class="p">,</span> <span class="n">Schema</span><span class="p">):</span>
+            <span class="c1"># NOTE: Packed in the context of the block it was parsed from, so</span>
+            <span class="c1"># that a key log the block cut is still read as cut (#1980).</span>
+            <span class="n">secrets_held</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">secrets_data_val</span><span class="o">.</span><span class="n">pack</span><span class="p">({</span><span class="s1">'__packet__'</span><span class="p">:</span> <span class="p">{</span>
+                <span class="s1">'length'</span><span class="p">:</span> <span class="n">block</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="s1">'secrets_length'</span><span class="p">:</span> <span class="n">block</span><span class="o">.</span><span class="n">secrets_length</span><span class="p">,</span>
+            <span class="p">}}))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">secrets_held</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">secrets_data_val</span><span class="p">)</span>
+        <span class="n">secrets_padded</span> <span class="o">=</span> <span class="n">secrets_held</span> <span class="o">+</span> <span class="o">-</span><span class="n">secrets_held</span> <span class="o">%</span> <span class="mi">4</span>
+        <span class="c1"># NOTE: A Secrets Length running past the block is kept as declared, as</span>
+        <span class="c1"># an EPB keeps its captured length, so the block rebuilds as captured;</span>
+        <span class="c1"># the block length is still sized from the secrets written (#1980).</span>
+        <span class="c1"># Only a true overrun is kept -- the one the parse side bounds and</span>
+        <span class="c1"># warns on, measured by ``secrets_area`` -- so a length that fits the</span>
+        <span class="c1"># block, or one an edit has outdated, follows the secrets written.</span>
+        <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">secrets_area</span>
+
+        <span class="k">if</span> <span class="n">block</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">declared</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">declared</span> <span class="o">&gt;</span> <span class="n">secrets_area</span><span class="p">({</span>
+            <span class="s1">'length'</span><span class="p">:</span> <span class="n">block</span><span class="o">.</span><span class="n">length</span><span class="p">,</span> <span class="s1">'secrets_length'</span><span class="p">:</span> <span class="n">declared</span><span class="p">,</span>
+        <span class="p">}):</span>
+            <span class="n">secrets_length</span> <span class="o">=</span> <span class="n">declared</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">secrets_length</span> <span class="o">=</span> <span class="n">secrets_held</span>
 
         <span class="k">if</span> <span class="n">options</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">options_value</span><span class="p">,</span> <span class="n">total_length</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_pcapng_options</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="n">namespace</span><span class="o">=</span><span class="s1">'dsb'</span><span class="p">)</span>

@@ -1309,7 +1309,9 @@ never configurable.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcap.frame.Frame.packet">
 <span class="sig-name descname"><span class="pre">packet</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;PayloadField</span> <span class="pre">packet&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcap.frame.Frame.packet" title="Link to this definition">¶</a></dt>
-<dd><p>Payload.</p>
+<dd><p>Payload, read no further than the record header and it together can go
+in one read, <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.maxsize" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.maxsize</span></code></a>; the frame reader moves past the rest
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1975">#1975</a>).</p>
 </dd></dl>
 
 </dd></dl>

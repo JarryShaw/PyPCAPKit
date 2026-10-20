@@ -1568,6 +1568,50 @@ above).</p>
 <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> runs pytest, unittest or <code class="file docutils literal notranslate"><span class="pre">util/run_unittest_leg.py</span></code>
 without the script, and runs the script against a small limit.</p>
 </section>
+<section id="action-pins-1968">
+<span id="action-pins"></span><h2>Action Pins (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1968">#1968</a>)<a class="headerlink" href="#action-pins-1968" title="Link to this heading">¶</a></h2>
+<p>A tag or a branch is a reference its owner can move, so every <code class="docutils literal notranslate"><span class="pre">uses:</span></code> of an
+action outside this repository names a full commit, with the release that commit
+is as a trailing comment:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="o">-</span> <span class="n">uses</span><span class="p">:</span> <span class="n">actions</span><span class="o">/</span><span class="n">checkout</span><span class="o">@&lt;</span><span class="mi">40</span><span class="o">-</span><span class="nb">hex</span> <span class="n">commit</span><span class="o">&gt;</span> <span class="c1"># v7.0.1</span>
+</pre></div>
+</div>
+<p>A step’s <code class="docutils literal notranslate"><span class="pre">uses</span></code> is therefore the commit alone, as the YAML reads it; the comment
+is what Dependabot rewrites with the commit on a bump. A local <code class="docutils literal notranslate"><span class="pre">./</span></code> workflow call
+stays as it is. <code class="file docutils literal notranslate"><span class="pre">.github/dependabot.yml</span></code> watches the <code class="docutils literal notranslate"><span class="pre">github-actions</span></code>
+ecosystem from the repository root beside <code class="docutils literal notranslate"><span class="pre">pip</span></code>, on the same weekly schedule, so a
+new release reaches the workflows as a Dependabot pull request rather than by a tag
+moving under a run.</p>
+<p><code class="file docutils literal notranslate"><span class="pre">tests/project/test_actions_pinned_1968.py</span></code> fails on a <code class="docutils literal notranslate"><span class="pre">uses:</span></code> under
+<code class="file docutils literal notranslate"><span class="pre">.github</span></code> that names a tag, a branch or a commit without its version comment,
+and when <code class="file docutils literal notranslate"><span class="pre">.github/dependabot.yml</span></code> drops the <code class="docutils literal notranslate"><span class="pre">github-actions</span></code> ecosystem.
+<code class="docutils literal notranslate"><span class="pre">pinned()</span></code> and <code class="docutils literal notranslate"><span class="pre">versions()</span></code> in <code class="file docutils literal notranslate"><span class="pre">tests/_workflows.py</span></code> read a pin, for a test
+that names a particular action.</p>
+</section>
+<section id="dependency-updates-1968">
+<h2>Dependency Updates (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1968">#1968</a>)<a class="headerlink" href="#dependency-updates-1968" title="Link to this heading">¶</a></h2>
+<p>Dependabot opens every dependency bump, weekly, from <code class="file docutils literal notranslate"><span class="pre">.github/dependabot.yml</span></code>
+(the owner’s ruling on #1968):</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pip</span></code> over <code class="docutils literal notranslate"><span class="pre">/</span></code>, <code class="docutils literal notranslate"><span class="pre">/docs</span></code> and <code class="docutils literal notranslate"><span class="pre">/examples/benchmark</span></code>. The docs build pins
+Sphinx and sphinx-autodoc-typehints exactly in <code class="file docutils literal notranslate"><span class="pre">docs/requirements.txt</span></code>, and
+Dependabot proposes bumps to both pins; the owner accepted that, so each bump is
+reviewed against the docs build rather than held back. The benchmark’s
+<code class="file docutils literal notranslate"><span class="pre">requirements-*.txt</span></code> files are watched because nothing else moves them.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">github-actions</span></code> over <code class="docutils literal notranslate"><span class="pre">/</span></code>, per <a class="reference internal" href="#action-pins">Action Pins</a> above.</p></li>
+</ul>
+<p>Neither <code class="file docutils literal notranslate"><span class="pre">conda/requirements.txt</span></code> nor the benchmark’s image digests are
+watched: Conda Update’s <code class="docutils literal notranslate"><span class="pre">Refresh</span> <span class="pre">the</span> <span class="pre">platform</span> <span class="pre">pins</span></code> and <code class="docutils literal notranslate"><span class="pre">Setup</span> <span class="pre">Conda</span>
+<span class="pre">Distribution</span></code> steps rewrite the former, and Dependabot reads only a <code class="docutils literal notranslate"><span class="pre">FROM</span></code> line
+that names its image, while the benchmark’s <code class="file docutils literal notranslate"><span class="pre">Dockerfile</span></code> takes its base image
+through <code class="docutils literal notranslate"><span class="pre">ARG</span> <span class="pre">PYTHON_IMAGE</span></code> from <code class="file docutils literal notranslate"><span class="pre">examples/benchmark/python-images.txt</span></code>.</p>
+<p>PyUp, which opened the same kind of bump before, opens none: <code class="file docutils literal notranslate"><span class="pre">.pyup.yml</span></code> sets
+<code class="docutils literal notranslate"><span class="pre">update:</span> <span class="pre">False</span></code> and lists no <code class="docutils literal notranslate"><span class="pre">requirements:</span></code>. A file listed there takes its own
+<code class="docutils literal notranslate"><span class="pre">update</span></code>, which defaults to <code class="docutils literal notranslate"><span class="pre">all</span></code>, so the list would override the global
+setting. Deleting <code class="file docutils literal notranslate"><span class="pre">.pyup.yml</span></code> would not stop the bot either, as without it
+PyUp runs on its defaults. The PyUp App’s installation, and the
+<code class="docutils literal notranslate"><span class="pre">pyup.io/safety-ci</span></code> commit status it posts, are repository settings.</p>
+</section>
 <section id="python-versions">
 <h2>Python Versions<a class="headerlink" href="#python-versions" title="Link to this heading">¶</a></h2>
 <p>Since <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1660">#1660</a>,
@@ -1721,6 +1765,8 @@ repeating it here.</p>
 <li><a class="reference internal" href="#test-tiers">Test Tiers</a></li>
 <li><a class="reference internal" href="#project-pins">Project Pins</a></li>
 <li><a class="reference internal" href="#file-size-caps-1969">File Size Caps (#1969)</a></li>
+<li><a class="reference internal" href="#action-pins-1968">Action Pins (#1968)</a></li>
+<li><a class="reference internal" href="#dependency-updates-1968">Dependency Updates (#1968)</a></li>
 <li><a class="reference internal" href="#python-versions">Python Versions</a></li>
 <li><a class="reference internal" href="#deployment-environment">Deployment <code class="docutils literal notranslate"><span class="pre">environment:</span></code></a></li>
 </ul>
