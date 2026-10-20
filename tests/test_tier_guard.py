@@ -559,6 +559,8 @@ class TestTierTests(unittest.TestCase):
                 'tests/protocols/test_option_roundtrip_unit.py': _tiers.TIER_LATEST,
                 'tests/protocols/test_capture_roundtrip_runtime.py': _tiers.TIER_LATEST,
                 'tests/protocols/test_dispatch_reachability_unit.py': _tiers.TIER_LATEST,
+                'tests/protocols/test_short_read_roundtrip_unit.py': _tiers.TIER_LATEST,
+                'tests/protocols/link/test_link_edge_roundtrip_unit.py': _tiers.TIER_ALL,
                 'tests/protocols/transport/test_tcp_ns_flag_roundtrip_unit.py': _tiers.TIER_ALL,
                 'tests/corekit/test_from_dict_roundtrip_unit.py': _tiers.TIER_ALL,
                 'tests/project/test_isort_clean.py': _tiers.TIER_LATEST,

@@ -246,17 +246,28 @@ class TestTheIgnoresAreTheLatestTier(unittest.TestCase):
         self.assertTrue([module for module in named if module in latest])
         self.assertTrue([module for module in latest if module not in named and 'tests/project/' not in module])
 
-    def test_every_module_on_a_sweep_harness_is_latest(self) -> None:
-        """The #1202 edge-case and corekit tables build every case they list, so their users are sweeps."""
-        modules = _tiers.suite_modules()
-        for harness in ('tests/protocols/_edge_roundtrip.py', 'tests/corekit/_roundtrip.py'):
-            users = [module for module in modules if _tiers.is_unit_tier(module) and re.search(
-                rf'^from {re.escape(harness[:-3].replace("/", "."))} import .*\b(?:Case|KnownFailureTable)\b',
-                (ROOT / module).read_text(encoding='utf-8'), re.M)]
-            with self.subTest(harness=harness):
-                self.assertTrue(users)
-                self.assertEqual([module for module in users if _tiers.module_tier(module) != _tiers.TIER_LATEST],
-                                 [])
+    @staticmethod
+    def harness_users(harness: 'str') -> 'list[str]':
+        """The unit-tier modules that import a table type from ``harness``."""
+        return [module for module in _tiers.suite_modules() if _tiers.is_unit_tier(module) and re.search(
+            rf'^from {re.escape(harness[:-3].replace("/", "."))} import .*\b(?:Case|KnownFailureTable)\b',
+            (ROOT / module).read_text(encoding='utf-8'), re.M)]
+
+    def test_every_module_on_the_corekit_harness_is_latest(self) -> None:
+        """The corekit tables build a case for every class they enumerate, so their users are sweeps."""
+        users = self.harness_users('tests/corekit/_roundtrip.py')
+        self.assertTrue(users)
+        self.assertEqual([module for module in users if _tiers.module_tier(module) != _tiers.TIER_LATEST], [])
+
+    def test_the_edge_case_tables_run_on_every_leg(self) -> None:
+        """#1958: the #1202 edge-case tables are written out by hand, so they run on every leg."""
+        deadline = 'tests/protocols/test_edge_roundtrip_deadline_1736_unit.py'
+        users = self.harness_users('tests/protocols/_edge_roundtrip.py')
+        self.assertIn(deadline, users)
+        tables = [module for module in users if module != deadline]
+        self.assertTrue(tables)
+        self.assertEqual([module for module in tables if _tiers.module_tier(module) != _tiers.TIER_ALL], [])
+        self.assertEqual(_tiers.module_tier(deadline), _tiers.TIER_LATEST)
 
 
 @unittest.skipIf(shutil.which('bash') is None, 'the step is a bash script')

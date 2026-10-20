@@ -930,9 +930,10 @@ collects it; a test tier decides on which of that job's legs it runs.
   exercises ``pcapkit`` is ``ALL``.
 
 The marker says what the AST cannot see. Each real sweep -- a round trip over every
-case of a table, every registry entry or every capture -- is marked ``LATEST``, as
-the owner ruled on #1732 and #1958; the hand-picked round trips, whatever their
-names, run on ``ALL``. A module that imports ``pcapkit`` only to read its text or
+class or registry entry a table enumerates, every offset of a packet or every
+capture -- is marked ``LATEST``, as the owner ruled on #1732 and #1958; the
+hand-picked round trips, whatever their names, run on ``ALL``, and so do the #1202
+edge-case tables, whose cases are each written out by hand. A module that imports ``pcapkit`` only to read its text or
 structure, or that drives a docs hook or a generator other legs already run, is
 marked ``LATEST``; one that the rule would send to ``latest`` but that depends on
 the interpreter, such as the tier guard itself, which :file:`tests/conftest.py` runs at
