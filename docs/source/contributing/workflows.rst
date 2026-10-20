@@ -1080,6 +1080,8 @@ above).
 ``unit-tests.yml`` runs pytest, unittest or :file:`util/run_unittest_leg.py`
 without the script, and runs the script against a small limit.
 
+.. _Action Pins:
+
 Action Pins (`#1968 <https://github.com/JarryShaw/PyPCAPKit/issues/1968>`__)
 ----------------------------------------------------------------------------
 
