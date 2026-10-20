@@ -7,6 +7,10 @@ from unittest import mock
 
 from tests._support import bootstrap_core_modules, reimport_once_per_class
 
+#: Test tier (#1958): exercises threading, locking or warning and exception hooks, which
+#: differ by interpreter.
+__tier__ = 'ALL'
+
 
 class ExceptionsWarningsTests(unittest.TestCase):
     def setUp(self) -> None:

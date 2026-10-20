@@ -39,6 +39,9 @@ if TYPE_CHECKING:
     from types import ModuleType
     from typing import Any
 
+#: Test tier (#1958): branches on the running interpreter's version or implementation.
+__tier__ = 'ALL'
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 #: The names ``dir(pcapkit.const.reg.apptype)`` listed on the eager package

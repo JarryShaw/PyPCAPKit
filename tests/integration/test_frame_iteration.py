@@ -24,6 +24,10 @@ from tests.integration._helpers import HAS_RUNTIME, EndToEndTestCase
 if TYPE_CHECKING:
     from typing import Any
 
+#: Test tier (#1958): the representative smoke slice for its package's main parse and
+#: build paths.
+__tier__ = 'ALL'
+
 #: Frames of :file:`http6.cap` that carry an HTTP header block: the request and
 #: the response of each of the two connections.
 HTTP_FRAMES = (4, 6, 19, 21)

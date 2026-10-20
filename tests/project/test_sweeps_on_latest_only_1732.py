@@ -317,10 +317,20 @@ class TestTheIntegrationSubset(unittest.TestCase):
                 f'--junitxml={RUNNER_TEMP}/junit.xml']
 
     def test_the_all_selection_leaves_out_the_latest_modules(self) -> None:
-        latest = [module for module in _tiers.latest_tier_paths() if not _tiers.is_unit_tier(module)]
-        self.assertTrue(latest)
-        modules = [{entry.split('::', 1)[0] for entry in entries} for entries in (self.selection, self.all)]
-        self.assertEqual(sorted(modules[0] - modules[1]), latest)
+        """What the ``ALL`` part drops is exactly the ``LATEST`` modules the whole selection reaches."""
+        def reached(entries: 'list[str]') -> 'set[str]':
+            modules = set()  # type: set[str]
+            for entry in entries:
+                module = entry.split('::', 1)[0]
+                if (_tiers.ROOT / module).is_dir():
+                    modules.update(path for path in _tiers.suite_modules() if path.startswith(module.rstrip('/') + '/'))
+                else:
+                    modules.add(module)
+            return modules
+        everything, kept = reached(self.selection), reached(self.all)
+        dropped = everything - kept
+        self.assertTrue(dropped)
+        self.assertEqual(dropped, everything & set(_tiers.latest_tier_paths()))
 
     def test_only_latest_runs_them(self) -> None:
         """``latest`` passes the whole selection; every other leg its ``ALL`` part."""

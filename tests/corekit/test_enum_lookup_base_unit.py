@@ -64,6 +64,10 @@ from pcapkit.utilities.exceptions import EnumValueError
 if TYPE_CHECKING:
     from typing import Any
 
+#: Test tier (#1958): exercises metaclass, ABC or enum machinery, which differs by
+#: interpreter.
+__tier__ = 'ALL'
+
 #: The mutating half, which must stay on :class:`~pcapkit.corekit.enum.EnumRegistry`.
 MUTATING = ('register', 'register_alias', 'register_aliases', '_extend',
             '_unregistered_member')

@@ -29,6 +29,10 @@ import warnings
 from tests._support import close_extractor, reimport_once_per_class
 from tests.foundation._roundtrip import ethernet, ipv4, pcap, pcapng, tcp
 
+#: Test tier (#1958): a record whose claimed length runs towards the interpreter's size
+#: limit, which differs by implementation (sys.maxsize, #1963).
+__tier__ = 'ALL'
+
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None
                   for name in ('tbtrim', 'aenum', 'chardet', 'dictdumper'))
 

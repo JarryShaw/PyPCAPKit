@@ -27,6 +27,10 @@ import warnings
 from tests._support import reimport_once_per_class
 from tests.foundation import _roundtrip as wire
 
+#: Test tier (#1958): exercises integer, bytes and struct edge cases, whose limits
+#: differ by interpreter.
+__tier__ = 'ALL'
+
 #: The TCP segment every chain ends in.
 SEGMENT = wire.tcp(b'payload', seq=1)
 

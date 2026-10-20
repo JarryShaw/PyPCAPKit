@@ -31,6 +31,10 @@ import warnings
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): exercises pickling and copying, whose protocols differ by
+#: interpreter.
+__tier__ = 'ALL'
+
 PAIRS = [('a', 1), ('b', 2), ('a', 3)]
 
 

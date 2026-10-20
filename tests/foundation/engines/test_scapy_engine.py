@@ -46,6 +46,11 @@ import unittest
 
 from tests._support import sample_path
 
+#: Test tier (#1958): drives Scapy, whose installable releases vary by interpreter; the
+#: integration and pypcap-parity legs install it on every interpreter, and a test leg
+#: off latest skips it.
+__tier__ = 'ALL'
+
 #: Repository root, which the child interpreter needs on :data:`sys.path` to
 #: import the :mod:`pcapkit` under test rather than an installed copy.
 ROOT = pathlib.Path(__file__).resolve().parents[3]

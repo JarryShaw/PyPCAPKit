@@ -71,6 +71,10 @@ from pcapkit.corekit.sentinels import (ABSENT, NO_DEFAULT, NO_VALUE, NULL, Absen
                                        NoDefaultType, NoValueType, NullType)
 from tests._support import purge_modules
 
+#: Test tier (#1958): exercises pickling and copying, whose protocols differ by
+#: interpreter.
+__tier__ = 'ALL'
+
 #: Every sentinel, as ``(instance name, consumer module, instance, type)``. The
 #: consumer module is the one that compares against the object, and so still
 #: imports it from :mod:`pcapkit.corekit.sentinels` -- without re-exporting it.

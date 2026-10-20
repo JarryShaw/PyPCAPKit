@@ -7,6 +7,10 @@ import unittest
 from tests._support import (bootstrap_core_modules, install_fake_payload_protocols,
                             isolate_modules)
 
+#: Test tier (#1958): exercises metaclass, ABC or enum machinery, which differs by
+#: interpreter.
+__tier__ = 'ALL'
+
 
 class DecoratorTests(unittest.TestCase):
     def setUp(self) -> None:

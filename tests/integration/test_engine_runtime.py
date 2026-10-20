@@ -8,6 +8,10 @@ from unittest import mock
 
 from tests._support import close_extractor, reimport_once_per_class, sample_path
 
+#: Test tier (#1958): drives a third-party engine whose installable releases vary by
+#: interpreter.
+__tier__ = 'ALL'
+
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in ('tbtrim', 'aenum', 'chardet', 'dictdumper'))
 HAS_DPKT = importlib.util.find_spec('dpkt') is not None
 HAS_SCAPY = importlib.util.find_spec('scapy') is not None

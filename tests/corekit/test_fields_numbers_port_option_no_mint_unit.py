@@ -52,6 +52,10 @@ from tests._support import reimport_once_per_class
 if TYPE_CHECKING:
     from typing import Any
 
+#: Test tier (#1958): exercises pickling and copying, whose protocols differ by
+#: interpreter.
+__tier__ = 'ALL'
+
 
 class IntCode(aenum.IntEnum):
     """An :class:`int`-backed registry stand-in.

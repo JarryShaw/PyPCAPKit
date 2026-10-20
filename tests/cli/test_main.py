@@ -48,6 +48,10 @@ from unittest import mock
 
 from tests._support import ISOLATED_PREFIXES, isolate_modules, snapshot_modules
 
+#: Test tier (#1958): the representative smoke slice for its package's main parse and
+#: build paths.
+__tier__ = 'ALL'
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 #: The :data:`sys.modules` region this file stands things in for, and therefore

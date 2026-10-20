@@ -40,6 +40,10 @@ from tests.utilities._harness import capture
 if TYPE_CHECKING:
     from typing import Any
 
+#: Test tier (#1958): exercises the warning machinery itself, which free-threaded builds
+#: make context-aware.
+__tier__ = 'ALL'
+
 #: Snaplen of the capture's interface, and so the octets each packet keeps.
 SNAPLEN = 10
 #: Original length of each packet, longer than the Ethernet header.

@@ -18,6 +18,10 @@ import unittest
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): exercises integer, bytes and struct edge cases, whose limits
+#: differ by interpreter.
+__tier__ = 'ALL'
+
 
 class TestSignedNumberFieldDecode(unittest.TestCase):
     """Pin the decoded value and the rebuilt octets of signed fields."""

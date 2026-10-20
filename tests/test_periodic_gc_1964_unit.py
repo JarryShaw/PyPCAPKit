@@ -16,6 +16,10 @@ from unittest import mock
 
 from tests import conftest
 
+#: Test tier (#1958): depends on garbage collection, weak references or object
+#: finalisation.
+__tier__ = 'ALL'
+
 
 class TestPeriodicCollection(unittest.TestCase):
 

@@ -27,6 +27,10 @@ import unittest
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): exercises integer, bytes and struct edge cases, whose limits
+#: differ by interpreter.
+__tier__ = 'ALL'
+
 SHARED = 'pcapkit.corekit.fields.byteorder'
 
 #: Where the helper lived before #1711; removed, not re-exported.

@@ -9,6 +9,10 @@ from unittest import mock
 
 from tests._support import bootstrap_core_modules, load_module, reimport_once_per_class
 
+#: Test tier (#1958): exercises stream and buffer semantics, which differ by
+#: interpreter.
+__tier__ = 'ALL'
+
 
 class SeekableReaderTests(unittest.TestCase):
     def _close_reader(self, reader) -> None:

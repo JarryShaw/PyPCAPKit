@@ -34,6 +34,10 @@ from tests.foundation import _roundtrip as wire
 if TYPE_CHECKING:
     from typing import Any, Iterator
 
+#: Test tier (#1958): exercises integer, bytes and struct edge cases, whose limits
+#: differ by interpreter.
+__tier__ = 'ALL'
+
 #: Root of the :mod:`pcapkit` package under test.
 PACKAGE = pathlib.Path(__file__).resolve().parents[2] / 'pcapkit'
 

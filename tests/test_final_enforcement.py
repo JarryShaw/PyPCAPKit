@@ -82,6 +82,9 @@ import importlib.util
 import unittest
 import warnings
 
+#: Test tier (#1958): branches on the running interpreter's version or implementation.
+__tier__ = 'ALL'
+
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 

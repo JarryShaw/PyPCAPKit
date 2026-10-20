@@ -5,6 +5,10 @@ import unittest
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): exercises pickling and copying, whose protocols differ by
+#: interpreter.
+__tier__ = 'ALL'
+
 #: Every address-typed branch of every address-typed
 #: :class:`~pcapkit.corekit.fields.misc.SwitchField` in the schema tree, as
 #: ``(module, class, attribute, label, packet)``. The ``packet`` is a selector

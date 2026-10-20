@@ -60,6 +60,10 @@ import unittest
 
 from pcapkit.corekit.enum import EnumLookup
 
+#: Test tier (#1958): exercises metaclass, ABC or enum machinery, which differs by
+#: interpreter.
+__tier__ = 'ALL'
+
 __all__ = [
     'ReparentedBasesTests', 'HttpV2FlagsHierarchyTests', 'PureReparentGetTests',
     'TransportProtocolGetTests', 'CriticalityGetTests', 'NoMintingTests',

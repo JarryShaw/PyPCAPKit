@@ -31,9 +31,12 @@ import sys
 import unittest
 from unittest import mock
 
-#: Test tier (#1958): exercises pcapkit.vendor, which users run on any supported
-#: interpreter.
-__tier__ = 'ALL'
+#: Test tier (#1958): the vendor extra is installed on latest alone, where the whole
+#: suite runs, and the crawlers are pure Python over requests and bs4; the vendor
+#: package's interpreter-sensitive parts, file restore and environment-variable parsing,
+#: run on every leg in tests/vendor/test_vendor_snapshot_restore_unit.py and
+#: tests/vendor/test_vendor_variables_1726_unit.py.
+__tier__ = 'LATEST'
 
 HAS_PYCRATE = importlib.util.find_spec('pycrate_asn1dir') is not None
 

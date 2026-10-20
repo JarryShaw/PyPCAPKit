@@ -33,6 +33,10 @@ import unittest
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): exercises metaclass, ABC or enum machinery, which differs by
+#: interpreter.
+__tier__ = 'ALL'
+
 #: Repository root, put first on the child interpreter's path so that it
 #: imports this tree rather than whatever :mod:`pcapkit` is installed.
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))

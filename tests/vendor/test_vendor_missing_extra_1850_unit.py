@@ -53,6 +53,9 @@ from tests._support import scale_timeout
 if TYPE_CHECKING:
     from typing import Sequence
 
+#: Test tier (#1958): branches on the running interpreter's version or implementation.
+__tier__ = 'ALL'
+
 #: The package under test, found from this file rather than by importing it, so
 #: that a child interpreter can be pointed at the same tree.
 PACKAGE = pathlib.Path(__file__).resolve().parents[2] / 'pcapkit'

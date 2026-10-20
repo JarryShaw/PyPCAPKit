@@ -38,6 +38,10 @@ from tests._support import (PCAPNG_GENERATOR, close_extractor, reimport_once_per
 if TYPE_CHECKING:
     from typing import Any
 
+#: Test tier (#1958): drives a third-party engine whose installable releases vary by
+#: interpreter.
+__tier__ = 'ALL'
+
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None
                   for name in ('tbtrim', 'aenum', 'chardet', 'dictdumper'))
 HAS_DPKT = importlib.util.find_spec('dpkt') is not None

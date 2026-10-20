@@ -45,6 +45,10 @@ import warnings
 from tests._support import reimport_once_per_class, scale_timeout
 from tests._tiers import ROOT
 
+#: Test tier (#1958): exercises stream and buffer semantics, which differ by
+#: interpreter.
+__tier__ = 'ALL'
+
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 HAS_DPKT = importlib.util.find_spec('dpkt') is not None
