@@ -48,6 +48,9 @@ So this module answers, cheaply and without needing the fixtures themselves:
   in order to still exercise them.
 * :func:`is_roundtrip_sweep` -- is this unit-tier module one of the round-trip
   sweeps, which only the ``latest`` leg of the ``test`` job runs (#1732)?
+* :func:`is_project_pin` and :func:`project_pin_paths` -- which
+  :file:`tests/project` modules give one answer on every interpreter, and so run
+  once per push, in the ``project-tests`` job, rather than on every leg (#1954)?
 
 :file:`tests/conftest.py` runs :func:`is_unit_tier` and :func:`audit_module` --
 and through it :func:`committed_captures` and :func:`explain` -- at collection
@@ -124,6 +127,7 @@ import ast
 import fnmatch
 import functools
 import pathlib
+import re
 import subprocess
 from typing import TYPE_CHECKING, NamedTuple
 
@@ -135,6 +139,8 @@ __all__ = [
     'ROOT', 'TESTS_ROOT', 'SAMPLE_ROOT', 'REGENERATE_SAMPLES_CMD', 'UNIT_TIER_SELECTION',
     'FIXTURE_TIER_SUFFIXES', 'FIXTURE_TIER_DIRS', 'FIXTURE_TIER_SELECTOR',
     'ROUNDTRIP_SWEEP_GLOB', 'ROUNDTRIP_RUNTIME_GLOB', 'is_roundtrip_sweep',
+    'PROJECT_PINS_DIR', 'PROJECT_PINS_SELECTOR', 'PROJECT_PIN_PACKAGE', 'LOADABLE_DIRS',
+    'varies_by_interpreter', 'is_project_pin', 'project_pin_paths',
     'is_unit_tier', 'committed_captures', 'committed_capture_names',
     'guard_unavailable_reason', 'handled_lines', 'sample_path_calls',
     'audit_module', 'check_unit_tier_read', 'explain',
@@ -188,6 +194,27 @@ ROUNDTRIP_SWEEP_GLOB = '*roundtrip*'
 #: alone. Every other leg drops them from :func:`fixture_tier_paths`'s selection and
 #: passes this as an ``--ignore-glob``, since pytest ignores no path it was handed.
 ROUNDTRIP_RUNTIME_GLOB = '*roundtrip*_runtime.py'
+#: The directory whose platform- and version-independent modules, the *project
+#: pins*, run once per push in the ``project-tests`` job of
+#: :file:`.github/workflows/unit-tests.yml` rather than on every leg (#1954). See
+#: :func:`is_project_pin`.
+PROJECT_PINS_DIR = 'project'
+#: The project pins' selector, verbatim from the workflows: the ``project-tests``
+#: job runs what it prints, and every ``test`` and ``experimental`` leg passes each
+#: path as an ``--ignore``. Asked at run time, as :data:`FIXTURE_TIER_SELECTOR` is,
+#: so neither workflow can drift from :func:`is_project_pin`.
+PROJECT_PINS_SELECTOR = (
+    'python -c "from tests._tiers import project_pin_paths; '
+    'print(\' \'.join(project_pin_paths()))"'
+)
+#: The package whose behaviour varies by interpreter, so a module that reaches it
+#: runs on every leg (#1954).
+PROJECT_PIN_PACKAGE = 'pcapkit'
+#: The directories, besides :file:`tests/`, whose Python files a test module may load
+#: by path -- a ``util/`` script, a generator, :file:`docs/source/conf.py` -- and
+#: :func:`varies_by_interpreter` follows. :file:`pcapkit/` is left out on purpose: a test
+#: that names a file there reads its text, which is the same on every leg.
+LOADABLE_DIRS = ('tests', 'util', 'examples', 'docs')
 #: Suffixes that make a tracked file worth suggesting as a replacement capture.
 #: Committedness itself is whatever git says -- this filter only keeps the
 #: suggestion in :func:`explain` from offering :file:`out.txt` as a capture.
@@ -300,6 +327,542 @@ def is_roundtrip_sweep(path: 'pathlib.Path | str') -> 'bool':
         candidate = ROOT / candidate
     return is_unit_tier(candidate) and fnmatch.fnmatch(str(candidate.resolve()),
                                                        str(ROOT / ROUNDTRIP_SWEEP_GLOB))
+
+
+#: Calls that import the module their first argument names. ``patch`` is
+#: :func:`unittest.mock.patch`, which imports its target's module, and ``find_spec``
+#: imports a dotted name's parents.
+_IMPORTING_CALLS = frozenset({'import_module', '__import__', 'patch', 'find_spec'})
+#: Of those, the ones whose computed argument may import anything at all.
+_COMPUTED_IMPORTS = frozenset({'import_module', '__import__'})
+#: Calls that run a file or a child process, so the files, directories and modules
+#: their arguments name run too.
+_RUNNING_CALLS = frozenset({
+    'spec_from_file_location', 'run_path', 'SourceFileLoader', 'load_source', 'run', 'Popen',
+    'call', 'check_call', 'check_output', 'system', 'create_subprocess_exec', 'create_subprocess_shell',
+    'exec', 'eval',
+})
+#: Source text that imports :data:`PROJECT_PIN_PACKAGE` in a child interpreter: a
+#: ``python -c`` script, or ``-m pcapkit``. Not ``from pcapkit/__init__.py``, a path.
+_IMPORT_TEXT = re.compile(rf'(?:\b(?:import|from)|-m)\s+{PROJECT_PIN_PACKAGE}(?:\.\w+)*(?![\w/.])')
+#: A string that is wholly a relative path, e.g. ``util/ci_timing.py`` or ``tests/cli``.
+_PATH_TEXT = re.compile(r'[\w.-]+(?:/[\w.-]+)*/?\Z')
+#: A string that is wholly a dotted module name, e.g. ``tests.project.test_setup``.
+_DOTTED_NAME = re.compile(r'[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)+\Z')
+
+#: What a module asks of the running interpreter when it branches on it:
+#: ``sys.version_info``, ``sys.implementation``, ``platform.python_version()``.
+_INTERPRETER_FACTS = frozenset({'version_info', 'hexversion', 'implementation', 'python_implementation',
+                                'python_version', 'python_version_tuple'})
+#: The same, imported bare: ``from sys import version_info``.
+_INTERPRETER_NAMES = frozenset({'version_info', 'hexversion'})
+
+#: One unit of :func:`varies_by_interpreter`'s search: a file, and the top-level names of it
+#: that run -- :data:`None` for the whole file, as when it is the test module itself,
+#: is loaded by path, or is imported as a module object.
+_Region = 'tuple[pathlib.Path, Optional[frozenset[str]]]'
+
+
+def _is_package(name: 'str') -> 'bool':
+    return name == PROJECT_PIN_PACKAGE or name.startswith(PROJECT_PIN_PACKAGE + '.')
+
+
+@functools.lru_cache(maxsize=1)
+def _loadable_files() -> 'tuple[pathlib.Path, ...]':
+    """Every Python file a test may run by path: those under :data:`LOADABLE_DIRS`, and the root's."""
+    files = set(ROOT.glob('*.py'))
+    for name in LOADABLE_DIRS:
+        files.update(path for path in (ROOT / name).rglob('*.py') if '__pycache__' not in path.parts)
+    return tuple(sorted(files))
+
+
+@functools.lru_cache(maxsize=None)
+def _paths_named(text: 'str') -> 'frozenset[pathlib.Path]':
+    """The loadable files a path string names: the files whose path ends with it,
+    e.g. ``conf.py``, or every file under the directory it is, e.g. ``tests/cli``.
+
+    A single word is no directory: ``ROOT / 'util'`` is a prefix being built, and
+    ``'examples'`` an argument as often as a path.
+
+    """
+    relative = text.strip('/')
+    while relative.startswith('./'):
+        relative = relative[2:]
+    if relative.endswith('.py'):
+        return frozenset(path for path in _loadable_files()
+                         if ('/' + path.relative_to(ROOT).as_posix()).endswith('/' + relative))
+    directory = ROOT / relative
+    if '/' not in relative or not directory.is_dir():
+        return frozenset()
+    return frozenset(path for path in _loadable_files() if directory in path.parents)
+
+
+def _module_file(name: 'str') -> 'Optional[pathlib.Path]':
+    """The file of the repository module ``name``, e.g. ``tests._support``, if there is one.
+
+    A ``util/`` script counts as a module too, as the tests that put :file:`util/`
+    on :data:`sys.path` import it: ``import run_unittest_leg``.
+
+    """
+    for root in (ROOT, ROOT / 'util'):
+        base = root.joinpath(*name.split('.'))
+        for candidate in (base.with_suffix('.py'), base / '__init__.py'):
+            if candidate.is_file():
+                return candidate
+    return None
+
+
+@functools.lru_cache(maxsize=None)
+def _parse_module(path: 'pathlib.Path') -> 'Optional[ast.Module]':
+    try:
+        return ast.parse(path.read_text(encoding='utf-8'), filename=str(path))
+    except (OSError, UnicodeDecodeError, SyntaxError, ValueError):
+        return None
+
+
+def _called(call: 'ast.Call') -> 'Optional[str]':
+    """The bare name a call is made through, e.g. ``run`` for ``subprocess.run(...)``."""
+    func = call.func
+    return func.id if isinstance(func, ast.Name) else func.attr if isinstance(func, ast.Attribute) else None
+
+
+def _defined_names(node: 'ast.stmt') -> 'set[str]':
+    """The top-level names a module-level statement binds, in a block it holds too:
+    ``if sys.version_info >= (3, 11): import tomllib`` binds ``tomllib``."""
+    if isinstance(node, (ast.If, ast.Try, ast.With, ast.For, ast.While)) or type(node).__name__ == 'TryStar':
+        return {name for field in ('body', 'orelse', 'finalbody', 'handlers')
+                for child in getattr(node, field, ()) for name in _defined_names(child)}
+    if isinstance(node, ast.ExceptHandler):
+        return {name for child in node.body for name in _defined_names(child)}
+    if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef)):
+        return {node.name}
+    if isinstance(node, (ast.Import, ast.ImportFrom)):
+        return {(alias.asname or alias.name).partition('.')[0] for alias in node.names}
+    targets = []  # type: list[ast.expr]
+    if isinstance(node, ast.Assign):
+        targets = node.targets
+    elif isinstance(node, (ast.AnnAssign, ast.AugAssign)):
+        targets = [node.target]
+    return {name.id for target in targets for name in ast.walk(target) if isinstance(name, ast.Name)}
+
+
+@functools.lru_cache(maxsize=None)
+def _import_time_nodes(tree: 'ast.Module') -> 'tuple[ast.AST, ...]':
+    """Every import and call of ``tree`` outside a function body, which run on import."""
+    inside = set()  # type: set[int]
+    for node in ast.walk(tree):
+        if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
+            for statement in node.body if isinstance(node.body, list) else [node.body]:
+                inside.update(id(child) for child in ast.walk(statement))
+    return tuple(node for node in ast.walk(tree)
+                 if isinstance(node, (ast.Import, ast.ImportFrom, ast.Call)) and id(node) not in inside)
+
+
+def _executed_nodes(tree: 'ast.Module',
+                    names: 'Optional[frozenset[str]]') -> 'tuple[list[ast.AST], list[ast.AST]]':
+    """The nodes of ``tree`` that run when ``names`` of it are used, as two lists.
+
+    The first is what runs on import -- every import and every call outside a
+    function -- and the second the definitions of ``names``, with the other
+    top-level names those use. For :data:`None`, the whole module is the second.
+
+    """
+    if names is None:
+        return [], [tree]
+    on_import = list(_import_time_nodes(tree))
+    nodes = []  # type: list[ast.AST]
+    wanted, todo = set(), list(names)  # type: set[str], list[str]
+    while todo:
+        name = todo.pop()
+        if name in wanted:
+            continue
+        wanted.add(name)
+        for statement in tree.body:
+            if name in _defined_names(statement):
+                nodes.append(statement)
+                todo.extend(node.id for node in ast.walk(statement)
+                            if isinstance(node, ast.Name) and isinstance(node.ctx, ast.Load))
+    return on_import, nodes
+
+
+def _compares_interpreter(node: 'ast.AST') -> 'bool':
+    """Whether ``node`` compares the running interpreter, e.g. ``sys.version_info < (3, 12)``."""
+    if not isinstance(node, ast.Compare):
+        return False
+    for operand in [node.left] + list(node.comparators):
+        for part in ast.walk(operand):
+            if isinstance(part, ast.Name) and part.id in _INTERPRETER_NAMES:
+                return True
+            if (isinstance(part, ast.Attribute) and part.attr in _INTERPRETER_FACTS
+                    and isinstance(part.value, ast.Name) and part.value.id in ('sys', 'platform')):
+                return True
+    return False
+
+
+#: The key :func:`_bindings` files a ``self.name`` or ``cls.name`` attribute under.
+_SELF = -1
+
+
+@functools.lru_cache(maxsize=None)
+def _scopes(tree: 'ast.Module') -> 'tuple[dict[int, int], dict[int, int]]':
+    """Each node's scope in ``tree``, and each scope's enclosing one, by ``id``.
+
+    A scope is the module, a function or a lambda; a class body belongs to the
+    scope around it, as its names are reached through ``self`` or ``cls``.
+
+    """
+    scope_of = {id(tree): id(tree)}  # type: dict[int, int]
+    parent = {}  # type: dict[int, int]
+    todo = [(tree, id(tree))]  # type: list[tuple[ast.AST, int]]
+    while todo:  # not recursion: a long ``'a' + 'b' + ...`` nests as deep as it is long
+        node, scope = todo.pop()
+        for child in ast.iter_child_nodes(node):
+            scope_of[id(child)] = scope
+            if isinstance(child, (ast.FunctionDef, ast.AsyncFunctionDef, ast.Lambda)):
+                parent[id(child)] = scope
+                todo.append((child, id(child)))
+            else:
+                todo.append((child, scope))
+    return scope_of, parent
+
+
+@functools.lru_cache(maxsize=None)
+def _bindings(tree: 'ast.Module') -> 'dict[tuple[int, str], tuple[ast.AST, ...]]':
+    """What each name of each scope of ``tree``, and each ``self.`` attribute, is bound to.
+
+    Keyed by ``(scope, name)``, ``(_SELF, attribute)`` for an attribute of ``self``
+    or ``cls``. An assignment binds its target to its value, a ``for`` loop or a
+    comprehension its target to what it iterates, and a function's parameter to
+    its default and to each argument the module passes it -- every one, since
+    which call runs is not known.
+
+    """
+    scope_of = _scopes(tree)[0]
+    found = {}  # type: dict[tuple[int, str], list[ast.AST]]
+
+    def bind(target: 'ast.AST', value: 'ast.AST') -> None:
+        for node in ast.walk(target):
+            if isinstance(node, ast.Name):
+                found.setdefault((scope_of[id(node)], node.id), []).append(value)
+            elif (isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name)
+                  and node.value.id in ('self', 'cls')):
+                found.setdefault((_SELF, node.attr), []).append(value)
+
+    functions = {}  # type: dict[str, list[tuple[int, ast.arguments]]]
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Assign):
+            for target in node.targets:
+                bind(target, node.value)
+        elif isinstance(node, (ast.AnnAssign, ast.AugAssign, ast.NamedExpr)) and node.value is not None:
+            bind(node.target, node.value)
+        elif isinstance(node, (ast.For, ast.AsyncFor, ast.comprehension)):
+            bind(node.target, node.iter)
+        elif isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+            functions.setdefault(node.name, []).append((id(node), node.args))
+            for arg, default in zip(reversed(node.args.args), reversed(node.args.defaults)):
+                found.setdefault((id(node), arg.arg), []).append(default)
+    for call in ast.walk(tree):
+        if not isinstance(call, ast.Call):
+            continue
+        for scope, arguments in functions.get(_called(call) or '', ()):
+            params = [arg.arg for arg in arguments.posonlyargs + arguments.args]
+            if params[:1] in (['self'], ['cls']) and isinstance(call.func, ast.Attribute):
+                params = params[1:]
+            for param, value in zip(params, call.args):
+                found.setdefault((scope, param), []).append(value)
+            if arguments.vararg is not None:
+                found.setdefault((scope, arguments.vararg.arg), []).extend(call.args[len(params):])
+            for keyword in call.keywords:
+                if keyword.arg is not None:
+                    found.setdefault((scope, keyword.arg), []).append(keyword.value)
+    return {key: tuple(values) for key, values in found.items()}
+
+
+def _bound_values(tree: 'ast.Module', node: 'ast.AST') -> 'tuple[ast.AST, ...]':
+    """What the name or ``self.`` attribute ``node`` may hold, from its own scope outwards."""
+    bindings = _bindings(tree)
+    if isinstance(node, ast.Attribute):
+        return bindings.get((_SELF, node.attr), ())
+    assert isinstance(node, ast.Name)
+    scope_of, parent = _scopes(tree)
+    scope = scope_of.get(id(node), id(tree))
+    while True:
+        values = bindings.get((scope, node.id))
+        if values is not None or scope == id(tree):
+            return values or ()
+        scope = parent[scope]
+
+
+def _imported_from(tree: 'ast.Module', path: 'pathlib.Path', name: 'str') -> 'Optional[tuple[pathlib.Path, str]]':
+    """Where ``tree`` imports ``name`` from, as the module's file and the name there."""
+    for node in tree.body:
+        if isinstance(node, ast.ImportFrom):
+            for module, taken in _imports(node, path):
+                found = _module_file(module)
+                if found is not None and taken is not None:
+                    for alias in node.names:
+                        if (alias.asname or alias.name) == name and alias.name in taken:
+                            return found, alias.name
+    return None
+
+
+def _flowing_strings(expressions: 'list[ast.AST]', path: 'pathlib.Path') -> 'tuple[set[str], bool]':
+    """The strings that may flow into ``expressions``, and whether a ``.py`` name is computed.
+
+    Followed through :func:`_bindings`, and through a name imported from another
+    repository module to its bindings there.
+
+    """
+    strings = set()  # type: set[str]
+    seen = set()  # type: set[tuple[pathlib.Path, int]]
+    origins = set()  # type: set[tuple[pathlib.Path, str]]
+    todo = [(expression, path) for expression in expressions]
+    while todo:
+        node, where = todo.pop()
+        if (where, id(node)) in seen:
+            continue
+        seen.add((where, id(node)))
+        if isinstance(node, ast.Constant):
+            if isinstance(node.value, str):
+                strings.add(node.value)
+        elif isinstance(node, ast.JoinedStr):
+            for before, after in zip(node.values, node.values[1:]):
+                # ``f'{name}.py'``: a file whose name is computed.
+                if (isinstance(before, ast.FormattedValue) and isinstance(after, ast.Constant)
+                        and str(after.value).startswith('.py')):
+                    return strings, True
+            todo.extend((value, where) for value in node.values)
+        elif isinstance(node, (ast.Name, ast.Attribute)):
+            if isinstance(node, ast.Attribute):
+                todo.append((node.value, where))
+                if not (isinstance(node.value, ast.Name) and node.value.id in ('self', 'cls')):
+                    continue  # ``sys.executable``: nothing this module binds
+            tree = _parse_module(where)
+            if tree is None:
+                continue
+            values = _bound_values(tree, node)
+            todo.extend((value, where) for value in values)
+            origin = _imported_from(tree, where, node.id) if isinstance(node, ast.Name) and not values else None
+            if origin is not None and origin not in origins:
+                origins.add(origin)
+                todo.append((ast.Name(id=origin[1], ctx=ast.Load()), origin[0]))
+        elif isinstance(node, ast.BinOp) and isinstance(node.op, ast.Div):
+            # ``ROOT / 'util' / 'ci_timing.py'`` names ``util/ci_timing.py``, not ``util``.
+            parts = []  # type: list[ast.expr]
+            while isinstance(node, ast.BinOp) and isinstance(node.op, ast.Div):
+                parts.append(node.right)
+                node = node.left
+            parts.append(node)
+            joined = []  # type: list[str]
+            for part in reversed([None] + parts):  # type: ignore[list-item]
+                if isinstance(part, ast.Constant) and isinstance(part.value, str):
+                    joined.append(part.value)
+                    continue
+                if joined:
+                    strings.add('/'.join(joined))
+                    joined = []
+                if part is not None:
+                    todo.append((part, where))
+        elif isinstance(node, ast.Call):
+            todo.extend((arg, where) for arg in node.args)
+            todo.extend((keyword.value, where) for keyword in node.keywords)
+            if isinstance(node.func, ast.Attribute):
+                todo.append((node.func.value, where))
+        elif not isinstance(node, (ast.Lambda, ast.FunctionDef, ast.AsyncFunctionDef)):
+            todo.extend((child, where) for child in ast.iter_child_nodes(node))
+    return strings, False
+
+
+def _attributes_used(tree: 'ast.Module', name: 'str') -> 'Optional[frozenset[str]]':
+    """The attributes ``tree`` reads off the module it binds to ``name``, or :data:`None`
+    when it uses that module some other way, e.g. passes it on."""
+    return _name_uses(tree).get(name, frozenset())
+
+
+@functools.lru_cache(maxsize=None)
+def _name_uses(tree: 'ast.Module') -> 'dict[str, Optional[frozenset[str]]]':
+    """For each name ``tree`` reads, the attributes it reads off it, :data:`None` once it is
+    used bare."""
+    values = {id(node.value) for node in ast.walk(tree) if isinstance(node, ast.Attribute)}
+    used = {}  # type: dict[str, Optional[set[str]]]
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Attribute) and isinstance(node.value, ast.Name):
+            found = used.setdefault(node.value.id, set())
+            if found is not None:
+                found.add(node.attr)
+        elif isinstance(node, ast.Name) and id(node) not in values:
+            used[node.id] = None
+    return {name: None if attrs is None else frozenset(attrs) for name, attrs in used.items()}
+
+
+def _imports(node: 'ast.AST', path: 'pathlib.Path',
+             tree: 'Optional[ast.Module]' = None) -> 'list[tuple[str, Optional[frozenset[str]]]]':
+    """The modules an ``import`` statement runs, and the names it takes from each.
+
+    A module bound to a name of its own -- ``from tests.project import
+    test_release_gates as gates`` -- gives the attributes ``tree`` reads off it.
+
+    """
+    if isinstance(node, ast.Import):
+        return [(alias.name, _attributes_used(tree, alias.asname) if tree is not None and alias.asname else None)
+                for alias in node.names]
+    assert isinstance(node, ast.ImportFrom)
+    module = node.module or ''
+    if node.level:
+        try:
+            package = path.parent.relative_to(ROOT).parts
+        except ValueError:  # a module outside the repository, as a test writes one
+            package = ()
+        package = package[:len(package) - node.level + 1]
+        module = '.'.join(package + ((module,) if module else ()))
+    found = []  # type: list[tuple[str, Optional[frozenset[str]]]]
+    names = set()  # type: set[str]
+    for alias in node.names:
+        # ``from tests.project import test_release_gates`` imports a module, not a name.
+        if alias.name != '*' and _module_file(f'{module}.{alias.name}') is not None:
+            taken = _attributes_used(tree, alias.asname or alias.name) if tree is not None else None
+            found.append((f'{module}.{alias.name}', taken))
+        else:
+            names.add(alias.name)
+    if names:
+        found.append((module, None if '*' in names else frozenset(names)))
+    return found
+
+
+@functools.lru_cache(maxsize=None)
+def _region_reach(path: 'pathlib.Path', names: 'Optional[frozenset[str]]') -> 'tuple[bool, frozenset[_Region]]':
+    """Whether the region of ``path`` that ``names`` runs varies by interpreter itself,
+    and the regions of other repository files it runs.
+
+    By the AST alone, and erring towards "varies": an unparsable file does, and so
+    does an import whose target is computed, or a file run whose name is. A
+    comparison counts in what the region defines, not in what merely runs on
+    import: a ``skipIf`` on a class nothing asked for decides nothing here.
+
+    """
+    tree = _parse_module(path)
+    if tree is None:
+        return True, frozenset()
+    modules = []  # type: list[tuple[str, Optional[frozenset[str]]]]
+    files = set()  # type: set[pathlib.Path]
+    on_import, definitions = _executed_nodes(tree, names)
+    for root in on_import + definitions:
+        for node in ast.walk(root):
+            if isinstance(node, (ast.Import, ast.ImportFrom)):
+                modules.extend(_imports(node, path, tree))
+            elif isinstance(node, ast.Call) and _called(node) in _IMPORTING_CALLS:
+                target = node.args[0] if node.args else None
+                if isinstance(target, ast.Constant) and isinstance(target.value, str):
+                    modules.append((target.value, None))
+                elif _called(node) in _COMPUTED_IMPORTS:
+                    return True, frozenset()
+            elif isinstance(node, ast.Call) and _called(node) in _RUNNING_CALLS:
+                strings, computed = _flowing_strings(list(node.args) + [keyword.value for keyword in node.keywords],
+                                                     path)
+                if computed or any(_IMPORT_TEXT.search(text) for text in strings):
+                    return True, frozenset()
+                for text in strings:
+                    if _DOTTED_NAME.match(text) and _module_file(text) is not None:
+                        modules.append((text, None))
+                    elif _PATH_TEXT.match(text):
+                        files.update(_paths_named(text))
+            elif _compares_interpreter(node) and root in definitions:
+                return True, frozenset()
+            elif isinstance(node, (ast.List, ast.Tuple)):
+                # ``[sys.executable, '-m', 'pcapkit']``
+                values = [element.value if isinstance(element, ast.Constant) else None for element in node.elts]
+                if any(first == '-m' and isinstance(second, str) and _is_package(second)
+                       for first, second in zip(values, values[1:])):
+                    return True, frozenset()
+
+    regions = {(file, None) for file in files}  # type: set[_Region]
+    for module, taken in modules:
+        if _is_package(module):
+            return True, frozenset()
+        found = _module_file(module)
+        if found is not None:
+            regions.add((found, taken))
+    regions.discard((path, names))
+    return False, frozenset(regions)
+
+
+@functools.lru_cache(maxsize=None)
+def varies_by_interpreter(path: 'pathlib.Path | str') -> 'bool':
+    """Whether running the module at ``path`` may give another answer on another interpreter (#1954).
+
+    By the AST of the module and of the repository code it runs. It may when any
+    of that imports :data:`PROJECT_PIN_PACKAGE` -- an ``import`` at any depth;
+    :func:`importlib.import_module`, :func:`__import__`, :func:`unittest.mock.patch`
+    or :func:`importlib.util.find_spec` naming it; a child interpreter's ``import
+    pcapkit`` or ``-m pcapkit`` -- or compares ``sys.version_info``,
+    ``sys.implementation`` or the like. The module runs whole, and so does a module
+    it imports as an object, unless it only reads attributes off it, which run as
+    names taken from it do: the module's imports and the calls it makes on import,
+    and the definitions of those names. A file or directory runs whole when a
+    string naming it flows into a call that runs one, e.g.
+    ``spec_from_file_location`` or ``subprocess.run``: a ``util/`` script, a
+    generator, :file:`docs/source/conf.py`, a test directory a child ``pytest``
+    collects. A computed import, a computed ``.py`` name, or a file that cannot be
+    parsed counts as importing the package.
+
+    Args:
+        path: Path to a module, absolute or relative to :data:`ROOT`.
+
+    """
+    start = pathlib.Path(path)
+    if not start.is_absolute():
+        start = ROOT / start
+    seen = set()  # type: set[_Region]
+    todo = [(start.resolve(), None)]  # type: list[_Region]
+    while todo:
+        region = todo.pop()
+        if region in seen:
+            continue
+        seen.add(region)
+        reaches, regions = _region_reach(*region)
+        if reaches:
+            return True
+        todo.extend(regions - seen)
+    return False
+
+
+def is_project_pin(path: 'pathlib.Path | str') -> 'bool':
+    """Whether ``path`` names a project pin, which runs once per push (#1954).
+
+    A project pin is a unit-tier test module under
+    :file:`tests/`:data:`PROJECT_PINS_DIR` whose run does not
+    :func:`vary by interpreter <varies_by_interpreter>`: it reads the repository's
+    text or drives a ``util/`` script, so the ``project-tests`` job runs it once, on
+    ``latest``. Any other module stays on every leg of ``test`` and
+    ``experimental``.
+
+    Args:
+        path: Path to a module, absolute or relative to :data:`ROOT`.
+
+    """
+    candidate = pathlib.Path(path)
+    if not candidate.is_absolute():
+        candidate = ROOT / candidate
+    candidate = candidate.resolve()
+    try:
+        relative = candidate.relative_to(TESTS_ROOT / PROJECT_PINS_DIR)
+    except ValueError:
+        return False
+    return (relative.name.startswith('test_') and relative.suffix == '.py' and candidate.is_file()
+            and is_unit_tier(candidate) and not varies_by_interpreter(candidate))
+
+
+@functools.lru_cache(maxsize=1)
+def project_pin_paths() -> 'tuple[str, ...]':
+    """Every :func:`project pin <is_project_pin>`, relative to :data:`ROOT`, sorted.
+
+    What :data:`PROJECT_PINS_SELECTOR` prints: the ``project-tests`` job's
+    selection, and the ``--ignore`` list of every ``test`` and ``experimental`` leg.
+
+    """
+    return tuple(sorted(path.relative_to(ROOT).as_posix()
+                        for path in (TESTS_ROOT / PROJECT_PINS_DIR).rglob('test_*.py')
+                        if is_project_pin(path)))
 
 
 def _git(*args: 'str') -> 'Optional[str]':

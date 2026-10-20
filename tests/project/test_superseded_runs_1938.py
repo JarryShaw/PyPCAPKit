@@ -171,7 +171,8 @@ class TestTheGate(unittest.TestCase):
         steps = {entry.get('id'): entry for entry in self.jobs[GATE]['steps']}
         self.assertEqual(steps['versions']['run'], 'python3 util/python_versions.py --github-output')
         setup = steps['python']
-        self.assertEqual(setup['uses'], job(NAME, 'experimental')['steps'][1]['uses'])
+        legs = {entry.get('id'): entry for entry in job(NAME, 'experimental')['steps']}
+        self.assertEqual(setup['uses'], legs['python']['uses'])
         self.assertEqual(setup['with'], {'python-version': '${{ steps.versions.outputs.latest }}'})
         self.assertEqual(steps['requests']['run'], 'python -m pip install requests')
 

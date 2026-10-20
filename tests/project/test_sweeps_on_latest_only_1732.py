@@ -99,8 +99,10 @@ def stringify(value: 'object') -> 'str':
 def step_env(leg: 'dict[str, Any]', where: 'tuple[str, str]' = JOB) -> 'dict[str, str]':
     """The step's ``env:`` on ``leg``, ``needs`` read from the tier file."""
     # #1938: experimental's tests step reads the token and the watcher's interpreter, unwatched here.
+    # #1954: and the project pins its own step lists, as that step prints them.
     context = {'matrix': leg, 'needs': {'python-versions': {'outputs': live_outputs()}}, 'github': {'token': ''},
-               'steps': {'watcher': {'outcome': 'skipped'}, 'watcher-python': {'outputs': {'python-path': ''}}}}
+               'steps': {'watcher': {'outcome': 'skipped'}, 'watcher-python': {'outputs': {'python-path': ''}},
+                         'pins': {'outputs': {'paths': ' '.join(_tiers.project_pin_paths())}}}}
     return {key: re.sub(r'\$\{\{.*?\}\}', lambda match: stringify(evaluate_expression(match.group(0), context)),
                         str(value))
             for key, value in (step(where).get('env') or {}).items()}
@@ -157,13 +159,16 @@ class TestTheStepSelectsByLeg(unittest.TestCase):
             with self.subTest(python=version):
                 self.assertEqual(SWEEP_FLAG in pytest_args(argv), version != self.latest)
 
-    def test_latest_keeps_the_whole_unit_tier_under_coverage(self) -> None:
-        """Coverage is measured over the selection it was before #1732."""
+    def test_latest_keeps_the_unit_tier_less_the_pins_under_coverage(self) -> None:
+        """Coverage is measured over the selection it was before #1732, less the project pins,
+        which import no pcapkit and run in ``project-tests`` (#1954)."""
         leg, argv = self.runs[self.latest]
         self.assertIs(leg.get('coverage'), True)
         self.assertEqual(argv[:4], ['-m', 'coverage', 'run', '--rcfile=.github/coverage.toml'])
         flags = [arg for arg in pytest_args(argv) if arg.startswith('--ignore')]
-        self.assertEqual(flags, list(TIER_FLAGS))
+        pins = [f'--ignore={pin}' for pin in _tiers.project_pin_paths()]
+        self.assertTrue(pins)
+        self.assertEqual(flags, list(TIER_FLAGS) + pins)
 
     def test_every_other_leg_runs_the_rest(self) -> None:
         """The same selection as ``latest``, the sweeps' glob last, and no coverage."""

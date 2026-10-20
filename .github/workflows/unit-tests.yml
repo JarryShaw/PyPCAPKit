@@ -222,15 +222,29 @@ jobs:
         # collects, with `*` spanning `/` (_pytest/main.py:437-461, pytest
         # 9.1.1). The modules that import the sweeps' harnesses for their
         # packet builders still import them.
+        #
+        # #1954, the owner's option 3: the project pins -- the tests/project
+        # modules whose run does not vary by interpreter, tests/_tiers.py's
+        # project_pin_paths() -- run once per push, in `project-tests`, so every
+        # leg passes each as an `--ignore`, as experimental.yml's do. Asked of
+        # tests/_tiers.py here rather than listed, as `integration` asks for its
+        # selection. The pins import no pcapkit, so coverage loses nothing.
         env:
           COVERAGE: ${{ matrix.coverage }}
           SWEEPS: ${{ matrix.python-version == needs.python-versions.outputs.latest }}
         run: |
+          if ! pins=$(python -c "from tests._tiers import project_pin_paths; print(' '.join(project_pin_paths()))"); then
+            echo "::${ANNOTATION_LEVEL} title=Could not compute the project pins::tests._tiers.project_pin_paths() failed -- see the traceback above."
+            exit 1
+          fi
           set -- -q -n auto --dist load \
             --durations=30 --durations-min=1.0 --junitxml="$RUNNER_TEMP/junit.xml" \
             --ignore=tests/integration \
             --ignore-glob='*_runtime.py' \
             --ignore-glob='*_regression.py'
+          for pin in $pins; do
+            set -- "$@" --ignore="$pin"
+          done
           if [ "$SWEEPS" != "true" ]; then
             set -- "$@" --ignore-glob='*roundtrip*'
           fi
@@ -1513,6 +1527,12 @@ jobs:
   #     covering none of tests/integration. Adding it back here would buy that
   #     nothing, not a failure.
   #
+  # The `project` cell keeps the project pins (#1954), which `test` leaves to
+  # `project-tests`: this job asks whether each module passes in one
+  # interpreter, in file order, with no xdist to isolate it, which is a
+  # question about the module and not the Python version, so a pin can fail
+  # it as readily as any other. It runs on main's pushes alone, one cell.
+  #
   # Not added to ``required-checks`` below: a brand-new job earns a place in
   # the required set once its own track record justifies it, which is the
   # maintainer's call to make separately from landing it.
@@ -1721,23 +1741,32 @@ jobs:
               print(f'code={code}', file=file)
           PY
 
-  # The docs-only replacement for `test`, running every test that reads
-  # docs/ or a Markdown file, since a docs-only diff can still break those:
-  # tests/project and the root-level modules, plus the modules elsewhere under
-  # tests/ named in the second run step. tests/project/test_unit_tests_queue.py
-  # finds every module outside those that names a docs/ or Markdown path
-  # and fails until it is listed there, so a new reader cannot go unrun. Runs
-  # only when `changes` says the diff is docs-only, so it never duplicates
-  # `test` on a code change. It uses
+  # #1954, the owner's option 3: the project pins, once per push. They are the
+  # tests/project modules whose run does not vary by interpreter -- each reads
+  # the repository's text or drives a util/ script, and none imports pcapkit
+  # or branches on the Python version, by tests/_tiers.py's
+  # is_project_pin() -- so one run on `latest` is every leg's answer, and
+  # `test` and experimental.yml leave them out. On every pull request and
+  # every push, `required-checks` needs this job to pass; under `gate-only`,
+  # `gate`'s full suite runs them instead. tests/_dependency_gates.py reads its
+  # pytest step as the `project-pins` selection.
+  #
+  # On a docs-only diff, it is `test`'s replacement too, running every test
+  # that reads docs/ or a Markdown file, since a docs-only diff can still break
+  # those: tests/project and the root-level modules, plus the modules
+  # elsewhere under tests/ named in the last run step.
+  # tests/project/test_unit_tests_queue.py finds every module outside those
+  # that names a docs/ or Markdown path and fails until it is listed there, so
+  # a new reader cannot go unrun. Those steps run only when `changes` says the
+  # diff is docs-only, so they never duplicate `test` on a code change, and
+  # they take in the pins, so the pins step is skipped there. They use
   # util/run_unittest_leg.py's `project` leg -- tests/project plus the
   # root-level modules, with the extras `unittest-ordering`'s `project` cell
-  # runs green on main -- rather than a pytest invocation of its own, which
-  # tests/_dependency_gates.py would then have to model as a new selection
-  # shape.
+  # runs green on main.
   project-tests:
-    name: Project tests (docs-only)
+    name: Project tests
     needs: [changes]
-    if: ${{ inputs.gate-only != true && needs.changes.outputs.code == 'false' }}
+    if: ${{ inputs.gate-only != true }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
 
@@ -1754,16 +1783,51 @@ jobs:
           python-version: ${{ steps.python-versions.outputs.latest }}
           cache: pip
 
+      # `test`'s install line, so a gated pin skips or runs here exactly as it
+      # did on `latest`.
       - name: Install package and test dependencies
         run: |
           python -m pip install -U pip setuptools wheel
           python -m pip install -e '.[test,DPKT,crypto,NGAP]'
 
+      # See the `test` job above for why this step exists.
+      - name: Report available parallelism
+        run: |
+          nproc
+          python -c "import os; print('cpu_count', os.cpu_count())"
+
+      # `test`'s pytest flags, with the pins as the selection. A selection that
+      # cannot be computed, or is empty, fails the step rather than letting a
+      # bare `pytest` run the whole suite. `ulimit -f` caps any file a test
+      # writes at 2 GiB (bash counts 1024-byte blocks), as experimental.yml's
+      # `prlimit --fsize` does. The step cap is several times the run's
+      # length, under the job's 20.
+      - name: Run the project pins
+        if: ${{ needs.changes.outputs.code != 'false' }}
+        timeout-minutes: 10
+        shell: bash
+        run: |
+          ulimit -f 2097152
+          if ! pins=$(python -c "from tests._tiers import project_pin_paths; print(' '.join(project_pin_paths()))"); then
+            echo "::error title=Could not compute the project pins::tests._tiers.project_pin_paths() failed -- see the traceback above."
+            exit 1
+          fi
+          if [ -z "$pins" ]; then
+            echo "::error title=No project pins::tests._tiers.project_pin_paths() returned nothing. Refusing to run pytest with no arguments, which would run the whole suite."
+            exit 1
+          fi
+          # shellcheck disable=SC2086
+          set -- $pins
+          python -m pytest -q -n auto --dist load \
+            --durations=30 --durations-min=1.0 --junitxml="$RUNNER_TEMP/junit.xml" "$@"
+
       - name: Run tests/project and the root-level modules under plain unittest
+        if: ${{ needs.changes.outputs.code == 'false' }}
         timeout-minutes: 15
         run: python util/run_unittest_leg.py project --verbose
 
       - name: Run the other tests that read docs/ or Markdown
+        if: ${{ needs.changes.outputs.code == 'false' }}
         timeout-minutes: 5
         run: python -m unittest -v tests.corekit.test_sentinel_exports_unit tests.utilities.test_config_unit tests.vendor.test_vendor_variables_1726_unit
 
@@ -1902,8 +1966,8 @@ jobs:
   # gating leg, and folding it in would widen what merging requires -- a
   # change for the maintainer to decide, not one to slip in here.
   # `test`, `integration`, `engine-tests` and `pypcap-parity` are the gating
-  # legs; `changes` and `project-tests` are needed only for the docs-only
-  # path below.
+  # legs, and `project-tests` gates every diff too, as the one run of the
+  # project pins (#1954); `changes` is needed for the docs-only path below.
   #
   # `engine-tests`'s `unsupported` and `not-installable` cells are not a gap
   # here: the cell script exits 0 for a cell that declined exactly as
@@ -1924,13 +1988,13 @@ jobs:
   # `docs/**` and `*.md` files outside the code directories (the `changes`
   # job's classifier), `test`, `integration`, `engine-tests` and
   # `pypcap-parity` are skipped by their own `if:`, and `project-tests` runs
-  # instead. A job-level `if:` rather than workflow-level `paths-ignore`,
-  # because `paths-ignore` would not run this workflow at all and leave this
-  # required context pending forever. So `skipped` is accepted for those
-  # legs **only** when `changes` succeeded and said `code == 'false'`, and then
-  # `project-tests` must have succeeded. Every other combination keeps the
-  # strict rule: `changes` failing, its output missing, or any leg skipped
-  # while `code` is `true` fails this gate. `changes` reports `code: true` for
+  # the docs readers as well. A job-level `if:` rather than workflow-level
+  # `paths-ignore`, because `paths-ignore` would not run this workflow at all
+  # and leave this required context pending forever. So `skipped` is accepted
+  # for those legs **only** when `changes` succeeded and said
+  # `code == 'false'`; `project-tests` must have succeeded either way. Every
+  # other combination keeps the strict rule: `changes` failing, its output
+  # missing, or any leg skipped while `code` is `true` fails this gate. `changes` reports `code: true` for
   # every event but this workflow's own `pull_request`, so `push` and
   # `workflow_call` runs never take this path.
   required-checks:
@@ -1966,11 +2030,13 @@ jobs:
             failed=1
           fi
 
-          # Docs-only (code == false): a leg may be skipped, and project-tests
-          # is what must have passed. Otherwise every leg must have succeeded.
+          # project-tests runs the project pins on every diff (#1954), and the
+          # docs readers on a docs-only one, so it must pass on both paths.
+          # Docs-only (code == false): a leg may be skipped. Otherwise every leg
+          # must have succeeded.
+          [ "$PROJECT_TESTS" = "success" ] || { echo "::error title=project-tests did not succeed::result was '$PROJECT_TESTS'; it runs the project pins, and on a docs-only diff the docs readers too, so it has to pass."; failed=1; }
           if [ "$CODE" = "false" ]; then
             allowed="success skipped"
-            [ "$PROJECT_TESTS" = "success" ] || { echo "::error title=project-tests did not succeed::result was '$PROJECT_TESTS'; on a docs-only diff it is the test that has to pass."; failed=1; }
           else
             allowed="success"
           fi
