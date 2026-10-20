@@ -342,7 +342,12 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             self._file.seek(_seek_set, io.SEEK_SET)
 
             #: bytes: Raw frame data.
-            self._data = self._read_fileng(self.length + _ilen)
+            #
+            # NOTE: Asked for no further than one read can go, :data:`sys.maxsize`.
+            # Past it the read raises :exc:`OverflowError` instead of coming back
+            # short, so a record claiming more than that would never reach the
+            # overrun handling below (:issue:`1975`).
+            self._data = self._read_fileng(min(self.length + _ilen, sys.maxsize))
 
             # NOTE: A record whose ``incl_len`` runs past the end of the data is
             # kept as captured, as the PCAP-NG reader keeps a captured length
@@ -356,6 +361,12 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
                 warn(f'PCAP: [Frame {self._fnum}] captured length {_ilen} runs past the data, '
                      f'which holds {held} octet(s); kept as captured',
                      ProtocolWarning, stacklevel=stacklevel())
+
+            # NOTE: Nor can a seek go past :data:`sys.maxsize`. A record ending
+            # beyond it was cut short by the end of the data, so the next frame
+            # starts where the octets read end (:issue:`1975`).
+            if seek_cur > sys.maxsize:
+                seek_cur = _seek_set + len(self._data)
 
             # move forward to the beginning of the next frame
             self._file.seek(seek_cur, io.SEEK_SET)

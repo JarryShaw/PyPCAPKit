@@ -13,6 +13,7 @@ a stream a ``name``.
 
 """
 import io
+import sys
 import tempfile
 from typing import TYPE_CHECKING, cast
 
@@ -202,11 +203,14 @@ class SeekableReader(io.BufferedReader):
         minimum = size if minimum is None else minimum
         read = getattr(self._stream, 'read1', self._stream.read)
 
-        limit = config.READ_CHUNK
+        # NOTE: ``-1`` sets no limit of its own, but one read still goes no further
+        # than :data:`sys.maxsize`, past which it raises :exc:`OverflowError`
+        # rather than coming back short (:issue:`1975`).
+        limit = sys.maxsize if config.READ_CHUNK == -1 else config.READ_CHUNK
         chunks = []  # type: list[bytes]
         count = 0
         while True:
-            chunk = read(size - count if limit == -1 else min(size - count, limit))
+            chunk = read(min(size - count, limit))
             if not chunk:
                 break
             chunks.append(chunk)
