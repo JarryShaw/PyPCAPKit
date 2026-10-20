@@ -103,7 +103,7 @@ if TYPE_CHECKING:
     from typing import Iterator, Optional
 
 __all__ = [
-    'WORKFLOW', 'PYPROJECT', 'CORE', 'MODULE_PROVIDERS', 'NON_DISTRIBUTION_FLAGS',
+    'WORKFLOW', 'PYPROJECT', 'LATEST_LEG_CONDITION', 'CORE', 'MODULE_PROVIDERS', 'NON_DISTRIBUTION_FLAGS',
     'MUTUALLY_EXCLUSIVE_IMPORTS', 'DEPENDENCY_GATE_EXCLUSIONS',
     'Requirement', 'Gate', 'Job', 'Gap', 'Exclusion', 'AmbiguousProvider',
     'requirement_key', 'provided_by', 'declared_requirements', 'extras_providing',
@@ -133,6 +133,9 @@ __all__ = [
 WORKFLOW = _tiers.ROOT / '.github' / 'workflows' / 'unit-tests.yml'
 #: Where the extras are declared.
 PYPROJECT = _tiers.ROOT / 'pyproject.toml'
+#: The ``if:`` of a step that runs on the ``latest`` leg alone (#1958), which is
+#: how :func:`pytest_jobs` tells that leg's install line from every leg's.
+LATEST_LEG_CONDITION = 'matrix.python-version == needs.python-versions.outputs.latest'
 
 #: Stands in for ``[project] dependencies`` where an extra name is expected:
 #: what ``pip install -e .`` installs with no extra asked for at all. Spelled
@@ -206,8 +209,9 @@ MODULE_PROVIDERS = {
     'pylint': ('pylint',),
     # ``beautifulsoup4`` ships ``bs4``; ``html5lib`` is an *extra of* that
     # distribution, so ``beautifulsoup4`` alone does not provide it. That
-    # distinction is the whole reason ``HAS_CRAWLER_DEPS`` is satisfied in CI
-    # and ``HAS_VENDOR_DEPS`` is not: the ``test`` extra carries plain
+    # distinction is why ``HAS_CRAWLER_DEPS`` is satisfied by the ``test``
+    # extra on every job and ``HAS_VENDOR_DEPS`` only where ``vendor`` joins it,
+    # the ``latest`` legs (#1958): the ``test`` extra carries plain
     # ``beautifulsoup4``, and only ``vendor`` and ``dev`` carry
     # ``beautifulsoup4[html5lib]``. The second alternative below is not a
     # second *distribution* -- pyproject.toml never declares bare
@@ -249,8 +253,8 @@ MODULE_PROVIDERS = {
     # extra declares docutils itself this entry has to change: the bare name goes
     # live alongside Sphinx, :func:`contested_imports` reports docutils, and the
     # :data:`MUTUALLY_EXCLUSIVE_IMPORTS` liveness test fails until the entry is
-    # cut to ``('docutils',)``. If the ``test`` and ``gate`` jobs install that
-    # extra, its gap closes and the ``HAS_DOCUTILS`` exclusion has to go as well.
+    # cut to ``('docutils',)``. The ``latest`` legs install the ``docs`` extra
+    # (#1958), which is what closes the ``HAS_DOCUTILS`` gate there.
     'docutils': ('Sphinx', 'docutils'),
     # The theme ``HAS_FURO`` asks for, whose table wrapper the #1861 transform
     # test runs. Only the ``docs`` extra carries it.
@@ -370,7 +374,9 @@ DEPENDENCY_GATE_EXCLUSIONS = {
             '``pcap`` module and cannot coexist -- see '
             "pcapkit/foundation/engines/_pcap_backend.py's own docstring. test and gate "
             "stay dark on purpose, per #751's ruling that per-engine coverage gets its "
-            'own job rather than one more install line on either.'
+            'own job rather than one more install line on either. #1958 gave the latest '
+            'legs every engine pip can install there, and PCAP_CT alone needs that '
+            "system libpcap, which engine-tests' PCAP_CT cell installs and runs on latest."
         ),
     ),
     'HAS_PYPCAPFILE': Exclusion(
@@ -407,192 +413,6 @@ DEPENDENCY_GATE_EXCLUSIONS = {
             "integration and gate stay dark on purpose, per #751's ruling that per-engine "
             'coverage gets its own job rather than one more install line on any of the '
             'three.'
-        ),
-    ),
-    'HAS_VENDOR_DEPS': Exclusion(
-        dark={'test': ('html5lib',), 'gate': ('html5lib',)},
-        reason=(
-            "Ruled onto a non-blocking leg by #738's option (b), on the premise that the "
-            'crawlers fetch from IANA and Wikipedia and #518 records four Wikipedia 403s '
-            'and a dead IETF URL -- so a blocking leg would go red on upstream '
-            'availability rather than on this code. Note what is actually missing, which '
-            "#738's own inventory gets wrong: requests and bs4 have shipped in the test "
-            'extra since #507 and are installed on every job, so these classes are one '
-            '*requirement extra* short -- html5lib, which only beautifulsoup4[html5lib] '
-            'provides, i.e. the vendor and all extras.\n\n'
-            'engine-tests (#751) used to be that leg: it mirrored test\'s ignore-shape '
-            'exactly (same --ignore flags) and carried vendor on its one shared install '
-            'line, so it reached and closed these unit-tier HAS_VENDOR_DEPS gates as a '
-            "side effect of installing everything together. #849's rebuild removes that "
-            'shared venv: each matrix.engine cell now installs only "test" plus its own '
-            'engine extra and runs only that engine\'s own explicit TEST_PATHS -- '
-            'tests/toolkit/test_scapy_unit.py and four siblings, never tests/vendor/ -- so '
-            'no cell reaches these gates at all any more, let alone installs vendor for '
-            'them. This is not a *new* gap this guard reports, because '
-            ':func:`dependency_gate_gaps` only counts a job that reaches a gate without '
-            "installing what it needs; a job that no longer reaches the gate at all is "
-            'invisible to it either way, which is exactly the "silence is the failure '
-            'mode" problem this module\'s own docstring opens with. It is a real, '
-            'disclosed regression rather than a silent one: #849\'s own PR description '
-            "records vendor coverage as dropped, not restored, and worth its own issue. "
-            'test and gate stay dark for their own, unrelated reasons below; engine-tests '
-            'is simply no longer part of the answer for this flag.\n\n'
-            'test and gate stay dark for different reasons, not the same one. test '
-            'declines html5lib per the non-blocking-leg ruling itself -- that is the '
-            'whole reason it is dark. gate is not part of the blocking matrix at all -- '
-            "it only runs on the release path (workflow_call's gate-only: true), never "
-            'on a pull request -- and now that engine-tests no longer carries vendor '
-            'either, no per-PR job does, so this flag\'s only per-PR-visible install '
-            'point is test\'s own decline above. gate could add vendor without '
-            'contradicting the "non-blocking" ruling, but doing so on the one job that '
-            'gates an actual release, for a network-and-parser extra whose own crawlers '
-            "#518 already documents as flaky, is not worth the footprint on its own -- "
-            "and it would not restore the per-PR coverage #849 removed regardless, since "
-            'gate never runs on a pull request at all.\n\n'
-            'Worth recording since it bears on the ruling itself, though this exclusion '
-            'is not the place to relitigate it: none of the 41 methods this closes make '
-            'a live network call, though not for one reason across all four files. '
-            'test_user_agent_unit.py (11 methods) and test_request_prompt_unit.py (16) '
-            'gate on HAS_VENDOR_DEPS only because the pcapkit.vendor package import '
-            'chain needs requests/bs4/html5lib importable -- html5lib itself is never '
-            "used by either file's test bodies, both of which replace requests.get with "
-            "a recorder for the whole of every case (each file's own module docstring "
-            'says so in its own words, not a shared one). test_ipx_packet_unit.py (9 '
-            'methods) is a regression suite for a *retired* scrape -- Packet.LINK is '
-            'None, so _request() short-circuits before ever calling requests.get, and '
-            'test_request_makes_no_network_call asserts exactly that by making '
-            'requests.get and requests.Session.request raise if reached at all; '
-            'html5lib is an import precondition there too, nothing in the file uses it. '
-            'test_ftp_return_code_unit.py (5 methods) is not retired -- '
-            'pcapkit.vendor.ftp.return_code.ReturnCode.LINK is a live Wikipedia URL -- '
-            'and is the one file where html5lib is a *functional* dependency rather '
-            'than an import precondition: its tests build the HTML fixture inline and '
-            "hand it straight to ReturnCode.request(), which is "
-            "bs4.BeautifulSoup(text, 'html5lib'); what keeps it off the network is the "
-            'fixture being inline, not an absence of html5lib use. '
-            "#518's flakiness is real for HAS_CRAWLER_DEPS's live crawlers, which run "
-            'unconditionally since #507; it does not describe any of the above. '
-            'pypcap-parity does not appear here even though it also declines html5lib, '
-            'because its fixture-tier selection never reaches '
-            'tests/vendor/test_ipx_packet_unit.py or its three siblings in the first '
-            'place -- same shape as integration above it, which is why integration is '
-            'not listed either.'
-        ),
-    ),
-    'HAS_SCAPY': Exclusion(
-        dark={'test': ('scapy',)},
-        reason=(
-            'Known, not new: #738 set it aside precisely because Scapy is installed on '
-            'the integration and gate legs, so "they are dark only on the test leg". The '
-            'test job declines Scapy on cost grounds -- its own install-step comment '
-            'contrasts DPKT, which "costs nothing per leg", with Scapy. What was never '
-            'written down is the consequence: the 10 methods it darkens '
-            '(test_scapy_unit.py 5, test_scapy_engine.py 2, and one each in '
-            'test_core.py, test_misc.py and test_sctp_unit.py) are all unit-tier, so the '
-            'integration job never reaches them either. The gate job does, but it runs '
-            "only where a caller passes gate-only: true -- the three Saturday schedules "
-            '(deploy-pages, cron-vendor, cron-conda) and a v* release tag -- never on a '
-            'pull request or a push to main. So no per-PR leg runs them at all.\n\n'
-            "#751's engine-tests job used to install Scapy across the full 3.10-3.14 "
-            'matrix and run it against the whole unit tier (same --ignore shape as '
-            'test), closing the "no per-PR leg" problem this exclusion used to describe '
-            "for all 10 of this guard's 14 unit-tier HAS_SCAPY methods at once.\n\n"
-            "#849's rebuild only partially keeps that closure. engine-tests's Scapy cell "
-            'now runs an explicit TEST_PATHS list -- tests/toolkit/test_scapy_unit.py, '
-            'tests/foundation/engines/test_scapy_engine.py and '
-            "tests/protocols/transport/test_sctp_unit.py -- which covers 8 of the 10 (5 "
-            '+ 2 + 1), but not the other 2, one each in test_core.py and test_misc.py: '
-            "those are simply not in that cell's path list, so no per-PR job reaches "
-            'them with Scapy installed any more -- the exact "no per-PR leg runs them '
-            'at all" state from before #751, reopened for those two. This is not '
-            'visible as a wider Gap here: :func:`dependency_gate_gaps` only reports a job '
-            'that reaches a gate without installing for it, and a job that no longer '
-            "reaches the gate at all is invisible to it either way, by construction -- "
-            "which is why this paragraph exists to say so in prose rather than leave it "
-            "to the tool. test_sctp_unit.py's one method was added to the Scapy cell's "
-            'TEST_PATHS at zero new-dark-flag cost: unlike test_core.py and '
-            'test_misc.py, it carries no HAS_DPKT-gated tests of its own, so restoring '
-            'it traded nothing away. test_core.py and test_misc.py each still carry '
-            "their own HAS_DPKT-gated tests (see the test job's own install-step "
-            "comment), and adding them here without DPKT would trade one dark flag for "
-            'another on a cell that installs neither -- disclosed rather than '
-            'restored, a decision worth its own review rather than folding into a '
-            'workflow-only CR. The other 4 of the 14 live in '
-            'tests/integration/ or match the *_runtime.py ignore-glob, unaffected by any '
-            'of this, already covered by Scapy on the integration and gate jobs. test '
-            'stays dark on purpose: the ruling on #751 was a dedicated job precisely so '
-            'test would not have to reconsider the cost question it already answered.'
-        ),
-    ),
-    'HAS_PYSHARK': Exclusion(
-        dark={'test': ('pyshark',), 'integration': ('pyshark',), 'gate': ('pyshark',)},
-        reason=(
-            'One of #738\'s seven, left out of #740\'s "cheap, uncontroversial subset" '
-            'and never since installed, so its 4 gated methods run nowhere. Three of them '
-            'assert what PyShark.unsupported_reason says on an interpreter where the '
-            'engine cannot work, so they need the distribution importable to have '
-            'anything to ask.\n\n'
-            "#751's later ruling asked to try a tshark binary the same way it asked to "
-            'try building pypcap: "try to build and if the CI is not a good suit, then '
-            'we ripe it… same for HAS_PYSHARK on tshark dependency." '
-            'test_the_reason_tracks_the_running_interpreter used to call '
-            'PyShark.unsupported_reason() unpatched and hard-assert the reason names '
-            '"tshark" on every version below the asyncio ceiling -- true only while '
-            'tshark stayed absent, and it would have turned that assertion from a pass '
-            'into a failure the moment tshark was installed. Fixed by probing the same '
-            'way PyShark.unsupported_reason() itself does -- pyshark\'s own '
-            "get_process_path(), not shutil.which(), which its own config.ini "
-            'precedence can make disagree with -- matching what its sibling '
-            'test_this_host_really_has_no_tshark_so_the_check_is_not_vacuous already '
-            'used, so the file no longer disagrees with itself about whether tshark may '
-            'be present. engine-tests installs both the distribution and tshark (apt-get, '
-            'with a debconf pre-seed so the postinst prompt does not block) on its own '
-            'PyShark cell, and that cell\'s explicit TEST_PATHS (#849) -- '
-            'tests/toolkit/test_pyshark_unit.py (0 of the 4; it carries no HAS_PYSHARK '
-            'gate of its own, only its DPKT/PyPCAPFile/etc. siblings do) and '
-            'tests/foundation/engines/test_pyshark_engine.py (the other 3) -- reaches 3 '
-            'of the 4 HAS_PYSHARK methods. The fourth, '
-            'tests/integration/test_engine_runtime.py:70\'s '
-            'test_pyshark_engine_is_refused_before_asyncio_can_break, is integration-tier '
-            "and outside any engine-tests cell's reach -- it stays dark on the integration "
-            'job exactly as recorded above, unaffected by any of this. So the rebuild '
-            "from one shared ignore-shape venv to one venv per engine leaves this flag's "
-            "closure unchanged, closing the test-job gap this exclusion used to describe "
-            "for those 3. integration and gate stay dark on purpose, per #751's ruling "
-            'that per-engine coverage gets its own job.'
-        ),
-    ),
-    'HAS_RUNTIME': Exclusion(
-        dark={'test': ('pyshark', 'scapy'), 'gate': ('pyshark',)},
-        reason=(
-            "Absent from #738's inventory of seven, and the one gap this guard found "
-            "that no earlier pass did. Every other module's HAS_RUNTIME asks only for "
-            'the four core dependencies, which pip install -e . always provides; '
-            'tests/foundation/engines/test_runtime_engines.py reuses the name for those '
-            'four plus dpkt, scapy and pyshark, so its two classes (5 methods) skip '
-            'wherever any of the three is absent. It is unit-tier despite the name, '
-            'because the ignore-glob is *_runtime.py and the file is '
-            'test_runtime_engines.py, so the test job is what reaches it. The narrow '
-            'fix -- giving that flag a name of its own, so the skip reason says which '
-            'dependency was missing -- is left for a follow-up: it touches a test '
-            "module #751 did not otherwise need to change, and this guard does not "
-            'care what a flag is named, only whether the job that reaches it installs '
-            'what it asks for.\n\n'
-            "#751's engine-tests job used to install DPKT, Scapy and PyShark together in "
-            "one shared venv, closing this gap as a side effect: all 5 methods ran "
-            "wherever engine-tests did. #849's rebuild removes that shared venv -- each "
-            'matrix.engine cell now installs exactly one engine\'s own extra, so no cell '
-            'installs all three together any more, and none of the five explicit '
-            'TEST_PATHS lists names test_runtime_engines.py at all, so engine-tests no '
-            'longer reaches this gate either. Like the HAS_SCAPY and HAS_VENDOR_DEPS '
-            'entries above, this does not surface as a wider Gap -- a job that stops '
-            "reaching a gate is invisible to :func:`dependency_gate_gaps` the same way a "
-            'job that never reached it would be -- so it is recorded here in prose. '
-            "Disclosed, not silent: #849's own PR description names this exact loss "
-            '("the multi-engine HAS_RUNTIME gate ... needs DPKT+Scapy+PyShark together") '
-            'and defers restoring it to a follow-up issue rather than reopening this '
-            'workflow-only change to add a seventh venv shape. test and gate stay dark on '
-            'purpose, for the same reason HAS_SCAPY and HAS_PYSHARK above do.'
         ),
     ),
     'HAS_MYPY': Exclusion(
@@ -644,34 +464,10 @@ DEPENDENCY_GATE_EXCLUSIONS = {
             ':meth:`~tests.test_tier_guard.DependencyGateCoverageTests\
 .test_each_exclusion_still_describes_a_gap_that_is_really_there` exists to catch if this '
             'entry is not kept in step with it. integration and pypcap-parity select by '
-            'fixture tier and never collect that module, which is why they are not listed, '
-            'the same reason they are absent from HAS_VENDOR_DEPS above. If a lint extra '
+            'fixture tier and never collect that module, which is why they are not listed. '
+            'If a lint extra '
             'is ever declared in pyproject.toml, the right change is to delete this entry '
             'and let the gap close on its own rather than to widen it.'
-        ),
-    ),
-    'HAS_SPHINX': Exclusion(
-        dark={'test': ('sphinx', 'sphinx_autodoc_typehints'),
-              'project-tests': ('sphinx', 'sphinx_autodoc_typehints'),
-              'gate': ('sphinx', 'sphinx_autodoc_typehints')},
-        reason=(
-            'The classes it gates (#1775, #1856, #1858-#1863, #1917, #1918 and the enum-value '
-            'hook\'s) load docs/source/conf.py and drive its hooks with the nodes and events '
-            'Sphinx itself builds, so they need Sphinx and the pinned sphinx-autodoc-typehints. '
-            'Only deploy-pages.yml installs those, from docs/requirements.txt, and that '
-            'workflow builds the documentation rather than running pytest; no workflow '
-            'installs the docs extra itself. The same argument declines it here as '
-            'declines HAS_MYPY above: the docs build is already the end-to-end check of '
-            'those hooks, and putting Sphinx, furo and their dependencies on every '
-            'unit-test leg would cost each one an install for these classes alone. The '
-            'flag also requires the installed sphinx-autodoc-typehints to be the release '
-            'docs/requirements.txt pins, since conf.py imports that release\'s private '
-            'modules; that check reads no module, so this entry still names only the '
-            'imports. They run wherever docs/requirements.txt or the docs extra is '
-            'installed, a developer checkout included, and skip visibly elsewhere, saying '
-            'which condition failed. The directive-name and pin-agreement tests need '
-            'nothing and run on every leg, or in project-tests where their module is a '
-            'project pin (#1954).'
         ),
     ),
     'HAS_PYLINT': Exclusion(
@@ -691,36 +487,6 @@ DEPENDENCY_GATE_EXCLUSIONS = {
             'pragma name to the pinned KNOWN_MESSAGES list; the lookup keeps that list '
             'honest wherever pylint is importable, a developer checkout included, and skips '
             'visibly elsewhere.'
-        ),
-    ),
-    'HAS_DOCUTILS': Exclusion(
-        dark={'test': ('docutils',), 'gate': ('docutils',)},
-        reason=(
-            "The method it gates (#1846) parses Vendor.wrap_comment's output with "
-            'docutils and asserts it is nothing but a plain paragraph, so it needs '
-            'docutils, which no pytest job installs. No workflow installs the docs extra; '
-            'deploy-pages.yml gets Sphinx, and with it docutils, from '
-            'docs/requirements.txt, and it builds the documentation rather than running '
-            'pytest. Installing docutils on these jobs would not run it anyway: it sits in '
-            'a class gated on '
-            'HAS_VENDOR_DEPS, which these same jobs leave dark by declining html5lib '
-            "(#738, above), so closing this gap would also mean the vendor extra on a "
-            'blocking leg. The cost argument of HAS_SPHINX applies too. What runs on '
-            'every leg instead is the ungated committed-const class in the same module, '
-            'which pins the re-rendered lines themselves; the string assertions on the '
-            'wrapper run wherever the vendor extra is installed, and the docutils parse '
-            'wherever docutils is importable as well.'
-        ),
-    ),
-    'HAS_FURO': Exclusion(
-        dark={'test': ('furo',), 'gate': ('furo',)},
-        reason=(
-            'The class it gates (#1861) runs the table-wrapper transform of furo, the '
-            'docs theme, ahead of the conf.py transform that undoes its duplicate ids, '
-            'and is gated on HAS_SPHINX as well. It is declined for the reason '
-            'HAS_SPHINX is: only deploy-pages.yml installs furo, from '
-            'docs/requirements.txt, and no workflow installs the docs extra itself; that '
-            'build is the end-to-end check of the same transform.'
         ),
     ),
 }
@@ -794,6 +560,10 @@ class Job(NamedTuple):
     #: :func:`~tests._tiers.fixture_tier_paths` for that tier alone, :data:`None`
     #: for one whose ``latest`` leg asks for every tier, and for every other shape.
     tier: 'Optional[str]' = None
+    #: Extras of the job's ``latest``-only install step (#1958), empty when it has
+    #: none. That leg's selection holds every other leg's, so a gate the job
+    #: reaches runs there with these installed; see :func:`dependency_gate_gaps`.
+    latest_extras: 'tuple[str, ...]' = ()
 
 
 class Gap(NamedTuple):
@@ -877,7 +647,7 @@ def provided_by(requirements: 'tuple[Requirement, ...]', provider: 'str') -> 'bo
     the base distribution -- while ``'beautifulsoup4[html5lib]'`` is *not*
     satisfied by plain ``beautifulsoup4``. That asymmetry is the whole point:
     it is what separates ``HAS_CRAWLER_DEPS``, which the ``test`` extra
-    satisfies, from ``HAS_VENDOR_DEPS``, which it does not.
+    satisfies, from ``HAS_VENDOR_DEPS``, which needs ``vendor`` as well.
 
     """
     wanted = requirement_key(provider)
@@ -1554,14 +1324,6 @@ def pytest_jobs(workflow: 'Optional[pathlib.Path]' = None) -> 'tuple[Job, ...]':
             jobs.extend(variants)
             continue
 
-        installs = re.findall(r"pip install -e '\.\[([^]]*)\]'", section)
-        if len(installs) != 1:
-            raise AssertionError(
-                f'the {name!r} job runs pytest but has {len(installs)} '
-                f"\"pip install -e '.[...]'\" lines, and this guard cannot tell which "
-                f'extras the run would have'
-            )
-
         # Scoped to the step that runs pytest, not to the job, and found by what
         # the step does rather than by what it is called. Both matter: the
         # `gate` job's *comment* says "no --ignore, no tier selection" and the
@@ -1570,6 +1332,27 @@ def pytest_jobs(workflow: 'Optional[pathlib.Path]' = None) -> 'tuple[Job, ...]':
         # credits it with reaching only the unit tier. Matching on the step name
         # would work only until a step is renamed.
         steps = re.findall(r'(?ms)^      - name: [^\n]*\n(.*?)(?=^      - name:|\Z)', section)
+
+        # #1958: a step whose `if:` runs it on `latest` alone holds that leg's
+        # install line, read apart from the one every leg runs.
+        latest_steps = [step for step in steps if LATEST_LEG_CONDITION in step.partition('run:')[0]]
+        latest_installs = [extras for step in latest_steps
+                           for extras in re.findall(r"pip install -e '\.\[([^]]*)\]'", step)]
+        if len(latest_installs) > 1:
+            raise AssertionError(
+                f'the {name!r} job has {len(latest_installs)} latest-only '
+                f"\"pip install -e '.[...]'\" lines, and this guard cannot tell which "
+                f'extras that leg would have'
+            )
+        installs = re.findall(r"pip install -e '\.\[([^]]*)\]'", section)
+        installs = [extras for extras in installs if extras not in latest_installs] \
+            if latest_installs else installs
+        if len(installs) != 1:
+            raise AssertionError(
+                f'the {name!r} job runs pytest but has {len(installs)} '
+                f"\"pip install -e '.[...]'\" lines, and this guard cannot tell which "
+                f'extras the run would have'
+            )
         running = [step for step in steps if 'python -m pytest' in step]
         if len(running) != 1:
             raise AssertionError(
@@ -1594,7 +1377,9 @@ def pytest_jobs(workflow: 'Optional[pathlib.Path]' = None) -> 'tuple[Job, ...]':
             selection = 'whole-suite'
 
         jobs.append(Job(name, tuple(extra.strip() for extra in installs[0].split(',')),
-                        selection, tier=tier))
+                        selection, tier=tier,
+                        latest_extras=tuple(extra.strip() for extra in latest_installs[0].split(','))
+                        if latest_installs else ()))
     return tuple(jobs)
 
 
@@ -1682,7 +1467,10 @@ def dependency_gate_gaps(workflow: 'Optional[pathlib.Path]' = None) -> 'tuple[Ga
     gaps = {}  # type: dict[tuple[str, str], tuple[set[str], list[Gate]]]
 
     for job in pytest_jobs(workflow):
-        available = frozenset(job.extras) | {CORE}
+        # #1958: a job's `latest` leg runs every test its other legs do, so a
+        # gate it reaches runs there with that leg's extras too. The other legs
+        # run the `ALL` tier with the job's own line, and skip what it lacks.
+        available = frozenset(job.extras) | frozenset(job.latest_extras) | {CORE}
         for gate in gated_scopes():
             if gate.flag in NON_DISTRIBUTION_FLAGS:
                 continue

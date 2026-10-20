@@ -54,7 +54,8 @@ class TestThePinsJob(unittest.TestCase):
         setup = next(entry for entry in job(*JOB)['steps'] if 'setup-python' in entry.get('uses', ''))
         self.assertEqual(setup['with']['python-version'], '${{ steps.python-versions.outputs.latest }}')
         install = step(JOB, 'Install package and test dependencies')['run']
-        self.assertIn(step(('unit-tests.yml', 'test'), 'Install package and test dependencies')['run']
+        # #1958: what `test` installs on `latest`, the leg the pins would run on.
+        self.assertIn(step(('unit-tests.yml', 'test'), "Install the whole suite's dependencies on latest")['run']
                       .split("pip install -e '", 1)[1].split("'", 1)[0], install)
 
     def test_it_runs_under_the_caps(self) -> None:

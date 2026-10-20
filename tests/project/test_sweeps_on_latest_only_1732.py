@@ -460,8 +460,10 @@ class TestTheExperimentalLegsAreAWorkflowOfTheirOwn(unittest.TestCase):
         self.assertEqual(_dependency_gates.WORKFLOW.name, 'unit-tests.yml')
         installs = {}
         for where in (JOB, EXPERIMENTAL):
+            # #1958: less the step `test` runs on `latest` alone, which no experimental leg is.
             found = [re.findall(r"pip install -e '\.\[([^]]*)\]'", str(entry.get('run', '')))
-                     for entry in job(*where)['steps']]
+                     for entry in job(*where)['steps']
+                     if _dependency_gates.LATEST_LEG_CONDITION not in str(entry.get('if', ''))]
             installs[where] = [extra for entries in found for extra in entries]
         self.assertEqual(installs[EXPERIMENTAL], installs[JOB])
         self.assertEqual(len(installs[JOB]), 1)

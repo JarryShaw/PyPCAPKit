@@ -142,10 +142,12 @@ jobs:
       # crypto (cryptography) and NGAP (pycrate) join it for the same reason,
       # covering #738's remaining HAS_CRYPTO gate (test_esp_unit.py) and its
       # HAS_PYCRATE gate (test_ngap_unit.py), both plain
-      # unit-tier. `cli` (emoji) is deliberately NOT added here: its only
+      # unit-tier. `cli` (emoji) is deliberately not on this line: its only
       # HAS_EMOJI-gated tests are in tests/integration/test_cli_subprocess.py,
       # which this job ignores wholesale, so installing it here would unlock
-      # nothing. cryptography is the one compiled wheel of the two; measured
+      # nothing. The `latest` leg gets it from the whole-suite step below
+      # (#1958), whose set every `latest` job shares, and there too it unlocks
+      # nothing in this job. cryptography is the one compiled wheel of the two; measured
       # clean installs on 3.10-3.14 (manylinux wheels, no build step). pycrate
       # is pure Python but its distribution is large (~238MB, see the NGAP
       # extra's comment in pyproject.toml) -- still cheap in wall time, just not
@@ -186,6 +188,23 @@ jobs:
             echo "::${ANNOTATION_LEVEL} title=pcapkit did not install on ${LEG//,/%2C}::${reason//%/%25}. The rest of this leg is skipped."
             exit 1
           fi
+
+      # #1958, the owner's ruling E: latest CPython runs the whole suite, so its
+      # leg installs everything the suite gates on that pip can install there --
+      # the engines (Scapy, PyShark), html5lib through `vendor`, Sphinx and the
+      # pinned sphinx-autodoc-typehints through `docs`, emoji through `cli`. The
+      # tests those gate skip on every other leg, which runs the minimal `ALL`
+      # tier. tests/_dependency_gates.py reads this line as the `latest` leg's
+      # extras; tests/project/test_whole_suite_on_latest_1958.py pins it to the
+      # same set as `integration`, `project-tests` and `gate`. Not here: PCAP_CT,
+      # which needs a system libpcap that `engine-tests` installs for its own
+      # cell, and PyPCAP and PyPCAPFile, whose markers resolve to nothing on
+      # `latest`. Never a KTLO leg, so `test-ktlo` always skips it.
+      - name: Install the whole suite's dependencies on latest
+        id: install-latest
+        if: ${{ steps.install.outcome == 'success' && matrix.python-version == needs.python-versions.outputs.latest }}
+        continue-on-error: ${{ matrix.ktlo == true }}
+        run: python -m pip install -e '.[test,Scapy,DPKT,crypto,cli,NGAP,vendor,docs,PyShark]'
 
       # 7.10 is the first release with `[run] patch = ["subprocess"]`, which
       # .github/coverage.toml relies on to measure the xdist workers.
@@ -500,10 +519,12 @@ jobs:
       # selection (tests/_tiers.py's fixture_tier_paths()) always includes the
       # whole of tests/integration/ -- which is where every HAS_EMOJI-gated
       # method lives (test_cli_subprocess.py). `crypto` and `NGAP`
-      # are deliberately NOT added here: test_esp_unit.py and test_ngap_unit.py
+      # are deliberately not on this line: test_esp_unit.py and test_ngap_unit.py
       # are plain unit-tier and never enter this job's selection, so installing
       # cryptography/pycrate here would unlock nothing -- they are already
-      # covered, on every Python version, by the `test` job above.
+      # covered, on every Python version, by the `test` job above. The `latest`
+      # leg gets both from the whole-suite step below (#1958), whose set every
+      # `latest` job shares, and there too they unlock nothing in this job.
       # PyPCAPFile is NOT added here either, even though this job's selection
       # also reaches test_new_engine_parity_runtime.py's HAS_PYPCAPFILE
       # methods -- see the `test` job's comment above for the bug that used to
@@ -527,6 +548,14 @@ jobs:
             echo "::${ANNOTATION_LEVEL} title=pcapkit did not install on ${LEG//,/%2C}::${reason//%/%25}. The rest of this leg is skipped."
             exit 1
           fi
+
+      # #1958: the `test` job's step of the same name. On `latest` this job runs
+      # the whole fixture tier, so it installs the whole suite's set too.
+      - name: Install the whole suite's dependencies on latest
+        id: install-latest
+        if: ${{ steps.install.outcome == 'success' && matrix.python-version == needs.python-versions.outputs.latest }}
+        continue-on-error: ${{ matrix.ktlo == true }}
+        run: python -m pip install -e '.[test,Scapy,DPKT,crypto,cli,NGAP,vendor,docs,PyShark]'
 
       # `shell: bash` rather than the default, because it runs with -o pipefail:
       # without it the `tee` below would swallow the generator's exit status.
@@ -1785,12 +1814,12 @@ jobs:
           python-version: ${{ steps.python-versions.outputs.latest }}
           cache: pip
 
-      # `test`'s install line, so a gated pin skips or runs here exactly as it
-      # did on `latest`.
+      # The whole suite's set, the line `test` adds on `latest` (#1958), so a
+      # gated pin runs here exactly as the rest of its tier does there.
       - name: Install package and test dependencies
         run: |
           python -m pip install -U pip setuptools wheel
-          python -m pip install -e '.[test,DPKT,crypto,NGAP]'
+          python -m pip install -e '.[test,Scapy,DPKT,crypto,cli,NGAP,vendor,docs,PyShark]'
 
       # See the `test` job above for why this step exists.
       - name: Report available parallelism
@@ -1869,10 +1898,15 @@ jobs:
       # would be a no-op that misleadingly suggests the extra is exercised by
       # `gate`; #751's `engine-tests` and `pypcap-parity` jobs cover it for
       # real, on the 3.10-3.15 (and 3.10-3.11) legs, 3.10 being KTLO in both.
+      #
+      # #1958: `vendor`, `docs` and `PyShark` join them, so this is the set the
+      # `latest` legs install (see `test`'s "Install the whole suite's
+      # dependencies on latest" step), and the html5lib, Sphinx and PyShark
+      # gates run here as they do there.
       - name: Install package, test and generator dependencies
         run: |
           python -m pip install -U pip setuptools wheel
-          python -m pip install -e '.[test,Scapy,DPKT,crypto,cli,NGAP]'
+          python -m pip install -e '.[test,Scapy,DPKT,crypto,cli,NGAP,vendor,docs,PyShark]'
 
       # See the integration job above for why this step is shaped the way it is.
       - name: Regenerate sample captures
