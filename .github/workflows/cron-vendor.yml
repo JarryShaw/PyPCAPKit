@@ -94,6 +94,10 @@ jobs:
 
   vendor-update:
     runs-on: macos-latest
+    # #1968: the deploy key is a `conda-tag` environment secret, and only
+    # a job naming the environment can read it. Keep that environment free of
+    # required reviewers, or every scheduled bump waits for an approval.
+    environment: conda-tag
     needs: [ unit-tests, verdict ]
     # `needs` cannot itself be conditional, so a skipped gate (`workflow_run`)
     # has to be accepted explicitly -- by default this job would inherit the

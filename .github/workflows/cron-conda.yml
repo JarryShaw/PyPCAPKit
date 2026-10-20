@@ -89,6 +89,10 @@ jobs:
   conda-update:
     name: Update requirements.txt
     runs-on: ubuntu-latest
+    # #1968: the deploy key is a `conda-tag` environment secret, and only
+    # a job naming the environment can read it. Keep that environment free of
+    # required reviewers, or every scheduled bump waits for an approval.
+    environment: conda-tag
     needs: [ unit-tests, verdict ]
     # `needs` cannot itself be conditional, so a skipped gate (`workflow_run`)
     # has to be accepted explicitly -- by default this job would inherit the
@@ -342,6 +346,10 @@ jobs:
     # there, which runs on the same commits.
     name: Conda Tag (update)
     runs-on: ubuntu-latest
+    # #1968: the deploy key and the `PYPCAPKIT` PAT are `conda-tag` environment
+    # secrets, as for create-release.yml's `tag`. Keep that environment free of
+    # required reviewers, or every scheduled bump waits for an approval.
+    environment: conda-tag
     needs: [ conda-update ]
     # `!cancelled()` is what makes this job reachable at all on the
     # `workflow_run` path (#1632). `unit-tests` above skips on that event, and
@@ -434,6 +442,10 @@ jobs:
   conda-dist:
     name: Conda deployment (update) on ${{ matrix.os }} with Python ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
+    # #1968: `ANACONDA_TOKEN` is an `anaconda` environment secret, as for
+    # create-release.yml's `conda`. Keep that environment free of required
+    # reviewers, or every leg of a scheduled upload waits for an approval.
+    environment: anaconda
     needs: [ conda-tag, conda-update ]
     # #1632, exactly as for `conda-tag` above -- this job was skipped by the
     # same implicit `success()` on the same runs.

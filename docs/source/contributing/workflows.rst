@@ -1193,12 +1193,29 @@ Deployment ``environment:``
 These jobs declare a deployment ``environment:`` and can therefore pause for an
 approval, in ``create-release.yml`` and ``cron-python-versions.yml``:
 
-* ``github`` -- ``environment: github-release`` (``create-release.yml:618``)
-* ``tag`` -- ``environment: conda-tag`` (``create-release.yml:806``)
-* ``pypi`` -- ``environment: pypi`` (``create-release.yml:969``)
-* ``conda`` -- ``environment: anaconda`` (``create-release.yml:1207``)
+* ``github`` -- ``environment: github-release``
+* ``tag`` -- ``environment: conda-tag``
+* ``pypi`` -- ``environment: pypi``
+* ``conda`` -- ``environment: anaconda``
 * ``pr`` -- ``environment: github-release``, for the release App's key (see
   `Python Versions`_)
+
+``ANACONDA_TOKEN`` is a secret of the ``anaconda`` environment, and the
+``PYPCAPKIT`` token and ``PYPCAPKIT_ACTIONS_DEPLOY_KEY`` are secrets of
+``conda-tag``. GitHub gives an environment's secrets only to a job that names
+it, so the scheduled jobs reading them name it too
+(`#1968 <https://github.com/JarryShaw/PyPCAPKit/issues/1968>`__):
+
+* Conda Update's ``conda-update`` and ``conda-tag`` -- ``environment: conda-tag``
+* Conda Update's ``conda-dist`` -- ``environment: anaconda``
+* Vendor Update's ``vendor-update`` -- ``environment: conda-tag``
+
+A required reviewer on ``conda-tag`` or ``anaconda`` would therefore hold every
+scheduled bump for an approval, besides the release-graph reason
+:doc:`releasing` gives for keeping them without one. Each run of these jobs
+also records a deployment to its environment.
+:file:`tests/project/test_secret_environments_1968.py` checks that every job
+reading one of these secrets names the environment holding it.
 
 No other workflow in scope here declares one -- including
 ``deploy-pages.yml``, whose ``publish-pages`` job pushes straight to the
