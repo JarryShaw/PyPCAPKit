@@ -7,8 +7,8 @@ on:
     workflows: [ "Vendor Update" ]
     types:
       - completed
-  #release:
-  #  types: ['published']
+# #1968: no scopes for a job without `permissions:` of its own. Each job has one.
+permissions: {}
 
 name: Create Release
 

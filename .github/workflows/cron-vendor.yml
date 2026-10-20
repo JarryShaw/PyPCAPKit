@@ -297,9 +297,31 @@ jobs:
             echo 'The step that tests the regenerated tree failed or timed out, so nothing from this crawl is committed.'
           } >> "$GITHUB_STEP_SUMMARY"
 
+      # #1968: `git status` in place of tj-actions/verify-changed-files@v17, so
+      # no third-party code runs while the deploy key is loaded. The outputs are
+      # the action's with no `files:` input, which it never had here:
+      # `files_changed`, and `changed_files`, the paths joined by spaces and
+      # written only when there are some. Every changed tracked file counts,
+      # untracked files are listed one by one, and ignored files are left out.
+      # A staged change counts too, which the action's `git diff` missed;
+      # nothing before this step stages one. git C-quotes a path holding a
+      # space, a quote, a control character or a non-ASCII byte, so the list is
+      # one line. Such a path still splits on its space, and
+      # util/vendor_code_changed.py counts a name it cannot read as code. The
+      # steps below read the list through `env:`, so a path is never shell text.
+      # cron-conda.yml runs the same script.
       - name: Verify Changed files
-        uses: tj-actions/verify-changed-files@v17
         id: verify-changed-files
+        run: |
+          listing="$(git -c core.quotepath=on status --porcelain --untracked-files=all --no-renames)"
+          printf '%s\n' "$listing"
+          changed="$(printf '%s\n' "$listing" | cut -c4- | LC_ALL=C sort -u | paste -sd ' ' -)"
+          if [ -n "$changed" ]; then
+            echo "files_changed=true" >> "$GITHUB_OUTPUT"
+            echo "changed_files=$changed" >> "$GITHUB_OUTPUT"
+          else
+            echo "files_changed=false" >> "$GITHUB_OUTPUT"
+          fi
 
       # #1674: only a code change cuts a beta. util/vendor_code_changed.py,
       # whose docstring gives the rule, writes `code_changed=false` when every
@@ -332,6 +354,8 @@ jobs:
         if: >-
           steps.verify-changed-files.outputs.files_changed == 'true' &&
           steps.classify.outputs.code_changed != 'false'
+        env:
+          CHANGED_FILES: ${{ steps.verify-changed-files.outputs.changed_files }}
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
@@ -345,7 +369,7 @@ jobs:
           git commit -am"Bumped version to $(python -c 'import pcapkit; print(pcapkit.__version__)')
 
           Updated vendor constant enumerations at $(date). The following files
-          have been changed: ${{ steps.verify-changed-files.outputs.changed_files }}"
+          have been changed: $CHANGED_FILES"
 
       # #1674: the same commit without the bump. Create Release still runs when
       # this workflow completes, as after a crawl that changed nothing, and sees

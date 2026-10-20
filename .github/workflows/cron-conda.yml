@@ -192,9 +192,21 @@ jobs:
 
           python util/conda_vendor.py
 
+      # #1968: `git status` in place of tj-actions/verify-changed-files@v17, so
+      # no third-party code runs while the deploy key is loaded. The script and
+      # its outputs are cron-vendor.yml's, whose comment gives the rules.
       - name: Verify Changed files
-        uses: tj-actions/verify-changed-files@v17
         id: verify-changed-files
+        run: |
+          listing="$(git -c core.quotepath=on status --porcelain --untracked-files=all --no-renames)"
+          printf '%s\n' "$listing"
+          changed="$(printf '%s\n' "$listing" | cut -c4- | LC_ALL=C sort -u | paste -sd ' ' -)"
+          if [ -n "$changed" ]; then
+            echo "files_changed=true" >> "$GITHUB_OUTPUT"
+            echo "changed_files=$changed" >> "$GITHUB_OUTPUT"
+          else
+            echo "files_changed=false" >> "$GITHUB_OUTPUT"
+          fi
 
       - name: Bump Version
         if: steps.verify-changed-files.outputs.files_changed == 'true'
@@ -203,13 +215,15 @@ jobs:
 
       - name: Commit Changes
         if: steps.verify-changed-files.outputs.files_changed == 'true'
+        env:
+          CHANGED_FILES: ${{ steps.verify-changed-files.outputs.changed_files }}
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git commit -am"Bumped build to $(cat conda/build)
 
           Updated conda distribution at $(date). The following files have been changed:
-            ${{ steps.verify-changed-files.outputs.changed_files }}"
+            $CHANGED_FILES"
 
       # Writes `pushed` and `commit`, which `CONDA_CHANGED` and `CONDA_COMMIT`
       # below hand to `conda-tag` and `conda-dist` (#1632).
