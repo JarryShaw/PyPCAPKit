@@ -2302,6 +2302,17 @@ class TLSKeyLog(DSBSecrets, code=Enum_SecretsType.TLS_Key_Log):
         Returns:
             Revised schema.
 
+        A line that does not parse -- an unknown label, a field that is not
+        hexadecimal, a wrong number of fields, or the first octets of an entry
+        cut inside the block's padding -- is left out of :attr:`entries` and
+        reported as a :class:`~pcapkit.utilities.warnings.ProtocolWarning`,
+        wherever it sits in the log (:issue:`1985`). Refusing it would abort
+        the whole extraction rather than this one line, as :func:`nonnegative`
+        explains, and :attr:`data` keeps the log text verbatim, so the line is
+        still kept as captured and the block rebuilds octet for octet. A last line the
+        capture or the block cut is left out silently (see
+        :func:`_cut_last_line`), since the cut is reported already.
+
         """
         from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel as Enum_TLSKeyLabel
 
@@ -2316,10 +2327,11 @@ class TLSKeyLog(DSBSecrets, code=Enum_SecretsType.TLS_Key_Log):
                 label_enum = Enum_TLSKeyLabel(label.upper())
                 entries[label_enum].add(bytes.fromhex(random),
                                         bytes.fromhex(secret))
-            except ValueError as error:
+            except ValueError:
                 if _cut_last_line(self, index, lines, packet):
                     break
-                raise FieldValueError(f'invalid TLS key log format: {line!r}') from error
+                warn(f'PCAP-NG: invalid TLS key log format: {line!r}; line kept as captured',
+                     ProtocolWarning, stacklevel=stacklevel())
 
         self.entries = entries
         return self
@@ -2347,6 +2359,10 @@ class WireGuardKeyLog(DSBSecrets, code=Enum_SecretsType.WireGuard_Key_Log):
         Returns:
             Revised schema.
 
+        A line that does not parse is left out of :attr:`entries`, reported and
+        kept as captured in :attr:`data`, as :meth:`TLSKeyLog.post_process`
+        describes (:issue:`1985`).
+
         """
         from pcapkit.protocols.misc.pcapng import WireGuardKeyLabel
 
@@ -2359,16 +2375,15 @@ class WireGuardKeyLog(DSBSecrets, code=Enum_SecretsType.WireGuard_Key_Log):
             fields = line.strip().split()
             try:
                 if len(fields) != 3 or fields[1] != '=':
-                    raise FieldValueError(f'invalid WireGuard key log format: {line!r}')
+                    raise ValueError(line)
                 label, _, secret = fields
                 label_enum = WireGuardKeyLabel(label.upper())
                 entries.add(label_enum, base64.b64decode(secret))
-            except ValueError as error:
+            except ValueError:
                 if _cut_last_line(self, index, lines, packet):
                     break
-                if isinstance(error, FieldValueError):
-                    raise
-                raise FieldValueError(f'invalid WireGuard key log format: {line!r}') from error
+                warn(f'PCAP-NG: invalid WireGuard key log format: {line!r}; line kept as captured',
+                     ProtocolWarning, stacklevel=stacklevel())
 
         self.entries = entries
         return self

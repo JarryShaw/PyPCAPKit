@@ -1447,7 +1447,8 @@ class PCAPNGUnitTests(unittest.TestCase):
         from pcapkit.corekit.fields.numbers import UInt16Field, UInt32Field
         from pcapkit.protocols.misc.pcapng import WireGuardKeyLabel
         from pcapkit.protocols.schema.misc import pcapng as schema_pcapng
-        from pcapkit.utilities.exceptions import FieldValueError, ProtocolError
+        from pcapkit.utilities.exceptions import ProtocolError
+        from pcapkit.utilities.warnings import ProtocolWarning
 
         field = UInt16Field()
         schema_pcapng.byteorder_callback(field, {'__packet__': {'byteorder': 'little'}})
@@ -1622,8 +1623,10 @@ class PCAPNGUnitTests(unittest.TestCase):
         wg = schema_pcapng.WireGuardKeyLog(data='# comment\n\nPRESHARED_KEY = a2V5')
         wg.post_process({})
         self.assertEqual(wg.entries.getlist(WireGuardKeyLabel.PRESHARED_KEY), [b'key'])
-        with self.assertRaises(FieldValueError):
-            schema_pcapng.WireGuardKeyLog(data='PRESHARED_KEY != a2V5').post_process({})
+        with self.assertWarns(ProtocolWarning):
+            wg = schema_pcapng.WireGuardKeyLog(data='PRESHARED_KEY != a2V5')
+            wg.post_process({})
+        self.assertEqual(len(wg.entries), 0)
 
     def test_pcapng_block_readers_cover_container_blocks(self) -> None:
         from pcapkit.const.pcapng.block_type import BlockType

@@ -209,17 +209,27 @@ class TestKeyLogLines(unittest.TestCase):
         self.assertTrue(schema.data.startswith(text.decode()), schema.data)
         self.assertEqual(len(schema.entries), 1)
 
-    def test_malformed_line_of_a_whole_log_is_refused(self) -> None:
-        from pcapkit.utilities.exceptions import FieldValueError
+    def test_malformed_line_of_a_whole_log_is_reported(self) -> None:
+        # a line that does not parse warns and is kept as captured, rather than
+        # aborting the extraction (#1985)
+        import importlib
 
-        text = b'CLIENT_RANDOM abcd\n'
-        with self.assertRaisesRegex(FieldValueError, r"^invalid TLS key log format: 'CLIENT_RANDOM abcd'$"):
-            self._unpack('TLSKeyLog', text, len(text))
+        from pcapkit.utilities.warnings import ProtocolWarning
 
-        text = b'LOCAL_STATIC_PRIVATE_KEY = Q\n'
-        with self.assertRaisesRegex(FieldValueError,
-                                    r"^invalid WireGuard key log format: 'LOCAL_STATIC_PRIVATE_KEY = Q'$"):
-            self._unpack('WireGuardKeyLog', text, len(text))
+        module = importlib.import_module('pcapkit.protocols.schema.misc.pcapng')
+        for schema, text, message in (
+            ('TLSKeyLog', b'CLIENT_RANDOM abcd\n',
+             "PCAP-NG: invalid TLS key log format: 'CLIENT_RANDOM abcd'; line kept as captured"),
+            ('WireGuardKeyLog', b'LOCAL_STATIC_PRIVATE_KEY = Q\n',
+             "PCAP-NG: invalid WireGuard key log format: 'LOCAL_STATIC_PRIVATE_KEY = Q'; "
+             'line kept as captured'),
+        ):
+            with self.subTest(schema=schema):
+                with self.assertWarns(ProtocolWarning) as caught:
+                    parsed = getattr(module, schema).unpack(text, len(text))
+                self.assertEqual(str(caught.warning), message)
+                self.assertEqual(len(parsed.entries), 0)
+                self.assertEqual(parsed.data, text.decode())
 
 
 if __name__ == '__main__':
