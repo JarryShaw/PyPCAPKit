@@ -24,6 +24,10 @@ import unittest
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): pins GraalPy-only semantics, so it must run on every
+#: interpreter leg.
+__tier__ = 'ALL'
+
 #: Octets the stream holds: more than a buffer's worth.
 DATA = bytes(range(64))
 #: A line longer than GraalPy's shared-read threshold, then more data.
