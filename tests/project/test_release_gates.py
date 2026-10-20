@@ -207,6 +207,12 @@ when what its rebase brings in is covered by :file:`util/verdict_covers_checkout
 rule, and Conda Tag tags the ``CONDA_COMMIT`` it pushed;
 :class:`TestCondaTagTagsWhatWasPushed` runs Conda Tag's own steps after it.
 
+Since #1967 the ``unit-tests`` gate and the ``verdict`` job are the jobs of
+:file:`cron-head.yml`, which ``cron-conda.yml`` calls as its ``head`` job. The
+rows still say whether each of those two runs, and :data:`HEAD_JOBS` are
+decided against that file; the jobs of ``cron-conda.yml`` read ``head``'s result
+and its ``verified`` output.
+
 """
 
 from __future__ import annotations
@@ -1360,6 +1366,8 @@ def text_gate_violations(condition: 'str', job: 'str') -> 'list[str]':
 #: else -- every expectation above this point is about ``create-release.yml``'s
 #: own job graph.
 CONDA_WORKFLOW = ROOT / '.github' / 'workflows' / 'cron-conda.yml'
+#: :file:`cron-head.yml`, which ``cron-conda.yml``'s ``head`` job calls (#1967).
+HEAD_WORKFLOW = ROOT / '.github' / 'workflows' / 'cron-head.yml'
 
 #: A call to one of Actions' four status-check functions. Their presence
 #: anywhere in a job's ``if:`` is what replaces the implicit ``success()``
@@ -1617,7 +1625,30 @@ def job_runs(jobs: 'dict[str, str]', name: 'str', context: 'dict[str, object]') 
 #: The jobs :file:`cron-conda.yml` declares. Named so that a scenario row can
 #: be keyed on them and ``test_the_scan_found_the_jobs`` fails loudly when the
 #: graph is renamed or extended, rather than leaving a new job unchecked.
-CONDA_JOBS = ('unit-tests', 'verdict', 'conda-update', 'conda-tag', 'conda-dist')
+#: ``head`` is the call to :data:`HEAD_WORKFLOW`, and has no ``if:`` of its own.
+CONDA_JOBS = ('head', 'conda-update', 'conda-tag', 'conda-dist')
+#: The jobs of :data:`HEAD_WORKFLOW`, which a row can be keyed on as well (#1967).
+HEAD_JOBS = ('unit-tests', 'verdict')
+#: The jobs whose own ``if:`` a row decides.
+CONDA_DECIDED = HEAD_JOBS + CONDA_JOBS[1:]
+
+
+def head_result(unit_tests: 'str', verdict: 'str') -> 'str':
+    """``needs.head.result`` as a row takes it, from the results of :data:`HEAD_JOBS`.
+
+    A failure in either is a failure, which is what ``conda-update``'s ``!=
+    'failure'`` reads. How Actions reports a call whose jobs partly skipped is
+    not pinned by any run here, so one where a job ran is ``success`` and one
+    where none did is ``skipped``; ``conda-update`` accepts both, and
+    ``test_removing_the_status_check_reproduces_the_defect`` passes ``head``
+    as ``skipped`` to keep the #1632 shape.
+
+    """
+    results = (unit_tests, verdict)
+    for result in ('failure', 'cancelled', 'success'):
+        if result in results:
+            return result
+    return 'skipped'
 
 #: What run 38325136710's Push Changes pushed, "Bumped build to 3".
 PUSHED_COMMIT = 'f4f94bcad4a195f98f1bd07d4d0bc2b6be7c9d15'
@@ -1626,6 +1657,7 @@ PUSHED_COMMIT = 'f4f94bcad4a195f98f1bd07d4d0bc2b6be7c9d15'
 def conda_context(unit_tests: 'str' = 'skipped',
                   verdict: 'str' = 'success',
                   verified: 'object' = 'true',
+                  head: 'Optional[str]' = None,
                   conda_update: 'str' = 'success',
                   conda_tag: 'str' = 'success',
                   conda_dist: 'str' = 'success',
@@ -1653,6 +1685,10 @@ def conda_context(unit_tests: 'str' = 'skipped',
     checkout. 38325136710's did not -- it was for 9083163f5 with 2e941bbb7
     checked out -- and since #1643 that run's own shape is the row that skips
     ``conda-update``. ``verified=NULL`` is a ``verdict`` that wrote no output.
+
+    ``unit_tests`` and ``verdict`` are :data:`HEAD_JOBS`' results (#1967). They
+    sit under ``needs.head.jobs``, which no expression reads, and make
+    ``needs.head.result`` through :func:`head_result` unless ``head`` names it.
 
     ``conda-update`` is given as its *steps'* outputs, which
     :func:`resolved_context` maps through the job's declared ``outputs:``:
@@ -1698,9 +1734,11 @@ def conda_context(unit_tests: 'str' = 'skipped',
 
     return {
         'needs': {
-            'unit-tests': {'result': unit_tests},
-            'verdict': {'result': verdict,
-                        'outputs': {} if verified is NULL else {'verified': verified}},
+            'head': {
+                'result': head_result(unit_tests, verdict) if head is None else head,
+                'outputs': {} if verified is NULL else {'verified': verified},
+                'jobs': {'unit-tests': {'result': unit_tests}, 'verdict': {'result': verdict}},
+            },
             'conda-update': {'result': conda_update, 'steps': steps},
             'conda-tag': {'result': conda_tag},
             'conda-dist': {'result': conda_dist},
@@ -3698,18 +3736,29 @@ class TestYAMLAgreesWithTheScanner(WorkflowMixin, unittest.TestCase):
 
 
 class CondaWorkflowMixin:
-    """Reads and scans :file:`cron-conda.yml` once per test."""
+    """Reads and scans :file:`cron-conda.yml`, and the head it calls, once per test."""
 
     @classmethod
     def setUpClass(cls) -> None:
         cls.text = CONDA_WORKFLOW.read_text(encoding='utf-8')  # type: ignore[attr-defined]
         cls.jobs = job_blocks(cls.text, CONDA_WORKFLOW)  # type: ignore[attr-defined]
+        cls.head_jobs = job_blocks(HEAD_WORKFLOW.read_text(encoding='utf-8'),  # type: ignore[attr-defined]
+                                   HEAD_WORKFLOW)
+
+    def decides(self, job: 'str', context: 'dict[str, object]') -> 'bool':
+        """:func:`job_runs` for ``job``, in :data:`HEAD_WORKFLOW` for :data:`HEAD_JOBS`,
+        which see the caller's ``github`` and no ``needs`` of their own.
+
+        """
+        if job in HEAD_JOBS:
+            return job_runs(self.head_jobs, job, {**context, 'needs': {}})  # type: ignore[attr-defined]
+        return job_runs(self.jobs, job, context)  # type: ignore[attr-defined]
 
 
 class TestCondaBumpIsTaggedAndUploaded(CondaWorkflowMixin, unittest.TestCase):
     """#1632: a committed build bump has to reach the tag and the upload.
 
-    The chain is ``unit-tests`` (the gate) -> ``conda-update`` (bumps
+    The chain is ``head`` (the gate, :file:`cron-head.yml`) -> ``conda-update`` (bumps
     ``conda/build`` and pushes the commit) -> ``conda-tag`` (pushes
     ``conda-<version>+<build>``) -> ``conda-dist`` (builds that tag and uploads
     it to anaconda.org). Since #731 the gate skips on the ``workflow_run``
@@ -3763,7 +3812,7 @@ class TestCondaBumpIsTaggedAndUploaded(CondaWorkflowMixin, unittest.TestCase):
         table of runs by a job with no gate at all.
 
         """
-        for job in CONDA_JOBS:
+        for job in CONDA_DECIDED:
             outcomes = {expectations[job] for _, _, expectations in CONDA_ROWS
                         if job in expectations}
             with self.subTest(job=job):
@@ -3786,7 +3835,7 @@ class TestCondaBumpIsTaggedAndUploaded(CondaWorkflowMixin, unittest.TestCase):
             needs = context['needs']
             assert isinstance(needs, dict)
             for job, expected in expectations.items():
-                entry = needs[job]
+                entry = needs['head']['jobs'][job] if job in HEAD_JOBS else needs[job]
                 assert isinstance(entry, dict)
                 with self.subTest(row=name, job=job):
                     if expected:
@@ -3807,7 +3856,7 @@ class TestCondaBumpIsTaggedAndUploaded(CondaWorkflowMixin, unittest.TestCase):
         violations = []  # type: list[str]
         for name, context, expectations in CONDA_ROWS:
             for job, expected in expectations.items():
-                if job_runs(self.jobs, job, context) != expected:  # type: ignore[arg-type]
+                if self.decides(job, context) != expected:
                     violations.append(
                         f'{name}: `{job}` should '
                         f'{"run" if expected else "skip"}, it did not'
@@ -3848,7 +3897,10 @@ class TestCondaBumpIsTaggedAndUploaded(CondaWorkflowMixin, unittest.TestCase):
 
         """
         pre_fix = self._pre_fix_jobs()
-        context = conda_context()
+        # #1967: the gate is a job of `head` now, and a row reports a call one
+        # of whose jobs ran as `success` (see `head_result`). `skipped` is the
+        # shape #1632 found, a skipped job ahead of the chain.
+        context = conda_context(head='skipped')
         for job in ('conda-tag', 'conda-dist'):
             with self.subTest(job=job):
                 self.assertTrue(
@@ -3943,7 +3995,7 @@ class TestCondaBumpIsTaggedAndUploaded(CondaWorkflowMixin, unittest.TestCase):
                     calls_status_check(condition),
                     f'`{job}`\'s `if:` ({condition!r}) calls no status-check '
                     f'function, so Actions conjoins the implicit `success()` and '
-                    f'the skipped `unit-tests` gate cascade-skips it -- #1632',
+                    f'a skip in `head` cascade-skips it -- #1632',
                 )
                 self.assertIn(
                     '!cancelled()', condition,

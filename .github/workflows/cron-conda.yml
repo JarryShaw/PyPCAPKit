@@ -4,12 +4,18 @@ permissions:
   contents: read
 
 on:
+  # #1967: GitHub Pages, Vendor Update and Conda Update run eight hours
+  # apart on Saturdays, so each runs `head`'s test gate alone, mostly on a
+  # commit of its own, and `vendor-update` and `conda-update` do not queue
+  # on `repository-maintenance` together. None reads another's output, and
+  # Conda Update comes last so its upload finds the release Create Release
+  # made after Vendor Update (#1634). workflows.rst gives the evidence.
   schedule:
-    - cron: '0 10 * * 6' # Saturdays at 10:00 UTC
+    - cron: '0 18 * * 6' # Saturdays at 18:00 UTC
   # No `push: branches: [main]` here. `unit-tests.yml`'s own push trigger
-  # already runs the full matrix for this commit; calling it again below with
-  # `gate-only: true` re-ran the single-version "Gate" job a second time for
-  # the same tree (#715). Chaining off `Unit Tests`' completion means the gate
+  # already runs the full matrix for this commit; calling it again on every push
+  # with `gate-only: true` re-ran the single-version "Gate" job a second time
+  # for the same tree (#715). Chaining off `Unit Tests`' completion means the gate
   # never runs twice, and `conda-update` below just reads the verdict that
   # already exists. `.event == 'push'` is checked in that job's `if` rather
   # than here, because `workflow_run` fires for a pull request's completion
@@ -25,7 +31,7 @@ on:
 #
 # A `workflow_run` is keyed on the commit `Unit Tests` verified instead (#1643).
 # Each `Unit Tests` completion raises a run here, and one whose verdict is for an
-# older commit only runs `verdict` and skips -- but in a shared group it would
+# older commit only runs `head` and skips -- but in a shared group it would
 # still displace a pending run whose verdict matches, since "any existing pending
 # job or workflow in the same concurrency group will be canceled" (GitHub,
 # "Control the concurrency of workflows and jobs").
@@ -38,53 +44,14 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  # Only earns its runners on the schedule trigger: `Unit Tests` has no
-  # schedule trigger of its own, so Saturday's cron run is the one case left
-  # where nothing else has already verified this tree. `workflow_run` carries
-  # its own verdict instead -- see `conda-update` below.
-  unit-tests:
-    name: Conda test gate
-    if: ${{ github.event_name != 'workflow_run' }}
+  # #1967: the test gate, on the schedule only, and the `verdict` on a
+  # `workflow_run`, shared with Vendor Update and GitHub Pages. cron-head.yml
+  # says when each runs.
+  head:
+    name: Conda gate
     permissions:
       contents: read
-    uses: ./.github/workflows/unit-tests.yml
-    with:
-      gate-only: true
-
-  # #1643: `github.sha`, which every checkout here takes, is main's tip when the
-  # `workflow_run` was raised -- not the commit the completed `Unit Tests` run
-  # verified, and in a merge wave the two differ. This job compares them with
-  # util/verdict_covers_checkout.py, whose docstring gives the rule, and the job
-  # below acts on a `workflow_run` only when `verified` is 'true'. Its `if:` is
-  # that job's `workflow_run` clause, so a run raised by a pull request's or a
-  # failed `Unit Tests` run still concludes `skipped`, as before.
-  verdict:
-    name: Verdict covers this commit
-    if: >-
-      github.event_name == 'workflow_run' &&
-      github.event.workflow_run.conclusion == 'success' &&
-      github.event.workflow_run.event == 'push' &&
-      github.event.workflow_run.head_branch == 'main'
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    permissions:
-      contents: read
-    outputs:
-      verified: ${{ steps.verdict.outputs.verified }}
-    steps:
-      # The default ref, as the job below uses, so both see the same `github.sha`.
-      # Twenty commits leaves room for the bot commits the rule accepts; a verdict
-      # further back is not found, and so not accepted.
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          fetch-depth: 20
-          persist-credentials: false
-
-      - name: Compare the verified commit with this checkout
-        id: verdict
-        env:
-          VERDICT_SHA: ${{ github.event.workflow_run.head_sha }}
-        run: python3 util/verdict_covers_checkout.py
+    uses: ./.github/workflows/cron-head.yml
 
   conda-update:
     name: Update requirements.txt
@@ -93,27 +60,27 @@ jobs:
     # a job naming the environment can read it. Keep that environment free of
     # required reviewers, or every scheduled bump waits for an approval.
     environment: conda-tag
-    needs: [ unit-tests, verdict ]
-    # `needs` cannot itself be conditional, so a skipped gate (`workflow_run`)
-    # has to be accepted explicitly -- by default this job would inherit the
-    # skip. `!cancelled()` rather than `always()` so that cancelling the run
-    # still cancels the update; a gate that actually failed still blocks.
+    needs: [ head ]
+    # `needs` cannot itself be conditional, and `head`'s jobs skip on every
+    # path, so this job must not inherit a skip. `!cancelled()` rather than
+    # `always()` so that cancelling the run still cancels the update; a gate
+    # that actually failed still blocks.
     #
     # The `workflow_run` clause is the real gate for a push to main: it
     # reads the verdict `Unit Tests` already reached instead of re-running it,
-    # and `verdict` says whether that verdict covers the commit checked out
-    # below (#1643). `.event == 'push'` and `.head_branch == 'main'`
+    # and `head`'s `verified` says whether that verdict covers the commit
+    # checked out below (#1643). `.event == 'push'` and `.head_branch == 'main'`
     # both matter -- `workflow_run` fires for *every* completion of that
     # workflow, including one triggered by a pull request, and without this
     # check a green PR would upload a conda distribution built from that PR's
     # tree.
     if: >-
-      !cancelled() && needs.unit-tests.result != 'failure' &&
+      !cancelled() && needs.head.result != 'failure' &&
       (github.event_name != 'workflow_run' || (
         github.event.workflow_run.conclusion == 'success' &&
         github.event.workflow_run.event == 'push' &&
         github.event.workflow_run.head_branch == 'main' &&
-        needs.verdict.outputs.verified == 'true'
+        needs.head.outputs.verified == 'true'
       ))
     concurrency:
       group: repository-maintenance
@@ -140,7 +107,7 @@ jobs:
           # onto main's actual tip before writing, or does not write at all, so
           # pinning to the exact tested sha would have bought nothing here
           # either. Whether this commit is one that verdict covers is
-          # `verdict`'s question (#1643); whether what lands after it is, Push
+          # `head`'s question (#1643); whether what lands after it is, Push
           # Changes' (#1632).
           #
           # The push below re-points `origin` at an SSH remote and authenticates
@@ -232,10 +199,11 @@ jobs:
       # Writes `pushed` and `commit`, which `CONDA_CHANGED` and `CONDA_COMMIT`
       # below hand to `conda-tag` and `conda-dist` (#1632).
       #
-      # The verdict this run acted on -- `verdict`'s, or on the schedule the
-      # gate's -- covers `$GITHUB_SHA`, the checkout, and nothing after it. A
-      # commit that lands on `main` during the run would otherwise be rebased
-      # under the bump, pushed, tagged and uploaded with no verdict of its own.
+      # The verdict this run acted on -- `head`'s `verdict`, or on the schedule
+      # its test gate's -- covers `$GITHUB_SHA`, the checkout, and nothing after
+      # it. A commit that lands on `main` during the run would otherwise be
+      # rebased under the bump, pushed, tagged and uploaded with no verdict of
+      # its own.
       # So the tip is fetched first and the commits a rebase onto it would bring
       # in are put to #1643's rule, util/verdict_covers_checkout.py, run from
       # this checkout and not from the tip it is judging. If they are not
@@ -351,11 +319,14 @@ jobs:
     # required reviewers, or every scheduled bump waits for an approval.
     environment: conda-tag
     needs: [ conda-update ]
-    # `!cancelled()` is what makes this job reachable at all on the
-    # `workflow_run` path (#1632). `unit-tests` above skips on that event, and
-    # "a default status check of `success()` is applied unless you include one
-    # of these functions" (GitHub, "Evaluate expressions in workflows and
-    # actions", Status check functions). The skip it reacts to is not only a
+    # `!cancelled()` is what made this job reachable at all on the
+    # `workflow_run` path (#1632), when the test gate was a job of this file and
+    # skipped on that event. It is kept now that the gate is in `head` (#1967):
+    # a job of `head` skips on every path, and this job must not hinge on how
+    # Actions reports such a call. Without a status-check function, "a default
+    # status check of `success()` is applied unless you include one of these
+    # functions" (GitHub, "Evaluate expressions in workflows and actions",
+    # Status check functions). The skip it reacts to is not only a
     # direct `needs:` entry's: "If a run contains a series of jobs that need
     # each other, a failure or skip applies to all jobs in the dependency chain
     # from the point of failure or skip onwards" (GitHub, "Workflow syntax for

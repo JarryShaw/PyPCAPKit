@@ -910,8 +910,8 @@ lists only ``push`` on ``v*`` tags and a ``workflow_run``. The chain has an
 extra hop: a push to ``main`` triggers **Unit Tests**
 (``unit-tests.yml``), whose completion triggers **Vendor Update**
 (``cron-vendor.yml``) via ``workflow_run`` -- ``cron-vendor.yml`` carries no
-``push`` trigger of its own, deliberately, per its own comment at
-``cron-vendor.yml:6-13`` -- and *that* completion triggers **Create Release**
+``push`` trigger of its own, deliberately, per the comment on its
+``workflow_run`` trigger -- and *that* completion triggers **Create Release**
 itself. :doc:`workflows` draws the repository-wide version of this graph;
 here is just the path that matters for a release:
 

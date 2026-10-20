@@ -1,0 +1,75 @@
+name: Cron Head
+
+# #1967: the head that Conda Update, Vendor Update and GitHub Pages each ran as
+# two jobs of their own, a test gate and a `verdict`, kept in step by a test
+# that compared the three copies. Each now calls this file as its `head` job and
+# gates its own work on the call's result and its `verified` output. One task:
+# saying whether the commit the caller checked out may be acted on.
+#
+# Reusable only. Every expression here reads the *caller's* `github` context,
+# so `github.event_name` is the event that started Conda Update, Vendor Update
+# or GitHub Pages, and `github.sha` is the commit it checked out.
+on:
+  workflow_call:
+    outputs:
+      verified:
+        description: >-
+          'true' when the `workflow_run` that raised the caller carries a
+          Unit Tests verdict covering the commit it checked out, 'false' when
+          it does not, and unset on any other event, where `verdict` skips.
+        value: ${{ jobs.verdict.outputs.verified }}
+
+# A called workflow cannot hold more than its caller grants, and each caller
+# grants this one `contents: read`. That is also what the `unit-tests.yml` call
+# below is granted, as Create Release's gate is.
+permissions:
+  contents: read
+
+jobs:
+  # Only earns its runners when no completed Unit Tests run has verified this
+  # tree: on the Saturday schedule, since Unit Tests has no schedule trigger of
+  # its own. A `workflow_run` carries its own verdict, read by `verdict` below,
+  # and a pull request never acts, so both skip the gate (#715).
+  unit-tests:
+    name: Test gate
+    if: ${{ github.event_name != 'pull_request' && github.event_name != 'workflow_run' }}
+    permissions:
+      contents: read
+    uses: ./.github/workflows/unit-tests.yml
+    with:
+      gate-only: true
+
+  # #1643: `github.sha`, which every checkout of the caller takes, is main's tip
+  # when the `workflow_run` was raised -- not the commit the completed `Unit
+  # Tests` run verified, and in a merge wave the two differ. This job compares
+  # them with util/verdict_covers_checkout.py, whose docstring gives the rule,
+  # and the caller acts on a `workflow_run` only when `verified` is 'true'. Its
+  # `if:` is the caller's `workflow_run` clause, so for a run raised by a pull
+  # request's or a failed `Unit Tests` run nothing here runs, as before.
+  verdict:
+    name: Verdict covers this commit
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_branch == 'main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      verified: ${{ steps.verdict.outputs.verified }}
+    steps:
+      # The default ref, as the caller's acting job uses, so both see the same
+      # `github.sha`. Twenty commits leaves room for the bot commits the rule
+      # accepts; a verdict further back is not found, and so not accepted.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 20
+          persist-credentials: false
+
+      - name: Compare the verified commit with this checkout
+        id: verdict
+        env:
+          VERDICT_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: python3 util/verdict_covers_checkout.py

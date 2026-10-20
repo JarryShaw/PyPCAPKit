@@ -54,8 +54,8 @@ on:
     # its item's concurrency queue below was full, a GitHub outage, or a label
     # changed while the secret was absent. 00:37 UTC sits well clear of the
     # Saturday jobs (CodeQL and GitHub Pages at 02:00, Python Compatibility at
-    # 04:00, Lint at 06:00, Vendor and Conda Update at 10:00), and off the hour
-    # mark that GitHub's scheduler queues most heavily.
+    # 04:00, Lint at 06:00, Vendor Update at 10:00, Conda Update at 18:00 since
+    # #1967), and off the hour mark that GitHub's scheduler queues most heavily.
     - cron: '37 0 * * *'
   workflow_dispatch:
 

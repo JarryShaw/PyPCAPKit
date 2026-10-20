@@ -15,7 +15,8 @@ name: CI Timing
 on:
   schedule:
     # Mondays 07:23 UTC: off the hour, where GitHub delays scheduled runs most,
-    # and clear of Saturday's 02:00-10:00 crons and Project Status at 00:37.
+    # and clear of Saturday's crons, 02:00 to 18:00 since #1967, and Project
+    # Status at 00:37.
     - cron: '23 7 * * 1'
   workflow_dispatch:
     inputs:
