@@ -4776,7 +4776,14 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         # NOTE: A Secrets Length running past the block is kept as declared, as
         # an EPB keeps its captured length, so the block rebuilds as captured;
         # the block length is still sized from the secrets written (#1980).
-        if declared is not None and declared > secrets_held:
+        # Only a true overrun is kept -- the one the parse side bounds and
+        # warns on, measured by ``secrets_area`` -- so a length that fits the
+        # block, or one an edit has outdated, follows the secrets written.
+        from pcapkit.protocols.schema.misc.pcapng import secrets_area
+
+        if block is not None and declared is not None and declared > secrets_area({
+            'length': block.length, 'secrets_length': declared,
+        }):
             secrets_length = declared
         else:
             secrets_length = secrets_held

@@ -120,6 +120,33 @@ class TestPCAPNGDSBSecretsOverrun(PCAPNGTestCase):
             warnings.simplefilter('ignore')
             self.assertRebuilds(octets)
 
+    def assertValidBlock(self, octets: 'bytes', secrets_length: 'int') -> None:  # pylint: disable=invalid-name
+        """Assert ``octets`` is one DSB as long as both its Block Total Lengths say."""
+        length, = struct.unpack('<I', octets[4:8])
+        self.assertEqual((len(octets), octets[-4:]), (length, octets[4:8]), octets.hex())
+        self.assertEqual(struct.unpack('<I', octets[12:16])[0], secrets_length, octets.hex())
+
+    def test_length_within_the_block_follows_the_secrets(self) -> None:
+        """A length that fits the block is no overrun, so the rebuild keeps its padding."""
+        key = bytes(range(16)) + b'\x34\x12'
+        octets = _dsb(ZIGBEE_NWK_KEY, 20, key)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            rebuilt = self._rebuild(octets)
+        self.assertValidBlock(rebuilt, 18)
+        self.assertEqual(rebuilt[16:34], key)
+
+    def test_edited_secrets_take_their_own_length(self) -> None:
+        from pcapkit.protocols.misc.pcapng import PCAPNG
+
+        info = self._parse(_dsb(UNKNOWN_SECRETS, 5, b'abcde')).info
+        fields = {key: value for key, value in dict(info).items() if key != 'packet'}
+        fields['secrets_data'] = info.secrets_data.__class__(data=b'ab')
+        context = self._context()
+        rebuilt = PCAPNG.from_data(info.__class__(**fields), num=2, sct=1, ctx=context).data
+        self.assertValidBlock(rebuilt, 2)
+        self.assertEqual(rebuilt[16:20], b'ab\x00\x00')
+
     def test_well_formed_blocks_are_unchanged(self) -> None:
         cases = (
             (TLS_KEY_LOG, KEY_LOG),
