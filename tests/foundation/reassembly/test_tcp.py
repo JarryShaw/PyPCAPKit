@@ -101,7 +101,8 @@ class TCPReassemblyTests(unittest.TestCase):
         self.assertEqual(reasm._buffer[self._bufid()].hdr, b'new-header')
 
     def test_fragment_merging_covers_gaps_overlaps_new_acks_and_holes(self) -> None:
-        from pcapkit.foundation.reassembly.data.tcp import Buffer, Fragment, HoleDescriptor
+        from pcapkit.foundation.reassembly.data.tcp import (HOLE_OPEN_BOUND, Buffer, Fragment,
+                                                            HoleDescriptor)
         from pcapkit.foundation.reassembly.tcp import TCP
 
         class Analyzer:
@@ -115,7 +116,7 @@ class TCPReassemblyTests(unittest.TestCase):
         reasm = TestTCP()
         bufid = self._bufid()
         reasm._buffer[bufid] = Buffer(
-            [HoleDescriptor(0, 4), HoleDescriptor(20, 30), HoleDescriptor(40, sys.maxsize)],
+            [HoleDescriptor(0, 4), HoleDescriptor(20, 30), HoleDescriptor(40, HOLE_OPEN_BOUND)],
             b'',
             {
                 500: Fragment([1], 10, 10, bytearray(b'0123456789'), [], []),
@@ -146,14 +147,14 @@ class TCPReassemblyTests(unittest.TestCase):
                          bytearray(b'abcdefghij0123456789AP\x00\x00\x00after-gap'))
         self.assertEqual(reasm._buffer[bufid].ack[500].conflict, [(15, 19), (10, 12)])
         self.assertEqual([(hole.first, hole.last) for hole in reasm._buffer[bufid].hdl],
-                         [(0, 4), (25, 30), (40, sys.maxsize)])
+                         [(0, 4), (25, 30), (40, HOLE_OPEN_BOUND)])
 
         reasm(self._packet(num=5, dsn=0, ack=501, payload=b'alt', first=50, last=52))
         self.assertEqual(reasm._buffer[bufid].ack[501].raw, bytearray(b'alt'))
 
         before_gap = TestTCP()
         before_gap._buffer[bufid] = Buffer(
-            [HoleDescriptor(50, sys.maxsize)],
+            [HoleDescriptor(50, HOLE_OPEN_BOUND)],
             b'',
             {500: Fragment([1], 10, 5, bytearray(b'world'), [], [])},
             1000.0,
@@ -518,12 +519,14 @@ class TCPReassemblyCoordinateTests(unittest.TestCase):
         sequence numbers, so one descriptor held one of each.
 
         """
+        from pcapkit.foundation.reassembly.data.tcp import HOLE_OPEN_BOUND
+
         packets = self._stream(segments=[(0, b'A' * 10), (20, b'C' * 10)], teardown=None)
         reasm = self._run(packets)
 
         buffer = reasm._buffer[self._bufid()]
         self.assertEqual([(hole.first, hole.last) for hole in buffer.hdl],
-                         [(ISN + 11, ISN + 20), (ISN + 31, sys.maxsize)])
+                         [(ISN + 11, ISN + 20), (ISN + 31, HOLE_OPEN_BOUND)])
 
         # the SYN acknowledges nothing, so it gets a payload buffer of its own
         # and the data lands in the one keyed by the data segments' ACK
@@ -548,6 +551,8 @@ class TCPReassemblyCoordinateTests(unittest.TestCase):
         long-lived connection, for no change in what is missing.
 
         """
+        from pcapkit.foundation.reassembly.data.tcp import HOLE_OPEN_BOUND
+
         base = ISN + 1
         reasm = self._run([
             self._segment(num=1, seq=ISN, syn=True, ack=0),
@@ -556,7 +561,7 @@ class TCPReassemblyCoordinateTests(unittest.TestCase):
         ])
 
         before = [(hole.first, hole.last) for hole in reasm._buffer[self._bufid()].hdl]
-        self.assertEqual(before, [(base + 10, base + 19), (base + 30, sys.maxsize)])
+        self.assertEqual(before, [(base + 10, base + 19), (base + 30, HOLE_OPEN_BOUND)])
 
         # one past the data, one *inside* the hole, and one repeated
         for (num, seq) in ((4, base + 30), (5, base + 15), (6, base + 30)):
@@ -565,6 +570,55 @@ class TCPReassemblyCoordinateTests(unittest.TestCase):
         after = [(hole.first, hole.last) for hole in reasm._buffer[self._bufid()].hdl]
         self.assertEqual(after, before)
         self.assertEqual(len(reasm._buffer[self._bufid()].ack[1000].raw), 30)
+
+    ##########################################################################
+    # The open bound of the hole list does not depend on the platform.
+    ##########################################################################
+
+    def test_open_hole_bound_is_not_sys_maxsize(self) -> None:
+        """Holes stay right above ``2 ** 31`` when :data:`sys.maxsize` is ``2 ** 31 - 1``.
+
+        That is :data:`sys.maxsize` on GraalPy and on 32-bit builds, and it lies
+        inside the ``2 ** 32`` sequence space. Used as the open bound, it left
+        the open-ended hole with ``last`` below its own ``first`` once sequence
+        numbers passed ``2 ** 31`` (#1959).
+
+        """
+        from unittest import mock
+
+        base = ISN + 1
+        self.assertGreater(base, 2 ** 31)
+        with mock.patch.object(sys, 'maxsize', 2 ** 31 - 1):
+            reasm = self._run(self._stream(segments=[(0, b'A' * 10), (20, b'C' * 10)],
+                                           teardown=None))
+            holes = [(hole.first, hole.last) for hole in reasm._buffer[self._bufid()].hdl]
+
+        self.assertEqual(len(holes), 2, holes)
+        self.assertEqual(holes[0], (base + 10, base + 19))
+        self.assertEqual(holes[1][0], base + 30)
+        self.assertGreater(holes[1][1], 0xFFFFFFFF)
+
+    def test_fin_completes_a_stream_above_2_31_whatever_sys_maxsize(self) -> None:
+        """A whole stream is submitted at its FIN, with or without its handshake.
+
+        With :data:`sys.maxsize` at ``2 ** 31 - 1`` the open-ended hole above a
+        stream past ``2 ** 31`` survived the FIN, so the stream never counted as
+        whole and was held until the capture ended (#1959).
+
+        """
+        from unittest import mock
+
+        from pcapkit.foundation.reassembly.data.data import Completion
+
+        for syn in (True, False):
+            with self.subTest(syn=syn), mock.patch.object(sys, 'maxsize', 2 ** 31 - 1):
+                reasm = self._run(self._stream(segments=[(0, b'A' * 10), (10, b'B' * 10)],
+                                               syn=syn))
+
+                self.assertNotIn(self._bufid(), reasm._buffer)
+                datagram, = reasm._dtgram
+                self.assertIs(datagram.completed, Completion.COMPLETE)
+                self.assertEqual(datagram.payload, b'A' * 10 + b'B' * 10)
 
     # The end-to-end case on a generated capture lives in
     # tests/foundation/reassembly/test_tcp_runtime.py, since the unit-test
