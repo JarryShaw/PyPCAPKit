@@ -645,7 +645,7 @@
         <span class="c1"># initialise buffer with BUFID; ``RCVBT`` holds one entry per 8-octet</span>
         <span class="c1"># block of the data buffer, its partial last block included -- 8191</span>
         <span class="c1"># covered octets 0 to 65527 only, so a fragment reaching octet 65528,</span>
-        <span class="c1"># e.g. at the largest Fragment Offset, indexed past it (:issue:`1565`)</span>
+        <span class="c1"># e.g. at the largest Fragment Offset, indexed past it (#1565)</span>
         <span class="k">if</span> <span class="n">BUFID</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="p">[</span><span class="n">BUFID</span><span class="p">]</span> <span class="o">=</span> <span class="n">Buffer</span><span class="p">(</span>
                 <span class="n">TDL</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span>                              <span class="c1"># Total Data Length</span>
@@ -674,11 +674,11 @@
         <span class="c1">#</span>
         <span class="c1"># A Total Length of 0 declares nothing. It is what TCP segmentation</span>
         <span class="c1"># offload leaves in a capture taken on the sending host, and the</span>
-        <span class="c1"># datagram then runs to the end of the captured frame (:issue:`1547`).</span>
+        <span class="c1"># datagram then runs to the end of the captured frame (#1547).</span>
         <span class="c1"># Wireshark ("presumed TSO") substitutes that length for the field</span>
         <span class="c1"># before it reassembles anything, and so does this, whatever **MF** and</span>
         <span class="c1"># the offset say: an unfragmented one is then whole rather than ``-IHL``</span>
-        <span class="c1"># octets long (:issue:`1555`). Linux's BIG TCP zeroes the field</span>
+        <span class="c1"># octets long (#1555). Linux's BIG TCP zeroes the field</span>
         <span class="c1"># precisely because the datagram, header included, outgrows the 65535</span>
         <span class="c1"># octets it can declare -- and such a datagram never completes in a</span>
         <span class="c1"># buffer of that length (:meth:`_is_complete`). So the buffer grows past</span>
@@ -731,7 +731,7 @@
         <span class="c1">#</span>
         <span class="c1"># * a truncated fragment's, since the octets after the cut are missing.</span>
         <span class="c1">#   That includes one clipped by the data buffer's end, whose octets</span>
-        <span class="c1">#   past it cannot be held, so it counts as cut there (:issue:`1566`).</span>
+        <span class="c1">#   past it cannot be held, so it counts as cut there (#1566).</span>
         <span class="c1"># * a non-final fragment's. :rfc:`791#section-3.2` and</span>
         <span class="c1">#   :rfc:`8200#section-4.5` make every fragment but the last carry a</span>
         <span class="c1">#   multiple of 8 octets, so one that ends mid-block was cut or is</span>
@@ -739,7 +739,7 @@
         <span class="c1">#   complete the datagram with zeros in their place. This is the only</span>
         <span class="c1">#   way a cut shows when the length is not declared: under Total</span>
         <span class="c1">#   Length 0, and on IPv6, whose adapters derive it from the captured</span>
-        <span class="c1">#   payload (:issue:`1567`).</span>
+        <span class="c1">#   payload (#1567).</span>
         <span class="n">start</span> <span class="o">=</span> <span class="n">FO</span> <span class="o">//</span> <span class="mi">8</span>
         <span class="k">if</span> <span class="n">held</span> <span class="o">==</span> <span class="n">length</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">MF</span><span class="p">:</span>
             <span class="n">stop</span> <span class="o">=</span> <span class="p">(</span><span class="n">FO</span> <span class="o">+</span> <span class="n">held</span> <span class="o">+</span> <span class="mi">7</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span>
@@ -931,7 +931,7 @@
                 <span class="n">data</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">bytes</span><span class="p">(</span><span class="n">byte</span><span class="p">))</span>
             <span class="c1"># Report it even with no run received, its payload ``()``, as</span>
             <span class="c1"># ``strict=False`` reports it with an empty payload: ``index``</span>
-            <span class="c1"># still says which frames were its fragments (:issue:`1566`).</span>
+            <span class="c1"># still says which frames were its fragments (#1566).</span>
             <span class="n">packet</span> <span class="o">=</span> <span class="n">Datagram</span><span class="p">(</span>
                 <span class="n">completed</span><span class="o">=</span><span class="n">completion</span><span class="p">,</span>
                 <span class="nb">id</span><span class="o">=</span><span class="n">DatagramID</span><span class="p">(</span>

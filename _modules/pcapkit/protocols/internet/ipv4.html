@@ -829,7 +829,7 @@
 
         <span class="c1"># NOTE: An ``ihl`` declaring more header than was captured leaves the</span>
         <span class="c1"># missing octets to read as zeros, which ``from_data`` then rebuilds;</span>
-        <span class="c1"># rejecting it keeps the octets as captured inside the parent (:issue:`1404`).</span>
+        <span class="c1"># rejecting it keeps the octets as captured inside the parent (#1404).</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: header length </span><span class="si">{</span><span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span><span class="si">}</span><span class="s1"> runs past the end of '</span>
                                 <span class="sa">f</span><span class="s1">'the data (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s1"> octets)'</span><span class="p">)</span>
@@ -847,7 +847,7 @@
         <span class="c1"># NOTE: Octets captured past the Total Length belong to this layer,</span>
         <span class="c1"># since its own length field is what leaves them out of the payload: an</span>
         <span class="c1"># Ethernet carrier hands the whole rest of its frame here, padding</span>
-        <span class="c1"># included, and the rebuild keeps them as captured (:issue:`1209`).</span>
+        <span class="c1"># included, and the rebuild keeps them as captured (#1209).</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">:</span>
             <span class="n">ipv4</span><span class="o">.</span><span class="n">__update__</span><span class="p">([</span>
                 <span class="p">(</span><span class="s1">'trailer'</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">),</span>
@@ -864,7 +864,7 @@
         <span class="c1"># NOTE: A capture that ends at or inside the header has no payload</span>
         <span class="c1"># octets, and parsing the next layer from none would default-fill a</span>
         <span class="c1"># header that was never captured, which ``from_data`` then rebuilds</span>
-        <span class="c1"># (:issue:`1167`). A zero length makes it a ``NoPayload`` instead.</span>
+        <span class="c1"># (#1167). A zero length makes it a ``NoPayload`` instead.</span>
         <span class="c1">#</span>
         <span class="c1"># A Total Length of 0 is what TCP segmentation offload leaves in a</span>
         <span class="c1"># capture taken on the sending host: the payload is then the rest of</span>
@@ -873,7 +873,7 @@
         <span class="c1"># Wireshark's "Bogus IP length", which it dissects no further: no</span>
         <span class="c1"># payload, and the octets after the header are the trailer, as they are</span>
         <span class="c1"># for a Total Length equal to the header's. Either way the rebuild</span>
-        <span class="c1"># writes the Total Length back as it was (:issue:`1547`).</span>
+        <span class="c1"># writes the Total Length back as it was (#1547).</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">len</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">_plen</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">hdr_len</span>
@@ -889,7 +889,7 @@
         <span class="c1"># code is dispatched on, so the registry's fallback leaves the octets as</span>
         <span class="c1"># :class:`~pcapkit.protocols.misc.raw.Raw` with no protocol to alias it</span>
         <span class="c1"># as, and ``'UDP' in frame`` does not hold of a slice of UDP payload</span>
-        <span class="c1"># (:issue:`1553`). Reassembly takes ``packet.payload``, the octets as</span>
+        <span class="c1"># (#1553). Reassembly takes ``packet.payload``, the octets as</span>
         <span class="c1"># captured, which this leaves as they were.</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span><span class="n">ipv4</span><span class="p">,</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">offset</span> <span class="k">else</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">protocol</span><span class="p">,</span> <span class="n">_plen</span><span class="p">,</span>
                                        <span class="n">packet</span><span class="o">=</span><span class="n">__packet__</span><span class="p">)</span></div>
@@ -1019,7 +1019,7 @@
         <span class="c1"># NOTE: An explicit ``total_length`` is written as given, so that a</span>
         <span class="c1"># ``from_data`` rebuild of a capture truncated by snaplen keeps the</span>
         <span class="c1"># length the sender declared instead of the one that was recorded</span>
-        <span class="c1"># (:issue:`1155`). Computed from the octets at hand otherwise, which is</span>
+        <span class="c1"># (#1155). Computed from the octets at hand otherwise, which is</span>
         <span class="c1"># what a plain ``IPv4(payload=...)`` wants.</span>
         <span class="k">if</span> <span class="n">total_length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">total_length</span> <span class="o">=</span> <span class="n">ihl</span> <span class="o">*</span> <span class="mi">4</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
@@ -1160,14 +1160,14 @@
             <span class="s1">'options'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'options'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
             <span class="c1"># NOTE: The parsed total length is passed through rather than left</span>
             <span class="c1"># to ``make`` to recompute, so that a truncated capture rebuilds</span>
-            <span class="c1"># with the length that was on the wire (:issue:`1155`).</span>
+            <span class="c1"># with the length that was on the wire (#1155).</span>
             <span class="s1">'total_length'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>
             <span class="c1"># NOTE: And the octets after the End of Option List, which no option</span>
             <span class="c1"># records. The header length is not passed: it follows from the</span>
             <span class="c1"># options and these octets, so edited options recompute it.</span>
             <span class="s1">'padding'</span><span class="p">:</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="s1">'padding'</span><span class="p">,</span> <span class="kc">None</span><span class="p">),</span>
             <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
-            <span class="c1"># NOTE: And the octets captured past the Total Length (:issue:`1209`).</span>
+            <span class="c1"># NOTE: And the octets captured past the Total Length (#1209).</span>
             <span class="s1">'trailer'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'trailer'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">),</span>
         <span class="p">}</span></div>
 

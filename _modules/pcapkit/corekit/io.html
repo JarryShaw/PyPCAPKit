@@ -1023,7 +1023,7 @@
                 <span class="c1">#</span>
                 <span class="c1"># The gap is waited for and the rest is not, and the position is</span>
                 <span class="c1"># the target, or the end of the stream if that comes first -- not</span>
-                <span class="c1"># wherever an over-asking read happened to stop (:issue:`1586`).</span>
+                <span class="c1"># wherever an over-asking read happened to stop (#1586).</span>
                 <span class="n">tmp_gap</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_tell</span> <span class="o">-</span> <span class="n">tmp_end</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span><span class="p">)</span>
                 <span class="n">tmp_len</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="n">tmp_gap</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span> <span class="o">//</span> <span class="mi">4</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span><span class="p">)</span>
 

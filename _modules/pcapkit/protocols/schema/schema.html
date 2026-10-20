@@ -1082,8 +1082,8 @@
         <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="n">data_iter</span><span class="p">:</span>
             <span class="c1"># NOTE: Not a field, but what :meth:`to_dict` emits for the octets an</span>
             <span class="c1"># enclosing ``SchemaField`` span held beyond this schema, and where,</span>
-            <span class="c1"># so that a rebuilt schema still re-emits them (:issue:`1380`).</span>
-            <span class="c1"># NOTE: Nor is the short read :meth:`unpack` records (:issue:`1458`).</span>
+            <span class="c1"># so that a rebuilt schema still re-emits them (#1380).</span>
+            <span class="c1"># NOTE: Nor is the short read :meth:`unpack` records (#1458).</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'__remainder__'</span><span class="p">,</span> <span class="s1">'__remainder_offset__'</span><span class="p">,</span> <span class="s1">'__short_read__'</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
                 <span class="k">continue</span>
@@ -1165,7 +1165,7 @@
         <span class="c1"># fields: a ``post_process`` may store derived values on the instance,</span>
         <span class="c1"># as :class:`~pcapkit.protocols.schema.internet.ipv4.TSOption` does, and</span>
         <span class="c1"># iteration reports them, so ``dict(schema)`` must be able to read them</span>
-        <span class="c1"># back (:issue:`1291`). A mangled key is reachable only under the name</span>
+        <span class="c1"># back (#1291). A mangled key is reachable only under the name</span>
         <span class="c1"># it was mangled from, as in iteration.</span>
         <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__fields__</span> <span class="ow">or</span> <span class="p">(</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__builtin__</span> <span class="ow">and</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__map_reverse__</span><span class="p">):</span>
             <span class="n">key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__map__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
@@ -1396,14 +1396,14 @@
                     <span class="c1"># the packed options do not fill. Without it every padding</span>
                     <span class="c1"># field sized from that key packs nothing, and the header</span>
                     <span class="c1"># comes out shorter than its own length field says</span>
-                    <span class="c1"># (:issue:`1289`). An undeclared area (a negative length)</span>
+                    <span class="c1"># (#1289). An undeclared area (a negative length)</span>
                     <span class="c1"># leaves no remainder.</span>
                     <span class="n">packet</span><span class="p">[</span><span class="s1">'__option_padding__'</span><span class="p">]</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">field</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]),</span> <span class="mi">0</span><span class="p">)</span>
                 <span class="k">continue</span>
 
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">field</span><span class="p">,</span> <span class="n">PaddingField</span><span class="p">):</span>
                 <span class="c1"># NOTE: the octets as captured, or zeros when there are none</span>
-                <span class="c1"># (:issue:`1223`) -- see :meth:`PaddingField.pack</span>
+                <span class="c1"># (#1223) -- see :meth:`PaddingField.pack</span>
                 <span class="c1"># &lt;pcapkit.corekit.fields.strings.PaddingField.pack&gt;`.</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">__buffer__</span><span class="p">[</span><span class="n">field</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
                 <span class="k">continue</span>
@@ -1439,8 +1439,8 @@
                 <span class="c1"># stale octets at a shifted offset, so then, or for a schema that</span>
                 <span class="c1"># never had any, the rest of the span is zero-filled.</span>
                 <span class="c1"># Either way the field keeps the width its length field declares</span>
-                <span class="c1"># (:issue:`1292`), and a schema rebuilt through :meth:`from_dict`</span>
-                <span class="c1"># packs what the parsed one did (:issue:`1380`).</span>
+                <span class="c1"># (#1292), and a schema rebuilt through :meth:`from_dict`</span>
+                <span class="c1"># packs what the parsed one did (#1380).</span>
                 <span class="c1">#</span>
                 <span class="c1"># A field reached through a</span>
                 <span class="c1"># :class:`~pcapkit.corekit.fields.misc.SwitchField` is not handled</span>
@@ -1582,7 +1582,7 @@
                 <span class="c1"># NOTE: A negative length is the unset default and takes what</span>
                 <span class="c1"># the declared length leaves, never less than nothing; a</span>
                 <span class="c1"># computed zero is an empty payload, not an unset one, or it</span>
-                <span class="c1"># would swallow the fields after it (:issue:`1275`).</span>
+                <span class="c1"># would swallow the fields after it (#1275).</span>
                 <span class="n">length</span> <span class="o">=</span> <span class="n">field</span><span class="o">.</span><span class="n">length</span>
                 <span class="k">if</span> <span class="n">length</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
                     <span class="n">length</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">cast</span><span class="p">(</span><span class="s1">'int'</span><span class="p">,</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]),</span> <span class="mi">0</span><span class="p">)</span>

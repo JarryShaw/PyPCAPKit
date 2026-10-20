@@ -577,7 +577,7 @@
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">__post_init__</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span>
 
         <span class="c1"># NOTE: A header the data ends inside keeps that in its ``info``, so</span>
-        <span class="c1"># that :meth:`from_data` rebuilds only what was captured (:issue:`1458`).</span>
+        <span class="c1"># that :meth:`from_data` rebuilds only what was captured (#1458).</span>
         <span class="n">keep_short_read</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
         <span class="c1"># ``read`` may have dispatched the undissected remainder through</span>

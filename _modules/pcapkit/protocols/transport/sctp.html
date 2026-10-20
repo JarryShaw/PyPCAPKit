@@ -1117,7 +1117,7 @@
 
         <span class="c1"># NOTE: With no packet length field, octets after the last whole chunk</span>
         <span class="c1"># cannot be told apart from a chunk cut short, so they are kept as</span>
-        <span class="c1"># captured rather than rejected (:issue:`1468`).</span>
+        <span class="c1"># captured rather than rejected (#1468).</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">:</span>
             <span class="n">sctp</span><span class="o">.</span><span class="n">__update__</span><span class="p">([</span>
                 <span class="p">(</span><span class="s1">'trailer'</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">),</span>

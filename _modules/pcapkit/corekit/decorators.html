@@ -657,7 +657,7 @@
             <span class="c1"># the payload *past* the extension headers, so falling back to the</span>
             <span class="c1"># whole IPv6 payload would hold those headers twice, once in the</span>
             <span class="c1"># extension header chain and once more in this ``Raw``</span>
-            <span class="c1"># (:issue:`1471`).</span>
+            <span class="c1"># (#1471).</span>
             <span class="n">file_</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Optional[bytes]'</span><span class="p">,</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'payload'</span><span class="p">))</span>
             <span class="k">if</span> <span class="n">file_</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">file_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_payload</span><span class="p">()</span>

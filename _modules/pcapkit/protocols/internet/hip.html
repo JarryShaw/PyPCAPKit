@@ -1358,7 +1358,7 @@
 
             <span class="c1"># NOTE: The trailing padding (:rfc:`7401#section-5.2.1`) is kept on</span>
             <span class="c1"># the data model only when it is not all zeros -- the form a fresh</span>
-            <span class="c1"># build writes -- so that a rebuild reproduces it (:issue:`1223`).</span>
+            <span class="c1"># build writes -- so that a rebuild reproduces it (#1223).</span>
             <span class="c1"># :meth:`_make_hip_param` writes it back.</span>
             <span class="n">padding</span> <span class="o">=</span> <span class="n">schema</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'padding'</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">padding</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="n">padding</span><span class="p">):</span>

@@ -857,7 +857,7 @@
         <span class="c1"># NOTE: An explicit ``hdr_ext_len`` is written as given, so that a</span>
         <span class="c1"># ``from_data`` rebuild of a header the capture cut short keeps the</span>
         <span class="c1"># length the sender declared instead of the one that was recorded</span>
-        <span class="c1"># (:issue:`1457`), the same as IPv6's ``payload_length``.</span>
+        <span class="c1"># (#1457), the same as IPv6's ``payload_length``.</span>
         <span class="k">if</span> <span class="n">hdr_ext_len</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">length</span> <span class="o">=</span> <span class="n">hdr_ext_len</span>
 
@@ -990,7 +990,7 @@
             <span class="c1"># NOTE: ``data.length`` is the parsed header length in octets,</span>
             <span class="c1"># passed through as ``Hdr Ext Len`` rather than left to ``make`` to</span>
             <span class="c1"># recompute, so that a truncated capture rebuilds with the length</span>
-            <span class="c1"># that was on the wire (:issue:`1457`).</span>
+            <span class="c1"># that was on the wire (#1457).</span>
             <span class="s1">'hdr_ext_len'</span><span class="p">:</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">length</span> <span class="o">-</span> <span class="mi">8</span><span class="p">)</span> <span class="o">//</span> <span class="mi">8</span><span class="p">,</span>
             <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
         <span class="p">}</span></div>

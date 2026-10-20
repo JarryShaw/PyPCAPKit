@@ -988,14 +988,14 @@
         <span class="n">ipv4</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IP'</span><span class="p">,</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'IP'</span><span class="p">])</span>
         <span class="k">if</span> <span class="n">ipv4</span><span class="o">.</span><span class="n">flags</span><span class="o">.</span><span class="n">DF</span><span class="p">:</span>       <span class="c1"># dismiss not fragmented packet</span>
             <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">_frame</span><span class="p">(</span><span class="n">packet</span><span class="p">):</span>  <span class="c1"># a zero-length frame (:issue:`1676`)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_frame</span><span class="p">(</span><span class="n">packet</span><span class="p">):</span>  <span class="c1"># a zero-length frame (#1676)</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="c1"># NOTE: ``bytes(ipv4)`` ends with the frame's trailer, which Scapy files</span>
         <span class="c1"># as padding at the end of the packet however deep the IPv4 layer, so</span>
         <span class="c1"># only the octets inside every IP datagram above it are kept, the</span>
-        <span class="c1"># Payload Length of IPv6 carrying it included (:issue:`1623`). The IHL</span>
+        <span class="c1"># Payload Length of IPv6 carrying it included (#1623). The IHL</span>
         <span class="c1"># and Total Length are read off them, as Scapy leaves ``ihl`` and</span>
-        <span class="c1"># ``len`` None on a layer built by hand until it is built (:issue:`1676`).</span>
+        <span class="c1"># ``len`` None on a layer built by hand until it is built (#1676).</span>
         <span class="n">octets</span> <span class="o">=</span> <span class="n">_within_datagrams</span><span class="p">(</span><span class="n">ipv4</span><span class="p">)</span>
         <span class="n">ihl</span> <span class="o">=</span> <span class="p">(</span><span class="n">octets</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&amp;</span> <span class="mh">0x0F</span><span class="p">)</span> <span class="o">*</span> <span class="mi">4</span> <span class="k">if</span> <span class="n">octets</span> <span class="k">else</span> <span class="n">IPV4_HEADER_LEN</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">octets</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">max</span><span class="p">(</span><span class="n">ihl</span><span class="p">,</span> <span class="n">IPV4_HEADER_LEN</span><span class="p">):</span>     <span class="c1"># a header those octets cut short</span>
@@ -1024,7 +1024,7 @@
             <span class="c1"># NOTE: this keeps the octets past the Total Length, since the</span>
             <span class="c1"># reassembly machinery cuts the payload at ``tl - ihl`` itself.</span>
             <span class="c1"># :func:`ipv6_reassembly` derives its ``tl`` from the payload, so it</span>
-            <span class="c1"># has to cut them (:issue:`1584`).</span>
+            <span class="c1"># has to cut them (#1584).</span>
             <span class="n">payload</span><span class="o">=</span><span class="nb">bytearray</span><span class="p">(</span><span class="n">octets</span><span class="p">[</span><span class="n">ihl</span><span class="p">:]),</span>           <span class="c1"># raw bytearray type payload</span>
             <span class="n">timestamp</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">packet</span><span class="o">.</span><span class="n">time</span><span class="p">),</span>              <span class="c1"># capture timestamp</span>
         <span class="p">)</span>
@@ -1091,7 +1091,7 @@
         <span class="c1"># reassembled packet keeps (:rfc:`8200#section-4.5`).</span>
         <span class="n">hdr_len</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ipv6</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">ipv6_frag</span><span class="p">)</span>
         <span class="c1"># the fragment's data stops at the Payload Length, so neither it nor</span>
-        <span class="c1"># ``tl`` below counts the frame's trailer (:issue:`1584`)</span>
+        <span class="c1"># ``tl`` below counts the frame's trailer (#1584)</span>
         <span class="n">payload</span> <span class="o">=</span> <span class="nb">bytearray</span><span class="p">(</span><span class="n">_within_datagrams</span><span class="p">(</span><span class="n">ipv6_frag</span><span class="o">.</span><span class="n">payload</span><span class="p">))</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">IP_Packet</span><span class="p">(</span>

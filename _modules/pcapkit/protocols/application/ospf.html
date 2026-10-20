@@ -693,7 +693,7 @@
         <span class="c1"># NOTE: Octets captured past the Packet Length belong to this layer,</span>
         <span class="c1"># since its own length field is what leaves them out of the payload --</span>
         <span class="c1"># the message digest of cryptographic authentication among them -- and</span>
-        <span class="c1"># the rebuild keeps them as captured (:issue:`1455`).</span>
+        <span class="c1"># the rebuild keeps them as captured (#1455).</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">:</span>
             <span class="n">ospf</span><span class="o">.</span><span class="n">__update__</span><span class="p">([</span>
                 <span class="p">(</span><span class="s1">'trailer'</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">),</span>
@@ -853,7 +853,7 @@
             <span class="s1">'auth_type'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">autype</span><span class="p">,</span>
             <span class="s1">'auth_data'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">auth</span><span class="p">,</span>
             <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
-            <span class="c1"># NOTE: And the octets captured past the Packet Length (:issue:`1455`).</span>
+            <span class="c1"># NOTE: And the octets captured past the Packet Length (#1455).</span>
             <span class="s1">'trailer'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'trailer'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">),</span>
         <span class="p">}</span></div>
 
@@ -975,7 +975,7 @@
                 <span class="n">seq</span><span class="o">=</span><span class="n">auth_data</span><span class="o">.</span><span class="n">seq</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="c1"># NOTE: The ``to_dict()`` form of the info above, which ``from_data``</span>
-        <span class="c1"># passes through as is (:issue:`1464`).</span>
+        <span class="c1"># passes through as is (#1464).</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">auth_data</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">Schema_CryptographicAuthentication</span><span class="p">(</span>

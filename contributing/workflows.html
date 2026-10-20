@@ -1404,30 +1404,57 @@ leg, and <code class="docutils literal notranslate"><span class="pre">LATEST</sp
 and fixture-dependent tiers, which decide what a module may read and so which job
 collects it; a test tier decides on which of that job’s legs it runs.</p>
 <p><code class="docutils literal notranslate"><span class="pre">module_tier()</span></code> in <code class="file docutils literal notranslate"><span class="pre">tests/_tiers.py</span></code> decides, in one place, for every
-<code class="docutils literal notranslate"><span class="pre">tests/**/test_*.py</span></code>:</p>
+<code class="docutils literal notranslate"><span class="pre">tests/**/test_*.py</span></code>. <code class="docutils literal notranslate"><span class="pre">ALL</span></code> is a curated, opt-in list (#1958, #1963): short enough
+to save time on every leg, the same on every leg so QA stays consistent, and enough
+on its own to validate a change on each interpreter, while <code class="docutils literal notranslate"><span class="pre">latest</span></code> runs the whole
+suite as the gate.</p>
 <ul class="simple">
-<li><p><strong>The marker.</strong> A module may state its tier outright with a module-level
-<code class="docutils literal notranslate"><span class="pre">__tier__</span> <span class="pre">=</span> <span class="pre">'ALL'</span></code> or <code class="docutils literal notranslate"><span class="pre">__tier__</span> <span class="pre">=</span> <span class="pre">'LATEST'</span></code>, read by AST, under a <code class="docutils literal notranslate"><span class="pre">#:</span></code>
-comment that gives the reason. It wins over the rule. It is a module constant
-rather than a pytest marker, so <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>’s plain <code class="docutils literal notranslate"><span class="pre">unittest</span></code> runs
-read the same module. A value that is not one of the two string literals, or a
-marker assigned twice or anywhere but at the module’s top level, fails the tier
-guard.</p></li>
-<li><p><strong>The rule.</strong> Otherwise a module is <code class="docutils literal notranslate"><span class="pre">LATEST</span></code> when its run does not vary by
-interpreter, by the same AST test as the project pins below: it reads the
-repository’s text, a workflow or the docs, or drives a <code class="docutils literal notranslate"><span class="pre">util/</span></code> script, and
-neither imports <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code> nor compares the Python version. Everything that
-exercises <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code> is <code class="docutils literal notranslate"><span class="pre">ALL</span></code>.</p></li>
+<li><p><strong>The marker.</strong> A module joins <code class="docutils literal notranslate"><span class="pre">ALL</span></code> with a module-level <code class="docutils literal notranslate"><span class="pre">__tier__</span> <span class="pre">=</span> <span class="pre">'ALL'</span></code>,
+read by AST, under a <code class="docutils literal notranslate"><span class="pre">#:</span> <span class="pre">Test</span> <span class="pre">tier</span> <span class="pre">(#1958):</span> <span class="pre">&lt;reason&gt;</span></code> comment. It is a module
+constant rather than a pytest marker, so <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>’s plain
+<code class="docutils literal notranslate"><span class="pre">unittest</span></code> runs read the same module. A value that is not <code class="docutils literal notranslate"><span class="pre">'ALL'</span></code> or
+<code class="docutils literal notranslate"><span class="pre">'LATEST'</span></code>, or a marker assigned twice or anywhere but at the module’s top
+level, fails the tier guard.</p></li>
+<li><p><strong>The default.</strong> A module that states no tier is <code class="docutils literal notranslate"><span class="pre">LATEST</span></code>, so a new module runs
+on <code class="docutils literal notranslate"><span class="pre">latest</span></code> until it says why every leg needs it. <code class="docutils literal notranslate"><span class="pre">__tier__</span> <span class="pre">=</span> <span class="pre">'LATEST'</span></code> is
+optional, and records why a module someone might expect on every leg is not; a
+module that compares <code class="docutils literal notranslate"><span class="pre">sys.version_info</span></code>, <code class="docutils literal notranslate"><span class="pre">sys.implementation</span></code> or
+<code class="docutils literal notranslate"><span class="pre">sys.maxsize</span></code>, reads
+<code class="docutils literal notranslate"><span class="pre">sys.flags</span></code>, calls <code class="docutils literal notranslate"><span class="pre">sysconfig.get_config_var()</span></code> or probes <a class="reference external" href="https://docs.python.org/3/library/sys.html#module-sys" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">sys</span></code></a> with
+<code class="docutils literal notranslate"><span class="pre">hasattr</span></code>/<code class="docutils literal notranslate"><span class="pre">getattr</span></code> has to state its tier either way, so a version gate never
+lands on <code class="docutils literal notranslate"><span class="pre">latest</span></code> alone by omission. The check is syntactic and best-effort: an
+alias, a flag imported from <code class="docutils literal notranslate"><span class="pre">pcapkit.utilities.compat</span></code> or a gate in a helper is
+not seen, and such a module states its tier by hand.</p></li>
 </ul>
-<p>The marker says what the AST cannot see. Each real sweep – a round trip over every
-class or registry entry a table enumerates, every offset of a packet or every
-capture – is marked <code class="docutils literal notranslate"><span class="pre">LATEST</span></code>, as the owner ruled on #1732 and #1958; the
-hand-picked round trips, whatever their names, run on <code class="docutils literal notranslate"><span class="pre">ALL</span></code>, and so do the #1202
-edge-case tables, whose cases are each written out by hand. A module that imports <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code> only to read its text or
-structure, or that drives a docs hook or a generator other legs already run, is
-marked <code class="docutils literal notranslate"><span class="pre">LATEST</span></code>; one that the rule would send to <code class="docutils literal notranslate"><span class="pre">latest</span></code> but that depends on
-the interpreter, such as the tier guard itself, which <code class="file docutils literal notranslate"><span class="pre">tests/conftest.py</span></code> runs at
-collection on every leg, is marked <code class="docutils literal notranslate"><span class="pre">ALL</span></code>.</p>
+<p>A module opts in when it exercises behaviour that can differ between interpreters
+or versions:</p>
+<ul class="simple">
+<li><p>compat shims and version or implementation gates;</p></li>
+<li><p>C-accelerated versus pure paths, and code sensitive to garbage collection, weak
+references or finalisation;</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">int</span></code>, <code class="docutils literal notranslate"><span class="pre">bytes</span></code> and <code class="docutils literal notranslate"><span class="pre">struct</span></code> edge cases, and <code class="docutils literal notranslate"><span class="pre">sys.maxsize</span></code> or recursion
+limits;</p></li>
+<li><p>pickling and copying, metaclass and ABC machinery, and enum mechanics;</p></li>
+<li><p>stream and buffer semantics, threading and locking, and the warning and
+exception hooks;</p></li>
+<li><p>a third-party engine whose installable releases vary by interpreter, such as
+<code class="docutils literal notranslate"><span class="pre">pypcap</span></code> and <code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code>, which install below 3.12 only, and Scapy, which the
+<code class="docutils literal notranslate"><span class="pre">integration</span></code> and <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> legs install on every interpreter and a
+<code class="docutils literal notranslate"><span class="pre">test</span></code> leg off <code class="docutils literal notranslate"><span class="pre">latest</span></code> skips;</p></li>
+<li><p>the hand-picked round trips, whatever their names, and the #1202 edge-case
+tables, whose cases are each written out by hand, as the owner ruled on #1958;
+and</p></li>
+<li><p>the smoke slice: a representative module per protocol family and per package,
+so each leg still drives the main parse and build paths.</p></li>
+</ul>
+<p>Everything else is <code class="docutils literal notranslate"><span class="pre">LATEST</span></code>: the per-protocol field-by-field tests, whose
+behaviour is interpreter-independent pure Python, each real sweep – a round trip
+over every class or registry entry a table enumerates, every offset of a packet or
+every capture, as the owner ruled on #1732 and #1958 – and the docs, project and
+structure tests. The vendor extra is installed on <code class="docutils literal notranslate"><span class="pre">latest</span></code> alone and the crawlers
+are pure Python, so the vendor modules are <code class="docutils literal notranslate"><span class="pre">LATEST</span></code>, each saying so, but for the
+file-restore and environment-variable tests, which stay on every leg. The tier guard itself is <code class="docutils literal notranslate"><span class="pre">ALL</span></code>, since <code class="file docutils literal notranslate"><span class="pre">tests/conftest.py</span></code>
+runs it at collection on every leg.</p>
 <p>Which legs run which tier:</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">

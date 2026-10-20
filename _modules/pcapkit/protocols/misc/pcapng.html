@@ -911,7 +911,7 @@
 <span class="c1"># closed, hand-picked set, so the TLS key label enumeration is the generated</span>
 <span class="c1"># :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`, imported above as</span>
 <span class="c1"># ``Enum_TLSKeyLabel`` like its :mod:`pcapkit.const.pcapng` siblings. This</span>
-<span class="c1"># module does not re-export it under the unaliased name (:issue:`1744`).</span>
+<span class="c1"># module does not re-export it under the unaliased name (#1744).</span>
 <span class="c1"># :class:`WireGuardKeyLabel` below stays hand-written: it is a closed set</span>
 <span class="c1"># (draft-ietf-opsawg-pcapng-06 section 4.7's "is one of" four names), not a</span>
 <span class="c1"># registry, so filing it under :mod:`pcapkit.const` would misrepresent it as</span>
@@ -1771,7 +1771,7 @@
                     <span class="n">packet</span><span class="o">.</span><span class="n">setdefault</span><span class="p">(</span><span class="s1">'snaplen'</span><span class="p">,</span> <span class="n">interfaces</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">snaplen</span><span class="p">)</span>
             <span class="c1"># NOTE: A zero snaplen handed in, e.g. interface 0's passed through,</span>
             <span class="c1"># means no limit as well; kept, it reads as a limit of no octets and</span>
-            <span class="c1"># the block's padding becomes packet data (:issue:`1558`).</span>
+            <span class="c1"># the block's padding becomes packet data (#1558).</span>
             <span class="k">if</span> <span class="s1">'snaplen'</span> <span class="ow">in</span> <span class="n">packet</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'snaplen'</span><span class="p">]:</span>
                 <span class="k">del</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'snaplen'</span><span class="p">]</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">__header__</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Schema_PCAPNG'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">__schema__</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_file</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="p">))</span>  <span class="c1"># type: ignore[call-arg,misc]</span>
@@ -1855,7 +1855,7 @@
         <span class="c1"># :class:`~pcapkit.protocols.schema.misc.pcapng.OptionAreaField`), and</span>
         <span class="c1"># parses as no options. The octets are kept on the block as</span>
         <span class="c1"># ``options_raw`` or ``records_raw``, which the block's ``make`` writes</span>
-        <span class="c1"># back verbatim (:issue:`1325`).</span>
+        <span class="c1"># back verbatim (#1325).</span>
         <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'records'</span><span class="p">,</span> <span class="s1">'options'</span><span class="p">):</span>
             <span class="n">area</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">block</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">area</span><span class="p">,</span> <span class="nb">list</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">area</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">area</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">bytes</span><span class="p">):</span>
@@ -1903,7 +1903,7 @@
                 <span class="c1"># its first octets, so the block cannot be rebuilt from them at</span>
                 <span class="c1"># the length it declares. The octets captured are kept as</span>
                 <span class="c1"># ``__truncated_raw__`` instead, which :meth:`__post_init__` parses</span>
-                <span class="c1"># again in place of building the block (:issue:`1470`).</span>
+                <span class="c1"># again in place of building the block (#1470).</span>
                 <span class="n">block</span><span class="o">.</span><span class="n">__update__</span><span class="p">([(</span><span class="s1">'__truncated_raw__'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)])</span>
 
             <span class="c1"># move backward to the beginning of next block</span>
@@ -2013,7 +2013,7 @@
 
         <span class="c1"># NOTE: A block the capture ended inside rebuilds as the octets that</span>
         <span class="c1"># were captured, parsed again as they were the first time (see</span>
-        <span class="c1"># :meth:`read`), rather than at the length it declares (:issue:`1470`).</span>
+        <span class="c1"># :meth:`read`), rather than at the length it declares (#1470).</span>
         <span class="n">block</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'block'</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">file</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">block</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">)</span> <span class="ow">and</span> <span class="s1">'__truncated_raw__'</span> <span class="ow">in</span> <span class="n">block</span><span class="p">:</span>
             <span class="n">file</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">block</span><span class="p">[</span><span class="s1">'__truncated_raw__'</span><span class="p">])</span>
@@ -2820,7 +2820,7 @@
             <span class="n">section_length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">section_length</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_pcapng_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span>
-        <span class="c1"># NOTE: The octets after ``opt_endofopt``, if any (:issue:`1437`).</span>
+        <span class="c1"># NOTE: The octets after ``opt_endofopt``, if any (#1437).</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_read_padding</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="s1">'padding'</span><span class="p">,</span> <span class="s1">'padding_opts'</span><span class="p">,</span> <span class="n">nonzero</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
@@ -2868,9 +2868,9 @@
             <span class="n">snaplen</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">snaplen</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_pcapng_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span>
-        <span class="c1"># NOTE: The reserved octets, if they are not all zeros (:issue:`1437`).</span>
+        <span class="c1"># NOTE: The reserved octets, if they are not all zeros (#1437).</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_read_padding</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="s1">'reserved'</span><span class="p">)</span>
-        <span class="c1"># NOTE: The octets after ``opt_endofopt``, if any (:issue:`1437`).</span>
+        <span class="c1"># NOTE: The octets after ``opt_endofopt``, if any (#1437).</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_read_padding</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="s1">'padding'</span><span class="p">,</span> <span class="s1">'padding_opts'</span><span class="p">,</span> <span class="n">nonzero</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
@@ -2938,13 +2938,13 @@
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_pcapng_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="c1"># NOTE: The padding of the packet data to 32 bits, if it is not all</span>
-        <span class="c1"># zeros (:issue:`1437`).</span>
+        <span class="c1"># zeros (#1437).</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_read_padding</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="s1">'padding_data'</span><span class="p">)</span>
-        <span class="c1"># NOTE: The octets after ``opt_endofopt``, if any (:issue:`1437`).</span>
+        <span class="c1"># NOTE: The octets after ``opt_endofopt``, if any (#1437).</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_read_padding</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="s1">'padding_opts'</span><span class="p">,</span> <span class="s1">'padding_opts'</span><span class="p">,</span> <span class="n">nonzero</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="c1"># NOTE: A captured length running past the block is kept as declared,</span>
-        <span class="c1"># and the packet data is the octets the block holds (:issue:`1405`).</span>
+        <span class="c1"># and the packet data is the octets the block holds (#1405).</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">captured_len</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">packet_data</span><span class="p">):</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Block </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] captured length </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">captured_len</span><span class="si">}</span><span class="s1"> runs past '</span>
                  <span class="sa">f</span><span class="s1">'the block, which holds </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">packet_data</span><span class="p">)</span><span class="si">}</span><span class="s1"> octet(s); kept as captured'</span><span class="p">,</span>
@@ -2997,11 +2997,11 @@
             <span class="n">original_len</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">original_len</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="c1"># NOTE: The padding of the packet data to 32 bits, if it is not all</span>
-        <span class="c1"># zeros (:issue:`1437`).</span>
+        <span class="c1"># zeros (#1437).</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_read_padding</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="s1">'padding'</span><span class="p">,</span> <span class="s1">'padding_data'</span><span class="p">)</span>
 
         <span class="c1"># NOTE: A block holding more packet data than the snaplen of interface 0</span>
-        <span class="c1"># allows keeps the excess (:issue:`1384`); the specification says the</span>
+        <span class="c1"># allows keeps the excess (#1384); the specification says the</span>
         <span class="c1"># snaplen determines the length, so the excess is reported.</span>
         <span class="n">snaplen</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">snaplen</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ctx</span><span class="o">.</span><span class="n">interfaces</span> <span class="k">else</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="n">snaplen</span> <span class="ow">and</span> <span class="n">data</span><span class="o">.</span><span class="n">captured_len</span> <span class="o">&gt;</span> <span class="n">snaplen</span><span class="p">:</span>
@@ -3009,7 +3009,7 @@
                  <span class="sa">f</span><span class="s1">'exceeds the snaplen of </span><span class="si">{</span><span class="n">snaplen</span><span class="si">}</span><span class="s1">; kept as captured'</span><span class="p">,</span>
                  <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>
         <span class="c1"># NOTE: Likewise for more packet data than the original length, padding</span>
-        <span class="c1"># aside (:issue:`1414`).</span>
+        <span class="c1"># aside (#1414).</span>
         <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">captured_len</span> <span class="o">&gt;</span> <span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">original_len</span> <span class="o">+</span> <span class="mi">3</span><span class="p">)</span> <span class="o">//</span> <span class="mi">4</span> <span class="o">*</span> <span class="mi">4</span><span class="p">:</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Block </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] packet data of </span><span class="si">{</span><span class="n">data</span><span class="o">.</span><span class="n">captured_len</span><span class="si">}</span><span class="s1"> octet(s) '</span>
                  <span class="sa">f</span><span class="s1">'exceeds the original length of </span><span class="si">{</span><span class="n">data</span><span class="o">.</span><span class="n">original_len</span><span class="si">}</span><span class="s1">; kept as captured'</span><span class="p">,</span>
@@ -3066,7 +3066,7 @@
             <span class="n">records</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_nrb_records</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">records</span><span class="p">),</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_pcapng_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span>
-        <span class="c1"># NOTE: The octets after ``opt_endofopt``, if any (:issue:`1437`).</span>
+        <span class="c1"># NOTE: The octets after ``opt_endofopt``, if any (#1437).</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_read_padding</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="s1">'padding'</span><span class="p">,</span> <span class="s1">'padding_opts'</span><span class="p">,</span> <span class="n">nonzero</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
@@ -3121,7 +3121,7 @@
             <span class="n">timestamp_epoch</span><span class="o">=</span><span class="n">timestamp_epoch</span><span class="p">,</span>
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_pcapng_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span>
-        <span class="c1"># NOTE: The octets after ``opt_endofopt``, if any (:issue:`1437`).</span>
+        <span class="c1"># NOTE: The octets after ``opt_endofopt``, if any (#1437).</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_read_padding</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="s1">'padding'</span><span class="p">,</span> <span class="s1">'padding_opts'</span><span class="p">,</span> <span class="n">nonzero</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
@@ -3163,13 +3163,13 @@
         <span class="c1"># NOTE: A malformed entry is kept as the octets captured, as one</span>
         <span class="c1"># :obj:`bytes` item, and parses as no entries. The octets are kept on</span>
         <span class="c1"># the block as ``entry_raw``, which the block's ``make`` writes back</span>
-        <span class="c1"># verbatim (:issue:`1406`).</span>
+        <span class="c1"># verbatim (#1406).</span>
         <span class="n">kept</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">entries</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">entries</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nb">bytes</span><span class="p">)</span>
         <span class="n">data</span> <span class="o">=</span> <span class="n">Data_SystemdJournalExportBlock</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
             <span class="n">length</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="c1"># NOTE: each entry as an OrderedMultiInfo, which ``Info`` does not</span>
-            <span class="c1"># do for a mapping held in a tuple (:issue:`1484`).</span>
+            <span class="c1"># do for a mapping held in a tuple (#1484).</span>
             <span class="n">data</span><span class="o">=</span><span class="p">()</span> <span class="k">if</span> <span class="n">kept</span> <span class="k">else</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">OrderedMultiInfo</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span> <span class="k">for</span> <span class="n">entry</span> <span class="ow">in</span> <span class="n">entries</span><span class="p">),</span>  <span class="c1"># type: ignore[arg-type]</span>
         <span class="p">)</span>
         <span class="k">if</span> <span class="n">kept</span><span class="p">:</span>
@@ -3236,9 +3236,9 @@
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_pcapng_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="c1"># NOTE: The padding of the secrets to 32 bits, if it is not all zeros</span>
-        <span class="c1"># (:issue:`1437`).</span>
+        <span class="c1"># (#1437).</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_read_padding</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="s1">'padding_data'</span><span class="p">)</span>
-        <span class="c1"># NOTE: The octets after ``opt_endofopt``, if any (:issue:`1437`).</span>
+        <span class="c1"># NOTE: The octets after ``opt_endofopt``, if any (#1437).</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_read_padding</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="s1">'padding_opts'</span><span class="p">,</span> <span class="s1">'padding_opts'</span><span class="p">,</span> <span class="n">nonzero</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">data</span></div>
 
@@ -3358,13 +3358,13 @@
             <span class="n">options</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_pcapng_options</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">options</span><span class="p">),</span>
         <span class="p">)</span>
         <span class="c1"># NOTE: The padding of the packet data to 32 bits, if it is not all</span>
-        <span class="c1"># zeros (:issue:`1437`).</span>
+        <span class="c1"># zeros (#1437).</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_read_padding</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="s1">'padding_data'</span><span class="p">)</span>
-        <span class="c1"># NOTE: The octets after ``opt_endofopt``, if any (:issue:`1437`).</span>
+        <span class="c1"># NOTE: The octets after ``opt_endofopt``, if any (#1437).</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_read_padding</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">data</span><span class="p">,</span> <span class="s1">'padding_opts'</span><span class="p">,</span> <span class="s1">'padding_opts'</span><span class="p">,</span> <span class="n">nonzero</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
         <span class="c1"># NOTE: A captured length running past the block is kept as declared,</span>
-        <span class="c1"># and the packet data is the octets the block holds (:issue:`1405`).</span>
+        <span class="c1"># and the packet data is the octets the block holds (#1405).</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">captured_length</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">packet_data</span><span class="p">):</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Block </span><span class="si">{</span><span class="n">header</span><span class="o">.</span><span class="n">type</span><span class="si">}</span><span class="s1">] captured length </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">captured_length</span><span class="si">}</span><span class="s1"> runs past '</span>
                  <span class="sa">f</span><span class="s1">'the block, which holds </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">packet_data</span><span class="p">)</span><span class="si">}</span><span class="s1"> octet(s); kept as captured'</span><span class="p">,</span>
@@ -3567,7 +3567,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
-            <span class="c1"># NOTE: The padding to 32 bits, if it is not all zeros (:issue:`1437`).</span>
+            <span class="c1"># NOTE: The padding to 32 bits, if it is not all zeros (#1437).</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_read_padding</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
 
             <span class="c1"># record option data</span>
@@ -4801,7 +4801,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">meth</span> <span class="o">=</span> <span class="n">name</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">data</span> <span class="o">=</span> <span class="n">meth</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">records</span><span class="o">=</span><span class="n">records</span><span class="p">)</span>
-            <span class="c1"># NOTE: The padding to 32 bits, if it is not all zeros (:issue:`1437`).</span>
+            <span class="c1"># NOTE: The padding to 32 bits, if it is not all zeros (#1437).</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_read_padding</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
 
             <span class="c1"># record option data</span>
@@ -4936,7 +4936,7 @@
 <span class="sd">        """</span>
         <span class="n">secrets</span> <span class="o">=</span> <span class="n">Data_TLSKeyLog</span><span class="p">(</span>
             <span class="c1"># NOTE: each label's entries as an OrderedMultiInfo, which ``Info``</span>
-            <span class="c1"># does not do for a mapping held in a dict (:issue:`1484`).</span>
+            <span class="c1"># does not do for a mapping held in a dict (#1484).</span>
             <span class="n">entries</span><span class="o">=</span><span class="p">{</span><span class="n">label</span><span class="p">:</span> <span class="n">OrderedMultiInfo</span><span class="p">(</span><span class="n">entry</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">label</span><span class="p">,</span> <span class="n">entry</span><span class="p">)</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">entries</span><span class="o">.</span><span class="n">items</span><span class="p">()},</span>
         <span class="p">)</span>
         <span class="c1"># NOTE: the log text is kept as well, since :attr:`entries` holds</span>
@@ -5309,7 +5309,7 @@
             <span class="n">original_len</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">original_len</span>
             <span class="n">packet_data</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_packet_data</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
             <span class="c1"># NOTE: The data model's ``captured_len`` already bounds the data,</span>
-            <span class="c1"># including a block that kept octets past the snaplen (:issue:`1384`).</span>
+            <span class="c1"># including a block that kept octets past the snaplen (#1384).</span>
             <span class="n">captured_len</span> <span class="o">=</span> <span class="n">block</span><span class="o">.</span><span class="n">captured_len</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">original_len</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>

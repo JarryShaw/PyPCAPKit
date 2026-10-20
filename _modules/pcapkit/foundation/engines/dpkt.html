@@ -842,7 +842,7 @@
                     <span class="k">yield</span> <span class="n">DecimalTimestamp</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">hdr</span><span class="o">.</span><span class="n">len</span><span class="p">),</span> <span class="n">buf</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="c1"># at a precision of 64 digits, not the caller's, which may</span>
-                    <span class="c1"># be too low to hold it (:issue:`1668`)</span>
+                    <span class="c1"># be too low to hold it (#1668)</span>
                     <span class="k">with</span> <span class="n">localcontext</span><span class="p">(</span><span class="n">prec</span><span class="o">=</span><span class="mi">64</span><span class="p">):</span>
                         <span class="n">exact</span> <span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">hdr</span><span class="o">.</span><span class="n">tv_sec</span><span class="p">)</span> <span class="o">+</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">hdr</span><span class="o">.</span><span class="n">tv_usec</span><span class="p">)</span> <span class="o">/</span> <span class="n">resolution</span>
                     <span class="k">yield</span> <span class="n">Timestamp</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">exact</span><span class="p">,</span> <span class="n">resolution</span><span class="p">,</span> <span class="n">hdr</span><span class="o">.</span><span class="n">len</span><span class="p">),</span> <span class="n">buf</span>
@@ -1049,7 +1049,7 @@
             <span class="c1"># more than its own ``UnpackError`` while parsing -- dpkt 1.9.8 reads</span>
             <span class="c1"># ``frag_off`` from whatever header follows an IPv6 Fragment header,</span>
             <span class="c1"># so a Fragment header followed by ESP or Destination Options raises</span>
-            <span class="c1"># :exc:`AttributeError` (:issue:`1351`). The frame is kept as a raw</span>
+            <span class="c1"># :exc:`AttributeError` (#1351). The frame is kept as a raw</span>
             <span class="c1"># packet, so one undecodable frame neither ends the extraction nor</span>
             <span class="c1"># shifts the numbering of the frames after it.</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Frame </span><span class="si">{</span><span class="n">ext</span><span class="o">.</span><span class="n">_frnum</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">: dpkt cannot parse the frame '</span>

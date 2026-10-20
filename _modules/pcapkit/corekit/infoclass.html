@@ -645,7 +645,7 @@
     <span class="c1"># ``Info`` class, rather than itself, plus that such class does not</span>
     <span class="c1"># override the ``__init__`` method of the meta class. A multi-mapping</span>
     <span class="c1"># :class:`Info` (:class:`_MultiInfo`) declares no fields and keeps the</span>
-    <span class="c1"># mapping constructor it inherits (:issue:`1484`).</span>
+    <span class="c1"># mapping constructor it inherits (#1484).</span>
     <span class="k">if</span> <span class="s1">'__init__'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span> <span class="ow">and</span> <span class="bp">cls</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">Info</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">issubclass</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">_MultiInfo</span><span class="p">):</span>
         <span class="n">args_</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
         <span class="n">dict_</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># type: list[str]</span>
@@ -662,7 +662,7 @@
             <span class="c1"># Python version: below 3.10 (bpo-43901), ``__annotations__`` of a</span>
             <span class="c1"># class declaring none is its nearest base's, so a field-less</span>
             <span class="c1"># subclass read Info's ``__finalised__``, ``__additional__`` and</span>
-            <span class="c1"># ``__excluded__`` as its fields (:issue:`1692`). See</span>
+            <span class="c1"># ``__excluded__`` as its fields (#1692). See</span>
             <span class="c1"># :func:`~pcapkit.utilities.compat.get_annotations`.</span>
             <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">get_annotations</span><span class="p">(</span><span class="n">cls_</span><span class="p">)):</span>
                 <span class="c1"># NOTE: We skip duplicated annotations to avoid duplicate</span>
@@ -1001,7 +1001,7 @@
         <span class="c1"># NOTE: A :class:`MultiDict` or :class:`OrderedMultiDict` held as a</span>
         <span class="c1"># *value* -- the option lists the parsers build -- is stored as a</span>
         <span class="c1"># :class:`MultiInfo` or :class:`OrderedMultiInfo`, so that a finalised</span>
-        <span class="c1"># instance holds no mutable mapping (:issue:`1484`).</span>
+        <span class="c1"># instance holds no mutable mapping (#1484).</span>
 
         <span class="vm">__name__</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span>  <span class="c1"># pylint: disable=redefined-builtin</span>
 
@@ -1481,7 +1481,7 @@
         <span class="c1"># in buckets -- it answered False where the OrderedMultiDict, asked the</span>
         <span class="c1"># other way round, answered True. The ordered side decides, as it does</span>
         <span class="c1"># for a bare MultiDict, which Python asks it first for being its</span>
-        <span class="c1"># subclass (:issue:`1484`).</span>
+        <span class="c1"># subclass (#1484).</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">OrderedMultiDict</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">NotImplemented</span>
         <span class="k">return</span> <span class="n">MultiDict</span><span class="o">.</span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">)</span>
@@ -1558,7 +1558,7 @@
     <span class="c1"># OrderedMultiDict's own. ``__ne__`` is not: OrderedMultiDict has none, and</span>
     <span class="c1"># dict's compares the internal buckets, so two equal option lists compared</span>
     <span class="c1"># ``!=`` as well as ``==``. It is :func:`_ne`, as for the exports</span>
-    <span class="c1"># (:issue:`1484`).</span>
+    <span class="c1"># (#1484).</span>
     <span class="fm">__getitem__</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="fm">__getitem__</span>  <span class="c1"># type: ignore[assignment]</span>
     <span class="fm">__iter__</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="fm">__iter__</span>  <span class="c1"># type: ignore[assignment]</span>
     <span class="fm">__len__</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="fm">__len__</span>

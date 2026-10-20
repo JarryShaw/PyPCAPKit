@@ -628,7 +628,7 @@
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mapping</span><span class="p">,</span> <span class="n">MultiDict</span><span class="p">):</span>
             <span class="c1"># NOTE: a dict, not pairs: GraalPy's dict.__init__ stores pairs</span>
-            <span class="c1"># through __setitem__, wrapping each list in another (:issue:`1963`).</span>
+            <span class="c1"># through __setitem__, wrapping each list in another (#1963).</span>
             <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">({</span><span class="n">k</span><span class="p">:</span> <span class="n">vs</span><span class="p">[:]</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">vs</span> <span class="ow">in</span> <span class="n">mapping</span><span class="o">.</span><span class="n">lists</span><span class="p">()})</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mapping</span><span class="p">,</span> <span class="n">cabc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">):</span>
             <span class="n">tmp</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[_KT, list[_VT]]</span>
@@ -653,7 +653,7 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">clear</span><span class="p">()</span>
-        <span class="c1"># NOTE: a dict, not pairs, as in __init__ (GraalPy, :issue:`1963`).</span>
+        <span class="c1"># NOTE: a dict, not pairs, as in __init__ (GraalPy, #1963).</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Iterator[_KT]'</span><span class="p">:</span>  <span class="c1"># pylint: disable=useless-parent-delegation</span>

@@ -1373,7 +1373,7 @@
         <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_raw</span> <span class="ow">and</span> <span class="n">_holds_raw</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="p">):</span>
             <span class="c1"># NOTE: A schema may accept octets that :meth:`read` then rejects,</span>
             <span class="c1"># e.g. an option whose length runs past the option area, so the</span>
-            <span class="c1"># read is covered too (:issue:`1394`).</span>
+            <span class="c1"># read is covered too (#1394).</span>
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">parsed</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'_ST'</span><span class="p">,</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="p">)</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">BytesIO</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">),</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="p">))</span>  <span class="c1"># type: ignore[call-arg,misc]</span>
                 <span class="k">if</span> <span class="n">_raw_where_parsed</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__header__</span><span class="p">,</span> <span class="n">parsed</span><span class="p">):</span>
@@ -1877,7 +1877,7 @@
         <span class="c1"># keyword would reach the schema as nothing at all and the field would</span>
         <span class="c1"># keep its default -- ``TCP_BASE`` asking for ``seq=1``, which</span>
         <span class="c1"># ``TCP.make`` spells ``seq_no``, would yield ``seq = 0`` with no warning</span>
-        <span class="c1"># (:issue:`617`). The schema layer is not that permissive: :meth:`Schema.__update__</span>
+        <span class="c1"># (#617). The schema layer is not that permissive: :meth:`Schema.__update__</span>
         <span class="c1"># &lt;pcapkit.protocols.schema.schema.Schema.__update__&gt;` warns</span>
         <span class="c1"># :exc:`~pcapkit.utilities.warnings.UnknownFieldWarning` for a field it</span>
         <span class="c1"># does not know, and this closes the asymmetry from the other end.</span>
@@ -2030,7 +2030,7 @@
         <span class="c1"># NOTE: a class defining its own ``__proto__`` ships what its body put</span>
         <span class="c1"># there; copy it now, before anything can register into it, so that</span>
         <span class="c1"># ``_next_layer_entry`` can restore a shipped descriptor without</span>
-        <span class="c1"># resolving it (:issue:`1504`). A class that inherits ``__proto__``</span>
+        <span class="c1"># resolving it (#1504). A class that inherits ``__proto__``</span>
         <span class="c1"># inherits this copy with it.</span>
         <span class="k">if</span> <span class="s1">'__proto__'</span> <span class="ow">in</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
             <span class="n">table</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">'__proto__'</span><span class="p">]</span>

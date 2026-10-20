@@ -684,7 +684,7 @@
         <span class="c1"># neither: an :rfc:`3931` §4.1.1 L2TPv3-over-IP datagram would otherwise</span>
         <span class="c1"># yield ``version=4``, ``tunnelid=0x5678`` and ``sessionid=0xff03``, read</span>
         <span class="c1"># out of the top half of a Session ID and the first two octets of the PPP</span>
-        <span class="c1"># frame behind it (:issue:`548`). This is also what keeps the hard-coded</span>
+        <span class="c1"># frame behind it (#548). This is also what keeps the hard-coded</span>
         <span class="c1"># ``Literal[2]`` of ``version`` true, instead of disagreeing with</span>
         <span class="c1"># ``info.version`` on the same datagram.</span>
         <span class="k">if</span> <span class="n">_flag</span><span class="p">[</span><span class="s1">'version'</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
@@ -722,7 +722,7 @@
 
         <span class="c1"># NOTE: Octets captured past the Length field belong to this layer,</span>
         <span class="c1"># since its own length field is what leaves them out of the payload,</span>
-        <span class="c1"># and the rebuild keeps them as captured (:issue:`1455`).</span>
+        <span class="c1"># and the rebuild keeps them as captured (#1455).</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">:</span>
             <span class="n">l2tp</span><span class="o">.</span><span class="n">__update__</span><span class="p">([</span>
                 <span class="p">(</span><span class="s1">'trailer'</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">),</span>
@@ -818,7 +818,7 @@
         <span class="c1"># NOTE: An explicit ``total_length`` is not checked against the octets</span>
         <span class="c1"># at hand, so that a ``from_data`` rebuild of a capture truncated by</span>
         <span class="c1"># snaplen keeps the length the sender declared, as UDP does</span>
-        <span class="c1"># (:issue:`1155`).</span>
+        <span class="c1"># (#1155).</span>
         <span class="k">if</span> <span class="n">length_flag</span> <span class="ow">and</span> <span class="n">total_length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">total_length</span> <span class="o">=</span> <span class="mi">6</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="n">seq</span> <span class="o">+</span> <span class="p">(</span><span class="n">offset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">))</span> <span class="o">+</span> <span class="p">(</span><span class="n">offset</span> <span class="ow">or</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
 
@@ -926,7 +926,7 @@
             <span class="c1"># NOTE: Passed as ``total_length`` since ``length`` is the parse</span>
             <span class="c1"># length :class:`~pcapkit.protocols.protocol.ProtocolBase` takes, so</span>
             <span class="c1"># under that key it never reached :meth:`make`, and the rebuild</span>
-            <span class="c1"># dropped both the Length field and the ``L`` flag (:issue:`1172`).</span>
+            <span class="c1"># dropped both the Length field and the ``L`` flag (#1172).</span>
             <span class="s1">'total_length'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
             <span class="c1"># NOTE: Passed so that a control message captured without ``L``</span>
             <span class="c1"># rebuilds as captured, rather than gaining the Length field</span>
@@ -939,7 +939,7 @@
             <span class="s1">'offset'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">offset</span><span class="p">,</span>
             <span class="s1">'padding'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'padding'</span><span class="p">),</span>
             <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
-            <span class="c1"># NOTE: And the octets captured past the Length field (:issue:`1455`).</span>
+            <span class="c1"># NOTE: And the octets captured past the Length field (#1455).</span>
             <span class="s1">'trailer'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'trailer'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">),</span>
         <span class="p">}</span></div>
 </div>

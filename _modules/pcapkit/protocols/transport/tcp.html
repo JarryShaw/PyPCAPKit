@@ -1024,7 +1024,7 @@
 
         <span class="c1"># NOTE: A Data Offset declaring more header than was captured leaves the</span>
         <span class="c1"># missing octets to read as zeros, which ``from_data`` then rebuilds;</span>
-        <span class="c1"># rejecting it keeps the octets as captured inside the parent (:issue:`1404`).</span>
+        <span class="c1"># rejecting it keeps the octets as captured inside the parent (#1404).</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">tcp</span><span class="o">.</span><span class="n">hdr_len</span><span class="p">:</span>
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: header length </span><span class="si">{</span><span class="n">tcp</span><span class="o">.</span><span class="n">hdr_len</span><span class="si">}</span><span class="s1"> runs past the end of '</span>
                                 <span class="sa">f</span><span class="s1">'the data (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="si">}</span><span class="s1"> octets)'</span><span class="p">)</span>

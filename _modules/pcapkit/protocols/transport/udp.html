@@ -668,7 +668,7 @@
 
         <span class="c1"># NOTE: Octets captured past the Length field belong to this layer,</span>
         <span class="c1"># since its own length field is what leaves them out of the payload,</span>
-        <span class="c1"># and the rebuild keeps them as captured (:issue:`1461`).</span>
+        <span class="c1"># and the rebuild keeps them as captured (#1461).</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">:</span>
             <span class="n">udp</span><span class="o">.</span><span class="n">__update__</span><span class="p">([</span>
                 <span class="p">(</span><span class="s1">'trailer'</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">trailer</span><span class="p">),</span>
@@ -715,7 +715,7 @@
         <span class="c1"># NOTE: An explicit ``total_length`` is written as given, so that a</span>
         <span class="c1"># ``from_data`` rebuild of a capture truncated by snaplen keeps the</span>
         <span class="c1"># length the sender declared instead of the one that was recorded</span>
-        <span class="c1"># (:issue:`1155`). Computed from the octets at hand otherwise, which is</span>
+        <span class="c1"># (#1155). Computed from the octets at hand otherwise, which is</span>
         <span class="c1"># what a plain ``UDP(payload=...)`` wants.</span>
         <span class="k">if</span> <span class="n">total_length</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">total_length</span> <span class="o">=</span> <span class="mi">8</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">payload</span><span class="p">)</span>
@@ -776,10 +776,10 @@
             <span class="s1">'checksum'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">checksum</span><span class="p">,</span>
             <span class="c1"># NOTE: The parsed length is passed through rather than left to</span>
             <span class="c1"># ``make`` to recompute, so that a truncated capture rebuilds with</span>
-            <span class="c1"># the length that was on the wire (:issue:`1155`).</span>
+            <span class="c1"># the length that was on the wire (#1155).</span>
             <span class="s1">'total_length'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">len</span><span class="p">,</span>
             <span class="s1">'payload'</span><span class="p">:</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">),</span>
-            <span class="c1"># NOTE: And the octets captured past the Length field (:issue:`1461`).</span>
+            <span class="c1"># NOTE: And the octets captured past the Length field (#1461).</span>
             <span class="s1">'trailer'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'trailer'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">),</span>
         <span class="p">}</span></div>
 </div>

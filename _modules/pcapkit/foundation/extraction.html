@@ -793,7 +793,7 @@
 
     <span class="c1"># Read-only copies of the registries as shipped. A public registrar</span>
     <span class="c1"># handed the built-in a name shipped with restores this entry, so an</span>
-    <span class="c1"># override can be undone (:issue:`1363`).</span>
+    <span class="c1"># override can be undone (#1363).</span>
     <span class="n">_shipped_output</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">MappingProxyType</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">__output__</span><span class="p">))</span>
     <span class="n">_shipped_engine</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">MappingProxyType</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">__engine__</span><span class="p">))</span>
     <span class="n">_shipped_reassembly</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">MappingProxyType</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">__reassembly__</span><span class="p">))</span>
@@ -1983,7 +1983,7 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_magic</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
             <span class="c1"># NOTE: ``peek`` makes at most one read of the stream, which a pipe or a</span>
             <span class="c1"># raw stream may answer with fewer than four octets, so a short peek is</span>
-            <span class="c1"># not a short file. Read them instead, and seek back (:issue:`1586`).</span>
+            <span class="c1"># not a short file. Read them instead, and seek back (#1586).</span>
             <span class="n">position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_magic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>

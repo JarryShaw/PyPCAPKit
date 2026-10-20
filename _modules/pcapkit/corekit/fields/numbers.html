@@ -1313,7 +1313,7 @@
                     <span class="k">return</span> <span class="n">member</span>
                 <span class="c1"># NOTE: A registry member is shared, so the captured bits</span>
                 <span class="c1"># outside ``bit_length`` go on an unregistered copy of it</span>
-                <span class="c1"># rather than on the member itself (:issue:`1488`).</span>
+                <span class="c1"># rather than on the member itself (#1488).</span>
                 <span class="n">attrs</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">val</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="n">member</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
                          <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'_name_'</span><span class="p">,</span> <span class="s1">'_value_'</span><span class="p">,</span> <span class="s1">'__reduce_ex__'</span><span class="p">)}</span>
                 <span class="n">attrs</span><span class="p">[</span><span class="n">_OUTSIDE_BITS</span><span class="p">]</span> <span class="o">=</span> <span class="n">record</span>
@@ -1616,7 +1616,7 @@
         <span class="c1"># NOTE: imported here rather than at module level, as</span>
         <span class="c1"># :mod:`pcapkit.const` itself imports :mod:`pcapkit.corekit`; and tested</span>
         <span class="c1"># against AppType rather than ``self._namespace``, as the</span>
-        <span class="c1"># per-transport copies this class replaced did (:issue:`1516`).</span>
+        <span class="c1"># per-transport copies this class replaced did (#1516).</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.apptype</span><span class="w"> </span><span class="kn">import</span> <span class="n">AppType</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
 
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">AppType</span><span class="p">):</span>

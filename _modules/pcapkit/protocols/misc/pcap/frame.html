@@ -842,11 +842,11 @@
 
             <span class="c1"># NOTE: A record whose ``incl_len`` runs past the end of the data is</span>
             <span class="c1"># kept as captured, as the PCAP-NG reader keeps a captured length</span>
-            <span class="c1"># running past its block (:issue:`1405`): ``incl_len`` and ``cap_len``</span>
+            <span class="c1"># running past its block (#1405): ``incl_len`` and ``cap_len``</span>
             <span class="c1"># stay as declared, so the record rebuilds byte-exactly, and the</span>
             <span class="c1"># packet is the octets present. A writer must not copy the declared</span>
             <span class="c1"># length; see :meth:`PCAPIO._append_value</span>
-            <span class="c1"># &lt;pcapkit.dumpkit.pcap.PCAPIO._append_value&gt;` (:issue:`1541`).</span>
+            <span class="c1"># &lt;pcapkit.dumpkit.pcap.PCAPIO._append_value&gt;` (#1541).</span>
             <span class="n">held</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_data</span><span class="p">)</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">length</span>
             <span class="k">if</span> <span class="n">held</span> <span class="o">&lt;</span> <span class="n">_ilen</span><span class="p">:</span>
                 <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP: [Frame </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fnum</span><span class="si">}</span><span class="s1">] captured length </span><span class="si">{</span><span class="n">_ilen</span><span class="si">}</span><span class="s1"> runs past the data, '</span>
