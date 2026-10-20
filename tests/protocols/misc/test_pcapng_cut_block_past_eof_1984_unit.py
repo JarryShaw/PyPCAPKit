@@ -7,7 +7,7 @@ the end of the file made that one field declare the missing octets, and past
 the zero-pad ceiling the read raised
 :exc:`~pcapkit.utilities.exceptions.FieldValueError` from inside the block's
 schema, which ended the whole extraction and lost every earlier frame. The body
-is now sized from the octets the file holds, at any declared length, so the
+is sized from the octets the file holds, at any declared length, so the
 block is reported as truncated as every other block type is, and extraction
 keeps the frames before it.
 
