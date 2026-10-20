@@ -426,8 +426,11 @@ jobs:
       #   way the tests run the one argv, in the scope or not.
       # `tests-status` holds the exit status, the scope and the probe's error,
       # the seconds the tests took, the kernel's OOM kills while they ran
-      # (/proc/vmstat `oom_kill`), the MemoryError count (`-w`, so Java's
-      # `OutOfMemoryError` and the flag are not counted) and the workers that
+      # (/proc/vmstat `oom_kill`), the MemoryErrors raised, as the lines that
+      # `MemoryError` heads, alone or before a `:`, at the line's start or after
+      # pytest's `E`, an `INTERNALERROR>` or an exception group's `|` (#1962: a
+      # mention is not one, such as a docstring a traceback prints, and nor are
+      # Java's `OutOfMemoryError` and the flag), and the workers that
       # crashed, by xdist's `[gwN] node down:` lines (under `-q` it prints no
       # `replacing crashed worker`, xdist/dsession.py:78-80 at v3.8.0), for
       # `Containment summary`.
@@ -516,7 +519,7 @@ jobs:
           set -e
           elapsed=$((SECONDS - started))
           after=$(oom_kills)
-          memory_errors=$(grep -cw MemoryError "$RUNNER_TEMP/pytest.log" || true)
+          memory_errors=$(grep -cE '^(INTERNALERROR> *)?(E +)?( *\| *)*MemoryError(:|[[:space:]]*$)' "$RUNNER_TEMP/pytest.log" || true)
           crashed_workers=$(grep -c '\] node down: ' "$RUNNER_TEMP/pytest.log" || true)
           printf 'exit=%s\nscope=%s\nprobe=%s\nelapsed=%s\noom_kills=%s\nmemory_errors=%s\ncrashed_workers=%s\n' \
             "$status" "$scope" "$probe" "$elapsed" "$(( ${after:-0} - ${before:-0} ))" "$memory_errors" \

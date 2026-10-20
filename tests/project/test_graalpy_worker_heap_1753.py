@@ -109,7 +109,7 @@ class TestTheCrashesAreCounted(unittest.TestCase):
         self.assertEqual(status['memory_errors'], '0')
 
     def test_a_java_out_of_memory_line_is_no_memory_error(self) -> None:
-        """``-w``: the flag, and Java's ``OutOfMemoryError``, are not Python's ``MemoryError``."""
+        """The flag, and Java's ``OutOfMemoryError``, are not Python's ``MemoryError`` (#1962)."""
         status = self.status('echo "heap $GRAAL_PYTHON_VM_ARGS"\necho "java.lang.OutOfMemoryError: Java heap space"\n'
                              'echo "E   MemoryError"\necho "MemoryError: out of memory"\nexit 1\n')
         self.assertEqual(status['memory_errors'], '2')

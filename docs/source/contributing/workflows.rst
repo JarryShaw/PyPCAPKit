@@ -891,7 +891,8 @@ warnings:
 
 The step writes ``$RUNNER_TEMP/tests-status``: the exit status, the scope and the
 probe's error, the seconds the tests took, the OOM kills while they ran
-(``/proc/vmstat``), the ``MemoryError`` lines in their output and xdist's ``node
+(``/proc/vmstat``), the lines in their output that report a raised ``MemoryError`` (#1962),
+not those that mention one, such as a docstring a traceback prints, and xdist's ``node
 down`` lines. From it and the monitor's last sample, ``Containment summary`` warns
 ``No memory cap``, ``tests lost a process to the OOM killer``, ``tests timed out at 110
 minutes``, ``tests raised MemoryError`` or ``tests lost an xdist worker``, each a
