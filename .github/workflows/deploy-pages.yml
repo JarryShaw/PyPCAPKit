@@ -192,7 +192,7 @@ jobs:
   # result is checked explicitly, under `!cancelled()`: `unit-tests` or `verdict`
   # always skips, and a skip anywhere in the chain skips a job left with the
   # implicit `success()` (#1632). Its own group keeps one push to `gh-pages` at
-  # a time.
+  # a time, and its check below keeps an older build from replacing a newer one.
   publish-pages:
     name: Publish to gh-pages
     needs: [ deploy-pages ]
@@ -221,10 +221,40 @@ jobs:
           gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --name pages-html
           --dir docs/build/html
 
+      # Builds finish in any order, and one group per job cannot order them: a
+      # job joining a group cancels the one pending there, so sharing the build's
+      # group would cancel the next build. So each deploy names its commit, and
+      # this step reads the commit `gh-pages` last published. Where that one is
+      # newer than this run's -- this run's commit is behind it on `main` -- the
+      # deploy is skipped. Anything else publishes, as before: no `gh-pages`, a
+      # head this workflow did not write, an API error, the same commit, or one
+      # that is not an ancestor. A head check alone would also skip when the
+      # newer commit's own run never publishes, a red one, leaving the docs
+      # older than this build.
+      - name: Check gh-pages holds no newer build
+        id: fresh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          published="$(gh api "repos/$GITHUB_REPOSITORY/commits/gh-pages" --jq .commit.message |
+                       sed -n 's/^Publish the documentation of \([0-9a-f]\{40\}\)$/\1/p' | head -n 1)"
+          if [ -n "$published" ] && [ "$published" != "$GITHUB_SHA" ]; then
+            status="$(gh api "repos/$GITHUB_REPOSITORY/compare/$published...$GITHUB_SHA" --jq .status || true)"
+            if [ "$status" = behind ]; then
+              echo "::notice title=Newer documentation already published::gh-pages holds the build of $published, which $GITHUB_SHA is behind on main, so this older build is not published"
+              echo "publish=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+          echo "publish=true" >> "$GITHUB_OUTPUT"
+
       - name: Deploy 🚀
+        if: steps.fresh.outputs.publish == 'true'
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages # The branch the action should deploy to.
           folder: docs/build/html # The folder the action should deploy.
           clean: true # Automatically remove deleted files from the deploy branch
+          # Read back by the step above; keep the two in step.
+          commit-message: Publish the documentation of ${{ github.sha }}

@@ -264,6 +264,13 @@ class TestEveryWorkflowDeclaresPermissions(unittest.TestCase):
                 self.assertEqual(writes, job_id == 'publish-pages')
         self.assertFalse([entry for entry in publish['steps'] if 'pip install' in str(entry.get('run', ''))])
 
+    def test_the_deploy_waits_on_the_freshness_check(self) -> None:
+        steps = workflow('deploy-pages.yml')['jobs']['publish-pages']['steps']
+        ids = [entry.get('id') for entry in steps]
+        deploy = next(index for index, entry in enumerate(steps) if 'JamesIves' in str(entry.get('uses', '')))
+        self.assertLess(ids.index('fresh'), deploy)
+        self.assertEqual(steps[deploy]['if'], "steps.fresh.outputs.publish == 'true'")
+
     def test_the_built_site_reaches_the_publish_job_whole(self) -> None:
         """``.nojekyll`` is a hidden file, which upload-artifact drops by default."""
         build = workflow('deploy-pages.yml')['jobs']['deploy-pages']['steps']
@@ -278,6 +285,86 @@ class TestEveryWorkflowDeclaresPermissions(unittest.TestCase):
         self.assertIn('--dir docs/build/html', download['run'])
         deploy = next(entry for entry in publish if 'JamesIves' in str(entry.get('uses', '')))
         self.assertEqual(deploy['with']['folder'], 'docs/build/html')
+
+
+#: A ``gh`` that answers the two ``gh api`` calls the check makes from the
+#: environment, and logs each call. ``$2`` is the endpoint.
+GH_STUB = '''#!/bin/sh
+printf '%s\\n' "$*" >> "$STUB_LOG"
+case "$2" in
+  */commits/gh-pages) [ -z "$STUB_COMMITS_FAIL" ] || exit 1; printf '%s\\n' "$STUB_MESSAGE" ;;
+  */compare/*) [ -z "$STUB_COMPARE_FAIL" ] || exit 1; printf '%s\\n' "$STUB_STATUS" ;;
+  *) exit 2 ;;
+esac
+'''
+
+#: This run's commit, and the one ``gh-pages`` last published.
+OURS = '1' * 40
+THEIRS = '2' * 40
+
+
+@unittest.skipIf(yaml is None, 'PyYAML, from the test extra, is not installed')
+class TestPublishSkipsAnOlderBuild(unittest.TestCase):
+    """``Check gh-pages holds no newer build``, run as ``bash -e`` runs it, ``gh`` stubbed.
+
+    Builds finish in any order, so an older run's publish can reach ``gh-pages``
+    after a newer one's; the check is what stops it replacing the newer docs.
+
+    """
+
+    def setUp(self) -> None:
+        tmp = tempfile.TemporaryDirectory()
+        self.addCleanup(tmp.cleanup)
+        self.root = pathlib.Path(tmp.name)
+        stub = self.root / 'bin' / 'gh'
+        stub.parent.mkdir()
+        stub.write_text(GH_STUB, encoding='utf-8')
+        stub.chmod(0o755)
+        self.steps = workflow('deploy-pages.yml')['jobs']['publish-pages']['steps']
+        self.check = next(entry for entry in self.steps if entry.get('id') == 'fresh')
+        deploy = next(entry for entry in self.steps if 'JamesIves' in str(entry.get('uses', '')))
+        #: What the deploy writes as the ``gh-pages`` commit for ``THEIRS``.
+        self.ours_message = deploy['with']['commit-message'].replace('${{ github.sha }}', THEIRS)
+
+    def run_check(self, message: 'str', status: 'str' = '', **flags: 'str') -> 'tuple[dict[str, str], str, str]':
+        """The check's outputs, its stdout, and the ``gh`` calls it made."""
+        script = self.root / 'check.sh'
+        script.write_text(self.check['run'], encoding='utf-8')
+        output, log = self.root / 'check.output', self.root / 'gh.log'
+        output.write_text('', encoding='utf-8')
+        log.write_text('', encoding='utf-8')
+        env = {'PATH': f'{self.root / "bin"}{os.pathsep}{os.environ.get("PATH", "")}', 'LC_ALL': 'C',
+               'GITHUB_SHA': OURS, 'GITHUB_REPOSITORY': 'JarryShaw/PyPCAPKit', 'GITHUB_OUTPUT': str(output),
+               'STUB_LOG': str(log), 'STUB_MESSAGE': message, 'STUB_STATUS': status, **flags}
+        result = subprocess.run(['bash', '-e', str(script)], cwd=self.root, env=env, capture_output=True,
+                                text=True, check=False, timeout=scale_timeout(30))
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        outputs = dict(line.split('=', 1) for line in output.read_text(encoding='utf-8').splitlines())
+        return outputs, result.stdout, log.read_text(encoding='utf-8')
+
+    def test_a_newer_published_build_is_kept(self) -> None:
+        outputs, stdout, calls = self.run_check(self.ours_message, 'behind')
+        self.assertEqual(outputs, {'publish': 'false'})
+        self.assertIn('::notice title=Newer documentation already published::', stdout)
+        self.assertIn(f'compare/{THEIRS}...{OURS}', calls)
+
+    def test_an_older_or_unrelated_published_build_is_replaced(self) -> None:
+        for status in ('ahead', 'diverged', 'identical', ''):
+            with self.subTest(status=status):
+                self.assertEqual(self.run_check(self.ours_message, status)[0], {'publish': 'true'})
+
+    def test_a_rerun_of_the_published_commit_publishes(self) -> None:
+        message = self.ours_message.replace(THEIRS, OURS)
+        outputs, _, calls = self.run_check(message, 'behind')
+        self.assertEqual(outputs, {'publish': 'true'})
+        self.assertNotIn('compare/', calls)
+
+    def test_what_it_cannot_read_publishes_as_before(self) -> None:
+        """A head this workflow did not write, or an API error: the old behaviour."""
+        default = f'Deploying to gh-pages from @ JarryShaw/PyPCAPKit@{THEIRS} \U0001f680'
+        self.assertEqual(self.run_check(default, 'behind')[0], {'publish': 'true'})
+        self.assertEqual(self.run_check(self.ours_message, 'behind', STUB_COMMITS_FAIL='1')[0], {'publish': 'true'})
+        self.assertEqual(self.run_check(self.ours_message, 'behind', STUB_COMPARE_FAIL='1')[0], {'publish': 'true'})
 
 
 if __name__ == '__main__':

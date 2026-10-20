@@ -1018,7 +1018,9 @@ No other workflow in scope here declares one -- including
 through an ``environment:``-gated deployment. Its ``deploy-pages`` job builds
 the site, a pull request's included, with ``contents: read``, and uploads it
 for ``publish-pages``, which alone holds ``contents: write`` and never runs on
-a pull request
+a pull request. Its ``Check gh-pages holds no newer build`` step skips the
+deploy when ``gh-pages`` already holds the build of a commit this run's commit
+is behind, so a build that finishes late cannot replace newer documentation
 (`#1968 <https://github.com/JarryShaw/PyPCAPKit/issues/1968>`__). Of these environments, only
 ``github-release`` carries a required reviewer; :doc:`releasing`
 covers why one approval on that single environment is enough to gate the
