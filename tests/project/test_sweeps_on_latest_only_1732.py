@@ -73,9 +73,11 @@ GATING = ('required-checks', 'unittest-ordering')
 #: The unit tier's own flags, which every leg passes.
 TIER_FLAGS = ('--ignore=tests/integration', '--ignore-glob=*_runtime.py', '--ignore-glob=*_regression.py')
 #: A ``python`` that writes each argument on a line of ``$ARGS_FILE``, and hands a
-#: ``-c`` to the real one, which is how the steps ask tests/_tiers.py, and
-#: util/cap_file_size.py, which execs this stub with the command it caps (#1969).
-STUB = ('#!/bin/sh\ncase "$1" in -c|util/cap_file_size.py) exec "$REAL_PYTHON" "$@";; esac\n'
+#: ``-c`` to the real one, which is how the steps ask tests/_tiers.py. util/cap_file_size.py's
+#: command it execs, as the script does, with no real interpreter: under the coverage
+#: leg one would be measured, be logged as a second ``coverage run --rcfile``
+#: controller, and exec before saving, which fails the #1387 guard (#1969).
+STUB = ('#!/bin/sh\ncase "$1" in -c) exec "$REAL_PYTHON" "$@";; util/cap_file_size.py) shift; exec "$@";; esac\n'
         'printf \'%s\\n\' "$@" > "$ARGS_FILE"\n')
 #: A directory holding sweeps, hand-picked round trips, and modules that only import
 #: the sweeps' harnesses' packet builders, for :class:`TestTheIgnoresAreTheLatestTier`.
@@ -146,6 +148,27 @@ def pytest_args(argv: 'list[str]') -> 'list[str]':
         if argv[index:index + 2] == ['-m', 'pytest']:
             return argv[index + 2:]
     raise AssertionError(f'no `-m pytest` in {argv}')
+
+
+@unittest.skipIf(shutil.which('sh') is None, 'the stub is a sh script')
+class TestTheStubRunsNoRealInterpreterForTheCap(unittest.TestCase):
+    """#1969: :data:`STUB` records the command util/cap_file_size.py caps without a real ``python``."""
+
+    def test_the_coverage_command_is_recorded_without_the_real_interpreter(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            for name, text in (('python', STUB), ('real', '#!/bin/sh\necho "$@" >> "$REAL_LOG"\n')):
+                path = pathlib.Path(temp, name)
+                path.write_text(text, encoding='utf-8')
+                path.chmod(0o755)
+            record, real = pathlib.Path(temp, 'args'), pathlib.Path(temp, 'real.log')
+            env = dict(os.environ, ARGS_FILE=str(record), REAL_PYTHON=str(pathlib.Path(temp, 'real')),
+                       REAL_LOG=str(real), PATH=temp + os.pathsep + os.environ.get('PATH', ''))
+            command = ['-m', 'coverage', 'run', '--rcfile=.github/coverage.toml', '-m', 'pytest', '-q']
+            result = subprocess.run(['python', 'util/cap_file_size.py', 'python', *command], env=env,  # nosec B603 B607
+                                    capture_output=True, text=True, check=False, timeout=60)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertFalse(real.exists(), 'the real interpreter ran the capped coverage command')
+            self.assertEqual(record.read_text(encoding='utf-8').splitlines(), command)
 
 
 def ignored(argv: 'list[str]') -> 'list[str]':
