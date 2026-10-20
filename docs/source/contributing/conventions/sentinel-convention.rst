@@ -163,7 +163,7 @@ Where the sentinels differ, the differences are **needs, not inconsistencies**:
    reach round them either. The metaclass does the same for the type, raising
    :exc:`TypeError` as ``type(None).x = 1`` does, so neither ``_name`` nor the cached
    instance can be swapped out. It lets through only ``_abc_negative_cache`` and
-   ``_abc_negative_cache_version``, which ``_py_abc``, the fallback :mod:`abc` uses
+   ``_abc_negative_cache_version``, which ``_py_abc``, the fallback ``abc`` uses
    without the C ``_abc`` module, rebinds during an :func:`isinstance` check
    (:issue:`1960`). It also refuses to let a concrete sentinel type be
    subclassed, by a ``class`` statement or by ``register``, as ``type(None)`` cannot be;

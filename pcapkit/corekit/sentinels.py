@@ -58,11 +58,11 @@ if TYPE_CHECKING:
 _FROZEN = '_frozen'
 
 #: frozenset[str]: The cache names ``_py_abc``, the pure-Python fallback
-#: :mod:`abc` uses where the C ``_abc`` module is missing, rebinds on a class
+#: ``abc`` uses where the C ``_abc`` module is missing, rebinds on a class
 #: while an :func:`isinstance` or :func:`issubclass` check runs against it
 #: (:issue:`1960`). A frozen sentinel type still lets these through, and only
 #: where its own :attr:`~object.__dict__` already holds the name, which only
-#: that fallback's :meth:`~abc.ABCMeta.__new__` puts there. Each can only make
+#: that fallback's ``ABCMeta.__new__`` puts there. Each can only make
 #: a check answer "no" or look again, never "yes". ``_abc_registry`` and
 #: ``_abc_cache`` are left out, being set only while the type is built, and
 #: replacing either could make a check answer "yes".
@@ -97,7 +97,7 @@ class SentinelMeta(abc.ABCMeta):
       ``type(None).x = 1`` does, so ``_name``, ``_instance`` and the methods
       every sentinel inherits stay as they were defined. The one exception is
       ``_abc_negative_cache`` and ``_abc_negative_cache_version``, which
-      ``_py_abc``, the fallback :mod:`abc` uses without the C ``_abc``
+      ``_py_abc``, the fallback ``abc`` uses without the C ``_abc``
       module, rebinds during an :func:`isinstance` check (:issue:`1960`).
 
     A concrete sentinel type also gets ``__final__`` set to :obj:`True` here.
