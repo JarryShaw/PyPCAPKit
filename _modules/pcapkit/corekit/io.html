@@ -771,6 +771,32 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">buf_off</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_cur</span> <span class="o">-</span> <span class="n">buf_off</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_take_buffer</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">size</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="o">/</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>
+<span class="w">        </span><span class="sa">r</span><span class="sd">"""Read up to ``size`` octets from the buffer's cursor, as a copy, and move past them.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            size: Octets to read, no more than :meth:`_seek_buffer` says the buffer can serve.</span>
+<span class="sd">            line: Stop after the first ``b'\n'``, as :meth:`io.BytesIO.readline` does.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The octets read.</span>
+
+<span class="sd">        Note:</span>
+<span class="sd">            The octets are copied out of :attr:`_buffer_view`, not read with</span>
+<span class="sd">            :meth:`io.BytesIO.read`, ``read1`` or ``readline``. On GraalPy those can hand</span>
+<span class="sd">            back :obj:`bytes` that share the memory of a :class:`io.BytesIO` whose buffer</span>
+<span class="sd">            is exported, as this one's is, so the next :meth:`_write_buffer`, which writes</span>
+<span class="sd">            through the view, changed octets that had already been returned</span>
+<span class="sd">            (:issue:`1963`). A slice of the view, copied, is a copy on every interpreter.</span>
+
+<span class="sd">        """</span>
+        <span class="n">buf_off</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+        <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_view</span><span class="p">[</span><span class="n">buf_off</span><span class="p">:</span><span class="n">buf_off</span> <span class="o">+</span> <span class="n">size</span><span class="p">]</span><span class="o">.</span><span class="n">tobytes</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">line</span> <span class="ow">and</span> <span class="p">(</span><span class="n">eol</span> <span class="o">:=</span> <span class="n">buf</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="sa">b</span><span class="s1">'</span><span class="se">\n</span><span class="s1">'</span><span class="p">))</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">buf</span> <span class="o">=</span> <span class="n">buf</span><span class="p">[:</span><span class="n">eol</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">buf_off</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">),</span> <span class="n">io</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">buf</span>
+
 <div class="viewcode-block" id="SeekableReader.close">
 <a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader.close">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">close</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
@@ -871,7 +897,7 @@
                 <span class="n">buf</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">buf_rem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seek_buffer</span><span class="p">()</span>
-                <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">readline</span><span class="p">(</span><span class="n">buf_rem</span> <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="nb">min</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">buf_rem</span><span class="p">))</span>
+                <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_take_buffer</span><span class="p">(</span><span class="n">buf_rem</span> <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="nb">min</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">buf_rem</span><span class="p">),</span> <span class="n">line</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
             <span class="c1"># NOTE: an unbounded ``readline`` has to keep going until the line ends, and</span>
             <span class="c1"># capping it at the buffer's content -- which the line need not end inside --</span>
@@ -1180,7 +1206,7 @@
                 <span class="n">buf</span> <span class="o">=</span> <span class="sa">b</span><span class="s1">''</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">buf_rem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seek_buffer</span><span class="p">()</span>
-                <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">buf_rem</span> <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="nb">min</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">buf_rem</span><span class="p">))</span>
+                <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_take_buffer</span><span class="p">(</span><span class="n">buf_rem</span> <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="nb">min</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">buf_rem</span><span class="p">))</span>
 
             <span class="n">size_rem</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
             <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="ow">or</span> <span class="p">(</span><span class="n">size_rem</span> <span class="o">:=</span> <span class="n">size</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">buf</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -1217,7 +1243,7 @@
                 <span class="c1"># NOTE: no continuation from the stream when the buffer answered, since</span>
                 <span class="c1"># :meth:`read1` is specified to return only buffered octets if any are.</span>
                 <span class="n">buf_rem</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_seek_buffer</span><span class="p">()</span>
-                <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">read1</span><span class="p">(</span><span class="n">buf_rem</span> <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="nb">min</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">buf_rem</span><span class="p">))</span>
+                <span class="n">buf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_take_buffer</span><span class="p">(</span><span class="n">buf_rem</span> <span class="k">if</span> <span class="n">size</span> <span class="o">&lt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="nb">min</span><span class="p">(</span><span class="n">size</span><span class="p">,</span> <span class="n">buf_rem</span><span class="p">))</span>
 
             <span class="k">if</span> <span class="ow">not</span> <span class="n">buf</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
                 <span class="n">size_rem</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
