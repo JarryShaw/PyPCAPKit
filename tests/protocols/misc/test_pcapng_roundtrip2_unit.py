@@ -296,8 +296,10 @@ class TestPCAPNGModelling(PCAPNGTestCase):
         self.assertRebuilds(_epb_with_options(verdict + verdict))
 
     def test_wireguard_error_names_the_line(self) -> None:
-        """#1286: the error message carries the offending line."""
-        from pcapkit.utilities.exceptions import FieldValueError
+        """#1286, #1985: a malformed line warns, eliding what it holds, rather than aborting the parse."""
+        import warnings
+
+        from pcapkit.utilities.warnings import ProtocolWarning
 
         body = b'a b c\n\x00\x00'
         octets = b''.join((
@@ -305,8 +307,14 @@ class TestPCAPNGModelling(PCAPNGTestCase):
             (0x57474b4c).to_bytes(4, 'little'), (6).to_bytes(4, 'little'),
             body, (28).to_bytes(4, 'little'),
         ))
-        with self.assertRaisesRegex(FieldValueError, r"format: 'a b c'"):
-            self._parse(octets)
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            with self.assertWarns(ProtocolWarning) as caught:
+                parsed = self._parse(octets)
+            self.assertEqual(str(caught.warning), 'PCAP-NG: invalid WireGuard key log line with an '
+                                                  'unrecognised label; line elided, kept as captured')
+            self.assertEqual(len(parsed.info.secrets_data.entries), 0)
+            self.assertRebuilds(octets)
 
 
 if __name__ == '__main__':
