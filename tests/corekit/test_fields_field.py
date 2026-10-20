@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import struct
+import sys
 import threading
 import unittest
 
@@ -177,7 +178,9 @@ class FieldBaseUnpackBoundsTests(unittest.TestCase):
         in case a future regression reintroduces the allocation instead of
         just moving the threshold.
         """
-        huge_declared_length = 2 ** 34  # 16 GiB; must never actually be allocated.
+        # 16 GiB; must never actually be allocated. ``struct`` refuses a count
+        # past ``sys.maxsize``, which is 2 GiB less one on GraalPy (#1963).
+        huge_declared_length = min(2 ** 34, sys.maxsize)
         field = self.BytesField(length=huge_declared_length)
 
         with time_limit():

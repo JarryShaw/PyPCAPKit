@@ -92,6 +92,35 @@ class MultiDictTests(unittest.TestCase):
                          [('a', 1), ('a', 2), ('c', 3)])
         self.assertEqual(list(self.multidict.iter_multi_items([('x', 1)])), [('x', 1)])
 
+    def test_werkzeug_31_takes_any_mapping_and_set_values(self) -> None:
+        import types  # pylint: disable=import-outside-toplevel
+
+        proxy = types.MappingProxyType({'a': [1, 2], 'b': {3}, 'c': set()})
+        self.assertEqual(list(self.multidict.iter_multi_items(proxy)), [('a', 1), ('a', 2), ('b', 3)])
+        data = self.multidict.MultiDict(proxy)
+        self.assertEqual(data.to_dict(flat=False), {'a': [1, 2], 'b': [3]})
+        ordered = self.multidict.OrderedMultiDict(proxy)
+        self.assertEqual(list(ordered.items(multi=True)), [('a', 1), ('a', 2), ('b', 3)])
+
+    def test_werkzeug_31_or_operators(self) -> None:
+        for cls in (self.multidict.MultiDict, self.multidict.OrderedMultiDict):
+            with self.subTest(cls=cls.__name__):
+                data = cls([('a', 1)])
+                merged = data | {'a': [2], 'b': 3}
+                self.assertIsInstance(merged, cls)
+                self.assertEqual(list(merged.items(multi=True)), [('a', 1), ('a', 2), ('b', 3)])
+                self.assertEqual(list(data.items(multi=True)), [('a', 1)])
+
+                with self.assertRaises(TypeError):
+                    data | [('b', 3)]  # pylint: disable=pointless-statement
+                self.assertIs(data.__or__([('b', 3)]), NotImplemented)
+
+                same = data
+                same |= [('c', 4)]
+                self.assertIs(same, data)
+                self.assertEqual(list(data.items(multi=True)), [('a', 1), ('c', 4)])
+                self.assertIs(data.__ior__(5), NotImplemented)
+
     def test_multidict_setlistdefault_returns_internal_list(self) -> None:
         data = self.multidict.MultiDict()
         values = data.setlistdefault('letters', ['a'])

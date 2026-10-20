@@ -33,6 +33,7 @@ import copy
 import importlib
 import inspect
 import pickle
+import sys
 import unittest
 from typing import TYPE_CHECKING
 
@@ -60,6 +61,11 @@ SENTINELS = (
 
 #: Python's own singletons, which a sentinel is to behave like.
 BUILTINS = (None, Ellipsis, NotImplemented)
+
+#: The lowest :mod:`pickle` protocol a :class:`typing.Generic` subclass round-trips at.
+#: GraalPy's :class:`typing.Generic` is not a heap type, so ``copyreg._reduce_ex``,
+#: which protocols 0 and 1 use, stops at it and fails on ``Generic(obj)`` (#1963).
+LOWEST_PROTOCOL = 2 if sys.implementation.name == 'graalpy' else 0
 
 #: Pickles written at ``75a9f237b``, keyed by ``(object name, protocol)``. ``NULL``
 #: reduced to the module-level ``_get_null``; the others took the default reduce,
@@ -444,7 +450,7 @@ class RealObjectTests(_ReimportCase):
         bad = []
         if copy.deepcopy(schema).options[0].seed is not no_value:
             bad.append('deepcopy')
-        for protocol in range(pickle.HIGHEST_PROTOCOL + 1):
+        for protocol in range(LOWEST_PROTOCOL, pickle.HIGHEST_PROTOCOL + 1):
             if pickle.loads(pickle.dumps(schema, protocol=protocol)).options[0].seed is not no_value:
                 bad.append(protocol)
         self.assertEqual(bad, [])

@@ -19,6 +19,7 @@ import importlib.util
 import json
 import os
 import plistlib
+import sys
 import tempfile
 import unittest
 from unittest import mock
@@ -57,7 +58,9 @@ class TestFallbackBounded(unittest.TestCase):
         reimport_once_per_class(self)
         self.tmpdir = tempfile.TemporaryDirectory()  # pylint: disable=consider-using-with
         self.addCleanup(self.tmpdir.cleanup)
-        if resource is not None:
+        # NOTE: GraalPy's ``resource`` has no ``setrlimit`` (#1963), so there, as
+        # off POSIX, the file is left to the leg's own cap.
+        if resource is not None and sys.implementation.name != 'graalpy':
             # NOTE: without the fix, the class case writes without bound, so
             # cap the file size rather than let it fill the disk.
             limits = resource.getrlimit(resource.RLIMIT_FSIZE)

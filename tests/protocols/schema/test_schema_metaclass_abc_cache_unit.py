@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import sys
 import unittest
 from collections import ChainMap
 from collections.abc import Mapping
@@ -13,6 +14,11 @@ __tier__ = 'ALL'
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
+
+#: GraalPy's :mod:`abc` is ``_py_abc``, which keeps its registry and caches as separate
+#: attributes, not in the C accelerator's ``_abc_impl`` these tests inspect (#1963).
+NO_ABC_IMPL = sys.implementation.name == 'graalpy'
+NO_ABC_IMPL_REASON = "GraalPy's abc is _py_abc, which has no _abc_impl (#1963)"
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
@@ -113,6 +119,7 @@ class SchemaMetaAbcCacheTests(unittest.TestCase):
         # THEN ask Mapping. A plain dict must still be reported as one.
         self.assertTrue(isinstance({}, Mapping))
 
+    @unittest.skipIf(NO_ABC_IMPL, NO_ABC_IMPL_REASON)
     def test_schema_subclasses_have_their_own_abc_impl(self) -> None:
         """Every schema class gets its own ABCMeta registry/cache triple.
 
@@ -181,6 +188,7 @@ class SchemaMetaAbcCacheTests(unittest.TestCase):
         del _SharedChild._abc_impl
         return _Shared, _SharedChild
 
+    @unittest.skipIf(NO_ABC_IMPL, NO_ABC_IMPL_REASON)
     def test_probing_the_same_exact_type_reproduces_439s_shape(self) -> None:
         """The general mechanism, generalised beyond :class:`dict` and ``Schema``.
 
@@ -201,6 +209,7 @@ class SchemaMetaAbcCacheTests(unittest.TestCase):
         self.assertTrue(isinstance(ChainMap(), Mapping))
         self.assertTrue(isinstance(ChainMap(), _SharedChild))
 
+    @unittest.skipIf(NO_ABC_IMPL, NO_ABC_IMPL_REASON)
     def test_probing_a_different_exact_type_gives_a_false_negative(self) -> None:
         """A pitfall in reproducing #439: the cache is keyed by *exact* type.
 

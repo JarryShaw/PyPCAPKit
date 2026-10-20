@@ -41,11 +41,14 @@ it.
 from __future__ import annotations
 
 import contextlib
+import errno
 import gc
 import hashlib
 import importlib
 import pathlib
+import sys
 import tempfile
+import time
 import types
 import warnings
 from typing import TYPE_CHECKING
@@ -531,6 +534,22 @@ collect_ignore = [f'protocols/{PROBE_MODULE_NAME}']
 #: module in question here too.
 _LOCK_MANAGED_ELSEWHERE = frozenset({PROBE_MODULE_NAME, 'test_tier_guard_xdist.py'})
 
+#: Whether :func:`_tier_guard_flock` polls with ``LOCK_NB`` instead of blocking
+#: (#1977). GraalPy keeps the GIL while a thread sits in a blocking
+#: :func:`fcntl.flock`, so a waiter there stops every other thread of its
+#: process -- the holder it waits on, when both are threads of one process as in
+#: :class:`~tests.test_tier_guard_xdist.ProbeWriteLockTests`, and
+#: pytest-timeout's timer thread, so nothing ends the wait. CPython releases the
+#: GIL there, and keeps the blocking call: the kernel wakes a blocked waiter the
+#: moment the lock frees, where a poller only wins if it happens to ask inside a
+#: gap between readers' holds.
+TIER_GUARD_LOCK_POLLS = sys.implementation.name == 'graalpy'
+
+#: Seconds :func:`_tier_guard_flock` sleeps between non-blocking attempts, when
+#: :data:`TIER_GUARD_LOCK_POLLS` is set. :func:`time.sleep` releases the GIL on
+#: GraalPy as on CPython.
+TIER_GUARD_LOCK_POLL = 0.05
+
 
 def _tier_guard_lock_path() -> 'pathlib.Path':
     """Where the probe/scan mutex lives, one file per checkout.
@@ -542,6 +561,29 @@ def _tier_guard_lock_path() -> 'pathlib.Path':
     """
     digest = hashlib.sha1(str(ROOT).encode('utf-8')).hexdigest()[:16]
     return pathlib.Path(tempfile.gettempdir()) / f'pcapkit-tier-guard-probe-{digest}.lock'
+
+
+def _tier_guard_flock(fd: 'int', operation: 'int') -> None:
+    """Take :func:`fcntl.flock` ``operation`` on ``fd``, waiting as long as it takes.
+
+    A blocking call, except where :data:`TIER_GUARD_LOCK_POLLS` says that would
+    hold the GIL: there, ``LOCK_NB`` retried after a :data:`TIER_GUARD_LOCK_POLL`
+    sleep, so no thread ever sits inside a blocking ``flock``. Only "would
+    block" is retried; any other error propagates.
+
+    """
+    if not TIER_GUARD_LOCK_POLLS:
+        fcntl.flock(fd, operation)
+        return
+    while True:
+        try:
+            fcntl.flock(fd, operation | fcntl.LOCK_NB)
+        except OSError as exc:
+            if exc.errno not in (errno.EWOULDBLOCK, errno.EAGAIN):
+                raise
+            time.sleep(TIER_GUARD_LOCK_POLL)
+        else:
+            return
 
 
 @contextlib.contextmanager
@@ -577,6 +619,18 @@ def _tier_guard_lock(exclusive: 'bool') -> 'Iterator[None]':
     :file:`.github/workflows/python-compatibility.yml`), so a platform this
     cannot protect is exactly as exposed to the race as it always was, not more.
 
+    Linux :func:`fcntl.flock` grants a shared request whenever no exclusive
+    hold is *granted*, however long a writer has been waiting, so readers whose
+    holds overlap can keep a writer out indefinitely -- and on GraalPy, which
+    has to poll (see :data:`TIER_GUARD_LOCK_POLLS`), they do (#1977). A second
+    lock file, the gate, gives the writer priority: a writer holds the gate
+    exclusively while it waits for the lock, and a reader passes through the
+    gate, shared and released at once, before asking for the lock. Readers
+    hold the gate only for that instant, so the writer gets it almost at once,
+    and the readers already past it then drain. The kernel drops both locks
+    with a dying process, so no crash can leave the gate shut. Every wait is
+    unbounded, as before: proceeding without the lock would reopen the race.
+
     Args:
         exclusive: :data:`True` for the writer's hold, :data:`False` for a
             reader's.
@@ -586,8 +640,19 @@ def _tier_guard_lock(exclusive: 'bool') -> 'Iterator[None]':
         yield
         return
     path = _tier_guard_lock_path()
-    with open(path, 'a', encoding='utf-8') as handle:
-        fcntl.flock(handle.fileno(), fcntl.LOCK_EX if exclusive else fcntl.LOCK_SH)
+    gate_path = path.with_name(f'{path.name}.gate')
+    with open(gate_path, 'a', encoding='utf-8') as gate, \
+            open(path, 'a', encoding='utf-8') as handle:
+        if exclusive:
+            _tier_guard_flock(gate.fileno(), fcntl.LOCK_EX)
+            try:
+                _tier_guard_flock(handle.fileno(), fcntl.LOCK_EX)
+            finally:
+                fcntl.flock(gate.fileno(), fcntl.LOCK_UN)
+        else:
+            _tier_guard_flock(gate.fileno(), fcntl.LOCK_SH)
+            fcntl.flock(gate.fileno(), fcntl.LOCK_UN)
+            _tier_guard_flock(handle.fileno(), fcntl.LOCK_SH)
         try:
             yield
         finally:

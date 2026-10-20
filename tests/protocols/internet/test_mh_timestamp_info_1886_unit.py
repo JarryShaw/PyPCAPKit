@@ -24,6 +24,7 @@ import os
 import pickle
 import plistlib
 import struct
+import sys
 import tempfile
 import unittest
 import warnings
@@ -36,6 +37,11 @@ __tier__ = 'ALL'
 
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
+
+#: The lowest :mod:`pickle` protocol a :class:`typing.Generic` subclass round-trips at.
+#: GraalPy's :class:`typing.Generic` is not a heap type, so ``copyreg._reduce_ex``,
+#: which protocols 0 and 1 use, stops at it and fails on ``Generic(obj)`` (#1963).
+LOWEST_PROTOCOL = 2 if sys.implementation.name == 'graalpy' else 0
 
 #: NTP seconds and fraction of the Mobility Message Replay Protection option:
 #: the UNIX epoch counted from 1900, plus a quarter of a second.
@@ -167,7 +173,7 @@ class MHTimestampInfoTests(unittest.TestCase):
         from pcapkit.corekit.infoclass import Info
 
         _, mesg_id, timestamp = self.parse()
-        for protocol in range(pickle.HIGHEST_PROTOCOL + 1):
+        for protocol in range(LOWEST_PROTOCOL, pickle.HIGHEST_PROTOCOL + 1):
             for value in (mesg_id.ntp_timestamp, timestamp.pmip_timestamp, mesg_id, timestamp):
                 with self.subTest(protocol=protocol, type=type(value).__name__):
                     restored = pickle.loads(pickle.dumps(value, protocol))

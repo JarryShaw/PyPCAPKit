@@ -46,12 +46,18 @@ A fourth (#1758): checking for a leftover probe before the exclusive hold is
 granted mistakes another worker's live probe for one. Both probe writers check
 only under the lock, and :class:`ProbeLeftoverCheckTests` pins that ordering.
 
+A fifth (#1977): GraalPy holds the GIL inside a blocking :func:`fcntl.flock`, so
+:class:`ProbeWriteLockTests` deadlocked its own process and every worker queued
+behind it. The lock now polls with ``LOCK_NB``, and :class:`ProbeLockNonBlockingTests`
+pins that it never makes a blocking call.
+
 Kept separate from :mod:`tests.test_tier_guard`, which another change is already
 modifying: this module touches none of its code, only :mod:`tests.conftest`.
 
 """
 from __future__ import annotations
 
+import errno
 import importlib.util
 import os
 import pathlib
@@ -61,6 +67,8 @@ import sys
 import tempfile
 import textwrap
 import threading
+import time
+import types
 import unittest
 import unittest.mock
 from typing import TYPE_CHECKING
@@ -68,7 +76,7 @@ from typing import TYPE_CHECKING
 from tests import _tiers, conftest as _conftest
 
 if TYPE_CHECKING:
-    from typing import ContextManager
+    from typing import Callable, ContextManager
 
 #: Test tier (#1958): checks the guard in xdist workers on each leg's interpreter.
 __tier__ = 'ALL'
@@ -406,6 +414,184 @@ class ProbeWriteLockTests(unittest.TestCase):
             reader_acquired.wait(timeout=5),
             'the reader never acquired the lock after the writer released it',
         )
+
+
+def _redirect_tier_guard_lock(case: 'unittest.TestCase', prefix: 'str') -> None:
+    """Point :func:`tests.conftest._tier_guard_lock` at a lock file of ``case``'s own."""
+    root = pathlib.Path(tempfile.mkdtemp(prefix=prefix))
+    case.addCleanup(shutil.rmtree, root, ignore_errors=True)
+    patcher = unittest.mock.patch.object(_conftest, '_tier_guard_lock_path',
+                                         return_value=root / 'tier-guard.lock')
+    patcher.start()
+    case.addCleanup(patcher.stop)
+
+
+@unittest.skipUnless(_conftest.fcntl is not None, 'fcntl unavailable on this platform')
+class ProbeLockNonBlockingTests(unittest.TestCase):
+    """On GraalPy, :func:`tests.conftest._tier_guard_lock` never waits inside :func:`fcntl.flock` (#1977).
+
+    There a thread blocked in ``flock`` keeps the GIL, so the holder it waits on
+    can never run to release it. CPython releases the GIL there, so no real lock
+    can reproduce the hang on it; a fake ``flock`` stands in instead, and
+    :data:`tests.conftest.TIER_GUARD_LOCK_POLLS` selects GraalPy's path. The fake
+    refuses ``LOCK_NB`` requests while "held", and records, then grants, any
+    request made without ``LOCK_NB`` -- the call that hangs on GraalPy.
+
+    """
+
+    #: ``LOCK_NB`` attempts the fake refuses before it lets the lock go.
+    REFUSALS = 3
+
+    def setUp(self) -> None:
+        real = _conftest.fcntl
+        self.calls = []  # type: list[int]
+        self.blocking = []  # type: list[int]
+        self.refusals = self.REFUSALS
+        self.held = 0
+
+        def flock(fd: 'int', operation: 'int') -> None:
+            del fd
+            self.calls.append(operation)
+            if operation & real.LOCK_UN:
+                self.held -= 1
+                return
+            if not operation & real.LOCK_NB:
+                self.blocking.append(operation)
+            elif self.refusals:
+                self.refusals -= 1
+                raise BlockingIOError(errno.EWOULDBLOCK, 'Resource temporarily unavailable')
+            self.held += 1
+
+        fake = types.SimpleNamespace(LOCK_SH=real.LOCK_SH, LOCK_EX=real.LOCK_EX,
+                                     LOCK_NB=real.LOCK_NB, LOCK_UN=real.LOCK_UN, flock=flock)
+        _redirect_tier_guard_lock(self, 'pcapkit-1977-')
+        for patcher in (
+            unittest.mock.patch.object(_conftest, 'fcntl', fake),
+            unittest.mock.patch.object(_conftest, 'TIER_GUARD_LOCK_POLL', 0.001, create=True),
+        ):
+            patcher.start()
+            self.addCleanup(patcher.stop)
+
+    def _take(self, polls: 'bool', exclusive: 'bool') -> None:
+        self.calls.clear()
+        self.blocking.clear()
+        self.refusals = self.REFUSALS
+        with unittest.mock.patch.object(_conftest, 'TIER_GUARD_LOCK_POLLS', polls, create=True):
+            with _conftest._tier_guard_lock(exclusive=exclusive):
+                self.assertGreater(self.held, 0, 'the block ran without the lock')
+        self.assertEqual(self.held, 0, f'not every lock taken was released: {self.calls!r}')
+
+    def test_graalpys_path_polls_and_never_blocks(self) -> None:
+        """Fails on the code before db36aed75, which asked for the lock blocking::
+
+            AssertionError: Lists differ: [1] != []
+
+        """
+        for exclusive in (False, True):
+            with self.subTest(exclusive=exclusive):
+                self._take(polls=True, exclusive=exclusive)
+                self.assertEqual(self.blocking, [])
+                self.assertEqual(self.refusals, 0, 'acquired before the holder let go')
+
+    def test_cpythons_path_still_blocks(self) -> None:
+        """Polling is GraalPy's workaround only: elsewhere the kernel queues the wait."""
+        real = _conftest.fcntl
+        for exclusive in (False, True):
+            with self.subTest(exclusive=exclusive):
+                self._take(polls=False, exclusive=exclusive)
+                taken = [op for op in self.calls if not op & real.LOCK_UN]
+                self.assertTrue(taken)
+                self.assertEqual(self.blocking, taken)
+
+    def test_an_unrelated_error_is_raised_not_retried(self) -> None:
+        """Only "would block" means "held": any other ``flock`` error propagates."""
+        def broken(fd: 'int', operation: 'int') -> None:
+            del fd
+            self.calls.append(operation)
+            raise OSError(errno.EBADF, 'Bad file descriptor')
+
+        with unittest.mock.patch.object(_conftest, 'TIER_GUARD_LOCK_POLLS', True, create=True), \
+                unittest.mock.patch.object(_conftest.fcntl, 'flock', broken):
+            with self.assertRaises(OSError) as context:
+                with _conftest._tier_guard_lock(exclusive=True):
+                    self.fail('the lock was reported held after flock failed')
+        self.assertEqual(context.exception.errno, errno.EBADF)
+        self.assertEqual(len(self.calls), 1)
+
+
+@unittest.skipUnless(_conftest.fcntl is not None, 'fcntl unavailable on this platform')
+class ProbeLockWriterPriorityTests(unittest.TestCase):
+    """A waiting writer keeps new readers out of :func:`tests.conftest._tier_guard_lock` (#1977).
+
+    Linux grants a shared ``flock`` whenever no exclusive hold is granted, so
+    without the gate a reader arriving while the writer waits walks straight in,
+    and readers whose holds overlap -- every xdist worker takes one per test --
+    can keep the writer out for good. Real locks, threads standing in for
+    workers as in :class:`ProbeWriteLockTests`, on both the blocking and the
+    polling path.
+
+    """
+
+    def setUp(self) -> None:
+        _redirect_tier_guard_lock(self, 'pcapkit-1977-')
+        patcher = unittest.mock.patch.object(_conftest, 'TIER_GUARD_LOCK_POLL', 0.01, create=True)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+
+    def test_a_reader_arriving_behind_a_waiting_writer_waits_for_it(self) -> None:
+        """Fails on db36aed75 and before, which have no gate: ``['R'] != []``."""
+        # The blocking path only where it is the real one: on GraalPy it holds
+        # the GIL, and these threads would deadlock exactly as #1977 describes.
+        for polls in sorted({getattr(_conftest, 'TIER_GUARD_LOCK_POLLS', False), True}):
+            with self.subTest(polls=polls), \
+                    unittest.mock.patch.object(_conftest, 'TIER_GUARD_LOCK_POLLS', polls,
+                                               create=True):
+                self._run_once()
+
+    def _run_once(self) -> None:
+        order = []  # type: list[str]
+        errors = []  # type: list[BaseException]
+        first_in, release_first = threading.Event(), threading.Event()
+
+        def run(body: 'Callable[[], None]') -> threading.Thread:
+            def target() -> None:
+                try:
+                    body()
+                except BaseException as exc:  # pylint: disable=broad-except
+                    errors.append(exc)
+            thread = threading.Thread(target=target, daemon=True)
+            thread.start()
+            self.addCleanup(thread.join, 5)
+            return thread
+
+        def first_reader() -> None:
+            with _conftest._tier_guard_lock(exclusive=False):
+                first_in.set()
+                release_first.wait(10)
+
+        def writer() -> None:
+            with _conftest._tier_guard_lock(exclusive=True):
+                order.append('W')
+                time.sleep(0.1)
+
+        def late_reader() -> None:
+            with _conftest._tier_guard_lock(exclusive=False):
+                order.append('R')
+
+        self.addCleanup(release_first.set)
+        threads = [run(first_reader)]
+        self.assertTrue(first_in.wait(5), 'the first reader never got the lock')
+        threads.append(run(writer))
+        time.sleep(0.3)  # the writer is now waiting on the first reader
+        threads.append(run(late_reader))
+        time.sleep(0.3)
+        self.assertEqual(order, [], 'someone got in while the first reader held the lock')
+        release_first.set()
+        for thread in threads:
+            thread.join(10)
+            self.assertFalse(thread.is_alive(), 'a thread never got the lock')
+        self.assertFalse(errors, errors)
+        self.assertEqual(order, ['W', 'R'])
 
 
 @unittest.skipUnless(_conftest.fcntl is not None, 'fcntl unavailable on this platform')
