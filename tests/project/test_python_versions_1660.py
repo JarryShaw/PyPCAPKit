@@ -286,6 +286,26 @@ TIERS_AT_MAIN = {
 }
 
 
+#: #1958, the owner's ruling E: every implementation runs the ``ALL`` tier, so
+#: ``test`` and ``integration`` gained PyPy's supported legs, after CPython's, and
+#: their KTLO twins PyPy's KTLO ones -- the one move besides ``latest``'s. Read
+#: from :data:`TIERS_AT_MAIN`, as each leg is a version the file lists.
+PYPY_TESTED = (('unit-tests.yml', 'test'), ('unit-tests.yml', 'integration'))
+PYPY_SUPPORTED = [{'python-version': version}
+                  for version, entry in TIERS_AT_MAIN['versions']['pypy'].items() if entry['tier'] == 'supported']
+PYPY_KTLO = [{'python-version': version, 'ktlo': True}
+             for version, entry in TIERS_AT_MAIN['versions']['pypy'].items() if entry['tier'] == 'ktlo']
+
+
+def with_pypy(name: 'str', job_id: 'str', expected: 'list[dict[str, Any]]') -> 'list[dict[str, Any]]':
+    """``expected``, :data:`MAIN`'s legs of a job, with the PyPy legs #1958 added to it."""
+    if (name, job_id) not in PYPY_TESTED:
+        return expected
+    supported = [leg for leg in expected if leg.get('ktlo') is not True]
+    ktlo = [leg for leg in expected if leg.get('ktlo') is True]
+    return supported + [dict(leg) for leg in PYPY_SUPPORTED] + ktlo + [dict(leg) for leg in PYPY_KTLO]
+
+
 #: The experimental legs' job name (#1732), which ``test``'s was on those legs from #1660.
 EXPERIMENTAL_TEMPLATE = 'Python ${{ matrix.python-version }} (experimental)'
 
@@ -551,7 +571,7 @@ class TestNothingMovedButLatest(unittest.TestCase):
             cls.values = script().outputs(script().load(write_tiers(pathlib.Path(tmp), TIERS_AT_MAIN)))
 
     def test_every_matrix_expands_to_mains_legs(self) -> None:
-        """Same legs, same order; the coverage leg moves from 3.14 to ``latest`` (#1661).
+        """Same legs, same order; the coverage leg moves from 3.14 to ``latest`` (#1661), and PyPy's join (#1958).
 
         Where the clone holds :data:`MAIN`, :data:`MAIN_MATRICES` is read back
         against it first, so the comparison is with what ``main`` really ran.
@@ -570,6 +590,7 @@ class TestNothingMovedButLatest(unittest.TestCase):
             if (name, job_id) in CONDA_JOBS:
                 # #1822: an Intel macOS leg per version, so osx-64 is built natively.
                 expected = legs(dict(spec, os=CONDA_OS))
+            expected = with_pypy(name, job_id, expected)
             if (name, job_id) in KTLO_TWINS:
                 # #1738: the KTLO legs, in MAIN's order, are the twin job's.
                 twin = KTLO_TWINS[(name, job_id)]
@@ -609,7 +630,7 @@ class TestNothingMovedButLatest(unittest.TestCase):
                     self.assertEqual(workflow(name)['jobs'][job_id]['name'], template)
                     continue
                 spec = MAIN_MATRICES[(name, job_id)]
-                before = sorted(render(template, leg) for leg in legs(spec))
+                before = sorted(render(template, leg) for leg in with_pypy(name, job_id, legs(spec)))
                 after = sorted(render(workflow(name)['jobs'][job]['name'], leg)
                                for job in (job_id, KTLO_TWINS[(name, job_id)])
                                for leg in legs(matrix(name, job, self.values)))

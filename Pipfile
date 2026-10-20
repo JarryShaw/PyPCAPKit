@@ -46,7 +46,7 @@ beautifulsoup4 = {extras = ["html5lib"],version = "*"}
 requests = {extras = ["socks"],version = "*"}
 # The markers match the test extra in pyproject.toml (#1894).
 psutil = {version = "*",markers = "platform_python_implementation == 'CPython'"}
-lxml = {version = "*",markers = "platform_python_implementation != 'GraalVM'"}
+lxml = {version = "*",markers = "platform_python_implementation == 'CPython'"}
 markdown-it-py = "*"
 autopep8 = "*"
 bandit = "*"

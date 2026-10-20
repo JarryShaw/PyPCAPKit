@@ -17,8 +17,9 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 
 #: GraalPy's :mod:`abc` is ``_py_abc``, which keeps its registry and caches as separate
 #: attributes, not in the C accelerator's ``_abc_impl`` these tests inspect (#1963).
-NO_ABC_IMPL = sys.implementation.name == 'graalpy'
-NO_ABC_IMPL_REASON = "GraalPy's abc is _py_abc, which has no _abc_impl (#1963)"
+#: PyPy's built-in ``_abc`` keeps them on the class the same way (#1958).
+NO_ABC_IMPL = sys.implementation.name in ('graalpy', 'pypy')
+NO_ABC_IMPL_REASON = "GraalPy's abc is _py_abc and PyPy's _abc keeps _py_abc's attributes, so no _abc_impl"
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')

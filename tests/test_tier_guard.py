@@ -385,7 +385,8 @@ class PythonStubTests(unittest.TestCase):
 def leg_ignores(text: 'str', latest: 'str') -> 'list[str]':
     """The modules a ``test`` leg's ``Run unit tests`` step ``--ignore``\\ s, ``latest`` or not."""
     script = run_script(job_section(text, 'test'), 'Run unit tests')
-    argv = stubbed_argv(script, {'ANNOTATION_LEVEL': 'error', 'COVERAGE': 'false', 'LATEST': latest})
+    # #2005: a leg that runs pytest once, as a PyPy leg's own `SHARDS` would otherwise reach the stubbed step.
+    argv = stubbed_argv(script, {'ANNOTATION_LEVEL': 'error', 'COVERAGE': 'false', 'LATEST': latest, 'SHARDS': ''})
     return [arg.split('=', 1)[1] for arg in argv
             if arg.startswith('--ignore=') and arg != f'--ignore=tests/{next(iter(_tiers.FIXTURE_TIER_DIRS))}']
 

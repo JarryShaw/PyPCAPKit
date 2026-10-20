@@ -27,7 +27,8 @@ import re
 import unittest
 from typing import TYPE_CHECKING
 
-from tests.project.test_python_matrix_tiers_1633 import KTLO, KTLO_GUARD, PARITY, REQUIRED, SUPPORTED
+from tests.project.test_python_matrix_tiers_1633 import (KTLO, KTLO_GUARD, PARITY, REQUIRED, SUPPORTED, TESTED_KTLO,
+                                                         TESTED_SUPPORTED)
 from tests.project.test_python_versions_1660 import legs as expand
 from tests.project.test_python_versions_1660 import matrix, workflow
 
@@ -41,9 +42,10 @@ NAME = 'unit-tests.yml'
 TWINS = {'test': 'test-ktlo', 'integration': 'integration-ktlo', 'pypcap-parity': 'pypcap-parity-ktlo'}
 #: Each gating job's check-name prefix, as main named its legs before the split.
 PREFIX = {'test': 'Python', 'integration': 'Integration Python', 'pypcap-parity': 'PyPCAP/PyPCAPFile parity Python'}
-#: The KTLO versions each twin runs; ``pypcap-parity`` runs on ``ubuntu-latest`` and below 3.12 only.
-KTLO_OF = {'test': KTLO, 'integration': KTLO, 'pypcap-parity': tuple(v for v in PARITY if v in KTLO)}
-SUPPORTED_OF = {'test': SUPPORTED, 'integration': SUPPORTED,
+#: The KTLO versions each twin runs; ``pypcap-parity`` runs on ``ubuntu-latest`` and below 3.12 only, and
+#: on CPython alone, where ``test`` and ``integration`` run PyPy's too (#1958).
+KTLO_OF = {'test': TESTED_KTLO, 'integration': TESTED_KTLO, 'pypcap-parity': tuple(v for v in PARITY if v in KTLO)}
+SUPPORTED_OF = {'test': TESTED_SUPPORTED, 'integration': TESTED_SUPPORTED,
                 'pypcap-parity': tuple(v for v in PARITY if v in SUPPORTED)}
 
 

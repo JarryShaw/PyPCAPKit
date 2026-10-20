@@ -97,13 +97,17 @@ EXPERIMENTAL_LEG_TEMPLATE = 'Python ${{ matrix.python-version }} (experimental, 
 #: The job holding experimental legs, the only one (#1660), in a workflow of its own
 #: since #1732, so that nothing in unit-tests.yml waits on it.
 EXPERIMENTAL_JOB = ('experimental.yml', 'experimental')
+#: What ``test`` and ``integration`` run, and their KTLO twins: CPython's tier
+#: then PyPy's, as each implementation runs the ``ALL`` test tier (#1958).
+TESTED_SUPPORTED = SUPPORTED + tier('pypy', 'supported')
+TESTED_KTLO = KTLO + tier('pypy', 'ktlo')
 #: Ruleset 23497679's required contexts, which a tier change edits with the file.
 REQUIRED = frozenset({'Required checks passed'} | {f'Compat Python {v}' for v in SUPPORTED})
 
 #: Every Python matrix, as (workflow, job, the blocking versions it must run).
 MATRICES = (
-    ('unit-tests.yml', 'test', SUPPORTED),
-    ('unit-tests.yml', 'integration', SUPPORTED),
+    ('unit-tests.yml', 'test', TESTED_SUPPORTED),
+    ('unit-tests.yml', 'integration', TESTED_SUPPORTED),
     ('unit-tests.yml', 'pypcap-parity', tuple(v for v in PARITY if v in SUPPORTED)),
     ('python-compatibility.yml', 'compatibility', SUPPORTED),
     ('create-release.yml', 'pypi', SUPPORTED + tier('pypy', 'supported')),
@@ -116,8 +120,8 @@ AGGREGATED = (('unit-tests.yml', 'test'), ('unit-tests.yml', 'integration'),
 #: Where each KTLO leg must be, as (workflow, job, KTLO versions). unit-tests.yml's
 #: are jobs of their own since #1738, which nothing gating waits on.
 KTLO_LEGS = (
-    ('unit-tests.yml', 'test-ktlo', KTLO),
-    ('unit-tests.yml', 'integration-ktlo', KTLO),
+    ('unit-tests.yml', 'test-ktlo', TESTED_KTLO),
+    ('unit-tests.yml', 'integration-ktlo', TESTED_KTLO),
     ('unit-tests.yml', 'pypcap-parity-ktlo', tuple(v for v in PARITY if v in KTLO)),
     ('python-compatibility.yml', 'compatibility', KTLO),
     ('create-release.yml', 'pypi', KTLO_ON_LATEST + tier('pypy', 'ktlo')),

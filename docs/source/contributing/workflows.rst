@@ -376,7 +376,7 @@ the same commit several times over. It also skips ``changes``,
 Checks`_ below), which are gated out by their own ``if:`` rather than by having
 already run. ``changelog`` carries no
 ``if:`` at all and runs on every path regardless -- deliberately, per its own
-comment (``unit-tests.yml:1602-1608``): ``create-release.yml`` feeds
+comment (``unit-tests.yml:1635-1641``): ``create-release.yml`` feeds
 ``CHANGELOG.md`` to the GitHub Release body, so the release path is exactly
 where a drifted file must not go unchecked. Confirmed on run `36210743295
 <https://github.com/JarryShaw/PyPCAPKit/actions/runs/36210743295>`__ (a
@@ -689,7 +689,7 @@ grepping every workflow file for its name:
      - Where
    * - ``Required checks passed``
      - job ``required-checks``
-     - ``unit-tests.yml:1937``
+     - ``unit-tests.yml:1970``
    * - ``Compat Python 3.11``
      - job ``compatibility``, matrix leg ``3.11``
      - ``python-compatibility.yml:60``, ``.github/python-versions.toml:20``
@@ -711,22 +711,22 @@ which added ``Compat Python 3.15`` and removed ``Compat Python 3.10``. Moving a 
 between the tiers below means editing the ruleset in the same change.
 
 ``Required checks passed`` is defined by exactly one job
-(``unit-tests.yml:1937``). ``Compat Python`` is defined by one, the
+(``unit-tests.yml:1970``). ``Compat Python`` is defined by one, the
 ``compatibility`` job in ``python-compatibility.yml`` (``:60``), whose matrix
 (``:74``) comes from :file:`.github/python-versions.toml`: the required legs
 are its supported tier (``python-versions.toml:20-24``), and its KTLO legs
 (``python-versions.toml:16-19``) have names ending in ``(KTLO)``, so no required
 context matches one. A comment at
-``unit-tests.yml:1849`` mentions the string without defining it.
+``unit-tests.yml:1882`` mentions the string without defining it.
 
 ``Required checks passed`` is an aggregate, not a single check run. The ruleset
 requires it and the ``Compat Python 3.11``-``3.15`` legs, nothing else, as
-``unit-tests.yml``'s own comment (``unit-tests.yml:1848-1858``) records. It
+``unit-tests.yml``'s own comment (``unit-tests.yml:1881-1891``) records. It
 ``needs:`` the gating jobs of ``unit-tests.yml`` -- ``test``, ``integration``,
 ``engine-tests`` and ``pypcap-parity``, plus ``project-tests``, the one run of
 the project pins, and ``changes`` for the docs-only path -- and checks each
 result explicitly
-(``unit-tests.yml:1936-1992``). Rulesets match check names literally, with no
+(``unit-tests.yml:1969-2025``). Rulesets match check names literally, with no
 wildcard, so requiring the matrix cells one by one would mean editing the
 ruleset whenever a matrix changes; the aggregate keeps the required list fixed.
 It accepts the gating jobs as ``skipped`` only on a docs-only pull request, where
@@ -735,7 +735,7 @@ It accepts the gating jobs as ``skipped`` only on a docs-only pull request, wher
 ``python-compatibility.yml``, and a job cannot ``needs:`` a job in another
 workflow file. This job runs on Unit Tests' own ``push``/``pull_request``
 triggers; the ``gate-only: true`` reusable calls documented above skip it via
-``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:1939``),
+``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:1972``),
 so it is never produced -- and never expected -- on those paths.
 
 .. _ktlo-tier:
@@ -759,7 +759,7 @@ and keeps its legs' check names, ``Python 3.10 (KTLO)`` and so on. In
 with supported legs. Every job holding KTLO legs works the same way:
 
 * Every step that can fail on a KTLO leg has an ``id`` and
-  ``continue-on-error: ${{ matrix.ktlo == true }}`` (``unit-tests.yml:367-384``),
+  ``continue-on-error: ${{ matrix.ktlo == true }}`` (``unit-tests.yml:400-417``),
   unless it is masked on every leg, as the timings uploads are. Its ``outcome`` is
   then ``failure`` but its ``conclusion`` ``success``, so the job, its check run
   and ``required-checks`` read ``success``. A step that needs an earlier one's work
@@ -784,6 +784,30 @@ Errors remain on a failed KTLO step, though none changes a conclusion: the
 runner's ``Process completed with exit code N.`` for a ``run:`` step, and an
 action's own. And `#1634 <https://github.com/JarryShaw/PyPCAPKit/issues/1634>`__'s tag check still blocks the ``pypi`` KTLO legs: it fails
 every leg alike, and masked, the leg would go on to publish.
+
+PyPy is tiered the same way. ``test`` and ``integration`` run its supported
+versions after CPython's, and ``test-ktlo`` and ``integration-ktlo`` its KTLO ones,
+each leg running the ``ALL`` test tier (`#1958
+<https://github.com/JarryShaw/PyPCAPKit/issues/1958>`__, see `Test Tiers`_). A
+supported PyPy leg blocks through ``Required checks passed``, which needs its job,
+so it adds no context to the ruleset. No ``Compat``, ``engine-tests`` or
+``pypcap-parity`` leg runs PyPy. On PyPy 8.0, which setup-python's ``pypy3.11``
+is, PyPI has no Linux wheel of |cryptography|_, so the install step builds it
+with the image's Rust and ``libssl-dev``, and none of ``lxml``, so the ``test``
+extra carries ``lxml`` on CPython only.
+
+On PyPy an xdist worker's RSS grows with every test it runs, rather than in a few
+heavy modules, so a PyPy leg's ``Run unit tests`` runs pytest once per directory its
+``SHARDS`` names, ``tests/protocols`` and then ``tests/corekit``, and once more over
+the rest, ignoring each (`#2005 <https://github.com/JarryShaw/PyPCAPKit/issues/2005>`__).
+Each run starts its workers afresh. Measured on PyPy 8.0.1 at ``-n 4``, one run
+over the whole ``ALL`` tier took each worker to 5.4-5.9 GB and the workers together
+past 20 GB, beyond the runner's 16 GB; split, the largest run peaked at 2.6 GB a
+worker and 8.5 GB in all, and the tier took 383 s rather than 493 s. A smaller
+``-n`` would only hand each worker more tests, and a ``PYPY_GC_MAX`` heap cap turns
+the kills into ``MemoryError``\ s. Each run but the last writes a JUnit file of its
+own beside ``junit.xml``, which ``Upload test timings`` takes too, and the step
+fails if any run did.
 
 3.7 can neither install the ``test`` extra nor import the package, so each 3.7 leg
 fails one step, with a warning saying why -- ``test`` and ``integration`` at the
@@ -1049,7 +1073,7 @@ Which legs run which tier:
      - ``ALL`` and ``LATEST``, less the project pins
    * - ``project-tests``
      - the project pins
-   * - ``test`` off ``latest``, ``test-ktlo``, ``experimental``
+   * - ``test`` off ``latest``, PyPy's among them, ``test-ktlo``, ``experimental``
      - ``ALL``
    * - ``integration`` on ``latest``
      - ``ALL`` and ``LATEST``

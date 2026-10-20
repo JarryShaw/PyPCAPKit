@@ -162,6 +162,11 @@ PROBES = (
     ('subclass the type', lambda obj: _subclass(type(obj))),
     ('call the type', lambda obj: type(obj)()),
 )
+#: The probes whose builtin outcome is PyPy's own (#1958): it raises
+#: :exc:`AttributeError` for deleting an existing attribute of an immutable
+#: builtin type, where CPython raises :exc:`TypeError`. A sentinel type keeps
+#: CPython's, which :class:`TypeImmutabilityTests` pins on every interpreter.
+PYPY_OWN = frozenset({'delete an existing type attribute'}) if sys.implementation.name == 'pypy' else frozenset()
 
 
 class _ReimportCase(unittest.TestCase):
@@ -256,6 +261,8 @@ class BuiltinParityTests(_ReimportCase):
         module = _module()
         bad = []
         for description, probe in PROBES:
+            if description in PYPY_OWN:
+                continue
             expected = {_raised(lambda: probe(obj)) for obj in BUILTINS}  # pylint: disable=cell-var-from-loop
             self.assertEqual(len(expected), 1, (description, expected))
             for name, _, _ in SENTINELS:

@@ -18,6 +18,12 @@ them again. The child reports whether :class:`abc.ABCMeta` is
 trusting the block. :class:`CModuleTests` pins that, under the C module, the
 names let through for ``_py_abc`` are still refused.
 
+Neither runs on PyPy (#1958). Its built-in ``_abc`` keeps ``_py_abc``'s caches
+on the class, so a sentinel type there holds both names, and it imports
+``_collections_abc`` at startup even under ``-S``, so a child that blocks
+``_abc`` builds :mod:`abc` anew under ABCs already made with the old one, and
+``import pcapkit`` fails with a metaclass conflict.
+
 """
 
 from __future__ import annotations
@@ -37,6 +43,11 @@ from tests._support import reimport_once_per_class
 #: Test tier (#1958): exercises metaclass, ABC or enum machinery, which differs by
 #: interpreter.
 __tier__ = 'ALL'
+
+#: PyPy's ``_abc`` is no C module and keeps the caches on the class (#1958).
+ON_PYPY = sys.implementation.name == 'pypy'
+#: Why both classes skip there.
+PYPY_REASON = "PyPy's built-in _abc keeps _py_abc's caches on the class, and the fallback cannot be forced"
 
 #: Repository root, put first on the child interpreter's path so that it
 #: imports this tree rather than whatever :mod:`pcapkit` is installed.
@@ -145,6 +156,7 @@ def _expected(instance_name: 'str | None') -> 'dict[str, str]':
     return probes
 
 
+@unittest.skipIf(ON_PYPY, PYPY_REASON)
 class PyABCFallbackTests(unittest.TestCase):
     """Every sentinel type behaves under ``_py_abc`` as it does under ``_abc``."""
 
@@ -181,6 +193,7 @@ class PyABCFallbackTests(unittest.TestCase):
                     self.assertEqual(actual[probe], outcome)
 
 
+@unittest.skipIf(ON_PYPY, PYPY_REASON)
 class CModuleTests(unittest.TestCase):
     """Under the C ``_abc`` module, the names let through for ``_py_abc`` stay refused."""
 

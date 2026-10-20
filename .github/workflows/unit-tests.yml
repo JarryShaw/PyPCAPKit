@@ -104,10 +104,16 @@ jobs:
       ANNOTATION_LEVEL: ${{ matrix.ktlo && 'warning' || 'error' }}
     strategy:
       fail-fast: false
-      # #1660: .github/python-versions.toml's supported CPython tier, through
-      # the `python-versions` job, as the `python-version` axis; it blocks
-      # through `required-checks` (#1633). `include` marks one leg
-      # `coverage: true`. The KTLO legs are `test-ktlo`'s (#1738).
+      # #1660: .github/python-versions.toml's supported tier, CPython's then
+      # PyPy's, through the `python-versions` job, as the `python-version`
+      # axis; it blocks through `required-checks` (#1633). `include` marks one
+      # leg `coverage: true`. The KTLO legs are `test-ktlo`'s (#1738).
+      #
+      # #1958, the owner's ruling E: every implementation runs the same `ALL`
+      # tier, so PyPy's legs run it as every CPython leg but `latest` does,
+      # here and in `integration`. A supported PyPy leg is one more leg of a
+      # job `required-checks` needs, so it blocks with no context of its own
+      # for the ruleset to name, and a KTLO one is `test-ktlo`'s.
       #
       # Exactly one leg runs under coverage, so measuring it adds no leg to
       # the queue. It is `latest`, the newest supported version, like every
@@ -151,7 +157,9 @@ jobs:
       # clean installs on 3.10-3.14 (manylinux wheels, no build step). pycrate
       # is pure Python but its distribution is large (~238MB, see the NGAP
       # extra's comment in pyproject.toml) -- still cheap in wall time, just not
-      # "a second" cheap.
+      # "a second" cheap. On PyPy 8.0, which setup-python's `pypy3.11` is,
+      # PyPI has no Linux wheel of cryptography, so pip builds it with the
+      # image's Rust and libssl-dev (#1958).
       #
       # PyPCAPFile (pypcapfile) is deliberately NOT here. It used to be kept off
       # every job in this file: on 3.10/3.11 (where its
@@ -250,9 +258,22 @@ jobs:
         # import no pcapkit, so coverage loses nothing. Both lists are asked of
         # tests/_tiers.py at run time rather than listed, as `integration` asks
         # for its selection.
+        #
+        # #2005: on PyPy an xdist worker keeps what each test leaves behind, so
+        # its RSS grows with every test it runs, never in a few heavy modules:
+        # at `-n 4` the `ALL` tier took each worker to 5.4-5.9 GB and them all
+        # past 20 GB, measured on PyPy 8.0.1, where a 14 GB cap OOM-killed them
+        # and a 3 GB `PYPY_GC_MAX` raised MemoryError instead. A smaller `-n`
+        # only hands each worker more tests. So a PyPy leg runs pytest once per
+        # directory `SHARDS` names, then once more over the rest, ignoring each
+        # of them, and every run starts its workers afresh: the largest, with
+        # tests/protocols, peaked at 2.6 GB a worker and 8.5 GB in all, and the
+        # tier took 383 s rather than 493 s. Each run but the last writes a
+        # JUnit file of its own, beside junit.xml; the step fails if any run did.
         env:
           COVERAGE: ${{ matrix.coverage }}
           LATEST: ${{ matrix.python-version == needs.python-versions.outputs.latest }}
+          SHARDS: ${{ startsWith(matrix.python-version, 'pypy') && 'tests/protocols tests/corekit' || '' }}
         run: |
           if [ "$LATEST" = "true" ]; then
             if ! skipped=$(python -c "from tests._tiers import project_pin_paths; print(' '.join(project_pin_paths()))"); then
@@ -275,6 +296,16 @@ jobs:
             # Logs every measured process and its parent, for the check below.
             COVERAGE_DEBUG=pid,process COVERAGE_DEBUG_FILE="$PWD/coverage-processes.log" \
             python util/cap_file_size.py python -m coverage run --rcfile=.github/coverage.toml -m pytest "$@"
+          elif [ -n "$SHARDS" ]; then
+            status=0
+            rest=()
+            for shard in $SHARDS; do
+              python util/cap_file_size.py python -m pytest "$@" \
+                --junitxml="$RUNNER_TEMP/junit-${shard//\//-}.xml" "$shard" || status=$?
+              rest+=(--ignore="$shard")
+            done
+            python util/cap_file_size.py python -m pytest "$@" "${rest[@]}" || status=$?
+            exit "$status"
           else
             python util/cap_file_size.py python -m pytest "$@"
           fi
@@ -331,13 +362,15 @@ jobs:
       # newest push runs. One artifact per leg, so the name carries the version.
       # `continue-on-error` because the file is only diagnostic: an artifact
       # service outage must not fail a leg that `Required checks passed` needs.
+      # The glob takes a PyPy leg's JUnit file per run too (#2005); a CPython
+      # leg writes junit.xml alone.
       - name: Upload test timings
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         continue-on-error: true
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: junit-unit-${{ matrix.python-version }}
-          path: ${{ runner.temp }}/junit.xml
+          path: ${{ runner.temp }}/junit*.xml
           retention-days: 14
 
       # #1672: the KTLO leg's report, and the last step of every KTLO matrix
