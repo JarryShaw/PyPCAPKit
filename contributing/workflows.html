@@ -1383,7 +1383,8 @@ leaves it running; each sample adds the kernel’s <code class="docutils literal
 </ul>
 <p>The step writes <code class="docutils literal notranslate"><span class="pre">$RUNNER_TEMP/tests-status</span></code>: the exit status, the scope and the
 probe’s error, the seconds the tests took, the OOM kills while they ran
-(<code class="docutils literal notranslate"><span class="pre">/proc/vmstat</span></code>), the <code class="docutils literal notranslate"><span class="pre">MemoryError</span></code> lines in their output and xdist’s <code class="docutils literal notranslate"><span class="pre">node</span>
+(<code class="docutils literal notranslate"><span class="pre">/proc/vmstat</span></code>), the lines in their output that report a raised <code class="docutils literal notranslate"><span class="pre">MemoryError</span></code> (#1962),
+not those that mention one, such as a docstring a traceback prints, and xdist’s <code class="docutils literal notranslate"><span class="pre">node</span>
 <span class="pre">down</span></code> lines. From it and the monitor’s last sample, <code class="docutils literal notranslate"><span class="pre">Containment</span> <span class="pre">summary</span></code> warns
 <code class="docutils literal notranslate"><span class="pre">No</span> <span class="pre">memory</span> <span class="pre">cap</span></code>, <code class="docutils literal notranslate"><span class="pre">tests</span> <span class="pre">lost</span> <span class="pre">a</span> <span class="pre">process</span> <span class="pre">to</span> <span class="pre">the</span> <span class="pre">OOM</span> <span class="pre">killer</span></code>, <code class="docutils literal notranslate"><span class="pre">tests</span> <span class="pre">timed</span> <span class="pre">out</span> <span class="pre">at</span> <span class="pre">110</span>
 <span class="pre">minutes</span></code>, <code class="docutils literal notranslate"><span class="pre">tests</span> <span class="pre">raised</span> <span class="pre">MemoryError</span></code> or <code class="docutils literal notranslate"><span class="pre">tests</span> <span class="pre">lost</span> <span class="pre">an</span> <span class="pre">xdist</span> <span class="pre">worker</span></code>, each a
@@ -1501,6 +1502,28 @@ without xdist, which is a question about the module rather than the Python versi
 those pins drive read the tier file on the runner’s own <code class="docutils literal notranslate"><span class="pre">python3</span></code>, and
 <code class="file docutils literal notranslate"><span class="pre">tests/project/test_python_versions_1660.py</span></code> checks those skips in a child
 interpreter that cannot import <code class="docutils literal notranslate"><span class="pre">tomllib</span></code>.</p>
+</section>
+<section id="file-size-caps-1969">
+<h2>File Size Caps (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1969">#1969</a>)<a class="headerlink" href="#file-size-caps-1969" title="Link to this heading">¶</a></h2>
+<p>A test that writes without bound fills the runner’s disk rather than failing: <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1372">#1372</a>’s <code class="docutils literal notranslate"><span class="pre">out.json</span></code> grew to
+several gigabytes on every run. So every pytest and unittest command in
+<code class="file docutils literal notranslate"><span class="pre">.github/workflows/unit-tests.yml</span></code> runs as <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">util/cap_file_size.py</span>
+<span class="pre">python</span> <span class="pre">-m</span> <span class="pre">...</span></code>: <code class="docutils literal notranslate"><span class="pre">test</span></code>’s <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">unit</span> <span class="pre">tests</span></code>; <code class="docutils literal notranslate"><span class="pre">integration</span></code>’s,
+<code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code>’s and <code class="docutils literal notranslate"><span class="pre">gate</span></code>’s <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">full</span> <span class="pre">test</span> <span class="pre">suite</span></code>; the KTLO twins of
+<code class="docutils literal notranslate"><span class="pre">test</span></code>, <code class="docutils literal notranslate"><span class="pre">integration</span></code> and <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code>, which share their steps; the
+engine cells that <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code>’ <code class="docutils literal notranslate"><span class="pre">Write</span> <span class="pre">the</span> <span class="pre">per-cell</span> <span class="pre">script</span></code> writes;
+<code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>’s cells; and each run step of <code class="docutils literal notranslate"><span class="pre">project-tests</span></code>.</p>
+<p><code class="docutils literal notranslate"><span class="pre">util/cap_file_size.py</span></code> sets <code class="docutils literal notranslate"><span class="pre">RLIMIT_FSIZE</span></code>, soft and hard, to 2 GiB, or keeps
+a lower hard limit, and execs the command, so the step’s exit status and
+<code class="docutils literal notranslate"><span class="pre">continue-on-error</span></code> behave as before and every process the command starts
+inherits the cap. A write past it raises <code class="docutils literal notranslate"><span class="pre">OSError:</span> <span class="pre">[Errno</span> <span class="pre">27]</span> <span class="pre">File</span> <span class="pre">too</span> <span class="pre">large</span></code> in
+Python, since CPython ignores <code class="docutils literal notranslate"><span class="pre">SIGXFSZ</span></code>, so the test errors; any other program is
+killed by the signal, whose default action the script restores before it execs.
+<code class="docutils literal notranslate"><span class="pre">experimental.yml</span></code>’s legs get the same 2 GiB through <code class="docutils literal notranslate"><span class="pre">prlimit</span> <span class="pre">--fsize</span></code> (see
+above).</p>
+<p><code class="file docutils literal notranslate"><span class="pre">tests/project/test_file_size_caps_1969.py</span></code> fails when a command in
+<code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> runs pytest, unittest or <code class="file docutils literal notranslate"><span class="pre">util/run_unittest_leg.py</span></code>
+without the script, and runs the script against a small limit.</p>
 </section>
 <section id="python-versions">
 <h2>Python Versions<a class="headerlink" href="#python-versions" title="Link to this heading">¶</a></h2>
@@ -1654,6 +1677,7 @@ repeating it here.</p>
 <li><a class="reference internal" href="#required-status-checks">Required Status Checks</a></li>
 <li><a class="reference internal" href="#test-tiers">Test Tiers</a></li>
 <li><a class="reference internal" href="#project-pins">Project Pins</a></li>
+<li><a class="reference internal" href="#file-size-caps-1969">File Size Caps (#1969)</a></li>
 <li><a class="reference internal" href="#python-versions">Python Versions</a></li>
 <li><a class="reference internal" href="#deployment-environment">Deployment <code class="docutils literal notranslate"><span class="pre">environment:</span></code></a></li>
 </ul>
