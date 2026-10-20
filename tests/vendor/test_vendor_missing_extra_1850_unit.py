@@ -41,6 +41,7 @@ import os
 import pathlib
 import subprocess  # nosec: B404
 import sys
+import sysconfig
 import tempfile
 import textwrap
 import unittest
@@ -86,6 +87,18 @@ CONSOLE_SCRIPT = ('-c', 'import sys; from pcapkit.vendor.__main__ import main; s
 #: ``python -m pcapkit.vendor``.
 RUN_MODULE = ('-m', 'pcapkit.vendor')
 
+#: Whether this interpreter is a free-threaded build. A build option rather than
+#: a version, as :data:`sys.version_info` reads the same on either build.
+FREE_THREADED = bool(sysconfig.get_config_var('Py_GIL_DISABLED'))
+
+#: The ``PYTHONWARNINGS`` filter for what a free-threaded build writes as it
+#: enables the GIL to load :mod:`lxml`, which ``bs4`` imports and which does not
+#: declare itself safe to run without the GIL (#1961). Its message part is a
+#: literal prefix, so it holds no comma or colon, and it names :mod:`lxml`, so the
+#: same warning for any other module still reaches stderr.
+LXML_GIL_FILTER = ("ignore:The global interpreter lock (GIL) has been enabled "
+                   "to load module 'lxml.:RuntimeWarning")
+
 
 def child_env() -> 'dict[str, str]':
     """The environment of a child interpreter, with nothing that adds to its stderr.
@@ -96,11 +109,18 @@ def child_env() -> 'dict[str, str]':
     default. ``COLUMNS`` and ``PYTHON_COLORS`` fix how :mod:`argparse` lays out
     and colours its help, so it can be compared with this interpreter's.
 
+    On a free-threaded build ``PYTHONWARNINGS`` is :data:`LXML_GIL_FILTER`, which
+    ignores the :mod:`lxml` GIL warning and nothing else. The child still starts
+    with the GIL disabled, as it would not under ``PYTHON_GIL=1``, so it runs as
+    that build does.
+
     """
     env = {key: value for key, value in os.environ.items()
            if not key.startswith('PCAPKIT_')
            and key not in ('PYTHONSAFEPATH', 'PYTHONWARNINGS', 'PYTHONDEVMODE')}
     env.update(COLUMNS='80', PYTHON_COLORS='0')
+    if FREE_THREADED:
+        env['PYTHONWARNINGS'] = LXML_GIL_FILTER
     return env
 
 
@@ -185,6 +205,43 @@ class PresentExtraTests(unittest.TestCase):
         with mock.patch.dict(os.environ, child_env(), clear=True):
             expected = get_parser().format_help()
         self.assertEqual(result.stdout, expected)
+
+
+class ChildEnvTests(unittest.TestCase):
+    """:func:`child_env` on either build, with :data:`FREE_THREADED` patched (#1961)."""
+
+    #: The warning as a free-threaded build words it, for a module named in turn.
+    GIL_WARNING = ('The global interpreter lock (GIL) has been enabled to load module {!r}, '
+                   'which has not declared that it can run safely without the GIL. To '
+                   'override this behavior and keep the GIL disabled (at your own risk), '
+                   'run with PYTHON_GIL=0 or -Xgil=0.')
+
+    def warn_in_a_child(self, env: 'dict[str, str]', module: str) -> 'subprocess.CompletedProcess[str]':
+        """Emit :attr:`GIL_WARNING` for ``module`` in a child interpreter run under ``env``."""
+        code = f'import warnings; warnings.warn({self.GIL_WARNING.format(module)!r}, RuntimeWarning)'
+        return subprocess.run([sys.executable, '-c', code], env=env,  # nosec: B603
+                              capture_output=True, text=True,
+                              timeout=scale_timeout(120), check=False)
+
+    def test_a_free_threaded_build_ignores_the_lxml_gil_warning(self) -> None:
+        with mock.patch.object(sys.modules[__name__], 'FREE_THREADED', True):
+            env = child_env()
+        self.assertEqual(env.get('PYTHONWARNINGS'), LXML_GIL_FILTER)
+        result = self.warn_in_a_child(env, 'lxml.etree')
+        self.assertEqual((result.returncode, result.stderr), (0, ''), result.stderr)
+
+    def test_the_filter_keeps_the_warning_for_another_module(self) -> None:
+        with mock.patch.object(sys.modules[__name__], 'FREE_THREADED', True):
+            env = child_env()
+        result = self.warn_in_a_child(env, 'not_lxml')
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertIn("RuntimeWarning: The global interpreter lock (GIL) has been enabled "
+                      "to load module 'not_lxml'", result.stderr)
+
+    def test_a_build_with_the_gil_sets_no_filter(self) -> None:
+        with mock.patch.object(sys.modules[__name__], 'FREE_THREADED', False), \
+                mock.patch.dict(os.environ, PYTHONWARNINGS='default'):
+            self.assertNotIn('PYTHONWARNINGS', child_env())
 
 
 class MainTests(unittest.TestCase):
