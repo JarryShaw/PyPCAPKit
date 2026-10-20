@@ -329,7 +329,7 @@ the same commit several times over. It also skips ``changes``,
 Checks`_ below), which are gated out by their own ``if:`` rather than by having
 already run. ``changelog`` carries no
 ``if:`` at all and runs on every path regardless -- deliberately, per its own
-comment (``unit-tests.yml:1634-1640``): ``create-release.yml`` feeds
+comment (``unit-tests.yml:1659-1665``): ``create-release.yml`` feeds
 ``CHANGELOG.md`` to the GitHub Release body, so the release path is exactly
 where a drifted file must not go unchecked. Confirmed on run `36210743295
 <https://github.com/JarryShaw/PyPCAPKit/actions/runs/36210743295>`__ (a
@@ -639,7 +639,7 @@ grepping every workflow file for its name:
      - Where
    * - ``Required checks passed``
      - job ``required-checks``
-     - ``unit-tests.yml:2003``
+     - ``unit-tests.yml:2033``
    * - ``Compat Python 3.11``
      - job ``compatibility``, matrix leg ``3.11``
      - ``python-compatibility.yml:60``, ``.github/python-versions.toml:20``
@@ -661,22 +661,22 @@ which added ``Compat Python 3.15`` and removed ``Compat Python 3.10``. Moving a 
 between the tiers below means editing the ruleset in the same change.
 
 ``Required checks passed`` is defined by exactly one job
-(``unit-tests.yml:2003``). ``Compat Python`` is defined by one, the
+(``unit-tests.yml:2033``). ``Compat Python`` is defined by one, the
 ``compatibility`` job in ``python-compatibility.yml`` (``:60``), whose matrix
 (``:74``) comes from :file:`.github/python-versions.toml`: the required legs
 are its supported tier (``python-versions.toml:20-24``), and its KTLO legs
 (``python-versions.toml:16-19``) have names ending in ``(KTLO)``, so no required
 context matches one. A comment at
-``unit-tests.yml:1915`` mentions the string without defining it.
+``unit-tests.yml:1945`` mentions the string without defining it.
 
 ``Required checks passed`` is an aggregate, not a single check run. The ruleset
 requires it and the ``Compat Python 3.11``-``3.15`` legs, nothing else, as
-``unit-tests.yml``'s own comment (``unit-tests.yml:1914-1924``) records. It
+``unit-tests.yml``'s own comment (``unit-tests.yml:1944-1954``) records. It
 ``needs:`` the gating jobs of ``unit-tests.yml`` -- ``test``, ``integration``,
 ``engine-tests`` and ``pypcap-parity``, plus ``project-tests``, the one run of
 the project pins, and ``changes`` for the docs-only path -- and checks each
 result explicitly
-(``unit-tests.yml:2002-2058``). Rulesets match check names literally, with no
+(``unit-tests.yml:2032-2088``). Rulesets match check names literally, with no
 wildcard, so requiring the matrix cells one by one would mean editing the
 ruleset whenever a matrix changes; the aggregate keeps the required list fixed.
 It accepts the gating jobs as ``skipped`` only on a docs-only pull request, where
@@ -685,7 +685,7 @@ It accepts the gating jobs as ``skipped`` only on a docs-only pull request, wher
 ``python-compatibility.yml``, and a job cannot ``needs:`` a job in another
 workflow file. This job runs on Unit Tests' own ``push``/``pull_request``
 triggers; the ``gate-only: true`` reusable calls documented above skip it via
-``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:2005``),
+``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:2035``),
 so it is never produced -- and never expected -- on those paths.
 
 .. _ktlo-tier:
@@ -709,7 +709,7 @@ and keeps its legs' check names, ``Python 3.10 (KTLO)`` and so on. In
 with supported legs. Every job holding KTLO legs works the same way:
 
 * Every step that can fail on a KTLO leg has an ``id`` and
-  ``continue-on-error: ${{ matrix.ktlo == true }}`` (``unit-tests.yml:424-441``),
+  ``continue-on-error: ${{ matrix.ktlo == true }}`` (``unit-tests.yml:441-458``),
   unless it is masked on every leg, as the timings uploads are. Its ``outcome`` is
   then ``failure`` but its ``conclusion`` ``success``, so the job, its check run
   and ``required-checks`` read ``success``. A step that needs an earlier one's work
@@ -975,6 +975,23 @@ The project pins stay in a job of their own rather than joining the ``latest`` l
 ``project-tests`` runs in parallel with the coverage leg, the slowest of ``test``'s,
 rather than lengthening it under coverage, and it is also the job that runs the docs
 readers on a docs-only diff.
+
+Latest CPython runs the whole suite, as the sanity check and the gate (the owner's
+ruling on #1958), so it also installs what the whole suite gates on. In ``test`` and
+``integration`` the step ``Install the whole suite's dependencies on latest`` runs on
+the ``latest`` leg alone, after the install every leg runs, and adds the engines pip
+can install there (``Scapy``, ``PyShark``), html5lib through ``vendor``, Sphinx and
+the pinned sphinx-autodoc-typehints through ``docs``, and emoji through ``cli``.
+``project-tests`` and ``gate``, which run on ``latest`` only, install the same set in
+their ``Install package and test dependencies`` and ``Install package, test and
+generator dependencies`` steps. The other legs keep their install lines and run the
+``ALL`` tier with them, so a test gated on one of these extras skips there and runs on
+``latest``. The other engines stay out: ``PCAP_CT`` needs a system libpcap, which
+``engine-tests`` installs for its own cell, and the ``PyPCAP`` and ``PyPCAPFile``
+markers resolve to nothing on ``latest``. :file:`tests/_dependency_gates.py` reads the
+``latest`` step as that leg's extras, and
+:file:`tests/project/test_whole_suite_on_latest_1958.py` pins the set and the gates it
+closes.
 
 Project Pins
 ------------

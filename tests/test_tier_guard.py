@@ -1870,8 +1870,9 @@ class DependencyGateSelectionTests(unittest.TestCase):
         """#1954: ``project-tests`` reaches the pins and nothing else, so a gate moves with its module."""
         job = next(job for job in _dependency_gates.pytest_jobs() if job.selection == 'project-pins')
         self.assertEqual(job.name, 'project-tests')
+        # #1958: the set `test` installs on `latest`, the leg the pins would run on.
         self.assertEqual(job.extras, next(job for job in _dependency_gates.pytest_jobs()
-                                          if job.name == 'test').extras)
+                                          if job.name == 'test').latest_extras)
         cases = {
             'tests/project/test_isort_clean.py': True,
             'tests/project/test_public_api.py': False,
@@ -2021,37 +2022,29 @@ class DependencyGateCoverageTests(unittest.TestCase):
         gaps = {gap.flag for gap in _dependency_gates.dependency_gate_gaps()}
         self.assertNotIn('HAS_CRAWLER_DEPS', gaps)
         self.assertNotIn('HAS_CRAWLER_DEPS', _dependency_gates.DEPENDENCY_GATE_EXCLUSIONS)
-        self.assertIn('HAS_VENDOR_DEPS', _dependency_gates.DEPENDENCY_GATE_EXCLUSIONS)
+        # The ``test`` extra still lacks html5lib: ``vendor`` closes that gate (#1958).
+        self.assertNotIn('test', _dependency_gates.extras_providing('html5lib'))
+        self.assertIn('vendor', _dependency_gates.extras_providing('html5lib'))
 
-    def test_the_vendor_extra_closes_engine_tests_but_not_test_or_gate(self) -> None:
-        """#738's remaining scope: an existing non-blocking leg absorbs it.
+    def test_the_vendor_extra_closes_every_job_reaching_the_vendor_gates(self) -> None:
+        """#1958: the ``latest`` legs install ``vendor``, so html5lib is no gap anywhere.
 
-        ``engine-tests`` (#751) already reaches these gates through the same
-        ignore-shape selection as ``test`` -- see this guard's own
-        ``HAS_VENDOR_DEPS`` exclusion -- and it has never been one of ruleset
-        23497679's required checks, so it already was the "job that exists
-        and reports without gating a merge" #738's ruling asked for. Installing
-        ``vendor`` there, rather than opening another job, is what closes the
-        gap on it. It is also the only *per-pull-request* job with
-        that property: ``gate`` reaches these gates too but never runs on a
-        pull request at all (only via a release's ``gate-only: true`` call),
-        and ``integration``'s fixture-tier selection never reaches
-        :file:`tests/vendor/` in the first place -- so ``engine-tests`` was
-        the forced choice, not merely a convenient one.
-
-        ``test`` and ``gate`` stay dark for different reasons, not the same
-        one -- see the exclusion's own reason for why ``gate`` is not merely
-        "also non-blocking".
+        #738 ruled these gates onto a non-blocking leg, and ``engine-tests`` was
+        that leg until #849 narrowed it to explicit engine paths, after which
+        they ran nowhere. The owner's ruling E on #1958 runs the whole suite on
+        latest CPython, so ``test``'s ``latest`` leg and ``gate`` install
+        ``vendor``, and the exclusion that recorded the gap is gone.
 
         """
+        reaching = {job.name for job in _dependency_gates.pytest_jobs()
+                    for gate in _dependency_gates.gated_scopes()
+                    if gate.flag == 'HAS_VENDOR_DEPS' and _dependency_gates.job_reaches(job, gate)}
+        self.assertEqual(reaching, {'test', 'gate'})
         gaps = {(gap.flag, gap.job) for gap in _dependency_gates.dependency_gate_gaps()}
-        self.assertNotIn(('HAS_VENDOR_DEPS', 'engine-tests'), gaps)
-        self.assertIn(('HAS_VENDOR_DEPS', 'test'), gaps)
-        self.assertIn(('HAS_VENDOR_DEPS', 'gate'), gaps)
-
-        exclusion = _dependency_gates.DEPENDENCY_GATE_EXCLUSIONS['HAS_VENDOR_DEPS']
-        self.assertNotIn('engine-tests', exclusion.dark)
-        self.assertEqual(set(exclusion.dark), {'test', 'gate'})
+        for job in sorted(reaching):
+            with self.subTest(job=job):
+                self.assertNotIn(('HAS_VENDOR_DEPS', job), gaps)
+        self.assertNotIn('HAS_VENDOR_DEPS', _dependency_gates.DEPENDENCY_GATE_EXCLUSIONS)
 
     def test_the_mypy_gate_is_visible_and_dark_on_every_job_that_reaches_it(self) -> None:
         """#779: a lint-tier tool gated visibly, and declining the install line anyway.
@@ -2068,7 +2061,7 @@ class DependencyGateCoverageTests(unittest.TestCase):
         :data:`~tests._dependency_gates.DEPENDENCY_GATE_EXCLUSIONS` filtering.
         (#779 reports 4 errors of 9 tests for the same mutation; it was written
         before #774 added
-        :meth:`test_the_vendor_extra_closes_engine_tests_but_not_test_or_gate`,
+        :meth:`test_the_vendor_extra_closes_every_job_reaching_the_vendor_gates`,
         which is the tenth and the fifth error. Re-measured here rather than
         copied.)
         The entry is what makes the gate expressible; the exclusion is what
@@ -2387,7 +2380,14 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
 
     def test_removing_crypto_from_the_test_job_is_caught(self) -> None:
         """#745's worked example, verbatim: "deleting ``crypto`` ... would go green"."""
+        # #1958: from both of `test`'s lines, the one every leg runs and the one
+        # `latest` adds, since the second alone runs the gate. The first is pinned
+        # to its extras by tests/project/test_whole_suite_on_latest_1958.py.
         doctored = doctored_workflow(self, "'.[test,DPKT,crypto,NGAP]'", "'.[test,DPKT,NGAP]'")
+        text = doctored.read_text(encoding='utf-8')
+        latest = "'.[test,Scapy,DPKT,crypto,cli,NGAP,vendor,docs,PyShark]'"
+        self.assertIn(latest, text)
+        doctored.write_text(text.replace(latest, latest.replace('crypto,', '')), encoding='utf-8')
 
         gaps = {(gap.flag, gap.job): gap
                 for gap in _dependency_gates.dependency_gate_gaps(doctored)}
@@ -2972,11 +2972,11 @@ class DependencyGateDegradationTests(unittest.TestCase):
         if reason is not None:
             self.skipTest(f'git cannot answer here: {reason}')
 
-        self.assertIn('HAS_PYSHARK',
+        self.assertIn('HAS_PYPCAPFILE',
                       {gap.flag for gap in _dependency_gates.dependency_gate_gaps()})
         with unittest.mock.patch.dict(_dependency_gates.NON_DISTRIBUTION_FLAGS,
-                                      {'HAS_PYSHARK': 'stood in for this test'}):
-            self.assertNotIn('HAS_PYSHARK',
+                                      {'HAS_PYPCAPFILE': 'stood in for this test'}):
+            self.assertNotIn('HAS_PYPCAPFILE',
                              {gap.flag for gap in _dependency_gates.dependency_gate_gaps()})
 
     def test_an_unmapped_module_names_itself_and_the_table_to_add_it_to(self) -> None:
