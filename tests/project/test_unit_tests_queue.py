@@ -655,13 +655,9 @@ RELEASE_CITATIONS: 'dict[str, list[tuple[Optional[str], str, Optional[str]]]]' =
         ('version_check', 'if: >-', "needs.vendor_update.outputs.updated != 'false' }}"),
         ('unit-tests', 'needs: [ version_check ]', None),
         ('unit-tests', 'uses: ./.github/workflows/unit-tests.yml', None),
-        ('github', 'environment: github-release', None),
         ('github', 'needs: [ unit-tests, version_check ]', None),
-        ('tag', 'environment: conda-tag', None),
         ('tag', 'needs: [ github, unit-tests, version_check ]', None),
-        ('pypi', 'environment: pypi', None),
         ('pypi', 'needs: [ github, unit-tests, version_check ]', None),
-        ('conda', 'environment: anaconda', None),
         ('conda', 'needs: [ tag, github, unit-tests, version_check ]', None),
     ],
 }

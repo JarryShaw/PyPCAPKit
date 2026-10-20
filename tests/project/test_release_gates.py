@@ -244,9 +244,9 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 #: :file:`cron-conda.yml` at the end of the file). It is read through
 #: :data:`CONDA_WORKFLOW` below, for whether a bump reaches those uploads at
 #: all; the ``environment:`` rule in this module is asserted over *this* file
-#: only, and extending it to ``conda-dist`` -- which carries no
-#: ``environment:`` -- is a #641 question nobody has asked yet rather than
-#: something #1632 settles.
+#: only. ``conda-dist`` names ``anaconda`` since #1968, but for its
+#: ``ANACONDA_TOKEN`` rather than as an approval gate, which
+#: :mod:`tests.project.test_secret_environments_1968` checks.
 #:
 #: :file:`cron-vendor.yml` does build and commit without uploading, and
 #: :file:`deploy-pages.yml` publishes documentation rather than a package,
