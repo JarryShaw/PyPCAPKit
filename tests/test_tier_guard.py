@@ -561,13 +561,26 @@ class TestTierTests(unittest.TestCase):
                 self.assertIn(_tiers.TIER_MARKER, str(caught.exception))
 
     def test_a_module_that_branches_on_the_interpreter_states_its_tier(self) -> None:
-        """A version gate is never ``LATEST`` by omission: such a module says which tier it is in."""
+        """A version gate is never ``LATEST`` by omission: such a module says which tier it is in.
+
+        Detection is syntactic and best-effort: :mod:`sys` under an alias, a flag imported
+        from :mod:`pcapkit.utilities.compat`, or a gate in an imported helper is not seen.
+
+        """
         cases = {
             'a version gate': ('import sys\nNEW = sys.version_info >= (3, 12)\n', True),
             'an implementation gate': ('import sys\nGRAAL = sys.implementation.name == "graalpy"\n', True),
             'a bare import': ('from sys import version_info\nOLD = version_info < (3, 9)\n', True),
             'pcapkit alone': ('import pcapkit\n', False),
             'a version only read': ('import sys\nprint(sys.version_info)\n', False),
+            'a build flag': ('import sys\nAWARE = sys.flags.context_aware_warnings\n', True),
+            'the GIL probe': ('import sys\nGIL = sys._is_gil_enabled()\n', True),
+            'a config var': ('import sysconfig\nFT = sysconfig.get_config_var("Py_GIL_DISABLED")\n', True),
+            'hasattr on sys': ('import sys\nSET = hasattr(sys, "tracebacklimit")\n', True),
+            'getattr on sys': ('import sys\nLIMIT = getattr(sys, "tracebacklimit", None)\n', True),
+            'getattr on another object': ('import os\nSEP = getattr(os, "sep")\n', False),
+            'a size limit': ('import sys\nBIG = 1 << 40 > sys.maxsize\n', True),
+            'a size limit only read': ('import sys\nprint(sys.maxsize)\n', False),
         }
         for label, (source, expected) in cases.items():
             with self.subTest(case=label), tempfile.TemporaryDirectory(prefix='pcapkit-test-tier-') as temp:
@@ -579,7 +592,9 @@ class TestTierTests(unittest.TestCase):
                 with self.subTest(module=module):
                     self.assertIsNotNone(_tiers.declared_tier(module),
                                          f'{module} branches on the interpreter; state its tier with '
-                                         f"{_tiers.TIER_MARKER} = {_tiers.TIER_ALL!r} or {_tiers.TIER_LATEST!r}")
+                                         f"{_tiers.TIER_MARKER} = {_tiers.TIER_ALL!r} or {_tiers.TIER_LATEST!r} "
+                                         '(the check is syntactic and best-effort: aliases, probes of other '
+                                         'modules and flags imported from compat are not seen)')
 
     def test_only_a_test_module_has_a_tier(self) -> None:
         for path in ('tests/_support.py', 'tests/_tiers.py', 'util/ci_timing.py', 'tests/project',

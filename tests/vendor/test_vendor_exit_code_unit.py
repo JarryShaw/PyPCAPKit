@@ -63,6 +63,13 @@ import unittest
 import warnings
 from unittest import mock
 
+#: Test tier (#1958): the vendor extra is installed on latest alone, where the whole
+#: suite runs, and the crawlers are pure Python over requests and bs4; the vendor
+#: package's interpreter-sensitive parts, file restore and environment-variable parsing,
+#: run on every leg in tests/vendor/test_vendor_snapshot_restore_unit.py and
+#: tests/vendor/test_vendor_variables_1726_unit.py.
+__tier__ = 'LATEST'
+
 #: Same gate :file:`tests/vendor/test_crawler_reachability_unit.py` and
 #: :file:`tests/vendor/test_vendor_dest_path_unit.py` use. Importing
 #: :mod:`pcapkit.vendor.__main__` imports :mod:`pcapkit.vendor` (for the

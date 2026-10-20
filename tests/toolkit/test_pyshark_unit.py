@@ -15,6 +15,10 @@ from tests.foundation import _roundtrip as wire
 if TYPE_CHECKING:
     from typing import Any, Callable
 
+#: Test tier (#1958): drives a third-party engine whose installable releases vary by
+#: interpreter.
+__tier__ = 'ALL'
+
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 

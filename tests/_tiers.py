@@ -145,10 +145,17 @@ differ between interpreters or versions:
 Everything else is ``LATEST`` by default: the per-protocol field-by-field tests,
 whose behaviour is interpreter-independent pure Python, the real sweeps, and the
 docs, project and structure tests. A module that branches on the interpreter
-itself (:func:`branches_on_interpreter`) has to state its tier either way, so a
-version gate never lands on ``latest`` alone by omission; a ``LATEST`` marker is
-otherwise optional, and records why a module someone might expect on every leg
-is not.
+itself (:func:`branches_on_interpreter`, a syntactic, best-effort check) has to
+state its tier either way, so a version gate never lands on ``latest`` alone by
+omission; a ``LATEST`` marker is otherwise optional, and records why a module
+someone might expect on every leg is not.
+
+Scapy is opted in like the other third-party engines: the ``integration`` and
+``pypcap-parity`` legs install it on every interpreter, and a ``test`` leg off
+``latest``, which does not, skips it. The vendor extra is installed on ``latest``
+alone, and the crawlers are pure Python over ``requests`` and ``bs4``, so the vendor
+modules are ``LATEST``, each saying so, but for the file-restore and
+environment-variable tests, which stay on every leg.
 
 Nothing here imports :mod:`tests._support` -- the dependency runs the other way,
 and adding the reverse edge would make it a cycle. Nothing here imports
@@ -952,15 +959,56 @@ def declared_tier(path: 'pathlib.Path | str') -> 'Optional[str]':
     return _declared_tier(_test_module(path))
 
 
+#: Attributes of :mod:`sys` whose mere use asks which build is running, compared or not:
+#: ``sys.flags.context_aware_warnings``, ``sys._is_gil_enabled()``.
+_BUILD_FACTS = frozenset({'flags', '_is_gil_enabled'})
+#: Builtins that probe :mod:`sys` for an attribute, e.g. ``hasattr(sys, 'tracebacklimit')``.
+_PROBES = frozenset({'hasattr', 'getattr'})
+
+
+def _probes_interpreter(node: 'ast.AST') -> 'bool':
+    """Whether ``node`` asks the running interpreter something outside a comparison.
+
+    ``sys.flags`` or ``sys._is_gil_enabled``, a comparison with ``sys.maxsize``, a
+    ``sysconfig.get_config_var()`` call such as ``Py_GIL_DISABLED``'s, or a
+    ``hasattr``/``getattr`` probe of :mod:`sys`.
+
+    """
+    if isinstance(node, ast.Attribute):
+        return node.attr in _BUILD_FACTS and isinstance(node.value, ast.Name) and node.value.id == 'sys'
+    if isinstance(node, ast.Compare):
+        return any(isinstance(part, ast.Attribute) and part.attr == 'maxsize' and isinstance(part.value, ast.Name)
+                   and part.value.id == 'sys' for operand in [node.left] + list(node.comparators)
+                   for part in ast.walk(operand))
+    if not isinstance(node, ast.Call):
+        return False
+    func = node.func
+    if isinstance(func, ast.Attribute) and func.attr == 'get_config_var':
+        return isinstance(func.value, ast.Name) and func.value.id == 'sysconfig'
+    if isinstance(func, ast.Name) and func.id == 'get_config_var':
+        return True
+    return (isinstance(func, ast.Name) and func.id in _PROBES and bool(node.args)
+            and isinstance(node.args[0], ast.Name) and node.args[0].id == 'sys')
+
+
 def branches_on_interpreter(path: 'pathlib.Path | str') -> 'bool':
-    """Whether the test module at ``path`` itself compares the running interpreter (#1958).
+    """Whether the test module at ``path`` itself asks which interpreter is running (#1958).
 
     By its own AST alone, unlike :func:`varies_by_interpreter`, which follows what
     the module runs: a comparison of ``sys.version_info``, ``sys.implementation``,
-    ``platform.python_version()`` or the like, anywhere in it. Such a module has to
-    state its tier with :data:`TIER_MARKER`, so a version gate never runs on
-    ``latest`` alone just because nobody opted it in to ``ALL``. A module that does
-    not parse branches on nothing here.
+    ``platform.python_version()`` or the like; a use of ``sys.flags`` or
+    ``sys._is_gil_enabled``; a comparison with ``sys.maxsize``; a
+    ``sysconfig.get_config_var()`` call, such as
+    ``Py_GIL_DISABLED``'s; or a ``hasattr``/``getattr`` probe of :mod:`sys`, anywhere
+    in it. Such a module has to state its tier with :data:`TIER_MARKER`, so a
+    version gate never runs on ``latest`` alone just because nobody opted it in to
+    ``ALL``. A module that does not parse branches on nothing here.
+
+    The detection is syntactic and best-effort, not proof that a module is
+    interpreter-independent: it does not see :mod:`sys` under an alias, a probe of
+    any other module, a flag imported from :mod:`pcapkit.utilities.compat` or
+    another helper, or a gate in code the module imports. A module that relies on
+    any of those states its tier by hand.
 
     Args:
         path: Path to a test module, absolute or relative to :data:`ROOT`.
@@ -970,7 +1018,8 @@ def branches_on_interpreter(path: 'pathlib.Path | str') -> 'bool':
 
     """
     tree = _parse_module(_test_module(path))
-    return tree is not None and any(_compares_interpreter(node) for node in ast.walk(tree))
+    return tree is not None and any(_compares_interpreter(node) or _probes_interpreter(node)
+                                    for node in ast.walk(tree))
 
 
 def module_tier(path: 'pathlib.Path | str') -> 'str':

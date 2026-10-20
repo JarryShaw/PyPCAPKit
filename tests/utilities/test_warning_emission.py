@@ -27,6 +27,10 @@ from unittest import mock
 from tests._support import purge_modules
 from tests.utilities._harness import bootstrap, capture
 
+#: Test tier (#1958): exercises the warning machinery itself, which free-threaded builds
+#: make context-aware.
+__tier__ = 'ALL'
+
 
 class WarningEmissionTests(unittest.TestCase):
     def setUp(self) -> None:

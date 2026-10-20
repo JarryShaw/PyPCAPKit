@@ -88,6 +88,13 @@ from tests._support import reimport_once_per_class, time_limit
 if TYPE_CHECKING:
     from typing import Any, Iterator
 
+#: Test tier (#1958): the vendor extra is installed on latest alone, where the whole
+#: suite runs, and the crawlers are pure Python over requests and bs4; the vendor
+#: package's interpreter-sensitive parts, file restore and environment-variable parsing,
+#: run on every leg in tests/vendor/test_vendor_snapshot_restore_unit.py and
+#: tests/vendor/test_vendor_variables_1726_unit.py.
+__tier__ = 'LATEST'
+
 #: Repository root, i.e. the grandparent of the directory holding this file.
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 

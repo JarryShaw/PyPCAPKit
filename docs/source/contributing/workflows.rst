@@ -929,9 +929,13 @@ suite as the gate.
 * **The default.** A module that states no tier is ``LATEST``, so a new module runs
   on ``latest`` until it says why every leg needs it. ``__tier__ = 'LATEST'`` is
   optional, and records why a module someone might expect on every leg is not; a
-  module that compares ``sys.version_info`` or ``sys.implementation`` itself has
-  to state its tier either way, so a version gate never lands on ``latest`` alone
-  by omission.
+  module that compares ``sys.version_info``, ``sys.implementation`` or
+  ``sys.maxsize``, reads
+  ``sys.flags``, calls ``sysconfig.get_config_var()`` or probes :mod:`sys` with
+  ``hasattr``/``getattr`` has to state its tier either way, so a version gate never
+  lands on ``latest`` alone by omission. The check is syntactic and best-effort: an
+  alias, a flag imported from ``pcapkit.utilities.compat`` or a gate in a helper is
+  not seen, and such a module states its tier by hand.
 
 A module opts in when it exercises behaviour that can differ between interpreters
 or versions:
@@ -945,7 +949,9 @@ or versions:
 * stream and buffer semantics, threading and locking, and the warning and
   exception hooks;
 * a third-party engine whose installable releases vary by interpreter, such as
-  ``pypcap`` and ``pypcapfile``, which install below 3.12 only;
+  ``pypcap`` and ``pypcapfile``, which install below 3.12 only, and Scapy, which the
+  ``integration`` and ``pypcap-parity`` legs install on every interpreter and a
+  ``test`` leg off ``latest`` skips;
 * the hand-picked round trips, whatever their names, and the #1202 edge-case
   tables, whose cases are each written out by hand, as the owner ruled on #1958;
   and
@@ -956,7 +962,9 @@ Everything else is ``LATEST``: the per-protocol field-by-field tests, whose
 behaviour is interpreter-independent pure Python, each real sweep -- a round trip
 over every class or registry entry a table enumerates, every offset of a packet or
 every capture, as the owner ruled on #1732 and #1958 -- and the docs, project and
-structure tests. The tier guard itself is ``ALL``, since :file:`tests/conftest.py`
+structure tests. The vendor extra is installed on ``latest`` alone and the crawlers
+are pure Python, so the vendor modules are ``LATEST``, each saying so, but for the
+file-restore and environment-variable tests, which stay on every leg. The tier guard itself is ``ALL``, since :file:`tests/conftest.py`
 runs it at collection on every leg.
 
 Which legs run which tier:
