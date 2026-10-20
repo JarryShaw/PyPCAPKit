@@ -172,7 +172,7 @@ def beholder(
             # the payload *past* the extension headers, so falling back to the
             # whole IPv6 payload would hold those headers twice, once in the
             # extension header chain and once more in this ``Raw``
-            # (:issue:`1471`).
+            # (#1471).
             file_ = cast('Optional[bytes]', kwargs.get('payload'))
             if file_ is None:
                 file_ = self._get_payload()

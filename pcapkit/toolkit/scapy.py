@@ -476,14 +476,14 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
         ipv4 = cast('IP', packet['IP'])
         if ipv4.flags.DF:       # dismiss not fragmented packet
             return None
-        if not _frame(packet):  # a zero-length frame (:issue:`1676`)
+        if not _frame(packet):  # a zero-length frame (#1676)
             return None
         # NOTE: ``bytes(ipv4)`` ends with the frame's trailer, which Scapy files
         # as padding at the end of the packet however deep the IPv4 layer, so
         # only the octets inside every IP datagram above it are kept, the
-        # Payload Length of IPv6 carrying it included (:issue:`1623`). The IHL
+        # Payload Length of IPv6 carrying it included (#1623). The IHL
         # and Total Length are read off them, as Scapy leaves ``ihl`` and
-        # ``len`` None on a layer built by hand until it is built (:issue:`1676`).
+        # ``len`` None on a layer built by hand until it is built (#1676).
         octets = _within_datagrams(ipv4)
         ihl = (octets[0] & 0x0F) * 4 if octets else IPV4_HEADER_LEN
         if len(octets) < max(ihl, IPV4_HEADER_LEN):     # a header those octets cut short
@@ -512,7 +512,7 @@ def ipv4_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv4Ad
             # NOTE: this keeps the octets past the Total Length, since the
             # reassembly machinery cuts the payload at ``tl - ihl`` itself.
             # :func:`ipv6_reassembly` derives its ``tl`` from the payload, so it
-            # has to cut them (:issue:`1584`).
+            # has to cut them (#1584).
             payload=bytearray(octets[ihl:]),           # raw bytearray type payload
             timestamp=float(packet.time),              # capture timestamp
         )
@@ -576,7 +576,7 @@ def ipv6_reassembly(packet: 'Packet', *, count: 'int' = -1) -> 'IP_Packet[IPv6Ad
         # reassembled packet keeps (:rfc:`8200#section-4.5`).
         hdr_len = len(ipv6) - len(ipv6_frag)
         # the fragment's data stops at the Payload Length, so neither it nor
-        # ``tl`` below counts the frame's trailer (:issue:`1584`)
+        # ``tl`` below counts the frame's trailer (#1584)
         payload = bytearray(_within_datagrams(ipv6_frag.payload))
 
         data = IP_Packet(

@@ -160,7 +160,7 @@ def info_final(cls: 'ST', *, _finalised: 'bool' = True) -> 'ST':
     # ``Info`` class, rather than itself, plus that such class does not
     # override the ``__init__`` method of the meta class. A multi-mapping
     # :class:`Info` (:class:`_MultiInfo`) declares no fields and keeps the
-    # mapping constructor it inherits (:issue:`1484`).
+    # mapping constructor it inherits (#1484).
     if '__init__' not in cls.__dict__ and cls is not Info and not issubclass(cls, _MultiInfo):
         args_ = []  # type: list[str]
         dict_ = []  # type: list[str]
@@ -177,7 +177,7 @@ def info_final(cls: 'ST', *, _finalised: 'bool' = True) -> 'ST':
             # Python version: below 3.10 (bpo-43901), ``__annotations__`` of a
             # class declaring none is its nearest base's, so a field-less
             # subclass read Info's ``__finalised__``, ``__additional__`` and
-            # ``__excluded__`` as its fields (:issue:`1692`). See
+            # ``__excluded__`` as its fields (#1692). See
             # :func:`~pcapkit.utilities.compat.get_annotations`.
             for key in reversed(get_annotations(cls_)):
                 # NOTE: We skip duplicated annotations to avoid duplicate
@@ -498,7 +498,7 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
         # NOTE: A :class:`MultiDict` or :class:`OrderedMultiDict` held as a
         # *value* -- the option lists the parsers build -- is stored as a
         # :class:`MultiInfo` or :class:`OrderedMultiInfo`, so that a finalised
-        # instance holds no mutable mapping (:issue:`1484`).
+        # instance holds no mutable mapping (#1484).
 
         __name__ = type(self).__name__  # pylint: disable=redefined-builtin
 
@@ -945,7 +945,7 @@ class MultiInfo(_MultiInfo[KT, VT], MultiDict[KT, VT]):
         # in buckets -- it answered False where the OrderedMultiDict, asked the
         # other way round, answered True. The ordered side decides, as it does
         # for a bare MultiDict, which Python asks it first for being its
-        # subclass (:issue:`1484`).
+        # subclass (#1484).
         if isinstance(other, OrderedMultiDict):
             return NotImplemented
         return MultiDict.__eq__(self, other)
@@ -1016,7 +1016,7 @@ class OrderedMultiInfo(_MultiInfo[KT, VT], OrderedMultiDict[KT, VT]):
     # OrderedMultiDict's own. ``__ne__`` is not: OrderedMultiDict has none, and
     # dict's compares the internal buckets, so two equal option lists compared
     # ``!=`` as well as ``==``. It is :func:`_ne`, as for the exports
-    # (:issue:`1484`).
+    # (#1484).
     __getitem__ = OrderedMultiDict.__getitem__  # type: ignore[assignment]
     __iter__ = OrderedMultiDict.__iter__  # type: ignore[assignment]
     __len__ = OrderedMultiDict.__len__

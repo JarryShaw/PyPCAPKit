@@ -209,7 +209,7 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
         # NOTE: Octets captured past the Packet Length belong to this layer,
         # since its own length field is what leaves them out of the payload --
         # the message digest of cryptographic authentication among them -- and
-        # the rebuild keeps them as captured (:issue:`1455`).
+        # the rebuild keeps them as captured (#1455).
         if schema.trailer:
             ospf.__update__([
                 ('trailer', schema.trailer),
@@ -360,7 +360,7 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
             'auth_type': data.autype,
             'auth_data': data.auth,
             'payload': cls._make_payload(data),
-            # NOTE: And the octets captured past the Packet Length (:issue:`1455`).
+            # NOTE: And the octets captured past the Packet Length (#1455).
             'trailer': data.get('trailer', b''),
         }
 
@@ -473,7 +473,7 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
                 seq=auth_data.seq,
             )
         # NOTE: The ``to_dict()`` form of the info above, which ``from_data``
-        # passes through as is (:issue:`1464`).
+        # passes through as is (#1464).
         if isinstance(auth_data, dict):
             try:
                 return Schema_CryptographicAuthentication(

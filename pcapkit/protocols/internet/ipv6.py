@@ -239,11 +239,11 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
 
         # NOTE: This class reads IPv6 only, as :meth:`IPv4.read
         # <pcapkit.protocols.internet.ipv4.IPv4.read>` reads IPv4 only; telling
-        # the two apart by the Version is left to the dispatchers (:issue:`1680`).
+        # the two apart by the Version is left to the dispatchers (#1680).
         if schema.hextet['version'] != 6:
             raise ProtocolError(f"[IPv6] invalid version: {schema.hextet['version']}")
 
-        # NOTE: A receiver treats each of these as an error (:issue:`1687`), so
+        # NOTE: A receiver treats each of these as an error (#1687), so
         # the frame stops here, see :meth:`IPv4.read
         # <pcapkit.protocols.internet.ipv4.IPv4.read>`. A Fragment header beside
         # the Jumbo Payload option is caught on the walk, see
@@ -266,7 +266,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
 
         # NOTE: Octets captured past the Payload Length are kept as captured,
         # see :meth:`IPv4.read <pcapkit.protocols.internet.ipv4.IPv4.read>`
-        # (:issue:`1209`).
+        # (#1209).
         if schema.trailer:
             ipv6.__update__({
                 'trailer': schema.trailer,
@@ -275,7 +275,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         # NOTE: A jumbogram's extent is its Jumbo Payload Length, not the zero
         # Payload Length, see :meth:`Schema_IPv6.post_process
         # <pcapkit.protocols.schema.internet.ipv6.IPv6.post_process>`
-        # (:issue:`1434`); the check above leaves a zero one beside it.
+        # (#1434); the check above leaves a zero one beside it.
         jumbo = jumbo_payload_length(schema.next, rest)
         extent = schema.length if jumbo is None else jumbo
 
@@ -339,12 +339,12 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         # NOTE: An explicit ``payload_length`` is written as given, so that a
         # ``from_data`` rebuild of a capture truncated by snaplen keeps the
         # length the sender declared instead of the one that was recorded
-        # (:issue:`1155`). Computed from the octets at hand otherwise, which is
+        # (#1155). Computed from the octets at hand otherwise, which is
         # what a plain ``IPv6(payload=...)`` wants -- or zero for a payload too
         # long for the field, or one whose Hop-by-Hop Options header carries a
         # Jumbo Payload option, i.e. a jumbogram, whose length the caller gives
         # there (:rfc:`2675#section-2`); its Payload Length must be zero
-        # (:issue:`1687`).
+        # (#1687).
         if payload_length is None:
             payload_length = len(payload)
             if payload_length > IP_MAX_LENGTH or jumbo_payload_length(next_val, bytes(payload)) is not None:
@@ -435,10 +435,10 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             # NOTE: ``data.payload`` is the parsed payload length, passed through
             # rather than left to ``make`` to recompute, so that a truncated
             # capture rebuilds with the length that was on the wire
-            # (:issue:`1155`).
+            # (#1155).
             'payload_length': data.payload,
             'payload': payload,
-            # NOTE: And the octets captured past the Payload Length (:issue:`1209`).
+            # NOTE: And the octets captured past the Payload Length (#1209).
             'trailer': data.get('trailer', b''),
         }
 
@@ -507,7 +507,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             # see :meth:`_import_next_layer`, and written under that class's
             # key rather than the dedicated one's. Rebuilding it with the
             # dedicated class would look for fields only that class parses
-            # (:issue:`1473`), so the key decides the parser.
+            # (#1473), so the key decides the parser.
             if key == cls._exthdr_key(IPv6_Ext.alias.fget(None)):  # type: ignore[attr-defined]
                 parser = IPv6_Ext  # type: Type[ProtocolBase]
             else:
@@ -604,13 +604,13 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             # headers are walked, as at most that many are dissected after any
             # other layer. This header and the rest are then the upper layer,
             # which :meth:`_import_next_layer` keeps raw, with one warning
-            # (:issue:`1604`).
+            # (#1604).
             if config.EXTENSION_HEADER_LIMIT != -1 and len(_protos) >= config.EXTENSION_HEADER_LIMIT:
                 break
 
             # NOTE: Likewise past :data:`FRAME_LAYER_LIMIT
             # <pcapkit.utilities.config.FRAME_LAYER_LIMIT>` layers of the
-            # frame (:issue:`1610`), since each header walked is one of them.
+            # frame (#1610), since each header walked is one of them.
             if config.FRAME_LAYER_LIMIT != -1 and depth + len(_protos) >= config.FRAME_LAYER_LIMIT:
                 break
 
@@ -657,7 +657,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             # NOTE: Added through a :class:`MultiDict`, so a repeated header
             # keeps its predecessor's info rather than overwriting it, and
             # :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>`
-            # writes every one of them, in wire order (:issue:`1453`).
+            # writes every one of them, in wire order (#1453).
             name = self._exthdr_key(next_.alias)
             ipv6.__update__(OrderedMultiDict([(name, info)]))
 
@@ -687,7 +687,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
                 # reassembly, so ``fragment``, ``hdr_len`` and ``raw_len`` keep
                 # that split however far the walk goes on.
                 if split is None:
-                    # NOTE: Nor may a jumbogram carry one (:issue:`1687`), so the
+                    # NOTE: Nor may a jumbogram carry one (#1687), so the
                     # frame stops here as for the errors :meth:`read` checks;
                     # past those, its Jumbo Payload option is in the payload.
                     error = jumbogram_error(ipv6.payload, ipv6.next, self.__header__.get_payload(), lambda: True)
@@ -701,7 +701,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
                 # NOTE: Only a first fragment goes on. :rfc:`8200#section-4.5`
                 # puts every header through the upper-layer one in the fragment
                 # at offset zero, so what follows its Fragment header is walked
-                # exactly as it would be without one (:issue:`1539`). A later
+                # exactly as it would be without one (#1539). A later
                 # fragment carries a slice of the Fragmentable Part from its
                 # offset on, and that slice starts with no header at all.
                 if not self._is_first_fragment(info):
@@ -727,7 +727,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         # fragment carries. No code is dispatched on, so the registry's
         # fallback leaves the octets as :class:`~pcapkit.protocols.misc.raw.Raw`
         # with no protocol to alias it as, and ``'UDP' in frame`` does not hold
-        # of a slice of UDP payload (:issue:`1545`). Reassembly takes
+        # of a slice of UDP payload (#1545). Reassembly takes
         # ``fragment`` above, which this leaves as it was.
         ipv6_exthdr = ProtoChain.from_list(_protos)  # type: ignore[arg-type]
         self._exthdr_depth = len(_protos)  # the headers the upper layer follows

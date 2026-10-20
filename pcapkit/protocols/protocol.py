@@ -862,7 +862,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         elif self._make_raw and _holds_raw(self.__header__):
             # NOTE: A schema may accept octets that :meth:`read` then rejects,
             # e.g. an option whose length runs past the option area, so the
-            # read is covered too (:issue:`1394`).
+            # read is covered too (#1394).
             try:
                 parsed = cast('_ST', type(self.__header__).unpack(io.BytesIO(self._data), length, packet))  # type: ignore[call-arg,misc]
                 if _raw_where_parsed(self.__header__, parsed):
@@ -1342,7 +1342,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         # keyword would reach the schema as nothing at all and the field would
         # keep its default -- ``TCP_BASE`` asking for ``seq=1``, which
         # ``TCP.make`` spells ``seq_no``, would yield ``seq = 0`` with no warning
-        # (:issue:`617`). The schema layer is not that permissive: :meth:`Schema.__update__
+        # (#617). The schema layer is not that permissive: :meth:`Schema.__update__
         # <pcapkit.protocols.schema.schema.Schema.__update__>` warns
         # :exc:`~pcapkit.utilities.warnings.UnknownFieldWarning` for a field it
         # does not know, and this closes the asymmetry from the other end.
@@ -1489,7 +1489,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         # NOTE: a class defining its own ``__proto__`` ships what its body put
         # there; copy it now, before anything can register into it, so that
         # ``_next_layer_entry`` can restore a shipped descriptor without
-        # resolving it (:issue:`1504`). A class that inherits ``__proto__``
+        # resolving it (#1504). A class that inherits ``__proto__``
         # inherits this copy with it.
         if '__proto__' in cls.__dict__:
             table = cls.__dict__['__proto__']

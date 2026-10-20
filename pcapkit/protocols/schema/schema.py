@@ -585,8 +585,8 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
         for (key, value) in data_iter:
             # NOTE: Not a field, but what :meth:`to_dict` emits for the octets an
             # enclosing ``SchemaField`` span held beyond this schema, and where,
-            # so that a rebuilt schema still re-emits them (:issue:`1380`).
-            # NOTE: Nor is the short read :meth:`unpack` records (:issue:`1458`).
+            # so that a rebuilt schema still re-emits them (#1380).
+            # NOTE: Nor is the short read :meth:`unpack` records (#1458).
             if key in ('__remainder__', '__remainder_offset__', '__short_read__'):
                 self.__dict__[key] = value
                 continue
@@ -668,7 +668,7 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
         # fields: a ``post_process`` may store derived values on the instance,
         # as :class:`~pcapkit.protocols.schema.internet.ipv4.TSOption` does, and
         # iteration reports them, so ``dict(schema)`` must be able to read them
-        # back (:issue:`1291`). A mangled key is reachable only under the name
+        # back (#1291). A mangled key is reachable only under the name
         # it was mangled from, as in iteration.
         if name in self.__fields__ or (name not in self.__builtin__ and name not in self.__map_reverse__):
             key = self.__map__.get(name, name)
@@ -885,14 +885,14 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
                     # the packed options do not fill. Without it every padding
                     # field sized from that key packs nothing, and the header
                     # comes out shorter than its own length field says
-                    # (:issue:`1289`). An undeclared area (a negative length)
+                    # (#1289). An undeclared area (a negative length)
                     # leaves no remainder.
                     packet['__option_padding__'] = max(field.length - len(self.__buffer__[field.name]), 0)
                 continue
 
             if isinstance(field, PaddingField):
                 # NOTE: the octets as captured, or zeros when there are none
-                # (:issue:`1223`) -- see :meth:`PaddingField.pack
+                # (#1223) -- see :meth:`PaddingField.pack
                 # <pcapkit.corekit.fields.strings.PaddingField.pack>`.
                 self.__buffer__[field.name] = field.pack(data, packet)
                 continue
@@ -928,8 +928,8 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
                 # stale octets at a shifted offset, so then, or for a schema that
                 # never had any, the rest of the span is zero-filled.
                 # Either way the field keeps the width its length field declares
-                # (:issue:`1292`), and a schema rebuilt through :meth:`from_dict`
-                # packs what the parsed one did (:issue:`1380`).
+                # (#1292), and a schema rebuilt through :meth:`from_dict`
+                # packs what the parsed one did (#1380).
                 #
                 # A field reached through a
                 # :class:`~pcapkit.corekit.fields.misc.SwitchField` is not handled
@@ -1065,7 +1065,7 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
                 # NOTE: A negative length is the unset default and takes what
                 # the declared length leaves, never less than nothing; a
                 # computed zero is an empty payload, not an unset one, or it
-                # would swallow the fields after it (:issue:`1275`).
+                # would swallow the fields after it (#1275).
                 length = field.length
                 if length < 0:
                     length = max(cast('int', packet['__length__']), 0)

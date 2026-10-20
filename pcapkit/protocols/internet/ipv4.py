@@ -345,7 +345,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
 
         # NOTE: An ``ihl`` declaring more header than was captured leaves the
         # missing octets to read as zeros, which ``from_data`` then rebuilds;
-        # rejecting it keeps the octets as captured inside the parent (:issue:`1404`).
+        # rejecting it keeps the octets as captured inside the parent (#1404).
         if len(self) < ipv4.hdr_len:
             raise ProtocolError(f'{self.alias}: header length {ipv4.hdr_len} runs past the end of '
                                 f'the data ({len(self)} octets)')
@@ -363,7 +363,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         # NOTE: Octets captured past the Total Length belong to this layer,
         # since its own length field is what leaves them out of the payload: an
         # Ethernet carrier hands the whole rest of its frame here, padding
-        # included, and the rebuild keeps them as captured (:issue:`1209`).
+        # included, and the rebuild keeps them as captured (#1209).
         if schema.trailer:
             ipv4.__update__([
                 ('trailer', schema.trailer),
@@ -380,7 +380,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         # NOTE: A capture that ends at or inside the header has no payload
         # octets, and parsing the next layer from none would default-fill a
         # header that was never captured, which ``from_data`` then rebuilds
-        # (:issue:`1167`). A zero length makes it a ``NoPayload`` instead.
+        # (#1167). A zero length makes it a ``NoPayload`` instead.
         #
         # A Total Length of 0 is what TCP segmentation offload leaves in a
         # capture taken on the sending host: the payload is then the rest of
@@ -389,7 +389,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         # Wireshark's "Bogus IP length", which it dissects no further: no
         # payload, and the octets after the header are the trailer, as they are
         # for a Total Length equal to the header's. Either way the rebuild
-        # writes the Total Length back as it was (:issue:`1547`).
+        # writes the Total Length back as it was (#1547).
         if len(self) > ipv4.hdr_len:
             if ipv4.len == 0:
                 _plen = len(self) - ipv4.hdr_len
@@ -405,7 +405,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         # code is dispatched on, so the registry's fallback leaves the octets as
         # :class:`~pcapkit.protocols.misc.raw.Raw` with no protocol to alias it
         # as, and ``'UDP' in frame`` does not hold of a slice of UDP payload
-        # (:issue:`1553`). Reassembly takes ``packet.payload``, the octets as
+        # (#1553). Reassembly takes ``packet.payload``, the octets as
         # captured, which this leaves as they were.
         return self._decode_next_layer(ipv4, None if ipv4.offset else ipv4.protocol, _plen,
                                        packet=__packet__)
@@ -532,7 +532,7 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
         # NOTE: An explicit ``total_length`` is written as given, so that a
         # ``from_data`` rebuild of a capture truncated by snaplen keeps the
         # length the sender declared instead of the one that was recorded
-        # (:issue:`1155`). Computed from the octets at hand otherwise, which is
+        # (#1155). Computed from the octets at hand otherwise, which is
         # what a plain ``IPv4(payload=...)`` wants.
         if total_length is None:
             total_length = ihl * 4 + len(payload)
@@ -661,14 +661,14 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             'options': getattr(data, 'options', None),
             # NOTE: The parsed total length is passed through rather than left
             # to ``make`` to recompute, so that a truncated capture rebuilds
-            # with the length that was on the wire (:issue:`1155`).
+            # with the length that was on the wire (#1155).
             'total_length': data.len,
             # NOTE: And the octets after the End of Option List, which no option
             # records. The header length is not passed: it follows from the
             # options and these octets, so edited options recompute it.
             'padding': getattr(data, 'padding', None),
             'payload': cls._make_payload(data),
-            # NOTE: And the octets captured past the Total Length (:issue:`1209`).
+            # NOTE: And the octets captured past the Total Length (#1209).
             'trailer': data.get('trailer', b''),
         }
 

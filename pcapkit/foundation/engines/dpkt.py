@@ -356,7 +356,7 @@ def _pcap_reader() -> 'Type[PCAPReader]':
                     yield DecimalTimestamp(value, resolution, hdr.len), buf
                 else:
                     # at a precision of 64 digits, not the caller's, which may
-                    # be too low to hold it (:issue:`1668`)
+                    # be too low to hold it (#1668)
                     with localcontext(prec=64):
                         exact = decimal.Decimal(hdr.tv_sec) + decimal.Decimal(hdr.tv_usec) / resolution
                     yield Timestamp(value, exact, resolution, hdr.len), buf
@@ -556,7 +556,7 @@ class DPKT(EngineBase['DPKTPacket']):
             # more than its own ``UnpackError`` while parsing -- dpkt 1.9.8 reads
             # ``frag_off`` from whatever header follows an IPv6 Fragment header,
             # so a Fragment header followed by ESP or Destination Options raises
-            # :exc:`AttributeError` (:issue:`1351`). The frame is kept as a raw
+            # :exc:`AttributeError` (#1351). The frame is kept as a raw
             # packet, so one undecodable frame neither ends the extraction nor
             # shifts the numbering of the frames after it.
             warn(f'Frame {ext._frnum + 1}: dpkt cannot parse the frame '

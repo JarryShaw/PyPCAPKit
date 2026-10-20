@@ -46,7 +46,7 @@ class HeaderTruncatedPayloadTests(unittest.TestCase):
         parsed = list(extractor.frame)[2][Ethernet]
 
         # 18 octets are short of the 20-octet IPv4 header, so they are kept as
-        # raw octets (:issue:`1170`) rather than parsed into a ``dst`` whose low
+        # raw octets (#1170) rather than parsed into a ``dst`` whose low
         # half is zero-filled, and the rebuild is exactly what was captured.
         self.assertIsInstance(parsed.payload, Raw)
         self.assertEqual(parsed.payload.data, bytes.fromhex('4500012ca8370000fa11178a00000000ffff'))
