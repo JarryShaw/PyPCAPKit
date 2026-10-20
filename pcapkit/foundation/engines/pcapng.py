@@ -10,6 +10,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 """
 import collections
 import os
+import sys
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.pcapng.block_type import BlockType as Enum_BlockType
@@ -453,7 +454,10 @@ class PCAPNG(EngineBase[P_PCAPNG]):
                 if block_type == Enum_BlockType.Decryption_Secrets_Block:
                     secrets = int.from_bytes(self._peek(16)[12:16], byteorder)
                     size = max(size, BLOCK_MINIMUM[block_type] + secrets + -secrets % 4)
-        ifile._read_ahead_size = size
+        # NOTE: No buffer holds more than :data:`sys.maxsize` octets, so a block
+        # longer than that is read ahead only so far; the reader moves past the
+        # rest itself (#1975).
+        ifile._read_ahead_size = min(size, sys.maxsize)
 
     def _check_packet_block_context(self) -> 'None':
         """Reject a packet block in a section that describes no interface.

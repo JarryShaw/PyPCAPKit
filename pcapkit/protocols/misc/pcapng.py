@@ -67,6 +67,7 @@ from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.corekit.enum import EnumLookup
 from pcapkit.corekit.fields.strings import DecodedString
 from pcapkit.corekit.infoclass import OrderedMultiInfo
+from pcapkit.corekit.io import advance
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.version import VersionInfo
@@ -1350,7 +1351,12 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             self._file.seek(_seek_set, io.SEEK_SET)
 
             #: bytes: Raw block data.
-            self._data = self._read_fileng(schema.block.length)
+            #
+            # NOTE: Asked for no further than one read can go, :data:`sys.maxsize`,
+            # past which the read raises :exc:`OverflowError` instead of coming
+            # back short as the truncation handling below expects (#1975).
+            bound = min(schema.block.length, sys.maxsize)
+            self._data = self._read_fileng(bound)
 
             # NOTE: Block Total Length is cross-checked against its own trailing
             # copy and never against the file, so on a capture cut short it runs
@@ -1383,8 +1389,15 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                 # again in place of building the block (#1470).
                 block.__update__([('__truncated_raw__', self._data)])
 
-            # move backward to the beginning of next block
-            self._file.seek(seek_cur, io.SEEK_SET)
+            # NOTE: A read that came back whole at the bound stopped there, not
+            # at the end of the file: the block runs on past it, and the next one
+            # starts where its Block Total Length says, so the stream is moved
+            # over the rest (#1975).
+            if read == bound < schema.block.length:
+                advance(self._file, schema.block.length - bound)
+            else:
+                # move backward to the beginning of next block
+                self._file.seek(seek_cur, io.SEEK_SET)
 
             #: io.BytesIO: Source packet stream.
             self._file = io.BytesIO(self._data)
@@ -1636,7 +1649,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         current = self._file.tell()
         self._file.seek(offset + 8, io.SEEK_SET)
-        body = self._read_fileng(header.block.length - GENERIC_BLOCK_MINIMUM)
+        # NOTE: bounded as :meth:`read` bounds the block's read (#1975).
+        body = self._read_fileng(min(header.block.length - GENERIC_BLOCK_MINIMUM, sys.maxsize))
         self._file.seek(current, io.SEEK_SET)
 
         return Data_UnknownBlock(

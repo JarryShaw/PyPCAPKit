@@ -21,7 +21,6 @@ import importlib.util
 import io
 import os
 import struct
-import sys
 import tempfile
 import unittest
 import warnings
@@ -115,9 +114,6 @@ class TestPCAPTraceTruncatedRecord(unittest.TestCase):
         """#1541: a record claiming more than the file holds writes what it holds."""
         for claim in CLAIMS:
             with self.subTest(claim=claim):
-                if 16 + claim > sys.maxsize:
-                    self.skipTest('the frame reader asks the file for the 16-octet header and the claim at once, '
-                                  'past sys.maxsize on GraalPy (#1963)')
                 self.check(self.trace(_cut_pcap(claim)), _frames()[-1])
 
     def test_a_pcapng_captured_length_past_its_block_is_traced_as_the_octets_it_has(self) -> None:

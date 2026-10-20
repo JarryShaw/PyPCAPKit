@@ -6,6 +6,7 @@ import collections
 import collections.abc
 import io
 import itertools
+import sys
 from typing import TYPE_CHECKING, Any, Generic, TypeVar, cast
 
 from pcapkit.corekit.decorators import prepare
@@ -1070,7 +1071,12 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
                 if length < 0:
                     length = max(cast('int', packet['__length__']), 0)
 
-                payload = data.read(length)
+                # NOTE: A declared length is asked for no further than one read
+                # can go, :data:`sys.maxsize`; past it the read raises
+                # :exc:`OverflowError` rather than coming back short, which is
+                # how every other overrun is reported. No stream holds more than
+                # that, so the bounded read is the same short read (#1975).
+                payload = data.read(min(length, sys.maxsize))
                 self.__buffer__[field.name] = payload
 
                 packet['__length__'] -= length
@@ -1102,7 +1108,8 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
 
             length = field.length
 
-            byte = data.read(length)
+            # NOTE: bounded as the payload read above is (#1975).
+            byte = data.read(min(length, sys.maxsize))
             self.__buffer__[field.name] = byte
             if not isinstance(field, ForwardMatchField):
                 self._note_short_read(field.name, length, byte)
