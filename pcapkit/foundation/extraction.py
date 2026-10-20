@@ -1590,9 +1590,26 @@ class Extractor(Generic[_P]):
 
     def __exit__(self, exc_type: 'Type[BaseException] | None', exc_value: 'BaseException | None',
                  traceback: 'TracebackType | None') -> 'None':  # pylint: disable=unused-argument
-        """Close the input file when exits."""
+        """Release what this class holds when the ``with`` block exits.
+
+        The engine is always closed. The input stream is closed only *if this
+        class owns it* -- the rule of :issue:`610`, as :meth:`_owns_input` writes
+        it down and :meth:`_cleanup` and the backstops already follow. A stream
+        the caller supplied stays open for the caller to close, so leaving the
+        block no longer closes it behind the caller's back (:issue:`1999`).
+
+        For a caller's non-seekable stream, the stream this class owns is the
+        :class:`~pcapkit.corekit.io.SeekableReader` wrapped around it, and that
+        wrapper is closed; it was built with ``stream_closing`` off, so closing
+        it leaves the caller's stream underneath open.
+
+        """
         logger.debug('closing %s on context exit after %d frame(s)', self._ifnm, self._frnum)
-        self._ifile.close()
+        # NOTE: ownership, not the ``with`` statement, decides who closes the
+        # input (#610, #1999): entering the block does not hand the caller's
+        # stream over to this class.
+        if self._owns_input():
+            self._ifile.close()
         self._detach_finalizer()
         self._exeng.close()
 
@@ -1643,8 +1660,8 @@ class Extractor(Generic[_P]):
         """Whether the input stream is this class's to close.
 
         The one place the ownership rule of :issue:`610` is written down, so that
-        :meth:`_cleanup`, :meth:`__del__` and the registration of
-        :attr:`_finalizer` cannot drift apart on it.
+        :meth:`_cleanup`, :meth:`__exit__`, :meth:`__del__` and the registration
+        of :attr:`_finalizer` cannot drift apart on it.
 
         Returns:
             :data:`True` when the input stream was opened by this class and is
