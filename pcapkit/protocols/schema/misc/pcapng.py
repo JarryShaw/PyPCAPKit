@@ -323,6 +323,52 @@ def nonnegative(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict[st
     return callback
 
 
+def held_body(framing: 'int') -> 'Callable[[dict[str, Any]], int]':
+    """Bound a block body read as one field to the octets the stream holds.
+
+    Args:
+        framing: Octets the block's fixed fields span, both copies of the Block
+            Total Length included.
+
+    Returns:
+        A callback returning the block's Block Total Length less ``framing``,
+        never below zero, and never past what is left of the stream.
+
+    The bodies of :class:`UnknownBlock`, :class:`CustomBlock` and
+    :class:`SystemdJournalExportBlock` are each one
+    :class:`~pcapkit.corekit.fields.strings.BytesField` spanning the whole
+    block, so a Block Total Length that runs past the end of the file is one
+    field declaring that many octets. Unbounded, that field is zero-filled
+    within :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH`, and past it
+    :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>`
+    raises :exc:`~pcapkit.utilities.exceptions.FieldValueError` from inside the
+    block's schema, where :meth:`PCAPNG.read
+    <pcapkit.protocols.misc.pcapng.PCAPNG.read>` cannot keep the block as
+    captured, so the whole extraction ends (:issue:`1984`). The other block
+    types read their bodies field by field, so none of them declares that much
+    in one field.
+
+    Bounded, the body is the octets the file actually holds, whatever the
+    block declares, and :meth:`PCAPNG.read
+    <pcapkit.protocols.misc.pcapng.PCAPNG.read>` reports the truncation as it
+    does for every other block type. On a well-formed block the stream holds
+    the body and the trailing Block Total Length, so this is a no-op; on the
+    packing path :meth:`Schema.pack
+    <pcapkit.protocols.schema.schema.Schema.pack>` leaves ``__length__`` at
+    ``-1`` for "unknown", and the declared span is kept.
+
+    """
+    floored = nonnegative(lambda pkt: pkt['length'] - framing)
+
+    def callback(pkt: 'dict[str, Any]') -> 'int':
+        nominal = floored(pkt)
+        remaining = pkt.get('__length__')
+        if not isinstance(remaining, int) or remaining < 0:
+            return nominal
+        return min(nominal, remaining)
+    return callback
+
+
 def bounded_option(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict[str, Any]], int]':
     """Refuse an option or record payload that runs past its area.
 
@@ -903,7 +949,7 @@ class UnknownBlock(BlockType):
     #: Block total length.
     length: 'int' = UInt32Field(callback=byteorder_callback)
     #: Block body (including padding).
-    body: 'bytes' = BytesField(length=nonnegative(lambda pkt: pkt['length'] - GENERIC_BLOCK_MINIMUM))
+    body: 'bytes' = BytesField(length=held_body(GENERIC_BLOCK_MINIMUM))
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
@@ -2089,7 +2135,7 @@ class SystemdJournalExportBlock(BlockType, code=Enum_BlockType.systemd_Journal_E
     #: Block total length.
     length: 'int' = UInt32Field(callback=byteorder_callback)
     #: Journal entry.
-    entry: 'bytes' = BytesField(length=nonnegative(lambda pkt: pkt['length'] - GENERIC_BLOCK_MINIMUM))
+    entry: 'bytes' = BytesField(length=held_body(GENERIC_BLOCK_MINIMUM))
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
@@ -2517,8 +2563,8 @@ class CustomBlock(BlockType, code=[Enum_BlockType.Custom_Block_that_rewriters_ca
     # NOTE: both custom block types span the same fixed fields, so the one
     # entry stands for both.
     #: Custom data (incl. padding and options).
-    data: 'bytes' = BytesField(length=nonnegative(
-        lambda pkt: pkt['length'] - BLOCK_MINIMUM[Enum_BlockType.Custom_Block_that_rewriters_can_copy_into_new_files]))
+    data: 'bytes' = BytesField(length=held_body(
+        BLOCK_MINIMUM[Enum_BlockType.Custom_Block_that_rewriters_can_copy_into_new_files]))
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
 
