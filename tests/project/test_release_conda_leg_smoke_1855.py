@@ -6,7 +6,7 @@
 upload. ``conda`` in :file:`.github/workflows/create-release.yml`, which
 publishes the release packages, had no such step, and its build step did not
 write the ``host_package`` output the step reads. The jobs are read with
-:func:`yaml.safe_load`, and each build step is run with a stand-in ``conda``,
+:func:`tests._workflows.steps`, and each build step is run with a stand-in ``conda``,
 as ``test_conda_native_platforms_1822.py`` runs it.
 
 """
@@ -22,6 +22,7 @@ import tempfile
 import unittest
 from typing import TYPE_CHECKING
 
+from tests import _workflows
 from tests._support import scale_timeout
 from tests.project.test_conda_native_platforms_1822 import BASH, CONDA
 
@@ -41,7 +42,7 @@ UPLOADS = ('Upload conda packages to Anaconda', 'Upload package to GitHub Releas
 
 
 def steps(workflow: 'str', job_id: 'str') -> 'list[dict[str, Any]]':
-    return yaml.safe_load((WORKFLOWS / workflow).read_text(encoding='utf-8'))['jobs'][job_id]['steps']
+    return _workflows.steps(WORKFLOWS / workflow, job_id)
 
 
 def smoke_steps(found: 'list[dict[str, Any]]') -> 'list[int]':

@@ -26,9 +26,7 @@ from __future__ import annotations
 import re
 import unittest
 
-import yaml
-
-from tests import _tiers
+from tests import _tiers, _workflows
 from tests.project.test_release_gates import evaluate_condition, evaluate_expression
 
 WORKFLOWS = _tiers.ROOT / '.github' / 'workflows'
@@ -41,8 +39,7 @@ _INTERPOLATION = re.compile(r'\$\{\{(.*?)\}\}', re.S)
 
 def concurrency(name: 'str') -> 'dict[str, str]':
     """The workflow-level ``concurrency:`` mapping of ``name``."""
-    with open(WORKFLOWS / name, encoding='utf-8') as file:
-        return yaml.safe_load(file)['concurrency']
+    return _workflows.load(WORKFLOWS / name)['concurrency']
 
 
 def context(event_name: 'str', ref: 'str', run_id: 'str', workflow: 'str' = 'Experimental Tests') -> 'dict[str, object]':
@@ -83,8 +80,7 @@ class TestExperimentalHasNoGroup(unittest.TestCase):
     """
 
     def test_no_concurrency_block(self) -> None:
-        with open(WORKFLOWS / 'experimental.yml', encoding='utf-8') as file:
-            self.assertNotIn('concurrency', yaml.safe_load(file))
+        self.assertNotIn('concurrency', _workflows.load(WORKFLOWS / 'experimental.yml'))
 
 
 class TestUnitTestsKeepsARunPerCommit(unittest.TestCase):

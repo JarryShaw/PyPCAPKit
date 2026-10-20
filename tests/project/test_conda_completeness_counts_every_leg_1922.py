@@ -21,6 +21,8 @@ import tempfile
 import unittest
 from typing import TYPE_CHECKING
 
+from tests import _workflows
+
 try:
     import yaml
 except ImportError:  # pragma: no cover
@@ -43,7 +45,7 @@ SUBDIRS = re.compile(r'^\s*export PCAPKIT_CONDA_SUBDIRS="([^"]*)"\s*$', re.MULTI
 def jobs() -> 'dict[str, Any]':
     if yaml is None:  # pragma: no cover
         raise unittest.SkipTest('PyYAML, from the test extra, is not installed')
-    return yaml.safe_load(WORKFLOW.read_text(encoding='utf-8'))['jobs']
+    return _workflows.load(WORKFLOW)['jobs']
 
 
 def check() -> 'dict[str, Any]':

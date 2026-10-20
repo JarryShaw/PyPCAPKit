@@ -40,6 +40,7 @@ import unittest
 from typing import TYPE_CHECKING
 from unittest import mock
 
+from tests import _workflows
 from tests._support import scale_timeout
 
 try:
@@ -93,7 +94,7 @@ def module(name: 'str', marker: 'str' = '') -> 'str':
 def vendor_update() -> 'dict[str, Any]':
     if yaml is None:  # pragma: no cover
         raise unittest.SkipTest('PyYAML, from the test extra, is not installed')
-    return yaml.safe_load(WORKFLOW.read_text(encoding='utf-8'))['jobs']['vendor-update']
+    return _workflows.job(WORKFLOW, 'vendor-update')
 
 
 def load_gate() -> 'types.ModuleType':

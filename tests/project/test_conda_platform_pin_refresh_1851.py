@@ -20,7 +20,7 @@
 * :file:`conda/platform-pins.toml` is in the form the job writes, and
   ``conda-update`` in :file:`.github/workflows/cron-conda.yml` installs
   requests and runs ``--refresh-pins`` between installing ``.[all]`` and
-  writing the requirements, read with :func:`yaml.safe_load`.
+  writing the requirements, read with :func:`tests._workflows.load`.
 * Every test reaches the script through :func:`load_vendor`, which skips without
   :mod:`tomllib`, so none fails on the 3.8 to 3.10 legs (#1898).
 
@@ -44,6 +44,8 @@ import types
 import unittest
 from typing import TYPE_CHECKING
 from unittest import mock
+
+from tests import _workflows
 
 try:
     import tomllib
@@ -642,7 +644,7 @@ class WorkflowTests(unittest.TestCase):
     """``conda-update`` refreshes the pins after installing ``.[all]`` and before writing the requirements."""
 
     def setUp(self) -> None:
-        self.jobs = yaml.safe_load(WORKFLOW.read_text(encoding='utf-8'))['jobs']
+        self.jobs = _workflows.load(WORKFLOW)['jobs']
         self.steps = self.jobs['conda-update']['steps']
 
     def index(self, found: 'Any') -> 'int':

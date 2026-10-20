@@ -45,6 +45,7 @@ from unittest import mock
 
 import requests
 
+from tests import _workflows
 from tests._support import scale_timeout
 from tests.project.test_release_gates import evaluate_condition
 
@@ -90,9 +91,7 @@ def updater() -> 'Any':
 
 
 def workflow() -> 'dict[str, Any]':
-    if yaml is None:  # pragma: no cover
-        raise unittest.SkipTest('PyYAML, from the test extra, is not installed')
-    return yaml.safe_load(WORKFLOW.read_text(encoding='utf-8'))
+    return _workflows.load(WORKFLOW)
 
 
 ###############################################################################
@@ -1378,7 +1377,7 @@ class TestTheWorkflow(unittest.TestCase):
         self.assertEqual(set(triggers), {'schedule', 'workflow_dispatch'})
         self.assertEqual(len(triggers['schedule']), 1)
         for path in sorted(WORKFLOW.parent.glob('*.yml')):
-            spec = yaml.safe_load(path.read_text(encoding='utf-8'))
+            spec = _workflows.load(path)
             on = spec.get('on', spec.get(True)) or {}
             with self.subTest(workflow=path.name):
                 listed = (on.get('workflow_run') or {}).get('workflows', []) if isinstance(on, dict) else []
@@ -1388,7 +1387,7 @@ class TestTheWorkflow(unittest.TestCase):
 
     def test_version_check_treats_its_merge_like_any_other(self) -> None:
         """Create Release starts on a ``v*`` tag or Vendor Update, and its gate names no branch of this job's."""
-        spec = yaml.safe_load((WORKFLOW.parent / 'create-release.yml').read_text(encoding='utf-8'))
+        spec = _workflows.load(WORKFLOW.parent / 'create-release.yml')
         on = spec.get('on', spec.get(True))
         self.assertEqual(set(on), {'push', 'workflow_run'})
         self.assertEqual(on['push'], {'tags': ['v*']})

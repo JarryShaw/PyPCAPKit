@@ -8,7 +8,7 @@ step: ``pip download`` needs pip alone, ``conda build`` installs into its own
 host environment, the version comes from job outputs, and ``--smoke`` runs its
 probe under ``-I -S``. On ``macos-26-intel`` the extras resolve a cryptography
 with no Intel wheel, which pip has to compile or fail on. The jobs are read
-with :func:`yaml.safe_load`.
+with :func:`tests._workflows.job`.
 
 """
 
@@ -19,6 +19,8 @@ import re
 import shlex
 import unittest
 from typing import TYPE_CHECKING
+
+from tests import _workflows
 
 try:
     import yaml
@@ -64,7 +66,7 @@ class TestTheCondaLegsInstallOnlyTheBuildTools(unittest.TestCase):
     def steps(self) -> 'list[tuple[str, str, dict[str, Any]]]':
         found = []
         for name, job_id in JOBS:
-            spec = yaml.safe_load((WORKFLOWS / name).read_text(encoding='utf-8'))['jobs'][job_id]
+            spec = _workflows.job(WORKFLOWS / name, job_id)
             found.extend((name, job_id, step) for step in spec['steps'])
         return found
 

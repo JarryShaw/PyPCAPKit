@@ -34,6 +34,8 @@ import unittest
 from typing import TYPE_CHECKING
 from unittest import mock
 
+from tests import _workflows
+
 try:
     import tomllib
 except ImportError:  # pragma: no cover
@@ -81,7 +83,7 @@ def load(name: 'str') -> 'Any':
 def job(name: 'str', job_id: 'str') -> 'dict[str, Any]':
     if yaml is None:  # pragma: no cover
         raise unittest.SkipTest('PyYAML, from the test extra, is not installed')
-    return yaml.safe_load((WORKFLOWS / name).read_text(encoding='utf-8'))['jobs'][job_id]
+    return _workflows.job(WORKFLOWS / name, job_id)
 
 
 #: A ``case "${{ matrix.os }}" in`` arm setting ``target_platform``.
@@ -152,7 +154,7 @@ class NoConvertTests(unittest.TestCase):
         if yaml is None:  # pragma: no cover
             raise unittest.SkipTest('PyYAML, from the test extra, is not installed')
         for path in sorted(WORKFLOWS.glob('*.yml')):
-            for job_id, spec in (yaml.safe_load(path.read_text(encoding='utf-8')).get('jobs') or {}).items():
+            for job_id, spec in (_workflows.load(path).get('jobs') or {}).items():
                 for step in spec.get('steps', []):
                     code = [line for line in str(step.get('run', '')).splitlines()
                             if not line.lstrip().startswith('#')]

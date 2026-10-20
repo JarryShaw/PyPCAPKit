@@ -61,15 +61,12 @@ import unittest
 from typing import TYPE_CHECKING
 from unittest import mock
 
+from tests import _workflows
+
 try:
     import tomllib
 except ImportError:  # Python 3.10 and older
     tomllib = None  # type: ignore[assignment]
-
-try:
-    import yaml
-except ImportError:  # pragma: no cover
-    yaml = None  # type: ignore[assignment]
 
 if TYPE_CHECKING:
     from typing import Any, Callable, Iterator, Optional
@@ -117,9 +114,7 @@ def live_outputs() -> 'dict[str, str]':
 
 def workflow(name: 'str') -> 'dict[str, Any]':
     """``name`` parsed, or the test skipped when PyYAML (the ``test`` extra) is absent."""
-    if yaml is None:  # pragma: no cover
-        raise unittest.SkipTest('PyYAML, from the test extra, is not installed')
-    return yaml.safe_load((WORKFLOWS / name).read_text(encoding='utf-8'))
+    return _workflows.load(WORKFLOWS / name)
 
 
 def has_main() -> 'bool':
@@ -132,7 +127,7 @@ def workflow_at_main(name: 'str') -> 'dict[str, Any]':
     """``name`` as it stood at :data:`MAIN`."""
     text = subprocess.run(['git', 'show', f'{MAIN}:.github/workflows/{name}'], cwd=ROOT,
                           capture_output=True, text=True, check=True).stdout
-    return yaml.safe_load(text)
+    return _workflows.loads(text)
 
 
 def workflows(load: 'Callable[[str], dict[str, Any]]' = workflow) -> 'Iterator[tuple[str, dict[str, Any]]]':

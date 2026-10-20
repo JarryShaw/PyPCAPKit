@@ -5,7 +5,7 @@
 every target reconciled by skipping. It named fixed PyPI and Anaconda totals,
 while ``version_check`` derives both at release time from the tag's own tier
 file, so the notice went wrong once a supported version was added or retired,
-and for an older tag. The step is read with :func:`yaml.safe_load` and its
+and for an older tag. The step is read with :func:`tests._workflows.steps` and its
 script run in that state, so the notice checked is the one a run prints.
 
 """
@@ -19,6 +19,7 @@ import shutil
 import subprocess  # nosec: B404
 import unittest
 
+from tests import _workflows
 from tests._support import scale_timeout
 
 try:
@@ -59,7 +60,7 @@ class TestNothingToReleaseStatesNoTotals(unittest.TestCase):
 
     def notice(self) -> 'str':
         """The ``Nothing to release`` notice the step prints in :data:`STEADY`."""
-        steps = yaml.safe_load(WORKFLOW.read_text(encoding='utf-8'))['jobs']['release_status']['steps']
+        steps = _workflows.steps(WORKFLOW, 'release_status')
         step = next(step for step in steps if 'run' in step)
         env = dict.fromkeys(step['env'], '')
         env.update(STEADY, PATH=os.environ.get('PATH', os.defpath))
