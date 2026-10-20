@@ -498,8 +498,71 @@ def captured_area(name: 'str') -> 'Callable[[dict[str, Any]], int]':
     framing = BLOCK_MINIMUM[Enum_BlockType.Enhanced_Packet_Block]
 
     def callback(pkt: 'dict[str, Any]') -> 'int':
-        return max(0, min(pkt[name], pkt['length'] - framing))
+        return _held_octets(pkt[name], pkt['length'], framing)
     return callback
+
+
+def _held_octets(declared: 'int', length: 'int', framing: 'int') -> 'int':
+    """Bound a declared length to the octets its block holds.
+
+    Args:
+        declared: Length a field of the block declares, e.g. ``captured_len``.
+        length: The block's own Block Total Length.
+        framing: Octets the block's fixed fields span, both copies of the Block
+            Total Length included.
+
+    Returns:
+        ``declared``, never past ``length`` less ``framing``, and never below
+        zero. Shared by :func:`captured_area` and :func:`secrets_area`.
+
+    """
+    return max(0, min(declared, length - framing))
+
+
+def secrets_area(packet: 'dict[str, Any]') -> 'int':
+    """Bound a Decryption Secrets Block's Secrets Data to the octets the block holds.
+
+    Args:
+        packet: Unpacked data so far, with ``length`` and ``secrets_length``.
+
+    Returns:
+        The declared ``secrets_length``, never past the block's Block Total
+        Length less its 20 framing octets, and never below zero.
+
+    ``secrets_length`` is a 32-bit wire field. Read as declared, a length past
+    the block read the trailing Block Total Length and the blocks after it as
+    secrets, and past :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH` the
+    read raised :exc:`~pcapkit.utilities.exceptions.FieldValueError` from inside
+    the block's schema, which ended the whole extraction (:issue:`1980`). This
+    is the Secrets Data counterpart of :func:`captured_area`: the block keeps its
+    declared ``secrets_length``, the secrets are the octets the block holds, and
+    the padding and option area are sized from those octets.
+    :meth:`DecryptionSecretsBlock.post_process` reports the overrun.
+
+    """
+    return _held_octets(packet['secrets_length'], packet['length'],
+                        BLOCK_MINIMUM[Enum_BlockType.Decryption_Secrets_Block])
+
+
+def _secrets_cut(packet: 'dict[str, Any]') -> 'bool':
+    """Tell whether a key log's enclosing block holds less than it declares.
+
+    Args:
+        packet: Unpacked data of the key log secrets schema, whose ``__packet__``
+            is the enclosing Decryption Secrets Block's.
+
+    Returns:
+        Whether that block's ``secrets_length`` runs past the block, so that
+        :func:`secrets_area` cut the key log at the block's end (:issue:`1980`).
+
+    """
+    block = packet.get('__packet__')
+    if not isinstance(block, dict):
+        return False
+    declared, length = block.get('secrets_length'), block.get('length')
+    if not isinstance(declared, int) or not isinstance(length, int):
+        return False
+    return declared > secrets_area(block)
 
 
 def pcapng_block_selector(packet: 'dict[str, Any]') -> 'Field':
@@ -539,23 +602,29 @@ def pcapng_block_selector(packet: 'dict[str, Any]') -> 'Field':
     return SchemaField(length=max(packet['__length__'], 0), schema=schema)
 
 
-def _cut_last_line(schema: 'Schema', index: 'int', lines: 'list[str]') -> 'bool':
+def _cut_last_line(schema: 'Schema', index: 'int', lines: 'list[str]',
+                   packet: 'Optional[dict[str, Any]]' = None) -> 'bool':
     """Tell whether a key log line that did not parse is one the capture cut.
 
     Args:
         schema: Key log secrets schema, just unpacked.
         index: Index of the line in ``lines``.
         lines: Lines of the key log.
+        packet: Unpacked data of ``schema``, if any.
 
     Returns:
         Whether ``lines[index]`` is the last line of a key log the data ended
         inside, which :meth:`Schema.unpack
         <pcapkit.protocols.schema.schema.Schema.unpack>` records as
-        ``__short_read__``. Such a line is only the first octets of an entry,
-        and the log text, kept verbatim, still rebuilds it (:issue:`1470`).
+        ``__short_read__``, or that the enclosing block ended inside, as
+        :func:`secrets_area` bounds it (:issue:`1980`). Such a line is only the
+        first octets of an entry, and the log text, kept verbatim, still
+        rebuilds it (:issue:`1470`).
 
     """
-    return index == len(lines) - 1 and '__short_read__' in schema.__dict__
+    if index != len(lines) - 1:
+        return False
+    return '__short_read__' in schema.__dict__ or (packet is not None and _secrets_cut(packet))
 
 
 def dsb_secrets_selector(packet: 'dict[str, Any]') -> 'Field':
@@ -568,7 +637,9 @@ def dsb_secrets_selector(packet: 'dict[str, Any]') -> 'Field':
         A :class:`~pcapkit.corekit.fields.misc.SchemaField` wrapped instance of
         the :class:`~pcapkit.protocols.schema.misc.pcapng.DSBSecrets` subclass
         registered for ``secrets_type``, or of
-        :class:`~pcapkit.protocols.schema.misc.pcapng.UnknownSecrets` if none is.
+        :class:`~pcapkit.protocols.schema.misc.pcapng.UnknownSecrets` if none is,
+        spanning the octets of ``secrets_length`` that the block holds (see
+        :func:`secrets_area`).
 
     See Also:
         * :class:`pcapkit.const.pcapng.secrets_type.SecretsType`
@@ -577,7 +648,7 @@ def dsb_secrets_selector(packet: 'dict[str, Any]') -> 'Field':
     """
     secrets_type = packet['secrets_type']  # type: int
     schema = DSBSecrets.registry[secrets_type]
-    return SchemaField(length=packet['secrets_length'], schema=schema)
+    return SchemaField(length=secrets_area(packet), schema=schema)
 
 
 class FlagsField(UInt32Field):
@@ -2246,7 +2317,7 @@ class TLSKeyLog(DSBSecrets, code=Enum_SecretsType.TLS_Key_Log):
                 entries[label_enum].add(bytes.fromhex(random),
                                         bytes.fromhex(secret))
             except ValueError as error:
-                if _cut_last_line(self, index, lines):
+                if _cut_last_line(self, index, lines, packet):
                     break
                 raise FieldValueError(f'invalid TLS key log format: {line!r}') from error
 
@@ -2293,7 +2364,7 @@ class WireGuardKeyLog(DSBSecrets, code=Enum_SecretsType.WireGuard_Key_Log):
                 label_enum = WireGuardKeyLabel(label.upper())
                 entries.add(label_enum, base64.b64decode(secret))
             except ValueError as error:
-                if _cut_last_line(self, index, lines):
+                if _cut_last_line(self, index, lines, packet):
                     break
                 if isinstance(error, FieldValueError):
                     raise
@@ -2365,18 +2436,18 @@ class DecryptionSecretsBlock(BlockType, code=Enum_BlockType.Decryption_Secrets_B
     secrets_type: 'Enum_SecretsType' = EnumField(length=4, namespace=Enum_SecretsType, callback=byteorder_callback)
     #: Secrets length.
     secrets_length: 'int' = UInt32Field(callback=byteorder_callback)
-    #: Secrets data.
+    #: Secrets data, bounded by the block (see :func:`secrets_area`).
     secrets_data: 'DSBSecrets' = SwitchField(
         selector=dsb_secrets_selector,
     )
     #: Padding.
-    padding_data: 'bytes' = PaddingField(length=lambda pkt: (4 - pkt['secrets_length'] % 4) % 4)
+    padding_data: 'bytes' = PaddingField(length=lambda pkt: (4 - secrets_area(pkt) % 4) % 4)
     #: Options.
     options: 'list[Option]' = OptionAreaField(
         # NOTE: see EnhancedPacketBlock.options on why the padding is recomputed
         # here instead of being read back from ``padding_data``.
         length=nonnegative(lambda pkt: pkt['length'] - BLOCK_MINIMUM[Enum_BlockType.Decryption_Secrets_Block]
-                           - pkt['secrets_length'] - (4 - pkt['secrets_length'] % 4) % 4),
+                           - (secrets_area(pkt) + 3) // 4 * 4),
         base_schema=_DSB_Option,
         type_name='type',
         registry=Option.registry['dsb'],
@@ -2387,6 +2458,37 @@ class DecryptionSecretsBlock(BlockType, code=Enum_BlockType.Decryption_Secrets_B
         length=nonnegative(lambda pkt: pkt.get('__option_padding__', 0)))
     #: Block total length.
     length2: 'int' = UInt32Field(callback=byteorder_callback)
+
+    def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
+        """Revise ``schema`` data after unpacking process.
+
+        Args:
+            packet: Unpacked data.
+
+        Returns:
+            Revised schema.
+
+        A ``secrets_length`` running past the block is kept as declared, and
+        the secrets are the octets the block holds (see :func:`secrets_area`),
+        so this reports the overrun as a
+        :class:`~pcapkit.utilities.warnings.ProtocolWarning` and carries on to
+        the next block (:issue:`1980`).
+
+        The report is made on the unpacking path only, where ``__length__`` is
+        what is left of the stream. :meth:`Schema.pack
+        <pcapkit.protocols.schema.schema.Schema.pack>` seeds it as ``-1``, and
+        rebuilding a block already reported is no new overrun. The lengths are
+        read from the schema rather than from ``packet``, since packing the
+        option area rebinds ``packet['length']`` to each option's own length.
+
+        """
+        held = _held_octets(self.secrets_length, self.length,
+                            BLOCK_MINIMUM[Enum_BlockType.Decryption_Secrets_Block])
+        if self.secrets_length > held and packet.get('__length__', -1) >= 0:
+            warn(f'PCAP-NG: [Block {Enum_BlockType.Decryption_Secrets_Block}] secrets length '
+                 f'{self.secrets_length} runs past the block, which holds {held} octet(s); '
+                 'kept as captured', ProtocolWarning, stacklevel=stacklevel())
+        return super().post_process(packet)
 
     if TYPE_CHECKING:
         def __init__(self, length: 'int', secrets_type: 'Enum_SecretsType',

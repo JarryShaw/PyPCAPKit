@@ -4747,9 +4747,11 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             Constructed block schema.
 
         """
+        declared = None  # type: Optional[int]
         if block is not None:
             secrets_type_val = block.secrets_type
             secrets_data = block.secrets_data
+            declared = block.secrets_length
             options = self._block_area(block, 'options')
         else:
             secrets_type_val = self._make_index(secrets_type, secrets_type_default, namespace=secrets_type_namespace,  # type: ignore[assignment]
@@ -4776,8 +4778,29 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [DSB] secrets {secrets_type_val} invalid format')
         # NOTE: Secrets Length excludes the padding to the next 32-bit boundary,
         # which ``padding_data`` writes and the block length has to include.
-        secrets_length = len(secrets_data_val)
-        secrets_padded = secrets_length + -secrets_length % 4
+        if block is not None and isinstance(secrets_data_val, Schema):
+            # NOTE: Packed in the context of the block it was parsed from, so
+            # that a key log the block cut is still read as cut (#1980).
+            secrets_held = len(secrets_data_val.pack({'__packet__': {
+                'length': block.length, 'secrets_length': block.secrets_length,
+            }}))
+        else:
+            secrets_held = len(secrets_data_val)
+        secrets_padded = secrets_held + -secrets_held % 4
+        # NOTE: A Secrets Length running past the block is kept as declared, as
+        # an EPB keeps its captured length, so the block rebuilds as captured;
+        # the block length is still sized from the secrets written (#1980).
+        # Only a true overrun is kept -- the one the parse side bounds and
+        # warns on, measured by ``secrets_area`` -- so a length that fits the
+        # block, or one an edit has outdated, follows the secrets written.
+        from pcapkit.protocols.schema.misc.pcapng import secrets_area
+
+        if block is not None and declared is not None and declared > secrets_area({
+            'length': block.length, 'secrets_length': declared,
+        }):
+            secrets_length = declared
+        else:
+            secrets_length = secrets_held
 
         if options is not None:
             options_value, total_length = self._make_pcapng_options(options, namespace='dsb')
