@@ -60,8 +60,7 @@ class TestThePinsJob(unittest.TestCase):
     def test_it_runs_under_the_caps(self) -> None:
         """xdist as ``test`` runs it, a 2 GiB file cap, and a step cap under the job's."""
         run = str(step(JOB, STEP)['run'])
-        self.assertIn('ulimit -f 2097152\n', run)
-        self.assertIn('python -m pytest -q -n auto --dist load', run)
+        self.assertIn('python util/cap_file_size.py python -m pytest -q -n auto --dist load', run)
         self.assertIn(_tiers.PROJECT_PINS_SELECTOR, run)
         self.assertLess(step(JOB, STEP)['timeout-minutes'], job(*JOB)['timeout-minutes'])
 
@@ -71,7 +70,7 @@ class TestEveryPinStillRunsWhereTheMatrixDoesNot(unittest.TestCase):
 
     def test_the_gate_runs_the_whole_suite(self) -> None:
         self.assertEqual(step(('unit-tests.yml', 'gate'), 'Run full test suite')['run'],
-                         'python -m pytest -q -n auto --dist load')
+                         'python util/cap_file_size.py python -m pytest -q -n auto --dist load')
 
     def test_the_ordering_cell_runs_every_pin(self) -> None:
         self.assertIn('project', job('unit-tests.yml', 'unittest-ordering')['strategy']['matrix']['leg'])

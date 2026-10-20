@@ -323,8 +323,11 @@ class WorkflowAgreementTests(unittest.TestCase):
 #: The experimental legs' workflow (#1732), whose unit-tier step leaves the ``LATEST`` tier out too.
 EXPERIMENTAL_WORKFLOW = _tiers.ROOT / '.github' / 'workflows' / 'experimental.yml'
 #: A ``python`` that writes each argument on a line of ``$ARGS_FILE``, and hands a
-#: ``-c`` to the real one, which is how the steps ask tests/_tiers.py for the pins.
-PYTHON_STUB = ('#!/bin/sh\nif [ "$1" = -c ]; then exec "$REAL_PYTHON" "$@"; fi\n'
+#: ``-c`` to the real one, which is how the steps ask tests/_tiers.py for the pins. util/cap_file_size.py's
+#: command it execs, as the script does, with no real interpreter: under the coverage
+#: leg one would be measured, be logged as a second ``coverage run --rcfile``
+#: controller, and exec before saving, which fails the #1387 guard (#1969).
+PYTHON_STUB = ('#!/bin/sh\ncase "$1" in -c) exec "$REAL_PYTHON" "$@";; util/cap_file_size.py) shift; exec "$@";; esac\n'
                'printf \'%s\\n\' "$@" > "$ARGS_FILE"\n')
 
 
@@ -356,6 +359,27 @@ def stubbed_argv(script: 'str', env: 'dict[str, str]') -> 'list[str]':
         if result.returncode:
             raise AssertionError(f'the step failed: {result.stdout[-1000:]}{result.stderr[-1000:]}')
         return record.read_text(encoding='utf-8').splitlines()
+
+
+@unittest.skipIf(shutil.which('sh') is None, 'the stub is a sh script')
+class PythonStubTests(unittest.TestCase):
+    """#1969: :data:`PYTHON_STUB` records the command util/cap_file_size.py caps without a real ``python``."""
+
+    def test_the_capped_command_is_recorded_without_the_real_interpreter(self) -> None:
+        with tempfile.TemporaryDirectory() as temp:
+            for name, text in (('python', PYTHON_STUB), ('real', '#!/bin/sh\necho "$@" >> "$REAL_LOG"\n')):
+                path = pathlib.Path(temp, name)
+                path.write_text(text, encoding='utf-8')
+                path.chmod(0o755)
+            record, real = pathlib.Path(temp, 'args'), pathlib.Path(temp, 'real.log')
+            env = dict(os.environ, ARGS_FILE=str(record), REAL_PYTHON=str(pathlib.Path(temp, 'real')),
+                       REAL_LOG=str(real), PATH=temp + os.pathsep + os.environ.get('PATH', ''))
+            command = ['-m', 'pytest', '-q', '-n', 'auto']
+            result = subprocess.run(['python', 'util/cap_file_size.py', 'python', *command], env=env,
+                                    capture_output=True, text=True, check=False, timeout=60)
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertFalse(real.exists(), 'the real interpreter ran the capped command')
+            self.assertEqual(record.read_text(encoding='utf-8').splitlines(), command)
 
 
 def leg_ignores(text: 'str', latest: 'str') -> 'list[str]':
