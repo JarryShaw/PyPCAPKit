@@ -19,10 +19,8 @@ in ``test_multidict.py`` fail without the fixes.
 
 """
 
-import builtins
 import io
 import unittest
-from unittest import mock
 
 from tests._support import reimport_once_per_class
 
@@ -106,42 +104,29 @@ class SeekableReaderCopiesItsBufferTests(unittest.TestCase):
         self.check('readline', LINES, -1)
 
 
-class _PairsThroughSetitemMeta(type):
-    """Lets :class:`PairsThroughSetitem` stand in for :class:`dict`.
+class PairsThroughSetitem(dict):
+    """:class:`dict`, with GraalPy's ``__init__`` and ``update``: pairs go through ``__setitem__``.
 
-    Calling it builds a plain :class:`dict`, ``isinstance`` asks :class:`dict`, and
-    every attribute it does not define is :class:`dict`'s.
+    :class:`~pcapkit.corekit.multidict.MultiDict` reaches :obj:`dict` through
+    :func:`super`, as Werkzeug's does, so a class deriving from it and then from
+    this one puts this in its place, as GraalPy's :obj:`dict` would be.
 
     """
 
-    def __call__(cls, *args: 'object', **kwargs: 'object') -> 'dict':
-        return builtins.dict(*args, **kwargs)
-
-    def __instancecheck__(cls, instance: 'object') -> bool:
-        return isinstance(instance, builtins.dict)
-
-    def __getattr__(cls, name: 'str') -> 'object':
-        return getattr(builtins.dict, name)
-
-
-def _store(target: 'dict', args: 'tuple', kwargs: 'dict', method: 'str') -> None:
-    """Pairs through ``target.__setitem__``, anything else as :class:`dict` stores it."""
-    if args and not isinstance(args[0], builtins.dict):
-        getattr(builtins.dict, method)(target, **kwargs)
-        for key, value in args[0]:
-            target[key] = value
-        return
-    getattr(builtins.dict, method)(target, *args, **kwargs)
-
-
-class PairsThroughSetitem(metaclass=_PairsThroughSetitemMeta):
-    """:class:`dict`, but with GraalPy's ``__init__`` and ``update``: pairs go through ``__setitem__``."""
-
     def __init__(self, *args: 'object', **kwargs: 'object') -> None:  # pylint: disable=super-init-not-called
-        _store(self, args, kwargs, '__init__')  # type: ignore[arg-type]
+        self._store(dict.__init__, args, kwargs)
 
     def update(self, *args: 'object', **kwargs: 'object') -> None:
-        _store(self, args, kwargs, 'update')  # type: ignore[arg-type]
+        self._store(dict.update, args, kwargs)
+
+    def _store(self, method: 'object', args: 'tuple', kwargs: 'dict') -> None:
+        """Pairs through ``self.__setitem__``, anything else as :class:`dict` stores it."""
+        if args and not isinstance(args[0], dict):
+            method(self, **kwargs)  # type: ignore[operator]
+            for key, value in args[0]:
+                self[key] = value
+            return
+        method(self, *args, **kwargs)  # type: ignore[operator]
 
 
 class MultiDictCopyTests(unittest.TestCase):
@@ -149,6 +134,15 @@ class MultiDictCopyTests(unittest.TestCase):
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
+
+    def multidict(self) -> 'type':
+        """A :class:`~pcapkit.corekit.multidict.MultiDict` over :class:`PairsThroughSetitem`."""
+        from pcapkit.corekit.multidict import MultiDict  # pylint: disable=import-outside-toplevel
+
+        class GraalMultiDict(MultiDict, PairsThroughSetitem):  # type: ignore[misc]
+            """A :class:`~pcapkit.corekit.multidict.MultiDict` on GraalPy's :obj:`dict`."""
+
+        return GraalMultiDict
 
     def test_the_stand_in_wraps_pairs_as_graalpy_does(self) -> None:
         """A guard on the stand-in, not on the fix: it passes with or without it.
@@ -158,32 +152,31 @@ class MultiDictCopyTests(unittest.TestCase):
         Without this, a stand-in that lost either would let them pass vacuously.
 
         """
-        from pcapkit.corekit.multidict import MultiDict  # pylint: disable=import-outside-toplevel
+        cls = self.multidict()
+        # MultiDict's ``super()`` reaches the stand-in, not :obj:`dict`
+        self.assertEqual([c.__name__ for c in cls.__mro__[1:4]],
+                         ['MultiDict', 'PairsThroughSetitem', 'dict'])
 
         for method in (PairsThroughSetitem.__init__, PairsThroughSetitem.update):
             with self.subTest(method=method.__name__):
-                data = MultiDict()
+                data = cls()
                 method(data, [('a', [5, 6])])
                 self.assertEqual(dict.__getitem__(data, 'a'), [[5, 6]])
                 method(data, {'b': [7]})
                 self.assertEqual(dict.__getitem__(data, 'b'), [7])
 
     def test_a_copy_keeps_the_value_lists(self) -> None:
-        from pcapkit.corekit import multidict  # pylint: disable=import-outside-toplevel
-
-        data = multidict.MultiDict([('a', 5), ('a', 6), ('b', 3)])
-        with mock.patch.object(multidict, 'dict', PairsThroughSetitem, create=True):
-            copied = multidict.MultiDict(data)
+        cls = self.multidict()
+        data = cls([('a', 5), ('a', 6), ('b', 3)])
+        copied = cls(data)
         self.assertEqual(copied.getlist('a'), [5, 6])
         self.assertEqual(copied.getlist('b'), [3])
 
     def test_state_restored_from_pairs_keeps_the_value_lists(self) -> None:
-        from pcapkit.corekit import multidict  # pylint: disable=import-outside-toplevel
-
-        state = multidict.MultiDict([('a', 5), ('a', 6), ('b', 3)]).__getstate__()
-        restored = multidict.MultiDict()
-        with mock.patch.object(multidict, 'dict', PairsThroughSetitem, create=True):
-            restored.__setstate__(state.items())
+        cls = self.multidict()
+        state = cls([('a', 5), ('a', 6), ('b', 3)]).__getstate__()
+        restored = cls()
+        restored.__setstate__(state.items())
         self.assertEqual(restored.getlist('a'), [5, 6])
         self.assertEqual(restored.getlist('b'), [3])
 
