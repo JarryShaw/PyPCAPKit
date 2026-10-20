@@ -1471,12 +1471,20 @@ class PCAPNGUnitTests(unittest.TestCase):
         })
         self.assertIs(isb_block_field.schema, schema_pcapng.InterfaceStatisticsBlock)
 
+        # NOTE: 20 framing octets and 17 of secrets padded to 20 (#1980).
         secrets_field = schema_pcapng.dsb_secrets_selector({
+            'length': 40,
             'secrets_type': SecretsType.TLS_Key_Log,
             'secrets_length': 17,
         })
         self.assertIs(secrets_field.schema, schema_pcapng.TLSKeyLog)
         self.assertEqual(secrets_field.length, 17)
+        overrun_field = schema_pcapng.dsb_secrets_selector({
+            'length': 24,
+            'secrets_type': SecretsType.TLS_Key_Log,
+            'secrets_length': 17,
+        })
+        self.assertEqual(overrun_field.length, 4)
 
         option_field = schema_pcapng.OptionEnumField(length=2, namespace='opt')
         option_field.name = 'type'

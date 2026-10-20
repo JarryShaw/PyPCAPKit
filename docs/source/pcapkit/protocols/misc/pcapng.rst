@@ -580,6 +580,7 @@ shared with the PCAP frame header and documented in
 .. autofunction:: pcapkit.protocols.schema.misc.pcapng.bounded_option
 .. autofunction:: pcapkit.protocols.schema.misc.pcapng.bounded_area
 .. autofunction:: pcapkit.protocols.schema.misc.pcapng.captured_area
+.. autofunction:: pcapkit.protocols.schema.misc.pcapng.secrets_area
 .. autofunction:: pcapkit.protocols.schema.misc.pcapng._spb_data_length
 
 Data Models
