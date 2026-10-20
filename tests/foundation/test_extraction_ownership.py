@@ -337,6 +337,131 @@ class ExtractorLeavesTheCallersStreamAlone(unittest.TestCase):
         stream.close()
 
 
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class FinaliserBackstopWithoutDel(unittest.TestCase):
+    """#1997: the backstop is a :class:`weakref.finalize`, not ``__del__`` alone.
+
+    GraalPy never calls ``__del__``, so on that interpreter the #606 backstop
+    only ever ran if something else did the closing. CPython does call it, which
+    is why a regression here would go unnoticed on every CPython leg unless the
+    finaliser is checked on its own: these tests do that, either by inspecting it
+    or by taking ``__del__`` out of the way, so that they fail on CPython too.
+
+    """
+
+    def test_abandoned_extraction_registers_a_finaliser_over_its_own_handle(self) -> None:
+        """The finaliser is alive mid-extraction and holds the stream, not ``self``.
+
+        A finaliser that referenced the extractor would keep it alive for as long
+        as the finaliser is, which is to say for ever.
+
+        """
+        import weakref
+
+        import pcapkit
+
+        extractor = pcapkit.extract(fin=sample_path('in.pcap'), nofile=True,
+                                    store=False, auto=False)
+        next(extractor)
+
+        finalizer = extractor._finalizer
+        self.assertIsInstance(finalizer, weakref.finalize)
+        self.assertTrue(finalizer.alive,
+                        'an extraction still in flight should have its backstop '
+                        'registered')
+
+        target, _, args, kwargs = finalizer.peek()
+        self.assertIs(target, extractor)
+        self.assertEqual(len(args), 1)
+        self.assertIs(args[0], extractor._ifile)
+        self.assertFalse(any(value is extractor for value in kwargs.values()),
+                         'the finaliser must not hold the extractor itself')
+
+        self.assertFalse(extractor._ifile.closed)
+        finalizer()
+        self.assertTrue(extractor._ifile.closed,
+                        'invoking the finaliser should release the handle')
+        self.assertFalse(finalizer.alive)
+
+    def test_finaliser_alone_releases_an_abandoned_handle(self) -> None:
+        """With ``__del__`` a no-op, as on GraalPy, collection still closes the file."""
+        import pcapkit
+        from pcapkit.foundation.extraction import Extractor
+
+        capture = sample_path('in.pcap')
+        recorder = _OpenRecorder(capture)
+        with mock.patch.object(Extractor, '__del__', lambda self: None):
+            with mock.patch.object(builtins, 'open', recorder):
+                extractor = pcapkit.extract(fin=capture, nofile=True, store=False,
+                                            auto=False)
+                next(extractor)
+            self.assertEqual(recorder.still_open, 1)
+
+            del extractor
+            gc.collect()
+
+            self.assertEqual(recorder.still_open, 0,
+                             'without __del__ the handle outlived the extractor')
+
+    def test_finished_extraction_detaches_its_finaliser(self) -> None:
+        """``_cleanup`` and the context manager unregister it, so nothing closes twice."""
+        import pcapkit
+
+        capture = sample_path('in.pcap')
+        with self.subTest(route='_cleanup at end of file'):
+            extractor = pcapkit.extract(fin=capture, nofile=True, store=False)
+            self.assertTrue(extractor._ifile.closed)
+            self.assertFalse(extractor._finalizer.alive)
+
+        with self.subTest(route='context manager exit'):
+            with pcapkit.extract(fin=capture, nofile=True, store=False,
+                                 auto=False) as extractor:
+                next(extractor)
+                self.assertTrue(extractor._finalizer.alive)
+            self.assertTrue(extractor._ifile.closed)
+            self.assertFalse(extractor._finalizer.alive)
+
+    def test_no_finaliser_for_a_callers_stream(self) -> None:
+        """A stream the caller passed in gets no finaliser, so collection leaves it open."""
+        import pcapkit
+        from pcapkit.foundation.extraction import Extractor
+
+        with open(sample_path('in.pcap'), 'rb') as handle:
+            with mock.patch.object(Extractor, '__del__', lambda self: None):
+                extractor = pcapkit.extract(fin=handle, nofile=True, store=False,
+                                            auto=False)
+                next(extractor)
+                self.assertIsNone(extractor._finalizer)
+
+                del extractor
+                gc.collect()
+
+            self.assertFalse(handle.closed,
+                             "collecting the extractor closed the caller's stream")
+
+    def test_finaliser_on_a_wrapper_spares_the_stream_beneath(self) -> None:
+        """A wrapped stream's finaliser closes the wrapper, not the caller's stream."""
+        import pcapkit
+        from pcapkit.corekit.io import SeekableReader
+
+        with open(sample_path('in.pcap'), 'rb') as source:
+            payload = source.read()
+        stream = io.BufferedReader(_NonSeekableRaw(payload))
+        self.addCleanup(stream.close)
+
+        extractor = pcapkit.extract(fin=stream, nofile=True, store=False,
+                                    auto=False)
+        next(extractor)
+        self.assertIsInstance(extractor._ifile, SeekableReader)
+        self.assertTrue(extractor._finalizer.alive)
+
+        extractor._finalizer()
+        self.assertTrue(extractor._ifile.closed)
+        self.assertFalse(stream.closed,
+                         "the finaliser closed the caller's stream through the "
+                         'wrapper')
+
+
 class OwnershipRuleInIsolation(unittest.TestCase):
     """``_owns_input`` and ``__del__`` without constructing a real extraction.
 
