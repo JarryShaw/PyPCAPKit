@@ -47,15 +47,19 @@ class SetupModuleTests(unittest.TestCase):
         spec.loader.exec_module(module)
         return module, captured, loaded
 
-    def test_get_long_description_reads_readme(self) -> None:
-        module, _, loaded = self._load_setup_module()
-        try:
-            description = module.get_long_description()
-        finally:
-            for name in loaded + ['project_setup']:
-                sys.modules.pop(name, None)
+    def test_setup_passes_no_long_description(self) -> None:
+        """``pyproject.toml``'s static ``readme`` is the long description (#1968).
 
-        self.assertIn('PyPCAPKit', description)
+        Dependabot replaces this file with a stub that passes none, so a long
+        description supplied here leaves ``readme`` dynamic and the stub's build
+        failing.
+        """
+        _, captured, loaded = self._load_setup_module()
+        for name in loaded + ['project_setup']:
+            sys.modules.pop(name, None)
+
+        self.assertNotIn('long_description', captured['kwargs'])
+        self.assertNotIn('long_description_content_type', captured['kwargs'])
 
     def test_refactor_runs_no_backports_on_modern_python(self) -> None:
         module, _, loaded = self._load_setup_module()

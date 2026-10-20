@@ -7,6 +7,8 @@
 # Left out (#1968): conda/requirements.txt, which Conda Update's `Refresh the
 # platform pins` and `Setup Conda Distribution` steps write, and the benchmark's
 # image digests, which its Dockerfile takes from examples/benchmark/python-images.txt.
+# The pip entry's `exclude-paths` keeps conda/requirements.txt out: the `/` job
+# otherwise reads requirements files one directory down, conda/ included.
 
 version: 2
 updates:
@@ -15,6 +17,8 @@ updates:
       - "/"
       - "/docs" # Pins Sphinx and sphinx-autodoc-typehints deliberately, bumps included
       - "/examples/benchmark" # Nothing else updates the benchmark's pins
+    exclude-paths: # Matched against the path from the repository root
+      - "conda/requirements.txt"
     schedule:
       interval: "weekly"
 

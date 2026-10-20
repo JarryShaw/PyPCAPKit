@@ -28,14 +28,6 @@ handler.setFormatter(formatter)
 logger.addHandler(handler)
 
 
-def get_long_description() -> "str":
-    """Extract description from README.md, for PyPI's usage."""
-    readme = os.path.join(os.path.dirname(os.path.abspath(__file__)), "README.md")
-    with open(readme, encoding="utf-8") as file:
-        long_description = file.read()
-    return long_description
-
-
 def refactor(path: "str") -> "None":
     """Refactor code."""
     import subprocess  # nosec: B404
@@ -160,8 +152,5 @@ except ImportError:
 # above, so the tree it archives is already converted before the wheel is
 # written, and ``dist_dir`` holds only the finished wheels (#1773).
 
-setup(
-    cmdclass=cmdclass,
-    long_description=get_long_description(),
-    long_description_content_type="text/markdown",
-)
+# The long description is ``pyproject.toml``'s static ``readme`` (#1968).
+setup(cmdclass=cmdclass)
