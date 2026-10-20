@@ -26,6 +26,10 @@ from tests.project.test_docs_class_signature_1860_unit import emit, resolve
 if TYPE_CHECKING:
     from typing import Any
 
+#: Test tier (#1958): drives a hook of docs/source/conf.py, which the docs build runs
+#: on one interpreter.
+__tier__ = 'LATEST'
+
 #: The event the hook answers.
 EVENT = 'viewcode-follow-imported'
 

@@ -24,6 +24,9 @@ import unittest
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): hand-picked round-trip cases, not a sweep.
+__tier__ = 'ALL'
+
 #: Mobility Header octets, parsed as an IPv6 extension header (next header 59).
 FRAMES = {
     # BRR carrying a PadN of Option Length 0, then a PadN of Option Length 4

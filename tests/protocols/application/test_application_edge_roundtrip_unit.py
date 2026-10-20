@@ -20,6 +20,10 @@ import unittest
 from tests.protocols import _edge_roundtrip as edge
 from tests.protocols._edge_roundtrip import Case, MakeCase
 
+#: Test tier (#1958): the #1202 edge-case table for the application layer, every case
+#: of it.
+__tier__ = 'LATEST'
+
 FTP = 'pcapkit.protocols.application.ftp:FTP'
 HTTP1 = 'pcapkit.protocols.application.httpv1:HTTP'
 HTTP2 = 'pcapkit.protocols.application.httpv2:HTTP'

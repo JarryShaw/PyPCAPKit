@@ -56,6 +56,10 @@ if TYPE_CHECKING:
     from types import ModuleType
     from typing import Any, Iterator, Optional
 
+#: Test tier (#1958): resolves annotations as the docs build does, which runs on one
+#: interpreter.
+__tier__ = 'LATEST'
+
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 

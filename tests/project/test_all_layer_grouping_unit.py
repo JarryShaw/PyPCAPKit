@@ -18,6 +18,10 @@ import os
 import tokenize
 import unittest
 
+#: Test tier (#1958): checks how pcapkit/all.py groups its names by layer, a question
+#: about the tree.
+__tier__ = 'LATEST'
+
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 

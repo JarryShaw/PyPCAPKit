@@ -33,6 +33,9 @@ import warnings
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): hand-picked round-trip cases, not a sweep.
+__tier__ = 'ALL'
+
 #: The protocol classes sharing the option code, by module and class name.
 PROTOCOLS = (
     ('pcapkit.protocols.internet.hopopt', 'HOPOPT'),

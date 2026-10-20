@@ -37,6 +37,10 @@ import pathlib
 import re
 import unittest
 
+#: Test tier (#1958): checks that each moved name's old path is gone, a question about
+#: the tree.
+__tier__ = 'LATEST'
+
 #: Repository root.
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 

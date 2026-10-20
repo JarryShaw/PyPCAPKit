@@ -20,6 +20,10 @@ import unittest
 from tests.protocols import _edge_roundtrip as edge
 from tests.protocols._edge_roundtrip import Case, MakeCase, Reject
 
+#: Test tier (#1958): the #1202 edge-case table for the internet layer, every case of
+#: it.
+__tier__ = 'LATEST'
+
 IPV4 = 'pcapkit.protocols.internet.ipv4:IPv4'
 IPX = 'pcapkit.protocols.internet.ipx:IPX'
 IPV6 = 'pcapkit.protocols.internet.ipv6:IPv6'

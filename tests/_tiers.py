@@ -46,8 +46,11 @@ So this module answers, cheaply and without needing the fixtures themselves:
   which of their test methods) skip a generated capture rather than reading it
   for real, and the complete pytest selection the fixture-dependent tier needs
   in order to still exercise them.
-* :func:`is_roundtrip_sweep` -- is this unit-tier module one of the round-trip
-  sweeps, which only the ``latest`` leg of the ``test`` job runs (#1732)?
+* :func:`module_tier` -- which *test tier* does this module run in (#1958):
+  ``ALL``, on every leg, or ``LATEST``, on ``latest`` alone? A ``__tier__``
+  constant in the module (:func:`declared_tier`) answers first, and
+  :func:`rule_tier` otherwise. :func:`latest_tier_paths` lists the ``LATEST``
+  modules, which every leg but ``latest`` leaves out.
 * :func:`is_project_pin` and :func:`project_pin_paths` -- which
   :file:`tests/project` modules give one answer on every interpreter, and so run
   once per push, in the ``project-tests`` job, rather than on every leg (#1954)?
@@ -124,7 +127,6 @@ Nothing in this file is collected by :program:`pytest`: ``python_files`` in
 from __future__ import annotations
 
 import ast
-import fnmatch
 import functools
 import pathlib
 import re
@@ -138,7 +140,8 @@ __all__ = [
     'GeneratedFixtureInUnitTierError', 'TierGuardWarning', 'SampleCall',
     'ROOT', 'TESTS_ROOT', 'SAMPLE_ROOT', 'REGENERATE_SAMPLES_CMD', 'UNIT_TIER_SELECTION',
     'FIXTURE_TIER_SUFFIXES', 'FIXTURE_TIER_DIRS', 'FIXTURE_TIER_SELECTOR',
-    'ROUNDTRIP_SWEEP_GLOB', 'ROUNDTRIP_RUNTIME_GLOB', 'is_roundtrip_sweep',
+    'TIER_ALL', 'TIER_LATEST', 'TIERS', 'TIER_MARKER', 'LATEST_TIER_SELECTOR', 'FIXTURE_ALL_TIER_SELECTOR',
+    'InvalidTierError', 'suite_modules', 'declared_tier', 'rule_tier', 'module_tier', 'latest_tier_paths',
     'PROJECT_PINS_DIR', 'PROJECT_PINS_SELECTOR', 'PROJECT_PIN_PACKAGE', 'LOADABLE_DIRS',
     'varies_by_interpreter', 'is_project_pin', 'project_pin_paths',
     'is_unit_tier', 'committed_captures', 'committed_capture_names',
@@ -183,17 +186,34 @@ FIXTURE_TIER_SELECTOR = (
     'python -c "from tests._tiers import fixture_tier_paths; '
     'print(\' \'.join(fixture_tier_paths()))"'
 )
-#: The round-trip sweeps (#1732), as the ``--ignore-glob`` that the ``test`` job
-#: of :file:`.github/workflows/unit-tests.yml` adds to :data:`UNIT_TIER_SELECTION`
-#: on every leg but ``latest``: a module whose path under :data:`ROOT` holds
-#: ``roundtrip``. A selection within the unit tier, not a tier of its own: the
-#: modules stay unit-tier, and ``latest`` runs them, under coverage.
-ROUNDTRIP_SWEEP_GLOB = '*roundtrip*'
-#: The round-trip sweeps of the fixture tier (#1732): the ``*_runtime.py`` modules
-#: whose name holds ``roundtrip``, which the ``integration`` job runs on ``latest``
-#: alone. Every other leg drops them from :func:`fixture_tier_paths`'s selection and
-#: passes this as an ``--ignore-glob``, since pytest ignores no path it was handed.
-ROUNDTRIP_RUNTIME_GLOB = '*roundtrip*_runtime.py'
+#: The test tiers (#1958), which say on which legs a module runs. Orthogonal to the
+#: unit and fixture-dependent tiers above, which say what a module may read: ``ALL``
+#: modules run on every leg of every job that collects them, ``LATEST`` ones on the
+#: ``latest`` leg alone. See :func:`module_tier`.
+TIER_ALL = 'ALL'
+#: See :data:`TIER_ALL`.
+TIER_LATEST = 'LATEST'
+#: Every test tier, the values a :data:`TIER_MARKER` may take.
+TIERS = (TIER_ALL, TIER_LATEST)
+#: The module-level constant that states a module's test tier outright, e.g.
+#: ``__tier__ = 'LATEST'``, read by AST in :func:`declared_tier`. A constant rather
+#: than a pytest marker, so plain :mod:`unittest` runs see the same module.
+TIER_MARKER = '__tier__'
+#: The ``LATEST`` tier's selector, verbatim from the workflows: every leg of ``test``
+#: but ``latest``, and every ``experimental`` leg, passes each path it prints as an
+#: ``--ignore``. Asked at run time, as :data:`FIXTURE_TIER_SELECTOR` is, so no
+#: workflow lists the tier. See :func:`latest_tier_paths`.
+LATEST_TIER_SELECTOR = (
+    'python -c "from tests._tiers import latest_tier_paths; '
+    'print(\' \'.join(latest_tier_paths()))"'
+)
+#: The fixture-dependent tier's ``ALL``-tier selection, verbatim from the workflows:
+#: what ``integration`` runs on every leg but ``latest``, and ``pypcap-parity`` on each
+#: of its legs. See :func:`fixture_tier_paths`.
+FIXTURE_ALL_TIER_SELECTOR = (
+    'python -c "from tests._tiers import fixture_tier_paths; '
+    'print(\' \'.join(fixture_tier_paths(\'ALL\')))"'
+)
 #: The directory whose platform- and version-independent modules, the *project
 #: pins*, run once per push in the ``project-tests`` job of
 #: :file:`.github/workflows/unit-tests.yml` rather than on every leg (#1954). See
@@ -259,6 +279,15 @@ class TierGuardWarning(UserWarning):
     """
 
 
+class InvalidTierError(ValueError):
+    """A test module's :data:`TIER_MARKER` cannot be read as one of :data:`TIERS`.
+
+    Raised rather than ignored: a marker that silently fell back to the rule would
+    put the module on legs its author ruled it off, or the other way round.
+
+    """
+
+
 class SampleCall(NamedTuple):
     """One ``sample_path(...)`` call found in a module's source."""
 
@@ -306,27 +335,6 @@ def is_unit_tier(path: 'pathlib.Path | str') -> 'bool':
     if relative.name.endswith(FIXTURE_TIER_SUFFIXES):
         return False
     return FIXTURE_TIER_DIRS.isdisjoint(relative.parts[:-1])
-
-
-def is_roundtrip_sweep(path: 'pathlib.Path | str') -> 'bool':
-    """Whether ``path`` names a unit-tier round-trip sweep (#1732).
-
-    The executable statement of :data:`ROUNDTRIP_SWEEP_GLOB`, matched the way
-    pytest matches an ``--ignore-glob`` run from :data:`ROOT`: the glob made
-    absolute, against the absolute path, with ``*`` spanning ``/``.
-
-    Args:
-        path: Path to a module, absolute or relative to :data:`ROOT`.
-
-    Returns:
-        :data:`True` for a unit-tier module the glob matches.
-
-    """
-    candidate = pathlib.Path(path)
-    if not candidate.is_absolute():
-        candidate = ROOT / candidate
-    return is_unit_tier(candidate) and fnmatch.fnmatch(str(candidate.resolve()),
-                                                       str(ROOT / ROUNDTRIP_SWEEP_GLOB))
 
 
 #: Calls that import the module their first argument names. ``patch`` is
@@ -826,6 +834,143 @@ def varies_by_interpreter(path: 'pathlib.Path | str') -> 'bool':
     return False
 
 
+def suite_modules() -> 'tuple[str, ...]':
+    """Every test module under :file:`tests/`, relative to :data:`ROOT`, sorted.
+
+    What pytest collects and :file:`util/run_unittest_leg.py` discovers: the
+    ``test_*.py`` files, ``python_files`` in :file:`pyproject.toml`.
+
+    """
+    return tuple(sorted(path.relative_to(ROOT).as_posix() for path in TESTS_ROOT.rglob('test_*.py')
+                        if '__pycache__' not in path.parts))
+
+
+def _test_module(path: 'pathlib.Path | str') -> 'pathlib.Path':
+    """``path`` resolved, once it is known to be a test module under :file:`tests/`."""
+    candidate = pathlib.Path(path)
+    if not candidate.is_absolute():
+        candidate = ROOT / candidate
+    candidate = candidate.resolve()
+    try:
+        candidate.relative_to(TESTS_ROOT)
+    except ValueError:
+        raise ValueError(f'{path} is not under {TESTS_ROOT}, so it has no test tier') from None
+    if not (candidate.name.startswith('test_') and candidate.suffix == '.py' and candidate.is_file()):
+        raise ValueError(f'{path} is not a test module (tests/**/test_*.py), so it has no test tier')
+    return candidate
+
+
+@functools.lru_cache(maxsize=None)
+def _declared_tier(candidate: 'pathlib.Path') -> 'Optional[str]':
+    tree = _parse_module(candidate)
+    if tree is None:
+        return None
+    where = _display_path(candidate)
+    top = [node for node in tree.body
+           if (isinstance(node, ast.Assign) and any(isinstance(target, ast.Name) and target.id == TIER_MARKER
+                                                    for target in node.targets))
+           or (isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name)
+               and node.target.id == TIER_MARKER)]
+    stores = [node for node in ast.walk(tree)
+              if isinstance(node, ast.Name) and node.id == TIER_MARKER and isinstance(node.ctx, ast.Store)]
+    if len(stores) != len(top) or len(top) > 1:
+        raise InvalidTierError(
+            f'{where} assigns {TIER_MARKER} {len(stores)} times, {len(top)} of them at module level; '
+            f'state the tier once, as a module-level {TIER_MARKER} = {TIER_LATEST!r} or {TIER_ALL!r}'
+        )
+    if not top:
+        return None
+    value = top[0].value
+    if not (isinstance(value, ast.Constant) and isinstance(value.value, str) and value.value in TIERS):
+        shown = (ast.get_source_segment(candidate.read_text(encoding='utf-8'), value) or ast.dump(value)
+                 if value is not None else 'nothing')
+        raise InvalidTierError(
+            f'{where}:{top[0].lineno}: {TIER_MARKER} is set to {shown}, which is not a test tier; '
+            f'it must be one of the string literals {", ".join(map(repr, TIERS))}'
+        )
+    return value.value
+
+
+def declared_tier(path: 'pathlib.Path | str') -> 'Optional[str]':
+    """The test tier the module at ``path`` states with :data:`TIER_MARKER`, if it does.
+
+    Read by AST, never by importing the module: one module-level statement,
+    ``__tier__ = 'ALL'`` or ``__tier__ = 'LATEST'``, the value a string literal.
+    A module that does not parse states nothing here, and :func:`rule_tier`
+    answers for it.
+
+    Args:
+        path: Path to a test module, absolute or relative to :data:`ROOT`.
+
+    Raises:
+        ValueError: ``path`` is not a test module under :file:`tests/`.
+        InvalidTierError: The marker is not one of :data:`TIERS`, not a string
+            literal, assigned more than once, or assigned anywhere but at the
+            module's top level.
+
+    """
+    return _declared_tier(_test_module(path))
+
+
+def rule_tier(path: 'pathlib.Path | str') -> 'str':
+    """The test tier the rule gives the module at ``path`` (#1958).
+
+    :data:`TIER_LATEST` when its run does not :func:`vary by interpreter
+    <varies_by_interpreter>` -- it reads the repository's text, a workflow or the
+    docs, or drives a ``util/`` script, and imports no ``pcapkit`` -- since one run
+    on ``latest`` is then every leg's answer. :data:`TIER_ALL` for everything
+    else, which is everything that exercises ``pcapkit``. What the AST cannot
+    see -- that a module is a sweep over every case of a table or every capture,
+    that one which imports ``pcapkit`` still answers a question about the
+    repository, or that one which imports nothing still depends on the
+    interpreter -- is stated with :data:`TIER_MARKER` instead; see
+    :func:`module_tier`.
+
+    Args:
+        path: Path to a test module, absolute or relative to :data:`ROOT`.
+
+    Raises:
+        ValueError: ``path`` is not a test module under :file:`tests/`.
+
+    """
+    return TIER_ALL if varies_by_interpreter(_test_module(path)) else TIER_LATEST
+
+
+def module_tier(path: 'pathlib.Path | str') -> 'str':
+    """The test tier of the module at ``path``: :data:`TIER_ALL` or :data:`TIER_LATEST` (#1958).
+
+    Its :func:`declared_tier` where it states one, its :func:`rule_tier`
+    otherwise, so every test module has exactly one. ``ALL`` modules run on every
+    leg; ``LATEST`` ones on ``latest`` alone, which is also the coverage leg, the
+    ``gate`` job's interpreter, and every ``unittest-ordering`` cell's. Within a
+    tier, the unit and fixture-dependent tiers still decide which job collects a
+    module.
+
+    Args:
+        path: Path to a test module, absolute or relative to :data:`ROOT`.
+
+    Raises:
+        ValueError: ``path`` is not a test module under :file:`tests/`.
+        InvalidTierError: Its marker is malformed; see :func:`declared_tier`.
+
+    """
+    candidate = _test_module(path)
+    return _declared_tier(candidate) or rule_tier(candidate)
+
+
+@functools.lru_cache(maxsize=1)
+def latest_tier_paths() -> 'tuple[str, ...]':
+    """Every :data:`TIER_LATEST` test module, relative to :data:`ROOT`, sorted.
+
+    What :data:`LATEST_TIER_SELECTOR` prints: the modules every leg but ``latest``
+    passes as an ``--ignore``. Unit-tier and fixture-dependent modules alike; the
+    unit tier's own flags ignore the latter already, and :func:`fixture_tier_paths`
+    leaves them out of its ``ALL`` selection.
+
+    """
+    return tuple(path for path in suite_modules() if module_tier(path) == TIER_LATEST)
+
+
 def is_project_pin(path: 'pathlib.Path | str') -> 'bool':
     """Whether ``path`` names a project pin, which runs once per push (#1954).
 
@@ -833,8 +978,10 @@ def is_project_pin(path: 'pathlib.Path | str') -> 'bool':
     :file:`tests/`:data:`PROJECT_PINS_DIR` whose run does not
     :func:`vary by interpreter <varies_by_interpreter>`: it reads the repository's
     text or drives a ``util/`` script, so the ``project-tests`` job runs it once, on
-    ``latest``. Any other module stays on every leg of ``test`` and
-    ``experimental``.
+    ``latest``. Every pin is in the :data:`TIER_LATEST` test tier (#1958): a module
+    that marks itself :data:`TIER_ALL` is no pin, and one that marks itself
+    ``LATEST`` while it imports ``pcapkit`` is no pin either, and runs on the
+    ``latest`` leg of ``test``, under coverage.
 
     Args:
         path: Path to a module, absolute or relative to :data:`ROOT`.
@@ -849,7 +996,8 @@ def is_project_pin(path: 'pathlib.Path | str') -> 'bool':
     except ValueError:
         return False
     return (relative.name.startswith('test_') and relative.suffix == '.py' and candidate.is_file()
-            and is_unit_tier(candidate) and not varies_by_interpreter(candidate))
+            and is_unit_tier(candidate) and not varies_by_interpreter(candidate)
+            and module_tier(candidate) == TIER_LATEST)
 
 
 @functools.lru_cache(maxsize=1)
@@ -857,7 +1005,8 @@ def project_pin_paths() -> 'tuple[str, ...]':
     """Every :func:`project pin <is_project_pin>`, relative to :data:`ROOT`, sorted.
 
     What :data:`PROJECT_PINS_SELECTOR` prints: the ``project-tests`` job's
-    selection, and the ``--ignore`` list of every ``test`` and ``experimental`` leg.
+    selection, and the ``--ignore`` list of the ``latest`` leg of ``test``. Each is
+    in :func:`latest_tier_paths` too, which every other leg leaves out.
 
     """
     return tuple(sorted(path.relative_to(ROOT).as_posix()
@@ -1431,8 +1580,8 @@ def skip_idiom_test_ids() -> 'tuple[str, ...]':
     return tuple(sorted(set(ids)))
 
 
-@functools.lru_cache(maxsize=1)
-def fixture_tier_paths() -> 'tuple[str, ...]':
+@functools.lru_cache(maxsize=None)
+def fixture_tier_paths(tier: 'Optional[str]' = None) -> 'tuple[str, ...]':
     """The complete pytest selection the fixture-dependent tier needs to run.
 
     Three things go into it:
@@ -1463,6 +1612,15 @@ def fixture_tier_paths() -> 'tuple[str, ...]':
     ask a single function for its selection instead of re-deriving it -- see
     :data:`FIXTURE_TIER_SELECTOR`.
 
+    With ``tier``, only that test tier's part of it (#1958): ``'ALL'`` is what
+    every leg but ``latest`` runs, :data:`FIXTURE_ALL_TIER_SELECTOR`. Each entry
+    whose module is in another tier is dropped, and a directory argument holding
+    such a module is replaced by its modules of ``tier``, since pytest applies no
+    ``--ignore`` to a path it was handed.
+
+    Args:
+        tier: One of :data:`TIERS`, or :data:`None` for every tier.
+
     Returns:
         Paths and/or node IDs relative to :data:`ROOT`, POSIX-separated,
         sorted, and deduplicated -- ready to hand to ``pytest`` as positional
@@ -1470,7 +1628,12 @@ def fixture_tier_paths() -> 'tuple[str, ...]':
         the directory arguments do not depend on git, so they are always
         present even when :func:`skip_idiom_test_ids` cannot answer.
 
+    Raises:
+        ValueError: ``tier`` is not one of :data:`TIERS`.
+
     """
+    if tier is not None and tier not in TIERS:
+        raise ValueError(f'{tier!r} is not a test tier; expected one of {", ".join(map(repr, TIERS))}')
     paths = {f'tests/{name}' for name in FIXTURE_TIER_DIRS}
 
     for path in sorted(TESTS_ROOT.rglob('*.py')):
@@ -1481,5 +1644,17 @@ def fixture_tier_paths() -> 'tuple[str, ...]':
             paths.add(path.relative_to(ROOT).as_posix())
 
     paths.update(skip_idiom_test_ids())
+
+    if tier is not None:
+        kept = set()  # type: set[str]
+        for entry in paths:
+            module = entry.partition('::')[0]
+            if (ROOT / module).is_dir():
+                members = [path for path in suite_modules() if path.startswith(module.rstrip('/') + '/')]
+                within = [path for path in members if module_tier(path) == tier]
+                kept.update([entry] if within == members else within)
+            elif module_tier(module) == tier:
+                kept.add(entry)
+        paths = kept
 
     return tuple(sorted(paths))

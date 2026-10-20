@@ -23,6 +23,9 @@ import unittest
 
 from tests._support import close_extractor, reimport_once_per_class, sample_path
 
+#: Test tier (#1958): hand-picked cases on one truncated fixture, not a sweep.
+__tier__ = 'ALL'
+
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 

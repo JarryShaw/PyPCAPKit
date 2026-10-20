@@ -24,6 +24,9 @@ import unittest
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): hand-picked round-trip cases, not a sweep.
+__tier__ = 'ALL'
+
 #: A PPP frame header and the first IPv4 octet, as the L2TPv2 payload.
 PAYLOAD = bytes.fromhex('ff03002145')
 

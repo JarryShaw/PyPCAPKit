@@ -80,6 +80,17 @@ class TestEveryPinStillRunsWhereTheMatrixDoesNot(unittest.TestCase):
         self.assertTrue(pins)
         self.assertEqual(pins - modules, set())
 
+    def test_every_pin_is_in_the_latest_tier(self) -> None:
+        """#1958: the pins are ``LATEST`` modules, so the legs off ``latest`` leave them out with the rest of
+        the tier, and ``latest`` leaves out the pins alone."""
+        pins = set(_tiers.project_pin_paths())
+        self.assertTrue(pins)
+        self.assertEqual({_tiers.module_tier(pin) for pin in pins}, {_tiers.TIER_LATEST})
+        self.assertLess(pins, set(_tiers.latest_tier_paths()))
+        run = str(step(('unit-tests.yml', 'test'), 'Run unit tests')['run'])
+        self.assertIn(_tiers.PROJECT_PINS_SELECTOR, run)
+        self.assertIn(_tiers.LATEST_TIER_SELECTOR, run)
+
 
 class TestTheDocsSayIt(unittest.TestCase):
 

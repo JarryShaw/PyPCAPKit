@@ -23,6 +23,9 @@ import warnings
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): hand-picked round-trip cases, not a sweep.
+__tier__ = 'ALL'
+
 
 def ipv6(nxt: int, payload: bytes) -> bytes:
     """Return an IPv6 header with next header ``nxt``, followed by ``payload``."""

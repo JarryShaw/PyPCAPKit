@@ -32,6 +32,9 @@ from tests._support import reimport_once_per_class
 if TYPE_CHECKING:
     from typing import Any
 
+#: Test tier (#1958): hand-picked round-trip cases, not a sweep.
+__tier__ = 'ALL'
+
 #: A little-endian Enhanced Packet Block on interface 0, timestamp 0, carrying
 #: the four octets ``abcd`` -- the repro of #1270.
 EPB = bytes.fromhex('06000000 24000000 00000000 00000000 00000000'

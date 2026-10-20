@@ -32,6 +32,9 @@ from tests._tiers import SAMPLE_ROOT
 from tests.foundation import _roundtrip as harness
 from tests.foundation._roundtrip import Gap, Outcome, read_pcap
 
+#: Test tier (#1958): a sweep that traces and rereads every sample capture.
+__tier__ = 'LATEST'
+
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None
                   for name in ('tbtrim', 'aenum', 'chardet', 'dictdumper'))
 

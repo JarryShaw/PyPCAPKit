@@ -26,6 +26,9 @@ import warnings
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): a sweep that cuts every protocol family at every offset.
+__tier__ = 'LATEST'
+
 ETHERNET = 'link.ethernet:Ethernet'
 IPV6 = 'internet.ipv6:IPv6'
 

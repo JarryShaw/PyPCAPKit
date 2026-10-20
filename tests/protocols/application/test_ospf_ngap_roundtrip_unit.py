@@ -23,6 +23,9 @@ import unittest
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): hand-picked round-trip cases, not a sweep.
+__tier__ = 'ALL'
+
 HAS_PYCRATE = importlib.util.find_spec('pycrate_asn1dir') is not None
 
 #: Cryptographic authentication: Key ID 1, Auth Data Len 16, sequence 7.

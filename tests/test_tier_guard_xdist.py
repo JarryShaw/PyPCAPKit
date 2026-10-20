@@ -70,6 +70,9 @@ from tests import _tiers, conftest as _conftest
 if TYPE_CHECKING:
     from typing import ContextManager
 
+#: Test tier (#1958): checks the guard in xdist workers on each leg's interpreter.
+__tier__ = 'ALL'
+
 #: Capture name the probe module in :class:`XdistSubprocessTests` reads. Not
 #: tracked by git -- see :func:`tests._tiers.committed_captures` -- so it is a
 #: tier violation regardless of what ``make samples`` has built locally.

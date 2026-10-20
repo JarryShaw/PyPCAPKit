@@ -75,6 +75,10 @@ from tests.project.test_release_gates import (declared_environment, declared_if,
 if TYPE_CHECKING:
     from typing import Any, Optional
 
+#: Test tier (#1958): drives the release workflow's tag job against temporary
+#: repositories.
+__tier__ = 'LATEST'
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 WORKFLOW = ROOT / '.github' / 'workflows' / 'create-release.yml'
 CONDA_WORKFLOW = ROOT / '.github' / 'workflows' / 'cron-conda.yml'

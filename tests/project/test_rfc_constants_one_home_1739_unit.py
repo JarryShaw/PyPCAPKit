@@ -39,6 +39,10 @@ import pathlib
 import sys
 import unittest
 
+#: Test tier (#1958): checks that each RFC constant has one home, a question about the
+#: tree.
+__tier__ = 'LATEST'
+
 #: Repository root.
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 

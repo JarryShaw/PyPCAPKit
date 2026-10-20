@@ -46,6 +46,10 @@ from unittest import mock
 if TYPE_CHECKING:
     from typing import Any, Optional
 
+#: Test tier (#1958): drives a hook of docs/source/conf.py, which the docs build runs
+#: on one interpreter.
+__tier__ = 'LATEST'
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 #: The documentation tree, and the configuration whose hooks are tested.

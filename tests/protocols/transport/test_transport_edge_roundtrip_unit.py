@@ -20,6 +20,10 @@ import unittest
 from tests.protocols import _edge_roundtrip as edge
 from tests.protocols._edge_roundtrip import Case, MakeCase, Reject
 
+#: Test tier (#1958): the #1202 edge-case table for the transport layer, every case of
+#: it.
+__tier__ = 'LATEST'
+
 TCP = 'pcapkit.protocols.transport.tcp:TCP'
 UDP = 'pcapkit.protocols.transport.udp:UDP'
 SCTP = 'pcapkit.protocols.transport.sctp:SCTP'

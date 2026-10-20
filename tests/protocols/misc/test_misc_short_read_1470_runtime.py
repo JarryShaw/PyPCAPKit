@@ -33,6 +33,9 @@ from tests._tiers import SAMPLE_ROOT
 if TYPE_CHECKING:
     from typing import Any, Iterator
 
+#: Test tier (#1958): a sweep that cuts every generated capture at every offset.
+__tier__ = 'LATEST'
+
 RUNTIME_DEPS = ('aenum', 'chardet')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 

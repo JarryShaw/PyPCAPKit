@@ -133,6 +133,10 @@ import unittest
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): exercises the sentinels' exports and behaviour as well as the
+#: conventions page.
+__tier__ = 'ALL'
+
 # ``pcapkit`` is deliberately not imported at module load. GitHub issue #1332: the
 # plain-unittest ordering legs leave a freshly re-imported ``pcapkit`` in
 # ``sys.modules``, so a sentinel bound here would be the *old* import's object and

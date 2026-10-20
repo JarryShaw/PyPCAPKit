@@ -229,6 +229,9 @@ from tests._support import scale_timeout
 if TYPE_CHECKING:
     from typing import Optional
 
+#: Test tier (#1958): checks the release and conda workflows' gates.
+__tier__ = 'LATEST'
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 #: The workflow #641 is about, and the one every test above

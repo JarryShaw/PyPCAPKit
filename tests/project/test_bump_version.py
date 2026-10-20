@@ -54,6 +54,9 @@ import tempfile
 import unittest
 from unittest import mock
 
+#: Test tier (#1958): drives util/bump_version.py, which runs on one interpreter.
+__tier__ = 'LATEST'
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 #: A minimal document that ``cffconvert --validate`` accepts, carrying the two

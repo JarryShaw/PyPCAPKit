@@ -21,6 +21,9 @@ import unittest
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): a sweep that rebuilds every three-digit HTTP status code.
+__tier__ = 'LATEST'
+
 
 class TestFTPReturnCodeEveryValue(unittest.TestCase):
     """Pin FTP replies across the whole three-digit range."""

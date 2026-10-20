@@ -49,6 +49,9 @@ from tests.corekit._roundtrip import (OK, KnownFailureTable, Outcome, describe, 
 if TYPE_CHECKING:
     from typing import Any
 
+#: Test tier (#1958): a sweep over every ``Info`` class.
+__tier__ = 'LATEST'
+
 #: Packages whose modules define :class:`Info` subclasses but are not imported by
 #: ``import pcapkit`` alone.
 PACKAGES = ('pcapkit.protocols.data', 'pcapkit.foundation.reassembly.data',

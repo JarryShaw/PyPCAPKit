@@ -27,6 +27,10 @@ import warnings
 from tests._support import time_limit
 from tests._tiers import ROOT
 
+#: Test tier (#1958): tests examples/generators/options.py, which make_samples.py runs
+#: on every integration leg.
+__tier__ = 'LATEST'
+
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 

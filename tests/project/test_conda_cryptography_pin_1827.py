@@ -35,6 +35,9 @@ except ImportError:  # pragma: no cover
 if TYPE_CHECKING:
     from typing import Any
 
+#: Test tier (#1958): drives util/conda_vendor.py, which runs on one interpreter.
+__tier__ = 'LATEST'
+
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 REQUIREMENTS = ROOT / 'conda' / 'requirements.txt'
 #: The Intel macOS line :func:`stand_in`'s pin writes.

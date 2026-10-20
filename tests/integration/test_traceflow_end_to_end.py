@@ -15,6 +15,9 @@ import unittest
 from tests._support import sample_path
 from tests.integration._helpers import HAS_RUNTIME, EndToEndTestCase, read_json
 
+#: Test tier (#1958): hand-picked traces of the sample captures, not a sweep.
+__tier__ = 'ALL'
+
 #: The two connections of :file:`tcp.pcap`: concurrent SSH sessions, one over
 #: IPv4 and one over IPv6. Tracing keys a flow on the canonical *pair* of
 #: endpoints, so a connection is one flow rather than one per direction; the

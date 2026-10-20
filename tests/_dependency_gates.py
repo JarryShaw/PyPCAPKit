@@ -789,6 +789,11 @@ class Job(NamedTuple):
     #: string equality -- unlike ``'fixture-tier'``, there is no directory or
     #: node-ID form here, because that is not the shape ``TEST_PATHS`` takes.
     paths: 'tuple[str, ...]' = ()
+    #: The test tier a ``'fixture-tier'`` selection is limited to on every leg
+    #: (#1958): ``'ALL'`` for a job none of whose legs is ``latest``, which asks
+    #: :func:`~tests._tiers.fixture_tier_paths` for that tier alone, :data:`None`
+    #: for one whose ``latest`` leg asks for every tier, and for every other shape.
+    tier: 'Optional[str]' = None
 
 
 class Gap(NamedTuple):
@@ -1573,8 +1578,14 @@ def pytest_jobs(workflow: 'Optional[pathlib.Path]' = None) -> 'tuple[Job, ...]':
             )
 
         run_block = running[0]
+        tier = None  # type: Optional[str]
         if 'fixture_tier_paths' in run_block:
             selection = 'fixture-tier'
+            # #1958: a step that asks for every tier on some leg reaches what that
+            # leg runs; one that only ever asks for one tier reaches that tier.
+            asked = set(re.findall(r"join\(fixture_tier_paths\(([^)]*)\)\)", run_block))
+            if '' not in asked and len(asked) == 1:
+                tier = ast.literal_eval(asked.pop())
         elif '--ignore' in run_block:
             selection = 'ignore'
         elif 'project_pin_paths' in run_block:
@@ -1583,7 +1594,7 @@ def pytest_jobs(workflow: 'Optional[pathlib.Path]' = None) -> 'tuple[Job, ...]':
             selection = 'whole-suite'
 
         jobs.append(Job(name, tuple(extra.strip() for extra in installs[0].split(',')),
-                        selection))
+                        selection, tier=tier))
     return tuple(jobs)
 
 
@@ -1600,18 +1611,20 @@ def job_reaches(job: 'Job', gate: 'Gate') -> 'bool':
       :meth:`~tests.test_tier_guard.WorkflowAgreementTests\
 .test_ignore_flags_match_the_fixture_tier_constants`
       is what keeps that equivalence true. It is the ``latest`` leg's: the
-      others also skip :data:`~tests._tiers.ROUNDTRIP_SWEEP_GLOB` (#1732), which
-      changes no answer, since every leg shares the job's one install line. The
-      same holds for ``'fixture'``, whose legs off ``latest`` drop
-      :data:`~tests._tiers.ROUNDTRIP_RUNTIME_GLOB`'s modules.
+      others also leave out the ``LATEST`` test tier,
+      :func:`~tests._tiers.latest_tier_paths` (#1958), which changes no answer,
+      since every leg shares the job's one install line. The same holds for a
+      ``'fixture-tier'`` job with a ``latest`` leg, whose other legs ask for the
+      ``ALL`` tier alone.
     * ``'project-pins'`` is :func:`~tests._tiers.is_project_pin`, the job running
       exactly what :func:`~tests._tiers.project_pin_paths` prints.
     * ``'explicit'`` is exact membership in :attr:`Job.paths` -- the literal
       ``TEST_PATHS`` list a ``matrix.engine`` cell of ``engine-tests`` (#849)
       runs, at file granularity (that job names whole files, never node IDs).
     * ``'fixture-tier'`` is whatever
-      :func:`~tests._tiers.fixture_tier_paths` returns, which is what the job
-      itself runs. Its node-ID entries are honoured at method granularity: a
+      :func:`~tests._tiers.fixture_tier_paths` returns for the job's
+      :attr:`Job.tier`, which is what the job itself runs. Its node-ID entries
+      are honoured at method granularity: a
       selection naming one method of a module does not reach a gate on a
       *different* method of it.
 
@@ -1635,7 +1648,7 @@ def job_reaches(job: 'Job', gate: 'Gate') -> 'bool':
     if job.selection == 'explicit':
         return gate.module in job.paths
 
-    for entry in _tiers.fixture_tier_paths():
+    for entry in _tiers.fixture_tier_paths(job.tier):
         module, _, scope = entry.partition('::')
         if not scope:
             candidate = _tiers.ROOT / module

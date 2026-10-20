@@ -234,6 +234,9 @@ class TestTheSamplesReachTheTestsLog(unittest.TestCase):
 #: Round 2's containment, as the issue's research sized it (estimates, until a run shows them);
 #: #1753 adds the exit on a spent heap, which tests/project/test_graalpy_worker_heap_1753.py pins.
 HEAP, GRAAL_WORKERS, SCOPE_MEMORY = '--vm.Xmx2g --vm.XX:+ExitOnOutOfMemoryError', '3', '12G'
+#: A ``LATEST``-tier module, as ``List the LATEST tier`` would hand the tests step (#1958):
+#: a stand-in naming no real module, so this pin runs no test module by path.
+SWEEP = 'tests/protocols/test_a_latest_sweep_unit.py'
 FSIZE = 2 * 1024 ** 3
 #: Round 3: the probe is the scope itself, every flag included, under a throwaway unit.
 PROBE = 'if probe=$(scoped "pcapkit-probe-$$.scope" true 2>&1); then'
@@ -341,7 +344,7 @@ class TestTheContainmentRuns(unittest.TestCase):
         self.vmstat.write_text('oom_kill 7\n', encoding='utf-8')
         self.argv = self.tmp / 'argv'
         self.env = dict(os.environ, RUNNER_TEMP=str(self.temp), GITHUB_WORKSPACE=str(ROOT), WORKERS='3',
-                        GRAAL_PYTHON_VM_ARGS=HEAP,
+                        GRAAL_PYTHON_VM_ARGS=HEAP, LATEST_TIER=SWEEP,
                         LEG='Python graalpy-25.4 (experimental, non-blocking)',
                         GITHUB_STEP_SUMMARY=str(self.tmp / 'summary.md'),
                         PATH=str(self.bindir) + os.pathsep + os.environ.get('PATH', ''))
@@ -439,7 +442,7 @@ class TestTheContainmentRuns(unittest.TestCase):
         argv = argvs['capped']
         self.assertEqual(argv[:6], ['-m', 'pytest', '-q', '-n', '3', '--dist'])
         for arg in (f'--junitxml={self.temp}/junit.xml', '--ignore=tests/integration', '--ignore-glob=*_runtime.py',
-                    '--ignore-glob=*_regression.py', '--ignore-glob=*roundtrip*', '--durations=30'):
+                    '--ignore-glob=*_regression.py', f'--ignore={SWEEP}', '--durations=30'):
             with self.subTest(arg=arg):
                 self.assertIn(arg, argv)
         # Only the capped path took the tests through sudo: the probe and the run.

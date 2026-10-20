@@ -24,6 +24,9 @@ import unittest
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): hand-picked round-trip cases, not a sweep.
+__tier__ = 'ALL'
+
 #: TCP header, Data Offset 6: NOP, EOOL, then two octets of padding.
 TCP_HEADER = bytes.fromhex('0050c3500000000100000000' '6002ffff00000000' '01000000')
 #: IPv4 header, IHL 6: NOP, EOOL, then two octets of padding.

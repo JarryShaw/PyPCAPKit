@@ -214,27 +214,34 @@ jobs:
         # distributed. The durations table and JUnit file are #1538's per-test
         # timings, uploaded by the last step of this job.
         #
-        # #1732, the owner's ruling: the round-trip sweeps -- every module whose
-        # path holds `roundtrip`, tests/_tiers.py's ROUNDTRIP_SWEEP_GLOB -- run
-        # on `latest` alone, which is also the coverage leg, so coverage keeps
-        # its selection. Every other leg ignores them, as do experimental.yml's.
-        # pytest matches the glob, made absolute, against each path it
-        # collects, with `*` spanning `/` (_pytest/main.py:437-461, pytest
-        # 9.1.1). The modules that import the sweeps' harnesses for their
-        # packet builders still import them.
+        # #1958, the test tiers: tests/_tiers.py's module_tier() puts every test
+        # module in `ALL` or `LATEST`, by the `__tier__` constant a module states
+        # or by the rule where it states none, and `LATEST` runs on `latest`
+        # alone, which is also the coverage leg, so coverage keeps its
+        # selection. Every other leg -- `test-ktlo`'s too, as it runs these
+        # steps -- passes each module latest_tier_paths() prints as an
+        # `--ignore`, as experimental.yml's legs do. That takes in the
+        # round-trip sweeps (#1732), each marked `LATEST`; the hand-picked
+        # round trips are `ALL`.
         #
         # #1954, the owner's option 3: the project pins -- the tests/project
         # modules whose run does not vary by interpreter, tests/_tiers.py's
-        # project_pin_paths() -- run once per push, in `project-tests`, so every
-        # leg passes each as an `--ignore`, as experimental.yml's do. Asked of
-        # tests/_tiers.py here rather than listed, as `integration` asks for its
-        # selection. The pins import no pcapkit, so coverage loses nothing.
+        # project_pin_paths(), each of them `LATEST` -- run once per push, in
+        # `project-tests`, so `latest` passes each as an `--ignore` too. The pins
+        # import no pcapkit, so coverage loses nothing. Both lists are asked of
+        # tests/_tiers.py at run time rather than listed, as `integration` asks
+        # for its selection.
         env:
           COVERAGE: ${{ matrix.coverage }}
-          SWEEPS: ${{ matrix.python-version == needs.python-versions.outputs.latest }}
+          LATEST: ${{ matrix.python-version == needs.python-versions.outputs.latest }}
         run: |
-          if ! pins=$(python -c "from tests._tiers import project_pin_paths; print(' '.join(project_pin_paths()))"); then
-            echo "::${ANNOTATION_LEVEL} title=Could not compute the project pins::tests._tiers.project_pin_paths() failed -- see the traceback above."
+          if [ "$LATEST" = "true" ]; then
+            if ! skipped=$(python -c "from tests._tiers import project_pin_paths; print(' '.join(project_pin_paths()))"); then
+              echo "::${ANNOTATION_LEVEL} title=Could not compute the project pins::tests._tiers.project_pin_paths() failed -- see the traceback above."
+              exit 1
+            fi
+          elif ! skipped=$(python -c "from tests._tiers import latest_tier_paths; print(' '.join(latest_tier_paths()))"); then
+            echo "::${ANNOTATION_LEVEL} title=Could not compute the LATEST tier::tests._tiers.latest_tier_paths() failed -- see the traceback above."
             exit 1
           fi
           set -- -q -n auto --dist load \
@@ -242,12 +249,9 @@ jobs:
             --ignore=tests/integration \
             --ignore-glob='*_runtime.py' \
             --ignore-glob='*_regression.py'
-          for pin in $pins; do
-            set -- "$@" --ignore="$pin"
+          for module in $skipped; do
+            set -- "$@" --ignore="$module"
           done
-          if [ "$SWEEPS" != "true" ]; then
-            set -- "$@" --ignore-glob='*roundtrip*'
-          fi
           if [ "$COVERAGE" = "true" ]; then
             # Logs every measured process and its parent, for the check below.
             COVERAGE_DEBUG=pid,process COVERAGE_DEBUG_FILE="$PWD/coverage-processes.log" \
@@ -579,24 +583,30 @@ jobs:
       # say so. `--dist load` is pinned explicitly; see the `test` job above
       # for why.
       #
-      # #1732, the owner's ruling: the round-trip sweeps here, the modules
-      # tests/_tiers.py's ROUNDTRIP_RUNTIME_GLOB names, run on `latest` alone, as
-      # `test`'s do. Every other leg adds the glob as an `--ignore-glob`, which
-      # covers a module a directory argument reaches, and drops each path or
-      # node ID the glob matches from the selection: pytest never applies an
-      # ignore to a path it was handed (`Dir.collect` asks `isinitpath` first,
-      # _pytest/main.py:564-584, pytest 9.1.1).
+      # #1958, the test tiers: the fixture tier's `LATEST` modules, the sweeps
+      # over every capture among them, run on `latest` alone, as `test`'s do.
+      # Every other leg asks for the `ALL` tier's part of the selection,
+      # FIXTURE_ALL_TIER_SELECTOR, which drops each `LATEST` path and node ID
+      # and replaces a directory holding a `LATEST` module by its `ALL` ones,
+      # since pytest applies no ignore to a path it was handed (`Dir.collect`
+      # asks `isinitpath` first, _pytest/main.py:564-584, pytest 9.1.1).
       - name: Run full test suite
         id: suite
         if: ${{ steps.install.outcome == 'success' }}
         continue-on-error: ${{ matrix.ktlo == true }}
         shell: bash
         env:
-          SWEEPS: ${{ matrix.python-version == needs.python-versions.outputs.latest }}
+          LATEST: ${{ matrix.python-version == needs.python-versions.outputs.latest }}
         run: |
-          if ! selection=$(python -c "from tests._tiers import fixture_tier_paths; print(' '.join(fixture_tier_paths()))"); then
+          cannot_compute() {
             echo "::${ANNOTATION_LEVEL} title=Could not compute the fixture-tier selection::tests._tiers.fixture_tier_paths() failed -- see the traceback above. Refusing to fall back to a bare 'pytest -q', which would silently re-run the entire suite instead of failing loudly."
             exit 1
+          }
+          if [ "$LATEST" = "true" ]; then
+            selection=$(python -c "from tests._tiers import fixture_tier_paths; print(' '.join(fixture_tier_paths()))") || cannot_compute
+          else
+            selection=$(python -c "from tests._tiers import fixture_tier_paths; print(' '.join(fixture_tier_paths('ALL')))") || cannot_compute
+            echo "Not latest, so the ALL tier alone (#1958)."
           fi
           if [ -z "$selection" ]; then
             echo "::${ANNOTATION_LEVEL} title=Fixture-tier selection is empty::tests._tiers.fixture_tier_paths() returned nothing, which cannot be right -- tests/integration alone should always be part of it. Refusing to run pytest with no arguments."
@@ -605,17 +615,6 @@ jobs:
           echo "Fixture-dependent selection: $selection"
           # shellcheck disable=SC2086
           set -- $selection
-          if [ "$SWEEPS" != "true" ]; then
-            kept=()
-            for arg in "$@"; do
-              case "${arg%%::*}" in
-                *roundtrip*_runtime.py) ;;
-                *) kept+=("$arg") ;;
-              esac
-            done
-            set -- "${kept[@]}" --ignore-glob='*roundtrip*_runtime.py'
-            echo "Not latest, so without the round-trip sweeps (#1732): $*"
-          fi
           python -m pytest -q -n auto --dist load \
             --durations=30 --durations-min=1.0 --junitxml="$RUNNER_TEMP/junit.xml" "$@"
 
@@ -1351,13 +1350,16 @@ jobs:
 
       # See the `integration` job above for why this is asked of
       # tests/_tiers.py directly rather than spelled out as literal flags.
+      # #1958: neither leg here is `latest`, so each runs the `ALL` tier's part
+      # of the selection, as `integration`'s other legs do; the `LATEST`
+      # sweeps over every capture run in `integration` on `latest`.
       - name: Run full test suite
         id: suite
         if: ${{ steps.install.outcome == 'success' }}
         continue-on-error: ${{ matrix.ktlo == true }}
         shell: bash
         run: |
-          if ! selection=$(python -c "from tests._tiers import fixture_tier_paths; print(' '.join(fixture_tier_paths()))"); then
+          if ! selection=$(python -c "from tests._tiers import fixture_tier_paths; print(' '.join(fixture_tier_paths('ALL')))"); then
             echo "::${ANNOTATION_LEVEL} title=Could not compute the fixture-tier selection::tests._tiers.fixture_tier_paths() failed -- see the traceback above. Refusing to fall back to a bare 'pytest -q', which would silently re-run the entire suite instead of failing loudly."
             exit 1
           fi

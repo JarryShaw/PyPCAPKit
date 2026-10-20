@@ -329,7 +329,7 @@ the same commit several times over. It also skips ``changes``,
 Checks`_ below), which are gated out by their own ``if:`` rather than by having
 already run. ``changelog`` carries no
 ``if:`` at all and runs on every path regardless -- deliberately, per its own
-comment (``unit-tests.yml:1632-1638``): ``create-release.yml`` feeds
+comment (``unit-tests.yml:1634-1640``): ``create-release.yml`` feeds
 ``CHANGELOG.md`` to the GitHub Release body, so the release path is exactly
 where a drifted file must not go unchecked. Confirmed on run `36210743295
 <https://github.com/JarryShaw/PyPCAPKit/actions/runs/36210743295>`__ (a
@@ -639,7 +639,7 @@ grepping every workflow file for its name:
      - Where
    * - ``Required checks passed``
      - job ``required-checks``
-     - ``unit-tests.yml:2001``
+     - ``unit-tests.yml:2003``
    * - ``Compat Python 3.11``
      - job ``compatibility``, matrix leg ``3.11``
      - ``python-compatibility.yml:60``, ``.github/python-versions.toml:20``
@@ -661,22 +661,22 @@ which added ``Compat Python 3.15`` and removed ``Compat Python 3.10``. Moving a 
 between the tiers below means editing the ruleset in the same change.
 
 ``Required checks passed`` is defined by exactly one job
-(``unit-tests.yml:2001``). ``Compat Python`` is defined by one, the
+(``unit-tests.yml:2003``). ``Compat Python`` is defined by one, the
 ``compatibility`` job in ``python-compatibility.yml`` (``:60``), whose matrix
 (``:74``) comes from :file:`.github/python-versions.toml`: the required legs
 are its supported tier (``python-versions.toml:20-24``), and its KTLO legs
 (``python-versions.toml:16-19``) have names ending in ``(KTLO)``, so no required
 context matches one. A comment at
-``unit-tests.yml:1913`` mentions the string without defining it.
+``unit-tests.yml:1915`` mentions the string without defining it.
 
 ``Required checks passed`` is an aggregate, not a single check run. The ruleset
 requires it and the ``Compat Python 3.11``-``3.15`` legs, nothing else, as
-``unit-tests.yml``'s own comment (``unit-tests.yml:1912-1922``) records. It
+``unit-tests.yml``'s own comment (``unit-tests.yml:1914-1924``) records. It
 ``needs:`` the gating jobs of ``unit-tests.yml`` -- ``test``, ``integration``,
 ``engine-tests`` and ``pypcap-parity``, plus ``project-tests``, the one run of
 the project pins, and ``changes`` for the docs-only path -- and checks each
 result explicitly
-(``unit-tests.yml:2000-2056``). Rulesets match check names literally, with no
+(``unit-tests.yml:2002-2058``). Rulesets match check names literally, with no
 wildcard, so requiring the matrix cells one by one would mean editing the
 ruleset whenever a matrix changes; the aggregate keeps the required list fixed.
 It accepts the gating jobs as ``skipped`` only on a docs-only pull request, where
@@ -685,7 +685,7 @@ It accepts the gating jobs as ``skipped`` only on a docs-only pull request, wher
 ``python-compatibility.yml``, and a job cannot ``needs:`` a job in another
 workflow file. This job runs on Unit Tests' own ``push``/``pull_request``
 triggers; the ``gate-only: true`` reusable calls documented above skip it via
-``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:2003``),
+``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:2005``),
 so it is never produced -- and never expected -- on those paths.
 
 .. _ktlo-tier:
@@ -709,7 +709,7 @@ and keeps its legs' check names, ``Python 3.10 (KTLO)`` and so on. In
 with supported legs. Every job holding KTLO legs works the same way:
 
 * Every step that can fail on a KTLO leg has an ``id`` and
-  ``continue-on-error: ${{ matrix.ktlo == true }}`` (``unit-tests.yml:420-437``),
+  ``continue-on-error: ${{ matrix.ktlo == true }}`` (``unit-tests.yml:424-441``),
   unless it is masked on every leg, as the timings uploads are. Its ``outcome`` is
   then ``failure`` but its ``conclusion`` ``success``, so the job, its check run
   and ``required-checks`` read ``success``. A step that needs an earlier one's work
@@ -829,21 +829,15 @@ and a ``Compat`` leg.
 
 The tests' 120 minutes are sized for GraalPy, the slowest of the legs that share
 them: its leg reached 26% of the unit tier in 25 minutes (job 115915976024), where
-3.14t's ran the whole tier in 5.8 (run 38581834697). By the owner's ruling the
-round-trip sweeps run on ``latest`` alone: every leg but ``latest`` adds
-``--ignore-glob='*roundtrip*'``, which leaves out each unit-tier module whose path
-holds ``roundtrip`` (``ROUNDTRIP_SWEEP_GLOB`` in :file:`tests/_tiers.py`), and
-``latest``, the coverage leg, runs them as before. The subset covers
-``integration`` too: off ``latest`` its legs leave out the
-``*roundtrip*_runtime.py`` modules (``ROUNDTRIP_RUNTIME_GLOB``), dropping them from
-``fixture_tier_paths()``'s selection and adding the glob as an ``--ignore-glob``,
-since pytest applies no ignore to a path it was handed. On 2026-10-14 they took
-8% of the unit tier's time in a serial 3.14 run (86 of 1,031 s), and 10-11% on the
-3.14, 3.15 and 3.14t legs of run 38581834697, so the rest should take GraalPy 88-113
-minutes (estimate). The experimental legs leave out the project pins too, as
-``test``'s do (see `Project Pins`_ below); ``List the project pins`` asks for them
-on the runner's own ``python3``, before setup-python, so GraalPy does not parse the
-tree.
+3.14t's ran the whole tier in 5.8 (run 38581834697). The experimental legs run the
+``ALL`` test tier alone, as every leg but ``latest`` does (see `Test Tiers`_ below):
+``List the LATEST tier`` asks ``latest_tier_paths()`` on the runner's own ``python3``,
+before setup-python, so GraalPy does not parse the tree, and ``Run unit tests``
+passes each module it printed as an ``--ignore``. The
+round-trip sweeps of `#1732 <https://github.com/JarryShaw/PyPCAPKit/issues/1732>`__
+took 8% of the unit tier's time in a serial 3.14 run (86 of 1,031 s), and 10-11% on
+the 3.14, 3.15 and 3.14t legs of run 38581834697, so the rest should take GraalPy
+88-113 minutes (estimate).
 
 GraalPy's leg still loses its runner 18-30 minutes into its tests, with ``The runner
 has received a shutdown signal`` (`#1740 <https://github.com/JarryShaw/PyPCAPKit/issues/1740>`__),
@@ -910,6 +904,76 @@ workers rather than 4, GraalPy's tests should take about 117-151 minutes (an inf
 from the 88-113 above, not measured), so its leg may end on the 110-minute timeout as a
 warning: that is expected, blocks nothing, and leaves the caps as they are.
 
+Test Tiers
+----------
+
+Every test module runs in one of two *test tiers* (`#1958
+<https://github.com/JarryShaw/PyPCAPKit/issues/1958>`__): ``ALL``, which runs on every
+leg, and ``LATEST``, which runs on ``latest`` alone. They are orthogonal to the unit
+and fixture-dependent tiers, which decide what a module may read and so which job
+collects it; a test tier decides on which of that job's legs it runs.
+
+``module_tier()`` in :file:`tests/_tiers.py` decides, in one place, for every
+``tests/**/test_*.py``:
+
+* **The marker.** A module may state its tier outright with a module-level
+  ``__tier__ = 'ALL'`` or ``__tier__ = 'LATEST'``, read by AST, under a ``#:``
+  comment that gives the reason. It wins over the rule. It is a module constant
+  rather than a pytest marker, so ``unittest-ordering``'s plain ``unittest`` runs
+  read the same module. A value that is not one of the two string literals, or a
+  marker assigned twice or anywhere but at the module's top level, fails the tier
+  guard.
+* **The rule.** Otherwise a module is ``LATEST`` when its run does not vary by
+  interpreter, by the same AST test as the project pins below: it reads the
+  repository's text, a workflow or the docs, or drives a ``util/`` script, and
+  neither imports ``pcapkit`` nor compares the Python version. Everything that
+  exercises ``pcapkit`` is ``ALL``.
+
+The marker says what the AST cannot see. Each real sweep -- a round trip over every
+case of a table, every registry entry or every capture -- is marked ``LATEST``, as
+the owner ruled on #1732 and #1958; the hand-picked round trips, whatever their
+names, run on ``ALL``. A module that imports ``pcapkit`` only to read its text or
+structure, or that drives a docs hook or a generator other legs already run, is
+marked ``LATEST``; one that the rule would send to ``latest`` but that depends on
+the interpreter, such as the tier guard itself, which :file:`tests/conftest.py` runs at
+collection on every leg, is marked ``ALL``.
+
+Which legs run which tier:
+
+.. list-table::
+   :header-rows: 1
+
+   * - Leg
+     - Tiers
+   * - ``test`` on ``latest``, the coverage leg
+     - ``ALL`` and ``LATEST``, less the project pins
+   * - ``project-tests``
+     - the project pins
+   * - ``test`` off ``latest``, ``test-ktlo``, ``experimental``
+     - ``ALL``
+   * - ``integration`` on ``latest``
+     - ``ALL`` and ``LATEST``
+   * - ``integration`` off ``latest``, ``integration-ktlo``, ``pypcap-parity``,
+       ``pypcap-parity-ktlo``
+     - ``ALL``
+   * - ``gate``, ``unittest-ordering``
+     - ``ALL`` and ``LATEST``
+
+Each leg asks :file:`tests/_tiers.py` at run time, so no workflow lists a tier: a
+``test`` leg off ``latest`` passes each module ``latest_tier_paths()`` prints as an
+``--ignore``, and an ``integration`` or ``pypcap-parity`` leg off ``latest`` runs
+``fixture_tier_paths('ALL')``, which drops each ``LATEST`` path and node ID and
+replaces a directory holding a ``LATEST`` module by its ``ALL`` ones, since pytest
+applies no ignore to a path it was handed. :file:`tests/test_tier_guard.py` checks
+that every module resolves to exactly one tier and runs the steps to check what each
+does with the answer, and :file:`tests/project/test_sweeps_on_latest_only_1732.py`
+does the same for every leg the tier file gives.
+
+The project pins stay in a job of their own rather than joining the ``latest`` leg:
+``project-tests`` runs in parallel with the coverage leg, the slowest of ``test``'s,
+rather than lengthening it under coverage, and it is also the job that runs the docs
+readers on a docs-only diff.
+
 Project Pins
 ------------
 
@@ -922,13 +986,17 @@ code it runs: a module is a pin unless it, a module it takes names from, or a fi
 it runs by path imports ``pcapkit``, or compares ``sys.version_info`` or
 ``sys.implementation``. A computed import, or a ``.py`` name computed for a
 loader or a child process, counts as importing it, and so does a file that does
-not parse. The modules that import ``pcapkit`` stay on every leg.
+not parse. Every pin is in the ``LATEST`` test tier (see `Test Tiers`_ above),
+and a ``tests/project`` module marked ``__tier__ = 'ALL'`` is no pin. The modules
+that import ``pcapkit`` are no pins either; those the tiers send to ``latest`` run
+on ``test``'s ``latest`` leg, under coverage.
 
 ``project-tests`` runs the pins under pytest, with ``test``'s flags, on ``latest``,
 on every pull request and every push to ``main``, and ``required-checks`` needs it.
 Every ``test``, ``test-ktlo`` and ``experimental`` leg passes each pin as an
 ``--ignore``, ``latest``'s coverage leg included, which measures only ``pcapkit``.
-Each asks ``project_pin_paths()`` at run time, as ``integration`` asks for its
+``latest`` asks ``project_pin_paths()`` at run time, and every other leg
+``latest_tier_paths()``, which holds each pin, as ``integration`` asks for its
 selection, so no workflow lists the pins, and :file:`tests/test_tier_guard.py` runs
 the steps to check what each does with the answer. Under ``gate-only``, ``gate``'s
 full suite runs the pins with everything else. ``unittest-ordering``'s ``project``

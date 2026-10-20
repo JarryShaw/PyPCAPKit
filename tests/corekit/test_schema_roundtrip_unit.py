@@ -51,6 +51,9 @@ from tests.corekit._roundtrip import (OK, Gap, KnownFailureTable, Outcome, descr
 if TYPE_CHECKING:
     from typing import Any, Callable, Optional
 
+#: Test tier (#1958): a sweep over every protocol schema.
+__tier__ = 'LATEST'
+
 #: Package prefix stripped from a schema's module to make its label.
 PREFIX = 'pcapkit.protocols.schema.'
 

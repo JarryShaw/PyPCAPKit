@@ -42,6 +42,9 @@ from tests.foundation._roundtrip import (Gap, Outcome, ethernet, ipv4, ipv6,
 if TYPE_CHECKING:
     from typing import Any
 
+#: Test tier (#1958): a sweep over every payload in every arrival order.
+__tier__ = 'LATEST'
+
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None
                   for name in ('tbtrim', 'aenum', 'chardet', 'dictdumper'))
 

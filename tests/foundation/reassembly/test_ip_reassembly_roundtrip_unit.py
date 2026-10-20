@@ -19,6 +19,9 @@ import unittest
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): hand-picked round-trip cases, not a sweep.
+__tier__ = 'ALL'
+
 #: A 2000-octet payload with no zero octet in it, so a zero-filled hole shows.
 FULL = (bytes(range(1, 256)) * 8)[:2000]
 

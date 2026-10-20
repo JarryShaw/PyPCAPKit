@@ -38,6 +38,9 @@ from tests._support import reimport_once_per_class
 if TYPE_CHECKING:
     from typing import Any, Iterator
 
+#: Test tier (#1958): a sweep over every bit field of the protocol schemas.
+__tier__ = 'LATEST'
+
 #: Bit fields allowed to leave bits unnamed, as ``schema.field`` (relative to
 #: :mod:`pcapkit.protocols.schema`) -> the ``(start, length)`` bit ranges left
 #: uncovered. Every known site has been fixed, so this is empty, and it must

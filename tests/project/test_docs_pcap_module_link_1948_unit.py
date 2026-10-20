@@ -47,6 +47,10 @@ from tests.project.test_docs_epilog_links_1936_unit import (CONF, ENGINE_LIST, R
 if TYPE_CHECKING:
     from typing import Any
 
+#: Test tier (#1958): checks the docs' links to the pcap module note, partly through
+#: docs/source/conf.py.
+__tier__ = 'LATEST'
+
 #: The label ``|pcap|_`` links to.
 LABEL = 'pcap-module'
 

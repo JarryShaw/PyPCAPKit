@@ -31,6 +31,9 @@ import warnings
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): hand-picked round-trip cases, not a sweep.
+__tier__ = 'ALL'
+
 
 def header(options: 'str' = '', flags: 'str' = '0000') -> 'bytes':
     """An IPv4 header from 10.0.0.1 to 10.0.0.2, protocol 253, with ``options`` in hex."""

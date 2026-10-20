@@ -24,6 +24,9 @@ import unittest
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): hand-picked round-trip cases, not a sweep.
+__tier__ = 'ALL'
+
 PREFACE = b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'
 SETTINGS_ACK = bytes.fromhex('000000040100000000')
 
