@@ -26,6 +26,7 @@ classes :class:`~pcapkit.corekit.infoclass.MultiInfo` and
 
    .. autoattribute:: __map__
    .. autoattribute:: __map_reverse__
+   .. autoattribute:: __order__
 
 .. autodecorator:: pcapkit.corekit.infoclass.info_final
 

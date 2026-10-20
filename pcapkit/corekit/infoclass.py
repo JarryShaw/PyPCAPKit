@@ -149,7 +149,7 @@ def info_final(cls: 'ST', *, _finalised: 'bool' = True) -> 'ST':
     if cls is Info and cls.__dict__.get('__base_ready__'):
         return cls
 
-    temp = ['__map__', '__map_reverse__', '__multi__', '__builtin__', '__finalised__']
+    temp = ['__map__', '__map_reverse__', '__multi__', '__order__', '__builtin__', '__finalised__']
     temp.extend(cls.__additional__)
     for obj in cls.mro():
         temp.extend(dir(obj))
@@ -341,9 +341,18 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
         #: original names).
         __map_reverse__: 'dict[str, str]'
         #: Values of keys held more than once, i.e. every value but the first,
-        #: keyed by the (transformed) key that was last in :attr:`__dict__` when
-        #: each was added, so :meth:`to_dict` writes it right after that key.
+        #: keyed by the (transformed) key that was last in :attr:`__order__`
+        #: when each was added, so :meth:`to_dict` writes it right after that
+        #: key.
         __multi__: 'dict[str, list[tuple[str, Any]]]'
+        #: The (transformed) keys of the fields, in the order each was first
+        #: set, as the keys of a plain :obj:`dict`. Every method that lists the
+        #: fields reads their order from here rather than from
+        #: :attr:`~object.__dict__`, whose iteration order is the interpreter's
+        #: storage layout: PyPy lays an instance's attributes out to match an
+        #: earlier instance of the same class, so the fields came out in that
+        #: instance's order instead (:issue:`2003`).
+        __order__: 'dict[str, None]'
         #: List of builtin methods.
         __builtin__: 'set[str]'
 
@@ -467,6 +476,7 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
         super().__setattr__(self, '__map__', {})
         super().__setattr__(self, '__map_reverse__', {})
         super().__setattr__(self, '__multi__', {})
+        super().__setattr__(self, '__order__', {})
 
         return self
 
@@ -478,6 +488,7 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
         new.__dict__['__map__'] = dict(self.__map__)
         new.__dict__['__map_reverse__'] = dict(self.__map_reverse__)
         new.__dict__['__multi__'] = {key: list(values) for (key, values) in self.__multi__.items()}
+        new.__dict__['__order__'] = dict(self.__order__)
         return new
 
     def __post_init__(self) -> 'None':
@@ -516,7 +527,7 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
         for (key, value) in multi_iter:
             new_key = f'_{__name__}{key}' if key in self.__builtin__ else key
             if new_key in self.__dict__ and new_key not in self.__excluded__:
-                anchor = next(reversed(self.__dict__))
+                anchor = next(reversed(self.__order__))
                 self.__multi__.setdefault(anchor, []).append((new_key, _freeze(value)))
             else:
                 self.__update__({key: value})
@@ -548,14 +559,23 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
             #     key = re.sub(r'\W', '_', key)
             self.__dict__[key] = _freeze(value)
 
+            # NOTE: The order is recorded here rather than read back from
+            # ``__dict__``, whose iteration order is the interpreter's storage
+            # layout and not the order the fields were set in (#2003). A key
+            # set again keeps its place, as it would in a :obj:`dict`.
+            self.__order__.setdefault(key)
+
     __init__ = __update__
+
+    def __fields(self) -> 'Iterator[tuple[str, VT]]':
+        """Every field, as ``(key, value)`` with the transformed key, in :attr:`__order__`."""
+        for key in self.__order__:
+            if key not in self.__excluded__:
+                yield key, self.__dict__[key]
 
     def __str__(self) -> 'str':
         temp = []  # type: list[str]
-        for (key, value) in self.__dict__.items():
-            if key in self.__excluded__:
-                continue
-
+        for (key, value) in self.__fields():
             out_key = self.__map_reverse__.get(key, key)
             temp.append(f'{out_key}={value}')
         args = ', '.join(temp)
@@ -563,10 +583,7 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
 
     def __repr__(self) -> 'str':
         temp = []  # type: list[str]
-        for (key, value) in self.__dict__.items():
-            if key in self.__excluded__:
-                continue
-
+        for (key, value) in self.__fields():
             out_key = self.__map_reverse__.get(key, key)
             # NOTE: a multi-mapping :class:`Info`, i.e. an option list, is
             # written out in full, as the multi-mapping it is.
@@ -580,12 +597,12 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
     def __len__(self) -> 'int':
         # NOTE: count exactly the keys :meth:`__iter__` yields, so the
         # bookkeeping attributes in ``__excluded__`` are not counted.
-        return sum(1 for key in self.__dict__ if key not in self.__excluded__)
+        return sum(1 for key in self.__order__ if key not in self.__excluded__)
 
     def __iter__(self) -> 'Iterator[str]':
-        for key in self.__dict__:
+        for key in self.__order__:
             if key in self.__excluded__:
-               continue
+                continue
             yield self.__map_reverse__.get(key, key)
 
     def __getitem__(self, name: 'str') -> 'VT':
@@ -608,9 +625,9 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
 
     def __items_multi(self) -> 'Iterator[tuple[str, VT]]':
         """Every ``(key, value)`` pair, with the transformed keys, in order."""
-        for (key, value) in self.__dict__.items():
+        for key in self.__order__:
             if key not in self.__excluded__:
-                yield key, value
+                yield key, self.__dict__[key]
             yield from self.__multi__.get(key, ())
 
     def __setattr__(self, name: 'str', value: 'VT') -> 'NoReturn':
