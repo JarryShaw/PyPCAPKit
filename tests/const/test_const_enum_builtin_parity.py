@@ -66,6 +66,9 @@ from tests._support import (ISOLATED_PREFIXES, purge_modules, reimport_once_per_
 if TYPE_CHECKING:
     from typing import Optional
 
+#: Test tier (#1958): branches on the running interpreter's version or implementation.
+__tier__ = 'ALL'
+
 #: An integer no wire field in the library is wide enough to carry. Shared with
 #: :mod:`tests.const.test_const_enum_get`, which uses the same value for the
 #: same reason.

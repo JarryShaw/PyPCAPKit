@@ -67,6 +67,9 @@ from unittest import mock
 from tests._support import load_module, purge_modules, reimport_once_per_class
 from tests._tiers import ROOT
 
+#: Test tier (#1958): branches on the running interpreter's version or implementation.
+__tier__ = 'ALL'
+
 # NOTE: :mod:`aenum` is deliberately *not* imported at module scope, however
 # convenient that would be for the assertions below. A module-level import would
 # warm the cache issue #687 is about as a side effect of this file being

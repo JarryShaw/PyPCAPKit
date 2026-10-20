@@ -63,10 +63,6 @@ import unittest
 import warnings
 from unittest import mock
 
-#: Test tier (#1958): exercises pcapkit.vendor, which users run on any supported
-#: interpreter.
-__tier__ = 'ALL'
-
 #: Same gate :file:`tests/vendor/test_crawler_reachability_unit.py` and
 #: :file:`tests/vendor/test_vendor_dest_path_unit.py` use. Importing
 #: :mod:`pcapkit.vendor.__main__` imports :mod:`pcapkit.vendor` (for the

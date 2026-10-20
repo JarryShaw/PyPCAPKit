@@ -72,6 +72,10 @@ from aenum import IntEnum, IntFlag
 from tests._support import (ISOLATED_PREFIXES, purge_modules, reimport_once_per_class,
                             restore_modules, snapshot_modules)
 
+#: Test tier (#1958): exercises metaclass, ABC or enum machinery, which differs by
+#: interpreter.
+__tier__ = 'ALL'
+
 #: Fully qualified names of the :class:`~aenum.IntEnum` classes under
 #: :mod:`pcapkit.const` for which rejecting ``0`` is *correct*, because their
 #: registries simply do not define ``0`` (registries reserving ``0`` and

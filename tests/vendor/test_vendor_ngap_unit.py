@@ -31,10 +31,6 @@ import sys
 import unittest
 from unittest import mock
 
-#: Test tier (#1958): exercises pcapkit.vendor, which users run on any supported
-#: interpreter.
-__tier__ = 'ALL'
-
 HAS_PYCRATE = importlib.util.find_spec('pycrate_asn1dir') is not None
 
 

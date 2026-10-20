@@ -24,6 +24,10 @@ import warnings
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): exercises stream and buffer semantics, which differ by
+#: interpreter.
+__tier__ = 'ALL'
+
 #: Octets the stream holds: more than a few buffers' worth.
 DATA = bytes(range(256)) * 4
 

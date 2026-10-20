@@ -47,6 +47,10 @@ if TYPE_CHECKING:
 
     from tests.utilities._harness import Recorder
 
+#: Test tier (#1958): exercises threading, locking or warning and exception hooks, which
+#: differ by interpreter.
+__tier__ = 'ALL'
+
 __all__ = ['QuietFallbackTests', 'QuietRaiseTests', 'LoudPathTests', 'MechanismTests']
 
 #: A value :class:`ToSPrecedence`'s ``_validate_value`` refuses: the field is 3 bits.

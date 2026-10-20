@@ -33,6 +33,9 @@ from tests._support import reimport_once_per_class
 if TYPE_CHECKING:
     from typing import Any
 
+#: Test tier (#1958): branches on the running interpreter's version or implementation.
+__tier__ = 'ALL'
+
 
 def _attr(path: 'str') -> 'Any':
     module, _, name = path.rpartition('.')

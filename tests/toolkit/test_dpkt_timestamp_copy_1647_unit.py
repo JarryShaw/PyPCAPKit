@@ -36,6 +36,10 @@ if TYPE_CHECKING:
 
     from pcapkit.toolkit.dpkt import RecordTimestamp
 
+#: Test tier (#1958): exercises pickling and copying, whose protocols differ by
+#: interpreter.
+__tier__ = 'ALL'
+
 ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 #: Rerun :func:`clones` over :func:`stamps` with :mod:`_decimal` unimportable, as

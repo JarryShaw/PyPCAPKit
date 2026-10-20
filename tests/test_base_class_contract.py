@@ -113,6 +113,10 @@ from pcapkit.protocols.protocol import Protocol, ProtocolBase
 if TYPE_CHECKING:
     from typing import Any, Iterator
 
+#: Test tier (#1958): exercises metaclass, ABC or enum machinery, which differs by
+#: interpreter.
+__tier__ = 'ALL'
+
 #: Every ``*Base`` name mapped to the public name it must never be aliased to.
 #: Keyed on the base rather than the public name because the base is what an
 #: import statement names; the alias is the thing being outlawed.

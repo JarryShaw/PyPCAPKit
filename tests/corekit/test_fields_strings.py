@@ -4,6 +4,10 @@ import unittest
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): exercises integer, bytes and struct edge cases, whose limits
+#: differ by interpreter.
+__tier__ = 'ALL'
+
 
 class BitFieldTests(unittest.TestCase):
     """Packing and parsing of :class:`~pcapkit.corekit.fields.strings.BitField`."""

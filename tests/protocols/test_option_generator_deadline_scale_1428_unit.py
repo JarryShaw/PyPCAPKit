@@ -47,6 +47,9 @@ from tests._tiers import ROOT
 if TYPE_CHECKING:
     from typing import Any
 
+#: Test tier (#1958): branches on the running interpreter's version or implementation.
+__tier__ = 'ALL'
+
 #: The variable :mod:`tests._support` reads, spelled out so a generator reading a
 #: different name fails here rather than agreeing with itself.
 SCALE_ENV = 'PCAPKIT_TEST_TIMEOUT_SCALE'

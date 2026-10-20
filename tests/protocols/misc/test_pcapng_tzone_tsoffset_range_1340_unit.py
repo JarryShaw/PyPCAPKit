@@ -32,6 +32,10 @@ from tests.protocols.misc.test_pcapng_roundtrip2_unit import PCAPNGTestCase
 if TYPE_CHECKING:
     from typing import Any
 
+#: Test tier (#1958): exercises integer, bytes and struct edge cases, whose limits
+#: differ by interpreter.
+__tier__ = 'ALL'
+
 #: ``datetime`` holds years 1 to 9999, so these are its first and last whole
 #: seconds since the UNIX epoch.
 DT_MIN = -62135596800

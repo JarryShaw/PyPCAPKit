@@ -58,6 +58,10 @@ if TYPE_CHECKING:
 
     _T = TypeVar('_T')
 
+#: Test tier (#1958): exercises threading, locking or warning and exception hooks, which
+#: differ by interpreter.
+__tier__ = 'ALL'
+
 #: The path fragment :func:`~pcapkit.utilities.exceptions.stacklevel` treats as
 #: "inside :mod:`pcapkit`".
 MARKER = f'{os.path.sep}pcapkit{os.path.sep}'

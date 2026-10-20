@@ -26,6 +26,10 @@ import unittest
 from tests._support import purge_modules
 from tests.utilities._harness import bootstrap, capture
 
+#: Test tier (#1958): exercises threading, locking or warning and exception hooks, which
+#: differ by interpreter.
+__tier__ = 'ALL'
+
 
 def _unrelated_failure() -> 'int':
     """Format an unrelated exception and count the traceback's lines.

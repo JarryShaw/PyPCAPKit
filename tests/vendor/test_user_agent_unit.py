@@ -50,10 +50,6 @@ from tests._support import reimport_once_per_class
 if TYPE_CHECKING:
     from typing import Any, Iterator
 
-#: Test tier (#1958): exercises pcapkit.vendor, which users run on any supported
-#: interpreter.
-__tier__ = 'ALL'
-
 #: Repository root, i.e. the grandparent of the directory holding this file.
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 

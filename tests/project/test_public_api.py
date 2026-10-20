@@ -144,6 +144,10 @@ import pkgutil
 import types
 import unittest
 
+#: Test tier (#1958): the representative smoke slice for its package's main parse and
+#: build paths.
+__tier__ = 'ALL'
+
 #: First path component under ``pcapkit.`` whose subtree the sweep skips. Empty:
 #: it held ``'vendor'`` until #1772, though ``requests`` and ``beautifulsoup4``
 #: were in the ``test`` extra before the exclusion was written, and

@@ -32,6 +32,10 @@ import unittest
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): exercises integer, bytes and struct edge cases, whose limits
+#: differ by interpreter.
+__tier__ = 'ALL'
+
 #: The two IPv6 addresses, ``::1`` and ``::2``.
 ADDRS = bytes(15) + b'\x01' + bytes(15) + b'\x02'
 #: A TCP header of 20 octets, no options.

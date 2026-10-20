@@ -36,6 +36,10 @@ from tests.foundation import _roundtrip as wire
 if TYPE_CHECKING:
     from typing import Optional
 
+#: Test tier (#1958): exercises integer, bytes and struct edge cases, whose limits
+#: differ by interpreter.
+__tier__ = 'ALL'
+
 #: Little-endian PCAP global header: v2.4, snaplen 65535, Ethernet.
 GLOBAL = bytes.fromhex('d4c3b2a1' '0200' '0400' '00000000' '00000000' 'ffff0000' '01000000')
 

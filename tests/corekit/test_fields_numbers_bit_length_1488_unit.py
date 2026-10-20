@@ -20,6 +20,10 @@ import unittest
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): exercises integer, bytes and struct edge cases, whose limits
+#: differ by interpreter.
+__tier__ = 'ALL'
+
 #: Octets of a two-octet field, as hex.
 WIRES = ('0000', '0001', '0fff', 'ffff', 'f000', '8000', '0800', 'f7ff', 'a5a5')
 

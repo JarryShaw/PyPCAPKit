@@ -47,6 +47,10 @@ import unittest
 from tests._support import purge_modules
 from tests.utilities._harness import bootstrap, capture
 
+#: Test tier (#1958): exercises threading, locking or warning and exception hooks, which
+#: differ by interpreter.
+__tier__ = 'ALL'
+
 #: Repository root -- three directories up from this file
 #: (``tests/utilities/test_exceptions_excepthook.py``). Passed to the child
 #: interpreter as ``PYTHONPATH`` explicitly, rather than relied on via the

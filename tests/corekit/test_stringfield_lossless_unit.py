@@ -31,6 +31,10 @@ import urllib.parse
 
 from tests._support import reimport_once_per_class
 
+#: Test tier (#1958): exercises integer, bytes and struct edge cases, whose limits
+#: differ by interpreter.
+__tier__ = 'ALL'
+
 #: Charsets whose codecs reject a ``'surrogateescape'`` error handler, so that a
 #: fallback through one would raise where ``'replace'`` does not.
 NO_SURROGATE_CHARSETS = ('utf-16', 'utf-16-le', 'utf-16-be', 'utf-32', 'utf-7')

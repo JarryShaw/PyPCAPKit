@@ -6,6 +6,10 @@ import unittest
 
 from tests._support import reimport_once_per_class, time_limit
 
+#: Test tier (#1958): exercises integer, bytes and struct edge cases, whose limits
+#: differ by interpreter.
+__tier__ = 'ALL'
+
 
 class FieldBaseUnpackBoundsTests(unittest.TestCase):
     """Bounds checking in :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>`.
