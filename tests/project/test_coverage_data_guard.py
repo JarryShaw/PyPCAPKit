@@ -6,13 +6,14 @@ with every test passing in both, and posted 85.85% against about 88.9%. A
 process that dies before coverage's atexit save leaves no ``.coverage.*`` file,
 and ``coverage combine`` reports what is left as the whole. So the ``Run unit
 tests`` step of :file:`.github/workflows/unit-tests.yml` logs every measured
-process (``COVERAGE_DEBUG=pid,process``), and ``Report coverage`` runs a check
-before ``coverage combine`` that fails the step, posting no total, unless the
-controller and each of its direct children -- the xdist workers -- saved a file.
+process (``COVERAGE_DEBUG=pid,process``), and ``Report coverage`` runs
+:file:`util/coverage_report.py` (#1967), whose check, before ``coverage combine``,
+fails the step, posting no total, unless the controller and each of its direct
+children -- the xdist workers -- saved a file.
 
-The check is extracted from the workflow and run here, both on hand-written
-logs and on one written by a real ``coverage run``, so the format it parses is
-the one coverage emits rather than one assumed.
+The script's ``check`` stage is run here, both on hand-written logs and on one
+written by a real ``coverage run``, so the format it parses is the one coverage
+emits rather than one assumed.
 
 """
 
@@ -25,7 +26,6 @@ import shutil
 import subprocess  # nosec: B404
 import sys
 import tempfile
-import textwrap
 import types
 import typing
 import unittest
@@ -37,6 +37,7 @@ if typing.TYPE_CHECKING:
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 WORKFLOW = ROOT / '.github' / 'workflows' / 'unit-tests.yml'
 RCFILE = ROOT / '.github' / 'coverage.toml'
+SCRIPT = ROOT / 'util' / 'coverage_report.py'
 LOG = 'coverage-processes.log'
 CONTROLLER_CMD = ("['/x/coverage/__main__.py', 'run', '--rcfile=.github/coverage.toml', "
                   "'-m', 'pytest', '-q', '-n', 'auto']")
@@ -48,12 +49,6 @@ def _report_step() -> str:
     """The ``run:`` text of the ``Report coverage`` step."""
     text = WORKFLOW.read_text(encoding='utf-8')
     return text.split('- name: Report coverage', 1)[1].split('\n      - name:', 1)[0]
-
-
-def _guard() -> str:
-    """The Python source of the check, the first heredoc in ``Report coverage``."""
-    body = _report_step().split("python - <<'PY'\n", 1)[1].split('\n          PY\n', 1)[0]
-    return textwrap.dedent(body)
 
 
 def _has_coverage() -> bool:
@@ -80,9 +75,9 @@ class CoverageDataGuardTests(unittest.TestCase):
         self.summary = self.tempdir / 'summary.md'
         self.summary.touch()
 
-    def run_guard(self) -> 'subprocess.CompletedProcess[str]':
+    def run_guard(self, stage: str = 'check') -> 'subprocess.CompletedProcess[str]':
         env = dict(os.environ, GITHUB_STEP_SUMMARY=str(self.summary))
-        return subprocess.run([sys.executable, '-c', _guard()], cwd=self.tempdir, env=env,  # nosec: B603
+        return subprocess.run([sys.executable, str(SCRIPT), stage], cwd=self.tempdir, env=env,  # nosec: B603
                               capture_output=True, text=True, check=False, timeout=60)
 
     def write(self, log: str, pids: 'list[int]') -> None:
@@ -98,8 +93,15 @@ class CoverageDataGuardTests(unittest.TestCase):
 
     def test_the_check_runs_before_combine(self) -> None:
         """``combine`` deletes the data files it merges, so the check must come first."""
-        step = _report_step()
-        self.assertLess(step.index('#1387'), step.index('coverage combine'))
+        self.assertIn('run: python util/coverage_report.py\n', _report_step())
+        log = _entry(100, 1, CONTROLLER_CMD) + _entry(101, 100, "['-c']") + _entry(102, 100, "['-c']")
+        self.write(log, [100, 101])
+        result = self.run_guard('all')
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertIn("::error::Coverage data is incomplete: no data file from pid ['102']", result.stdout)
+        # Nothing was combined: both data files are where the tests left them.
+        self.assertEqual(len(list(self.tempdir.glob('.coverage.*'))), 2)
+        self.assertFalse((self.tempdir / '.coverage').exists())
         tests = WORKFLOW.read_text(encoding='utf-8').split('- name: Run unit tests', 1)[1]
         self.assertRegex(tests.split('- name:', 1)[0],
                          r'COVERAGE_DEBUG=pid,process COVERAGE_DEBUG_FILE="\$PWD/' + re.escape(LOG))

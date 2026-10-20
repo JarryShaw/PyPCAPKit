@@ -329,7 +329,7 @@ the same commit several times over. It also skips ``changes``,
 Checks`_ below), which are gated out by their own ``if:`` rather than by having
 already run. ``changelog`` carries no
 ``if:`` at all and runs on every path regardless -- deliberately, per its own
-comment (``unit-tests.yml:1663-1669``): ``create-release.yml`` feeds
+comment (``unit-tests.yml:1569-1575``): ``create-release.yml`` feeds
 ``CHANGELOG.md`` to the GitHub Release body, so the release path is exactly
 where a drifted file must not go unchecked. Confirmed on run `36210743295
 <https://github.com/JarryShaw/PyPCAPKit/actions/runs/36210743295>`__ (a
@@ -463,8 +463,11 @@ and re-importing pcapkit, one module's peak RSS was 4.17 GiB under the default
 killed the runner. ``sigterm = true`` and a ``pytest_sessionfinish`` hook in
 :file:`tests/conftest.py` that saves each xdist worker's data early keep a
 worker that dies during shutdown from losing its file
-(`#1423 <https://github.com/JarryShaw/PyPCAPKit/issues/1423>`__). The leg then
-writes the total and a per-package table to the job summary and uploads the HTML
+(`#1423 <https://github.com/JarryShaw/PyPCAPKit/issues/1423>`__). The leg's
+``Report coverage`` step then runs :file:`util/coverage_report.py`, which fails,
+posting no total, unless the controller and every xdist worker saved a data file
+(`#1387 <https://github.com/JarryShaw/PyPCAPKit/issues/1387>`__), and otherwise
+writes the total and a per-package table to the job summary. The leg uploads the HTML
 report as the ``coverage-html`` artifact (30 days), with the bare numbers as the
 ``coverage-summary`` artifact and the per-process debug log as
 ``coverage-processes-log``.
@@ -639,7 +642,7 @@ grepping every workflow file for its name:
      - Where
    * - ``Required checks passed``
      - job ``required-checks``
-     - ``unit-tests.yml:2037``
+     - ``unit-tests.yml:1904``
    * - ``Compat Python 3.11``
      - job ``compatibility``, matrix leg ``3.11``
      - ``python-compatibility.yml:60``, ``.github/python-versions.toml:20``
@@ -661,22 +664,22 @@ which added ``Compat Python 3.15`` and removed ``Compat Python 3.10``. Moving a 
 between the tiers below means editing the ruleset in the same change.
 
 ``Required checks passed`` is defined by exactly one job
-(``unit-tests.yml:2037``). ``Compat Python`` is defined by one, the
+(``unit-tests.yml:1904``). ``Compat Python`` is defined by one, the
 ``compatibility`` job in ``python-compatibility.yml`` (``:60``), whose matrix
 (``:74``) comes from :file:`.github/python-versions.toml`: the required legs
 are its supported tier (``python-versions.toml:20-24``), and its KTLO legs
 (``python-versions.toml:16-19``) have names ending in ``(KTLO)``, so no required
 context matches one. A comment at
-``unit-tests.yml:1949`` mentions the string without defining it.
+``unit-tests.yml:1816`` mentions the string without defining it.
 
 ``Required checks passed`` is an aggregate, not a single check run. The ruleset
 requires it and the ``Compat Python 3.11``-``3.15`` legs, nothing else, as
-``unit-tests.yml``'s own comment (``unit-tests.yml:1948-1958``) records. It
+``unit-tests.yml``'s own comment (``unit-tests.yml:1815-1825``) records. It
 ``needs:`` the gating jobs of ``unit-tests.yml`` -- ``test``, ``integration``,
 ``engine-tests`` and ``pypcap-parity``, plus ``project-tests``, the one run of
 the project pins, and ``changes`` for the docs-only path -- and checks each
 result explicitly
-(``unit-tests.yml:2036-2092``). Rulesets match check names literally, with no
+(``unit-tests.yml:1903-1959``). Rulesets match check names literally, with no
 wildcard, so requiring the matrix cells one by one would mean editing the
 ruleset whenever a matrix changes; the aggregate keeps the required list fixed.
 It accepts the gating jobs as ``skipped`` only on a docs-only pull request, where
@@ -685,7 +688,7 @@ It accepts the gating jobs as ``skipped`` only on a docs-only pull request, wher
 ``python-compatibility.yml``, and a job cannot ``needs:`` a job in another
 workflow file. This job runs on Unit Tests' own ``push``/``pull_request``
 triggers; the ``gate-only: true`` reusable calls documented above skip it via
-``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:2039``),
+``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:1906``),
 so it is never produced -- and never expected -- on those paths.
 
 .. _ktlo-tier:
@@ -709,14 +712,15 @@ and keeps its legs' check names, ``Python 3.10 (KTLO)`` and so on. In
 with supported legs. Every job holding KTLO legs works the same way:
 
 * Every step that can fail on a KTLO leg has an ``id`` and
-  ``continue-on-error: ${{ matrix.ktlo == true }}`` (``unit-tests.yml:443-460``),
+  ``continue-on-error: ${{ matrix.ktlo == true }}`` (``unit-tests.yml:367-384``),
   unless it is masked on every leg, as the timings uploads are. Its ``outcome`` is
   then ``failure`` but its ``conclusion`` ``success``, so the job, its check run
   and ``required-checks`` read ``success``. A step that needs an earlier one's work
   waits on that step's ``outcome``: a leg that cannot install stops there, and a
   ``pypi`` leg stops at its first failure.
 * The last step, ``KTLO summary``, runs on KTLO legs only and reports each failed
-  ``outcome`` as a warning and a job-summary line. A step's own annotations take
+  ``outcome`` as a warning and a job-summary line, through
+  :file:`util/leg_summary.py` (see `Workflow Scripts (#1967)`_). A step's own annotations take
   ``ANNOTATION_LEVEL``: ``warning`` on a KTLO leg, ``error`` on a supported one.
   ``engine-tests``' KTLO cells, a step of their own with ``continue-on-error: true``,
   report the same way.
@@ -1079,6 +1083,39 @@ above).
 :file:`tests/project/test_file_size_caps_1969.py` fails when a command in
 ``unit-tests.yml`` runs pytest, unittest or :file:`util/run_unittest_leg.py`
 without the script, and runs the script against a small limit.
+
+Workflow Scripts (`#1967 <https://github.com/JarryShaw/PyPCAPKit/issues/1967>`__)
+---------------------------------------------------------------------------------
+
+Shell that several steps repeat lives in a :file:`util/` script, which the steps
+run, rather than in a composite action: a composite action's inner steps cannot
+take ``timeout-minutes``, so each calling step keeps its own, with its ``shell:``,
+``if:``, ``env:`` and ``continue-on-error``. Each script's docstring says what it
+does; each has tests under :file:`tests/project/` that run it.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Script
+     - Run by
+   * - :file:`util/leg_summary.py`
+     - ``KTLO summary`` in ``unit-tests.yml``'s ``test``, ``integration`` and
+       ``pypcap-parity`` (and so their KTLO twins) and ``python-compatibility.yml``'s
+       ``compatibility``, as ``leg_summary.py ktlo``; ``Experimental summary`` in
+       ``experimental.yml``'s ``experimental``, as ``leg_summary.py experimental``.
+   * - :file:`util/classify_changes.py`
+     - ``Classify the diff`` in the ``changes`` job of ``unit-tests.yml`` and of
+       ``experimental.yml``.
+   * - :file:`util/coverage_report.py`
+     - ``Report coverage`` in ``unit-tests.yml``'s ``test``, on the coverage leg.
+
+The summaries run on the image's ``/usr/bin/python3`` rather than the leg's
+interpreter, which may have failed to set up or be too broken to run anything, so
+they need only the standard library, as ``classify_changes.py`` does on the
+runner's ``python3``. Both ``changes`` jobs check out on every event, since the
+script is in the tree. ``create-release.yml``'s ``pypi`` job keeps its own copy of
+the KTLO summary's shell until its shell moves to scripts too; a project pin runs
+that copy and the script on the same steps and requires the same output.
 
 .. _Action Pins:
 

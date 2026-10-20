@@ -131,13 +131,4 @@ jobs:
         env:
           LEG: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}
           STEPS: ${{ toJSON(steps) }}
-        run: |
-          failed=$(jq -r 'to_entries[] | select(.value.outcome == "failure") | .key' <<< "$STEPS")
-          if [ -z "$failed" ]; then
-            echo "$LEG: no step failed."
-            exit 0
-          fi
-          while IFS= read -r id; do
-            echo "::warning title=${id} failed on ${LEG//,/%2C}::KTLO legs never block (#1633), so this job still succeeds (#1672); see the ${id} step's log."
-            echo "- ${LEG}: step \`${id}\` failed; non-blocking, so this job still succeeds." >> "$GITHUB_STEP_SUMMARY"
-          done <<< "$failed"
+        run: /usr/bin/python3 util/leg_summary.py ktlo
