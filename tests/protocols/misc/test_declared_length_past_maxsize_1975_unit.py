@@ -8,9 +8,14 @@ raises :exc:`OverflowError` instead of coming back short. A PCAP record whose
 the reader before the short-read handling could keep it as captured.
 
 Each case runs such a build's limit on whatever build the suite runs on: the
-in-memory streams raise :exc:`OverflowError` past ``2 ** 31 - 1``, and
-:data:`sys.maxsize` reads as that value, so the case parses as it would there and
-must match the result of the same octets parsed without the limit.
+streams raise :exc:`OverflowError` past :data:`sys.maxsize`, which reads as
+``2 ** 31 - 1``, so the case parses as it would there and must match the result
+of the same octets parsed without the limit.
+
+A record the file really holds past the limit is read only as far as the limit,
+but the next record still starts where it declares it ends. Those cases lower the
+limit to :data:`LONG_LIMIT`, so the record need not be gigabytes long, and serve
+it from :class:`_SparseStream`, which holds only the octets that are not zero.
 
 Every case builds its own octets and reads no capture. Classes are imported
 inside each test, after :func:`~tests._support.reimport_once_per_class`.
@@ -33,6 +38,12 @@ __tier__ = 'ALL'
 
 #: ``sys.maxsize`` where ``Py_ssize_t`` is 32 bits wide.
 NARROW_MAXSIZE = 2 ** 31 - 1
+#: A narrow limit for the records a file really holds past it, cheap to exceed and
+#: still past a ``SeekableReader`` buffer, as the real limit is.
+LONG_LIMIT = 2 ** 20 - 1
+#: How far those records run past :data:`LONG_LIMIT`: more than one discarding
+#: read or relative seek's worth, and not a whole number of either.
+LONG_EXCESS = 2 * LONG_LIMIT + 4097
 
 #: Little-endian global header: v2.4, Ethernet.
 GLOBAL = bytes.fromhex('d4c3b2a1' '0200' '0400' '00000000' '00000000' 'ffff0000' '01000000')
@@ -43,56 +54,88 @@ PACKET = bytes(range(1, 61))
 CLAIMS = (NARROW_MAXSIZE - 15, NARROW_MAXSIZE, NARROW_MAXSIZE + 1, 0xFFFF_FFFF)
 
 
-class _NarrowBytesIO(io.BytesIO):
-    """:class:`io.BytesIO` whose reads and seeks refuse what a 32-bit ``Py_ssize_t`` cannot hold."""
+def _check(value: 'int | None') -> 'None':
+    """Refuse a read or seek size that ``Py_ssize_t`` cannot hold on the simulated build."""
+    if value is not None and value > sys.maxsize:
+        raise OverflowError('Python int too large to convert to C ssize_t')
 
-    @staticmethod
-    def _check(value: 'int | None') -> 'None':
-        if value is not None and value > NARROW_MAXSIZE:
-            raise OverflowError('Python int too large to convert to C ssize_t')
+
+class _NarrowBytesIO(io.BytesIO):
+    """:class:`io.BytesIO` whose reads and seeks refuse what ``Py_ssize_t`` cannot hold."""
 
     def read(self, size: 'int | None' = -1, /) -> 'bytes':
-        self._check(size)
+        _check(size)
         return super().read(size)
 
     def read1(self, size: 'int | None' = -1, /) -> 'bytes':
-        self._check(size)
+        _check(size)
         return super().read1(size)
 
     def seek(self, pos: 'int', whence: 'int' = io.SEEK_SET, /) -> 'int':
-        self._check(pos)
+        _check(pos)
         return super().seek(pos, whence)
 
 
-class _NarrowPipe(io.RawIOBase):
-    """A non-seekable stream with the same limit, read through a ``SeekableReader``."""
+class _SparseStream(io.RawIOBase):
+    """A file of ``size`` octets, zero but for ``pieces``, that allocates only what is read.
 
-    def __init__(self, data: 'bytes') -> 'None':
+    Its reads refuse what ``Py_ssize_t`` cannot hold. Its seeks do not, as a file's
+    do not on GraalPy; built with ``seekable=False`` it cannot seek at all, and an
+    extractor reads it through a ``SeekableReader``.
+
+    """
+
+    def __init__(self, pieces: 'dict[int, bytes]', size: 'int', *, seekable: 'bool' = True) -> 'None':
         super().__init__()
-        self._data = data
+        self._pieces = pieces
+        self._size = size
+        self._seekable = seekable
         self._pos = 0
 
     def readable(self) -> 'bool':
         return True
 
     def seekable(self) -> 'bool':
-        return False
+        return self._seekable
+
+    def tell(self) -> 'int':
+        if not self._seekable:
+            raise io.UnsupportedOperation('tell')
+        return self._pos
+
+    def seek(self, pos: 'int', whence: 'int' = io.SEEK_SET, /) -> 'int':
+        if not self._seekable:
+            raise io.UnsupportedOperation('seek')
+        base = {io.SEEK_SET: 0, io.SEEK_CUR: self._pos, io.SEEK_END: self._size}[whence]
+        self._pos = max(base + pos, 0)
+        return self._pos
 
     def read(self, size: 'int | None' = -1, /) -> 'bytes':
-        _NarrowBytesIO._check(size)  # pylint: disable=protected-access
-        if size is None or size < 0:
-            size = len(self._data) - self._pos
-        chunk = self._data[self._pos:self._pos + size]
-        self._pos += len(chunk)
-        return chunk
+        _check(size)
+        start = self._pos
+        stop = self._size if size is None or size < 0 else min(self._size, start + size)
+        if stop <= start:
+            return b''
+        out = bytearray(stop - start)
+        for offset, piece in self._pieces.items():
+            low, high = max(offset, start), min(offset + len(piece), stop)
+            if low < high:
+                out[low - start:high - start] = piece[low - offset:high - offset]
+        self._pos = stop
+        return bytes(out)
 
     read1 = read
 
 
+def _pipe(data: 'bytes') -> '_SparseStream':
+    """A non-seekable stream holding exactly ``data``."""
+    return _SparseStream({0: data}, len(data), seekable=False)
+
+
 @contextlib.contextmanager
-def narrow_build():
-    """Run the block as a build whose ``Py_ssize_t`` is 32 bits wide would."""
-    with unittest.mock.patch.object(sys, 'maxsize', NARROW_MAXSIZE), \
+def narrow_build(limit: 'int' = NARROW_MAXSIZE):
+    """Run the block as a build whose one read or seek goes no further than ``limit``."""
+    with unittest.mock.patch.object(sys, 'maxsize', limit), \
             unittest.mock.patch.object(io, 'BytesIO', _NarrowBytesIO):
         yield
 
@@ -133,11 +176,18 @@ class TestDeclaredLengthPastMaxsize(unittest.TestCase):
 
     def test_the_simulated_build_refuses_what_a_narrow_build_does(self) -> None:
         """The streams this module reads overflow where a 32-bit build's do."""
-        for stream in (_NarrowBytesIO(PACKET), _NarrowPipe(PACKET)):
-            with self.subTest(stream=type(stream).__name__):
+        for stream in (_NarrowBytesIO(PACKET), _pipe(PACKET)):
+            with self.subTest(stream=type(stream).__name__), narrow_build():
                 self.assertEqual(stream.read(NARROW_MAXSIZE), PACKET)
                 with self.assertRaises(OverflowError):
                     stream.read(NARROW_MAXSIZE + 1)
+
+    def test_the_sparse_stream_serves_its_pieces_among_zeros(self) -> None:
+        stream = _SparseStream({2: b'ab', 6: b'cd'}, 9)
+        self.assertEqual(stream.read(4), b'\x00\x00ab')
+        self.assertEqual(stream.seek(1, io.SEEK_CUR), 5)
+        self.assertEqual(stream.read(), b'\x00cd\x00')
+        self.assertEqual(stream.read(1), b'')
 
     def test_a_frame_claiming_past_maxsize_is_kept_as_captured(self) -> None:
         from pcapkit.protocols.misc.pcap.frame import Frame
@@ -159,15 +209,21 @@ class TestDeclaredLengthPastMaxsize(unittest.TestCase):
                 self.assertEqual(bytes(info.packet), PACKET)
                 self.assertEqual(frame.data, octets)  # type: ignore[attr-defined]
 
-    def extract(self, fin: 'object', **kwargs: 'object') -> 'list[bytes]':
-        """The packets the default engine extracts from ``fin``, on the narrow build."""
+    def extract_frames(self, fin: 'object', limit: 'int' = NARROW_MAXSIZE,
+                       **kwargs: 'object') -> 'tuple[list[object], list[str]]':
+        """The frames the default engine extracts from ``fin``, and the warnings raised."""
         import pcapkit
 
-        with narrow_build(), warnings.catch_warnings():
-            warnings.simplefilter('ignore')
+        with narrow_build(limit), warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
             extractor = pcapkit.extract(fin=fin, nofile=True, store=True, engine='default', **kwargs)
         close_extractor(extractor)
-        return [bytes(frame.info.packet) for frame in extractor.frame]
+        return list(extractor.frame), [str(item.message) for item in caught]
+
+    def extract(self, fin: 'object', limit: 'int' = NARROW_MAXSIZE, **kwargs: 'object') -> 'list[bytes]':
+        """The packets the default engine extracts from ``fin``, on the narrow build."""
+        frames, _ = self.extract_frames(fin, limit, **kwargs)
+        return [bytes(frame.info.packet) for frame in frames]  # type: ignore[attr-defined]
 
     def test_extraction_keeps_a_pcap_record_claiming_past_maxsize(self) -> None:
         for claim in CLAIMS:
@@ -192,7 +248,46 @@ class TestDeclaredLengthPastMaxsize(unittest.TestCase):
         octets = GLOBAL + _record(len(PACKET)) + _record(0xFFFF_FFFF)
         for chunk in (config.READ_CHUNK, -1):
             with self.subTest(read_chunk=chunk), unittest.mock.patch.object(config, 'READ_CHUNK', chunk):
-                self.assertEqual(self.extract(_NarrowPipe(octets)), [PACKET, PACKET])
+                self.assertEqual(self.extract(_pipe(octets)), [PACKET, PACKET])
+
+    def check_moved_past(self, frames: 'list[object]', messages: 'list[str]', warning: 'str') -> 'None':
+        """The long record is bounded and warned of, and the next one parses where it is."""
+        packets = [bytes(frame.info.packet) for frame in frames]  # type: ignore[attr-defined]
+        self.assertEqual(len(packets), 3, [len(packet) for packet in packets])
+        self.assertEqual((packets[0], packets[2]), (PACKET, PACKET))
+        self.assertLessEqual(len(packets[1]), LONG_LIMIT)
+        self.assertTrue([text for text in messages if text.startswith(warning)], messages)
+
+    def test_a_pcap_record_really_past_maxsize_is_moved_past_whole(self) -> None:
+        """The record after it parses where it is, past a seek or a read over the rest."""
+        from pcapkit.utilities import config
+
+        claim = LONG_LIMIT + LONG_EXCESS
+        head = GLOBAL + _record(len(PACKET)) + _record(claim, b'')
+        pieces = {0: head, len(head) + claim: _record(len(PACKET))}
+        size = len(head) + claim + len(_record(len(PACKET)))
+        cases = (('seekable', True, config.READ_CHUNK), ('pipe', False, config.READ_CHUNK),
+                 ('pipe, no read chunk limit', False, -1))
+        for name, seekable, chunk in cases:
+            with self.subTest(stream=name), unittest.mock.patch.object(config, 'READ_CHUNK', chunk):
+                frames, messages = self.extract_frames(_SparseStream(pieces, size, seekable=seekable),
+                                                       LONG_LIMIT)
+                self.check_moved_past(frames, messages, f'PCAP: [Frame 2] captured length {claim} runs past')
+                self.assertEqual(frames[1].info.frame_info.incl_len, claim)  # type: ignore[attr-defined]
+
+    def test_a_pcapng_block_really_past_maxsize_is_moved_past_whole(self) -> None:
+        """So does the block after a PCAP-NG block holding more than the limit."""
+        total = (LONG_LIMIT + LONG_EXCESS) // 4 * 4
+        head = SECTION + _epb(len(PACKET))
+        start = struct.pack('<IIIIIII', 6, total, 0, 0, 0, total - 32, total - 32)
+        end = struct.pack('<I', total) + _epb(len(PACKET))
+        pieces = {0: head + start, len(head) + total - 4: end}
+        size = len(head) + total - 4 + len(end)
+        for seekable in (True, False):
+            with self.subTest(seekable=seekable):
+                frames, messages = self.extract_frames(_SparseStream(pieces, size, seekable=seekable),
+                                                       LONG_LIMIT)
+                self.check_moved_past(frames, messages, f'PCAP-NG: [Block 6] block length {total} exceeds')
 
 
 if __name__ == '__main__':

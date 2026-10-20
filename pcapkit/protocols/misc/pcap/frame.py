@@ -39,6 +39,7 @@ import time
 from typing import TYPE_CHECKING, cast, overload
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
+from pcapkit.corekit.io import advance
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.data.misc.pcap.frame import Frame as Data_Frame
 from pcapkit.protocols.data.misc.pcap.frame import FrameInfo as Data_FrameInfo
@@ -347,7 +348,8 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             # Past it the read raises :exc:`OverflowError` instead of coming back
             # short, so a record claiming more than that would never reach the
             # overrun handling below (#1975).
-            self._data = self._read_fileng(min(self.length + _ilen, sys.maxsize))
+            bound = min(self.length + _ilen, sys.maxsize)
+            self._data = self._read_fileng(bound)
 
             # NOTE: A record whose ``incl_len`` runs past the end of the data is
             # kept as captured, as the PCAP-NG reader keeps a captured length
@@ -362,14 +364,20 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
                      f'which holds {held} octet(s); kept as captured',
                      ProtocolWarning, stacklevel=stacklevel())
 
-            # NOTE: Nor can a seek go past :data:`sys.maxsize`. A record ending
-            # beyond it was cut short by the end of the data, so the next frame
-            # starts where the octets read end (#1975).
-            if seek_cur > sys.maxsize:
-                seek_cur = _seek_set + len(self._data)
+            # NOTE: A read that came back whole at the bound stopped there, not
+            # at the end of the data: the record runs on past it, and the next
+            # one starts where this one declares it ends, so the stream is
+            # moved over the rest (#1975). A shorter read met the end of the
+            # data, where a seek past :data:`sys.maxsize` could not go either,
+            # so the next frame then starts where the octets read end.
+            if len(self._data) == bound < self.length + _ilen:
+                advance(self._file, self.length + _ilen - bound)
+            else:
+                if seek_cur > sys.maxsize:
+                    seek_cur = _seek_set + len(self._data)
 
-            # move forward to the beginning of the next frame
-            self._file.seek(seek_cur, io.SEEK_SET)
+                # move forward to the beginning of the next frame
+                self._file.seek(seek_cur, io.SEEK_SET)
 
             #: io.BytesIO: Source data stream.
             self._file = io.BytesIO(self._data)

@@ -9,6 +9,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
 
 """
 import io
+import sys
 from typing import TYPE_CHECKING
 
 from pcapkit.corekit.io import SeekableReader
@@ -240,4 +241,7 @@ class PCAP(EngineBase[Frame]):
         size = RECORD_HEADER_LEN
         if len(head) == RECORD_HEADER_LEN:
             size += int.from_bytes(head[8:12], self._gbhdr.byteorder)
-        ifile._read_ahead_size = size
+        # NOTE: No buffer holds more than :data:`sys.maxsize` octets, so a record
+        # longer than that is read ahead only so far; the reader moves past the
+        # rest itself (#1975).
+        ifile._read_ahead_size = min(size, sys.maxsize)

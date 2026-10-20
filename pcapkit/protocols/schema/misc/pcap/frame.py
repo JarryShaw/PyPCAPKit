@@ -2,6 +2,7 @@
 # mypy: disable-error-code=assignment
 """header schema for frame header of PCAP file format"""
 
+import sys
 from typing import TYPE_CHECKING
 
 from pcapkit.corekit.fields.byteorder import byteorder_callback
@@ -36,8 +37,10 @@ class Frame(Schema):
     incl_len: 'int' = UInt32Field(callback=byteorder_callback)
     #: Actual length of packet.
     orig_len: 'int' = UInt32Field(callback=byteorder_callback)
-    #: Payload.
-    packet: 'bytes' = PayloadField(length=lambda pkt: pkt['incl_len'])
+    #: Payload, read no further than the record header and it together can go
+    #: in one read, :data:`sys.maxsize`; the frame reader moves past the rest
+    #: (:issue:`1975`).
+    packet: 'bytes' = PayloadField(length=lambda pkt: min(pkt['incl_len'], sys.maxsize - RECORD_HEADER_LEN))
 
     if TYPE_CHECKING:
         def __init__(self, ts_sec: 'int', ts_usec: 'int', incl_len: 'int',

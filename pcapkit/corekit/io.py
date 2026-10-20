@@ -9,7 +9,8 @@
 implementation to :class:`io.BufferedReader`, and the stream proxies
 :class:`~pcapkit.corekit.io.PeekableStream`, which adds ``peek`` to a
 seekable stream, and :class:`~pcapkit.corekit.io.NamedStream`, which gives
-a stream a ``name``.
+a stream a ``name``, as well as :func:`~pcapkit.corekit.io.advance`, which moves
+a stream past more octets than one read or seek can take.
 
 """
 import io
@@ -28,7 +29,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Buffer
 
-__all__ = ['SeekableReader', 'PeekableStream', 'NamedStream']
+__all__ = ['SeekableReader', 'PeekableStream', 'NamedStream', 'advance']
 
 
 class SeekableReader(io.BufferedReader):
@@ -204,9 +205,9 @@ class SeekableReader(io.BufferedReader):
         read = getattr(self._stream, 'read1', self._stream.read)
 
         # NOTE: ``-1`` sets no limit of its own, but one read still goes no further
-        # than :data:`sys.maxsize`, past which it raises :exc:`OverflowError`
-        # rather than coming back short (#1975).
-        limit = sys.maxsize if config.READ_CHUNK == -1 else config.READ_CHUNK
+        # than :data:`sys.maxsize`, whatever the setting, past which it raises
+        # :exc:`OverflowError` rather than coming back short (#1975).
+        limit = sys.maxsize if config.READ_CHUNK == -1 else min(config.READ_CHUNK, sys.maxsize)
         chunks = []  # type: list[bytes]
         count = 0
         while True:
@@ -828,6 +829,46 @@ class SeekableReader(io.BufferedReader):
                         self._write_buffer(buf_tmp)
                         buf += buf_tmp
         return buf
+
+
+#: Octets :func:`advance` reads and discards at a time when
+#: :data:`~pcapkit.utilities.config.READ_CHUNK` sets no limit.
+_DISCARD_CHUNK = 1 << 20
+
+
+def advance(file: 'IO[bytes]', count: 'int', /) -> 'None':
+    """Move ``file`` forward by ``count`` octets, however many one read or seek can take.
+
+    Args:
+        file: Stream to move.
+        count: Octets to move past, counted from the position.
+
+    A frame reader asks for a record no further than one read can go,
+    :data:`sys.maxsize`, so a record the file really holds past that is read only
+    as far as the limit; the next record still starts where this one declares it
+    ends (:issue:`1975`). A seekable stream gets there by relative seeks, none
+    longer than :data:`sys.maxsize`, and may land past its end, as an absolute seek
+    would. A :class:`SeekableReader`, or a stream that cannot seek, reads the
+    octets and discards them, no more than
+    :data:`~pcapkit.utilities.config.READ_CHUNK` at a time, and stops at the end
+    of the stream: a :class:`SeekableReader` seek reads at most a buffer's worth
+    past what it holds, so a longer one would stop short of the target.
+
+    """
+    if isinstance(file, SeekableReader) or not file.seekable():
+        chunk = _DISCARD_CHUNK if config.READ_CHUNK == -1 else config.READ_CHUNK
+        chunk = min(chunk, sys.maxsize)
+        while count > 0:
+            buf = file.read(min(count, chunk))
+            if not buf:
+                break
+            count -= len(buf)
+        return
+
+    while count > 0:
+        step = min(count, sys.maxsize)
+        file.seek(step, io.SEEK_CUR)
+        count -= step
 
 
 class PeekableStream:
