@@ -20,6 +20,7 @@ import io
 import os
 import sys
 import types
+import weakref
 from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 from dictdumper.dumper import Dumper
@@ -104,6 +105,35 @@ _P = TypeVar('_P')
 #: :attr:`Extractor._ifile <pcapkit.foundation.extraction.Extractor._ifile>`, so they cannot take an
 #: unnamed stream.
 _PATH_ENGINES = frozenset({'scapy', 'pyshark', 'pypcap', 'pcap_ct'})
+
+
+def _release_input(ifile: 'IO[bytes]') -> 'None':
+    """Close an input stream from a finaliser, if it is still open.
+
+    The one close both backstops of :issue:`606` perform --
+    :meth:`Extractor.__del__ <pcapkit.foundation.extraction.Extractor.__del__>`
+    and the :class:`weakref.finalize` held in
+    :attr:`Extractor._finalizer <pcapkit.foundation.extraction.Extractor._finalizer>`.
+    It takes the stream rather than the extractor, so that a finaliser built on
+    it holds no reference that would keep the extractor alive; deciding whether
+    the stream is the extractor's to close is the caller's business, cf.
+    :meth:`Extractor._owns_input <pcapkit.foundation.extraction.Extractor._owns_input>`.
+
+    Args:
+        ifile: The stream to close.
+
+    Note:
+        A finaliser must not raise, so the close is guarded: that is what a close
+        during interpreter shutdown can fail at.
+
+    """
+    try:
+        if not ifile.closed:
+            ifile.close()
+    except (OSError, ValueError):  # pragma: no cover
+        # Nothing useful can be reported from a finaliser, and raising here
+        # would only produce an "Exception ignored in __del__" on stderr.
+        pass
 
 
 class Extractor(Generic[_P]):
@@ -229,6 +259,12 @@ class Extractor(Generic[_P]):
 
         #: Input file object.
         _ifile: 'BufferedReader'
+        #: Backstop that closes :attr:`_ifile` when the extractor is collected
+        #: before :meth:`_cleanup` has run, registered only when the stream is
+        #: this class's own to close (:issue:`1997`), else :data:`None`.
+        #: :meth:`__del__` alone is not enough, as GraalPy never calls it; a
+        #: :class:`weakref.finalize` runs there and on CPython alike.
+        _finalizer: 'Optional[weakref.finalize]'
         #: Output writer. It holds the writer class until :meth:`_open_output`
         #: replaces it with the writer, or under split mode with a factory.
         _ofile: 'Dumper | Type[Dumper]'
@@ -1439,6 +1475,15 @@ class Extractor(Generic[_P]):
             logger.debug('input stream has no peek(), wrapping it in PeekableStream')
             self._ifile = cast('BufferedReader', PeekableStream(self._ifile))
 
+        # NOTE: the #606 backstop for an extraction abandoned before EOF. GraalPy
+        # never calls ``__del__``, so it is a ``weakref.finalize`` as well (#1997).
+        # It closes over the stream alone -- a reference to ``self`` would keep
+        # the extractor alive for as long as the finaliser is -- and it is only
+        # registered for a stream this class owns, so a caller's is never closed.
+        self._finalizer = None
+        if self._owns_input():
+            self._finalizer = weakref.finalize(self, _release_input, self._ifile)
+
         if not self._flag_q:
             output, ext = self.__output__[fmt]
             if ext is None:
@@ -1548,6 +1593,7 @@ class Extractor(Generic[_P]):
         """Close the input file when exits."""
         logger.debug('closing %s on context exit after %d frame(s)', self._ifnm, self._frnum)
         self._ifile.close()
+        self._detach_finalizer()
         self._exeng.close()
 
     def __del__(self) -> 'None':
@@ -1560,6 +1606,13 @@ class Extractor(Generic[_P]):
         interpreter collects it, and CPython announces that with a
         ``ResourceWarning`` raised wherever collection happens to run, which can be
         far from the code that abandoned the handle (:issue:`606`).
+
+        GraalPy never calls this method, so the same close is also registered as
+        the :class:`weakref.finalize` in :attr:`_finalizer`, which runs on either
+        interpreter (:issue:`1997`). This method stays for whoever calls it
+        directly, a subclass extending it through :func:`super` among them, and
+        both are safe to run for one stream: whichever comes second finds it
+        already closed.
 
         This is a backstop and not the recommended route: collection is not
         deterministic, and :class:`Extractor` takes part in a reference cycle
@@ -1580,14 +1633,7 @@ class Extractor(Generic[_P]):
         """
         if not self._owns_input():
             return
-        try:
-            ifile = self.__dict__['_ifile']
-            if not ifile.closed:
-                ifile.close()
-        except (OSError, ValueError):  # pragma: no cover
-            # Nothing useful can be reported from a finaliser, and raising here
-            # would only produce an "Exception ignored in __del__" on stderr.
-            pass
+        _release_input(self.__dict__['_ifile'])
 
     ##########################################################################
     # Utilities.
@@ -1597,7 +1643,8 @@ class Extractor(Generic[_P]):
         """Whether the input stream is this class's to close.
 
         The one place the ownership rule of :issue:`610` is written down, so that
-        :meth:`_cleanup` and :meth:`__del__` cannot drift apart on it.
+        :meth:`_cleanup`, :meth:`__del__` and the registration of
+        :attr:`_finalizer` cannot drift apart on it.
 
         Returns:
             :data:`True` when the input stream was opened by this class and is
@@ -1632,6 +1679,20 @@ class Extractor(Generic[_P]):
         if self.__dict__.get('_flag_s'):
             return True
         return isinstance(ifile, SeekableReader)
+
+    def _detach_finalizer(self) -> 'None':
+        """Unregister :attr:`_finalizer`, once the input has been closed on purpose.
+
+        A finished extraction then leaves nothing registered against its stream:
+        neither a second close at collection nor a reference that keeps the stream
+        alive until the extractor is collected.
+
+        """
+        # NOTE: read through ``__dict__``, as ``_owns_input`` does, for an
+        # instance whose constructor did not get as far as registering one.
+        finalizer = self.__dict__.get('_finalizer')
+        if finalizer is not None:
+            finalizer.detach()
 
     def _note_eof_progress(self) -> 'bool':
         """Record this end of stream, and say whether the input advanced to reach it.
@@ -1734,4 +1795,5 @@ class Extractor(Generic[_P]):
         # supplied and still needs *is* closed.
         if self._owns_input():
             self._ifile.close()
+        self._detach_finalizer()
         self._exeng.close()
