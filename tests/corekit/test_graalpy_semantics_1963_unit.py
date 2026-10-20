@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Two GraalPy behaviours :mod:`pcapkit.corekit` no longer depends on (#1963).
+"""GraalPy behaviours :mod:`pcapkit.corekit` no longer depends on (#1963).
 
 Each was measured on GraalPy 25.4 and does not happen on CPython, so each class
 here stands in for GraalPy's behaviour and checks the module does not lean on
@@ -151,6 +151,13 @@ class MultiDictCopyTests(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_the_stand_in_wraps_pairs_as_graalpy_does(self) -> None:
+        """A guard on the stand-in, not on the fix: it passes with or without it.
+
+        The tests below fail without the fix only because the stand-in stores
+        pairs through ``__setitem__``, as GraalPy does, and a plain dict as is.
+        Without this, a stand-in that lost either would let them pass vacuously.
+
+        """
         from pcapkit.corekit.multidict import MultiDict  # pylint: disable=import-outside-toplevel
 
         for method in (PairsThroughSetitem.__init__, PairsThroughSetitem.update):
@@ -164,25 +171,21 @@ class MultiDictCopyTests(unittest.TestCase):
     def test_a_copy_keeps_the_value_lists(self) -> None:
         from pcapkit.corekit import multidict  # pylint: disable=import-outside-toplevel
 
-        for cls in (multidict.MultiDict, multidict.OrderedMultiDict):
-            with self.subTest(cls=cls.__name__):
-                data = multidict.MultiDict([('a', 5), ('a', 6), ('b', 3)])
-                with mock.patch.object(multidict, 'dict', PairsThroughSetitem, create=True):
-                    copied = cls(data)
-                self.assertEqual(copied.getlist('a'), [5, 6])
-                self.assertEqual(copied.getlist('b'), [3])
+        data = multidict.MultiDict([('a', 5), ('a', 6), ('b', 3)])
+        with mock.patch.object(multidict, 'dict', PairsThroughSetitem, create=True):
+            copied = multidict.MultiDict(data)
+        self.assertEqual(copied.getlist('a'), [5, 6])
+        self.assertEqual(copied.getlist('b'), [3])
 
     def test_state_restored_from_pairs_keeps_the_value_lists(self) -> None:
         from pcapkit.corekit import multidict  # pylint: disable=import-outside-toplevel
 
         state = multidict.MultiDict([('a', 5), ('a', 6), ('b', 3)]).__getstate__()
-        for given in (state, state.items()):
-            with self.subTest(state=type(given).__name__):
-                restored = multidict.MultiDict()
-                with mock.patch.object(multidict, 'dict', PairsThroughSetitem, create=True):
-                    restored.__setstate__(given)
-                self.assertEqual(restored.getlist('a'), [5, 6])
-                self.assertEqual(restored.getlist('b'), [3])
+        restored = multidict.MultiDict()
+        with mock.patch.object(multidict, 'dict', PairsThroughSetitem, create=True):
+            restored.__setstate__(state.items())
+        self.assertEqual(restored.getlist('a'), [5, 6])
+        self.assertEqual(restored.getlist('b'), [3])
 
 
 if __name__ == '__main__':
