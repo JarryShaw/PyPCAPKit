@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
-"""GitHub issue #1985: a malformed key log line no longer aborts the extraction.
+"""GitHub issue #1985: a malformed key log line is reported, not refused.
 
-A well-sized Decryption Secrets Block whose TLS key log held a line that did not
-parse -- an unknown label, fields that are not hexadecimal, a garbage line, or
-the first octets of an entry cut inside the block's padding -- raised
-:exc:`~pcapkit.utilities.exceptions.FieldValueError` from
-:meth:`TLSKeyLog.post_process <pcapkit.protocols.schema.misc.pcapng.TLSKeyLog.post_process>`,
-which ended the whole extraction. The WireGuard key log did the same. Such a line
-now raises a :class:`~pcapkit.utilities.warnings.ProtocolWarning` and is kept as
-captured in the log text, the well-formed entries around it are kept, and the
+A line of a TLS or WireGuard key log that does not parse -- an unknown label,
+fields that are not hexadecimal, a garbage line, or the first octets of an entry
+cut inside the block's padding -- raises a
+:class:`~pcapkit.utilities.warnings.ProtocolWarning` from
+:meth:`TLSKeyLog.post_process <pcapkit.protocols.schema.misc.pcapng.TLSKeyLog.post_process>`
+rather than a :exc:`~pcapkit.utilities.exceptions.FieldValueError`, which would
+end the whole extraction. The line is kept as captured in the log text and leaves
+no trace in the entries, the well-formed entries around it are kept, and the
 block rebuilds octet for octet.
 
 :mod:`pcapkit` is imported inside each test, after
@@ -143,6 +143,32 @@ class TestPCAPNGKeyLogMalformedLine(PCAPNGTestCase):
                                      [(WireGuardKeyLabel.LOCAL_STATIC_PRIVATE_KEY, WG_KEY)]
                                      * secrets.count(WG_LINE))
                     self.assertRebuildsQuietly(octets)
+
+    def test_malformed_line_leaves_no_empty_bucket(self) -> None:
+        """A line with a known label but fields that do not decode adds no bucket for that label."""
+        from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel
+        from pcapkit.protocols.schema.misc.pcapng import TLSKeyLog, WireGuardKeyLog
+
+        for secrets in (b'CLIENT_RANDOM zz yy\n', b'CLIENT_RANDOM zz yy\n' + TLS_LINE2,
+                        b'CLIENT_RANDOM ' + b'ab' * 32 + b' zz\n'):
+            with self.subTest(secrets=secrets):
+                with warnings.catch_warnings():
+                    warnings.simplefilter('ignore')
+                    schema = TLSKeyLog.unpack(secrets, len(secrets))
+                self.assertNotIn(TLSKeyLabel.CLIENT_RANDOM, schema.entries)
+                self.assertTrue(all(len(entry) for entry in schema.entries.values()), schema.entries)
+
+                octets = _dsb(TLS_KEY_LOG, len(secrets), secrets)
+                entries = self._parse_quietly(octets).info.secrets_data.entries  # type: ignore[attr-defined]
+                self.assertNotIn(TLSKeyLabel.CLIENT_RANDOM, entries)
+                self.assertTrue(all(len(entry) for entry in entries.values()), entries)
+                self.assertRebuildsQuietly(octets)
+
+        secrets = b'LOCAL_STATIC_PRIVATE_KEY = Q\n'
+        with warnings.catch_warnings():
+            warnings.simplefilter('ignore')
+            schema = WireGuardKeyLog.unpack(secrets, len(secrets))
+        self.assertEqual(len(schema.entries), 0)
 
     def test_well_formed_logs_are_unchanged(self) -> None:
         cases = (

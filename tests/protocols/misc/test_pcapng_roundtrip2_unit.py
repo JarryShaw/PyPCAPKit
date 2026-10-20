@@ -296,7 +296,7 @@ class TestPCAPNGModelling(PCAPNGTestCase):
         self.assertRebuilds(_epb_with_options(verdict + verdict))
 
     def test_wireguard_error_names_the_line(self) -> None:
-        """#1286: the report carries the offending line, which no longer aborts the parse (#1985)."""
+        """#1286: the report carries the offending line; #1985: it warns rather than aborting the parse."""
         import warnings
 
         from pcapkit.utilities.warnings import ProtocolWarning

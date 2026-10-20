@@ -2309,8 +2309,8 @@ class TLSKeyLog(DSBSecrets, code=Enum_SecretsType.TLS_Key_Log):
         wherever it sits in the log (:issue:`1985`). Refusing it would abort
         the whole extraction rather than this one line, as :func:`nonnegative`
         explains, and :attr:`data` keeps the log text verbatim, so the line is
-        still kept as captured and the block rebuilds octet for octet. A last line the
-        capture or the block cut is left out silently (see
+        still kept as captured and the block rebuilds octet for octet. A last
+        line the capture or the block cut is left out silently (see
         :func:`_cut_last_line`), since the cut is reported already.
 
         """
@@ -2325,13 +2325,16 @@ class TLSKeyLog(DSBSecrets, code=Enum_SecretsType.TLS_Key_Log):
             try:
                 label, random, secret = line.strip().split()
                 label_enum = Enum_TLSKeyLabel(label.upper())
-                entries[label_enum].add(bytes.fromhex(random),
-                                        bytes.fromhex(secret))
+                # NOTE: both values are decoded before ``entries`` is touched, so
+                # a line that does not parse leaves no empty bucket behind (#1985).
+                random_octets, secret_octets = bytes.fromhex(random), bytes.fromhex(secret)
             except ValueError:
                 if _cut_last_line(self, index, lines, packet):
                     break
                 warn(f'PCAP-NG: invalid TLS key log format: {line!r}; line kept as captured',
                      ProtocolWarning, stacklevel=stacklevel())
+                continue
+            entries[label_enum].add(random_octets, secret_octets)
 
         self.entries = entries
         return self
