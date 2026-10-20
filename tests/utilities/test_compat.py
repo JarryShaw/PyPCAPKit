@@ -158,6 +158,11 @@ WARM_BEFORE_FAKING = ('_thread', 'aenum', 'builtins', 'collections.abc', 'contex
 #: assertion is aimed there.
 OWN_MODULE_PREFIX = 'pcapkit'
 
+#: Whether a :exc:`UnicodeDecodeError` row's message is compared past the octet
+#: and position it names. GraalPy's codecs word the reason their own way --
+#: ``malformed input`` for the rows below -- so there the reason is left out (#1963).
+DECODE_REASON_COMPARED = sys.implementation.name != 'graalpy'
+
 #: ``(value, encoding, errors, outcome)`` for ``compat.unquote``, each as Python
 #: 3.9's :func:`urllib.parse.unquote` has it: the text returned, or the exception
 #: type and message raised. ``None`` keywords leave the defaults in place. Before
@@ -340,7 +345,11 @@ class CompatTests(unittest.TestCase):
                 else:
                     with self.assertRaises(outcome[0]) as raised:
                         unquote(value, **kwargs)
-                    self.assertEqual(str(raised.exception), outcome[1])
+                    message, expected = str(raised.exception), outcome[1]
+                    if outcome[0] is UnicodeDecodeError and not DECODE_REASON_COMPARED:
+                        message = message.rpartition(': ')[0]
+                        expected = expected.rpartition(': ')[0]
+                    self.assertEqual(message, expected)
 
     def test_unquote_decodes_bytes_as_python39_does(self) -> None:
         """From 3.9 the name is :func:`urllib.parse.unquote` itself (#1693)."""

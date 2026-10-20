@@ -12,7 +12,8 @@ other.
 :class:`PyABCFallbackTests` runs the checks in a child interpreter that really
 takes the fallback. It starts with ``-S``, so that no module but :mod:`io` has
 imported :mod:`abc` yet, drops both from :data:`sys.modules`, blocks ``_abc``
-and imports them again. The child reports whether :class:`abc.ABCMeta` is
+(except on GraalPy, which takes the fallback unaided, #1963), and imports
+them again. The child reports whether :class:`abc.ABCMeta` is
 ``_py_abc``'s and whether ``_collections_abc`` was already loaded, rather than
 trusting the block. :class:`CModuleTests` pins that, under the C module, the
 names let through for ``_py_abc`` are still refused.
@@ -60,7 +61,11 @@ CHILD = textwrap.dedent('''
     preloaded = sorted(name for name in ('abc', 'io', '_collections_abc') if name in sys.modules)
     for name in ('abc', 'io'):
         sys.modules.pop(name, None)
-    sys.modules['_abc'] = None
+    # GraalPy's ``_abc`` holds only the two helpers its own ``_py_abc`` imports,
+    # so :mod:`abc` takes the fallback there unaided, and blocking ``_abc``
+    # would break ``_py_abc`` too (#1963).
+    if sys.implementation.name != 'graalpy':
+        sys.modules['_abc'] = None
 
     import abc
     import io  # noqa: F401  # rebuilt on the fallback before anything uses it

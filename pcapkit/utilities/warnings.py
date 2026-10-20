@@ -483,7 +483,10 @@ def _importer_stacklevel() -> 'int':
     level then runs past the outermost frame, and the warning is attributed to
     ``<sys>:0``. This counts frames as :func:`warnings.warn` does, and
     :mod:`logging` does from Python 3.11; on earlier versions the log record is
-    attributed to a frame inside the import.
+    attributed to a frame inside the import. GraalPy names the bootstrap's frames
+    ``<frozen _frozen_importlib>`` and ``<frozen _frozen_importlib_external>``,
+    which its :func:`warnings.warn` leaves out too, so those are not counted
+    either (:issue:`1963`).
 
     """
     pcapkit = f'{os.path.sep}pcapkit{os.path.sep}'
@@ -493,7 +496,8 @@ def _importer_stacklevel() -> 'int':
         frame = frame.f_back if frame is not None else None  # the caller, level 1
         while frame is not None:
             filename = frame.f_code.co_filename
-            if not ('importlib' in filename and '_bootstrap' in filename):
+            graalpy_bootstrap = filename.startswith('<frozen _frozen_importlib')
+            if not ('importlib' in filename and ('_bootstrap' in filename or graalpy_bootstrap)):
                 level += 1
                 outermost = level
                 if pcapkit in filename:
