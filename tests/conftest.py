@@ -3,8 +3,9 @@
 
 Besides session hooks documented where they are defined -- the warm import
 and coverage flush in :func:`pytest_sessionstart` and
-:func:`pytest_sessionfinish`, and the timer release in
-:func:`pytest_timeout_cancel_timer` -- it holds the following. The first is
+:func:`pytest_sessionfinish`, the timer release in
+:func:`pytest_timeout_cancel_timer`, and the periodic garbage collection in
+:func:`pytest_runtest_protocol` -- it holds the following. The first is
 :func:`restore_module_table`, the guard that
 puts the :mod:`pcapkit` region of :data:`sys.modules` back after every test; see
 its own docstring for why it is here rather than left to each test file.
@@ -40,6 +41,7 @@ it.
 from __future__ import annotations
 
 import contextlib
+import gc
 import hashlib
 import importlib
 import pathlib
@@ -329,6 +331,74 @@ def pytest_timeout_cancel_timer(item: 'pytest.Item') -> 'Iterator[None]':
     """
     yield
     item.__dict__.pop('cancel_timeout', None)
+
+
+#: How many tests a process runs between the explicit :func:`gc.collect` calls
+#: :func:`pytest_runtest_protocol` makes (#1964). Every test leaves unreachable
+#: reference cycles behind -- the :mod:`pcapkit` generation
+#: :func:`restore_module_table` drops, with its ABC caches and its ``InfoMeta``
+#: and ``EnumMeta`` classes -- and the free-threaded build's collector reclaims
+#: them far less often than the default build's, so a free-threaded xdist
+#: worker grows until the experimental leg's memory scope kills it. A fixed
+#: count rather than every test keeps nearly all of the saving for a fraction of
+#: the cost; see that hook for the measurements.
+GC_EVERY = 50
+
+#: Tests this process has finished since its last periodic collection. Each
+#: xdist worker is its own process, so each counts its own tests.
+_tests_since_collect = 0
+
+
+def _collect_periodically() -> 'bool':
+    """Count one finished test, and collect cyclic garbage every :data:`GC_EVERY`.
+
+    Returns:
+        Whether this call ran :func:`gc.collect`.
+
+    """
+    global _tests_since_collect
+    _tests_since_collect += 1
+    if _tests_since_collect < GC_EVERY:
+        return False
+    _tests_since_collect = 0
+    gc.collect()
+    return True
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_protocol(item: 'pytest.Item',
+                            nextitem: 'Optional[pytest.Item]') -> 'Iterator[None]':
+    """Collect cyclic garbage every :data:`GC_EVERY` tests, so workers stay in memory (#1964).
+
+    The experimental leg's 3.14t job runs its xdist workers under one 12G
+    memory scope, and was OOM-killed whenever their sum crossed it: the
+    garbage :data:`GC_EVERY` describes is not a leak, but the free-threaded
+    collector frees it too late to keep a worker small. A wrapper is used so the
+    count is taken once the whole protocol has finished, teardown included, so
+    the generation :func:`restore_module_table` drops on the way out is already
+    unreachable when the collection runs.
+
+    Not gated on ``Py_GIL_DISABLED``: the default build holds the same garbage
+    between its own collections, and collecting it cost no time on either build.
+    Peak RSS per process over ``tests/protocols``, unpatched against patched, on
+    local CPython 3.14.8 builds:
+
+    * 3.14t, serial: 1668 MB to 1000 MB; 217 s to 205 s.
+    * 3.14t, ``-n 2``: 3129 and 1968 MB to 669 and 891 MB; 142 s to 110 s.
+    * 3.14, serial: 1602 MB to 856 MB; 397 s to 336 s.
+    * 3.14, ``-n 2``: 4047 and 1020 MB to 855 and 462 MB; 294 s to 178 s.
+
+    Collecting after every test instead cut the 3.14t serial peak only a little
+    further and nearly doubled its time. Plain :mod:`unittest` runs never load
+    this file, so they keep the collector's own schedule.
+
+    Args:
+        item: The test about to run, unused.
+        nextitem: The test after it, unused.
+
+    """
+    yield
+    _collect_periodically()
 
 
 def _collected_modules(items: 'Iterable[pytest.Item]') -> 'Iterator[pathlib.Path]':
