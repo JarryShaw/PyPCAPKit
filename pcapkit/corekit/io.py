@@ -286,6 +286,32 @@ class SeekableReader(io.BufferedReader):
         self._buffer.seek(buf_off, io.SEEK_SET)
         return self._buffer_cur - buf_off
 
+    def _take_buffer(self, size: 'int', /, *, line: 'bool' = False) -> 'bytes':
+        r"""Read up to ``size`` octets from the buffer's cursor, as a copy, and move past them.
+
+        Args:
+            size: Octets to read, no more than :meth:`_seek_buffer` says the buffer can serve.
+            line: Stop after the first ``b'\n'``, as :meth:`io.BytesIO.readline` does.
+
+        Returns:
+            The octets read.
+
+        Note:
+            The octets are copied out of :attr:`_buffer_view`, not read with
+            :meth:`io.BytesIO.read`, ``read1`` or ``readline``. On GraalPy those can hand
+            back :obj:`bytes` that share the memory of a :class:`io.BytesIO` whose buffer
+            is exported, as this one's is, so the next :meth:`_write_buffer`, which writes
+            through the view, changed octets that had already been returned
+            (:issue:`1963`). A slice of the view, copied, is a copy on every interpreter.
+
+        """
+        buf_off = self._buffer.tell()
+        buf = self._buffer_view[buf_off:buf_off + size].tobytes()
+        if line and (eol := buf.find(b'\n')) >= 0:
+            buf = buf[:eol + 1]
+        self._buffer.seek(buf_off + len(buf), io.SEEK_SET)
+        return buf
+
     def close(self) -> 'None':
         """Flush and close this stream. This method has no effect if the file is already closed.
         Once the file is closed, any operation on the file (e.g. reading or writing) will raise
@@ -369,7 +395,7 @@ class SeekableReader(io.BufferedReader):
                 buf = b''
             else:
                 buf_rem = self._seek_buffer()
-                buf = self._buffer.readline(buf_rem if size < 0 else min(size, buf_rem))
+                buf = self._take_buffer(buf_rem if size < 0 else min(size, buf_rem), line=True)
 
             # NOTE: an unbounded ``readline`` has to keep going until the line ends, and
             # capping it at the buffer's content -- which the line need not end inside --
@@ -651,7 +677,7 @@ class SeekableReader(io.BufferedReader):
                 buf = b''
             else:
                 buf_rem = self._seek_buffer()
-                buf = self._buffer.read(buf_rem if size < 0 else min(size, buf_rem))
+                buf = self._take_buffer(buf_rem if size < 0 else min(size, buf_rem))
 
             size_rem = -1
             if size < 0 or (size_rem := size - len(buf)) > 0:
@@ -685,7 +711,7 @@ class SeekableReader(io.BufferedReader):
                 # NOTE: no continuation from the stream when the buffer answered, since
                 # :meth:`read1` is specified to return only buffered octets if any are.
                 buf_rem = self._seek_buffer()
-                buf = self._buffer.read1(buf_rem if size < 0 else min(size, buf_rem))
+                buf = self._take_buffer(buf_rem if size < 0 else min(size, buf_rem))
 
             if not buf:  # pragma: no cover
                 size_rem = -1

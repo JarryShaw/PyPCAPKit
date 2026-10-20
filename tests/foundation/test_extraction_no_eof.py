@@ -126,11 +126,17 @@ ADDRESS_SPACE_CAP = 2 * 1024 ** 3
 #: "the extraction did not finish" from "the child failed for some other reason".
 SENTINEL = 'NO-EOF-RETURNED'
 
+#: How a child caps its address space. GraalPy's ``resource`` has no ``setrlimit``
+#: (#1963); a child there is held by the heap cap the leg gives every GraalPy
+#: process, in ``GRAAL_PYTHON_VM_ARGS``, which it inherits.
+CHILD_CAP = ('' if sys.implementation.name == 'graalpy'
+             else 'resource.setrlimit(resource.RLIMIT_AS, ({cap}, {cap}))')
+
 #: Preamble for every child: cap the address space, put the tree under test first
 #: on ``sys.path``, and *prove* that is the tree which got imported.
 CHILD_PREAMBLE = """
 import resource, sys, warnings
-resource.setrlimit(resource.RLIMIT_AS, ({cap}, {cap}))
+""" + CHILD_CAP + """
 sys.path.insert(0, {root!r})
 warnings.simplefilter('ignore')
 import pcapkit

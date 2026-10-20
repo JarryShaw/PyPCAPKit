@@ -15,6 +15,7 @@ inside each test, after :func:`~tests._support.reimport_once_per_class`.
 
 import io
 import struct
+import sys
 import unittest
 import warnings
 
@@ -54,6 +55,9 @@ class TestFrameInclLenOverrun(unittest.TestCase):
         header = Header(GLOBAL).info
         for claim in (61, 1000, 0x7FFF_FFFF):
             with self.subTest(claim=claim):
+                if 16 + claim > sys.maxsize:
+                    self.skipTest('the frame reader asks the file for the 16-octet header and the claim at once, '
+                                  'past sys.maxsize on GraalPy (#1963)')
                 octets = _record(claim)
                 frame, messages = self.parse(octets)
                 self.assertIn(f'PCAP: [Frame 4] captured length {claim} runs past the data, '

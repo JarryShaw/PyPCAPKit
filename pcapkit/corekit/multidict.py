@@ -136,7 +136,10 @@ class MultiDict(dict, Generic[_KT, _VT]):
 
     def __init__(self, mapping: 'Optional[dict[_KT, _VT] | Iterable[tuple[_KT, _VT]]]' = None) -> 'None':  # pylint: disable=line-too-long
         if isinstance(mapping, MultiDict):
-            dict.__init__(self, ((k, v[:]) for k, v in mapping.lists()))
+            # NOTE: a dict, as the other branches pass, not werkzeug's pairs. GraalPy's
+            # ``dict.__init__`` stores pairs through the overridden ``__setitem__``,
+            # which wraps each list in another (:issue:`1963`); a dict it copies as is.
+            dict.__init__(self, {k: v[:] for k, v in mapping.lists()})
         elif isinstance(mapping, dict):
             tmp = {}  # type: dict[_KT, list[_VT]]
             for key, value in mapping.items():
@@ -159,7 +162,9 @@ class MultiDict(dict, Generic[_KT, _VT]):
 
     def __setstate__(self, value: 'Iterable[tuple[_KT, list[_VT]]]') -> 'None':
         dict.clear(self)
-        dict.update(self, value)  # type: ignore[arg-type]
+        # NOTE: made a dict first, as in :meth:`__init__`: GraalPy's ``dict.update``
+        # stores pairs through the overridden ``__setitem__`` (:issue:`1963`).
+        dict.update(self, dict(value))  # type: ignore[arg-type]
 
     def __iter__(self) -> 'Iterator[_KT]':
         return dict.__iter__(self)
