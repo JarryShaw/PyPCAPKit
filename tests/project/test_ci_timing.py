@@ -52,6 +52,7 @@ from unittest import mock
 
 import requests
 
+from tests import _workflows
 from tests.project.test_python_versions_1660 import NO_TOMLLIB
 from tests.project.test_python_versions_1660 import legs as matrix_legs
 from tests.project.test_python_versions_1660 import matrix, tomllib
@@ -1129,7 +1130,10 @@ class TestTimingArtifacts(unittest.TestCase):
                 self.assertNotIn('python -m pytest', block)
 
     def test_artifact_names_are_unique_in_a_run(self) -> 'None':
-        names = re.findall(r'uses: actions/upload-artifact@\S+\n +with:\n +name: ([^\n]+)', self.text)
+        names = [found.group(1) for found in
+                 (re.match(r'\n? +with:\n +name: ([^\n]+)', self.text[pin.end():])
+                  for pin in _workflows.PINNED.finditer(self.text) if pin['action'] == 'actions/upload-artifact')
+                 if found is not None]
         self.assertGreaterEqual(len(names), 5)
         self.assertEqual(len(names), len(set(names)), names)
 

@@ -1080,6 +1080,54 @@ above).
 ``unit-tests.yml`` runs pytest, unittest or :file:`util/run_unittest_leg.py`
 without the script, and runs the script against a small limit.
 
+Action Pins (`#1968 <https://github.com/JarryShaw/PyPCAPKit/issues/1968>`__)
+----------------------------------------------------------------------------
+
+A tag or a branch is a reference its owner can move, so every ``uses:`` of an
+action outside this repository names a full commit, with the release that commit
+is as a trailing comment::
+
+   - uses: actions/checkout@<40-hex commit> # v7.0.1
+
+A step's ``uses`` is therefore the commit alone, as the YAML reads it; the comment
+is what Dependabot rewrites with the commit on a bump. A local ``./`` workflow call
+stays as it is. :file:`.github/dependabot.yml` watches the ``github-actions``
+ecosystem from the repository root beside ``pip``, on the same weekly schedule, so a
+new release reaches the workflows as a Dependabot pull request rather than by a tag
+moving under a run.
+
+:file:`tests/project/test_actions_pinned_1968.py` fails on a ``uses:`` under
+:file:`.github` that names a tag, a branch or a commit without its version comment,
+and when :file:`.github/dependabot.yml` drops the ``github-actions`` ecosystem.
+``pinned()`` and ``versions()`` in :file:`tests/_workflows.py` read a pin, for a test
+that names a particular action.
+
+Dependency Updates (`#1968 <https://github.com/JarryShaw/PyPCAPKit/issues/1968>`__)
+-----------------------------------------------------------------------------------
+
+Dependabot opens every dependency bump, weekly, from :file:`.github/dependabot.yml`
+(the owner's ruling on #1968):
+
+* ``pip`` over ``/``, ``/docs`` and ``/examples/benchmark``. The docs build pins
+  Sphinx and sphinx-autodoc-typehints exactly in :file:`docs/requirements.txt`, and
+  Dependabot proposes bumps to both pins; the owner accepted that, so each bump is
+  reviewed against the docs build rather than held back. The benchmark's
+  :file:`requirements-*.txt` files are watched because nothing else moves them.
+* ``github-actions`` over ``/``, per `Action Pins`_ above.
+
+Neither :file:`conda/requirements.txt` nor the benchmark's image digests are
+watched: Conda Update's ``Refresh the platform pins`` and ``Setup Conda
+Distribution`` steps rewrite the former, and Dependabot reads only a ``FROM`` line
+that names its image, while the benchmark's :file:`Dockerfile` takes its base image
+through ``ARG PYTHON_IMAGE`` from :file:`examples/benchmark/python-images.txt`.
+
+PyUp, which opened the same kind of bump before, opens none: :file:`.pyup.yml` sets
+``update: False`` and lists no ``requirements:``. A file listed there takes its own
+``update``, which defaults to ``all``, so the list would override the global
+setting. Deleting :file:`.pyup.yml` would not stop the bot either, as without it
+PyUp runs on its defaults. The PyUp App's installation, and the
+``pyup.io/safety-ci`` commit status it posts, are repository settings.
+
 Python Versions
 ---------------
 

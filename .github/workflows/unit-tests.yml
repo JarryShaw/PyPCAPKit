@@ -73,7 +73,7 @@ jobs:
       engine-ktlo: ${{ steps.read.outputs.engine-ktlo }}
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           sparse-checkout: |
             .github/python-versions.toml
@@ -122,11 +122,11 @@ jobs:
 
     # `&test-steps`: `test-ktlo` runs these same steps, by YAML alias.
     steps: &test-steps
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         id: checkout
         continue-on-error: ${{ matrix.ktlo == true }}
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         id: python
         continue-on-error: ${{ matrix.ktlo == true }}
         with:
@@ -373,7 +373,7 @@ jobs:
       # that passed is the baseline the failing one has to be read against.
       - name: Upload coverage process log
         if: ${{ !cancelled() && matrix.coverage }}
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: coverage-processes-log
           path: coverage-processes.log
@@ -382,7 +382,7 @@ jobs:
 
       - name: Upload coverage HTML report
         if: ${{ !cancelled() && matrix.coverage }}
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: coverage-html
           path: coverage-html/
@@ -390,7 +390,7 @@ jobs:
 
       - name: Upload coverage summary
         if: ${{ !cancelled() && matrix.coverage }}
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: coverage-summary
           path: coverage-comment/coverage-summary.json
@@ -403,7 +403,7 @@ jobs:
       - name: Upload test timings
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         continue-on-error: true
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: junit-unit-${{ matrix.python-version }}
           path: ${{ runner.temp }}/junit.xml
@@ -496,11 +496,11 @@ jobs:
 
     # `&integration-steps`: `integration-ktlo` runs these same steps.
     steps: &integration-steps
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         id: checkout
         continue-on-error: ${{ matrix.ktlo == true }}
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         id: python
         continue-on-error: ${{ matrix.ktlo == true }}
         with:
@@ -651,7 +651,7 @@ jobs:
       - name: Upload test timings
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         continue-on-error: true
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: junit-integration-${{ matrix.python-version }}
           path: ${{ runner.temp }}/junit.xml
@@ -780,7 +780,7 @@ jobs:
           - PCAP_CT
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # Each interpreter is then reachable as `python3.X`. The KTLO ones are
       # installed by a step of their own so that losing one cannot fail the
@@ -788,13 +788,13 @@ jobs:
       # `python`, and is skipped when the tier has no cell here. The supported
       # ones share the second step. Each output is one version per line, the
       # list form setup-python reads.
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         if: ${{ needs.python-versions.outputs.engine-ktlo != '' }}
         continue-on-error: true
         with:
           python-version: ${{ needs.python-versions.outputs.engine-ktlo }}
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ needs.python-versions.outputs.engine-supported }}
 
@@ -892,7 +892,7 @@ jobs:
       - name: Restore this engine's cached .deb files
         id: apt-cache
         if: steps.apt-plan.outputs.key != ''
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ runner.temp }}/apt-debs/*.deb
           key: ${{ steps.apt-plan.outputs.key }}
@@ -960,7 +960,7 @@ jobs:
         if: >-
           env.APT_CACHE_SAVE == 'true' && steps.apt-plan.outputs.key != ''
           && steps.apt-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ runner.temp }}/apt-debs/*.deb
           key: ${{ steps.apt-plan.outputs.key }}
@@ -1204,11 +1204,11 @@ jobs:
 
     # `&pypcap-parity-steps`: `pypcap-parity-ktlo` runs these same steps.
     steps: &pypcap-parity-steps
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         id: checkout
         continue-on-error: ${{ matrix.ktlo == true }}
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         id: python
         continue-on-error: ${{ matrix.ktlo == true }}
         with:
@@ -1269,7 +1269,7 @@ jobs:
         id: apt-cache
         if: steps.apt-plan.outputs.key != ''
         continue-on-error: ${{ matrix.ktlo == true }}
-        uses: actions/cache/restore@v6
+        uses: actions/cache/restore@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ runner.temp }}/apt-debs/*.deb
           key: ${{ steps.apt-plan.outputs.key }}
@@ -1332,7 +1332,7 @@ jobs:
         if: >-
           env.APT_CACHE_SAVE == 'true' && steps.apt-plan.outputs.key != ''
           && steps.apt-cache.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v6
+        uses: actions/cache/save@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
           path: ${{ runner.temp }}/apt-debs/*.deb
           key: ${{ steps.apt-plan.outputs.key }}
@@ -1618,7 +1618,7 @@ jobs:
             label: protocols (rest)
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # `latest` from .github/python-versions.toml, read here rather than
       # through `python-versions`: see that job's comment.
@@ -1626,7 +1626,7 @@ jobs:
         id: python-versions
         run: python3 util/python_versions.py --github-output
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ steps.python-versions.outputs.latest }}
           cache: pip
@@ -1678,14 +1678,14 @@ jobs:
     timeout-minutes: 5
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # See `unittest-ordering` above.
       - name: Read the Python versions
         id: python-versions
         run: python3 util/python_versions.py --github-output
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ steps.python-versions.outputs.latest }}
 
@@ -1727,7 +1727,7 @@ jobs:
       code: ${{ steps.classify.outputs.code }}
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         if: ${{ github.event_name == 'pull_request' && github.workflow == 'Unit Tests' }}
         with:
           fetch-depth: 2
@@ -1802,14 +1802,14 @@ jobs:
     timeout-minutes: 20
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # See `unittest-ordering` above.
       - name: Read the Python versions
         id: python-versions
         run: python3 util/python_versions.py --github-output
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ steps.python-versions.outputs.latest }}
           cache: pip
@@ -1876,9 +1876,9 @@ jobs:
     timeout-minutes: 45
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ needs.python-versions.outputs.latest }}
           cache: pip

@@ -60,7 +60,7 @@ jobs:
       current: ${{ steps.check.outputs.current }}
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         continue-on-error: true
         with:
           sparse-checkout: |
@@ -78,7 +78,7 @@ jobs:
         continue-on-error: true
         run: python3 util/python_versions.py --github-output
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         id: python
         continue-on-error: true
         with:
@@ -109,7 +109,7 @@ jobs:
       latest: ${{ steps.read.outputs.latest }}
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           sparse-checkout: |
             .github/python-versions.toml
@@ -135,7 +135,7 @@ jobs:
       code: ${{ steps.classify.outputs.code }}
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         if: ${{ github.event_name == 'pull_request' }}
         with:
           fetch-depth: 2
@@ -238,7 +238,7 @@ jobs:
       matrix: ${{ fromJSON(needs.python-versions.outputs.experimental) }}
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         id: checkout
         continue-on-error: true
 
@@ -257,7 +257,7 @@ jobs:
           latest=$(python3 -c "from tests._tiers import latest_tier_paths; print(' '.join(latest_tier_paths()))")
           echo "paths=$latest" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         id: python
         continue-on-error: true
         timeout-minutes: 5
@@ -302,7 +302,7 @@ jobs:
       # leg's. No `cache:` and `--no-cache-dir`, so the leg's pip cache is
       # untouched. Each step has a cap of 1 minute (see the job's comment),
       # and a failure leaves the tests to run unwatched.
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         id: watcher-python
         if: ${{ steps.install.outcome == 'success' }}
         continue-on-error: true
@@ -551,7 +551,7 @@ jobs:
       - name: Upload the resource monitor's log
         if: ${{ always() }}
         continue-on-error: true
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: resource-monitor-${{ matrix.python-version }}
           path: ${{ runner.temp }}/resource-monitor.log
@@ -564,7 +564,7 @@ jobs:
       - name: Upload test timings
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         continue-on-error: true
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: junit-experimental-${{ matrix.python-version }}
           path: ${{ runner.temp }}/junit.xml

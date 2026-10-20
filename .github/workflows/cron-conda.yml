@@ -75,7 +75,7 @@ jobs:
       # The default ref, as the job below uses, so both see the same `github.sha`.
       # Twenty commits leaves room for the bot commits the rule accepts; a verdict
       # further back is not found, and so not accepted.
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 20
           persist-credentials: false
@@ -118,11 +118,11 @@ jobs:
       contents: write
     steps:
       - name: Load maintenance deploy key
-        uses: webfactory/ssh-agent@v0.9.1
+        uses: webfactory/ssh-agent@a6f90b1f127823b31d4d4a8d96047790581349bd # v0.9.1
         with:
           ssh-private-key: ${{ secrets.PYPCAPKIT_ACTIONS_DEPLOY_KEY }}
 
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # Deliberately the default `github.sha` (main's tip), not
           # `github.event.workflow_run.head_sha`. Pinning to the latter once
@@ -152,7 +152,7 @@ jobs:
         id: python-versions
         run: python3 util/python_versions.py --github-output
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ steps.python-versions.outputs.latest }}
 
@@ -372,7 +372,7 @@ jobs:
       contents: write
     steps:
       - name: Load maintenance deploy key
-        uses: webfactory/ssh-agent@v0.9.1
+        uses: webfactory/ssh-agent@a6f90b1f127823b31d4d4a8d96047790581349bd # v0.9.1
         with:
           ssh-private-key: ${{ secrets.PYPCAPKIT_ACTIONS_DEPLOY_KEY }}
 
@@ -383,7 +383,7 @@ jobs:
       # history for all branches and tags" (actions/checkout), so Create Tag sees
       # a tag that already exists.
       - name: Checkout code
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ needs.conda-update.outputs.CONDA_COMMIT }}
           token: ${{ secrets.PYPCAPKIT }}
@@ -466,12 +466,12 @@ jobs:
         # there is no KTLO 3.10 leg.
         python-version: ${{ fromJSON(needs.conda-update.outputs.PYTHON_CONDA) }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: conda-${{ needs.conda-update.outputs.PCAPKIT_VERSION }}+${{ needs.conda-update.outputs.PCAPKIT_BUILD }}
           fetch-depth: 0
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -508,7 +508,7 @@ jobs:
 
       # See create-release.yml's step of the same name for the 3.15 exception.
       - name: Conda environment creation and activation
-        uses: conda-incubator/setup-miniconda@v4.0.1
+        uses: conda-incubator/setup-miniconda@8ee1f361103df19b6f8c8655fd3967a8ecb162d5 # v4.0.1
         env:
           PCAPKIT_VERSION: ${{ needs.conda-update.outputs.PCAPKIT_VERSION }}
           PCAPKIT_BUILD: ${{ needs.conda-update.outputs.PCAPKIT_BUILD }}
@@ -608,7 +608,7 @@ jobs:
           "${pythonLocation}/bin/python" util/conda_vendor.py --smoke "$PCAPKIT_CONDA_PACKAGE"
 
       - name: Upload conda packages to Anaconda
-        uses: anaconda/actions/upload-package@v0.3.1
+        uses: anaconda/actions/upload-package@a6f488910b4a1e4f3fe01736241ca1b92b4b355a # v0.3.1
         with:
           token: ${{ secrets.ANACONDA_TOKEN }}
           channel: jarryshaw
@@ -670,7 +670,7 @@ jobs:
       # wrote.
       - name: Upload package to GitHub Release
         if: ${{ matrix.os == 'ubuntu-latest' && steps.release.outputs.published == 'true' }}
-        uses: ncipollo/release-action@v1.21.0
+        uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
         with:
           allowUpdates: true
           artifacts: ${{ steps.conda_build.outputs.packages_csv }}

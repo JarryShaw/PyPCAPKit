@@ -37,6 +37,7 @@ import textwrap
 import unittest
 from typing import TYPE_CHECKING
 
+from tests import _workflows
 from tests.project.test_python_versions_1660 import legs, matrix
 from tests.project.test_unit_tests_queue import job, step_script
 
@@ -198,6 +199,14 @@ def matrix_engines() -> 'list[str]':
     return re.findall(r'- (\S+)', match.group(1))
 
 
+def with_block(text: 'str', action: 'str') -> 'Optional[re.Match[str]]':
+    """The ``with:`` block of the step in ``text`` running ``action``, pinned to a commit (#1968)."""
+    pin = next((match for match in _workflows.PINNED.finditer(text) if match['action'] == action), None)
+    if pin is None:
+        return None
+    return re.match(r'(?s)\n?        with:\n(.*?)\n\n', text[pin.end():])
+
+
 def job_env(job_name: 'str', key: 'str') -> 'str':
     """The raw value of ``key`` in ``job_name``'s job-level ``env:``."""
     match = re.search(rf'(?m)^      {re.escape(key)}: (.+)$', job(job_name))
@@ -297,8 +306,8 @@ class TestCacheKey(_Stubbed):
         for job_name, _, _ in SITES:
             with self.subTest(job=job_name):
                 text = job(job_name)
-                restore = re.search(r'(?ms)uses: actions/cache/restore@\S+\n        with:\n(.*?)\n\n', text)
-                save = re.search(r'(?ms)uses: actions/cache/save@\S+\n        with:\n(.*?)\n\n', text)
+                restore = with_block(text, 'actions/cache/restore')
+                save = with_block(text, 'actions/cache/save')
                 self.assertIsNotNone(restore)
                 self.assertIsNotNone(save)
                 restore_with = dict(re.findall(r'(?m)^          ([\w-]+): (.+)$', restore.group(1)))  # type: ignore[union-attr]

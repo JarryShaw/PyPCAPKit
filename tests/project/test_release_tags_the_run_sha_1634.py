@@ -67,6 +67,7 @@ import tempfile
 import unittest
 from typing import TYPE_CHECKING
 
+from tests import _workflows
 from tests._support import scale_timeout
 from tests.project import test_release_gates as gates
 from tests.project.test_release_gates import (declared_environment, declared_if, evaluate_condition,
@@ -98,7 +99,7 @@ CHECK_STEP = "Check the release tags name this run's commit"
 
 #: ``github``'s step minting the release App's token, and its inputs, exactly.
 MINT_STEP = "Mint the release App's token"
-MINT_ACTION = 'actions/create-github-app-token@v3'
+MINT_ACTION = 'actions/create-github-app-token'
 MINT_WITH = {
     'client-id': '${{ vars.RELEASE_APP_CLIENT_ID }}',
     'private-key': '${{ secrets.RELEASE_APP_PRIVATE_KEY }}',
@@ -369,7 +370,8 @@ class TestTheReleaseAppToken(WorkflowMixin, unittest.TestCase):
 
     def test_github_mints_with_contents_and_workflows_write_only(self) -> None:
         step = self.step('github', MINT_STEP)
-        self.assertEqual(step.get('uses'), MINT_ACTION)
+        self.assertTrue(_workflows.pinned(step.get('uses'), MINT_ACTION), step.get('uses'))
+        self.assertEqual({version.split('.')[0] for version in _workflows.versions(WORKFLOW, MINT_ACTION)}, {'v3'})
         self.assertEqual(step.get('id'), 'app_token')
         self.assertEqual(step.get('with'), MINT_WITH)
 
@@ -1541,7 +1543,8 @@ class TestCondaUpdateNeverMakesTheRelease(CondaDistMixin, unittest.TestCase):
 
     def test_the_action_is_still_the_upload(self) -> None:
         step = self.upload()
-        self.assertEqual(step.get('uses'), 'ncipollo/release-action@v1.21.0')
+        self.assertTrue(_workflows.pinned(step.get('uses'), 'ncipollo/release-action'), step.get('uses'))
+        self.assertEqual(_workflows.versions(CONDA_WORKFLOW, 'ncipollo/release-action'), ['v1.21.0'])
         self.assertEqual(step['with'].get('allowUpdates'), 'true')
         self.assertEqual(step['with'].get('tag'), CONDA_RELEASE_TAG)
 

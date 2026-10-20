@@ -1443,7 +1443,9 @@ class TestTheWorkflow(unittest.TestCase):
         self.assertEqual(job['environment'], 'github-release')
         self.assertEqual(job['needs'], 'detect')
         mint = self.step('pr', "Mint the release App's token")
-        self.assertEqual(mint['uses'], 'actions/create-github-app-token@v3')
+        self.assertTrue(_workflows.pinned(mint['uses'], 'actions/create-github-app-token'), mint['uses'])
+        self.assertEqual({version.split('.')[0]
+                          for version in _workflows.versions(WORKFLOW, 'actions/create-github-app-token')}, {'v3'})
         self.assertEqual(mint['with'], {
             'client-id': '${{ vars.RELEASE_APP_CLIENT_ID }}',
             'private-key': '${{ secrets.RELEASE_APP_PRIVATE_KEY }}',

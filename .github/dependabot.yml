@@ -2,10 +2,23 @@
 # package ecosystems to update and where the package manifests are located.
 # Please see the documentation for all configuration options:
 # https://docs.github.com/github/administering-a-repository/configuration-options-for-dependency-updates
+#
+# Dependabot replaces PyUp's update pull requests (#1968); `.pyup.yml` turns those off.
+# Left out (#1968): conda/requirements.txt, which Conda Update's `Refresh the
+# platform pins` and `Setup Conda Distribution` steps write, and the benchmark's
+# image digests, which its Dockerfile takes from examples/benchmark/python-images.txt.
 
 version: 2
 updates:
   - package-ecosystem: "pip" # See documentation for possible values
-    directory: "/" # Location of package manifests
+    directories: # Location of package manifests; `directories` replaces `directory`
+      - "/"
+      - "/docs" # Pins Sphinx and sphinx-autodoc-typehints deliberately, bumps included
+      - "/examples/benchmark" # Nothing else updates the benchmark's pins
+    schedule:
+      interval: "weekly"
+
+  - package-ecosystem: "github-actions" # Every `uses:` under .github/workflows
+    directory: "/" # Dependabot reads .github/workflows from the repository root
     schedule:
       interval: "weekly"
