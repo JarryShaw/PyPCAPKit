@@ -80,7 +80,7 @@ jobs:
       # The default ref, as the job below uses, so both see the same `github.sha`.
       # Twenty commits leaves room for the bot commits the rule accepts; a verdict
       # further back is not found, and so not accepted.
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           fetch-depth: 20
           persist-credentials: false
@@ -118,7 +118,7 @@ jobs:
     runs-on: macos-latest
     steps:
       - name: Checkout 🛎️
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # Deliberately the default `github.sha` (main's tip), not
           # `github.event.workflow_run.head_sha`. Pinning to the latter once
@@ -141,7 +141,7 @@ jobs:
         id: python-versions
         run: python3 util/python_versions.py --github-output
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ steps.python-versions.outputs.latest }}
 
@@ -177,7 +177,7 @@ jobs:
       # told otherwise.
       - name: Upload the built site
         if: ${{ github.event_name != 'pull_request' }}
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: pages-html
           path: docs/build/html
@@ -210,7 +210,7 @@ jobs:
     steps:
       # The deploy action pushes from a checkout of this repository.
       - name: Checkout 🛎️
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -250,7 +250,7 @@ jobs:
 
       - name: Deploy 🚀
         if: steps.fresh.outputs.publish == 'true'
-        uses: JamesIves/github-pages-deploy-action@v4
+        uses: JamesIves/github-pages-deploy-action@fa24774553152dd7873cd16ebd8d959b010c5445 # v4.9.0
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages # The branch the action should deploy to.

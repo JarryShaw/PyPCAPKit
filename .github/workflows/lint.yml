@@ -109,7 +109,7 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # One interpreter, not a matrix. Unit Tests and Python Compatibility sweep
       # the supported tier, plus the non-blocking KTLO legs (#1633), because
@@ -130,7 +130,7 @@ jobs:
         id: python-versions
         run: python3 util/python_versions.py --github-output
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ steps.python-versions.outputs.latest }}
 

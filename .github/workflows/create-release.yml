@@ -296,7 +296,7 @@ jobs:
       contents: read
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.sha }}
           fetch-depth: 0
@@ -309,7 +309,7 @@ jobs:
         id: python-versions
         run: python3 util/python_versions.py --github-output
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ steps.python-versions.outputs.latest }}
 
@@ -328,7 +328,7 @@ jobs:
           echo "PCAPKIT_PRERELEASE=$(python -c 'from packaging.version import Version; import pcapkit; print(str(Version(pcapkit.__version__).is_prerelease).lower())')" >> $GITHUB_OUTPUT
           echo "PCAPKIT_CONDA_LABEL=$(python -c 'from packaging.version import Version; import pcapkit; print("dev" if Version(pcapkit.__version__).is_prerelease else "main")')" >> $GITHUB_OUTPUT
 
-      - uses: mukunku/tag-exists-action@v1.7.0
+      - uses: mukunku/tag-exists-action@5c39604fe8aef7e65acb6fbcf96ec580f7680313 # v1.7.0
         id: check_tag
         with:
           tag: "v${{ steps.get_version.outputs.PCAPKIT_VERSION }}"
@@ -340,7 +340,7 @@ jobs:
       # release leaves the ``v*`` tag behind while those are still
       # incomplete, and gating them on it is what made every one of them skip
       # silently. Each gets its own evidence step below instead.
-      - uses: mukunku/tag-exists-action@v1.7.0
+      - uses: mukunku/tag-exists-action@5c39604fe8aef7e65acb6fbcf96ec580f7680313 # v1.7.0
         id: check_conda_tag
         with:
           tag: "conda-${{ steps.get_version.outputs.PCAPKIT_VERSION }}+0"
@@ -624,7 +624,7 @@ jobs:
       (startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false') }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.sha }}
           fetch-depth: 0
@@ -692,7 +692,7 @@ jobs:
       - name: Mint the release App's token
         id: app_token
         if: ${{ vars.RELEASE_APP_CLIENT_ID != '' }}
-        uses: actions/create-github-app-token@v3
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         with:
           client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
           private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
@@ -701,7 +701,7 @@ jobs:
 
       - name: Create Release
         id: create_release
-        uses: softprops/action-gh-release@v3.0.2
+        uses: softprops/action-gh-release@3d0d9888cb7fd7b750713d6e236d1fcb99157228 # v3.0.2
         with:
           # allowUpdates: true
           # artifacts: |
@@ -814,7 +814,7 @@ jobs:
       (startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_CONDA_TAG_EXISTS == 'false') }}
     steps:
       - name: Load maintenance deploy key
-        uses: webfactory/ssh-agent@v0.9.1
+        uses: webfactory/ssh-agent@a6f90b1f127823b31d4d4a8d96047790581349bd # v0.9.1
         with:
           ssh-private-key: ${{ secrets.PYPCAPKIT_ACTIONS_DEPLOY_KEY }}
 
@@ -823,7 +823,7 @@ jobs:
       # which fast-forwarded it onto ``main``'s tip first -- ``b6b95bc8e`` to
       # ``2c0008c3c`` in job 115087308551 (#1634).
       - name: Checkout code
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           token: ${{ secrets.PYPCAPKIT }}
           ref: ${{ github.sha }}
@@ -1009,7 +1009,7 @@ jobs:
       # whatever ``main`` had become by approval time -- and then the check
       # below that the tag these files are filed under names it too.
       - name: Checkout code
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.sha }}
           fetch-depth: 0
@@ -1032,7 +1032,7 @@ jobs:
             echo "${tag} -> ${run_commit}"
           done
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         id: setup
         continue-on-error: ${{ matrix.ktlo == true }}
         with:
@@ -1071,7 +1071,7 @@ jobs:
         id: publish
         if: ${{ steps.build.outcome == 'success' && steps.no_sdist.outcome != 'failure' }}
         continue-on-error: ${{ matrix.ktlo == true }}
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
         with:
           # password: ${{ secrets.PYPI_API_TOKEN }}
           skip-existing: true
@@ -1084,7 +1084,7 @@ jobs:
       - name: Publish package to TestPyPI
         if: ${{ steps.publish.outcome == 'success' }}
         continue-on-error: true
-        uses: pypa/gh-action-pypi-publish@release/v1
+        uses: pypa/gh-action-pypi-publish@dc37677b2e1c63e2034f94d8a5b11f265b73ba33 # v1.14.2
         with:
           # password: ${{ secrets.TEST_PYPI_API_TOKEN }}
           repository-url: https://test.pypi.org/legacy/
@@ -1238,7 +1238,7 @@ jobs:
     steps:
       # #1634: this run's commit, not ``ref: conda-<version>+0``, then the check
       # that both tags these packages are filed under name it.
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.sha }}
           fetch-depth: 0
@@ -1334,7 +1334,7 @@ jobs:
             echo "::notice title=conda leg already published::pypcapkit ${PCAPKIT_VERSION} for ${target_platform} / ${py_tag} is already on anaconda.org/jarryshaw (http ${status}); skipping this leg's upload."
           fi
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -1378,7 +1378,7 @@ jobs:
       # measured to build and import pypcapkit-*-py315_0. Drop the exception
       # once conda publishes a py315 build.
       - name: Conda environment creation and activation
-        uses: conda-incubator/setup-miniconda@v4.0.1
+        uses: conda-incubator/setup-miniconda@8ee1f361103df19b6f8c8655fd3967a8ecb162d5 # v4.0.1
         env:
           PCAPKIT_VERSION: ${{ needs.version_check.outputs.PCAPKIT_VERSION }}
           PCAPKIT_BUILD: "0"
@@ -1473,7 +1473,7 @@ jobs:
 
       - name: Upload conda packages to Anaconda
         if: ${{ steps.check_leg.outputs.PCAPKIT_LEG_EXISTS != 'true' }}
-        uses: anaconda/actions/upload-package@v0.3.1
+        uses: anaconda/actions/upload-package@a6f488910b4a1e4f3fe01736241ca1b92b4b355a # v0.3.1
         with:
           token: ${{ secrets.ANACONDA_TOKEN }}
           channel: jarryshaw

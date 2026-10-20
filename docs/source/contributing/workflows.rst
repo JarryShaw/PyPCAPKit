@@ -1053,6 +1053,28 @@ above).
 ``unit-tests.yml`` runs pytest, unittest or :file:`util/run_unittest_leg.py`
 without the script, and runs the script against a small limit.
 
+Action Pins (`#1968 <https://github.com/JarryShaw/PyPCAPKit/issues/1968>`__)
+----------------------------------------------------------------------------
+
+A tag or a branch is a reference its owner can move, so every ``uses:`` of an
+action outside this repository names a full commit, with the release that commit
+is as a trailing comment::
+
+   - uses: actions/checkout@<40-hex commit> # v7.0.1
+
+A step's ``uses`` is therefore the commit alone, as the YAML reads it; the comment
+is what Dependabot rewrites with the commit on a bump. A local ``./`` workflow call
+stays as it is. :file:`.github/dependabot.yml` watches the ``github-actions``
+ecosystem from the repository root beside ``pip``, on the same weekly schedule, so a
+new release reaches the workflows as a Dependabot pull request rather than by a tag
+moving under a run.
+
+:file:`tests/project/test_actions_pinned_1968.py` fails on a ``uses:`` under
+:file:`.github` that names a tag, a branch or a commit without its version comment,
+and when :file:`.github/dependabot.yml` drops the ``github-actions`` ecosystem.
+``pinned()`` and ``versions()`` in :file:`tests/_workflows.py` read a pin, for a test
+that names a particular action.
+
 Python Versions
 ---------------
 

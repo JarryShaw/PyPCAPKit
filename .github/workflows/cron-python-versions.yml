@@ -43,7 +43,7 @@ jobs:
       publish: ${{ steps.update.outputs.publish }}
 
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
@@ -52,7 +52,7 @@ jobs:
         id: python-versions
         run: python3 util/python_versions.py --github-output
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ steps.python-versions.outputs.latest }}
 
@@ -106,7 +106,7 @@ jobs:
       # files/.github/..., which upload-artifact leaves out unless told otherwise.
       - name: Upload the proposal
         if: ${{ steps.update.outputs.publish == 'true' }}
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: python-versions-proposal
           path: ${{ runner.temp }}/proposal
@@ -150,7 +150,7 @@ jobs:
     steps:
       - name: Mint the release App's token
         id: app
-        uses: actions/create-github-app-token@v3
+        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
         with:
           client-id: ${{ vars.RELEASE_APP_CLIENT_ID }}
           private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
@@ -158,7 +158,7 @@ jobs:
           permission-pull-requests: write
 
       # The commit `detect` read, with full history for the branch's merge base.
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: ${{ github.sha }}
           fetch-depth: 0

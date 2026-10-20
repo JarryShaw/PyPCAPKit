@@ -1478,16 +1478,17 @@ class ProcessConventionTests(unittest.TestCase):
                     templated[template.name] = line.split(':', 1)[1].strip()
 
         # The dependabot attribution, which had no pin at all -- which is how the page
-        # came to name ``github_actions`` as dependabot-applied when
-        # .github/dependabot.yml configures only ``pip``, so dependabot can never open a
-        # workflow bump here. Saying a hand-applied label is a machine default is this
-        # section's own point stated backwards, and the places the page mentioned it
-        # disagreed with each other about ``python``.
+        # came to name ``github_actions`` as dependabot-applied while
+        # .github/dependabot.yml configured only ``pip``. Since #1968 it configures
+        # ``github-actions`` too, so the label is dependabot's on a workflow bump and
+        # hand-applied everywhere else. Getting either half wrong is this section's own
+        # point stated backwards, and the places the page mentioned it once disagreed
+        # with each other about ``python``.
         dependabot = (ROOT / '.github' / 'dependabot.yml').read_text(encoding='utf-8')
         ecosystems = re.findall(r'package-ecosystem:\s*"([^"]+)"', dependabot)
 
         self.assertEqual(
-            ecosystems, ['pip'],
+            ecosystems, ['pip', 'github-actions'],
             'dependabot now watches a different set of ecosystems, so the page\'s claim '
             f'about which labels it applies needs re-deriving: {ecosystems}')
         # Derived rather than pinned to one phrasing. The previous form asserted the
@@ -1498,13 +1499,13 @@ class ProcessConventionTests(unittest.TestCase):
         # the tool with the label is checked instead, so the phrasing no longer matters.
         #
         # Proximity is not the test, and a first attempt at #949 that used it was wrong:
-        # the section states more than once, deliberately, that ``github_actions`` is
-        # *not* dependabot's, and each of those sentences names the tool and the label
-        # together.
+        # the section then stated more than once, deliberately, that ``github_actions``
+        # was *not* dependabot's, and each of those sentences named the tool and the
+        # label together.
         # Distinguishing an attribution from a denial by looking for a negation nearby
-        # also failed -- the attributing bullet's own sentence ends "so it never opens a
-        # workflow bump here", so the negation is present in the sentence that makes the
-        # claim as well as in the two that deny it.
+        # also failed -- the attributing bullet's own sentence ended "so it never opens a
+        # workflow bump here", so the negation was present in the sentence that made the
+        # claim as well as in the two that denied it.
         #
         # So the page's attribution is *parsed* instead: the one clause that says what
         # dependabot puts on its pull requests is located, the labels named inside it are
@@ -1537,8 +1538,9 @@ class ProcessConventionTests(unittest.TestCase):
                 f'{claimed!r}')
 
         # And the positive half, which the set comparison above cannot reach: the page
-        # has to say outright that ``github_actions`` is hand-applied. Without this, a
-        # page that simply stopped mentioning the label would satisfy everything above.
+        # has to say outright that ``github_actions`` is hand-applied on every pull
+        # request dependabot did not open. Without this, a page that simply stopped
+        # mentioning the label would satisfy everything above.
         self.assertIn('hand-applied', self.flat,
                       'the page no longer says github_actions is hand-applied, so a '
                       'reader is left to assume the label arrives automatically')

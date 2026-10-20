@@ -158,11 +158,12 @@ it is a record that the owner asserted it.
 Some paths are automated, and each is worth knowing about because a label they set has
 had no human judgement behind it:
 
-*  **dependabot** puts ``dependencies`` and ``python`` on its own pull requests, and
-   only those: :file:`.github/dependabot.yml` configures only the ``pip``
-   ecosystem, so it never opens a workflow bump here. ``github_actions`` exists as a
-   label but is **hand-applied like the rest** -- naming it as dependabot's would tell
-   a reader the opposite of this section's point.
+*  **dependabot** puts ``dependencies``, ``python`` and ``github_actions`` on its own
+   pull requests, and only those: :file:`.github/dependabot.yml` configures the
+   ``pip`` and ``github-actions`` ecosystems and no ``labels:`` key, so each bump
+   takes dependabot's defaults -- ``dependencies`` always, with ``python`` on a
+   ``pip`` bump and ``github_actions`` on a workflow bump. On anyone else's pull
+   request ``github_actions`` is **hand-applied like the rest**.
 *  **The issue templates** apply an issue-kind label from their front matter, before
    anyone reads the issue -- :file:`.github/ISSUE_TEMPLATE/bug_report.md` carries
    ``labels: bug`` and :file:`.github/ISSUE_TEMPLATE/feature_request.md` carries
@@ -273,10 +274,9 @@ top of a review already in progress, and the second verdict then arrives against
 the first was never given. Separating the two makes *which pull requests still need a
 reviewer* answerable from the board rather than from memory of what was dispatched.
 
-**Scope.** ``dependencies`` and ``python`` are dependabot's, per above.
-``github_actions`` is the same kind of label -- it scopes a change to the workflows --
-but nothing applies it automatically, because dependabot is not configured for that
-ecosystem here.
+**Scope.** ``dependencies``, ``python`` and ``github_actions`` are dependabot's on
+its own pull requests, per above. ``github_actions`` scopes a change to the workflows,
+and on any other pull request it is hand-applied.
 
 The ``breaking`` Label
 ~~~~~~~~~~~~~~~~~~~~~~

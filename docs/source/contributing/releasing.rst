@@ -229,8 +229,9 @@ spends a GitHub App's token instead (`The Release App`_). After ``github``,
 nothing in this workflow calls Update a release, so by the docs nothing
 re-checks the target (unmeasured).
 ``cron-conda.yml``'s ``conda-dist`` does: it attaches packages with
-``ncipollo/release-action@v1.21.0`` and ``allowUpdates: true``, which updates
-the release before uploading (``src/Action.ts:53-66,107-120``). It therefore
+``ncipollo/release-action`` v1.21.0, pinned to its commit, and
+``allowUpdates: true``, which updates the release before uploading
+(``src/Action.ts:53-66,107-120``). It therefore
 names the default branch -- ``github.ref_name`` whichever trigger raised it -- as
 ``commit``, which that update sends as ``target_commitish``
 (``src/Releases.ts:150-174``), so the rule checks ``main`` itself; the tag
@@ -263,10 +264,11 @@ the release with a GitHub App installation token, which Create a release
 accepts for a target that changes a workflow file when it has the "Workflows"
 repository permission (write). "Mint the release App's token"
 (``create-release.yml:692-700``) runs
-``actions/create-github-app-token@v3`` with ``permission-contents: write`` and
-``permission-workflows: write`` and no ``owner`` or ``repositories``, so the
-token is "scoped to only the current repository" and revoked in the action's
-``post`` step (v3.3.0's README). Only Create Release spends it (``:736``).
+``actions/create-github-app-token`` v3.3.0, pinned to its commit, with
+``permission-contents: write`` and ``permission-workflows: write`` and no
+``owner`` or ``repositories``, so the token is "scoped to only the current
+repository" and revoked in the action's ``post`` step (v3.3.0's README). Only
+Create Release spends it (``:736``).
 While ``vars.RELEASE_APP_CLIENT_ID`` is unset, which reads as "an empty
 string", the step skips and Create Release spends ``GITHUB_TOKEN``, so the
 workflow keeps working, refusals included, until the App exists. A PAT would

@@ -15,6 +15,10 @@ copy, so a test may edit what it gets without the next caller seeing the edit.
   the trigger key.
 * **Without PyYAML** (the ``test`` extra) every helper raises
   :exc:`unittest.SkipTest`, so a test that needs one skips.
+* **Every action is pinned to a commit** (#1968), written
+  ``uses: owner/repo@<sha> # vX.Y.Z``. A parsed ``uses`` holds only
+  ``owner/repo@<sha>``, since YAML drops the comment, so :func:`pinned` checks
+  the reference and :func:`versions` reads the comment from the raw text.
 
 """
 
@@ -22,6 +26,7 @@ from __future__ import annotations
 
 import copy
 import functools
+import re
 import unittest
 from typing import TYPE_CHECKING
 
@@ -43,7 +48,7 @@ if TYPE_CHECKING:
 
     PathLike = Union[str, 'os.PathLike[str]']
 
-__all__ = ['WORKFLOWS', 'NO_YAML', 'load', 'loads', 'job', 'steps']
+__all__ = ['WORKFLOWS', 'NO_YAML', 'PINNED', 'load', 'loads', 'job', 'steps', 'pinned', 'versions']
 
 #: Directory holding the workflow files. A relative name given to :func:`load` is
 #: read from here; an absolute path is read as it stands.
@@ -53,6 +58,11 @@ NO_YAML = 'PyYAML, from the test extra, is not installed'
 #: How many distinct texts :func:`_parse` keeps. The workflow files, the same files
 #: as an older commit held them, and the copies a test doctors all fit.
 CACHE_SIZE = 128
+#: A ``uses:`` line pinned to a commit with its version comment, read from the raw
+#: text: the action (``owner/repo`` and any sub-path), the 40-hex commit and the
+#: version the comment names, which is what Dependabot rewrites on a bump.
+PINNED = re.compile(r'(?m)^\s*(?:- )?uses: (?P<action>[\w.-]+/[\w.-]+(?:/[^@\s]+)?)'
+                    r'@(?P<sha>[0-9a-f]{40}) # (?P<version>v\d[\w.-]*)\s*$')
 
 
 @functools.lru_cache(maxsize=CACHE_SIZE)
@@ -91,3 +101,14 @@ def job(path: 'PathLike', job_id: 'str') -> 'dict[str, Any]':
 def steps(path: 'PathLike', job_id: 'str') -> 'list[dict[str, Any]]':
     """The ``steps`` of job ``job_id`` of the workflow at ``path``, as :func:`load` reads it."""
     return job(path, job_id)['steps']
+
+
+def pinned(uses: 'object', action: 'str') -> 'bool':
+    """Whether ``uses``, a parsed step's ``uses``, is ``action`` pinned to a full commit sha."""
+    return re.fullmatch(rf'{re.escape(action)}@[0-9a-f]{{40}}', str(uses)) is not None
+
+
+def versions(path: 'PathLike', action: 'str') -> 'list[str]':
+    """The version comment on each line of the workflow at ``path`` pinning ``action``, in order."""
+    text = (WORKFLOWS / path).read_text(encoding='utf-8')
+    return [match['version'] for match in PINNED.finditer(text) if match['action'] == action]

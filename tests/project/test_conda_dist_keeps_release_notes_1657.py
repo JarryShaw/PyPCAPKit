@@ -22,11 +22,14 @@ from __future__ import annotations
 
 import unittest
 
+from tests import _workflows
 from tests.project.test_release_tags_the_run_sha_1634 import (CONDA_WORKFLOW, UPLOAD_STEP,
                                                               CondaDistMixin)
 
-#: The pinned action. The input names and the citations above are for this tag.
-ACTION = 'ncipollo/release-action@v1.21.0'
+#: The pinned action, and the release its commit is (#1968). The input names and
+#: the citations above are for this tag, so a bump means reading the action again.
+ACTION = 'ncipollo/release-action'
+VERSION = 'v1.21.0'
 
 #: The inputs that leave a field out of Update a release, and the field each keeps.
 OMITTED = {
@@ -47,7 +50,8 @@ class TestTheUploadKeepsTheRelease(CondaDistMixin, unittest.TestCase):
     """Update a release leaves the name, body and flags as Create Release wrote them."""
 
     def test_the_action_is_the_one_read(self) -> None:
-        self.assertEqual(self.upload().get('uses'), ACTION)
+        self.assertTrue(_workflows.pinned(self.upload().get('uses'), ACTION), self.upload().get('uses'))
+        self.assertEqual(_workflows.versions(CONDA_WORKFLOW, ACTION), [VERSION])
         self.assertEqual(self.upload()['with'].get('allowUpdates'), 'true')
 
     def test_each_field_the_update_would_reset_is_omitted(self) -> None:

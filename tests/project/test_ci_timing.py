@@ -1129,7 +1129,7 @@ class TestTimingArtifacts(unittest.TestCase):
                 self.assertNotIn('python -m pytest', block)
 
     def test_artifact_names_are_unique_in_a_run(self) -> 'None':
-        names = re.findall(r'uses: actions/upload-artifact@\S+\n +with:\n +name: ([^\n]+)', self.text)
+        names = re.findall(r'uses: actions/upload-artifact@\S+(?: # \S+)?\n +with:\n +name: ([^\n]+)', self.text)
         self.assertGreaterEqual(len(names), 5)
         self.assertEqual(len(names), len(set(names)), names)
 

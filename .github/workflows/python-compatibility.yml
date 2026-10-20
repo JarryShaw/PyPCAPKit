@@ -32,7 +32,7 @@ jobs:
     outputs:
       compatibility: ${{ steps.read.outputs.compatibility }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           sparse-checkout: |
             .github/python-versions.toml
@@ -73,11 +73,11 @@ jobs:
       # tier change edits the ruleset too.
       matrix: ${{ fromJSON(needs.python-versions.outputs.compatibility) }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         id: checkout
         continue-on-error: ${{ matrix.ktlo == true }}
 
-      - uses: actions/setup-python@v7
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         id: python
         continue-on-error: ${{ matrix.ktlo == true }}
         with:
