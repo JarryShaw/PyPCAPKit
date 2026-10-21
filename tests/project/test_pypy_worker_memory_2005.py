@@ -91,7 +91,7 @@ class TestTheRunsCoverTheTier(unittest.TestCase):
         with tempfile.TemporaryDirectory() as temp:
             stub = pathlib.Path(temp, 'python')
             # The first pytest run fails as pytest does on a failed test; `-c` asks the real interpreter.
-            stub.write_text('#!/bin/sh\ncase "$1" in -c) exec "$REAL_PYTHON" "$@";; '
+            stub.write_text('#!/bin/sh\ncase "$1" in -c|util/pytest_shards.py) exec "$REAL_PYTHON" "$@";; '
                             'util/cap_file_size.py) shift; exec "$@";; esac\n'
                             'echo run >> "$RUNS"\n'
                             '[ "$(wc -l < "$RUNS")" -eq 1 ] && exit 1\nexit 0\n', encoding='utf-8')
@@ -112,9 +112,15 @@ class TestTheTimingsAreUploaded(unittest.TestCase):
     def test_the_upload_takes_each_runs_junit_file(self) -> None:
         upload = next(entry for entry in job(*JOB)['steps'] if entry.get('name') == 'Upload test timings')
         self.assertEqual(upload['with']['path'], '${{ runner.temp }}/junit*.xml')
-        for shard in SHARDS:
+        runs = run_step_each(pypy_leg())
+        for shard, run in zip(SHARDS, runs):
             with self.subTest(shard=shard):
-                self.assertIn(f'--junitxml="$RUNNER_TEMP/junit-${{shard//\\//-}}.xml" "$shard"', step()['run'])
+                self.assertIn(f'--junitxml={RUNNER_TEMP}/junit-{shard.replace("/", "-")}.xml', run)
+
+    def test_the_shards_run_through_the_graalpy_script(self) -> None:
+        """#2005 reuses #1963's util/pytest_shards.py, on the leg's interpreter, under the one file-size cap."""
+        self.assertIn('python util/cap_file_size.py python util/pytest_shards.py "$SHARDS" -- '
+                      'python -m pytest "$@"', step()['run'])
 
 
 class TestTheDocsSayIt(unittest.TestCase):

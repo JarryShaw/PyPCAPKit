@@ -79,8 +79,10 @@ TIER_FLAGS = ('--ignore=tests/integration', '--ignore-glob=*_runtime.py', '--ign
 #: no real interpreter: under the coverage leg one would be measured, be logged as a
 #: second ``coverage run --rcfile`` controller, and exec before saving, which fails the
 #: #1387 guard (#1969). A PyPy leg runs pytest more than once (#2005), so each run is
-#: recorded rather than the last.
-STUB = ('#!/bin/sh\ncase "$1" in -c) exec "$REAL_PYTHON" "$@";; util/cap_file_size.py) shift; exec "$@";; esac\n'
+#: recorded rather than the last, and util/pytest_shards.py, which starts them there,
+#: runs on the real one too.
+STUB = ('#!/bin/sh\ncase "$1" in -c|util/pytest_shards.py) exec "$REAL_PYTHON" "$@";; '
+        'util/cap_file_size.py) shift; exec "$@";; esac\n'
         'printf \'%s\\n\' "$@" \'<end>\' >> "$ARGS_FILE"\n')
 #: The line :data:`STUB` writes after each run's arguments.
 END = '<end>'
@@ -172,8 +174,9 @@ def shards(leg: 'dict[str, Any]') -> 'list[str]':
 def unsharded(leg: 'dict[str, Any]', runs: 'list[list[str]]') -> 'list[str]':
     """The arguments each of the ``test`` step's runs on ``leg`` shares, once each run's own are taken off.
 
-    #2005: a run per directory :func:`shards` names adds its JUnit file and the
-    directory, and the last run an ``--ignore`` of each.
+    #2005: util/pytest_shards.py's run per directory :func:`shards` names adds its JUnit
+    file, an ``--ignore`` of each earlier shard, and the directory, and the last run an
+    ``--ignore`` of each.
 
     """
     named = shards(leg)
@@ -183,8 +186,8 @@ def unsharded(leg: 'dict[str, Any]', runs: 'list[list[str]]') -> 'list[str]':
     common = runs[-1][:len(runs[-1]) - len(rest)]
     if runs[-1][len(common):] != rest:
         raise AssertionError(f'the last run on {leg} does not end by ignoring {named}: {runs[-1]}')
-    for shard, run in zip(named, runs):
-        own = [f'--junitxml={RUNNER_TEMP}/junit-{shard.replace("/", "-")}.xml', shard]
+    for index, (shard, run) in enumerate(zip(named, runs)):
+        own = [f'--junitxml={RUNNER_TEMP}/junit-{shard.replace("/", "-")}.xml', *rest[:index], shard]
         if run != common + own:
             raise AssertionError(f'the {shard} run on {leg} is not the others\' arguments and {own}: {run}')
     return common

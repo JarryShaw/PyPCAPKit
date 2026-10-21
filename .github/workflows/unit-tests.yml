@@ -264,12 +264,13 @@ jobs:
         # at `-n 4` the `ALL` tier took each worker to 5.4-5.9 GB and them all
         # past 20 GB, measured on PyPy 8.0.1, where a 14 GB cap OOM-killed them
         # and a 3 GB `PYPY_GC_MAX` raised MemoryError instead. A smaller `-n`
-        # only hands each worker more tests. So a PyPy leg runs pytest once per
-        # directory `SHARDS` names, then once more over the rest, ignoring each
-        # of them, and every run starts its workers afresh: the largest, with
-        # tests/protocols, peaked at 2.6 GB a worker and 8.5 GB in all, and the
-        # tier took 383 s rather than 493 s. Each run but the last writes a
-        # JUnit file of its own, beside junit.xml; the step fails if any run did.
+        # only hands each worker more tests. So on a PyPy leg util/pytest_shards.py
+        # runs pytest once per directory `SHARDS` names, then once more over the
+        # rest, ignoring each of them, and every run starts its workers afresh:
+        # the largest, with tests/protocols, peaked at 2.6 GB a worker and 8.5 GB
+        # in all, and the tier took 383 s rather than 493 s. Each run but the
+        # last writes a JUnit file of its own, beside junit.xml; the step fails
+        # if any run did.
         env:
           COVERAGE: ${{ matrix.coverage }}
           LATEST: ${{ matrix.python-version == needs.python-versions.outputs.latest }}
@@ -297,15 +298,8 @@ jobs:
             COVERAGE_DEBUG=pid,process COVERAGE_DEBUG_FILE="$PWD/coverage-processes.log" \
             python util/cap_file_size.py python -m coverage run --rcfile=.github/coverage.toml -m pytest "$@"
           elif [ -n "$SHARDS" ]; then
-            status=0
-            rest=()
-            for shard in $SHARDS; do
-              python util/cap_file_size.py python -m pytest "$@" \
-                --junitxml="$RUNNER_TEMP/junit-${shard//\//-}.xml" "$shard" || status=$?
-              rest+=(--ignore="$shard")
-            done
-            python util/cap_file_size.py python -m pytest "$@" "${rest[@]}" || status=$?
-            exit "$status"
+            # #2005: #1963's script, on the leg's interpreter, under the one cap.
+            python util/cap_file_size.py python util/pytest_shards.py "$SHARDS" -- python -m pytest "$@"
           else
             python util/cap_file_size.py python -m pytest "$@"
           fi
