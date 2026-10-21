@@ -372,6 +372,14 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
             value = cast('_T', self._default)
 
         pre_processed = self.pre_process(value, packet)
+
+        # NOTE: CPython's ``s`` and ``p`` formats take a bytearray, PyPy's take
+        # bytes alone (``TypeError: expected bytes, got bytearray object``), so a
+        # bytearray is handed over as bytes, packing identically on both (#2004).
+        # Nothing CPython refuses is let through: a memoryview stays refused, as
+        # does a bytearray for the ``c`` format, which CPython rejects too.
+        if isinstance(pre_processed, bytearray) and self.template[-1:] in ('s', 'p'):
+            pre_processed = bytes(pre_processed)
         return struct.pack(self.template, pre_processed)
 
     def post_process(self, value: 'Any', packet: 'dict[str, Any]') -> '_T':  # pylint: disable=unused-argument
