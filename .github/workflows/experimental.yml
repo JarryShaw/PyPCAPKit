@@ -375,6 +375,20 @@ jobs:
       #   is 4 a worker, 12 at -n 3.
       #   Five corekit files at `--vm.Xmx450m -n 1`: exit 3 after 28 passed
       #   without the flag; with it, 3 workers replaced and the run finished.
+      # - #1963: GraalPy's tier runs in shards, so no worker outlives its heap.
+      #   Job 118912680486, the curated `ALL` tier's first full run, lost nine
+      #   workers at 2.5-3.0 GB RSS, 9-17 minutes into their lives, each
+      #   failing a test that passes alone. So util/pytest_shards.py runs
+      #   pytest once per shard `SHARDS` names, a directory or a glob of one
+      #   directory's entries, then once over the rest, and every run starts
+      #   its workers afresh. Each shard is sized by its largest live heap
+      #   after a full GC, measured locally on GraalPy 25.4.4 at `-n 3`: run
+      #   whole, the tier lost 8 workers, its heap reached the 2 GiB cap, and
+      #   it took 3559 s; in these shards none went down, no heap passed
+      #   1303 MB, and it took 1879 s. The script runs inside the timeout,
+      #   scope and watcher below, so they hold over the whole tier; on the
+      #   timeout's SIGINT no later run starts. Each shard's run writes a
+      #   JUnit file of its own beside junit.xml.
       # - `timeout` sends SIGINT at 110 minutes, under the 120-minute cap, so
       #   pytest still writes the junit XML, and exits 124; SIGKILL 3 minutes on.
       # - `prlimit --fsize`: no file over 2 GiB.
@@ -428,6 +442,12 @@ jobs:
         env:
           GRAAL_PYTHON_VM_ARGS: ${{ startsWith(matrix.python-version, 'graalpy') && '--vm.Xmx2g --vm.XX:+ExitOnOutOfMemoryError' || '' }}
           WORKERS: ${{ startsWith(matrix.python-version, 'graalpy') && '3' || 'auto' }}
+          # #1963: folded, so each line break reads as the space between two shards.
+          SHARDS: >-
+            ${{ startsWith(matrix.python-version, 'graalpy') && 'tests/const
+            tests/corekit/test_fields_n* tests/corekit/test_[a-h]* tests/corekit/test_i* tests/corekit
+            tests/foundation tests/protocols/internet tests/protocols/[a-m]* tests/protocols
+            tests/toolkit' || '' }}
           GH_TOKEN: ${{ github.token }}
           WATCHER: ${{ steps.watcher.outcome }}
           WATCHER_PYTHON: ${{ steps.watcher-python.outputs.python-path }}
@@ -445,7 +465,12 @@ jobs:
           for module in $LATEST_TIER; do
             set -- "$@" --ignore="$module"
           done
-          set -- prlimit --fsize=2147483648 timeout --signal=INT --kill-after=3m 110m python -m pytest "$@"
+          set -- python -m pytest "$@"
+          # #1963: GraalPy's tier in runs that each start fresh workers, under the one cap below.
+          if [ -n "$SHARDS" ]; then
+            set -- /usr/bin/python3 util/pytest_shards.py "$SHARDS" -- "$@"
+          fi
+          set -- prlimit --fsize=2147483648 timeout --signal=INT --kill-after=3m 110m "$@"
           scoped() {
             unit=$1
             shift
@@ -526,14 +551,14 @@ jobs:
 
       # As `test`'s, under a name of its own: ci-timing.yml reads `test`'s
       # `junit-unit-*` files alone, and this one is the record of GraalPy's
-      # runtime.
+      # runtime. The glob takes GraalPy's JUnit file per shard too (#1963).
       - name: Upload test timings
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         continue-on-error: true
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: junit-experimental-${{ matrix.python-version }}
-          path: ${{ runner.temp }}/junit.xml
+          path: ${{ runner.temp }}/junit*.xml
           retention-days: 14
 
       # #1740: what `tests-status` and the monitor's last sample say about the

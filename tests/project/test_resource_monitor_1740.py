@@ -284,7 +284,9 @@ class TestTheTestsAreContained(unittest.TestCase):
 
     def test_the_timeout_ends_the_tests_before_the_step_cap(self) -> None:
         script = step(TESTS)['run']
-        match = re.search(r'timeout --signal=INT --kill-after=(\d+)m (\d+)m python -m pytest "\$@"', script)
+        # #1963: the command the timeout runs, pytest or GraalPy's shards of it, is set just before.
+        self.assertIn('set -- python -m pytest "$@"\n', script)
+        match = re.search(r'timeout --signal=INT --kill-after=(\d+)m (\d+)m "\$@"\n', script)
         self.assertIsNotNone(match, script)
         assert match is not None
         kill_after, duration = map(int, match.groups())
