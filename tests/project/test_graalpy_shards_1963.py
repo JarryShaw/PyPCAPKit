@@ -40,7 +40,7 @@ SCRIPT = ROOT / 'util' / 'pytest_shards.py'
 #: The three lines that build the command the step's caps run, in order.
 PYTEST = 'set -- python -m pytest "$@"\n'
 SHARDED = 'set -- /usr/bin/python3 util/pytest_shards.py "$SHARDS" -- "$@"\n'
-CAPPED = 'set -- prlimit --fsize=2147483648 timeout --signal=INT --kill-after=3m 110m "$@"\n'
+CAPPED = 'set -- prlimit --fsize=2147483648 "$gnu_timeout" --signal=INT --kill-after=3m 110m "$@"\n'
 
 
 def rest_ignores(shards: 'str') -> 'list[str]':

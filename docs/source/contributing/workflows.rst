@@ -947,7 +947,9 @@ warnings:
   timings`` takes them all. 3.14t's leg runs pytest once, as before.
 * ``timeout --signal=INT --kill-after=3m 110m`` ends pytest under the step's 120-minute
   cap, so it still writes the junit XML, and exits 124; ``prlimit --fsize=2147483648``
-  caps any file at 2 GiB.
+  caps any file at 2 GiB. The ``timeout`` is GNU's, ``gnutimeout`` where it exists
+  (#2020): on Ubuntu 26.04 ``timeout`` is uutils', whose ``--kill-after`` sends SIGKILL
+  with the SIGINT, and to its child alone.
 * Where the scope starts ``true`` under a throwaway unit, ``pcapkit-probe-<pid>.scope``,
   with every flag the tests get (``sudo -n --preserve-env``, ``MemoryMax=12G``,
   ``MemorySwapMax=0``, ``CPUWeight=20``, ``--uid``, ``--gid``), the tests run in the
