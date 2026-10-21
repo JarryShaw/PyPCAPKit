@@ -51,10 +51,16 @@ import gc
 import importlib.util
 import io
 import os
+import sys
+import time
 import unittest
+from typing import TYPE_CHECKING
 from unittest import mock
 
 from tests._support import sample_path
+
+if TYPE_CHECKING:
+    from typing import Callable
 
 #: Test tier (#1958): depends on garbage collection, weak references or object
 #: finalisation.
@@ -66,6 +72,36 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 #: Whether file descriptors can be counted on this platform. ``/proc/self/fd`` is
 #: Linux; the :func:`builtins.open` measurement below covers the rest.
 HAS_PROC_FD = os.path.isdir('/proc/self/fd')
+
+#: Seconds :func:`collect_until` keeps collecting for a finaliser after the first
+#: :func:`gc.collect`. CPython runs the finaliser before ``collect`` returns, so it
+#: gets no grace. GraalPy's ``collect`` forces a full Java GC, sleeps 15 ms "just
+#: trying to give the GC more time" and then runs only the weak reference
+#: callbacks queued by then (graalpython ``GcModuleBuiltins.javaCollect``, at
+#: graal-25.4.4), so on a loaded runner the finaliser can run after it returns
+#: (#1963). A finaliser that never runs still fails once the grace is spent.
+FINALISER_GRACE = 10.0 if sys.implementation.name == 'graalpy' else 0.0
+
+
+def collect_until(done: 'Callable[[], bool]', grace: float = FINALISER_GRACE) -> bool:
+    """Collect garbage until ``done()`` holds or ``grace`` seconds have passed.
+
+    Args:
+        done: Zero-argument callable, checked after each collection.
+        grace: Seconds to keep collecting after the first collection.
+
+    Returns:
+        Whether ``done()`` held before the grace ran out.
+
+    """
+    deadline = time.monotonic() + grace
+    while True:
+        gc.collect()
+        if done():
+            return True
+        if time.monotonic() >= deadline:
+            return False
+        time.sleep(0.05)
 
 
 def fd_count(target: str) -> int:
@@ -230,7 +266,7 @@ class ExtractorClosesWhatItOpens(unittest.TestCase):
                          'open at this point')
 
         del extractor
-        gc.collect()
+        collect_until(lambda: recorder.still_open == 0)
 
         with self.subTest(measurement='builtins.open handles still open'):
             self.assertEqual(recorder.still_open, 0,
@@ -474,10 +510,29 @@ class FinaliserBackstopWithoutDel(unittest.TestCase):
             self.assertEqual(recorder.still_open, 1)
 
             del extractor
-            gc.collect()
+            collect_until(lambda: recorder.still_open == 0)
 
             self.assertEqual(recorder.still_open, 0,
                              'without __del__ the handle outlived the extractor')
+
+    def test_collect_until_waits_out_a_finaliser_that_runs_late(self) -> None:
+        """A finaliser run after :func:`gc.collect` returns, as GraalPy's can be (:issue:`1963`).
+
+        The stand-in finaliser runs on the third collection. With no grace the
+        helper reports it as never run, the shape of the GraalPy leg's failure; with a
+        grace it waits it out.
+
+        """
+        collections = []
+
+        def late() -> bool:
+            collections.append(None)
+            return len(collections) >= 3
+
+        self.assertFalse(collect_until(late, grace=0.0))
+        collections.clear()
+        self.assertTrue(collect_until(late, grace=5.0))
+        self.assertEqual(len(collections), 3)
 
     def test_finished_extraction_detaches_its_finaliser(self) -> None:
         """``_cleanup`` and the context manager unregister it, so nothing closes twice."""
