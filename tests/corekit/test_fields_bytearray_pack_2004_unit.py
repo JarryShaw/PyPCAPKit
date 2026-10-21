@@ -12,6 +12,10 @@ stand-in that refuses a :obj:`bytearray`, as PyPy's does. The real
 :func:`struct.pack` then pins that the output is unchanged and that a value
 refused before -- a :obj:`memoryview`, a :obj:`bool`, a :obj:`str` -- still is.
 
+GitHub issue #2015. GraalPy's ``c`` format takes a :obj:`bytearray`, where
+CPython's refuses it, so the field refuses anything but :obj:`bytes` for ``c``
+itself, with :exc:`~pcapkit.utilities.exceptions.StructError`.
+
 """
 
 import struct
@@ -51,6 +55,24 @@ class _PyPyStruct:
         for value in values:
             if isinstance(value, bytearray):
                 raise TypeError(f'expected bytes, got {type(value).__name__} object')
+        return struct.pack(fmt, *values)
+
+
+class _LenientStruct:
+    """A :mod:`struct` whose :func:`pack` takes any buffer for ``c``, as GraalPy's does.
+
+    GraalPy's ``c`` format packs a :obj:`bytearray` (#2015), where CPython's
+    raises :exc:`struct.error`. Everything else is the real :mod:`struct`.
+
+    """
+
+    def __getattr__(self, name: str) -> object:
+        return getattr(struct, name)
+
+    def pack(self, fmt: str, *values: object) -> bytes:
+        if fmt[-1:] == 'c':
+            values = tuple(bytes(value) if isinstance(value, (bytearray, memoryview)) else value
+                           for value in values)
         return struct.pack(fmt, *values)
 
 
@@ -99,16 +121,37 @@ class TestBytearrayPack(unittest.TestCase):
                     with self.assertRaises((struct.error, TypeError)):
                         field.pack(value, {})  # type: ignore[attr-defined]
 
-    def test_bytearray_for_the_c_format_stays_refused(self) -> None:
-        # CPython's ``c`` format refuses a bytearray as well, so converting one
-        # there would accept what no interpreter accepted before.
+    def _char(self) -> 'object':
         from pcapkit.corekit.fields.strings import BytesField
 
         char = BytesField(length=1)
         char._template = 'c'
-        self.assertEqual(char.pack(b'a', {}), b'a')
-        with self.assertRaises((struct.error, TypeError)):
-            char.pack(bytearray(b'a'), {})
+        return char
+
+    def test_bytearray_for_the_c_format_stays_refused(self) -> None:
+        # CPython's ``c`` format refuses a bytearray as well, so converting one
+        # there would accept what no interpreter accepted before.
+        from pcapkit.utilities.exceptions import StructError
+
+        char = self._char()
+        self.assertEqual(char.pack(b'a', {}), b'a')  # type: ignore[attr-defined]
+        for value in (bytearray(b'a'), _ByteArray(b'a'), memoryview(b'a')):
+            with self.subTest(value=type(value).__name__):
+                with self.assertRaises(StructError):
+                    char.pack(value, {})  # type: ignore[attr-defined]
+
+    def test_c_format_refuses_a_buffer_under_a_struct_that_takes_it(self) -> None:
+        # GraalPy's ``c`` format takes a bytearray (#2015), so Field.pack refuses
+        # one itself rather than leaving it to the engine's struct.
+        from pcapkit.utilities.exceptions import StructError
+
+        char = self._char()
+        with mock.patch('pcapkit.corekit.fields.field.struct', _LenientStruct()):
+            self.assertEqual(char.pack(b'a', {}), b'a')  # type: ignore[attr-defined]
+            for value in (bytearray(b'a'), _ByteArray(b'a'), memoryview(b'a')):
+                with self.subTest(value=type(value).__name__):
+                    with self.assertRaises(StructError):
+                        char.pack(value, {})  # type: ignore[attr-defined]
 
 
 if __name__ == '__main__':

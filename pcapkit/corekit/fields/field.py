@@ -29,7 +29,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 from pcapkit.corekit.sentinels import NO_VALUE
 from pcapkit.utilities import config
-from pcapkit.utilities.exceptions import FieldValueError, NoDefaultValue, ProtocolError
+from pcapkit.utilities.exceptions import FieldValueError, NoDefaultValue, ProtocolError, StructError
 
 __all__ = ['Field']
 
@@ -365,6 +365,10 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
         Returns:
             Packed field value.
 
+        Raises:
+            StructError: If :attr:`template` is a ``c`` format and the value is
+                not :obj:`bytes`.
+
         """
         if value is None:
             if self._default is NO_VALUE:
@@ -380,6 +384,12 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
         # does a bytearray for the ``c`` format, which CPython rejects too.
         if isinstance(pre_processed, bytearray) and self.template[-1:] in ('s', 'p'):
             pre_processed = bytes(pre_processed)
+        # NOTE: CPython's ``c`` format takes bytes alone, GraalPy's takes a
+        # bytearray as well (#2015), so the refusal is made here rather than left
+        # to the engine's struct.
+        if self.template[-1:] == 'c' and not isinstance(pre_processed, bytes):
+            raise StructError(f'Field {self.name}: char format requires a bytes object '
+                              f'of length 1, not {type(pre_processed).__name__}')
         return struct.pack(self.template, pre_processed)
 
     def post_process(self, value: 'Any', packet: 'dict[str, Any]') -> '_T':  # pylint: disable=unused-argument
