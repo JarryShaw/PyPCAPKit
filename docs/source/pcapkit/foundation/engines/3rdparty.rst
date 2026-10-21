@@ -126,6 +126,19 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    |pyshark|_'s own resolver for exactly that reason, so a correctly configured
    install off :envvar:`PATH` is not refused.
 
+   **Read access under AppArmor.** From Ubuntu 25.04, :program:`tshark` runs
+   confined by an enforcing AppArmor profile, :file:`/etc/apparmor.d/tshark`,
+   which reads captures only under :file:`/tmp`, so a capture anywhere else
+   fails with *You don't have permission to read the file* -- which |pyshark|_
+   raises as ``TSharkCrashException``. The check above cannot see this. To allow
+   a directory, add a rule for it to the profile's local include and reload the
+   profile:
+
+   .. code-block:: shell
+
+      echo 'file r /path/to/captures/**,' | sudo tee -a /etc/apparmor.d/local/tshark
+      sudo apparmor_parser -r /etc/apparmor.d/tshark
+
 .. autoclass:: pcapkit.foundation.engines.pyshark.PyShark
    :no-members:
    :show-inheritance:
