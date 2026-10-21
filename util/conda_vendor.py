@@ -230,9 +230,14 @@ def _load_python_versions() -> 'object':
 
 
 def conda_pythons() -> 'list[str]':
-    """The CPython versions a conda package is built for, as ``conda`` in python_versions.py."""
+    """The CPython versions a conda package is built for, as ``conda`` in python_versions.py.
+
+    Its ``builds()``, not the supported tier: a free-threaded build such as 3.14t
+    has no conda build of its own (#1958), so no pin waits on a wheel for it.
+
+    """
     versions = _load_python_versions()
-    return list(versions.tier(versions.load(), 'cpython', 'supported'))  # type: ignore[attr-defined]
+    return list(versions.builds(versions.load(), 'cpython', 'supported'))  # type: ignore[attr-defined]
 
 
 def environments(pythons: 'Iterable[str]') -> 'list[dict[str, str]]':

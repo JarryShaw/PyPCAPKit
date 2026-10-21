@@ -62,7 +62,8 @@ class TestTheStep(unittest.TestCase):
         env = step(TESTS)['env']
         versions = [leg['python-version'] for leg in legs(*EXPERIMENTAL)]
         self.assertTrue(any(version.startswith('graalpy') for version in versions), versions)
-        self.assertTrue(any(not version.startswith('graalpy') for version in versions), versions)
+        # #1958: 3.14t left for unit-tests.yml; it stands for any other build the tier may hold here.
+        versions += [version for version in ('3.14t',) if version not in versions]
         for version in versions:
             with self.subTest(version=version):
                 self.assertEqual(by_impl(env['SHARDS'], version), SHARDS if version.startswith('graalpy') else '')

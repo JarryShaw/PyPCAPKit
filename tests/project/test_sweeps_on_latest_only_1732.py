@@ -440,7 +440,8 @@ class TestTheExperimentalLegsAreAWorkflowOfTheirOwn(unittest.TestCase):
     def test_the_workflow_holds_every_experimental_leg_and_unit_tests_none(self) -> None:
         found = legs(*EXPERIMENTAL)
         self.assertEqual(self.own['name'], 'Experimental Tests')
-        self.assertEqual([leg['python-version'] for leg in found], ['3.14t', 'graalpy-25.4'])
+        # #1958: 3.14t is supported, a leg of unit-tests.yml's `test` and `integration`.
+        self.assertEqual([leg['python-version'] for leg in found], ['graalpy-25.4'])
         self.assertTrue(all(map(is_experimental, found)))
         self.assertEqual(self.own['jobs']['experimental']['name'], 'Python ${{ matrix.python-version }} (experimental)')
         self.assertNotIn('experimental', self.unit['jobs'])
@@ -557,7 +558,7 @@ class TestTheExperimentalLegsAreAWorkflowOfTheirOwn(unittest.TestCase):
 
     def test_no_required_context_names_a_leg(self) -> None:
         names = {f'Python {leg["python-version"]} (experimental)' for leg in legs(*EXPERIMENTAL)}
-        self.assertEqual(len(names), 2)
+        self.assertEqual(len(names), 1)
         self.assertFalse(names & REQUIRED)
 
 

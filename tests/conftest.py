@@ -4,8 +4,9 @@
 Besides session hooks documented where they are defined -- the warm import
 and coverage flush in :func:`pytest_sessionstart` and
 :func:`pytest_sessionfinish`, the timer release in
-:func:`pytest_timeout_cancel_timer`, and the periodic garbage collection in
-:func:`pytest_runtest_protocol` -- it holds the following. The first is
+:func:`pytest_timeout_cancel_timer`, the periodic garbage collection in
+:func:`pytest_runtest_protocol`, and the free-threaded legs' GIL check in
+:func:`pytest_runtest_makereport` -- it holds the following. The first is
 :func:`restore_module_table`, the guard that
 puts the :mod:`pcapkit` region of :data:`sys.modules` back after every test; see
 its own docstring for why it is here rather than left to each test file.
@@ -55,6 +56,7 @@ from typing import TYPE_CHECKING
 
 import pytest
 
+from tests import _gil_guard
 from tests._support import ISOLATED_PREFIXES, restore_modules, snapshot_modules
 from tests._tiers import (ROOT, TierGuardWarning, audit_module, guard_unavailable_reason,
                           is_unit_tier)
@@ -342,7 +344,7 @@ def pytest_timeout_cancel_timer(item: 'pytest.Item') -> 'Iterator[None]':
 #: :func:`restore_module_table` drops, with its ABC caches and its ``InfoMeta``
 #: and ``EnumMeta`` classes -- and the free-threaded build's collector reclaims
 #: them far less often than the default build's, so a free-threaded xdist
-#: worker grows until the experimental leg's memory scope kills it. A fixed
+#: worker grows until its runner's memory runs out (#1964). A fixed
 #: count rather than every test keeps nearly all of the saving for a fraction of
 #: the cost; see that hook for the measurements.
 GC_EVERY = 50
@@ -373,7 +375,7 @@ def pytest_runtest_protocol(item: 'pytest.Item',
                             nextitem: 'Optional[pytest.Item]') -> 'Iterator[None]':
     """Collect cyclic garbage every :data:`GC_EVERY` tests, so workers stay in memory (#1964).
 
-    The experimental leg's 3.14t job runs its xdist workers under one 12G
+    3.14t's leg, experimental until #1958, ran its xdist workers under one 12G
     memory scope, and was OOM-killed whenever their sum crossed it: the
     garbage :data:`GC_EVERY` describes is not a leak, but the free-threaded
     collector frees it too late to keep a worker small. A wrapper is used so the
@@ -402,6 +404,28 @@ def pytest_runtest_protocol(item: 'pytest.Item',
     """
     yield
     _collect_periodically()
+
+
+@pytest.hookimpl(hookwrapper=True)
+def pytest_runtest_makereport(item: 'pytest.Item', call: 'pytest.CallInfo[None]') -> 'Iterator[None]':
+    """Fail the first teardown after which a free-threaded CI process finds the GIL on (#1958).
+
+    :mod:`tests._gil_guard` decides, and says why the free-threaded legs keep the
+    GIL off. A teardown, so the test and its fixtures have imported what they
+    will; a hook rather than an autouse fixture, so every test's fixture list is
+    as it was.
+
+    Args:
+        item: The test whose report this is.
+        call: The phase's call, unused.
+
+    """
+    outcome = yield
+    report = outcome.get_result()
+    message = _gil_guard.failure(report.when, item.nodeid)
+    if message is not None:
+        report.outcome = 'failed'
+        report.longrepr = message
 
 
 def _collected_modules(items: 'Iterable[pytest.Item]') -> 'Iterator[pathlib.Path]':

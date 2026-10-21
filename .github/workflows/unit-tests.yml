@@ -100,8 +100,17 @@ jobs:
     # #1672: the level of every annotation a failing step writes -- a warning on
     # a KTLO leg, which must not show red, an error on a supported one. The
     # steps are shared with `test-ktlo`, whose legs carry `ktlo: true`.
+    #
+    # #1958, the owner's ruling: the free-threaded leg, 3.14t, runs with the GIL
+    # off. `PYTHON_GIL=0` keeps it off when an extension module that does not
+    # declare `Py_mod_gil` is imported, as `lxml.etree` did through bs4 in every
+    # experimental run (docs.python.org, Command line and environment,
+    # PYTHON_GIL); the install leaves `lxml` out besides (see that step), and
+    # tests/_gil_guard.py fails the leg if a test still finds the GIL on. Empty,
+    # so unset to CPython, on every other leg, where `0` would be an error.
     env:
       ANNOTATION_LEVEL: ${{ matrix.ktlo && 'warning' || 'error' }}
+      PYTHON_GIL: ${{ endsWith(matrix.python-version, 't') && '0' || '' }}
     strategy:
       fail-fast: false
       # #1660: .github/python-versions.toml's supported tier, CPython's then
@@ -122,8 +131,10 @@ jobs:
       # coverage cost 1.8x on 3.15 locally (2.0x on 3.14): a step of about
       # 15-19 minutes under the job's 45.
       #
-      # The experimental tier (#1660) runs in experimental.yml, a workflow of
-      # its own, so that nothing here waits on it (#1732).
+      # Free-threaded 3.14t is a supported CPython leg since #1958, after
+      # CPython's others, with the GIL off (see `env` above). The experimental
+      # tier, GraalPy (#1660), runs in experimental.yml, a workflow of its own,
+      # so that nothing here waits on it (#1732).
       matrix: ${{ fromJSON(needs.python-versions.outputs.test) }}
 
     # `&test-steps`: `test-ktlo` runs these same steps, by YAML alias.
@@ -181,6 +192,13 @@ jobs:
       # interpreter: if setup-python failed, the image's `python` would be
       # tested under this leg's name. On a supported leg either fails the job;
       # on a KTLO leg the annotation is a warning (#1672).
+      #
+      # #1958: a free-threaded leg uninstalls the `test` extra's `lxml`, which no
+      # marker can leave out. lxml 6 declares no `Py_mod_gil`, its maintainer
+      # reports crashes in its threading tests on 3.14t without the GIL
+      # (bugs.launchpad.net/lxml/+bug/2111289), and its free-threading support
+      # is in the 7.0 alphas alone (lxml CHANGES.txt, 7.0.0a1). So the tests
+      # gated on HAS_LXML skip there, each of them `LATEST` in any case.
       - name: Install package and test dependencies
         id: install
         if: ${{ steps.python.outcome == 'success' }}
@@ -195,6 +213,9 @@ jobs:
             if [ -z "$reason" ]; then reason="pip failed without an ERROR line; see this step's log"; fi
             echo "::${ANNOTATION_LEVEL} title=pcapkit did not install on ${LEG//,/%2C}::${reason//%/%25}. The rest of this leg is skipped."
             exit 1
+          fi
+          if [ "$(python -c 'import sysconfig; print(sysconfig.get_config_var("Py_GIL_DISABLED"))')" = 1 ]; then
+            python -m pip uninstall -y lxml
           fi
 
       # #1958, the owner's ruling E: latest CPython runs the whole suite, so its
@@ -436,9 +457,10 @@ jobs:
     needs: [changes, python-versions]
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
     timeout-minutes: 45
-    # See the `test` job above.
+    # See the `test` job above, PYTHON_GIL too.
     env:
       ANNOTATION_LEVEL: ${{ matrix.ktlo && 'warning' || 'error' }}
+      PYTHON_GIL: ${{ endsWith(matrix.python-version, 't') && '0' || '' }}
     strategy:
       fail-fast: false
       # The supported tier of the `test` job above, without its coverage leg;
@@ -483,7 +505,8 @@ jobs:
       # `pypcap-parity` job below covers those methods instead, on the same
       # fixture-tier selection as this job but in a venv of its own.
       #
-      # A KTLO leg that cannot install stops here, as in the `test` job above.
+      # A KTLO leg that cannot install stops here, as in the `test` job above,
+      # and a free-threaded one leaves `lxml` out, as there (#1958).
       - name: Install package, test and generator dependencies
         id: install
         if: ${{ steps.python.outcome == 'success' }}
@@ -498,6 +521,9 @@ jobs:
             if [ -z "$reason" ]; then reason="pip failed without an ERROR line; see this step's log"; fi
             echo "::${ANNOTATION_LEVEL} title=pcapkit did not install on ${LEG//,/%2C}::${reason//%/%25}. The rest of this leg is skipped."
             exit 1
+          fi
+          if [ "$(python -c 'import sysconfig; print(sysconfig.get_config_var("Py_GIL_DISABLED"))')" = 1 ]; then
+            python -m pip uninstall -y lxml
           fi
 
       # #1958: the `test` job's step of the same name. On `latest` this job runs

@@ -22,20 +22,20 @@ latest = "3.15"
 "3.13" = { tier = "supported" }
 "3.14" = { tier = "supported" }
 "3.15" = { tier = "supported" }
-"3.14t" = { tier = "experimental" }
+"3.14t" = { tier = "supported" }
 
 [versions.pypy]
 "pypy3.10" = { tier = "ktlo" }
 "pypy3.11" = { tier = "supported" }
 
-# Experimental (#1660): free-threaded CPython (a `t` version, above) and
-# GraalPy, by its release line, spelt as setup-python reads them. Each runs as
-# one non-blocking leg of experimental.yml, named `(experimental)`, a workflow
-# of its own that nothing waits on (#1732), and in no other matrix:
-# no wheel, conda build or required context. The weekly job has no source for
-# either, so it keeps these lines as written, after the other versions of their
-# table. Promoting one once its leg is green is a hand edit, which
-# util/python_versions.py refuses until it has all of them.
+# Hand-kept (#1660): free-threaded CPython (a `t` version, above) and GraalPy,
+# by its release line, spelt as setup-python reads them. The weekly job has no
+# source for either, so it keeps these lines as written, after the other
+# versions of their table. #1958 promoted 3.14t: supported, it runs `test`,
+# `integration` and `Compat` legs with the GIL off, and no wheel or conda build
+# of its own, as 3.14's wheel is the one it installs. GraalPy stays one
+# non-blocking leg of experimental.yml, which nothing waits on (#1732), until
+# util/python_versions.py has its wheel, conda build and Compat leg.
 [versions.graalpy]
 "graalpy-25.4" = { tier = "experimental" }
 

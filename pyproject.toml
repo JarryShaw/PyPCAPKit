@@ -382,8 +382,9 @@ test = [
     # util/pyshark_encap_map.py reads PDML with (#1894). CPython only, like
     # psutil: PyPI has no wheel for GraalPy, nor for PyPy 8.0, which
     # setup-python's ``pypy3.11`` is, and the image has no libxml2 headers to
-    # build one (#1958). The tests that parse skip there, all of them on
-    # ``latest`` alone, and the scripts do not fall back to a laxer parser.
+    # build one (#1958). unit-tests.yml's free-threaded legs uninstall it, as
+    # lxml 6 needs the GIL (#1958). The tests that parse skip there, all of them
+    # on ``latest`` alone, and the scripts do not fall back to a laxer parser.
     # Unpinned, like the entries above.
     "lxml; platform_python_implementation == 'CPython'",
 ]

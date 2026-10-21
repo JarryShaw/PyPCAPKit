@@ -1,7 +1,7 @@
 name: Experimental Tests
 
-# The experimental tier (#1660): free-threaded CPython and GraalPy, one leg each,
-# here and in no other workflow. #1732, the owner's option 2: nothing waits on
+# The experimental tier (#1660): GraalPy, one leg, here and in no other workflow;
+# free-threaded 3.14t left for unit-tests.yml (#1958). #1732: nothing waits on
 # these legs. They used to be legs of unit-tests.yml, first of `test` and then of
 # a job of their own there, and either way the Unit Tests run stayed in progress
 # until GraalPy finished, up to 140 minutes. Every `workflow_run` consumer of
@@ -172,8 +172,8 @@ jobs:
   # the tier less the round-trip sweeps, which this job did not run then (see
   # `Run unit tests`), held 3.5-4.5 times as much, by per-module times from a local
   # 3.14 run and the 3.14, 3.15 and 3.14t legs of run 38581834697: 88-113
-  # minutes on GraalPy (estimate). 3.14t, which shares the caps, took 5.8
-  # minutes over the whole unit tier in that run.
+  # minutes on GraalPy (estimate). 3.14t, then an experimental leg here, took
+  # 5.8 minutes over the whole unit tier in that run.
   #
   # #1740 gives GraalPy 3 workers, not 4, so at 4/3 of that time its tests should
   # take about 117-151 minutes (an inference from the 88-113, not measured),
@@ -258,8 +258,8 @@ jobs:
           python -c "import os; print('cpu_count', os.cpu_count())"
 
       # #1938: the interpreter `Run unit tests` runs util/superseded.py on, a
-      # CPython of its own: `latest`, never the leg's GraalPy or free-threaded
-      # build, which would also have to take requests. `update-environment:
+      # CPython of its own: `latest`, never the leg's GraalPy, which would
+      # also have to take requests. `update-environment:
       # false` leaves PATH, `pythonLocation` and `LD_LIBRARY_PATH` as the leg's
       # setup-python set them, so the tests see the leg's interpreter alone;
       # this one is run by its `python-path`, and finds its own libpython by

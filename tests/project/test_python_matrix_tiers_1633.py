@@ -74,6 +74,10 @@ def tier(impl: 'str', name: 'str') -> 'tuple[str, ...]':
 
 
 SUPPORTED = tier('cpython', 'supported')
+#: The supported default builds, which have a wheel, a conda build and an
+#: ``engine-tests`` cell of their own; a free-threaded build such as 3.14t, supported
+#: since #1958, has its ``test``, ``integration`` and ``Compat`` legs alone.
+BUILDS = tuple(v for v in SUPPORTED if not v.endswith('t'))
 KTLO = tier('cpython', 'ktlo')
 #: The image each version needs where ``ubuntu-latest`` cannot provide it:
 #: setup-python has no Ubuntu 26.04 build of 3.7-3.9, and ubuntu-22.04, 3.7's, is
@@ -82,7 +86,7 @@ PINNED_OS = {v: entry['runner'] for v, entry in TIERS['versions']['cpython'].ite
 #: The KTLO versions a job pinned to ``ubuntu-latest`` runs.
 KTLO_ON_LATEST = tuple(v for v in KTLO if v not in PINNED_OS)
 #: PyPCAP/PyPCAPFile's ``python_version < '3.12'`` marker bounds ``pypcap-parity``.
-PARITY = tuple(v for v in SUPPORTED + KTLO_ON_LATEST if tuple(map(int, v.split('.'))) < (3, 12))
+PARITY = tuple(v for v in BUILDS + KTLO_ON_LATEST if tuple(map(int, v.split('.'))) < (3, 12))
 #: The step-level guard every failure-prone step of a KTLO leg's job carries.
 KTLO_GUARD = '${{ matrix.ktlo == true }}'
 #: The job-level level of every annotation a failing step writes (#1672).
@@ -110,9 +114,9 @@ MATRICES = (
     ('unit-tests.yml', 'integration', TESTED_SUPPORTED),
     ('unit-tests.yml', 'pypcap-parity', tuple(v for v in PARITY if v in SUPPORTED)),
     ('python-compatibility.yml', 'compatibility', SUPPORTED),
-    ('create-release.yml', 'pypi', SUPPORTED + tier('pypy', 'supported')),
-    ('create-release.yml', 'conda', SUPPORTED),
-    ('cron-conda.yml', 'conda-dist', SUPPORTED),
+    ('create-release.yml', 'pypi', BUILDS + tier('pypy', 'supported')),
+    ('create-release.yml', 'conda', BUILDS),
+    ('cron-conda.yml', 'conda-dist', BUILDS),
 )
 #: The jobs a single ``needs.<job>.result`` aggregates, so KTLO must stay step-level.
 AGGREGATED = (('unit-tests.yml', 'test'), ('unit-tests.yml', 'integration'),
@@ -255,17 +259,17 @@ class TestTheSupportedTierBlocks(unittest.TestCase):
     def test_engine_tests_runs_every_supported_cell_in_its_blocking_step(self) -> None:
         steps = job('unit-tests.yml', 'engine-tests')['steps']
         blocking = [versions for step, versions in engine_inputs() if 'continue-on-error' not in step]
-        self.assertEqual([versions.split() for versions in blocking], [list(SUPPORTED)])
+        self.assertEqual([versions.split() for versions in blocking], [list(BUILDS)])
         loop = next(step for step in steps if step.get('name') == 'Run the supported cells')
         self.assertNotIn('continue-on-error', loop)
         self.assertNotIn('if', loop)
-        self.assertEqual(resolve('unit-tests.yml', 'engine-tests', loop['env']['PYTHONS']).split(), list(SUPPORTED))
+        self.assertEqual(resolve('unit-tests.yml', 'engine-tests', loop['env']['PYTHONS']).split(), list(BUILDS))
         self.assertIn('for py in $PYTHONS;', loop['run'])
 
     def test_the_supported_tier_is_what_the_classifiers_list(self) -> None:
         text = (ROOT / 'pyproject.toml').read_text(encoding='utf-8')
-        listed = re.findall(r'"Programming Language :: Python :: (3\.\d+)"', text)
-        self.assertEqual(listed, list(SUPPORTED))
+        listed = re.findall(r'"Programming Language :: Python :: (3\.\d+t?)"', text)
+        self.assertEqual(listed, list(BUILDS))
 
     def test_requires_python_is_unchanged(self) -> None:
         """The owner's ruling: KTLO keeps old versions installable, it does not raise the floor."""
@@ -279,7 +283,7 @@ class TestTheSupportedTierBlocks(unittest.TestCase):
         spec.loader.exec_module(ci_timing)  # type: ignore[union-attr]
         self.assertEqual(ci_timing.COVERAGE_JOB, f"Python {TIERS['latest']}")
         self.assertEqual(sorted((ci_timing.COVERAGE_JOB,) + ci_timing.PAIRED_JOBS),
-                         sorted(f'Python {v}' for v in SUPPORTED))
+                         sorted(f'Python {v}' for v in BUILDS))
 
     def test_pypcap_parity_stops_where_the_engines_markers_do(self) -> None:
         """The script's ``PARITY_BELOW`` is pyproject.toml's PyPCAP and PyPCAPFile marker."""
@@ -396,7 +400,7 @@ class TestNoKTLOLegCanFailTheRelease(unittest.TestCase):
     def test_pypi_completeness_counts_the_supported_tier_only(self) -> None:
         tags = {leg['python-version']: versions_script().wheel_tag(leg['python-version'])
                 for leg in legs('create-release.yml', 'pypi')}
-        supported = [f'pypcapkit-1.5.0-{tags[v]}-none-any.whl' for v in SUPPORTED + tier('pypy', 'supported')]
+        supported = [f'pypcapkit-1.5.0-{tags[v]}-none-any.whl' for v in BUILDS + tier('pypy', 'supported')]
         ktlo = [f'pypcapkit-1.5.0-{tags[v]}-none-any.whl' for v in KTLO_ON_LATEST + tier('pypy', 'ktlo')]
         self.assertTrue(supported and ktlo)
         sdist = ['pypcapkit-1.5.0.tar.gz']

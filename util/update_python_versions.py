@@ -40,9 +40,10 @@ pre-release
     ``feature`` or ``prerelease`` once setup-python has a build. No workflow runs
     pre-release legs yet, and :func:`python_versions.load` refuses the tier, so
     such a version is reported (:data:`HELD`) rather than written.
-experimental
+hand-kept
     Free-threaded CPython and GraalPy, which no source here rates (#1660), are
-    hand-maintained: every recompute keeps their entries as the file has them,
+    hand-maintained, whatever their tier (experimental, or supported for 3.14t
+    since #1958): every recompute keeps their entries as the file has them,
     after the computed versions of their table, and :func:`fingerprint` leaves
     them out, so a hand edit to one neither changes nor re-proposes the tiers.
 
@@ -859,8 +860,8 @@ def validate(rendered: 'str') -> 'dict[str, Any]':
 
 
 def computed(versions: 'dict[str, dict[str, Any]]') -> 'dict[str, dict[str, Any]]':
-    """``versions`` without the experimental entries, which no rule here computes, and the tables left empty."""
-    found = {impl: {version: entry for version, entry in entries.items() if entry['tier'] != 'experimental'}
+    """``versions`` without the hand-kept entries, which no rule here computes, and the tables left empty."""
+    found = {impl: {version: entry for version, entry in entries.items() if not pv.hand_kept(impl, version)}
              for impl, entries in versions.items()}
     return {impl: entries for impl, entries in found.items() if entries}
 
@@ -973,7 +974,7 @@ CLAIMS = {
         Claim(r'The \*\*supported\*\* tier, (3\.\d+)-(3\.\d+),', lambda f: span(f['supported'])),
         Claim(r'end-of-life (3\.\d+)-(3\.\d+), still built', lambda f: span(f['ktlo'])),
         Claim(r'the required legs are its supported tier \(``python-versions\.toml:(\d+)-(\d+)``\)',
-              lambda f: lines_of(f, 'supported')),
+              lambda f: lines_of(f, 'compat')),
         Claim(r'its KTLO legs \(``python-versions\.toml:(\d+)-(\d+)``\)', lambda f: lines_of(f, 'ktlo')),
         Claim(r'and the ``Compat Python (3\.\d+)``-``(3\.\d+)`` legs', lambda f: span(f['supported'])),
         Claim(r'the ``Python (3\.\d+)`` leg of ``test`` \(matrix key ``coverage: true``\)',
@@ -997,7 +998,7 @@ CLAIMS = {
 #: ``"Programming Language :: Python :: 3.N",``, one line per supported version.
 CLASSIFIER = re.compile(r'^(?P<indent>[ \t]*)"Programming Language :: Python :: 3\.\d+",$', re.M)
 #: One row of the workflows page's required-contexts table.
-COMPAT_ROW = re.compile(r'^(?P<indent>[ \t]*)\* - ``Compat Python (?P<version>3\.\d+)``\n'
+COMPAT_ROW = re.compile(r'^(?P<indent>[ \t]*)\* - ``Compat Python (?P<version>3\.\d+t?)``\n'
                         r'(?P<inner>[ \t]*)- job ``compatibility``, matrix leg ``(?P=version)``\n'
                         r'(?P=inner)- (?P<where>``[^`\n]+``), ``\.github/python-versions\.toml:\d+``\n', re.M)
 BUG_VERSIONS = re.compile(r'(Python Version: \[e\.g\. )([^\]\n]+)(\])')
@@ -1026,7 +1027,7 @@ def rewrite_compat_rows(text: 'str', facts: 'dict[str, Any]') -> 'tuple[str, lis
                     f'{first["inner"]}- job ``compatibility``, matrix leg ``{version}``\n'
                     f'{first["inner"]}- {first["where"]}, '
                     f'``.github/python-versions.toml:{facts["tier_lines"][version]}``\n'
-                    for version in facts['supported'])
+                    for version in facts['compat'])
     return text[:first.start()] + block + text[matches[-1].end():], []
 
 
@@ -1061,7 +1062,11 @@ def make_facts(data: 'dict[str, Any]', values: 'dict[str, str]', workflows: 'dic
             tier_lines[match['version']] = number
     return {
         'latest': data['latest'],
-        'supported': pv.tier(data, 'cpython', 'supported'),
+        # The default builds, which the classifiers and the "3.11-3.15" spans
+        # name; `compat` adds a supported free-threaded build, which has a
+        # `Compat` leg and a tier line of its own (#1958).
+        'supported': pv.builds(data, 'cpython', 'supported'),
+        'compat': pv.tier(data, 'cpython', 'supported'),
         'ktlo': pv.tier(data, 'cpython', 'ktlo'),
         'experimental': [version for impl in data['versions'] for version in pv.tier(data, impl, 'experimental')],
         'required': required_contexts(workflows, values),
@@ -1133,11 +1138,11 @@ def compute_plan(root: 'pathlib.Path', sources: 'dict[str, Any]') -> 'tuple[dict
         notes.extend(result.notes)
         if result.latest is not None:
             latest = result.latest
-    # The experimental entries, kept as the file has them, after the computed ones
+    # The hand-kept entries, kept as the file has them, after the computed ones
     # (#1660); so is a table no rule computes, GraalPy's.
     for impl, entries in before['versions'].items():
         versions.setdefault(impl, {}).update(
-            (version, entry) for version, entry in entries.items() if entry['tier'] == 'experimental')
+            (version, entry) for version, entry in entries.items() if pv.hand_kept(impl, version))
     versions = {impl: versions[impl] for impl in before['versions']}
     after = dict(before, latest=latest, versions=versions)
     new_tier_text = render_tier_file(old_tier_text, latest, versions)

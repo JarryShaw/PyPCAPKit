@@ -891,12 +891,17 @@ class TestTheProseFollowsTheFile(unittest.TestCase):
     def setUpClass(cls) -> None:
         data = script().load()
         cls.latest = data['latest']
-        cls.supported = script().tier(data, 'cpython', 'supported')
+        # The default builds, which the classifiers and the spans name, and with
+        # them a supported free-threaded build, which has a Compat leg and a
+        # tier line of its own (#1958).
+        cls.supported = script().builds(data, 'cpython', 'supported')
+        cls.compat = script().tier(data, 'cpython', 'supported')
         cls.ktlo = script().tier(data, 'cpython', 'ktlo')
 
     def test_the_classifiers_name_the_supported_tier_and_both_implementations(self) -> None:
+        """The default builds alone: no trove classifier names a free-threaded build (#1958)."""
         text = (ROOT / 'pyproject.toml').read_text(encoding='utf-8')
-        self.assertEqual(re.findall(r'"Programming Language :: Python :: (3\.\d+)"', text), self.supported)
+        self.assertEqual(re.findall(r'"Programming Language :: Python :: (3\.\d+t?)"', text), self.supported)
         self.assertEqual(re.findall(r'"Programming Language :: Python :: Implementation :: (\w+)"', text),
                          ['CPython', 'PyPy'])
 
@@ -933,18 +938,18 @@ class TestTheProseFollowsTheFile(unittest.TestCase):
     def test_the_required_contexts_table_is_the_supported_tier(self) -> None:
         """The docs' copy of ruleset 23497679, which a tier change edits with it."""
         page = prose(ROOT / 'docs' / 'source' / 'contributing' / 'workflows.rst')
-        self.assertEqual(re.findall(r'\* - ``Compat Python (3\.\d+)``', page), self.supported)
+        self.assertEqual(re.findall(r'\* - ``Compat Python (3\.\d+t?)``', page), self.compat)
 
     def test_the_workflows_page_cites_each_version_on_its_line(self) -> None:
         """The required contexts' rows, and the two tiers' spans under them, cite the file by line."""
         lines = TIER_FILE.read_text(encoding='utf-8').splitlines()
         page = prose(ROOT / 'docs' / 'source' / 'contributing' / 'workflows.rst')
-        rows = re.findall(r'``Compat Python (3\.\d+)`` .*? ``\.github/python-versions\.toml:(\d+)``', page)
-        self.assertEqual([version for version, _ in rows], self.supported)
+        rows = re.findall(r'``Compat Python (3\.\d+t?)`` .*? ``\.github/python-versions\.toml:(\d+)``', page)
+        self.assertEqual([version for version, _ in rows], self.compat)
         for version, line in rows:
             with self.subTest(version=version):
                 self.assertTrue(lines[int(line) - 1].startswith(f'"{version}" = '), lines[int(line) - 1])
-        for label, versions in (('supported tier', self.supported), ('KTLO legs', self.ktlo)):
+        for label, versions in (('supported tier', self.compat), ('KTLO legs', self.ktlo)):
             spans = re.findall(rf'its {label} \(``python-versions\.toml:(\d+)-(\d+)``\)', page)
             with self.subTest(tier=label):
                 self.assertEqual(len(spans), 1, spans)
@@ -1016,14 +1021,21 @@ class TestTheExperimentalTier(unittest.TestCase):
         return script().outputs(script().load(write_tiers(self.tmp, data)))
 
     def test_the_file_lists_free_threaded_cpython_and_graalpy(self) -> None:
-        """Each spelt as setup-python's ``python-version`` reads it, and nothing else experimental."""
+        """Each spelt as setup-python's ``python-version`` reads it, and nothing else experimental.
+
+        GraalPy is experimental; free-threaded 3.14t is listed, supported since #1958.
+
+        """
         data = script().load()
         for impl, spelling in SETUP_PYTHON.items():
-            found = script().tier(data, impl, 'experimental')
+            found = [version for version in data['versions'].get(impl, {}) if script().hand_kept(impl, version)]
             with self.subTest(implementation=impl):
-                self.assertTrue(found, f'no experimental {impl}')
+                self.assertTrue(found, f'no hand-kept {impl}')
                 for version in found:
                     self.assertRegex(version, rf'^{spelling.pattern}$')
+                for version in script().tier(data, impl, 'experimental'):
+                    self.assertIn(version, found)
+        self.assertTrue(script().tier(data, 'graalpy', 'experimental'))
         self.assertEqual(script().tier(data, 'pypy', 'experimental'), [])
 
     def test_load_holds_the_tier_to_those_builds(self) -> None:
@@ -1033,8 +1045,9 @@ class TestTheExperimentalTier(unittest.TestCase):
         versions = TIERS_WITH_EXPERIMENTAL['versions']
         cpython = {key: value for key, value in versions['cpython'].items() if key != '3.14t'}
         cases = {
-            'a free-threaded build in a blocking tier': dict(versions, cpython=dict(cpython, **{
-                '3.14t': {'tier': 'supported'}})),
+            # #1958: supported is allowed beside its default build, KTLO never.
+            'a free-threaded build in KTLO': dict(versions, cpython=dict(cpython, **{
+                '3.14t': {'tier': 'ktlo'}})),
             'GraalPy in a blocking tier': dict(versions, graalpy={'graalpy-25.4': {'tier': 'ktlo'}}),
             'a plain CPython experimental': dict(versions, cpython=dict(cpython, **{
                 '3.16': {'tier': 'experimental'}})),

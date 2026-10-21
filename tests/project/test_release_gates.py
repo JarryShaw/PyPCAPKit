@@ -137,8 +137,9 @@ is the only row in the table that mutation fails.
 
 :func:`evaluate_condition` implements the subset this workflow uses and
 nothing more: ``!``, ``&&``, ``||``, parentheses, ``==``/``!=`` against
-single-quoted literals, integer literals, ``startsWith``, ``contains``,
-``fromJSON``, the status-check functions, and ``needs.<job>.result`` /
+single-quoted literals, integer literals, ``startsWith``, ``endsWith`` (the
+free-threaded legs' ``PYTHON_GIL``, #1958), ``contains``, ``fromJSON``, the
+status-check functions, and ``needs.<job>.result`` /
 ``needs.<job>.outputs.<NAME>`` / ``github.*`` lookups. ``contains``,
 ``fromJSON`` and ``always()`` appear in no gate on the tree -- they are
 implemented because the mutation table needs them *evaluated* rather than
@@ -680,6 +681,7 @@ _FUNCTIONS = {
     'success': 0,
     'failure': 0,
     'startswith': 2,
+    'endswith': 2,
     'contains': 2,
     'fromjson': 1,
 }
@@ -981,6 +983,9 @@ def _call(name: 'str', arguments: 'list[object]', context: 'dict[str, object]') 
     if name == 'startswith':
         # `startsWith` is case-insensitive and casts both operands, same as `==`.
         return _as_string(arguments[0]).casefold().startswith(_as_string(arguments[1]).casefold())
+    if name == 'endswith':
+        # Likewise case-insensitive (docs.github.com, Expressions, `endsWith`).
+        return _as_string(arguments[0]).casefold().endswith(_as_string(arguments[1]).casefold())
     if name == 'contains':
         haystack, needle = arguments
         if isinstance(haystack, list):

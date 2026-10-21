@@ -124,11 +124,16 @@ TIERS = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 
 def _coverage_legs() -> 'tuple[str, tuple[str, ...]]':
-    """The ``latest`` leg's job name, and the other supported legs', from :data:`TIERS`."""
+    """The ``latest`` leg's job name, and the other supported default builds' legs', from :data:`TIERS`.
+
+    Not a free-threaded leg, such as 3.14t (#1958): the coverage ratio compares
+    ``latest`` with legs of the same build.
+
+    """
     with open(TIERS, 'rb') as file:
         data = tomllib.load(file)
     paired = tuple(f'Python {version}' for version, entry in data['versions']['cpython'].items()
-                   if entry['tier'] == 'supported' and version != data['latest'])
+                   if entry['tier'] == 'supported' and version != data['latest'] and not version.endswith('t'))
     return f"Python {data['latest']}", paired
 
 

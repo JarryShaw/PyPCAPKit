@@ -273,8 +273,9 @@ class TestTheTestsAreContained(unittest.TestCase):
     def legs(self) -> 'list[str]':
         found = [leg['python-version'] for leg in legs(*EXPERIMENTAL)]
         self.assertTrue(any(version.startswith('graalpy') for version in found), found)
-        self.assertTrue(any(not version.startswith('graalpy') for version in found), found)
-        return found
+        # #1958: 3.14t left for unit-tests.yml, so the leg GraalPy's settings must
+        # not reach is the free-threaded build the tier may hold here again.
+        return found + [version for version in ('3.14t',) if version not in found]
 
     def test_graalpy_alone_gets_a_2g_heap_and_3_workers(self) -> None:
         env = step(TESTS).get('env', {})

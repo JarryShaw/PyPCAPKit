@@ -17,8 +17,8 @@ actions/runner-images' READMEs at 2c421200c.
     Both tiers. A KTLO leg carries ``ktlo: true``, and ``os`` where
     ``ubuntu-latest`` cannot provide it.
 ``test``, ``integration``
-    The supported tier alone, CPython's then PyPy's (#1958); ``test`` marks the
-    ``latest`` leg ``coverage: true``.
+    The supported tier alone, CPython's then PyPy's (#1958), free-threaded
+    CPython among CPython's; ``test`` marks the ``latest`` leg ``coverage: true``.
 ``test-ktlo``, ``integration-ktlo``
     Each KTLO version, CPython's then PyPy's, as a leg carrying ``ktlo: true``,
     and ``os`` as above, for unit-tests.yml's jobs of the same names, which
@@ -27,19 +27,21 @@ actions/runner-images' READMEs at 2c421200c.
     The same, for CPython's KTLO versions below 3.12. No other unit-tests.yml
     output holds a KTLO version.
 ``experimental``
-    Each experimental version as a leg carrying ``experimental: true``, for
+    Each experimental version -- GraalPy's, since free-threaded 3.14t is
+    supported (#1958) -- as a leg carrying ``experimental: true``, for
     experimental.yml's ``experimental`` job, a workflow of its own so that nothing
     waits on it (#1732).
     No other output holds an experimental version.
 ``pypcap-parity``
     The supported versions below 3.12.
 ``pypi``
-    CPython, then PyPy, both tiers, on ``ubuntu-latest``.
+    CPython, then PyPy, both tiers, on ``ubuntu-latest``; no free-threaded build
+    (:func:`builds`).
 ``conda``
-    The supported CPython versions, as one matrix axis.
+    The supported CPython versions, as one matrix axis; no free-threaded build.
 ``engine-supported``, ``engine-ktlo``
     What ``engine-tests`` installs on ``ubuntu-latest``, one version per line,
-    as ``actions/setup-python`` reads a list.
+    as ``actions/setup-python`` reads a list; no free-threaded build.
 ``pypi-wheels``, ``conda-builds``
     The supported tier's wheel tags and conda build tags, which Create Release's
     completeness checks count.
@@ -102,15 +104,29 @@ def key(version: 'str') -> 'tuple[int, int]':
     return int(found['line']), int(found['release'])
 
 
+def free_threaded(impl: 'str', version: 'str') -> 'bool':
+    """Whether ``version`` is a free-threaded CPython build, such as ``3.14t``."""
+    return impl == 'cpython' and version.endswith('t')
+
+
+def hand_kept(impl: 'str', version: 'str') -> 'bool':
+    """Whether the weekly job keeps ``version``'s line as written (#1660).
+
+    Free-threaded CPython and GraalPy: :file:`util/update_python_versions.py` has
+    no source to compute a tier for either, whatever tier the file gives it.
+
+    """
+    return impl == 'graalpy' or free_threaded(impl, version)
+
+
 def experimental_only(impl: 'str', version: 'str') -> 'bool':
     """Whether ``version`` is a build the experimental tier holds, and no other (#1660).
 
-    Free-threaded CPython and GraalPy: no wheel tag, conda build or ``Compat`` leg
-    handles either, and the weekly job (:file:`util/update_python_versions.py`)
-    has no source to compute a tier for one, so it keeps their lines as written.
+    GraalPy: no wheel tag, conda build or ``Compat`` leg handles it. Free-threaded
+    CPython was one too until #1958 promoted 3.14t, which may be supported.
 
     """
-    return impl == 'graalpy' or (impl == 'cpython' and version.endswith('t'))
+    return impl == 'graalpy'
 
 
 def load(path: 'pathlib.Path' = FILE) -> 'dict[str, Any]':
@@ -124,11 +140,16 @@ def load(path: 'pathlib.Path' = FILE) -> 'dict[str, Any]':
     instead of running it as something else. An exemption's reason is the
     comment above it, which :mod:`tomllib` does not keep.
 
-    The experimental tier holds free-threaded CPython and GraalPy, and they hold
-    no other (:func:`experimental_only`): promoting one to a blocking tier needs
-    its wheel, conda build and ``Compat`` leg first, so that fails here too. They
-    are listed after the other versions of their table, which keeps each tier's
-    lines one run for the prose that cites them.
+    The experimental tier holds free-threaded CPython and GraalPy alone
+    (:func:`hand_kept`). GraalPy holds no other (:func:`experimental_only`):
+    promoting it to a blocking tier needs its wheel, conda build and ``Compat``
+    leg first, so that fails here too. A free-threaded CPython may be supported
+    (#1958), never KTLO, and only beside its default build: it gets ``test``,
+    ``integration`` and ``Compat`` legs, and no wheel or conda build of its own,
+    as the default build's pure-Python ``cp3N-none-any`` wheel is the one it
+    installs (:func:`builds`). The hand-kept versions are listed after the
+    others of their table, which keeps each tier's lines one run for the prose
+    that cites them.
 
     """
     data = tomllib.loads(pathlib.Path(path).read_text(encoding='utf-8'))
@@ -152,20 +173,29 @@ def load(path: 'pathlib.Path' = FILE) -> 'dict[str, Any]':
             if entry['tier'] == 'pre-release':
                 raise ValueError(f'{where}: no workflow runs pre-release legs yet; wire their '
                                  'non-blocking mechanics before listing one (#1660)')
-            if entry['tier'] == 'experimental' and not experimental_only(impl, version):
+            if entry['tier'] == 'experimental' and not hand_kept(impl, version):
                 raise ValueError(f'{where}: the experimental tier holds free-threaded CPython and GraalPy '
                                  'only; the weekly job computes the tier of every other version (#1660)')
             if entry['tier'] != 'experimental' and experimental_only(impl, version):
-                raise ValueError(f'{where}: free-threaded CPython and GraalPy are experimental only; give them '
-                                 'a wheel, a conda build and a Compat leg before a blocking tier (#1660)')
+                raise ValueError(f'{where}: GraalPy is experimental only; give it a wheel, a conda build '
+                                 'and a Compat leg before a blocking tier (#1660)')
+            if free_threaded(impl, version) and entry['tier'] not in ('experimental', 'supported'):
+                raise ValueError(f'{where}: a free-threaded build is experimental or supported, never '
+                                 f'{entry["tier"]} (#1958)')
+            if (free_threaded(impl, version) and entry['tier'] == 'supported'
+                    and entries.get(version[:-1], {}).get('tier') != 'supported'):
+                raise ValueError(f'{where}: a supported free-threaded build installs {version[:-1]}\'s '
+                                 f'wheel, so {version[:-1]} must be supported too (#1958)')
             if 'runner' in entry and not RUNNER.fullmatch(str(entry['runner'])):
                 raise ValueError(f'{where}: runner {entry["runner"]!r} is not an ubuntu-YY.04 image')
-        rest = [version for version, entry in entries.items() if entry['tier'] != 'experimental']
-        last = [version for version, entry in entries.items() if entry['tier'] == 'experimental']
+        rest = [version for version in entries if not hand_kept(impl, version)]
+        last = [version for version in entries if hand_kept(impl, version)]
         if list(entries) != sorted(rest, key=key) + sorted(last, key=key):
-            raise ValueError(f'{impl}: list the versions oldest first, the experimental ones after the rest')
-    if data.get('latest') not in tier(data, 'cpython', 'supported'):
-        raise ValueError(f'latest {data.get("latest")!r} is not a supported CPython version')
+            raise ValueError(f'{impl}: list the versions oldest first, the hand-kept ones '
+                             '(free-threaded CPython, GraalPy) after the rest')
+    if data.get('latest') not in builds(data, 'cpython', 'supported'):
+        raise ValueError(f'latest {data.get("latest")!r} is not a supported CPython version, '
+                         'free-threaded builds aside')
     for index, exemption in enumerate(data.get('exemptions', [])):
         fields = ('workflow', 'job', 'where', 'value')
         if (not isinstance(exemption, dict) or set(exemption) != set(fields)
@@ -179,20 +209,32 @@ def tier(data: 'dict[str, Any]', impl: 'str', name: 'str') -> 'list[str]':
     return [version for version, entry in data['versions'].get(impl, {}).items() if entry['tier'] == name]
 
 
+def builds(data: 'dict[str, Any]', impl: 'str', name: 'str') -> 'list[str]':
+    """:func:`tier` less the free-threaded builds: the versions with a wheel and a conda build of their own.
+
+    A free-threaded build installs its default build's pure-Python wheel, which
+    :file:`util/wheel_rename.py` would tag ``cp3N`` for either, so it gets no
+    ``pypi`` or ``conda`` leg; nor an ``engine-tests`` one, as PyShark needs the
+    ``lxml`` its install leaves out (#1958).
+
+    """
+    return [version for version in tier(data, impl, name) if not free_threaded(impl, version)]
+
+
 def runner(data: 'dict[str, Any]', impl: 'str', version: 'str') -> 'Optional[str]':
     """The image ``version`` needs, or :data:`None` for ``ubuntu-latest``."""
     return data['versions'][impl][version].get('runner')
 
 
 def on_latest(data: 'dict[str, Any]', impl: 'str', name: 'str', job: 'str') -> 'list[str]':
-    """Tier ``name`` of ``impl`` as a job pinned to ``ubuntu-latest`` can run it.
+    """Tier ``name`` of ``impl`` as a job pinned to ``ubuntu-latest`` can run it, free-threaded builds aside.
 
     A KTLO version needing an older image is left out. A supported one cannot be,
     so that raises: ``job`` would silently stop testing it.
 
     """
     found = []
-    for version in tier(data, impl, name):
+    for version in builds(data, impl, name):
         if runner(data, impl, version) is None:
             found.append(version)
         elif name == 'supported':
@@ -246,7 +288,7 @@ def ktlo_matrix(data: 'dict[str, Any]') -> 'dict[str, Any]':
 
 
 def experimental_legs(data: 'dict[str, Any]') -> 'list[dict[str, Any]]':
-    """Each experimental version, CPython's then GraalPy's, as a leg of its own (#1660)."""
+    """Each experimental version, as a leg of its own (#1660): free-threaded CPython's, if any, then GraalPy's."""
     found = []
     for impl in SPELLING:
         for version in tier(data, impl, 'experimental'):
@@ -294,7 +336,7 @@ def parity_ktlo_matrix(data: 'dict[str, Any]') -> 'dict[str, Any]':
 
 
 def pypi_matrix(data: 'dict[str, Any]') -> 'dict[str, Any]':
-    """create-release.yml's ``pypi``: one wheel per CPython and PyPy version, both tiers, none experimental."""
+    """create-release.yml's ``pypi``: one wheel per CPython and PyPy version, both tiers, none experimental or free-threaded."""
     impls = tuple(WHEEL_PREFIX)
     return {'python-version': [v for impl in impls for v in on_latest(data, impl, 'supported', 'pypi')],
             'include': [{'python-version': v, 'ktlo': True}
@@ -319,11 +361,11 @@ OUTPUTS = {
     'pypcap-parity': parity_matrix,
     'pypcap-parity-ktlo': parity_ktlo_matrix,
     'pypi': pypi_matrix,
-    'conda': lambda data: tier(data, 'cpython', 'supported'),
+    'conda': lambda data: builds(data, 'cpython', 'supported'),
     'engine-supported': lambda data: '\n'.join(on_latest(data, 'cpython', 'supported', 'engine-tests')),
     'engine-ktlo': lambda data: '\n'.join(on_latest(data, 'cpython', 'ktlo', 'engine-tests')),
     'pypi-wheels': lambda data: ' '.join(map(wheel_tag, pypi_matrix(data)['python-version'])),
-    'conda-builds': lambda data: ' '.join('py' + ''.join(map(str, key(v))) for v in tier(data, 'cpython', 'supported')),
+    'conda-builds': lambda data: ' '.join('py' + ''.join(map(str, key(v))) for v in builds(data, 'cpython', 'supported')),
 }  # type: dict[str, Callable[[dict[str, Any]], Any]]
 
 

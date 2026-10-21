@@ -50,8 +50,8 @@ jobs:
     # showed two rows reading `Python 3.10`, one a 13-second import smoke test
     # and one a three-minute test run, with nothing to tell them apart.
     #
-    # #1633's tiers. The supported tier, 3.11-3.15, keeps the plain name,
-    # which is what ruleset 23497679 requires one context per version of. The
+    # #1633's tiers. The supported tier, 3.11-3.15 and 3.14t (#1958), keeps the
+    # plain name, which ruleset 23497679 requires one context per version of. The
     # KTLO tier, end-of-life 3.7-3.10, is suffixed ` (KTLO)`, so no required
     # context can match one. Its steps carry `continue-on-error`, as in
     # unit-tests.yml's `test` job: job-level, a failed leg's check run concluded
@@ -119,6 +119,12 @@ jobs:
           fi
           if ! python -c 'import pcapkit; print(pcapkit.__version__)'; then
             echo "::${ANNOTATION_LEVEL} title=pcapkit does not import on ${LEG//,/%2C}::See the traceback in this step's log."
+            exit 1
+          fi
+          # #1958: on a free-threaded build, with no PYTHON_GIL set, importing
+          # pcapkit and its dependencies must leave the GIL off.
+          if ! python -c 'import sys, sysconfig, pcapkit; sys.exit(sysconfig.get_config_var("Py_GIL_DISABLED") == 1 and sys._is_gil_enabled())'; then
+            echo "::${ANNOTATION_LEVEL} title=pcapkit turns the GIL on on ${LEG//,/%2C}::Importing pcapkit enabled the GIL on this free-threaded build; see the RuntimeWarning in this step's log."
             exit 1
           fi
 

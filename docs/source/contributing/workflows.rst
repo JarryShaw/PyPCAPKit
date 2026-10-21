@@ -376,7 +376,7 @@ the same commit several times over. It also skips ``changes``,
 Checks`_ below), which are gated out by their own ``if:`` rather than by having
 already run. ``changelog`` carries no
 ``if:`` at all and runs on every path regardless -- deliberately, per its own
-comment (``unit-tests.yml:1629-1635``): ``create-release.yml`` feeds
+comment (``unit-tests.yml:1655-1661``): ``create-release.yml`` feeds
 ``CHANGELOG.md`` to the GitHub Release body, so the release path is exactly
 where a drifted file must not go unchecked. Confirmed on run `36210743295
 <https://github.com/JarryShaw/PyPCAPKit/actions/runs/36210743295>`__ (a
@@ -689,7 +689,7 @@ grepping every workflow file for its name:
      - Where
    * - ``Required checks passed``
      - job ``required-checks``
-     - ``unit-tests.yml:1964``
+     - ``unit-tests.yml:1990``
    * - ``Compat Python 3.11``
      - job ``compatibility``, matrix leg ``3.11``
      - ``python-compatibility.yml:60``, ``.github/python-versions.toml:20``
@@ -705,28 +705,33 @@ grepping every workflow file for its name:
    * - ``Compat Python 3.15``
      - job ``compatibility``, matrix leg ``3.15``
      - ``python-compatibility.yml:60``, ``.github/python-versions.toml:24``
+   * - ``Compat Python 3.14t``
+     - job ``compatibility``, matrix leg ``3.14t``
+     - ``python-compatibility.yml:60``, ``.github/python-versions.toml:25``
 
 That is the list after `#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__,
-which added ``Compat Python 3.15`` and removed ``Compat Python 3.10``. Moving a version
-between the tiers below means editing the ruleset in the same change.
+which added ``Compat Python 3.15`` and removed ``Compat Python 3.10``, and
+`#1958 <https://github.com/JarryShaw/PyPCAPKit/issues/1958>`__, which added ``Compat
+Python 3.14t``. Moving a version between the tiers below means editing the ruleset in
+the same change.
 
 ``Required checks passed`` is defined by exactly one job
-(``unit-tests.yml:1964``). ``Compat Python`` is defined by one, the
+(``unit-tests.yml:1990``). ``Compat Python`` is defined by one, the
 ``compatibility`` job in ``python-compatibility.yml`` (``:60``), whose matrix
 (``:74``) comes from :file:`.github/python-versions.toml`: the required legs
-are its supported tier (``python-versions.toml:20-24``), and its KTLO legs
+are its supported tier (``python-versions.toml:20-25``), and its KTLO legs
 (``python-versions.toml:16-19``) have names ending in ``(KTLO)``, so no required
 context matches one. A comment at
-``unit-tests.yml:1876`` mentions the string without defining it.
+``unit-tests.yml:1902`` mentions the string without defining it.
 
 ``Required checks passed`` is an aggregate, not a single check run. The ruleset
-requires it and the ``Compat Python 3.11``-``3.15`` legs, nothing else, as
-``unit-tests.yml``'s own comment (``unit-tests.yml:1875-1885``) records. It
+requires it and the ``Compat Python 3.11``-``3.15`` legs and ``Compat Python 3.14t``, nothing else, as
+``unit-tests.yml``'s own comment (``unit-tests.yml:1901-1911``) records. It
 ``needs:`` the gating jobs of ``unit-tests.yml`` -- ``test``, ``integration``,
 ``engine-tests`` and ``pypcap-parity``, plus ``project-tests``, the one run of
 the project pins, and ``changes`` for the docs-only path -- and checks each
 result explicitly
-(``unit-tests.yml:1963-2019``). Rulesets match check names literally, with no
+(``unit-tests.yml:1989-2045``). Rulesets match check names literally, with no
 wildcard, so requiring the matrix cells one by one would mean editing the
 ruleset whenever a matrix changes; the aggregate keeps the required list fixed.
 It accepts the gating jobs as ``skipped`` only on a docs-only pull request, where
@@ -735,7 +740,7 @@ It accepts the gating jobs as ``skipped`` only on a docs-only pull request, wher
 ``python-compatibility.yml``, and a job cannot ``needs:`` a job in another
 workflow file. This job runs on Unit Tests' own ``push``/``pull_request``
 triggers; the ``gate-only: true`` reusable calls documented above skip it via
-``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:1966``),
+``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:1992``),
 so it is never produced -- and never expected -- on those paths.
 
 .. _ktlo-tier:
@@ -745,7 +750,8 @@ Python versions are tiered -- supported and KTLO
 (`#1660 <https://github.com/JarryShaw/PyPCAPKit/issues/1660>`__, below) -- in
 :file:`.github/python-versions.toml` (see `Python Versions`_).
 The **supported** tier, 3.11-3.15, blocks: a failed leg fails ``Required checks passed`` or its own
-required ``Compat`` context. The **KTLO** (*keep the lights on*) tier -- end-of-life 3.7-3.10, still built and
+required ``Compat`` context. So does free-threaded 3.14t, supported since `#1958
+<https://github.com/JarryShaw/PyPCAPKit/issues/1958>`__ (see `Free-threaded CPython`_). The **KTLO** (*keep the lights on*) tier -- end-of-life 3.7-3.10, still built and
 tested -- never blocks, is never a required context, and never shows a commit or a
 pull request red (`#1672 <https://github.com/JarryShaw/PyPCAPKit/issues/1672>`__). In ``unit-tests.yml`` the KTLO legs are jobs of their own
 since `#1738 <https://github.com/JarryShaw/PyPCAPKit/issues/1738>`__: ``test-ktlo``,
@@ -759,7 +765,7 @@ and keeps its legs' check names, ``Python 3.10 (KTLO)`` and so on. In
 with supported legs. Every job holding KTLO legs works the same way:
 
 * Every step that can fail on a KTLO leg has an ``id`` and
-  ``continue-on-error: ${{ matrix.ktlo == true }}`` (``unit-tests.yml:394-411``),
+  ``continue-on-error: ${{ matrix.ktlo == true }}`` (``unit-tests.yml:415-432``),
   unless it is masked on every leg, as the timings uploads are. Its ``outcome`` is
   then ``failure`` but its ``conclusion`` ``success``, so the job, its check run
   and ``required-checks`` read ``success``. A step that needs an earlier one's work
@@ -824,8 +830,36 @@ in no matrix: setup-python builds it only for retired Ubuntu images. Nor are
 are they in ``pypcap-parity``, which also runs on ``ubuntu-latest``; none of them
 was measured on that job.
 
-The **experimental** tier is free-threaded CPython and GraalPy, spelt as
-setup-python reads them (``3.14t``, ``graalpy-25.4``). Each runs a leg of
+.. _free-threaded-cpython:
+
+**Free-threaded CPython.** 3.14t is supported (`#1958
+<https://github.com/JarryShaw/PyPCAPKit/issues/1958>`__), after 21 green runs in a row
+as an experimental leg: a leg of ``test`` and ``integration``, after CPython's other
+legs and running the ``ALL`` test tier, and ``Compat Python 3.14t``, a required context.
+It has no wheel, conda build or ``engine-tests`` cell of its own: the 3.14 wheel is
+pure Python, tagged ``cp314-none-any``, and installs on it, and
+:file:`util/wheel_rename.py` would give a 3.14t wheel that same name.
+:file:`util/python_versions.py` holds a supported free-threaded build to a supported
+default build, and the weekly job keeps its line as written. Its tests run with the
+GIL off, by the owner's ruling:
+
+* ``test`` and ``integration`` set ``PYTHON_GIL=0`` on the leg, which keeps the GIL off
+  even when an extension module that does not declare ``Py_mod_gil`` is imported
+  (`PYTHON_GIL <https://docs.python.org/3/using/cmdline.html#envvar-PYTHON_GIL>`__).
+  ``lxml.etree``, imported through bs4, turned it back on in every experimental run.
+* The install uninstalls the ``test`` extra's ``lxml``, which no marker can leave out.
+  lxml 6 declares no ``Py_mod_gil``, its maintainer reports crashes in its threading
+  tests on 3.14t without the GIL (`LP#2111289
+  <https://bugs.launchpad.net/lxml/+bug/2111289>`__), and its free-threading support
+  is in 7.0.0a1 alone. So the ``HAS_LXML`` tests skip there; each is ``LATEST`` anyway.
+* :file:`tests/_gil_guard.py` fails the first test after which a free-threaded process
+  under GitHub Actions finds ``sys._is_gil_enabled()`` true, in every xdist worker, and
+  ``Compat Python 3.14t`` fails where importing pcapkit, with no ``PYTHON_GIL`` set,
+  turns the GIL on.
+
+The **experimental** tier holds GraalPy and any free-threaded CPython not yet promoted, spelt as
+setup-python reads them (``graalpy-25.4``).
+Each runs a leg of
 ``experimental``, the matrix job of :file:`.github/workflows/experimental.yml`
 ("Experimental Tests"), named ``Python <version> (experimental)``, and nothing
 else: no ``integration``, ``Compat``, wheel or conda leg, so never a required
@@ -899,13 +933,13 @@ fails rather than cancels, and the guard holds (actions/runner
 stays, changing no conclusion, as ``Process completed with exit code N.`` does.
 Everything but the install and the tests took under 20 seconds on every uncovered
 leg of runs 38569321543-38569522442. ``test``'s caps are main's: 45 minutes for the
-job, and none on a step. Promoting one whose leg stays green is a hand edit, which
-:file:`util/python_versions.py` refuses until the build has a wheel, a conda build
+job, and none on a step. Promoting GraalPy once its leg stays green is a hand edit, which
+:file:`util/python_versions.py` refuses until it has a wheel, a conda build
 and a ``Compat`` leg.
 
-The tests' 120 minutes are sized for GraalPy, the slowest of the legs that share
-them: its leg reached 26% of the unit tier in 25 minutes (job 115915976024), where
-3.14t's ran the whole tier in 5.8 (run 38581834697). The experimental legs run the
+The tests' 120 minutes are sized for GraalPy: its leg reached 26% of the unit tier in
+25 minutes (job 115915976024), where 3.14t's, experimental then, ran the whole tier in
+5.8 (run 38581834697). The experimental legs run the
 ``ALL`` test tier alone, as every leg but ``latest`` does (see `Test Tiers`_ below):
 ``List the LATEST tier`` asks ``latest_tier_paths()`` on the runner's own ``python3``,
 before setup-python, so GraalPy does not parse the tree, and ``Run unit tests``
@@ -944,7 +978,7 @@ warnings:
 
 * GraalPy alone gets ``GRAAL_PYTHON_VM_ARGS=--vm.Xmx2g --vm.XX:+ExitOnOutOfMemoryError``,
   a 2 GiB heap for every GraalPy process, xdist workers included, and ``-n 3``, a CPU
-  of the runner's 4 left to the JIT and the runner; 3.14t keeps ``-n auto``. A
+  of the runner's 4 left to the JIT and the runner. A
   worker's live heap grows with the tests it runs (`#1753
   <https://github.com/JarryShaw/PyPCAPKit/issues/1753>`__): in job 116172356218 all
   three reached 2.2-2.6 GB RSS in 16 minutes, and a ``MemoryError`` in pytest's own
@@ -969,7 +1003,7 @@ warnings:
   caps hold over the whole tier; on ``timeout``'s SIGINT the run in progress writes
   its JUnit file and no later one starts. Each shard's run writes a JUnit file of its
   own beside ``junit.xml``, such as ``junit-tests-protocols.xml``, and ``Upload test
-  timings`` takes them all. 3.14t's leg runs pytest once, as before.
+  timings`` takes them all.
 * ``timeout --signal=INT --kill-after=3m 110m`` ends pytest under the step's 120-minute
   cap, so it still writes the junit XML, and exits 124; ``prlimit --fsize=2147483648``
   caps any file at 2 GiB. The ``timeout`` is GNU's, ``gnutimeout`` where it exists
