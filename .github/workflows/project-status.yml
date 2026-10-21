@@ -22,10 +22,8 @@ name: Project Status
 #     `env:` rather than interpolated into the script, and re-reads everything else
 #     (labels, state) from the API.
 #
-# tests/project/test_project_status.py asserts each of them over this file -- no
-# checkout or `uses:`, no `${{ }}` inside a `run:` script, and no event-payload
-# reference outside `env:` other than the item number -- so a later edit that
-# breaks one fails a test rather than a security review.
+# tests/project/test_project_status.py asserts each of them over this file, so a
+# later edit that breaks one fails a test rather than a security review.
 #
 # `workflow_dispatch` is the other way in, and it is not a fork boundary: it runs
 # the workflow file *of the branch selected* with PROJECT_TOKEN in scope. Only
@@ -33,12 +31,10 @@ name: Project Status
 # workflow, so this trusts collaborators rather than forks -- the same trust the
 # rest of the repository's secrets rely on.
 #
-# Event runs and reconciles are in different concurrency groups, so they can
-# overlap. A reconcile reads an item, an event run then sets a fresher Status,
-# and the reconcile writes its older answer over it. The window is the length of
-# one reconcile, and the damage is self-repairing: the item's next event, or the
-# next nightly run, re-reads the labels and sets it right. Serializing the two
-# would mean one global group, which lets a reconcile hold every event run.
+# Event runs and reconciles are in different concurrency groups, so a reconcile
+# can write an older Status over a fresher one. That self-repairs on the item's
+# next event or the next nightly run; one global group instead would let a
+# reconcile hold every event run.
 #
 # PROJECT_TOKEN is a classic PAT with `project` and `repo` scopes, because
 # GITHUB_TOKEN cannot write a user-owned project. Without it every run skips with a
@@ -50,17 +46,14 @@ on:
   pull_request_target:
     types: [opened, reopened, labeled, unlabeled, closed, ready_for_review]
   schedule:
-    # Nightly backstop for events this workflow missed -- a run dropped because
-    # its item's concurrency queue below was full, a GitHub outage, or a label
-    # changed while the secret was absent. 00:37 UTC sits well clear of the
-    # Saturday jobs (CodeQL and GitHub Pages at 02:00, Python Compatibility at
-    # 04:00, Lint at 06:00, Vendor Update at 10:00, Conda Update at 18:00 since
-    # #1967), and off the hour mark that GitHub's scheduler queues most heavily.
+    # Nightly backstop for events this workflow missed -- a run dropped from a
+    # full concurrency queue, a GitHub outage, or a label changed while the
+    # secret was absent. 00:37 UTC is clear of the Saturday jobs (#1967) and off
+    # the hour, which GitHub's scheduler queues most heavily.
     - cron: '37 0 * * *'
   workflow_dispatch:
 
-# The job authenticates with PROJECT_TOKEN throughout and never uses GITHUB_TOKEN,
-# so it is granted nothing.
+# The job uses PROJECT_TOKEN only, never GITHUB_TOKEN.
 permissions: {}
 
 # Event runs are keyed on the item number, so a label swap -- which fires an
@@ -76,17 +69,11 @@ permissions: {}
 # GitHub documents both, and that the two keys together are a validation error:
 # https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency
 #
-# The board still ends right, whatever order the queue runs in -- GitHub states
-# that order is not guaranteed. Runs on one item never overlap, and each re-reads
-# the labels rather than trusting its payload. So the last run to execute starts
-# after every other run on the item has finished, including the one started by
-# the final label event. It therefore reads the final labels, and its write is
-# the last. The cost is that a burst of N events makes N runs instead of
-# collapsing into one, each a handful of API calls.
-#
-# Scheduled and manual reconciles share their own group and queue the same way.
-# A second reconcile waiting behind the first repeats its work, which is cheap at
-# nightly cadence.
+# Queue order is not guaranteed, but the board still ends right: runs on one
+# item never overlap and each re-reads the labels, so the last to execute reads
+# the final labels and writes last. The cost is one run per event, not one per
+# burst. Scheduled and manual reconciles share their own group, queued the same
+# way.
 concurrency:
   group: project-status-${{ (github.event.issue.number || github.event.pull_request.number) && format('item-{0}', github.event.issue.number || github.event.pull_request.number) || 'reconcile' }}
   queue: max

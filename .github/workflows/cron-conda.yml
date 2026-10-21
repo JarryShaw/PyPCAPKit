@@ -4,49 +4,27 @@ permissions:
   contents: read
 
 on:
-  # #1967: GitHub Pages, Vendor Update and Conda Update run eight hours
-  # apart on Saturdays, so each runs `head`'s test gate alone, mostly on a
-  # commit of its own, and `vendor-update` and `conda-update` do not queue
-  # on `repository-maintenance` together. None reads another's output, and
-  # Conda Update comes last so its upload finds the release Create Release
-  # made after Vendor Update (#1634). workflows.rst gives the evidence.
+  # #1967: eight hours after Vendor Update, so its upload finds the release
+  # Create Release made after that (#1634); cron-vendor.yml's schedule says more.
   schedule:
     - cron: '0 18 * * 6' # Saturdays at 18:00 UTC
-  # No `push: branches: [main]` here. `unit-tests.yml`'s own push trigger
-  # already runs the full matrix for this commit; calling it again on every push
-  # with `gate-only: true` re-ran the single-version "Gate" job a second time
-  # for the same tree (#715). Chaining off `Unit Tests`' completion means the gate
-  # never runs twice, and `conda-update` below just reads the verdict that
-  # already exists. `.event == 'push'` is checked in that job's `if` rather
-  # than here, because `workflow_run` fires for a pull request's completion
-  # too and a `branches:` filter here would be the only thing stopping that.
+  # No `push` trigger, and pull requests' runs refused in `conda-update`'s
+  # `if`, as in cron-vendor.yml (#715).
   workflow_run:
     workflows: ["Unit Tests"]
     types: [completed]
 
-# This workflow commits and pushes, so a cancelled run can leave the bump
-# half-applied. Kept keyed on the ref, unlike the validation workflows: this
-# publishes to Anaconda, and letting two runs upload the same version
-# concurrently is worse than dropping a superseded duplicate.
-#
-# A `workflow_run` is keyed on the commit `Unit Tests` verified instead (#1643).
-# Each `Unit Tests` completion raises a run here, and one whose verdict is for an
-# older commit only runs `head` and skips -- but in a shared group it would
-# still displace a pending run whose verdict matches, since "any existing pending
-# job or workflow in the same concurrency group will be canceled" (GitHub,
-# "Control the concurrency of workflows and jobs").
-#
-# Note this group is not what serialises the repository writes -- the
-# `conda-update` job below carries its own `repository-maintenance` group, shared
-# with cron-vendor, and that is what actually stops two jobs committing at once.
+# Never cancelled in progress: a cancelled run can leave the bump half-applied,
+# and two runs uploading one version to Anaconda is worse than dropping a
+# superseded duplicate. Keyed as cron-vendor.yml's group is, and why (#1643);
+# `conda-update`'s `repository-maintenance` group serialises the writes.
 concurrency:
   group: conda-update-${{ github.event.workflow_run.head_sha || github.ref }}
   cancel-in-progress: false
 
 jobs:
-  # #1967: the test gate, on the schedule only, and the `verdict` on a
-  # `workflow_run`, shared with Vendor Update and GitHub Pages. cron-head.yml
-  # says when each runs.
+  # #1967: the test gate on the schedule, `verdict` on a `workflow_run`;
+  # shared with Vendor Update and GitHub Pages.
   head:
     name: Conda gate
     permissions:
@@ -56,24 +34,11 @@ jobs:
   conda-update:
     name: Update requirements.txt
     runs-on: ubuntu-latest
-    # #1968: the deploy key is a `conda-tag` environment secret, and only
-    # a job naming the environment can read it. Keep that environment free of
-    # required reviewers, or every scheduled bump waits for an approval.
+    # #1968: as for cron-vendor.yml's `vendor-update`.
     environment: conda-tag
     needs: [ head ]
-    # `needs` cannot itself be conditional, and `head`'s jobs skip on every
-    # path, so this job must not inherit a skip. `!cancelled()` rather than
-    # `always()` so that cancelling the run still cancels the update; a gate
-    # that actually failed still blocks.
-    #
-    # The `workflow_run` clause is the real gate for a push to main: it
-    # reads the verdict `Unit Tests` already reached instead of re-running it,
-    # and `head`'s `verified` says whether that verdict covers the commit
-    # checked out below (#1643). `.event == 'push'` and `.head_branch == 'main'`
-    # both matter -- `workflow_run` fires for *every* completion of that
-    # workflow, including one triggered by a pull request, and without this
-    # check a green PR would upload a conda distribution built from that PR's
-    # tree.
+    # As cron-vendor.yml's `vendor-update` (#1643); without the `push`/`main`
+    # checks a green PR would upload a conda distribution built from its tree.
     if: >-
       !cancelled() && needs.head.result != 'failure' &&
       (github.event_name != 'workflow_run' || (
@@ -95,25 +60,9 @@ jobs:
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # Deliberately the default `github.sha` (main's tip), not
-          # `github.event.workflow_run.head_sha`. Pinning to the latter once
-          # ran here and CodeQL flagged it as "checkout of untrusted code in a
-          # privileged context" -- `workflow_run` can also be raised by a pull
-          # request's `Unit Tests` run, and that field would then be a fork's
-          # commit. The `if:` above already keeps that path from reaching this
-          # step, but making the ref itself always resolve to a trusted
-          # default-branch commit removes the pattern outright rather than
-          # relying on CodeQL tracing through the guard. The push below rebases
-          # onto main's actual tip before writing, or does not write at all, so
-          # pinning to the exact tested sha would have bought nothing here
-          # either. Whether this commit is one that verdict covers is
-          # `head`'s question (#1643); whether what lands after it is, Push
-          # Changes' (#1632).
-          #
-          # The push below re-points `origin` at an SSH remote and authenticates
-          # with the loaded deploy key, not with this checkout's credential --
-          # so there is nothing here for a persisted token to do, and one less
-          # live credential for anything running in between to find.
+          # `github.sha`, and no persisted token, as in cron-vendor.yml. Whether
+          # the verdict covers this commit is `head`'s question (#1643); whether
+          # it covers what lands after it, Push Changes' (#1632).
           persist-credentials: false
           fetch-depth: 0
 
@@ -127,32 +76,24 @@ jobs:
         with:
           python-version: ${{ steps.python-versions.outputs.latest }}
 
-      # `.[all]`, which is what `util/conda_vendor.py` below vendors (#1814):
-      # it derives `conda/requirements.txt` from `dependencies` and the `all`
-      # extra, walks what they require through the installed metadata, and
-      # pins each package at the version installed here, but for its
-      # `PLATFORM_PINS` (#1827). So this install is the step that resolves the
-      # newest releases, and of the script's runs only the next one reads the
-      # network, through `requests`, which `.[all]` does not bring.
+      # `.[all]` is what util/conda_vendor.py vendors (#1814), pinning each
+      # package at the version installed here but for its `PLATFORM_PINS`
+      # (#1827), so this install resolves the newest releases. `requests` is
+      # for the next step, the script's only run that reads the network.
       - name: Install and Setup
         run: |
           set -x
 
           python -m pip install -U pip setuptools wheel packaging requests
-          python -m pip install -e .[all]
+          python -m pip install -e '.[all]'
 
-      # #1851: asks PyPI for each `PLATFORM_PINS` package's releases and moves
-      # its pin in conda/platform-pins.toml up to the newest release, up to the
-      # one installed above, with a wheel for the pinned platform, renewing its
-      # review-by date; a pin that reaches the installed release, or already
-      # pins it, goes.
-      # The step below then writes the moved pin into conda/requirements.txt,
-      # and Commit Changes commits both. The table is not one of
-      # util/verdict_covers_checkout.py's bot-managed paths, which says why:
-      # the workflows chained off Unit Tests wait for such a commit's own run
-      # (#1643). A package PyPI cannot be read for keeps its pin, with a
-      # warning, and a pin past its review-by date gets one too; either way the
-      # step passes.
+      # #1851: moves each `PLATFORM_PINS` pin in conda/platform-pins.toml up to
+      # PyPI's newest release with a wheel for the pinned platform, no further
+      # than the one installed above, and renews its review-by date; a pin that
+      # reaches the installed release goes. Not one of
+      # util/verdict_covers_checkout.py's bot-managed paths, which says why
+      # (#1643). An unreadable package keeps its pin and a pin past its
+      # review-by date warns; neither fails the step.
       - name: Refresh the platform pins
         run: python util/conda_vendor.py --refresh-pins
 
@@ -196,33 +137,21 @@ jobs:
           Updated conda distribution at $(date). The following files have been changed:
             $CHANGED_FILES"
 
-      # Writes `pushed` and `commit`, which `CONDA_CHANGED` and `CONDA_COMMIT`
-      # below hand to `conda-tag` and `conda-dist` (#1632).
+      # #1632: writes `pushed` and `commit` for `conda-tag` and `conda-dist`.
+      # The verdict covers `$GITHUB_SHA` only, so the commits a rebase onto the
+      # fetched tip would bring in are put to #1643's rule, run from this
+      # checkout. Not covered: nothing is pushed, and the tip's own Unit Tests
+      # run raises this workflow again. Covered: rebase onto that same commit,
+      # so what is pushed is what was judged.
       #
-      # The verdict this run acted on -- `head`'s `verdict`, or on the schedule
-      # its test gate's -- covers `$GITHUB_SHA`, the checkout, and nothing after
-      # it. A commit that lands on `main` during the run would otherwise be
-      # rebased under the bump, pushed, tagged and uploaded with no verdict of
-      # its own.
-      # So the tip is fetched first and the commits a rebase onto it would bring
-      # in are put to #1643's rule, util/verdict_covers_checkout.py, run from
-      # this checkout and not from the tip it is judging. If they are not
-      # covered, nothing is pushed: the tip's own `Unit Tests` run raises this
-      # workflow again, and that run bumps. Otherwise the rebase is onto that
-      # same fetched commit, so what is pushed is what was judged.
-      #
-      # A bump then counts only while `conda/build` still differs from the tip.
-      # Two runs can compute the same bump from one checkout -- the schedule and
-      # a `workflow_run`, or a re-run, which uses "the same `GITHUB_SHA`"
-      # (GitHub, "Re-running workflows and jobs") -- and the second one's rebase
-      # drops it as "previously applied", while `files_changed` still reads
-      # 'true'. Conda Update 38325136710 and 38325153882 were such a pair, both
-      # on 2e941bbb7 and raised 2 s after two different `Unit Tests` runs, for
-      # 9083163f5 and for 01151b13f, completed; `verdict` refuses both.
-      # Asking about that file rather than "is a commit left to push" also
-      # covers a rebase that keeps part of the commit but drops its bump: that
-      # remainder would land under a build already tagged, so it is not pushed,
-      # and the next run recomputes it under a fresh build.
+      # A bump counts only while `conda/build` still differs from the tip. Two
+      # runs from one checkout -- the schedule and a `workflow_run`, or a
+      # re-run, which uses "the same `GITHUB_SHA`" (GitHub, "Re-running
+      # workflows and jobs") -- compute the same bump, and the second's rebase
+      # drops it while `files_changed` still reads 'true' (Conda Update
+      # 38325136710 and 38325153882, both on 2e941bbb7). Asking about the file
+      # also refuses a rebase that keeps part of the commit but drops its bump,
+      # which would land under a build already tagged.
       - name: Push Changes
         id: push-changes
         if: steps.verify-changed-files.outputs.files_changed == 'true'
@@ -262,14 +191,10 @@ jobs:
               status=0
               git push origin "${commit}:${GITHUB_REF}" || status=$?
               if [ "$status" -ne 0 ]; then
-                # #1649: a merge landing after the fetch above has the push
-                # refused as a non-fast-forward. That is main moving past this
-                # checkout one step later than the rule can see, so it ends as
-                # the rule's refusal does. Only main moved to a commit without
-                # `$commit` in its history is that race: at `$tip` the push
-                # failed for another reason, and over `$commit` it landed though
-                # git says it did not. Those, and a fetch that fails, fail the
-                # step.
+                # #1649: a merge after the fetch makes this a non-fast-forward,
+                # which ends as the rule's refusal does. Only main moved to a
+                # commit lacking `$commit` is that race; main still at `$tip`,
+                # main already holding `$commit`, or a failed fetch fail the step.
                 git fetch origin "${GITHUB_REF#refs/heads/}" || exit "$status"
                 moved="$(git rev-parse FETCH_HEAD)"
                 ancestry=0
@@ -295,9 +220,11 @@ jobs:
         run: |
           set -ex
 
-          echo "PCAPKIT_VERSION=$(python -c 'import pcapkit; print(pcapkit.__version__)')" >> $GITHUB_OUTPUT
-          echo "PCAPKIT_CONDA_LABEL=$(python -c 'from packaging.version import Version; import pcapkit; print("dev" if Version(pcapkit.__version__).is_prerelease else "main")')" >> $GITHUB_OUTPUT
-          echo "PCAPKIT_BUILD=$(cat conda/build)" >> $GITHUB_OUTPUT
+          {
+            echo "PCAPKIT_VERSION=$(python -c 'import pcapkit; print(pcapkit.__version__)')"
+            echo "PCAPKIT_CONDA_LABEL=$(python -c 'from packaging.version import Version; import pcapkit; print("dev" if Version(pcapkit.__version__).is_prerelease else "main")')"
+            echo "PCAPKIT_BUILD=$(cat conda/build)"
+          } >> "$GITHUB_OUTPUT"
 
     outputs:
       # Not `files_changed`: see Push Changes above.
@@ -315,35 +242,22 @@ jobs:
     name: Conda Tag (update)
     runs-on: ubuntu-latest
     # #1968: the deploy key and the `PYPCAPKIT` PAT are `conda-tag` environment
-    # secrets, as for create-release.yml's `tag`. Keep that environment free of
-    # required reviewers, or every scheduled bump waits for an approval.
+    # secrets, as for create-release.yml's `tag`; keep it free of reviewers.
     environment: conda-tag
     needs: [ conda-update ]
-    # `!cancelled()` is what made this job reachable at all on the
-    # `workflow_run` path (#1632), when the test gate was a job of this file and
-    # skipped on that event. It is kept now that the gate is in `head` (#1967):
-    # a job of `head` skips on every path, and this job must not hinge on how
-    # Actions reports such a call. Without a status-check function, "a default
-    # status check of `success()` is applied unless you include one of these
-    # functions" (GitHub, "Evaluate expressions in workflows and actions",
-    # Status check functions). The skip it reacts to is not only a
-    # direct `needs:` entry's: "If a run contains a series of jobs that need
-    # each other, a failure or skip applies to all jobs in the dependency chain
-    # from the point of failure or skip onwards" (GitHub, "Workflow syntax for
-    # GitHub Actions", `jobs.<job_id>.needs`). So `conda-update` escaping it
-    # with its own `!cancelled()` does not escape it for this job. Run
-    # 38325136710 shows it: "Update requirements.txt" succeeded, pushing
-    # f4f94bcad, and both this job and `conda-dist` reported `skipped` with
-    # their own conditions true. So the bumps #1632 lists were committed
-    # and never tagged or uploaded.
+    # #1632: `!cancelled()`, since `head`'s jobs skip on every path (#1967) and
+    # without a status-check function "a default status check of `success()`
+    # is applied" (GitHub, "Evaluate expressions in workflows and actions").
+    # The skip cascades past `conda-update`'s own `!cancelled()`: "a failure or
+    # skip applies to all jobs in the dependency chain from the point of
+    # failure or skip onwards" (GitHub, "Workflow syntax for GitHub Actions",
+    # `jobs.<job_id>.needs`). Run 38325136710: "Update requirements.txt"
+    # pushed f4f94bcad, and this job and `conda-dist` reported `skipped` with
+    # their own conditions true, so the bump was never tagged or uploaded.
     #
-    # `needs.conda-update.result == 'success'` is then what the lost implicit
-    # check was doing, and it has to be said explicitly: `!cancelled()` bypasses
-    # the cascade for a legitimate skip, so without it a failed or cancelled
-    # update -- which still publishes the outputs of the steps that did run --
-    # would have this job tag from a half-finished run, e.g. one whose push
-    # landed and whose Get Version then failed, leaving no build. Same shape as
-    # create-release.yml's `tag` job.
+    # `needs.conda-update.result == 'success'` restores the lost check, so a
+    # failed or cancelled update, which still publishes its finished steps'
+    # outputs, is never tagged. Same shape as create-release.yml's `tag` job.
     if: >-
       !cancelled() && needs.conda-update.result == 'success' &&
       needs.conda-update.outputs.CONDA_CHANGED == 'true'
@@ -355,12 +269,10 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.PYPCAPKIT_ACTIONS_DEPLOY_KEY }}
 
-      # The commit Push Changes pushed, not `main`'s tip: a commit landing after
-      # the push is neither the bump nor covered by this run's verdict, and
-      # tagging the tip -- a `git pull` and `HEAD`, as this job did -- would have
-      # `conda-dist` build and upload it (#1632). `fetch-depth: 0` fetches "all
-      # history for all branches and tags" (actions/checkout), so Create Tag sees
-      # a tag that already exists.
+      # The commit Push Changes pushed, not main's tip, which is neither the
+      # bump nor covered by this run's verdict (#1632). `fetch-depth: 0` fetches
+      # "all history for all branches and tags" (actions/checkout), so Create
+      # Tag sees a tag that already exists.
       - name: Checkout code
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -368,18 +280,11 @@ jobs:
           token: ${{ secrets.PYPCAPKIT }}
           fetch-depth: 0
 
-      # `env:` rather than splicing `needs.*.outputs` straight into the script --
-      # CodeQL flags the latter as code injection, since Actions substitutes
-      # `${{ }}` into the script text before the shell ever parses it, so a
-      # value containing shell metacharacters runs as script rather than data.
-      # Routing it through `env:` and reading `$PCAPKIT_VERSION`/`$PCAPKIT_BUILD`
-      # keeps it a shell variable, which the shell can only ever treat as data.
-      #
-      # Tags `$CONDA_COMMIT` by name rather than `HEAD`. A tag that already tags
-      # it is left alone and the job stays green, so a re-run of this job goes
-      # on to `conda-dist`; a tag on any other commit means this build number
-      # already names another tree, so the job fails, the tag is not moved, and
-      # nothing is uploaded under it.
+      # `env:`, not `${{ }}` in the script, which CodeQL flags as code
+      # injection. Tags `$CONDA_COMMIT` by name: a tag already on it is left
+      # and the job stays green, so a re-run goes on to `conda-dist`; a tag on
+      # another commit means the build number names another tree, so the job
+      # fails, the tag stays, and nothing is uploaded under it.
       - name: Create Tag
         env:
           CONDA_COMMIT: ${{ needs.conda-update.outputs.CONDA_COMMIT }}
@@ -414,20 +319,13 @@ jobs:
     name: Conda deployment (update) on ${{ matrix.os }} with Python ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     # #1968: `ANACONDA_TOKEN` is an `anaconda` environment secret, as for
-    # create-release.yml's `conda`. Keep that environment free of required
-    # reviewers, or every leg of a scheduled upload waits for an approval.
+    # create-release.yml's `conda`; keep it free of reviewers.
     environment: anaconda
     needs: [ conda-tag, conda-update ]
-    # #1632, exactly as for `conda-tag` above -- this job was skipped by the
-    # same implicit `success()` on the same runs.
-    #
-    # `needs.conda-tag.result == 'success'` strictly, with no `|| 'skipped'`
-    # escape hatch of the kind create-release.yml's `conda` job grants its
-    # `tag`: the checkout below pins `ref: conda-<version>+<build>`, a tag known
-    # to name the pushed commit only once `conda-tag` has succeeded. There `tag`
-    # skips when the tag already exists, which is a reason to carry on; here
-    # `conda-tag` skips only when no bump was pushed, so carrying on would mean
-    # failing in `actions/checkout` instead of skipping cleanly.
+    # #1632, as for `conda-tag`. `conda-tag` must succeed, with no `skipped`
+    # escape as create-release.yml's `conda` job grants its `tag`: the checkout
+    # pins the tag, which names the pushed commit only then, and `conda-tag`
+    # skips only when no bump was pushed.
     if: >-
       !cancelled() && needs.conda-update.result == 'success' &&
       needs.conda-tag.result == 'success' &&
@@ -573,17 +471,14 @@ jobs:
             echo EOF
           } >> "$GITHUB_OUTPUT"
 
-      # #1814: the package declares no run requirement but Python, so the
-      # packages it vendors in `pcapkit/_extern` are all it has, and package
-      # discovery on its own ships them as bare modules, without their data
-      # files. This unpacks the package built for this runner and checks that
-      # every vendored distribution has every file its RECORD lists and imports
-      # from there, with no site-packages on the path, before anything is
-      # uploaded. #1822: it also fails unless the package, and every native
-      # binary in it, is for this runner's platform, so a relabelled package
-      # cannot pass on the runner that built it. setup-python's interpreter, not
-      # conda's: it is the matrix version the package was built for, which
-      # conda's base is not on 3.15.
+      # #1814: the package's only run requirement is Python, so it has only what
+      # it vendors in `pcapkit/_extern`, and package discovery alone ships those
+      # without their data files. This checks every vendored distribution has
+      # every file its RECORD lists and imports from there, with no
+      # site-packages on the path. #1822: it also fails unless the package and
+      # every native binary in it are for this runner's platform.
+      # setup-python's interpreter, not conda's: it is the matrix version the
+      # package was built for, which conda's base is not on 3.15.
       - name: Smoke-test the vendored packages
         env:
           PCAPKIT_CONDA_PACKAGE: ${{ steps.conda_build.outputs.host_package }}
@@ -602,14 +497,12 @@ jobs:
       # #1634: the upload below never makes the release. ncipollo/release-action
       # v1.21.0 creates a missing one, and its tag, at ``commit``
       # (src/Action.ts:72-92), so a bump made while Create Release waits on
-      # approval would tag the pending version at main's tip, and Create
-      # Release's tag check would fail. It also retargets a draft at ``commit``
-      # (:85-92,107-120), which ``omitDraftDuringUpdate`` keeps a draft, but
-      # Create Release's ``workflow_run`` run finds the draft and resets its
-      # target to the run's sha (softprops/action-gh-release v3.0.2,
-      # src/github.ts:636-646,832-866). Skipping a draft is a precaution
-      # against retargeting a release Create Release owns. Only the GitHub
-      # upload is skipped; the build is on anaconda.org regardless.
+      # approval would tag the pending version at main's tip and fail Create
+      # Release's tag check. It also retargets a draft at ``commit``
+      # (:85-92,107-120), though Create Release's ``workflow_run`` run resets a
+      # draft's target to its sha (softprops/action-gh-release v3.0.2,
+      # src/github.ts:636-646,832-866); skipping a draft is a precaution. Only
+      # the GitHub upload is skipped; the build is on anaconda.org regardless.
       - name: Check the GitHub release exists
         id: release
         if: ${{ matrix.os == 'ubuntu-latest' }}
@@ -646,11 +539,9 @@ jobs:
       #
       # #1657: that update also sends ``name``, ``body``, ``prerelease`` and
       # ``draft``, which unset inputs make the tag, "" and false
-      # (src/Inputs.ts:70-92,128-135,210-240), so each bump wiped the
-      # release's name and notes. Each ``omit*DuringUpdate`` makes its field
-      # undefined (:210-252), which Octokit drops from the request
-      # (dist/index.js:38369-38388), so the release keeps what Create Release
-      # wrote.
+      # (src/Inputs.ts:70-92,128-135,210-240), so each bump wiped the release's
+      # name and notes. Each ``omit*DuringUpdate`` leaves its field undefined
+      # (:210-252), and Octokit drops it (dist/index.js:38369-38388).
       - name: Upload package to GitHub Release
         if: ${{ matrix.os == 'ubuntu-latest' && steps.release.outputs.published == 'true' }}
         uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0

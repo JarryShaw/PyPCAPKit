@@ -663,7 +663,7 @@ class WorkflowTests(unittest.TestCase):
 
     def test_the_refresh_runs_between_the_install_and_the_writer(self) -> None:
         refresh = self.index(lambda step: self.runs(step) == ['python util/conda_vendor.py --refresh-pins'])
-        install = self.index(lambda step: 'python -m pip install -e .[all]' in self.runs(step))
+        install = self.index(lambda step: "python -m pip install -e '.[all]'" in self.runs(step))
         writer = self.index(lambda step: 'python util/conda_vendor.py' in self.runs(step))
         changed = self.index(lambda step: step.get('id') == 'verify-changed-files')
         self.assertLess(install, refresh)

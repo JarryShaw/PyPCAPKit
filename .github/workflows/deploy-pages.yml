@@ -1,57 +1,43 @@
 name: GitHub Pages
 
 on:
-  # No `push: branches: [main]` here. `unit-tests.yml`'s own push trigger already
-  # runs the full matrix for this commit; calling it again with `gate-only: true`
-  # on every push re-ran the single-version "Gate" job a second time for the same
-  # tree (#715). Chaining off `Unit Tests`' completion instead means the gate never
-  # runs twice, and this workflow simply waits for the verdict that already
-  # exists. `workflow_run` fires for *any* completion of that workflow, PR or
-  # push, so the jobs below filter on `.event == 'push'` themselves rather than
-  # trusting a `branches:` filter here to do it -- see the note on `deploy-pages`.
+  # No `push` trigger: chaining off `Unit Tests`' completion reuses its verdict
+  # instead of running the gate a second time for the same tree (#715).
+  # `workflow_run` fires for any completion, PR or push, so `deploy-pages`
+  # filters on the event itself.
   workflow_run:
     workflows: ["Unit Tests"]
     types: [completed]
-  # #1967: GitHub Pages, Vendor Update and Conda Update run eight hours
-  # apart on Saturdays, so each runs `head`'s test gate alone, mostly on a
-  # commit of its own, and `vendor-update` and `conda-update` do not queue
-  # on `repository-maintenance` together. None reads another's output, and
-  # Conda Update comes last so its upload finds the release Create Release
-  # made after Vendor Update (#1634). workflows.rst gives the evidence.
+  # #1967: GitHub Pages, Vendor Update and Conda Update run eight hours apart
+  # on Saturdays, so each runs `head`'s test gate alone and `vendor-update` and
+  # `conda-update` do not queue on `repository-maintenance` together. Conda
+  # Update comes last so its upload finds the release Create Release made after
+  # Vendor Update (#1634). workflows.rst gives the evidence.
   schedule:
     - cron: '0 2 * * 6' # Saturdays at 02:00 UTC
   pull_request:
-    # Was '**', which matched pull requests against every branch and made this
-    # the one workflow that fired outside the main-targeting set the others
-    # use. Every pull request here targets main, so '**' only ever added runs.
     branches: [main]
 
 permissions:
   contents: read
 
-# Deliberately still keyed on the ref, unlike the validation workflows. This one
-# publishes a *latest state* rather than a verdict on a commit, so coalescing is
-# correct: when two pushes land close together the pending build is dropped and
-# the newer one publishes, and deploying the older commit's docs after the newer
-# ones would actively be wrong. GitHub Pages also permits only one live
-# deployment, so serialising here is a requirement rather than a saving.
+# Keyed on the ref, unlike the validation workflows: this publishes a latest
+# state, not a verdict, so a pending build a newer push supersedes is rightly
+# dropped, and Pages permits only one live deployment anyway.
 #
-# A `workflow_run` is keyed on the commit `Unit Tests` verified instead (#1643).
-# One whose verdict is for an older commit only runs `head` and skips, and in
-# the shared group it would still displace a pending run whose verdict matches,
-# since "any existing pending job or workflow in the same concurrency group will
-# be canceled" (GitHub, "Control the concurrency of workflows and jobs"). The
-# coalescing and serialising above then happen in `deploy-pages`' own `ci-`
-# group, which only a run whose verdict covers its checkout reaches.
+# A `workflow_run` keys on the commit `Unit Tests` verified instead (#1643):
+# one whose verdict is for an older commit only runs `head` and skips, and in a
+# shared group would cancel a pending run whose verdict matches. Coalescing
+# then happens in `deploy-pages`' own `ci-` group, which only a run whose
+# verdict covers its checkout reaches.
 concurrency:
   group: pages-${{ github.event.workflow_run.head_sha || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  # #1967: the test gate, on the schedule only, and the `verdict` on a
-  # `workflow_run`, shared with Conda Update and Vendor Update. Pull requests
-  # never published anyway, so on one both skip. cron-head.yml says when each
-  # runs.
+  # #1967: the test gate on the schedule and the `verdict` on a `workflow_run`,
+  # shared with Conda Update and Vendor Update; cron-head.yml says when each
+  # runs. On a pull request both skip.
   head:
     name: Docs gate
     permissions:
@@ -60,18 +46,12 @@ jobs:
 
   deploy-pages:
     needs: [ head ]
-    # `needs` cannot itself be conditional, and `head`'s jobs skip on every
-    # path (both on a pull request), so this job must not inherit a skip.
-    # `!cancelled()` rather than `always()` so that cancelling the run still
-    # cancels the docs build; a gate that actually failed still blocks.
-    #
-    # The `workflow_run` clause is the real gate for a push to main: it
-    # reads the verdict `Unit Tests` already reached instead of re-running it,
-    # and `head`'s `verified` says whether that verdict covers the commit
-    # checked out below (#1643). `.event == 'push'` and `.head_branch == 'main'`
-    # both matter -- `workflow_run` fires for *every* completion of that
-    # workflow, including one triggered by a pull request, and without this
-    # check a green PR would publish docs from that PR's tree.
+    # A job of `head` skips on every path, so this must not inherit a skip;
+    # `!cancelled()` rather than `always()` so cancelling the run still cancels
+    # the build. The `workflow_run` clause is the real gate for a push to main:
+    # `head`'s `verified` says whether the verdict covers the commit checked out
+    # below (#1643), and without `.event == 'push'` and `.head_branch == 'main'`
+    # a green PR would publish docs from that PR's tree.
     if: >-
       !cancelled() && needs.head.result != 'failure' &&
       (github.event_name != 'workflow_run' || (
@@ -86,19 +66,13 @@ jobs:
       - name: Checkout 🛎️
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # Deliberately the default `github.sha` (main's tip), not
-          # `github.event.workflow_run.head_sha`. Pinning to the latter once
-          # ran here and CodeQL flagged it as "checkout of untrusted code in a
-          # privileged context" -- `workflow_run` can also be raised by a pull
-          # request's `Unit Tests` run, and that field would then be a fork's
-          # commit. The `if:` above already keeps that path from reaching this
-          # step, but making the ref itself always resolve to a trusted
-          # default-branch commit removes the pattern outright rather than
-          # relying on CodeQL tracing through the guard. `main`'s tip is also
-          # the *right* commit for docs, which should reflect current main,
-          # not a slightly older one -- so this is not a compromise here.
-          # Whether this commit is one that verdict covers is `head`'s
-          # question (#1643).
+          # The default `github.sha` (main's tip), not
+          # `github.event.workflow_run.head_sha`, which CodeQL flagged as
+          # "checkout of untrusted code in a privileged context": on a pull
+          # request's `Unit Tests` run it is a fork's commit. A trusted ref
+          # removes the pattern rather than relying on the `if:` guard, and
+          # main's tip is the right commit for docs anyway. Whether the verdict
+          # covers it is `head`'s question (#1643).
           persist-credentials: false
 
       # #1660: `latest` from .github/python-versions.toml, read with the
@@ -111,17 +85,12 @@ jobs:
         with:
           python-version: ${{ steps.python-versions.outputs.latest }}
 
-      # Builds the Sphinx documentation into `docs/build/html`, which the deploy
-      # step below publishes. `PCAPKIT_SPHINX` is what makes the
-      # `if SPHINX_TYPE_CHECKING:` TypedDicts visible to autodoc; `PCAPKIT_DEVMODE`
-      # puts the library logger at DEBUG on stderr and leaves tracebacks untrimmed,
-      # so an autodoc import failure is legible in the run log. Both are read at
-      # import time, so they are exported before anything imports `pcapkit` --
-      # `docs/source/conf.py` sets `PCAPKIT_SPHINX` itself for the same reason.
-      # `.[all,dev]`, not `.[all]` alone: autodoc imports every module, including
-      # the engine wrappers, so it needs the same imports resolvable that
-      # `lint.yml` does and for the same reason (#910's `dev` extra, added when
-      # that issue narrowed `all` to core addons only).
+      # `PCAPKIT_SPHINX` makes the `if SPHINX_TYPE_CHECKING:` TypedDicts visible
+      # to autodoc; `PCAPKIT_DEVMODE` logs at DEBUG with untrimmed tracebacks,
+      # so an autodoc import failure is legible. Both are read at import time,
+      # so they are exported before anything imports `pcapkit`. `.[all,dev]`
+      # because autodoc imports the engine wrappers too, which need #910's
+      # `dev` extra, as in Lint.
       - name: Install and Build 🔧
         run: |
           set -x
@@ -131,7 +100,7 @@ jobs:
 
           python -m pip install -U pip setuptools wheel
           python -m pip install -r docs/requirements.txt
-          python -m pip install -e .[all,dev]
+          python -m pip install -e '.[all,dev]'
 
           rm -rf docs/build
           make -C docs html
@@ -150,15 +119,11 @@ jobs:
           include-hidden-files: true
           retention-days: 1
 
-  # #1968: the push to `gh-pages`, split out of `deploy-pages` so that the job
-  # running the tree's own code, a pull request's included, holds only the
-  # top-level `contents: read`. This job runs no project code, and never on a
-  # pull request. It needs `contents: write` to push `gh-pages`, and `actions:
-  # read` to download the site `deploy-pages` uploaded in this run. That job's
-  # result is checked explicitly, under `!cancelled()`: a job of `head` skips on
-  # every path, and a skip anywhere in the chain skips a job left with the
-  # implicit `success()` (#1632). Its own group keeps one push to `gh-pages` at
-  # a time, and its check below keeps an older build from replacing a newer one.
+  # #1968: the push to `gh-pages`, split out so that the job running the tree's
+  # own code, a pull request's included, holds only `contents: read`. This one
+  # runs no project code, and never on a pull request. `deploy-pages`' result is
+  # checked explicitly under `!cancelled()`: a skip anywhere in the chain skips
+  # a job left with the implicit `success()` (#1632).
   publish-pages:
     name: Publish to gh-pages
     needs: [ deploy-pages ]
@@ -187,16 +152,12 @@ jobs:
           gh run download "$GITHUB_RUN_ID" --repo "$GITHUB_REPOSITORY" --name pages-html
           --dir docs/build/html
 
-      # Builds finish in any order, and one group per job cannot order them: a
-      # job joining a group cancels the one pending there, so sharing the build's
-      # group would cancel the next build. So each deploy names its commit, and
-      # this step reads the commit `gh-pages` last published. Where that one is
-      # newer than this run's -- this run's commit is behind it on `main` -- the
-      # deploy is skipped. Anything else publishes, as before: no `gh-pages`, a
-      # head this workflow did not write, an API error, the same commit, or one
-      # that is not an ancestor. A head check alone would also skip when the
-      # newer commit's own run never publishes, a red one, leaving the docs
-      # older than this build.
+      # Builds finish in any order, and a concurrency group cannot order them (a
+      # job joining one cancels the one pending there). So each deploy names its
+      # commit, and this skips only when `gh-pages` holds a build this run's
+      # commit is behind on main; anything else, an API error included,
+      # publishes. Comparing heads alone would also skip when the newer commit's
+      # run never publishes, a red one, leaving the docs older than this build.
       - name: Check gh-pages holds no newer build
         id: fresh
         env:
