@@ -338,6 +338,82 @@ class ExtractorLeavesTheCallersStreamAlone(unittest.TestCase):
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class ContextExitFollowsOwnership(unittest.TestCase):
+    """#1999: leaving a ``with`` block closes only what ``Extractor`` owns.
+
+    ``__exit__`` closed the input unconditionally, so scoping an extraction with
+    ``with`` closed a stream the caller had passed in and still held, which the
+    rule of #610 says is the caller's to close.
+
+    """
+
+    def test_callers_seekable_stream_stays_open(self) -> None:
+        """The issue's own repro: an ``auto=True`` extraction inside ``with``."""
+        import pcapkit
+
+        with open(sample_path('in.pcap'), 'rb') as handle:
+            with pcapkit.extract(fin=handle, nofile=True, store=False):
+                pass
+
+            with self.subTest(check='handle not closed'):
+                self.assertFalse(handle.closed,
+                                 "leaving the with block closed the caller's stream")
+
+            with self.subTest(check='handle still readable'):
+                handle.seek(0)
+                self.assertEqual(handle.read(4), b'\xd4\xc3\xb2\xa1')
+
+    def test_callers_non_seekable_stream_stays_open(self) -> None:
+        """The wrapper ``Extractor`` built is closed; the stream under it is not."""
+        import pcapkit
+        from pcapkit.corekit.io import SeekableReader
+
+        with open(sample_path('in.pcap'), 'rb') as source:
+            payload = source.read()
+
+        # The ``sys.stdin.buffer`` shape: see
+        # ``test_non_seekable_stream_survives_its_seekable_wrapper`` for why a
+        # bare non-seekable ``BytesIO`` will not do.
+        stream = io.BufferedReader(_NonSeekableRaw(payload))
+        self.addCleanup(stream.close)
+        with pcapkit.extract(fin=stream, nofile=True, store=False,
+                             auto=False) as extractor:
+            next(extractor)
+
+        self.assertIsInstance(extractor._ifile, SeekableReader,
+                              'a non-seekable input should have been wrapped, '
+                              'without which this test proves nothing')
+        with self.subTest(check='wrapper closed'):
+            self.assertTrue(extractor._ifile.closed,
+                            'leaving the with block should close the wrapper '
+                            'Extractor built')
+        with self.subTest(check="caller's stream still open"):
+            self.assertFalse(stream.closed,
+                             "leaving the with block closed the caller's stream "
+                             'through the wrapper')
+
+    def test_path_opened_handle_is_closed(self) -> None:
+        """A handle ``Extractor`` opened from a path is closed on leaving the block.
+
+        ``auto=False`` and one frame read, so the extraction is still short of end
+        of file and ``_cleanup`` has not run: the close is ``__exit__``'s alone.
+
+        """
+        import pcapkit
+
+        with pcapkit.extract(fin=sample_path('in.pcap'), nofile=True, store=False,
+                             auto=False) as extractor:
+            next(extractor)
+            self.assertFalse(extractor._flag_e,
+                             '_cleanup ran inside the block, so this test no '
+                             'longer measures __exit__')
+            self.assertFalse(extractor._ifile.closed)
+
+        self.assertTrue(extractor._ifile.closed,
+                        'leaving the with block left the handle Extractor opened')
+
+
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class FinaliserBackstopWithoutDel(unittest.TestCase):
     """#1997: the backstop is a :class:`weakref.finalize`, not ``__del__`` alone.
 

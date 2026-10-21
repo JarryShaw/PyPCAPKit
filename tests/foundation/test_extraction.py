@@ -949,10 +949,20 @@ class ExtractorTests(unittest.TestCase):
         given_stream._cleanup()
         self.assertFalse(given_stream._ifile.closed_by_test)
 
+        # Leaving the ``with`` block follows the same ownership rule: it closes
+        # a handle ``Extractor`` opened, and leaves a caller's stream open. This
+        # assertion closed the caller's stream until #1999.
+        manual._flag_s = True
         with manual as ctx:
             self.assertIs(ctx, manual)
         self.assertTrue(manual._ifile.closed_by_test)
         self.assertGreaterEqual(manual._exeng.close_calls, 1)
+
+        scoped_stream = self._bare_extractor()
+        with scoped_stream:
+            pass
+        self.assertFalse(scoped_stream._ifile.closed_by_test)
+        self.assertGreaterEqual(scoped_stream._exeng.close_calls, 1)
 
     def test_constructor_initialises_without_running_when_patched(self) -> None:
         from pcapkit.foundation.extraction import Extractor

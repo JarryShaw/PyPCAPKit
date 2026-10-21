@@ -1135,8 +1135,9 @@ def close_extractor(extractor: object) -> None:
     :meth:`Extractor._cleanup <pcapkit.foundation.extraction.Extractor._cleanup>`
     or :meth:`Extractor.__exit__ <pcapkit.foundation.extraction.Extractor.__exit__>`,
     so nothing in the library closes up after them. Both of those close the
-    input file *and* the engine, and this helper has to do the same: the input
-    file is not the only resource. The ``pcap_ct`` and ``pypcap`` engines hold a
+    engine as well as an input file the extractor opened itself, and this helper
+    closes both, whoever opened the input: the input file is not the only
+    resource. The ``pcap_ct`` and ``pypcap`` engines hold a
     live :class:`pcap.pcap` handle, and ``pyshark`` holds a temporary file, so
     dropping the extractor without closing the engine leaks an OS-level handle
     per test. Under a suite that builds hundreds of extractors that accumulates
