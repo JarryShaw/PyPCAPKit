@@ -2168,12 +2168,19 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         """Find the payload of ``data`` that carries no ``__next_type__``.
 
         :meth:`_decode_next_layer` writes the payload's info under the payload's
-        :attr:`info_name`, after every field of the data model, so the payload is
-        the *last* key that the data model does not declare and whose value is a
-        mapping. Its protocol is the one of :attr:`__proto__` -- or its fallback
-        -- whose :attr:`info_name` the key is. That is the lowercased class name
-        by default, but a protocol may override it: every version of
+        :attr:`info_name`, so the payload is the key, among those the data
+        model does not declare and whose value is a mapping, that is the
+        :attr:`info_name` of a protocol of :attr:`__proto__` -- or of its
+        fallback. That is the lowercased class name by default, but a protocol
+        may override it: every version of
         :class:`~pcapkit.protocols.link.l2tp.L2TP` is ``l2tp``.
+
+        The payload is found by that name, and never by its place among the
+        keys: the order of the keys of an :class:`~pcapkit.corekit.infoclass.Info`
+        is not part of its contract, and on PyPy it follows the attribute
+        layout of an earlier instance of the same class (:issue:`2003`). Should
+        ``data`` hold the names of several such protocols, the first of them in
+        :attr:`__proto__`, its fallback last, is the payload.
 
         Args:
             data: protocol data
@@ -2186,10 +2193,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             dispatch to.
 
         """
-        keys = [key for key in cls._lookup_nested(data) if key not in exclude]
+        keys = {key for key in cls._lookup_nested(data) if key not in exclude}
         if not keys:
             return None, None
-        name = keys[-1]
 
         registry = cls.__proto__
         candidates = list(registry.values())
@@ -2207,22 +2213,23 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
                 label = proto.__new__(proto).info_name
             except TypeError:
                 continue
-            if label == name:
-                return proto, name
+            if label in keys:
+                return proto, label
         return None, None
 
     @staticmethod
     def _lookup_nested(data: 'Data') -> 'list[str]':
         """Keys of ``data`` that its data model does not declare and that hold a mapping.
 
-        These are where the next layer protocols wrote their info, in the order
-        they wrote it -- the payload, and the IPv6 extension headers.
+        These are where the next layer protocols wrote their info -- the
+        payload, and the IPv6 extension headers.
 
         Args:
             data: protocol data
 
         Returns:
-            The keys, in the order of ``data``.
+            The keys, in the order of ``data``, which no caller relies on
+            (:issue:`2003`).
 
         """
         declared = set()  # type: set[str]

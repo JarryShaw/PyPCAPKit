@@ -26,7 +26,10 @@ Octets      Bits        Name                    Description
 .. [*] https://en.wikipedia.org/wiki/IPv6_packet
 
 """
+import collections.abc
+import inspect
 import ipaddress
+import types
 from typing import TYPE_CHECKING
 
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
@@ -462,9 +465,19 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         """Recover the extension header chain of ``data`` without ``__exthdr__``.
 
         :meth:`_decode_next_layer` writes each extension header's info under a
-        key of its own, in wire order, ahead of the upper layer. Walking the
-        ``next`` field from :attr:`data.next <Data_IPv6.next>` names the parser
-        of each in turn, exactly as the walk that parsed them did.
+        key of its own. Walking the ``next`` field from :attr:`data.next
+        <Data_IPv6.next>` names the parser of each in turn, exactly as the walk
+        that parsed them did, and each step takes the first header not yet
+        taken that is held under the key that parser writes.
+
+        So the chain comes from the ``next`` fields, and never from the order
+        of the keys of ``data``: that order is not part of the contract of an
+        :class:`~pcapkit.corekit.infoclass.Info`, and on PyPy it follows the
+        attribute layout of an earlier instance of the same class, which put
+        the Hop-by-Hop Options header after the upper layer (:issue:`2003`).
+        A header repeated in the chain is held under the same key as its
+        predecessor, and the headers held under one key are taken in the order
+        ``items(multi=True)`` yields them (:issue:`1453`).
 
         Args:
             data: protocol data, without ``__exthdr__``
@@ -473,24 +486,20 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             The keys the extension headers are under, and the chain in the
             shape of ``__exthdr__``, i.e. the parser class and info of each.
 
-        A header repeated in the chain is held under the same key as its
-        predecessor, and ``data.items(multi=True)`` yields each of them in turn.
-
         """
-        from pcapkit.protocols.internet.ipv6_ext import \
-            IPv6_Ext  # isort: skip # pylint: disable=import-outside-toplevel
+        nested = cls._lookup_nested(data)
+        pairs = data.items(multi=True) if isinstance(data, (Info, MultiDict)) else data.items()
+        # NOTE: ``fragment`` is declared only for type checkers, so it reads as
+        # nested, but it is the packet split at the Fragment header and sits
+        # between that header and the next one.
+        pool = [(key, info) for (key, info) in pairs
+                if key in nested and key != 'fragment']  # type: list[tuple[str, Any]]
+        taken = [False] * len(pool)
 
         names = []  # type: list[str]
         chain = []  # type: list[tuple[Type[ProtocolBase], Any]]
         proto = data.get('next')
-        nested = cls._lookup_nested(data)
-        pairs = data.items(multi=True) if isinstance(data, (Info, MultiDict)) else data.items()
-        for (key, info) in pairs:
-            # NOTE: ``fragment`` is declared only for type checkers, so it reads
-            # as nested, but it is the packet split at the Fragment header and
-            # sits between that header and the next one.
-            if key not in nested or key == 'fragment':
-                continue
+        while True:
             try:
                 ex_proto = Enum_ExtensionHeader(proto)
             except ValueError:
@@ -498,20 +507,19 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
 
             # NOTE: As in :meth:`_decode_next_layer`, a code with no parser
             # carrying ``next`` ends the chain, and so does a Fragment header
-            # other than a first fragment's.
-            if 'next' not in info:
+            # other than a first fragment's. Nor does the walk go on past a
+            # code none of the headers left is held under -- the upper layer
+            # kept raw at a limit, say.
+            index, parser = -1, None  # type: int, Optional[Type[ProtocolBase]]
+            for (index, (key, info)) in enumerate(pool):
+                if not taken[index]:
+                    parser = cls._exthdr_parser(key, info, ex_proto)
+                    if parser is not None:
+                        break
+            if parser is None:
                 break
-
-            # NOTE: A header whose dedicated parser raised was parsed by
-            # :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` instead,
-            # see :meth:`_import_next_layer`, and written under that class's
-            # key rather than the dedicated one's. Rebuilding it with the
-            # dedicated class would look for fields only that class parses
-            # (#1473), so the key decides the parser.
-            if key == cls._exthdr_key(IPv6_Ext.alias.fget(None)):  # type: ignore[attr-defined]
-                parser = IPv6_Ext  # type: Type[ProtocolBase]
-            else:
-                parser = cls._lookup_next_layer(cls.__proto__, int(ex_proto))
+            key, info = pool[index]
+            taken[index] = True
             names.append(key)
             chain.append((parser, info))
 
@@ -519,6 +527,54 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             if ex_proto == Enum_ExtensionHeader.IPv6_Frag and not cls._is_first_fragment(info):
                 break
         return tuple(names), tuple(chain)
+
+    @classmethod
+    def _exthdr_parser(cls, key: 'str', info: 'Any', code: 'Enum_ExtensionHeader') -> 'Optional[Type[ProtocolBase]]':  # pylint: disable=line-too-long
+        """Parser of the extension header ``code`` names, if ``key`` holds it as ``info``.
+
+        Args:
+            key: key of ``info`` in :class:`Data_IPv6`
+            info: info of an extension header, as parsed or from
+                :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>`
+            code: extension header code the walk dispatches on
+
+        Returns:
+            The parser to rebuild ``info`` with, or :data:`None` if ``info``
+            under ``key`` is not the header ``code`` names.
+
+        """
+        from pcapkit.protocols.internet.ipv6_ext import \
+            IPv6_Ext  # isort: skip # pylint: disable=import-outside-toplevel
+
+        if not isinstance(info, collections.abc.Mapping) or 'next' not in info:
+            return None
+
+        # NOTE: A header whose dedicated parser raised was parsed by
+        # :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` instead, see
+        # :meth:`_import_next_layer`, and written under that class's key rather
+        # than the dedicated one's, with the code it stands in for as its
+        # ``protocol``. Rebuilding it with the dedicated class would look for
+        # fields only that class parses (#1473), so the key decides the parser.
+        if key == cls._exthdr_key(IPv6_Ext.alias.fget(None)):  # type: ignore[attr-defined]
+            stands_for = info.get('protocol')
+            return IPv6_Ext if stands_for is None or stands_for == code else None
+
+        parser = cls._lookup_next_layer(cls.__proto__, int(code))
+        # NOTE: The key is the parser's alias, which HIP reads off the info it
+        # parsed -- ``HIPv2`` -- so the alias is read off a stand-in for an
+        # instance holding ``info``.
+        alias = inspect.getattr_static(parser, 'alias', None)
+        try:
+            if isinstance(alias, property):
+                view = info  # type: Any
+                if not isinstance(info, Info):
+                    view = types.SimpleNamespace(**dict(info.items()))
+                alias = alias.fget(types.SimpleNamespace(_info=view))  # type: ignore[misc]
+        except Exception:  # pylint: disable=broad-except
+            return None
+        if not isinstance(alias, str) or cls._exthdr_key(alias) != key:
+            return None
+        return parser
 
     @staticmethod
     def _is_first_fragment(info: 'Mapping[str, Any]') -> 'bool':

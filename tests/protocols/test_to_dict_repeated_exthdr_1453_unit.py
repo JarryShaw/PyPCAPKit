@@ -7,9 +7,11 @@ overwrote the first and the dict rebuild silently came back shorter --
 Destination Options, Destination Options, UDP rebuilt 56 of 64 octets.
 
 ``to_dict`` returns an :class:`~pcapkit.corekit.multidict.OrderedMultiDict`
-(#1484): indexing sees the first value of each key, and ``items(multi=True)``
-yields every header in wire order for the rebuild. The dumpers write every
-header too.
+(#1484): indexing sees the first value of each key, and ``getlist`` gives every
+header of a type in wire order. The order across types is that of the keys of
+the :class:`~pcapkit.corekit.infoclass.Info`, which is not part of its contract
+and differs on PyPy, so the rebuild walks the ``next`` fields instead (#2003).
+The dumpers write every header too.
 
 Every case builds its own octets and reads no capture. Classes are imported
 inside each test, after :func:`~tests._support.reimport_once_per_class`.
@@ -133,7 +135,7 @@ class TestToDictRepeatedExtensionHeader(unittest.TestCase):
                 self.assertEqual([ext.data for ext in rebuilt.extension_headers.values()],
                                  [ext.data for ext in ip6.extension_headers.values()])
 
-    def test_to_dict_keeps_every_header_in_wire_order(self) -> None:
+    def test_to_dict_keeps_every_header_of_a_type_in_wire_order(self) -> None:
         from pcapkit.corekit.multidict import OrderedMultiDict
         from pcapkit.protocols.internet.ipv6 import IPv6
 
@@ -143,8 +145,10 @@ class TestToDictRepeatedExtensionHeader(unittest.TestCase):
                 dict_ = ip6.info.to_dict()
                 self.assertIsInstance(dict_, OrderedMultiDict)
 
-                parsed = [canonical(ext.info.to_dict()) for ext in ip6.extension_headers.values()]
-                held = [canonical(val) for _, val in dict_.items(multi=True) if canonical(val) in parsed]
+                parsed = {}  # type: dict[str, list[object]]
+                for _, ext in ip6.extension_headers.items(multi=True):
+                    parsed.setdefault(IPv6._exthdr_key(ext.alias), []).append(canonical(ext.info.to_dict()))
+                held = {key: [canonical(val) for val in dict_.getlist(key)] for key in parsed}
                 self.assertEqual(held, parsed)
 
                 # Indexing sees the first of each.
