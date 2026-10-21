@@ -1131,11 +1131,13 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         ``data`` may be the :obj:`dict` that :meth:`Info.to_dict
         <pcapkit.corekit.infoclass.Info.to_dict>` returns, which carries the
-        ``__next_name__`` and ``__next_type__`` metadata the payload is
-        dispatched on. A hand-written :obj:`dict` must carry them too -- and,
-        for :class:`~pcapkit.protocols.internet.ipv6.IPv6`, the extension
-        headers under ``extension_headers`` -- or no payload is rebuilt, see
-        :meth:`_make_payload`.
+        metadata the rebuild reads: ``__next_name__`` and ``__next_type__``,
+        which the payload is dispatched on, ``__short_read__``, and, for
+        :class:`~pcapkit.protocols.internet.ipv6.IPv6`, the extension header
+        chain under ``__exthdr__``. A hand-written :obj:`dict` must carry them
+        too, or no payload (nor IPv6 extension header) is rebuilt and no short
+        read is cut back, see :meth:`_make_payload`; nothing is guessed from
+        its other keys (:issue:`2003`).
 
         Args:
             data: Protocol data.
@@ -2121,9 +2123,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` carries
         both keys, so ``data`` rebuilt from such a :obj:`dict` dispatches as
-        the info did. A hand-written :obj:`dict` must carry them too: the
-        payload is never guessed from the other keys of ``data``
-        (:issue:`2003`).
+        the info did. A hand-written :obj:`dict` must carry them too, as it
+        must ``__short_read__`` and, for IPv6, ``__exthdr__``: the payload is
+        never guessed from the other keys of ``data`` (:issue:`2003`).
 
         The payload is built one layer further into the frame than this
         protocol, as :meth:`_parse_next_layer` counts it, since each layer built

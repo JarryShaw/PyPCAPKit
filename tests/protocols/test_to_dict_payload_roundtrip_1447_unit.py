@@ -136,6 +136,7 @@ class TestToDictPayloadRoundTrip(unittest.TestCase):
 
         ipv6 = self.frame('ipv6-exthdr-udp')[IPv6]
         dict_ = ipv6.info.to_dict()
+        self.assertIn('__exthdr__', dict_)
 
         rebuilt = IPv6.from_data(dict_)
         self.assertEqual(rebuilt.data, ipv6.data)
@@ -229,7 +230,8 @@ class TestToDictPayloadRoundTrip(unittest.TestCase):
                         with open(path, encoding='utf-8') as file:
                             text = file.read()
                         json.loads(text)
-                        self.assertNotIn('"__', text)
+                        for key in ('__next_type__', '__next_name__', '__short_read__', '__exthdr__'):
+                            self.assertNotIn(f'"{key}"', text)
 
 if __name__ == '__main__':
     unittest.main()

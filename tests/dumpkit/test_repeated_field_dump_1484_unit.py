@@ -3,10 +3,8 @@
 
 GitHub issue #1484. An IPv6 packet carrying two Destination Options headers
 holds both under the one ``opts`` key, and every dump held only the first.
-Each dump now writes both headers, in wire order, while a field held once is
-written as its value. The headers are held in ``extension_headers``
-(#2003), an option list, which a dump writes as one single-key mapping per
-entry.
+Each dump now writes the field as the list of both headers, in wire order,
+while a field held once is written as its value.
 
 Every case builds its input in a temporary directory, and reads no capture.
 :mod:`pcapkit` is imported inside each test, after
@@ -48,11 +46,6 @@ def capture() -> bytes:
     return GLOBAL + struct.pack('<IIII', 1, 2, len(packet), len(packet)) + packet
 
 
-def opts(ipv6: 'dict') -> 'list[dict]':
-    """The Destination Options headers of a dumped IPv6 header, in wire order."""
-    return [entry['opts'] for entry in ipv6['extension_headers']]
-
-
 def pads(headers: 'list[dict]') -> 'list[str]':
     """The PadN octets of each Destination Options header, as the JSON dump spells them."""
     return [next(iter(header['options'][0].values()))['pad']['hex'] for header in headers]
@@ -84,14 +77,15 @@ class RepeatedFieldDumpTests(unittest.TestCase):
 
     def test_json_holds_both_headers_in_order(self) -> None:
         ipv6 = json.loads(self.dump('json'))['Frame 1']['ethernet']['ipv6']
-        self.assertEqual([list(entry) for entry in ipv6['extension_headers']], [['opts'], ['opts']])
-        self.assertEqual(pads(opts(ipv6)), [f'000000{mark:02x}' for mark in MARKS])
+        self.assertIsInstance(ipv6['opts'], list)
+        self.assertEqual(pads(ipv6['opts']), [f'000000{mark:02x}' for mark in MARKS])
         # A field held once is still written as its value.
         self.assertEqual(ipv6['limit'], 64)
 
     def test_plist_holds_both_headers_in_order(self) -> None:
         ipv6 = plistlib.loads(self.dump('plist'))['Frame 1']['ethernet']['ipv6']
-        self.assertEqual([next(iter(header['options'][0].values()))['pad'] for header in opts(ipv6)],
+        self.assertIsInstance(ipv6['opts'], list)
+        self.assertEqual([next(iter(header['options'][0].values()))['pad'] for header in ipv6['opts']],
                          [b'\x00\x00\x00' + bytes([mark]) for mark in MARKS])
 
     def test_tree_holds_both_headers(self) -> None:
@@ -124,11 +118,10 @@ class RepeatedFieldDumpTests(unittest.TestCase):
             make_dumper(dictdumper.JSON)(path)(value, name='Frame 1')
             with open(path, encoding='utf-8') as file:
                 tops.append(json.load(file)['Frame 1'])
-        self.assertEqual(pads(opts(tops[0]['ethernet']['ipv6'])), [f'000000{mark:02x}' for mark in MARKS])
+        self.assertEqual(pads(tops[0]['ethernet']['ipv6']['opts']), [f'000000{mark:02x}' for mark in MARKS])
         self.assertEqual(list(tops[1]), list(tops[0]))
-        # Every key but the dunder metadata, which the dumps leave out (#2003).
-        self.assertEqual(list(tops[0]), [key for key in frame.info.to_dict()
-                                         if not (key.startswith('__') and key.endswith('__'))])
+        # Every key but those the dumps leave out (#2003).
+        self.assertEqual(list(tops[0]), [key for key in frame.info.to_dict() if key not in frame.info.__excluded__])
 
 
 if __name__ == '__main__':

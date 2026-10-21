@@ -62,19 +62,47 @@ class InfoClassTests(unittest.TestCase):
 
         bag = Bag({'items': 'conflict', 'visible': 1, 'hidden': 2}, extra=3)
         self.assertEqual(bag['items'], 'conflict')
-        self.assertEqual(list(bag), ['items', 'visible', 'extra'])
+        # NOTE: GitHub issue #2003 -- ``__excluded__`` keys are left out of
+        # ``repr`` and ``str`` only; iteration and ``to_dict`` carry them.
+        self.assertEqual(list(bag), ['items', 'visible', 'hidden', 'extra'])
         # NOTE: GitHub issue #1296 -- ``len`` counts exactly the keys
-        # iteration yields, so the ``__excluded__`` ``hidden`` key and the
-        # internal bookkeeping attributes are not counted.
-        self.assertEqual(len(bag), 3)
+        # iteration yields, so the internal bookkeeping attributes are not
+        # counted.
+        self.assertEqual(len(bag), 4)
         self.assertEqual(str(bag), 'Bag(items=conflict, visible=1, extra=3)')
         self.assertIn('items=', repr(bag))
-        self.assertEqual(list(bag.to_dict().items(multi=True)), [('items', 'conflict'), ('visible', 1), ('extra', 3)])
+        self.assertNotIn('hidden', repr(bag))
+        self.assertEqual(list(bag.to_dict().items(multi=True)),
+                         [('items', 'conflict'), ('visible', 1), ('hidden', 2), ('extra', 3)])
 
         with self.assertRaises(UnsupportedCall):
             bag.visible = 9
         with self.assertRaises(UnsupportedCall):
             del bag.visible
+
+    def test_to_dict_carries_only_the_included_dunder_keys(self) -> None:
+        """GitHub issue #2003: a dunder key is metadata, carried only if ``__included__`` names it."""
+        from pcapkit.corekit.infoclass import Info
+
+        class Plain(Info):
+            pass
+
+        class Meta(Info):
+            __included__ = ['__meta__']
+
+        class More(Meta):
+            __included__ = ['__more__']
+
+        self.assertEqual(More.__included__, ['__more__', '__meta__'])
+        pairs = {'a': 1, '__meta__': 2, '__more__': 3}
+        for cls, kept in ((Plain, ['a']), (Meta, ['a', '__meta__']), (More, ['a', '__meta__', '__more__'])):
+            with self.subTest(cls=cls.__name__):
+                info = cls.from_dict(pairs)
+                self.assertEqual([key for key, _ in info.to_dict().items(multi=True)], kept)
+                self.assertEqual(list(info), kept)
+                self.assertEqual(len(info), len(kept))
+                # Still held, and read by indexing.
+                self.assertEqual(info['__meta__'], 2)
 
     def test_from_dict_iterables_nested_info_and_inherited_metadata(self) -> None:
         from pcapkit.corekit.infoclass import Info
@@ -100,8 +128,10 @@ class InfoClassTests(unittest.TestCase):
         converted = outer.to_dict()
         self.assertEqual(list(converted['inner'].items(multi=True)), [('answer', 42)])
         self.assertEqual(converted['kept'], 'yes')
-        self.assertNotIn('base_hidden', converted)
-        self.assertNotIn('child_hidden', converted)
+        # Carried by ``to_dict``, left out of ``repr`` (#2003).
+        self.assertEqual(converted['base_hidden'], 'skip')
+        self.assertEqual(converted['child_hidden'], 'skip')
+        self.assertNotIn('hidden', repr(outer))
 
         self.assertEqual(Info.from_dict({'a': 1}, b=2).to_dict().to_dict(), {'a': 1, 'b': 2})
         self.assertEqual(Info.from_dict(c=3).to_dict().to_dict(), {'c': 3})

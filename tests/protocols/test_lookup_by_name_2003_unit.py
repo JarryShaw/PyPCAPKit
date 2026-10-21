@@ -12,7 +12,7 @@ rebuilt short, and so did a Hop-by-Hop, Destination, Destination chain once
 The order of an :class:`~pcapkit.corekit.infoclass.Info` is not part of its
 contract, so nothing is read off it any more: ``to_dict()`` carries the
 ``__next_type__`` and ``__next_name__`` metadata the payload is dispatched on,
-and the chain is held in ``extension_headers``, an
+and ``__exthdr__``, the extension header chain keyed by code in an
 :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo` keeping the order of its
 own. A dict without the metadata is not guessed at. These tests reorder an
 instance's :attr:`~object.__dict__` as PyPy does, so CPython checks the same
@@ -87,7 +87,8 @@ class LookupByNameTests(unittest.TestCase):
         self.addCleanup(quiet.__exit__, None, None, None)
         warnings.simplefilter('ignore')
 
-    def test_extension_headers_keep_their_order_whatever_the_key_order(self) -> None:
+    def test_extension_headers_follow_exthdr_whatever_the_key_order(self) -> None:
+        from pcapkit.const.ipv6.extension_header import ExtensionHeader
         from pcapkit.protocols.internet.hopopt import HOPOPT
         from pcapkit.protocols.internet.ipv6 import IPv6
         from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
@@ -95,14 +96,15 @@ class LookupByNameTests(unittest.TestCase):
         ip6 = IPv6(HOP_DST_DST)
         self.assertEqual(len(ip6.data), len(HOP_DST_DST))
 
-        # The headers first, then last, of the keys.
-        for before in ('version', None):
-            with self.subTest(before=before):
-                exported = moved(ip6.info, 'extension_headers', before=before).to_dict()
-                chain = IPv6._lookup_exthdr(exported)
-                self.assertEqual([parser for parser, _ in chain], [HOPOPT, IPv6_Opts, IPv6_Opts])
-                self.assertEqual([parser.from_data(hdr).data for parser, hdr in chain],
-                                 [ext.data for _, ext in ip6.extension_headers.items(multi=True)])
+        # As PyPy laid it out: ``hopopt`` after every other key; and the
+        # chain first.
+        for key, before in (('hopopt', None), ('__exthdr__', 'version')):
+            with self.subTest(moved=key):
+                exported = moved(ip6.info, key, before=before).to_dict()
+                chain = list(exported['__exthdr__'].items(multi=True))
+                self.assertEqual([code for code, _ in chain],
+                                 [ExtensionHeader.HOPOPT, ExtensionHeader.IPv6_Opts, ExtensionHeader.IPv6_Opts])
+                self.assertEqual([parser for _, (parser, _) in chain], [HOPOPT, IPv6_Opts, IPv6_Opts])
                 self.assertEqual(IPv6.from_data(exported).data, HOP_DST_DST)
 
     def test_payload_follows_the_metadata_whatever_the_key_order(self) -> None:
@@ -137,14 +139,15 @@ class LookupByNameTests(unittest.TestCase):
         self.assertIn('raw', ip6.info)
         self.assertEqual(len(ip6.data), len(HOP_DST_DST))
 
-        # As on PyPy for #1610: the headers after the upper layer.
-        exported = moved(ip6.info, 'raw', before='extension_headers').to_dict()
-        self.assertEqual(len(IPv6._lookup_exthdr(exported)), 2)
+        # As on PyPy for #1610: ``opts`` after the upper layer.
+        info = moved(moved(ip6.info, 'raw', before='opts'), 'hopopt', before='raw')
+        exported = info.to_dict()
+        self.assertEqual(len(list(exported['__exthdr__'].items(multi=True))), 2)
         rebuilt = IPv6.from_data(exported)
         self.assertIsInstance(rebuilt.payload, Raw)
         self.assertEqual(rebuilt.data, HOP_DST_DST)
 
-    def test_dict_without_the_metadata_is_not_guessed_at(self) -> None:
+    def test_dict_without_the_dispatch_keys_is_not_guessed_at(self) -> None:
         from pcapkit.protocols.internet.ipv6 import IPv6
         from pcapkit.protocols.misc.null import NoPayload
 
@@ -154,11 +157,24 @@ class LookupByNameTests(unittest.TestCase):
             exported.poplist(key)
         self.assertIn('udp', exported)
 
-        # The extension headers are rebuilt from ``extension_headers``, and the
+        # The extension headers are rebuilt from ``__exthdr__``, and the
         # upper layer, named by nothing, is not.
         rebuilt = IPv6.from_data(exported)
         self.assertIsInstance(rebuilt.payload, NoPayload)
         self.assertEqual(rebuilt.data, HOP_DST_DST[:40 + 3 * 8])
+
+    def test_dict_without_exthdr_rebuilds_no_extension_header(self) -> None:
+        from pcapkit.protocols.internet.ipv6 import IPv6
+
+        ip6 = IPv6(HOP_DST_DST)
+        exported = ip6.info.to_dict()
+        exported.poplist('__exthdr__')
+        self.assertIn('hopopt', exported)
+        self.assertEqual(len(exported.getlist('opts')), 2)
+
+        # The headers are still there under their keys, but nothing names
+        # the chain, so only the upper layer follows the IPv6 header.
+        self.assertEqual(IPv6.from_data(exported).data, HOP_DST_DST[:40] + DATAGRAM)
 
 if __name__ == '__main__':
     unittest.main()

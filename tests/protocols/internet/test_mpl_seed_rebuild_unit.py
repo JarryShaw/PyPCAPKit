@@ -63,7 +63,7 @@ class TestMPLSeedRebuild(unittest.TestCase):
                 octets = HEADERS[0]
                 packet = (struct.pack('!IHBB', 6 << 28, len(octets), nh, 64)
                           + SRC.packed + DST.packed + octets)
-                info = IPv6(packet, len(packet)).info.extension_headers[key]
+                info = IPv6(packet, len(packet)).info[key]
                 opt = list(info.options.values())[0]
                 self.assertEqual(opt.seed_id, SRC)
                 self.assertEqual(cls.from_data(info).data, octets)

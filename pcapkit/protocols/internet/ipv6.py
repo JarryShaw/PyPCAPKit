@@ -410,14 +410,25 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             Key-value pairs for protocol construction.
 
         """
-        exthdr = cls._lookup_exthdr(data)
+        # NOTE: The chain is rebuilt from ``__exthdr__`` alone, which
+        # :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>`
+        # carries; without it, no extension header is rebuilt, and none is
+        # guessed from the keys of ``data``, whose order is not part of the
+        # contract of an :class:`~pcapkit.corekit.infoclass.Info` and differs
+        # on PyPy (#2003).
+        exthdr = data.get('__exthdr__')  # type: Optional[Mapping[Enum_ExtensionHeader, tuple[Type[ProtocolBase], Any]]] # pylint: disable=line-too-long
+        chain = []  # type: list[tuple[Type[ProtocolBase], Any]]
+        if isinstance(exthdr, MultiDict):
+            chain.extend(value for _, value in exthdr.items(multi=True))
+        elif isinstance(exthdr, collections.abc.Mapping):
+            chain.extend(exthdr.values())
         upper = cls._make_payload(data)
         payload = upper  # type: bytes | ProtocolBase
 
         # NOTE: The extension headers sit between this header and the upper
         # layer payload, so they are rebuilt in wire order ahead of it.
-        if exthdr:
-            payload = b''.join(proto.from_data(info).data for proto, info in exthdr) + upper.data
+        if chain:
+            payload = b''.join(proto.from_data(info).data for proto, info in chain) + upper.data
 
         return {
             'traffic_class': data['class'],
@@ -438,7 +449,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
 
     @staticmethod
     def _exthdr_key(alias: 'str') -> 'str':
-        """Key an extension header's info is written under in :attr:`Data_IPv6.extension_headers`.
+        """Key an extension header's info is written under in :class:`Data_IPv6`.
 
         Args:
             alias: :attr:`~pcapkit.protocols.protocol.ProtocolBase.alias` of
@@ -450,70 +461,6 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
 
         """
         return alias.lstrip('IPv6-').lower()
-
-    @classmethod
-    def _lookup_exthdr(cls, data: 'Data_IPv6') -> 'tuple[tuple[Type[ProtocolBase], Any], ...]':
-        """Recover the extension header chain of ``data``, with the parser of each header.
-
-        :meth:`_decode_next_layer` holds the extension headers in
-        :attr:`data.extension_headers <Data_IPv6.extension_headers>`, in wire
-        order, each under the key its parser writes. The code of each is the
-        ``next`` field of the one before it, or :attr:`data.next
-        <Data_IPv6.next>` for the first, exactly as the walk that parsed them
-        dispatched on it.
-
-        The order is that of ``extension_headers``, which keeps it across keys
-        and so across a repeated header (:issue:`1453`), and never that of the
-        keys of ``data``: those are an :class:`~pcapkit.corekit.infoclass.Info`'s,
-        whose order is not part of its contract and on PyPy follows the
-        attribute layout of an earlier instance of the same class
-        (:issue:`2003`).
-
-        Args:
-            data: protocol data
-
-        Returns:
-            The parser class and info of each extension header, in wire order.
-
-        """
-        from pcapkit.protocols.internet.ipv6_ext import \
-            IPv6_Ext  # isort: skip # pylint: disable=import-outside-toplevel
-
-        headers = data.get('extension_headers')
-        if not isinstance(headers, collections.abc.Mapping):
-            return ()
-        pairs = headers.items(multi=True) if isinstance(headers, MultiDict) else headers.items()
-
-        chain = []  # type: list[tuple[Type[ProtocolBase], Any]]
-        proto = data.get('next')
-        for (key, info) in pairs:
-            try:
-                ex_proto = Enum_ExtensionHeader(proto)
-            except ValueError:
-                break
-
-            # NOTE: As in :meth:`_decode_next_layer`, a code with no parser
-            # carrying ``next`` ends the chain, and so does a Fragment header
-            # other than a first fragment's.
-            if 'next' not in info:
-                break
-
-            # NOTE: A header whose dedicated parser raised was parsed by
-            # :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` instead,
-            # see :meth:`_import_next_layer`, and written under that class's
-            # key rather than the dedicated one's. Rebuilding it with the
-            # dedicated class would look for fields only that class parses
-            # (#1473), so the key decides the parser.
-            if key == cls._exthdr_key(IPv6_Ext.alias.fget(None)):  # type: ignore[attr-defined]
-                parser = IPv6_Ext  # type: Type[ProtocolBase]
-            else:
-                parser = cls._lookup_next_layer(cls.__proto__, int(ex_proto))
-            chain.append((parser, info))
-
-            proto = info['next']
-            if ex_proto == Enum_ExtensionHeader.IPv6_Frag and not cls._is_first_fragment(info):
-                break
-        return tuple(chain)
 
     @staticmethod
     def _is_first_fragment(info: 'Mapping[str, Any]') -> 'bool':
@@ -581,7 +528,8 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         hdr_len = self.length       # header length
         raw_len = ipv6.payload if length is None else length  # payload length
         _protos = []                # type: list[ProtocolBase] # ProtoChain buffer
-        _headers = OrderedMultiDict()  # type: OrderedMultiDict[str, Any] # info per extension header
+        # (parser class, info) per extension header
+        _exthdr = OrderedMultiDict()  # type: OrderedMultiDict[Enum_ExtensionHeader, tuple[Type[ProtocolBase], Any]]
         split = None                # type: Optional[tuple[int, int]] # at first Fragment header
         opaque = False              # walk ended at a non-zero Fragment Offset
         depth = _frame_depth.get()  # layers of the frame up to this one
@@ -642,23 +590,24 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             #
             # Such a layer is not recorded as an extension header: it consumed
             # nothing (``Raw.length`` is 0), so recording it would emit its
-            # octets twice on rebuild, once from ``extension_headers`` and once
-            # more as the upper layer. Stopping here with ``proto`` unchanged instead
+            # octets twice on rebuild, once from ``__exthdr__`` and once more as
+            # the upper layer. Stopping here with ``proto`` unchanged instead
             # hands the remaining octets to ``super()._decode_next_layer``
             # below, which decodes them once, as the upper layer.
             if not hasattr(info, 'next'):
                 break
 
-            # NOTE: Held in an :class:`OrderedMultiDict` of their own, so a
-            # repeated header keeps its predecessor's info rather than
-            # overwriting it (#1453), and the wire order is that of the
-            # headers, not of the keys of ``ipv6``, which differs on PyPy
-            # (#2003).
-            _headers.add(self._exthdr_key(next_.alias), info)
+            # NOTE: Added through a :class:`MultiDict`, so a repeated header
+            # keeps its predecessor's info rather than overwriting it, and
+            # :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>`
+            # writes every one of them (#1453).
+            name = self._exthdr_key(next_.alias)
+            ipv6.__update__(OrderedMultiDict([(name, info)]))
 
             # record protocol name
             # self._protos = ProtoChain(name, chain, alias)
             _protos.append(next_)
+            _exthdr.add(ex_proto, (type(next_), info))
 
             # update header & payload length
             hdr_len += next_.length  # type: ignore[assignment]
@@ -711,8 +660,10 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             # update next header
             'protocol': proto,
 
-            # extension headers in wire order
-            'extension_headers': _headers,
+            # extension header chain in wire order, with the parser of each,
+            # for ``from_data``; the parser keeps the IPv6_Ext a header fell
+            # back to (#1473)
+            '__exthdr__': _exthdr,
         })
 
         # NOTE: Nor does a later fragment's slice start with the upper-layer

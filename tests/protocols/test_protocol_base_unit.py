@@ -653,7 +653,7 @@ class ProtocolBaseUnitTests(unittest.TestCase):
                   + hopopt)
 
         parsed = IPv6(io.BytesIO(packet), len(packet))
-        option = list(parsed.info.extension_headers['hopopt'].options.values())[0]
+        option = list(parsed.info.hopopt.options.values())[0]
 
         self.assertEqual(str(parsed.protochain), 'IPv6:HOPOPT')
         self.assertEqual(parsed.info.src, source)

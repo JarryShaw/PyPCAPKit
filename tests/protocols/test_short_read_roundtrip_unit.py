@@ -189,9 +189,35 @@ class TestShortReadRoundTrip(unittest.TestCase):
         again = Ethernet.from_data(cut.info.to_dict())
         self.assertEqual(again.info['__short_read__'], ('type', 1))
         self.assertEqual(Ethernet.from_data(again.info.to_dict()).data, bytes(13))
-        # a dumper writes the record as a list, which replays the same
+        # a hand-written dict may carry the record as a list, which replays
+        # the same
         record = dict(cut.info.to_dict(), __short_read__=['type', 1])
         self.assertEqual(Ethernet.from_data(record).data, bytes(13))
+
+    def test_record_is_left_out_of_repr_and_dumps(self) -> None:
+        import json
+        import os
+        import tempfile
+
+        import dictdumper.json
+
+        from pcapkit.dumpkit.common import make_dumper
+        from pcapkit.protocols.link.ethernet import Ethernet
+
+        # GitHub issue #2003: metadata, which ``__excluded__`` names.
+        info = Ethernet(bytes(13), 13).info
+        self.assertIn('__short_read__', info.to_dict())
+        self.assertNotIn('__short_read__', repr(info))
+        self.assertNotIn('__short_read__', str(info))
+        with tempfile.TemporaryDirectory() as tmp:
+            for index, value in enumerate((info, info.to_dict())):
+                with self.subTest(dumped=type(value).__name__):
+                    path = os.path.join(tmp, f'{index}.json')
+                    make_dumper(dictdumper.json.JSON)(path)(value, name='Ethernet')
+                    with open(path, encoding='utf-8') as file:
+                        dumped = json.load(file)['Ethernet']
+                    self.assertNotIn('__short_read__', dumped)
+                    self.assertIn('dst', dumped)
 
 
 class TestSchemaShortRead(unittest.TestCase):

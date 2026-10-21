@@ -8,14 +8,16 @@ from pcapkit.protocols.data.protocol import Protocol
 
 if TYPE_CHECKING:
     from ipaddress import IPv6Address
-    from typing import Any
+    from typing import Any, Type
 
     from typing_extensions import Literal
 
+    from pcapkit.const.ipv6.extension_header import ExtensionHeader
     from pcapkit.const.reg.transtype import TransType
     from pcapkit.corekit.infoclass import OrderedMultiInfo
     from pcapkit.protocols.data.data import Data
     from pcapkit.protocols.data.protocol import Packet
+    from pcapkit.protocols.protocol import ProtocolBase
 
 __all__ = [
     'IPv6',
@@ -32,6 +34,11 @@ class IPv6(Protocol):
         to create an instance of this data model.
 
     """
+
+    # NOTE: ``__exthdr__`` is metadata, as the keys ``Data`` names are:
+    # ``to_dict`` carries it, the dumps and ``repr`` leave it out (#2003).
+    __included__ = ['__exthdr__']
+    __excluded__ = ['__exthdr__']
 
     #: Version.
     version: 'Literal[6]'
@@ -62,10 +69,12 @@ class IPv6(Protocol):
         #: Octets captured past the Payload Length -- or, for a jumbogram,
         #: past the Jumbo Payload Length -- present only when there are any.
         trailer: 'bytes'
-        #: Extension headers, in wire order, each under the key its parser
-        #: writes, such as ``hopopt`` or ``opts``; a repeated header keeps
-        #: every one of its infos (:issue:`1453`, :issue:`2003`).
-        extension_headers: 'OrderedMultiInfo[str, Data]'
+        #: Extension header chain, in wire order, keyed by extension header
+        #: code, each value the pair of the parser class and its info. The
+        #: per-header keys hold the same infos, but in the order of the keys
+        #: of this :class:`~pcapkit.corekit.infoclass.Info`, which differs on
+        #: PyPy, so the chain is rebuilt from this alone (:issue:`2003`).
+        __exthdr__: 'OrderedMultiInfo[ExtensionHeader, tuple[Type[ProtocolBase], Data]]'
 
     def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'IPv6':
         self = super().__new__(cls, *args, **kwargs)

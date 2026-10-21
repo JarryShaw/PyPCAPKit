@@ -329,6 +329,9 @@ class InfoMechanicsTests(unittest.TestCase):
         class Node(Info):
             """Nested, optional, renamed and plain keys together."""
 
+            # NOTE: ``to_dict`` carries a dunder key only if named here (#2003).
+            __included__ = ['__short_read__', '__truncated_raw__']
+
             leaf: Leaf
             maybe: Optional[Leaf]
             items: int

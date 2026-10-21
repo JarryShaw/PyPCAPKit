@@ -112,7 +112,7 @@ class TestIPv6ExtensionHeaderCutRebuild(unittest.TestCase):
             with self.subTest(cut=cut):
                 ip6 = IPv6(data, len(data))
                 self.assertIs(type(ip6._exthdr[ExtensionHeader.HOPOPT]), IPv6_Ext)
-                chain = IPv6._lookup_exthdr(ip6.info.to_dict())
+                chain = [value for _, value in ip6.info.to_dict()['__exthdr__'].items(multi=True)]
                 self.assertEqual([parser for parser, _ in chain], [IPv6_Ext])
                 self.assertEqual(IPv6.from_data(ip6.info.to_dict()).data, data)
 

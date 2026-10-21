@@ -178,7 +178,7 @@ class IPv6UnitTests(unittest.TestCase):
         self.assertTrue(import_next.call_args.kwargs['extension'])
         self.assertEqual(import_next.call_args.kwargs['payload'], b'fragment-payload')
         proto._read_packet.assert_called_once_with(header=48, payload=len(b'fragment-payload') - 8)
-        self.assertEqual(ipv6.extension_headers['frag'].next, TransType.UDP)
+        self.assertEqual(ipv6.frag.next, TransType.UDP)
         self.assertEqual(ipv6.fragment, 'fragment-data')
         self.assertEqual(ipv6.hdr_len, 48)
         self.assertEqual(ipv6.raw_len, len(b'fragment-payload') - 8)

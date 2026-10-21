@@ -1029,7 +1029,7 @@ class ESPProtocolTests(unittest.TestCase):
         packet = header + body
 
         ipv6 = IPv6(packet, len(packet), __context__=registry)
-        esp = ipv6.info.extension_headers['esp']
+        esp = ipv6.info.esp
         self.assertIs(esp.status, ESPStatus.DECRYPTED)
         self.assertEqual(esp.next, TransType.TCP)
         self.assertEqual(esp.plaintext, INNER_TCP[20:])
