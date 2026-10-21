@@ -4,7 +4,7 @@ name: "Lint"
 # bandit -- had Makefile targets and no CI presence at all, so nothing noticed
 # when their output changed. (`isort` does appear in cron-vendor.yml, but as a
 # formatter that rewrites the generated constants, not as a check.) This workflow
-# is where they run.
+# is where they run, with actionlint over the workflows themselves (#1967).
 #
 # Every one of them is advisory -- `continue-on-error: true` on each step -- and
 # that is a measurement result rather than a preference. This header records no
@@ -110,6 +110,53 @@ jobs:
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      # #1967: actionlint checks every workflow under .github/workflows, and runs
+      # the image's shellcheck over each `run:` block. First, as it needs no
+      # Python and is the quickest verdict. Advisory like the steps below, since
+      # shellcheck still reports style and info findings across the workflows.
+      #
+      # The release binary is pinned by version and sha256, from the release's
+      # checksums file. Dependabot does not see this pin; bump both together.
+      # These files use YAML anchors, which actionlint reads from 1.7.10 on.
+      #
+      # The `-ignore` hides a false positive. `concurrency.queue` is a documented
+      # GitHub key (project-status.yml uses it) that no actionlint release knows
+      # yet: rhysd/actionlint#657, with the fix in rhysd/actionlint#654. Drop the
+      # pattern once a release with that fix is pinned here.
+      - name: actionlint
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          ACTIONLINT_VERSION: 1.7.12
+          ACTIONLINT_SHA256: 8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8
+        run: |
+          archive="actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/$archive" \
+            "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/$archive"
+          echo "$ACTIONLINT_SHA256  $RUNNER_TEMP/$archive" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP" actionlint
+          "$RUNNER_TEMP/actionlint" -version
+
+          set +e
+          "$RUNNER_TEMP/actionlint" -oneline -no-color \
+            -ignore '^unexpected key "queue" for "concurrency" section\.' 2>&1 | tee actionlint.log
+          status=${PIPESTATUS[0]}
+          set -e
+
+          # Without pipefail a pipeline's status is uniq's, so an empty count
+          # is caught by its output, not its status.
+          rules=$(grep -oE '\[[a-z-]+\]$' actionlint.log | sort | uniq -c)
+          shellcheck=$(grep -oE 'SC[0-9]+:[a-z]+' actionlint.log | sort | uniq -c)
+          {
+            echo '### actionlint'
+            echo '```'
+            printf 'findings by rule:\n%s\n' "${rules:-none}"
+            printf 'shellcheck findings by code:\n%s\n' "${shellcheck:-none}"
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          exit "$status"
 
       # One interpreter, not a matrix. Unit Tests and Python Compatibility sweep
       # the supported tier, plus the non-blocking KTLO legs (#1633), because
