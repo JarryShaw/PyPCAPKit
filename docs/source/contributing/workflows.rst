@@ -69,7 +69,7 @@ At a Glance
      - :file:`cron-conda.yml`
      - --
      - --
-     - Sat 10:00
+     - Sat 18:00
      - **Unit Tests**
      - --
    * - GitHub Pages
@@ -79,6 +79,13 @@ At a Glance
      - Sat 02:00
      - **Unit Tests**
      - --
+   * - Cron Head
+     - :file:`cron-head.yml`
+     - --
+     - --
+     - --
+     - --
+     - ``workflow_call`` (reusable)
    * - Create Release
      - :file:`create-release.yml`
      - tags ``v*``
@@ -179,7 +186,7 @@ than starting a new one.
        PR --> GP
        SAT -->|02:00| GP
 
-       SAT -->|10:00| CU
+       SAT -->|18:00| CU
 
        PR --> LT
        SAT -->|06:00| LT
@@ -210,6 +217,7 @@ than starting a new one.
        VU["Vendor Update<br/>cron-vendor.yml"]
        CU["Conda Update<br/>cron-conda.yml"]
        GP["GitHub Pages<br/>deploy-pages.yml"]
+       CH["Cron Head<br/>cron-head.yml"]
        CC["Coverage Comment<br/>coverage-comment.yml"]
        CR["Create Release<br/>create-release.yml"]
 
@@ -219,23 +227,25 @@ than starting a new one.
        VU ==>|workflow_run: completed| CR
        UT ==>|workflow_run: completed| CC
 
-       VU -.-> UT
-       CU -.-> UT
-       GP -.-> UT
+       VU -.-> CH
+       CU -.-> CH
+       GP -.-> CH
+       CH -.-> UT
        CR -.-> UT
 
 The double relationship between **Unit Tests** and the dependants that also
 call it is the part that reading a single file cannot show, and it is
 deliberate rather than redundant. Vendor Update, Conda Update and GitHub Pages
-call ``unit-tests.yml`` with ``gate-only: true`` themselves (dotted, above)
-**only when their own trigger is** ``schedule`` -- their gate jobs' ``if:``
-skips ``workflow_run``, and GitHub Pages' skips ``pull_request`` as well -- so
-only on the Saturday path, where no completed Unit Tests run exists yet to read
-a verdict from. On the ``workflow_run`` path (thick arrows), each reads the
-verdict Unit Tests already reached instead of re-running the gate a second
-time, and acts on it only once its ``verdict`` job, described under the edge
-list below, says it is a verdict on the commit it builds. Create Release has
-no ``schedule``, and its gate job's ``if:`` reads ``version_check``'s evidence
+each call **Cron Head** as their ``head`` job (dotted, above), and its test gate
+calls ``unit-tests.yml`` with ``gate-only: true`` **only when the caller's
+trigger is** ``schedule`` -- the gate's ``if:`` skips ``workflow_run`` and
+``pull_request`` -- so only on the Saturday path, where no completed Unit Tests
+run exists yet to read a verdict from. On the ``workflow_run`` path (thick
+arrows), each reads the verdict Unit Tests already reached instead of re-running
+the gate a second time, and acts on it only once the head's ``verdict`` job,
+described under the edge list below, says it is a verdict on the commit it
+builds (`#1967 <https://github.com/JarryShaw/PyPCAPKit/issues/1967>`__). Create
+Release has no ``schedule``, and its gate job's ``if:`` reads ``version_check``'s evidence
 rather than the event, so its gate can run whichever way the run was raised, once
 ``version_check`` itself has passed: on a ``v*`` tag push, and on a
 ``workflow_run`` from Vendor Update when some target is not yet published
@@ -247,12 +257,12 @@ rather than the event, so its gate can run whichever way the run was raised, onc
 Each edge cites the ``on:`` block it comes from, so grepping those blocks
 re-derives the list:
 
-* ``.github/workflows/cron-vendor.yml:14-16`` -- **Vendor Update** fires on
-  completion of **Unit Tests**.
-* ``.github/workflows/cron-conda.yml:17-19`` -- **Conda Update** fires on
-  completion of **Unit Tests**.
-* ``.github/workflows/deploy-pages.yml:12-14`` -- **GitHub Pages** fires on
-  completion of **Unit Tests**.
+* ``.github/workflows/cron-vendor.yml``, its ``workflow_run`` trigger --
+  **Vendor Update** fires on completion of **Unit Tests**.
+* ``.github/workflows/cron-conda.yml``, its ``workflow_run`` trigger --
+  **Conda Update** fires on completion of **Unit Tests**.
+* ``.github/workflows/deploy-pages.yml``, its ``workflow_run`` trigger --
+  **GitHub Pages** fires on completion of **Unit Tests**.
 * ``.github/workflows/create-release.yml:6-9`` -- **Create Release** fires on
   completion of **Vendor Update**.
 * ``.github/workflows/coverage-comment.yml:21-23`` -- **Coverage Comment** fires
@@ -271,8 +281,9 @@ checks out ``github.sha``, ``main``'s tip when the event is raised, not
 ``github.event.workflow_run.head_sha``, the commit the completed run tested, and
 in a merge wave the two differ: Conda Update 38325136710 bumped 2e941bbb7 under
 the verdict for 9083163f5 (`#1643 <https://github.com/JarryShaw/PyPCAPKit/issues/1643>`__).
-So Vendor Update, Conda Update and GitHub Pages each run a ``verdict`` job first,
-and act only when the tip is the verified commit, or that commit plus bot commits
+So Vendor Update, Conda Update and GitHub Pages each run Cron Head's ``verdict``
+job first, in their ``head`` job, and act only when its ``verified`` output says
+the tip is the verified commit, or that commit plus bot commits
 to ``conda/build`` and ``conda/requirements.txt`` alone; otherwise they skip, and
 the tip's own Unit Tests run raises them again. Vendor Update's run still
 concludes ``success`` then, since ``verdict`` ran, so Create Release reads its
@@ -301,17 +312,53 @@ Reusable-Workflow Calls (``uses:``)
 
 A ``uses:`` call is a different relationship from triggering: it runs inside
 the caller's own workflow run, as one of the caller's own jobs, rather than
-starting an independent run after the caller finishes. Every call in this
-repository targets the same reusable workflow, with the same input:
+starting an independent run after the caller finishes. The calls target
+``unit-tests.yml``, always with ``gate-only: true``, and ``cron-head.yml``:
 
 * ``.github/workflows/create-release.yml:595`` -- job ``unit-tests`` calls
   ``./.github/workflows/unit-tests.yml`` with ``gate-only: true``.
-* ``.github/workflows/cron-conda.yml:50`` -- job ``unit-tests`` calls
+* ``.github/workflows/cron-head.yml``, job ``unit-tests`` -- calls
   ``./.github/workflows/unit-tests.yml`` with ``gate-only: true``.
-* ``.github/workflows/cron-vendor.yml:56`` -- job ``unit-tests`` calls
-  ``./.github/workflows/unit-tests.yml`` with ``gate-only: true``.
-* ``.github/workflows/deploy-pages.yml:55`` -- job ``unit-tests`` calls
-  ``./.github/workflows/unit-tests.yml`` with ``gate-only: true``.
+* ``.github/workflows/cron-conda.yml``, ``cron-vendor.yml`` and
+  ``deploy-pages.yml``, job ``head`` in each -- calls
+  ``./.github/workflows/cron-head.yml``, with no inputs. The call's ``verified``
+  output is its ``verdict`` job's, and the acting job reads it beside
+  ``needs.head.result``.
+
+Cron Head (`#1967 <https://github.com/JarryShaw/PyPCAPKit/issues/1967>`__) is
+one copy of the test gate and the ``verdict`` job, which Conda Update, Vendor
+Update and GitHub Pages used to carry each. It holds ``contents: read`` and no
+more, which is what each caller grants its ``head`` job and what
+``unit-tests.yml`` is called with. Every expression in it reads the caller's ``github`` context, so its jobs decide on
+the event that started the caller and check out the caller's ``github.sha``. A
+job of the call skips on every path -- the gate everywhere but the schedule,
+``verdict`` everywhere but a ``workflow_run`` -- so each acting job keeps
+``!cancelled()``, for the reason the skip-cascade section below gives, and
+treats a ``head`` result other than ``failure`` as passing.
+
+Their schedules are eight hours apart on Saturdays: GitHub Pages at 02:00,
+Vendor Update at 10:00 and Conda Update at 18:00 UTC
+(`#1967 <https://github.com/JarryShaw/PyPCAPKit/issues/1967>`__). The owner's
+ruling kept a schedule on each and allowed them aligned or spread, and nothing
+orders them:
+
+* None reads another's output. A Vendor Update push reaches Conda Update and
+  GitHub Pages anyway, as a Unit Tests run whose completion raises both on the
+  ``workflow_run`` path. Create Release reads only the Vendor Update run that
+  triggered it, through its ``vendor_update`` job, so the time of the others
+  does not matter to it.
+* At one time they cost more. Vendor Update and Conda Update both ran at 10:00
+  until this change, and each scheduled pair read back from 2026-09-26 on
+  checked out the same commit -- on 2026-10-17, Conda Update 39023770904 and
+  Vendor Update 39023891165 both gated 44ed96fc3, their ``Gate (full suite,
+  …)`` jobs taking twelve and ten minutes. Their writing jobs share the ``repository-maintenance`` group, so ``conda-update``
+  then waited for ``vendor-update`` to finish, and a third job joining that
+  group cancels the one pending there.
+
+Spread, each ``head`` gates alone, and Conda Update runs once Vendor Update's
+Create Release has had the day to publish, so its ``Check the GitHub release
+exists`` step finds the release rather than skipping the GitHub upload
+(`#1634 <https://github.com/JarryShaw/PyPCAPKit/issues/1634>`__).
 
 ``gate-only: true`` selects not only ``unit-tests.yml``'s ``gate`` (the full
 suite, on ``latest``) but also ``changelog`` (checks ``CHANGELOG.md`` against its

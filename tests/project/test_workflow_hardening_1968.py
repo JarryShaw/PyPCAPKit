@@ -234,21 +234,22 @@ class TestEveryWorkflowDeclaresPermissions(unittest.TestCase):
         self.assertEqual(publish['permissions'], {'actions': 'read', 'contents': 'write'})
         self.assertEqual(publish['needs'], ['deploy-pages'])
 
-        # `(event, unit-tests, verdict, deploy-pages, whether publish-pages runs)`.
-        # One of the first two always skips, and a skip anywhere in the chain
-        # skips a job left with the implicit `success()` (#1632).
+        # `(event, head, deploy-pages, whether publish-pages runs)`. A job of
+        # `head` skips on every path (#1967), and a skip anywhere in the chain
+        # skips a job left with the implicit `success()` (#1632), so `head` is
+        # given both ways.
         rows = (
-            ('workflow_run', 'skipped', 'success', 'success', True),
-            ('schedule', 'success', 'skipped', 'success', True),
-            ('pull_request', 'skipped', 'skipped', 'success', False),
-            ('workflow_run', 'skipped', 'success', 'skipped', False),
-            ('workflow_run', 'skipped', 'success', 'failure', False),
-            ('schedule', 'success', 'skipped', 'cancelled', False),
+            ('workflow_run', 'success', 'success', True),
+            ('workflow_run', 'skipped', 'success', True),
+            ('schedule', 'success', 'success', True),
+            ('pull_request', 'skipped', 'success', False),
+            ('workflow_run', 'success', 'skipped', False),
+            ('workflow_run', 'success', 'failure', False),
+            ('schedule', 'success', 'cancelled', False),
         )
-        for event, gate, verdict, built, expected in rows:
+        for event, head, built, expected in rows:
             context = {STATUS: {'cancelled': False}, 'github': {'event_name': event, 'event': {}}, 'needs': {
-                'unit-tests': {'result': gate}, 'verdict': {'result': verdict},
-                'deploy-pages': {'result': built},
+                'head': {'result': head}, 'deploy-pages': {'result': built},
             }}  # type: dict[str, object]
             with self.subTest(event=event, built=built):
                 self.assertEqual(job_runs(jobs, 'publish-pages', context), expected)

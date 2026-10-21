@@ -16,7 +16,9 @@ Two layers, as in :mod:`tests.project.test_release_gates`:
   and paths are git's answers rather than a model's;
 * :class:`TestEachWorkflowGatesOnTheVerdict` evaluates each workflow's job
   conditions and concurrency group over the scenarios, with the evaluator
-  :mod:`tests.project.test_release_gates` pins.
+  :mod:`tests.project.test_release_gates` pins. Since #1967 the test gate and
+  the ``verdict`` job are one copy, in :data:`HEAD`, which each workflow calls
+  as its ``head`` job.
 
 """
 
@@ -44,7 +46,9 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / 'util' / 'verdict_covers_checkout.py'
 WORKFLOWS = ROOT / '.github' / 'workflows'
 
-#: ``{workflow file: the job the verdict gates}``.
+#: The reusable workflow holding the test gate and the ``verdict`` job (#1967).
+HEAD = 'cron-head.yml'
+#: ``{workflow file: the job the verdict gates}``, each of which calls :data:`HEAD`.
 ACTING_JOBS = {
     'cron-conda.yml': 'conda-update',
     'cron-vendor.yml': 'vendor-update',
@@ -340,14 +344,35 @@ class TestTheRuleOnRealRunShapes(unittest.TestCase):
         self.assertEqual(written, [], 'a commit ran maintenance in the test repository')
 
 
+def head_result(unit_tests: 'str', verdict: 'str') -> 'str':
+    """What the caller's ``needs.head.result`` is taken to be, from the two jobs of
+    :data:`HEAD` (#1967).
+
+    A failure in either is a failure, which is what the acting jobs' ``!=
+    'failure'`` reads. How Actions reports a call whose jobs partly skipped is
+    not pinned by any run here, so a skip-and-success call is modelled as
+    ``success`` and an all-skipped one as ``skipped``; the acting jobs accept
+    both, which ``test_a_skipped_head_cannot_cascade_into_the_acting_job``
+    checks for the second.
+
+    """
+    results = (unit_tests, verdict)
+    for result in ('failure', 'cancelled', 'success'):
+        if result in results:
+            return result
+    return 'skipped'
+
+
 def _context(event_name: 'str' = 'workflow_run', conclusion: 'str' = 'success',
              event: 'str' = 'push', head_branch: 'str' = 'main', head_sha: 'str' = 'f' * 40,
              unit_tests: 'str' = 'skipped', verdict: 'str' = 'success',
              verified: 'object' = 'true', cancelled: bool = False) -> 'dict[str, object]':
     """One run's ``github``/``needs`` context; the defaults are a verdict that covers its checkout.
 
+    ``unit_tests`` and ``verdict`` are the results of :data:`HEAD`'s two jobs,
+    which make the caller's ``head`` result through :func:`head_result`.
     ``verified=NULL`` is a ``verdict`` job that wrote no output, which is what a
-    skipped or failed one leaves.
+    skipped or failed one leaves, and the call passes it on as it is.
 
     """
     outputs = {} if verified is NULL else {'verified': verified}
@@ -361,99 +386,175 @@ def _context(event_name: 'str' = 'workflow_run', conclusion: 'str' = 'success',
                                             'head_branch': head_branch, 'head_sha': head_sha}}
     return {
         'github': github,
-        'needs': {'unit-tests': {'result': unit_tests},
-                  'verdict': {'result': verdict, 'outputs': outputs}},
+        'needs': {'head': {'result': head_result(unit_tests, verdict), 'outputs': outputs}},
         STATUS: {'cancelled': cancelled},
     }
 
 
-#: ``[(row, context, whether verdict's if: holds, whether the acting job's does)]``,
-#: for every workflow above; :data:`None` asserts nothing about that job.
+def _head_context(context: 'dict[str, object]') -> 'dict[str, object]':
+    """``context`` as :data:`HEAD`'s own jobs see it: the caller's ``github``, no ``needs``."""
+    return {**context, 'needs': {}}
+
+
+#: ``[(row, context, whether the test gate's if: holds, whether verdict's does,
+#: whether the acting job's does)]``, for every workflow above; :data:`None`
+#: asserts nothing about that job. The first two are :data:`HEAD`'s jobs.
 ROWS = [
     ('run 38325136710: the verdict is for an older commit',
-     _context(verified='false'), True, False),
+     _context(verified='false'), False, True, False),
     ("run 38326990571: the verdict covers the checkout",
-     _context(), True, True),
+     _context(), False, True, True),
     ('verdict failed before writing its answer',
-     _context(verdict='failure', verified=NULL), True, False),
+     _context(verdict='failure', verified=NULL), False, True, False),
     ('the Saturday schedule, the gate green',
-     _context(event_name='schedule', unit_tests='success', verdict='skipped', verified=NULL), False, True),
+     _context(event_name='schedule', unit_tests='success', verdict='skipped', verified=NULL),
+     True, False, True),
     ('the Saturday schedule, the gate failed',
-     _context(event_name='schedule', unit_tests='failure', verdict='skipped', verified=NULL), False, False),
+     _context(event_name='schedule', unit_tests='failure', verdict='skipped', verified=NULL),
+     True, False, False),
     ("a pull request's Unit Tests completed",
-     _context(event='pull_request', verdict='skipped', verified=NULL), False, False),
+     _context(event='pull_request', verdict='skipped', verified=NULL), False, False, False),
     ('Unit Tests failed on main',
-     _context(conclusion='failure', verdict='skipped', verified=NULL), False, False),
+     _context(conclusion='failure', verdict='skipped', verified=NULL), False, False, False),
     ('Unit Tests completed on a branch that is not main',
-     _context(head_branch='dependabot/pip/scapy-2.6.2', verdict='skipped', verified=NULL), False, False),
+     _context(head_branch='dependabot/pip/scapy-2.6.2', verdict='skipped', verified=NULL),
+     False, False, False),
     ('the run was cancelled',
-     _context(cancelled=True), None, False),
+     _context(cancelled=True), None, None, False),
 ]
 
 #: GitHub Pages also builds, without deploying, for a pull request against ``main``.
 PAGES_ROWS = [
     ('a pull request against main',
-     _context(event_name='pull_request', verdict='skipped', verified=NULL), False, True),
+     _context(event_name='pull_request', verdict='skipped', verified=NULL), False, False, True),
 ]
 
 _GROUP = re.compile(r'^concurrency:\n  group: (?P<prefix>[^$\n]*)\$\{\{(?P<body>[^}]*)\}\}\n', re.M)
+#: The line each caller's ``head`` job calls :data:`HEAD` with.
+_CALL = f'uses: ./.github/workflows/{HEAD}'
 
 
 class TestEachWorkflowGatesOnTheVerdict(unittest.TestCase):
-    """The ``verdict`` job, and the job it gates, in each :data:`ACTING_JOBS` workflow."""
+    """:data:`HEAD`'s jobs, and the job they gate, in each :data:`ACTING_JOBS` workflow."""
 
     @classmethod
     def setUpClass(cls) -> None:
-        cls.texts = {name: (WORKFLOWS / name).read_text(encoding='utf-8') for name in ACTING_JOBS}
+        cls.texts = {name: (WORKFLOWS / name).read_text(encoding='utf-8')
+                     for name in (*ACTING_JOBS, HEAD)}
         cls.jobs = {name: job_blocks(text) for name, text in cls.texts.items()}
 
     def _jobs(self, workflow: 'str') -> 'dict[str, str]':
         jobs = self.jobs[workflow]
-        if 'verdict' not in jobs:
-            self.fail(f'{workflow} has no `verdict` job, so it acts on whatever commit it checks out')
+        if 'head' not in jobs or _CALL not in jobs['head']:
+            self.fail(f'{workflow} has no `head` job calling {HEAD}, so it acts on whatever '
+                      f'commit it checks out')
         return jobs
 
-    def test_each_acting_job_needs_the_verdict(self) -> None:
+    def test_each_acting_job_needs_the_head(self) -> None:
         for workflow, job in ACTING_JOBS.items():
             with self.subTest(workflow=workflow):
-                self.assertIn('verdict', declared_needs(self._jobs(workflow)[job]))
+                self.assertEqual(declared_needs(self._jobs(workflow)[job]), ['head'])
 
     def test_every_scenario_decides_correctly(self) -> None:
-        """The table above, for both jobs, in every workflow."""
+        """The table above, for :data:`HEAD`'s jobs and each acting job."""
+        head = self.jobs[HEAD]
         violations = []  # type: list[str]
         for workflow, job in ACTING_JOBS.items():
-            jobs = self.jobs[workflow]
+            jobs = self._jobs(workflow)
             rows = ROWS + (PAGES_ROWS if workflow == 'deploy-pages.yml' else [])
-            for name, context, verdict_runs, acting_runs in rows:
-                for target, expected in (('verdict', verdict_runs), (job, acting_runs)):
+            for name, context, gate_runs, verdict_runs, acting_runs in rows:
+                for target, block, scope, expected in (
+                        ('unit-tests', head.get('unit-tests'), _head_context(context), gate_runs),
+                        ('verdict', head.get('verdict'), _head_context(context), verdict_runs),
+                        (job, jobs.get(job), context, acting_runs)):
                     if expected is None:
                         continue
-                    if target not in jobs:
+                    if block is None:
                         violations.append(f'{workflow}: {name}: no `{target}` job')
                         continue
-                    if evaluate_condition(declared_if(jobs[target]), context) != expected:
+                    if evaluate_condition(declared_if(block), scope) != expected:
                         violations.append(f'{workflow}: {name}: `{target}` should '
                                           f'{"run" if expected else "skip"}, it does not')
         if violations:
             self.fail(f'{len(violations)} scenario(s) decided wrongly:\n' + '\n'.join(violations))
 
-    def test_a_skipped_verdict_cannot_cascade_into_the_acting_job(self) -> None:
-        """``verdict`` skips on the schedule, so without a status-check function
-        the implicit ``success()`` would skip the job behind it there too.
+    def test_a_skipped_head_cannot_cascade_into_the_acting_job(self) -> None:
+        """A job of ``head`` skips on every path, so without a status-check
+        function the implicit ``success()`` could skip the job behind it.
 
         """
+        skipped = _context(event_name='schedule', unit_tests='skipped', verdict='skipped', verified=NULL)
         for workflow, job in ACTING_JOBS.items():
             with self.subTest(workflow=workflow):
-                self.assertTrue(declared_if(self._jobs(workflow)[job]).startswith('!cancelled() && '))
+                condition = declared_if(self._jobs(workflow)[job])
+                self.assertTrue(condition.startswith('!cancelled() && '))
+                self.assertTrue(evaluate_condition(condition, skipped))
 
-    def test_the_verdict_job_is_one_job_in_three_places(self) -> None:
-        """Identical text, so a fix to one cannot leave the others behind."""
-        blocks = {workflow: self._jobs(workflow)['verdict'] for workflow in ACTING_JOBS}
-        self.assertEqual(len(set(blocks.values())), 1, sorted(blocks))
+    def test_the_three_call_one_head(self) -> None:
+        """#1967: one copy of the gate and the verdict, called the same way from each.
+
+        The ``head`` jobs differ in their ``name:`` alone, no acting workflow
+        keeps a gate or a ``verdict`` of its own, and nothing else calls
+        :data:`HEAD`.
+
+        """
+        blocks = {}  # type: dict[str, str]
+        for workflow in ACTING_JOBS:
+            jobs = self._jobs(workflow)
+            with self.subTest(workflow=workflow):
+                self.assertNotIn('verdict', jobs)
+                self.assertNotIn('uses: ./.github/workflows/unit-tests.yml', self.texts[workflow])
+                self.assertNotIn('run: python3 util/verdict_covers_checkout.py\n', self.texts[workflow])
+                blocks[workflow] = re.sub(r'(?m)^    name: .*\n', '', jobs['head'] + '\n')
+        self.assertEqual(len(set(blocks.values())), 1, blocks)
+        callers = sorted(path.name for path in WORKFLOWS.glob('*.yml')
+                         if _CALL in path.read_text(encoding='utf-8'))
+        self.assertEqual(callers, sorted(ACTING_JOBS))
+
+    def test_the_schedules_are_spread_with_vendor_before_conda(self) -> None:
+        """#1967: one Saturday schedule each, at distinct hours, so no two heads
+        gate at once; Conda Update after Vendor Update, so its GitHub upload
+        finds the release Vendor Update's Create Release made (#1634).
+
+        """
+        hours = {}  # type: dict[str, int]
+        for workflow in ACTING_JOBS:
+            crons = re.findall(r"(?m)^    - cron: '(\d+) (\d+) \* \* (\d)'", self.texts[workflow])
+            with self.subTest(workflow=workflow):
+                self.assertEqual(len(crons), 1, crons)
+                minute, hour, day = crons[0]
+                self.assertEqual((minute, day), ('0', '6'))
+                hours[workflow] = int(hour)
+        self.assertEqual(len(set(hours.values())), len(hours), hours)
+        self.assertLess(hours['cron-vendor.yml'], hours['cron-conda.yml'])
+
+    def test_the_head_is_reusable_only_and_holds_what_its_callers_grant(self) -> None:
+        """``workflow_call`` alone, ``verified`` passed out from ``verdict``, and
+        ``contents: read`` everywhere: what each caller grants ``head``, and what
+        ``unit-tests.yml`` is called with elsewhere.
+
+        """
+        text = self.texts[HEAD]
+        triggers = re.search(r'(?ms)^on:\n(.*?)^\S', text)
+        self.assertIsNotNone(triggers)
+        self.assertEqual(re.findall(r'(?m)^  ([\w-]+):', triggers.group(1)),  # type: ignore[union-attr]
+                         ['workflow_call'])
+        self.assertIn('value: ${{ jobs.verdict.outputs.verified }}', text)
+        self.assertIn('\npermissions:\n  contents: read\n', text)
+        scopes = {line.strip() for line in text.splitlines()
+                  if re.match(r'^ +(actions|attestations|checks|contents|deployments|discussions|'
+                              r'id-token|issues|models|packages|pages|pull-requests|'
+                              r'security-events|statuses): ', line)}
+        self.assertEqual(scopes, {'contents: read'})
+        self.assertIn('    permissions:\n      contents: read\n    uses: ./.github/workflows/unit-tests.yml\n'
+                      '    with:\n      gate-only: true', self.jobs[HEAD]['unit-tests'])
+        for workflow in ACTING_JOBS:
+            with self.subTest(workflow=workflow):
+                self.assertIn('    permissions:\n      contents: read\n', self._jobs(workflow)['head'])
 
     def test_the_verdict_job_reads_the_payload_as_data(self) -> None:
         """The sha arrives through ``env:``, and the script it runs exists."""
-        block = self._jobs('cron-conda.yml')['verdict']
+        block = self.jobs[HEAD]['verdict']
         self.assertIn('VERDICT_SHA: ${{ github.event.workflow_run.head_sha }}', block)
         command = re.search(r'(?m)^ +run: python3 (\S+)$', block)
         self.assertIsNotNone(command, block)
@@ -461,13 +562,16 @@ class TestEachWorkflowGatesOnTheVerdict(unittest.TestCase):
         self.assertEqual(block.count('${{'), 2, 'the only expressions are the output and the env value')
 
     def test_the_verdict_job_checks_out_what_the_acting_job_builds(self) -> None:
-        """Neither checkout names a ``ref:``, so both are the default ``github.sha``."""
+        """Neither checkout names a ``ref:``, so both are the default ``github.sha``,
+        which in a called workflow is the caller's.
+
+        """
         for workflow, job in ACTING_JOBS.items():
-            jobs = self._jobs(workflow)
-            for target in ('verdict', job):
+            for target, block in (('verdict', self.jobs[HEAD]['verdict']),
+                                  (job, self._jobs(workflow)[job])):
                 with self.subTest(workflow=workflow, job=target):
-                    self.assertIn('uses: actions/checkout@', jobs[target])
-                    self.assertNotRegex(jobs[target], r'(?m)^ +ref:')
+                    self.assertIn('uses: actions/checkout@', block)
+                    self.assertNotRegex(block, r'(?m)^ +ref:')
 
     def test_the_verdict_checkout_reaches_past_a_bot_commit(self) -> None:
         """At ``fetch-depth: 1`` only ``HEAD`` is fetched, so with a bot commit on
@@ -476,14 +580,12 @@ class TestEachWorkflowGatesOnTheVerdict(unittest.TestCase):
         ``0`` fetches all history.
 
         """
-        for workflow in ACTING_JOBS:
-            with self.subTest(workflow=workflow):
-                depths = re.findall(r'(?m)^ +fetch-depth: *(\S+)$', self._jobs(workflow)['verdict'])
-                self.assertEqual(len(depths), 1, 'one checkout, with an explicit fetch-depth')
-                self.assertRegex(depths[0], r'^\d+$')
-                depth = int(depths[0])
-                self.assertTrue(depth == 0 or depth >= 2,
-                                f'fetch-depth {depth} cannot hold the verdict under a bot commit')
+        depths = re.findall(r'(?m)^ +fetch-depth: *(\S+)$', self.jobs[HEAD]['verdict'])
+        self.assertEqual(len(depths), 1, 'one checkout, with an explicit fetch-depth')
+        self.assertRegex(depths[0], r'^\d+$')
+        depth = int(depths[0])
+        self.assertTrue(depth == 0 or depth >= 2,
+                        f'fetch-depth {depth} cannot hold the verdict under a bot commit')
 
     def test_a_stale_run_cannot_share_a_concurrency_group_with_a_fresh_one(self) -> None:
         """GitHub cancels a pending run when a newer one joins its group, so a run
@@ -515,13 +617,20 @@ class TestEachWorkflowGatesOnTheVerdict(unittest.TestCase):
             import yaml  # pylint: disable=import-outside-toplevel
         except ImportError:
             self.skipTest('PyYAML is only installed with the test extra')
-        for workflow, job in ACTING_JOBS.items():
+        targets = list(ACTING_JOBS.items()) + [(HEAD, 'unit-tests'), (HEAD, 'verdict')]
+        for workflow, target in targets:
             parsed = yaml.safe_load(self.texts[workflow])['jobs']
-            for target in ('verdict', job):
-                with self.subTest(workflow=workflow, job=target):
-                    self.assertIn(target, sorted(parsed))
-                    self.assertEqual(' '.join(parsed[target]['if'].split()),
-                                     ' '.join(declared_if(self._jobs(workflow)[target]).split()))
+            with self.subTest(workflow=workflow, job=target):
+                self.assertIn(target, sorted(parsed))
+                self.assertEqual(' '.join(parsed[target]['if'].split()),
+                                 ' '.join(declared_if(self.jobs[workflow][target]).split()))
+        for workflow in ACTING_JOBS:
+            parsed = yaml.safe_load(self.texts[workflow])['jobs']['head']
+            with self.subTest(workflow=workflow, job='head'):
+                self.assertEqual(parsed['uses'], f'./.github/workflows/{HEAD}')
+                self.assertEqual(parsed['permissions'], {'contents': 'read'})
+                for key in ('if', 'with', 'secrets'):
+                    self.assertNotIn(key, parsed)
 
 
 if __name__ == '__main__':
