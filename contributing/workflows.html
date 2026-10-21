@@ -1418,6 +1418,23 @@ failure report ended the session, exit 3, with 7.9 GB free. So a worker whose he
 is spent exits, xdist fails the test it ran as crashed and starts another, and
 <code class="docutils literal notranslate"><span class="pre">--max-worker-restart=30</span></code> allows 30 restarts in all, where three 16-minute heaps need
 about 21 in 110 minutes; xdist’s default is 4 a worker, 12 at <code class="docutils literal notranslate"><span class="pre">-n</span> <span class="pre">3</span></code>.</p></li>
+<li><p>GraalPy’s tier runs in shards (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1963">#1963</a>), so no worker outlives its
+heap. In job 118912680486, the first full run of the curated <code class="docutils literal notranslate"><span class="pre">ALL</span></code> tier, nine
+workers went down at 2.5-3.0 GB RSS, 9-17 minutes into their lives, each failing a
+test that passes alone. So on GraalPy’s leg <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">unit</span> <span class="pre">tests</span></code> hands its pytest
+command to <code class="file docutils literal notranslate"><span class="pre">util/pytest_shards.py</span></code>, which runs it once per shard <code class="docutils literal notranslate"><span class="pre">SHARDS</span></code>
+names – a directory, or a glob of one directory’s entries such as
+<code class="docutils literal notranslate"><span class="pre">tests/corekit/test_i*</span></code> – and once more over the rest, and every run starts its
+own workers. Each run also ignores what every earlier shard took, so a glob may
+precede its own directory, which then takes the remainder. The shards are sized by
+each one’s largest live heap after a full GC, measured locally on GraalPy 25.4.4 at
+<code class="docutils literal notranslate"><span class="pre">-n</span> <span class="pre">3</span></code>: run whole, the tier lost 8 workers, its heap reached the 2 GiB cap, and it
+took 3559 s; in these shards none went down, no heap passed 1303 MB, and it
+took 1879 s. The runs share the step’s <code class="docutils literal notranslate"><span class="pre">timeout</span></code>, scope and watcher, so the
+caps hold over the whole tier; on <code class="docutils literal notranslate"><span class="pre">timeout</span></code>’s SIGINT the run in progress writes
+its JUnit file and no later one starts. Each shard’s run writes a JUnit file of its
+own beside <code class="docutils literal notranslate"><span class="pre">junit.xml</span></code>, such as <code class="docutils literal notranslate"><span class="pre">junit-tests-protocols.xml</span></code>, and <code class="docutils literal notranslate"><span class="pre">Upload</span> <span class="pre">test</span>
+<span class="pre">timings</span></code> takes them all. 3.14t’s leg runs pytest once, as before.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">timeout</span> <span class="pre">--signal=INT</span> <span class="pre">--kill-after=3m</span> <span class="pre">110m</span></code> ends pytest under the step’s 120-minute
 cap, so it still writes the junit XML, and exits 124; <code class="docutils literal notranslate"><span class="pre">prlimit</span> <span class="pre">--fsize=2147483648</span></code>
 caps any file at 2 GiB.</p></li>
@@ -1646,14 +1663,20 @@ does; each has tests under <code class="file docutils literal notranslate"><span
 <tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">util/coverage_report.py</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">Report</span> <span class="pre">coverage</span></code> in <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">test</span></code>, on the coverage leg.</p></td>
 </tr>
+<tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/pytest_shards.py</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">unit</span> <span class="pre">tests</span></code> in <code class="docutils literal notranslate"><span class="pre">experimental.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">experimental</span></code>, on GraalPy’s leg
+(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1963">#1963</a>).</p></td>
+</tr>
 </tbody>
 </table>
 </div>
 <p>The summaries run on the image’s <code class="docutils literal notranslate"><span class="pre">/usr/bin/python3</span></code> rather than the leg’s
 interpreter, which may have failed to set up or be too broken to run anything, so
 they need only the standard library, as <code class="docutils literal notranslate"><span class="pre">classify_changes.py</span></code> does on the
-runner’s <code class="docutils literal notranslate"><span class="pre">python3</span></code>. Both <code class="docutils literal notranslate"><span class="pre">changes</span></code> jobs check out on every event, since the
-script is in the tree. <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">pypi</span></code> job keeps its own copy of
+runner’s <code class="docutils literal notranslate"><span class="pre">python3</span></code>. <code class="file docutils literal notranslate"><span class="pre">util/pytest_shards.py</span></code> runs on <code class="docutils literal notranslate"><span class="pre">/usr/bin/python3</span></code>
+too, standard library only, so on GraalPy’s leg the leg’s interpreter runs pytest
+alone. Both <code class="docutils literal notranslate"><span class="pre">changes</span></code> jobs check out on every event, since the script is in the
+tree. <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">pypi</span></code> job keeps its own copy of
 the KTLO summary’s shell until its shell moves to scripts too; a project pin runs
 that copy and the script on the same steps and requires the same output.</p>
 </section>

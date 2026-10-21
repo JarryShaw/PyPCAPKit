@@ -927,6 +927,24 @@ warnings:
   is spent exits, xdist fails the test it ran as crashed and starts another, and
   ``--max-worker-restart=30`` allows 30 restarts in all, where three 16-minute heaps need
   about 21 in 110 minutes; xdist's default is 4 a worker, 12 at ``-n 3``.
+* GraalPy's tier runs in shards (`#1963
+  <https://github.com/JarryShaw/PyPCAPKit/issues/1963>`__), so no worker outlives its
+  heap. In job 118912680486, the first full run of the curated ``ALL`` tier, nine
+  workers went down at 2.5-3.0 GB RSS, 9-17 minutes into their lives, each failing a
+  test that passes alone. So on GraalPy's leg ``Run unit tests`` hands its pytest
+  command to :file:`util/pytest_shards.py`, which runs it once per shard ``SHARDS``
+  names -- a directory, or a glob of one directory's entries such as
+  ``tests/corekit/test_i*`` -- and once more over the rest, and every run starts its
+  own workers. Each run also ignores what every earlier shard took, so a glob may
+  precede its own directory, which then takes the remainder. The shards are sized by
+  each one's largest live heap after a full GC, measured locally on GraalPy 25.4.4 at
+  ``-n 3``: run whole, the tier lost 8 workers, its heap reached the 2 GiB cap, and it
+  took 3559 s; in these shards none went down, no heap passed 1303 MB, and it
+  took 1879 s. The runs share the step's ``timeout``, scope and watcher, so the
+  caps hold over the whole tier; on ``timeout``'s SIGINT the run in progress writes
+  its JUnit file and no later one starts. Each shard's run writes a JUnit file of its
+  own beside ``junit.xml``, such as ``junit-tests-protocols.xml``, and ``Upload test
+  timings`` takes them all. 3.14t's leg runs pytest once, as before.
 * ``timeout --signal=INT --kill-after=3m 110m`` ends pytest under the step's 120-minute
   cap, so it still writes the junit XML, and exits 124; ``prlimit --fsize=2147483648``
   caps any file at 2 GiB.
@@ -1155,12 +1173,17 @@ does; each has tests under :file:`tests/project/` that run it.
        ``experimental.yml``.
    * - :file:`util/coverage_report.py`
      - ``Report coverage`` in ``unit-tests.yml``'s ``test``, on the coverage leg.
+   * - :file:`util/pytest_shards.py`
+     - ``Run unit tests`` in ``experimental.yml``'s ``experimental``, on GraalPy's leg
+       (`#1963 <https://github.com/JarryShaw/PyPCAPKit/issues/1963>`__).
 
 The summaries run on the image's ``/usr/bin/python3`` rather than the leg's
 interpreter, which may have failed to set up or be too broken to run anything, so
 they need only the standard library, as ``classify_changes.py`` does on the
-runner's ``python3``. Both ``changes`` jobs check out on every event, since the
-script is in the tree. ``create-release.yml``'s ``pypi`` job keeps its own copy of
+runner's ``python3``. :file:`util/pytest_shards.py` runs on ``/usr/bin/python3``
+too, standard library only, so on GraalPy's leg the leg's interpreter runs pytest
+alone. Both ``changes`` jobs check out on every event, since the script is in the
+tree. ``create-release.yml``'s ``pypi`` job keeps its own copy of
 the KTLO summary's shell until its shell moves to scripts too; a project pin runs
 that copy and the script on the same steps and requires the same output.
 
