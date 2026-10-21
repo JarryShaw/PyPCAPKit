@@ -376,9 +376,10 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
         # NOTE: CPython's ``s`` and ``p`` formats take a bytearray, PyPy's take
         # bytes alone (``TypeError: expected bytes, got bytearray object``), so a
         # bytearray is handed over as bytes, packing identically on both (#2004).
-        # Nothing CPython refuses is let through: a memoryview stays refused, as
-        # does a bytearray for the ``c`` format, which CPython rejects too.
-        if isinstance(pre_processed, bytearray) and self.template[-1:] in ('s', 'p'):
+        # The ``c`` format is converted too: CPython's refuses a bytearray and
+        # GraalPy's takes one, so converting it packs alike everywhere (#2015).
+        # A memoryview is left to the engine, which CPython refuses for all three.
+        if isinstance(pre_processed, bytearray) and self.template[-1:] in ('s', 'p', 'c'):
             pre_processed = bytes(pre_processed)
         return struct.pack(self.template, pre_processed)
 
