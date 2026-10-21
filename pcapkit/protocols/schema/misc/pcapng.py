@@ -21,7 +21,8 @@ from pcapkit.corekit.fields.byteorder import byteorder_callback, packet_byteorde
 from pcapkit.corekit.fields.collections import OptionField
 from pcapkit.corekit.fields.ipaddress import (IPv4AddressField, IPv4InterfaceField,
                                               IPv6AddressField, IPv6InterfaceField)
-from pcapkit.corekit.fields.misc import ForwardMatchField, PayloadField, SchemaField, SwitchField
+from pcapkit.corekit.fields.misc import (ConditionalField, ForwardMatchField, PayloadField,
+                                         SchemaField, SwitchField)
 from pcapkit.corekit.fields.numbers import (EnumField, Int32Field, Int64Field, NumberField,
                                             UInt8Field, UInt16Field, UInt32Field, UInt64Field)
 from pcapkit.corekit.fields.strings import (BitField, BytesField, DecodedString, PaddingField,
@@ -62,7 +63,7 @@ __all__ = [
 
 if TYPE_CHECKING:
     from ipaddress import IPv4Address, IPv4Interface, IPv6Address, IPv6Interface
-    from typing import IO, Any, Callable, DefaultDict, Dict, Iterable, Optional, Type
+    from typing import IO, Any, Callable, DefaultDict, Dict, Iterable, Optional, Type, TypeVar
 
     from typing_extensions import Literal, Self
 
@@ -70,6 +71,8 @@ if TYPE_CHECKING:
     from pcapkit.corekit.fields.field import FieldBase as Field
     from pcapkit.protocols.misc.pcapng import WireGuardKeyLabel
     from pcapkit.protocols.protocol import ProtocolBase
+
+    _ZigBeeKey = TypeVar('_ZigBeeKey', 'ZigBeeNWKKey', 'ZigBeeAPSKey')
 
 if SPHINX_TYPE_CHECKING:  # pragma: no cover
     from typing_extensions import TypedDict
@@ -609,6 +612,79 @@ def _secrets_cut(packet: 'dict[str, Any]') -> 'bool':
     if not isinstance(declared, int) or not isinstance(length, int):
         return False
     return declared > secrets_area(block)
+
+
+def zigbee_key_has_trailing(packet: 'dict[str, Any]') -> 'bool':
+    """Tell whether a ZigBee key schema carries octets past its fixed fields.
+
+    Args:
+        packet: Unpacked data so far, or the data being packed.
+
+    Returns:
+        On unpacking, whether any of the span the block gives the key is left
+        once its fixed fields are read; on packing, whether the schema holds
+        such octets.
+
+    """
+    trailing = packet.get('trailing')
+    if isinstance(trailing, bytes):
+        return bool(trailing)
+    return packet['__length__'] > 0
+
+
+def zigbee_key_trailing(packet: 'dict[str, Any]') -> 'int':
+    """Size the octets a ZigBee key schema carries past its fixed fields.
+
+    Args:
+        packet: Unpacked data so far, or the data being packed.
+
+    Returns:
+        On unpacking, what is left of the span the block gives the key; on
+        packing, the octets the schema holds.
+
+    The ZigBee NWK and APS keys have a fixed width, but a block's Secrets
+    Length may declare more. The octets past the fixed fields are kept here,
+    rather than dropped, so that the key rebuilds as captured (:issue:`1986`).
+
+    """
+    trailing = packet.get('trailing')
+    if isinstance(trailing, bytes):
+        return len(trailing)
+    return max(packet['__length__'], 0)
+
+
+def zigbee_key_held(schema: 'Type[_ZigBeeKey]', data: 'bytes') -> '_ZigBeeKey':
+    """Rebuild a ZigBee key schema from the Secrets Data octets its block held.
+
+    Args:
+        schema: :class:`ZigBeeNWKKey` or :class:`ZigBeeAPSKey`.
+        data: The Secrets Data octets, as the block held them.
+
+    Returns:
+        A ``schema`` instance that packs back to exactly ``data``.
+
+    The fixed fields are read from ``data``, and any octets past them are kept
+    as the schema's ``trailing`` octets. A ``data`` short of the fixed width is
+    read as though zero-filled and recorded as a short read, so that packing
+    cuts it back to the octets held, as :meth:`Schema._cut_short_read
+    <pcapkit.protocols.schema.schema.Schema._cut_short_read>` describes. A key
+    shorter than its fixed width, or a Secrets Length longer than it, then
+    rebuilds byte for byte (:issue:`1986`).
+
+    """
+    fixed = [(name, field.length) for (name, field) in schema.__fields__.items()
+             if name != 'trailing']
+    width = sum(length for (_, length) in fixed)
+    padded = data.ljust(width, b'\x00')
+    value = cast('_ZigBeeKey', schema.unpack(padded))  # type: ignore[call-arg,misc]
+
+    offset = 0
+    for (name, length) in fixed:
+        if len(data) < offset + length:
+            value.__dict__['__short_read__'] = (name, len(data) - offset)
+            break
+        offset += length
+    return value
 
 
 def pcapng_block_selector(packet: 'dict[str, Any]') -> 'Field':
@@ -2481,13 +2557,20 @@ class ZigBeeNWKKey(DSBSecrets, code=Enum_SecretsType.ZigBee_NWK_Key):
     key: 'bytes' = BytesField(length=16)
     #: ZigBee PANID.
     panid: 'int' = UInt16Field(byteorder='little')
+    #: Octets past the PAN ID, if Secrets Length declares any (see
+    #: :func:`zigbee_key_trailing`).
+    trailing: 'Optional[bytes]' = ConditionalField(
+        BytesField(length=zigbee_key_trailing),
+        zigbee_key_has_trailing,
+    )
 
     # NOTE: The two zero octets after the PAN ID are the Decryption Secrets
     # Block's own padding, which Secrets Length does not count, so they belong
     # to :attr:`DecryptionSecretsBlock.padding_data` rather than to this schema.
 
     if TYPE_CHECKING:
-        def __init__(self, key: 'bytes', panid: 'int') -> 'None': ...
+        def __init__(self, key: 'bytes', panid: 'int',
+                     trailing: 'Optional[bytes]' = None) -> 'None': ...
 
 
 @schema_final
@@ -2502,12 +2585,19 @@ class ZigBeeAPSKey(DSBSecrets, code=Enum_SecretsType.ZigBee_APS_Key):
     addr_low: 'int' = UInt16Field(byteorder='little')
     #: High node short address.
     addr_high: 'int' = UInt16Field(byteorder='little')
+    #: Octets past the high node short address, if Secrets Length declares any
+    #: (see :func:`zigbee_key_trailing`).
+    trailing: 'Optional[bytes]' = ConditionalField(
+        BytesField(length=zigbee_key_trailing),
+        zigbee_key_has_trailing,
+    )
 
     # NOTE: As for :class:`ZigBeeNWKKey`, the trailing two zero octets are the
     # block's padding, not part of the secrets.
 
     if TYPE_CHECKING:
-        def __init__(self, key: 'bytes', panid: 'int', addr_low: 'int', addr_high: 'int') -> 'None': ...
+        def __init__(self, key: 'bytes', panid: 'int', addr_low: 'int', addr_high: 'int',
+                     trailing: 'Optional[bytes]' = None) -> 'None': ...
 
 
 class _DSB_Option(Option, ns='dsb'):

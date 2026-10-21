@@ -860,6 +860,11 @@ class ZigBeeNWKKey(DSBSecrets):
     pan_id: 'int'
 
     if TYPE_CHECKING:
+        #: Secrets Data octets as the block carries them, which a Secrets
+        #: Length may make shorter or longer than the key's fixed width. Set on
+        #: parsing only, and written back verbatim on rebuild (:issue:`1986`).
+        data: 'bytes'
+
         def __init__(self, nwk_key: 'bytes', pan_id: 'int') -> 'None': ...
 
 
@@ -875,6 +880,11 @@ class ZigBeeAPSKey(DSBSecrets):
     short_address: 'int'
 
     if TYPE_CHECKING:
+        #: Secrets Data octets as the block carries them, as for
+        #: :attr:`ZigBeeNWKKey.data`. Set on parsing only, and written back
+        #: verbatim on rebuild (:issue:`1986`).
+        data: 'bytes'
+
         def __init__(self, aps_key: 'bytes', pan_id: 'int', short_address: 'int') -> 'None': ...
 
 

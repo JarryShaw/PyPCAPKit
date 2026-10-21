@@ -91,9 +91,9 @@ class TestPCAPNGDSBSecretsOverrun(PCAPNGTestCase):
 
     def test_overrun_rebuilds(self) -> None:
         """The data model rebuilds the declared ``secrets_length``, as an EPB does its ``captured_len``."""
-        # NOTE: no ZigBee key here: one shorter than its fixed width rebuilds at
-        # full width whatever its secrets_length says, overrun or not.
-        for secrets_type in (TLS_KEY_LOG, UNKNOWN_SECRETS):
+        # NOTE: a ZigBee key shorter than its fixed width rebuilds as held too
+        # (#1986).
+        for secrets_type in (TLS_KEY_LOG, UNKNOWN_SECRETS, ZIGBEE_NWK_KEY):
             for secrets_length in (0xFFFF_FFF0, 5):
                 with self.subTest(secrets_type=hex(secrets_type), secrets_length=secrets_length):
                     octets = _dsb(secrets_type, secrets_length, b'abcd')
@@ -127,14 +127,19 @@ class TestPCAPNGDSBSecretsOverrun(PCAPNGTestCase):
         self.assertEqual(struct.unpack('<I', octets[12:16])[0], secrets_length, octets.hex())
 
     def test_length_within_the_block_follows_the_secrets(self) -> None:
-        """A length that fits the block is no overrun, so the rebuild keeps its padding."""
+        """A length that fits the block is no overrun, so the rebuild keeps its padding.
+
+        The two octets past the ZigBee key's fixed width are secrets the length
+        declares, so they rebuild with it (#1986).
+        """
         key = bytes(range(16)) + b'\x34\x12'
         octets = _dsb(ZIGBEE_NWK_KEY, 20, key)
-        with warnings.catch_warnings():
-            warnings.simplefilter('ignore')
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter('always')
             rebuilt = self._rebuild(octets)
-        self.assertValidBlock(rebuilt, 18)
-        self.assertEqual(rebuilt[16:34], key)
+        self.assertFalse(any('runs past the block' in str(item.message) for item in caught))
+        self.assertValidBlock(rebuilt, 20)
+        self.assertEqual(rebuilt.hex(), octets.hex())
 
     def test_edited_secrets_take_their_own_length(self) -> None:
         from pcapkit.protocols.misc.pcapng import PCAPNG

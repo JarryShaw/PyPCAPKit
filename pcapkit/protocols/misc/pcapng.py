@@ -208,6 +208,7 @@ from pcapkit.protocols.schema.misc.pcapng import UnknownSecrets as Schema_Unknow
 from pcapkit.protocols.schema.misc.pcapng import WireGuardKeyLog as Schema_WireGuardKeyLog
 from pcapkit.protocols.schema.misc.pcapng import ZigBeeAPSKey as Schema_ZigBeeAPSKey
 from pcapkit.protocols.schema.misc.pcapng import ZigBeeNWKKey as Schema_ZigBeeNWKKey
+from pcapkit.protocols.schema.misc.pcapng import zigbee_key_held
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.compat import StrEnum, localcontext
 from pcapkit.utilities.exceptions import (BaseError, EnumValueError, FormatError, ProtocolError,
@@ -4292,6 +4293,10 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             nwk_key=schema.key,
             pan_id=schema.panid,
         )
+        # NOTE: the octets as the block holds them are kept as well, since a
+        # Secrets Length may declare fewer or more than the key's fixed width,
+        # and a rebuild writes them back verbatim (#1986).
+        secrets.__update__(data=bytes(schema))
         return secrets
 
     def _read_secrets_zigbee_aps(self, schema: 'Schema_ZigBeeAPSKey', *,
@@ -4342,6 +4347,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             pan_id=schema.panid,
             short_address=schema.addr_high << 16 | schema.addr_low,
         )
+        # NOTE: kept as for ``_read_secrets_zigbee_nwk`` (#1986).
+        secrets.__update__(data=bytes(schema))
         return secrets
 
     def _make_block_unknown(self, block: 'Optional[Data_UnknownBlock]' = None, *,
@@ -6716,7 +6723,12 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         Args:
             type: Secrets type.
-            secrets: Secrets data model.
+            secrets: Secrets data model. The Secrets Data octets it was parsed
+                from, if any, are written back verbatim, so that a key shorter
+                or longer than its fixed width rebuilds as captured
+                (:issue:`1986`); otherwise its fields are. On a parsed model
+                the octets win, so an edit to its fields alone is silently
+                ignored.
             nwk_key: NWK key.
             pan_id: PAN ID.
             **kwargs: Arbitrary keyword arguments.
@@ -6726,6 +6738,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         """
         if secrets is not None:
+            held = secrets.get('data')
+            if isinstance(held, bytes):
+                return zigbee_key_held(Schema_ZigBeeNWKKey, held)
             nwk_key = secrets.nwk_key
             pan_id = secrets.pan_id
 
@@ -6743,7 +6758,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         Args:
             type: Secrets type.
-            secrets: Secrets data model.
+            secrets: Secrets data model. The Secrets Data octets it was parsed
+                from, if any, are written back verbatim, as for
+                :meth:`_make_secrets_zigbee_nwk`; otherwise its fields are.
             aps_key: APS key.
             pan_id: PAN ID.
             short_address: Short address.
@@ -6754,6 +6771,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         """
         if secrets is not None:
+            held = secrets.get('data')
+            if isinstance(held, bytes):
+                return zigbee_key_held(Schema_ZigBeeAPSKey, held)
             aps_key = secrets.aps_key
             pan_id = secrets.pan_id
             short_address = secrets.short_address
