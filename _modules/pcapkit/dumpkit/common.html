@@ -521,7 +521,7 @@
 
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">TextIO</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Collection</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">TextIO</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">dictdumper.dumper</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dumper</span> <span class="k">as</span> <span class="n">ABCDumper</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
@@ -903,6 +903,26 @@
             <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="nb">format</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="s1">''</span><span class="p">))[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">key</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">excluded</span><span class="p">(</span><span class="n">info</span><span class="p">:</span> <span class="s1">'Info | MultiDict[Any, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Collection[Any]'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return the keys of ``info`` the writer leaves out.</span>
+
+<span class="sd">        Args:</span>
+<span class="sd">            info: An :class:`~pcapkit.corekit.infoclass.Info`, or a multi-mapping</span>
+<span class="sd">                such as the export its :meth:`~pcapkit.corekit.infoclass.Info.to_dict`</span>
+<span class="sd">                returns.</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            The :attr:`~pcapkit.corekit.infoclass.Info.__excluded__` of a field</span>
+<span class="sd">            model, or of the field model an export was made from -- metadata</span>
+<span class="sd">            such as ``__next_type__``, which only a rebuild reads</span>
+<span class="sd">            (:issue:`2003`). None for an option list, whose keys are its</span>
+<span class="sd">            options.</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">Info</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="n">MultiDict</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">()</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">info</span><span class="p">,</span> <span class="s1">'__excluded__'</span><span class="p">,</span> <span class="p">())</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">fields</span><span class="p">(</span><span class="n">info</span><span class="p">:</span> <span class="s1">'Info | MultiDict[Any, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[Any, Any]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Return the fields of ``info`` as the :class:`dict` the writer is handed.</span>
 
@@ -917,10 +937,12 @@
 <span class="sd">            held more than once, such as a repeated IPv6 extension header, maps</span>
 <span class="sd">            to the :class:`list` of all its values, in order (GitHub issue</span>
 <span class="sd">            :issue:`1484`). The values are left as they are, so each comes back</span>
-<span class="sd">            through :meth:`DictDumper.object_hook` when written.</span>
+<span class="sd">            through :meth:`DictDumper.object_hook` when written. The keys</span>
+<span class="sd">            :func:`excluded` names are left out.</span>
 
 <span class="sd">        """</span>
-        <span class="n">pairs</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">info</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+        <span class="n">skip</span> <span class="o">=</span> <span class="n">excluded</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
+        <span class="n">pairs</span> <span class="o">=</span> <span class="p">[(</span><span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">info</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">skip</span><span class="p">]</span>
         <span class="n">counts</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">Counter</span><span class="p">(</span><span class="n">key</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">pairs</span><span class="p">)</span>
         <span class="n">result</span> <span class="o">=</span> <span class="p">{}</span>  <span class="c1"># type: dict[Any, Any]</span>
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">pairs</span><span class="p">:</span>
@@ -1034,10 +1056,13 @@
                 <span class="c1"># by name could only gather the repeats of a key under its first</span>
                 <span class="c1"># occurrence (GitHub issue #1263). The keys are escaped when the</span>
                 <span class="c1"># writer hands each mapping back to this hook, through the</span>
-                <span class="c1"># :class:`dict` branch below.</span>
+                <span class="c1"># :class:`dict` branch below. The keys an export of an</span>
+                <span class="c1"># :class:`Info` excludes are left out, as :func:`fields` leaves</span>
+                <span class="c1"># them out (#2003).</span>
+                <span class="n">skip</span> <span class="o">=</span> <span class="n">excluded</span><span class="p">(</span><span class="n">o</span><span class="p">)</span>
                 <span class="n">result</span> <span class="o">=</span> <span class="p">[</span>
                     <span class="p">{</span><span class="n">render_enum</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">,</span> <span class="n">aenum</span><span class="o">.</span><span class="n">Enum</span><span class="p">))</span> <span class="k">else</span> <span class="n">key</span><span class="p">:</span> <span class="n">val</span><span class="p">}</span>
-                    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">o</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">o</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">skip</span>
                 <span class="p">]</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">o</span><span class="p">,</span> <span class="n">MultiDict</span><span class="p">):</span>
                 <span class="c1"># NOTE: a :class:`MultiDict` keeps no order across keys, only</span>

@@ -501,7 +501,7 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">types</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">typing</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Generic</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumLookup</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultiDict</span><span class="p">,</span> <span class="n">OrderedMultiDict</span><span class="p">,</span> <span class="n">iter_multi_items</span>
@@ -510,7 +510,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">InfoWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">ItemsView</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">Any</span><span class="p">,</span> <span class="n">Collection</span><span class="p">,</span> <span class="n">ItemsView</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">NoReturn</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span>
+                        <span class="n">SupportsIndex</span><span class="p">,</span> <span class="n">Type</span><span class="p">)</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Self</span>
 
@@ -743,11 +744,13 @@
 <span class="sd">    :class:`Info` class. It can be useful to reduce runtime generation</span>
 <span class="sd">    cost as well as caching already generated attributes.</span>
 
-<span class="sd">    * :attr:`Info.__additional__` and :attr:`Info.__excluded__` are</span>
-<span class="sd">      lists of additional and excluded field names, which are used to</span>
-<span class="sd">      determine certain names to be included or excluded from the field</span>
-<span class="sd">      dictionary. They will be automatically populated from the class</span>
-<span class="sd">      attributes of the :class:`Info` class and its base classes.</span>
+<span class="sd">    * :attr:`Info.__additional__`, :attr:`Info.__excluded__` and</span>
+<span class="sd">      :attr:`Info.__included__` are lists of additional, excluded and included</span>
+<span class="sd">      field names, which are used to determine certain names to be treated as</span>
+<span class="sd">      built-in names, left out of ``repr`` and the dumps, or carried as</span>
+<span class="sd">      metadata by :meth:`Info.to_dict`. They will be automatically populated</span>
+<span class="sd">      from the class attributes of the :class:`Info` class and its base</span>
+<span class="sd">      classes.</span>
 
 <span class="sd">      .. note::</span>
 
@@ -776,8 +779,9 @@
 <div class="viewcode-block" id="InfoMeta.__new__">
 <a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.InfoMeta.__new__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">bases</span><span class="p">:</span> <span class="s1">'tuple[type, ...]'</span><span class="p">,</span> <span class="n">attrs</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[Info]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Create the class, extending its :attr:`Info.__additional__` and</span>
-<span class="sd">        :attr:`Info.__excluded__` with every base's.</span>
+<span class="w">        </span><span class="sd">"""Create the class, extending its :attr:`Info.__additional__`,</span>
+<span class="sd">        :attr:`Info.__excluded__` and :attr:`Info.__included__` with every</span>
+<span class="sd">        base's.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            name: Class name.</span>
@@ -790,6 +794,8 @@
             <span class="n">attrs</span><span class="p">[</span><span class="s1">'__additional__'</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">if</span> <span class="s1">'__excluded__'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
             <span class="n">attrs</span><span class="p">[</span><span class="s1">'__excluded__'</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">if</span> <span class="s1">'__included__'</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">:</span>
+            <span class="n">attrs</span><span class="p">[</span><span class="s1">'__included__'</span><span class="p">]</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">for</span> <span class="n">base</span> <span class="ow">in</span> <span class="n">bases</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s1">'__additional__'</span><span class="p">):</span>
@@ -797,6 +803,8 @@
                     <span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">base</span><span class="o">.</span><span class="n">__additional__</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">[</span><span class="s1">'__additional__'</span><span class="p">])</span>
             <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s1">'__excluded__'</span><span class="p">):</span>
                 <span class="n">attrs</span><span class="p">[</span><span class="s1">'__excluded__'</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">base</span><span class="o">.</span><span class="n">__excluded__</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">[</span><span class="s1">'__excluded__'</span><span class="p">])</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">base</span><span class="p">,</span> <span class="s1">'__included__'</span><span class="p">):</span>
+                <span class="n">attrs</span><span class="p">[</span><span class="s1">'__included__'</span><span class="p">]</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">base</span><span class="o">.</span><span class="n">__included__</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">attrs</span><span class="p">[</span><span class="s1">'__included__'</span><span class="p">])</span>
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">bases</span><span class="p">,</span> <span class="n">attrs</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>  <span class="c1"># type: ignore[return-value]</span></div>
 </div>
 
@@ -825,6 +833,19 @@
 
 <span class="sd">       Iterating an instance skips the names listed in :attr:`__excluded__`.</span>
 
+<span class="sd">    A key whose name is a dunder, such as ``__next_type__``, is metadata.</span>
+<span class="sd">    Iterating an instance, ``len()`` and :meth:`to_dict` leave such a key out</span>
+<span class="sd">    unless :attr:`__included__` names it, and carry every other key;</span>
+<span class="sd">    :attr:`__excluded__` names the keys that ``repr``, ``str`` and the dumps of</span>
+<span class="sd">    :mod:`pcapkit.dumpkit` leave out besides. A subclass extends either list</span>
+<span class="sd">    with its own names, as for :attr:`__additional__`.</span>
+
+<span class="sd">    .. versionchanged:: 1.5.0</span>
+
+<span class="sd">       :attr:`__excluded__` names the keys left out of ``repr``, ``str`` and</span>
+<span class="sd">       the dumps only, and :attr:`__included__` the dunder keys that iterating</span>
+<span class="sd">       an instance, ``len()`` and :meth:`to_dict` carry (:issue:`2003`).</span>
+
 <span class="sd">    """</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -846,8 +867,20 @@
 
     <span class="c1">#: List of additional built-in names.</span>
     <span class="n">__additional__</span><span class="p">:</span> <span class="s1">'list[str]'</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="c1">#: List of names to be excluded from :obj:`dict` conversion.</span>
+    <span class="c1">#: List of names of keys left out of ``repr``, ``str`` and the dumps of</span>
+    <span class="c1">#: :mod:`pcapkit.dumpkit` -- metadata such as ``__next_type__``, which</span>
+    <span class="c1">#: :meth:`to_dict` may still carry, see :attr:`__included__`.</span>
+    <span class="c1">#: Finalisation adds the names in :attr:`__builtin__`.</span>
     <span class="n">__excluded__</span><span class="p">:</span> <span class="s1">'list[str]'</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="c1">#: List of names of dunder keys that iterating an instance, ``len()`` and</span>
+    <span class="c1">#: :meth:`to_dict` carry -- metadata such as ``__next_type__``, which a</span>
+    <span class="c1">#: rebuild from the :obj:`dict` reads. Every other dunder key is dropped</span>
+    <span class="c1">#: from all three, though indexing still reads it; a key that is no</span>
+    <span class="c1">#: dunder is carried regardless. A subclass extends the list with its own</span>
+    <span class="c1">#: names, as for :attr:`__excluded__`, so a custom :class:`Info` holding</span>
+    <span class="c1">#: dunder keys of its own must list them here for :meth:`to_dict` to keep</span>
+    <span class="c1">#: them (:issue:`2003`).</span>
+    <span class="n">__included__</span><span class="p">:</span> <span class="s1">'list[str]'</span> <span class="o">=</span> <span class="p">[]</span>
 
 <div class="viewcode-block" id="Info.__init_subclass__">
 <a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass.Info.__init_subclass__">[docs]</a>
@@ -945,9 +978,9 @@
         <span class="c1"># ``info_final`` writes ``BASE`` or ``FINAL`` onto the class it</span>
         <span class="c1"># finalises, and a subclass reading that state through inheritance was</span>
         <span class="c1"># never finalised itself -- it would keep the ``__excluded__`` it copied</span>
-        <span class="c1"># at declaration, without the names ``info_final`` adds, and leak</span>
-        <span class="c1"># ``__map__``, ``__map_reverse__`` and ``__multi__`` from ``to_dict()``</span>
-        <span class="c1"># (GitHub issue #1490). The inner one: an ancestor hand-marked bare</span>
+        <span class="c1"># at declaration, without the names ``info_final`` adds, which once</span>
+        <span class="c1"># leaked ``__map__``, ``__map_reverse__`` and ``__multi__`` from</span>
+        <span class="c1"># ``to_dict()`` (GitHub issue #1490). The inner one: an ancestor hand-marked bare</span>
         <span class="c1"># ``@final`` passes its marker to every subclass declared before it</span>
         <span class="c1"># landed, and ``getattr`` would blame such a subclass for a mismarking</span>
         <span class="c1"># that is its ancestor's. ``OwnDictRuleTests.test_a_subclass_that_</span>
@@ -1082,13 +1115,14 @@
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
         <span class="c1"># NOTE: count exactly the keys :meth:`__iter__` yields, so the</span>
-        <span class="c1"># bookkeeping attributes in ``__excluded__`` are not counted.</span>
-        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span> <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__excluded__</span><span class="p">)</span>
+        <span class="c1"># bookkeeping attributes and the dunder keys ``__included__`` does not</span>
+        <span class="c1"># name are not counted, while the keys in ``__excluded__`` are (#2003).</span>
+        <span class="k">return</span> <span class="nb">sum</span><span class="p">(</span><span class="mi">1</span> <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span> <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__hidden</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Iterator[str]'</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__excluded__</span><span class="p">:</span>
-               <span class="k">continue</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">__hidden</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
+                <span class="k">continue</span>
             <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">__map_reverse__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'VT'</span><span class="p">:</span>
@@ -1115,9 +1149,21 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">__items_multi</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Iterator[tuple[str, VT]]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Every ``(key, value)`` pair, with the transformed keys, in order."""</span>
         <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__excluded__</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">__hidden</span><span class="p">(</span><span class="n">key</span><span class="p">):</span>
                 <span class="k">yield</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span>
             <span class="k">yield from</span> <span class="bp">self</span><span class="o">.</span><span class="n">__multi__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="p">())</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__hidden</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Whether iteration, ``len()`` and :meth:`to_dict` leave ``key`` out.</span>
+
+<span class="sd">        That is a bookkeeping attribute in :attr:`__builtin__`, or a dunder key</span>
+<span class="sd">        :attr:`__included__` does not name (:issue:`2003`).</span>
+
+<span class="sd">        """</span>
+        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__builtin__</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="n">key</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'__'</span><span class="p">)</span> <span class="ow">and</span> <span class="n">key</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">'__'</span><span class="p">)</span>
+                <span class="ow">and</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__included__</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__setattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="s1">'VT'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'NoReturn'</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">UnsupportedCall</span><span class="p">(</span><span class="s2">"can't set attribute"</span><span class="p">)</span>
@@ -1230,10 +1276,14 @@
 
 <span class="sd">           Returns an :class:`~pcapkit.corekit.multidict.OrderedMultiDict`</span>
 <span class="sd">           rather than a :obj:`dict`, so a key held more than once keeps every</span>
-<span class="sd">           value (:issue:`1484`).</span>
+<span class="sd">           value (:issue:`1484`). It leaves out the dunder keys</span>
+<span class="sd">           :attr:`__included__` does not name, carries the keys in</span>
+<span class="sd">           :attr:`__excluded__`, and records those as its own ``__excluded__``</span>
+<span class="sd">           for the dumpers to leave out (:issue:`2003`).</span>
 
 <span class="sd">        """</span>
-        <span class="n">dict_</span> <span class="o">=</span> <span class="n">_OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: OrderedMultiDict[str, Any]</span>
+        <span class="n">dict_</span> <span class="o">=</span> <span class="n">_OrderedMultiDict</span><span class="p">()</span>  <span class="c1"># type: _OrderedMultiDict[str, Any]</span>
+        <span class="n">dict_</span><span class="o">.</span><span class="n">__excluded__</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__excluded__</span>
         <span class="k">for</span> <span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__items_multi</span><span class="p">():</span>
             <span class="n">out_key</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__map_reverse__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">key</span><span class="p">)</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Info</span><span class="p">):</span>
@@ -1293,6 +1343,11 @@
 
     <span class="fm">__ne__</span> <span class="o">=</span> <span class="n">_ne</span>
 
+    <span class="c1">#: Names of the keys the dumpers leave out: the :attr:`Info.__excluded__`</span>
+    <span class="c1">#: of the info exported, kept by copies, deep copies and pickles; none for</span>
+    <span class="c1">#: an export of a multi-mapping (:issue:`2003`).</span>
+    <span class="n">__excluded__</span> <span class="o">=</span> <span class="p">()</span>  <span class="c1"># type: Collection[str]</span>
+
 <div class="viewcode-block" id="_OrderedMultiDict.__repr__">
 <a class="viewcode-back" href="../../../pcapkit/corekit/infoclass.html#pcapkit.corekit.infoclass._OrderedMultiDict.__repr__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
@@ -1301,8 +1356,31 @@
 
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">OrderedMultiDict</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">(</span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span><span class="si">!r}</span><span class="s1">)'</span></div>
-</div>
 
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Self'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return a shallow copy, with the same ``__excluded__``."""</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">new</span><span class="o">.</span><span class="n">__excluded__</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__excluded__</span>
+        <span class="k">return</span> <span class="n">new</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memo</span><span class="p">:</span> <span class="s1">'Optional[dict]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Self'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Return a deep copy, with the same ``__excluded__``."""</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'Self'</span><span class="p">,</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">memo</span><span class="p">))</span>
+        <span class="n">new</span><span class="o">.</span><span class="n">__excluded__</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__excluded__</span>
+        <span class="k">return</span> <span class="n">new</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">__reduce_ex__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'SupportsIndex'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Any'</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_restore_export</span><span class="p">,</span> <span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">items</span><span class="p">(</span><span class="n">multi</span><span class="o">=</span><span class="kc">True</span><span class="p">)),</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">__excluded__</span><span class="p">))</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_restore_export</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="s1">'Type[_OrderedMultiDict]'</span><span class="p">,</span> <span class="n">pairs</span><span class="p">:</span> <span class="s1">'list[tuple[Any, Any]]'</span><span class="p">,</span>
+                    <span class="n">excluded</span><span class="p">:</span> <span class="s1">'list[str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_OrderedMultiDict'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Unpickle an :class:`_OrderedMultiDict`, with its ``__excluded__``."""</span>
+    <span class="n">new</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">pairs</span><span class="p">)</span>
+    <span class="n">new</span><span class="o">.</span><span class="n">__excluded__</span> <span class="o">=</span> <span class="n">excluded</span>
+    <span class="k">return</span> <span class="n">new</span>
 
 
 <div class="viewcode-block" id="_MultiInfo">

@@ -376,7 +376,7 @@ the same commit several times over. It also skips ``changes``,
 Checks`_ below), which are gated out by their own ``if:`` rather than by having
 already run. ``changelog`` carries no
 ``if:`` at all and runs on every path regardless -- deliberately, per its own
-comment (``unit-tests.yml:1569-1575``): ``create-release.yml`` feeds
+comment (``unit-tests.yml:1602-1608``): ``create-release.yml`` feeds
 ``CHANGELOG.md`` to the GitHub Release body, so the release path is exactly
 where a drifted file must not go unchecked. Confirmed on run `36210743295
 <https://github.com/JarryShaw/PyPCAPKit/actions/runs/36210743295>`__ (a
@@ -689,7 +689,7 @@ grepping every workflow file for its name:
      - Where
    * - ``Required checks passed``
      - job ``required-checks``
-     - ``unit-tests.yml:1904``
+     - ``unit-tests.yml:1937``
    * - ``Compat Python 3.11``
      - job ``compatibility``, matrix leg ``3.11``
      - ``python-compatibility.yml:60``, ``.github/python-versions.toml:20``
@@ -711,22 +711,22 @@ which added ``Compat Python 3.15`` and removed ``Compat Python 3.10``. Moving a 
 between the tiers below means editing the ruleset in the same change.
 
 ``Required checks passed`` is defined by exactly one job
-(``unit-tests.yml:1904``). ``Compat Python`` is defined by one, the
+(``unit-tests.yml:1937``). ``Compat Python`` is defined by one, the
 ``compatibility`` job in ``python-compatibility.yml`` (``:60``), whose matrix
 (``:74``) comes from :file:`.github/python-versions.toml`: the required legs
 are its supported tier (``python-versions.toml:20-24``), and its KTLO legs
 (``python-versions.toml:16-19``) have names ending in ``(KTLO)``, so no required
 context matches one. A comment at
-``unit-tests.yml:1816`` mentions the string without defining it.
+``unit-tests.yml:1849`` mentions the string without defining it.
 
 ``Required checks passed`` is an aggregate, not a single check run. The ruleset
 requires it and the ``Compat Python 3.11``-``3.15`` legs, nothing else, as
-``unit-tests.yml``'s own comment (``unit-tests.yml:1815-1825``) records. It
+``unit-tests.yml``'s own comment (``unit-tests.yml:1848-1858``) records. It
 ``needs:`` the gating jobs of ``unit-tests.yml`` -- ``test``, ``integration``,
 ``engine-tests`` and ``pypcap-parity``, plus ``project-tests``, the one run of
 the project pins, and ``changes`` for the docs-only path -- and checks each
 result explicitly
-(``unit-tests.yml:1903-1959``). Rulesets match check names literally, with no
+(``unit-tests.yml:1936-1992``). Rulesets match check names literally, with no
 wildcard, so requiring the matrix cells one by one would mean editing the
 ruleset whenever a matrix changes; the aggregate keeps the required list fixed.
 It accepts the gating jobs as ``skipped`` only on a docs-only pull request, where
@@ -735,7 +735,7 @@ It accepts the gating jobs as ``skipped`` only on a docs-only pull request, wher
 ``python-compatibility.yml``, and a job cannot ``needs:`` a job in another
 workflow file. This job runs on Unit Tests' own ``push``/``pull_request``
 triggers; the ``gate-only: true`` reusable calls documented above skip it via
-``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:1906``),
+``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:1939``),
 so it is never produced -- and never expected -- on those paths.
 
 .. _ktlo-tier:
@@ -947,7 +947,9 @@ warnings:
   timings`` takes them all. 3.14t's leg runs pytest once, as before.
 * ``timeout --signal=INT --kill-after=3m 110m`` ends pytest under the step's 120-minute
   cap, so it still writes the junit XML, and exits 124; ``prlimit --fsize=2147483648``
-  caps any file at 2 GiB.
+  caps any file at 2 GiB. The ``timeout`` is GNU's, ``gnutimeout`` where it exists
+  (#2020): on Ubuntu 26.04 ``timeout`` is uutils', whose ``--kill-after`` sends SIGKILL
+  with the SIGINT, and to its child alone.
 * Where the scope starts ``true`` under a throwaway unit, ``pcapkit-probe-<pid>.scope``,
   with every flag the tests get (``sudo -n --preserve-env``, ``MemoryMax=12G``,
   ``MemorySwapMax=0``, ``CPUWeight=20``, ``--uid``, ``--gid``), the tests run in the

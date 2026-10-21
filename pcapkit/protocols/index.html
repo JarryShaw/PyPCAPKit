@@ -1424,15 +1424,34 @@ registry is left as it was, so <code class="docutils literal notranslate"><span 
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.data.data.</span></span><span class="sig-name descname"><span class="pre">Data</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/data/data.html#Data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.data.data.Data" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="../corekit/infoclass.html#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a></p>
 <p>Base class for data models.</p>
+<p>The <code class="docutils literal notranslate"><span class="pre">__next_name__</span></code>, <code class="docutils literal notranslate"><span class="pre">__next_type__</span></code> and <code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> keys are
+metadata, listed in <a class="reference internal" href="../corekit/infoclass.html#pcapkit.corekit.infoclass.Info.__included__" title="pcapkit.corekit.infoclass.Info.__included__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__included__</span></code></a>
+and <a class="reference internal" href="../corekit/infoclass.html#pcapkit.corekit.infoclass.Info.__excluded__" title="pcapkit.corekit.infoclass.Info.__excluded__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__excluded__</span></code></a>:
+<a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.ProtocolBase.from_data" title="pcapkit.protocols.protocol.ProtocolBase.from_data"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Protocol.from_data</span></code></a>
+dispatches the payload on the first two and on nothing else, and cuts a
+short read back on the third. <code class="xref py py-meth docutils literal notranslate"><span class="pre">to_dict()</span></code> carries them, so that
+<code class="docutils literal notranslate"><span class="pre">from_data(info.to_dict())</span></code> rebuilds as <code class="docutils literal notranslate"><span class="pre">from_data(info)</span></code> does, while
+the dumpers and <code class="docutils literal notranslate"><span class="pre">repr</span></code> leave them out. A hand-written <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> must
+carry them as well – and, for IPv6, the extension header chain under
+<code class="docutils literal notranslate"><span class="pre">__exthdr__</span></code> – to be rebuilt the same way: without the first two, no
+payload layer is dispatched, as for a protocol with no next layer, and
+without <code class="docutils literal notranslate"><span class="pre">__exthdr__</span></code> no IPv6 extension header is rebuilt
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2003">#2003</a>).</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.protocols.data.data.Data.__excluded__">
 <span class="sig-name descname"><span class="pre">__excluded__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.data.data.Data.__excluded__" title="Link to this definition">¶</a></dt>
-<dd><p>List of names to be excluded from <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> conversion.</p>
+<dd><p>Metadata keys that <code class="docutils literal notranslate"><span class="pre">repr</span></code>, <code class="docutils literal notranslate"><span class="pre">str</span></code> and the dumps leave out.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
 <p>Please refer to <a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.Protocol._decode_next_layer" title="pcapkit.protocols.protocol.Protocol._decode_next_layer"><code class="xref py py-func docutils literal notranslate"><span class="pre">Protocol._decode_next_layer</span></code></a>
 for more information with the inserted names to be excluded.</p>
 </div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.data.Data.__included__">
+<span class="sig-name descname"><span class="pre">__included__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.data.data.Data.__included__" title="Link to this definition">¶</a></dt>
+<dd><p>Metadata keys that <code class="xref py py-meth docutils literal notranslate"><span class="pre">to_dict()</span></code> carries, for a rebuild to read.</p>
 </dd></dl>
 
 </dd></dl>

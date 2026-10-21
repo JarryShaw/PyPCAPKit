@@ -496,9 +496,28 @@
 <div class="viewcode-block" id="Data">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/index.html#pcapkit.protocols.data.data.Data">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">Data</span><span class="p">(</span><span class="n">Info</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Base class for data models."""</span>
+<span class="w">    </span><span class="sd">"""Base class for data models.</span>
 
-    <span class="n">__excluded__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'__next_name__'</span><span class="p">,</span> <span class="s1">'__next_type__'</span><span class="p">]</span>
+<span class="sd">    The ``__next_name__``, ``__next_type__`` and ``__short_read__`` keys are</span>
+<span class="sd">    metadata, listed in :attr:`~pcapkit.corekit.infoclass.Info.__included__`</span>
+<span class="sd">    and :attr:`~pcapkit.corekit.infoclass.Info.__excluded__`:</span>
+<span class="sd">    :meth:`Protocol.from_data &lt;pcapkit.protocols.protocol.ProtocolBase.from_data&gt;`</span>
+<span class="sd">    dispatches the payload on the first two and on nothing else, and cuts a</span>
+<span class="sd">    short read back on the third. :meth:`to_dict` carries them, so that</span>
+<span class="sd">    ``from_data(info.to_dict())`` rebuilds as ``from_data(info)`` does, while</span>
+<span class="sd">    the dumpers and ``repr`` leave them out. A hand-written :obj:`dict` must</span>
+<span class="sd">    carry them as well -- and, for IPv6, the extension header chain under</span>
+<span class="sd">    ``__exthdr__`` -- to be rebuilt the same way: without the first two, no</span>
+<span class="sd">    payload layer is dispatched, as for a protocol with no next layer, and</span>
+<span class="sd">    without ``__exthdr__`` no IPv6 extension header is rebuilt</span>
+<span class="sd">    (:issue:`2003`).</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">#: Metadata keys that :meth:`to_dict` carries, for a rebuild to read.</span>
+    <span class="n">__included__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'__next_name__'</span><span class="p">,</span> <span class="s1">'__next_type__'</span><span class="p">,</span> <span class="s1">'__short_read__'</span><span class="p">]</span>
+    <span class="c1">#: Metadata keys that ``repr``, ``str`` and the dumps leave out.</span>
+    <span class="n">__excluded__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'__next_name__'</span><span class="p">,</span> <span class="s1">'__next_type__'</span><span class="p">,</span> <span class="s1">'__short_read__'</span><span class="p">]</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Next field name, i.e., the name of the payload field.</span>
@@ -506,9 +525,9 @@
         <span class="c1">#: Next field type, i.e., the type of the payload field.</span>
         <span class="n">__next_type__</span><span class="p">:</span> <span class="s1">'Type[ProtocolBase]'</span>
         <span class="c1">#: Name of the header field the data ended inside, and how many of its</span>
-        <span class="c1">#: octets were there; present only then. Not excluded, so that</span>
-        <span class="c1">#: :meth:`to_dict` carries it and ``from_data(info.to_dict())`` cuts</span>
-        <span class="c1">#: the rebuild back as ``from_data(info)`` does. See</span>
+        <span class="c1">#: octets were there; present only then. :meth:`to_dict` carries it,</span>
+        <span class="c1">#: so that ``from_data(info.to_dict())`` cuts the rebuild back as</span>
+        <span class="c1">#: ``from_data(info)`` does. See</span>
         <span class="c1">#: :func:`~pcapkit.protocols.schema.schema.keep_short_read`.</span>
         <span class="n">__short_read__</span><span class="p">:</span> <span class="s1">'tuple[str, int]'</span></div>
 

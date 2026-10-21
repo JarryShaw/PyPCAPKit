@@ -526,6 +526,17 @@ used, i.e., such renaming is totally transparent to the user.</p>
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.3.1.post8: </span>Iterating an instance skips the names listed in <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.__excluded__" title="pcapkit.corekit.infoclass.Info.__excluded__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__excluded__</span></code></a>.</p>
 </div>
+<p>A key whose name is a dunder, such as <code class="docutils literal notranslate"><span class="pre">__next_type__</span></code>, is metadata.
+Iterating an instance, <code class="docutils literal notranslate"><span class="pre">len()</span></code> and <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.to_dict" title="pcapkit.corekit.infoclass.Info.to_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_dict()</span></code></a> leave such a key out
+unless <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.__included__" title="pcapkit.corekit.infoclass.Info.__included__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__included__</span></code></a> names it, and carry every other key;
+<a class="reference internal" href="#pcapkit.corekit.infoclass.Info.__excluded__" title="pcapkit.corekit.infoclass.Info.__excluded__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__excluded__</span></code></a> names the keys that <code class="docutils literal notranslate"><span class="pre">repr</span></code>, <code class="docutils literal notranslate"><span class="pre">str</span></code> and the dumps of
+<a class="reference internal" href="../dumpkit/index.html#module-pcapkit.dumpkit" title="pcapkit.dumpkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.dumpkit</span></code></a> leave out besides. A subclass extends either list
+with its own names, as for <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.__additional__" title="pcapkit.corekit.infoclass.Info.__additional__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__additional__</span></code></a>.</p>
+<div class="versionchanged">
+<p><span class="versionmodified changed">Changed in version 1.5.0: </span><a class="reference internal" href="#pcapkit.corekit.infoclass.Info.__excluded__" title="pcapkit.corekit.infoclass.Info.__excluded__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__excluded__</span></code></a> names the keys left out of <code class="docutils literal notranslate"><span class="pre">repr</span></code>, <code class="docutils literal notranslate"><span class="pre">str</span></code> and
+the dumps only, and <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.__included__" title="pcapkit.corekit.infoclass.Info.__included__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__included__</span></code></a> the dunder keys that iterating
+an instance, <code class="docutils literal notranslate"><span class="pre">len()</span></code> and <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.to_dict" title="pcapkit.corekit.infoclass.Info.to_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_dict()</span></code></a> carry (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2003">#2003</a>).</p>
+</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -545,7 +556,23 @@ subclass its key’s annotation names.</p></li>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.corekit.infoclass.Info.__excluded__">
 <span class="sig-name descname"><span class="pre">__excluded__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.corekit.infoclass.Info.__excluded__" title="Link to this definition">¶</a></dt>
-<dd><p>List of names to be excluded from <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> conversion.</p>
+<dd><p>List of names of keys left out of <code class="docutils literal notranslate"><span class="pre">repr</span></code>, <code class="docutils literal notranslate"><span class="pre">str</span></code> and the dumps of
+<a class="reference internal" href="../dumpkit/index.html#module-pcapkit.dumpkit" title="pcapkit.dumpkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.dumpkit</span></code></a> – metadata such as <code class="docutils literal notranslate"><span class="pre">__next_type__</span></code>, which
+<a class="reference internal" href="#pcapkit.corekit.infoclass.Info.to_dict" title="pcapkit.corekit.infoclass.Info.to_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_dict()</span></code></a> may still carry, see <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.__included__" title="pcapkit.corekit.infoclass.Info.__included__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__included__</span></code></a>.
+Finalisation adds the names in <code class="xref py py-attr docutils literal notranslate"><span class="pre">__builtin__</span></code>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.corekit.infoclass.Info.__included__">
+<span class="sig-name descname"><span class="pre">__included__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#list" title="(in Python v3.15)"><span class="pre">list</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.corekit.infoclass.Info.__included__" title="Link to this definition">¶</a></dt>
+<dd><p>List of names of dunder keys that iterating an instance, <code class="docutils literal notranslate"><span class="pre">len()</span></code> and
+<a class="reference internal" href="#pcapkit.corekit.infoclass.Info.to_dict" title="pcapkit.corekit.infoclass.Info.to_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_dict()</span></code></a> carry – metadata such as <code class="docutils literal notranslate"><span class="pre">__next_type__</span></code>, which a
+rebuild from the <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a> reads. Every other dunder key is dropped
+from all three, though indexing still reads it; a key that is no
+dunder is carried regardless. A subclass extends the list with its own
+names, as for <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.__excluded__" title="pcapkit.corekit.infoclass.Info.__excluded__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__excluded__</span></code></a>, so a custom <a class="reference internal" href="#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a> holding
+dunder keys of its own must list them here for <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.to_dict" title="pcapkit.corekit.infoclass.Info.to_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">to_dict()</span></code></a> to keep
+them (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2003">#2003</a>).</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -742,7 +769,10 @@ written as in.</p>
 <div class="versionchanged">
 <p><span class="versionmodified changed">Changed in version 1.5.0: </span>Returns an <a class="reference internal" href="multidict.html#pcapkit.corekit.multidict.OrderedMultiDict" title="pcapkit.corekit.multidict.OrderedMultiDict"><code class="xref py py-class docutils literal notranslate"><span class="pre">OrderedMultiDict</span></code></a>
 rather than a <a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dict</span></code></a>, so a key held more than once keeps every
-value (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1484">#1484</a>).</p>
+value (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1484">#1484</a>). It leaves out the dunder keys
+<a class="reference internal" href="#pcapkit.corekit.infoclass.Info.__included__" title="pcapkit.corekit.infoclass.Info.__included__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__included__</span></code></a> does not name, carries the keys in
+<a class="reference internal" href="#pcapkit.corekit.infoclass.Info.__excluded__" title="pcapkit.corekit.infoclass.Info.__excluded__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__excluded__</span></code></a>, and records those as its own <code class="docutils literal notranslate"><span class="pre">__excluded__</span></code>
+for the dumpers to leave out (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2003">#2003</a>).</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -905,11 +935,13 @@ the first value of each key if <a class="reference external" href="https://docs.
 <a class="reference internal" href="#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a> class. It can be useful to reduce runtime generation
 cost as well as caching already generated attributes.</p>
 <ul>
-<li><p><a class="reference internal" href="#pcapkit.corekit.infoclass.Info.__additional__" title="pcapkit.corekit.infoclass.Info.__additional__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Info.__additional__</span></code></a> and <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.__excluded__" title="pcapkit.corekit.infoclass.Info.__excluded__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Info.__excluded__</span></code></a> are
-lists of additional and excluded field names, which are used to
-determine certain names to be included or excluded from the field
-dictionary. They will be automatically populated from the class
-attributes of the <a class="reference internal" href="#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a> class and its base classes.</p>
+<li><p><a class="reference internal" href="#pcapkit.corekit.infoclass.Info.__additional__" title="pcapkit.corekit.infoclass.Info.__additional__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Info.__additional__</span></code></a>, <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.__excluded__" title="pcapkit.corekit.infoclass.Info.__excluded__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Info.__excluded__</span></code></a> and
+<a class="reference internal" href="#pcapkit.corekit.infoclass.Info.__included__" title="pcapkit.corekit.infoclass.Info.__included__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Info.__included__</span></code></a> are lists of additional, excluded and included
+field names, which are used to determine certain names to be treated as
+built-in names, left out of <code class="docutils literal notranslate"><span class="pre">repr</span></code> and the dumps, or carried as
+metadata by <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.to_dict" title="pcapkit.corekit.infoclass.Info.to_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Info.to_dict()</span></code></a>. They will be automatically populated
+from the class attributes of the <a class="reference internal" href="#pcapkit.corekit.infoclass.Info" title="pcapkit.corekit.infoclass.Info"><code class="xref py py-class docutils literal notranslate"><span class="pre">Info</span></code></a> class and its base
+classes.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>This is implemented thru the <a class="reference internal" href="#pcapkit.corekit.infoclass.InfoMeta.__new__" title="pcapkit.corekit.infoclass.InfoMeta.__new__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__new__()</span></code></a> method, which will
@@ -936,8 +968,9 @@ from the subclass attributes.</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.corekit.infoclass.InfoMeta.__new__">
 <span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">__new__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cls</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">name</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bases</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">attrs</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/infoclass.html#InfoMeta.__new__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.infoclass.InfoMeta.__new__" title="Link to this definition">¶</a></dt>
-<dd><p>Create the class, extending its <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.__additional__" title="pcapkit.corekit.infoclass.Info.__additional__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Info.__additional__</span></code></a> and
-<a class="reference internal" href="#pcapkit.corekit.infoclass.Info.__excluded__" title="pcapkit.corekit.infoclass.Info.__excluded__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Info.__excluded__</span></code></a> with every base’s.</p>
+<dd><p>Create the class, extending its <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.__additional__" title="pcapkit.corekit.infoclass.Info.__additional__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Info.__additional__</span></code></a>,
+<a class="reference internal" href="#pcapkit.corekit.infoclass.Info.__excluded__" title="pcapkit.corekit.infoclass.Info.__excluded__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Info.__excluded__</span></code></a> and <a class="reference internal" href="#pcapkit.corekit.infoclass.Info.__included__" title="pcapkit.corekit.infoclass.Info.__included__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Info.__included__</span></code></a> with every
+base’s.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">

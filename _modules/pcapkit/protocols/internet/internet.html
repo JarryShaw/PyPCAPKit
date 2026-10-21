@@ -821,7 +821,7 @@
 <div class="viewcode-block" id="Internet._make_payload">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/internet/internet.html#pcapkit.protocols.internet.internet.Internet._make_payload">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_make_payload</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Data'</span><span class="p">,</span> <span class="n">exclude</span><span class="p">:</span> <span class="s1">'tuple[str, ...]'</span> <span class="o">=</span> <span class="p">())</span> <span class="o">-&gt;</span> <span class="s1">'ProtocolBase'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_make_payload</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'Data'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'ProtocolBase'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Create payload from ``data`` for protocol construction.</span>
 
 <span class="sd">        As :meth:`ProtocolBase._make_payload</span>
@@ -834,9 +834,6 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            data: protocol data</span>
-<span class="sd">            exclude: keys of ``data`` that are not the payload, see</span>
-<span class="sd">                :meth:`ProtocolBase._make_payload</span>
-<span class="sd">                &lt;pcapkit.protocols.protocol.ProtocolBase._make_payload&gt;`</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Payload for protocol construction.</span>
@@ -848,7 +845,7 @@
         <span class="c1"># where it does not parse), so no rebuilt upper layer reads this place.</span>
         <span class="n">token</span> <span class="o">=</span> <span class="n">_exthdr_rebuilt</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">_rebuilt_exthdr_depth</span><span class="p">()</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">exclude</span><span class="p">)</span>
+            <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_make_payload</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
         <span class="k">finally</span><span class="p">:</span>
             <span class="n">_exthdr_rebuilt</span><span class="o">.</span><span class="n">reset</span><span class="p">(</span><span class="n">token</span><span class="p">)</span></div>
 
@@ -932,8 +929,9 @@
 
 <span class="sd">        Notes:</span>
 <span class="sd">            ``dict_`` gains the keys ``__next_type__`` (next layer protocol</span>
-<span class="sd">            type) and ``__next_name__`` (next layer protocol name). Neither</span>
-<span class="sd">            is included when :meth:`Info.to_dict &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;` is called.</span>
+<span class="sd">            type) and ``__next_name__`` (next layer protocol name), which</span>
+<span class="sd">            :meth:`Info.to_dict &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;`</span>
+<span class="sd">            carries and the dumpers leave out.</span>
 
 <span class="sd">        """</span>
         <span class="n">next_</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'ProtocolBase'</span><span class="p">,</span>  <span class="c1"># type: ignore[redundant-cast]</span>

@@ -513,6 +513,10 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">Flags</span><span class="p">(</span><span class="n">Data</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for HTTP/2 flags."""</span>
 
+    <span class="c1"># NOTE: ``__value__`` is a dunder key, which ``to_dict`` carries only so</span>
+    <span class="c1"># named (#2003); the rebuild reads it, and the dumps write it, as before.</span>
+    <span class="n">__included__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'__value__'</span><span class="p">]</span>
+
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
         <span class="c1">#: Flags as in combination value, bits the frame type leaves</span>
         <span class="c1">#: undefined included.</span>

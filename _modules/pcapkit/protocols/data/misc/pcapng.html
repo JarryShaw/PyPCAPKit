@@ -547,6 +547,11 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">PCAPNG</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Data model for PCAP-NG file blocks."""</span>
 
+    <span class="c1"># NOTE: ``__truncated_raw__`` is a dunder key, which ``to_dict`` carries</span>
+    <span class="c1"># only so named (#2003); the rebuild reads it, and the dumps write it, as</span>
+    <span class="c1"># before.</span>
+    <span class="n">__included__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'__truncated_raw__'</span><span class="p">]</span>
+
     <span class="c1">#: Block type.</span>
     <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_BlockType'</span>
     <span class="c1">#: Block total length.</span>

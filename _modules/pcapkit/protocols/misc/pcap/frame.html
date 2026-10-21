@@ -1142,8 +1142,9 @@
 <span class="sd">        Notes:</span>
 <span class="sd">            We added a new key ``__next_type__`` to ``dict_`` to store the</span>
 <span class="sd">            next layer protocol type, and a new key ``__next_name__`` to</span>
-<span class="sd">            store the next layer protocol name. These keys will **NOT**</span>
-<span class="sd">            be included when :meth:`Info.to_dict &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;` is called.</span>
+<span class="sd">            store the next layer protocol name. :meth:`Info.to_dict</span>
+<span class="sd">            &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;` carries both, and the</span>
+<span class="sd">            dumpers leave them out.</span>
 
 <span class="sd">            We also added a new key ``protocols`` to ``dict_`` to store the</span>
 <span class="sd">            protocol chain of the current packet (frame).</span>

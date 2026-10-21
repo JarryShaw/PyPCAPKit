@@ -515,6 +515,9 @@
 
 <span class="sd">    """</span>
 
+    <span class="c1"># NOTE: ``__exthdr__`` is metadata, as the keys ``Data`` names are:</span>
+    <span class="c1"># ``to_dict`` carries it, the dumps and ``repr`` leave it out (#2003).</span>
+    <span class="n">__included__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'__exthdr__'</span><span class="p">]</span>
     <span class="n">__excluded__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'__exthdr__'</span><span class="p">]</span>
 
     <span class="c1">#: Version.</span>
@@ -547,8 +550,11 @@
         <span class="c1">#: past the Jumbo Payload Length -- present only when there are any.</span>
         <span class="n">trailer</span><span class="p">:</span> <span class="s1">'bytes'</span>
         <span class="c1">#: Extension header chain, in wire order, as pairs of the parser</span>
-        <span class="c1">#: class and its info. Kept apart from the per-header keys above,</span>
-        <span class="c1">#: which a repeated header overwrites.</span>
+        <span class="c1">#: class and its info. The per-header keys hold the same infos, but in</span>
+        <span class="c1">#: the order of the keys of this :class:`~pcapkit.corekit.infoclass.Info`,</span>
+        <span class="c1">#: which differs on PyPy, so the chain is rebuilt from this alone; the</span>
+        <span class="c1">#: parser class keeps the IPv6_Ext a header fell back to</span>
+        <span class="c1">#: (:issue:`1473`, :issue:`2003`).</span>
         <span class="n">__exthdr__</span><span class="p">:</span> <span class="s1">'tuple[tuple[Type[ProtocolBase], Data], ...]'</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'IPv6'</span><span class="p">:</span>

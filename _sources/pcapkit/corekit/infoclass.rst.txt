@@ -23,6 +23,8 @@ classes :class:`~pcapkit.corekit.infoclass.MultiInfo` and
       :no-value:
    .. autoattribute:: __excluded__
       :no-value:
+   .. autoattribute:: __included__
+      :no-value:
 
    .. autoattribute:: __map__
    .. autoattribute:: __map_reverse__
