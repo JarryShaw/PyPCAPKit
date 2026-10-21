@@ -2122,9 +2122,26 @@
 <a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor.__exit__">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exc_type</span><span class="p">:</span> <span class="s1">'Type[BaseException] | None'</span><span class="p">,</span> <span class="n">exc_value</span><span class="p">:</span> <span class="s1">'BaseException | None'</span><span class="p">,</span>
                  <span class="n">traceback</span><span class="p">:</span> <span class="s1">'TracebackType | None'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
-<span class="w">        </span><span class="sd">"""Close the input file when exits."""</span>
+<span class="w">        </span><span class="sd">"""Release what this class holds when the ``with`` block exits.</span>
+
+<span class="sd">        The engine is always closed. The input stream is closed only *if this</span>
+<span class="sd">        class owns it* -- the rule of :issue:`610`, as :meth:`_owns_input` writes</span>
+<span class="sd">        it down and :meth:`_cleanup` and the backstops already follow. A stream</span>
+<span class="sd">        the caller supplied stays open for the caller to close, so leaving the</span>
+<span class="sd">        block no longer closes it behind the caller's back (:issue:`1999`).</span>
+
+<span class="sd">        For a caller's non-seekable stream, the stream this class owns is the</span>
+<span class="sd">        :class:`~pcapkit.corekit.io.SeekableReader` wrapped around it, and that</span>
+<span class="sd">        wrapper is closed; it was built with ``stream_closing`` off, so closing</span>
+<span class="sd">        it leaves the caller's stream underneath open.</span>
+
+<span class="sd">        """</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'closing </span><span class="si">%s</span><span class="s1"> on context exit after </span><span class="si">%d</span><span class="s1"> frame(s)'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifnm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frnum</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="c1"># NOTE: ownership, not the ``with`` statement, decides who closes the</span>
+        <span class="c1"># input (#610, #1999): entering the block does not hand the caller's</span>
+        <span class="c1"># stream over to this class.</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_owns_input</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_detach_finalizer</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 
@@ -2181,8 +2198,8 @@
 <span class="w">        </span><span class="sd">"""Whether the input stream is this class's to close.</span>
 
 <span class="sd">        The one place the ownership rule of :issue:`610` is written down, so that</span>
-<span class="sd">        :meth:`_cleanup`, :meth:`__del__` and the registration of</span>
-<span class="sd">        :attr:`_finalizer` cannot drift apart on it.</span>
+<span class="sd">        :meth:`_cleanup`, :meth:`__exit__`, :meth:`__del__` and the registration</span>
+<span class="sd">        of :attr:`_finalizer` cannot drift apart on it.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            :data:`True` when the input stream was opened by this class and is</span>

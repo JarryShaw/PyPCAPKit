@@ -572,7 +572,7 @@ itself, job by job from a version bump to a published package, is on
 <td><p><code class="file docutils literal notranslate"><span class="pre">cron-conda.yml</span></code></p></td>
 <td><p>–</p></td>
 <td><p>–</p></td>
-<td><p>Sat 10:00</p></td>
+<td><p>Sat 18:00</p></td>
 <td><p><strong>Unit Tests</strong></p></td>
 <td><p>–</p></td>
 </tr>
@@ -584,7 +584,15 @@ itself, job by job from a version bump to a published package, is on
 <td><p><strong>Unit Tests</strong></p></td>
 <td><p>–</p></td>
 </tr>
-<tr class="row-even"><td><p>Create Release</p></td>
+<tr class="row-even"><td><p>Cron Head</p></td>
+<td><p><code class="file docutils literal notranslate"><span class="pre">cron-head.yml</span></code></p></td>
+<td><p>–</p></td>
+<td><p>–</p></td>
+<td><p>–</p></td>
+<td><p>–</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">workflow_call</span></code> (reusable)</p></td>
+</tr>
+<tr class="row-odd"><td><p>Create Release</p></td>
 <td><p><code class="file docutils literal notranslate"><span class="pre">create-release.yml</span></code></p></td>
 <td><p>tags <code class="docutils literal notranslate"><span class="pre">v*</span></code></p></td>
 <td><p>–</p></td>
@@ -592,7 +600,7 @@ itself, job by job from a version bump to a published package, is on
 <td><p><strong>Vendor Update</strong></p></td>
 <td><p>–</p></td>
 </tr>
-<tr class="row-odd"><td><p>Project Status</p></td>
+<tr class="row-even"><td><p>Project Status</p></td>
 <td><p><code class="file docutils literal notranslate"><span class="pre">project-status.yml</span></code></p></td>
 <td><p>–</p></td>
 <td><p>–</p></td>
@@ -600,7 +608,7 @@ itself, job by job from a version bump to a published package, is on
 <td><p>–</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">issues</span></code>, <code class="docutils literal notranslate"><span class="pre">pull_request_target</span></code>, <code class="docutils literal notranslate"><span class="pre">workflow_dispatch</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p>Coverage Comment</p></td>
+<tr class="row-odd"><td><p>Coverage Comment</p></td>
 <td><p><code class="file docutils literal notranslate"><span class="pre">coverage-comment.yml</span></code></p></td>
 <td><p>–</p></td>
 <td><p>–</p></td>
@@ -608,7 +616,7 @@ itself, job by job from a version bump to a published package, is on
 <td><p><strong>Unit Tests</strong></p></td>
 <td><p>–</p></td>
 </tr>
-<tr class="row-odd"><td><p>CI Timing</p></td>
+<tr class="row-even"><td><p>CI Timing</p></td>
 <td><p><code class="file docutils literal notranslate"><span class="pre">ci-timing.yml</span></code></p></td>
 <td><p>–</p></td>
 <td><p>–</p></td>
@@ -616,7 +624,7 @@ itself, job by job from a version bump to a published package, is on
 <td><p>–</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">workflow_dispatch</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p>Python Versions</p></td>
+<tr class="row-odd"><td><p>Python Versions</p></td>
 <td><p><code class="file docutils literal notranslate"><span class="pre">cron-python-versions.yml</span></code></p></td>
 <td><p>–</p></td>
 <td><p>–</p></td>
@@ -689,7 +697,7 @@ than starting a new one.</p>
     PR --&gt; GP
     SAT --&gt;|02:00| GP
 
-    SAT --&gt;|10:00| CU
+    SAT --&gt;|18:00| CU
 
     PR --&gt; LT
     SAT --&gt;|06:00| LT
@@ -718,6 +726,7 @@ than starting a new one.</p>
     VU[&quot;Vendor Update&lt;br/&gt;cron-vendor.yml&quot;]
     CU[&quot;Conda Update&lt;br/&gt;cron-conda.yml&quot;]
     GP[&quot;GitHub Pages&lt;br/&gt;deploy-pages.yml&quot;]
+    CH[&quot;Cron Head&lt;br/&gt;cron-head.yml&quot;]
     CC[&quot;Coverage Comment&lt;br/&gt;coverage-comment.yml&quot;]
     CR[&quot;Create Release&lt;br/&gt;create-release.yml&quot;]
 
@@ -727,22 +736,24 @@ than starting a new one.</p>
     VU ==&gt;|workflow_run: completed| CR
     UT ==&gt;|workflow_run: completed| CC
 
-    VU -.-&gt; UT
-    CU -.-&gt; UT
-    GP -.-&gt; UT
+    VU -.-&gt; CH
+    CU -.-&gt; CH
+    GP -.-&gt; CH
+    CH -.-&gt; UT
     CR -.-&gt; UT
     </pre><p>The double relationship between <strong>Unit Tests</strong> and the dependants that also
 call it is the part that reading a single file cannot show, and it is
 deliberate rather than redundant. Vendor Update, Conda Update and GitHub Pages
-call <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> with <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code> themselves (dotted, above)
-<strong>only when their own trigger is</strong> <code class="docutils literal notranslate"><span class="pre">schedule</span></code> – their gate jobs’ <code class="docutils literal notranslate"><span class="pre">if:</span></code>
-skips <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code>, and GitHub Pages’ skips <code class="docutils literal notranslate"><span class="pre">pull_request</span></code> as well – so
-only on the Saturday path, where no completed Unit Tests run exists yet to read
-a verdict from. On the <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> path (thick arrows), each reads the
-verdict Unit Tests already reached instead of re-running the gate a second
-time, and acts on it only once its <code class="docutils literal notranslate"><span class="pre">verdict</span></code> job, described under the edge
-list below, says it is a verdict on the commit it builds. Create Release has
-no <code class="docutils literal notranslate"><span class="pre">schedule</span></code>, and its gate job’s <code class="docutils literal notranslate"><span class="pre">if:</span></code> reads <code class="docutils literal notranslate"><span class="pre">version_check</span></code>’s evidence
+each call <strong>Cron Head</strong> as their <code class="docutils literal notranslate"><span class="pre">head</span></code> job (dotted, above), and its test gate
+calls <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> with <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code> <strong>only when the caller’s
+trigger is</strong> <code class="docutils literal notranslate"><span class="pre">schedule</span></code> – the gate’s <code class="docutils literal notranslate"><span class="pre">if:</span></code> skips <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> and
+<code class="docutils literal notranslate"><span class="pre">pull_request</span></code> – so only on the Saturday path, where no completed Unit Tests
+run exists yet to read a verdict from. On the <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> path (thick
+arrows), each reads the verdict Unit Tests already reached instead of re-running
+the gate a second time, and acts on it only once the head’s <code class="docutils literal notranslate"><span class="pre">verdict</span></code> job,
+described under the edge list below, says it is a verdict on the commit it
+builds (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1967">#1967</a>). Create
+Release has no <code class="docutils literal notranslate"><span class="pre">schedule</span></code>, and its gate job’s <code class="docutils literal notranslate"><span class="pre">if:</span></code> reads <code class="docutils literal notranslate"><span class="pre">version_check</span></code>’s evidence
 rather than the event, so its gate can run whichever way the run was raised, once
 <code class="docutils literal notranslate"><span class="pre">version_check</span></code> itself has passed: on a <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag push, and on a
 <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> from Vendor Update when some target is not yet published
@@ -753,12 +764,12 @@ rather than the event, so its gate can run whichever way the run was raised, onc
 <p>Each edge cites the <code class="docutils literal notranslate"><span class="pre">on:</span></code> block it comes from, so grepping those blocks
 re-derives the list:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/cron-vendor.yml:14-16</span></code> – <strong>Vendor Update</strong> fires on
-completion of <strong>Unit Tests</strong>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/cron-conda.yml:17-19</span></code> – <strong>Conda Update</strong> fires on
-completion of <strong>Unit Tests</strong>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/deploy-pages.yml:12-14</span></code> – <strong>GitHub Pages</strong> fires on
-completion of <strong>Unit Tests</strong>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/cron-vendor.yml</span></code>, its <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> trigger –
+<strong>Vendor Update</strong> fires on completion of <strong>Unit Tests</strong>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/cron-conda.yml</span></code>, its <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> trigger –
+<strong>Conda Update</strong> fires on completion of <strong>Unit Tests</strong>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/deploy-pages.yml</span></code>, its <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> trigger –
+<strong>GitHub Pages</strong> fires on completion of <strong>Unit Tests</strong>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/create-release.yml:6-9</span></code> – <strong>Create Release</strong> fires on
 completion of <strong>Vendor Update</strong>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/coverage-comment.yml:21-23</span></code> – <strong>Coverage Comment</strong> fires
@@ -776,8 +787,9 @@ checks out <code class="docutils literal notranslate"><span class="pre">github.s
 <code class="docutils literal notranslate"><span class="pre">github.event.workflow_run.head_sha</span></code>, the commit the completed run tested, and
 in a merge wave the two differ: Conda Update 38325136710 bumped 2e941bbb7 under
 the verdict for 9083163f5 (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1643">#1643</a>).
-So Vendor Update, Conda Update and GitHub Pages each run a <code class="docutils literal notranslate"><span class="pre">verdict</span></code> job first,
-and act only when the tip is the verified commit, or that commit plus bot commits
+So Vendor Update, Conda Update and GitHub Pages each run Cron Head’s <code class="docutils literal notranslate"><span class="pre">verdict</span></code>
+job first, in their <code class="docutils literal notranslate"><span class="pre">head</span></code> job, and act only when its <code class="docutils literal notranslate"><span class="pre">verified</span></code> output says
+the tip is the verified commit, or that commit plus bot commits
 to <code class="docutils literal notranslate"><span class="pre">conda/build</span></code> and <code class="docutils literal notranslate"><span class="pre">conda/requirements.txt</span></code> alone; otherwise they skip, and
 the tip’s own Unit Tests run raises them again. Vendor Update’s run still
 concludes <code class="docutils literal notranslate"><span class="pre">success</span></code> then, since <code class="docutils literal notranslate"><span class="pre">verdict</span></code> ran, so Create Release reads its
@@ -804,18 +816,52 @@ and bump again (<a class="reference external" href="https://github.com/JarryShaw
 <h2>Reusable-Workflow Calls (<code class="docutils literal notranslate"><span class="pre">uses:</span></code>)<a class="headerlink" href="#reusable-workflow-calls-uses" title="Link to this heading">¶</a></h2>
 <p>A <code class="docutils literal notranslate"><span class="pre">uses:</span></code> call is a different relationship from triggering: it runs inside
 the caller’s own workflow run, as one of the caller’s own jobs, rather than
-starting an independent run after the caller finishes. Every call in this
-repository targets the same reusable workflow, with the same input:</p>
+starting an independent run after the caller finishes. The calls target
+<code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>, always with <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code>, and <code class="docutils literal notranslate"><span class="pre">cron-head.yml</span></code>:</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/create-release.yml:595</span></code> – job <code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> calls
 <code class="docutils literal notranslate"><span class="pre">./.github/workflows/unit-tests.yml</span></code> with <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/cron-conda.yml:50</span></code> – job <code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> calls
+<li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/cron-head.yml</span></code>, job <code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> – calls
 <code class="docutils literal notranslate"><span class="pre">./.github/workflows/unit-tests.yml</span></code> with <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/cron-vendor.yml:56</span></code> – job <code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> calls
-<code class="docutils literal notranslate"><span class="pre">./.github/workflows/unit-tests.yml</span></code> with <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/deploy-pages.yml:55</span></code> – job <code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> calls
-<code class="docutils literal notranslate"><span class="pre">./.github/workflows/unit-tests.yml</span></code> with <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/cron-conda.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">cron-vendor.yml</span></code> and
+<code class="docutils literal notranslate"><span class="pre">deploy-pages.yml</span></code>, job <code class="docutils literal notranslate"><span class="pre">head</span></code> in each – calls
+<code class="docutils literal notranslate"><span class="pre">./.github/workflows/cron-head.yml</span></code>, with no inputs. The call’s <code class="docutils literal notranslate"><span class="pre">verified</span></code>
+output is its <code class="docutils literal notranslate"><span class="pre">verdict</span></code> job’s, and the acting job reads it beside
+<code class="docutils literal notranslate"><span class="pre">needs.head.result</span></code>.</p></li>
 </ul>
+<p>Cron Head (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1967">#1967</a>) is
+one copy of the test gate and the <code class="docutils literal notranslate"><span class="pre">verdict</span></code> job, which Conda Update, Vendor
+Update and GitHub Pages used to carry each. It holds <code class="docutils literal notranslate"><span class="pre">contents:</span> <span class="pre">read</span></code> and no
+more, which is what each caller grants its <code class="docutils literal notranslate"><span class="pre">head</span></code> job and what
+<code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> is called with. Every expression in it reads the caller’s <code class="docutils literal notranslate"><span class="pre">github</span></code> context, so its jobs decide on
+the event that started the caller and check out the caller’s <code class="docutils literal notranslate"><span class="pre">github.sha</span></code>. A
+job of the call skips on every path – the gate everywhere but the schedule,
+<code class="docutils literal notranslate"><span class="pre">verdict</span></code> everywhere but a <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> – so each acting job keeps
+<code class="docutils literal notranslate"><span class="pre">!cancelled()</span></code>, for the reason the skip-cascade section below gives, and
+treats a <code class="docutils literal notranslate"><span class="pre">head</span></code> result other than <code class="docutils literal notranslate"><span class="pre">failure</span></code> as passing.</p>
+<p>Their schedules are eight hours apart on Saturdays: GitHub Pages at 02:00,
+Vendor Update at 10:00 and Conda Update at 18:00 UTC
+(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1967">#1967</a>). The owner’s
+ruling kept a schedule on each and allowed them aligned or spread, and nothing
+orders them:</p>
+<ul class="simple">
+<li><p>None reads another’s output. A Vendor Update push reaches Conda Update and
+GitHub Pages anyway, as a Unit Tests run whose completion raises both on the
+<code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> path. Create Release reads only the Vendor Update run that
+triggered it, through its <code class="docutils literal notranslate"><span class="pre">vendor_update</span></code> job, so the time of the others
+does not matter to it.</p></li>
+<li><p>At one time they cost more. Vendor Update and Conda Update both ran at 10:00
+until this change, and each scheduled pair read back from 2026-09-26 on
+checked out the same commit – on 2026-10-17, Conda Update 39023770904 and
+Vendor Update 39023891165 both gated 44ed96fc3, their <code class="docutils literal notranslate"><span class="pre">Gate</span> <span class="pre">(full</span> <span class="pre">suite,</span>
+<span class="pre">…)</span></code> jobs taking twelve and ten minutes. Their writing jobs share the <code class="docutils literal notranslate"><span class="pre">repository-maintenance</span></code> group, so <code class="docutils literal notranslate"><span class="pre">conda-update</span></code>
+then waited for <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code> to finish, and a third job joining that
+group cancels the one pending there.</p></li>
+</ul>
+<p>Spread, each <code class="docutils literal notranslate"><span class="pre">head</span></code> gates alone, and Conda Update runs once Vendor Update’s
+Create Release has had the day to publish, so its <code class="docutils literal notranslate"><span class="pre">Check</span> <span class="pre">the</span> <span class="pre">GitHub</span> <span class="pre">release</span>
+<span class="pre">exists</span></code> step finds the release rather than skipping the GitHub upload
+(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1634">#1634</a>).</p>
 <p><code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code> selects not only <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">gate</span></code> (the full
 suite, on <code class="docutils literal notranslate"><span class="pre">latest</span></code>) but also <code class="docutils literal notranslate"><span class="pre">changelog</span></code> (checks <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> against its
 source entry) and <code class="docutils literal notranslate"><span class="pre">python-versions</span></code>, which reads <code class="docutils literal notranslate"><span class="pre">gate</span></code>’s version (see

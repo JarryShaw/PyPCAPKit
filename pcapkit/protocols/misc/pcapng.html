@@ -4179,7 +4179,12 @@ On a parsed model the text wins, so an edit to its
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>type</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.secrets_type.SecretsType" title="pcapkit.const.pcapng.secrets_type.SecretsType"><code class="xref py py-class docutils literal notranslate"><span class="pre">SecretsType</span></code></a></span>) – Secrets type.</p></li>
-<li><p><strong>secrets</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.ZigBeeNWKKey" title="pcapkit.protocols.data.misc.pcapng.ZigBeeNWKKey"><code class="xref py py-class docutils literal notranslate"><span class="pre">ZigBeeNWKKey</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Secrets data model.</p></li>
+<li><p><strong>secrets</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.ZigBeeNWKKey" title="pcapkit.protocols.data.misc.pcapng.ZigBeeNWKKey"><code class="xref py py-class docutils literal notranslate"><span class="pre">ZigBeeNWKKey</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Secrets data model. The Secrets Data octets it was parsed
+from, if any, are written back verbatim, so that a key shorter
+or longer than its fixed width rebuilds as captured
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1986">#1986</a>); otherwise its fields are. On a parsed model
+the octets win, so an edit to its fields alone is silently
+ignored.</p></li>
 <li><p><strong>nwk_key</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – NWK key.</p></li>
 <li><p><strong>pan_id</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – PAN ID.</p></li>
 <li><p><strong>**kwargs</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – Arbitrary keyword arguments.</p></li>
@@ -4202,7 +4207,9 @@ On a parsed model the text wins, so an edit to its
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>type</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="../../const/pcapng.html#pcapkit.const.pcapng.secrets_type.SecretsType" title="pcapkit.const.pcapng.secrets_type.SecretsType"><code class="xref py py-class docutils literal notranslate"><span class="pre">SecretsType</span></code></a></span>) – Secrets type.</p></li>
-<li><p><strong>secrets</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.ZigBeeAPSKey" title="pcapkit.protocols.data.misc.pcapng.ZigBeeAPSKey"><code class="xref py py-class docutils literal notranslate"><span class="pre">ZigBeeAPSKey</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Secrets data model.</p></li>
+<li><p><strong>secrets</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.ZigBeeAPSKey" title="pcapkit.protocols.data.misc.pcapng.ZigBeeAPSKey"><code class="xref py py-class docutils literal notranslate"><span class="pre">ZigBeeAPSKey</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span>) – Secrets data model. The Secrets Data octets it was parsed
+from, if any, are written back verbatim, as for
+<a class="reference internal" href="#pcapkit.protocols.misc.pcapng.PCAPNG._make_secrets_zigbee_nwk" title="pcapkit.protocols.misc.pcapng.PCAPNG._make_secrets_zigbee_nwk"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_make_secrets_zigbee_nwk()</span></code></a>; otherwise its fields are.</p></li>
 <li><p><strong>aps_key</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – APS key.</p></li>
 <li><p><strong>pan_id</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – PAN ID.</p></li>
 <li><p><strong>short_address</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Short address.</p></li>
@@ -6792,7 +6799,7 @@ describes (<a class="extlink-issue reference external" href="https://github.com/
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.ZigBeeNWKKey">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.misc.pcapng.</span></span><span class="sig-name descname"><span class="pre">ZigBeeNWKKey</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">panid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">__packet__</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/misc/pcapng.html#ZigBeeNWKKey"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.ZigBeeNWKKey" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.misc.pcapng.</span></span><span class="sig-name descname"><span class="pre">ZigBeeNWKKey</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">panid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trailing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">__packet__</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/misc/pcapng.html#ZigBeeNWKKey"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.ZigBeeNWKKey" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.DSBSecrets" title="pcapkit.protocols.schema.misc.pcapng.DSBSecrets"><code class="xref py py-class docutils literal notranslate"><span class="pre">DSBSecrets</span></code></a></p>
 <p>Header schema for ZigBee NWK Key and ZigBee PANID secrets data.</p>
 <dl class="py attribute">
@@ -6807,11 +6814,18 @@ describes (<a class="extlink-issue reference external" href="https://github.com/
 <dd><p>ZigBee PANID.</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.ZigBeeNWKKey.trailing">
+<span class="sig-name descname"><span class="pre">trailing</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ConditionalField</span> <span class="pre">trailing&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.ZigBeeNWKKey.trailing" title="Link to this definition">¶</a></dt>
+<dd><p>Octets past the PAN ID, if Secrets Length declares any (see
+<a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.zigbee_key_trailing" title="pcapkit.protocols.schema.misc.pcapng.zigbee_key_trailing"><code class="xref py py-func docutils literal notranslate"><span class="pre">zigbee_key_trailing()</span></code></a>).</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.ZigBeeAPSKey">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.misc.pcapng.</span></span><span class="sig-name descname"><span class="pre">ZigBeeAPSKey</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">panid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr_low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr_high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">__packet__</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/misc/pcapng.html#ZigBeeAPSKey"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.ZigBeeAPSKey" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.misc.pcapng.</span></span><span class="sig-name descname"><span class="pre">ZigBeeAPSKey</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">key</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">panid</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr_low</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">addr_high</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trailing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NO_VALUE</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">__packet__</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/misc/pcapng.html#ZigBeeAPSKey"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.ZigBeeAPSKey" title="Link to this definition">¶</a></dt>
 <dd><p>Bases: <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.DSBSecrets" title="pcapkit.protocols.schema.misc.pcapng.DSBSecrets"><code class="xref py py-class docutils literal notranslate"><span class="pre">DSBSecrets</span></code></a></p>
 <p>Header schema for ZigBee APS Key secrets data.</p>
 <dl class="py attribute">
@@ -6836,6 +6850,13 @@ describes (<a class="extlink-issue reference external" href="https://github.com/
 <dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.ZigBeeAPSKey.addr_high">
 <span class="sig-name descname"><span class="pre">addr_high</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;UInt16Field</span> <span class="pre">addr_high&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.ZigBeeAPSKey.addr_high" title="Link to this definition">¶</a></dt>
 <dd><p>High node short address.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.ZigBeeAPSKey.trailing">
+<span class="sig-name descname"><span class="pre">trailing</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">&lt;ConditionalField</span> <span class="pre">trailing&gt;</span></span><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.ZigBeeAPSKey.trailing" title="Link to this definition">¶</a></dt>
+<dd><p>Octets past the high node short address, if Secrets Length declares any
+(see <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.zigbee_key_trailing" title="pcapkit.protocols.schema.misc.pcapng.zigbee_key_trailing"><code class="xref py py-func docutils literal notranslate"><span class="pre">zigbee_key_trailing()</span></code></a>).</p>
 </dd></dl>
 
 </dd></dl>
@@ -7527,6 +7548,72 @@ is the Secrets Data counterpart of <a class="reference internal" href="#pcapkit.
 declared <code class="docutils literal notranslate"><span class="pre">secrets_length</span></code>, the secrets are the octets the block holds, and
 the padding and option area are sized from those octets.
 <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.DecryptionSecretsBlock.post_process" title="pcapkit.protocols.schema.misc.pcapng.DecryptionSecretsBlock.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">DecryptionSecretsBlock.post_process()</span></code></a> reports the overrun.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.zigbee_key_has_trailing">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.misc.pcapng.</span></span><span class="sig-name descname"><span class="pre">zigbee_key_has_trailing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/misc/pcapng.html#zigbee_key_has_trailing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.zigbee_key_has_trailing" title="Link to this definition">¶</a></dt>
+<dd><p>Tell whether a ZigBee key schema carries octets past its fixed fields.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Unpacked data so far, or the data being packed.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>On unpacking, whether any of the span the block gives the key is left
+once its fixed fields are read; on packing, whether the schema holds
+such octets.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.zigbee_key_trailing">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.misc.pcapng.</span></span><span class="sig-name descname"><span class="pre">zigbee_key_trailing</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">packet</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/misc/pcapng.html#zigbee_key_trailing"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.zigbee_key_trailing" title="Link to this definition">¶</a></dt>
+<dd><p>Size the octets a ZigBee key schema carries past its fixed fields.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>packet</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#dict" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">dict</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a>]</span>) – Unpacked data so far, or the data being packed.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>On unpacking, what is left of the span the block gives the key; on
+packing, the octets the schema holds.</p>
+</dd>
+</dl>
+<p>The ZigBee NWK and APS keys have a fixed width, but a block’s Secrets
+Length may declare more. The octets past the fixed fields are kept here,
+rather than dropped, so that the key rebuilds as captured (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1986">#1986</a>).</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.misc.pcapng.zigbee_key_held">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.misc.pcapng.</span></span><span class="sig-name descname"><span class="pre">zigbee_key_held</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">schema</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/protocols/schema/misc/pcapng.html#zigbee_key_held"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.misc.pcapng.zigbee_key_held" title="Link to this definition">¶</a></dt>
+<dd><p>Rebuild a ZigBee key schema from the Secrets Data octets its block held.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>schema</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Type</span></code></a>[<code class="docutils literal notranslate"><span class="pre">_ZigBeeKey</span></code>]</span>) – <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.ZigBeeNWKKey" title="pcapkit.protocols.schema.misc.pcapng.ZigBeeNWKKey"><code class="xref py py-class docutils literal notranslate"><span class="pre">ZigBeeNWKKey</span></code></a> or <a class="reference internal" href="#pcapkit.protocols.schema.misc.pcapng.ZigBeeAPSKey" title="pcapkit.protocols.schema.misc.pcapng.ZigBeeAPSKey"><code class="xref py py-class docutils literal notranslate"><span class="pre">ZigBeeAPSKey</span></code></a>.</p></li>
+<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a></span>) – The Secrets Data octets, as the block held them.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">_ZigBeeKey</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>A <code class="docutils literal notranslate"><span class="pre">schema</span></code> instance that packs back to exactly <code class="docutils literal notranslate"><span class="pre">data</span></code>.</p>
+</dd>
+</dl>
+<p>The fixed fields are read from <code class="docutils literal notranslate"><span class="pre">data</span></code>, and any octets past them are kept
+as the schema’s <code class="docutils literal notranslate"><span class="pre">trailing</span></code> octets. A <code class="docutils literal notranslate"><span class="pre">data</span></code> short of the fixed width is
+read as though zero-filled and recorded as a short read, so that packing
+cuts it back to the octets held, as <code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema._cut_short_read</span></code> describes. A key
+shorter than its fixed width, or a Secrets Length longer than it, then
+rebuilds byte for byte (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1986">#1986</a>).</p>
 </dd></dl>
 
 <dl class="py function">
@@ -8937,6 +9024,14 @@ Set on parsing only, and written back verbatim on rebuild.</p>
 <dd><p>PAN ID.</p>
 </dd></dl>
 
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.ZigBeeNWKKey.data">
+<span class="sig-name descname"><span class="pre">data</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.ZigBeeNWKKey.data" title="Link to this definition">¶</a></dt>
+<dd><p>Secrets Data octets as the block carries them, which a Secrets
+Length may make shorter or longer than the key’s fixed width. Set on
+parsing only, and written back verbatim on rebuild (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1986">#1986</a>).</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -8960,6 +9055,14 @@ Set on parsing only, and written back verbatim on rebuild.</p>
 <dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.ZigBeeAPSKey.short_address">
 <span class="sig-name descname"><span class="pre">short_address</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.ZigBeeAPSKey.short_address" title="Link to this definition">¶</a></dt>
 <dd><p>Node short address.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.data.misc.pcapng.ZigBeeAPSKey.data">
+<span class="sig-name descname"><span class="pre">data</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><span class="pre">bytes</span></a></span><a class="headerlink" href="#pcapkit.protocols.data.misc.pcapng.ZigBeeAPSKey.data" title="Link to this definition">¶</a></dt>
+<dd><p>Secrets Data octets as the block carries them, as for
+<a class="reference internal" href="#pcapkit.protocols.data.misc.pcapng.ZigBeeNWKKey.data" title="pcapkit.protocols.data.misc.pcapng.ZigBeeNWKKey.data"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ZigBeeNWKKey.data</span></code></a>. Set on parsing only, and written back
+verbatim on rebuild (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1986">#1986</a>).</p>
 </dd></dl>
 
 </dd></dl>

@@ -1460,7 +1460,16 @@ then it calls <a class="reference internal" href="#pcapkit.foundation.extraction
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor.__exit__">
 <span class="sig-name descname"><span class="pre">__exit__</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">exc_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exc_value</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">traceback</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/foundation/extraction.html#Extractor.__exit__"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor.__exit__" title="Link to this definition">¶</a></dt>
-<dd><p>Close the input file when exits.</p>
+<dd><p>Release what this class holds when the <code class="docutils literal notranslate"><span class="pre">with</span></code> block exits.</p>
+<p>The engine is always closed. The input stream is closed only <em>if this
+class owns it</em> – the rule of <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/610">#610</a>, as <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._owns_input" title="pcapkit.foundation.extraction.Extractor._owns_input"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_owns_input()</span></code></a> writes
+it down and <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._cleanup" title="pcapkit.foundation.extraction.Extractor._cleanup"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_cleanup()</span></code></a> and the backstops already follow. A stream
+the caller supplied stays open for the caller to close, so leaving the
+block no longer closes it behind the caller’s back (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1999">#1999</a>).</p>
+<p>For a caller’s non-seekable stream, the stream this class owns is the
+<a class="reference internal" href="../corekit/io.html#pcapkit.corekit.io.SeekableReader" title="pcapkit.corekit.io.SeekableReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">SeekableReader</span></code></a> wrapped around it, and that
+wrapper is closed; it was built with <code class="docutils literal notranslate"><span class="pre">stream_closing</span></code> off, so closing
+it leaves the caller’s stream underneath open.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1528,8 +1537,8 @@ built-in engine is written. Not part of the public API.</p>
 <span class="sig-name descname"><span class="pre">_owns_input</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/foundation/extraction.html#Extractor._owns_input"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._owns_input" title="Link to this definition">¶</a></dt>
 <dd><p>Whether the input stream is this class’s to close.</p>
 <p>The one place the ownership rule of <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/610">#610</a> is written down, so that
-<a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._cleanup" title="pcapkit.foundation.extraction.Extractor._cleanup"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_cleanup()</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.__del__" title="pcapkit.foundation.extraction.Extractor.__del__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__del__()</span></code></a> and the registration of
-<a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._finalizer" title="pcapkit.foundation.extraction.Extractor._finalizer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_finalizer</span></code></a> cannot drift apart on it.</p>
+<a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._cleanup" title="pcapkit.foundation.extraction.Extractor._cleanup"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_cleanup()</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.__exit__" title="pcapkit.foundation.extraction.Extractor.__exit__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__exit__()</span></code></a>, <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.__del__" title="pcapkit.foundation.extraction.Extractor.__del__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__del__()</span></code></a> and the registration
+of <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._finalizer" title="pcapkit.foundation.extraction.Extractor._finalizer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_finalizer</span></code></a> cannot drift apart on it.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>

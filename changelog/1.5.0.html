@@ -1476,9 +1476,8 @@ descriptor per extraction, the root cause of the <code class="docutils literal n
 Both conditions now follow ownership via a single <code class="docutils literal notranslate"><span class="pre">Extractor._owns_input</span></code>, and a
 finaliser releases the handle of an extraction <em>abandoned</em> before end of file
 (<code class="docutils literal notranslate"><span class="pre">auto=False</span></code>, iterated part way and dropped); the files <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/610">#610</a> names
-emit no such warning. <code class="docutils literal notranslate"><span class="pre">__exit__</span></code> deliberately still
-closes unconditionally, since a caller who scopes an <a class="reference internal" href="../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> with <code class="docutils literal notranslate"><span class="pre">with</span></code>
-asked for that (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/610">#610</a>).</p></li>
+emit no such warning. Leaving a <code class="docutils literal notranslate"><span class="pre">with</span></code> block follows the same rule, so a caller’s
+stream stays open after it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1999">#1999</a>).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">extract(...,</span> <span class="pre">no_eof=True)</span></code> never returned. End of stream was detected and
 <code class="docutils literal notranslate"><span class="pre">ExtractionWarning:</span> <span class="pre">EOF</span> <span class="pre">reached</span></code> fired, but every loop that handles it
 (<code class="docutils literal notranslate"><span class="pre">record_frames</span></code>, <code class="docutils literal notranslate"><span class="pre">__next__</span></code>, <code class="docutils literal notranslate"><span class="pre">__call__</span></code>) read <code class="docutils literal notranslate"><span class="pre">if</span> <span class="pre">self._flag_n:</span> <span class="pre">continue</span></code>,

@@ -1330,8 +1330,8 @@ lists only <code class="docutils literal notranslate"><span class="pre">push</sp
 extra hop: a push to <code class="docutils literal notranslate"><span class="pre">main</span></code> triggers <strong>Unit Tests</strong>
 (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>), whose completion triggers <strong>Vendor Update</strong>
 (<code class="docutils literal notranslate"><span class="pre">cron-vendor.yml</span></code>) via <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> – <code class="docutils literal notranslate"><span class="pre">cron-vendor.yml</span></code> carries no
-<code class="docutils literal notranslate"><span class="pre">push</span></code> trigger of its own, deliberately, per its own comment at
-<code class="docutils literal notranslate"><span class="pre">cron-vendor.yml:6-13</span></code> – and <em>that</em> completion triggers <strong>Create Release</strong>
+<code class="docutils literal notranslate"><span class="pre">push</span></code> trigger of its own, deliberately, per the comment on its
+<code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> trigger – and <em>that</em> completion triggers <strong>Create Release</strong>
 itself. <a class="reference internal" href="workflows.html"><span class="doc">GitHub Actions Workflows</span></a> draws the repository-wide version of this graph;
 here is just the path that matters for a release:</p>
 <pre  class="mermaid">

@@ -871,6 +871,14 @@
             <span class="n">value</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'_T'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_default</span><span class="p">)</span>
 
         <span class="n">pre_processed</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">pre_process</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
+
+        <span class="c1"># NOTE: CPython's ``s`` and ``p`` formats take a bytearray, PyPy's take</span>
+        <span class="c1"># bytes alone (``TypeError: expected bytes, got bytearray object``), so a</span>
+        <span class="c1"># bytearray is handed over as bytes, packing identically on both (#2004).</span>
+        <span class="c1"># Nothing CPython refuses is let through: a memoryview stays refused, as</span>
+        <span class="c1"># does a bytearray for the ``c`` format, which CPython rejects too.</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">pre_processed</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:]</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">'s'</span><span class="p">,</span> <span class="s1">'p'</span><span class="p">):</span>
+            <span class="n">pre_processed</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">pre_processed</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">struct</span><span class="o">.</span><span class="n">pack</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">,</span> <span class="n">pre_processed</span><span class="p">)</span></div>
 
 

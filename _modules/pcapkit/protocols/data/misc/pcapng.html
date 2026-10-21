@@ -1513,6 +1513,11 @@
     <span class="n">pan_id</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Secrets Data octets as the block carries them, which a Secrets</span>
+        <span class="c1">#: Length may make shorter or longer than the key's fixed width. Set on</span>
+        <span class="c1">#: parsing only, and written back verbatim on rebuild (:issue:`1986`).</span>
+        <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span>
+
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">nwk_key</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">pan_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
@@ -1531,6 +1536,11 @@
     <span class="n">short_address</span><span class="p">:</span> <span class="s1">'int'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+        <span class="c1">#: Secrets Data octets as the block carries them, as for</span>
+        <span class="c1">#: :attr:`ZigBeeNWKKey.data`. Set on parsing only, and written back</span>
+        <span class="c1">#: verbatim on rebuild (:issue:`1986`).</span>
+        <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span>
+
         <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aps_key</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">pan_id</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">short_address</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 

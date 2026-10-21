@@ -501,7 +501,8 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.collections</span><span class="w"> </span><span class="kn">import</span> <span class="n">OptionField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">IPv4AddressField</span><span class="p">,</span> <span class="n">IPv4InterfaceField</span><span class="p">,</span>
                                               <span class="n">IPv6AddressField</span><span class="p">,</span> <span class="n">IPv6InterfaceField</span><span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.misc</span><span class="w"> </span><span class="kn">import</span> <span class="n">ForwardMatchField</span><span class="p">,</span> <span class="n">PayloadField</span><span class="p">,</span> <span class="n">SchemaField</span><span class="p">,</span> <span class="n">SwitchField</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.misc</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">ConditionalField</span><span class="p">,</span> <span class="n">ForwardMatchField</span><span class="p">,</span> <span class="n">PayloadField</span><span class="p">,</span>
+                                         <span class="n">SchemaField</span><span class="p">,</span> <span class="n">SwitchField</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.numbers</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">EnumField</span><span class="p">,</span> <span class="n">Int32Field</span><span class="p">,</span> <span class="n">Int64Field</span><span class="p">,</span> <span class="n">NumberField</span><span class="p">,</span>
                                             <span class="n">UInt8Field</span><span class="p">,</span> <span class="n">UInt16Field</span><span class="p">,</span> <span class="n">UInt32Field</span><span class="p">,</span> <span class="n">UInt64Field</span><span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.strings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">BitField</span><span class="p">,</span> <span class="n">BytesField</span><span class="p">,</span> <span class="n">DecodedString</span><span class="p">,</span> <span class="n">PaddingField</span><span class="p">,</span>
@@ -542,7 +543,7 @@
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">ipaddress</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPv4Address</span><span class="p">,</span> <span class="n">IPv4Interface</span><span class="p">,</span> <span class="n">IPv6Address</span><span class="p">,</span> <span class="n">IPv6Interface</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">IO</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span><span class="p">,</span> <span class="n">TypeVar</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Self</span>
 
@@ -550,6 +551,8 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.field</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldBase</span> <span class="k">as</span> <span class="n">Field</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">WireGuardKeyLabel</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.protocol</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolBase</span>
+
+    <span class="n">_ZigBeeKey</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_ZigBeeKey'</span><span class="p">,</span> <span class="s1">'ZigBeeNWKKey'</span><span class="p">,</span> <span class="s1">'ZigBeeAPSKey'</span><span class="p">)</span>
 
 <span class="k">if</span> <span class="n">SPHINX_TYPE_CHECKING</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">TypedDict</span>
@@ -1125,6 +1128,88 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">declared</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">length</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
         <span class="k">return</span> <span class="kc">False</span>
     <span class="k">return</span> <span class="n">declared</span> <span class="o">&gt;</span> <span class="n">secrets_area</span><span class="p">(</span><span class="n">block</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="zigbee_key_has_trailing">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.zigbee_key_has_trailing">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">zigbee_key_has_trailing</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Tell whether a ZigBee key schema carries octets past its fixed fields.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: Unpacked data so far, or the data being packed.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        On unpacking, whether any of the span the block gives the key is left</span>
+<span class="sd">        once its fixed fields are read; on packing, whether the schema holds</span>
+<span class="sd">        such octets.</span>
+
+<span class="sd">    """</span>
+    <span class="n">trailing</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'trailing'</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trailing</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">trailing</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
+
+
+
+<div class="viewcode-block" id="zigbee_key_trailing">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.zigbee_key_trailing">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">zigbee_key_trailing</span><span class="p">(</span><span class="n">packet</span><span class="p">:</span> <span class="s1">'dict[str, Any]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Size the octets a ZigBee key schema carries past its fixed fields.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        packet: Unpacked data so far, or the data being packed.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        On unpacking, what is left of the span the block gives the key; on</span>
+<span class="sd">        packing, the octets the schema holds.</span>
+
+<span class="sd">    The ZigBee NWK and APS keys have a fixed width, but a block's Secrets</span>
+<span class="sd">    Length may declare more. The octets past the fixed fields are kept here,</span>
+<span class="sd">    rather than dropped, so that the key rebuilds as captured (:issue:`1986`).</span>
+
+<span class="sd">    """</span>
+    <span class="n">trailing</span> <span class="o">=</span> <span class="n">packet</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'trailing'</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">trailing</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">trailing</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">max</span><span class="p">(</span><span class="n">packet</span><span class="p">[</span><span class="s1">'__length__'</span><span class="p">],</span> <span class="mi">0</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="zigbee_key_held">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng.zigbee_key_held">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">zigbee_key_held</span><span class="p">(</span><span class="n">schema</span><span class="p">:</span> <span class="s1">'Type[_ZigBeeKey]'</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'_ZigBeeKey'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Rebuild a ZigBee key schema from the Secrets Data octets its block held.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        schema: :class:`ZigBeeNWKKey` or :class:`ZigBeeAPSKey`.</span>
+<span class="sd">        data: The Secrets Data octets, as the block held them.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        A ``schema`` instance that packs back to exactly ``data``.</span>
+
+<span class="sd">    The fixed fields are read from ``data``, and any octets past them are kept</span>
+<span class="sd">    as the schema's ``trailing`` octets. A ``data`` short of the fixed width is</span>
+<span class="sd">    read as though zero-filled and recorded as a short read, so that packing</span>
+<span class="sd">    cuts it back to the octets held, as :meth:`Schema._cut_short_read</span>
+<span class="sd">    &lt;pcapkit.protocols.schema.schema.Schema._cut_short_read&gt;` describes. A key</span>
+<span class="sd">    shorter than its fixed width, or a Secrets Length longer than it, then</span>
+<span class="sd">    rebuilds byte for byte (:issue:`1986`).</span>
+
+<span class="sd">    """</span>
+    <span class="n">fixed</span> <span class="o">=</span> <span class="p">[(</span><span class="n">name</span><span class="p">,</span> <span class="n">field</span><span class="o">.</span><span class="n">length</span><span class="p">)</span> <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="n">__fields__</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+             <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="s1">'trailing'</span><span class="p">]</span>
+    <span class="n">width</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">(</span><span class="n">length</span> <span class="k">for</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span> <span class="ow">in</span> <span class="n">fixed</span><span class="p">)</span>
+    <span class="n">padded</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">ljust</span><span class="p">(</span><span class="n">width</span><span class="p">,</span> <span class="sa">b</span><span class="s1">'</span><span class="se">\x00</span><span class="s1">'</span><span class="p">)</span>
+    <span class="n">value</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'_ZigBeeKey'</span><span class="p">,</span> <span class="n">schema</span><span class="o">.</span><span class="n">unpack</span><span class="p">(</span><span class="n">padded</span><span class="p">))</span>  <span class="c1"># type: ignore[call-arg,misc]</span>
+
+    <span class="n">offset</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">for</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">length</span><span class="p">)</span> <span class="ow">in</span> <span class="n">fixed</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">offset</span> <span class="o">+</span> <span class="n">length</span><span class="p">:</span>
+            <span class="n">value</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">'__short_read__'</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)</span> <span class="o">-</span> <span class="n">offset</span><span class="p">)</span>
+            <span class="k">break</span>
+        <span class="n">offset</span> <span class="o">+=</span> <span class="n">length</span>
+    <span class="k">return</span> <span class="n">value</span></div>
+
 
 
 <div class="viewcode-block" id="pcapng_block_selector">
@@ -3251,13 +3336,20 @@
     <span class="n">key</span><span class="p">:</span> <span class="s1">'bytes'</span> <span class="o">=</span> <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
     <span class="c1">#: ZigBee PANID.</span>
     <span class="n">panid</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">(</span><span class="n">byteorder</span><span class="o">=</span><span class="s1">'little'</span><span class="p">)</span>
+    <span class="c1">#: Octets past the PAN ID, if Secrets Length declares any (see</span>
+    <span class="c1">#: :func:`zigbee_key_trailing`).</span>
+    <span class="n">trailing</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+        <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">zigbee_key_trailing</span><span class="p">),</span>
+        <span class="n">zigbee_key_has_trailing</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="c1"># NOTE: The two zero octets after the PAN ID are the Decryption Secrets</span>
     <span class="c1"># Block's own padding, which Secrets Length does not count, so they belong</span>
     <span class="c1"># to :attr:`DecryptionSecretsBlock.padding_data` rather than to this schema.</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">panid</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">panid</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                     <span class="n">trailing</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 
@@ -3275,12 +3367,19 @@
     <span class="n">addr_low</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">(</span><span class="n">byteorder</span><span class="o">=</span><span class="s1">'little'</span><span class="p">)</span>
     <span class="c1">#: High node short address.</span>
     <span class="n">addr_high</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt16Field</span><span class="p">(</span><span class="n">byteorder</span><span class="o">=</span><span class="s1">'little'</span><span class="p">)</span>
+    <span class="c1">#: Octets past the high node short address, if Secrets Length declares any</span>
+    <span class="c1">#: (see :func:`zigbee_key_trailing`).</span>
+    <span class="n">trailing</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span> <span class="o">=</span> <span class="n">ConditionalField</span><span class="p">(</span>
+        <span class="n">BytesField</span><span class="p">(</span><span class="n">length</span><span class="o">=</span><span class="n">zigbee_key_trailing</span><span class="p">),</span>
+        <span class="n">zigbee_key_has_trailing</span><span class="p">,</span>
+    <span class="p">)</span>
 
     <span class="c1"># NOTE: As for :class:`ZigBeeNWKKey`, the trailing two zero octets are the</span>
     <span class="c1"># block's padding, not part of the secrets.</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">panid</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">addr_low</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">addr_high</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
+        <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">,</span> <span class="n">panid</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">addr_low</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">addr_high</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span>
+                     <span class="n">trailing</span><span class="p">:</span> <span class="s1">'Optional[bytes]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span> <span class="o">...</span></div>
 
 
 

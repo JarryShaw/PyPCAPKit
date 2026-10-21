@@ -976,9 +976,8 @@ Fixed
   Both conditions now follow ownership via a single ``Extractor._owns_input``, and a
   finaliser releases the handle of an extraction *abandoned* before end of file
   (``auto=False``, iterated part way and dropped); the files :issue:`610` names
-  emit no such warning. ``__exit__`` deliberately still
-  closes unconditionally, since a caller who scopes an :class:`.Extractor` with ``with``
-  asked for that (:issue:`610`).
+  emit no such warning. Leaving a ``with`` block follows the same rule, so a caller's
+  stream stays open after it (:issue:`1999`).
 * ``extract(..., no_eof=True)`` never returned. End of stream was detected and
   ``ExtractionWarning: EOF reached`` fired, but every loop that handles it
   (``record_frames``, ``__next__``, ``__call__``) read ``if self._flag_n: continue``,

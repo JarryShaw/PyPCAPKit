@@ -581,6 +581,9 @@ shared with the PCAP frame header and documented in
 .. autofunction:: pcapkit.protocols.schema.misc.pcapng.bounded_area
 .. autofunction:: pcapkit.protocols.schema.misc.pcapng.captured_area
 .. autofunction:: pcapkit.protocols.schema.misc.pcapng.secrets_area
+.. autofunction:: pcapkit.protocols.schema.misc.pcapng.zigbee_key_has_trailing
+.. autofunction:: pcapkit.protocols.schema.misc.pcapng.zigbee_key_trailing
+.. autofunction:: pcapkit.protocols.schema.misc.pcapng.zigbee_key_held
 .. autofunction:: pcapkit.protocols.schema.misc.pcapng._spb_data_length
 
 Data Models

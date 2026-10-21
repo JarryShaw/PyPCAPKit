@@ -688,6 +688,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">WireGuardKeyLog</span> <span class="k">as</span> <span class="n">Schema_WireGuardKeyLog</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">ZigBeeAPSKey</span> <span class="k">as</span> <span class="n">Schema_ZigBeeAPSKey</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">ZigBeeNWKKey</span> <span class="k">as</span> <span class="n">Schema_ZigBeeNWKKey</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.misc.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">zigbee_key_held</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrEnum</span><span class="p">,</span> <span class="n">localcontext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="n">EnumValueError</span><span class="p">,</span> <span class="n">FormatError</span><span class="p">,</span> <span class="n">ProtocolError</span><span class="p">,</span>
@@ -5031,6 +5032,10 @@
             <span class="n">nwk_key</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">key</span><span class="p">,</span>
             <span class="n">pan_id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">panid</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="c1"># NOTE: the octets as the block holds them are kept as well, since a</span>
+        <span class="c1"># Secrets Length may declare fewer or more than the key's fixed width,</span>
+        <span class="c1"># and a rebuild writes them back verbatim (#1986).</span>
+        <span class="n">secrets</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="nb">bytes</span><span class="p">(</span><span class="n">schema</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">secrets</span></div>
 
 
@@ -5084,6 +5089,8 @@
             <span class="n">pan_id</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">panid</span><span class="p">,</span>
             <span class="n">short_address</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">addr_high</span> <span class="o">&lt;&lt;</span> <span class="mi">16</span> <span class="o">|</span> <span class="n">schema</span><span class="o">.</span><span class="n">addr_low</span><span class="p">,</span>
         <span class="p">)</span>
+        <span class="c1"># NOTE: kept as for ``_read_secrets_zigbee_nwk`` (#1986).</span>
+        <span class="n">secrets</span><span class="o">.</span><span class="n">__update__</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="nb">bytes</span><span class="p">(</span><span class="n">schema</span><span class="p">))</span>
         <span class="k">return</span> <span class="n">secrets</span></div>
 
 
@@ -7638,7 +7645,12 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            type: Secrets type.</span>
-<span class="sd">            secrets: Secrets data model.</span>
+<span class="sd">            secrets: Secrets data model. The Secrets Data octets it was parsed</span>
+<span class="sd">                from, if any, are written back verbatim, so that a key shorter</span>
+<span class="sd">                or longer than its fixed width rebuilds as captured</span>
+<span class="sd">                (:issue:`1986`); otherwise its fields are. On a parsed model</span>
+<span class="sd">                the octets win, so an edit to its fields alone is silently</span>
+<span class="sd">                ignored.</span>
 <span class="sd">            nwk_key: NWK key.</span>
 <span class="sd">            pan_id: PAN ID.</span>
 <span class="sd">            **kwargs: Arbitrary keyword arguments.</span>
@@ -7648,6 +7660,9 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">secrets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">held</span> <span class="o">=</span> <span class="n">secrets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'data'</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">held</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">zigbee_key_held</span><span class="p">(</span><span class="n">Schema_ZigBeeNWKKey</span><span class="p">,</span> <span class="n">held</span><span class="p">)</span>
             <span class="n">nwk_key</span> <span class="o">=</span> <span class="n">secrets</span><span class="o">.</span><span class="n">nwk_key</span>
             <span class="n">pan_id</span> <span class="o">=</span> <span class="n">secrets</span><span class="o">.</span><span class="n">pan_id</span>
 
@@ -7668,7 +7683,9 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            type: Secrets type.</span>
-<span class="sd">            secrets: Secrets data model.</span>
+<span class="sd">            secrets: Secrets data model. The Secrets Data octets it was parsed</span>
+<span class="sd">                from, if any, are written back verbatim, as for</span>
+<span class="sd">                :meth:`_make_secrets_zigbee_nwk`; otherwise its fields are.</span>
 <span class="sd">            aps_key: APS key.</span>
 <span class="sd">            pan_id: PAN ID.</span>
 <span class="sd">            short_address: Short address.</span>
@@ -7679,6 +7696,9 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">secrets</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">held</span> <span class="o">=</span> <span class="n">secrets</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'data'</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">held</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">zigbee_key_held</span><span class="p">(</span><span class="n">Schema_ZigBeeAPSKey</span><span class="p">,</span> <span class="n">held</span><span class="p">)</span>
             <span class="n">aps_key</span> <span class="o">=</span> <span class="n">secrets</span><span class="o">.</span><span class="n">aps_key</span>
             <span class="n">pan_id</span> <span class="o">=</span> <span class="n">secrets</span><span class="o">.</span><span class="n">pan_id</span>
             <span class="n">short_address</span> <span class="o">=</span> <span class="n">secrets</span><span class="o">.</span><span class="n">short_address</span>
