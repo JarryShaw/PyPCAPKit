@@ -33,6 +33,9 @@ class IPv6(Protocol):
 
     """
 
+    # NOTE: ``__exthdr__`` is metadata, as the keys ``Data`` names are:
+    # ``to_dict`` carries it, the dumps and ``repr`` leave it out (#2003).
+    __included__ = ['__exthdr__']
     __excluded__ = ['__exthdr__']
 
     #: Version.
@@ -65,8 +68,11 @@ class IPv6(Protocol):
         #: past the Jumbo Payload Length -- present only when there are any.
         trailer: 'bytes'
         #: Extension header chain, in wire order, as pairs of the parser
-        #: class and its info. Kept apart from the per-header keys above,
-        #: which a repeated header overwrites.
+        #: class and its info. The per-header keys hold the same infos, but in
+        #: the order of the keys of this :class:`~pcapkit.corekit.infoclass.Info`,
+        #: which differs on PyPy, so the chain is rebuilt from this alone; the
+        #: parser class keeps the IPv6_Ext a header fell back to
+        #: (:issue:`1473`, :issue:`2003`).
         __exthdr__: 'tuple[tuple[Type[ProtocolBase], Data], ...]'
 
     def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'IPv6':

@@ -408,11 +408,16 @@ class InfoFinalisationTests(unittest.TestCase):
         exported = info.to_dict()
         self.assertIs(type(exported), _OrderedMultiDict)
         self.assertIsInstance(exported, OrderedMultiDict)
-        self.assertEqual([key for key, _ in exported.items(multi=True)], ['nested', 'ordered', 'grouped', 'nested'])
-        self.assertEqual([type(value) for _, value in exported.items(multi=True)],
-                         [_OrderedMultiDict, _OrderedMultiDict, MultiDict, _OrderedMultiDict])
+        # NOTE: The order across keys is that of the Info's own keys, which is
+        # not part of its contract and differs on PyPy (#2003); the values of
+        # one key keep theirs.
+        self.assertEqual(sorted(key for key, _ in exported.items(multi=True)), ['grouped', 'nested', 'nested', 'ordered'])
+        self.assertEqual({key: [type(value) for value in exported.getlist(key)] for key in exported},
+                         {'nested': [_OrderedMultiDict, _OrderedMultiDict], 'ordered': [_OrderedMultiDict],
+                          'grouped': [MultiDict]})
         self.assertEqual([value['x'] for value in exported.getlist('nested')], [1, 2])
         self.assertEqual(list(exported['ordered'].items(multi=True)), PAIRS)
+        self.assertEqual(list(exported['grouped'].items(multi=True)), list(MultiDict(PAIRS).items(multi=True)))
 
         # The export is a copy the caller may edit.
         exported['ordered'].add('z', 9)

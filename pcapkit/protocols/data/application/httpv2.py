@@ -31,6 +31,10 @@ __all__ = [
 class Flags(Data):
     """Data model for HTTP/2 flags."""
 
+    # NOTE: ``__value__`` is a dunder key, which ``to_dict`` carries only so
+    # named (#2003); the rebuild reads it, and the dumps write it, as before.
+    __included__ = ['__value__']
+
     if TYPE_CHECKING:
         #: Flags as in combination value, bits the frame type leaves
         #: undefined included.

@@ -59,7 +59,7 @@ from pcapkit.protocols.schema.misc.raw import Raw as Schema_Raw
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities import config
 from pcapkit.utilities.chardet import detect
-from pcapkit.utilities.compat import cached_property, get_annotations
+from pcapkit.utilities.compat import cached_property
 from pcapkit.utilities.exceptions import (BaseError, ProtocolError, ProtocolNotFound,
                                           ProtocolNotImplemented, RegistryError, StructError,
                                           UnsupportedCall, stacklevel)
@@ -1129,6 +1129,16 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     def from_data(cls, data: '_PT | dict[str, Any]', **kwargs: 'Any') -> 'Self':
         """Create protocol instance from data.
 
+        ``data`` may be the :obj:`dict` that :meth:`Info.to_dict
+        <pcapkit.corekit.infoclass.Info.to_dict>` returns, which carries the
+        metadata the rebuild reads: ``__next_name__`` and ``__next_type__``,
+        which the payload is dispatched on, ``__short_read__``, and, for
+        :class:`~pcapkit.protocols.internet.ipv6.IPv6`, the extension header
+        chain under ``__exthdr__``. A hand-written :obj:`dict` must carry them
+        too, or no payload (nor IPv6 extension header) is rebuilt and no short
+        read is cut back, see :meth:`_make_payload`; nothing is guessed from
+        its other keys (:issue:`2003`).
+
         Args:
             data: Protocol data.
             **kwargs: Construction keywords that ``data`` does not carry, such as
@@ -2100,19 +2110,22 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         return data.to_dict()
 
     @classmethod
-    def _make_payload(cls, data: 'Data', exclude: 'tuple[str, ...]' = ()) -> 'ProtocolBase':
+    def _make_payload(cls, data: 'Data') -> 'ProtocolBase':
         """Create payload from ``data`` for protocol construction.
 
         This method uses ``__next_type__`` and ``__next_name__`` to
-        determine the payload type and name. If either of them is
-        :data:`None`, a :class:`~pcapkit.protocols.misc.null.NoPayload`
-        instance will be returned. Otherwise, the payload will be
-        constructed by :meth:`Protocol.from_data <pcapkit.protocols.protocol.Protocol.from_data>`.
+        determine the payload type and name. If either of them is missing or
+        :data:`None`, or ``data`` holds nothing under ``__next_name__``, a
+        :class:`~pcapkit.protocols.misc.null.NoPayload` instance will be
+        returned, exactly as for a protocol with no next layer. Otherwise, the
+        payload will be constructed by :meth:`Protocol.from_data
+        <pcapkit.protocols.protocol.Protocol.from_data>`.
 
-        :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` leaves
-        both keys out, so ``data`` rebuilt from such a :obj:`dict` carries
-        neither. The payload is then found from the structure of ``data``
-        instead, by ``_lookup_payload()``.
+        :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` carries
+        both keys, so ``data`` rebuilt from such a :obj:`dict` dispatches as
+        the info did. A hand-written :obj:`dict` must carry them too, as it
+        must ``__short_read__`` and, for IPv6, ``__exthdr__``: the payload is
+        never guessed from the other keys of ``data`` (:issue:`2003`).
 
         The payload is built one layer further into the frame than this
         protocol, as :meth:`_parse_next_layer` counts it, since each layer built
@@ -2124,34 +2137,15 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         Args:
             data: protocol data
-            exclude: keys of ``data`` that are not the payload, though they may
-                look like it, passed on to ``_lookup_payload()``
 
         Returns:
             Payload for protocol construction.
 
         """
-        if '__next_type__' not in data and '__next_name__' not in data:
-            proto, name = cls._lookup_payload(data, exclude)
-            if proto is None or name is None:
-                from pcapkit.protocols.misc.null import \
-                    NoPayload  # pylint: disable=import-outside-toplevel
-                return NoPayload()
-            token, rebuilding = _frame_depth.set(_frame_depth.get() + 1), _rebuilding.set(True)
-            try:
-                return proto.from_data(data[name])
-            finally:
-                _rebuilding.reset(rebuilding)
-                _frame_depth.reset(token)
-
         proto = cast('Optional[Type[Protocol]]', data.get('__next_type__'))
-        if proto is None or not (isinstance(proto, type) and issubclass(proto, ProtocolBase)):
-            from pcapkit.protocols.misc.null import \
-                NoPayload  # pylint: disable=import-outside-toplevel
-            return NoPayload()
-
         name = cast('Optional[str]', data.get('__next_name__'))
-        if name is None:
+        if (proto is None or not (isinstance(proto, type) and issubclass(proto, ProtocolBase))
+                or name is None or name not in data):
             from pcapkit.protocols.misc.null import \
                 NoPayload  # pylint: disable=import-outside-toplevel
             return NoPayload()
@@ -2162,74 +2156,6 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         finally:
             _rebuilding.reset(rebuilding)
             _frame_depth.reset(token)
-
-    @classmethod
-    def _lookup_payload(cls, data: 'Data', exclude: 'tuple[str, ...]' = ()) -> 'tuple[Optional[Type[ProtocolBase]], Optional[str]]':  # pylint: disable=line-too-long
-        """Find the payload of ``data`` that carries no ``__next_type__``.
-
-        :meth:`_decode_next_layer` writes the payload's info under the payload's
-        :attr:`info_name`, after every field of the data model, so the payload is
-        the *last* key that the data model does not declare and whose value is a
-        mapping. Its protocol is the one of :attr:`__proto__` -- or its fallback
-        -- whose :attr:`info_name` the key is. That is the lowercased class name
-        by default, but a protocol may override it: every version of
-        :class:`~pcapkit.protocols.link.l2tp.L2TP` is ``l2tp``.
-
-        Args:
-            data: protocol data
-            exclude: keys of ``data`` to pass over, such as the IPv6 extension
-                headers, which are written like a payload but are not one
-
-        Returns:
-            The payload protocol and the key of its info in ``data``, or
-            :data:`None` for both if ``data`` has no payload this protocol can
-            dispatch to.
-
-        """
-        keys = [key for key in cls._lookup_nested(data) if key not in exclude]
-        if not keys:
-            return None, None
-        name = keys[-1]
-
-        registry = cls.__proto__
-        candidates = list(registry.values())
-        if registry.default_factory is not None:
-            candidates.append(registry.default_factory())
-        for entry in candidates:
-            proto = entry.klass if isinstance(entry, ModuleDescriptor) else entry
-            if not (isinstance(proto, type) and issubclass(proto, ProtocolBase)):
-                continue
-
-            # NOTE: :attr:`info_name` is an instance property, so it is read off
-            # a bare instance; ``__new__`` only sets up the per-instance caches.
-            # An abstract class cannot be instantiated, and is never a payload.
-            try:
-                label = proto.__new__(proto).info_name
-            except TypeError:
-                continue
-            if label == name:
-                return proto, name
-        return None, None
-
-    @staticmethod
-    def _lookup_nested(data: 'Data') -> 'list[str]':
-        """Keys of ``data`` that its data model does not declare and that hold a mapping.
-
-        These are where the next layer protocols wrote their info, in the order
-        they wrote it -- the payload, and the IPv6 extension headers.
-
-        Args:
-            data: protocol data
-
-        Returns:
-            The keys, in the order of ``data``.
-
-        """
-        declared = set()  # type: set[str]
-        for klass in type(data).mro():
-            declared.update(get_annotations(klass))
-        return [key for key in data
-                if key not in declared and isinstance(data[key], collections.abc.Mapping)]
 
     @staticmethod
     def _lookup_registry(registry: 'DefaultDict[Any, _VT]', code: 'Any') -> '_VT':
@@ -2328,9 +2254,10 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         Notes:
             We added a new key ``__next_type__`` to ``dict_`` to store the
             next layer protocol type, and a new key ``__next_name__`` to
-            store the next layer protocol name. These keys will **NOT**
-            be included when :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` is called;
-            ``_lookup_payload()`` finds the payload of such a :obj:`dict` instead.
+            store the next layer protocol name. :meth:`Info.to_dict
+            <pcapkit.corekit.infoclass.Info.to_dict>` carries both, so that
+            :meth:`_make_payload` dispatches a :obj:`dict` rebuild on them,
+            while the dumpers and ``repr`` leave them out (:issue:`2003`).
 
         """
         next_ = cast('ProtocolBase', self._import_next_layer(proto, length, packet=packet))  # type: ignore[misc,call-arg,redundant-cast]

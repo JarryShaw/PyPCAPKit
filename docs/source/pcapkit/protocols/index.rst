@@ -268,3 +268,6 @@ Data Model
 
          Please refer to :func:`Protocol._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
          for more information with the inserted names to be excluded.
+
+   .. autoattribute:: __included__
+      :no-value:

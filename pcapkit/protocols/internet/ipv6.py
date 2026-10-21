@@ -32,8 +32,7 @@ from typing import TYPE_CHECKING
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.decorators import beholder
-from pcapkit.corekit.infoclass import Info
-from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
+from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.data.internet.ipv6 import IPv6 as Data_IPv6
 from pcapkit.protocols.internet.ip import IP
@@ -410,20 +409,21 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             Key-value pairs for protocol construction.
 
         """
+        # NOTE: The chain is rebuilt from ``__exthdr__`` alone, which
+        # :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>`
+        # carries; without it, no extension header is rebuilt, and none is
+        # guessed from the keys of ``data``, whose order is not part of the
+        # contract of an :class:`~pcapkit.corekit.infoclass.Info` and differs
+        # on PyPy (#2003).
         exthdr = data.get('__exthdr__')  # type: Optional[tuple[tuple[Type[ProtocolBase], Any], ...]] # pylint: disable=line-too-long
-        exclude = ()  # type: tuple[str, ...]
-        if exthdr is None:
-            # NOTE: ``data`` was rebuilt from :meth:`Info.to_dict`, which leaves
-            # ``__exthdr__`` out, so the chain is recovered from the keys the
-            # extension headers were written under; those are no payload.
-            exclude, exthdr = cls._lookup_exthdr(data)
-        upper = cls._make_payload(data, exclude=exclude)
+        chain = tuple(exthdr) if isinstance(exthdr, (tuple, list)) else ()
+        upper = cls._make_payload(data)
         payload = upper  # type: bytes | ProtocolBase
 
         # NOTE: The extension headers sit between this header and the upper
         # layer payload, so they are rebuilt in wire order ahead of it.
-        if exthdr:
-            payload = b''.join(proto.from_data(info).data for proto, info in exthdr) + upper.data
+        if chain:
+            payload = b''.join(proto.from_data(info).data for proto, info in chain) + upper.data
 
         return {
             'traffic_class': data['class'],
@@ -456,69 +456,6 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
 
         """
         return alias.lstrip('IPv6-').lower()
-
-    @classmethod
-    def _lookup_exthdr(cls, data: 'Data_IPv6') -> 'tuple[tuple[str, ...], tuple[tuple[Type[ProtocolBase], Any], ...]]':  # pylint: disable=line-too-long
-        """Recover the extension header chain of ``data`` without ``__exthdr__``.
-
-        :meth:`_decode_next_layer` writes each extension header's info under a
-        key of its own, in wire order, ahead of the upper layer. Walking the
-        ``next`` field from :attr:`data.next <Data_IPv6.next>` names the parser
-        of each in turn, exactly as the walk that parsed them did.
-
-        Args:
-            data: protocol data, without ``__exthdr__``
-
-        Returns:
-            The keys the extension headers are under, and the chain in the
-            shape of ``__exthdr__``, i.e. the parser class and info of each.
-
-        A header repeated in the chain is held under the same key as its
-        predecessor, and ``data.items(multi=True)`` yields each of them in turn.
-
-        """
-        from pcapkit.protocols.internet.ipv6_ext import \
-            IPv6_Ext  # isort: skip # pylint: disable=import-outside-toplevel
-
-        names = []  # type: list[str]
-        chain = []  # type: list[tuple[Type[ProtocolBase], Any]]
-        proto = data.get('next')
-        nested = cls._lookup_nested(data)
-        pairs = data.items(multi=True) if isinstance(data, (Info, MultiDict)) else data.items()
-        for (key, info) in pairs:
-            # NOTE: ``fragment`` is declared only for type checkers, so it reads
-            # as nested, but it is the packet split at the Fragment header and
-            # sits between that header and the next one.
-            if key not in nested or key == 'fragment':
-                continue
-            try:
-                ex_proto = Enum_ExtensionHeader(proto)
-            except ValueError:
-                break
-
-            # NOTE: As in :meth:`_decode_next_layer`, a code with no parser
-            # carrying ``next`` ends the chain, and so does a Fragment header
-            # other than a first fragment's.
-            if 'next' not in info:
-                break
-
-            # NOTE: A header whose dedicated parser raised was parsed by
-            # :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` instead,
-            # see :meth:`_import_next_layer`, and written under that class's
-            # key rather than the dedicated one's. Rebuilding it with the
-            # dedicated class would look for fields only that class parses
-            # (#1473), so the key decides the parser.
-            if key == cls._exthdr_key(IPv6_Ext.alias.fget(None)):  # type: ignore[attr-defined]
-                parser = IPv6_Ext  # type: Type[ProtocolBase]
-            else:
-                parser = cls._lookup_next_layer(cls.__proto__, int(ex_proto))
-            names.append(key)
-            chain.append((parser, info))
-
-            proto = info['next']
-            if ex_proto == Enum_ExtensionHeader.IPv6_Frag and not cls._is_first_fragment(info):
-                break
-        return tuple(names), tuple(chain)
 
     @staticmethod
     def _is_first_fragment(info: 'Mapping[str, Any]') -> 'bool':
@@ -586,7 +523,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         hdr_len = self.length       # header length
         raw_len = ipv6.payload if length is None else length  # payload length
         _protos = []                # type: list[ProtocolBase] # ProtoChain buffer
-        _exthdr = []                # (parser class, info) per extension header
+        _exthdr = []                # type: list[tuple[Type[ProtocolBase], Any]] # (parser class, info) per extension header
         split = None                # type: Optional[tuple[int, int]] # at first Fragment header
         opaque = False              # walk ended at a non-zero Fragment Offset
         depth = _frame_depth.get()  # layers of the frame up to this one
@@ -657,7 +594,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             # NOTE: Added through a :class:`MultiDict`, so a repeated header
             # keeps its predecessor's info rather than overwriting it, and
             # :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>`
-            # writes every one of them, in wire order (#1453).
+            # writes every one of them (#1453).
             name = self._exthdr_key(next_.alias)
             ipv6.__update__(OrderedMultiDict([(name, info)]))
 
@@ -718,7 +655,8 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             'protocol': proto,
 
             # extension header chain in wire order, with the parser of each,
-            # for ``from_data``
+            # for ``from_data``; the parser keeps the IPv6_Ext a header fell
+            # back to (#1473)
             '__exthdr__': tuple(_exthdr),
         })
 

@@ -21,7 +21,7 @@ import itertools
 import sys
 import types
 import typing
-from typing import TYPE_CHECKING, Generic, TypeVar
+from typing import TYPE_CHECKING, Generic, TypeVar, cast
 
 from pcapkit.corekit.enum import EnumLookup
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict, iter_multi_items
@@ -30,7 +30,8 @@ from pcapkit.utilities.exceptions import InfoError, UnsupportedCall, stacklevel
 from pcapkit.utilities.warnings import InfoWarning, warn
 
 if TYPE_CHECKING:
-    from typing import Any, ItemsView, Iterable, Iterator, NoReturn, Optional, Type
+    from typing import (Any, Collection, ItemsView, Iterable, Iterator, NoReturn, Optional,
+                        SupportsIndex, Type)
 
     from typing_extensions import Self
 
@@ -255,11 +256,13 @@ class InfoMeta(abc.ABCMeta):
     :class:`Info` class. It can be useful to reduce runtime generation
     cost as well as caching already generated attributes.
 
-    * :attr:`Info.__additional__` and :attr:`Info.__excluded__` are
-      lists of additional and excluded field names, which are used to
-      determine certain names to be included or excluded from the field
-      dictionary. They will be automatically populated from the class
-      attributes of the :class:`Info` class and its base classes.
+    * :attr:`Info.__additional__`, :attr:`Info.__excluded__` and
+      :attr:`Info.__included__` are lists of additional, excluded and included
+      field names, which are used to determine certain names to be treated as
+      built-in names, left out of ``repr`` and the dumps, or carried as
+      metadata by :meth:`Info.to_dict`. They will be automatically populated
+      from the class attributes of the :class:`Info` class and its base
+      classes.
 
       .. note::
 
@@ -286,8 +289,9 @@ class InfoMeta(abc.ABCMeta):
     """
 
     def __new__(cls, name: 'str', bases: 'tuple[type, ...]', attrs: 'dict[str, Any]', **kwargs: 'Any') -> 'Type[Info]':
-        """Create the class, extending its :attr:`Info.__additional__` and
-        :attr:`Info.__excluded__` with every base's.
+        """Create the class, extending its :attr:`Info.__additional__`,
+        :attr:`Info.__excluded__` and :attr:`Info.__included__` with every
+        base's.
 
         Args:
             name: Class name.
@@ -300,6 +304,8 @@ class InfoMeta(abc.ABCMeta):
             attrs['__additional__'] = []
         if '__excluded__' not in attrs:
             attrs['__excluded__'] = []
+        if '__included__' not in attrs:
+            attrs['__included__'] = []
 
         for base in bases:
             if hasattr(base, '__additional__'):
@@ -307,6 +313,8 @@ class InfoMeta(abc.ABCMeta):
                     name for name in base.__additional__ if name not in attrs['__additional__'])
             if hasattr(base, '__excluded__'):
                 attrs['__excluded__'].extend(name for name in base.__excluded__ if name not in attrs['__excluded__'])
+            if hasattr(base, '__included__'):
+                attrs['__included__'].extend(name for name in base.__included__ if name not in attrs['__included__'])
         return super().__new__(cls, name, bases, attrs, **kwargs)  # type: ignore[return-value]
 
 
@@ -331,6 +339,19 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
 
        Iterating an instance skips the names listed in :attr:`__excluded__`.
 
+    A key whose name is a dunder, such as ``__next_type__``, is metadata.
+    Iterating an instance, ``len()`` and :meth:`to_dict` leave such a key out
+    unless :attr:`__included__` names it, and carry every other key;
+    :attr:`__excluded__` names the keys that ``repr``, ``str`` and the dumps of
+    :mod:`pcapkit.dumpkit` leave out besides. A subclass extends either list
+    with its own names, as for :attr:`__additional__`.
+
+    .. versionchanged:: 1.5.0
+
+       :attr:`__excluded__` names the keys left out of ``repr``, ``str`` and
+       the dumps only, and :attr:`__included__` the dunder keys that iterating
+       an instance, ``len()`` and :meth:`to_dict` carry (:issue:`2003`).
+
     """
 
     if TYPE_CHECKING:
@@ -352,8 +373,20 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
 
     #: List of additional built-in names.
     __additional__: 'list[str]' = []
-    #: List of names to be excluded from :obj:`dict` conversion.
+    #: List of names of keys left out of ``repr``, ``str`` and the dumps of
+    #: :mod:`pcapkit.dumpkit` -- metadata such as ``__next_type__``, which
+    #: :meth:`to_dict` may still carry, see :attr:`__included__`.
+    #: Finalisation adds the names in :attr:`__builtin__`.
     __excluded__: 'list[str]' = []
+    #: List of names of dunder keys that iterating an instance, ``len()`` and
+    #: :meth:`to_dict` carry -- metadata such as ``__next_type__``, which a
+    #: rebuild from the :obj:`dict` reads. Every other dunder key is dropped
+    #: from all three, though indexing still reads it; a key that is no
+    #: dunder is carried regardless. A subclass extends the list with its own
+    #: names, as for :attr:`__excluded__`, so a custom :class:`Info` holding
+    #: dunder keys of its own must list them here for :meth:`to_dict` to keep
+    #: them (:issue:`2003`).
+    __included__: 'list[str]' = []
 
     def __init_subclass__(cls, /, *args: 'Any', **kwargs: 'Any') -> 'None':
         """Refuse to derive from a finalised info class.
@@ -446,9 +479,9 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
         # ``info_final`` writes ``BASE`` or ``FINAL`` onto the class it
         # finalises, and a subclass reading that state through inheritance was
         # never finalised itself -- it would keep the ``__excluded__`` it copied
-        # at declaration, without the names ``info_final`` adds, and leak
-        # ``__map__``, ``__map_reverse__`` and ``__multi__`` from ``to_dict()``
-        # (GitHub issue #1490). The inner one: an ancestor hand-marked bare
+        # at declaration, without the names ``info_final`` adds, which once
+        # leaked ``__map__``, ``__map_reverse__`` and ``__multi__`` from
+        # ``to_dict()`` (GitHub issue #1490). The inner one: an ancestor hand-marked bare
         # ``@final`` passes its marker to every subclass declared before it
         # landed, and ``getattr`` would blame such a subclass for a mismarking
         # that is its ancestor's. ``OwnDictRuleTests.test_a_subclass_that_
@@ -579,13 +612,14 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
 
     def __len__(self) -> 'int':
         # NOTE: count exactly the keys :meth:`__iter__` yields, so the
-        # bookkeeping attributes in ``__excluded__`` are not counted.
-        return sum(1 for key in self.__dict__ if key not in self.__excluded__)
+        # bookkeeping attributes and the dunder keys ``__included__`` does not
+        # name are not counted, while the keys in ``__excluded__`` are (#2003).
+        return sum(1 for key in self.__dict__ if not self.__hidden(key))
 
     def __iter__(self) -> 'Iterator[str]':
         for key in self.__dict__:
-            if key in self.__excluded__:
-               continue
+            if self.__hidden(key):
+                continue
             yield self.__map_reverse__.get(key, key)
 
     def __getitem__(self, name: 'str') -> 'VT':
@@ -609,9 +643,21 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
     def __items_multi(self) -> 'Iterator[tuple[str, VT]]':
         """Every ``(key, value)`` pair, with the transformed keys, in order."""
         for (key, value) in self.__dict__.items():
-            if key not in self.__excluded__:
+            if not self.__hidden(key):
                 yield key, value
             yield from self.__multi__.get(key, ())
+
+    def __hidden(self, key: 'str') -> 'bool':
+        """Whether iteration, ``len()`` and :meth:`to_dict` leave ``key`` out.
+
+        That is a bookkeeping attribute in :attr:`__builtin__`, or a dunder key
+        :attr:`__included__` does not name (:issue:`2003`).
+
+        """
+        if key in self.__builtin__:
+            return True
+        return (isinstance(key, str) and key.startswith('__') and key.endswith('__')
+                and key not in self.__included__)
 
     def __setattr__(self, name: 'str', value: 'VT') -> 'NoReturn':
         raise UnsupportedCall("can't set attribute")
@@ -719,10 +765,14 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
 
            Returns an :class:`~pcapkit.corekit.multidict.OrderedMultiDict`
            rather than a :obj:`dict`, so a key held more than once keeps every
-           value (:issue:`1484`).
+           value (:issue:`1484`). It leaves out the dunder keys
+           :attr:`__included__` does not name, carries the keys in
+           :attr:`__excluded__`, and records those as its own ``__excluded__``
+           for the dumpers to leave out (:issue:`2003`).
 
         """
-        dict_ = _OrderedMultiDict()  # type: OrderedMultiDict[str, Any]
+        dict_ = _OrderedMultiDict()  # type: _OrderedMultiDict[str, Any]
+        dict_.__excluded__ = self.__excluded__
         for (key, value) in self.__items_multi():
             out_key = self.__map_reverse__.get(key, key)
             if isinstance(value, Info):
@@ -775,12 +825,40 @@ class _OrderedMultiDict(OrderedMultiDict[KT, VT]):
 
     __ne__ = _ne
 
+    #: Names of the keys the dumpers leave out: the :attr:`Info.__excluded__`
+    #: of the info exported, kept by copies, deep copies and pickles; none for
+    #: an export of a multi-mapping (:issue:`2003`).
+    __excluded__ = ()  # type: Collection[str]
+
     def __repr__(self) -> 'str':
         """Write the export as the :class:`~pcapkit.corekit.multidict.OrderedMultiDict`
         it is, with every pair.
 
         """
         return f'{OrderedMultiDict.__name__}({list(self.items(multi=True))!r})'
+
+    def copy(self) -> 'Self':
+        """Return a shallow copy, with the same ``__excluded__``."""
+        new = super().copy()
+        new.__excluded__ = self.__excluded__
+        return new
+
+    def deepcopy(self, memo: 'Optional[dict]' = None) -> 'Self':
+        """Return a deep copy, with the same ``__excluded__``."""
+        new = cast('Self', super().deepcopy(memo))
+        new.__excluded__ = self.__excluded__
+        return new
+
+    def __reduce_ex__(self, protocol: 'SupportsIndex') -> 'Any':
+        return _restore_export, (type(self), list(self.items(multi=True)), list(self.__excluded__))
+
+
+def _restore_export(cls: 'Type[_OrderedMultiDict]', pairs: 'list[tuple[Any, Any]]',
+                    excluded: 'list[str]') -> '_OrderedMultiDict':
+    """Unpickle an :class:`_OrderedMultiDict`, with its ``__excluded__``."""
+    new = cls(pairs)
+    new.__excluded__ = excluded
+    return new
 
 
 class _MultiInfo(Info[VT], Generic[KT, VT]):

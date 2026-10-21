@@ -82,13 +82,18 @@ class TestIPv6FromDataExtensionHeaders(unittest.TestCase):
         )
         self.assertEqual(IPv6.from_data(parsed.info).data, packet)
 
-    def test_chain_is_hidden_from_info_views(self) -> None:
+    def test_chain_is_carried_by_to_dict_and_hidden_from_repr(self) -> None:
         from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.internet.ipv6_route import IPv6_Route
 
         packet = PACKETS['routing']
         info = IPv6(packet, len(packet)).info
-        self.assertNotIn('__exthdr__', list(info))
-        self.assertNotIn('__exthdr__', info.to_dict())
+        self.assertNotIn('__exthdr__', repr(info))
+        self.assertNotIn('__exthdr__', str(info))
+        # The parser and the info of each, as ``to_dict`` carries it.
+        exported = info.to_dict()['__exthdr__']
+        self.assertEqual(exported, info.__exthdr__)
+        self.assertEqual([parser for parser, _ in exported], [IPv6_Route])
 
 
 if __name__ == '__main__':

@@ -120,7 +120,8 @@ class RepeatedFieldDumpTests(unittest.TestCase):
                 tops.append(json.load(file)['Frame 1'])
         self.assertEqual(pads(tops[0]['ethernet']['ipv6']['opts']), [f'000000{mark:02x}' for mark in MARKS])
         self.assertEqual(list(tops[1]), list(tops[0]))
-        self.assertEqual(list(tops[0]), list(frame.info.to_dict()))
+        # Every key but those the dumps leave out (#2003).
+        self.assertEqual(list(tops[0]), [key for key in frame.info.to_dict() if key not in frame.info.__excluded__])
 
 
 if __name__ == '__main__':

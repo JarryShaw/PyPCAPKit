@@ -8,8 +8,9 @@ a layer rebuilt from its dict lost its payload: an Ethernet frame came back as
 its 14-octet header. IPv6 lost its extension headers the same way, with
 ``__exthdr__``, and HTTP raised ``ProtocolError('invalid HTTP data: Raw')``.
 
-The dict itself is left as it was, since the dumps are written from it; the
-payload is found from the dict's structure instead.
+``to_dict`` now carries both keys, so the dict rebuild dispatches exactly as
+the info's, and the dumps leave every dunder key out (#2003). A dict without
+them is not guessed at: no payload is rebuilt.
 
 Every case builds its own octets and reads no capture. Classes are imported
 inside each test, after :func:`~tests._support.reimport_once_per_class`.
@@ -135,7 +136,7 @@ class TestToDictPayloadRoundTrip(unittest.TestCase):
 
         ipv6 = self.frame('ipv6-exthdr-udp')[IPv6]
         dict_ = ipv6.info.to_dict()
-        self.assertNotIn('__exthdr__', dict_)
+        self.assertIn('__exthdr__', dict_)
 
         rebuilt = IPv6.from_data(dict_)
         self.assertEqual(rebuilt.data, ipv6.data)
@@ -144,7 +145,7 @@ class TestToDictPayloadRoundTrip(unittest.TestCase):
             ['HOPOPT', 'IPv6_Opts'],
         )
 
-    def test_payload_is_found_by_info_name_not_class_name(self) -> None:
+    def test_payload_is_found_under_its_info_name(self) -> None:
         from pcapkit.protocols.link.l2tpv2 import L2TPv2
         from pcapkit.protocols.transport.udp import UDP
 
@@ -178,15 +179,59 @@ class TestToDictPayloadRoundTrip(unittest.TestCase):
         self.assertIsInstance(rebuilt.payload, NoPayload)
         self.assertEqual(rebuilt.data, FRAMES['ipv4-udp'][:14])
 
-    def test_to_dict_still_leaves_the_dispatch_keys_out(self) -> None:
-        # The dumps are written from ``to_dict``, so the fix must not add to it.
+    def test_dict_without_the_dispatch_keys_rebuilds_the_header_alone(self) -> None:
+        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.misc.null import NoPayload
+
+        # The payload is still there under its name, but nothing names it.
+        eth = Ethernet(FRAMES['ipv4-udp'])
+        dict_ = eth.info.to_dict()
+        for key in ('__next_type__', '__next_name__'):
+            dict_.poplist(key)
+        self.assertIn('ipv4', dict_)
+
+        rebuilt = Ethernet.from_data(dict_)
+        self.assertIsInstance(rebuilt.payload, NoPayload)
+        self.assertEqual(rebuilt.data, FRAMES['ipv4-udp'][:14])
+
+    def test_repr_and_str_leave_the_dispatch_keys_out(self) -> None:
         for name in FRAMES:
+            info = self.frame(name).info
+            self.assertIn('__next_type__', info)
+            with self.subTest(frame=name):
+                self.assertNotIn('__next', repr(info))
+                self.assertNotIn('__next', str(info))
+
+    def test_to_dict_carries_the_dispatch_keys_and_a_dump_none(self) -> None:
+        import json
+        import os
+        import tempfile
+
+        import dictdumper.json
+
+        from pcapkit.dumpkit.common import make_dumper
+
+        for name in FRAMES:
+            self.assertIn('__next_type__', self.frame(name).info.to_dict())
             for layer in self.layers(name):
                 with self.subTest(frame=name, layer=type(layer).__name__):
                     dict_ = layer.info.to_dict()
-                    for key in ('__next_type__', '__next_name__', '__exthdr__'):
-                        self.assertNotIn(key, dict_)
+                    for key in ('__next_type__', '__next_name__'):
+                        self.assertEqual(key in dict_, key in layer.info)
+                        if key in dict_:
+                            self.assertIs(dict_[key], layer.info[key])
 
+            frame = self.frame(name)
+            with tempfile.TemporaryDirectory() as tmp:
+                for index, value in enumerate((frame.info, frame.info.to_dict())):
+                    with self.subTest(frame=name, dumped=type(value).__name__):
+                        path = os.path.join(tmp, f'{index}.json')
+                        make_dumper(dictdumper.json.JSON)(path)(value, name='Frame 1')
+                        with open(path, encoding='utf-8') as file:
+                            text = file.read()
+                        json.loads(text)
+                        for key in ('__next_type__', '__next_name__', '__short_read__', '__exthdr__'):
+                            self.assertNotIn(f'"{key}"', text)
 
 if __name__ == '__main__':
     unittest.main()

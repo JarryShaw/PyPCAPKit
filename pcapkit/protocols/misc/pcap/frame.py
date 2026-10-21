@@ -633,8 +633,9 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
         Notes:
             We added a new key ``__next_type__`` to ``dict_`` to store the
             next layer protocol type, and a new key ``__next_name__`` to
-            store the next layer protocol name. These keys will **NOT**
-            be included when :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` is called.
+            store the next layer protocol name. :meth:`Info.to_dict
+            <pcapkit.corekit.infoclass.Info.to_dict>` carries both, and the
+            dumpers leave them out.
 
             We also added a new key ``protocols`` to ``dict_`` to store the
             protocol chain of the current packet (frame).
