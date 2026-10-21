@@ -325,7 +325,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
         return _exthdr_rebuilt.get() if issubclass(cls, IPv6_Ext) else 0
 
     @classmethod
-    def _make_payload(cls, data: 'Data', exclude: 'tuple[str, ...]' = ()) -> 'ProtocolBase':
+    def _make_payload(cls, data: 'Data') -> 'ProtocolBase':
         """Create payload from ``data`` for protocol construction.
 
         As :meth:`ProtocolBase._make_payload
@@ -338,9 +338,6 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
 
         Args:
             data: protocol data
-            exclude: keys of ``data`` that are not the payload, see
-                :meth:`ProtocolBase._make_payload
-                <pcapkit.protocols.protocol.ProtocolBase._make_payload>`
 
         Returns:
             Payload for protocol construction.
@@ -352,7 +349,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
         # where it does not parse), so no rebuilt upper layer reads this place.
         token = _exthdr_rebuilt.set(cls._rebuilt_exthdr_depth() + 1)
         try:
-            return super()._make_payload(data, exclude)
+            return super()._make_payload(data)
         finally:
             _exthdr_rebuilt.reset(token)
 
@@ -430,8 +427,9 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
 
         Notes:
             ``dict_`` gains the keys ``__next_type__`` (next layer protocol
-            type) and ``__next_name__`` (next layer protocol name). Neither
-            is included when :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` is called.
+            type) and ``__next_name__`` (next layer protocol name), which
+            :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>`
+            carries and the dumpers leave out.
 
         """
         next_ = cast('ProtocolBase',  # type: ignore[redundant-cast]

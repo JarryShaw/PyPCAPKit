@@ -29,7 +29,7 @@ import dictdumper.json
 import dictdumper.plist
 import dictdumper.tree
 
-from pcapkit.corekit.infoclass import Info
+from pcapkit.corekit.infoclass import Info, _is_dunder
 from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
 from pcapkit.corekit.sentinels import NoValueType, NullType
 from pcapkit.protocols.schema.schema import Schema
@@ -423,10 +423,13 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
             held more than once, such as a repeated IPv6 extension header, maps
             to the :class:`list` of all its values, in order (GitHub issue
             :issue:`1484`). The values are left as they are, so each comes back
-            through :meth:`DictDumper.object_hook` when written.
+            through :meth:`DictDumper.object_hook` when written. A dunder key,
+            such as ``__next_type__``, is metadata for :meth:`from_data
+            <pcapkit.protocols.protocol.ProtocolBase.from_data>` and is left out
+            (:issue:`2003`).
 
         """
-        pairs = list(info.items(multi=True))
+        pairs = [(key, val) for key, val in info.items(multi=True) if not _is_dunder(key)]
         counts = collections.Counter(key for key, _ in pairs)
         result = {}  # type: dict[Any, Any]
         for key, val in pairs:
@@ -540,16 +543,20 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                 # by name could only gather the repeats of a key under its first
                 # occurrence (GitHub issue #1263). The keys are escaped when the
                 # writer hands each mapping back to this hook, through the
-                # :class:`dict` branch below.
+                # :class:`dict` branch below. A dunder key, which an export of
+                # an :class:`Info` holds, is left out, as :func:`fields` leaves
+                # it out (#2003).
                 result = [
                     {render_enum(key) if isinstance(key, (enum.Enum, aenum.Enum)) else key: val}
-                    for key, val in o.items(multi=True)
+                    for key, val in o.items(multi=True) if not _is_dunder(key)
                 ]
             elif isinstance(o, MultiDict):
                 # NOTE: a :class:`MultiDict` keeps no order across keys, only
                 # among the values of each, so grouping by key loses nothing.
                 temp = collections.defaultdict(list)  # type: DefaultDict[str, list[Any]]
                 for key, val in o.items(multi=True):
+                    if _is_dunder(key):
+                        continue
                     if isinstance(key, (enum.Enum, aenum.Enum)):
                         key = render_enum(key)
                     temp[escape_key(key)].append(val)

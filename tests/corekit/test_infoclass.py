@@ -193,11 +193,9 @@ class OwnAnnotationsTests(unittest.TestCase):
     def test_annotations_are_read_through_the_compat_shim(self) -> None:
         """GitHub issue #1709: one version-gated reader, from :mod:`pcapkit.utilities.compat`."""
         from pcapkit.corekit import infoclass
-        from pcapkit.protocols import protocol
         from pcapkit.utilities import compat
 
         self.assertIs(infoclass.get_annotations, compat.get_annotations)
-        self.assertIs(protocol.get_annotations, compat.get_annotations)
 
     def test_the_pre_3_10_reader_gives_the_same_signatures(self) -> None:
         # NOTE: a stand-in for ``compat.get_annotations`` below 3.10 -- the

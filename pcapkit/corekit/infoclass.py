@@ -553,7 +553,9 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
     def __str__(self) -> 'str':
         temp = []  # type: list[str]
         for (key, value) in self.__dict__.items():
-            if key in self.__excluded__:
+            # NOTE: a dunder key, such as ``__next_type__``, is metadata, and
+            # left out as the dumpers leave it out (#2003).
+            if key in self.__excluded__ or _is_dunder(key):
                 continue
 
             out_key = self.__map_reverse__.get(key, key)
@@ -564,7 +566,7 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
     def __repr__(self) -> 'str':
         temp = []  # type: list[str]
         for (key, value) in self.__dict__.items():
-            if key in self.__excluded__:
+            if key in self.__excluded__ or _is_dunder(key):
                 continue
 
             out_key = self.__map_reverse__.get(key, key)
@@ -1051,6 +1053,17 @@ class OrderedMultiInfo(_MultiInfo[KT, VT], OrderedMultiDict[KT, VT]):
         if flat is None:
             return _OrderedMultiDict(self)
         return OrderedMultiDict.to_dict(self, flat)  # type: ignore[call-overload]
+
+
+def _is_dunder(key: 'Any') -> 'bool':
+    """Whether ``key`` is a dunder key, such as ``__next_type__``.
+
+    Such a key is metadata rather than a field: :meth:`Info.to_dict` carries
+    it, while ``repr``, ``str`` and the dumpers of :mod:`pcapkit.dumpkit` leave
+    it out (:issue:`2003`).
+
+    """
+    return isinstance(key, str) and len(key) > 4 and key.startswith('__') and key.endswith('__')
 
 
 def _freeze(value: 'Any') -> 'Any':

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""A dict rebuild finds the payload and the extension headers whatever the key order.
+"""A dict rebuild dispatches as the info's, whatever the key order.
 
 GitHub issue #2003: on PyPy, an :class:`~pcapkit.corekit.infoclass.Info`
 lays its keys out as an earlier instance of the same class did, so its key
@@ -10,11 +10,13 @@ rebuilt short, and so did a Hop-by-Hop, Destination, Destination chain once
 ``hopopt`` had moved past the upper layer.
 
 The order of an :class:`~pcapkit.corekit.infoclass.Info` is not part of its
-contract, so the payload is now found by the name of a protocol it dispatches
-to, and the chain is held in ``extension_headers``, an
+contract, so nothing is read off it any more: ``to_dict()`` carries the
+``__next_type__`` and ``__next_name__`` metadata the payload is dispatched on,
+and the chain is held in ``extension_headers``, an
 :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo` keeping the order of its
-own. These tests reorder an instance's
-:attr:`~object.__dict__` as PyPy does, so CPython checks the same thing.
+own. A dict without the metadata is not guessed at. These tests reorder an
+instance's :attr:`~object.__dict__` as PyPy does, so CPython checks the same
+thing.
 
 Every case builds its own octets and reads no capture. Classes are imported
 inside each test, after :func:`~tests._support.reimport_once_per_class`.
@@ -99,11 +101,11 @@ class LookupByNameTests(unittest.TestCase):
                 exported = moved(ip6.info, 'extension_headers', before=before).to_dict()
                 chain = IPv6._lookup_exthdr(exported)
                 self.assertEqual([parser for parser, _ in chain], [HOPOPT, IPv6_Opts, IPv6_Opts])
-                self.assertEqual(IPv6.from_data(exported).data, HOP_DST_DST)
                 self.assertEqual([parser.from_data(hdr).data for parser, hdr in chain],
                                  [ext.data for _, ext in ip6.extension_headers.items(multi=True)])
+                self.assertEqual(IPv6.from_data(exported).data, HOP_DST_DST)
 
-    def test_payload_is_found_by_name_not_as_the_last_key(self) -> None:
+    def test_payload_follows_the_metadata_whatever_the_key_order(self) -> None:
         from pcapkit.protocols.internet.ipv6 import IPv6
         from pcapkit.protocols.transport.udp import UDP as UDP_
 
@@ -111,13 +113,15 @@ class LookupByNameTests(unittest.TestCase):
         self.assertIn('fragment', ip6.info)
         self.assertEqual(len(ip6.data), len(ATOMIC))
 
-        # ``fragment`` is a nested key too, and not the payload; laid out
-        # after the payload, it is the last nested key.
-        info = moved(ip6.info, 'udp', before='fragment')
+        # ``fragment`` is a mapping too, and not the payload; laid out after
+        # the payload, it is the last of them, and the metadata first.
+        info = moved(moved(ip6.info, 'udp', before='fragment'), '__next_name__', before='version')
         exported = info.to_dict()
-        self.assertEqual(list(exported['extension_headers']), ['frag'])
-        self.assertEqual(IPv6._lookup_payload(exported), (UDP_, 'udp'))
-        self.assertEqual(IPv6.from_data(exported).data, ATOMIC)
+        self.assertEqual(exported['__next_name__'], 'udp')
+        self.assertIs(exported['__next_type__'], UDP_)
+        rebuilt = IPv6.from_data(exported)
+        self.assertIsInstance(rebuilt.payload, UDP_)
+        self.assertEqual(rebuilt.data, ATOMIC)
 
     def test_cut_upper_layer_is_found_ahead_of_the_headers(self) -> None:
         from pcapkit.protocols.internet.ipv6 import IPv6
@@ -134,12 +138,27 @@ class LookupByNameTests(unittest.TestCase):
         self.assertEqual(len(ip6.data), len(HOP_DST_DST))
 
         # As on PyPy for #1610: the headers after the upper layer.
-        info = moved(ip6.info, 'raw', before='extension_headers')
-        exported = info.to_dict()
+        exported = moved(ip6.info, 'raw', before='extension_headers').to_dict()
         self.assertEqual(len(IPv6._lookup_exthdr(exported)), 2)
-        self.assertEqual(IPv6._lookup_payload(exported), (Raw, 'raw'))
-        self.assertEqual(IPv6.from_data(exported).data, HOP_DST_DST)
+        rebuilt = IPv6.from_data(exported)
+        self.assertIsInstance(rebuilt.payload, Raw)
+        self.assertEqual(rebuilt.data, HOP_DST_DST)
 
+    def test_dict_without_the_metadata_is_not_guessed_at(self) -> None:
+        from pcapkit.protocols.internet.ipv6 import IPv6
+        from pcapkit.protocols.misc.null import NoPayload
+
+        ip6 = IPv6(HOP_DST_DST)
+        exported = ip6.info.to_dict()
+        for key in ('__next_type__', '__next_name__'):
+            exported.poplist(key)
+        self.assertIn('udp', exported)
+
+        # The extension headers are rebuilt from ``extension_headers``, and the
+        # upper layer, named by nothing, is not.
+        rebuilt = IPv6.from_data(exported)
+        self.assertIsInstance(rebuilt.payload, NoPayload)
+        self.assertEqual(rebuilt.data, HOP_DST_DST[:40 + 3 * 8])
 
 if __name__ == '__main__':
     unittest.main()

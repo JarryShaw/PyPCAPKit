@@ -170,7 +170,10 @@ class CaptureDumpTests(unittest.TestCase):
                 for number, frame in enumerate(extractor.frame, start=1):
                     section = report[f'Frame {number}']
                     with self.subTest(capture=name, frame=number):
-                        self.assertEqual(list(section), list(frame.info.to_dict()))
+                        # Every key but the dunder metadata, which the dumps
+                        # leave out (#2003).
+                        self.assertEqual(list(section), [key for key in frame.info.to_dict()
+                                                         if not (key.startswith('__') and key.endswith('__'))])
                         self.assertEqual(section['protocols'], str(frame.protochain))
 
     def test_plist_dump_reads_back_through_plistlib(self) -> None:
