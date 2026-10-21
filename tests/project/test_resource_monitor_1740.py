@@ -133,6 +133,11 @@ def sh(script: 'str', env: 'dict[str, str]', shell: 'tuple[str, ...]',
         os.unlink(file.name)
 
 
+def gnu_timeout(env: 'dict[str, str]') -> 'str | None':
+    """The ``timeout`` the tests step resolves on ``env``'s ``PATH``: ``gnutimeout`` first (#2020)."""
+    return shutil.which('gnutimeout', path=env['PATH']) or shutil.which('timeout', path=env['PATH'])
+
+
 BASH = ('bash', '--noprofile', '--norc', '-eo', 'pipefail')
 DEFAULT = ('bash', '-e')
 
@@ -286,7 +291,7 @@ class TestTheTestsAreContained(unittest.TestCase):
         script = step(TESTS)['run']
         # #1963: the command the timeout runs, pytest or GraalPy's shards of it, is set just before.
         self.assertIn('set -- python -m pytest "$@"\n', script)
-        match = re.search(r'timeout --signal=INT --kill-after=(\d+)m (\d+)m "\$@"\n', script)
+        match = re.search(r'"\$gnu_timeout" --signal=INT --kill-after=(\d+)m (\d+)m "\$@"\n', script)
         self.assertIsNotNone(match, script)
         assert match is not None
         kill_after, duration = map(int, match.groups())
@@ -294,7 +299,7 @@ class TestTheTestsAreContained(unittest.TestCase):
         self.assertLess(duration + kill_after, step(TESTS)['timeout-minutes'])
 
     def test_no_file_grows_past_2_gib(self) -> None:
-        self.assertIn(f'set -- prlimit --fsize={FSIZE} timeout ', step(TESTS)['run'])
+        self.assertIn(f'set -- prlimit --fsize={FSIZE} "$gnu_timeout" ', step(TESTS)['run'])
 
     def test_the_scope_is_probed_and_falls_back_with_a_warning(self) -> None:
         script = step(TESTS)['run']
@@ -398,8 +403,9 @@ class TestTheContainmentRuns(unittest.TestCase):
         self.assertTrue(probe.startswith(SUDO_ARGV.format(unit=unit.group(1), **ids)), probe)
         self.assertTrue(probe.endswith(f' GRAAL_PYTHON_VM_ARGS={HEAP} true'), probe)
         self.assertTrue(run.startswith(SUDO_ARGV.format(unit='pcapkit-tests.scope', **ids)), run)
-        self.assertIn(f' prlimit --fsize={FSIZE} timeout --signal=INT --kill-after=3m 110m python -m pytest -q -n 3 ',
-                      run)
+        # #2020: GNU's timeout, `gnutimeout` where the image has one, by its path.
+        self.assertIn(f' prlimit --fsize={FSIZE} {gnu_timeout(self.env)} --signal=INT --kill-after=3m 110m '
+                      'python -m pytest -q -n 3 ', run)
         self.assertIn('args: -m pytest -q -n 3 --dist load', result.stdout)
         self.assertIn(f'heap {HEAP}\n', result.stdout)
         self.assertIn(f' GRAAL_PYTHON_VM_ARGS={HEAP} prlimit ', run)

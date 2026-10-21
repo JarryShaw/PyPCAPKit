@@ -391,6 +391,10 @@ jobs:
       #   JUnit file of its own beside junit.xml.
       # - `timeout` sends SIGINT at 110 minutes, under the 120-minute cap, so
       #   pytest still writes the junit XML, and exits 124; SIGKILL 3 minutes on.
+      #   #2020: GNU's `timeout`, which Ubuntu 26.04 installs as `gnutimeout`.
+      #   Its `timeout` is uutils' (0.10.0), whose `--kill-after` sends SIGKILL
+      #   with the SIGINT, and to its child alone, so a run there exits 137
+      #   with no teardown and leaves xdist's workers running.
       # - `prlimit --fsize`: no file over 2 GiB.
       # - A transient scope, 12G and no swap, at a fifth of the runner's CPU
       #   weight, where `sudo -n` can start one; otherwise uncapped. A scope's
@@ -470,7 +474,9 @@ jobs:
           if [ -n "$SHARDS" ]; then
             set -- /usr/bin/python3 util/pytest_shards.py "$SHARDS" -- "$@"
           fi
-          set -- prlimit --fsize=2147483648 timeout --signal=INT --kill-after=3m 110m "$@"
+          # #2020: GNU's `timeout` on any image, `gnutimeout` where it exists.
+          gnu_timeout=$(command -v gnutimeout || command -v timeout)
+          set -- prlimit --fsize=2147483648 "$gnu_timeout" --signal=INT --kill-after=3m 110m "$@"
           scoped() {
             unit=$1
             shift
