@@ -24,12 +24,54 @@ Every class is declared inside its test, after
 """
 
 import gc
+import sys
 import unittest
 
 from tests._support import reimport_once_per_class
 
-#: Test tier (#1958): hand-picked round-trip cases, not a sweep.
+#: Test tier (#1958): hand-picked round-trip cases, not a sweep, and a
+#: collectability check that branches on the interpreter.
 __tier__ = 'ALL'
+
+#: Throwaway classes :func:`release_inline_caches` sends through
+#: :func:`~pcapkit.corekit.infoclass._nested_info_types` before a class's
+#: collectability is judged (#1963). GraalPy's ``lookupConstantMRO``
+#: specialisation of ``LookupAttributeInMRONode.SlowPath`` caches the receiver
+#: class as ``@Cached("klass") Object cachedKlass``, a strong reference where its
+#: sibling ``lookupConstantMROCached`` passes ``weak = true``, for up to
+#: ``AttributeAccessInlineCacheMaxDepth`` classes (default 5, ``PythonOptions``),
+#: until ``lookupCachedLen`` replaces it (oracle/graalpython, ``graalpython/
+#: com.oracle.graal.python/src/com/oracle/graal/python/nodes/attributes/
+#: LookupAttributeInMRONode.java`` at tag ``graal-25.4.4``). ``cls.mro()`` on a
+#: plain class reaches it. Measured on GraalPy 25.4.4: such a class stays reachable
+#: through repeated :func:`gc.collect` calls until other classes pass the same call
+#: sites; the number left reachable tracks that option when it is set; and the
+#: smallest flush that frees the class every time equals the option's value. The
+#: constant is headroom over the default for a runner that raises the option.
+#: CPython keeps no such cache, so it gets none.
+INLINE_CACHE_FLUSH = 64 if sys.implementation.name == 'graalpy' else 0
+
+
+def release_inline_caches() -> None:
+    """Overflow the interpreter's inline caches along the nested-type walk.
+
+    Each throwaway class is shaped like the one under test, so it takes the same
+    path through :func:`~pcapkit.corekit.infoclass.info_final` and
+    :func:`~pcapkit.corekit.infoclass._nested_info_types`. A strong reference
+    :mod:`pcapkit` itself keeps does not let go of the class however many pass.
+
+    """
+    from pcapkit.corekit.infoclass import Info, _nested_info_types, info_final
+
+    for _ in range(INLINE_CACHE_FLUSH):
+        @info_final
+        class Throwaway(Info):
+            nxt: int
+
+        Throwaway.__annotations__['nxt'] = Throwaway
+        _nested_info_types(Throwaway)
+        del Throwaway
+
 
 #: PCAP-NG blocks, little-endian, one per block schema that claims a type code.
 #: Each nests its body in :attr:`PCAPNG.block
@@ -256,6 +298,9 @@ class NestedTypeResolverTests(unittest.TestCase):
         ref = weakref.ref(Node)
         del Node
         gc.collect()
+        if INLINE_CACHE_FLUSH and ref() is not None:
+            release_inline_caches()
+            gc.collect()
         self.assertIsNone(ref())
 
     def test_a_subclass_does_not_inherit_its_parents_map(self) -> None:
