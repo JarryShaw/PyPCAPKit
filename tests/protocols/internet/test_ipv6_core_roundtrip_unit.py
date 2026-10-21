@@ -67,7 +67,7 @@ class TestIPv6CoreRoundTrip(unittest.TestCase):
             with self.subTest(code=code):
                 frame = ipv6(code, bytes.fromhex('3b00010203040506'))
                 parsed = IPv6(frame)
-                self.assertEqual(parsed.info.__exthdr__, ())
+                self.assertEqual(len(parsed.info.extension_headers), 0)
                 self.assertEqual(len(parsed.protochain), 2)
                 self.assertEqual(IPv6.from_data(parsed.info).data, frame)
 

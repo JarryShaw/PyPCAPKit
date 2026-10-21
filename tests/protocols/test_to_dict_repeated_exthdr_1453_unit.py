@@ -6,12 +6,13 @@ keyed the extension headers by name, so a second header of the same type
 overwrote the first and the dict rebuild silently came back shorter --
 Destination Options, Destination Options, UDP rebuilt 56 of 64 octets.
 
-``to_dict`` returns an :class:`~pcapkit.corekit.multidict.OrderedMultiDict`
-(#1484): indexing sees the first value of each key, and ``getlist`` gives every
-header of a type in wire order. The order across types is that of the keys of
-the :class:`~pcapkit.corekit.infoclass.Info`, which is not part of its contract
-and differs on PyPy, so the rebuild walks the ``next`` fields instead (#2003).
-The dumpers write every header too.
+The extension headers are held in ``extension_headers``, an
+:class:`~pcapkit.corekit.infoclass.OrderedMultiInfo` that ``to_dict`` exports
+as an :class:`~pcapkit.corekit.multidict.OrderedMultiDict` (#1484): indexing
+sees the first header of each type, and ``items(multi=True)`` yields every
+header in wire order for the rebuild -- the order of the headers, not of the
+keys of the :class:`~pcapkit.corekit.infoclass.Info`, which differs on PyPy
+(#2003). The dumpers write every header too.
 
 Every case builds its own octets and reads no capture. Classes are imported
 inside each test, after :func:`~tests._support.reimport_once_per_class`.
@@ -135,7 +136,7 @@ class TestToDictRepeatedExtensionHeader(unittest.TestCase):
                 self.assertEqual([ext.data for ext in rebuilt.extension_headers.values()],
                                  [ext.data for ext in ip6.extension_headers.values()])
 
-    def test_to_dict_keeps_every_header_of_a_type_in_wire_order(self) -> None:
+    def test_to_dict_keeps_every_header_in_wire_order(self) -> None:
         from pcapkit.corekit.multidict import OrderedMultiDict
         from pcapkit.protocols.internet.ipv6 import IPv6
 
@@ -144,18 +145,20 @@ class TestToDictRepeatedExtensionHeader(unittest.TestCase):
                 ip6 = self.frame(name)[IPv6]
                 dict_ = ip6.info.to_dict()
                 self.assertIsInstance(dict_, OrderedMultiDict)
+                headers = dict_['extension_headers']
+                self.assertIsInstance(headers, OrderedMultiDict)
 
-                parsed = {}  # type: dict[str, list[object]]
-                for _, ext in ip6.extension_headers.items(multi=True):
-                    parsed.setdefault(IPv6._exthdr_key(ext.alias), []).append(canonical(ext.info.to_dict()))
-                held = {key: [canonical(val) for val in dict_.getlist(key)] for key in parsed}
-                self.assertEqual(held, parsed)
+                # NOTE: As for every OrderedMultiInfo, the export holds the
+                # headers' infos as they are.
+                parsed = [(IPv6._exthdr_key(ext.alias), ext.info)
+                          for _, ext in ip6.extension_headers.items(multi=True)]
+                self.assertEqual(list(headers.items(multi=True)), parsed)
 
                 # Indexing sees the first of each.
                 first = {}  # type: dict[str, object]
-                for key, val in dict_.items(multi=True):
+                for key, val in headers.items(multi=True):
                     first.setdefault(key, val)
-                self.assertEqual({key: dict_[key] for key in dict_}, first)
+                self.assertEqual({key: headers[key] for key in headers}, first)
 
     def test_info_from_dict_keeps_the_repeats(self) -> None:
         from pcapkit.protocols.data.internet.ipv6 import IPv6 as Data_IPv6
@@ -196,12 +199,12 @@ class TestToDictRepeatedExtensionHeader(unittest.TestCase):
 
         info = self.frame('dst-dst')[IPv6].info
         before = list(info.items(multi=True))
-        extra = info['opts']
+        extra = info['extension_headers']
         for clone in (copy.copy(info), copy.deepcopy(info)):
             with self.subTest(clone=type(clone).__name__):
                 self.assertIsNot(clone.__multi__, info.__multi__)
                 self.assertIsNot(clone.__map__, info.__map__)
-                clone.__update__(OrderedMultiDict([('opts', extra)]))
+                clone.__update__(OrderedMultiDict([('extension_headers', extra)]))
                 self.assertEqual(len(list(clone.items(multi=True))), len(before) + 1)
                 self.assertEqual(list(info.items(multi=True)), before)
 
@@ -218,9 +221,9 @@ class TestToDictRepeatedExtensionHeader(unittest.TestCase):
                 make_dumper(dictdumper.json.JSON)(path)(value, name='Frame 1')
                 with open(path, encoding='utf-8') as file:
                     outputs.append(json.load(file))
-        ipv6 = outputs[0]['Frame 1']['ethernet']['ipv6']
-        self.assertEqual(len(ipv6['opts']), 2)
-        self.assertIsInstance(ipv6['route'], dict)
+        # One single-key mapping per header, in wire order.
+        headers = outputs[0]['Frame 1']['ethernet']['ipv6']['extension_headers']
+        self.assertEqual([list(header) for header in headers], [['opts'], ['route'], ['opts']])
         # Handed the export, the dumper writes the top level the same way.
         self.assertEqual(list(outputs[1]['Frame 1']), list(outputs[0]['Frame 1']))
 

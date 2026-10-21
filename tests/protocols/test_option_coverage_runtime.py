@@ -186,7 +186,7 @@ class OptionCoverageCaptureTests(unittest.TestCase):
 
         self.assertEqual(str(frame.protochain), 'Ethernet:IPv6:HOPOPT:UDP:Raw')
         ipv6 = frame[IPv6].info
-        self.assertEqual(ipv6.hopopt.options[Option.Jumbo_Payload].jumbo_len, jumbo)
+        self.assertEqual(ipv6.extension_headers['hopopt'].options[Option.Jumbo_Payload].jumbo_len, jumbo)
         self.assertEqual(ipv6.hdr_len + ipv6.raw_len, 40 + jumbo)
 
     def test_option_captures_dump_to_tree_and_json(self) -> None:

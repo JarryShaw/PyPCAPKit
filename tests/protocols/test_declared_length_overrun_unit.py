@@ -153,7 +153,7 @@ class TestDeclaredLengthOverrun(unittest.TestCase):
 
                 if name == 'IPv6':
                     # an extension header is kept as raw extension data
-                    self.assertIn('has an option that runs past the end of the data', str(parsed.info.ext.error))
+                    self.assertIn('has an option that runs past the end of the data', str(parsed.info.extension_headers['ext'].error))
                 else:
                     # any other layer is kept as a raw payload, as captured
                     self.assertIsInstance(parsed.payload, Raw)

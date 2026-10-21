@@ -8,14 +8,14 @@ from pcapkit.protocols.data.protocol import Protocol
 
 if TYPE_CHECKING:
     from ipaddress import IPv6Address
-    from typing import Any, Type
+    from typing import Any
 
     from typing_extensions import Literal
 
     from pcapkit.const.reg.transtype import TransType
+    from pcapkit.corekit.infoclass import OrderedMultiInfo
     from pcapkit.protocols.data.data import Data
     from pcapkit.protocols.data.protocol import Packet
-    from pcapkit.protocols.protocol import ProtocolBase
 
 __all__ = [
     'IPv6',
@@ -32,8 +32,6 @@ class IPv6(Protocol):
         to create an instance of this data model.
 
     """
-
-    __excluded__ = ['__exthdr__']
 
     #: Version.
     version: 'Literal[6]'
@@ -64,10 +62,10 @@ class IPv6(Protocol):
         #: Octets captured past the Payload Length -- or, for a jumbogram,
         #: past the Jumbo Payload Length -- present only when there are any.
         trailer: 'bytes'
-        #: Extension header chain, in wire order, as pairs of the parser
-        #: class and its info. Kept apart from the per-header keys above,
-        #: which a repeated header overwrites.
-        __exthdr__: 'tuple[tuple[Type[ProtocolBase], Data], ...]'
+        #: Extension headers, in wire order, each under the key its parser
+        #: writes, such as ``hopopt`` or ``opts``; a repeated header keeps
+        #: every one of its infos (:issue:`1453`, :issue:`2003`).
+        extension_headers: 'OrderedMultiInfo[str, Data]'
 
     def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'IPv6':
         self = super().__new__(cls, *args, **kwargs)

@@ -11,7 +11,9 @@ rebuilt short, and so did a Hop-by-Hop, Destination, Destination chain once
 
 The order of an :class:`~pcapkit.corekit.infoclass.Info` is not part of its
 contract, so the payload is now found by the name of a protocol it dispatches
-to, and the chain by its ``next`` fields. These tests reorder an instance's
+to, and the chain is held in ``extension_headers``, an
+:class:`~pcapkit.corekit.infoclass.OrderedMultiInfo` keeping the order of its
+own. These tests reorder an instance's
 :attr:`~object.__dict__` as PyPy does, so CPython checks the same thing.
 
 Every case builds its own octets and reads no capture. Classes are imported
@@ -83,7 +85,7 @@ class LookupByNameTests(unittest.TestCase):
         self.addCleanup(quiet.__exit__, None, None, None)
         warnings.simplefilter('ignore')
 
-    def test_extension_headers_follow_next_not_key_order(self) -> None:
+    def test_extension_headers_keep_their_order_whatever_the_key_order(self) -> None:
         from pcapkit.protocols.internet.hopopt import HOPOPT
         from pcapkit.protocols.internet.ipv6 import IPv6
         from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
@@ -91,14 +93,15 @@ class LookupByNameTests(unittest.TestCase):
         ip6 = IPv6(HOP_DST_DST)
         self.assertEqual(len(ip6.data), len(HOP_DST_DST))
 
-        # As PyPy laid it out: ``hopopt`` after every other key.
-        exported = moved(ip6.info, 'hopopt').to_dict()
-        names, chain = IPv6._lookup_exthdr(exported)
-        self.assertEqual(names, ('hopopt', 'opts', 'opts'))
-        self.assertEqual([parser for parser, _ in chain], [HOPOPT, IPv6_Opts, IPv6_Opts])
-        self.assertEqual([parser.from_data(hdr).data for parser, hdr in chain],
-                         [ext.data for _, ext in ip6.extension_headers.items(multi=True)])
-        self.assertEqual(IPv6.from_data(exported).data, HOP_DST_DST)
+        # The headers first, then last, of the keys.
+        for before in ('version', None):
+            with self.subTest(before=before):
+                exported = moved(ip6.info, 'extension_headers', before=before).to_dict()
+                chain = IPv6._lookup_exthdr(exported)
+                self.assertEqual([parser for parser, _ in chain], [HOPOPT, IPv6_Opts, IPv6_Opts])
+                self.assertEqual(IPv6.from_data(exported).data, HOP_DST_DST)
+                self.assertEqual([parser.from_data(hdr).data for parser, hdr in chain],
+                                 [ext.data for _, ext in ip6.extension_headers.items(multi=True)])
 
     def test_payload_is_found_by_name_not_as_the_last_key(self) -> None:
         from pcapkit.protocols.internet.ipv6 import IPv6
@@ -112,9 +115,8 @@ class LookupByNameTests(unittest.TestCase):
         # after the payload, it is the last nested key.
         info = moved(ip6.info, 'udp', before='fragment')
         exported = info.to_dict()
-        names, _ = IPv6._lookup_exthdr(exported)
-        self.assertEqual(names, ('frag',))
-        self.assertEqual(IPv6._lookup_payload(exported, exclude=names), (UDP_, 'udp'))
+        self.assertEqual(list(exported['extension_headers']), ['frag'])
+        self.assertEqual(IPv6._lookup_payload(exported), (UDP_, 'udp'))
         self.assertEqual(IPv6.from_data(exported).data, ATOMIC)
 
     def test_cut_upper_layer_is_found_ahead_of_the_headers(self) -> None:
@@ -131,12 +133,11 @@ class LookupByNameTests(unittest.TestCase):
         self.assertIn('raw', ip6.info)
         self.assertEqual(len(ip6.data), len(HOP_DST_DST))
 
-        # As on PyPy for #1610: ``opts`` after the upper layer.
-        info = moved(moved(ip6.info, 'raw', before='opts'), 'hopopt', before='raw')
+        # As on PyPy for #1610: the headers after the upper layer.
+        info = moved(ip6.info, 'raw', before='extension_headers')
         exported = info.to_dict()
-        names, _ = IPv6._lookup_exthdr(exported)
-        self.assertEqual(sorted(names), ['hopopt', 'opts'])
-        self.assertEqual(IPv6._lookup_payload(exported, exclude=names), (Raw, 'raw'))
+        self.assertEqual(len(IPv6._lookup_exthdr(exported)), 2)
+        self.assertEqual(IPv6._lookup_payload(exported), (Raw, 'raw'))
         self.assertEqual(IPv6.from_data(exported).data, HOP_DST_DST)
 
 
