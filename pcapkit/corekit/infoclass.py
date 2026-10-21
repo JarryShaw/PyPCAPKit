@@ -380,8 +380,12 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
     __excluded__: 'list[str]' = []
     #: List of names of dunder keys that iterating an instance, ``len()`` and
     #: :meth:`to_dict` carry -- metadata such as ``__next_type__``, which a
-    #: rebuild from the :obj:`dict` reads. Every other dunder key is left
-    #: out; a key that is no dunder is carried regardless.
+    #: rebuild from the :obj:`dict` reads. Every other dunder key is dropped
+    #: from all three, though indexing still reads it; a key that is no
+    #: dunder is carried regardless. A subclass extends the list with its own
+    #: names, as for :attr:`__excluded__`, so a custom :class:`Info` holding
+    #: dunder keys of its own must list them here for :meth:`to_dict` to keep
+    #: them (:issue:`2003`).
     __included__: 'list[str]' = []
 
     def __init_subclass__(cls, /, *args: 'Any', **kwargs: 'Any') -> 'None':

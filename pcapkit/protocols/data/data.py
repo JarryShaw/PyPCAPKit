@@ -32,7 +32,9 @@ class Data(Info):
 
     """
 
+    #: Metadata keys that :meth:`to_dict` carries, for a rebuild to read.
     __included__ = ['__next_name__', '__next_type__', '__short_read__']
+    #: Metadata keys that ``repr``, ``str`` and the dumps leave out.
     __excluded__ = ['__next_name__', '__next_type__', '__short_read__']
 
     if TYPE_CHECKING:
