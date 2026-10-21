@@ -850,6 +850,26 @@ jobs:
             apt_install build-essential libpcap-dev
           fi
 
+      # #2019: from Ubuntu 25.04, apparmor 4.1 ships an enforcing profile for
+      # /usr/bin/tshark (/etc/apparmor.d/tshark) whose own file rules read only
+      # /tmp and /usr/share/wireshark, so on an ubuntu-26.04 image `tshark -r`
+      # is denied every capture under $GITHUB_WORKSPACE -- "You don't have
+      # permission to read the file", a TSharkCrashException with retcode 3.
+      # The profile's `include if exists <local/tshark>` is its site hook, so
+      # one read rule for the checkout goes there, in the profile's own
+      # `file r <glob>,` form, and `apparmor_parser -r` recompiles the profile
+      # with that include and replaces the loaded one. 24.04 has no such
+      # profile, so there this is a no-op. `pypcap-parity` runs the same body.
+      - name: Let tshark read the checkout past its AppArmor profile
+        if: env.ENGINE == 'PyShark'
+        run: |
+          set -eu
+          if [ -f /etc/apparmor.d/tshark ]; then
+            sudo mkdir -p /etc/apparmor.d/local
+            echo "file r ${GITHUB_WORKSPACE}/**," | sudo tee -a /etc/apparmor.d/local/tshark >/dev/null
+            sudo apparmor_parser -r /etc/apparmor.d/tshark
+          fi
+
       - name: Collect this engine's installed .deb files for the cache
         if: >-
           env.APT_CACHE_SAVE == 'true' && steps.apt-plan.outputs.key != ''
@@ -1221,6 +1241,19 @@ jobs:
             fi
           done
           exit 1
+
+      # #2019: tshark's AppArmor profile on Ubuntu 25.04 and later; see
+      # `engine-tests`'s step of the same name, whose body this is.
+      - name: Let tshark read the checkout past its AppArmor profile
+        id: apparmor
+        continue-on-error: ${{ matrix.ktlo == true }}
+        run: |
+          set -eu
+          if [ -f /etc/apparmor.d/tshark ]; then
+            sudo mkdir -p /etc/apparmor.d/local
+            echo "file r ${GITHUB_WORKSPACE}/**," | sudo tee -a /etc/apparmor.d/local/tshark >/dev/null
+            sudo apparmor_parser -r /etc/apparmor.d/tshark
+          fi
 
       - name: Collect the installed .deb files for the cache
         if: >-
