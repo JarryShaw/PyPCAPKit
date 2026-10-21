@@ -520,19 +520,47 @@ class FinaliserBackstopWithoutDel(unittest.TestCase):
 
         The stand-in finaliser runs on the third collection. With no grace the
         helper reports it as never run, the shape of the GraalPy leg's failure; with a
-        grace it waits it out.
+        grace it waits it out, and one that never runs still fails once the grace is
+        spent.
+
+        The collector and the clock are both fakes, with each collection costing a
+        fake second, so the outcome does not depend on how fast the engine's own
+        :func:`gc.collect` is (:issue:`2016`).
 
         """
-        collections = []
+        clock = [0.0]
+        collections: 'list[None]' = []
+
+        def collect() -> int:
+            clock[0] += 1.0
+            collections.append(None)
+            return 0
+
+        def sleep(seconds: float) -> None:
+            clock[0] += seconds
 
         def late() -> bool:
-            collections.append(None)
             return len(collections) >= 3
 
-        self.assertFalse(collect_until(late, grace=0.0))
-        collections.clear()
-        self.assertTrue(collect_until(late, grace=5.0))
-        self.assertEqual(len(collections), 3)
+        with mock.patch.object(gc, 'collect', collect), \
+                mock.patch.object(time, 'monotonic', lambda: clock[0]), \
+                mock.patch.object(time, 'sleep', sleep):
+            # CPython's case: no grace, and the finaliser ran inside the collection.
+            self.assertTrue(collect_until(lambda: True, grace=0.0))
+
+            collections.clear()
+            self.assertFalse(collect_until(late, grace=0.0))
+            self.assertEqual(len(collections), 1)
+
+            collections.clear()
+            self.assertTrue(collect_until(late, grace=5.0))
+            self.assertEqual(len(collections), 3)
+
+            collections.clear()
+            self.assertFalse(collect_until(lambda: False, grace=5.0))
+            # Collections end at fake 1, 2.05, 3.1, 4.15 and 5.2 s; the fifth is
+            # the first to finish past the deadline.
+            self.assertEqual(len(collections), 5)
 
     def test_finished_extraction_detaches_its_finaliser(self) -> None:
         """``_cleanup`` and the context manager unregister it, so nothing closes twice."""
