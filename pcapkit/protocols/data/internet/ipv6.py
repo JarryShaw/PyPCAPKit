@@ -12,9 +12,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Literal
 
-    from pcapkit.const.ipv6.extension_header import ExtensionHeader
     from pcapkit.const.reg.transtype import TransType
-    from pcapkit.corekit.infoclass import OrderedMultiInfo
     from pcapkit.protocols.data.data import Data
     from pcapkit.protocols.data.protocol import Packet
     from pcapkit.protocols.protocol import ProtocolBase
@@ -69,12 +67,13 @@ class IPv6(Protocol):
         #: Octets captured past the Payload Length -- or, for a jumbogram,
         #: past the Jumbo Payload Length -- present only when there are any.
         trailer: 'bytes'
-        #: Extension header chain, in wire order, keyed by extension header
-        #: code, each value the pair of the parser class and its info. The
-        #: per-header keys hold the same infos, but in the order of the keys
-        #: of this :class:`~pcapkit.corekit.infoclass.Info`, which differs on
-        #: PyPy, so the chain is rebuilt from this alone (:issue:`2003`).
-        __exthdr__: 'OrderedMultiInfo[ExtensionHeader, tuple[Type[ProtocolBase], Data]]'
+        #: Extension header chain, in wire order, as pairs of the parser
+        #: class and its info. The per-header keys hold the same infos, but in
+        #: the order of the keys of this :class:`~pcapkit.corekit.infoclass.Info`,
+        #: which differs on PyPy, so the chain is rebuilt from this alone; the
+        #: parser class keeps the IPv6_Ext a header fell back to
+        #: (:issue:`1473`, :issue:`2003`).
+        __exthdr__: 'tuple[tuple[Type[ProtocolBase], Data], ...]'
 
     def __new__(cls, *args: 'Any', **kwargs: 'Any') -> 'IPv6':
         self = super().__new__(cls, *args, **kwargs)

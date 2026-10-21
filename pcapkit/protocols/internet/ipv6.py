@@ -26,14 +26,13 @@ Octets      Bits        Name                    Description
 .. [*] https://en.wikipedia.org/wiki/IPv6_packet
 
 """
-import collections.abc
 import ipaddress
 from typing import TYPE_CHECKING
 
 from pcapkit.const.ipv6.extension_header import ExtensionHeader as Enum_ExtensionHeader
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
 from pcapkit.corekit.decorators import beholder
-from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
+from pcapkit.corekit.multidict import OrderedMultiDict
 from pcapkit.corekit.protochain import ProtoChain
 from pcapkit.protocols.data.internet.ipv6 import IPv6 as Data_IPv6
 from pcapkit.protocols.internet.ip import IP
@@ -416,12 +415,8 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         # guessed from the keys of ``data``, whose order is not part of the
         # contract of an :class:`~pcapkit.corekit.infoclass.Info` and differs
         # on PyPy (#2003).
-        exthdr = data.get('__exthdr__')  # type: Optional[Mapping[Enum_ExtensionHeader, tuple[Type[ProtocolBase], Any]]] # pylint: disable=line-too-long
-        chain = []  # type: list[tuple[Type[ProtocolBase], Any]]
-        if isinstance(exthdr, MultiDict):
-            chain.extend(value for _, value in exthdr.items(multi=True))
-        elif isinstance(exthdr, collections.abc.Mapping):
-            chain.extend(exthdr.values())
+        exthdr = data.get('__exthdr__')  # type: Optional[tuple[tuple[Type[ProtocolBase], Any], ...]] # pylint: disable=line-too-long
+        chain = tuple(exthdr) if isinstance(exthdr, (tuple, list)) else ()
         upper = cls._make_payload(data)
         payload = upper  # type: bytes | ProtocolBase
 
@@ -528,8 +523,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
         hdr_len = self.length       # header length
         raw_len = ipv6.payload if length is None else length  # payload length
         _protos = []                # type: list[ProtocolBase] # ProtoChain buffer
-        # (parser class, info) per extension header
-        _exthdr = OrderedMultiDict()  # type: OrderedMultiDict[Enum_ExtensionHeader, tuple[Type[ProtocolBase], Any]]
+        _exthdr = []                # type: list[tuple[Type[ProtocolBase], Any]] # (parser class, info) per extension header
         split = None                # type: Optional[tuple[int, int]] # at first Fragment header
         opaque = False              # walk ended at a non-zero Fragment Offset
         depth = _frame_depth.get()  # layers of the frame up to this one
@@ -607,7 +601,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             # record protocol name
             # self._protos = ProtoChain(name, chain, alias)
             _protos.append(next_)
-            _exthdr.add(ex_proto, (type(next_), info))
+            _exthdr.append((type(next_), info))
 
             # update header & payload length
             hdr_len += next_.length  # type: ignore[assignment]
@@ -663,7 +657,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             # extension header chain in wire order, with the parser of each,
             # for ``from_data``; the parser keeps the IPv6_Ext a header fell
             # back to (#1473)
-            '__exthdr__': _exthdr,
+            '__exthdr__': tuple(_exthdr),
         })
 
         # NOTE: Nor does a later fragment's slice start with the upper-layer

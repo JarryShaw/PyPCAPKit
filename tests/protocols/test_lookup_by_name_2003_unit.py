@@ -12,9 +12,8 @@ rebuilt short, and so did a Hop-by-Hop, Destination, Destination chain once
 The order of an :class:`~pcapkit.corekit.infoclass.Info` is not part of its
 contract, so nothing is read off it any more: ``to_dict()`` carries the
 ``__next_type__`` and ``__next_name__`` metadata the payload is dispatched on,
-and ``__exthdr__``, the extension header chain keyed by code in an
-:class:`~pcapkit.corekit.infoclass.OrderedMultiInfo` keeping the order of its
-own. A dict without the metadata is not guessed at. These tests reorder an
+and ``__exthdr__``, the extension header chain as a tuple of parser and info
+pairs in wire order. A dict without the metadata is not guessed at. These tests reorder an
 instance's :attr:`~object.__dict__` as PyPy does, so CPython checks the same
 thing.
 
@@ -88,7 +87,6 @@ class LookupByNameTests(unittest.TestCase):
         warnings.simplefilter('ignore')
 
     def test_extension_headers_follow_exthdr_whatever_the_key_order(self) -> None:
-        from pcapkit.const.ipv6.extension_header import ExtensionHeader
         from pcapkit.protocols.internet.hopopt import HOPOPT
         from pcapkit.protocols.internet.ipv6 import IPv6
         from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
@@ -101,10 +99,11 @@ class LookupByNameTests(unittest.TestCase):
         for key, before in (('hopopt', None), ('__exthdr__', 'version')):
             with self.subTest(moved=key):
                 exported = moved(ip6.info, key, before=before).to_dict()
-                chain = list(exported['__exthdr__'].items(multi=True))
-                self.assertEqual([code for code, _ in chain],
-                                 [ExtensionHeader.HOPOPT, ExtensionHeader.IPv6_Opts, ExtensionHeader.IPv6_Opts])
-                self.assertEqual([parser for _, (parser, _) in chain], [HOPOPT, IPv6_Opts, IPv6_Opts])
+                chain = exported['__exthdr__']
+                self.assertIsInstance(chain, tuple)
+                self.assertEqual([parser for parser, _ in chain], [HOPOPT, IPv6_Opts, IPv6_Opts])
+                self.assertEqual([info for _, info in chain],
+                                 [ext.info for _, ext in ip6.extension_headers.items(multi=True)])
                 self.assertEqual(IPv6.from_data(exported).data, HOP_DST_DST)
 
     def test_payload_follows_the_metadata_whatever_the_key_order(self) -> None:
@@ -142,7 +141,7 @@ class LookupByNameTests(unittest.TestCase):
         # As on PyPy for #1610: ``opts`` after the upper layer.
         info = moved(moved(ip6.info, 'raw', before='opts'), 'hopopt', before='raw')
         exported = info.to_dict()
-        self.assertEqual(len(list(exported['__exthdr__'].items(multi=True))), 2)
+        self.assertEqual(len(exported['__exthdr__']), 2)
         rebuilt = IPv6.from_data(exported)
         self.assertIsInstance(rebuilt.payload, Raw)
         self.assertEqual(rebuilt.data, HOP_DST_DST)
