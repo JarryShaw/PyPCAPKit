@@ -43,6 +43,7 @@ import unittest
 from typing import TYPE_CHECKING
 
 from tests import _tiers
+from tests.project.test_graalpy_shards_1963 import rest_ignores
 from tests.project.test_python_matrix_tiers_1633 import REQUIRED, is_experimental, job, legs, workflow
 from tests.project.test_python_versions_1660 import ROOT, live_outputs, prose
 from tests.project.test_release_gates import NULL, evaluate_expression
@@ -171,6 +172,17 @@ class TestTheStubRunsNoRealInterpreterForTheCap(unittest.TestCase):
             self.assertEqual(record.read_text(encoding='utf-8').splitlines(), command)
 
 
+def unsharded(leg: 'dict[str, Any]', where: 'tuple[str, str]', argv: 'list[str]') -> 'list[str]':
+    """``argv`` less what util/pytest_shards.py's last run adds on a sharded leg (#1963), which it must end with."""
+    shards = step_env(leg, where).get('SHARDS', '')
+    if not shards:
+        return argv
+    rest = rest_ignores(shards)
+    if not rest or argv[-len(rest):] != rest:
+        raise AssertionError(f'the last run on {leg} does not end with the ignores of {shards!r}: {argv[-60:]}')
+    return argv[:-len(rest)]
+
+
 def ignored(argv: 'list[str]') -> 'list[str]':
     """The modules the arguments ``--ignore``, less the unit tier's own flags."""
     return [arg.split('=', 1)[1] for arg in pytest_args(argv) if arg.startswith('--ignore=') and arg not in TIER_FLAGS]
@@ -183,7 +195,7 @@ class TestTheStepSelectsByLeg(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.latest = live_outputs()['latest']
-        cls.runs = {leg['python-version']: (leg, run_step(leg, where))
+        cls.runs = {leg['python-version']: (leg, unsharded(leg, where, run_step(leg, where)))
                     for where in (JOB, EXPERIMENTAL) for leg in legs(*where)}
         assert len(cls.runs) == len(legs(*JOB)) + len(legs(*EXPERIMENTAL)), 'a version runs in both jobs'
 

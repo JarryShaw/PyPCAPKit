@@ -198,7 +198,8 @@ class TestTheGate(unittest.TestCase):
         self.assertEqual(tests['env']['WATCHER'], '${{ steps.watcher.outcome }}')
         self.assertEqual(tests['env']['WATCHER_PYTHON'], '${{ steps.watcher-python.outputs.python-path }}')
         self.assertIn('set -- "$WATCHER_PYTHON" util/superseded.py watch ', tests['run'])
-        self.assertNotIn('/usr/bin/python3', tests['run'])
+        # #1963: the image's interpreter runs GraalPy's shards in the tests step, never the watcher.
+        self.assertNotIn('/usr/bin/python3 util/superseded.py', tests['run'])
         # Nothing the leg's interpreter runs installs requests.
         for entry in legs['steps']:
             if entry.get('id') != 'watcher':
@@ -757,7 +758,7 @@ class TestTheTestsStep(unittest.TestCase):
     def test_the_watcher_runs_the_scope_and_names_it(self) -> None:
         """Every cap stays on pytest, and the watcher runs outside the scope, which it names to ``--scope``."""
         script = step(TESTS)['run']
-        capped = 'set -- prlimit --fsize=2147483648 timeout --signal=INT --kill-after=3m 110m python -m pytest "$@"\n'
+        capped = 'set -- prlimit --fsize=2147483648 timeout --signal=INT --kill-after=3m 110m "$@"\n'
         scoped = 'set -- scoped pcapkit-tests.scope "$@"\n'
         named = 'watched=pcapkit-tests.scope\n'
         watched = ('set -- "$WATCHER_PYTHON" util/superseded.py watch --interval 60 --grace 30 --scope "$watched" '
