@@ -1188,6 +1188,31 @@ and when :file:`.github/dependabot.yml` drops the ``github-actions`` ecosystem.
 ``pinned()`` and ``versions()`` in :file:`tests/_workflows.py` read a pin, for a test
 that names a particular action.
 
+Workflow Lint (`#1967 <https://github.com/JarryShaw/PyPCAPKit/issues/1967>`__)
+------------------------------------------------------------------------------
+
+Lint's ``lint`` job runs actionlint over every workflow in its ``actionlint`` step,
+first, as it needs no Python. The step downloads the release that
+``ACTIONLINT_VERSION`` names and checks it against ``ACTIONLINT_SHA256``, from that
+release's checksums file, before unpacking it. Dependabot does not read this pin,
+so a bump changes both. The workflows use YAML anchors, which actionlint reads from
+1.7.10 on, and the pin is 1.7.12 or newer.
+
+actionlint runs the image's shellcheck over each ``run:`` block, and shellcheck
+still reports style and info findings, so the step is advisory like the others in
+Lint. Its run summary counts the findings by actionlint rule and by shellcheck code.
+
+The step's ``-ignore`` pattern, which matches a message, not a file, hides a false
+positive: ``concurrency.queue``, which ``project-status.yml`` sets and GitHub
+documents, is a key no actionlint release knows yet (`rhysd/actionlint#657
+<https://github.com/rhysd/actionlint/issues/657>`__). The pattern goes once a
+release that knows it is pinned.
+
+:file:`tests/project/test_actionlint_in_lint_1967.py` fails when the step is gone,
+pins an older release or no checksum, unpacks before it verifies, or passes an
+``-ignore`` pattern other than that, and when no workflow sets
+``concurrency.queue`` any more.
+
 Dependency Updates (`#1968 <https://github.com/JarryShaw/PyPCAPKit/issues/1968>`__)
 -----------------------------------------------------------------------------------
 

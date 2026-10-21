@@ -1677,6 +1677,26 @@ and when <code class="file docutils literal notranslate"><span class="pre">.gith
 <code class="docutils literal notranslate"><span class="pre">pinned()</span></code> and <code class="docutils literal notranslate"><span class="pre">versions()</span></code> in <code class="file docutils literal notranslate"><span class="pre">tests/_workflows.py</span></code> read a pin, for a test
 that names a particular action.</p>
 </section>
+<section id="workflow-lint-1967">
+<h2>Workflow Lint (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1967">#1967</a>)<a class="headerlink" href="#workflow-lint-1967" title="Link to this heading">¶</a></h2>
+<p>Lint’s <code class="docutils literal notranslate"><span class="pre">lint</span></code> job runs actionlint over every workflow in its <code class="docutils literal notranslate"><span class="pre">actionlint</span></code> step,
+first, as it needs no Python. The step downloads the release that
+<code class="docutils literal notranslate"><span class="pre">ACTIONLINT_VERSION</span></code> names and checks it against <code class="docutils literal notranslate"><span class="pre">ACTIONLINT_SHA256</span></code>, from that
+release’s checksums file, before unpacking it. Dependabot does not read this pin,
+so a bump changes both. The workflows use YAML anchors, which actionlint reads from
+1.7.10 on, and the pin is 1.7.12 or newer.</p>
+<p>actionlint runs the image’s shellcheck over each <code class="docutils literal notranslate"><span class="pre">run:</span></code> block, and shellcheck
+still reports style and info findings, so the step is advisory like the others in
+Lint. Its run summary counts the findings by actionlint rule and by shellcheck code.</p>
+<p>The step’s <code class="docutils literal notranslate"><span class="pre">-ignore</span></code> pattern, which matches a message, not a file, hides a false
+positive: <code class="docutils literal notranslate"><span class="pre">concurrency.queue</span></code>, which <code class="docutils literal notranslate"><span class="pre">project-status.yml</span></code> sets and GitHub
+documents, is a key no actionlint release knows yet (<a class="reference external" href="https://github.com/rhysd/actionlint/issues/657">rhysd/actionlint#657</a>). The pattern goes once a
+release that knows it is pinned.</p>
+<p><code class="file docutils literal notranslate"><span class="pre">tests/project/test_actionlint_in_lint_1967.py</span></code> fails when the step is gone,
+pins an older release or no checksum, unpacks before it verifies, or passes an
+<code class="docutils literal notranslate"><span class="pre">-ignore</span></code> pattern other than that, and when no workflow sets
+<code class="docutils literal notranslate"><span class="pre">concurrency.queue</span></code> any more.</p>
+</section>
 <section id="dependency-updates-1968">
 <h2>Dependency Updates (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1968">#1968</a>)<a class="headerlink" href="#dependency-updates-1968" title="Link to this heading">¶</a></h2>
 <p>Dependabot opens every dependency bump, weekly, from <code class="file docutils literal notranslate"><span class="pre">.github/dependabot.yml</span></code>
@@ -1872,6 +1892,7 @@ repeating it here.</p>
 <li><a class="reference internal" href="#file-size-caps-1969">File Size Caps (#1969)</a></li>
 <li><a class="reference internal" href="#workflow-scripts-1967">Workflow Scripts (#1967)</a></li>
 <li><a class="reference internal" href="#action-pins-1968">Action Pins (#1968)</a></li>
+<li><a class="reference internal" href="#workflow-lint-1967">Workflow Lint (#1967)</a></li>
 <li><a class="reference internal" href="#dependency-updates-1968">Dependency Updates (#1968)</a></li>
 <li><a class="reference internal" href="#python-versions">Python Versions</a></li>
 <li><a class="reference internal" href="#deployment-environment">Deployment <code class="docutils literal notranslate"><span class="pre">environment:</span></code></a></li>
