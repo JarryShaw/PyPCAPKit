@@ -7,7 +7,8 @@
 * :class:`TestTheFormerShellAgrees` runs the shell the steps held before the
   script against the same stand-in and requires the same output, log and status;
   for the steps that had no annotation, the same except for the annotation a
-  failed install now writes.
+  failed install now writes; and for an indented ``ERROR:`` line, the same
+  except for the reason the shell missed (#2041).
 * :class:`TestTheStepsRunTheScript` pins each covered step to the script, with
   its guards and environment, and every other ``pip install`` in
   ``unit-tests.yml`` to a listed step that keeps its shell.
@@ -144,6 +145,16 @@ FORMER_BARE = textwrap.dedent('''\
 CLEAN = ['out:Obtaining file:///checkout', 'err:a deprecation warning', 'out:Successfully installed pypcapkit-1.5.0']
 FAILED = ['out:Collecting pytest>=8', 'err:ERROR: Ignored the following versions: 8.0.0 Requires-Python >=3.8',
           'out:INFO: pip is looking at multiple versions', 'err:ERROR: No matching distribution found for pytest>=8']
+#: The tail of a failed wheel build, as pip printed it on ``Python pypy3.10 (KTLO)``:
+#: its one ``ERROR:`` line is indented, so the former shell found none (#2041).
+WHEEL_FAILED = ['out:  note: This error originates from a subprocess, and is likely not a problem with pip.',
+                'out:  ERROR: Failed building wheel for cryptography', 'out:Successfully built pypcapkit',
+                'out:Failed to build cryptography', 'out:',
+                'err:[notice] A new release of pip is available: 26.2.1 -> 26.2.2',
+                'err:[notice] To update, run: pip install --upgrade pip',
+                'err:error: failed-wheel-build-for-install', 'err:',
+                'err:× Failed to build installable wheels for some pyproject.toml based projects',
+                'err:╰─> cryptography']
 #: Every ``(install output, install status)`` an install step can meet.
 OUTCOMES = (
     (CLEAN, 0),
@@ -228,6 +239,20 @@ class TestPipInstall(_Scratch):
                 self.assertTrue(result.stdout.endswith(f'::warning title={TITLE}::{reason}{SKIPPED}\n'),
                                 result.stdout)
 
+    def test_an_indented_error_line_is_the_reason(self) -> None:
+        """Pip indents a failed wheel build's ``ERROR:`` line; the reason drops the indent and the prefix (#2041)."""
+        result = self.script('-e', SPEC, env=self.env(install_output=WHEEL_FAILED, install_status=1))
+        self.assertEqual(result.returncode, 1, result.stderr)
+        self.assertEqual(result.stdout, text(WHEEL_FAILED) + f'::warning title={TITLE}::Failed building wheel '
+                         f'for cryptography{SKIPPED}\n')
+        for output, reason in ((['out:\tERROR: a tab', 'out:  INFO: later'], 'a tab'),
+                               (['err:ERROR: first', 'out:    ERROR: last'], 'last'),
+                               (['out:ERROR: first', 'out:  ERROR: '], NO_REASON)):
+            with self.subTest(output=output):
+                result = self.script('-e', SPEC, env=self.env(install_output=output, install_status=1))
+                self.assertTrue(result.stdout.endswith(f'::warning title={TITLE}::{reason}{SKIPPED}\n'),
+                                result.stdout)
+
     def test_a_signal_is_a_failed_install(self) -> None:
         result = self.script('-e', SPEC, env=self.env(install_output=FAILED, install_status=-signal.SIGTERM))
         self.assertEqual(result.returncode, 1, result.stderr)
@@ -306,6 +331,18 @@ class TestTheFormerShellAgrees(_Scratch):
                     (old, _), (new, _) = self.both(FORMER_ANNOTATED, level, install_output=output,
                                                    install_status=status)
                     self.assertEqual(new, old)
+
+    def test_an_indented_error_line_departs_on_purpose(self) -> None:
+        """The former shell's ``^ERROR: `` missed an indented line and fell back; the script names it
+        (#2041). Everything else still matches, and so does an outcome where both find the same line."""
+        for level in ('error', 'warning'):
+            with self.subTest(level=level):
+                (old, _), (new, _) = self.both(FORMER_ANNOTATED, level, install_output=WHEEL_FAILED,
+                                               install_status=1)
+                self.assertEqual((new[0], new[2], new[3]), (old[0], old[2], old[3]))
+                head = text(WHEEL_FAILED) + f'::{level} title={TITLE}::'
+                self.assertEqual(old[1], f'{head}{NO_REASON}{SKIPPED}\n')
+                self.assertEqual(new[1], f'{head}Failed building wheel for cryptography{SKIPPED}\n')
 
     def test_a_failed_upgrade_matches_on_both_forms(self) -> None:
         for shell in (FORMER_ANNOTATED, FORMER_BARE):

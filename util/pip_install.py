@@ -20,10 +20,11 @@ with ``ANNOTATION_LEVEL``, ``error`` or ``warning``, ``LEG``, the leg's name, an
    output, which it copies, as it arrives, both to its own standard output and to
    :file:`$RUNNER_TEMP/pip-install.log`. On a failure it writes one
    ``ANNOTATION_LEVEL`` annotation, ``pcapkit did not install on LEG``, whose
-   message is pip's last ``ERROR:`` line without that prefix, or a fallback when
-   there is none, and exits 1. The title escapes ``,`` as ``%2C``, since the runner
-   splits an annotation's properties on ``,`` (#1633), and the message ``%`` as
-   ``%25``.
+   message is pip's last ``ERROR:`` line without that prefix or its indent, since
+   pip indents the one naming a wheel it failed to build (#2041), or a fallback
+   when there is none, and exits 1. The title escapes ``,`` as ``%2C``, since the
+   runner splits an annotation's properties on ``,`` (#1633), and the message
+   ``%`` as ``%25``.
 
 On a KTLO leg the level is ``warning`` and the step carries ``continue-on-error``,
 so every later step, which waits on the install's ``outcome``, is skipped. An
@@ -75,8 +76,16 @@ def status_of(code: 'int') -> 'int':
 
 
 def reason(output: 'bytes') -> 'bytes':
-    """Pip's last ``ERROR:`` line in ``output``, less the prefix, or :data:`NO_REASON`."""
-    found = [line[len(PREFIX):] for line in output.split(b'\n') if line.startswith(PREFIX)]
+    """Pip's last ``ERROR:`` line in ``output``, less its indent and the prefix, or :data:`NO_REASON`.
+
+    A failed wheel build's line is indented, ``  ERROR: Failed building wheel for
+    cryptography``, and names the package and the step; pip's closing
+    ``Failed to build cryptography`` and ``error: failed-wheel-build-for-install``
+    say less, and carry no ``ERROR:`` prefix (#2041).
+
+    """
+    lines = (line.lstrip() for line in output.split(b'\n'))
+    found = [line[len(PREFIX):] for line in lines if line.startswith(PREFIX)]
     return found[-1] if found and found[-1] else NO_REASON
 
 
