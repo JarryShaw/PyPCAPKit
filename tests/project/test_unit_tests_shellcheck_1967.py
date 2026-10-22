@@ -2,8 +2,8 @@
 """#1967: every ``run:`` block of unit-tests.yml passes shellcheck.
 
 Lint's ``actionlint`` step runs shellcheck over every workflow's ``run:`` blocks,
-but is advisory. Step 5 of #1967 fixed unit-tests.yml's findings at the root, so
-this test keeps it clean: it checks each
+and a finding fails Lint. Step 5 of #1967 fixed unit-tests.yml's findings at the
+root, and this test keeps it clean without waiting for a Lint run: it checks each
 ``run:`` block of a ``bash`` or ``sh`` step as actionlint does: each
 ``${{ ... }}`` expression replaced by underscores of the same length, the
 shell's ``set -e`` line above it, and the checks actionlint disables left out.

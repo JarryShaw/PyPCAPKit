@@ -1346,16 +1346,21 @@ that names a particular action.
 Workflow Lint (`#1967 <https://github.com/JarryShaw/PyPCAPKit/issues/1967>`__)
 ------------------------------------------------------------------------------
 
-Lint's ``lint`` job runs actionlint over every workflow in its ``actionlint`` step,
-first, as it needs no Python. The step downloads the release that
-``ACTIONLINT_VERSION`` names and checks it against ``ACTIONLINT_SHA256``, from that
-release's checksums file, before unpacking it. Dependabot does not read this pin,
-so a bump changes both. The workflows use YAML anchors, which actionlint reads from
+Lint's ``lint`` job runs actionlint over every workflow in its ``actionlint`` step.
+The step downloads the release that ``ACTIONLINT_VERSION`` names and checks it
+against ``ACTIONLINT_SHA256``, from that release's checksums file, before unpacking
+it. Dependabot does not read this pin, so a bump changes both. The workflows use YAML anchors, which actionlint reads from
 1.7.10 on, and the pin is 1.7.12 or newer.
 
-actionlint runs the image's shellcheck over each ``run:`` block, and shellcheck
-still reports style and info findings, so the step is advisory like the others in
-Lint. Its run summary counts the findings by actionlint rule and by shellcheck code.
+actionlint runs the image's shellcheck over each ``run:`` block. Unlike Lint's
+other steps, this one blocks: a finding fails the job, as the owner ruled on #1967
+once #2023, #2037 and #2038 had fixed every finding it reported. It runs last and
+on ``!cancelled()``, so a finding skips none of the advisory steps and a failed
+Python setup does not skip it. Lint is not a required check of ruleset 23497679, so
+a red Lint does not hold a merge. The image's shellcheck is not pinned, so a runner
+image that adds a check can turn Lint red on unchanged code; the fix is to the
+script it flags. The step's run summary counts the findings by actionlint rule and
+by shellcheck code.
 
 The step's ``-ignore`` pattern, which matches a message, not a file, hides a false
 positive: ``concurrency.queue``, which ``project-status.yml`` sets and GitHub
@@ -1364,9 +1369,11 @@ documents, is a key no actionlint release knows yet (`rhysd/actionlint#657
 release that knows it is pinned.
 
 :file:`tests/project/test_actionlint_in_lint_1967.py` fails when the step is gone,
-pins an older release or no checksum, unpacks before it verifies, or passes an
-``-ignore`` pattern other than that, and when no workflow sets
-``concurrency.queue`` any more.
+pins an older release or no checksum, unpacks before it verifies, passes an
+``-ignore`` pattern other than that, or stops blocking: when it carries
+``continue-on-error``, exits with a status other than actionlint's, or sits above
+an advisory step or a failed setup would skip it. It fails too when no workflow
+sets ``concurrency.queue`` any more.
 
 Dependency Updates (`#1968 <https://github.com/JarryShaw/PyPCAPKit/issues/1968>`__)
 -----------------------------------------------------------------------------------

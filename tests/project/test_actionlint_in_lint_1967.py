@@ -9,6 +9,11 @@ workflows use YAML anchors, which 1.7.7 cannot read.
 
 * :class:`TestTheStep` pins the step: one of it, the version, the checksum, and
   the order download, verify, unpack, run.
+* :class:`TestItBlocks` pins that a finding fails Lint, as the owner ruled on
+  #1967 once #2023, #2037 and #2038 had fixed every finding: no
+  ``continue-on-error``, actionlint's own exit status, and a place below every
+  advisory step, run on ``!cancelled()``, so a finding skips none of them and a
+  failed setup does not skip it.
 * :class:`TestTheIgnores` pins each ``-ignore`` pattern to the false positive it
   exists for, so a blanket pattern fails here, and checks that a workflow still
   uses the key, so the pattern goes when the key does.
@@ -50,6 +55,8 @@ IGNORES = {
         ),
     ),
 }
+#: The ``if:`` values under which a step still runs after an earlier step failed.
+RUNS_AFTER_A_FAILURE = frozenset({'${{ !cancelled() }}', '${{ always() }}', '!cancelled()', 'always()'})
 #: An ``-ignore`` argument in the step's script, quoted either way.
 IGNORE = re.compile(r'''-ignore\s+(?P<quote>['"])(?P<pattern>.*?)(?P=quote)''')
 
@@ -99,6 +106,33 @@ class TestTheStep(unittest.TestCase):
         minutes = step().get('timeout-minutes')
         self.assertIsInstance(minutes, int)
         self.assertLess(minutes, _workflows.job(WORKFLOW, JOB)['timeout-minutes'])
+
+
+class TestItBlocks(unittest.TestCase):
+    """An actionlint finding fails Lint, and skips none of Lint's advisory steps."""
+
+    def test_it_is_not_continue_on_error(self) -> None:
+        self.assertNotIn('continue-on-error', step())
+
+    def test_it_exits_with_actionlints_status(self) -> None:
+        script = step()['run']
+        # The command with its continuation lines, up to the end of its last line.
+        run = re.search(r'"\$RUNNER_TEMP/actionlint" -oneline\b(?:[^\n]*\\\n)*[^\n]*\n', script)
+        self.assertIsNotNone(run, 'the step does not run actionlint')
+        self.assertNotRegex(run[0], r'\|\|')  # type: ignore[index]
+        after = script[run.end():].splitlines()  # type: ignore[union-attr]
+        self.assertEqual(after[0].strip(), 'status=${PIPESTATUS[0]}')
+        self.assertEqual([line for line in after if line.strip()][-1].strip(), 'exit "$status"')
+
+    def test_it_runs_after_a_failed_setup(self) -> None:
+        self.assertIn(step().get('if'), RUNS_AFTER_A_FAILURE)
+
+    def test_no_step_after_it_is_skipped_by_a_finding(self) -> None:
+        steps = _workflows.steps(WORKFLOW, JOB)
+        index = next(i for i, entry in enumerate(steps) if entry.get('name') == STEP)
+        skipped = [entry.get('name') or entry.get('uses') for entry in steps[index + 1:]
+                   if entry.get('if') not in RUNS_AFTER_A_FAILURE]
+        self.assertEqual(skipped, [], 'a finding would skip these steps; move actionlint below them')
 
 
 class TestTheIgnores(unittest.TestCase):
