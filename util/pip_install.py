@@ -3,8 +3,10 @@
 
 The install step of each :file:`.github/workflows/unit-tests.yml` job that installs
 the package -- ``test``, ``integration``, ``pypcap-parity`` (and so their KTLO
-twins), ``unittest-ordering``, ``project-tests`` and ``gate`` -- runs, from the
-checkout's root and on the leg's own interpreter::
+twins), ``unittest-ordering``, ``project-tests`` and ``gate`` -- and of the
+``experimental`` job of :file:`.github/workflows/experimental.yml` and the
+``compatibility`` job of :file:`.github/workflows/python-compatibility.yml` runs,
+from the checkout's root and on the leg's own interpreter::
 
     python util/pip_install.py -e '.[test,DPKT,crypto,NGAP]'
 
@@ -27,7 +29,7 @@ On a KTLO leg the level is ``warning`` and the step carries ``continue-on-error`
 so every later step, which waits on the install's ``outcome``, is skipped. An
 ``ANNOTATION_LEVEL`` other than ``error`` or ``warning`` exits 2 before pip runs.
 The script is standard library only, and runs on every interpreter the matrices
-hold, 3.7 included.
+hold, 3.7 and the experimental tier included.
 
 """
 

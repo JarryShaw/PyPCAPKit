@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""#1967: :file:`util/pip_install.py`, the install step of most ``unit-tests.yml`` jobs, run as the steps run it.
+"""#1967: :file:`util/pip_install.py`, the install step of most test jobs, run as the steps run it.
 
 * :class:`TestPipInstall` runs the script against a stand-in ``pip``: a clean
   install, a failed one with and without an ``ERROR:`` line, a failed upgrade,
@@ -11,6 +11,9 @@
 * :class:`TestTheStepsRunTheScript` pins each covered step to the script, with
   its guards and environment, and every other ``pip install`` in
   ``unit-tests.yml`` to a listed step that keeps its shell.
+* :class:`TestTheOtherWorkflowsRunTheScript` does the same for the install of
+  ``experimental.yml``'s ``experimental`` and ``python-compatibility.yml``'s
+  ``compatibility``.
 
 """
 
@@ -29,11 +32,11 @@ import textwrap
 import unittest
 
 from tests._dependency_gates import EDITABLE_INSTALL
-from tests._workflows import job, load, steps
+from tests._workflows import WORKFLOWS, job, load, steps
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 SCRIPT = ROOT / 'util' / 'pip_install.py'
-WORKFLOW = ROOT / '.github' / 'workflows' / 'unit-tests.yml'
+WORKFLOW = WORKFLOWS / 'unit-tests.yml'
 LOG = 'pip-install.log'
 SPEC = '.[test,DPKT]'
 
@@ -72,6 +75,36 @@ LEFT_INLINE = frozenset({
 TWINS = {'test-ktlo': 'test', 'integration-ktlo': 'integration', 'pypcap-parity-ktlo': 'pypcap-parity'}
 #: Text only the former inline install held.
 INLINE = ('pip-install.log', 'did not install on', "s/^ERROR: //p")
+#: The covered steps outside ``unit-tests.yml``, as ``(workflow, job)``, each step whole,
+#: and its job's ``ANNOTATION_LEVEL``. The experimental legs are never blocking, so
+#: always ``warning``; Compat's KTLO legs take ``warning`` as ``test``'s do. Compat
+#: installs no extra, and its step keeps the default shell.
+ELSEWHERE = {
+    ('experimental.yml', 'experimental'): ({
+        'name': 'Install package and test dependencies',
+        'id': 'install',
+        'if': "${{ steps.python.outcome == 'success' }}",
+        'continue-on-error': True,
+        'timeout-minutes': 10,
+        'shell': 'bash',
+        'env': {'LEG': 'Python ${{ matrix.python-version }} (experimental, non-blocking)'},
+        'run': "python util/pip_install.py -e '.[test,DPKT,crypto,NGAP]'",
+    }, 'warning'),
+    ('python-compatibility.yml', 'compatibility'): ({
+        'name': 'Install package',
+        'id': 'install',
+        'if': "${{ steps.python.outcome == 'success' }}",
+        'continue-on-error': '${{ matrix.ktlo == true }}',
+        'env': {'LEG': MATRIX_LEG},
+        'run': 'python util/pip_install.py -e .',
+    }, MATRIX_LEVEL),
+}
+#: The other ``pip install`` steps of those workflows, which install ``requests`` for
+#: util/superseded.py on an interpreter of their own, never the package.
+ELSEWHERE_INLINE = frozenset({
+    ('experimental.yml', 'current', 'Install requests'),
+    ('experimental.yml', 'experimental', "Install the watcher's requests"),
+})
 
 #: A stand-in ``pip``: it appends its arguments to ``calls``, then does what
 #: ``PIP_<STEP>`` says, ``STEP`` ``UPGRADE`` or ``INSTALL``: ``OUTPUT`` lines, each
@@ -366,6 +399,42 @@ class TestTheStepsRunTheScript(unittest.TestCase):
         for job_id, name in LEFT_INLINE:
             with self.subTest(job=job_id, step=name):
                 self.assertIn('pip install', str(self.step(job_id, name)['run']))
+
+
+class TestTheOtherWorkflowsRunTheScript(unittest.TestCase):
+    """The experimental and Compat installs run the script, guards unchanged; nothing else there keeps the shell."""
+
+    def test_each_site_is_the_script_with_its_guards(self) -> None:
+        for (name, job_id), (expected, _) in ELSEWHERE.items():
+            with self.subTest(workflow=name, job=job_id):
+                found = [entry for entry in steps(WORKFLOWS / name, job_id) if entry.get('name') == expected['name']]
+                self.assertEqual(found, [expected])
+
+    def test_each_job_sets_the_level(self) -> None:
+        for (name, job_id), (_, level) in ELSEWHERE.items():
+            with self.subTest(workflow=name, job=job_id):
+                self.assertEqual(job(WORKFLOWS / name, job_id)['env']['ANNOTATION_LEVEL'], level)
+
+    def test_every_other_pip_install_is_a_listed_one(self) -> None:
+        sites = {(name, job_id, expected['name']) for (name, job_id), (expected, _) in ELSEWHERE.items()}
+        found = []
+        for name in sorted({name for name, _ in ELSEWHERE}):
+            for job_id, body in load(WORKFLOWS / name)['jobs'].items():
+                for step in body.get('steps', []):
+                    where = (name, job_id, step.get('name'))
+                    run = str(step.get('run', ''))
+                    if re.search(r'pip install|pip_install\.py', run) and where not in sites | ELSEWHERE_INLINE:
+                        found.append(f'{name} {job_id} {step.get("name")!r}')
+                    found.extend(f'{name} {job_id} {step.get("name")!r}: {piece}' for piece in INLINE if piece in run)
+        self.assertEqual(found, [])
+
+    def test_the_listed_steps_still_install(self) -> None:
+        """So :data:`ELSEWHERE_INLINE` names nothing stale."""
+        for name, job_id, step_name in ELSEWHERE_INLINE:
+            with self.subTest(workflow=name, job=job_id, step=step_name):
+                found = [entry for entry in steps(WORKFLOWS / name, job_id) if entry.get('name') == step_name]
+                self.assertEqual(len(found), 1)
+                self.assertIn('pip install', str(found[0]['run']))
 
 
 if __name__ == '__main__':
