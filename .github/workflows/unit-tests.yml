@@ -508,33 +508,14 @@ jobs:
         continue-on-error: ${{ matrix.ktlo == true }}
         run: python -m pip install -e '.[test,Scapy,DPKT,crypto,cli,NGAP,vendor,docs,PyShark]'
 
-      # `shell: bash` rather than the default, because it runs with -o pipefail:
-      # without it the `tee` below would swallow the generator's exit status.
+      # util/regenerate_samples.py annotates a failure as a fixture failure, not
+      # a test one, and warns when the PCAP-NG captures are stand-ins.
       - name: Regenerate sample captures
         id: samples
         if: ${{ steps.install.outcome == 'success' }}
         continue-on-error: ${{ matrix.ktlo == true }}
         shell: bash
-        run: |
-          # Keep a failure here legible as what it is -- the fixtures could not
-          # be built, so no test has run yet and nothing is wrong with the code
-          # under test.
-          if ! python examples/generators/make_samples.py 2>&1 | tee "$RUNNER_TEMP/make-samples.log"; then
-            echo "::${ANNOTATION_LEVEL} title=Sample fixture generation failed::examples/generators/make_samples.py could not rebuild examples/captures/. This is a fixture-generation failure, not a test failure -- the test suite has not run."
-            exit 1
-          fi
-
-          # examples/generators/pcapng.py fetches captures from the Wireshark
-          # repository and synthesises stand-ins when the download fails. The
-          # stand-ins parse, and tests/protocols/test_pcapng_regression.py only
-          # asserts that extraction succeeds, so a degraded run goes green and
-          # is otherwise indistinguishable from a clean one. Say which happened.
-          if grep -q '(download unavailable)' "$RUNNER_TEMP/make-samples.log"; then
-            echo "::warning title=Sample fixtures degraded::The upstream Wireshark captures were unreachable, so synthesised stand-ins were used. The PCAP-NG tier ran, but not against the upstream bytes."
-            grep '(download unavailable)' "$RUNNER_TEMP/make-samples.log"
-          else
-            echo "Upstream Wireshark captures were used, matching their pinned SHA-256 digests."
-          fi
+        run: python util/regenerate_samples.py
 
       # See the `test` job above for why this step exists.
       - name: Report available parallelism
@@ -1323,25 +1304,13 @@ jobs:
           python -m pip install -U pip setuptools wheel
           python -m pip install -e '.[test,Scapy,DPKT,cli,PyShark,PyPCAP,PyPCAPFile]'
 
-      # See the `integration` job above for why this step is shaped the way it
-      # is.
+      # See the `integration` job above.
       - name: Regenerate sample captures
         id: samples
         if: ${{ steps.install.outcome == 'success' }}
         continue-on-error: ${{ matrix.ktlo == true }}
         shell: bash
-        run: |
-          if ! python examples/generators/make_samples.py 2>&1 | tee "$RUNNER_TEMP/make-samples.log"; then
-            echo "::${ANNOTATION_LEVEL} title=Sample fixture generation failed::examples/generators/make_samples.py could not rebuild examples/captures/. This is a fixture-generation failure, not a test failure -- the test suite has not run."
-            exit 1
-          fi
-
-          if grep -q '(download unavailable)' "$RUNNER_TEMP/make-samples.log"; then
-            echo "::warning title=Sample fixtures degraded::The upstream Wireshark captures were unreachable, so synthesised stand-ins were used. The PCAP-NG tier ran, but not against the upstream bytes."
-            grep '(download unavailable)' "$RUNNER_TEMP/make-samples.log"
-          else
-            echo "Upstream Wireshark captures were used, matching their pinned SHA-256 digests."
-          fi
+        run: python util/regenerate_samples.py
 
       # See the `test` job above for why this step exists.
       - name: Report available parallelism
@@ -1835,21 +1804,13 @@ jobs:
           python -m pip install -U pip setuptools wheel
           python -m pip install -e '.[test,Scapy,DPKT,crypto,cli,NGAP,vendor,docs,PyShark]'
 
-      # See the integration job above for why this step is shaped the way it is.
+      # See the `integration` job above. This job has no KTLO leg, so a
+      # failure is always an error.
       - name: Regenerate sample captures
         shell: bash
-        run: |
-          if ! python examples/generators/make_samples.py 2>&1 | tee "$RUNNER_TEMP/make-samples.log"; then
-            echo "::error title=Sample fixture generation failed::examples/generators/make_samples.py could not rebuild examples/captures/. This is a fixture-generation failure, not a test failure -- the test suite has not run."
-            exit 1
-          fi
-
-          if grep -q '(download unavailable)' "$RUNNER_TEMP/make-samples.log"; then
-            echo "::warning title=Sample fixtures degraded::The upstream Wireshark captures were unreachable, so synthesised stand-ins were used. The PCAP-NG tier ran, but not against the upstream bytes."
-            grep '(download unavailable)' "$RUNNER_TEMP/make-samples.log"
-          else
-            echo "Upstream Wireshark captures were used, matching their pinned SHA-256 digests."
-          fi
+        env:
+          ANNOTATION_LEVEL: error
+        run: python util/regenerate_samples.py
 
       # See the `test` job above for why this step exists.
       - name: Report available parallelism
