@@ -386,7 +386,8 @@ class TestTheTiers(unittest.TestCase):
         """``matrix.os || 'ubuntu-latest'``; the conda jobs' ``os`` axis; where ``latest`` is installed."""
         found = context(snapshot()).labels
         self.assertEqual(found, {'default': ['ubuntu-latest'],
-                                 'supported': ['macos-26-intel', 'macos-latest', 'ubuntu-latest'],
+                                 # #2060: Conda Update's windows-latest leg.
+                                 'supported': ['macos-26-intel', 'macos-latest', 'ubuntu-latest', 'windows-latest'],
                                  'latest': ['macos-latest', 'ubuntu-latest']})
 
     def test_ubuntu_latest_counts_as_its_image_and_every_newer_one(self) -> None:
@@ -396,6 +397,8 @@ class TestTheTiers(unittest.TestCase):
                          [module.Target('linux', '24.04', 'x64'), module.Target('linux', '26.04', 'x64')])
         self.assertEqual(module.label_targets('ubuntu-24.04', images), [module.Target('linux', '24.04', 'x64')])
         self.assertEqual(module.label_targets('macos-latest', images), [module.Target('darwin', None, 'arm64')])
+        # #2060: the Windows Server image; the Arm64 Windows 11 one is no newer x64 image.
+        self.assertEqual(module.label_targets('windows-latest', images), [module.Target('win32', None, 'x64')])
         moved = module.parse_images(move_latest(snapshot(), '26.04')['runner-images'])
         self.assertEqual(module.label_targets('ubuntu-latest', moved), [module.Target('linux', '26.04', 'x64')])
         with self.assertRaisesRegex(ValueError, 'does not list'):

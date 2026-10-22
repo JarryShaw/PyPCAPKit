@@ -68,15 +68,24 @@ class TestTheReleaseLegSmokeTests(unittest.TestCase):
                 self.assertLess(smoke[0], min(uploads))
 
     def test_it_is_conda_updates_step(self) -> None:
-        """The same interpreter, package and gate: setup-python's, ``host_package``, none."""
+        """The same interpreter and package: setup-python's, ``host_package``.
+
+        #2060: Conda Update's step also finds that interpreter on its Windows
+        leg, and carries that leg's ``id``, gate and ``continue-on-error``. The
+        release job has no Windows leg yet, so its step is the POSIX branch alone.
+
+        """
         cron = steps(*CRON)
         release = steps(*RELEASE)
         expected = cron[smoke_steps(cron)[0]]
         self.assertEqual(expected['env'], {'PCAPKIT_CONDA_PACKAGE': '${{ steps.conda_build.outputs.host_package }}'})
-        self.assertIn('"${pythonLocation}/bin/python" util/conda_vendor.py --smoke', expected['run'])
+        self.assertIn('python="${pythonLocation}/bin/python"\n', expected['run'])
+        self.assertIn('"$python" util/conda_vendor.py --smoke "$PCAPKIT_CONDA_PACKAGE"', expected['run'])
         found = smoke_steps(release)
         self.assertEqual(len(found), 1, 'the release leg runs no smoke test')
-        self.assertEqual(release[found[0]], expected)
+        self.assertEqual(release[found[0]], {
+            'name': expected['name'], 'env': expected['env'],
+            'run': '"${pythonLocation}/bin/python" util/conda_vendor.py --smoke "$PCAPKIT_CONDA_PACKAGE"\n'})
 
 
 @unittest.skipIf(yaml is None, 'PyYAML, from the test extra, is not installed')

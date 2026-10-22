@@ -206,7 +206,7 @@ class DeriveTests(unittest.TestCase):
         # Conda Update's newest Python.
         with self.assertRaises(module.NotInstalled) as elsewhere:
             module.derive([Requirement('core')], module.environments(['3.1', '3.2']), lacking)
-        self.assertIn('shim is needed on Python 3.1 on darwin, linux (core requires shim; '
+        self.assertIn('shim is needed on Python 3.1 on darwin, linux, win32 (core requires shim; '
                       'python_version < "3.2")', str(elsewhere.exception))
         self.assertIn(f'and Python {here} on {sys.platform}, which runs this, does not have it: '
                       'its marker leaves it out here', str(elsewhere.exception))

@@ -99,15 +99,17 @@ FILE = ROOT / 'conda' / 'requirements.txt'
 #: The extras the conda distribution carries, besides ``dependencies``.
 EXTRAS = ('all',)
 #: The platforms the conda workflows build on -- ``cron-conda.yml`` and
-#: ``create-release.yml`` -- by the conda subdir each leg publishes, as
+#: ``create-release.yml`` -- by the conda subdir each leg builds, as
 #: ``sys.platform``, ``platform.system()`` and ``platform.machine()`` read on its
-#: runner: ``ubuntu-latest``, the Intel ``macos-26-intel`` and the arm64
-#: ``macos-latest``. Each leg publishes only its own runner's platform (#1822).
-#: They have no Windows leg (#1967), so the recipe's ``bld.bat`` goes unused.
+#: runner: ``ubuntu-latest``, the Intel ``macos-26-intel``, the arm64
+#: ``macos-latest`` and ``windows-latest``. Each leg builds only its own runner's
+#: platform (#1822). The Windows leg, ``cron-conda.yml``'s alone, builds and
+#: smoke-tests with the recipe's ``bld.bat`` and publishes nothing yet (#2060).
 PLATFORMS = {
     'linux-64': ('linux', 'Linux', 'x86_64'),
     'osx-64': ('darwin', 'Darwin', 'x86_64'),
     'osx-arm64': ('darwin', 'Darwin', 'arm64'),
+    'win-64': ('win32', 'Windows', 'AMD64'),
 }
 #: The file :data:`PLATFORM_PINS` is read from, and ``--refresh-pins`` rewrites (#1827, #1851).
 PINS = ROOT / 'conda' / 'platform-pins.toml'
@@ -116,23 +118,27 @@ PINS = ROOT / 'conda' / 'platform-pins.toml'
 REVIEW_HORIZON = datetime.timedelta(weeks=13)
 #: The wheel platform tags a build on each of :data:`PLATFORMS` installs, besides
 #: ``any``, for :func:`installs` (#1851): glibc's manylinux on linux-64, and on
-#: macOS the runner's own architecture or universal2, for any macOS version. A
-#: tag left out here only leaves a pin where it is.
+#: macOS the runner's own architecture or universal2, for any macOS version, and
+#: ``win_amd64`` on win-64. A tag left out here only leaves a pin where it is.
 WHEEL_PLATFORMS = {
     'linux-64': re.compile(r'manylinux(?:1|2010|2014|_\d+_\d+)_x86_64'),
     'osx-64': re.compile(r'macosx_\d+_\d+_(?:x86_64|universal2)'),
     'osx-arm64': re.compile(r'macosx_\d+_\d+_(?:arm64|universal2)'),
+    'win-64': re.compile(r'win_amd64'),
 }
 #: Where ``--refresh-pins`` reads a package's releases: PyPI's JSON API.
 PYPI = 'https://pypi.org/pypi/{}/json'
 #: The object format and the machine of every native binary a package for each
 #: of :data:`PLATFORMS` may carry (#1822). A universal Mach-O passes when one of
 #: its slices is the machine.
-BINARIES = {'linux-64': ('ELF', 'x86_64'), 'osx-64': ('Mach-O', 'x86_64'), 'osx-arm64': ('Mach-O', 'arm64')}
-#: What ELF's ``e_machine`` and Mach-O's ``cputype`` say, as :data:`BINARIES` spells it.
+BINARIES = {'linux-64': ('ELF', 'x86_64'), 'osx-64': ('Mach-O', 'x86_64'), 'osx-arm64': ('Mach-O', 'arm64'),
+            'win-64': ('PE', 'x86_64')}
+#: What ELF's ``e_machine``, Mach-O's ``cputype`` and PE's ``Machine`` say, as
+#: :data:`BINARIES` spells it.
 ELF_MACHINES = {3: 'i386', 20: 'ppc', 21: 'ppc64', 40: 'arm', 62: 'x86_64', 183: 'arm64', 243: 'riscv'}
 MACHO_CPUS = {7: 'i386', 0x01000007: 'x86_64', 12: 'arm', 0x0100000c: 'arm64', 0x0200000c: 'arm64_32',
               18: 'ppc', 0x01000012: 'ppc64'}
+PE_MACHINES = {0x014c: 'i386', 0x01c4: 'arm', 0x8664: 'x86_64', 0xaa64: 'arm64'}
 #: File names a native extension or library goes by, so one whose header this
 #: cannot read is reported rather than passed over.
 NATIVE_SUFFIXES = ('.so', '.dylib', '.pyd', '.dll')
@@ -245,7 +251,7 @@ def environments(pythons: 'Iterable[str]') -> 'list[dict[str, str]]':
                 'python_version': python, 'python_full_version': f'{python}.0',
                 'implementation_name': 'cpython', 'platform_python_implementation': 'CPython',
                 'implementation_version': f'{python}.0', 'sys_platform': sys_platform,
-                'platform_system': system, 'os_name': 'posix',
+                'platform_system': system, 'os_name': 'nt' if sys_platform == 'win32' else 'posix',
                 'platform_machine': machine, 'platform_release': '', 'platform_version': '',
             })
     return found
@@ -834,6 +840,14 @@ PROBE = textwrap.dedent('''\
 def native(head: 'bytes') -> 'Optional[tuple[str, frozenset[str]]]':
     """The object format and machines of a binary starting with ``head``; :data:`None` for any other file."""
     magic = head[:4]
+    # #2060: a PE image, as a ``.pyd`` or ``.dll`` is: the DOS header's
+    # ``e_lfanew``, at 0x3c, points at ``PE\0\0`` and the COFF ``Machine`` after it.
+    if magic[:2] == b'MZ' and len(head) >= 0x40:
+        offset = int.from_bytes(head[0x3c:0x40], 'little')
+        if head[offset:offset + 4] == b'PE\0\0' and len(head) >= offset + 6:
+            machine = int.from_bytes(head[offset + 4:offset + 6], 'little')
+            return 'PE', frozenset((PE_MACHINES.get(machine, f'Machine {machine:#06x}'),))
+        return None
     if magic == b'\x7fELF' and len(head) >= 20 and head[5] in (1, 2):
         order = 'little' if head[5] == 1 else 'big'  # type: Literal['little', 'big']
         machine = int.from_bytes(head[18:20], order)
@@ -859,7 +873,7 @@ def foreign(root: 'pathlib.Path', subdir: 'str') -> 'tuple[int, list[str]]':
     """How many native binaries ``root`` holds, and each one that does not run on ``subdir``.
 
     ``noarch`` may hold none; a platform outside :data:`BINARIES` fails every one.
-    A file named as a native library whose header is neither ELF nor Mach-O is
+    A file named as a native library whose header is not ELF, Mach-O or PE is
     reported too, since this cannot vouch for it.
 
     """
@@ -874,7 +888,7 @@ def foreign(root: 'pathlib.Path', subdir: 'str') -> 'tuple[int, list[str]]':
         name = path.relative_to(root).as_posix()
         if found is None:
             if path.name.endswith(NATIVE_SUFFIXES) or '.so.' in path.name:
-                problems.append(f'{name}: neither ELF nor Mach-O, so its machine is unknown')
+                problems.append(f'{name}: not ELF, Mach-O or PE, so its machine is unknown')
             continue
         count += 1
         kind, machines = found
@@ -892,6 +906,22 @@ def runner_platform() -> 'Optional[str]':
                 None)
 
 
+def built_for(site: 'pathlib.Path', index: 'dict[str, Any]') -> 'str':
+    """The ``pythonX.Y`` a package's ``site-packages`` at ``site`` is for, or what it is if not that.
+
+    A POSIX package names it in the path, ``lib/pythonX.Y/site-packages``. A
+    Windows one has ``Lib/site-packages`` for every version (#2060), so it is read
+    from the ``pyXY`` that starts the build string in ``info/index.json``.
+
+    """
+    if site.parent.name != 'Lib':
+        return site.parent.name
+    match = re.match(r'py(\d)(\d+)(?![0-9])', str(index.get('build', '')))
+    if match is None:
+        return f'Lib/site-packages with build string {index.get("build")!r}'
+    return f'python{match.group(1)}.{match.group(2)}'
+
+
 def smoke(package: 'pathlib.Path') -> 'int':
     """Unpack a built ``.tar.bz2`` conda package, check its platform and binaries, and run :data:`PROBE`."""
     with tempfile.TemporaryDirectory() as temp:
@@ -902,16 +932,16 @@ def smoke(package: 'pathlib.Path') -> 'int':
             print(f'{package}: expected one site-packages/pcapkit, found {len(inits)}', file=sys.stderr)
             return 1
         site = inits[0].parents[1]
-        built = site.parent.name
-        if built != f'python{sys.version_info.major}.{sys.version_info.minor}':
-            print(f'{package} is built for {built}, and this is {sys.version}', file=sys.stderr)
-            return 1
         try:
             index = json.loads((pathlib.Path(temp) / 'info' / 'index.json').read_text(encoding='utf-8'))
             subdir = str(index['subdir'])
         except (OSError, ValueError, TypeError, KeyError) as error:
             print(f'{package}: info/index.json names no subdir ({error!r}), so its platform is unknown',
                   file=sys.stderr)
+            return 1
+        built = built_for(site, index)
+        if built != f'python{sys.version_info.major}.{sys.version_info.minor}':
+            print(f'{package} is built for {built}, and this is {sys.version}', file=sys.stderr)
             return 1
         runner = runner_platform()
         if subdir not in ('noarch', runner):

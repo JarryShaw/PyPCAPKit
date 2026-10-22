@@ -30,6 +30,11 @@
     "arch": "x64",
     "platform": "linux",
     "platform_version": "26.04"
+   },
+   {
+    "filename": "python-3.15.0-win32-x64.zip",
+    "arch": "x64",
+    "platform": "win32"
    }
   ]
  },
@@ -64,6 +69,11 @@
     "arch": "x64",
     "platform": "linux",
     "platform_version": "26.04"
+   },
+   {
+    "filename": "python-3.14.8-win32-x64.zip",
+    "arch": "x64",
+    "platform": "win32"
    }
   ]
  },
@@ -110,6 +120,11 @@
     "arch": "x64",
     "platform": "linux",
     "platform_version": "26.04"
+   },
+   {
+    "filename": "python-3.13.16-win32-x64.zip",
+    "arch": "x64",
+    "platform": "win32"
    }
   ]
  },
@@ -168,6 +183,11 @@
     "arch": "x64",
     "platform": "linux",
     "platform_version": "26.04"
+   },
+   {
+    "filename": "python-3.12.15-win32-x64.zip",
+    "arch": "x64",
+    "platform": "win32"
    }
   ]
  },
@@ -238,6 +258,11 @@
     "arch": "x64",
     "platform": "linux",
     "platform_version": "26.04"
+   },
+   {
+    "filename": "python-3.11.17-win32-x64.zip",
+    "arch": "x64",
+    "platform": "win32"
    }
   ]
  },

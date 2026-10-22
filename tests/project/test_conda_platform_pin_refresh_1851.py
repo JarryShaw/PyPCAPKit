@@ -362,7 +362,7 @@ class BumpTests(unittest.TestCase):
         self.assertEqual(self.refresh(recorded(**{'51.0.0': INTEL_AGAIN}), installed='50.0.2'), (table(), []))
 
     def test_a_pin_on_a_platform_no_leg_builds_is_left_alone(self) -> None:
-        pins = {'cryptography': {'win-64': vendor().Pin('1.0', TODAY, 'a stand-in')}}
+        pins = {'cryptography': {'linux-aarch64': vendor().Pin('1.0', TODAY, 'a stand-in')}}
         result, notes = self.refresh(recorded(**{'51.0.0': INTEL_AGAIN}), pins=pins)
         self.assertEqual(result, pins)
         self.assertEqual([level for level, _ in notes], ['warning'])

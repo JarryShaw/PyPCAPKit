@@ -11,6 +11,10 @@ Each step that can fail on a KTLO or experimental leg carries an ``id`` and a
 
     /usr/bin/python3 util/leg_summary.py ktlo          # or: experimental
 
+:file:`.github/workflows/cron-conda.yml`'s ``Windows summary`` runs it as
+``python util/leg_summary.py conda-windows``, since a Windows image has no
+``/usr/bin/python3`` (#2060).
+
 with ``LEG``, the leg's display name, and ``STEPS``, ``${{ toJSON(steps) }}``, in
 the environment. ``STEPS`` holds each earlier step with an ``id``, and its
 ``outcome`` is the step's result before ``continue-on-error`` applied. For each
@@ -47,6 +51,7 @@ __all__ = ['REASONS', 'failed_steps', 'main']
 REASONS = {
     'ktlo': 'KTLO legs never block (#1633), so this job still succeeds (#1672)',
     'experimental': 'Experimental legs never block (#1660), so this job still succeeds',
+    'conda-windows': 'The win-64 conda leg is unpublished and never blocks (#2060), so this job still succeeds',
 }
 
 
