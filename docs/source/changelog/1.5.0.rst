@@ -367,6 +367,14 @@ Fixed
   as :meth:`.Method.get` does. ``get(b'\x01')`` minted a member keyed by ``bytes``, and
   ``get(-1)`` raised ``AttributeError`` whatever its ``default`` (:issue:`1824`,
   :pr:`1826`).
+* IANA's port spans that name no transport answer
+  :meth:`.AppType.get` with the asking registry's transport rather than
+  ``TransportProtocol.undefined``, as its ``unknown`` fallback for a port in no span
+  already did: ``TCP.get(8012)`` is ``unassigned [tcp]``. A port IANA lists on other
+  transports only stays ``unknown``: 8011 is ``reserved [tcp]`` and
+  ``bier-echo [udp]``, and ``unknown [dccp]`` and ``unknown [sctp]``. Lookups still
+  mint nothing (:issue:`860`) and an out-of-range port still raises (:issue:`2048`,
+  :pr:`2052`).
 
 pcapkit.corekit
 ---------------
