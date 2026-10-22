@@ -231,7 +231,8 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
 
-      # As unit-tests.yml `test`'s install, for the same reasons.
+      # As unit-tests.yml `test`'s install, for the same reasons: util/pip_install.py
+      # annotates a failed install, at the job's `warning` (#1967).
       - name: Install package and test dependencies
         id: install
         if: ${{ steps.python.outcome == 'success' }}
@@ -240,14 +241,7 @@ jobs:
         shell: bash
         env:
           LEG: Python ${{ matrix.python-version }} (experimental, non-blocking)
-        run: |
-          python -m pip install -U pip setuptools wheel
-          if ! python -m pip install -e '.[test,DPKT,crypto,NGAP]' 2>&1 | tee "$RUNNER_TEMP/pip-install.log"; then
-            reason=$(sed -n 's/^ERROR: //p' "$RUNNER_TEMP/pip-install.log" | tail -n 1)
-            if [ -z "$reason" ]; then reason="pip failed without an ERROR line; see this step's log"; fi
-            echo "::${ANNOTATION_LEVEL} title=pcapkit did not install on ${LEG//,/%2C}::${reason//%/%25}. The rest of this leg is skipped."
-            exit 1
-          fi
+        run: python util/pip_install.py -e '.[test,DPKT,crypto,NGAP]'
 
       - name: Report available parallelism
         id: parallelism

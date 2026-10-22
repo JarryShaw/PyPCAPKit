@@ -78,13 +78,14 @@ jobs:
       # The install needs this leg's interpreter, and the check below needs the
       # install, as in unit-tests.yml's `test` job: on a KTLO leg a failed step
       # does not stop the job, so each one waits on the `outcome` it needs.
+      # util/pip_install.py annotates a failed install, as in `test` (#1967).
       - name: Install package
         id: install
         if: ${{ steps.python.outcome == 'success' }}
         continue-on-error: ${{ matrix.ktlo == true }}
-        run: |
-          python -m pip install -U pip setuptools wheel
-          python -m pip install -e .
+        env:
+          LEG: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}
+        run: python util/pip_install.py -e .
 
       # One annotation saying why, so a failed leg -- such as 3.7's, where the
       # install succeeds and the sources do not compile -- is legible from the

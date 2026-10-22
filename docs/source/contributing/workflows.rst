@@ -1209,8 +1209,10 @@ does; each has tests under :file:`tests/project/` that run it.
        and ``gate``, at ``error``.
    * - :file:`util/pip_install.py`
      - The install step of ``unit-tests.yml``'s ``test``, ``integration`` and
-       ``pypcap-parity`` (and so their KTLO twins), at the job's ``ANNOTATION_LEVEL``,
-       and of ``unittest-ordering``, ``project-tests`` and ``gate``, at ``error``.
+       ``pypcap-parity`` (and so their KTLO twins), ``experimental.yml``'s
+       ``experimental`` and ``python-compatibility.yml``'s ``compatibility``, at the
+       job's ``ANNOTATION_LEVEL``, and of ``unittest-ordering``, ``project-tests`` and
+       ``gate``, at ``error``.
 
 The summaries run on the image's ``/usr/bin/python3`` rather than the leg's
 interpreter, which may have failed to set up or be too broken to run anything, so
@@ -1222,7 +1224,7 @@ file-size cap every test command of ``unit-tests.yml`` takes.
 :file:`util/regenerate_samples.py` is standard library only but runs on the leg's
 interpreter, since the generator it runs imports ``pcapkit``, and so does
 :file:`util/pip_install.py`, since it installs into that interpreter; it runs on
-every version the matrices hold, 3.7 included. Both ``changes`` jobs check out on every event, since the script is in the
+every version the matrices hold, 3.7 and the experimental tier included. Both ``changes`` jobs check out on every event, since the script is in the
 tree. ``create-release.yml``'s ``pypi`` job keeps its own copy of
 the KTLO summary's shell until its shell moves to scripts too; a project pin runs
 that copy and the script on the same steps and requires the same output.

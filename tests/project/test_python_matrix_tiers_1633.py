@@ -509,6 +509,8 @@ INSTALLS = (
     ('unit-tests.yml', 'pypcap-parity', 'Install package, test and generator dependencies'),
     ('python-compatibility.yml', 'compatibility', 'Install package'),
 )
+#: The install steps of the 3.7 legs, each running util/pip_install.py (#1967).
+INSTALLS_37 = (LEGACY_37[0], LEGACY_37[1], INSTALLS[3])
 
 
 def workflow_commands(output: 'str') -> 'list[str]':
@@ -573,17 +575,19 @@ class TestPython37IsKTLO(unittest.TestCase):
     def run_step(self, name: 'str', job_id: 'str', step_name: 'str', stub: 'str',
                  env: 'dict[str, str]', leg: 'Optional[dict[str, Any]]' = None,
                  ) -> 'subprocess.CompletedProcess[str]':
-        """Step ``step_name`` on ``leg`` (3.7's by default) under ``shell: bash``, ``python`` stubbed.
+        """Step ``step_name`` on ``leg`` (3.7's by default) under its shell, ``python`` stubbed.
 
         ``LEG`` and the job's ``ANNOTATION_LEVEL`` get the values their expressions
-        take on that leg, and ``-eo pipefail`` is what ``shell: bash`` runs. With
-        :data:`PIP_STUB`, ``python`` is this interpreter and the stub is its ``pip``.
+        take on that leg; ``-eo pipefail`` is what ``shell: bash`` runs, and ``-e``
+        the default shell. With :data:`PIP_STUB`, ``python`` is this interpreter and
+        the stub is its ``pip``.
 
         """
         leg = KTLO_37 if leg is None else leg
         spec = job(name, job_id)
         step = next(step for step in spec['steps'] if step.get('name') == step_name)
-        self.assertEqual(step.get('shell'), 'bash')
+        self.assertIn(step.get('shell'), ('bash', None))
+        flags = ['--noprofile', '--norc', '-eo', 'pipefail'] if step.get('shell') == 'bash' else ['-e']
         self.assertEqual(step['env']['LEG'], leg_template(name, job_id))
         self.assertEqual(spec['env']['ANNOTATION_LEVEL'], annotation_level(name, job_id))
         env = dict(env, LEG=leg_label(leg), ANNOTATION_LEVEL='warning' if is_nonblocking(leg) else 'error')
@@ -601,7 +605,7 @@ class TestPython37IsKTLO(unittest.TestCase):
         else:
             python.write_text('#!/bin/bash\n' + stub, encoding='utf-8')
             python.chmod(0o755)
-        return subprocess.run(['bash', '--noprofile', '--norc', '-eo', 'pipefail', '-c', step['run']],
+        return subprocess.run(['bash', *flags, '-c', step['run']],
                               env=dict(os.environ, PATH=f'{bin_dir}{os.pathsep}{os.environ["PATH"]}',
                                        RUNNER_TEMP=str(self.tmp), **env),
                               cwd=ROOT, capture_output=True, text=True, check=False, timeout=60)
@@ -648,7 +652,7 @@ class TestPython37IsKTLO(unittest.TestCase):
                     self.assertIn("steps.install.outcome == 'success'", condition)
 
     def test_a_failed_install_fails_once_naming_pips_reason(self) -> None:
-        for name, job_id, install in LEGACY_37[:2]:
+        for name, job_id, install in INSTALLS_37:
             with self.subTest(job=job_id):
                 result = self.run_step(name, job_id, install, PIP_STUB, {'PIP_OUTPUT': PIP_37, 'PIP_STATUS': '1'})
                 self.assertNotEqual(result.returncode, 0)
@@ -670,7 +674,7 @@ class TestPython37IsKTLO(unittest.TestCase):
                     'The rest of this leg is skipped.'])
 
     def test_a_clean_install_passes_without_an_annotation(self) -> None:
-        for name, job_id, install in LEGACY_37[:2]:
+        for name, job_id, install in INSTALLS_37:
             with self.subTest(job=job_id):
                 result = self.run_step(name, job_id, install, PIP_STUB,
                                        {'PIP_OUTPUT': 'Successfully installed pypcapkit-1.5.0', 'PIP_STATUS': '0'})
@@ -702,7 +706,7 @@ class TestPython37IsKTLO(unittest.TestCase):
         cases = [(name, job_id, install, PIP_STUB, {'PIP_OUTPUT': PIP_37, 'PIP_STATUS': '1'},
                   '::error title=pcapkit did not install on Python 3.12::No matching distribution found '
                   'for pytest>=8; extra == "test". The rest of this leg is skipped.')
-                 for name, job_id, install in LEGACY_37[:2]]
+                 for name, job_id, install in INSTALLS_37]
         cases.append(('python-compatibility.yml', 'compatibility', 'Verify package', VERIFY_STUB,
                       {'COMPILE_OUTPUT': '', 'COMPILE_STATUS': '0', 'IMPORT_STATUS': '1'},
                       "::error title=pcapkit does not import on Python 3.12::See the traceback in this step's log."))
