@@ -626,8 +626,11 @@ class TestUploadsStayOffUpdateARelease(WorkflowMixin, unittest.TestCase):
         already has is what stops the replacement #1640 measured.
         """
         self.assertEqual(self.step('conda', UPLOAD_STEP).get('if'), "${{ matrix.os == 'ubuntu-latest' }}")
+        # #2044: each Anaconda upload also names its legs.
         self.assertEqual(self.step('conda', 'Upload conda packages to Anaconda').get('if'),
-                         "${{ steps.check_leg.outputs.PCAPKIT_LEG_EXISTS != 'true' }}")
+                         "${{ matrix.os != 'macos-26-intel' && steps.check_leg.outputs.PCAPKIT_LEG_EXISTS != 'true' }}")
+        self.assertEqual(self.step('conda', 'Upload conda packages to Anaconda (Intel)').get('if'),
+                         "${{ matrix.os == 'macos-26-intel' && steps.check_leg.outputs.PCAPKIT_LEG_EXISTS != 'true' }}")
 
 
 class TestEveryScriptIsHandedTheRunSha(WorkflowMixin, unittest.TestCase):
@@ -1567,7 +1570,11 @@ class TestCondaUpdateNeverMakesTheRelease(CondaDistMixin, unittest.TestCase):
         self.assertNotIn('${{', check['run'])
 
     def test_the_anaconda_upload_is_not_gated_on_it(self) -> None:
-        self.assertNotIn('if', self.step('conda-dist', 'Upload conda packages to Anaconda'))
+        # #2044: gated on the leg alone.
+        self.assertEqual(self.step('conda-dist', 'Upload conda packages to Anaconda').get('if'),
+                         "${{ matrix.os != 'macos-26-intel' }}")
+        self.assertEqual(self.step('conda-dist', 'Upload conda packages to Anaconda (Intel)').get('if'),
+                         "${{ matrix.os == 'macos-26-intel' }}")
 
     def test_an_update_targets_the_default_branch(self) -> None:
         """``github.ref_name`` is the default branch on this workflow's triggers.

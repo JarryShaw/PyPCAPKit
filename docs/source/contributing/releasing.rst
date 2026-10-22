@@ -351,7 +351,13 @@ checks *is* the one it is about to create:
   is already there -- this second check is the actual correctness fix, because
   ``anaconda/actions/upload-package`` has no ``skip-existing`` equivalent, only
   ``force:`` (never set), so re-uploading a file it already has fails outright
-  rather than being absorbed.
+  rather than being absorbed. The ``macos-26-intel`` leg is the exception: the
+  action's CLI download returns 404 there, so its "Upload conda packages to
+  Anaconda (Intel)" step runs ``anaconda upload --skip-existing`` instead
+  (`#2044 <https://github.com/JarryShaw/PyPCAPKit/issues/2044>`__), which skips
+  such a file. Conda Update's Intel leg runs the same step, so it keeps a file
+  anaconda.org already has, where the action's ``force: true`` on its other legs
+  replaces it.
 
 These evidence checks all run inside ``version_check``, curling PyPI's and
 Anaconda's public, unauthenticated JSON APIs; the per-leg check runs inside

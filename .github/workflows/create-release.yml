@@ -72,7 +72,8 @@ concurrency:
 # exists, ``pypi`` PyPI's file count, and ``conda`` Anaconda's aggregate count
 # (a cost saver) plus, per leg, its own distribution -- the correctness fix,
 # since ``anaconda/actions/upload-package`` has no ``skip-existing``, only
-# ``force:``, never set here.
+# ``force:``, never set here. The ``macos-26-intel`` leg uploads with the
+# anaconda-client CLI and ``--skip-existing`` instead (#2044).
 #
 # GitHub skips a job whose ``needs:`` skipped before evaluating its ``if:``,
 # unless the ``if:`` calls a status-check function, and ``github`` skips on
@@ -1214,14 +1215,63 @@ jobs:
         run: |
           "${pythonLocation}/bin/python" util/conda_vendor.py --smoke "$PCAPKIT_CONDA_PACKAGE"
 
+      # #2044: not on macos-26-intel, whose leg "Upload conda packages to
+      # Anaconda (Intel)" uploads instead.
       - name: Upload conda packages to Anaconda
-        if: ${{ steps.check_leg.outputs.PCAPKIT_LEG_EXISTS != 'true' }}
+        if: ${{ matrix.os != 'macos-26-intel' && steps.check_leg.outputs.PCAPKIT_LEG_EXISTS != 'true' }}
         uses: anaconda/actions/upload-package@a6f488910b4a1e4f3fe01736241ca1b92b4b355a # v0.3.1
         with:
           token: ${{ secrets.ANACONDA_TOKEN }}
           channel: jarryshaw
           packages: ${{ steps.conda_build.outputs.packages }}
           labels: ${{ needs.version_check.outputs.PCAPKIT_CONDA_LABEL }}
+
+      # #2044: upload-package v0.3.1 installs its CLI from
+      # anaconda.sh/releases/stable/v0.2.1/ana-darwin-x86_64, which returns 404,
+      # so the Intel leg runs the call the action makes -- `anaconda --token
+      # upload --user`, with the same channel, labels and files and the new CLI
+      # parser -- from conda-forge's anaconda-client in base. One difference:
+      # `--skip-existing`, so a file anaconda.org already has is skipped where
+      # the action, with no `force:`, fails on it. "Check whether this leg is
+      # already on Anaconda" still gates both.
+      - name: Upload conda packages to Anaconda (Intel)
+        if: ${{ matrix.os == 'macos-26-intel' && steps.check_leg.outputs.PCAPKIT_LEG_EXISTS != 'true' }}
+        shell: bash
+        env:
+          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
+          ANACONDA_CLI_FORCE_NEW: "1"
+          PCAPKIT_CONDA_CHANNEL: jarryshaw
+          PCAPKIT_CONDA_PACKAGES: ${{ steps.conda_build.outputs.packages }}
+          PCAPKIT_CONDA_LABELS: ${{ needs.version_check.outputs.PCAPKIT_CONDA_LABEL }}
+        run: |
+          set -euo pipefail
+
+          conda install -n base --override-channels -c conda-forge -y anaconda-client
+
+          # The action's handling of its `labels:` and `packages:` inputs: a
+          # comma-separated list, each trimmed, and the build step's
+          # newline-separated paths.
+          labels=()
+          IFS=',' read -ra names <<< "$PCAPKIT_CONDA_LABELS"
+          for name in ${names[@]+"${names[@]}"}; do
+            name="$(echo "$name" | xargs)"
+            if [ -n "$name" ]; then
+              labels+=(--label "$name")
+            fi
+          done
+          packages=()
+          while IFS= read -r path; do
+            if [ -n "$path" ]; then
+              packages+=("$path")
+            fi
+          done <<< "$PCAPKIT_CONDA_PACKAGES"
+          if [ "${#packages[@]}" -eq 0 ]; then
+            echo "::error::No conda packages to upload"
+            exit 1
+          fi
+
+          "${CONDA}/bin/anaconda" --token "$ANACONDA_API_TOKEN" upload \
+            --user "$PCAPKIT_CONDA_CHANNEL" --skip-existing ${labels[@]+"${labels[@]}"} "${packages[@]}"
 
       # ``pypi``'s upload script, for the same reasons (#1634, #1640). Not
       # gated on ``check_leg`` as the Anaconda upload is: a leg whose Anaconda

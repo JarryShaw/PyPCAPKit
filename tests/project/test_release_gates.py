@@ -274,6 +274,9 @@ WORKFLOW = ROOT / '.github' / 'workflows' / 'create-release.yml'
 PUBLISHING_MARKERS = {
     'pypa/gh-action-pypi-publish': 'uploads a distribution to PyPI or TestPyPI',
     'anaconda/actions/upload-package': 'uploads a package to anaconda.org',
+    # #2044: the ``macos-26-intel`` leg's ``anaconda … upload``, which calls the
+    # anaconda-client binary by path; a bare ``anaconda`` on ``PATH`` is not matched.
+    '/bin/anaconda"': 'uploads a package to anaconda.org with the anaconda-client CLI',
     'softprops/action-gh-release': 'creates a public GitHub Release, and the tag it names',
     # ``pypi`` and ``conda`` attach their files this way since #1634.
     'gh release upload': 'attaches a file to a public GitHub Release',
@@ -4078,7 +4081,7 @@ class TestCondaBumpIsTaggedAndUploaded(CondaWorkflowMixin, unittest.TestCase):
         self.assertIn('ncipollo/release-action', block)
         self.assertEqual(
             sorted(publishing_reasons(block)),
-            ['uploads a package to anaconda.org'],
+            ['uploads a package to anaconda.org', 'uploads a package to anaconda.org with the anaconda-client CLI'],
             'the publishing markers no longer recognise what `conda-dist` does; '
             'see PUBLISHING_MARKERS, which is an allowlist and says nothing about '
             'a route it does not name',

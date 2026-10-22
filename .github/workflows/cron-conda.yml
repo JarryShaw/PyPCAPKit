@@ -562,7 +562,10 @@ jobs:
         run: |
           "${pythonLocation}/bin/python" util/conda_vendor.py --smoke "$PCAPKIT_CONDA_PACKAGE"
 
+      # #2044: not on macos-26-intel, whose leg "Upload conda packages to
+      # Anaconda (Intel)" uploads instead.
       - name: Upload conda packages to Anaconda
+        if: ${{ matrix.os != 'macos-26-intel' }}
         uses: anaconda/actions/upload-package@a6f488910b4a1e4f3fe01736241ca1b92b4b355a # v0.3.1
         with:
           token: ${{ secrets.ANACONDA_TOKEN }}
@@ -570,6 +573,48 @@ jobs:
           packages: ${{ steps.conda_build.outputs.packages }}
           labels: ${{ needs.conda-update.outputs.PCAPKIT_CONDA_LABEL }}
           force: true
+
+      # #2044: see create-release.yml's step of the same name. One difference
+      # from the action here: `--skip-existing` keeps a file anaconda.org
+      # already has, where the action's `force: true` replaces it.
+      - name: Upload conda packages to Anaconda (Intel)
+        if: ${{ matrix.os == 'macos-26-intel' }}
+        shell: bash
+        env:
+          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
+          ANACONDA_CLI_FORCE_NEW: "1"
+          PCAPKIT_CONDA_CHANNEL: jarryshaw
+          PCAPKIT_CONDA_PACKAGES: ${{ steps.conda_build.outputs.packages }}
+          PCAPKIT_CONDA_LABELS: ${{ needs.conda-update.outputs.PCAPKIT_CONDA_LABEL }}
+        run: |
+          set -euo pipefail
+
+          conda install -n base --override-channels -c conda-forge -y anaconda-client
+
+          # The action's handling of its `labels:` and `packages:` inputs: a
+          # comma-separated list, each trimmed, and the build step's
+          # newline-separated paths.
+          labels=()
+          IFS=',' read -ra names <<< "$PCAPKIT_CONDA_LABELS"
+          for name in ${names[@]+"${names[@]}"}; do
+            name="$(echo "$name" | xargs)"
+            if [ -n "$name" ]; then
+              labels+=(--label "$name")
+            fi
+          done
+          packages=()
+          while IFS= read -r path; do
+            if [ -n "$path" ]; then
+              packages+=("$path")
+            fi
+          done <<< "$PCAPKIT_CONDA_PACKAGES"
+          if [ "${#packages[@]}" -eq 0 ]; then
+            echo "::error::No conda packages to upload"
+            exit 1
+          fi
+
+          "${CONDA}/bin/anaconda" --token "$ANACONDA_API_TOKEN" upload \
+            --user "$PCAPKIT_CONDA_CHANNEL" --skip-existing ${labels[@]+"${labels[@]}"} "${packages[@]}"
 
       # #1634: the upload below never makes the release. ncipollo/release-action
       # v1.21.0 creates a missing one, and its tag, at ``commit``
