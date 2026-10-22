@@ -21,38 +21,28 @@ on:
 permissions:
   contents: read
 
-# Only pull-request runs may be superseded. Keying every event on the ref (as
-# this did) coalesces all of main's pushes into one group, and GitHub cancels a
-# *pending* run whenever a newer one joins the group -- `cancel-in-progress:
-# false` protects a run that has already started, never one still queued. Merging
-# two PRs a minute apart therefore left the first commit with no unit tests at
-# all: measured on run 34970682137 for e0f0160a3, which finished `cancelled` with
-# zero jobs one second after the next push's run was created. Keying non-PR
-# events on the run id gives each commit its own group.
+# Only pull-request runs may be superseded. GitHub cancels a *pending* run
+# whenever a newer one joins its group -- `cancel-in-progress: false` protects
+# only a started one -- so a ref-keyed group on main left a commit with no unit
+# tests at all (run 34970682137). Other events key on the run id instead.
 #
-# `github.workflow` is the *caller's* workflow name inside a called workflow, and
-# `github.run_id` is the caller's run id too, so the literal `unit-tests-` prefix
-# is what stops a called run from sharing a group with the caller that invoked it
-# -- if they shared one, the callee would sit pending behind its own caller and
-# deadlock.
+# Inside a called workflow `github.workflow` and `github.run_id` are the
+# caller's, so the literal `unit-tests-` prefix keeps a called run out of its
+# caller's group, where it would wait behind the caller and deadlock.
 concurrency:
   group: unit-tests-${{ github.workflow }}-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 jobs:
-  # #1660: the Python versions, from .github/python-versions.toml. The matrix
-  # jobs below read theirs from here with `fromJSON`, and `gate` reads `latest`
-  # for its name. util/python_versions.py needs only the standard library, so
-  # the runner's own `python3` runs it, against a checkout of those two files:
-  # its tomllib needs 3.11, and each image that runs it has 3.12 or newer (the
-  # script's docstring names each one's).
-  # Runs on every path, `gate-only` included, and asks for no write permission,
-  # since this file is a reusable workflow whose callers grant `contents: read`.
+  # #1660: the Python versions, from .github/python-versions.toml, for the
+  # matrix jobs' `fromJSON` and `gate`'s name. util/python_versions.py needs
+  # only the standard library, so the image's `python3` runs it (its tomllib
+  # needs 3.11). Runs on every path, `gate-only` included, with no write
+  # permission, since callers of this reusable workflow grant `contents: read`.
   #
   # The other single-interpreter jobs (`unittest-ordering`, `changelog`,
-  # `project-tests`) run the same script in a step of their own, which leaves
-  # their `needs:` and `if:` as they were. setup-python takes an empty
-  # `python-version` as "the Python on PATH", with only a warning, so
+  # `project-tests`) run the script in a step of their own: setup-python takes
+  # an empty `python-version` as "the Python on PATH", with only a warning, so
   # `unittest-ordering`'s `!cancelled()` would otherwise need a check that this
   # job succeeded.
   python-versions:
@@ -86,12 +76,9 @@ jobs:
         run: python3 util/python_versions.py --github-output
 
   test:
-    # `github.event_name` is NOT 'workflow_call' inside a called workflow --
-    # the github context is inherited from the caller, so it reads
-    # 'pull_request', 'push', 'schedule' or 'workflow_run'. Guarding on it (as
-    # this workflow used to) therefore ran the whole matrix in every caller
-    # and skipped the gate everywhere. An input is the only reliable way for a
-    # reusable workflow to know how it was invoked.
+    # `github.event_name` is never 'workflow_call' inside a called workflow,
+    # whose github context is the caller's, so an input is the only reliable
+    # way for a reusable workflow to know how it was invoked.
     name: Python ${{ matrix.python-version }}
     if: ${{ inputs.gate-only != true && needs.changes.outputs.code != 'false' }}
     needs: [changes, python-versions]
@@ -105,25 +92,14 @@ jobs:
     strategy:
       fail-fast: false
       # #1660: .github/python-versions.toml's supported tier, CPython's then
-      # PyPy's, through the `python-versions` job, as the `python-version`
-      # axis; it blocks through `required-checks` (#1633). `include` marks one
-      # leg `coverage: true`. The KTLO legs are `test-ktlo`'s (#1738).
+      # PyPy's; it blocks through `required-checks` (#1633). The KTLO legs are
+      # `test-ktlo`'s (#1738), and the experimental tier is experimental.yml's,
+      # so nothing here waits on it (#1732). #1958, the owner's ruling E: PyPy's
+      # legs run the same `ALL` tier as every CPython leg but `latest`.
       #
-      # #1958, the owner's ruling E: every implementation runs the same `ALL`
-      # tier, so PyPy's legs run it as every CPython leg but `latest` does,
-      # here and in `integration`. A supported PyPy leg is one more leg of a
-      # job `required-checks` needs, so it blocks with no context of its own
-      # for the ruleset to name, and a KTLO one is `test-ktlo`'s.
-      #
-      # Exactly one leg runs under coverage, so measuring it adds no leg to
-      # the queue. It is `latest`, the newest supported version, like every
-      # single-interpreter job (#1661). Uncovered, 3.15's tests step took a
-      # median 8.1 minutes (max 10.4) in runs 38428091094-38433484101, and
-      # coverage cost 1.8x on 3.15 locally (2.0x on 3.14): a step of about
-      # 15-19 minutes under the job's 45.
-      #
-      # The experimental tier (#1660) runs in experimental.yml, a workflow of
-      # its own, so that nothing here waits on it (#1732).
+      # `include` marks one leg `coverage: true`, `latest` (#1661), so coverage
+      # adds no leg to the queue. Uncovered, 3.15's tests step took a median
+      # 8.1 minutes and coverage cost about 1.8x, which fits the job's 45.
       matrix: ${{ fromJSON(needs.python-versions.outputs.test) }}
 
     # `&test-steps`: `test-ktlo` runs these same steps, by YAML alias.
@@ -139,39 +115,13 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
 
-      # The DPKT extra is here so the tests gated on it (test_dpkt_unit.py,
-      # test_misc.py, test_extraction.py and test_core.py among them) execute
-      # instead of skipping -- see #729. It is a small, pure-Python
-      # dependency (measured clean installs on 3.10-3.14), so it costs
-      # nothing per leg and adds no new job or leg, unlike Scapy below.
-      #
-      # crypto (cryptography) and NGAP (pycrate) join it for the same reason,
-      # covering #738's remaining HAS_CRYPTO gate (test_esp_unit.py) and its
-      # HAS_PYCRATE gate (test_ngap_unit.py), both plain
-      # unit-tier. `cli` (emoji) is deliberately not on this line: its only
-      # HAS_EMOJI-gated tests are in tests/integration/test_cli_subprocess.py,
-      # which this job ignores wholesale, so installing it here would unlock
-      # nothing. The `latest` leg gets it from the whole-suite step below
-      # (#1958), whose set every `latest` job shares, and there too it unlocks
-      # nothing in this job. cryptography is the one compiled wheel of the two; measured
-      # clean installs on 3.10-3.14 (manylinux wheels, no build step). pycrate
-      # is pure Python but its distribution is large (~238MB, see the NGAP
-      # extra's comment in pyproject.toml) -- still cheap in wall time, just not
-      # "a second" cheap. On PyPy 8.0, which setup-python's `pypy3.11` is,
-      # PyPI has no Linux wheel of cryptography, so pip builds it with the
-      # image's Rust and libssl-dev (#1958).
-      #
-      # PyPCAPFile (pypcapfile) is deliberately NOT here. It used to be kept off
-      # every job in this file: on 3.10/3.11 (where its
-      # `python_version < '3.12'` marker lets it install), installing it turned
-      # most of the HAS_PYPCAPFILE-gated methods of the time
-      # into failures, against a real bug in pcapkit/toolkit/pypcapfile.py's
-      # handling of pypcapfile 0.12.0's `IP.src`/`IP.dst`. #743 and #746 fixed
-      # that bug, and #751 gave the extra a home: the dedicated
-      # `engine-tests` and `pypcap-parity` jobs below install it, covering the
-      # HAS_PYPCAPFILE-gated methods between them, deliberately apart from
-      # this job rather than added to it -- see either job's own comment for
-      # why.
+      # DPKT (#729), crypto and NGAP (#738) are here so the unit-tier tests
+      # gated on them run instead of skipping; all three install cleanly. On
+      # PyPy 8.0 PyPI has no Linux wheel of cryptography, so pip builds it with
+      # the image's Rust and libssl-dev (#1958). `cli` (emoji) is not here: its
+      # only gated tests are in tests/integration, which this job ignores.
+      # PyPCAPFile is not here either: #751's `engine-tests` and
+      # `pypcap-parity` jobs cover its gated methods.
       #
       # #1633: a KTLO leg that cannot install -- such as 3.7 -- fails fast and
       # once: util/pip_install.py writes one annotation naming pip's last ERROR
@@ -190,11 +140,8 @@ jobs:
         run: python util/pip_install.py -e '.[test,DPKT,crypto,NGAP]'
 
       # #1958, the owner's ruling E: latest CPython runs the whole suite, so its
-      # leg installs everything the suite gates on that pip can install there --
-      # the engines (Scapy, PyShark), html5lib through `vendor`, Sphinx and the
-      # pinned sphinx-autodoc-typehints through `docs`, emoji through `cli`. The
-      # tests those gate skip on every other leg, which runs the minimal `ALL`
-      # tier. tests/_dependency_gates.py reads this line as the `latest` leg's
+      # leg installs everything the suite gates on that pip can install there.
+      # tests/_dependency_gates.py reads this line as the `latest` leg's
       # extras; tests/project/test_whole_suite_on_latest_1958.py pins it to the
       # same set as `integration`, `project-tests` and `gate`. Not here: PCAP_CT,
       # which needs a system libpcap that `engine-tests` installs for its own
@@ -212,9 +159,7 @@ jobs:
         if: ${{ matrix.coverage }}
         run: python -m pip install 'coverage>=7.10'
 
-      # `-n auto` resolves to whatever this runner reports, and nothing else in
-      # the log says what that was -- print it so the number `-n auto` picked
-      # is a measured fact instead of an assumption about runner size.
+      # Nothing else in the log says what `-n auto` resolved to on this runner.
       - name: Report available parallelism
         id: parallelism
         if: ${{ steps.install.outcome == 'success' }}
@@ -227,42 +172,28 @@ jobs:
         id: tests
         if: ${{ steps.install.outcome == 'success' }}
         continue-on-error: ${{ matrix.ktlo == true }}
-        # `--dist load` is pinned explicitly rather than left to default: a
-        # future change to xdist's own default, or someone "optimising" to
-        # `loadfile`/`loadscope`, cannot silently change how this suite is
-        # distributed. The durations table and JUnit file are #1538's per-test
-        # timings, uploaded by the last step of this job.
+        # `--dist load` is pinned explicitly, so a change to xdist's default
+        # cannot silently change how this suite is distributed. The durations
+        # table and JUnit file are #1538's per-test timings.
         #
         # #1958, the test tiers: tests/_tiers.py's module_tier() puts every test
         # module in `ALL`, a curated list each stating `__tier__ = 'ALL'` (#1963),
         # or else in `LATEST`, and `LATEST` runs on `latest`
-        # alone, which is also the coverage leg, so coverage keeps its
-        # selection. Every other leg -- `test-ktlo`'s too, as it runs these
-        # steps -- passes each module latest_tier_paths() prints as an
-        # `--ignore`, as experimental.yml's legs do. That takes in the
-        # round-trip sweeps (#1732), each marked `LATEST`; the hand-picked
-        # round trips are `ALL`.
+        # alone, which is also the coverage leg. Every other leg -- `test-ktlo`'s
+        # too -- passes each module latest_tier_paths() prints as an `--ignore`,
+        # which takes in the round-trip sweeps (#1732).
         #
-        # #1954, the owner's option 3: the project pins -- the tests/project
-        # modules whose run does not vary by interpreter, tests/_tiers.py's
-        # project_pin_paths(), each of them `LATEST` -- run once per push, in
-        # `project-tests`, so `latest` passes each as an `--ignore` too. The pins
-        # import no pcapkit, so coverage loses nothing. Both lists are asked of
-        # tests/_tiers.py at run time rather than listed, as `integration` asks
-        # for its selection.
+        # #1954, the owner's option 3: the project pins, tests/_tiers.py's
+        # project_pin_paths(), run once per push in `project-tests`, so `latest`
+        # passes each as an `--ignore` too. They import no pcapkit, so coverage
+        # loses nothing.
         #
-        # #2005: on PyPy an xdist worker keeps what each test leaves behind, so
-        # its RSS grows with every test it runs, never in a few heavy modules:
-        # at `-n 4` the `ALL` tier took each worker to 5.4-5.9 GB and them all
-        # past 20 GB, measured on PyPy 8.0.1, where a 14 GB cap OOM-killed them
-        # and a 3 GB `PYPY_GC_MAX` raised MemoryError instead. A smaller `-n`
-        # only hands each worker more tests. So on a PyPy leg util/pytest_shards.py
-        # runs pytest once per directory `SHARDS` names, then once more over the
-        # rest, ignoring each of them, and every run starts its workers afresh:
-        # the largest, with tests/protocols, peaked at 2.6 GB a worker and 8.5 GB
-        # in all, and the tier took 383 s rather than 493 s. Each run but the
-        # last writes a JUnit file of its own, beside junit.xml; the step fails
-        # if any run did.
+        # #2005: on PyPy an xdist worker's RSS grows with every test it runs, so
+        # the `ALL` tier took the workers past 20 GB. A smaller `-n` only hands
+        # each worker more tests. So on a PyPy leg util/pytest_shards.py runs
+        # pytest once per directory `SHARDS` names, then once over the rest,
+        # and every run starts its workers afresh. Each run but the last writes
+        # a JUnit file of its own, beside junit.xml; the step fails if any did.
         env:
           COVERAGE: ${{ matrix.coverage }}
           LATEST: ${{ matrix.python-version == needs.python-versions.outputs.latest }}
@@ -296,14 +227,11 @@ jobs:
             python util/cap_file_size.py python -m pytest "$@"
           fi
 
-      # util/coverage_report.py (#1967): it fails, posting no number, unless every
-      # measured process saved its data (#1387), then combines it. The table goes
-      # to the job summary. The numbers also go to an artifact
-      # that coverage-comment.yml renders as a PR comment once this run
-      # completes; that comment cannot be posted from here, because this file is
-      # also a reusable workflow and its callers grant only `contents: read`.
-      # `!cancelled()` so a failing test still reports what it measured, and
-      # says the tests failed in the first line.
+      # util/coverage_report.py (#1967) fails, posting no number, unless every
+      # measured process saved its data (#1387). coverage-comment.yml posts the
+      # PR comment from the artifact, since callers of this reusable workflow
+      # grant only `contents: read`. `!cancelled()` so a failing test still
+      # reports what it measured.
       - name: Report coverage
         if: ${{ !cancelled() && matrix.coverage }}
         shell: bash
@@ -313,12 +241,9 @@ jobs:
           TESTS_OUTCOME: ${{ steps.tests.outcome }}
         run: python util/coverage_report.py
 
-      # #1423: the guard above fires on runs whose tests all pass, and the only
-      # record of what became of the lost process is this log -- it carries each
-      # measured process's command line, its parent, and the `atexit:` line
-      # coverage writes as it saves. Reading it off the runner is impossible once
-      # the job ends, so keep it whenever the leg ran, not only on failure: a run
-      # that passed is the baseline the failing one has to be read against.
+      # #1423: this log is the only record of a measured process that saved no
+      # data. Kept whenever the leg ran, not only on failure: a run that passed
+      # is the baseline the failing one has to be read against.
       - name: Upload coverage process log
         if: ${{ !cancelled() && matrix.coverage }}
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -344,12 +269,9 @@ jobs:
           path: coverage-comment/coverage-summary.json
           retention-days: 7
 
-      # #1538: the weekly CI Timing review (ci-timing.yml) reads this from the
-      # newest push runs. One artifact per leg, so the name carries the version.
-      # `continue-on-error` because the file is only diagnostic: an artifact
-      # service outage must not fail a leg that `Required checks passed` needs.
-      # The glob takes a PyPy leg's JUnit file per run too (#2005); a CPython
-      # leg writes junit.xml alone.
+      # #1538: ci-timing.yml reads these from the newest push runs. Diagnostic
+      # only, so an artifact service outage must not fail a gating leg. The glob
+      # takes a PyPy leg's JUnit file per run too (#2005).
       - name: Upload test timings
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         continue-on-error: true
@@ -359,21 +281,15 @@ jobs:
           path: ${{ runner.temp }}/junit*.xml
           retention-days: 14
 
-      # #1672: the KTLO leg's report, and the last step of every KTLO matrix
-      # job, in one script, util/leg_summary.py (#1967). Each step above that
-      # can fail on a KTLO leg has an `id` and `continue-on-error: ${{
-      # matrix.ktlo == true }}`, so its failure leaves the job, and
-      # `required-checks`, at success. This step makes the failure visible
-      # again: one warning and one job-summary line per failed step.
-      # `toJSON(steps)` holds each step above with an `id`, and its `outcome` is
-      # the result before `continue-on-error` applied. It runs on the image's
-      # /usr/bin/python3, not the leg's, which may have failed to set up. A
-      # step masked on every leg, as the timings upload is, is not KTLO's to
-      # report. Not removable here: the error the
-      # runner itself records for a failed `run:` step, `Process completed with
-      # exit code N.`, whatever its `continue-on-error` (actions/runner
-      # src/Runner.Worker/Handlers/ScriptHandler.cs:354, at 5f0b3ddcc), and an
-      # action's own error. Neither changes the job's conclusion.
+      # #1672: the last step of every KTLO matrix job, util/leg_summary.py
+      # (#1967). Each step above that can fail on a KTLO leg has an `id` and
+      # `continue-on-error: ${{ matrix.ktlo == true }}`, so its failure leaves
+      # the job at success; this step makes it visible again, one warning and
+      # one job-summary line per failed step, from each `outcome` in
+      # `toJSON(steps)`. It runs on the image's /usr/bin/python3, as the leg's
+      # may have failed to set up. The runner's own `Process completed with
+      # exit code N.` error for a failed `run:` step cannot be removed, but
+      # does not change the job's conclusion.
       - name: KTLO summary
         if: ${{ !cancelled() && matrix.ktlo == true }}
         continue-on-error: ${{ matrix.ktlo == true }}
@@ -387,27 +303,17 @@ jobs:
   # never block. #1738, the owner's option A: their legs are this job's, not
   # `test`'s, and neither `required-checks` nor `unittest-ordering` `needs:`
   # it, so a failure no step can contain -- a lost runner, the job cap --
-  # fails nothing that gates. The steps are `test`'s, by YAML alias
-  # (docs.github.com, Reusing workflow configurations, "YAML anchors and
-  # aliases"), and each that can fail on a KTLO leg carries
-  # `continue-on-error: ${{ matrix.ktlo == true }}`, so the leg concludes
-  # success, its annotations are warnings, and `KTLO summary`, the last step,
-  # reports each failed step as a warning (#1672). The job-level
-  # `continue-on-error` is the backstop for the rest: it "Prevents a workflow
-  # run from failing when a job fails" (docs.github.com, Workflow syntax,
-  # `jobs.<job_id>.continue-on-error`), as on experimental.yml's job, so the
-  # Unit Tests run its `workflow_run` consumers read stays green.
+  # fails nothing that gates. The steps are `test`'s, by YAML alias, so the
+  # leg concludes success and `KTLO summary` reports each failed step as a
+  # warning (#1672). The job-level `continue-on-error` is the backstop for the
+  # rest, so the Unit Tests run its `workflow_run` consumers read stays green.
   #
   # A version `ubuntu-latest` cannot provide carries its `runner` from the
-  # file as `os`: 3.8 and 3.9 need ubuntu-24.04, as setup-python has no Ubuntu
-  # 26.04 build of either and `ubuntu-latest` moves to 26.04 from 2026-10-19.
-  # 3.7 needs ubuntu-22.04, the newest image setup-python builds it for
-  # (3.7.17). It cannot install -- the `test` extra's `pytest>=8` needs
-  # 3.8, and the sources use syntax 3.7 cannot parse -- so the leg stops at
-  # its install step, with one annotation naming pip's reason (see that step).
-  # ubuntu-22.04 is deprecated: brownouts from 2027-03-23, retirement on
-  # 2027-04-17 (actions/runner-images#14254); a brownout fails the leg before
-  # any step runs, which only the job-level guard contains.
+  # file as `os`: 3.8 and 3.9 need ubuntu-24.04, and 3.7 ubuntu-22.04, the
+  # newest image setup-python builds them for. 3.7 cannot install -- the `test`
+  # extra's `pytest>=8` needs 3.8 -- so the leg stops at its install step.
+  # ubuntu-22.04 is deprecated (actions/runner-images#14254); a brownout fails
+  # the leg before any step runs, which only the job-level guard contains.
   test-ktlo:
     name: Python ${{ matrix.python-version }} (KTLO)
     if: ${{ inputs.gate-only != true && needs.changes.outputs.code != 'false' }}
@@ -450,30 +356,12 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
 
-      # The Scapy extra is there for examples/generators/pcap.py and legacy.py,
-      # which build their captures with scapy; examples/generators/pcapng.py needs
-      # requests (#1894), from the test extra, and pcapkit itself, which it uses
-      # to parse each fixture back. DPKT joins it so the dpkt-gated methods
-      # living under tests/integration/ (test_engine_parity.py,
-      # test_engine_runtime.py) actually run here instead of skipping -- see
-      # #729; same reasoning as the `test` job above.
-      #
-      # `cli` (emoji) joins it for one of #738's remaining gates. This job's
-      # selection (tests/_tiers.py's fixture_tier_paths()) always includes the
-      # whole of tests/integration/ -- which is where every HAS_EMOJI-gated
-      # method lives (test_cli_subprocess.py). `crypto` and `NGAP`
-      # are deliberately not on this line: test_esp_unit.py and test_ngap_unit.py
-      # are plain unit-tier and never enter this job's selection, so installing
-      # cryptography/pycrate here would unlock nothing -- they are already
-      # covered, on every Python version, by the `test` job above. The `latest`
-      # leg gets both from the whole-suite step below (#1958), whose set every
-      # `latest` job shares, and there too they unlock nothing in this job.
-      # PyPCAPFile is NOT added here either, even though this job's selection
-      # also reaches test_new_engine_parity_runtime.py's HAS_PYPCAPFILE
-      # methods -- see the `test` job's comment above for the bug that used to
-      # make installing it here a regression, fixed by #743/#746. #751's
-      # `pypcap-parity` job below covers those methods instead, on the same
-      # fixture-tier selection as this job but in a venv of its own.
+      # Scapy builds examples/generators/pcap.py's and legacy.py's captures;
+      # pcapng.py needs requests (#1894), from the test extra. DPKT (#729) and
+      # `cli` (#738) unlock the gated methods under tests/integration, which
+      # this job's selection always includes. `crypto` and `NGAP` gate only
+      # unit-tier modules, which `test` runs. PyPCAPFile's methods here are
+      # #751's `pypcap-parity` job's, in a venv of its own.
       #
       # A KTLO leg that cannot install stops here, as in the `test` job above.
       - name: Install package, test and generator dependencies
@@ -511,31 +399,21 @@ jobs:
           nproc
           python -c "import os; print('cpu_count', os.cpu_count())"
 
-      # The ``test`` job above already ran every unit-tier test for real, on this
-      # same commit. Re-running them here (a bare ``pytest -q`` used to) bought
-      # no signal and cost ~21.75 minutes per Python version -- ~130 minutes per
-      # PR push across the matrix (see #715). So this selects only the
-      # fixture-dependent tier plus the unit-tier modules whose
-      # capture read is skipped, not exercised, in the `test` job -- see
-      # tests/_tiers.py's module docstring and fixture_tier_paths() for why a
-      # module can be unit-tier by path and still belong here. The selection is
-      # not spelled out as literal flags: it is asked of tests/_tiers.py
-      # directly (FIXTURE_TIER_SELECTOR), so this step and that module cannot
-      # drift the way two independent copies of the same list could.
+      # `test` already ran every unit-tier test on this commit, so this selects
+      # only the fixture-dependent tier plus the unit-tier modules whose capture
+      # read `test` skips (#715; see tests/_tiers.py's fixture_tier_paths()).
+      # The selection is asked of tests/_tiers.py (FIXTURE_TIER_SELECTOR) so the
+      # two cannot drift, and a failure to compute it never falls back to a
+      # bare `pytest -q`, which would silently re-run the whole suite.
       #
-      # A failure to compute the selection intentionally does not fall back to
-      # a bare `pytest -q` -- that would silently re-introduce the whole-suite
-      # duplication this selection exists to remove, with nothing in the log to
-      # say so. `--dist load` is pinned explicitly; see the `test` job above
-      # for why.
+      # #1958, the test tiers: the fixture tier's `LATEST` modules run on
+      # `latest` alone. Every other leg asks for the `ALL` tier's part,
+      # FIXTURE_ALL_TIER_SELECTOR, which replaces a directory holding a `LATEST`
+      # module by its `ALL` ones, since pytest applies no ignore to a path it
+      # was handed.
       #
-      # #1958, the test tiers: the fixture tier's `LATEST` modules, the sweeps
-      # over every capture among them, run on `latest` alone, as `test`'s do.
-      # Every other leg asks for the `ALL` tier's part of the selection,
-      # FIXTURE_ALL_TIER_SELECTOR, which drops each `LATEST` path and node ID
-      # and replaces a directory holding a `LATEST` module by its `ALL` ones,
-      # since pytest applies no ignore to a path it was handed (`Dir.collect`
-      # asks `isinitpath` first, _pytest/main.py:564-584, pytest 9.1.1).
+      # `read -ra` splits the selection on whitespace, as an unquoted
+      # expansion would, but with no pathname expansion of a node ID.
       - name: Run full test suite
         id: suite
         if: ${{ steps.install.outcome == 'success' }}
@@ -559,10 +437,9 @@ jobs:
             exit 1
           fi
           echo "Fixture-dependent selection: $selection"
-          # shellcheck disable=SC2086
-          set -- $selection
+          read -ra selection <<< "$selection"
           python util/cap_file_size.py python -m pytest -q -n auto --dist load \
-            --durations=30 --durations-min=1.0 --junitxml="$RUNNER_TEMP/junit.xml" "$@"
+            --durations=30 --durations-min=1.0 --junitxml="$RUNNER_TEMP/junit.xml" "${selection[@]}"
 
       # See the `test` job's step of the same name.
       - name: Upload test timings
@@ -600,71 +477,40 @@ jobs:
     steps: *integration-steps
 
   # Per-engine coverage for the third-party capture engines (#845): every
-  # (Python version, engine) pair is checked, and a failure -- or a correctly
-  # asserted decline -- names the one engine and interpreter responsible. Each
-  # pair ("cell") resolves to one of these expected outcomes, decided by the
-  # cell script's `expect` case below (anything not listed there is
-  # `supported`):
+  # (Python version, engine) cell resolves to one outcome, decided by the cell
+  # script's `expect` case below (anything not listed there is `supported`):
   #
-  #   * `supported`    -- the engine installs via its normal pyproject.toml
-  #                        extra and its dedicated unit-tier tests must
-  #                        actually pass, proving this engine ran.
-  #   * `unsupported`  -- the engine is installable on this interpreter but
-  #                        its own PYTHON_CEILING means it declines at run
-  #                        time (PyShark on 3.14+; PyPCAPFile on 3.12+, whose
-  #                        pip marker would otherwise stop it ever installing
-  #                        here -- so the cell installs the raw distribution
-  #                        past that marker, deliberately, rather than via the
-  #                        extra). The same test files run; their own
-  #                        version-aware assertions (e.g.
-  #                        PyPCAPFile's test_unsupported_reason_tracks_the_running_interpreter)
-  #                        are what prove the decline actually fired and named
-  #                        the interpreter, rather than merely skipping.
-  #   * `not-installable` -- PyPCAP on 3.12+: a C-extension build failure, not
-  #                        a runtime refusal (no wheel; pcap.c does not
-  #                        compile against the 3.12+ C API -- PyPCAP carries
-  #                        no PYTHON_CEILING at all, so there is no decline to
-  #                        assert). The cell still installs the raw
-  #                        distribution past pyproject.toml's marker to prove
-  #                        the failure is real rather than assumed, and treats
-  #                        that failure as the expected, passing outcome --
-  #                        distinctly logged via `::notice`, never silently
-  #                        green and never red for the wrong reason. If it
-  #                        ever starts building, the cell fails loudly.
+  #   * `supported`       -- installs through its pyproject.toml extra, and
+  #                          its dedicated unit-tier tests must pass.
+  #   * `unsupported`     -- installable, but its PYTHON_CEILING declines it at
+  #                          run time (PyShark on 3.14+, PyPCAPFile on 3.12+).
+  #                          The raw distribution is installed past the extra's
+  #                          marker, and the same tests' version-aware
+  #                          assertions prove the decline fired.
+  #   * `not-installable` -- PyPCAP on 3.12+: pcap.c does not compile against
+  #                          the 3.12+ C API. The raw distribution is installed
+  #                          past the marker to prove the failure is real, and
+  #                          that failure is the expected outcome, logged as a
+  #                          `::notice`; if it ever builds, the cell fails.
   #
-  # One job per engine loops over its interpreters, each in a fresh venv,
-  # rather than one job per cell (one engine on one Python): the queue,
-  # not the runners, is the bottleneck, and a job per cell would pay checkout,
-  # setup and apt for a minute of work. One job per *engine* rather than per Python
-  # because the engine is what varies the environment: the apt packages
-  # are per engine (installed once per job, not once per interpreter), and pcap-ct
-  # and pypcap both install a top-level `pcap` module, so a per-Python job
-  # looping over engines would need a fresh venv per engine anyway while also
-  # carrying every engine's system packages. It also keeps `matrix.engine` as
-  # the one matrix axis, which is what tests/_dependency_gates.py's
-  # _engine_matrix_variants() reads this job as. The cell script below is one
-  # cell's install-and-test logic, run once per interpreter as its own process
-  # (so `set -e` holds inside it), under a `::group::` named for the cell, with
-  # every annotation titled by engine and Python version and a per-cell row in
-  # the job summary.
+  # One job per engine loops over its interpreters, each in a fresh venv: the
+  # queue is the bottleneck, so a job per cell would pay checkout, setup and
+  # apt for a minute of work, and the engine is what varies the environment
+  # (its apt packages, and pcap-ct and pypcap both installing a top-level
+  # `pcap`). tests/_dependency_gates.py's _engine_matrix_variants() reads
+  # `matrix.engine` as the one axis.
   #
-  # #1633 splits the interpreters into supported and KTLO tiers, read from
-  # .github/python-versions.toml by `python-versions` (#1660). The supported
-  # cells share one step, and any one of them failing fails the job. The KTLO
-  # cells (3.10 alone; see below) are end-of-life, still tested on every run,
-  # never blocking. They are a step of their own with step-level `continue-on-error:
-  # true` -- the treatment #845 gave the then-prerelease 3.15 cell -- so a KTLO
-  # failure is reported as warnings and a job-summary row (#1672) while the
-  # job, and `required-checks`, which reads its result, stay green. A version
-  # with a `runner` in that file is no cell here, since this job installs every
-  # interpreter on `ubuntu-latest`: so not 3.7-3.9, which setup-python builds
-  # for no Ubuntu 26.04. PCAP_CT's extra is also `>= '3.10'`.
+  # #1633: the supported cells share one step, and any one failing fails the
+  # job. The KTLO cells are a step of their own with step-level
+  # `continue-on-error: true`, so a KTLO failure is warnings and a job-summary
+  # row (#1672) while the job, and `required-checks`, stay green. A version
+  # with a `runner` in .github/python-versions.toml is no cell here, since this
+  # job installs every interpreter on `ubuntu-latest`.
   #
-  # Scoped deliberately out (#845): per-engine integration coverage (needs
-  # regenerated captures, so it stays in aggregate in `integration` and
-  # `pypcap-parity`), the multi-engine HAS_RUNTIME gate and the incidental
-  # crypto/NGAP/vendor coverage of the pre-#845 shared venv. #1538 dropped the
-  # DPKT cell: it ran only test_dpkt_unit.py, which `test` runs with DPKT.
+  # Scoped out (#845): per-engine integration coverage, which needs regenerated
+  # captures and stays in aggregate in `integration` and `pypcap-parity`, and
+  # the multi-engine HAS_RUNTIME gate. #1538 dropped the DPKT cell, which ran
+  # only what `test` runs.
   engine-tests:
     name: Engines (${{ matrix.engine }})
     if: ${{ inputs.gate-only != true && needs.changes.outputs.code != 'false' }}
@@ -691,12 +537,9 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      # Each interpreter is then reachable as `python3.X`. The KTLO ones are
-      # installed by a step of their own so that losing one cannot fail the
-      # job; it comes first because the last version installed is the default
-      # `python`, and is skipped when the tier has no cell here. The supported
-      # ones share the second step. Each output is one version per line, the
-      # list form setup-python reads.
+      # Each interpreter is then reachable as `python3.X`. The KTLO ones get a
+      # step of their own so that losing one cannot fail the job, first because
+      # the last version installed is the default `python`.
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         if: ${{ needs.python-versions.outputs.engine-ktlo != '' }}
         continue-on-error: true
@@ -707,75 +550,39 @@ jobs:
         with:
           python-version: ${{ needs.python-versions.outputs.engine-supported }}
 
-      # Only the engines that need a system package get one:
+      # Only the engines that need a system package get one: tshark, which
+      # PyShark wraps; libpcap0.8, which PCAP_CT's ctypes loader finds at run
+      # time; and PyPCAP's compiler and headers, on every cell -- the
+      # `not-installable` ones too, so their failure is a genuine compile
+      # failure rather than no compiler.
       #
-      # tshark: PyShark is a wrapper around it and does no parsing of its own.
-      # The debconf pre-seed stops tshark's postinst blocking on the "allow
-      # non-superusers to capture packets" prompt.
+      # #974: an apt stall used to eat the whole job, whose cap reports
+      # `cancelled` and so fails `Required checks passed`. Not `-o
+      # Acquire::Retries=3 -o Acquire::http::Timeout=30`, which #974 proposed:
+      # both are noble's defaults already, and that per-`select()` timeout never
+      # fires on a mirror that trickles. Hence `timeout(1)` around each apt
+      # command: 60s update, 180s install (#1306), two attempts, inside the
+      # 10-minute step cap, which stays the hang detector.
       #
-      # libpcap0.8: PCAP_CT's ctypes loader calls find_library("pcap") at run
-      # time; without it, PCAP_CT.unsupported_reason() degrades the engine to
-      # the default parser instead of running it.
+      # #1432: a slow mirror, not a dead one, then killed both attempts. So:
       #
-      # build-essential + libpcap-dev: PyPCAP compiles
-      # (pcap.c against libpcap's headers), on every cell -- including the
-      # `not-installable` ones, deliberately, so that failure is a genuine
-      # compile failure against the 3.12+ C API rather than merely "no
-      # compiler was present to try".
-      #
-      # `timeout-minutes` bounds the apt steps because an apt stall used to
-      # eat the whole job: per #974, a PCAP_CT cell fetched its InRelease
-      # metadata and then went silent for 29m52s until the job's own 30-minute
-      # cap killed it, which reports `cancelled` and so fails `Required checks
-      # passed` -- an unrelated mirror turning a green PR red. Deliberately
-      # *not* `-o Acquire::Retries=3 -o Acquire::http::Timeout=30`, which #974
-      # proposed: both are noble's defaults already (apt 2.8.3:
-      # `Acquire::Retries` 3 in apt-pkg/acquire-item.cc, `TimeOut(30)` in
-      # methods/basehttp.cc), and that per-`select()` timeout never fires on a
-      # mirror that trickles. Hence `timeout(1)` around each apt command: 60s
-      # update, 180s install (#1306), two attempts, 480s inside the 10-minute
-      # cap, which stays the hang detector. `dpkg --configure -a` precedes the
-      # retry.
-      #
-      # #1432: a slow mirror, not a dead one, kept failing it. On 2026-10-08
-      # `azure.archive.ubuntu.com` served ~75 kB/s (4.2 MB in 57s ahead of the
-      # 23.7 MB libwireshark17t64) while its indexes came at 4-10 MB/s, so
-      # `timeout 180` killed *both* attempts, three times (jobs 113323976331,
-      # 113470461084, 113485425256). tshark's 27.9 MB at that rate is ~380s,
-      # which no bound leaving two attempts inside the cap reaches, and the
-      # retry went back to the same mirror. So, around the unchanged install:
-      #
-      # * **The .deb files are cached** (`actions/cache`, which the read-only
-      #   token suffices for), so a warm run downloads nothing. The plan step
-      #   runs `apt-get update`, then keys on a digest of the `Inst` lines of
-      #   `apt-get install -s` -- every package and exact version this image
-      #   still lacks -- plus ImageOS, arch and APT_SET. Any new version
-      #   changes the key, so a stale set is never an exact hit. `restore-keys`
-      #   falls back to the newest older set for the same image and APT_SET;
+      # * **The .deb files are cached**, so a warm run downloads nothing. The
+      #   key is a digest of the `Inst` lines of `apt-get install -s` -- every
+      #   package and exact version this image still lacks -- plus ImageOS,
+      #   arch and APT_SET, so a stale set is never an exact hit. ImageVersion
+      #   is left out, or the weekly image rollout would force a cold miss.
       #   apt uses a cached file only when its size and hash match the signed
-      #   index and downloads the rest, and only the versions now installed are
-      #   collected into the new entry, by one job per key (APT_CACHE_SAVE).
-      #   ImageVersion is left out: the digest already moves when the image's
-      #   installed set does, and the weekly image rollout would otherwise force
-      #   a cold miss.
+      #   index, so a real install failure still fails on a hit.
       # * **On a miss, attempt 2 goes to another mirror.** apt fails over
-      #   within /etc/apt/apt-mirrors.txt (the image's `mirror+file:` list:
-      #   azure, then archive.ubuntu.com, then security.ubuntu.com) only on an
-      #   error, never on slowness, so azure is dropped from it before the
-      #   retry. apt keeps the killed attempt's partial file and resumes it
-      #   with `Range`/`If-Range`.
+      #   within /etc/apt/apt-mirrors.txt only on an error, never on slowness,
+      #   so azure is dropped from it before the retry.
       #
-      # A cache only supplies bytes apt verifies, and the install runs in full
-      # on a hit, so a real install failure still fails; a cache-service error
-      # is only a warning from actions/cache. The 180s bound is unchanged: with
-      # the above it binds only on a cold miss, and TestAptRetry in
-      # tests/project/test_unit_tests_queue.py pins it. APT_PACKAGES, the job's
-      # env, is what both the plan and the install read, so the key always
-      # describes the set installed.
+      # TestAptRetry in tests/project/test_unit_tests_queue.py pins the 180s
+      # bound. APT_PACKAGES, the job's env, is what both the plan and the
+      # install read, so the key always describes the set installed.
       #
       # The plan, seed, install and collect steps run util/apt_packages.py
-      # (#1967), which runs the commands above under `sudo` and writes the same
-      # annotations; its docstring says what each subcommand does. `pypcap-parity`
+      # (#1967); its docstring says what each subcommand does. `pypcap-parity`
       # runs the same steps; every body but the install's is identical to these.
       - name: Plan this engine's system packages
         id: apt-plan
@@ -835,32 +642,16 @@ jobs:
           path: ${{ runner.temp }}/apt-debs/*.deb
           key: ${{ steps.apt-plan.outputs.key }}
 
-      # The per-cell script: one (Python version, engine) cell, start to
-      # finish, in a venv of its own. Written to a file so each cell runs as a
-      # separate `bash` process -- `set -e` is suspended inside a function
-      # called from an `if`, so an inline function would let a failed install
-      # carry on silently.
+      # The per-cell script, one cell in a venv of its own. Written to a file so
+      # each cell runs as a separate `bash` process: `set -e` is suspended
+      # inside a function called from an `if`, so an inline function would let
+      # a failed install carry on silently.
       #
-      # `expect` decides not just the assertion but *how* the engine gets
-      # installed: `supported` uses the ordinary pyproject.toml extra, whose
-      # own marker (if any) already resolves to "install" on this Python
-      # version; `unsupported` and `not-installable` install the raw
-      # distribution directly, deliberately bypassing whichever marker would
-      # otherwise have skipped it silently (#845 finding 2).
-      #
-      # `set +e` is scoped to the one install command whose failure is
-      # sometimes expected. Upgrading pip and editable-installing this repo's
-      # `test` extra failing is never expected on any cell, so those run under
-      # the script's `set -eu` (#845's cross-review: running them unchecked
-      # once let a broken base install on a `not-installable` cell read as
-      # "expected").
-      #
-      # Runs the SAME test files whether `expect` is `supported` or
-      # `unsupported`: the difference is in what those files assert once they
-      # see this interpreter's version (PyPCAPFile's
-      # test_unsupported_reason_tracks_the_running_interpreter, PyShark's
-      # test_the_reason_tracks_the_running_interpreter), which is what proves
-      # the decline fired. `not-installable` cells run no tests.
+      # `expect` also decides how the engine is installed: `supported` through
+      # its extra, the others as the raw distribution, bypassing the marker
+      # that would otherwise skip it silently (#845 finding 2). `set +e` covers
+      # only that install; the pip upgrade and the `test` extra run under
+      # `set -eu`, as a broken base install once read as "expected" (#845).
       - name: Write the per-cell script
         run: |
           cat > "$RUNNER_TEMP/engine-cell.sh" <<'CELL'
@@ -915,12 +706,10 @@ jobs:
           fi
           if [ "$status" -ne 0 ]; then
             # A not-installable cell's point is a genuine C-API compile
-            # failure, not a flaky index: grep for pip's own retry/network
-            # vocabulary, and require the *absence* of a compile marker
-            # alongside it. A bare "5xx or 429" number scan is not used,
-            # because pip prints "(NNN kB)" download sizes and compiler
-            # diagnostics quote line numbers in that range (#845's
-            # cross-review), which would make a permanent false red.
+            # failure, not a flaky index: match pip's own network vocabulary
+            # and require the absence of a compile marker. Not a bare "5xx or
+            # 429" scan, which pip's "(NNN kB)" sizes and compiler line numbers
+            # would turn permanently red (#845).
             if echo "$output" | grep -qiE \
                  'read timed out|connection (reset|refused|aborted)|temporary failure in name resolution|max retries exceeded|could not fetch url|newconnectionerror|readtimeouterror|httpsconnectionpool|retrying \(retry\(|http error (5[0-9][0-9]|429)|status code 429|too many 429 error responses|no matching distribution found' \
                && ! echo "$output" | grep -qiE \
@@ -992,12 +781,10 @@ jobs:
             exit 1
           fi
 
-      # KTLO, non-blocking (#1633) -- see this job's comment. Runs on every event,
-      # as the 3.10 cell did while it was supported; with no KTLO cell it loops
-      # over nothing. #1672: this step is the KTLO cells' report, as `KTLO
-      # summary` is a KTLO leg's in the matrix jobs. A failure is a job-summary
-      # row and warnings, the cell's own included, and an interpreter the setup
-      # step above could not install fails here.
+      # KTLO, non-blocking (#1633); with no KTLO cell it loops over nothing.
+      # #1672: this step is the KTLO cells' report, as `KTLO summary` is a KTLO
+      # leg's in the matrix jobs, and an interpreter the setup step above could
+      # not install fails here.
       - name: Run the KTLO cells (non-blocking)
         shell: bash
         continue-on-error: true
@@ -1019,39 +806,23 @@ jobs:
             exit 1
           fi
 
-  # Whether upstream PyPCAP is worth building in CI at all -- #751's own
-  # instruction was "try to build and if the CI is not a good suit, then we
-  # ripe it". This job is that attempt: a C toolchain plus libpcap headers, on
-  # the Python versions its own marker allows (the PyPCAP extra's
-  # "pypcap; python_version < '3.12'" in pyproject.toml). If a clean run of
-  # this job's install step goes red -- not a flake -- the fix is deleting this
-  # job and returning HAS_PYPCAP to
-  # tests/_dependency_gates.DEPENDENCY_GATE_EXCLUSIONS with that run linked as
-  # the reason, per the ruling.
+  # #751's ruling: try building upstream PyPCAP in CI, and drop it if CI is
+  # not a good fit. If a clean run of this job's install step goes red -- not
+  # a flake -- the fix is deleting this job and returning HAS_PYPCAP to
+  # tests/_dependency_gates.DEPENDENCY_GATE_EXCLUSIONS with that run linked.
   #
-  # Kept apart from `engine-tests` above: it needs a compiler
-  # that job has no other reason to carry, and its `pcap` module would collide
-  # with pcap-ct's if both were installed into the one venv (see
-  # `engine-tests`'s own comment on that). The HAS_PYPCAP-gated module this job
-  # targets, tests/foundation/engines/test_new_engine_parity_runtime.py, reads
-  # generated captures (arp.pcap, tcp.pcap, ipv4.pcap -- its own module
-  # docstring), so this mirrors the `integration` job's fixture-tier selection
-  # and Scapy/DPKT/cli baseline rather than `test`'s ignore-shape one, and pays
-  # that job's full run cost a second time on top -- accepted here rather than
-  # discovered, since tests/_dependency_gates.py's guard has no cheaper known
-  # selection shape for reaching one fixture-dependent module (see
-  # that module's own docstring). The same module also carries some of
-  # HAS_PYPCAPFILE's gated methods, which come along for free once
-  # PyPCAPFile is on this job's install line too.
+  # Apart from `engine-tests`: it needs a compiler that job has no other use
+  # for, and its `pcap` module collides with pcap-ct's. The HAS_PYPCAP-gated
+  # module, tests/foundation/engines/test_new_engine_parity_runtime.py, reads
+  # generated captures, so this mirrors `integration`'s fixture-tier selection
+  # and pays its run cost a second time; tests/_dependency_gates.py's guard
+  # knows no cheaper selection that reaches it. The same module carries some of
+  # HAS_PYPCAPFILE's gated methods, so PyPCAPFile is installed too.
   #
-  # The matrix is deliberately just 3.10 and 3.11, not every version: PyPCAP's
-  # marker and PyPCAPFile's marker are both "python_version < '3.12'", so
-  # 3.12 and later would install neither extra here and pay this job's full
-  # fixture-tier run for zero new coverage. util/python_versions.py takes the
-  # versions below 3.12 that run on `ubuntu-latest` from both tiers (#1660).
-  # 3.11 is the one supported leg; 3.10 is KTLO (#1633), non-blocking through
-  # step-level `continue-on-error`, for the reason given on the `test` job's
-  # matrix.
+  # Both extras' markers are "python_version < '3.12'", so
+  # util/python_versions.py takes only the versions below 3.12 that run on
+  # `ubuntu-latest`, from both tiers (#1660); the KTLO ones are
+  # `pypcap-parity-ktlo`'s (#1738).
   pypcap-parity:
     name: PyPCAP/PyPCAPFile parity Python ${{ matrix.python-version }}
     if: ${{ inputs.gate-only != true && needs.changes.outputs.code != 'false' }}
@@ -1087,30 +858,17 @@ jobs:
           cache: pip
 
       # pypcap ships no wheel: it compiles pcap.c against libpcap, so both the
-      # headers and the shared library have to be present before pip is asked
-      # to build it.
+      # headers and the shared library have to be present before pip builds it.
       #
-      # tshark joins them per #845's finding 1: this job installs pyshark and
-      # its fixture-tier selection (see this job's own comment above) is the
+      # tshark joins them per #845's finding 1: this job's selection is the
       # only place tests/integration/test_engine_runtime.py's real
-      # ``engine='pyshark'`` extraction is reachable at all --
-      # `engine-tests`'s own selection ignores tests/integration and
-      # *_runtime.py wholesale. Without tshark, PyShark.unsupported_reason()
-      # declines the engine, the extractor silently falls back to the default
-      # parser, and the test's assertions used to pass on that fallback's
-      # output -- a vacuous pass, invisible in skip counts. The install
-      # pre-seeds debconf and sets DEBIAN_FRONTEND as `engine-tests`'s does,
-      # for the same reason: tshark's postinst otherwise blocks on the "allow
-      # non-superusers to capture packets" prompt.
+      # ``engine='pyshark'`` extraction is reachable. Without tshark the engine
+      # declines, the extractor silently falls back to the default parser, and
+      # the test used to pass on that fallback's output.
       #
-      # The apt steps -- plan, restore, seed, install, collect, save -- are
-      # `engine-tests`'s, for the reasons in the note above its plan step:
-      # bounds, retry, .deb cache and fallback mirror alike, with APT_SET
-      # keeping this job's cache entries apart. This job was not the leg that
-      # stalled in #974, but it has since failed the same way: at 155s on
-      # 2026-10-07 (#1307's job 112948578234), and on 2026-10-08 with
-      # `timeout 180` killing both attempts (#1432, jobs 113323976331 and
-      # 113485425256).
+      # The apt steps are `engine-tests`'s, for the reasons in the note above
+      # its plan step, with APT_SET keeping this job's cache entries apart; this
+      # job has failed the same ways (#1307, #1432).
       - name: Plan the system packages
         id: apt-plan
         if: env.APT_PACKAGES != ''
@@ -1168,10 +926,8 @@ jobs:
           path: ${{ runner.temp }}/apt-debs/*.deb
           key: ${{ steps.apt-plan.outputs.key }}
 
-      # As in the `test` job (#1672): the install needs this leg's interpreter,
-      # and the steps after it need the install, so a KTLO leg whose setup or
-      # install failed stops there instead of testing the image's `python`.
-      # util/pip_install.py annotates a failed install, as in `test`.
+      # As in the `test` job (#1672): a KTLO leg whose setup or install failed
+      # stops there instead of testing the image's `python`.
       - name: Install package, test and generator dependencies
         id: install
         if: ${{ steps.python.outcome == 'success' }}
@@ -1197,11 +953,8 @@ jobs:
           nproc
           python -c "import os; print('cpu_count', os.cpu_count())"
 
-      # See the `integration` job above for why this is asked of
-      # tests/_tiers.py directly rather than spelled out as literal flags.
-      # #1958: neither leg here is `latest`, so each runs the `ALL` tier's part
-      # of the selection, as `integration`'s other legs do; the `LATEST`
-      # sweeps over every capture run in `integration` on `latest`.
+      # See the `integration` job's step of the same name. #1958: no leg here
+      # is `latest`, so each runs the `ALL` tier's part of the selection.
       - name: Run full test suite
         id: suite
         if: ${{ steps.install.outcome == 'success' }}
@@ -1217,7 +970,8 @@ jobs:
             exit 1
           fi
           echo "Fixture-dependent selection: $selection"
-          python util/cap_file_size.py python -m pytest -q -n auto --dist load $selection
+          read -ra selection <<< "$selection"
+          python util/cap_file_size.py python -m pytest -q -n auto --dist load "${selection[@]}"
 
       # #1672: see the `test` job's step of the same name.
       - name: KTLO summary
@@ -1248,165 +1002,59 @@ jobs:
       matrix: ${{ fromJSON(needs.python-versions.outputs.pypcap-parity-ktlo) }}
     steps: *pypcap-parity-steps
 
-  # GitHub issue #981: the test modules
-  # tests/protocols/application/test_http_unit.py and
-  # tests/test_base_class_contract.py each pass alone, and pytest -- the
-  # runner every job above uses -- reports the combined run green, while
-  # plain unittest over the same modules in one process fails some of
-  # their subTest cases. pytest-subtests is not why -- it is not even installed in
-  # this project (absent from the `test` extra in pyproject.toml), and plain
-  # pytest already reports a failed subTest as its own top-level SUBFAILED
-  # entry rather than folding it into a passing parent. The real cause is
-  # tests/conftest.py's autouse restore_module_table fixture, which
-  # reconciles the cross-module pcapkit reimport pollution #981 is about --
-  # but only under pytest, since plain unittest never loads conftest.py at
-  # all. Every job above runs under pytest, so that reconciliation is why
-  # none of them can see this shape of defect -- invisible by construction
-  # once the fixture is doing its job, not by oversight. This job exists
-  # solely to make that visible, by using a different test *runner* --
-  # unittest.TextTestRunner -- that never loads conftest.py and so never
-  # gets the reconciliation that hides the defect from pytest.
+  # #981: some modules pass alone and under pytest, but fail subTest cases
+  # when plain unittest runs them in one process. The cause is the
+  # cross-module pcapkit reimport pollution #981 is about, which
+  # tests/conftest.py's autouse restore_module_table fixture reconciles -- but
+  # only under pytest, so every job above is blind to it by construction. This
+  # job runs a different runner, unittest.TextTestRunner, which never loads
+  # conftest.py. A narrower `pytest --noconftest` over the same modules
+  # reproduced the failures too; whether it would suffice was never evaluated.
+  # util/run_unittest_leg.py's docstring has the fuller reasoning.
   #
-  # A cheaper, narrower alternative: `pytest --noconftest` over just those
-  # modules, in that order, disables that same autouse fixture directly and
-  # reproduced the identical subTest failures in about 70s on the pre-fix
-  # tree, under the pytest this CI already installs. Whether that single
-  # invocation would have been sufficient instead of this dedicated job and its
-  # per-directory matrix was not evaluated when this job was written --
-  # recorded here rather than justified after the fact; see
-  # util/run_unittest_leg.py's own docstring for the fuller version of both
-  # this and the paragraph above.
+  # Each cell runs one tests/ subdirectory, then every root-level tests/test_*.py
+  # module, in the order #981's reproduction needs. One process over the whole
+  # suite OOMs (29 GB), so a cell per top-level directory is the affordable
+  # approximation, sized for wall time rather than memory.
   #
-  # util/run_unittest_leg.py (its own docstring has the full reasoning) runs
-  # one tests/ subdirectory per matrix cell (for protocols, one shard of it,
-  # see #1029 below), paired with every root-level
-  # tests/test_*.py module, directory first and root second -- the order
-  # #981's own reproduction needs, since the defect is an earlier module
-  # polluting a later one. Running the whole suite in one process is not an
-  # option (it OOMs at 29 GB on the machine this was diagnosed on); a matrix
-  # of one leg per top-level directory (protocols split across cells, #1029)
-  # is the affordable approximation, and it
-  # is sized for wall time rather than for memory. Peak RSS was measured for
-  # the three cheapest legs only -- cli 152 MiB, dumpkit 237 MiB, interface
-  # 305 MiB (resource.getrusage on RUSAGE_CHILDREN, this venv) -- leaving the
-  # largest of the three some 90x short of 29 GB; no figure was taken for
-  # tests/protocols, the largest leg. Measured wall times (this venv, serial):
-  # cli 18s, const 268s, dumpkit 39s, foundation 272s, interface 38s, project
-  # 70s, protocols 847s (before the #1029 split), toolkit 97s, utilities 42s,
-  # vendor 104s, one leg per
-  # matrix cell -- see `timeout-minutes` below for why the job-level budget is
-  # 45 rather than 20.
+  # #1029: the protocols cell took 30.4 minutes of the 45-minute cap, so it is
+  # split into `protocols/internet` and the rest (`protocols` with `--exclude
+  # protocols/internet`), measured on CI at 8.2m and 7.6m. The cost: a pair of
+  # modules split between the two no longer shares a process, so pollution
+  # between them is invisible again; every pair of a protocols module followed
+  # by a root-level module survives. The modules directly in tests/protocols
+  # stay in the rest cell, as moving them would split more pairs than it joins.
   #
-  # GitHub issue #1029: the protocols cell measured 30.4 minutes on a CI
-  # runner against this job's 45-minute cap (#1029 measured the next slowest
-  # leg at 6.2 minutes on CI), so it is split: `protocols/internet` and the rest of
-  # tests/protocols (its other subdirectories and the modules sitting
-  # directly in it), the latter expressed as `protocols` with
-  # `--exclude protocols/internet`. run_unittest_leg.py takes a sub-path and
-  # repeatable --exclude for this; every other cell is untouched.
+  # Deliberately absent from ``leg``:
   #
-  # Measured on CI (GitHub Actions wall time per cell, one unit throughout):
+  #   * tests/corekit -- plain unittest fails its identity subtests, as
+  #     tests/_support.py's purge_modules() docstring documents; pytest is the
+  #     supported runner for exactly that reason, so the leg would be
+  #     permanently red for an accepted characteristic.
+  #   * tests/integration -- needs generated captures, and `integration` runs
+  #     it under pytest. tests._tiers.is_unit_tier() rejects every one of its
+  #     files, so the leg would run the root-level modules alone -- green,
+  #     while covering none of it.
   #
-  #   leg                  run 37334173854     run 37341197811
-  #                        (#1031, unsharded)  (#1032, sharded)
-  #   protocols            27.8m               -
-  #   protocols/internet   -                   8.2m
-  #   protocols (rest)     -                   7.6m
-  #   foundation (control) 6.2m                6.4m
-  #   const (control)      6.0m                6.1m
+  # The `project` cell keeps the project pins (#1954): whether a module passes
+  # in one interpreter, in file order, with no xdist, is a question about the
+  # module, so a pin can fail it as readily as any other.
   #
-  # The baseline is 27.8m from a same-hour run, deliberately not #1029's
-  # headline 30.4m (its quiet-runner re-run, taken after a window of
-  # cancelled runs). The controls moved by 0.1-0.2m between the two runs, so
-  # the runners compare. Two cells rather than three because these already
-  # balance (8.2m against 7.6m) and the next slowest unsharded leg is
-  # foundation at 6.4m: a third cell could save under two minutes of wall time
-  # and would cost more co-running module pairs. No local per-module timings
-  # are recorded here; the figure above is the one that matters, and the
-  # pre-#1029 local serial table above is left as it was measured.
-  #
-  # What sharding costs: modules in different cells no longer share a process,
-  # so pollution from one to the other is invisible again. A pair of
-  # tests/protocols modules still co-runs when both land in the same cell
-  # (leg_modules() is what places each module); a pair split between
-  # internet and the rest no longer does, where the unsharded leg ran it in
-  # one process. Pairs are unordered, since a single serial run realises each
-  # pair in one order. Every pair of a protocols module followed by a
-  # root-level module survives, since every cell still runs the root modules
-  # after its own. The modules sitting directly in tests/protocols stay in the
-  # rest cell: moving them into internet would split more of the pairs that
-  # still co-run than it would join, and lengthen internet, the slower cell
-  # already.
-  #
-  # tests/vendor was first left out of ``leg`` because running it this way
-  # surfaced an instance of the very defect this job exists to catch (issue
-  # #985): a stale VendorRuntimeWarning generation made assertWarnsRegex fail
-  # in tests/vendor/test_vendor_snapshot_restore_unit.py. That was fixed by
-  # re-resolving the class fresh per test, so the directory is a leg like
-  # the others.
-  #
-  # These directories are deliberately absent from ``leg``, for reasons that
-  # are not this job's to fix:
-  #
-  #   * tests/corekit -- already known and already accepted, not a new
-  #     finding. tests/_support.py's own purge_modules() docstring measures
-  #     and documents exactly this: plain `python -m unittest discover -s
-  #     tests/corekit` fails identity subtests there, because
-  #     test_module sorts first and purges. pytest is "the supported
-  #     runner" for precisely this reason -- tests/conftest.py's autouse
-  #     restore_module_table fixture reconciles the module-identity drift
-  #     that plain unittest has no way to see coming. Running this leg
-  #     against tests/corekit would be permanently red for a characteristic
-  #     the suite's own documentation already treats as expected, not a
-  #     regression this job would be reporting.
-  #   * tests/integration -- needs generated captures this script does not
-  #     build, and is already run whole, under pytest, by the `integration`
-  #     job above. The exclusion lives here, in this matrix, and nowhere else:
-  #     util/run_unittest_leg.py does not refuse the directory, it collects
-  #     nothing from it. tests._tiers.is_unit_tier() rejects every one of its
-  #     test_*.py files, so leg_modules('integration') returns an empty tuple
-  #     and the leg would run the root-level modules alone -- green, while
-  #     covering none of tests/integration. Adding it back here would buy that
-  #     nothing, not a failure.
-  #
-  # The `project` cell keeps the project pins (#1954), which `test` leaves to
-  # `project-tests`: this job asks whether each module passes in one
-  # interpreter, in file order, with no xdist to isolate it, which is a
-  # question about the module and not the Python version, so a pin can fail
-  # it as readily as any other. It runs on main's pushes alone, one cell.
-  #
-  # Not added to ``required-checks`` below: a brand-new job earns a place in
-  # the required set once its own track record justifies it, which is the
-  # maintainer's call to make separately from landing it.
+  # Not in ``required-checks``: a new job earns a place in the required set by
+  # its track record, which is the maintainer's call.
   unittest-ordering:
     name: Plain unittest ordering (${{ matrix.label || matrix.leg }})
-    # Every push to main and no PR (#1052 item H): not required, and its
-    # cells would add a large share of each PR push's jobs. `needs: [test]` (#1538)
+    # Every push to main and no PR (#1052 item H): not required, and its cells
+    # would add a large share of each PR push's jobs. `needs: [test]` (#1538)
     # queues them behind this push's own legs; `!cancelled()` still runs them
     # if `test` fails, so a red cell still fails the run that gates publishing.
     if: ${{ !cancelled() && inputs.gate-only != true && github.event_name != 'pull_request' }}
     needs: [test]
     runs-on: ubuntu-latest
-    # 45, not 20: `timeout-minutes` is job-level, so it has to cover
-    # checkout/setup/install (~39s) as well as the leg itself, and this is
-    # the only test job in this file with no xdist underneath it, so its
-    # protocols leg (847s serial, measured above) carries the full cost
-    # alone. A review pass measured medium legs at 1.22-1.31x that figure on
-    # a contended machine, putting protocols at 17-18.5 minutes, and one
-    # contended run of it hit 1275s outright -- over the old 20-minute cap.
-    # 45 matches the `test`/`integration`/`pypcap-parity` jobs' own cap
-    # rather than inventing a new number (`engine-tests` is 30, but runs
-    # under xdist, which this job deliberately does not). 45 did stop fitting
-    # comfortably (#1029: protocols at 30.4 minutes on CI), so `protocols` is
-    # split into sub-legs, as foreseen -- see the matrix comment above. The
-    # cap is left at 45: CI measured the slowest cell, protocols/internet, at
-    # 8.2m (run 37341197811), so even a slowdown like #1029's window leaves it
-    # far inside the cap: that window's runs were cancelled at 45.3m or more,
-    # so it ran at least 45.3/27.8, about 1.6x (a lower bound, the runs were
-    # cut off), which would put the 8.2m cell near 13m. Lowering the cap
-    # would only trade headroom for a tighter timeout. Raising it to 60
-    # instead was the one-line alternative; it would have kept every
-    # cross-module pair co-running but left the slowest cell at 28 minutes.
+    # 45, as `test`'s: this is the only test job with no xdist, so a cell
+    # carries its whole serial cost, and a contended run once passed 20
+    # minutes. The slowest cell since #1029 is 8.2m; even #1029's slowdown
+    # window, at least 1.6x, leaves it far inside the cap.
     timeout-minutes: 45
     strategy:
       fail-fast: false
@@ -1442,10 +1090,8 @@ jobs:
           python-version: ${{ steps.python-versions.outputs.latest }}
           cache: pip
 
-      # DPKT/crypto/NGAP join `test` for the same reason the `test` job above
-      # installs them: this leg's root-level modules and its own directory's
-      # modules both reach gates that would otherwise skip silently rather
-      # than run. This job has no KTLO leg, so a failed install is an error.
+      # `test`'s extras, for the gates both jobs' modules reach. No KTLO leg, so
+      # a failed install is an error.
       - name: Install package and test dependencies
         env:
           ANNOTATION_LEVEL: error
@@ -1457,33 +1103,22 @@ jobs:
           nproc
           python -c "import os; print('cpu_count', os.cpu_count())"
 
-      # `--verbose` names every test as it runs, so a slow or hung cell
-      # shows where it was. The step cap of 20 is about twice the slowest
-      # cell's measured maximum (9.8 minutes; the other shard 8.9), and sits
-      # under the job's 45 so a hang reports as this step timing out.
+      # `--verbose` names every test as it runs, so a hung cell shows where it
+      # was. The step cap is about twice the slowest cell's measured maximum,
+      # under the job's, so a hang reports as this step timing out.
       - name: Run tests/${{ matrix.leg }} and the root-level modules under plain unittest
         timeout-minutes: 20
         run: python util/cap_file_size.py python util/run_unittest_leg.py ${{ matrix.leg }} ${{ matrix.exclude }} --verbose
 
   # ``CHANGELOG.md`` is generated from the newest entry under
-  # ``docs/source/changelog/`` by ``util/changelog_md.py``, so it falls out of step
-  # the moment an entry is edited without regenerating it. That is worth its own
-  # job rather than leaving it to review, because ``Create Release`` feeds the file
-  # to the GitHub Release body: a drifted copy is not merely wrong in the tree, it
-  # is published.
+  # ``docs/source/changelog/`` by ``util/changelog_md.py``, and ``Create
+  # Release`` publishes it as the GitHub Release body, so drift is published.
   #
-  # Deliberately *not* gated on ``gate-only``, unlike the matrix jobs above
-  # (`test`, `integration`, `engine-tests`, `pypcap-parity` and the KTLO ones),
-  # and that is the point of putting it here at all. ``create-release.yml`` calls this
-  # workflow as its release gate, so an ungated job runs on the release path and
-  # the release body cannot be built from a file that has drifted. The matrix is
-  # skipped per caller because it is expensive and already ran for the commit;
-  # this is neither expensive nor covered elsewhere on that path.
-  #
-  # ``tests/project/test_changelog_md.py`` asserts the same identity, so the
-  # matrix covers it too -- but that test ``skipTest``s when either file is
-  # absent, and reports a mismatch as two whole-file strings. ``--check`` cannot skip,
-  # exits 1 when the file is missing, and prints a unified diff.
+  # Deliberately *not* gated on ``gate-only``: ``create-release.yml`` calls this
+  # workflow as its release gate, so this job runs on the release path too.
+  # ``tests/project/test_changelog_md.py`` asserts the same identity but
+  # ``skipTest``s when either file is absent; ``--check`` cannot skip, and
+  # prints a unified diff.
   changelog:
     name: Changelog drift
     runs-on: ubuntu-latest
@@ -1501,9 +1136,7 @@ jobs:
         with:
           python-version: ${{ steps.python-versions.outputs.latest }}
 
-      # No install step: the generator imports nothing outside the standard
-      # library, so it runs against a bare interpreter.
-      # Verified with ``python -S``.
+      # No install step: the generator needs only the standard library.
       - name: Check CHANGELOG.md is in step with its source entry
         shell: bash
         run: |
@@ -1512,20 +1145,16 @@ jobs:
             exit 1
           fi
 
-  # Which of a pull request's changed files are code. This decides
-  # whether the expensive legs run at all (see `required-checks` for how their
-  # skips are then judged). util/classify_changes.py, which experimental.yml's
-  # `changes` runs too (#1967), says how a file is classified, and fails safe:
-  # anything it cannot classify is code.
+  # Which of a pull request's changed files are code, which decides whether
+  # the expensive legs run at all. util/classify_changes.py, which
+  # experimental.yml's `changes` runs too (#1967), fails safe: anything it
+  # cannot classify is code.
   #
-  # Only this workflow's own `pull_request` run is classified. Every other
-  # event reports `code: true`, including a `workflow_call` from a caller
-  # triggered by a pull request: inside a called workflow `github.event_name`
-  # is the caller's, but `github.workflow` is the caller's name too (see the
-  # concurrency comment at the top), and no caller is named "Unit Tests".
-  # Every event checks out, as the script is in the tree; only the pull
-  # request's merge commit needs its first parent, but `fetch-depth: 2` costs
-  # the others one commit.
+  # Only this workflow's own `pull_request` run is classified; every other
+  # event reports `code: true`. A `workflow_call` sees the caller's
+  # `github.event_name` but also the caller's `github.workflow`, and no caller
+  # is named "Unit Tests". `fetch-depth: 2` gives the merge commit its first
+  # parent.
   changes:
     name: Classify changed files
     if: ${{ inputs.gate-only != true }}
@@ -1546,27 +1175,18 @@ jobs:
         run: python3 util/classify_changes.py
 
   # #1954, the owner's option 3: the project pins, once per push. They are the
-  # tests/project modules whose run does not vary by interpreter -- each reads
-  # the repository's text or drives a util/ script, and none imports pcapkit
-  # or branches on the Python version, by tests/_tiers.py's
-  # is_project_pin() -- so one run on `latest` is every leg's answer, and
-  # `test` and experimental.yml leave them out. On every pull request and
-  # every push, `required-checks` needs this job to pass; under `gate-only`,
-  # `gate`'s full suite runs them instead. tests/_dependency_gates.py reads its
-  # pytest step as the `project-pins` selection.
+  # tests/project modules whose run does not vary by interpreter, by
+  # tests/_tiers.py's is_project_pin(), so one run on `latest` is every leg's
+  # answer, and `test` and experimental.yml leave them out. `required-checks`
+  # needs this job; under `gate-only`, `gate`'s full suite runs them instead.
+  # tests/_dependency_gates.py reads its pytest step as the `project-pins`
+  # selection.
   #
-  # On a docs-only diff, it is `test`'s replacement too, running every test
-  # that reads docs/ or a Markdown file, since a docs-only diff can still break
-  # those: tests/project and the root-level modules, plus the modules
-  # elsewhere under tests/ named in the last run step.
-  # tests/project/test_unit_tests_queue.py finds every module outside those
-  # that names a docs/ or Markdown path and fails until it is listed there, so
-  # a new reader cannot go unrun. Those steps run only when `changes` says the
-  # diff is docs-only, so they never duplicate `test` on a code change, and
-  # they take in the pins, so the pins step is skipped there. They use
-  # util/run_unittest_leg.py's `project` leg -- tests/project plus the
-  # root-level modules, with the extras `unittest-ordering`'s `project` cell
-  # runs green on main.
+  # On a docs-only diff it replaces `test` for every test that reads docs/ or a
+  # Markdown file: util/run_unittest_leg.py's `project` leg, which takes in the
+  # pins, plus the modules elsewhere under tests/ named in the last run step.
+  # tests/project/test_unit_tests_queue.py fails until every such reader is
+  # listed there, so a new one cannot go unrun.
   project-tests:
     name: Project tests
     needs: [changes]
@@ -1587,9 +1207,8 @@ jobs:
           python-version: ${{ steps.python-versions.outputs.latest }}
           cache: pip
 
-      # The whole suite's set, the line `test` adds on `latest` (#1958), so a
-      # gated pin runs here exactly as the rest of its tier does there. No KTLO
-      # leg, so a failed install is an error.
+      # The whole suite's set, as `test` installs on `latest` (#1958), so a
+      # gated pin runs here as the rest of its tier does there.
       - name: Install package and test dependencies
         env:
           ANNOTATION_LEVEL: error
@@ -1604,11 +1223,9 @@ jobs:
 
       # `test`'s pytest flags, with the pins as the selection. A selection that
       # cannot be computed, or is empty, fails the step rather than letting a
-      # bare `pytest` run the whole suite. The step cap is several times the
-      # run's length, under the job's 20. #1969: every pytest and unittest
+      # bare `pytest` run the whole suite. #1969: every pytest and unittest
       # command in this file runs under util/cap_file_size.py, which caps any
-      # file a test writes at 2 GiB, as experimental.yml's `prlimit --fsize`
-      # does; tests/project/test_file_size_caps_1969.py pins that.
+      # file a test writes; tests/project/test_file_size_caps_1969.py pins that.
       - name: Run the project pins
         if: ${{ needs.changes.outputs.code != 'false' }}
         timeout-minutes: 10
@@ -1622,10 +1239,9 @@ jobs:
             echo "::error title=No project pins::tests._tiers.project_pin_paths() returned nothing. Refusing to run pytest with no arguments, which would run the whole suite."
             exit 1
           fi
-          # shellcheck disable=SC2086
-          set -- $pins
+          read -ra pins <<< "$pins"
           python util/cap_file_size.py python -m pytest -q -n auto --dist load \
-            --durations=30 --durations-min=1.0 --junitxml="$RUNNER_TEMP/junit.xml" "$@"
+            --durations=30 --durations-min=1.0 --junitxml="$RUNNER_TEMP/junit.xml" "${pins[@]}"
 
       - name: Run tests/project and the root-level modules under plain unittest
         if: ${{ needs.changes.outputs.code == 'false' }}
@@ -1638,11 +1254,8 @@ jobs:
         run: python util/cap_file_size.py python -m unittest -v tests.corekit.test_sentinel_exports_unit tests.utilities.test_config_unit tests.vendor.test_vendor_variables_1726_unit
 
   # The verdict a shipping workflow asks for: the full suite, fixtures and
-  # all, on one interpreter. It is deliberately not the matrix -- the matrix
-  # has already run against this very commit, from this workflow's own push or
-  # pull_request trigger, before anything reaches a release path.
-  #
-  # On `latest`, from `python-versions`, which its name needs too (#1661).
+  # all, on `latest` (#1661). Not the matrix, which already ran against this
+  # commit from this workflow's own push or pull_request trigger.
   gate:
     name: Gate (full suite, Python ${{ needs.python-versions.outputs.latest }})
     if: ${{ inputs.gate-only == true }}
@@ -1658,35 +1271,19 @@ jobs:
           python-version: ${{ needs.python-versions.outputs.latest }}
           cache: pip
 
-      # DPKT joins Scapy here for the same reason as the `integration` job
-      # above -- this is the full, unfiltered suite, so it is the one place
-      # where skipping the dpkt-gated tests would be most misleading. crypto,
-      # cli and NGAP join it for the same reason and cover those of #738's
-      # remaining gates they were added for, since an unfiltered `pytest` run (no
-      # --ignore, no tier selection) reaches every one of them regardless of
-      # which tier they live in -- unlike the `test` and `integration` jobs
-      # above, which each cover only the subset their own selection reaches.
-      # PyPCAPFile is deliberately NOT added here -- see the `test` job's
-      # comment above for the bug that used to make installing it a
-      # regression, fixed by #743/#746. This job runs on `latest` only, where
-      # PyPCAPFile's marker resolves to nothing regardless, so adding it here
-      # would be a no-op that misleadingly suggests the extra is exercised by
-      # `gate`; #751's `engine-tests` and `pypcap-parity` jobs cover it for
-      # real, on the 3.10-3.15 (and 3.10-3.11) legs, 3.10 being KTLO in both.
-      #
-      # #1958: `vendor`, `docs` and `PyShark` join them, so this is the set the
-      # `latest` legs install (see `test`'s "Install the whole suite's
-      # dependencies on latest" step), and the html5lib, Sphinx and PyShark
-      # gates run here as they do there. No KTLO leg, so a failed install is an
-      # error.
+      # #1958: the set the `latest` legs install (see `test`'s "Install the
+      # whole suite's dependencies on latest" step), since an unfiltered
+      # `pytest` run (no --ignore, no tier selection) reaches every gate,
+      # whatever its tier. PyPCAPFile's marker resolves to
+      # nothing on `latest`; #751's `engine-tests` and `pypcap-parity` jobs
+      # cover it.
       - name: Install package, test and generator dependencies
         env:
           ANNOTATION_LEVEL: error
           LEG: Python ${{ needs.python-versions.outputs.latest }}
         run: python util/pip_install.py -e '.[test,Scapy,DPKT,crypto,cli,NGAP,vendor,docs,PyShark]'
 
-      # See the `integration` job above. This job has no KTLO leg, so a
-      # failure is always an error.
+      # See the `integration` job above. No KTLO leg, so always an error.
       - name: Regenerate sample captures
         shell: bash
         env:
@@ -1699,109 +1296,58 @@ jobs:
           nproc
           python -c "import os; print('cpu_count', os.cpu_count())"
 
-      # Deliberately still the whole suite, unlike the `integration` job above:
-      # this is the shipping gate's own independent re-verification (see the
-      # job comment above), not the same accidental duplication #715 measured
-      # for `integration`. `gate` does not run per PR push -- only via
-      # `create-release.yml`'s `gate-only: true` -- so it is not part of the
-      # ~130 minutes/push #715 measured, and partitioning it would trade away
-      # the "trust nothing, re-run everything" property this job exists for.
-      # Whether `gate` should run at all on a commit the matrix already
-      # covered is #715's separate item 2 ("stop the gate re-running on main
-      # pushes"), a trigger-frequency question, not a selection one -- out of
-      # scope here. `--dist load` is pinned explicitly; see the `test` job
-      # above for why.
+      # Deliberately the whole suite, unlike `integration` (#715): `gate` runs
+      # only under `gate-only: true`, never per PR push, and partitioning it
+      # would trade away the "trust nothing, re-run everything" property this
+      # job exists for. `--dist load` as in the `test` job.
       - name: Run full test suite
         run: python util/cap_file_size.py python -m pytest -q -n auto --dist load
 
   # Ruleset 23497679's required_status_checks requires these contexts: this
   # job's `Required checks passed`, and a `Compat Python` one per supported version,
   # from the `compatibility` job in `.github/workflows/python-compatibility.yml`.
-  # This job aggregates the gating jobs of *this* file, the ones its `needs:`
-  # lists, because rulesets match check names literally and support no
-  # wildcard: requiring each matrix cell by name would mean hand-editing the
-  # ruleset every time a matrix changes. On a docs-only pull request it
-  # accepts `skipped` for the code legs (see below). The `Compat` legs
-  # are required on their own because a job cannot `needs:` a job in another
-  # workflow file, so nothing here can stand in for
-  # them.
+  # Rulesets match check names literally and support no wildcard, so this job
+  # aggregates the gating jobs its `needs:` lists rather than the ruleset naming
+  # each matrix cell. The `Compat` legs are required on their own because a job
+  # cannot `needs:` a job in another workflow file.
   #
   # `if: ${{ always() && inputs.gate-only != true }}` and the explicit
   # per-job check below are both required, not decorative:
   #
-  #   * Without `always()`, this job would itself be *skipped* -- not
-  #     failed -- the instant any job it `needs:` failed or skipped, per
-  #     "Using jobs in a workflow" > "Defining prerequisite jobs": "If a job
-  #     fails or is skipped, all jobs that need it are skipped unless the
-  #     jobs use a conditional expression that causes the job to continue."
-  #     And a skipped required check is not automatically a blocked merge:
-  #     GitHub's own "Troubleshooting required status checks" page lists
-  #     `skipped` alongside `success` and `neutral` as a *passing* check
-  #     status, and its "Handling skipped but required checks" table says
-  #     plainly that when "A job depends on a failed job", the result is
-  #     "The dependent job is skipped and may not block merging" -- exactly
-  #     the silently-worse-than-no-gate failure this job exists to prevent.
-  #     That page's own recommended fix is this job's shape: "Use always()
-  #     with needs for required checks that depend on other jobs."
-  #   * `inputs.gate-only != true` mirrors the jobs this needs: below.
-  #     They are all skipped by their own `if:` whenever this workflow is
-  #     called with `gate-only: true` (as every caller does), so without
-  #     this guard every needs.*.result below would read `skipped` on that
-  #     path and this job would report a spurious failure -- on a release
-  #     call, not a PR, which is not where ruleset 23497679 applies anyway.
-  #   * The check itself inspects every dependency explicitly and prints each
-  #     one's result before failing, so a red run names which leg broke
-  #     instead of leaving that to be re-discovered from the jobs' own
-  #     logs.
+  #   * Without `always()`, this job would be *skipped* the instant a job it
+  #     `needs:` failed, and GitHub counts a skipped required check as passing
+  #     ("Handling skipped but required checks"); its recommended fix is this
+  #     job's shape: "Use always() with needs for required checks that depend
+  #     on other jobs."
+  #   * `inputs.gate-only != true` mirrors the jobs this needs, which all skip
+  #     under `gate-only: true`, so this job would otherwise fail spuriously on
+  #     every release call.
+  #   * The check prints each dependency's result, so a red run names the leg.
   #
-  # Note for whoever adds a caller of this reusable workflow: under
-  # `workflow_call`, GitHub prefixes a called workflow's check names with the
-  # calling job's own name (`<caller job> / Required checks passed`), which
-  # would not match a ruleset entry naming just `Required checks passed`.
-  # Harmless for the callers -- create-release, cron-conda, cron-vendor and
-  # deploy-pages each pass `gate-only: true`, which skips this job via the guard
-  # above before that renaming would ever matter -- but a caller that does NOT
-  # set `gate-only: true` would produce a differently-named, unrequired check.
+  # Under `workflow_call`, GitHub prefixes a called workflow's check names with
+  # the calling job's name, which no ruleset entry matches. Harmless for the
+  # callers, which each pass `gate-only: true`, but a caller that does not
+  # would produce a differently-named, unrequired check.
   #
-  # Deliberately NOT `needs: gate`: `gate` only ever runs when this workflow
-  # is called with `gate-only: true` and is otherwise skipped by its own
-  # `if:`, so depending on it would leave this job permanently skipped on
-  # every ordinary PR -- the one case this job has to actually gate.
-  # `changelog` is deliberately left out too: it is a drift check, not a
-  # gating leg, and folding it in would widen what merging requires -- a
-  # change for the maintainer to decide, not one to slip in here.
-  # `test`, `integration`, `engine-tests` and `pypcap-parity` are the gating
-  # legs, and `project-tests` gates every diff too, as the one run of the
-  # project pins (#1954); `changes` is needed for the docs-only path below.
-  #
-  # `engine-tests`'s `unsupported` and `not-installable` cells are not a gap
-  # here: the cell script exits 0 for a cell that declined exactly as
-  # expected, so they contribute to that job's `success` like any other cell.
-  #
-  # Nor is the KTLO tier (#1633). engine-tests' KTLO cell is non-blocking
-  # through step-level `continue-on-error`, whose effect on the job's result
-  # *is* documented (a step's `conclusion` is its result after
-  # `continue-on-error` is applied), so the job, and this gate, read `success`
-  # while the failed step stays visible. The KTLO legs of `test`,
-  # `integration` and `pypcap-parity` are `test-ktlo`, `integration-ktlo`
-  # and `pypcap-parity-ktlo` (#1738), which this job does not need, so not
-  # even a failure no step can contain -- a lost runner, the job cap -- can
-  # fail it. The experimental legs (#1660) are in experimental.yml, which
-  # nothing here needs or waits on (#1732).
+  # Deliberately NOT `needs: gate`: `gate` runs only under `gate-only: true`,
+  # so depending on it would skip this job on every ordinary PR. `changelog`
+  # is left out too: it is a drift check, and folding it in would widen what
+  # merging requires, which is the maintainer's call. `project-tests` gates
+  # every diff, as the one run of the project pins (#1954). `engine-tests`'s
+  # `unsupported` and `not-installable` cells exit 0 when they decline as
+  # expected, and its KTLO cells are non-blocking through step-level
+  # `continue-on-error`; the KTLO legs of the matrix jobs are jobs of their
+  # own (#1738), which this one does not need, and the experimental legs are
+  # experimental.yml's (#1732).
   #
   # The docs-only path. On a pull request whose diff touches nothing but
-  # `docs/**` and `*.md` files outside the code directories (the `changes`
-  # job's classifier), `test`, `integration`, `engine-tests` and
-  # `pypcap-parity` are skipped by their own `if:`, and `project-tests` runs
-  # the docs readers as well. A job-level `if:` rather than workflow-level
-  # `paths-ignore`, because `paths-ignore` would not run this workflow at all
-  # and leave this required context pending forever. So `skipped` is accepted
-  # for those legs **only** when `changes` succeeded and said
-  # `code == 'false'`; `project-tests` must have succeeded either way. Every
-  # other combination keeps the strict rule: `changes` failing, its output
-  # missing, or any leg skipped while `code` is `true` fails this gate. `changes` reports `code: true` for
-  # every event but this workflow's own `pull_request`, so `push` and
-  # `workflow_call` runs never take this path.
+  # `docs/**` and `*.md` files outside the code directories, `test`,
+  # `integration`, `engine-tests` and `pypcap-parity` are skipped by their own
+  # `if:`, and `project-tests` runs the docs readers as well. A job-level `if:`
+  # rather than workflow-level `paths-ignore`, which would leave this required
+  # context pending forever. So `skipped` is accepted for those legs **only**
+  # when `changes` succeeded and said `code == 'false'`; `project-tests` must
+  # have succeeded either way, and every other combination fails this gate.
   required-checks:
     name: Required checks passed
     needs: [changes, test, integration, engine-tests, pypcap-parity, project-tests]
