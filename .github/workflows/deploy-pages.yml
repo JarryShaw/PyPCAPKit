@@ -34,6 +34,11 @@ concurrency:
   group: pages-${{ github.event.workflow_run.head_sha || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+# #2030: one Discussions category holds every report with no pull request to
+# comment on, one thread per job.
+env:
+  REPORT_CATEGORY: CI reports
+
 jobs:
   # #1967: the test gate on the schedule and the `verdict` on a `workflow_run`,
   # shared with Conda Update and Vendor Update; cron-head.yml says when each
@@ -185,3 +190,64 @@ jobs:
           clean: true # Automatically remove deleted files from the deploy branch
           # Read back by the step above; keep the two in step.
           commit-message: Publish the documentation of ${{ github.sha }}
+
+  # #2030: the run's report, the gate's, the build's and the publish's results,
+  # posted to the thread `deploy-pages: documentation build report`. As
+  # cron-vendor.yml's `discussion` job: a `workflow_run` follows a push to
+  # main, so it posts as a push run, only when it failed and once more on the
+  # next green run, and the schedule posts every run. It runs where
+  # `deploy-pages` ran or `head`'s gate failed, so never on a pull request's
+  # run or a verdict for another commit,
+  # which skip `deploy-pages` deliberately. It reads no artifact, and checks
+  # out the script alone. The job and its step are `continue-on-error`;
+  # util/discussion_report.py writes a warning rather than failing.
+  discussion:
+    name: Post the Pages report
+    needs: [ head, deploy-pages, publish-pages ]
+    if: >-
+      ${{ always() && github.event_name != 'pull_request' && (needs.deploy-pages.result != 'skipped' ||
+      needs.head.result == 'failure' || needs.head.result == 'cancelled') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    permissions:
+      contents: read
+      discussions: write
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: |
+            util/discussion_report.py
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      # A skipped `deploy-pages` reports the gate's result; a skipped
+      # `publish-pages` after a green build, the skip.
+      - name: Post the report to Discussions
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MODE: ${{ github.event_name == 'workflow_run' && 'push' || 'scheduled' }}
+          HEAD_RESULT: ${{ needs.head.result }}
+          BUILD_RESULT: ${{ needs.deploy-pages.result }}
+          PUBLISH_RESULT: ${{ needs.publish-pages.result }}
+        run: |
+          if [ "$BUILD_RESULT" = skipped ]; then
+            status="$HEAD_RESULT"
+          elif [ "$BUILD_RESULT" != success ]; then
+            status="$BUILD_RESULT"
+          else
+            status="$PUBLISH_RESULT"
+          fi
+          mkdir -p report
+          {
+            echo '### GitHub Pages'
+            echo
+            echo "- Gate: $HEAD_RESULT"
+            echo "- Build: $BUILD_RESULT"
+            echo "- Publish: $PUBLISH_RESULT"
+          } > report/pages-report.md
+          python3 util/discussion_report.py --category "$REPORT_CATEGORY" \
+            --title 'deploy-pages: documentation build report' --report report/pages-report.md \
+            --mode "$MODE" --status "$status"

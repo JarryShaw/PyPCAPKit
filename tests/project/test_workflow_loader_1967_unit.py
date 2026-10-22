@@ -122,7 +122,7 @@ class TestReadsTheFileAsItIsNow(LoaderTestCase):
             self.assertEqual(self.parser.call_count, 1)
             path.write_text(text + '\nenv:\n  DOCTORED: "1"\n', encoding='utf-8')
             self.assertEqual(_workflows.load(path)['env'], {'DOCTORED': '1'})
-            self.assertNotIn('env', _workflows.load(OTHER))
+            self.assertNotIn('DOCTORED', _workflows.load(OTHER).get('env') or {})
 
 
 class TestOnIsTheTriggerKey(LoaderTestCase):

@@ -56,7 +56,10 @@ IGNORES = {
     ),
 }
 #: The ``if:`` values under which a step still runs after an earlier step failed.
-RUNS_AFTER_A_FAILURE = frozenset({'${{ !cancelled() }}', '${{ always() }}', '!cancelled()', 'always()'})
+#: The last is the run report's (#2030), which a pull request skips whatever
+#: actionlint found.
+RUNS_AFTER_A_FAILURE = frozenset({'${{ !cancelled() }}', '${{ always() }}', '!cancelled()', 'always()',
+                                  "${{ !cancelled() && github.event_name != 'pull_request' }}"})
 #: An ``-ignore`` argument in the step's script, quoted either way.
 IGNORE = re.compile(r'''-ignore\s+(?P<quote>['"])(?P<pattern>.*?)(?P=quote)''')
 

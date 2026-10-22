@@ -255,14 +255,18 @@ class TestEveryWorkflowDeclaresPermissions(unittest.TestCase):
                 self.assertEqual(job_runs(jobs, 'publish-pages', context), expected)
 
         # Only the job that runs no project code holds the write token, and
-        # only it pushes.
+        # only it pushes. The run report's job (#2030) may write discussions
+        # alone.
+        self.assertEqual(spec['jobs']['discussion']['permissions'], {'contents': 'read', 'discussions': 'write'})
         for job_id, job in spec['jobs'].items():
             uses = [str(entry.get('uses', '')) for entry in job.get('steps') or []]
             with self.subTest(job=job_id):
                 pushes = any(entry.startswith('JamesIves/github-pages-deploy-action@') for entry in uses)
                 self.assertEqual(pushes, job_id == 'publish-pages')
-                writes = 'write' in (job.get('permissions') or spec['permissions']).values()
-                self.assertEqual(writes, job_id == 'publish-pages')
+                scopes = dict(job.get('permissions') or spec['permissions'])
+                if job_id == 'discussion':
+                    del scopes['discussions']
+                self.assertEqual('write' in scopes.values(), job_id == 'publish-pages')
         self.assertFalse([entry for entry in publish['steps'] if 'pip install' in str(entry.get('run', ''))])
 
     def test_the_deploy_waits_on_the_freshness_check(self) -> None:

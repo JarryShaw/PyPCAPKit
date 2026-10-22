@@ -689,6 +689,9 @@ grepping every workflow file for its name:
    * - Required context
      - Emitted by
      - Where
+   * - ``Lint``
+     - job ``lint``, required since `#1967 <https://github.com/JarryShaw/PyPCAPKit/issues/1967>`__
+     - ``lint.yml``
    * - ``Required checks passed``
      - job ``required-checks``
      - ``unit-tests.yml``
@@ -1221,8 +1224,9 @@ does; each has tests under :file:`tests/project/` that run it.
        ``gate``, at ``error``.
    * - :file:`util/discussion_report.py`
      - ``Post the report to Discussions`` in the ``discussion`` job of
-       ``ci-timing.yml``, ``cron-vendor.yml``, ``cron-conda.yml`` and
-       ``cron-python-versions.yml`` (see `CI Reports`_).
+       ``ci-timing.yml``, ``cron-vendor.yml``, ``cron-conda.yml``,
+       ``cron-python-versions.yml``, ``lint.yml`` and ``deploy-pages.yml`` (see
+       `CI Reports`_).
    * - :file:`util/apt_packages.py`
      - The apt steps of ``unit-tests.yml``'s ``engine-tests`` and ``pypcap-parity``
        (and so its KTLO twin): the plan, seed, install and collect steps, as
@@ -1305,6 +1309,20 @@ hand-edit note, for a failed audit of a changed tree, or for an unset
 ``vars.RELEASE_APP_CLIENT_ID``. Its ``discussion`` job needs ``detect`` alone,
 because ``pr`` waits for the owner's approval of ``github-release``, and the pull
 request it opens is its own record.
+
+``lint.yml`` has no push trigger, so it posts as ``scheduled`` to ``lint: weekly
+lint report``, on ``schedule`` and ``workflow_dispatch``, never on a pull request,
+whose run has checks of its own. Its report lists each tool step's outcome, then
+the blocks those steps wrote to the job summary, which each also appends to a file
+the report reads. It reports ``warning`` where an advisory step failed, as each
+does while its findings stand, and ``failure`` where actionlint failed the job.
+``deploy-pages.yml`` posts to ``deploy-pages: documentation build report`` by
+``cron-vendor.yml``'s rules: ``push`` on its ``workflow_run``, ``scheduled`` on its
+``schedule``, and never on a pull request or a verdict for another commit. Its
+report is the results of ``head``, ``deploy-pages`` and ``publish-pages``, so it
+uploads no artifact, and its ``discussion`` job checks out the script alone. The
+``--status`` is the publish's result after a green build, the build's where the
+build did not pass, and the gate's where the gate skipped the build.
 
 The category is the workflow-level ``REPORT_CATEGORY``. The API cannot
 create one, so it is made by hand, in Settings, Discussions.
@@ -1389,8 +1407,9 @@ actionlint runs the image's shellcheck over each ``run:`` block. Unlike Lint's
 other steps, this one blocks: a finding fails the job, as the owner ruled on #1967
 once #2023, #2037 and #2038 had fixed every finding it reported. It runs last and
 on ``!cancelled()``, so a finding skips none of the advisory steps and a failed
-Python setup does not skip it. Lint is not a required check of ruleset 23497679, so
-a red Lint does not hold a merge. The image's shellcheck is not pinned, so a runner
+Python setup does not skip it. ``Lint`` is a required check of ruleset 23497679
+(`#1967 <https://github.com/JarryShaw/PyPCAPKit/issues/1967>`__), so a red Lint
+holds a merge. The image's shellcheck is not pinned, so a runner
 image that adds a check can turn Lint red on unchanged code; the fix is to the
 script it flags. The step's run summary counts the findings by actionlint rule and
 by shellcheck code.
