@@ -65,6 +65,11 @@ import subprocess  # nosec: B404
 import sys
 from typing import TYPE_CHECKING
 
+try:  # #2047: run as `python util/<script>.py`, with util/ first on sys.path
+    import _actions
+except ImportError:  # imported as util.<script>, or loaded by path, from the repository root
+    from util import _actions
+
 if TYPE_CHECKING:
     from typing import Callable, Optional, Sequence
 
@@ -87,17 +92,6 @@ CACHE_DIR = 'apt-debs'
 AZURE = b'azure.archive.ubuntu.com'
 #: The debconf answer that stops tshark's postinst prompting.
 DEBCONF = b'wireshark-common wireshark-common/install-setuid boolean false\n'
-
-
-def say(text: 'str') -> 'None':
-    """Write ``text`` and a newline to standard output at once, ahead of any command's."""
-    sys.stdout.buffer.write(text.encode('utf-8', 'surrogateescape') + b'\n')
-    sys.stdout.buffer.flush()
-
-
-def status_of(code: 'int') -> 'int':
-    """``code`` as the shell reports it: a signal ``N`` as ``128 + N``."""
-    return code if code >= 0 else 128 - code
 
 
 def call(command: 'Sequence[str]', **kwargs: 'object') -> 'subprocess.CompletedProcess[bytes]':
@@ -128,14 +122,15 @@ def plan() -> 'int':
     for attempt in range(1, ATTEMPTS + 1):
         if call(['sudo', 'timeout', str(UPDATE_BOUND), 'apt-get', 'update']).returncode == 0:
             break
-        say(f'::warning title=apt-get update attempt {attempt} of {ATTEMPTS} failed ({os.environ["APT_SET"]})'
-            f'::apt-get update failed or exceeded its {UPDATE_BOUND}s bound.')
+        # #2047: each command stays literal, where #1672's scan of a KTLO step's scripts reads it.
+        _actions.say(f'::warning title=apt-get update attempt {attempt} of {ATTEMPTS} failed '
+                     f'({os.environ["APT_SET"]})::apt-get update failed or exceeded its {UPDATE_BOUND}s bound.')
         if attempt == ATTEMPTS:
             return 1
 
     simulated = call(['apt-get', 'install', '-s', '--no-install-recommends', *packages()], stdout=subprocess.PIPE)
     if simulated.returncode != 0:
-        return status_of(simulated.returncode)
+        return _actions.exit_status(simulated.returncode)
     lines = sorted(line for line in simulated.stdout.rstrip(b'\n').split(b'\n') if line.startswith(b'Inst '))
     listed = b'\n'.join(lines)
     sys.stdout.buffer.write(b'To download:\n' + (listed or b'(nothing)') + b'\n')
@@ -144,10 +139,8 @@ def plan() -> 'int':
         prefix = f'apt-debs-{os.environ.get("ImageOS") or "unknown"}-{os.environ["RUNNER_ARCH"]}-' \
                  f'{os.environ["APT_SET"]}-'
         digest = hashlib.sha256(listed + b'\n').hexdigest()[:16]
-        with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
-            # Concatenated: vermin reads `f'key={prefix}'` as 3.8's `{prefix=}`.
-            output.write('restore-prefix=' + prefix + '\n')
-            output.write('key=' + prefix + digest + '\n')
+        _actions.set_output('restore-prefix', prefix)
+        _actions.set_output('key', prefix + digest)
     return 0
 
 
@@ -157,8 +150,8 @@ def seed(archives: 'str') -> 'int':
     # An unmatched glob stays the pattern, as the shell's does, so `cp` fails on it.
     copied = call(['sudo', 'cp', *(debs(cache) or [os.path.join(cache, '*.deb')]), archives + '/'])
     if copied.returncode != 0:
-        return status_of(copied.returncode)
-    say(f'Seeded {count_debs(cache)} .deb files')
+        return _actions.exit_status(copied.returncode)
+    _actions.say(f'Seeded {count_debs(cache)} .deb files')
     return 0
 
 
@@ -180,9 +173,9 @@ def fallback(mirrors: 'str', suffix: 'str') -> 'None':
             first = file.read().split(b'\n', 1)[0].split(b'\t', 1)[0]
     except OSError:
         first = b''
-    say(f'::warning title=apt retry on a fallback mirror{suffix}::Retrying against '
-        f'{first.decode("utf-8", "surrogateescape")} instead of azure.archive.ubuntu.com, '
-        'resuming the partial download.')
+    _actions.say(f'::warning title=apt retry on a fallback mirror{suffix}::Retrying against '
+                 f'{first.decode("utf-8", "surrogateescape")} instead of azure.archive.ubuntu.com, '
+                 'resuming the partial download.')
 
 
 def install(mirrors: 'str', name: 'Optional[str]') -> 'int':
@@ -194,14 +187,14 @@ def install(mirrors: 'str', name: 'Optional[str]') -> 'int':
     if 'tshark' in wanted:
         answered = call(['sudo', 'debconf-set-selections'], input=DEBCONF)
         if answered.returncode != 0:
-            return status_of(answered.returncode)
+            return _actions.exit_status(answered.returncode)
     for attempt in range(1, ATTEMPTS + 1):
         if call(['sudo', 'timeout', str(UPDATE_BOUND), 'apt-get', 'update']).returncode == 0 \
                 and call(['sudo', 'DEBIAN_FRONTEND=noninteractive', 'timeout', str(INSTALL_BOUND),
                           'apt-get', 'install', '-y', '--no-install-recommends', *wanted]).returncode == 0:
             return 0
-        say(f'::warning title=apt attempt {attempt} of {ATTEMPTS} failed{suffix}::apt-get update or install '
-            'failed or exceeded its per-attempt bound; retrying once.')
+        _actions.say(f'::warning title=apt attempt {attempt} of {ATTEMPTS} failed{suffix}::apt-get update or '
+                     'install failed or exceeded its per-attempt bound; retrying once.')
         call(['sudo', 'dpkg', '--configure', '-a'])
         if attempt == 1:
             fallback(mirrors, suffix)
@@ -211,7 +204,8 @@ def install(mirrors: 'str', name: 'Optional[str]') -> 'int':
 def field(deb: 'str', name: 'str') -> 'tuple[int, str]':
     """``dpkg-deb -f DEB NAME``'s status and output, trailing newlines stripped."""
     result = call(['dpkg-deb', '-f', deb, name], stdout=subprocess.PIPE)
-    return status_of(result.returncode), result.stdout.decode('utf-8', 'surrogateescape').rstrip('\n')
+    status = _actions.exit_status(result.returncode)
+    return status, result.stdout.decode('utf-8', 'surrogateescape').rstrip('\n')
 
 
 def collect(archives: 'str') -> 'int':
@@ -235,7 +229,7 @@ def collect(archives: 'str') -> 'int':
                          stdout=subprocess.PIPE, stderr=subprocess.DEVNULL)
         if installed.stdout.decode('utf-8', 'surrogateescape').rstrip('\n') == fields['Version']:
             shutil.copy(deb, out)
-    say(f'Collected {count_debs(out)} .deb files')
+    _actions.say(f'Collected {count_debs(out)} .deb files')
     return 0
 
 

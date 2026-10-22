@@ -1229,6 +1229,10 @@ does; each has tests under :file:`tests/project/` that run it.
        ``apt_packages.py plan``, ``seed``, ``install`` and ``collect``. The
        ``actions/cache`` steps and the AppArmor step (`#2019
        <https://github.com/JarryShaw/PyPCAPKit/issues/2019>`__) stay as they were.
+   * - :file:`util/_actions.py`
+     - No step: it is imported by the scripts that share its annotations, step
+       outputs, job summary lines and logged runs (`#2047
+       <https://github.com/JarryShaw/PyPCAPKit/issues/2047>`__).
 
 The summaries run on the image's ``/usr/bin/python3`` rather than the leg's
 interpreter, which may have failed to set up or be too broken to run anything, so
@@ -1252,6 +1256,8 @@ could not signal. Both ``changes`` jobs check out on every event, since the scri
 tree. ``create-release.yml``'s ``pypi`` job keeps its own copy of
 the KTLO summary's shell until its shell moves to scripts too; a project pin runs
 that copy and the script on the same steps and requires the same output.
+:file:`util/_actions.py` is standard library only, and keeps to 3.7's syntax,
+since the scripts on ``/usr/bin/python3`` and on every leg's interpreter import it.
 
 .. _CI Reports:
 

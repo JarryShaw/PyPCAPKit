@@ -35,9 +35,13 @@ from __future__ import annotations
 import argparse
 import os
 import pathlib
-import subprocess  # nosec: B404
 import sys
 from typing import TYPE_CHECKING
+
+try:  # #2047: run as `python util/<script>.py`, with util/ first on sys.path
+    import _actions
+except ImportError:  # imported as util.<script>, or loaded by path, from the repository root
+    from util import _actions
 
 if TYPE_CHECKING:
     from typing import Optional
@@ -63,17 +67,6 @@ DEGRADED = ('::warning title=Sample fixtures degraded::The upstream Wireshark ca
 UPSTREAM = 'Upstream Wireshark captures were used, matching their pinned SHA-256 digests.'
 
 
-def emit(data: 'bytes') -> 'None':
-    """Write ``data`` to standard output as it is, at once."""
-    sys.stdout.buffer.write(data)
-    sys.stdout.buffer.flush()
-
-
-def say(text: 'str') -> 'None':
-    """Write ``text`` and a newline to standard output, at once."""
-    emit(text.encode('utf-8') + b'\n')
-
-
 def main(argv: 'Optional[list[str]]' = None) -> 'int':
     """Run the generator, copy its output to the log, and report on it; the exit status."""
     parser = argparse.ArgumentParser(description=__doc__.split('\n', 1)[0])
@@ -84,31 +77,21 @@ def main(argv: 'Optional[list[str]]' = None) -> 'int':
         print(f'ANNOTATION_LEVEL is {level!r}, not one of {", ".join(LEVELS)}.', file=sys.stderr)
         return 2
 
-    output = bytearray()
-    with open(pathlib.Path(os.environ['RUNNER_TEMP']) / LOG_NAME, 'wb') as log:
-        with subprocess.Popen([sys.executable, GENERATOR],  # nosec: B603
-                              stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as process:
-            assert process.stdout is not None  # nosec: B101
-            for line in process.stdout:
-                emit(line)
-                log.write(line)
-                log.flush()
-                output.extend(line)
-        status = process.returncode
+    status, output = _actions.run([sys.executable, GENERATOR], pathlib.Path(os.environ['RUNNER_TEMP']) / LOG_NAME)
 
     # Keep a failure here legible as what it is: the fixtures could not be
     # built, so no test has run yet and nothing is wrong with the code under test.
     if status != 0:
-        say(f'::{level} {FAILED}')
+        _actions.say(f'::{level} {FAILED}')
         return 1
 
-    marked = [line for line in bytes(output).split(b'\n') if MARKER in line]
+    marked = [line for line in output.split(b'\n') if MARKER in line]
     if marked:
-        say(DEGRADED)
+        _actions.say(DEGRADED)
         for line in marked:
-            emit(line + b'\n')
+            _actions.emit(line + b'\n')
     else:
-        say(UPSTREAM)
+        _actions.say(UPSTREAM)
     return 0
 
 
