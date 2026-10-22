@@ -375,8 +375,8 @@ the same commit several times over. It also skips ``changes``,
 `Project Pins`_ below), and ``required-checks`` (see `Required Status
 Checks`_ below), which are gated out by their own ``if:`` rather than by having
 already run. ``changelog`` carries no
-``if:`` at all and runs on every path regardless -- deliberately, per its own
-comment (``unit-tests.yml:1629-1635``): ``create-release.yml`` feeds
+``if:`` at all and runs on every path regardless -- deliberately, per the comment
+above the job: ``create-release.yml`` feeds
 ``CHANGELOG.md`` to the GitHub Release body, so the release path is exactly
 where a drifted file must not go unchecked. Confirmed on run `36210743295
 <https://github.com/JarryShaw/PyPCAPKit/actions/runs/36210743295>`__ (a
@@ -688,7 +688,7 @@ grepping every workflow file for its name:
      - Where
    * - ``Required checks passed``
      - job ``required-checks``
-     - ``unit-tests.yml:1964``
+     - ``unit-tests.yml``
    * - ``Compat Python 3.11``
      - job ``compatibility``, matrix leg ``3.11``
      - ``python-compatibility.yml``, ``.github/python-versions.toml:20``
@@ -709,23 +709,22 @@ That is the list after `#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/163
 which added ``Compat Python 3.15`` and removed ``Compat Python 3.10``. Moving a version
 between the tiers below means editing the ruleset in the same change.
 
-``Required checks passed`` is defined by exactly one job
-(``unit-tests.yml:1964``). ``Compat Python`` is defined by one, the
-``name:`` of the ``compatibility`` job in ``python-compatibility.yml``, whose
+``Required checks passed`` is defined by exactly one, the ``name:`` of the
+``required-checks`` job in ``unit-tests.yml``. ``Compat Python`` is defined by
+one, the ``name:`` of the ``compatibility`` job in ``python-compatibility.yml``, whose
 ``matrix`` comes from :file:`.github/python-versions.toml`: the required legs
 are its supported tier (``python-versions.toml:20-24``), and its KTLO legs
 (``python-versions.toml:16-19``) have names ending in ``(KTLO)``, so no required
-context matches one. A comment at
-``unit-tests.yml:1876`` mentions the string without defining it.
+context matches one. The comment above ``required-checks`` mentions the string
+without defining it.
 
 ``Required checks passed`` is an aggregate, not a single check run. The ruleset
 requires it and the ``Compat Python 3.11``-``3.15`` legs, nothing else, as
-``unit-tests.yml``'s own comment (``unit-tests.yml:1875-1885``) records. It
-``needs:`` the gating jobs of ``unit-tests.yml`` -- ``test``, ``integration``,
-``engine-tests`` and ``pypcap-parity``, plus ``project-tests``, the one run of
-the project pins, and ``changes`` for the docs-only path -- and checks each
-result explicitly
-(``unit-tests.yml:1963-2019``). Rulesets match check names literally, with no
+that comment records. It ``needs:`` the gating jobs of ``unit-tests.yml`` --
+``test``, ``integration``, ``engine-tests`` and ``pypcap-parity``, plus
+``project-tests``, the one run of the project pins, and ``changes`` for the
+docs-only path -- and checks each result explicitly, in its "Check every
+required job succeeded" step. Rulesets match check names literally, with no
 wildcard, so requiring the matrix cells one by one would mean editing the
 ruleset whenever a matrix changes; the aggregate keeps the required list fixed.
 It accepts the gating jobs as ``skipped`` only on a docs-only pull request, where
@@ -734,8 +733,8 @@ It accepts the gating jobs as ``skipped`` only on a docs-only pull request, wher
 ``python-compatibility.yml``, and a job cannot ``needs:`` a job in another
 workflow file. This job runs on Unit Tests' own ``push``/``pull_request``
 triggers; the ``gate-only: true`` reusable calls documented above skip it via
-``if: ${{ always() && inputs.gate-only != true }}`` (``unit-tests.yml:1966``),
-so it is never produced -- and never expected -- on those paths.
+its ``if: ${{ always() && inputs.gate-only != true }}``, so it is never
+produced -- and never expected -- on those paths.
 
 .. _ktlo-tier:
 
@@ -758,9 +757,9 @@ and keeps its legs' check names, ``Python 3.10 (KTLO)`` and so on. In
 with supported legs. Every job holding KTLO legs works the same way:
 
 * Every step that can fail on a KTLO leg has an ``id`` and
-  ``continue-on-error: ${{ matrix.ktlo == true }}`` (``unit-tests.yml:394-411``),
-  unless it is masked on every leg, as the timings uploads are. Its ``outcome`` is
-  then ``failure`` but its ``conclusion`` ``success``, so the job, its check run
+  ``continue-on-error: ${{ matrix.ktlo == true }}`` (see the comment above
+  ``test-ktlo``), unless it is masked on every leg, as the timings uploads are.
+  Its ``outcome`` is then ``failure`` but its ``conclusion`` ``success``, so the job, its check run
   and ``required-checks`` read ``success``. A step that needs an earlier one's work
   waits on that step's ``outcome``: a leg that cannot install stops there, and a
   ``pypi`` leg stops at its first failure.
