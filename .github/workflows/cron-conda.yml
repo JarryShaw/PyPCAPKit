@@ -396,6 +396,9 @@ jobs:
           PCAPKIT_VERSION: ${{ needs.conda-update.outputs.PCAPKIT_VERSION }}
           PCAPKIT_BUILD: ${{ needs.conda-update.outputs.PCAPKIT_BUILD }}
         with:
+          # #2044: Miniforge on the Intel leg; see create-release.yml's step of
+          # the same name.
+          miniforge-version: ${{ matrix.os == 'macos-26-intel' && 'latest' || '' }}
           python-version: ${{ matrix.python-version != '3.15' && matrix.python-version || '' }}
           activate-environment: base
           auto-update-conda: false
