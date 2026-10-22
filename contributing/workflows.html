@@ -1695,6 +1695,11 @@ does; each has tests under <code class="file docutils literal notranslate"><span
 <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> (and so their KTLO twins), at the job’s <code class="docutils literal notranslate"><span class="pre">ANNOTATION_LEVEL</span></code>,
 and <code class="docutils literal notranslate"><span class="pre">gate</span></code>, at <code class="docutils literal notranslate"><span class="pre">error</span></code>.</p></td>
 </tr>
+<tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/pip_install.py</span></code></p></td>
+<td><p>The install step of <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">test</span></code>, <code class="docutils literal notranslate"><span class="pre">integration</span></code> and
+<code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> (and so their KTLO twins), at the job’s <code class="docutils literal notranslate"><span class="pre">ANNOTATION_LEVEL</span></code>,
+and of <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>, <code class="docutils literal notranslate"><span class="pre">project-tests</span></code> and <code class="docutils literal notranslate"><span class="pre">gate</span></code>, at <code class="docutils literal notranslate"><span class="pre">error</span></code>.</p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -1706,7 +1711,9 @@ too, standard library only, so on GraalPy’s leg the leg’s interpreter runs p
 alone; on PyPy’s legs the leg’s interpreter runs the script as well, under the
 file-size cap every test command of <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> takes.
 <code class="file docutils literal notranslate"><span class="pre">util/regenerate_samples.py</span></code> is standard library only but runs on the leg’s
-interpreter, since the generator it runs imports <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code>. Both <code class="docutils literal notranslate"><span class="pre">changes</span></code> jobs check out on every event, since the script is in the
+interpreter, since the generator it runs imports <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code>, and so does
+<code class="file docutils literal notranslate"><span class="pre">util/pip_install.py</span></code>, since it installs into that interpreter; it runs on
+every version the matrices hold, 3.7 included. Both <code class="docutils literal notranslate"><span class="pre">changes</span></code> jobs check out on every event, since the script is in the
 tree. <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">pypi</span></code> job keeps its own copy of
 the KTLO summary’s shell until its shell moves to scripts too; a project pin runs
 that copy and the script on the same steps and requires the same output.</p>
