@@ -86,10 +86,11 @@ import urllib.parse
 from typing import TYPE_CHECKING, NamedTuple
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Iterable, Literal, Optional
+    from typing import Any, Callable, Iterable, Iterator, Literal, Optional
 
     from packaging.markers import Marker
     from packaging.requirements import Requirement
+    from packaging.version import Version
 
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 PYPROJECT = ROOT / 'pyproject.toml'
@@ -546,36 +547,75 @@ def installs(filename: 'str', subdir: 'str', python: 'str', requires_python: 'Op
                for tag in tags)
 
 
-def newest_wheel(project: 'dict[str, Any]', subdir: 'str', pythons: 'Iterable[str]',
-                 ceiling: 'Optional[str]' = None) -> 'Optional[str]':
-    """The newest release in ``project`` with a wheel each of ``pythons`` installs on ``subdir`` (#1851).
+def _releases(project: 'dict[str, Any]', ceiling: 'Optional[str]' = None,
+              ) -> 'Iterator[tuple[Version, str, list[dict[str, Any]]]]':
+    """Each release in ``project`` :func:`newest_wheel` weighs, its version, its key and its wheels (#1851).
 
     ``project`` is PyPI's JSON for a package, whose ``releases`` map each version
     to its files. A yanked file is passed over, and so are a pre-release and,
-    given a ``ceiling``, a release above it. :data:`None` when no release has such
-    a wheel; :class:`ValueError` when ``project`` lists no releases at all.
+    given a ``ceiling``, a release above it. :class:`ValueError` when ``project``
+    lists no releases at all.
 
     """
     from packaging.version import InvalidVersion, Version  # pylint: disable=import-outside-toplevel
     releases = project.get('releases') if isinstance(project, dict) else None
     if not isinstance(releases, dict):
         raise ValueError("PyPI's JSON has no releases")
-    pythons = list(pythons)
     top = None if ceiling is None else Version(ceiling)
-    best, found = None, None  # type: Optional[Version], Optional[str]
     for text, files in releases.items():
         try:
             version = Version(text)
         except InvalidVersion:
             continue
-        if version.is_prerelease or (top is not None and version > top) or (best is not None and version <= best):
+        if version.is_prerelease or (top is not None and version > top):
             continue
-        wheels = [file for file in files or () if isinstance(file, dict) and not file.get('yanked')
-                  and str(file.get('filename', '')).endswith('.whl')]
-        if pythons and all(any(installs(file['filename'], subdir, python, file.get('requires_python'))
-                               for file in wheels) for python in pythons):
+        yield version, text, [file for file in files or () if isinstance(file, dict) and not file.get('yanked')
+                              and str(file.get('filename', '')).endswith('.whl')]
+
+
+def lacking(wheels: 'Iterable[dict[str, Any]]', subdir: 'str', pythons: 'Iterable[str]') -> 'list[str]':
+    """Each of ``pythons`` that none of ``wheels``, files of PyPI's JSON, installs on ``subdir`` (#2025)."""
+    wheels = list(wheels)
+    return [python for python in pythons
+            if not any(installs(file['filename'], subdir, python, file.get('requires_python')) for file in wheels)]
+
+
+def newest_wheel(project: 'dict[str, Any]', subdir: 'str', pythons: 'Iterable[str]',
+                 ceiling: 'Optional[str]' = None) -> 'Optional[str]':
+    """The newest release in ``project`` with a wheel each of ``pythons`` installs on ``subdir`` (#1851).
+
+    Of the releases :func:`_releases` weighs. :data:`None` when no release has
+    such a wheel; :class:`ValueError` when ``project`` lists no releases at all.
+
+    """
+    pythons = list(pythons)
+    best, found = None, None  # type: Optional[Version], Optional[str]
+    for version, text, wheels in _releases(project, ceiling):
+        if best is not None and version <= best:
+            continue
+        if pythons and not lacking(wheels, subdir, pythons):
             best, found = version, text
     return found
+
+
+def _tags(pythons: 'Iterable[str]') -> 'str':
+    """``pythons`` by their wheel tags, such as ``cp314`` for 3.14, for a note."""
+    return ', '.join(f"cp{python.replace('.', '')}" for python in pythons)
+
+
+def stuck(project: 'dict[str, Any]', subdir: 'str', pythons: 'list[str]', have: 'str') -> 'str':
+    """Why no release in ``project`` up to ``have`` moves a pin on ``subdir``, for its warning (#2025).
+
+    It names the conda Pythons that no such release has a wheel for at all, or,
+    when each has one in some release, says no release has one for every Python.
+
+    """
+    if not pythons:
+        return 'conda builds for no Python, so no release qualifies'
+    missing = lacking((file for _, _, files in _releases(project, have) for file in files), subdir, pythons)
+    if missing:
+        return f'no release up to {have} has a wheel for {_tags(missing)} on {subdir}'
+    return f'no release up to {have} has wheels for all of {_tags(pythons)} on {subdir} at once'
 
 
 #: What :func:`_fetch` raises when PyPI cannot be read: :class:`OSError` for a
@@ -595,9 +635,10 @@ def refresh(table: 'dict[str, dict[str, Pin]]', fetch: 'Callable[[str], dict[str
     version, due for review on ``today`` plus :data:`REVIEW_HORIZON`. A pin that
     reaches the installed version that way, or already pins it, is dropped, as
     the other platforms vendor that version. A package or pin it cannot settle
-    stays as it is. Each note is a
-    workflow command, ``notice`` for a change and ``warning`` for a pin left
-    alone, and its text.
+    stays as it is, and so does a pin no release up to the installed version has
+    a wheel for every conda Python, which :func:`stuck` warns about (#2025). Each
+    note is a workflow command, ``notice`` for a change and ``warning`` for a pin
+    left alone, and its text.
 
     """
     from packaging.version import Version  # pylint: disable=import-outside-toplevel
@@ -639,6 +680,10 @@ def refresh(table: 'dict[str, dict[str, Pin]]', fetch: 'Callable[[str], dict[str
                 kept[subdir] = pin._replace(version=newest, review_by=today + REVIEW_HORIZON)
                 notes.append(('notice', f'{name} on {subdir} moves from {pin.version} to {newest}, the newest '
                                         f'release with a wheel there; due for review by {kept[subdir].review_by}'))
+            elif newest is None:
+                # #2025: a pin no release can move to used to stay without a word.
+                notes.append(('warning', f'{name} {pin.version} on {subdir} stays as it is, and may no longer '
+                                         f'hold: {stuck(project, subdir, pythons, have)}'))
     return {name: platforms for name, platforms in result.items() if platforms}, notes
 
 
