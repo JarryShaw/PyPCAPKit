@@ -278,8 +278,9 @@ PUBLISHING_MARKERS = {
     # anaconda-client binary by path; a bare ``anaconda`` on ``PATH`` is not matched.
     '/bin/anaconda"': 'uploads a package to anaconda.org with the anaconda-client CLI',
     'softprops/action-gh-release': 'creates a public GitHub Release, and the tag it names',
-    # ``pypi`` and ``conda`` attach their files this way since #1634.
-    'gh release upload': 'attaches a file to a public GitHub Release',
+    # ``pypi`` and ``conda`` attach their files with ``gh release upload`` since
+    # #1634, which util/release_upload.py runs since #1967.
+    'util/release_upload.py': 'attaches a file to a public GitHub Release',
     'git push': 'pushes a commit or a tag to the repository',
 }
 

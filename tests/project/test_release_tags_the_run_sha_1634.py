@@ -60,6 +60,7 @@ import json
 import os
 import pathlib
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -81,6 +82,7 @@ if TYPE_CHECKING:
 __tier__ = 'LATEST'
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
+UTIL = ROOT / 'util'
 WORKFLOW = ROOT / '.github' / 'workflows' / 'create-release.yml'
 CONDA_WORKFLOW = ROOT / '.github' / 'workflows' / 'cron-conda.yml'
 
@@ -244,6 +246,18 @@ def workflow_steps(text: 'str') -> 'dict[str, list[dict[str, Any]]]':
 
 def label(step: 'dict[str, Any]') -> 'str':
     return step.get('name') or step.get('uses') or '<unnamed>'
+
+
+def script_command(run: 'str') -> 'Optional[list[str]]':
+    """A ``run:`` of ``python3 util/<script>.py ...`` (#1967), as this interpreter runs it from any directory.
+
+    :data:`None` for any other ``run:``, which the tests run under ``bash``.
+
+    """
+    words = shlex.split(run)
+    if len(run.strip().splitlines()) != 1 or words[:1] != ['python3'] or not words[1].startswith('util/'):
+        return None
+    return [sys.executable, str(ROOT / words[1]), *words[2:]]
 
 
 class WorkflowMixin:
@@ -612,11 +626,13 @@ class TestUploadsStayOffUpdateARelease(WorkflowMixin, unittest.TestCase):
         That one replaces an asset whose ``state`` is not ``uploaded``, which
         :class:`TestTheUploadScript` runs; nothing else may delete an asset.
         """
-        script = self.step('pypi', UPLOAD_STEP)['run']
-        calls = re.findall(r'\bgh\s+(\S+(?:\s+\S+)?)', script)
-        self.assertEqual(sorted(set(calls)), ['release upload', 'release view'])
-        self.assertEqual(script.count('--clobber'), 1)
-        self.assertIn("--jq '.assets[] | [.name, .state] | @tsv'", script)
+        self.assertEqual(self.step('pypi', UPLOAD_STEP)['run'], 'python3 util/release_upload.py')
+        script = (UTIL / 'release_upload.py').read_text(encoding='utf-8')
+        calls = re.findall(r"\bgh\('(\w+)', '(\w+)'", script)
+        self.assertEqual(sorted(set(calls)), [('release', 'upload'), ('release', 'view')])
+        self.assertEqual(script.count("'--clobber'"), 1)
+        self.assertIn("ASSETS_JQ = '.assets[] | [.name, .state] | @tsv'", script)
+        self.assertEqual(re.findall(r'subprocess\.\w+\(', script), ['subprocess.run('])
 
     def test_conda_uploads_whatever_check_leg_found(self) -> None:
         """Only the Anaconda upload is gated per leg.
@@ -737,7 +753,8 @@ class ScratchRepository(WorkflowMixin, unittest.TestCase):
 
     def run_steps(self, job: 'str', names: 'tuple[str, ...]', env: 'dict[str, str]',
                   path: 'Optional[str]' = None) -> 'subprocess.CompletedProcess[str]':
-        """Run the named steps' scripts in order under ``bash -e``, stopping at a failure.
+        """Run the named steps in order, stopping at a failure: a script under ``bash -e``, a
+        ``python3 util/`` command (#1967) under this interpreter.
 
         ``env`` stands in for each step's own ``env:``, so it must name the same
         variables; their values in the workflow are checked by the classes above.
@@ -751,7 +768,8 @@ class ScratchRepository(WorkflowMixin, unittest.TestCase):
             step_env = dict(self.env, **env)
             if path is not None:
                 step_env['PATH'] = path + os.pathsep + step_env['PATH']
-            result = subprocess.run([BASH, '-e', str(script)], cwd=self.work, env=step_env,
+            command = script_command(self.step(job, name)['run']) or [BASH, '-e', str(script)]
+            result = subprocess.run(command, cwd=self.work, env=step_env,
                                     capture_output=True, text=True, check=False,
                                     timeout=scale_timeout(60))
             output.append(result.stdout + result.stderr)
@@ -1114,16 +1132,17 @@ class TestTheOwnerStep(ScratchRepository):
         self.assertEqual(self.owner(self.later)['PCAPKIT_RELEASED_ELSEWHERE'], 'true')
 
     def test_it_resolves_the_tag_as_the_check_does(self) -> None:
-        """The same fetch and the same ``rev-parse``, so the two cannot read the tag differently."""
-        owner = self.step('version_check', OWNER_STEP)['run']
-        check = self.step('github', CHECK_STEP)['run']
-        for line in ('run_commit="$(git rev-parse --verify "${PCAPKIT_RUN_SHA}^{commit}")"',):
-            self.assertIn(line, owner)
-            self.assertIn(line, check)
-        for line in ('git fetch --quiet --force origin "refs/tags/${tag}:refs/tags/${tag}" || true',
-                     'tagged="$(git rev-parse -q --verify "refs/tags/${tag}^{commit}" || true)"'):
-            self.assertIn(line, check)
-            self.assertIn(line.replace('${tag}', '${PCAPKIT_TAG}'), owner)
+        """One script's ``run_commit`` and ``resolve`` (#1967), so the two cannot read the tag differently."""
+        self.assertEqual(self.step('version_check', OWNER_STEP)['run'], 'python3 util/release_tags.py owner')
+        self.assertEqual(self.step('github', CHECK_STEP)['run'], 'python3 util/release_tags.py check')
+        source = (UTIL / 'release_tags.py').read_text(encoding='utf-8')
+        bodies = dict(re.findall(r'^def (check|owner)\(\).*\n((?:    .*\n|\n)+)', source, re.M))
+        self.assertEqual(sorted(bodies), ['check', 'owner'])
+        for name, body in sorted(bodies.items()):
+            with self.subTest(command=name):
+                self.assertEqual(body.count('run_commit()'), 1)
+                self.assertEqual(body.count('resolve(tag)'), 1)
+                self.assertNotIn('git(', body)
 
     def test_both_outputs_reach_the_jobs(self) -> None:
         block = job_blocks(WORKFLOW.read_text(encoding='utf-8'))['version_check']
@@ -1369,8 +1388,8 @@ ASSETS_JQ = '.assets[] | [.name, .state] | @tsv'
 
 @unittest.skipIf(not BASH, 'needs bash on PATH')
 class TestTheUploadScript(WorkflowMixin, unittest.TestCase):
-    """``pypi`` and ``conda``'s upload, run as ``shell: bash`` runs it
-    (``bash --noprofile --norc -eo pipefail``) against :data:`FAKE_GH`."""
+    """``pypi`` and ``conda``'s upload, its ``python3 util/`` command (#1967) run under this
+    interpreter, against :data:`FAKE_GH`."""
 
     TAG = 'v1.5.0b9'
     WHEEL = 'pypcapkit-1.5.0b9-cp311-none-any.whl'
@@ -1414,7 +1433,8 @@ class TestTheUploadScript(WorkflowMixin, unittest.TestCase):
             'LC_ALL': 'C', 'GITHUB_REPOSITORY': 'JarryShaw/PyPCAPKit',
             'GH_ASSETS': str(self.assets), 'GH_LOG': str(self.log),
         })
-        return subprocess.run([BASH, '--noprofile', '--norc', '-eo', 'pipefail', str(script)],
+        command = script_command(step['run']) or [BASH, '--noprofile', '--norc', '-eo', 'pipefail', str(script)]
+        return subprocess.run(command,
                               cwd=self.work, env=env, capture_output=True, text=True, check=False,
                               timeout=scale_timeout(60))
 
