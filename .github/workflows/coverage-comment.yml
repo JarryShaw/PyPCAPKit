@@ -15,20 +15,35 @@ name: Coverage Comment
 #     head sha), not from the artifact, and accepts it only if it is all digits;
 #   * renders its own Markdown from the artifact's numbers, accepting only the
 #     shapes the `test` job writes, rather than posting text from the run.
+#
+# A push run has no pull request to comment on, so the `discussion` job posts it
+# to its branch's thread in the Discussions category REPORT_CATEGORY names
+# (#2030). It reads the run's jobs through the API, not the run's artifacts,
+# runs util/discussion_report.py from the default branch's checkout, never the
+# run's head, and alone holds `discussions: write`.
 on:
   workflow_run:
     workflows: ["Unit Tests"]
     types: [completed]
 
-permissions:
-  actions: read
-  pull-requests: write
+# Each job holds its own scopes (#2030).
+permissions: {}
 
 # One comment per PR, so serialise per head branch. A run that finishes after a
-# newer push skips itself below, since its sha is no longer the PR's head.
+# newer push skips itself below, since its sha is no longer the PR's head. A
+# push run's group is its own (#2030): a group cancels a pending run when a
+# newer one joins it, which would drop that run's report.
 concurrency:
-  group: coverage-comment-${{ github.event.workflow_run.head_repository.full_name }}-${{ github.event.workflow_run.head_branch }}
+  group: >-
+    coverage-comment-${{ github.event.workflow_run.event == 'pull_request' &&
+    format('{0}-{1}', github.event.workflow_run.head_repository.full_name, github.event.workflow_run.head_branch) ||
+    github.event.workflow_run.id }}
   cancel-in-progress: false
+
+# #2030: one Discussions category holds every report with no pull request to
+# comment on, one thread per job.
+env:
+  REPORT_CATEGORY: CI reports
 
 jobs:
   comment:
@@ -36,6 +51,9 @@ jobs:
     if: ${{ github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion != 'cancelled' }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      actions: read
+      pull-requests: write
 
     steps:
       - name: Post or update the coverage comment
@@ -112,3 +130,175 @@ jobs:
           else
             gh api -X POST "repos/$REPO/issues/$pr/comments" -F body=@"$RUNNER_TEMP/body.md" > /dev/null
           fi
+
+  # #2030: a Unit Tests run on a push, posted as a `push` report to the thread
+  # `unit-tests: <branch> push runs`: a run that failed or warned posts, then one
+  # green run after it. The report is built from the run's check suite, read in
+  # one GraphQL call rather than from an artifact, and quotes each job name and
+  # annotation as a code span, so none renders or mentions. A green run reports
+  # `warning` where a job failed without failing it, or a job that passed holds
+  # a warning or failure annotation, as a failing KTLO leg does (#1672), other
+  # than those `EXPECTED` lists as written on every run by design. The job and
+  # its steps are `continue-on-error`; util/discussion_report.py warns instead.
+  discussion:
+    name: Post the push run report
+    if: ${{ github.event.workflow_run.event == 'push' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    permissions:
+      checks: read
+      contents: read
+      discussions: write
+
+    steps:
+      # The default branch, which is what `workflow_run` checks out, and only
+      # the script; nothing from the run's head.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: |
+            util/discussion_report.py
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Write the run report
+        id: report
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SUITE: ${{ github.event.workflow_run.check_suite_node_id }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+          RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: |
+          set -u
+          # The run's conclusion as a --status; anything else, `timed_out` and
+          # `startup_failure` among them, is a failure.
+          case "$RUN_CONCLUSION" in
+            success) status=success ;;
+            cancelled|stale) status=cancelled ;;
+            skipped|neutral) status=skipped ;;
+            *) status=failure ;;
+          esac
+          branch=$(printf '%s' "$HEAD_BRANCH" | tr -c 'A-Za-z0-9._/-' '-')
+          echo "title=unit-tests: ${branch:-unknown} push runs" >> "$GITHUB_OUTPUT"
+
+          # shellcheck disable=SC2016 # `$id` is a GraphQL variable
+          query='query($id: ID!) { node(id: $id) { ... on CheckSuite { checkRuns(first: 100) {
+            pageInfo { hasNextPage }
+            nodes { name conclusion annotations(first: 20) { nodes { annotationLevel title message } } } } } } }'
+          if ! gh api graphql -f query="$query" -f id="$SUITE" > "$RUNNER_TEMP/jobs.json"; then
+            echo "::warning::The run's jobs could not be read, so the report names none of them."
+            : > "$RUNNER_TEMP/jobs.json"
+          fi
+
+          mkdir -p report
+          if ! STATUS="$status" python3 - "$RUNNER_TEMP/jobs.json" report/unit-tests-report.md <<'PY'
+          import json, os, re, sys
+          status, conclusion = os.environ['STATUS'], os.environ['RUN_CONCLUSION']
+          sha, url = os.environ['HEAD_SHA'], os.environ['RUN_URL']
+
+          def code(text):
+              """One line of ``text``, at most 200 characters, as a code span, so it renders and mentions nothing."""
+              text = ' '.join(str(text).replace('`', "'").split())
+              return '`{}`'.format(text if len(text) <= 200 else text[:197] + '...')
+
+          # The annotations a job writes on every run by design, which neither
+          # count nor are listed: per job, `(level, title prefix)`, where an
+          # empty prefix matches only an empty title, the runner's own line for
+          # the step that failed. Matched on the title, not the message, which
+          # #2041 rewords. Anything else in these jobs, a failed tests step
+          # among it, still makes a green run `warning`.
+          EXPECTED = {
+              # #1633, #1672: no pytest>=8 for 3.7, so its KTLO legs stop at install.
+              'Python 3.7 (KTLO)': (
+                  ('WARNING', 'install failed on Python 3.7 (KTLO, non-blocking)'),
+                  ('FAILURE', ''),
+                  ('WARNING', 'pcapkit did not install on Python 3.7 (KTLO, non-blocking)'),
+              ),
+              'Integration Python 3.7 (KTLO)': (
+                  ('WARNING', 'install failed on Python 3.7 (KTLO, non-blocking)'),
+                  ('FAILURE', ''),
+                  ('WARNING', 'pcapkit did not install on Python 3.7 (KTLO, non-blocking)'),
+              ),
+              # #1633, #1672: pypy3.10's KTLO leg stops at install too, until #2040.
+              'Python pypy3.10 (KTLO)': (
+                  ('WARNING', 'install failed on Python pypy3.10 (KTLO, non-blocking)'),
+                  ('FAILURE', ''),
+                  ('WARNING', 'pcapkit did not install on Python pypy3.10 (KTLO, non-blocking)'),
+              ),
+          }
+
+          def expected(job, note):
+              """Whether ``note``, an annotation of ``job``, is one :data:`EXPECTED` lists."""
+              title = note.get('title') or ''
+              return any(note.get('annotationLevel') == level and (title.startswith(prefix) if prefix else not title)
+                         for level, prefix in EXPECTED.get(job, ()))
+
+          try:
+              with open(sys.argv[1], encoding='utf-8') as file:
+                  runs = json.load(file)['data']['node']['checkRuns']
+              nodes, more = [node for node in runs['nodes'] if node], runs['pageInfo']['hasNextPage']
+          except (OSError, ValueError, LookupError, TypeError):
+              nodes, more = None, False
+          failed, warned, by_design = [], [], False
+          for node in nodes or []:
+              name, result = node.get('name') or '?', (node.get('conclusion') or 'unknown').lower()
+              if result not in ('success', 'skipped', 'neutral'):
+                  failed.append(f'{code(name)} ({result})')
+              elif result == 'success':
+                  flagged = [note for note in (node.get('annotations') or {}).get('nodes') or []
+                             if note and note.get('annotationLevel') in ('WARNING', 'FAILURE')]
+                  kept = [note for note in flagged if not expected(name, note)]
+                  by_design = by_design or len(kept) < len(flagged)
+                  notes = [note.get('title') or note.get('message') or '' for note in kept]
+                  notes = list(dict.fromkeys(note for note in notes if note.strip()))[:5]
+                  if notes:
+                      warned.append(f'{code(name)}: ' + '; '.join(map(code, notes)))
+          if status == 'success' and (failed or warned):
+              status = 'warning'
+
+          run = 'The Unit Tests run'
+          if re.fullmatch(r'https://[\w.-]+/[\w.-]+/[\w.-]+/actions/runs/\d+', url):
+              run = f'[Unit Tests run]({url})'
+          commit = f' for `{sha[:9]}`' if re.fullmatch(r'[0-9a-f]{40}', sha) else ''
+          lines = ['### Unit Tests push run', '', f'{run}{commit} concluded {code(conclusion or "unknown")}.']
+          if failed:
+              heading = 'Failed without failing the run' if conclusion == 'success' else 'Did not pass'
+              lines += ['', f'**{heading}:**', '', *(f'- {item}' for item in failed)]
+          if warned:
+              lines += ['', '**Warned, in jobs that passed:**', '', *(f'- {item}' for item in warned)]
+          if nodes is None:
+              lines += ['', "The run's jobs could not be read, so none is named here."]
+          elif more:
+              lines += ['', 'Only the first 100 jobs were read.']
+          elif not failed and not warned:
+              lines += ['', 'Every job passed, with no warning but the by-design ones.' if by_design
+                        else 'Every job passed, with no warning.']
+          with open(sys.argv[2], 'w', encoding='utf-8') as file:
+              print('\n'.join(lines), file=file)
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as file:
+              print(f'status={status}', file=file)
+          PY
+          then
+            echo "::warning::The report could not be written, so it holds the run's conclusion alone."
+            echo "### Unit Tests push run, which concluded \`$status\`" > report/unit-tests-report.md
+            echo "status=$status" >> "$GITHUB_OUTPUT"
+          fi
+          cat report/unit-tests-report.md
+
+      # The script labels the run it links with GITHUB_WORKFLOW, which names
+      # this workflow, so the command sets the relayed run's for that process.
+      - name: Post the report to Discussions
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TITLE: ${{ steps.report.outputs.title }}
+          STATUS: ${{ steps.report.outputs.status }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          GITHUB_WORKFLOW='Unit Tests' python3 util/discussion_report.py --category "$REPORT_CATEGORY" \
+            --title "$TITLE" --report report/unit-tests-report.md \
+            --mode push --status "$STATUS" --run-url "$RUN_URL" --sha "$HEAD_SHA"
