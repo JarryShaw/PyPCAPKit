@@ -771,8 +771,13 @@ class WorkflowTests(unittest.TestCase):
         return [line.strip() for line in str(step.get('run', '')).splitlines()
                 if line.strip() and not line.strip().startswith('#')]
 
+    def refreshes(self, step: 'dict[str, Any]') -> 'bool':
+        """Whether ``step`` runs the refresh, its log kept for the run report (#2030)."""
+        return self.runs(step) == ['set -o pipefail', 'python util/conda_vendor.py --refresh-pins | '
+                                                      'tee "$RUNNER_TEMP/platform-pins.log"']
+
     def test_the_refresh_runs_between_the_install_and_the_writer(self) -> None:
-        refresh = self.index(lambda step: self.runs(step) == ['python util/conda_vendor.py --refresh-pins'])
+        refresh = self.index(self.refreshes)
         install = self.index(lambda step: "python -m pip install -e '.[all]'" in self.runs(step))
         writer = self.index(lambda step: 'python util/conda_vendor.py' in self.runs(step))
         changed = self.index(lambda step: step.get('id') == 'verify-changed-files')
@@ -785,7 +790,7 @@ class WorkflowTests(unittest.TestCase):
 
     def test_the_job_installs_requests_before_the_refresh(self) -> None:
         """``.[all]`` does not bring :mod:`requests`, which ``--refresh-pins`` reads PyPI with."""
-        refresh = self.index(lambda step: self.runs(step) == ['python util/conda_vendor.py --refresh-pins'])
+        refresh = self.index(self.refreshes)
         installs = [index for index, step in enumerate(self.steps) for line in self.runs(step)
                     if 'requests' in pip_installs(line)]
         self.assertTrue(installs, 'no step of conda-update installs requests')
