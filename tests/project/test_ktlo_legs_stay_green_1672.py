@@ -96,10 +96,13 @@ MASKED_ON_EVERY_LEG = {
 #: interpreters, which reads :data:`ENGINE_KTLO_OUTPUT` (#1660).
 ENGINE_KTLO = ('Run the KTLO cells (non-blocking)',)
 ENGINE_KTLO_OUTPUT = '${{ needs.python-versions.outputs.engine-ktlo }}'
+#: The job's level, as a step's shell writes it.
+LEVEL = '${ANNOTATION_LEVEL}'
 #: The workflow commands a step a KTLO leg runs may write.
-KTLO_COMMANDS = frozenset({'${ANNOTATION_LEVEL}', 'warning', 'notice', 'group', 'endgroup'})
-#: A workflow command a script writes, by its name.
-COMMAND = re.compile(r'''(?:echo|printf|print\(f?)\s*["']::([^\s:"']+)''')
+KTLO_COMMANDS = frozenset({LEVEL, 'warning', 'notice', 'group', 'endgroup'})
+#: A workflow command a script writes, by its name: ``say`` is the printer of
+#: util/apt_packages.py and util/regenerate_samples.py (#1967).
+COMMAND = re.compile(r'''(?:echo|printf|(?:print|say)\(f?)\s*["']::([^\s:"']+)''')
 #: A status-check function: an ``if:`` holding none gets ``success() &&`` prepended.
 STATUS_FUNCTION = re.compile(r'\b(?:success|failure|cancelled|always)\(\)')
 #: A ``needs`` output a step's ``if:`` reads, such as the tier file's (#1660).
@@ -285,10 +288,17 @@ def scenarios(name: 'str', job_id: 'str', spec: 'dict[str, Any]',
 
 
 def commands(script: 'str') -> 'set[str]':
-    """The workflow commands ``script`` writes, and each ``util/`` script it runs (#1967)."""
+    """The workflow commands ``script`` writes, and each ``util/`` script it runs (#1967).
+
+    A script's ``::{level}``, where it reads ``ANNOTATION_LEVEL`` into ``level`` as
+    :file:`util/regenerate_samples.py` does, is the shell's ``${ANNOTATION_LEVEL}``.
+
+    """
     found = set(COMMAND.findall(script))
     for path in set(UTIL_SCRIPT.findall(script)):
-        found |= set(COMMAND.findall((ROOT / path).read_text(encoding='utf-8')))
+        text = (ROOT / path).read_text(encoding='utf-8')
+        levelled = "level = os.environ['ANNOTATION_LEVEL']" in text
+        found |= {LEVEL if name == '{level}' and levelled else name for name in COMMAND.findall(text)}
     return found
 
 
@@ -412,7 +422,7 @@ class TestAKTLOFailureIsAWarning(unittest.TestCase):
                         self.assertEqual(step.get('if'), unreachable)
                         continue
                     self.assertLessEqual(commands(step.get('run', '')), KTLO_COMMANDS)
-                    if '${ANNOTATION_LEVEL}' in step.get('run', ''):
+                    if LEVEL in commands(step.get('run', '')):
                         self.assertIn((name, job_id), LEVELLED)
 
     def summary(self, steps: 'dict[str, str]') -> 'tuple[subprocess.CompletedProcess[str], str]':

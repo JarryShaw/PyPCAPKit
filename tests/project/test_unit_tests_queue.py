@@ -16,8 +16,9 @@ These fail silently if they drift, so they are pinned here:
   ``continue-on-error`` rather than a job-level one (#1633), and the job has no
   ``DPKT`` cell (#1538).
 * The classifier, :file:`util/classify_changes.py` (#1967), the engine cell loops
-  and the apt retry are executed too: the classifier against a scratch merge
-  commit, the others with their commands stubbed on ``PATH``.
+  and the apt retry, :file:`util/apt_packages.py`'s since #1967, are executed
+  too: the classifier against a scratch merge commit, the others with their
+  commands stubbed on ``PATH``.
 * Every test outside :file:`tests/project` that reads ``docs/`` or Markdown is
   run by ``project-tests``, so a docs-only PR cannot break it unseen.
 
@@ -34,6 +35,7 @@ import importlib.util
 import os
 import pathlib
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -295,9 +297,17 @@ def step(section: 'str', name: 'str') -> 'str':
     return match.group(1)
 
 
+#: The interpreter the steps run a ``util/`` script on, the image's (#1967).
+IMAGE_PYTHON = '/usr/bin/python3'
+
+
 def step_script(section: 'str', name: 'str') -> 'str':
-    """The dedented ``run: |`` script of step ``name``."""
-    body = step(section, name).split('        run: |\n', 1)[1]
+    """The dedented script of step ``name``: its ``run: |`` block, or its one-line ``run:``."""
+    text = step(section, name)
+    line = re.search(r'(?m)^        run: (?!\|$)(.+)$', text)
+    if line is not None:
+        return line.group(1) + '\n'
+    body = text.split('        run: |\n', 1)[1]
     lines = []
     for line in body.splitlines():
         if line.strip() and not line.startswith(' ' * 10):
@@ -318,6 +328,16 @@ def bash(script: 'str', env: 'dict[str, str]', cwd: 'Optional[str]' = None) -> '
     """Run ``script`` under ``bash -e`` (GitHub's default shell) and return its status."""
     return subprocess.run(['bash', '-e', '-c', script], env=dict(os.environ, **env), cwd=cwd,
                           check=False, capture_output=True, text=True).returncode
+
+
+def checkout_script(script: 'str', mirrors: 'Optional[pathlib.Path]' = None) -> 'str':
+    """``script`` runnable from the checkout here (#1967): this interpreter for the
+    image's and, given ``mirrors``, that file for the runner's mirror list."""
+    script = script.replace(IMAGE_PYTHON, shlex.quote(sys.executable))
+    if mirrors is not None:
+        script = script.replace('util/apt_packages.py install',
+                                f'util/apt_packages.py install --mirrors {shlex.quote(str(mirrors))}')
+    return script
 
 
 class _Scratch(unittest.TestCase):
@@ -476,10 +496,11 @@ class TestEngineCellLoops(_Scratch):
         self.assertEqual(status, 0)
 
 
-#: The two apt steps, as (job, step name, extra env).
+#: The two apt steps, as (job, step name, extra env), each with its job's ``APT_PACKAGES``.
 APT_STEPS: 'tuple[tuple[str, str, dict[str, str]], ...]' = (
-    ('engine-tests', "Install this engine's system packages", {'ENGINE': 'PyShark'}),
-    ('pypcap-parity', 'Install libpcap headers, a C toolchain, and tshark', {}),
+    ('engine-tests', "Install this engine's system packages", {'ENGINE': 'PyShark', 'APT_PACKAGES': 'tshark'}),
+    ('pypcap-parity', 'Install libpcap headers, a C toolchain, and tshark',
+     {'APT_PACKAGES': 'build-essential libpcap-dev tshark'}),
 )
 
 #: Stubs for the commands the apt steps run, put first on PATH.
@@ -497,7 +518,7 @@ STUBS = {
 
 
 class TestAptRetry(_Scratch):
-    """Both apt steps, with ``sudo``/``timeout``/``apt-get`` stubbed."""
+    """Both apt install steps, :file:`util/apt_packages.py` (#1967), with ``sudo``/``timeout``/``apt-get`` stubbed."""
 
     def run_apt(self, name: 'str', job_name: 'str', extra: 'dict[str, str]',
                 fail_updates: 'int') -> 'tuple[int, list[str], list[int]]':
@@ -511,9 +532,9 @@ class TestAptRetry(_Scratch):
         log = self.tmp / 'stub'
         for suffix in ('.apt', '.timeouts'):
             pathlib.Path(f'{log}{suffix}').write_text('', encoding='utf-8')
-        status = bash(step_script(job(job_name), name),
+        status = bash(checkout_script(step_script(job(job_name), name), self.tmp / 'no-mirror-list'),
                       dict(extra, PATH=f'{bin_dir}{os.pathsep}{os.environ["PATH"]}',
-                           STUB_LOG=str(log), FAIL_UPDATES=str(fail_updates)))
+                           STUB_LOG=str(log), FAIL_UPDATES=str(fail_updates)), str(ROOT))
         apt = pathlib.Path(f'{log}.apt').read_text(encoding='utf-8').split()
         timeouts = pathlib.Path(f'{log}.timeouts').read_text(encoding='utf-8')
         bounds = [int(n) for n in timeouts.split()]

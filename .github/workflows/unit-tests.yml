@@ -673,7 +673,8 @@ jobs:
     timeout-minutes: 30
     env:
       ENGINE: ${{ matrix.engine }}
-      # Read by the apt plan step; see the note above it.
+      # Read by util/apt_packages.py's plan and install; see the note above
+      # the plan step.
       APT_PACKAGES: ${{ matrix.engine == 'PyShark' && 'tshark' || matrix.engine == 'PCAP_CT' && 'libpcap0.8' || matrix.engine == 'PyPCAP' && 'build-essential libpcap-dev' || '' }}
       APT_SET: ${{ matrix.engine }}
       APT_CACHE_SAVE: 'true'
@@ -768,34 +769,19 @@ jobs:
       # on a hit, so a real install failure still fails; a cache-service error
       # is only a warning from actions/cache. The 180s bound is unchanged: with
       # the above it binds only on a cold miss, and TestAptRetry in
-      # tests/project/test_unit_tests_queue.py pins it. APT_PACKAGES (the job's
-      # env, read by the plan step) must name what the install step installs,
-      # or the key describes the wrong set -- a lost cache, not a wrong install.
+      # tests/project/test_unit_tests_queue.py pins it. APT_PACKAGES, the job's
+      # env, is what both the plan and the install read, so the key always
+      # describes the set installed.
       #
-      # `pypcap-parity` runs the same steps; every body but the install's is
-      # byte-identical to these.
+      # The plan, seed, install and collect steps run util/apt_packages.py
+      # (#1967), which runs the commands above under `sudo` and writes the same
+      # annotations; its docstring says what each subcommand does. `pypcap-parity`
+      # runs the same steps; every body but the install's is identical to these.
       - name: Plan this engine's system packages
         id: apt-plan
         if: env.APT_PACKAGES != ''
         timeout-minutes: 4
-        run: |
-          set -eu
-          for attempt in 1 2; do
-            if sudo timeout 60 apt-get update; then
-              break
-            fi
-            echo "::warning title=apt-get update attempt $attempt of 2 failed (${APT_SET})::apt-get update failed or exceeded its 60s bound."
-            [ "$attempt" = 1 ] || exit 1
-          done
-          # shellcheck disable=SC2086
-          sim=$(apt-get install -s --no-install-recommends $APT_PACKAGES)
-          plan=$(printf '%s\n' "$sim" | grep '^Inst ' | sort || true)
-          printf 'To download:\n%s\n' "${plan:-(nothing)}"
-          if [ -n "$plan" ]; then
-            prefix="apt-debs-${ImageOS:-unknown}-${RUNNER_ARCH}-${APT_SET}-"
-            echo "restore-prefix=$prefix" >> "$GITHUB_OUTPUT"
-            echo "key=${prefix}$(printf '%s\n' "$plan" | sha256sum | cut -c1-16)" >> "$GITHUB_OUTPUT"
-          fi
+        run: /usr/bin/python3 util/apt_packages.py plan
 
       - name: Restore this engine's cached .deb files
         id: apt-cache
@@ -808,40 +794,11 @@ jobs:
 
       - name: Seed apt's archive with this engine's cached .deb files
         if: steps.apt-cache.outputs.cache-matched-key != ''
-        run: |
-          set -eu
-          sudo cp "$RUNNER_TEMP"/apt-debs/*.deb /var/cache/apt/archives/
-          echo "Seeded $(find "$RUNNER_TEMP/apt-debs" -name '*.deb' | wc -l) .deb files"
+        run: /usr/bin/python3 util/apt_packages.py seed
 
       - name: Install this engine's system packages
         timeout-minutes: 10
-        run: |
-          set -eu
-          mirrors=/etc/apt/apt-mirrors.txt
-          apt_install() {
-            for attempt in 1 2; do
-              if sudo timeout 60 apt-get update \
-                 && sudo DEBIAN_FRONTEND=noninteractive timeout 180 apt-get install -y --no-install-recommends "$@"; then
-                return 0
-              fi
-              echo "::warning title=apt attempt $attempt of 2 failed (${ENGINE})::apt-get update or install failed or exceeded its per-attempt bound; retrying once."
-              sudo dpkg --configure -a || true
-              if [ "$attempt" = 1 ] && [ -f "$mirrors" ] \
-                 && grep -v 'azure\.archive\.ubuntu\.com' "$mirrors" | grep -q '^http' \
-                 && sudo sed -i '/azure\.archive\.ubuntu\.com/d' "$mirrors"; then
-                echo "::warning title=apt retry on a fallback mirror (${ENGINE})::Retrying against $(head -n 1 "$mirrors" | cut -f 1) instead of azure.archive.ubuntu.com, resuming the partial download."
-              fi
-            done
-            return 1
-          }
-          if [ "$ENGINE" = "PyShark" ]; then
-            echo "wireshark-common wireshark-common/install-setuid boolean false" | sudo debconf-set-selections
-            apt_install tshark
-          elif [ "$ENGINE" = "PCAP_CT" ]; then
-            apt_install libpcap0.8
-          elif [ "$ENGINE" = "PyPCAP" ]; then
-            apt_install build-essential libpcap-dev
-          fi
+        run: /usr/bin/python3 util/apt_packages.py install --name "$ENGINE"
 
       # #2019: from Ubuntu 25.04, apparmor 4.1 ships an enforcing profile for
       # /usr/bin/tshark (/etc/apparmor.d/tshark) whose own file rules read only
@@ -867,22 +824,7 @@ jobs:
         if: >-
           env.APT_CACHE_SAVE == 'true' && steps.apt-plan.outputs.key != ''
           && steps.apt-cache.outputs.cache-hit != 'true'
-        run: |
-          set -eu
-          out="$RUNNER_TEMP/apt-debs"
-          rm -rf "$out"
-          mkdir -p "$out"
-          for deb in /var/cache/apt/archives/*.deb; do
-            [ -e "$deb" ] || continue
-            pkg=$(dpkg-deb -f "$deb" Package)
-            ver=$(dpkg-deb -f "$deb" Version)
-            arch=$(dpkg-deb -f "$deb" Architecture)
-            # shellcheck disable=SC2016
-            if [ "$(dpkg-query -W -f '${Version}' "$pkg:$arch" 2>/dev/null || true)" = "$ver" ]; then
-              cp "$deb" "$out/"
-            fi
-          done
-          echo "Collected $(find "$out" -name '*.deb' | wc -l) .deb files"
+        run: /usr/bin/python3 util/apt_packages.py collect
 
       - name: Save this engine's .deb files to the cache
         if: >-
@@ -1117,7 +1059,8 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     env:
-      # Read by the apt plan step; see `engine-tests`'s note on it.
+      # Read by util/apt_packages.py's plan and install; see `engine-tests`'s
+      # note on it.
       APT_PACKAGES: build-essential libpcap-dev tshark
       APT_SET: pypcap-parity
       # Every cell installs the same set under the same key; only one saves it,
@@ -1155,11 +1098,10 @@ jobs:
       # *_runtime.py wholesale. Without tshark, PyShark.unsupported_reason()
       # declines the engine, the extractor silently falls back to the default
       # parser, and the test's assertions used to pass on that fallback's
-      # output -- a vacuous pass, invisible in skip counts. The debconf
-      # pre-seed and DEBIAN_FRONTEND mirror `engine-tests`'s "Install this
-      # engine's system packages" step exactly, for the same reason: tshark's
-      # postinst otherwise blocks on the "allow non-superusers to capture
-      # packets" prompt.
+      # output -- a vacuous pass, invisible in skip counts. The install
+      # pre-seeds debconf and sets DEBIAN_FRONTEND as `engine-tests`'s does,
+      # for the same reason: tshark's postinst otherwise blocks on the "allow
+      # non-superusers to capture packets" prompt.
       #
       # The apt steps -- plan, restore, seed, install, collect, save -- are
       # `engine-tests`'s, for the reasons in the note above its plan step:
@@ -1174,24 +1116,7 @@ jobs:
         if: env.APT_PACKAGES != ''
         continue-on-error: ${{ matrix.ktlo == true }}
         timeout-minutes: 4
-        run: |
-          set -eu
-          for attempt in 1 2; do
-            if sudo timeout 60 apt-get update; then
-              break
-            fi
-            echo "::warning title=apt-get update attempt $attempt of 2 failed (${APT_SET})::apt-get update failed or exceeded its 60s bound."
-            [ "$attempt" = 1 ] || exit 1
-          done
-          # shellcheck disable=SC2086
-          sim=$(apt-get install -s --no-install-recommends $APT_PACKAGES)
-          plan=$(printf '%s\n' "$sim" | grep '^Inst ' | sort || true)
-          printf 'To download:\n%s\n' "${plan:-(nothing)}"
-          if [ -n "$plan" ]; then
-            prefix="apt-debs-${ImageOS:-unknown}-${RUNNER_ARCH}-${APT_SET}-"
-            echo "restore-prefix=$prefix" >> "$GITHUB_OUTPUT"
-            echo "key=${prefix}$(printf '%s\n' "$plan" | sha256sum | cut -c1-16)" >> "$GITHUB_OUTPUT"
-          fi
+        run: /usr/bin/python3 util/apt_packages.py plan
 
       - name: Restore the cached .deb files
         id: apt-cache
@@ -1207,33 +1132,13 @@ jobs:
         id: apt-seed
         if: steps.apt-cache.outputs.cache-matched-key != ''
         continue-on-error: ${{ matrix.ktlo == true }}
-        run: |
-          set -eu
-          sudo cp "$RUNNER_TEMP"/apt-debs/*.deb /var/cache/apt/archives/
-          echo "Seeded $(find "$RUNNER_TEMP/apt-debs" -name '*.deb' | wc -l) .deb files"
+        run: /usr/bin/python3 util/apt_packages.py seed
 
       - name: Install libpcap headers, a C toolchain, and tshark
         id: apt-install
         continue-on-error: ${{ matrix.ktlo == true }}
         timeout-minutes: 10
-        run: |
-          set -eu
-          echo "wireshark-common wireshark-common/install-setuid boolean false" | sudo debconf-set-selections
-          mirrors=/etc/apt/apt-mirrors.txt
-          for attempt in 1 2; do
-            if sudo timeout 60 apt-get update \
-               && sudo DEBIAN_FRONTEND=noninteractive timeout 180 apt-get install -y --no-install-recommends build-essential libpcap-dev tshark; then
-              exit 0
-            fi
-            echo "::warning title=apt attempt $attempt of 2 failed::apt-get update or install failed or exceeded its per-attempt bound; retrying once."
-            sudo dpkg --configure -a || true
-            if [ "$attempt" = 1 ] && [ -f "$mirrors" ] \
-               && grep -v 'azure\.archive\.ubuntu\.com' "$mirrors" | grep -q '^http' \
-               && sudo sed -i '/azure\.archive\.ubuntu\.com/d' "$mirrors"; then
-              echo "::warning title=apt retry on a fallback mirror::Retrying against $(head -n 1 "$mirrors" | cut -f 1) instead of azure.archive.ubuntu.com, resuming the partial download."
-            fi
-          done
-          exit 1
+        run: /usr/bin/python3 util/apt_packages.py install
 
       # #2019: tshark's AppArmor profile on Ubuntu 25.04 and later; see
       # `engine-tests`'s step of the same name, whose body this is.
@@ -1252,22 +1157,7 @@ jobs:
         if: >-
           env.APT_CACHE_SAVE == 'true' && steps.apt-plan.outputs.key != ''
           && steps.apt-cache.outputs.cache-hit != 'true'
-        run: |
-          set -eu
-          out="$RUNNER_TEMP/apt-debs"
-          rm -rf "$out"
-          mkdir -p "$out"
-          for deb in /var/cache/apt/archives/*.deb; do
-            [ -e "$deb" ] || continue
-            pkg=$(dpkg-deb -f "$deb" Package)
-            ver=$(dpkg-deb -f "$deb" Version)
-            arch=$(dpkg-deb -f "$deb" Architecture)
-            # shellcheck disable=SC2016
-            if [ "$(dpkg-query -W -f '${Version}' "$pkg:$arch" 2>/dev/null || true)" = "$ver" ]; then
-              cp "$deb" "$out/"
-            fi
-          done
-          echo "Collected $(find "$out" -name '*.deb' | wc -l) .deb files"
+        run: /usr/bin/python3 util/apt_packages.py collect
 
       - name: Save the .deb files to the cache
         if: >-
