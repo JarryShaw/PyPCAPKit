@@ -770,10 +770,10 @@ re-derives the list:</p>
 <strong>Conda Update</strong> fires on completion of <strong>Unit Tests</strong>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/deploy-pages.yml</span></code>, its <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> trigger –
 <strong>GitHub Pages</strong> fires on completion of <strong>Unit Tests</strong>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/create-release.yml:6-9</span></code> – <strong>Create Release</strong> fires on
-completion of <strong>Vendor Update</strong>.</p></li>
-<li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/coverage-comment.yml:21-23</span></code> – <strong>Coverage Comment</strong> fires
-on completion of <strong>Unit Tests</strong>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/create-release.yml</span></code>, its <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> trigger –
+<strong>Create Release</strong> fires on completion of <strong>Vendor Update</strong>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/coverage-comment.yml</span></code>, its <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> trigger –
+<strong>Coverage Comment</strong> fires on completion of <strong>Unit Tests</strong>.</p></li>
 </ul>
 <p><code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> fires for <em>every</em> completion of the named workflow –
 success, failure, or skipped – and regardless of what triggered it,
@@ -819,7 +819,7 @@ the caller’s own workflow run, as one of the caller’s own jobs, rather than
 starting an independent run after the caller finishes. The calls target
 <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>, always with <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code>, and <code class="docutils literal notranslate"><span class="pre">cron-head.yml</span></code>:</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/create-release.yml:595</span></code> – job <code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> calls
+<li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/create-release.yml</span></code>, job <code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> – calls
 <code class="docutils literal notranslate"><span class="pre">./.github/workflows/unit-tests.yml</span></code> with <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/cron-head.yml</span></code>, job <code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> – calls
 <code class="docutils literal notranslate"><span class="pre">./.github/workflows/unit-tests.yml</span></code> with <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code>.</p></li>
@@ -899,7 +899,7 @@ above – carries:</p>
 <span class="w">  </span><span class="no">needs.vendor_update.outputs.updated != 'false' }}</span>
 </pre></div>
 </div>
-<p>(<code class="docutils literal notranslate"><span class="pre">create-release.yml:290-294</span></code>). Its third clause skips the tag-push run that
+<p>Its third clause skips the tag-push run that
 the release App’s own tag starts (<a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a>, “The Release App”). On the
 <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> path, this evaluates <strong>false</strong>, and the job is skipped
 outright, whenever the upstream Vendor Update run’s own conclusion was
@@ -913,13 +913,12 @@ its <code class="docutils literal notranslate"><span class="pre">verdict</span><
 the <code class="docutils literal notranslate"><span class="pre">vendor_update</span></code> job reads from that run’s jobs first (observed on run
 38650191283). <code class="docutils literal notranslate"><span class="pre">!cancelled()</span></code> keeps a skipped <code class="docutils literal notranslate"><span class="pre">vendor_update</span></code>, on a push, from
 skipping it. <code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> then depends on that job with
-<code class="docutils literal notranslate"><span class="pre">needs:</span> <span class="pre">[</span> <span class="pre">version_check</span> <span class="pre">]</span></code> (<code class="docutils literal notranslate"><span class="pre">create-release.yml:583</span></code>) and an <code class="docutils literal notranslate"><span class="pre">if:</span></code> that
+<code class="docutils literal notranslate"><span class="pre">needs:</span> <span class="pre">[</span> <span class="pre">version_check</span> <span class="pre">]</span></code> and an <code class="docutils literal notranslate"><span class="pre">if:</span></code> that
 calls no status-check function, so a skipped dependency skips it too – and
 every job past it is gated the same way: <code class="docutils literal notranslate"><span class="pre">github</span></code> needs <code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">unit-tests,</span>
-<span class="pre">version_check</span> <span class="pre">]</span></code> (<code class="docutils literal notranslate"><span class="pre">:621</span></code>), <code class="docutils literal notranslate"><span class="pre">tag</span></code> needs <code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">github,</span> <span class="pre">unit-tests,</span>
-<span class="pre">version_check</span> <span class="pre">]</span></code> (<code class="docutils literal notranslate"><span class="pre">:808</span></code>), <code class="docutils literal notranslate"><span class="pre">pypi</span></code> needs <code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">github,</span> <span class="pre">unit-tests,</span>
-<span class="pre">version_check</span> <span class="pre">]</span></code> (<code class="docutils literal notranslate"><span class="pre">:974</span></code>), and <code class="docutils literal notranslate"><span class="pre">conda</span></code> needs <code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">tag,</span> <span class="pre">github,</span>
-<span class="pre">unit-tests,</span> <span class="pre">version_check</span> <span class="pre">]</span></code> (<code class="docutils literal notranslate"><span class="pre">:1210</span></code>).</p>
+<span class="pre">version_check</span> <span class="pre">]</span></code>, <code class="docutils literal notranslate"><span class="pre">tag</span></code> and <code class="docutils literal notranslate"><span class="pre">pypi</span></code> need <code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">github,</span> <span class="pre">unit-tests,</span>
+<span class="pre">version_check</span> <span class="pre">]</span></code>, and <code class="docutils literal notranslate"><span class="pre">conda</span></code> needs <code class="docutils literal notranslate"><span class="pre">[</span> <span class="pre">tag,</span> <span class="pre">github,</span> <span class="pre">unit-tests,</span>
+<span class="pre">version_check</span> <span class="pre">]</span></code>.</p>
 <pre  class="mermaid">
         flowchart TD
     WR[&quot;Vendor Update completed&lt;br/&gt;conclusion != success,&lt;br/&gt;or vendor-update skipped&quot;]
@@ -941,8 +940,8 @@ every job past it is gated the same way: <code class="docutils literal notransla
     classDef skipped fill:#fdecea,stroke:#c0392b,stroke-dasharray:4 2
     class UTX,VC,GH,TAGJ,PY,CD skipped
     </pre><p>This is a transitive reduction, as in <a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a>: <code class="docutils literal notranslate"><span class="pre">version_check</span></code> and
-<code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> are also direct <code class="docutils literal notranslate"><span class="pre">needs:</span></code> of <code class="docutils literal notranslate"><span class="pre">tag</span></code> and <code class="docutils literal notranslate"><span class="pre">pypi</span></code>
-(<code class="docutils literal notranslate"><span class="pre">create-release.yml:808,974</span></code>) and of <code class="docutils literal notranslate"><span class="pre">conda</span></code> (<code class="docutils literal notranslate"><span class="pre">:1210</span></code>), but <code class="docutils literal notranslate"><span class="pre">github</span></code>
+<code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> are also direct <code class="docutils literal notranslate"><span class="pre">needs:</span></code> of <code class="docutils literal notranslate"><span class="pre">tag</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code>,
+but <code class="docutils literal notranslate"><span class="pre">github</span></code>
 already implies those edges, since it depends on both itself. Drawing them
 would add lines without changing which job can start before which, or which
 job a skip in <code class="docutils literal notranslate"><span class="pre">version_check</span></code> reaches.</p>
@@ -960,7 +959,7 @@ skipping because the tag a <em>previous</em> run already created still exists): 
 one can skip the very first attempt, before any tag is ever created, purely
 because the upstream Vendor Update run did not itself conclude <code class="docutils literal notranslate"><span class="pre">success</span></code>.</p>
 <p>Such a run is also kept out of the release’s concurrency group
-(<code class="docutils literal notranslate"><span class="pre">create-release.yml:30-32</span></code>,
+(its <code class="docutils literal notranslate"><span class="pre">concurrency</span></code> block,
 <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1705">#1705</a>). It is keyed on
 its own <code class="docutils literal notranslate"><span class="pre">github.run_id</span></code> rather than on the ref, so it cannot cancel a run
 waiting there with release work. Keyed on the ref, run 38499295798 joined at
@@ -1196,23 +1195,23 @@ grepping every workflow file for its name:</p>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.11</span></code></p></td>
 <td><p>job <code class="docutils literal notranslate"><span class="pre">compatibility</span></code>, matrix leg <code class="docutils literal notranslate"><span class="pre">3.11</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">python-compatibility.yml:60</span></code>, <code class="docutils literal notranslate"><span class="pre">.github/python-versions.toml:20</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">.github/python-versions.toml:20</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.12</span></code></p></td>
 <td><p>job <code class="docutils literal notranslate"><span class="pre">compatibility</span></code>, matrix leg <code class="docutils literal notranslate"><span class="pre">3.12</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">python-compatibility.yml:60</span></code>, <code class="docutils literal notranslate"><span class="pre">.github/python-versions.toml:21</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">.github/python-versions.toml:21</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.13</span></code></p></td>
 <td><p>job <code class="docutils literal notranslate"><span class="pre">compatibility</span></code>, matrix leg <code class="docutils literal notranslate"><span class="pre">3.13</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">python-compatibility.yml:60</span></code>, <code class="docutils literal notranslate"><span class="pre">.github/python-versions.toml:22</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">.github/python-versions.toml:22</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.14</span></code></p></td>
 <td><p>job <code class="docutils literal notranslate"><span class="pre">compatibility</span></code>, matrix leg <code class="docutils literal notranslate"><span class="pre">3.14</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">python-compatibility.yml:60</span></code>, <code class="docutils literal notranslate"><span class="pre">.github/python-versions.toml:23</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">.github/python-versions.toml:23</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.15</span></code></p></td>
 <td><p>job <code class="docutils literal notranslate"><span class="pre">compatibility</span></code>, matrix leg <code class="docutils literal notranslate"><span class="pre">3.15</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">python-compatibility.yml:60</span></code>, <code class="docutils literal notranslate"><span class="pre">.github/python-versions.toml:24</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">.github/python-versions.toml:24</span></code></p></td>
 </tr>
 </tbody>
 </table>
@@ -1222,8 +1221,8 @@ which added <code class="docutils literal notranslate"><span class="pre">Compat<
 between the tiers below means editing the ruleset in the same change.</p>
 <p><code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code> is defined by exactly one job
 (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1964</span></code>). <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span></code> is defined by one, the
-<code class="docutils literal notranslate"><span class="pre">compatibility</span></code> job in <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code> (<code class="docutils literal notranslate"><span class="pre">:60</span></code>), whose matrix
-(<code class="docutils literal notranslate"><span class="pre">:74</span></code>) comes from <code class="file docutils literal notranslate"><span class="pre">.github/python-versions.toml</span></code>: the required legs
+<code class="docutils literal notranslate"><span class="pre">name:</span></code> of the <code class="docutils literal notranslate"><span class="pre">compatibility</span></code> job in <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>, whose
+<code class="docutils literal notranslate"><span class="pre">matrix</span></code> comes from <code class="file docutils literal notranslate"><span class="pre">.github/python-versions.toml</span></code>: the required legs
 are its supported tier (<code class="docutils literal notranslate"><span class="pre">python-versions.toml:20-24</span></code>), and its KTLO legs
 (<code class="docutils literal notranslate"><span class="pre">python-versions.toml:16-19</span></code>) have names ending in <code class="docutils literal notranslate"><span class="pre">(KTLO)</span></code>, so no required
 context matches one. A comment at

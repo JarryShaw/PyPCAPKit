@@ -263,10 +263,10 @@ re-derives the list:
   **Conda Update** fires on completion of **Unit Tests**.
 * ``.github/workflows/deploy-pages.yml``, its ``workflow_run`` trigger --
   **GitHub Pages** fires on completion of **Unit Tests**.
-* ``.github/workflows/create-release.yml:6-9`` -- **Create Release** fires on
-  completion of **Vendor Update**.
-* ``.github/workflows/coverage-comment.yml:21-23`` -- **Coverage Comment** fires
-  on completion of **Unit Tests**.
+* ``.github/workflows/create-release.yml``, its ``workflow_run`` trigger --
+  **Create Release** fires on completion of **Vendor Update**.
+* ``.github/workflows/coverage-comment.yml``, its ``workflow_run`` trigger --
+  **Coverage Comment** fires on completion of **Unit Tests**.
 
 ``workflow_run`` fires for *every* completion of the named workflow --
 success, failure, or skipped -- and regardless of what triggered it,
@@ -315,7 +315,7 @@ the caller's own workflow run, as one of the caller's own jobs, rather than
 starting an independent run after the caller finishes. The calls target
 ``unit-tests.yml``, always with ``gate-only: true``, and ``cron-head.yml``:
 
-* ``.github/workflows/create-release.yml:595`` -- job ``unit-tests`` calls
+* ``.github/workflows/create-release.yml``, job ``unit-tests`` -- calls
   ``./.github/workflows/unit-tests.yml`` with ``gate-only: true``.
 * ``.github/workflows/cron-head.yml``, job ``unit-tests`` -- calls
   ``./.github/workflows/unit-tests.yml`` with ``gate-only: true``.
@@ -401,7 +401,7 @@ above -- carries:
      !(github.event_name == 'push' && github.actor_id == vars.RELEASE_APP_BOT_ID) &&
      needs.vendor_update.outputs.updated != 'false' }}
 
-(``create-release.yml:290-294``). Its third clause skips the tag-push run that
+Its third clause skips the tag-push run that
 the release App's own tag starts (:doc:`releasing`, "The Release App"). On the
 ``workflow_run`` path, this evaluates **false**, and the job is skipped
 outright, whenever the upstream Vendor Update run's own conclusion was
@@ -415,13 +415,12 @@ its ``verdict`` job found the Unit Tests verdict was for another commit -- which
 the ``vendor_update`` job reads from that run's jobs first (observed on run
 38650191283). ``!cancelled()`` keeps a skipped ``vendor_update``, on a push, from
 skipping it. ``unit-tests`` then depends on that job with
-``needs: [ version_check ]`` (``create-release.yml:583``) and an ``if:`` that
+``needs: [ version_check ]`` and an ``if:`` that
 calls no status-check function, so a skipped dependency skips it too -- and
 every job past it is gated the same way: ``github`` needs ``[ unit-tests,
-version_check ]`` (``:621``), ``tag`` needs ``[ github, unit-tests,
-version_check ]`` (``:808``), ``pypi`` needs ``[ github, unit-tests,
-version_check ]`` (``:974``), and ``conda`` needs ``[ tag, github,
-unit-tests, version_check ]`` (``:1210``).
+version_check ]``, ``tag`` and ``pypi`` need ``[ github, unit-tests,
+version_check ]``, and ``conda`` needs ``[ tag, github, unit-tests,
+version_check ]``.
 
 .. mermaid::
 
@@ -446,8 +445,8 @@ unit-tests, version_check ]`` (``:1210``).
        class UTX,VC,GH,TAGJ,PY,CD skipped
 
 This is a transitive reduction, as in :doc:`releasing`: ``version_check`` and
-``unit-tests`` are also direct ``needs:`` of ``tag`` and ``pypi``
-(``create-release.yml:808,974``) and of ``conda`` (``:1210``), but ``github``
+``unit-tests`` are also direct ``needs:`` of ``tag``, ``pypi`` and ``conda``,
+but ``github``
 already implies those edges, since it depends on both itself. Drawing them
 would add lines without changing which job can start before which, or which
 job a skip in ``version_check`` reaches.
@@ -470,7 +469,7 @@ one can skip the very first attempt, before any tag is ever created, purely
 because the upstream Vendor Update run did not itself conclude ``success``.
 
 Such a run is also kept out of the release's concurrency group
-(``create-release.yml:30-32``,
+(its ``concurrency`` block,
 `#1705 <https://github.com/JarryShaw/PyPCAPKit/issues/1705>`__). It is keyed on
 its own ``github.run_id`` rather than on the ref, so it cannot cancel a run
 waiting there with release work. Keyed on the ref, run 38499295798 joined at
@@ -692,19 +691,19 @@ grepping every workflow file for its name:
      - ``unit-tests.yml:1964``
    * - ``Compat Python 3.11``
      - job ``compatibility``, matrix leg ``3.11``
-     - ``python-compatibility.yml:60``, ``.github/python-versions.toml:20``
+     - ``python-compatibility.yml``, ``.github/python-versions.toml:20``
    * - ``Compat Python 3.12``
      - job ``compatibility``, matrix leg ``3.12``
-     - ``python-compatibility.yml:60``, ``.github/python-versions.toml:21``
+     - ``python-compatibility.yml``, ``.github/python-versions.toml:21``
    * - ``Compat Python 3.13``
      - job ``compatibility``, matrix leg ``3.13``
-     - ``python-compatibility.yml:60``, ``.github/python-versions.toml:22``
+     - ``python-compatibility.yml``, ``.github/python-versions.toml:22``
    * - ``Compat Python 3.14``
      - job ``compatibility``, matrix leg ``3.14``
-     - ``python-compatibility.yml:60``, ``.github/python-versions.toml:23``
+     - ``python-compatibility.yml``, ``.github/python-versions.toml:23``
    * - ``Compat Python 3.15``
      - job ``compatibility``, matrix leg ``3.15``
-     - ``python-compatibility.yml:60``, ``.github/python-versions.toml:24``
+     - ``python-compatibility.yml``, ``.github/python-versions.toml:24``
 
 That is the list after `#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__,
 which added ``Compat Python 3.15`` and removed ``Compat Python 3.10``. Moving a version
@@ -712,8 +711,8 @@ between the tiers below means editing the ruleset in the same change.
 
 ``Required checks passed`` is defined by exactly one job
 (``unit-tests.yml:1964``). ``Compat Python`` is defined by one, the
-``compatibility`` job in ``python-compatibility.yml`` (``:60``), whose matrix
-(``:74``) comes from :file:`.github/python-versions.toml`: the required legs
+``name:`` of the ``compatibility`` job in ``python-compatibility.yml``, whose
+``matrix`` comes from :file:`.github/python-versions.toml`: the required legs
 are its supported tier (``python-versions.toml:20-24``), and its KTLO legs
 (``python-versions.toml:16-19``) have names ending in ``(KTLO)``, so no required
 context matches one. A comment at
