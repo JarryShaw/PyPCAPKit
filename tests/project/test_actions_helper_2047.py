@@ -40,7 +40,7 @@ __tier__ = 'LATEST'
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 HELPER = ROOT / 'util' / '_actions.py'
 #: The scripts that import the helper.
-SCRIPTS = ('apt_packages', 'classify_changes', 'coverage_report', 'leg_summary', 'pip_install',
+SCRIPTS = ('apt_packages', 'classify_changes', 'codeql_report', 'coverage_report', 'leg_summary', 'pip_install',
            'regenerate_samples', 'vendor_code_changed')
 #: The top-level modules the helper may import, each in Python 3.7's standard
 #: library: the running interpreter's :data:`sys.stdlib_module_names` would
@@ -50,6 +50,7 @@ STDLIB_37 = frozenset({'__future__', 'contextlib', 'os', 'subprocess', 'sys', 't
 RUNS = {
     'apt_packages': (['--help'], {}),
     'classify_changes': ([], {'OWN_PR': 'false'}),
+    'codeql_report': (['--help'], {}),
     'coverage_report': (['--help'], {}),
     'leg_summary': (['ktlo'], {'LEG': 'Python 3.8 (KTLO, non-blocking)', 'STEPS': '{}'}),
     'pip_install': (['--help'], {}),

@@ -8,7 +8,7 @@ on:
   schedule:
     - cron: '0 2 * * 6'
 
-# #1968: no scopes by default. `analyze` declares the ones it needs.
+# #1968: no scopes by default. Each job declares the ones it needs.
 permissions: {}
 
 # Only pull-request runs may be superseded (see unit-tests.yml's
@@ -17,6 +17,11 @@ permissions: {}
 concurrency:
   group: codeql-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+# #2030: one Discussions category holds every report with no pull request to
+# comment on, one thread per job.
+env:
+  REPORT_CATEGORY: CI reports
 
 jobs:
   # Not gated on Unit Tests: CodeQL reads the source, so its findings do not
@@ -41,3 +46,53 @@ jobs:
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@6f2ac81f5cd81fe351a197ba0b00d91d03cd2aee # v4.39.0
+
+  # #2030: the run's report, to its thread in Discussions. A pull request's run
+  # posts nothing: its findings belong to the pull request, and the alerts the
+  # report lists are the default branch's. The only job holding
+  # `security-events: read` or `discussions: write`, and it runs no project
+  # code but the two util/ scripts.
+  discussion:
+    name: Post the CodeQL report
+    needs: [ analyze ]
+    if: ${{ always() && github.event_name != 'pull_request' && needs.analyze.result != 'skipped' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    permissions:
+      contents: read
+      discussions: write
+      security-events: read
+
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        persist-credentials: false
+
+    # The default branch's open alerts, by severity, after `Perform CodeQL
+    # Analysis` waited for its upload to be processed. `status` is `analyze`'s
+    # result where it did not succeed or the alerts could not be read, and
+    # otherwise `warning` while any alert is open, `success` at none.
+    - name: Write the report
+      id: report
+      continue-on-error: true
+      env:
+        GH_TOKEN: ${{ github.token }}
+        ANALYZE_RESULT: ${{ needs.analyze.result }}
+      run: python3 util/codeql_report.py --result "$ANALYZE_RESULT" --report report/codeql-report.md
+
+    # The schedule posts every run. A push posts as a push run: every run with
+    # an open alert, then once on the first run back at none. A report step
+    # that wrote no status leaves `analyze`'s result.
+    - name: Post the report to Discussions
+      continue-on-error: true
+      env:
+        GH_TOKEN: ${{ github.token }}
+        MODE: ${{ github.event_name == 'schedule' && 'scheduled' || 'push' }}
+        ANALYZE_RESULT: ${{ needs.analyze.result }}
+        REPORT_STATUS: ${{ steps.report.outputs.status }}
+      run: |
+        status="${REPORT_STATUS:-$ANALYZE_RESULT}"
+        python3 util/discussion_report.py --category "$REPORT_CATEGORY" \
+          --title 'codeql-analysis: CodeQL report' --report report/codeql-report.md \
+          --mode "$MODE" --status "$status"

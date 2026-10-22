@@ -1233,6 +1233,9 @@ does; each has tests under :file:`tests/project/` that run it.
      - No step: it is imported by the scripts that share its annotations, step
        outputs, job summary lines and logged runs (`#2047
        <https://github.com/JarryShaw/PyPCAPKit/issues/2047>`__).
+   * - :file:`util/codeql_report.py`
+     - ``Write the report`` in ``codeql-analysis.yml``'s ``discussion`` (see `CI
+       Reports`_).
 
 The summaries run on the image's ``/usr/bin/python3`` rather than the leg's
 interpreter, which may have failed to set up or be too broken to run anything, so
@@ -1351,6 +1354,22 @@ pin together. The script labels the
 run it links with ``GITHUB_WORKFLOW``, so the post step sets ``Unit Tests`` for
 that one command. A push relay's concurrency group is its own run's, since a
 group cancels a pending run when a newer one joins it.
+
+``codeql-analysis.yml`` posts to ``codeql-analysis: CodeQL report``, as
+``scheduled`` on its ``schedule`` and ``push`` on a push to ``main``, and never on
+a pull request, whose findings belong to the pull request. Its ``discussion`` job
+runs after ``analyze`` and alone holds ``security-events: read``, beside
+``discussions: write`` and ``contents: read``. ``Write the report`` runs
+:file:`util/codeql_report.py`, which lists the default branch's open CodeQL alerts
+by severity, read through GitHub's `List code scanning alerts for a repository
+<https://docs.github.com/en/rest/code-scanning/code-scanning#list-code-scanning-alerts-for-a-repository>`__
+endpoint, and hands on the step output ``status`` that ``Post the report to
+Discussions`` passes as ``--status``. A ``success`` of ``analyze`` reports
+``warning`` while any alert is open and ``success`` at none, so every push run
+with an open alert posts and the first run back at none posts once; any other
+result of ``analyze`` stands. Where the alerts cannot be read, the step writes a
+warning, the report marks them unavailable, and ``analyze``'s result stands
+unchanged.
 
 .. _Action Pins:
 
