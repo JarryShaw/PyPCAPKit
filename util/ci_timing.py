@@ -89,6 +89,11 @@ from typing import TYPE_CHECKING
 
 import requests
 
+try:  # #2047: run as `python util/<script>.py`, with util/ first on sys.path
+    import _actions
+except ImportError:  # imported as util.<script>, or loaded by path, from the repository root
+    from util import _actions
+
 if TYPE_CHECKING:
     from typing import Any, Callable, Iterable, Iterator, Optional
 
@@ -1365,8 +1370,8 @@ def main(argv: 'Optional[list[str]]' = None, *, transport: 'Optional[Transport]'
 
     token = os.environ.get('GH_TOKEN') or os.environ.get('GITHUB_TOKEN')
     if not args.repo or not (token or transport):
-        print('::error title=CI timing::Needs --repo (or $GITHUB_REPOSITORY) and a token in '
-              '$GH_TOKEN or $GITHUB_TOKEN.')
+        _actions.annotate('error', 'Needs --repo (or $GITHUB_REPOSITORY) and a token in $GH_TOKEN or $GITHUB_TOKEN.',
+                          title='CI timing')
         return EXIT_API
 
     client = Client(token or '', transport=transport, max_calls=args.max_calls)
@@ -1381,13 +1386,13 @@ def main(argv: 'Optional[list[str]]' = None, *, transport: 'Optional[Transport]'
                            budget=args.budget_minutes * 60, clock=clock,
                            progress=lambda line: print(line, file=sys.stderr, flush=True))
         except (BudgetExceeded, OSError) as error:
-            print(f'::error title=CI timing could not read the API::{error}. '
-                  'No threshold was evaluated.')
+            _actions.annotate('error', f'{error}. No threshold was evaluated.',
+                              title='CI timing could not read the API', escape=False)
             return EXIT_API
         return _report(args, client, data)
     except Exception:  # pylint: disable=broad-except
         traceback.print_exc()
-        print('::error title=CI timing crashed::See the traceback above. No threshold was evaluated.')
+        _actions.annotate('error', 'See the traceback above. No threshold was evaluated.', title='CI timing crashed')
         return EXIT_CRASH
 
 
@@ -1415,11 +1420,11 @@ def _report(args: 'argparse.Namespace', client: 'Client', data: 'dict[str, Any]'
             file.write(text)
     print(text)
     if data.get('stopped'):
-        print(f"::warning title=CI timing stopped early::{data['stopped']}")
+        _actions.annotate('warning', data['stopped'], title='CI timing stopped early', escape=False)
     for item in findings:
         kind = 'error' if item['level'] == 'hard' else 'warning'
         message = item['message'].replace('`', '').replace('%', '%25')
-        print(f'::{kind} title=CI timing {item["id"]}::{message}')
+        _actions.annotate(kind, message, title=f'CI timing {item["id"]}', escape=False)
     return EXIT_HARD if any(item['level'] == 'hard' for item in findings) else 0
 
 
