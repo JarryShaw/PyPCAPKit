@@ -1120,6 +1120,12 @@ jobs:
           PCAPKIT_VERSION: ${{ needs.version_check.outputs.PCAPKIT_VERSION }}
           PCAPKIT_BUILD: "0"
         with:
+          # #2044: with no installer named, the Intel runner downloads
+          # Miniconda3-latest-MacOSX-x86_64.sh, frozen at conda 25.7.0: too old
+          # for conda-forge's conda-content-trust, and with no py314 build. So
+          # that leg installs Miniforge. An empty string names no installer, so
+          # the other legs keep the bundled or downloaded Miniconda.
+          miniforge-version: ${{ matrix.os == 'macos-26-intel' && 'latest' || '' }}
           python-version: ${{ matrix.python-version != '3.15' && matrix.python-version || '' }}
           activate-environment: base
           auto-update-conda: false
