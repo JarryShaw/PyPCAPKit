@@ -1,103 +1,56 @@
 name: "Lint"
 
-# The linters this repository already maintains -- vermin, pylint, mypy and
-# bandit -- had Makefile targets and no CI presence at all, so nothing noticed
-# when their output changed. (`isort` does appear in cron-vendor.yml, but as a
-# formatter that rewrites the generated constants, not as a check.) This workflow
-# is where they run, with actionlint over the workflows themselves (#1967).
+# vermin, pylint, mypy and bandit, which had Makefile targets but no CI
+# presence, plus actionlint over the workflows (#1967). `isort` is not among
+# them: it appears only in cron-vendor.yml, as a formatter that rewrites the
+# generated constants, not as a check.
 #
-# Every one of them is advisory -- `continue-on-error: true` on each step -- and
-# that is a measurement result rather than a preference. This header records no
-# finding counts on purpose: #753 was filed when most of the figures it once
-# recorded (on 15189abff) had already drifted -- mypy and pylint by the issue's
-# own numbers, and vermin too, which had moved before the issue's own text said
-# it "was not re-checked". Only bandit held. A written-down count invites
-# exactly this, with no way to tell staleness from disagreement, so each step
-# writes its result to the run summary instead; read the numbers there.
+# Every step is advisory (`continue-on-error: true`): none is clean, and a job
+# that is red the day it lands teaches everyone to scroll past red. Promote a
+# step by deleting its `continue-on-error` once its count reaches zero. Each
+# step writes its result to the run summary; read the numbers there. This
+# header records no counts on purpose: most of those #753 recorded had drifted
+# by the time it was filed.
 #
-# pylint's R class is the one that moves without the code moving. Repeated runs
-# on an identical tree were measured to disagree on it, entirely through
-# `R0401` cyclic-import, whose count depends on module-processing order rather
-# than on the code -- `duplicate-code` and every other R check held steady
-# across all of them, as did E, W and C. A change in R between two runs is
-# therefore no evidence on its own that anything changed.
+# pylint's R class moves without the code moving: `R0401` cyclic-import
+# depends on module-processing order, so runs on one tree disagree on it. A
+# change in R alone is no evidence that anything changed.
 #
-# #767 cleaned up `PYLINT_FLAGS`. Its `--disable=` list named checks pylint has
-# genuinely removed -- `old-division`, `no-absolute-import` and
-# `input-builtin` (-> `R0022 useless-option-value`, and pylint's own message
-# says so: "was removed from pylint") -- plus `eq-without-hash`, which is not
-# gone, only unloaded: `pylint.extensions.eq_without_hash` still ships `W1641`,
-# but nothing in `--load-plugins=` ever named it, so `--disable=eq-without-hash`
-# was as unrecognised as if the check had been removed (-> `W0012
-# unknown-option-value`). Same shape of breakage as `emptystring` below, a
-# different cause. All of them are dropped either way -- loading that plugin
-# to enable `eq-without-hash` properly found nothing when measured (no `W1641`
-# over `pcapkit/`), so there is nothing lost in dropping it instead.
-#
-# `--load-plugins=` also named `pylint.extensions.emptystring`, which no
-# longer exists in the installed pylint (-> `E0013 bad-plugin-value` every
-# run). Unlike the entries above, though, the check it used to provide did not
-# stop running when the plugin did: `compare-to-empty-string` was folded into
-# the core `refactoring` checker at pylint 3.0 as
-# `use-implicit-booleaness-not-comparison-to-string` (C1804), reachable under
-# either name with no plugin load at all. #767's own premise -- that the
-# broken plugin reference made the check "inert" and it "has never run" -- is
-# wrong: `--list-msgs-enabled` run under the old flags (broken plugin
-# reference included) and the new ones side by side gives the same
-# enabled-message list either way, and C1804 fires under the old flags on a
-# minimal repro despite the `E0013`. So this half of `PYLINT_FLAGS`' change is
-# flag hygiene, not enablement: it drops a dead plugin reference and keeps the
-# check it used to gate under that check's current name, and the only thing
-# that actually changes is that `E0013` (and the Command-line noise of the
-# entries above) stops firing. With those gone, every message the job's own
-# grep-based count (the `pylint` step below) tallies is about the code.
-#
-# None of them is clean, so none can block: a job that is red the day
-# it lands teaches everyone to scroll past red, which costs more than the checks
-# are worth. Advisory steps keep the numbers visible (each writes its result to
-# the run summary) without that damage, and promoting one to blocking is a matter
-# of deleting its `continue-on-error` line once its count reaches zero.
+# #767's `PYLINT_FLAGS` cleanup was flag hygiene, not enablement. It dropped
+# `--disable=` entries pylint no longer recognises (`R0022`, `W0012`; loading
+# the unloaded `eq-without-hash` plugin instead found no `W1641`) and the dead
+# `pylint.extensions.emptystring` plugin (`E0013`), whose check still runs as
+# core C1804 `use-implicit-booleaness-not-comparison-to-string` -- measured
+# with `--list-msgs-enabled`, contrary to #767's premise. Every message the
+# `pylint` step tallies is now about the code.
 #
 # Promotion order, cheapest first:
-#   * bandit -- most of its findings are B104 "binding to all interfaces" on
-#     `address: ... = '0.0.0.0'` *default arguments* in MH/MIP option builders,
-#     which bind no socket. This package already suppresses findings with
-#     `# nosec`, so triaging what is left is the whole job.
-#   * mypy -- part of its output is `unused-ignore`, i.e. `# type: ignore`
-#     comments that are no longer needed. Deleting those is risk-free.
-#   * vermin -- blocked on a decision, not on cleanup: see the step below.
-#   * pylint -- not realistically promotable at this rule set. Most of its
-#     warnings are `unused-argument`, `redefined-builtin` and
-#     `super-init-not-called`, each of which is inherent to the
-#     schema DSL: protocol fields are legitimately named `next`/`type`/`id`, and
-#     the `if TYPE_CHECKING: def __init__(...)` stubs exist precisely so as not
-#     to call `super().__init__`. Narrowing to `--enable=E,F` does not rescue it
-#     either -- what remains is mostly `unsubscriptable-object` and
+#   * bandit -- most findings are B104 on `address: ... = '0.0.0.0'` default
+#     arguments in MH/MIP option builders, which bind no socket; triage the
+#     rest with `# nosec`.
+#   * mypy -- part of its output is `unused-ignore`, risk-free to delete.
+#   * vermin -- blocked on a decision, not on cleanup: see its step.
+#   * pylint -- not realistically promotable: `unused-argument`,
+#     `redefined-builtin` and `super-init-not-called` are inherent to the
+#     schema DSL, and `--enable=E,F` leaves `unsubscriptable-object` and
 #     `no-member` false positives off the same metaprogramming.
 
 on:
-  # Deliberately *not* `push: [main]`, which is the trigger the other validation
-  # workflows here use. Those gate something: a failing unit-test or CodeQL run
-  # on main is a commit someone must look at. These steps gate nothing, so a
-  # second advisory run per merge -- on a commit that already got one on its pull
-  # request -- would buy no information while competing for runners that are
-  # visibly oversubscribed (pull requests on this repository have been sitting at
-  # 21 queued checks for ten minutes at a time). The weekly schedule covers
-  # main's own drift, which is the only thing the push trigger would have added.
+  # No `push: [main]`: these steps gate nothing, so a second advisory run per
+  # merge, on a commit its pull request already linted, buys no information
+  # while competing for oversubscribed runners. The schedule covers main's drift.
   pull_request:
     branches: [main]
   schedule:
-    # Saturdays, an hour clear of the other weekly jobs: CodeQL runs at 02:00,
-    # Python Compatibility at 04:00 and Vendor Update at 10:00.
+    # Saturdays, an hour clear of the other Saturday jobs.
     - cron: '0 6 * * 6'
   workflow_dispatch:
 
 permissions:
   contents: read
 
-# Only pull-request runs may be superseded -- see the note in unit-tests.yml. A
-# ref-keyed group drops a *pending* run when a newer one joins it, so scheduled
-# and manual runs are keyed on the run id to give each one its own group.
+# Only pull-request runs may be superseded (see unit-tests.yml): a shared group
+# drops a *pending* run when a newer one joins, so other events key on the run id.
 concurrency:
   group: lint-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -111,19 +64,18 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      # #1967: actionlint checks every workflow under .github/workflows, and runs
-      # the image's shellcheck over each `run:` block. First, as it needs no
-      # Python and is the quickest verdict. Advisory like the steps below, since
-      # shellcheck still reports style and info findings across the workflows.
+      # actionlint checks every workflow, running the image's shellcheck over
+      # each `run:` block. First, as it needs no Python. It stays advisory while
+      # shellcheck findings remain in unit-tests.yml and experimental.yml (#1967).
       #
       # The release binary is pinned by version and sha256, from the release's
       # checksums file. Dependabot does not see this pin; bump both together.
-      # These files use YAML anchors, which actionlint reads from 1.7.10 on.
+      # The workflows use YAML anchors, which actionlint reads from 1.7.10 on.
       #
-      # The `-ignore` hides a false positive. `concurrency.queue` is a documented
+      # The `-ignore` hides a false positive: `concurrency.queue` is a documented
       # GitHub key (project-status.yml uses it) that no actionlint release knows
-      # yet: rhysd/actionlint#657, with the fix in rhysd/actionlint#654. Drop the
-      # pattern once a release with that fix is pinned here.
+      # yet (rhysd/actionlint#657, fixed by rhysd/actionlint#654). Drop the
+      # pattern once a release with that fix is pinned.
       - name: actionlint
         continue-on-error: true
         timeout-minutes: 5
@@ -158,21 +110,13 @@ jobs:
 
           exit "$status"
 
-      # One interpreter, not a matrix. Unit Tests and Python Compatibility sweep
-      # the supported tier, plus the non-blocking KTLO legs (#1633), because
-      # they check that the package *runs* everywhere; these tools read the
-      # source, and running them several times over would produce several
-      # copies of the same findings for several times the runner cost.
-      #
-      # `latest` from .github/python-versions.toml, like every single-interpreter
-      # job (#1661). Moving off 3.14 changes no count. Measured at 0bc157660
-      # on setup-python's 3.14.8 and 3.15.0 builds: pylint 4.1.3 (astroid
-      # 4.3.4) reports the same C, E and W messages on both, message for message;
-      # only R0401 cyclic-import differs, as it does between two runs on one
-      # interpreter (see the header). bandit, mypy and vermin print identical
-      # reports. To test a 3.15 without C `_decimal`, use setup-python's build,
-      # which has none: faking it with `sys.modules['_decimal'] = None` makes
-      # astroid crash on pcapkit/toolkit/dpkt.py on 3.14.8 too (#1677).
+      # One interpreter, not a matrix: these tools read the source, so more
+      # interpreters would only repeat the same findings. `latest` from
+      # .github/python-versions.toml, like every single-interpreter job (#1661).
+      # Measured at 0bc157660, setup-python's 3.14.8 and 3.15.0 give identical
+      # reports bar R0401 (see the header). To test a 3.15 without C `_decimal`,
+      # use setup-python's build, which has none: faking it with
+      # `sys.modules['_decimal'] = None` crashes astroid on 3.14.8 too (#1677).
       - name: Read the Python versions
         id: python-versions
         run: python3 util/python_versions.py --github-output
@@ -181,36 +125,24 @@ jobs:
         with:
           python-version: ${{ steps.python-versions.outputs.latest }}
 
-      # `.[all,dev]` rather than a bare install: pylint and mypy resolve imports,
-      # so findings depend on what is importable. #910 narrowed `all` to core
-      # addons only (`cli`, `crypto`, `NGAP`), so the `dev` extra it added is
-      # what puts `dpkt`/`scapy`/`pyshark`/`pypcapfile` back for this job --
-      # without it, narrowing `all` would have grown the count below rather
-      # than left it alone. Note `pypcap` and `pypcapfile` are marked
-      # `python_version < '3.12'` in pyproject.toml, and `pcap-ct` is in no
-      # extra installed here, so each is absent by design -- that is the source
-      # of pylint's `import-error` messages, and they will persist until those
-      # engines are installed here.
+      # `.[all,dev]`: pylint and mypy resolve imports, so findings depend on what
+      # is importable, and `dev` carries the engines #910 took out of `all`.
+      # `pypcap` and `pypcapfile` are `python_version < '3.12'` and `pcap-ct` is
+      # in no extra installed here, so pylint's `import-error` messages for them
+      # are by design.
       - name: Install package and lint tools
         run: |
           set -x
 
           python -m pip install -U pip setuptools wheel
-          python -m pip install -e .[all,dev]
+          python -m pip install -e '.[all,dev]'
           python -m pip install -U vermin pylint mypy bandit
 
-      # Every step below runs the *Makefile* target rather than spelling the
-      # flags out again, with `RUN=` emptying the `pipenv run` prefix the targets
-      # use locally. That is what keeps this workflow and a developer's `make
-      # pylint` running the same check -- restating the flag sets here would let
-      # the two drift the first time either changed, which is how "passes on my
-      # machine" starts.
-      #
-      # `continue-on-error: true` reports the step's real verdict as a non-
-      # blocking annotation and lets the following steps run, so one tool's
-      # findings never hide another's. The `status=$?` dance is needed because
-      # the default shell is `bash -e`: without it the summary lines after a
-      # non-zero tool would never execute.
+      # Each step runs its Makefile target, `RUN=` emptying the local `pipenv
+      # run` prefix, so this and a developer's `make pylint` cannot drift apart.
+      # `continue-on-error: true` lets every tool run whatever another found;
+      # `set +e` and `status=` keep the summary lines running under the default
+      # `bash -e`.
 
       - name: bandit
         continue-on-error: true
@@ -227,7 +159,7 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
-          exit $status
+          exit "$status"
 
       - name: mypy
         continue-on-error: true
@@ -244,20 +176,15 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
-          exit $status
+          exit "$status"
 
-      # `vermin-ci`, not `vermin`: the `vermin` target redirects the report into
-      # temp/, so a run that found violations stops at that line with the report
-      # in a file rather than in this log. Same flags, via $(VERMIN_FLAGS).
+      # `vermin-ci`, not `vermin`: that target redirects the report into temp/,
+      # out of this log. Same flags, via $(VERMIN_FLAGS).
       #
-      # This one needs a decision rather than a cleanup before it can block, and
-      # the decision is not CI's to make. vermin.ini sets `targets = 3.6` while
-      # the code's real floor is 3.11 -- `enum.StrEnum` and
-      # `enum.show_flag_values` are 3.11 members, and modules across the package
-      # import `typing_extensions`. pyproject.toml's `requires-python` claims
-      # `>=3.6, <4`, so the declared floor and the actual one are five releases
-      # apart. Whichever way that is resolved -- raise `requires-python`, or
-      # raise `targets` to match it -- belongs in its own change.
+      # Blocking needs a decision, not a cleanup, and not CI's: vermin.ini's
+      # `targets = 3.6` and `requires-python`'s `>=3.6, <4` both sit below the
+      # code's real floor, 3.11 (`enum.StrEnum`, `enum.show_flag_values`).
+      # Raising either belongs in its own change.
       - name: vermin
         continue-on-error: true
         run: |
@@ -274,10 +201,10 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
-          exit $status
+          exit "$status"
 
-      # Last because it is by far the slowest -- minutes over ~90k lines -- so
-      # the quick verdicts reach the summary before it starts.
+      # Last because it is by far the slowest, so the quick verdicts reach the
+      # summary first.
       - name: pylint
         continue-on-error: true
         run: |
@@ -294,4 +221,4 @@ jobs:
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
-          exit $status
+          exit "$status"

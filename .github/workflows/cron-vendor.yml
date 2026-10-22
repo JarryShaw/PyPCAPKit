@@ -2,57 +2,39 @@ name: "Vendor Update"
 
 on:
   # #1967: GitHub Pages, Vendor Update and Conda Update run eight hours
-  # apart on Saturdays, so each runs `head`'s test gate alone, mostly on a
-  # commit of its own, and `vendor-update` and `conda-update` do not queue
-  # on `repository-maintenance` together. None reads another's output, and
-  # Conda Update comes last so its upload finds the release Create Release
-  # made after Vendor Update (#1634). workflows.rst gives the evidence.
+  # apart on Saturdays, so each runs `head`'s test gate alone and the
+  # `repository-maintenance` jobs do not queue together. Conda Update comes
+  # last so its upload finds the release Create Release made after Vendor
+  # Update (#1634). workflows.rst gives the evidence.
   schedule:
     - cron: '0 10 * * 6' # Saturdays at 10:00 UTC
-  # No `push: branches: [main]` here. `unit-tests.yml`'s own push trigger
-  # already runs the full matrix for this commit; calling it again on every push
-  # with `gate-only: true` re-ran the single-version "Gate" job a second time
-  # for the same tree (#715). Chaining off `Unit Tests`' completion means the gate
-  # never runs twice, and `vendor-update` below just reads the verdict that
-  # already exists. `.event == 'push'` is checked in that job's `if` rather
-  # than here, because `workflow_run` fires for a pull request's completion
-  # too and a `branches:` filter here would be the only thing stopping that.
+  # No `push` trigger: Unit Tests' own push run already reaches a verdict, and
+  # calling it again with `gate-only: true` re-ran the gate on the same tree
+  # (#715). `workflow_run` also fires for a pull request's run; the
+  # `vendor-update` job's `if` refuses those, not a `branches:` filter here.
   workflow_run:
     workflows: ["Unit Tests"]
     types: [completed]
 
-# Least privilege by default, since `workflow_run` is in the trigger list --
-# that event can be raised by a pull request's `Unit Tests` run completing, so
-# the ambient token this workflow gets should default to nothing rather than
-# whatever the repository's default is. Every job below already declares its
-# own narrower `permissions:`, so this changes nothing they rely on; it only
-# closes the gap for anything added later that forgets to.
+# Nothing by default, since a pull request's Unit Tests run can raise
+# `workflow_run`; each job declares its own `permissions:`.
 permissions: {}
 
-# This workflow commits and pushes, so a cancelled run can leave the bump
-# half-applied. Kept keyed on the ref, unlike the validation workflows: a dropped
-# run here just means a crawl that did not happen twice, and the next schedule
-# picks the registries up again, whereas a dropped validation run means a commit
-# nobody ever checked.
-#
-# A `workflow_run` is keyed on the commit `Unit Tests` verified instead (#1643).
-# Each `Unit Tests` completion raises a run here, and one whose verdict is for an
-# older commit only runs `head` and skips -- but in a shared group it would
-# still displace a pending run whose verdict matches, since "any existing pending
-# job or workflow in the same concurrency group will be canceled" (GitHub,
-# "Control the concurrency of workflows and jobs").
-#
-# Note this group is not what serialises the repository writes -- the
-# `vendor-update` job below carries its own `repository-maintenance` group, shared
-# with cron-conda, and that is what actually stops two jobs committing at once.
+# Never cancelled in progress: a cancelled run can leave the bump half-applied,
+# while a dropped duplicate only means a crawl not run twice. A `workflow_run` is
+# keyed on the commit Unit Tests verified (#1643): in a shared group, a run for
+# an older verdict would displace a pending one whose verdict matches, since
+# "any existing pending job or workflow in the same concurrency group will be
+# canceled" (GitHub, "Control the concurrency of workflows and jobs"). The
+# repository writes are serialised by `vendor-update`'s `repository-maintenance`
+# group, shared with cron-conda, not by this one.
 concurrency:
   group: vendor-update-${{ github.event.workflow_run.head_sha || github.ref }}
   cancel-in-progress: false
 
 jobs:
-  # #1967: the test gate, on the schedule only, and the `verdict` on a
-  # `workflow_run`, shared with Conda Update and GitHub Pages. cron-head.yml
-  # says when each runs.
+  # #1967: the test gate on the schedule, `verdict` on a `workflow_run`;
+  # shared with Conda Update and GitHub Pages.
   head:
     name: Vendor gate
     permissions:
@@ -61,23 +43,16 @@ jobs:
 
   vendor-update:
     runs-on: macos-latest
-    # #1968: the deploy key is a `conda-tag` environment secret, and only
-    # a job naming the environment can read it. Keep that environment free of
-    # required reviewers, or every scheduled bump waits for an approval.
+    # #1968: the deploy key is a `conda-tag` environment secret, readable only
+    # by a job naming it. Keep it free of required reviewers, or every
+    # scheduled bump waits for an approval.
     environment: conda-tag
     needs: [ head ]
-    # `needs` cannot itself be conditional, and `head`'s jobs skip on every
-    # path, so this job must not inherit a skip. `!cancelled()` rather than
-    # `always()` so that cancelling the run still cancels the update; a gate
-    # that actually failed still blocks.
-    #
-    # The `workflow_run` clause is the real gate for a push to main: it
-    # reads the verdict `Unit Tests` already reached instead of re-running it,
-    # and `head`'s `verified` says whether that verdict covers the commit
-    # checked out below (#1643). `.event == 'push'` and `.head_branch == 'main'`
-    # both matter -- `workflow_run` fires for *every* completion of that
-    # workflow, including one triggered by a pull request, and without this
-    # check a green PR would push a vendor-registry commit from that PR's tree.
+    # `head`'s jobs skip on every path, so this job must not inherit a skip;
+    # `!cancelled()`, not `always()`, so cancelling still cancels and a failed
+    # gate still blocks. On `workflow_run`, `verified` says Unit Tests' verdict
+    # covers the checkout (#1643), and the `push`/`main` checks stop a green
+    # pull request's run from pushing a vendor commit from that PR's tree.
     if: >-
       !cancelled() && needs.head.result != 'failure' &&
       (github.event_name != 'workflow_run' || (
@@ -99,22 +74,12 @@ jobs:
 
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # Deliberately the default `github.sha` (main's tip), not
-          # `github.event.workflow_run.head_sha`. Pinning to the latter once
-          # ran here and CodeQL flagged it as "checkout of untrusted code in a
-          # privileged context" -- `workflow_run` can also be raised by a pull
-          # request's `Unit Tests` run, and that field would then be a fork's
-          # commit. The `if:` above already keeps that path from reaching this
-          # step, but making the ref itself always resolve to a trusted
-          # default-branch commit removes the pattern outright rather than
-          # relying on CodeQL tracing through the guard. The push below rebases
-          # onto main's actual tip before writing regardless, so pinning to the
-          # exact tested sha would have bought nothing here either. Whether this
-          # commit is one that verdict covers is `head`'s question (#1643).
-          # The push below re-points `origin` at an SSH remote and authenticates
-          # with the loaded deploy key, not with this checkout's credential --
-          # so there is nothing here for a persisted token to do, and one less
-          # live credential for anything running in between to find.
+          # The default `github.sha` (main's tip), not `workflow_run.head_sha`,
+          # which CodeQL flagged as "checkout of untrusted code in a privileged
+          # context": a pull request's run can raise `workflow_run`. The push
+          # rebases onto main's tip anyway; whether the verdict covers this
+          # commit is `head`'s question (#1643). No persisted token: the push
+          # authenticates with the deploy key over SSH.
           persist-credentials: false
 
       # #1660: `latest` from .github/python-versions.toml, read with the
@@ -134,16 +99,11 @@ jobs:
           python -m pip install -U pip setuptools wheel packaging
           python -m pip install -U isort
 
-          # `all` carries `pycrate`, a core addon under #910 (see its
-          # own comment in pyproject.toml), but not `requests`/`beautifulsoup4`:
-          # #910 moved those to the `dev` extra instead, which is
-          # for the toolchain rather than for a vendor crawl. `vendor` is
-          # installed alongside `all` for those two: `pcapkit-vendor` below
-          # regenerates every crawler with no target given, and some of them
-          # import `bs4` at module scope while `pcapkit.vendor.default` imports
-          # `requests` the same way (#507). See the `vendor` extra's own
-          # comment in pyproject.toml for the full reasoning.
-          python -m pip install -e .[all,vendor]
+          # `vendor` for `requests` and `beautifulsoup4`, which `all` lacks
+          # since #910: `pcapkit-vendor` with no target runs every crawler, and
+          # some import them at module scope (#507). See the `vendor` extra's
+          # comment in pyproject.toml.
+          python -m pip install -e '.[all,vendor]'
 
       - name: Update Vendor
         run: |
@@ -152,40 +112,25 @@ jobs:
           export PCAPKIT_VENDOR_RETRY=10
           export PCAPKIT_CI_MODE=1
 
-          # `pcapkit-vendor` (#872) exits non-zero if any target raised, and
-          # the owner's ruling on that is: discard a failed sub-vendor's own
-          # changes, keep every zero-exited one's, and never fail the whole
-          # job over it -- the targets that DID succeed still need isort,
-          # diff, commit and push below. `set +e`/`set -e` around the one
-          # command (not a bare `pcapkit-vendor || true`) so $vendor_exit
-          # actually carries the exit code instead of it being thrown away.
+          # #872, the owner's ruling: a failed sub-vendor's changes are
+          # discarded, every zero-exited one's are kept, and the job does not
+          # fail over it. `set +e`, not `|| true`, so $vendor_exit keeps the code.
           set +e
           pcapkit-vendor 2> "$RUNNER_TEMP/vendor-stderr.log"
           vendor_exit=$?
           set -e
 
-          # Always replayed into the step log, success or failure: this is
-          # each failing target's qualified name and exception repr (from
-          # __main__.py's run()) plus its VendorRuntimeWarning line, i.e.
-          # exactly what a live, uncaptured `pcapkit-vendor` would have
-          # written to stderr directly. `|| true` deliberately: this line
-          # runs after `set -e` is restored above, and if $RUNNER_TEMP were
-          # ever unset or unwritable the redirect on the previous command
-          # would already have failed to create the log file at all --
-          # `cat` on a missing file returns 1 under `-e` and would abort the
-          # whole step right here, exactly the "one dead crawler kills every
-          # good regeneration" failure mode this handling exists to remove.
+          # Replayed whatever the exit: each failing target's name and
+          # exception, plus its VendorRuntimeWarning. `|| true` so a log that
+          # was never created cannot abort the step under `-e` and lose the
+          # good regenerations.
           cat "$RUNNER_TEMP/vendor-stderr.log" >&2 || true
 
           if [ "$vendor_exit" -ne 0 ]; then
-            # Anchored at the start of the line: the unanchored `failed: `
-            # also matches inside the VendorRuntimeWarning line whenever the
-            # exception's own text happens to contain "failed: " (e.g.
-            # ConnectionError('request failed: 503')), since that line embeds
-            # the same {error!r} __main__.py's run() already put in the
-            # print() line above it -- double-counting one failure as two
-            # ::warning:: annotations. Only the print() line starts with the
-            # bare qualified name; the warning line starts with a file path.
+            # Anchored: the VendorRuntimeWarning line embeds the same
+            # {error!r} and so can contain "failed: " too (e.g.
+            # ConnectionError('request failed: 503')), double-counting one
+            # failure. Only run()'s print() line starts with the qualified name.
             failed_targets=$(grep -E '^[A-Za-z_][A-Za-z0-9_.]* failed: ' \
                                   "$RUNNER_TEMP/vendor-stderr.log" || true)
 
@@ -212,35 +157,21 @@ jobs:
             fi
           fi
 
-          # `find -mindepth 2`, not a `pcapkit/const/*/*.py` shell glob (#765):
-          # this job runs on `macos-latest`, whose default `bash` on PATH is
-          # the system's, unlike the Makefile's own `SHELL := $(shell command
-          # -v bash ...)`, which is confirmed (elsewhere) to pick up a modern
-          # one -- `shopt -s globstar` is not a safe assumption here, and
-          # `find` needs neither globstar nor a modern bash to reach any
-          # depth. `-mindepth 2` keeps the same floor the old glob had: it
-          # still skips `pcapkit/const/__init__.py` itself.
-          isort -l100 -ppcapkit $(find pcapkit/const -mindepth 2 -name '*.py')
+          # `find`, not a glob (#765): macOS's system bash has no globstar.
+          # `-mindepth 2` skips `pcapkit/const/__init__.py`.
+          find pcapkit/const -mindepth 2 -name '*.py' -exec isort -l100 -ppcapkit {} +
 
-      # #1853: neither gate in `head` sees the regenerated tree -- the test gate
-      # runs on the schedule alone, and `verdict` accepts the Unit Tests result for
-      # the commit from before the crawl -- so 1.5.0b13 was committed with a test
-      # failing on it. The owner's ruling: test the regenerated tree here, before
-      # anything is committed, under #872's rule above. A module the tests fail
-      # with is put back as HEAD has it and the rest go on to be committed, as
-      # for a sub-vendor that raised. util/vendor_test_gate.py, whose docstring
-      # gives the rule, decides which modules those are.
+      # #1853: both gates in `head` judge the commit from before the crawl, so
+      # 1.5.0b13 was committed with a test failing on it. The owner's ruling:
+      # test it here under #872's rule -- a module the tests fail with goes
+      # back to HEAD's copy, the rest are committed. util/vendor_test_gate.py's
+      # docstring gives the rule.
       #
-      # `continue-on-error`, so the tests never fail the job. The script exits
-      # zero once it has decided; if this step fails or times out instead, the
-      # tree may hold modules no run passed with, and the next step discards
-      # every regenerated module. The test extra is installed here because only
-      # this step needs it; it carries psutil too, which the script samples a
-      # run's memory with (#1894). The script's budget bounds its runs together,
-      # and `timeout-minutes` sits above it as the backstop. Run serially, pytest
-      # peaked at 0.7 GB resident over tests/const, measured locally, so the
-      # memory cap leaves headroom on this runner; files are capped at 2 GiB, as
-      # in experimental.yml.
+      # `continue-on-error`, so the tests never fail the job; if the step fails
+      # or times out, the next one discards every regenerated module. `.[test]`
+      # brings psutil, which samples a run's memory (#1894); `timeout-minutes`
+      # backs up the script's budget. Serial pytest peaked at 0.7 GB resident
+      # over tests/const, measured locally; files capped as in experimental.yml.
       - name: Test the regenerated tree
         id: vendor-tests
         continue-on-error: true
@@ -253,9 +184,8 @@ jobs:
               --max-memory-mib 4096 --max-file-size-mib 2048 -- \
               python -m pytest -q -p no:cacheprovider tests/const tests/vendor
 
-      # What the step above left is untested if it did not finish, so HEAD's
-      # copy of every module goes back, new modules are removed, and nothing
-      # from this crawl is committed. Not a failure either, per #872.
+      # The tree is untested if the step above did not finish, so nothing from
+      # this crawl is committed. Not a failure either (#872).
       - name: Discard untested const changes
         if: steps.vendor-tests.outcome != 'success'
         run: |
@@ -269,17 +199,13 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
 
       # #1968: `git status` in place of tj-actions/verify-changed-files@v17, so
-      # no third-party code runs while the deploy key is loaded. The outputs are
-      # the action's with no `files:` input, which it never had here:
-      # `files_changed`, and `changed_files`, the paths joined by spaces and
-      # written only when there are some. Every changed tracked file counts,
-      # untracked files are listed one by one, and ignored files are left out.
-      # A staged change counts too, which the action's `git diff` missed;
-      # nothing before this step stages one. git C-quotes a path holding a
-      # space, a quote, a control character or a non-ASCII byte, so the list is
-      # one line. Such a path still splits on its space, and
-      # util/vendor_code_changed.py counts a name it cannot read as code. The
-      # steps below read the list through `env:`, so a path is never shell text.
+      # no third-party code runs while the deploy key is loaded. Same outputs as
+      # the action with no `files:` input: `files_changed`, and `changed_files`,
+      # space-joined, written only when non-empty. Tracked changes count, staged
+      # ones too; untracked files are listed one by one; ignored files never.
+      # git C-quotes an unusual path, so the list is one line; a path with a
+      # space still splits, and util/vendor_code_changed.py counts a name it
+      # cannot read as code. Read through `env:`, so a path is never shell text.
       # cron-conda.yml runs the same script.
       - name: Verify Changed files
         id: verify-changed-files
@@ -294,12 +220,9 @@ jobs:
             echo "files_changed=false" >> "$GITHUB_OUTPUT"
           fi
 
-      # #1674: only a code change cuts a beta. util/vendor_code_changed.py,
-      # whose docstring gives the rule, writes `code_changed=false` when every
-      # change is to comments or docstrings; those are committed below without
-      # a bump. Anything else bumps, as before, including this step failing:
-      # `continue-on-error` leaves `code_changed` unset, and the bump reads
-      # `!= 'false'`.
+      # #1674: only a code change cuts a beta. util/vendor_code_changed.py
+      # writes `code_changed=false` for comment- and docstring-only changes;
+      # anything else bumps, including this step failing, which leaves it unset.
       - name: Classify Changed files
         id: classify
         if: steps.verify-changed-files.outputs.files_changed == 'true'
@@ -317,8 +240,8 @@ jobs:
 
           python util/bump_version.py
           isort -l100 -ppcapkit --skip-glob '**/__init__.py' pcapkit
-          isort -l100 -ppcapkit $(find pcapkit/const -mindepth 2 -name '*.py')
-          isort -l100 -ppcapkit $(find pcapkit/vendor -mindepth 2 -name '*.py')
+          find pcapkit/const -mindepth 2 -name '*.py' -exec isort -l100 -ppcapkit {} +
+          find pcapkit/vendor -mindepth 2 -name '*.py' -exec isort -l100 -ppcapkit {} +
 
       - name: Commit changes
         id: commit
@@ -330,29 +253,22 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          # #1685: `-a` stages tracked files only, so a module the crawl added
-          # for a new registry was bumped for but never committed, and every
-          # later crawl bumped for it again. Stage pcapkit-vendor's output first,
-          # new and deleted modules included; `-a` still takes the bump's files.
-          # Quoted, so git matches the pattern at any depth, not the shell at
-          # one; `.py` only, so a backup pcapkit-vendor could not remove stays out.
+          # #1685: `-a` skips untracked files, so a new module was bumped for but
+          # never committed, and every later crawl bumped again. Quoted, so git
+          # matches at any depth; `.py` only, so a leftover backup stays out.
           git add -A -- 'pcapkit/const/*.py'
           git commit -am"Bumped version to $(python -c 'import pcapkit; print(pcapkit.__version__)')
 
           Updated vendor constant enumerations at $(date). The following files
           have been changed: $CHANGED_FILES"
 
-      # #1674: the same commit without the bump. Create Release still runs when
-      # this workflow completes, as after a crawl that changed nothing, and sees
-      # the same version, so nothing new is published. The push starts Unit
-      # Tests, whose completion raises this workflow again on the commit made
-      # here. If that crawl changes comments once more, it does not commit them
-      # on top of this commit; the next push or schedule picks them up. So
-      # documentation commits cannot chain, however the registries behave. The
-      # Unit Tests run's head commit is in the `workflow_run` payload
-      # (octokit/webhooks' workflow-run.schema.json, `head_commit`). `-a` is
-      # enough here: a new or deleted module is code to the classifier, so it
-      # takes the bump path above and never reaches this step (#1685).
+      # #1674: the same commit without the bump; Create Release sees the same
+      # version and publishes nothing. Its push raises this workflow again, and
+      # a crawl changing comments once more on top of this commit is held for
+      # the next push or schedule, so documentation commits cannot chain. The
+      # verified commit is the payload's `head_commit` (octokit/webhooks'
+      # workflow-run.schema.json). `-a` suffices: a new or deleted module is
+      # code, so it takes the bump path (#1685).
       - name: Commit documentation changes
         id: commit-docs
         if: >-
@@ -390,19 +306,3 @@ jobs:
           git remote set-url origin git@github.com:JarryShaw/PyPCAPKit.git
           git pull --rebase origin "${GITHUB_REF#refs/heads/}"
           git push origin "HEAD:${GITHUB_REF}"
-
-      # - name: Create Tag
-      #   if: steps.verify-changed-files.outputs.files_changed == 'true'
-      #   run: |
-      #     version=$(python -c 'import pcapkit; print(pcapkit.__version__)')
-      #     git tag "v$version" -m "New distribution [$version] \
-
-      #     Update vendor constant enumerations at $(date). The following files have been changed: ${{ steps.verify-changed-files.outputs.changed_files }}"
-
-      # - name: Push changes
-      #   uses: ad-m/github-push-action@master
-      #   if: steps.verify-changed-files.outputs.files_changed == 'true'
-      #   with:
-      #     tags: true
-      #     github_token: ${{ secrets.GITHUB_TOKEN }}
-      #     branch: ${{ github.ref }}

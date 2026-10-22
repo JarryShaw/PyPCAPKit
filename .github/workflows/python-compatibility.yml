@@ -11,13 +11,10 @@ on:
 permissions:
   contents: read
 
-# Only pull-request runs may be superseded. Keying every event on the ref (as
-# this did) coalesces all of main's pushes into one group, and GitHub cancels a
-# *pending* run whenever a newer one joins the group -- `cancel-in-progress:
-# false` protects a run that has already started, never one still queued. So a
-# commit merged while its predecessor was still running lost its validation
-# entirely. Keying non-PR events on the run id gives each one its own group,
-# which is what "validate every commit" actually requires.
+# Only pull-request runs may be superseded. GitHub cancels a *pending* run when
+# a newer one joins its group, whatever `cancel-in-progress` says, so a shared
+# group for main's pushes would leave commits unvalidated; other events key on
+# the run id.
 concurrency:
   group: python-compatibility-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -45,18 +42,16 @@ jobs:
         run: python3 util/python_versions.py --github-output
 
   compatibility:
-    # Not named "Python ${{ matrix.python-version }}": that name collided
-    # exactly with the Unit Tests matrix job of the same name, and `gh pr checks`
-    # showed two rows reading `Python 3.10`, one a 13-second import smoke test
-    # and one a three-minute test run, with nothing to tell them apart.
+    # `Compat`, so `gh pr checks` cannot show two `Python 3.N` rows, this and
+    # Unit Tests', with nothing to tell them apart.
     #
-    # #1633's tiers. The supported tier, 3.11-3.15, keeps the plain name,
-    # which is what ruleset 23497679 requires one context per version of. The
-    # KTLO tier, end-of-life 3.7-3.10, is suffixed ` (KTLO)`, so no required
-    # context can match one. Its steps carry `continue-on-error`, as in
-    # unit-tests.yml's `test` job: job-level, a failed leg's check run concluded
-    # `failure`, so every commit showed red (#1672). 3.7 fails "Verify package"
-    # by design. No 3.6: setup-python builds it only for retired Ubuntu images.
+    # #1633's tiers. A supported leg keeps the plain name, one of ruleset
+    # 23497679's required contexts. A KTLO leg is suffixed ` (KTLO)`, so no
+    # required context can match it, and its steps carry `continue-on-error`,
+    # as in unit-tests.yml's `test` job: job-level, a failed leg's check run
+    # concluded `failure`, so every commit showed red (#1672). 3.7 fails "Verify
+    # package" by design. No 3.6: setup-python builds it only for retired
+    # Ubuntu images.
     name: Compat Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}
     needs: [python-versions]
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
@@ -64,13 +59,10 @@ jobs:
       ANNOTATION_LEVEL: ${{ matrix.ktlo && 'warning' || 'error' }}
     strategy:
       fail-fast: false
-      # Both tiers, as for the `test` job in unit-tests.yml (#1660): a KTLO leg
-      # carries `ktlo: true`, and `os` where `ubuntu-latest` cannot provide it.
-      # setup-python publishes 3.8 and 3.9 builds up to Ubuntu 24.04 only, and
-      # `ubuntu-latest` moves to 26.04 from 2026-10-19, hence their pin. 3.7's
-      # newest is for the deprecated 22.04; see the `test` job in unit-tests.yml.
-      # Each supported leg is one of ruleset 23497679's required contexts, so a
-      # tier change edits the ruleset too.
+      # Both tiers, as for unit-tests.yml's `test` job (#1660), which explains
+      # the `os` pins: a KTLO leg carries `ktlo: true`, and `os` where
+      # `ubuntu-latest` has no setup-python build for it. A tier change edits
+      # ruleset 23497679 too.
       matrix: ${{ fromJSON(needs.python-versions.outputs.compatibility) }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -95,11 +87,10 @@ jobs:
           python -m pip install -e .
 
       # One annotation saying why, so a failed leg -- such as 3.7's, where the
-      # editable install succeeds and the sources do not compile -- is legible
-      # from the run summary without opening the log. ANNOTATION_LEVEL makes it
-      # a warning on a KTLO leg (#1672). Each title escapes `,` as `%2C`: the
-      # runner splits a command's properties on `,`, so the KTLO leg's title
-      # would otherwise stop at "(KTLO" (actions/runner
+      # install succeeds and the sources do not compile -- is legible from the
+      # run summary; a warning on a KTLO leg (#1672). Each title escapes `,` as
+      # `%2C`: the runner splits a command's properties on `,`, so the KTLO
+      # title would stop at "(KTLO" (actions/runner
       # src/Runner.Common/ActionCommand.cs:100, at 5f0b3ddcc).
       - name: Verify package
         id: verify

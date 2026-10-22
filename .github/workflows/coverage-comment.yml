@@ -1,12 +1,10 @@
 name: Coverage Comment
 
-# Posts the coverage the `test` job's `latest` leg measured in
-# unit-tests.yml as a pull-request comment. It runs no tests. The comment cannot
-# be posted from unit-tests.yml itself: that file is also a reusable workflow,
-# and a called workflow can only narrow the token its caller passes, never widen
-# it. Every caller grants `contents: read`, so asking for
-# `pull-requests: write` there would break every one of them, the release gate
-# included.
+# Posts the coverage the `test` job's `latest` leg measured in unit-tests.yml
+# as a pull-request comment. Not from unit-tests.yml itself: that file is also a
+# reusable workflow whose callers grant `contents: read`, and a called workflow
+# can only narrow its caller's token, so `pull-requests: write` there would
+# break every caller, the release gate included.
 #
 # `workflow_run` runs this file as it is on the default branch, with a token of
 # its own, so fork pull requests get a comment too. The price is that the

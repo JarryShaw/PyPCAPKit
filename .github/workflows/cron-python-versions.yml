@@ -1,24 +1,20 @@
 name: Python Versions
 
 # #1660: keeps .github/python-versions.toml current. `detect` recomputes the
-# tiers from python.org's release cycle, PyPy's releases, setup-python's builds
-# and the hosted runner images (util/update_python_versions.py, whose docstring
-# gives the rules), rewrites the file and the prose the audit tests pin to it,
-# and runs that audit. When something changed, `pr` pushes the change to
-# `bot/python-versions` and opens that branch's pull request, or updates the
-# open one, for the owner to merge. Nothing here pushes `main` or edits ruleset
-# 23497679: the pull request body lists the required contexts to change by hand.
+# tiers (util/update_python_versions.py's docstring gives the rules), rewrites
+# the file and the prose the audit tests pin to it, and runs that audit. `pr`
+# proposes any change on `bot/python-versions` for the owner to merge. Nothing
+# here pushes `main` or edits ruleset 23497679: the pull request body lists the
+# required contexts to change by hand.
 #
-# Only these triggers. A push to `bot/python-versions` starts the pull
-# request's own checks, which is why `pr` spends the release App's token rather
-# than GITHUB_TOKEN, whose pushes start nothing; nothing it starts runs this
+# `pr` pushes with the release App's token, not GITHUB_TOKEN, whose pushes
+# start nothing, so the pull request's own checks run; none of them runs this
 # workflow again.
 on:
   schedule:
     - cron: '41 5 * * 1' # Mondays at 05:41 UTC
   workflow_dispatch:
 
-# Nothing by default; each job asks for what it needs.
 permissions: {}
 
 # One run at a time, so two runs cannot race for the branch. A queued run is
@@ -63,16 +59,12 @@ jobs:
       - name: Install PyYAML, requests and markdown-it-py
         run: python -m pip install PyYAML requests markdown-it-py
 
-      # Fetches the sources, rewrites the files, and writes the proposal to
-      # $RUNNER_TEMP/proposal. `publish` is false when nothing changed, or when
-      # `bot/python-versions` has an open pull request and a commit it holds
-      # ahead of main proposes these tiers, hand edits or merges of main on top
-      # or not (an anonymous, commits-only fetch), so an unmerged proposal is not
-      # pushed, nor its approval asked for, every week. When that branch holds
-      # commits it did not make and proposes other tiers, this fails as
-      # `publish` would refuse, before any approval. A branch with no open pull
-      # request was merged or closed, and is proposed afresh. The token reads
-      # that pull request's state.
+      # Writes the proposal to $RUNNER_TEMP/proposal. `publish` is false when
+      # nothing changed, or when `bot/python-versions`' open pull request
+      # already proposes these tiers, so an unmerged proposal is not re-pushed,
+      # nor its approval asked for, every week. A branch holding commits it did
+      # not make that proposes other tiers fails here, before any approval, as
+      # `publish` would refuse it. The token reads the pull request's state.
       - name: Recompute the tiers
         id: update
         env:
@@ -127,13 +119,12 @@ jobs:
           echo "::error title=The audit fails on main::the tiers need no change, but the audit fails; see above."
           exit 1
 
-  # The release App's private key is a secret of the `github-release`
-  # environment, which needs the owner's approval, so he is asked only on a run
-  # that has something to propose. The token is contents and pull requests
-  # write and nothing else: no `workflows`, so it cannot push a workflow file,
-  # and `update` writes none. `publish` force-pushes `bot/python-versions` alone,
-  # and while its pull request is open refuses it if it holds commits it did not
-  # make; with none open it recreates the branch from main.
+  # The release App's key is a secret of the `github-release` environment,
+  # which needs the owner's approval, so he is asked only when there is
+  # something to propose. The token has no `workflows` permission, so it cannot
+  # push a workflow file, and `update` writes none. `publish` force-pushes
+  # `bot/python-versions` alone, refusing while its pull request is open if it
+  # holds commits it did not make; with none open it recreates it from main.
   pr:
     name: Open or update the pull request
     needs: detect

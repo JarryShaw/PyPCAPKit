@@ -626,68 +626,16 @@ CITATIONS: 'dict[str, list[tuple[str, Optional[str]]]]' = {
 }
 
 
-#: Every ``create-release.yml`` citation in these documents, as (the job its lines
-#: sit in, ``None`` above ``jobs:``; text the first line must contain; text the
-#: last line must contain). Lines repeat across jobs -- ``tag`` and ``pypi`` share
-#: their ``needs:``, ``pypi`` and ``conda`` their upload step -- so the job is
-#: checked too. A list such as ``:619,784`` is one citation per number.
-RELEASE_CITATIONS: 'dict[str, list[tuple[Optional[str], str, Optional[str]]]]' = {
-    'docs/source/contributing/releasing.rst': [
-        (None, 'push:', '- completed'),
-        (None, 'concurrency:', 'cancel-in-progress: false'),
-        ('vendor_update', '  vendor_update:', 'esac'),
-        ('version_check', 'if: >-', "needs.vendor_update.outputs.updated != 'false' }}"),
-        ('version_check', '- name: Checkout code', 'fetch-depth: 0'),
-        ('version_check', "- name: Check which commit the version's tag names",
-         'PCAPKIT_RELEASED_ELSEWHERE=${elsewhere}'),
-        ('version_check', 'print(pcapkit.__version__)', None),
-        ('unit-tests', '  unit-tests:', 'gate-only: true'),
-        ('github', 'needs: [ unit-tests, version_check ]', None),
-        ('github', "grep -qi 'unreleased'", 'title=Changelog entry is undated'),
-        ('github', "- name: Mint the release App's token", 'permission-workflows: write'),
-        ('github', 'tag_name: "v${{ needs.version_check.outputs.PCAPKIT_VERSION }}"', None),
-        ('github', "target_commitish: ${{ github.event_name == 'workflow_run' && github.sha", None),
-        ('github', 'token: ${{ steps.app_token.outputs.token || secrets.GITHUB_TOKEN }}', None),
-        ('github', '- name: Explain a refused release tag', 'title=Could not create v'),
-        ('tag', 'needs: [ github, unit-tests, version_check ]', None),
-        ('tag', '- name: Create Tag', 'fi'),
-        ('tag', '- name: Reset Build Number', 'exit 1'),
-        ('pypi', 'environment: pypi', None),
-        ('pypi', 'id-token: write', None),
-        ('pypi', 'needs: [ github, unit-tests, version_check ]', None),
-        ('pypi', 'PCAPKIT_RELEASE_TAG: v${{ needs.version_check.outputs.PCAPKIT_VERSION }}', None),
-        ('pypi', '- name: Upload package to GitHub Release', 'done <<< "$PCAPKIT_ASSETS"'),
-        ('conda', 'needs: [ tag, github, unit-tests, version_check ]', None),
-        ('conda', 'PCAPKIT_RELEASE_TAG: v${{ needs.version_check.outputs.PCAPKIT_VERSION }}', None),
-        ('conda', '- name: Upload package to GitHub Release', 'done <<< "$PCAPKIT_ASSETS"'),
-        ('release_status', '[ -n "$PCAPKIT_RELEASE_APP_BOT_ID" ]', 'title=Nothing to release'),
-        ('release_status', 'if [ "${PCAPKIT_RELEASED_ELSEWHERE:-}" = "true" ]', 'is unfinished (#1634)::'),
-    ],
-    'docs/source/contributing/workflows.rst': [
-        (None, 'workflow_run:', '- completed'),
-        (None, 'concurrency:', 'cancel-in-progress: false'),
-        ('version_check', 'if: >-', "needs.vendor_update.outputs.updated != 'false' }}"),
-        ('unit-tests', 'needs: [ version_check ]', None),
-        ('unit-tests', 'uses: ./.github/workflows/unit-tests.yml', None),
-        ('github', 'needs: [ unit-tests, version_check ]', None),
-        ('tag', 'needs: [ github, unit-tests, version_check ]', None),
-        ('pypi', 'needs: [ github, unit-tests, version_check ]', None),
-        ('conda', 'needs: [ tag, github, unit-tests, version_check ]', None),
-    ],
-}
+#: The workflows the prose cites by job and step name, never by line number:
+#: trimming a comment in one moves every line below it (#1967).
+BY_NAME = ('create-release.yml', 'python-compatibility.yml', 'coverage-comment.yml')
 
-#: A document that names ``create-release.yml`` also cites it bare, as ``:N``,
-#: and each bare citation there counts as one of its citations unless listed
-#: here with the file it does cite. A bare ``:997`` is what outlived the line it
-#: named when #1672 first moved ``conda`` down 29 lines.
+#: A document that names one of :data:`BY_NAME` may still cite another file bare,
+#: as ``:N``; each such citation is listed here with the file it does cite, and
+#: any other bare citation there reads as a line of the named workflow.
 BARE_ELSEWHERE: 'dict[str, dict[str, str]]' = {
     'docs/source/contributing/releasing.rst': {
-        '494-514': 'tests/project/test_bump_version.py',
         '631-647': "softprops/action-gh-release 3.0.2's src/github.ts",
-    },
-    'docs/source/contributing/workflows.rst': {
-        '60': '.github/workflows/python-compatibility.yml',
-        '74': '.github/workflows/python-compatibility.yml',
     },
 }
 
@@ -701,55 +649,35 @@ def documents() -> 'list[str]':
                   | {str(p.relative_to(ROOT)) for p in ROOT.glob('*.md')})
 
 
-def jobs_by_line(lines: 'list[str]') -> 'list[Optional[str]]':
-    """The job each workflow line sits in, ``None`` above ``jobs:``."""
-    owner: 'list[Optional[str]]' = []
-    current: 'Optional[str]' = None
-    seen = False
-    for line in lines:
-        seen = seen or line.startswith('jobs:')
-        match = re.match(r'  ([\w-]+):\s*$', line) if seen else None
-        current = match.group(1) if match else current
-        owner.append(current)
-    return owner
+class TestWorkflowsCitedByName(unittest.TestCase):
+    """The prose cites :data:`BY_NAME`'s workflows by job and step, not by line."""
+
+    def test_no_document_cites_them_by_line_number(self) -> None:
+        """Neither ``<file>.yml:N`` nor, beside one's name, a bare ``:N`` of it.
+
+        The owner's decision A on #1967: cite steps by job and step name, not
+        ``file.yml:N``. A bare citation of another file goes in
+        :data:`BARE_ELSEWHERE`, and an entry no bare citation matches fails too.
+        """
+        for document in documents():
+            text = (ROOT / document).read_text(encoding='utf-8')
+            for name in BY_NAME:
+                with self.subTest(document=document, workflow=name):
+                    self.assertEqual(re.findall(rf'{re.escape(name)}:{SPANS}', text), [],
+                                     f'{document} cites {name} by line; name the job and step')
+            if not any(name in text for name in BY_NAME):
+                continue
+            bare = set(re.findall(rf'``:{SPANS}``', text))
+            elsewhere = set(BARE_ELSEWHERE.get(document, {}))
+            with self.subTest(document=document, table='BARE_ELSEWHERE'):
+                self.assertEqual(bare - elsewhere, set(),
+                                 f'{document} cites these bare; name the job and step, or list '
+                                 f'the file they cite in BARE_ELSEWHERE')
+                self.assertEqual(elsewhere - bare, set(), f'{document} no longer cites these bare')
 
 
 class TestDocCitationsResolve(unittest.TestCase):
-    """The prose's ``unit-tests.yml`` and ``create-release.yml`` line numbers land where it says."""
-
-    def test_every_create_release_citation_lands_on_its_anchor(self) -> None:
-        """Each citation, bare ones included, lands in its anchor's job and on its lines."""
-        release = ROOT / '.github' / 'workflows' / 'create-release.yml'
-        lines = release.read_text(encoding='utf-8').splitlines()
-        owner = jobs_by_line(lines)
-        for document in documents():
-            text = (ROOT / document).read_text(encoding='utf-8')
-            groups = re.findall(rf'create-release\.yml:{SPANS}', text)
-            if 'create-release.yml' in text:
-                bare = re.findall(rf'``:{SPANS}``', text)
-                elsewhere = BARE_ELSEWHERE.get(document, {})
-                with self.subTest(document=document, table='BARE_ELSEWHERE'):
-                    self.assertFalse(set(elsewhere) - set(bare),
-                                     f'{document} no longer cites these bare')
-                groups += [group for group in bare if group not in elsewhere]
-            anchors = RELEASE_CITATIONS.get(document, [])
-            unmatched = list(anchors)
-            for first, last in ((int(a), int(b or a)) for group in groups
-                                for a, b in re.findall(r'(\d+)(?:-(\d+))?', group)):
-                with self.subTest(document=document, citation=f'{first}-{last}'):
-                    self.assertLessEqual(last, len(lines))
-                    hit = next((a for a in anchors if owner[first - 1] == owner[last - 1] == a[0]
-                                and a[1] in lines[first - 1]
-                                and (a[2] is None or a[2] in lines[last - 1])), None)
-                    self.assertIsNotNone(
-                        hit, f'{document} cites create-release.yml:{first}-{last}, which is '
-                             f'{lines[first - 1].strip()!r} .. {lines[last - 1].strip()!r} in '
-                             f'{owner[first - 1]!r}; a bare citation of another file goes in '
-                             f'BARE_ELSEWHERE')
-                    if hit in unmatched:
-                        unmatched.remove(hit)
-            with self.subTest(document=document):
-                self.assertFalse(unmatched, f'{document}: no citation lands on {unmatched}')
+    """The prose's ``unit-tests.yml`` line numbers land where it says."""
 
     def test_every_citation_lands_on_its_anchor(self) -> None:
         """Each ``unit-tests.yml`` citation's range starts and ends on the line its anchor names."""
