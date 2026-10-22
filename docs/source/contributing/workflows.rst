@@ -1218,6 +1218,12 @@ does; each has tests under :file:`tests/project/` that run it.
    * - :file:`util/discussion_report.py`
      - ``Post the report to Discussions`` in the ``discussion`` job of
        ``ci-timing.yml`` and of ``cron-vendor.yml`` (see `CI Reports`_).
+   * - :file:`util/apt_packages.py`
+     - The apt steps of ``unit-tests.yml``'s ``engine-tests`` and ``pypcap-parity``
+       (and so its KTLO twin): the plan, seed, install and collect steps, as
+       ``apt_packages.py plan``, ``seed``, ``install`` and ``collect``. The
+       ``actions/cache`` steps and the AppArmor step (`#2019
+       <https://github.com/JarryShaw/PyPCAPKit/issues/2019>`__) stay as they were.
 
 The summaries run on the image's ``/usr/bin/python3`` rather than the leg's
 interpreter, which may have failed to set up or be too broken to run anything, so
@@ -1229,7 +1235,15 @@ file-size cap every test command of ``unit-tests.yml`` takes.
 :file:`util/regenerate_samples.py` is standard library only but runs on the leg's
 interpreter, since the generator it runs imports ``pcapkit``, and so does
 :file:`util/pip_install.py`, since it installs into that interpreter; it runs on
-every version the matrices hold, 3.7 and the experimental tier included. Both ``changes`` jobs check out on every event, since the script is in the
+every version the matrices hold, 3.7 and the experimental tier included. :file:`util/apt_packages.py` runs on
+``/usr/bin/python3``, as the apt shell needed no interpreter of the leg's, and runs
+under ``sudo`` the commands that shell ran. Its ``plan`` and ``install`` both read
+the job's ``APT_PACKAGES``, so the cache key always describes the set installed.
+Its bounds are still ``timeout`` run as root inside ``sudo``, given no option, so
+uutils' ``timeout`` behaves as GNU's (`#2020
+<https://github.com/JarryShaw/PyPCAPKit/issues/2020>`__), and the bound reaches
+apt's own children, which a timeout in the script, running as the runner's user,
+could not signal. Both ``changes`` jobs check out on every event, since the script is in the
 tree. ``create-release.yml``'s ``pypi`` job keeps its own copy of
 the KTLO summary's shell until its shell moves to scripts too; a project pin runs
 that copy and the script on the same steps and requires the same output.

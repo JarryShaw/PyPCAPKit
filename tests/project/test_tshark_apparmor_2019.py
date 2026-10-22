@@ -63,13 +63,21 @@ class TestEveryTsharkInstallIsFollowed(unittest.TestCase):
                 self.assertEqual(names[names.index(install) + 1], NAME)
 
     def test_every_job_installing_tshark_is_covered(self) -> None:
-        """A new tshark install elsewhere in the workflows needs the step too."""
+        """A new tshark install elsewhere in the workflows needs the step too.
+
+        Since #1967 an install runs :file:`util/apt_packages.py install`, which installs
+        the job's ``APT_PACKAGES``, so a job counts when that names tshark.
+
+        """
         found = set()
         for path in sorted(WORKFLOWS.glob('*.yml')):
             for job_id, spec in (load(path).get('jobs') or {}).items():
+                packages = str((spec.get('env') or {}).get('APT_PACKAGES', ''))
                 for item in spec.get('steps') or ():
-                    if re.search(r'apt-get install[^\n]*\btshark\b|apt_install tshark\b',
-                                 str(item.get('run', ''))):
+                    run = str(item.get('run', ''))
+                    if re.search(r'apt-get install[^\n]*\btshark\b|apt_install tshark\b', run) or (
+                            re.search(r'\butil/apt_packages\.py install\b', run)
+                            and re.search(r'\btshark\b', packages)):
                         found.add((path.name, job_id))
         self.assertEqual(found, {(WORKFLOW, job_id) for job_id, _ in SITES})
 

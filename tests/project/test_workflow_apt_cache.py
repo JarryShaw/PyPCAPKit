@@ -8,15 +8,15 @@ unchanged install step (pinned by
 computes a cache key, ``actions/cache`` restore/seed/collect/save steps, and a
 retry that drops azure from the runner's ``mirror+file:`` list.
 
-Each property below is exercised by running the step's real ``run:`` script
-under ``bash -e`` with ``sudo``/``timeout``/``apt-get`` stubbed, the way
-``TestAptRetry`` does, or by reading the step text where only the Actions runner
-could execute it:
+Each property below is exercised by running the step's real ``run:`` script, which
+runs :file:`util/apt_packages.py` since #1967, under ``bash -e`` with
+``sudo``/``timeout``/``apt-get`` stubbed, the way ``TestAptRetry`` does, or by
+reading the step text where only the Actions runner could execute it:
 
 * the azure line is dropped before attempt 2 only, and only when another
   ``http`` mirror would remain;
-* each job's ``APT_PACKAGES`` (which the key is computed from) names exactly
-  what its install step installs, for every engine in the matrix;
+* each job's ``APT_PACKAGES`` (which the key is computed from) is what its
+  install step installs, for every engine in the matrix, since both read it;
 * the key is ``apt-debs-<ImageOS>-<arch>-<APT_SET>-<digest>`` of the sorted
   ``Inst`` lines, and ``restore-keys`` is that same-image, same-set prefix only;
 * only one job per key saves, so ``pypcap-parity``'s two cells do not race to
@@ -38,8 +38,9 @@ import unittest
 from typing import TYPE_CHECKING
 
 from tests import _workflows
-from tests.project.test_python_versions_1660 import legs, matrix
-from tests.project.test_unit_tests_queue import job, step_script
+from tests.project.test_python_versions_1660 import ROOT, legs, matrix
+from tests.project.test_unit_tests_queue import checkout_script, job, step_script
+from util.apt_packages import MIRRORS as MIRRORS_DEFAULT
 
 if TYPE_CHECKING:
     from typing import Optional
@@ -50,6 +51,8 @@ MIRRORS = ('http://azure.archive.ubuntu.com/ubuntu/\tpriority:1\n'
            'https://security.ubuntu.com/ubuntu/\tpriority:3\n')
 #: The path the install steps edit, replaced by a scratch file in these tests.
 MIRRORS_PATH = '/etc/apt/apt-mirrors.txt'
+#: The install steps' command (#1967), which takes ``--mirrors`` for that scratch file.
+INSTALL = 'util/apt_packages.py install'
 
 #: (job, plan step, install step) for both apt sites.
 SITES = (
@@ -107,11 +110,18 @@ class _Stubbed(unittest.TestCase):
         for suffix in ('.apt', '.pkgs'):
             pathlib.Path(f'{self.log}{suffix}').write_text('', encoding='utf-8')
 
-    def run_script(self, script: 'str', env: 'dict[str, str]') -> 'tuple[int, str]':
-        """Run ``script`` under ``bash -e``; return its status and combined output."""
+    def run_script(self, script: 'str', env: 'dict[str, str]',
+                   mirrors: 'Optional[pathlib.Path]' = None) -> 'tuple[int, str]':
+        """Run ``script`` under ``bash -e`` from the checkout; return its status and combined output.
+
+        :file:`util/apt_packages.py install` reads ``mirrors`` for the runner's mirror
+        list, a missing scratch file by default, so no test reads the host's.
+
+        """
         full = dict(os.environ, **env, PATH=f'{self.bin}{os.pathsep}{os.environ["PATH"]}',
                     STUB_LOG=str(self.log))
-        proc = subprocess.run(['bash', '-e', '-c', script], env=full, check=False,
+        script = checkout_script(script, mirrors or self.tmp / 'no-mirror-list')
+        proc = subprocess.run(['bash', '-e', '-c', script], env=full, check=False, cwd=ROOT,
                               stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True)
         return proc.returncode, proc.stdout
 
@@ -131,8 +141,8 @@ class TestFallbackMirror(_Stubbed):
                     fail_updates: 'int') -> 'tuple[int, str, list[str], Optional[str]]':
         """Run ``job_name``'s install step against a scratch mirror list."""
         script = step_script(job(job_name), name)
-        self.assertEqual(script.count(MIRRORS_PATH), 1,
-                         f'{name!r} no longer names {MIRRORS_PATH} exactly once')
+        self.assertEqual(script.count(INSTALL), 1, f'{name!r} no longer runs {INSTALL} exactly once')
+        self.assertEqual(MIRRORS_DEFAULT, MIRRORS_PATH)
         self.reset()
         fake = self.tmp / 'apt-mirrors.txt'
         if fake.exists():
@@ -140,8 +150,8 @@ class TestFallbackMirror(_Stubbed):
         if mirrors is not None:
             fake.write_text(mirrors, encoding='utf-8')
         status, output = self.run_script(
-            script.replace(MIRRORS_PATH, str(fake)),
-            {'ENGINE': 'PyShark', 'MIRRORS': str(fake), 'FAIL_UPDATES': str(fail_updates)})
+            script, {'ENGINE': 'PyShark', 'APT_PACKAGES': 'tshark', 'MIRRORS': str(fake),
+                     'FAIL_UPDATES': str(fail_updates)}, fake)
         after = fake.read_text(encoding='utf-8') if mirrors is not None else None
         return status, output, self.apt_calls(), after
 
@@ -235,19 +245,21 @@ class TestPackageListsAgree(_Stubbed):
         self.assertLessEqual(named, set(matrix_engines()))
 
     def test_engine_tests_installs_what_it_plans(self) -> None:
-        """Per engine, the install step's apt-get operands equal APT_PACKAGES."""
+        """Per engine, the install step's apt-get operands are APT_PACKAGES, whatever ENGINE says."""
         script = step_script(job('engine-tests'), SITES[0][2])
-        for engine, packages in engine_packages().items():
-            with self.subTest(engine=engine):
-                self.reset()
-                status, output = self.run_script(script, {'ENGINE': engine})
-                self.assertEqual(status, 0, output)
-                self.assertEqual(self.installed(), packages.split())
+        engines = engine_packages()
+        for engine, packages in engines.items():
+            for named in (engine, *[other for other in engines if other != engine][:1]):
+                with self.subTest(engine=engine, ENGINE=named):
+                    self.reset()
+                    status, output = self.run_script(script, {'ENGINE': named, 'APT_PACKAGES': packages})
+                    self.assertEqual(status, 0, output)
+                    self.assertEqual(self.installed(), packages.split())
 
     def test_pypcap_parity_installs_what_it_plans(self) -> None:
-        """The parity job's literal list equals its install step's operands."""
+        """The parity job's literal list is its install step's operands."""
         packages = job_env('pypcap-parity', 'APT_PACKAGES')
-        status, output = self.run_script(step_script(job('pypcap-parity'), SITES[1][2]), {})
+        status, output = self.run_script(step_script(job('pypcap-parity'), SITES[1][2]), {'APT_PACKAGES': packages})
         self.assertEqual(status, 0, output)
         self.assertEqual(self.installed(), packages.split())
         self.assertTrue(self.installed())

@@ -47,6 +47,9 @@ skipping on an install without that extra. That is the same split
 assertion that must run everywhere does not need the dependency, and the one
 that needs it guards the substitute.
 
+Since #1967 the steps run apt through :file:`util/apt_packages.py`, so a step running
+its ``plan`` or ``install`` counts as invoking apt, as one naming ``apt-get`` does.
+
 Comments are stripped before the ``apt-get`` marker is looked for. Without that,
 prose *about* apt -- including the long note #974 added above the very step this
 module guards -- would register as an invocation, so a step could be flagged for
@@ -86,12 +89,18 @@ WORKFLOW_DIR = ROOT / '.github' / 'workflows'
 #: it cannot invent a second one. Adding a different installer to a workflow
 #: means adding its marker here.
 APT_MARKER = 'apt-get'
+#: The commands that invoke apt for a step since #1967: :file:`util/apt_packages.py`'s
+#: ``plan`` and ``install``, which run ``apt-get``. Its ``seed`` and ``collect`` run
+#: none, and so need no bound of their own, as before.
+APT_SCRIPT = re.compile(r'\butil/apt_packages\.py (?:plan|install)\b')
 
 #: The steps known to invoke apt, as ``(workflow name, step name)``. Quoted
 #: so :class:`TestTheScannerIsNotBlind` can tell "the rule holds everywhere" from
 #: "the scanner found nothing to check", which look identical in a passing run.
 KNOWN_APT_STEPS = {
+    ('unit-tests.yml', "Plan this engine's system packages"),
     ('unit-tests.yml', "Install this engine's system packages"),
+    ('unit-tests.yml', 'Plan the system packages'),
     ('unit-tests.yml', 'Install libpcap headers, a C toolchain, and tshark'),
 }
 
@@ -119,6 +128,11 @@ def strip_comments(text: 'str') -> 'str':
                      if not line.strip().startswith('#'))
 
 
+def invokes_apt(script: 'str', marker: 'str' = APT_MARKER) -> 'bool':
+    """Whether ``script`` holds ``marker`` or a command of :data:`APT_SCRIPT`."""
+    return marker in script or APT_SCRIPT.search(script) is not None
+
+
 class Step:
     """One step of one workflow: its name, its script, and the job it belongs to."""
 
@@ -137,8 +151,9 @@ class Step:
         return None if match is None else int(match.group('minutes'))
 
     def invokes(self, marker: 'str') -> 'bool':
-        """Whether the step's script, comments stripped, contains ``marker``."""
-        return marker in strip_comments(self.block)
+        """Whether the step's script, comments stripped, contains ``marker`` or runs apt through
+        :data:`APT_SCRIPT`."""
+        return invokes_apt(strip_comments(self.block), marker)
 
     def __repr__(self) -> 'str':
         return f'<Step {self.workflow}:{self.job}:{self.name!r}>'
@@ -294,7 +309,7 @@ class TestYAMLAgreesWithTheScanner(unittest.TestCase):
                 for step in job.get('steps') or []:
                     if not isinstance(step, dict):
                         continue
-                    if APT_MARKER in strip_comments(step.get('run') or ''):
+                    if invokes_apt(strip_comments(step.get('run') or '')):
                         parsed.add((path.name, step.get('name')))
 
         scanned = {(step.workflow, step.name) for step in apt_steps()}
@@ -318,7 +333,7 @@ class TestYAMLAgreesWithTheScanner(unittest.TestCase):
                 for step in job.get('steps') or []:
                     if not isinstance(step, dict):
                         continue
-                    if APT_MARKER in strip_comments(step.get('run') or ''):
+                    if invokes_apt(strip_comments(step.get('run') or '')):
                         parsed[(path.name, step.get('name'))] = step.get('timeout-minutes')
 
         scanned = {(step.workflow, step.name): step.timeout for step in apt_steps()}
