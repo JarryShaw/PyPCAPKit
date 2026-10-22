@@ -73,13 +73,19 @@ CAPS = {JOB: (45, {}), EXPERIMENTAL: (140, {'python': 5, 'install': 10, 'watcher
 GATING = ('required-checks', 'unittest-ordering')
 #: The unit tier's own flags, which every leg passes.
 TIER_FLAGS = ('--ignore=tests/integration', '--ignore-glob=*_runtime.py', '--ignore-glob=*_regression.py')
-#: A ``python`` that writes each argument on a line of ``$ARGS_FILE``, and hands a
-#: ``-c`` to the real one, which is how the steps ask tests/_tiers.py. util/cap_file_size.py's
-#: command it execs, as the script does, with no real interpreter: under the coverage
-#: leg one would be measured, be logged as a second ``coverage run --rcfile``
-#: controller, and exec before saving, which fails the #1387 guard (#1969).
-STUB = ('#!/bin/sh\ncase "$1" in -c) exec "$REAL_PYTHON" "$@";; util/cap_file_size.py) shift; exec "$@";; esac\n'
-        'printf \'%s\\n\' "$@" > "$ARGS_FILE"\n')
+#: A ``python`` that appends each argument on a line of ``$ARGS_FILE``, then an
+#: :data:`END` line, and hands a ``-c`` to the real one, which is how the steps ask
+#: tests/_tiers.py. util/cap_file_size.py's command it execs, as the script does, with
+#: no real interpreter: under the coverage leg one would be measured, be logged as a
+#: second ``coverage run --rcfile`` controller, and exec before saving, which fails the
+#: #1387 guard (#1969). A PyPy leg runs pytest more than once (#2005), so each run is
+#: recorded rather than the last, and util/pytest_shards.py, which starts them there,
+#: runs on the real one too.
+STUB = ('#!/bin/sh\ncase "$1" in -c|util/pytest_shards.py) exec "$REAL_PYTHON" "$@";; '
+        'util/cap_file_size.py) shift; exec "$@";; esac\n'
+        'printf \'%s\\n\' "$@" \'<end>\' >> "$ARGS_FILE"\n')
+#: The line :data:`STUB` writes after each run's arguments.
+END = '<end>'
 #: A directory holding sweeps, hand-picked round trips, and modules that only import
 #: the sweeps' harnesses' packet builders, for :class:`TestTheIgnoresAreTheLatestTier`.
 PROBE = 'tests/protocols/internet'
@@ -117,7 +123,17 @@ def step_env(leg: 'dict[str, Any]', where: 'tuple[str, str]' = JOB) -> 'dict[str
 
 
 def run_step(leg: 'dict[str, Any]', where: 'tuple[str, str]' = JOB, script: 'Optional[str]' = None) -> 'list[str]':
-    """The arguments the step of job ``where`` hands ``python`` on ``leg``; ``script`` replaces its ``run:``."""
+    """The arguments the step of job ``where`` hands ``python`` on ``leg``, which runs it once."""
+    runs = run_step_each(leg, where, script)
+    if len(runs) != 1:
+        raise AssertionError(f'the step ran python {len(runs)} times on {leg}, not once')
+    return runs[0]
+
+
+def run_step_each(leg: 'dict[str, Any]', where: 'tuple[str, str]' = JOB,
+                  script: 'Optional[str]' = None) -> 'list[list[str]]':
+    """The arguments of each run of ``python`` by the step of job ``where`` on ``leg``, in order;
+    ``script`` replaces its ``run:``."""
     with tempfile.TemporaryDirectory() as temp:
         stub = pathlib.Path(temp, 'python')
         stub.write_text(STUB, encoding='utf-8')
@@ -140,7 +156,41 @@ def run_step(leg: 'dict[str, Any]', where: 'tuple[str, str]' = JOB, script: 'Opt
                                 cwd=ROOT, capture_output=True, text=True, check=False, timeout=120)
         if result.returncode:
             raise AssertionError(f'the step failed on {leg}: {result.stdout[-2000:]}{result.stderr[-2000:]}')
-        return [arg.replace(str(runner_temp), RUNNER_TEMP) for arg in record.read_text(encoding='utf-8').splitlines()]
+        runs, run = [], []  # type: list[list[str]], list[str]
+        for arg in record.read_text(encoding='utf-8').splitlines():
+            if arg == END:
+                runs.append(run)
+                run = []
+            else:
+                run.append(arg.replace(str(runner_temp), RUNNER_TEMP))
+        return runs
+
+
+def shards(leg: 'dict[str, Any]') -> 'list[str]':
+    """#2005: the directories the ``test`` step runs on their own on ``leg``, before the rest."""
+    return step_env(leg).get('SHARDS', '').split()
+
+
+def unsharded(leg: 'dict[str, Any]', runs: 'list[list[str]]') -> 'list[str]':
+    """The arguments each of the ``test`` step's runs on ``leg`` shares, once each run's own are taken off.
+
+    #2005: util/pytest_shards.py's run per directory :func:`shards` names adds its JUnit
+    file, an ``--ignore`` of each earlier shard, and the directory, and the last run an
+    ``--ignore`` of each.
+
+    """
+    named = shards(leg)
+    if len(runs) != len(named) + 1:
+        raise AssertionError(f'{len(runs)} runs on {leg} for the shards {named}')
+    rest = [f'--ignore={shard}' for shard in named]
+    common = runs[-1][:len(runs[-1]) - len(rest)]
+    if runs[-1][len(common):] != rest:
+        raise AssertionError(f'the last run on {leg} does not end by ignoring {named}: {runs[-1]}')
+    for index, (shard, run) in enumerate(zip(named, runs)):
+        own = [f'--junitxml={RUNNER_TEMP}/junit-{shard.replace("/", "-")}.xml', *rest[:index], shard]
+        if run != common + own:
+            raise AssertionError(f'the {shard} run on {leg} is not the others\' arguments and {own}: {run}')
+    return common
 
 
 def pytest_args(argv: 'list[str]') -> 'list[str]':
@@ -169,10 +219,10 @@ class TestTheStubRunsNoRealInterpreterForTheCap(unittest.TestCase):
                                     capture_output=True, text=True, check=False, timeout=60)
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertFalse(real.exists(), 'the real interpreter ran the capped coverage command')
-            self.assertEqual(record.read_text(encoding='utf-8').splitlines(), command)
+            self.assertEqual(record.read_text(encoding='utf-8').splitlines(), [*command, END])
 
 
-def unsharded(leg: 'dict[str, Any]', where: 'tuple[str, str]', argv: 'list[str]') -> 'list[str]':
+def rest_unsharded(leg: 'dict[str, Any]', where: 'tuple[str, str]', argv: 'list[str]') -> 'list[str]':
     """``argv`` less what util/pytest_shards.py's last run adds on a sharded leg (#1963), which it must end with."""
     shards = step_env(leg, where).get('SHARDS', '')
     if not shards:
@@ -195,7 +245,10 @@ class TestTheStepSelectsByLeg(unittest.TestCase):
     @classmethod
     def setUpClass(cls) -> None:
         cls.latest = live_outputs()['latest']
-        cls.runs = {leg['python-version']: (leg, unsharded(leg, where, run_step(leg, where)))
+        # #2005: a PyPy leg of `test` runs pytest once a shard, each with the arguments the others share;
+        # #1963: GraalPy's `experimental` leg through util/pytest_shards.py, whose last run is the rest.
+        cls.runs = {leg['python-version']: (leg, unsharded(leg, run_step_each(leg, where)) if where == JOB
+                                            else rest_unsharded(leg, where, run_step_each(leg, where)[-1]))
                     for where in (JOB, EXPERIMENTAL) for leg in legs(*where)}
         assert len(cls.runs) == len(legs(*JOB)) + len(legs(*EXPERIMENTAL)), 'a version runs in both jobs'
 
@@ -246,7 +299,7 @@ class TestTheStepSelectsByLeg(unittest.TestCase):
         latest = _tiers.LATEST_TIER_SELECTOR.split('"', 1)[1]
         self.assertEqual(script.count(latest), 1)
         doctored = script.replace(latest, _tiers.PROJECT_PINS_SELECTOR.split('"', 1)[1])
-        leg = next(leg for leg in legs(*JOB) if leg['python-version'] != self.latest)
+        leg = next(leg for leg in legs(*JOB) if leg['python-version'] != self.latest and not shards(leg))
         self.assertNotEqual(ignored(run_step(leg, JOB, doctored)), list(_tiers.latest_tier_paths()))
 
 

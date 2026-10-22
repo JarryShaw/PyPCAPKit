@@ -586,6 +586,8 @@ class CompatTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             compat.show_flag_values(-1)
 
+    @unittest.skipIf(sys.implementation.name == 'pypy',
+                     "PyPy's _thread has no _excepthook, and no tier runs a PyPy before 3.10 (#1958)")
     def test_python39_default_threading_excepthook_is_the_310_one(self) -> None:
         """The 3.8 and 3.9 branch lands on the object 3.10 and later name.
 

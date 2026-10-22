@@ -17,11 +17,15 @@ actions/runner-images' READMEs at 2c421200c.
     Both tiers. A KTLO leg carries ``ktlo: true``, and ``os`` where
     ``ubuntu-latest`` cannot provide it.
 ``test``, ``integration``
-    The supported tier alone; ``test`` marks the ``latest`` leg ``coverage: true``.
-``test-ktlo``, ``integration-ktlo``, ``pypcap-parity-ktlo``
-    Each KTLO version as a leg carrying ``ktlo: true``, and ``os`` as above, for
-    unit-tests.yml's jobs of the same names, which nothing gating waits on (#1738).
-    No other unit-tests.yml output holds a KTLO version.
+    The supported tier alone, CPython's then PyPy's (#1958); ``test`` marks the
+    ``latest`` leg ``coverage: true``.
+``test-ktlo``, ``integration-ktlo``
+    Each KTLO version, CPython's then PyPy's, as a leg carrying ``ktlo: true``,
+    and ``os`` as above, for unit-tests.yml's jobs of the same names, which
+    nothing gating waits on (#1738).
+``pypcap-parity-ktlo``
+    The same, for CPython's KTLO versions below 3.12. No other unit-tests.yml
+    output holds a KTLO version.
 ``experimental``
     Each experimental version as a leg carrying ``experimental: true``, for
     experimental.yml's ``experimental`` job, a workflow of its own so that nothing
@@ -74,6 +78,10 @@ SPELLING = {'cpython': re.compile(r'3\.(\d+)t?'), 'pypy': re.compile(r'pypy3\.(\
             'graalpy': re.compile(r'graalpy-(\d+)\.(\d+)')}
 #: The implementations every file lists; a GraalPy table is optional.
 MANDATORY = ('cpython', 'pypy')
+#: The implementations unit-tests.yml's ``test`` and ``integration`` jobs and
+#: their KTLO twins run, in this order: each runs the ``ALL`` test tier, and
+#: ``latest`` the whole suite (#1958).
+TESTED = ('cpython', 'pypy')
 TIERS = ('supported', 'ktlo', 'pre-release', 'experimental')
 #: The images a version may name as its ``runner``.
 RUNNER = re.compile(r'ubuntu-\d{2}\.04')
@@ -209,8 +217,14 @@ def tiered(data: 'dict[str, Any]', impl: 'str' = 'cpython') -> 'dict[str, Any]':
 
 
 def supported_matrix(data: 'dict[str, Any]') -> 'dict[str, Any]':
-    """unit-tests.yml's ``integration``: the supported tier alone, its KTLO legs ``integration-ktlo``'s (#1738)."""
-    return {'python-version': tier(data, 'cpython', 'supported'), 'include': []}
+    """unit-tests.yml's ``integration``: the supported tier of each of :data:`TESTED`.
+
+    Its KTLO legs are ``integration-ktlo``'s (#1738). PyPy's legs (#1958) run the
+    ``ALL`` tier, as every leg but ``latest`` does.
+
+    """
+    return {'python-version': [version for impl in TESTED for version in tier(data, impl, 'supported')],
+            'include': []}
 
 
 def legs_matrix(found: 'list[dict[str, Any]]') -> 'dict[str, Any]':
@@ -221,12 +235,14 @@ def legs_matrix(found: 'list[dict[str, Any]]') -> 'dict[str, Any]':
 def ktlo_matrix(data: 'dict[str, Any]') -> 'dict[str, Any]':
     """unit-tests.yml's ``test-ktlo`` and ``integration-ktlo``: the KTLO legs alone, out of the gating jobs (#1738).
 
+    Each of :data:`TESTED`'s, CPython's then PyPy's (#1958).
+
     ``Required checks passed`` reads one ``needs.<job>.result`` per job, and
     ``unittest-ordering`` needs ``test``, so a KTLO leg that fails as a job -- a
     lost runner, or the job cap -- failed both from inside ``test``.
 
     """
-    return legs_matrix(ktlo_legs(data))
+    return legs_matrix([leg for impl in TESTED for leg in ktlo_legs(data, impl)])
 
 
 def experimental_legs(data: 'dict[str, Any]') -> 'list[dict[str, Any]]':
@@ -242,7 +258,7 @@ def experimental_legs(data: 'dict[str, Any]') -> 'list[dict[str, Any]]':
 
 
 def test_matrix(data: 'dict[str, Any]') -> 'dict[str, Any]':
-    """unit-tests.yml's ``test``: the supported tier, and the one coverage leg on ``latest``."""
+    """unit-tests.yml's ``test``: ``integration``'s legs, and the one coverage leg on ``latest``."""
     matrix = supported_matrix(data)
     matrix['include'].insert(0, {'python-version': data['latest'], 'coverage': True})
     return matrix

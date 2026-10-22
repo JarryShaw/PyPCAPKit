@@ -24,6 +24,24 @@ __all__ = [
     'Mapping', 'Tuple', 'List', 'Dict', 'TypeAlias', 'UnionType',
 ]
 
+# PyPy 8.0 binds ``NoneType`` in :mod:`builtins`, which CPython does not, and
+# its own stdlib relies on it (``_sqlite3``, which aenum imports). aenum 3.1.17's
+# ``_common`` binds a ``NoneType`` of its own only on a ``NameError``, so there it
+# binds none, and the ``from ._common import *`` in aenum's ``__init__`` fails on
+# the name ``__all__`` lists: ``AttributeError: module 'aenum._common' has no
+# attribute 'NoneType'``. That left pcapkit unimportable on PyPy 8.0 (#1958).
+# ``aenum._common`` itself ran to its end and stays in :data:`sys.modules`, so
+# binding the name there and importing aenum again completes it, leaving
+# :mod:`builtins` as PyPy has it. This module runs before any of pcapkit's that
+# imports aenum: pcapkit/__init__.py reaches it through
+# pcapkit.utilities.exceptions, ahead of pcapkit.corekit.
+if sys.implementation.name == 'pypy':
+    try:
+        import aenum  # pylint: disable=unused-import
+    except AttributeError:
+        sys.modules['aenum._common'].NoneType = type(None)  # type: ignore[attr-defined]
+        import aenum  # pylint: disable=unused-import
+
 if sys.version_info < (3, 6):
     class ModuleNotFoundError(ImportError):  # pylint: disable=redefined-builtin
         """Module not found."""

@@ -409,7 +409,9 @@ class TestTheTiers(unittest.TestCase):
         # Only the tier file: releasing.rst counted the wheels until #1811, so a new PyPy rewrote it.
         self.assertEqual(sorted(texts), ['.github/python-versions.toml'])
         self.assertEqual(plan['required'], {'remove': [], 'add': []})
-        self.assertEqual(plan['added'], ['PyPI distribution for Python pypy3.12'])
+        # #1958: a supported PyPy gets a `test` and an `integration` leg too.
+        self.assertEqual(plan['added'], ['PyPI distribution for Python pypy3.12',
+                                         'Integration Python pypy3.12', 'Python pypy3.12'])
 
     def test_as_of_the_file_nothing_changes(self) -> None:
         """Before PyPy 8.0.0, the sources gave the tier file exactly as #1677 wrote it."""

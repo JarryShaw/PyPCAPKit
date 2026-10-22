@@ -80,7 +80,10 @@ HAS_PROC_FD = os.path.isdir('/proc/self/fd')
 #: callbacks queued by then (graalpython ``GcModuleBuiltins.javaCollect``, at
 #: graal-25.4.4), so on a loaded runner the finaliser can run after it returns
 #: (#1963). A finaliser that never runs still fails once the grace is spent.
-FINALISER_GRACE = 10.0 if sys.implementation.name == 'graalpy' else 0.0
+#: PyPy frees the extractor, and so runs the finaliser, one collection later
+#: than CPython: the class still defines ``__del__`` (#1958, measured on PyPy
+#: 8.0.1), so a short grace lets a second collection run there.
+FINALISER_GRACE = {'graalpy': 10.0, 'pypy': 1.0}.get(sys.implementation.name, 0.0)
 
 
 def collect_until(done: 'Callable[[], bool]', grace: float = FINALISER_GRACE) -> bool:

@@ -9,6 +9,9 @@ is what bounds them. ``Run unit tests`` therefore runs, on the GraalPy leg::
 
     /usr/bin/python3 util/pytest_shards.py "$SHARDS" -- python -m pytest ...
 
+unit-tests.yml's ``Run unit tests`` runs it the same way on PyPy's legs, whose
+xdist workers' RSS grows with every test as well (#2005).
+
 ``SHARDS`` holds the shards, separated by whitespace, and each is a directory or
 a glob of the entries of one directory, such as ``tests/corekit/test_i*``.
 The command runs once per shard, then once more over the rest, and each run

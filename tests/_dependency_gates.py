@@ -262,10 +262,12 @@ MODULE_PROVIDERS = {
     # The strict XML parser ``HAS_LXML`` asks for (#1894): util/ci_timing.py
     # reads JUnit and util/pyshark_encap_map.py reads PDML with it, and neither
     # falls back to a laxer parser. The ``test`` extra carries it with a
-    # ``platform_python_implementation != 'GraalVM'`` marker, because PyPI has
-    # no wheel for GraalPy, so the gate skips on experimental.yml's GraalPy leg.
-    # That is no :data:`DEPENDENCY_GATE_EXCLUSIONS` entry: this module does not
-    # model markers and does not read experimental.yml, so every job it reads
+    # ``platform_python_implementation == 'CPython'`` marker, because PyPI has
+    # no wheel for GraalPy or PyPy 8.0, so the gate skips on experimental.yml's
+    # GraalPy leg and on unit-tests.yml's PyPy legs (#1958). That is no
+    # :data:`DEPENDENCY_GATE_EXCLUSIONS` entry: this module does not model
+    # markers, every module gated on it is ``LATEST``, which no PyPy leg runs,
+    # and this module does not read experimental.yml, so every job it reads
     # satisfies the gate, and an entry would describe a gap that is not there.
     'lxml': ('lxml',),
 }

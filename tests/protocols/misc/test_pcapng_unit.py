@@ -570,7 +570,12 @@ class PCAPNGUnitTests(unittest.TestCase):
         pcapng._ctx = types.SimpleNamespace(interfaces=[interface],
                                             section=types.SimpleNamespace(byteorder='little'))
         pcapng._type = BlockType.Enhanced_Packet_Block
-        with mock.patch('pcapkit.protocols.misc.pcapng.datetime.datetime', FakeDateTime), \
+        # Faked through the module's name in pcapng.py, not through
+        # ``datetime.datetime`` itself: PyPy's datetime is pure Python and
+        # reads its own ``datetime`` global, so faking that fails the real call
+        # the fake hands on to (#1958).
+        fake_module = types.SimpleNamespace(**dict(vars(datetime), datetime=FakeDateTime))
+        with mock.patch('pcapkit.protocols.misc.pcapng.datetime', fake_module), \
                 mock.patch('pcapkit.protocols.misc.pcapng.warn') as warn:
             timestamp, epoch = pcapng._read_timestamp(0, 1, interface_id=0)
         self.assertEqual(timestamp, real_datetime.fromtimestamp(0, datetime.timezone.utc))

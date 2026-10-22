@@ -1118,14 +1118,17 @@ class TestTimingArtifacts(unittest.TestCase):
         self.assertEqual(names, ['junit-unit-${{ matrix.python-version }}',
                                  'junit-integration-${{ matrix.python-version }}'])
         self.assertIn(ci_timing.JUNIT_ARTIFACT.format(leg='${{ matrix.python-version }}'), names)
-        for block in blocks:
+        # #2005: a PyPy unit leg writes a JUnit file per pytest run, junit.xml among them.
+        paths = ('junit*.xml', 'junit.xml')
+        self.assertEqual(len(blocks), len(paths))
+        for block, path in zip(blocks, paths):
             with self.subTest(step=block.split('\n', 3)[:3]):
                 # A failed upload of a diagnostic file must not fail a required leg.
                 # It runs after failed tests too, but not after a failed install
                 # (#1633), which leaves no file to upload.
                 self.assertIn('continue-on-error: true', block)
                 self.assertIn("if: ${{ !cancelled() && steps.install.outcome == 'success' }}", block)
-                self.assertIn('path: ${{ runner.temp }}/junit.xml', block)
+                self.assertIn(f'path: ${{{{ runner.temp }}}}/{path}\n', block)
                 # tests/_dependency_gates.py reads exactly one pytest step per job.
                 self.assertNotIn('python -m pytest', block)
 

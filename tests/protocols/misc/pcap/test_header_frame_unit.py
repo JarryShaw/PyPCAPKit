@@ -307,7 +307,12 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
         bad_time._nsec = False
         bad_time._fnum = 6
         bad_time._file = io.BytesIO(b'')
-        with mock.patch('pcapkit.protocols.misc.pcap.frame.datetime.datetime', FakeDateTime), \
+        # Faked through the module's name in frame.py, not through
+        # ``datetime.datetime`` itself: PyPy's datetime is pure Python and
+        # reads its own ``datetime`` global, so faking that fails the real call
+        # the fake hands on to (#1958).
+        fake_module = SimpleNamespace(**dict(vars(datetime), datetime=FakeDateTime))
+        with mock.patch('pcapkit.protocols.misc.pcap.frame.datetime', fake_module), \
                 mock.patch.object(Frame, '_decode_next_layer',
                                   lambda self, info, proto=None, length=None, packet=None: info), \
                 mock.patch('pcapkit.protocols.misc.pcap.frame.warn') as warn:

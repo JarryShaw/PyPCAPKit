@@ -269,6 +269,9 @@ class ChainingTests(unittest.TestCase):
         self.assertNotIn('IntError', proc.stderr.split('PREVIOUS_HOOK_RAN')[-1])
 
 
+@unittest.skipIf(sys.implementation.name == 'pypy',
+                 "PyPy's sys.__excepthook__ under tracebacklimit = 0 prints the last exception without "
+                 'its chain, so it is no reference for the shape (#1958)')
 class ChainedExceptionTests(unittest.TestCase):
     """A chained exception must come out in the *shape* ``tracebacklimit = 0``
     produced, not just "one line".
