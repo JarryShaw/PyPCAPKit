@@ -2741,6 +2741,10 @@ Changed
   means no record at any level and no longer sets ``sys.tracebacklimit``, and the
   ``pcapkit.utilities.warnings.DEVMODE`` re-export is gone; its home is
   :mod:`pcapkit.utilities.logging`.
+* :mod:`pcapkit.utilities.compat` exports :mod:`pathlib`, :exc:`ModuleNotFoundError`,
+  :class:`collections.abc.Collection` and :func:`functools.cached_property` as the
+  standard library has them: their fallbacks for interpreters below 3.8 are removed
+  with that floor (:issue:`2051`, :pr:`2053`).
 
 Fixed
 ~~~~~
@@ -2951,6 +2955,14 @@ Added
 Changed
 ~~~~~~~
 
+* **a breaking change to** ``requires-python``: it is ``>=3.8``, so pip refuses an
+  older interpreter at install, as "requires a different Python". The sources use 3.8
+  syntax, and the ``bpc-*`` backport tools that converted it for 3.6 and 3.7 are no
+  longer maintained, so the conversion goes: the ``bpc-*`` requirements,
+  ``refactor()`` and the ``setup.py`` build commands that ran it. The 3.7 KTLO (*keep
+  the lights on*) legs go with it, and ``coverage-comment.yml`` lists no install
+  failure as by design any more, which closes :issue:`2040` (:issue:`2051`,
+  :pr:`2053`).
 * renames with no compatibility alias left behind: ``examples/sample`` and
   ``examples/samples`` -- one letter apart, holding different things -- are now
   ``examples/captures`` and ``examples/generators``.

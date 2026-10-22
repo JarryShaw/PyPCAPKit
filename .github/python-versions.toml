@@ -13,7 +13,6 @@
 latest = "3.15"
 
 [versions.cpython]
-"3.7" = { tier = "ktlo", runner = "ubuntu-22.04" }
 "3.8" = { tier = "ktlo", runner = "ubuntu-24.04" }
 "3.9" = { tier = "ktlo", runner = "ubuntu-24.04" }
 "3.10" = { tier = "ktlo" }

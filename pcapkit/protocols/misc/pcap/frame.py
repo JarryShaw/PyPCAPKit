@@ -63,9 +63,6 @@ if TYPE_CHECKING:
 
 __all__ = ['Frame']
 
-# check Python version
-py37 = ((version_info := sys.version_info).major >= 3 and version_info.minor >= 7)
-
 
 class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             schema=Schema_Frame, data=Data_Frame):
@@ -600,7 +597,7 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
         """
         with localcontext(prec=64):
             if timestamp is None:
-                if py37 and nanosecond:
+                if nanosecond:
                     timestamp = decimal.Decimal(time.time_ns()) / 1_000_000_000
                 else:
                     timestamp = decimal.Decimal(time.time())

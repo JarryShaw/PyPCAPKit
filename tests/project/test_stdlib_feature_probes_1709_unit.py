@@ -52,9 +52,10 @@ EXEMPT = {
     ('pcapkit/vendor/default.py', "getattr(sys, 'stdin', None)"),
 }
 
-#: Attributes that only some supported interpreters define on their objects, and
-#: the version that added them. A literal probe for one is a version probe on any
-#: receiver, which is why these are matched by name alone.
+#: Attributes an older interpreter lacked on its objects, and the version that
+#: added them. A literal probe for one is a version probe on any receiver, which
+#: is why these are matched by name alone; from the 3.8 floor (#2051) it is a
+#: dead one as well.
 VERSIONED = {
     'end_lineno': (3, 8),      # ast node end positions
     'end_col_offset': (3, 8),

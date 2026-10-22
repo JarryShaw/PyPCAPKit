@@ -102,14 +102,13 @@ appears in a signature, in :func:`help` output and in a traceback. Compare what
    identity ``__eq__`` and is exactly as safe as ``object()``. That argument appeared
    in an early draft of :mod:`pcapkit.corekit.enum` and was wrong.
 
-**Ported code is exempt.** ``_NOT_FOUND = object()`` at
-:file:`pcapkit/utilities/compat.py`, line 73, sits inside the
-:class:`~pcapkit.utilities.compat.cached_property`
-backport taken for interpreters below 3.8, which tracks CPython's own
-:mod:`functools` implementation down to that name. It is **not** to be converted: the
-value of a vendored backport is that it can still be diffed against upstream, and a
-house-style rewrite destroys that in exchange for a sentinel nobody outside the backport
-ever sees. The rule above is for sentinels this package writes itself.
+**Ported code is exempt.** A verbatim upstream port keeps its upstream's sentinels
+as written: the value of a vendored copy is that it can still be diffed against
+upstream, and a house-style rewrite destroys that in exchange for a sentinel nobody
+outside the port ever sees. The rule above is for sentinels this package writes
+itself. The case that settled it, ``_NOT_FOUND = object()`` in the
+:class:`~pcapkit.utilities.compat.cached_property` backport for interpreters below
+3.8, went with that backport when 1.5.0 raised the floor to 3.8 (:issue:`2051`).
 
 Per-Sentinel Dunder Methods
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

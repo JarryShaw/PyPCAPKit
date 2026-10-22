@@ -168,7 +168,7 @@ rewrites the regenerated constants, not as a check, so nothing verifies import o
 request.
 
 One trap: `make vermin` redirects its report into `temp/vermin.txt` rather than to your terminal,
-and vermin exits 1 because `vermin.ini` sets `targets = 3.6` against the 3.11 minimum it detects.
+and vermin exits 1 because `vermin.ini` sets `targets = 3.8` against the 3.11 minimum it detects.
 Make gives up at the redirect with `make: *** [vermin] Error 1`, the report left in the file and the line
 that would have opened it never reached. `make vermin-ci` runs the same flags to stdout, which is why
 CI uses it and why it is easier to read at a desk. Running the lot before you push still saves a

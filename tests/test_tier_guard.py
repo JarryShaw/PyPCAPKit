@@ -1504,12 +1504,12 @@ class DependencyRequirementTests(unittest.TestCase):
 
         On 2.5.0 ``main`` reads a PCAP-NG nanosecond interface as microseconds and
         ``packet2dict`` reports DNS records and field order differently; 2.6.0, the
-        next release, fixes all three. The marker is ``PCAP_CT``'s courtesy: 2.6.0
-        needs Python 3.7, above this project's ``requires-python`` floor.
+        next release, fixes all three. Unmarked: 2.6.0 needs Python 3.7, below this
+        project's ``requires-python`` floor (#2051).
 
         """
         declared = _dependency_gates.declared_requirements()
-        floor = "scapy>=2.6.0; python_version >= '3.7'"
+        floor = 'scapy>=2.6.0'
         self.assertEqual([requirement.text for requirement in declared['Scapy']], [floor])
         self.assertIn(floor, [requirement.text for requirement in declared['dev']])
 

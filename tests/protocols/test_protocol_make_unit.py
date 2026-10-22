@@ -23,7 +23,6 @@ imported inside each test, after
 """
 
 import importlib
-import sys
 import unittest
 import unittest.mock
 from typing import TYPE_CHECKING
@@ -247,8 +246,7 @@ class TestMakeIndexPerArgument(unittest.TestCase):
                                     namespace=a_namespace)
 
         first = make_split.__code__.co_firstlineno + 1
-        last = first + 1 if sys.version_info >= (3, 8) else first
-        self.assertEqual(module._make_index_calls(make_split), ((first, last, 'a'),))
+        self.assertEqual(module._make_index_calls(make_split), ((first, first + 1, 'a'),))
 
 
 if __name__ == '__main__':

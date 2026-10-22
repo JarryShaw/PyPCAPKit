@@ -210,25 +210,9 @@ jobs:
           # the step that failed. Matched on the title, not the message, which
           # #2041 rewords. Anything else in these jobs, a failed tests step
           # among it, still makes a green run `warning`.
-          EXPECTED = {
-              # #1633, #1672: no pytest>=8 for 3.7, so its KTLO legs stop at install.
-              'Python 3.7 (KTLO)': (
-                  ('WARNING', 'install failed on Python 3.7 (KTLO, non-blocking)'),
-                  ('FAILURE', ''),
-                  ('WARNING', 'pcapkit did not install on Python 3.7 (KTLO, non-blocking)'),
-              ),
-              'Integration Python 3.7 (KTLO)': (
-                  ('WARNING', 'install failed on Python 3.7 (KTLO, non-blocking)'),
-                  ('FAILURE', ''),
-                  ('WARNING', 'pcapkit did not install on Python 3.7 (KTLO, non-blocking)'),
-              ),
-              # #1633, #1672: pypy3.10's KTLO leg stops at install too, until #2040.
-              'Python pypy3.10 (KTLO)': (
-                  ('WARNING', 'install failed on Python pypy3.10 (KTLO, non-blocking)'),
-                  ('FAILURE', ''),
-                  ('WARNING', 'pcapkit did not install on Python pypy3.10 (KTLO, non-blocking)'),
-              ),
-          }
+          # None today: the 3.7 legs that stopped at install went with #2051, and
+          # pypy3.10's installs since #2040's cryptography cap.
+          EXPECTED = {}
 
           def expected(job, note):
               """Whether ``note``, an annotation of ``job``, is one :data:`EXPECTED` lists."""

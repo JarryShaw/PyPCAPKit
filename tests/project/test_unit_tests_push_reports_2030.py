@@ -92,22 +92,22 @@ GREEN = ('Python 3.14', 'SUCCESS', [('NOTICE', 'The ubuntu-latest label will mig
 KTLO = ('Python 3.8 (KTLO)', 'SUCCESS', [('WARNING', 'tests failed on Python 3.8 (KTLO, non-blocking)'),
                                          ('FAILURE', '')])
 
-#: The annotations main's run writes by design, as the step's ``EXPECTED`` lists them.
-BY_DESIGN = {
+#: The annotations main's run writes by design, as the step's ``EXPECTED`` lists them:
+#: none since #2051 dropped the 3.7 legs and #2040's cap let pypy3.10 install.
+BY_DESIGN = {}  # type: dict[str, tuple[tuple[str, str], ...]]
+#: The list as it stood for pypy3.10's install failure, before #2040, which the
+#: tests of the matching itself install in place of :data:`BY_DESIGN`.
+LISTED = {
     job: (('WARNING', f'install failed on {leg} (KTLO, non-blocking)'), ('FAILURE', ''),
           ('WARNING', f'pcapkit did not install on {leg} (KTLO, non-blocking)'))
-    for job, leg in (('Python 3.7 (KTLO)', 'Python 3.7'), ('Integration Python 3.7 (KTLO)', 'Python 3.7'),
-                     ('Python pypy3.10 (KTLO)', 'Python pypy3.10'))
+    for job, leg in (('Python pypy3.10 (KTLO)', 'Python pypy3.10'),)
 }
 #: Unit Tests run 39718608950's jobs with any annotation but a notice, as the
 #: check-suite query returned them on 2026-10-22, and one job with a notice alone.
+#: Its 3.7 legs are left out: #2051 dropped them, and their entries in
+#: ``EXPECTED`` with them.
 REAL_KTLO = "KTLO legs never block (#1633), so this job still succeeds (#1672); see the install step's log."
 REAL_RUN = (
-    ('Python 3.7 (KTLO)', 'SUCCESS', [
-        ('WARNING', 'install failed on Python 3.7 (KTLO, non-blocking)', REAL_KTLO),
-        ('FAILURE', '', 'Process completed with exit code 1.'),
-        ('WARNING', 'pcapkit did not install on Python 3.7 (KTLO, non-blocking)',
-         'No matching distribution found for pytest>=8; extra == "test". The rest of this leg is skipped.')]),
     ('Python pypy3.10 (KTLO)', 'SUCCESS', [
         ('WARNING', 'install failed on Python pypy3.10 (KTLO, non-blocking)', REAL_KTLO),
         ('FAILURE', '', 'Process completed with exit code 1.'),
@@ -115,11 +115,6 @@ REAL_RUN = (
          "pip failed without an ERROR line; see this step's log. The rest of this leg is skipped."),
         ('NOTICE', '', '"The ubuntu-latest label will migrate to Ubuntu 26 beginning October 19, 2026. For more '
                        'information, see https://github.com/actions/runner-images/issues/14748"')]),
-    ('Integration Python 3.7 (KTLO)', 'SUCCESS', [
-        ('WARNING', 'install failed on Python 3.7 (KTLO, non-blocking)', REAL_KTLO),
-        ('FAILURE', '', 'Process completed with exit code 1.'),
-        ('WARNING', 'pcapkit did not install on Python 3.7 (KTLO, non-blocking)',
-         'No matching distribution found for pytest>=8; extra == "test". The rest of this leg is skipped.')]),
     GREEN,
 )
 
@@ -226,10 +221,15 @@ def write_launcher(directory: 'pathlib.Path', name: 'str', script: 'str') -> Non
     launcher.chmod(0o755)
 
 
-def run_step(name: 'str', cwd: 'pathlib.Path', env: 'dict[str, str]') -> 'subprocess.CompletedProcess[str]':
-    """Step ``name``'s ``run:`` as a bash step runs it."""
+def run_step(name: 'str', cwd: 'pathlib.Path', env: 'dict[str, str]',
+             expected: 'Optional[dict[str, Any]]' = None) -> 'subprocess.CompletedProcess[str]':
+    """Step ``name``'s ``run:`` as a bash step runs it, with ``EXPECTED`` replaced by ``expected`` if given."""
     script = cwd.parent / 'step.sh'
-    script.write_text(named(name)['run'], encoding='utf-8')
+    source = named(name)['run']
+    if expected is not None:
+        assert source.count('\nEXPECTED = {}\n') == 1, 'the step no longer reads EXPECTED = {}'
+        source = source.replace('\nEXPECTED = {}\n', f'\nEXPECTED = {expected!r}\n')
+    script.write_text(source, encoding='utf-8')
     return subprocess.run([str(BASH), '--noprofile', '--norc', '-eo', 'pipefail', str(script)],  # nosec: B603
                           cwd=cwd, env=env, capture_output=True, text=True, check=False, timeout=120)
 
@@ -253,7 +253,8 @@ class TestTheReportStep(unittest.TestCase):
         self.output = self.root / 'output'
 
     def report(self, conclusion: 'str' = 'success', answer: 'Optional[object]' = None,
-               branch: 'str' = 'main', **extra: 'str') -> 'tuple[dict[str, str], str, str]':
+               branch: 'str' = 'main', expected: 'Optional[dict[str, Any]]' = None,
+               **extra: 'str') -> 'tuple[dict[str, str], str, str]':
         """The step's outputs, its report and its stdout, for a run that ended ``conclusion``."""
         shutil.rmtree(self.work / 'report', ignore_errors=True)
         self.output.write_text('', encoding='utf-8')
@@ -264,7 +265,7 @@ class TestTheReportStep(unittest.TestCase):
         if answer is not None:
             self.answer.write_text(answer if isinstance(answer, str) else json.dumps(answer), encoding='utf-8')
             env['FAKE_SUITE_ANSWER'] = str(self.answer)
-        result = run_step('Write the run report', self.work, env)
+        result = run_step('Write the run report', self.work, env, expected)
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         outputs = dict(line.split('=', 1) for line in self.output.read_text(encoding='utf-8').splitlines())
         return outputs, (self.work / REPORT).read_text(encoding='utf-8'), result.stdout
@@ -304,13 +305,20 @@ class TestTheReportStep(unittest.TestCase):
     def test_the_by_design_list_is_pinned(self) -> None:
         """``EXPECTED`` holds the install failures main's KTLO legs write on every run, and nothing else."""
         source = named('Write the run report')['run']
-        start = source.index('EXPECTED = {')
-        end = source.index('\n}\n', start) + 2
-        self.assertEqual(ast.literal_eval(source[start + len('EXPECTED = '):end]), BY_DESIGN)
+        script = source.split("<<'PY'\n", 1)[1].split('\nPY\n', 1)[0]
+        [value] = [node.value for node in ast.parse(script).body if isinstance(node, ast.Assign)
+                   and [getattr(target, 'id', None) for target in node.targets] == ['EXPECTED']]
+        self.assertEqual(ast.literal_eval(value), BY_DESIGN)
+
+    def test_with_nothing_listed_the_old_install_failures_warn(self) -> None:
+        """Run 39718608950's pypy3.10 install failure is no longer by design (#2040)."""
+        outputs, report, _ = self.report('success', check_runs(*REAL_RUN))
+        self.assertEqual(outputs['status'], 'warning')
+        self.assertIn('- `Python pypy3.10 (KTLO)`: `install failed on Python pypy3.10 (KTLO, non-blocking)`', report)
 
     def test_mains_by_design_annotations_leave_a_green_run_green(self) -> None:
         """Run 39718608950's annotations, as the API returned them: ``success``, and none listed."""
-        outputs, report, _ = self.report('success', check_runs(*REAL_RUN))
+        outputs, report, _ = self.report('success', check_runs(*REAL_RUN), expected=LISTED)
         self.assertEqual(outputs['status'], 'success')
         self.assertEqual(report, (
             '### Unit Tests push run\n\n'
@@ -319,22 +327,23 @@ class TestTheReportStep(unittest.TestCase):
 
     def test_a_reworded_message_still_matches(self) -> None:
         """The title is matched, not the message, which #2041 rewords."""
-        reworded = [(level, title, 'something else entirely') for level, title, _ in REAL_RUN[1][2]]
-        outputs, _, _ = self.report('success', check_runs(('Python pypy3.10 (KTLO)', 'SUCCESS', reworded)))
+        reworded = [(level, title, 'something else entirely') for level, title, _ in REAL_RUN[0][2]]
+        outputs, _, _ = self.report('success', check_runs(('Python pypy3.10 (KTLO)', 'SUCCESS', reworded)),
+                                    expected=LISTED)
         self.assertEqual(outputs['status'], 'success')
 
     def test_anything_else_still_warns(self) -> None:
         """An annotation the list does not hold, beside the by-design ones or in their place, is a warning."""
         failed = 'FAILED tests/project/test_x.py::TestX::test_y - AssertionError'
         cases = {
-            'a failed test on a by-design job': ('Python 3.7 (KTLO)', 'WARNING', failed),
+            'a failed test on a by-design job': ('Python pypy3.10 (KTLO)', 'WARNING', failed),
             'a failed tests step on a by-design job': (
-                'Python 3.7 (KTLO)', 'WARNING', 'tests failed on Python 3.7 (KTLO, non-blocking)'),
-            'a titled failure on a by-design job': ('Integration Python 3.7 (KTLO)', 'FAILURE', 'Something broke'),
+                'Python pypy3.10 (KTLO)', 'WARNING', 'tests failed on Python pypy3.10 (KTLO, non-blocking)'),
+            'a titled failure on a by-design job': ('Python pypy3.10 (KTLO)', 'FAILURE', 'Something broke'),
             'a by-design title at another level': (
                 'Python pypy3.10 (KTLO)', 'FAILURE', 'install failed on Python pypy3.10 (KTLO, non-blocking)'),
             'a by-design title on another job': (
-                'Python 3.8 (KTLO)', 'WARNING', 'install failed on Python 3.7 (KTLO, non-blocking)'),
+                'Python 3.8 (KTLO)', 'WARNING', 'install failed on Python pypy3.10 (KTLO, non-blocking)'),
             'an install failure on a leg not listed': (
                 'Python 3.8 (KTLO)', 'WARNING', 'install failed on Python 3.8 (KTLO, non-blocking)'),
         }
@@ -346,7 +355,7 @@ class TestTheReportStep(unittest.TestCase):
             else:
                 runs.append((job, 'SUCCESS', [(level, title, 'extra')]))
             with self.subTest(case=case):
-                outputs, report, _ = self.report('success', check_runs(*runs))
+                outputs, report, _ = self.report('success', check_runs(*runs), expected=LISTED)
                 self.assertEqual(outputs['status'], 'warning')
                 [line] = [line for line in report.splitlines() if line.startswith('- ')]
                 self.assertEqual(line, f'- `{job}`: `{title}`')
@@ -359,12 +368,11 @@ class TestTheReportStep(unittest.TestCase):
     def test_a_failed_run_names_its_jobs(self) -> None:
         answer = check_runs(*REAL_RUN, KTLO, ('Project tests', 'FAILURE', [('FAILURE', '')]),
                             ('Required checks passed', 'FAILURE', []), ('Python 3.13', 'TIMED_OUT', []))
-        outputs, report, _ = self.report('failure', answer)
+        outputs, report, _ = self.report('failure', answer, expected=LISTED)
         self.assertEqual(outputs['status'], 'failure')
         self.assertIn('**Did not pass:**\n\n- `Project tests` (failure)\n- `Required checks passed` (failure)\n'
                       '- `Python 3.13` (timed_out)\n', report)
         self.assertIn('- `Python 3.8 (KTLO)`: ', report)
-        self.assertNotIn('Python 3.7', report)
         self.assertNotIn('pypy3.10', report)
 
     def test_unreadable_jobs_keep_the_conclusion(self) -> None:

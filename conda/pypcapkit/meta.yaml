@@ -26,18 +26,12 @@ requirements:
     - pip
     - setuptools>=62.3.0
 
-    # # version compatibility
-    # - bpc-f2format
-    # - bpc-poseur
-    # - bpc-walrus
-
     # - dictdumper~=0.8.0  # for formatted output
     # - chardet            # for bytes decode
     # - aenum              # for const types
     # - tbtrim>=0.2.1      # for refined exceptions
 
     # # version compatibility
-    # - pathlib2>=2.3.2
     # - typing-extensions
 
     # - emoji
@@ -51,18 +45,12 @@ requirements:
     - pip
     - setuptools>=62.3.0
 
-    # # version compatibility
-    # - bpc-f2format
-    # - bpc-poseur
-    # - bpc-walrus
-
     # - dictdumper~=0.8.0  # for formatted output
     # - chardet            # for bytes decode
     # - aenum              # for const types
     # - tbtrim>=0.2.1      # for refined exceptions
 
     # # version compatibility
-    # - pathlib2>=2.3.2
     # - typing-extensions
 
     # - emoji
@@ -80,7 +68,6 @@ requirements:
     # - tbtrim>=0.2.1      # for refined exceptions
 
     # # version compatibility
-    # - pathlib2>=2.3.2
     # - typing-extensions
 
     # - emoji

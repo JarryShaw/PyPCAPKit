@@ -40,8 +40,6 @@ below:
 """
 import ipaddress
 import re
-import sys
-import textwrap
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.arp.hardware import Hardware as Enum_Hardware
@@ -68,9 +66,6 @@ if TYPE_CHECKING:
     from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['ARP', 'InARP']
-
-# check Python version
-py38 = ((version_info := sys.version_info).major >= 3 and version_info.minor >= 8)
 
 # Ethernet address pattern, of any number of octets (``hlen`` is not fixed at 6)
 PAT_MAC_ADDR = re.compile(rb'(?i)(?:[0-9a-f]{2}(?:[:-][0-9a-f]{2})*)?')
@@ -370,10 +365,7 @@ class ARP(Link[Data_ARP, Schema_ARP],
 
         """
         if htype == Enum_Hardware.Ethernet:  # Ethernet
-            if py38:
-                _addr = addr.hex(':')
-            else:
-                _addr = ':'.join(textwrap.wrap(addr.hex(), 2))
+            _addr = addr.hex(':')
         else:
             _addr = addr.hex()
         return _addr

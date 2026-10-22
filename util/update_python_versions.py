@@ -784,7 +784,7 @@ LATEST = re.compile(r'^latest = "[^"]*"(?P<rest>.*)$')
 
 
 def entry_line(version: 'str', entry: 'dict[str, str]', comment: 'str' = '') -> 'str':
-    """One version's line, as the file spells it: ``"3.7" = { tier = "ktlo", runner = "ubuntu-22.04" }``."""
+    """One version's line, as the file spells it: ``"3.8" = { tier = "ktlo", runner = "ubuntu-24.04" }``."""
     fields = [f'tier = {json.dumps(entry["tier"])}']
     if 'runner' in entry:
         fields.append(f'runner = {json.dumps(entry["runner"])}')

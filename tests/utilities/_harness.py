@@ -6,7 +6,7 @@ form that fits:
 * :func:`capture` -- collect every record a :class:`logging.Logger` emits, at any
   level, without also printing it. :mod:`unittest.TestCase.assertNoLogs` would do
   half of this but only exists on Python 3.10+, and this project declares support
-  from 3.6.
+  from 3.8.
 * :func:`bootstrap` -- (re)load the :mod:`pcapkit` core modules with
   :envvar:`PCAPKIT_DEVMODE` forced on or off. The flag is read once, at import
   time, so a test that cares about it has to control the environment *before* the

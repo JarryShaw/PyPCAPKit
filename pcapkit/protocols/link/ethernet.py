@@ -26,8 +26,6 @@ below:
 
 """
 import re
-import sys
-import textwrap
 from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
@@ -48,9 +46,6 @@ if TYPE_CHECKING:
     from pcapkit.protocols.schema.schema import Schema
 
 __all__ = ['Ethernet']
-
-# check Python version
-py38 = ((version_info := sys.version_info).major >= 3 and version_info.minor >= 8)
 
 # Ethernet address pattern
 PAT_MAC_ADDR = re.compile(rb'(?i)(?:[0-9a-f]{2}[:-]){5}[0-9a-f]{2}')
@@ -225,11 +220,7 @@ class Ethernet(Link[Data_Ethernet, Schema_Ethernet],
             Colon (``:``) separated *hex* encoded MAC address.
 
         """
-        if py38:
-            _addr = addr.hex(':')
-        else:
-            _addr = ':'.join(textwrap.wrap(addr.hex(), 2))
-        return _addr
+        return addr.hex(':')
 
     def _make_mac_addr(self, addr: 'str | bytes | bytearray') -> 'bytes':
         """Make MAC address.

@@ -50,7 +50,7 @@ a :mod:`subprocess` timeout: apt runs as root, so this process could signal
 running as root in a process group of its own, ends with apt. It is given no
 option, so uutils' ``timeout`` on Ubuntu 26.04 behaves as GNU's (#2020). The
 step's ``timeout-minutes`` stays the hang detector. The script is standard library
-only, and runs on every interpreter the matrices hold, 3.7 included.
+only, and runs on every interpreter the matrices hold.
 
 """
 

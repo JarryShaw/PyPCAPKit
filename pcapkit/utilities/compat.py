@@ -1,10 +1,14 @@
 # -*- coding: utf-8 -*-
 
+import pathlib
 import sys
+from builtins import ModuleNotFoundError
+from collections.abc import Collection
+from functools import cached_property
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Iterator, Optional, Type, Union
+    from typing import Any, Iterator, Optional
 
 __all__ = [
     # functions
@@ -41,104 +45,6 @@ if sys.implementation.name == 'pypy':
     except AttributeError:
         sys.modules['aenum._common'].NoneType = type(None)  # type: ignore[attr-defined]
         import aenum  # pylint: disable=unused-import
-
-if sys.version_info < (3, 6):
-    class ModuleNotFoundError(ImportError):  # pylint: disable=redefined-builtin
-        """Module not found."""
-else:
-    from builtins import ModuleNotFoundError
-
-if sys.version_info <= (3, 5):
-    from collections.abc import Container, Iterable, Sized  # pylint: disable=unused-import
-
-    def _check_methods(C: 'Type[Any]', *methods: 'str') -> 'bool | Any':
-        mro = C.__mro__
-        for method in methods:
-            for B in mro:  # pragma: no branch
-                if method in B.__dict__:
-                    if B.__dict__[method] is None:
-                        return NotImplemented
-                    break
-            else:
-                return NotImplemented
-        return True
-
-    class Collection(Sized, Iterable, Container):  # pylint: disable=abstract-method
-
-        __slots__ = ()
-
-        @classmethod
-        def __subclasshook__(cls, C: 'Type[Any]') -> 'bool | Any':
-            if cls is Collection:
-                return _check_methods(C, "__len__", "__iter__", "__contains__")
-            return NotImplemented  # pragma: no cover
-else:
-    from collections.abc import Collection
-
-if sys.version_info <= (3, 4):  # pragma: no cover
-    import pathlib2 as pathlib  # pylint: disable=import-error
-else:
-    import pathlib
-
-# functools.cached_property added in 3.8
-if sys.version_info < (3, 8):
-    from threading import RLock
-    from typing import Generic, TypeVar  # isort: split
-
-    _T = TypeVar("_T")
-    _S = TypeVar("_S")
-
-    _NOT_FOUND = object()
-
-    class cached_property(Generic[_T]):
-        def __init__(self, func: 'Callable[[Any], _T]') -> 'None':
-            self.func = func  # type: Callable[[Any], _T]
-            self.attrname = None  # type: Optional[str]
-            self.__doc__ = func.__doc__
-            self.lock = RLock()
-
-        def __set_name__(self, owner: 'Type[Any]', name: 'str') -> 'None':
-            if self.attrname is None:
-                self.attrname = name
-            elif name != self.attrname:
-                raise TypeError(
-                    "Cannot assign the same cached_property to two different names "
-                    f"({self.attrname!r} and {name!r})."
-                )
-
-        def __get__(self, instance: 'Optional[_S]',
-                    owner: 'Optional[Type[Any]]' = None) -> 'Union[cached_property[_T], _T]':
-            if instance is None:
-                return self
-            if self.attrname is None:  # pragma: no cover
-                raise TypeError(
-                    "Cannot use cached_property instance without calling __set_name__ on it.")
-            try:
-                cache = instance.__dict__
-            except AttributeError:  # not all objects have __dict__ (e.g. class defines slots)
-                msg = (
-                    f"No '__dict__' attribute on {type(instance).__name__!r} "
-                    f"instance to cache {self.attrname!r} property."
-                )
-                raise TypeError(msg) from None
-            val = cache.get(self.attrname, _NOT_FOUND)
-            if val is _NOT_FOUND:
-                with self.lock:
-                    # check if another thread filled cache while we awaited lock
-                    val = cache.get(self.attrname, _NOT_FOUND)
-                    if val is _NOT_FOUND:  # pragma: no branch
-                        val = self.func(instance)
-                        try:
-                            cache[self.attrname] = val
-                        except TypeError:  # pragma: no cover
-                            msg = (
-                                f"The '__dict__' attribute on {type(instance).__name__!r} instance "
-                                f"does not support item assignment for caching {self.attrname!r} property."
-                            )
-                            raise TypeError(msg) from None
-            return val
-else:
-    from functools import cached_property
 
 if sys.version_info < (3, 9):
     from typing import Dict, List, Mapping, Tuple
@@ -273,18 +179,14 @@ else:
 # whatever :data:`threading.excepthook` holds when this module loads, keeps it the
 # real default on 3.8 and 3.9 even when a host application, or an earlier loaded
 # copy of :mod:`pcapkit.utilities.exceptions`, has already replaced the hook --
-# as it is on 3.10 and later. 3.6 and 3.7 have no thread exception hook at all,
-# so the name is :data:`None` there rather than a failed import; nothing on those
-# interpreters calls it.
+# as it is on 3.10 and later.
 #
 # The stdlib name is not reused as it stands, unlike every other name here: a
 # bare ``__excepthook__`` imported into a module reads as
 # :data:`sys.__excepthook__`, which takes three arguments rather than one, and
 # :mod:`pcapkit.utilities.exceptions` uses both. ``default_`` is the word that
 # module's docstrings already use for this object.
-if sys.version_info < (3, 8):
-    default_threading_excepthook = None
-elif sys.version_info < (3, 10):
+if sys.version_info < (3, 10):
     from _thread import _excepthook as default_threading_excepthook
 else:
     from threading import __excepthook__ as default_threading_excepthook  # novermin
@@ -308,7 +210,7 @@ else:
 # The :pep:`604` union type, i.e. the origin of ``int | None``, which is the
 # same object as :data:`typing.Union` from 3.14. Below 3.10 only
 # :data:`typing.Union` spells a union, so the name is :data:`None` there rather
-# than a failed import, as ``default_threading_excepthook`` is below 3.8.
+# than a failed import.
 if sys.version_info < (3, 10):
     UnionType = None
 else:

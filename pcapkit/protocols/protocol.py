@@ -36,7 +36,6 @@ import os
 import shutil
 import string
 import struct
-import sys
 import textwrap
 import types
 import urllib.parse
@@ -105,11 +104,10 @@ def _make_index_calls(func: 'Callable[..., Any]') -> 'tuple[tuple[int, int, str]
         tree = ast.parse(textwrap.dedent(''.join(lines)))
     except (OSError, TypeError, SyntaxError):
         return ()
-    # NOTE: ``end_lineno`` is new in Python 3.8, where ``ast.parse`` always sets
-    # it on a call; below that a call's last line is not known, only its first.
+    # NOTE: ``ast.parse`` always sets ``end_lineno`` on a call.
     return tuple(
         (node.lineno + start - 1,
-         (cast('int', node.end_lineno) if sys.version_info >= (3, 8) else node.lineno) + start - 1,
+         cast('int', node.end_lineno) + start - 1,
          node.args[0].id)
         for node in ast.walk(tree)
         if isinstance(node, ast.Call) and isinstance(node.func, ast.Attribute)

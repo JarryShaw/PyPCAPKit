@@ -44,8 +44,6 @@ import ctypes
 import functools
 import ipaddress
 import struct
-import sys
-import textwrap
 from typing import TYPE_CHECKING
 
 from pcapkit.const.reg.ethertype import EtherType as Enum_EtherType
@@ -78,11 +76,6 @@ __all__ = [
     'packet2timestamp', 'ipv4_header', 'packet2chain', 'packet2dict',
     'ipv4_reassembly', 'ipv6_reassembly', 'tcp_reassembly', 'tcp_traceflow',
 ]
-
-#: Whether :meth:`bytes.hex` supports the ``sep`` argument (Python 3.8+), as used
-#: below by :func:`_parse_mac_address` -- mirrors the same guard in
-#: :meth:`pcapkit.protocols.link.ethernet.Ethernet._read_mac_addr`.
-py38 = ((version_info := sys.version_info).major >= 3 and version_info.minor >= 8)
 
 #: IPv4 **DF** (don't fragment) bit, within the three-bit flags field.
 IPV4_FLAG_DF = 0b010
@@ -211,7 +204,7 @@ def _parse_mac_address(value: 'Any') -> 'str':
         raise ProtocolError(f'invalid PyPCAPFile MAC address: {value!r}')
     raw = bytes(value)
     if len(raw) == 6:
-        return raw.hex(':') if py38 else ':'.join(textwrap.wrap(raw.hex(), 2))
+        return raw.hex(':')
     try:
         return raw.decode('ascii')
     except UnicodeDecodeError as error:
