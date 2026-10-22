@@ -8,7 +8,9 @@
   musllinux, yanked or pre-release file.
 * :func:`conda_vendor.refresh` moves a pin up to that release with a fresh
   review-by date, drops it once it reaches the installed release or if it
-  already pins it, and leaves it, with a warning, when PyPI cannot be read.
+  already pins it, and leaves it, with a warning, when PyPI cannot be read or
+  when no release has a wheel for every conda Python, naming the Pythons no
+  release has one for (#2025).
   ``--refresh-pins`` rewrites :file:`conda/platform-pins.toml` only on a change.
 * :func:`conda_vendor._fetch` reads PyPI through :mod:`requests`, a stand-in
   here, and raises each of its errors as :class:`OSError`. It imports requests
@@ -372,6 +374,25 @@ class BumpTests(unittest.TestCase):
         self.assertEqual(notes, [('warning', "cryptography 48.0.1 on osx-64 stays as it is: "
                                              "PyPI's JSON has no releases")])
 
+    def test_a_pin_no_release_can_move_to_warns_with_the_missing_tags(self) -> None:
+        # #2025: no release has a cp38 wheel, so the pin used to stay without a word.
+        result, notes = vendor().refresh(table(), lambda name: recorded(), lambda name: '50.0.2',
+                                         ('3.8', *PYTHONS), TODAY)
+        self.assertEqual(result, table())
+        self.assertEqual(notes, [('warning', 'cryptography 48.0.1 on osx-64 stays as it is, and may no longer '
+                                             'hold: no release up to 50.0.2 has a wheel for cp38 on osx-64')])
+
+    def test_a_pin_no_single_release_serves_warns_for_every_tag(self) -> None:
+        # #2025: each Python has an osx-64 wheel in some release, but none has all of them.
+        project = {'releases': {'1.0': files('1.0', 'cp311-cp311-macosx_10_9_x86_64'),
+                                '2.0': files('2.0', 'cp312-cp312-macosx_10_9_x86_64')}}
+        pins = {'cryptography': {'osx-64': vendor().Pin('1.0', TODAY, 'a stand-in')}}
+        result, notes = vendor().refresh(pins, lambda name: project, lambda name: '3.0', ['3.11', '3.12'], TODAY)
+        self.assertEqual(result, pins)
+        self.assertEqual(notes, [('warning', 'cryptography 1.0 on osx-64 stays as it is, and may no longer '
+                                             'hold: no release up to 3.0 has wheels for all of cp311, cp312 '
+                                             'on osx-64 at once')])
+
     def test_a_package_not_installed_leaves_the_pin_and_warns(self) -> None:
         result, notes = self.refresh(recorded(**{'51.0.0': INTEL_AGAIN}), installed=None)
         self.assertEqual(result, table())
@@ -511,6 +532,21 @@ class RefreshCommandTests(unittest.TestCase):
         self.assertEqual(output.splitlines(), [
             '::warning title=Platform pins::overdue: cryptography is pinned to 48.0.1 on osx-64, and was due for '
             'review by 2026-10-16; check the pin still holds, then set a new review-by date, such as 2027-01-16'])
+
+    def test_a_stuck_pin_is_warned_about_and_passes(self) -> None:
+        # #2025: the step stays green, as the workflow's non-blocking rule has it, but says so.
+        module = vendor()
+        with Scratch(table()) as scratch:
+            before = scratch.table.read_bytes()
+            module._fetch = lambda name: recorded()
+            with mock.patch.object(module, 'conda_pythons', lambda: ['3.8', *PYTHONS]):
+                status, output = scratch.main('--refresh-pins')
+            after = scratch.table.read_bytes()
+        self.assertEqual(status, 0)
+        self.assertEqual(after, before)
+        self.assertEqual(output, '::warning title=Platform pins::cryptography 48.0.1 on osx-64 stays as it is, '
+                                 'and may no longer hold: no release up to 52.0.0 has a wheel for cp38 '
+                                 'on osx-64\n')
 
 
 class CheckTests(unittest.TestCase):

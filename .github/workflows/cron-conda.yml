@@ -92,8 +92,9 @@ jobs:
       # than the one installed above, and renews its review-by date; a pin that
       # reaches the installed release goes. Not one of
       # util/verdict_covers_checkout.py's bot-managed paths, which says why
-      # (#1643). An unreadable package keeps its pin and a pin past its
-      # review-by date warns; neither fails the step.
+      # (#1643). An unreadable package keeps its pin, as does a pin no release
+      # can move to (#2025), and each warns, as does a pin past its review-by
+      # date; none fails the step.
       - name: Refresh the platform pins
         run: python util/conda_vendor.py --refresh-pins
 
