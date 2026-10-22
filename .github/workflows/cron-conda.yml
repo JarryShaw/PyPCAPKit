@@ -22,6 +22,11 @@ concurrency:
   group: conda-update-${{ github.event.workflow_run.head_sha || github.ref }}
   cancel-in-progress: false
 
+# #2030: one Discussions category holds every report with no pull request to
+# comment on, one thread per job; cron-vendor.yml's `discussion` job says more.
+env:
+  REPORT_CATEGORY: CI reports
+
 jobs:
   # #1967: the test gate on the schedule, `verdict` on a `workflow_run`;
   # shared with Vendor Update and GitHub Pages.
@@ -95,9 +100,13 @@ jobs:
       # (#1643). An unreadable package keeps its pin, as does a pin no release
       # can move to (#2025) and a pin whose own release has lost a wheel while
       # an older one still qualifies (#2028), and each warns, as does a pin past
-      # its review-by date; none fails the step.
+      # its review-by date; none fails the step. The log keeps those lines for
+      # the run report (#2030); `pipefail`, so `tee` cannot hide the script's
+      # own exit status.
       - name: Refresh the platform pins
-        run: python util/conda_vendor.py --refresh-pins
+        run: |
+          set -o pipefail
+          python util/conda_vendor.py --refresh-pins | tee "$RUNNER_TEMP/platform-pins.log"
 
       - name: Setup Conda Distribution
         run: |
@@ -228,6 +237,67 @@ jobs:
             echo "PCAPKIT_BUILD=$(cat conda/build)"
           } >> "$GITHUB_OUTPUT"
 
+      # #2030: the run's outcome for the `discussion` job to post: what the pin
+      # refresh moved or warned about, the files the run changed, and the build
+      # it pushed. `status=warning` where a pin warned, which is what needs a
+      # hand. `continue-on-error` on both, so a report never fails the bump.
+      - name: Write the run report
+        id: run-report
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        env:
+          FILES_CHANGED: ${{ steps.verify-changed-files.outputs.files_changed }}
+          CHANGED_FILES: ${{ steps.verify-changed-files.outputs.changed_files }}
+          PUSH: ${{ steps.push-changes.outcome }}
+          COMMIT: ${{ steps.push-changes.outputs.commit }}
+        run: |
+          pins="$RUNNER_TEMP/platform-pins.log"
+          if grep -q '^::warning title=Platform pins::' "$pins" 2> /dev/null; then
+            echo "status=warning" >> "$GITHUB_OUTPUT"
+          else
+            echo "status=success" >> "$GITHUB_OUTPUT"
+          fi
+          {
+            echo '### Conda Update'
+            echo
+            if [ ! -f "$pins" ]; then
+              echo '- Platform pins: not refreshed, as the job stopped first'
+            elif grep -q '^::[a-z]* title=Platform pins::' "$pins"; then
+              echo '- Platform pins:'
+              # The workflow command's data escapes, undone; `%25` last.
+              grep '^::[a-z]* title=Platform pins::' "$pins" |
+                sed -e 's/^::\([a-z]*\) title=Platform pins::/  - \1: /' \
+                    -e 's/%0D//g' -e 's/%0A/ /g' -e 's/%25/%/g'
+            else
+              echo '- Platform pins: none moved, and none warned'
+            fi
+            if [ "$FILES_CHANGED" = true ]; then
+              echo "- Changed: $CHANGED_FILES"
+            elif [ "$FILES_CHANGED" = false ]; then
+              echo '- Changed: nothing, so no build was bumped'
+            fi
+            # `commit` is written only beside `pushed=true`.
+            if [ -n "$COMMIT" ]; then
+              echo "- Pushed: build $(cat conda/build) as $COMMIT"
+            elif [ "$PUSH" = success ]; then
+              echo "- Pushed: nothing; Push Changes' notice says why"
+            elif [ "$PUSH" = failure ]; then
+              echo '- Pushed: nothing, as Push Changes failed'
+            elif [ "$FILES_CHANGED" != false ]; then
+              echo '- Pushed: nothing, as the job stopped first'
+            fi
+          } > "$RUNNER_TEMP/conda-report.md"
+          cat "$RUNNER_TEMP/conda-report.md"
+
+      - name: Upload the run report
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: conda-report
+          path: ${{ runner.temp }}/conda-report.md
+          retention-days: 14
+
     outputs:
       # Not `files_changed`: see Push Changes above.
       CONDA_CHANGED: ${{ steps.push-changes.outputs.pushed }}
@@ -237,6 +307,8 @@ jobs:
       PCAPKIT_CONDA_LABEL: ${{ steps.get_version.outputs.PCAPKIT_CONDA_LABEL }}
       PCAPKIT_BUILD: ${{ steps.get_version.outputs.PCAPKIT_BUILD }}
       PYTHON_CONDA: ${{ steps.python-versions.outputs.conda }}
+      # #2030: `warning` where a platform pin warned without failing the job.
+      status: ${{ steps.run-report.outputs.status }}
 
   conda-tag:
     # See create-release.yml: "(update)" keeps this apart from the Conda Tag job
@@ -560,3 +632,77 @@ jobs:
           omitPrereleaseDuringUpdate: true
           tag: "v${{ needs.conda-update.outputs.PCAPKIT_VERSION }}"
           token: "${{ secrets.GITHUB_TOKEN }}"
+
+  # #2030: posts `conda-update`'s report with the tag and upload results, and a
+  # short one of its own where `head` failed or was cancelled, as cron-vendor.yml's
+  # `discussion` job does, whose comment gives the rules. It waits for
+  # `conda-dist`, so the report says whether the build reached Anaconda.
+  discussion:
+    name: Post the conda report
+    needs: [ head, conda-update, conda-tag, conda-dist ]
+    if: >-
+      ${{ always() && (needs.conda-update.result != 'skipped' ||
+      needs.head.result == 'failure' || needs.head.result == 'cancelled') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    permissions:
+      contents: read
+      discussions: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # A run that never wrote a report uploaded none; the script then warns.
+      - name: Download the report
+        if: needs.conda-update.result != 'skipped'
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: conda-report
+          path: report
+
+      # As cron-vendor.yml's: a `workflow_run` posts as a push run, the
+      # schedule every run. A failed tag or upload fails the report too, and a
+      # green `conda-update` that warned reports `warning`.
+      - name: Post the report to Discussions
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MODE: ${{ github.event_name == 'workflow_run' && 'push' || 'scheduled' }}
+          HEAD_RESULT: ${{ needs.head.result }}
+          UPDATE_RESULT: ${{ needs.conda-update.result }}
+          UPDATE_STATUS: ${{ needs.conda-update.outputs.status }}
+          TAG_RESULT: ${{ needs.conda-tag.result }}
+          DIST_RESULT: ${{ needs.conda-dist.result }}
+        run: |
+          if [ "$UPDATE_RESULT" = skipped ]; then
+            status="$HEAD_RESULT"
+            mkdir -p report
+            {
+              echo '### Conda Update'
+              echo
+              echo "- Gate: $HEAD_RESULT, so conda-update did not run and nothing was built or pushed"
+            } > report/conda-report.md
+          else
+            if [ "$UPDATE_RESULT" != success ]; then
+              status="$UPDATE_RESULT"
+            elif [ "$TAG_RESULT" = failure ] || [ "$DIST_RESULT" = failure ]; then
+              status=failure
+            elif [ "$TAG_RESULT" = cancelled ] || [ "$DIST_RESULT" = cancelled ]; then
+              status=cancelled
+            else
+              status="${UPDATE_STATUS:-success}"
+            fi
+            # Both skip unless a build was pushed.
+            if [ "$TAG_RESULT" != skipped ] && [ -f report/conda-report.md ]; then
+              {
+                echo "- Tag: $TAG_RESULT"
+                echo "- Upload: $DIST_RESULT"
+              } >> report/conda-report.md
+            fi
+          fi
+          python3 util/discussion_report.py --category "$REPORT_CATEGORY" \
+            --title 'cron-conda: conda distribution update report' --report report/conda-report.md \
+            --mode "$MODE" --status "$status"

@@ -9,7 +9,9 @@ name: Python Versions
 #
 # `pr` pushes with the release App's token, not GITHUB_TOKEN, whose pushes
 # start nothing, so the pull request's own checks run; none of them runs this
-# workflow again.
+# workflow again. The `discussion` job posts `detect`'s report to this job's
+# thread in the Discussions category REPORT_CATEGORY names (#2030); it alone
+# holds `discussions: write`, and a report it cannot post is a warning.
 on:
   schedule:
     - cron: '41 5 * * 1' # Mondays at 05:41 UTC
@@ -24,6 +26,11 @@ concurrency:
   group: python-versions
   cancel-in-progress: false
 
+# #2030: one Discussions category holds every report with no pull request to
+# comment on, one thread per job.
+env:
+  REPORT_CATEGORY: CI reports
+
 jobs:
   # No secret and a read-only token. The computation reads the network and
   # writes only this checkout, and the audit is the repository's own tests.
@@ -37,6 +44,8 @@ jobs:
     outputs:
       changed: ${{ steps.update.outputs.changed }}
       publish: ${{ steps.update.outputs.publish }}
+      # #2030: `warning` where the run asks for a hand without failing.
+      status: ${{ steps.run-report.outputs.status }}
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -119,6 +128,84 @@ jobs:
           echo "::error title=The audit fails on main::the tiers need no change, but the audit fails; see above."
           exit 1
 
+      # #2030: what the run found, for the `discussion` job to post, from the
+      # plan `update` wrote: each tier that moved and why, the notes it raised,
+      # the audit, and what becomes of the proposal. `status=warning` where a
+      # note asks for a hand edit, the audit of a changed tree failed, or no
+      # pull request can open. `continue-on-error` on both, so a report never
+      # fails the run.
+      - name: Write the run report
+        id: run-report
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        env:
+          UPDATE: ${{ steps.update.outcome }}
+          CHANGED: ${{ steps.update.outputs.changed }}
+          PUBLISH: ${{ steps.update.outputs.publish }}
+          AUDIT: ${{ steps.audit.outcome }}
+          APP: ${{ vars.RELEASE_APP_CLIENT_ID != '' }}
+          ON_MAIN: ${{ github.ref == 'refs/heads/main' }}
+        run: |
+          python3 - "$RUNNER_TEMP/proposal/plan.json" "$RUNNER_TEMP/python-versions-report.md" <<'PY'
+          import json, os, pathlib, sys
+
+          env = os.environ
+          source, target = map(pathlib.Path, sys.argv[1:])
+          plan = json.loads(source.read_text(encoding='utf-8')) if source.is_file() else None
+
+
+          def tier(entry):
+              if entry is None:
+                  return '--'
+              name = 'KTLO' if entry['tier'] == 'ktlo' else entry['tier']
+              return f"{name} on `{entry['runner']}`" if 'runner' in entry else name
+
+
+          lines, warned = ['### Python Versions', ''], False
+          if plan is None:
+              lines.append('- Tiers: not computed, as the job stopped first')
+          else:
+              moves = [f"  - `{c['version']}`: {tier(c['before'])} -> {tier(c['after'])} ({c['reason']})"
+                       for c in plan['changes']]
+              if plan['latest'][0] != plan['latest'][1]:
+                  moves.append(f"  - `latest`: {plan['latest'][0]} -> {plan['latest'][1]}")
+              lines += ['- Tiers moved:', *moves] if moves else ['- Tiers: unchanged']
+              if plan['changed_files']:
+                  lines.append('- Regenerated: ' + ', '.join(f'`{path}`' for path in plan['changed_files']))
+              for kind in ('remove', 'add'):
+                  lines += [f'- Ruleset 23497679, by hand: {kind} `{name}`' for name in plan['required'][kind]]
+              lines += [f"- {note['kind']}: {note['text']}" for note in plan['notes']]
+              warned = any(note['kind'] != 'held' for note in plan['notes'])
+          lines.append(f"- Audit: {env.get('AUDIT') or 'not run'}")
+          warned = warned or (env.get('CHANGED') == 'true' and env.get('AUDIT') != 'success')
+          if env.get('UPDATE') != 'success':
+              lines.append('- Pull request: none, as Recompute the tiers failed')
+          elif env.get('CHANGED') != 'true':
+              lines.append('- Pull request: none needed, as nothing changed')
+          elif env.get('PUBLISH') != 'true':
+              lines.append('- Pull request: none, as `bot/python-versions` already proposes these tiers')
+          elif env.get('APP') != 'true':
+              lines.append('- Pull request: none, as `vars.RELEASE_APP_CLIENT_ID` is unset')
+              warned = True
+          elif env.get('ON_MAIN') != 'true':
+              lines.append('- Pull request: none, as this run is not on `main`')
+          else:
+              lines.append('- Pull request: the `pr` job opens or updates it once `github-release` is approved')
+          target.write_text('\n'.join(lines) + '\n', encoding='utf-8')
+          with open(env['GITHUB_OUTPUT'], 'a', encoding='utf-8') as file:
+              file.write(f"status={'warning' if warned else 'success'}\n")
+          PY
+          cat "$RUNNER_TEMP/python-versions-report.md"
+
+      - name: Upload the run report
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: python-versions-report
+          path: ${{ runner.temp }}/python-versions-report.md
+          retention-days: 14
+
   # The release App's key is a secret of the `github-release` environment,
   # which needs the owner's approval, so he is asked only when there is
   # something to propose. The token has no `workflows` permission, so it cannot
@@ -168,3 +255,49 @@ jobs:
           APP_SLUG: ${{ steps.app.outputs.app-slug }}
           APP_BOT_ID: ${{ vars.RELEASE_APP_BOT_ID }}
         run: python3 util/update_python_versions.py publish "$RUNNER_TEMP/proposal"
+
+  # #2030: posts `detect`'s report, on `always()` so a run failed by the audit
+  # or the script is posted too. Not after `pr`, which waits on the owner's
+  # approval of `github-release`; the pull request it opens is its own record.
+  # util/discussion_report.py writes a warning rather than failing;
+  # `continue-on-error` covers the rest.
+  discussion:
+    name: Post the Python version report
+    needs: [ detect ]
+    if: ${{ always() && needs.detect.result != 'skipped' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    permissions:
+      contents: read
+      discussions: write
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # A run that never wrote a report uploaded none; the script then warns.
+      - name: Download the report
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: python-versions-report
+          path: report
+
+      # `scheduled` on dispatch too: a manual run is a deliberate report. A
+      # green `detect` that asked for a hand reports `warning`.
+      - name: Post the report to Discussions
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          DETECT_RESULT: ${{ needs.detect.result }}
+          DETECT_STATUS: ${{ needs.detect.outputs.status }}
+        run: |
+          status="$DETECT_RESULT"
+          if [ "$DETECT_RESULT" = success ] && [ -n "$DETECT_STATUS" ]; then
+            status="$DETECT_STATUS"
+          fi
+          python3 util/discussion_report.py --category "$REPORT_CATEGORY" \
+            --title 'cron-python-versions: Python version update report' \
+            --report report/python-versions-report.md --mode scheduled --status "$status"

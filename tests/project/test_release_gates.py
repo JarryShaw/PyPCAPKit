@@ -1627,6 +1627,9 @@ def job_runs(jobs: 'dict[str, str]', name: 'str', context: 'dict[str, object]') 
 #: graph is renamed or extended, rather than leaving a new job unchecked.
 #: ``head`` is the call to :data:`HEAD_WORKFLOW`, and has no ``if:`` of its own.
 CONDA_JOBS = ('head', 'conda-update', 'conda-tag', 'conda-dist')
+#: The job posting the run's report (#2030). It gates nothing, so no row is
+#: keyed on it; :file:`tests/project/test_cron_reports_2030.py` pins it.
+CONDA_REPORTER = 'discussion'
 #: The jobs of :data:`HEAD_WORKFLOW`, which a row can be keyed on as well (#1967).
 HEAD_JOBS = ('unit-tests', 'verdict')
 #: The jobs whose own ``if:`` a row decides.
@@ -3798,7 +3801,7 @@ class TestCondaBumpIsTaggedAndUploaded(CondaWorkflowMixin, unittest.TestCase):
     def test_the_scan_found_the_jobs(self) -> None:
         """A scanner that finds nothing would pass every test below it."""
         self.assertEqual(
-            sorted(self.jobs), sorted(CONDA_JOBS),
+            sorted(self.jobs), sorted(CONDA_JOBS + (CONDA_REPORTER,)),
             'the job list in cron-conda.yml moved; if that is intended, the '
             'expectations in this class need revisiting rather than this line '
             'being updated alone',

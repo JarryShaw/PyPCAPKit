@@ -1406,7 +1406,8 @@ class TestTheWorkflow(unittest.TestCase):
         # detect reads the branch's pull request; pr's token is the App's.
         self.assertEqual(self.jobs['detect']['permissions'], {'contents': 'read', 'pull-requests': 'read'})
         self.assertEqual(self.jobs['pr']['permissions'], {'actions': 'read'})
-        self.assertEqual(set(self.jobs), {'detect', 'pr'})
+        # #2030: `discussion` posts detect's report; test_cron_reports_2030.py pins it.
+        self.assertEqual(set(self.jobs), {'detect', 'pr', 'discussion'})
 
     def test_detect_reads_no_secret_and_names_no_environment(self) -> None:
         text = json.dumps(self.jobs['detect'])
@@ -1431,7 +1432,8 @@ class TestTheWorkflow(unittest.TestCase):
         self.assertEqual(command[:4], ['python', '-m', 'unittest', '-v'])
         self.assertEqual(tuple(command[4:]), module.AUDIT)
         self.assertEqual(self.jobs['detect']['outputs'], {'changed': '${{ steps.update.outputs.changed }}',
-                                                           'publish': '${{ steps.update.outputs.publish }}'})
+                                                           'publish': '${{ steps.update.outputs.publish }}',
+                                                           'status': '${{ steps.run-report.outputs.status }}'})
         upload = self.step('detect', 'Upload the proposal')
         self.assertEqual(upload['if'], "${{ steps.update.outputs.publish == 'true' }}")
         # The proposal's files/.github/python-versions.toml is a hidden path.

@@ -1221,7 +1221,8 @@ does; each has tests under :file:`tests/project/` that run it.
        ``gate``, at ``error``.
    * - :file:`util/discussion_report.py`
      - ``Post the report to Discussions`` in the ``discussion`` job of
-       ``ci-timing.yml`` and of ``cron-vendor.yml`` (see `CI Reports`_).
+       ``ci-timing.yml``, ``cron-vendor.yml``, ``cron-conda.yml`` and
+       ``cron-python-versions.yml`` (see `CI Reports`_).
    * - :file:`util/apt_packages.py`
      - The apt steps of ``unit-tests.yml``'s ``engine-tests`` and ``pypcap-parity``
        (and so its KTLO twin): the plan, seed, install and collect steps, as
@@ -1279,7 +1280,27 @@ reports ``warning`` where ``vendor-update`` passed over a failed target or test
 gate. A failed or cancelled ``head`` skips ``vendor-update``, so its
 ``discussion`` job runs on ``always()`` and then posts a line of its own with
 ``head``'s result; a skip on purpose, on a pull request's ``workflow_run`` or a
-verdict for another commit, skips it too. The category is the workflow-level ``REPORT_CATEGORY``. The API cannot
+verdict for another commit, skips it too.
+
+``cron-conda.yml`` posts to ``cron-conda: conda distribution update report`` by
+the same rules: ``push`` on its ``workflow_run``, ``scheduled`` otherwise, and a
+line of its own for a failed or cancelled ``head``. Its report lists each ``Platform pins`` notice and
+warning from ``Refresh the platform pins``, whose output that step keeps in a log,
+the files the run changed, and the build Push Changes pushed, or that it pushed
+none. Its ``discussion`` job waits for ``conda-tag`` and ``conda-dist`` and adds
+their results, so a failed tag or upload posts as ``failure``. A pin warning
+reports ``warning``. ``cron-python-versions.yml`` runs only on ``schedule`` and
+``workflow_dispatch``, so it posts as ``scheduled`` to ``cron-python-versions:
+Python version update report``. ``detect``'s report, read from the plan
+``Recompute the tiers`` writes, lists each tier that moved and why, the files it
+regenerated, the ruleset edits to make by hand, the script's notes, the audit's
+outcome, and why no pull request opens, if none does. It reports ``warning`` for a
+hand-edit note, for a failed audit of a changed tree, or for an unset
+``vars.RELEASE_APP_CLIENT_ID``. Its ``discussion`` job needs ``detect`` alone,
+because ``pr`` waits for the owner's approval of ``github-release``, and the pull
+request it opens is its own record.
+
+The category is the workflow-level ``REPORT_CATEGORY``. The API cannot
 create one, so it is made by hand, in Settings, Discussions.
 
 The reporting job uploads its report as an artifact, and a ``discussion`` job of
@@ -1290,7 +1311,10 @@ other job keeps its permissions. It uses ``GITHUB_TOKEN`` and first-party action
 only. Reporting never fails a run: a missing category, a missing report or a
 failed API call is one warning, and the job is ``continue-on-error``, since a
 failed Vendor Update run is one Create Release reads as not updated. A CI timing
-run failed by a HARD threshold is posted all the same, on ``always()``.
+run failed by a HARD threshold is posted all the same, on ``always()``, and so is
+a Python Versions run failed by its audit. The report steps of ``vendor-update``,
+``conda-update`` and ``detect`` are ``continue-on-error`` on ``!cancelled()``,
+and come last in each job.
 
 Unit Tests push runs post as ``push`` to ``unit-tests: <branch> push runs``, so
 ``main``'s thread is ``unit-tests: main push runs``. ``unit-tests.yml`` is a
