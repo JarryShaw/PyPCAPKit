@@ -66,12 +66,13 @@ def main(argv: 'Optional[list[str]]' = None) -> 'int':
     if not failed:
         print(f'{leg}: no step failed.')
         return 0
-    # The runner splits an annotation's properties on `,`, so the title's are escaped.
-    # #2047: the command stays literal, where #1672's scan of a KTLO step's scripts reads it.
+    # The runner splits an annotation's properties on `,`, so the title's are escaped;
+    # #2047: nothing else is, as before the helper.
     title = leg.replace(',', '%2C')
     with _actions.open_summary() as summary:
         for step in failed:
-            print(f"::warning title={step} failed on {title}::{REASONS[args.tier]}; see the {step} step's log.")
+            _actions.annotate('warning', f"{REASONS[args.tier]}; see the {step} step's log.",
+                              title=f'{step} failed on {title}', escape=False)
             print(f'- {leg}: step `{step}` failed; non-blocking, so this job still succeeds.', file=summary)
     return 0
 
