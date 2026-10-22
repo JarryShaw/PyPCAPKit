@@ -528,7 +528,8 @@ treats the artifact as untrusted: it never checks out pull-request code. It
 takes the PR number from the API, as the open PR whose head is the run's head
 sha, and renders its own Markdown from validated numbers. It edits one comment,
 found by a hidden marker, on each push. The first line says when the tests
-failed. Neither workflow's coverage step is a required check.
+failed. Neither workflow's coverage step is a required check. A push run has no
+pull request, so its report goes to Discussions instead (see `CI Reports`_).
 
 CI Timing Review (`#1538 <https://github.com/JarryShaw/PyPCAPKit/issues/1538>`__)
 ---------------------------------------------------------------------------------
@@ -1273,6 +1274,36 @@ only. Reporting never fails a run: a missing category, a missing report or a
 failed API call is one warning, and the job is ``continue-on-error``, since a
 failed Vendor Update run is one Create Release reads as not updated. A CI timing
 run failed by a HARD threshold is posted all the same, on ``always()``.
+
+Unit Tests push runs post as ``push`` to ``unit-tests: <branch> push runs``, so
+``main``'s thread is ``unit-tests: main push runs``. ``unit-tests.yml`` is a
+reusable workflow whose callers grant ``contents: read``, so the post comes from
+``coverage-comment.yml``'s ``workflow_run`` relay instead: its ``discussion`` job
+takes a run whose event is ``push``, and ``comment`` keeps a pull request's. Each
+job holds its own scopes, ``discussion`` alone ``discussions: write``, with
+``contents: read`` for a checkout of the default branch's script, never the run's
+head, and ``checks: read`` for the run's check suite. Its ``Write the run report``
+step reads that suite in a single GraphQL call rather than any artifact, and
+renders every name and annotation it quotes as a code span. The report links the
+run, names its commit and conclusion, the jobs that did not pass, and the warning
+and failure annotations of the jobs that did. The conclusion becomes the
+``--status``: ``success``, ``cancelled`` (and ``stale``), ``skipped`` (and
+``neutral``), and ``failure`` for anything else, ``timed_out`` and
+``startup_failure`` among them. A green run reports ``warning`` where a job failed
+without failing it, or a job that passed holds a warning or failure annotation, as
+a KTLO leg whose tests fail does (`#1672
+<https://github.com/JarryShaw/PyPCAPKit/issues/1672>`__). The exception is the
+step's ``EXPECTED`` list: the annotations a job writes on every run by design,
+today the install failures of the KTLO legs that cannot install, which neither
+count nor appear in the report. Each entry is a job, a level and a title prefix,
+an empty prefix matching only an empty title, so a reworded message still
+matches, and anything else those jobs write still counts.
+:file:`tests/project/test_unit_tests_push_reports_2030.py` pins the list, so a
+leg that starts to install, or a new by-design annotation, changes it and the
+pin together. The script labels the
+run it links with ``GITHUB_WORKFLOW``, so the post step sets ``Unit Tests`` for
+that one command. A push relay's concurrency group is its own run's, since a
+group cancels a pending run when a newer one joins it.
 
 .. _Action Pins:
 
