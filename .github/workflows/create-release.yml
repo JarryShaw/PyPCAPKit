@@ -980,7 +980,8 @@ jobs:
           - macos-latest
           - macos-26-intel
           - ubuntu-latest
-          # - windows-latest  # skip for now
+          # No Windows leg since 2023, and no Windows steps (#1967): adding the leg
+          # back means writing its steps, as test_conda_no_windows_steps_1967 pins.
         # #1633, #1660: the supported tier only. No KTLO 3.10 leg: the list
         # util/conda_vendor.py derives omits typing-extensions, which
         # pcapkit/utilities/compat.py imports below 3.11, and pins each
@@ -1032,9 +1033,6 @@ jobs:
             ubuntu-latest)
               target_platform="linux-64"
               ;;
-            windows-latest)
-              target_platform="win-64"
-              ;;
             *)
               target_platform=""
               ;;
@@ -1083,28 +1081,15 @@ jobs:
       # installed here: on ``macos-26-intel`` they resolve a cryptography with
       # no Intel wheel, which pip has to compile or fail on.
       - name: Install and Setup
-        if: ${{ matrix.os != 'windows-latest' }}
         run: |
           set -x
 
-          python -m pip install -U pip setuptools wheel
-
-      - name: Install and Setup (Windows)
-        if: ${{ matrix.os == 'windows-latest' }}
-        run: |
           python -m pip install -U pip setuptools wheel
 
       - name: Setup Conda Distribution
-        if: ${{ matrix.os != 'windows-latest' }}
         run: |
           set -x
 
-          mkdir -p conda/wheels
-          python -m pip download -r conda/requirements.txt -d conda/wheels
-
-      - name: Setup Conda Distribution (Windows)
-        if: ${{ matrix.os == 'windows-latest' }}
-        run: |
           mkdir -p conda/wheels
           python -m pip download -r conda/requirements.txt -d conda/wheels
 
@@ -1172,9 +1157,6 @@ jobs:
               ;;
             ubuntu-latest)
               target_platform="linux-64"
-              ;;
-            windows-latest)
-              target_platform="win-64"
               ;;
             *)
               target_platform=""

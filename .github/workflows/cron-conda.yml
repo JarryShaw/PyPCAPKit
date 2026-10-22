@@ -415,7 +415,8 @@ jobs:
           - macos-latest
           - macos-26-intel
           - ubuntu-latest
-          # - windows-latest  # skip for now
+          # No Windows leg since 2023, and no Windows steps (#1967): adding the leg
+          # back means writing its steps, as test_conda_no_windows_steps_1967 pins.
         # #1633: the supported tier, from .github/python-versions.toml through
         # `conda-update` (#1660); create-release.yml's ``conda`` job says why
         # there is no KTLO 3.10 leg.
@@ -433,31 +434,18 @@ jobs:
       # #1854: pcapkit is not installed here; see create-release.yml's step of
       # the same name.
       - name: Install and Setup
-        if: ${{ matrix.os != 'windows-latest' }}
         run: |
           set -x
 
-          python -m pip install -U pip setuptools wheel
-
-      - name: Install and Setup (Windows)
-        if: ${{ matrix.os == 'windows-latest' }}
-        run: |
           python -m pip install -U pip setuptools wheel
 
       # #1827: pip evaluates conda/requirements.txt's platform markers here,
       # on this leg's own runner, so Intel macOS fetches its own cryptography
       # pin; the recipe's build.sh installs whatever this downloaded.
       - name: Setup Conda Distribution
-        if: ${{ matrix.os != 'windows-latest' }}
         run: |
           set -x
 
-          mkdir -p conda/wheels
-          python -m pip download -r conda/requirements.txt -d conda/wheels
-
-      - name: Setup Conda Distribution (Windows)
-        if: ${{ matrix.os == 'windows-latest' }}
-        run: |
           mkdir -p conda/wheels
           python -m pip download -r conda/requirements.txt -d conda/wheels
 
@@ -513,9 +501,6 @@ jobs:
               ;;
             ubuntu-latest)
               target_platform="linux-64"
-              ;;
-            windows-latest)
-              target_platform="win-64"
               ;;
             *)
               target_platform=""

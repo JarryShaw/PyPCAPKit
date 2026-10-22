@@ -88,7 +88,7 @@ class TestTheCondaLegsInstallOnlyTheBuildTools(unittest.TestCase):
             steps = [step for found, job, step in self.steps() if (found, job) == (name, job_id)
                      and str(step.get('name', '')).startswith('Install and Setup')]
             with self.subTest(workflow=name, job=job_id):
-                self.assertEqual(len(steps), 2, 'the Linux/macOS step and the Windows one')
+                self.assertEqual(len(steps), 1, 'one step for every leg, with no Windows twin (#1967)')
             for step in steps:
                 with self.subTest(workflow=name, job=job_id, step=step['name']):
                     self.assertEqual(installs(step), [BUILD_TOOLS])
