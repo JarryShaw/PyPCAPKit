@@ -22,8 +22,8 @@ are not actions fetched by tag, so they are left alone.
   either; and the root job's ``exclude-paths`` skips
   :file:`conda/requirements.txt`, which it would otherwise read.
 * :class:`TestDependabotCanBuildTheEditable` checks :file:`pyproject.toml`
-  declares its readme statically, as Dependabot's stub :file:`setup.py` supplies
-  none.
+  declares its readme statically, as Dependabot now fetches that file in place
+  of :file:`setup.py` and passes it through unstubbed.
 * :class:`TestPyUpOpensNoUpdates` checks :file:`.pyup.yml` turns PyUp's update
   pull requests off, as Dependabot opens them.
 
@@ -203,12 +203,13 @@ class TestDependabotCoversEveryManifest(unittest.TestCase):
 
 
 class TestDependabotCanBuildTheEditable(unittest.TestCase):
-    """The Pipfile's editable ``pypcapkit`` builds under Dependabot's stub :file:`setup.py`.
+    """The Pipfile's editable ``pypcapkit`` reads its readme from :file:`pyproject.toml`.
 
-    Dependabot's ``SetupFileSanitizer`` replaces :file:`setup.py` with
-    ``setup(name=..., version="0.0.1", ...)``, which passes no long
-    description. A ``readme`` left in ``dynamic`` then fails the build, and every
-    root pip update with it.
+    There is no :file:`setup.py` (#2061), so ``fetch_project_file`` in
+    Dependabot's Python file fetcher fetches :file:`pyproject.toml` in its place,
+    and the Pipfile updater writes it unstubbed: ``SetupFileSanitizer`` runs only
+    on a :file:`setup.py`. A static ``readme`` does not depend on what a stub
+    would supply.
     """
 
     def setUp(self) -> None:

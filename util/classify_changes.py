@@ -11,7 +11,7 @@ is code.
 A file is docs iff :func:`is_docs` holds: it is under ``docs/`` or ends in
 ``.md``, and is not under one of :data:`CODE_DIRS` -- so a Markdown file in one
 of those (a PR template, a test fixture) is code, and so is every other file
-(``pyproject.toml``, ``setup.py``, ...). The diff is ``HEAD^1..HEAD``, a pull
+(``pyproject.toml``, ``Makefile``, ...). The diff is ``HEAD^1..HEAD``, a pull
 request's merge commit against its first parent, which is exactly what merging
 would add; ``--no-renames`` lists both sides of a rename, so moving a code file
 under ``docs/`` is still a code change.
