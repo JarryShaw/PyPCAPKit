@@ -25,10 +25,13 @@ On the tree, in :file:`pyproject.toml`:
 .. code-block:: toml
 
    cli    = [ "emoji" ]
-   crypto = [ "cryptography>=3.4" ]
+   crypto = [
+       "cryptography>=3.4; platform_python_implementation != 'PyPy' or python_version >= '3.11'",
+       "cryptography>=3.4,<46; platform_python_implementation == 'PyPy' and python_version < '3.11'",
+   ]
    NGAP   = [ "pycrate" ]
 
-   all    = [ "emoji", "cryptography>=3.4", "pycrate" ]
+   all    = [ "emoji", "cryptography>=3.4; platform_python_implementation != 'PyPy' or python_version >= '3.11'", "cryptography>=3.4,<46; platform_python_implementation == 'PyPy' and python_version < '3.11'", "pycrate" ]
 
 So ``all`` is exactly the union of those extras, written out as literals rather
 than referenced.

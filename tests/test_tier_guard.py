@@ -1428,8 +1428,11 @@ class DependencyRequirementTests(unittest.TestCase):
         """Spot checks on the extras the rest of this suite reasons about."""
         declared = _dependency_gates.declared_requirements()
 
-        self.assertEqual([requirement.text for requirement in declared['crypto']],
-                         ['cryptography>=3.4'])
+        # Two lines since #2040: the second caps PyPy below 3.11.
+        self.assertEqual(
+            [requirement.text for requirement in declared['crypto']],
+            ["cryptography>=3.4; platform_python_implementation != 'PyPy' or python_version >= '3.11'",
+             "cryptography>=3.4,<46; platform_python_implementation == 'PyPy' and python_version < '3.11'"])
         self.assertTrue(_dependency_gates.provided_by(declared['NGAP'], 'pycrate'))
         self.assertTrue(_dependency_gates.provided_by(declared['cli'], 'emoji'))
         # The `test` extra carries requests and bs4 (#507) but not html5lib.
