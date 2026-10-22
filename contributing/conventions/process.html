@@ -512,10 +512,13 @@ settled that on <a class="extlink-issue reference external" href="https://github
 the ones that qualify: the CLI addon, the crypto addon, and <code class="docutils literal notranslate"><span class="pre">pycrate</span></code>.</p>
 <p>On the tree, in <code class="file docutils literal notranslate"><span class="pre">pyproject.toml</span></code>:</p>
 <div class="highlight-toml notranslate"><div class="highlight"><pre><span></span><span class="n">cli</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"emoji"</span><span class="w"> </span><span class="p">]</span>
-<span class="n">crypto</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"cryptography&gt;=3.4"</span><span class="w"> </span><span class="p">]</span>
+<span class="n">crypto</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p">[</span>
+<span class="w">    </span><span class="s2">"cryptography&gt;=3.4; platform_python_implementation != 'PyPy' or python_version &gt;= '3.11'"</span><span class="p">,</span>
+<span class="w">    </span><span class="s2">"cryptography&gt;=3.4,&lt;46; platform_python_implementation == 'PyPy' and python_version &lt; '3.11'"</span><span class="p">,</span>
+<span class="p">]</span>
 <span class="n">NGAP</span><span class="w">   </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"pycrate"</span><span class="w"> </span><span class="p">]</span>
 
-<span class="n">all</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"emoji"</span><span class="p">,</span><span class="w"> </span><span class="s2">"cryptography&gt;=3.4"</span><span class="p">,</span><span class="w"> </span><span class="s2">"pycrate"</span><span class="w"> </span><span class="p">]</span>
+<span class="n">all</span><span class="w">    </span><span class="o">=</span><span class="w"> </span><span class="p">[</span><span class="w"> </span><span class="s2">"emoji"</span><span class="p">,</span><span class="w"> </span><span class="s2">"cryptography&gt;=3.4; platform_python_implementation != 'PyPy' or python_version &gt;= '3.11'"</span><span class="p">,</span><span class="w"> </span><span class="s2">"cryptography&gt;=3.4,&lt;46; platform_python_implementation == 'PyPy' and python_version &lt; '3.11'"</span><span class="p">,</span><span class="w"> </span><span class="s2">"pycrate"</span><span class="w"> </span><span class="p">]</span>
 </pre></div>
 </div>
 <p>So <code class="docutils literal notranslate"><span class="pre">all</span></code> is exactly the union of those extras, written out as literals rather
@@ -994,7 +997,7 @@ ordering cells’ timings and their step cap’s rationale.</p></li>
       
     </aside>
   </div>
-</div><script src="../../_static/documentation_options.js?v=08d57b38"></script>
+</div><script src="../../_static/documentation_options.js?v=e0f63a88"></script>
     <script src="../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../_static/scripts/furo.js?v=46bd48cc"></script>

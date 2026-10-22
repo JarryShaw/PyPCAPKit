@@ -528,7 +528,8 @@ treats the artifact as untrusted: it never checks out pull-request code. It
 takes the PR number from the API, as the open PR whose head is the run's head
 sha, and renders its own Markdown from validated numbers. It edits one comment,
 found by a hidden marker, on each push. The first line says when the tests
-failed. Neither workflow's coverage step is a required check.
+failed. Neither workflow's coverage step is a required check. A push run has no
+pull request, so its report goes to Discussions instead (see `CI Reports`_).
 
 CI Timing Review (`#1538 <https://github.com/JarryShaw/PyPCAPKit/issues/1538>`__)
 ---------------------------------------------------------------------------------
@@ -557,7 +558,9 @@ cancelled at 95% of its cap or later timed out and counts, even in a run that re
 ``cancelled`` for that reason; one cancelled earlier was superseded and does not. A
 step cap written as an expression differs by leg and reads as none.
 The report goes to the job summary and to the ``ci-timing-report`` artifact (90
-days), and the newest earlier report is the next run's baseline. It is not a
+days), and the newest earlier report is the next run's baseline. The
+``discussion`` job then posts it to the ``ci-timing: weekly CI timing report``
+thread (see `CI Reports`_). It is not a
 ``workflow_run`` on Unit Tests, which would add a job per run to a runner pool
 measured saturated at 20 concurrent jobs.
 
@@ -792,7 +795,10 @@ so it adds no context to the ruleset. No ``Compat``, ``engine-tests`` or
 ``pypcap-parity`` leg runs PyPy. On PyPy 8.0, which setup-python's ``pypy3.11``
 is, PyPI has no Linux wheel of |cryptography|_, so the install step builds it
 with the image's Rust and ``libssl-dev``, and none of ``lxml``, so the ``test``
-extra carries ``lxml`` on CPython only.
+extra carries ``lxml`` on CPython only. On ``pypy3.10`` the ``crypto`` and ``all``
+extras cap |cryptography|_ below 46, as 45.0.7 is the newest release with a Linux
+``pp310`` wheel and the newest release's sdist does not build there (`#2040
+<https://github.com/JarryShaw/PyPCAPKit/issues/2040>`__).
 
 On PyPy an xdist worker's RSS grows with every test it runs, rather than in a few
 heavy modules, so a PyPy leg's ``Run unit tests`` hands its pytest command to
@@ -1209,8 +1215,24 @@ does; each has tests under :file:`tests/project/` that run it.
        and ``gate``, at ``error``.
    * - :file:`util/pip_install.py`
      - The install step of ``unit-tests.yml``'s ``test``, ``integration`` and
-       ``pypcap-parity`` (and so their KTLO twins), at the job's ``ANNOTATION_LEVEL``,
-       and of ``unittest-ordering``, ``project-tests`` and ``gate``, at ``error``.
+       ``pypcap-parity`` (and so their KTLO twins), ``experimental.yml``'s
+       ``experimental`` and ``python-compatibility.yml``'s ``compatibility``, at the
+       job's ``ANNOTATION_LEVEL``, and of ``unittest-ordering``, ``project-tests`` and
+       ``gate``, at ``error``.
+   * - :file:`util/discussion_report.py`
+     - ``Post the report to Discussions`` in the ``discussion`` job of
+       ``ci-timing.yml``, ``cron-vendor.yml``, ``cron-conda.yml`` and
+       ``cron-python-versions.yml`` (see `CI Reports`_).
+   * - :file:`util/apt_packages.py`
+     - The apt steps of ``unit-tests.yml``'s ``engine-tests`` and ``pypcap-parity``
+       (and so its KTLO twin): the plan, seed, install and collect steps, as
+       ``apt_packages.py plan``, ``seed``, ``install`` and ``collect``. The
+       ``actions/cache`` steps and the AppArmor step (`#2019
+       <https://github.com/JarryShaw/PyPCAPKit/issues/2019>`__) stay as they were.
+   * - :file:`util/_actions.py`
+     - No step: it is imported by the scripts that share its annotations, step
+       outputs, job summary lines and logged runs (`#2047
+       <https://github.com/JarryShaw/PyPCAPKit/issues/2047>`__).
 
 The summaries run on the image's ``/usr/bin/python3`` rather than the leg's
 interpreter, which may have failed to set up or be too broken to run anything, so
@@ -1222,10 +1244,113 @@ file-size cap every test command of ``unit-tests.yml`` takes.
 :file:`util/regenerate_samples.py` is standard library only but runs on the leg's
 interpreter, since the generator it runs imports ``pcapkit``, and so does
 :file:`util/pip_install.py`, since it installs into that interpreter; it runs on
-every version the matrices hold, 3.7 included. Both ``changes`` jobs check out on every event, since the script is in the
+every version the matrices hold, 3.7 and the experimental tier included. :file:`util/apt_packages.py` runs on
+``/usr/bin/python3``, as the apt shell needed no interpreter of the leg's, and runs
+under ``sudo`` the commands that shell ran. Its ``plan`` and ``install`` both read
+the job's ``APT_PACKAGES``, so the cache key always describes the set installed.
+Its bounds are still ``timeout`` run as root inside ``sudo``, given no option, so
+uutils' ``timeout`` behaves as GNU's (`#2020
+<https://github.com/JarryShaw/PyPCAPKit/issues/2020>`__), and the bound reaches
+apt's own children, which a timeout in the script, running as the runner's user,
+could not signal. Both ``changes`` jobs check out on every event, since the script is in the
 tree. ``create-release.yml``'s ``pypi`` job keeps its own copy of
 the KTLO summary's shell until its shell moves to scripts too; a project pin runs
 that copy and the script on the same steps and requires the same output.
+:file:`util/_actions.py` is standard library only, and keeps to 3.7's syntax,
+since the scripts on ``/usr/bin/python3`` and on every leg's interpreter import it.
+
+.. _CI Reports:
+
+CI Reports (`#2030 <https://github.com/JarryShaw/PyPCAPKit/issues/2030>`__)
+---------------------------------------------------------------------------
+
+A report with no pull request to comment on goes to GitHub Discussions. One
+category, ``CI reports``, holds every report, and each job has one thread in it,
+titled ``<workflow file stem>: <job or report name>``. A run adds a comment to its
+job's thread rather than opening a new one; the comment links the run, names its
+commit and its status, and ends in a hidden ``<!-- report-status: ... -->``
+marker. How often depends on the script's ``--mode``:
+
+* ``scheduled``: every run posts, on ``schedule`` and on ``workflow_dispatch``,
+  since a manual run is a deliberate report.
+* ``push``, for a run on a push or a ``workflow_run`` relay of one: a run that
+  warned or failed posts every time, and a green run posts only where the
+  thread's newest marker is not ``success``, so one "back to green" comment
+  follows a bad run and later green runs stay silent. A thread with no marker
+  counts as green.
+
+``ci-timing.yml`` posts as ``scheduled`` to ``ci-timing: weekly CI timing
+report``. ``cron-vendor.yml`` posts to ``cron-vendor: vendor constant update
+report``, as ``push`` on its ``workflow_run`` and ``scheduled`` otherwise, and
+reports ``warning`` where ``vendor-update`` passed over a failed target or test
+gate. A failed or cancelled ``head`` skips ``vendor-update``, so its
+``discussion`` job runs on ``always()`` and then posts a line of its own with
+``head``'s result; a skip on purpose, on a pull request's ``workflow_run`` or a
+verdict for another commit, skips it too.
+
+``cron-conda.yml`` posts to ``cron-conda: conda distribution update report`` by
+the same rules: ``push`` on its ``workflow_run``, ``scheduled`` otherwise, and a
+line of its own for a failed or cancelled ``head``. Its report lists each ``Platform pins`` notice and
+warning from ``Refresh the platform pins``, whose output that step keeps in a log,
+the files the run changed, and the build Push Changes pushed, or that it pushed
+none. Its ``discussion`` job waits for ``conda-tag`` and ``conda-dist`` and adds
+their results, so a failed tag or upload posts as ``failure``. A pin warning
+reports ``warning``. ``cron-python-versions.yml`` runs only on ``schedule`` and
+``workflow_dispatch``, so it posts as ``scheduled`` to ``cron-python-versions:
+Python version update report``. ``detect``'s report, read from the plan
+``Recompute the tiers`` writes, lists each tier that moved and why, the files it
+regenerated, the ruleset edits to make by hand, the script's notes, the audit's
+outcome, and why no pull request opens, if none does. It reports ``warning`` for a
+hand-edit note, for a failed audit of a changed tree, or for an unset
+``vars.RELEASE_APP_CLIENT_ID``. Its ``discussion`` job needs ``detect`` alone,
+because ``pr`` waits for the owner's approval of ``github-release``, and the pull
+request it opens is its own record.
+
+The category is the workflow-level ``REPORT_CATEGORY``. The API cannot
+create one, so it is made by hand, in Settings, Discussions.
+
+The reporting job uploads its report as an artifact, and a ``discussion`` job of
+its own downloads it and runs :file:`util/discussion_report.py`, which finds the
+category and the thread by name and opens the thread on first use. That job alone
+holds ``discussions: write``, beside ``contents: read`` for its checkout, so every
+other job keeps its permissions. It uses ``GITHUB_TOKEN`` and first-party actions
+only. Reporting never fails a run: a missing category, a missing report or a
+failed API call is one warning, and the job is ``continue-on-error``, since a
+failed Vendor Update run is one Create Release reads as not updated. A CI timing
+run failed by a HARD threshold is posted all the same, on ``always()``, and so is
+a Python Versions run failed by its audit. The report steps of ``vendor-update``,
+``conda-update`` and ``detect`` are ``continue-on-error`` on ``!cancelled()``,
+and come last in each job.
+
+Unit Tests push runs post as ``push`` to ``unit-tests: <branch> push runs``, so
+``main``'s thread is ``unit-tests: main push runs``. ``unit-tests.yml`` is a
+reusable workflow whose callers grant ``contents: read``, so the post comes from
+``coverage-comment.yml``'s ``workflow_run`` relay instead: its ``discussion`` job
+takes a run whose event is ``push``, and ``comment`` keeps a pull request's. Each
+job holds its own scopes, ``discussion`` alone ``discussions: write``, with
+``contents: read`` for a checkout of the default branch's script, never the run's
+head, and ``checks: read`` for the run's check suite. Its ``Write the run report``
+step reads that suite in a single GraphQL call rather than any artifact, and
+renders every name and annotation it quotes as a code span. The report links the
+run, names its commit and conclusion, the jobs that did not pass, and the warning
+and failure annotations of the jobs that did. The conclusion becomes the
+``--status``: ``success``, ``cancelled`` (and ``stale``), ``skipped`` (and
+``neutral``), and ``failure`` for anything else, ``timed_out`` and
+``startup_failure`` among them. A green run reports ``warning`` where a job failed
+without failing it, or a job that passed holds a warning or failure annotation, as
+a KTLO leg whose tests fail does (`#1672
+<https://github.com/JarryShaw/PyPCAPKit/issues/1672>`__). The exception is the
+step's ``EXPECTED`` list: the annotations a job writes on every run by design,
+today the install failures of the KTLO legs that cannot install, which neither
+count nor appear in the report. Each entry is a job, a level and a title prefix,
+an empty prefix matching only an empty title, so a reworded message still
+matches, and anything else those jobs write still counts.
+:file:`tests/project/test_unit_tests_push_reports_2030.py` pins the list, so a
+leg that starts to install, or a new by-design annotation, changes it and the
+pin together. The script labels the
+run it links with ``GITHUB_WORKFLOW``, so the post step sets ``Unit Tests`` for
+that one command. A push relay's concurrency group is its own run's, since a
+group cancels a pending run when a newer one joins it.
 
 .. _Action Pins:
 
@@ -1254,16 +1379,21 @@ that names a particular action.
 Workflow Lint (`#1967 <https://github.com/JarryShaw/PyPCAPKit/issues/1967>`__)
 ------------------------------------------------------------------------------
 
-Lint's ``lint`` job runs actionlint over every workflow in its ``actionlint`` step,
-first, as it needs no Python. The step downloads the release that
-``ACTIONLINT_VERSION`` names and checks it against ``ACTIONLINT_SHA256``, from that
-release's checksums file, before unpacking it. Dependabot does not read this pin,
-so a bump changes both. The workflows use YAML anchors, which actionlint reads from
+Lint's ``lint`` job runs actionlint over every workflow in its ``actionlint`` step.
+The step downloads the release that ``ACTIONLINT_VERSION`` names and checks it
+against ``ACTIONLINT_SHA256``, from that release's checksums file, before unpacking
+it. Dependabot does not read this pin, so a bump changes both. The workflows use YAML anchors, which actionlint reads from
 1.7.10 on, and the pin is 1.7.12 or newer.
 
-actionlint runs the image's shellcheck over each ``run:`` block, and shellcheck
-still reports style and info findings, so the step is advisory like the others in
-Lint. Its run summary counts the findings by actionlint rule and by shellcheck code.
+actionlint runs the image's shellcheck over each ``run:`` block. Unlike Lint's
+other steps, this one blocks: a finding fails the job, as the owner ruled on #1967
+once #2023, #2037 and #2038 had fixed every finding it reported. It runs last and
+on ``!cancelled()``, so a finding skips none of the advisory steps and a failed
+Python setup does not skip it. Lint is not a required check of ruleset 23497679, so
+a red Lint does not hold a merge. The image's shellcheck is not pinned, so a runner
+image that adds a check can turn Lint red on unchanged code; the fix is to the
+script it flags. The step's run summary counts the findings by actionlint rule and
+by shellcheck code.
 
 The step's ``-ignore`` pattern, which matches a message, not a file, hides a false
 positive: ``concurrency.queue``, which ``project-status.yml`` sets and GitHub
@@ -1272,9 +1402,11 @@ documents, is a key no actionlint release knows yet (`rhysd/actionlint#657
 release that knows it is pinned.
 
 :file:`tests/project/test_actionlint_in_lint_1967.py` fails when the step is gone,
-pins an older release or no checksum, unpacks before it verifies, or passes an
-``-ignore`` pattern other than that, and when no workflow sets
-``concurrency.queue`` any more.
+pins an older release or no checksum, unpacks before it verifies, passes an
+``-ignore`` pattern other than that, or stops blocking: when it carries
+``continue-on-error``, exits with a status other than actionlint's, or sits above
+an advisory step or a failed setup would skip it. It fails too when no workflow
+sets ``concurrency.queue`` any more.
 
 Dependency Updates (`#1968 <https://github.com/JarryShaw/PyPCAPKit/issues/1968>`__)
 -----------------------------------------------------------------------------------

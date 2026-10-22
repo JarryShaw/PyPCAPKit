@@ -1015,7 +1015,8 @@ treats the artifact as untrusted: it never checks out pull-request code. It
 takes the PR number from the API, as the open PR whose head is the run’s head
 sha, and renders its own Markdown from validated numbers. It edits one comment,
 found by a hidden marker, on each push. The first line says when the tests
-failed. Neither workflow’s coverage step is a required check.</p>
+failed. Neither workflow’s coverage step is a required check. A push run has no
+pull request, so its report goes to Discussions instead (see <a class="reference internal" href="#ci-reports">CI Reports</a>).</p>
 </section>
 <section id="ci-timing-review-1538">
 <h2>CI Timing Review (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1538">#1538</a>)<a class="headerlink" href="#ci-timing-review-1538" title="Link to this heading">¶</a></h2>
@@ -1043,7 +1044,9 @@ cancelled at 95% of its cap or later timed out and counts, even in a run that re
 <code class="docutils literal notranslate"><span class="pre">cancelled</span></code> for that reason; one cancelled earlier was superseded and does not. A
 step cap written as an expression differs by leg and reads as none.
 The report goes to the job summary and to the <code class="docutils literal notranslate"><span class="pre">ci-timing-report</span></code> artifact (90
-days), and the newest earlier report is the next run’s baseline. It is not a
+days), and the newest earlier report is the next run’s baseline. The
+<code class="docutils literal notranslate"><span class="pre">discussion</span></code> job then posts it to the <code class="docutils literal notranslate"><span class="pre">ci-timing:</span> <span class="pre">weekly</span> <span class="pre">CI</span> <span class="pre">timing</span> <span class="pre">report</span></code>
+thread (see <a class="reference internal" href="#ci-reports">CI Reports</a>). It is not a
 <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> on Unit Tests, which would add a job per run to a runner pool
 measured saturated at 20 concurrent jobs.</p>
 <p>Per-test timings come from the <code class="docutils literal notranslate"><span class="pre">test</span></code> and <code class="docutils literal notranslate"><span class="pre">integration</span></code> legs, and from
@@ -1294,7 +1297,9 @@ so it adds no context to the ruleset. No <code class="docutils literal notransla
 <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> leg runs PyPy. On PyPy 8.0, which setup-python’s <code class="docutils literal notranslate"><span class="pre">pypy3.11</span></code>
 is, PyPI has no Linux wheel of <a class="reference external" href="https://cryptography.io"><code class="docutils literal notranslate"><span class="pre">cryptography</span></code></a>, so the install step builds it
 with the image’s Rust and <code class="docutils literal notranslate"><span class="pre">libssl-dev</span></code>, and none of <code class="docutils literal notranslate"><span class="pre">lxml</span></code>, so the <code class="docutils literal notranslate"><span class="pre">test</span></code>
-extra carries <code class="docutils literal notranslate"><span class="pre">lxml</span></code> on CPython only.</p>
+extra carries <code class="docutils literal notranslate"><span class="pre">lxml</span></code> on CPython only. On <code class="docutils literal notranslate"><span class="pre">pypy3.10</span></code> the <code class="docutils literal notranslate"><span class="pre">crypto</span></code> and <code class="docutils literal notranslate"><span class="pre">all</span></code>
+extras cap <a class="reference external" href="https://cryptography.io"><code class="docutils literal notranslate"><span class="pre">cryptography</span></code></a> below 46, as 45.0.7 is the newest release with a Linux
+<code class="docutils literal notranslate"><span class="pre">pp310</span></code> wheel and the newest release’s sdist does not build there (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2040">#2040</a>).</p>
 <p>On PyPy an xdist worker’s RSS grows with every test it runs, rather than in a few
 heavy modules, so a PyPy leg’s <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">unit</span> <span class="pre">tests</span></code> hands its pytest command to
 <code class="file docutils literal notranslate"><span class="pre">util/pytest_shards.py</span></code>, as GraalPy’s leg does (see below), which runs it once per
@@ -1697,8 +1702,25 @@ and <code class="docutils literal notranslate"><span class="pre">gate</span></co
 </tr>
 <tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/pip_install.py</span></code></p></td>
 <td><p>The install step of <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">test</span></code>, <code class="docutils literal notranslate"><span class="pre">integration</span></code> and
-<code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> (and so their KTLO twins), at the job’s <code class="docutils literal notranslate"><span class="pre">ANNOTATION_LEVEL</span></code>,
-and of <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>, <code class="docutils literal notranslate"><span class="pre">project-tests</span></code> and <code class="docutils literal notranslate"><span class="pre">gate</span></code>, at <code class="docutils literal notranslate"><span class="pre">error</span></code>.</p></td>
+<code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> (and so their KTLO twins), <code class="docutils literal notranslate"><span class="pre">experimental.yml</span></code>’s
+<code class="docutils literal notranslate"><span class="pre">experimental</span></code> and <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">compatibility</span></code>, at the
+job’s <code class="docutils literal notranslate"><span class="pre">ANNOTATION_LEVEL</span></code>, and of <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>, <code class="docutils literal notranslate"><span class="pre">project-tests</span></code> and
+<code class="docutils literal notranslate"><span class="pre">gate</span></code>, at <code class="docutils literal notranslate"><span class="pre">error</span></code>.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">util/discussion_report.py</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Post</span> <span class="pre">the</span> <span class="pre">report</span> <span class="pre">to</span> <span class="pre">Discussions</span></code> in the <code class="docutils literal notranslate"><span class="pre">discussion</span></code> job of
+<code class="docutils literal notranslate"><span class="pre">ci-timing.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">cron-vendor.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">cron-conda.yml</span></code> and
+<code class="docutils literal notranslate"><span class="pre">cron-python-versions.yml</span></code> (see <a class="reference internal" href="#ci-reports">CI Reports</a>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/apt_packages.py</span></code></p></td>
+<td><p>The apt steps of <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> and <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code>
+(and so its KTLO twin): the plan, seed, install and collect steps, as
+<code class="docutils literal notranslate"><span class="pre">apt_packages.py</span> <span class="pre">plan</span></code>, <code class="docutils literal notranslate"><span class="pre">seed</span></code>, <code class="docutils literal notranslate"><span class="pre">install</span></code> and <code class="docutils literal notranslate"><span class="pre">collect</span></code>. The
+<code class="docutils literal notranslate"><span class="pre">actions/cache</span></code> steps and the AppArmor step (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2019">#2019</a>) stay as they were.</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">util/_actions.py</span></code></p></td>
+<td><p>No step: it is imported by the scripts that share its annotations, step
+outputs, job summary lines and logged runs (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2047">#2047</a>).</p></td>
 </tr>
 </tbody>
 </table>
@@ -1713,10 +1735,104 @@ file-size cap every test command of <code class="docutils literal notranslate"><
 <code class="file docutils literal notranslate"><span class="pre">util/regenerate_samples.py</span></code> is standard library only but runs on the leg’s
 interpreter, since the generator it runs imports <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code>, and so does
 <code class="file docutils literal notranslate"><span class="pre">util/pip_install.py</span></code>, since it installs into that interpreter; it runs on
-every version the matrices hold, 3.7 included. Both <code class="docutils literal notranslate"><span class="pre">changes</span></code> jobs check out on every event, since the script is in the
+every version the matrices hold, 3.7 and the experimental tier included. <code class="file docutils literal notranslate"><span class="pre">util/apt_packages.py</span></code> runs on
+<code class="docutils literal notranslate"><span class="pre">/usr/bin/python3</span></code>, as the apt shell needed no interpreter of the leg’s, and runs
+under <code class="docutils literal notranslate"><span class="pre">sudo</span></code> the commands that shell ran. Its <code class="docutils literal notranslate"><span class="pre">plan</span></code> and <code class="docutils literal notranslate"><span class="pre">install</span></code> both read
+the job’s <code class="docutils literal notranslate"><span class="pre">APT_PACKAGES</span></code>, so the cache key always describes the set installed.
+Its bounds are still <code class="docutils literal notranslate"><span class="pre">timeout</span></code> run as root inside <code class="docutils literal notranslate"><span class="pre">sudo</span></code>, given no option, so
+uutils’ <code class="docutils literal notranslate"><span class="pre">timeout</span></code> behaves as GNU’s (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2020">#2020</a>), and the bound reaches
+apt’s own children, which a timeout in the script, running as the runner’s user,
+could not signal. Both <code class="docutils literal notranslate"><span class="pre">changes</span></code> jobs check out on every event, since the script is in the
 tree. <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">pypi</span></code> job keeps its own copy of
 the KTLO summary’s shell until its shell moves to scripts too; a project pin runs
-that copy and the script on the same steps and requires the same output.</p>
+that copy and the script on the same steps and requires the same output.
+<code class="file docutils literal notranslate"><span class="pre">util/_actions.py</span></code> is standard library only, and keeps to 3.7’s syntax,
+since the scripts on <code class="docutils literal notranslate"><span class="pre">/usr/bin/python3</span></code> and on every leg’s interpreter import it.</p>
+</section>
+<section id="ci-reports-2030">
+<span id="ci-reports"></span><h2>CI Reports (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2030">#2030</a>)<a class="headerlink" href="#ci-reports-2030" title="Link to this heading">¶</a></h2>
+<p>A report with no pull request to comment on goes to GitHub Discussions. One
+category, <code class="docutils literal notranslate"><span class="pre">CI</span> <span class="pre">reports</span></code>, holds every report, and each job has one thread in it,
+titled <code class="docutils literal notranslate"><span class="pre">&lt;workflow</span> <span class="pre">file</span> <span class="pre">stem&gt;:</span> <span class="pre">&lt;job</span> <span class="pre">or</span> <span class="pre">report</span> <span class="pre">name&gt;</span></code>. A run adds a comment to its
+job’s thread rather than opening a new one; the comment links the run, names its
+commit and its status, and ends in a hidden <code class="docutils literal notranslate"><span class="pre">&lt;!--</span> <span class="pre">report-status:</span> <span class="pre">...</span> <span class="pre">--&gt;</span></code>
+marker. How often depends on the script’s <code class="docutils literal notranslate"><span class="pre">--mode</span></code>:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">scheduled</span></code>: every run posts, on <code class="docutils literal notranslate"><span class="pre">schedule</span></code> and on <code class="docutils literal notranslate"><span class="pre">workflow_dispatch</span></code>,
+since a manual run is a deliberate report.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">push</span></code>, for a run on a push or a <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> relay of one: a run that
+warned or failed posts every time, and a green run posts only where the
+thread’s newest marker is not <code class="docutils literal notranslate"><span class="pre">success</span></code>, so one “back to green” comment
+follows a bad run and later green runs stay silent. A thread with no marker
+counts as green.</p></li>
+</ul>
+<p><code class="docutils literal notranslate"><span class="pre">ci-timing.yml</span></code> posts as <code class="docutils literal notranslate"><span class="pre">scheduled</span></code> to <code class="docutils literal notranslate"><span class="pre">ci-timing:</span> <span class="pre">weekly</span> <span class="pre">CI</span> <span class="pre">timing</span>
+<span class="pre">report</span></code>. <code class="docutils literal notranslate"><span class="pre">cron-vendor.yml</span></code> posts to <code class="docutils literal notranslate"><span class="pre">cron-vendor:</span> <span class="pre">vendor</span> <span class="pre">constant</span> <span class="pre">update</span>
+<span class="pre">report</span></code>, as <code class="docutils literal notranslate"><span class="pre">push</span></code> on its <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> and <code class="docutils literal notranslate"><span class="pre">scheduled</span></code> otherwise, and
+reports <code class="docutils literal notranslate"><span class="pre">warning</span></code> where <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code> passed over a failed target or test
+gate. A failed or cancelled <code class="docutils literal notranslate"><span class="pre">head</span></code> skips <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code>, so its
+<code class="docutils literal notranslate"><span class="pre">discussion</span></code> job runs on <code class="docutils literal notranslate"><span class="pre">always()</span></code> and then posts a line of its own with
+<code class="docutils literal notranslate"><span class="pre">head</span></code>’s result; a skip on purpose, on a pull request’s <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> or a
+verdict for another commit, skips it too.</p>
+<p><code class="docutils literal notranslate"><span class="pre">cron-conda.yml</span></code> posts to <code class="docutils literal notranslate"><span class="pre">cron-conda:</span> <span class="pre">conda</span> <span class="pre">distribution</span> <span class="pre">update</span> <span class="pre">report</span></code> by
+the same rules: <code class="docutils literal notranslate"><span class="pre">push</span></code> on its <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code>, <code class="docutils literal notranslate"><span class="pre">scheduled</span></code> otherwise, and a
+line of its own for a failed or cancelled <code class="docutils literal notranslate"><span class="pre">head</span></code>. Its report lists each <code class="docutils literal notranslate"><span class="pre">Platform</span> <span class="pre">pins</span></code> notice and
+warning from <code class="docutils literal notranslate"><span class="pre">Refresh</span> <span class="pre">the</span> <span class="pre">platform</span> <span class="pre">pins</span></code>, whose output that step keeps in a log,
+the files the run changed, and the build Push Changes pushed, or that it pushed
+none. Its <code class="docutils literal notranslate"><span class="pre">discussion</span></code> job waits for <code class="docutils literal notranslate"><span class="pre">conda-tag</span></code> and <code class="docutils literal notranslate"><span class="pre">conda-dist</span></code> and adds
+their results, so a failed tag or upload posts as <code class="docutils literal notranslate"><span class="pre">failure</span></code>. A pin warning
+reports <code class="docutils literal notranslate"><span class="pre">warning</span></code>. <code class="docutils literal notranslate"><span class="pre">cron-python-versions.yml</span></code> runs only on <code class="docutils literal notranslate"><span class="pre">schedule</span></code> and
+<code class="docutils literal notranslate"><span class="pre">workflow_dispatch</span></code>, so it posts as <code class="docutils literal notranslate"><span class="pre">scheduled</span></code> to <code class="docutils literal notranslate"><span class="pre">cron-python-versions:</span>
+<span class="pre">Python</span> <span class="pre">version</span> <span class="pre">update</span> <span class="pre">report</span></code>. <code class="docutils literal notranslate"><span class="pre">detect</span></code>’s report, read from the plan
+<code class="docutils literal notranslate"><span class="pre">Recompute</span> <span class="pre">the</span> <span class="pre">tiers</span></code> writes, lists each tier that moved and why, the files it
+regenerated, the ruleset edits to make by hand, the script’s notes, the audit’s
+outcome, and why no pull request opens, if none does. It reports <code class="docutils literal notranslate"><span class="pre">warning</span></code> for a
+hand-edit note, for a failed audit of a changed tree, or for an unset
+<code class="docutils literal notranslate"><span class="pre">vars.RELEASE_APP_CLIENT_ID</span></code>. Its <code class="docutils literal notranslate"><span class="pre">discussion</span></code> job needs <code class="docutils literal notranslate"><span class="pre">detect</span></code> alone,
+because <code class="docutils literal notranslate"><span class="pre">pr</span></code> waits for the owner’s approval of <code class="docutils literal notranslate"><span class="pre">github-release</span></code>, and the pull
+request it opens is its own record.</p>
+<p>The category is the workflow-level <code class="docutils literal notranslate"><span class="pre">REPORT_CATEGORY</span></code>. The API cannot
+create one, so it is made by hand, in Settings, Discussions.</p>
+<p>The reporting job uploads its report as an artifact, and a <code class="docutils literal notranslate"><span class="pre">discussion</span></code> job of
+its own downloads it and runs <code class="file docutils literal notranslate"><span class="pre">util/discussion_report.py</span></code>, which finds the
+category and the thread by name and opens the thread on first use. That job alone
+holds <code class="docutils literal notranslate"><span class="pre">discussions:</span> <span class="pre">write</span></code>, beside <code class="docutils literal notranslate"><span class="pre">contents:</span> <span class="pre">read</span></code> for its checkout, so every
+other job keeps its permissions. It uses <code class="docutils literal notranslate"><span class="pre">GITHUB_TOKEN</span></code> and first-party actions
+only. Reporting never fails a run: a missing category, a missing report or a
+failed API call is one warning, and the job is <code class="docutils literal notranslate"><span class="pre">continue-on-error</span></code>, since a
+failed Vendor Update run is one Create Release reads as not updated. A CI timing
+run failed by a HARD threshold is posted all the same, on <code class="docutils literal notranslate"><span class="pre">always()</span></code>, and so is
+a Python Versions run failed by its audit. The report steps of <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code>,
+<code class="docutils literal notranslate"><span class="pre">conda-update</span></code> and <code class="docutils literal notranslate"><span class="pre">detect</span></code> are <code class="docutils literal notranslate"><span class="pre">continue-on-error</span></code> on <code class="docutils literal notranslate"><span class="pre">!cancelled()</span></code>,
+and come last in each job.</p>
+<p>Unit Tests push runs post as <code class="docutils literal notranslate"><span class="pre">push</span></code> to <code class="docutils literal notranslate"><span class="pre">unit-tests:</span> <span class="pre">&lt;branch&gt;</span> <span class="pre">push</span> <span class="pre">runs</span></code>, so
+<code class="docutils literal notranslate"><span class="pre">main</span></code>’s thread is <code class="docutils literal notranslate"><span class="pre">unit-tests:</span> <span class="pre">main</span> <span class="pre">push</span> <span class="pre">runs</span></code>. <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> is a
+reusable workflow whose callers grant <code class="docutils literal notranslate"><span class="pre">contents:</span> <span class="pre">read</span></code>, so the post comes from
+<code class="docutils literal notranslate"><span class="pre">coverage-comment.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> relay instead: its <code class="docutils literal notranslate"><span class="pre">discussion</span></code> job
+takes a run whose event is <code class="docutils literal notranslate"><span class="pre">push</span></code>, and <code class="docutils literal notranslate"><span class="pre">comment</span></code> keeps a pull request’s. Each
+job holds its own scopes, <code class="docutils literal notranslate"><span class="pre">discussion</span></code> alone <code class="docutils literal notranslate"><span class="pre">discussions:</span> <span class="pre">write</span></code>, with
+<code class="docutils literal notranslate"><span class="pre">contents:</span> <span class="pre">read</span></code> for a checkout of the default branch’s script, never the run’s
+head, and <code class="docutils literal notranslate"><span class="pre">checks:</span> <span class="pre">read</span></code> for the run’s check suite. Its <code class="docutils literal notranslate"><span class="pre">Write</span> <span class="pre">the</span> <span class="pre">run</span> <span class="pre">report</span></code>
+step reads that suite in a single GraphQL call rather than any artifact, and
+renders every name and annotation it quotes as a code span. The report links the
+run, names its commit and conclusion, the jobs that did not pass, and the warning
+and failure annotations of the jobs that did. The conclusion becomes the
+<code class="docutils literal notranslate"><span class="pre">--status</span></code>: <code class="docutils literal notranslate"><span class="pre">success</span></code>, <code class="docutils literal notranslate"><span class="pre">cancelled</span></code> (and <code class="docutils literal notranslate"><span class="pre">stale</span></code>), <code class="docutils literal notranslate"><span class="pre">skipped</span></code> (and
+<code class="docutils literal notranslate"><span class="pre">neutral</span></code>), and <code class="docutils literal notranslate"><span class="pre">failure</span></code> for anything else, <code class="docutils literal notranslate"><span class="pre">timed_out</span></code> and
+<code class="docutils literal notranslate"><span class="pre">startup_failure</span></code> among them. A green run reports <code class="docutils literal notranslate"><span class="pre">warning</span></code> where a job failed
+without failing it, or a job that passed holds a warning or failure annotation, as
+a KTLO leg whose tests fail does (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1672">#1672</a>). The exception is the
+step’s <code class="docutils literal notranslate"><span class="pre">EXPECTED</span></code> list: the annotations a job writes on every run by design,
+today the install failures of the KTLO legs that cannot install, which neither
+count nor appear in the report. Each entry is a job, a level and a title prefix,
+an empty prefix matching only an empty title, so a reworded message still
+matches, and anything else those jobs write still counts.
+<code class="file docutils literal notranslate"><span class="pre">tests/project/test_unit_tests_push_reports_2030.py</span></code> pins the list, so a
+leg that starts to install, or a new by-design annotation, changes it and the
+pin together. The script labels the
+run it links with <code class="docutils literal notranslate"><span class="pre">GITHUB_WORKFLOW</span></code>, so the post step sets <code class="docutils literal notranslate"><span class="pre">Unit</span> <span class="pre">Tests</span></code> for
+that one command. A push relay’s concurrency group is its own run’s, since a
+group cancels a pending run when a newer one joins it.</p>
 </section>
 <section id="action-pins-1968">
 <span id="action-pins"></span><h2>Action Pins (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1968">#1968</a>)<a class="headerlink" href="#action-pins-1968" title="Link to this heading">¶</a></h2>
@@ -1740,23 +1856,30 @@ that names a particular action.</p>
 </section>
 <section id="workflow-lint-1967">
 <h2>Workflow Lint (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1967">#1967</a>)<a class="headerlink" href="#workflow-lint-1967" title="Link to this heading">¶</a></h2>
-<p>Lint’s <code class="docutils literal notranslate"><span class="pre">lint</span></code> job runs actionlint over every workflow in its <code class="docutils literal notranslate"><span class="pre">actionlint</span></code> step,
-first, as it needs no Python. The step downloads the release that
-<code class="docutils literal notranslate"><span class="pre">ACTIONLINT_VERSION</span></code> names and checks it against <code class="docutils literal notranslate"><span class="pre">ACTIONLINT_SHA256</span></code>, from that
-release’s checksums file, before unpacking it. Dependabot does not read this pin,
-so a bump changes both. The workflows use YAML anchors, which actionlint reads from
+<p>Lint’s <code class="docutils literal notranslate"><span class="pre">lint</span></code> job runs actionlint over every workflow in its <code class="docutils literal notranslate"><span class="pre">actionlint</span></code> step.
+The step downloads the release that <code class="docutils literal notranslate"><span class="pre">ACTIONLINT_VERSION</span></code> names and checks it
+against <code class="docutils literal notranslate"><span class="pre">ACTIONLINT_SHA256</span></code>, from that release’s checksums file, before unpacking
+it. Dependabot does not read this pin, so a bump changes both. The workflows use YAML anchors, which actionlint reads from
 1.7.10 on, and the pin is 1.7.12 or newer.</p>
-<p>actionlint runs the image’s shellcheck over each <code class="docutils literal notranslate"><span class="pre">run:</span></code> block, and shellcheck
-still reports style and info findings, so the step is advisory like the others in
-Lint. Its run summary counts the findings by actionlint rule and by shellcheck code.</p>
+<p>actionlint runs the image’s shellcheck over each <code class="docutils literal notranslate"><span class="pre">run:</span></code> block. Unlike Lint’s
+other steps, this one blocks: a finding fails the job, as the owner ruled on #1967
+once #2023, #2037 and #2038 had fixed every finding it reported. It runs last and
+on <code class="docutils literal notranslate"><span class="pre">!cancelled()</span></code>, so a finding skips none of the advisory steps and a failed
+Python setup does not skip it. Lint is not a required check of ruleset 23497679, so
+a red Lint does not hold a merge. The image’s shellcheck is not pinned, so a runner
+image that adds a check can turn Lint red on unchanged code; the fix is to the
+script it flags. The step’s run summary counts the findings by actionlint rule and
+by shellcheck code.</p>
 <p>The step’s <code class="docutils literal notranslate"><span class="pre">-ignore</span></code> pattern, which matches a message, not a file, hides a false
 positive: <code class="docutils literal notranslate"><span class="pre">concurrency.queue</span></code>, which <code class="docutils literal notranslate"><span class="pre">project-status.yml</span></code> sets and GitHub
 documents, is a key no actionlint release knows yet (<a class="reference external" href="https://github.com/rhysd/actionlint/issues/657">rhysd/actionlint#657</a>). The pattern goes once a
 release that knows it is pinned.</p>
 <p><code class="file docutils literal notranslate"><span class="pre">tests/project/test_actionlint_in_lint_1967.py</span></code> fails when the step is gone,
-pins an older release or no checksum, unpacks before it verifies, or passes an
-<code class="docutils literal notranslate"><span class="pre">-ignore</span></code> pattern other than that, and when no workflow sets
-<code class="docutils literal notranslate"><span class="pre">concurrency.queue</span></code> any more.</p>
+pins an older release or no checksum, unpacks before it verifies, passes an
+<code class="docutils literal notranslate"><span class="pre">-ignore</span></code> pattern other than that, or stops blocking: when it carries
+<code class="docutils literal notranslate"><span class="pre">continue-on-error</span></code>, exits with a status other than actionlint’s, or sits above
+an advisory step or a failed setup would skip it. It fails too when no workflow
+sets <code class="docutils literal notranslate"><span class="pre">concurrency.queue</span></code> any more.</p>
 </section>
 <section id="dependency-updates-1968">
 <h2>Dependency Updates (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1968">#1968</a>)<a class="headerlink" href="#dependency-updates-1968" title="Link to this heading">¶</a></h2>
@@ -1952,6 +2075,7 @@ repeating it here.</p>
 <li><a class="reference internal" href="#project-pins">Project Pins</a></li>
 <li><a class="reference internal" href="#file-size-caps-1969">File Size Caps (#1969)</a></li>
 <li><a class="reference internal" href="#workflow-scripts-1967">Workflow Scripts (#1967)</a></li>
+<li><a class="reference internal" href="#ci-reports-2030">CI Reports (#2030)</a></li>
 <li><a class="reference internal" href="#action-pins-1968">Action Pins (#1968)</a></li>
 <li><a class="reference internal" href="#workflow-lint-1967">Workflow Lint (#1967)</a></li>
 <li><a class="reference internal" href="#dependency-updates-1968">Dependency Updates (#1968)</a></li>
@@ -1968,7 +2092,7 @@ repeating it here.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=08d57b38"></script>
+</div><script src="../_static/documentation_options.js?v=e0f63a88"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>

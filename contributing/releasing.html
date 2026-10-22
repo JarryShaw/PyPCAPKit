@@ -818,7 +818,13 @@ checks, per matrix leg, whether that leg’s own platform/Python distribution
 is already there – this second check is the actual correctness fix, because
 <code class="docutils literal notranslate"><span class="pre">anaconda/actions/upload-package</span></code> has no <code class="docutils literal notranslate"><span class="pre">skip-existing</span></code> equivalent, only
 <code class="docutils literal notranslate"><span class="pre">force:</span></code> (never set), so re-uploading a file it already has fails outright
-rather than being absorbed.</p></li>
+rather than being absorbed. The <code class="docutils literal notranslate"><span class="pre">macos-26-intel</span></code> leg is the exception: the
+action’s CLI download returns 404 there, so its “Upload conda packages to
+Anaconda (Intel)” step runs <code class="docutils literal notranslate"><span class="pre">anaconda</span> <span class="pre">upload</span> <span class="pre">--skip-existing</span></code> instead
+(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2044">#2044</a>), which skips
+such a file. Conda Update’s Intel leg runs the same step, so it keeps a file
+anaconda.org already has, where the action’s <code class="docutils literal notranslate"><span class="pre">force:</span> <span class="pre">true</span></code> on its other legs
+replaces it.</p></li>
 </ul>
 <p>These evidence checks all run inside <code class="docutils literal notranslate"><span class="pre">version_check</span></code>, curling PyPI’s and
 Anaconda’s public, unauthenticated JSON APIs; the per-leg check runs inside
@@ -1107,7 +1113,7 @@ hand-rolled recovery.</p>
       
     </aside>
   </div>
-</div><script src="../_static/documentation_options.js?v=08d57b38"></script>
+</div><script src="../_static/documentation_options.js?v=e0f63a88"></script>
     <script src="../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../_static/scripts/furo.js?v=46bd48cc"></script>
