@@ -1,21 +1,17 @@
 name: Experimental Tests
 
-# The experimental tier (#1660): free-threaded CPython and GraalPy, one leg each,
-# here and in no other workflow. #1732, the owner's option 2: nothing waits on
-# these legs. They used to be legs of unit-tests.yml, first of `test` and then of
-# a job of their own there, and either way the Unit Tests run stayed in progress
-# until GraalPy finished, up to 140 minutes. Every `workflow_run` consumer of
-# "Unit Tests" -- coverage-comment.yml, deploy-pages.yml, cron-vendor.yml and
-# cron-conda.yml -- fires only once that run completes, so each waited too. A
-# workflow of their own reports separately: no `workflow_run` names it, it has no
-# `workflow_call` trigger, and a job cannot `needs:` one in another workflow.
+# The experimental tier (#1660), free-threaded CPython and GraalPy, in a
+# workflow of its own so that nothing waits on its legs (#1732): a
+# `workflow_run` consumer of "Unit Tests" fires only once that run completes,
+# and GraalPy's leg can take the job's whole cap. No `workflow_run` names this
+# workflow, it has no `workflow_call` trigger, and a job cannot `needs:` one in
+# another workflow.
 #
-# Its check names are the ones the legs had in unit-tests.yml, `Python <version>
-# (experimental)`. No required context names one: ruleset 23497679 requires
-# `Required checks passed` and the `Compat` legs alone.
+# Its check names, `Python <version> (experimental)`, are the ones the legs had
+# in unit-tests.yml; no required context of ruleset 23497679 names one.
 #
-# The same events as unit-tests.yml's own, and the same `changes` job, so a
-# docs-only pull request skips the legs here as it skips `test` there.
+# The same events and `changes` job as unit-tests.yml, so a docs-only pull
+# request skips the legs here as it skips `test` there.
 on:
   push:
     branches: [main]
@@ -25,30 +21,22 @@ on:
 permissions:
   contents: read
 
-# #1903 has a newer commit supersede a run, a pull request's or a push to
-# main's: nothing waits on these legs, so the newest commit is the one worth
-# testing. #1938, the owner's choice: a superseded run is skipped or stopped,
-# never cancelled, since GitHub counts a cancelled check against its commit and
-# marks it red. So there is no `concurrency:` block at all: without
-# `cancel-in-progress` a group still holds one pending run and cancels it once
-# a newer one arrives (docs.github.com, "Control the concurrency of workflows
-# and jobs"), and `queue: max` would hold a new commit's run behind the
-# superseded one until that one stops. Instead `current` skips every other job
-# of a run whose commit is superseded before it starts, and `Run unit tests`
-# stops one superseded while its tests run; util/superseded.py holds the rule
-# for both. A run whose commit stays current is unaffected.
+# A newer commit supersedes a run (#1903), which is skipped or stopped, never
+# cancelled (#1938), since GitHub counts a cancelled check against its commit
+# and marks it red. So there is no `concurrency:` block: without
+# `cancel-in-progress` a group still cancels its pending run once a newer one
+# arrives (docs.github.com, "Control the concurrency of workflows and jobs"),
+# and `queue: max` would hold the new run behind the superseded one. Instead
+# `current` skips the jobs of a superseded run, and `Run unit tests` stops one
+# superseded mid-run; util/superseded.py holds the rule for both.
 
 jobs:
-  # #1938: the gate. util/superseded.py's `check` asks the API whether this
-  # run's commit is still the head of main or of its open pull request, and
-  # writes `current`; any other event, or an API it cannot read, is current.
-  # Every other job needs this one and skips where `current` is `false`, so a
-  # superseded run's checks read `skipped`, which marks no commit red. Every
-  # step is `continue-on-error`: without `latest`, setup-python or requests the
-  # check fails or answers current, so a step's failure leaves `current` empty
-  # or `true`, which runs the rest; each job's `if:` opens with `!cancelled()`,
-  # so a failure of the job itself, which replaces the implicit `success()`,
-  # runs the rest too.
+  # #1938: the gate. util/superseded.py's `check` writes `current`, `false`
+  # only where this run's commit is no longer the head of main or of its open
+  # pull request, and every other job skips on `false`, so a superseded run's
+  # checks read `skipped`, which marks no commit red. Every step is
+  # `continue-on-error` and each job's `if:` opens with `!cancelled()`, so a
+  # failure here, of a step or of the job, runs the rest.
   current:
     name: Check the commit is still current
     runs-on: ubuntu-latest
@@ -70,9 +58,7 @@ jobs:
           sparse-checkout-cone-mode: false
           persist-credentials: false
 
-      # #1660: `latest` from .github/python-versions.toml, read with the
-      # runner's own python3, for the interpreter util/superseded.py fetches
-      # with requests on.
+      # #1660: `latest`, the interpreter util/superseded.py runs on.
       - name: Read the Python versions
         id: versions
         continue-on-error: true
@@ -96,7 +82,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: python util/superseded.py check
 
-  # unit-tests.yml's job of the same name, reading the one output this file needs.
+  # unit-tests.yml's job of the same name, for the outputs this file needs.
   python-versions:
     name: Read the Python versions
     needs: current
@@ -121,9 +107,8 @@ jobs:
         id: read
         run: python3 util/python_versions.py --github-output
 
-  # unit-tests.yml's `changes`: both run util/classify_changes.py, whose docstring
-  # says how a file is classified (#1967), with the same step
-  # (tests/project/test_sweeps_on_latest_only_1732.py pins it). This workflow is
+  # unit-tests.yml's `changes`, the same util/classify_changes.py step (#1967;
+  # tests/project/test_sweeps_on_latest_only_1732.py pins it). This workflow is
   # never called, so its own pull_request run is every pull_request run. Every
   # event checks out, as the script is in the tree.
   changes:
@@ -151,35 +136,21 @@ jobs:
   # summary` reports each failed step as a warning. A failure no step contains
   # -- a lost runner -- fails the job, and its job-level `continue-on-error`
   # then passes the run: "Prevents a workflow run from failing when a job
-  # fails" (docs.github.com, Workflow syntax, `jobs.<job_id>.continue-on-error`,
-  # whose own example is an experimental matrix leg). Its check run still reads
-  # `failure`, so the step-level guards stay for every failure a step can hold.
+  # fails" (docs.github.com, Workflow syntax, `jobs.<job_id>.continue-on-error`).
+  # Its check run still reads `failure`, so the step-level guards stay.
   #
   # A job past its `timeout-minutes` is cancelled (same page,
-  # `jobs.<job_id>.timeout-minutes`), and the page does not say whether the
-  # job-level guard covers that. So setup-python, the install, the watcher's
-  # setup-python and requests (#1938) and the tests carry caps of their own,
-  # 5, 10, 1, 1 and 120 minutes, under the job's 140: a step past its cap
-  # fails rather than cancels, and `continue-on-error` then applies as to any
-  # failure (actions/runner src/Runner.Worker/StepsRunner.cs:322-353, at
-  # 5f0b3ddcc). That leaves 3 minutes for the rest, which took at most 0.32,
-  # setup-python included, on every uncovered leg of runs
-  # 38569321543-38569522442.
+  # `jobs.<job_id>.timeout-minutes`), which does not say whether the
+  # job-level guard covers that. So every step that can run long
+  # carries a cap of its own under the job's: a step past its cap fails rather
+  # than cancels, and `continue-on-error` then applies as to any failure
+  # (actions/runner src/Runner.Worker/StepsRunner.cs:322-353, at 5f0b3ddcc).
+  # tests/project/test_ktlo_legs_stay_green_1672.py pins the caps and the
+  # minutes they leave the rest.
   #
-  # The tests' 120: GraalPy 25.4's tests step reached 26% of the unit tier's
-  # tests at its old 25-minute cap (job 115915976024; setup-python took 0.7
-  # minutes, the install 3.3). Those tests hold 20-26% of the tier's time, and
-  # the tier less the round-trip sweeps, which this job did not run then (see
-  # `Run unit tests`), held 3.5-4.5 times as much, by per-module times from a local
-  # 3.14 run and the 3.14, 3.15 and 3.14t legs of run 38581834697: 88-113
-  # minutes on GraalPy (estimate). 3.14t, which shares the caps, took 5.8
-  # minutes over the whole unit tier in that run.
-  #
-  # #1740 gives GraalPy 3 workers, not 4, so at 4/3 of that time its tests should
-  # take about 117-151 minutes (an inference from the 88-113, not measured),
-  # past the 110-minute `timeout` in `Run unit tests`. GraalPy's leg may then end
-  # on that timeout, which `Containment summary` reports as a warning: that is
-  # expected, blocks nothing, and leaves the caps as they are.
+  # The tests' cap is sized for GraalPy (#1732), whose leg may still end on the
+  # 110-minute `timeout` in `Run unit tests`, which `Containment summary`
+  # reports as a warning that blocks nothing.
   experimental:
     name: Python ${{ matrix.python-version }} (experimental)
     # #1938: `!cancelled()` so a failed `current` skips nothing, and then the
@@ -209,12 +180,10 @@ jobs:
         continue-on-error: true
 
       # #1958: these legs run the `ALL` test tier alone, as `test`'s legs but
-      # `latest` do, so they leave out every `LATEST` module -- the project
-      # pins (#1954) and the round-trip sweeps (#1732) among them. The runner's
-      # own `python3` asks tests/_tiers.py, which needs only the standard
-      # library, before setup-python puts the leg's interpreter on PATH, so
-      # GraalPy does not parse the tree. Where it fails, the tests run the
-      # `LATEST` tier too, and `Experimental summary` names this step.
+      # `latest` do. The runner's own `python3` asks tests/_tiers.py before
+      # setup-python puts the leg's interpreter on PATH, so GraalPy does not
+      # parse the tree. Where it fails, the tests run the `LATEST` tier too,
+      # and `Experimental summary` names this step.
       - name: List the LATEST tier
         id: tier
         if: ${{ steps.checkout.outcome == 'success' }}
@@ -251,17 +220,15 @@ jobs:
           nproc
           python -c "import os; print('cpu_count', os.cpu_count())"
 
-      # #1938: the interpreter `Run unit tests` runs util/superseded.py on, a
-      # CPython of its own: `latest`, never the leg's GraalPy or free-threaded
-      # build, which would also have to take requests. `update-environment:
-      # false` leaves PATH, `pythonLocation` and `LD_LIBRARY_PATH` as the leg's
-      # setup-python set them, so the tests see the leg's interpreter alone;
-      # this one is run by its `python-path`, and finds its own libpython by
-      # the rpath actions/python-versions builds with
-      # (builders/ubuntu-python-builder.psm1), since its soname is not the
-      # leg's. No `cache:` and `--no-cache-dir`, so the leg's pip cache is
-      # untouched. Each step has a cap of 1 minute (see the job's comment),
-      # and a failure leaves the tests to run unwatched.
+      # #1938: the interpreter `Run unit tests` runs util/superseded.py on,
+      # `latest`, so the leg's GraalPy or free-threaded build need not take
+      # requests. `update-environment: false` leaves PATH, `pythonLocation` and
+      # `LD_LIBRARY_PATH` as the leg's setup-python set them, so the tests see
+      # the leg's interpreter alone; this one is run by its `python-path`, and
+      # finds its own libpython by the rpath actions/python-versions builds
+      # with (builders/ubuntu-python-builder.psm1). No `cache:` and
+      # `--no-cache-dir`, so the leg's pip cache is untouched. A failure here
+      # leaves the tests to run unwatched.
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         id: watcher-python
         if: ${{ steps.install.outcome == 'success' }}
@@ -280,23 +247,18 @@ jobs:
           WATCHER_PYTHON: ${{ steps.watcher-python.outputs.python-path }}
         run: '"$WATCHER_PYTHON" -m pip install --no-cache-dir requests'
 
-      # #1740: GraalPy's leg loses its runner 18-30 minutes into its tests ("The
-      # runner has received a shutdown signal"), under a 120-minute cap. So every
-      # 30 s this samples `free -m`, `df -h` of `/` and the workspace's volume,
-      # /proc/loadavg and the five processes with the most RSS, each line led by
-      # `[monitor]`, into $RUNNER_TEMP/resource-monitor.log. The sampler holds none
-      # of this step's output: the runner kills a step's process tree 5 s after
-      # its shell exits while a child still holds it (actions/runner
-      # src/Runner.Sdk/ProcessInvoker.cs:485-505, at 796cc18ff). `Run unit tests`
-      # follows the file into its own log instead, which is the evidence a lost
-      # runner leaves: once it has the shutdown signal, the runner evaluates no
-      # later step's condition, `always()` included (src/Runner.Worker/StepsRunner.cs:205-208,
-      # same commit), and job 116057255255 skipped every step after the tests.
-      # `set +eo pipefail`: `shell: bash` sets both, and `ps | head` can end
-      # `ps` with SIGPIPE. Started here, the sampler is outside the tests' memory
-      # scope (`Run unit tests`), so an OOM kill there leaves it running; each
-      # sample also holds the kernel's OOM-kill count and, while it exists, the
-      # scope's own memory use and events.
+      # #1740: GraalPy's leg can lose its runner mid-tests ("The runner has
+      # received a shutdown signal"), and then the runner evaluates no later
+      # step's condition, `always()` included (actions/runner
+      # src/Runner.Worker/StepsRunner.cs:205-208, at 796cc18ff). So this samples
+      # the runner every 30 s into resource-monitor.log, and `Run unit tests`
+      # follows the file into its own log, the one record a lost runner leaves.
+      # The sampler holds none of this step's output: the runner kills a step's
+      # process tree 5 s after its shell exits while a child still holds it
+      # (src/Runner.Sdk/ProcessInvoker.cs:485-505, same commit). `set +eo
+      # pipefail`: `shell: bash` sets both, and `ps | head` can end `ps` with
+      # SIGPIPE. Started here, the sampler is outside the tests' memory scope,
+      # so an OOM kill there leaves it running.
       - name: Start the resource monitor
         id: monitor
         if: ${{ steps.install.outcome == 'success' }}
@@ -323,12 +285,10 @@ jobs:
             count=0
             while :; do
               count=$((count + 1))
-              # One write a sample, opening on a newline: `Run unit tests` copies
-              # it into a log where pytest may have left a line unfinished. bash
-              # line-buffers its builtins' output, so printf wrote a sample in
-              # pieces, `tail -F` could copy them apart and pytest's output land
-              # between them (#1888); `cat` reads the here-string whole and
-              # writes it in one call.
+              # One write a sample, so `tail -F` cannot land pytest's output
+              # inside one (#1888): bash's builtins write a sample in pieces,
+              # and `cat` writes the here-string in one call. The leading
+              # newline ends any line pytest left unfinished.
               lines=$(sample "$count" 2>&1 | sed 's/^/[monitor] /')
               cat <<< $'\n'"$lines"
               sleep 30 &
@@ -339,99 +299,77 @@ jobs:
           echo "$!" > "$RUNNER_TEMP/resource-monitor.pid"
           echo "Sampling every 30 s into $log, pid $!."
 
-      # unit-tests.yml `test`'s selection on every leg but `latest`: no
-      # experimental version is `latest`, which util/python_versions.py holds to
-      # a supported CPython, so the `LATEST` test tier (#1958) is always left out
-      # here. #1740: `tail -F` copies the resource monitor's samples into this
-      # step's log as they are taken, and stops with the step.
+      # unit-tests.yml `test`'s selection on every leg but `latest`, so the
+      # `LATEST` tier (#1958) is always left out here: util/python_versions.py
+      # holds `latest` to a supported CPython. #1740: `tail -F` copies the
+      # resource monitor's samples into this step's log.
       #
-      # #1740, containment: a lost runner fails the job, and so the check, which
-      # no `continue-on-error` prevents, so the tests are held to what leaves the
+      # #1740, containment: a lost runner fails the check, which no
+      # `continue-on-error` prevents, so the tests are held to what leaves the
       # runner alive, and a breach fails this step instead:
-      # - GraalPy alone: a 2 GiB heap per process, read by every GraalPy
-      #   process, xdist workers included (GRAAL_PYTHON_VM_ARGS), and 3 workers,
-      #   which leaves a CPU of the 4 to the JIT and the runner. On the native
-      #   standalone `--vm.Xmx` caps the Java heap alone, not thread stacks or
-      #   JIT code (graalvm.org, Native Image, Memory Management), and a heap
-      #   the GC cannot free raises OutOfMemoryError, which GraalPy turns into
-      #   MemoryError (graalpython runtime/exception/ExceptionUtils.java:313-316,
-      #   at graal-25.4.4).
-      # - #1753: a worker's live heap grows with its tests. Job 116172356218's
-      #   three workers reached 2.2-2.6 GB RSS in 16 minutes; four tests raised
-      #   MemoryError, then gw1 raised one in pytest's own failure report,
-      #   which ends the session (exit 3) with 7.9 GB still free. Locally
-      #   (25.4.4, -n 0) the heap after a full GC rose from 199M to 1738M over
-      #   11% of tests/const and tests/corekit, so no heap the 12G holds for 3
-      #   workers lasts the tier. `-XX:+ExitOnOutOfMemoryError` ends that
-      #   worker instead, xdist reports the test it ran as crashed and starts a
-      #   fresh one. `--max-worker-restart=30` allows 30 restarts in all, where
-      #   three heaps that last 16 minutes need about 21 in 110; xdist's default
-      #   is 4 a worker, 12 at -n 3.
-      #   Five corekit files at `--vm.Xmx450m -n 1`: exit 3 after 28 passed
-      #   without the flag; with it, 3 workers replaced and the run finished.
-      # - #1963: GraalPy's tier runs in shards, so no worker outlives its heap.
-      #   Job 118912680486, the curated `ALL` tier's first full run, lost nine
-      #   workers at 2.5-3.0 GB RSS, 9-17 minutes into their lives, each
-      #   failing a test that passes alone. So util/pytest_shards.py runs
-      #   pytest once per shard `SHARDS` names, a directory or a glob of one
-      #   directory's entries, then once over the rest, and every run starts
-      #   its workers afresh. Each shard is sized by its largest live heap
-      #   after a full GC, measured locally on GraalPy 25.4.4 at `-n 3`: run
-      #   whole, the tier lost 8 workers, its heap reached the 2 GiB cap, and
-      #   it took 3559 s; in these shards none went down, no heap passed
-      #   1303 MB, and it took 1879 s. The script runs inside the timeout,
-      #   scope and watcher below, so they hold over the whole tier; on the
-      #   timeout's SIGINT no later run starts. Each shard's run writes a
-      #   JUnit file of its own beside junit.xml.
-      # - `timeout` sends SIGINT at 110 minutes, under the 120-minute cap, so
-      #   pytest still writes the junit XML, and exits 124; SIGKILL 3 minutes on.
-      #   #2020: GNU's `timeout`, which Ubuntu 26.04 installs as `gnutimeout`.
-      #   Its `timeout` is uutils' (0.10.0), whose `--kill-after` sends SIGKILL
-      #   with the SIGINT, and to its child alone, so a run there exits 137
-      #   with no teardown and leaves xdist's workers running.
+      # - GraalPy alone: a 2 GiB heap per process, xdist workers included
+      #   (GRAAL_PYTHON_VM_ARGS), and 3 workers, which leaves a CPU of the 4 to
+      #   the JIT and the runner. On the native standalone `--vm.Xmx` caps the
+      #   Java heap alone, not thread stacks or JIT code (graalvm.org, Native
+      #   Image, Memory Management), and a heap the GC cannot free raises
+      #   OutOfMemoryError, which GraalPy turns into MemoryError (graalpython
+      #   runtime/exception/ExceptionUtils.java:313-316, at graal-25.4.4).
+      # - #1753: a worker's live heap grows with its tests until no heap lasts
+      #   the tier, and a MemoryError in pytest's own failure report ends the
+      #   session. `-XX:+ExitOnOutOfMemoryError` ends that worker instead, and
+      #   xdist reports the test it ran as crashed and starts a fresh one.
+      #   `--max-worker-restart=30` counts restarts over the whole run, where
+      #   three heaps that last 16 minutes need about 21 in 110; xdist's
+      #   default is 4 a worker.
+      # - #1963: util/pytest_shards.py runs pytest once per shard `SHARDS`
+      #   names, a directory or a glob of one directory's entries, then once
+      #   over the rest, so every run starts its workers afresh and none
+      #   outlives its heap. Each shard is sized by its largest live heap after
+      #   a full GC on GraalPy. The script runs inside the timeout, scope and
+      #   watcher below, so they hold over the whole tier; on the timeout's
+      #   SIGINT no later run starts. Each shard's run writes a JUnit file of
+      #   its own beside junit.xml.
+      # - `timeout` sends SIGINT at 110 minutes, under the step's cap, so pytest
+      #   still writes the JUnit XML, and exits 124; SIGKILL 3 minutes on.
+      #   #2020: GNU's `timeout`, which Ubuntu 26.04 installs as `gnutimeout`:
+      #   its `timeout` is uutils' (0.10.0), whose `--kill-after` sends SIGKILL with the
+      #   SIGINT, to its child alone, which leaves xdist's workers running.
       # - `prlimit --fsize`: no file over 2 GiB.
       # - A transient scope, 12G and no swap, at a fifth of the runner's CPU
       #   weight, where `sudo -n` can start one; otherwise uncapped. A scope's
-      #   command "will thus inherit the execution environment of the caller"
-      #   (systemd-run(1), systemd v255 man/systemd-run.xml:70-71), but sudo
-      #   resets PATH to its secure_path and drops `LD_*` even under
-      #   --preserve-env (sudo plugins/sudoers/env.c:133-141, at 43defa130),
-      #   where setup-python puts its lib/ (src/find-python.ts:163-170, at
-      #   ff73b2463), so `env` sets those again, and the heap too. systemd-run
-      #   drops to the runner's uid and gid itself, with no setgroups
-      #   (src/run/run.c:1645-1683, v255). The probe is `scoped` itself, every
-      #   flag included, under a throwaway unit and running `true`, and either
-      #   way the tests run the one argv, in the scope or not.
-      # `tests-status` holds the exit status, the scope and the probe's error,
-      # the seconds the tests took, the kernel's OOM kills while they ran
-      # (/proc/vmstat `oom_kill`), the MemoryErrors raised, as the lines that
-      # `MemoryError` heads, alone or before a `:`, at the line's start or after
-      # pytest's `E`, an `INTERNALERROR>` or an exception group's `|` (#1962: a
-      # mention is not one, such as a docstring a traceback prints, and nor are
-      # Java's `OutOfMemoryError` and the flag), and the workers that
-      # crashed, by xdist's `[gwN] node down:` lines (under `-q` it prints no
-      # `replacing crashed worker`, xdist/dsession.py:78-80 at v3.8.0), for
-      # `Containment summary`.
+      #   command inherits the caller's environment (systemd-run(1), systemd
+      #   v255 man/systemd-run.xml:70-71), but sudo resets PATH and drops
+      #   `LD_*` even under --preserve-env (sudo plugins/sudoers/env.c:133-141,
+      #   at 43defa130), where setup-python puts its lib/
+      #   (src/find-python.ts:163-170, at ff73b2463), so `env` sets those
+      #   again, and the heap too. systemd-run drops to the runner's uid and
+      #   gid itself (src/run/run.c:1645-1683, v255). The probe is `scoped`
+      #   itself, every flag included, under a throwaway unit and running
+      #   `true`, and either way the tests run the one argv, in the scope or not.
+      # `tests-status` holds, for `Containment summary`, the exit status, the
+      # scope and the probe's error, the seconds taken, the kernel's OOM kills
+      # while the tests ran, the MemoryErrors raised and the workers that went
+      # down. A MemoryError is a line `MemoryError` heads, alone or before a
+      # `:`, at the line's start or after pytest's `E`, an `INTERNALERROR>` or
+      # an exception group's `|`: a mention is not one (#1962), and nor is
+      # Java's `OutOfMemoryError`. A worker down is xdist's `[gwN] node down:`
+      # line, since under `-q` it prints no `replacing crashed worker`
+      # (xdist/dsession.py:78-80, at v3.8.0).
       #
-      # #1938: util/superseded.py's `watch` runs the whole command -- the scope's
-      # sudo where there is one, then prlimit, timeout and pytest -- in a
-      # session of its own, outside the scope, and asks `current`'s question
-      # every 60 s. Once the commit is superseded it sends SIGTERM, SIGKILL 30 s
-      # on, to that session and, with `--scope`, to every process of
-      # pcapkit-tests.scope through `systemctl kill`: the scope's processes run
-      # as the runner's user under a root-owned sudo, which a signal to the
-      # session cannot pass. Ubuntu's own /etc/sudoers sets `use_pty` (sudo
-      # 1.9.9-1ubuntu2.7 and 1.9.15p5-3ubuntu5.24.04.4), and sudoers(5) says it
-      # has no effect where sudo has no terminal, as in a step; the scope is
-      # reached by name either way. Once the command exits it writes a
-      # `Superseded` notice and a job-summary line and exits 0, so the step
-      # succeeds and frees the runner; where it outlives SIGKILL by 15 s, a
-      # warning and exit 70, since the tests may run on until `timeout` ends
-      # them. Otherwise it exits with the command's own status, so a failure on
-      # a current commit reads as it would unwatched, and an API it cannot read
-      # counts as current. It runs on `watcher-python`, with requests; where
-      # that interpreter or its requests did not install, the tests run
-      # unwatched, as they would without #1938.
+      # #1938: util/superseded.py's `watch` runs the whole command in a session
+      # of its own, outside the scope, and asks `current`'s question every
+      # 60 s. Once the commit is superseded it sends SIGTERM, SIGKILL 30 s on,
+      # to that session and, with `--scope`, to every process of
+      # pcapkit-tests.scope through `systemctl kill`, since a signal to the
+      # session cannot pass the root-owned sudo they run under. Ubuntu's
+      # /etc/sudoers sets `use_pty` (sudo 1.9.9-1ubuntu2.7 and
+      # 1.9.15p5-3ubuntu5.24.04.4), which sudoers(5) says has no effect where
+      # sudo has no terminal, as in a step; the scope is reached by name
+      # either way. The step then
+      # succeeds and frees the runner; where the command outlives SIGKILL, it
+      # warns and exits 70. Otherwise it exits with the command's own status,
+      # and an API it cannot read counts as current. Where `watcher-python` or
+      # its requests did not install, the tests run unwatched.
       - name: Run unit tests
         id: tests
         if: ${{ steps.install.outcome == 'success' }}
@@ -533,12 +471,11 @@ jobs:
           kill "$pid" 2>/dev/null || echo "The resource monitor, pid $pid, had already stopped."
           echo "$(grep -c '^\[monitor\] .* sample [0-9]*$' "$RUNNER_TEMP/resource-monitor.log") samples taken."
 
-      # #1740: the monitor's file, where the runner survives the tests. docs.github.com
-      # says `always()` runs a step "even when canceled" (Expressions, `always`)
-      # and nothing about a runner's shutdown, which runs no later step (above):
-      # job 116057255255 skipped even `Post Run actions/checkout@v7`, whose action
-      # sets no `post-if`, which "defaults to `always()`" (Metadata syntax,
-      # `runs.post-if`). So on a lost runner the samples are in the tests' log alone.
+      # #1740: the monitor's file, where the runner survives the tests. A lost
+      # runner runs no later step (see `Start the resource monitor`), not even
+      # a post step, whose `post-if` "defaults to `always()`" (docs.github.com,
+      # Metadata syntax, `runs.post-if`), so the samples are then in the
+      # tests' log alone.
       - name: Upload the resource monitor's log
         if: ${{ always() }}
         continue-on-error: true
@@ -551,7 +488,7 @@ jobs:
 
       # As `test`'s, under a name of its own: ci-timing.yml reads `test`'s
       # `junit-unit-*` files alone, and this one is the record of GraalPy's
-      # runtime. The glob takes GraalPy's JUnit file per shard too (#1963).
+      # runtime. The glob takes each shard's JUnit file too (#1963).
       - name: Upload test timings
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         continue-on-error: true
@@ -563,14 +500,12 @@ jobs:
 
       # #1740: what `tests-status` and the monitor's last sample say about the
       # tests, ahead of `Experimental summary`, whose script stays the KTLO
-      # summary's (tests/project/test_ktlo_legs_stay_green_1672.py) and which
-      # still reports a failed `tests` step as it reports any. Each cause gets a
-      # warning of its own: no 12G scope, an OOM kill, a MemoryError, a worker
-      # xdist replaced (#1753), and a timeout -- exit 124, or 137 with no OOM
-      # kill after 110 minutes, which is `--kill-after` ending a teardown that
-      # SIGINT did not. An OOM kill of pytest itself also exits 137, so the OOM
-      # count and the time tell them apart. Nothing here fails: a missing or
-      # partial status is reported as what it is.
+      # summary's (tests/project/test_ktlo_legs_stay_green_1672.py). Each cause
+      # gets a warning of its own: no 12G scope, an OOM kill, a MemoryError, a
+      # worker xdist replaced (#1753), and a timeout -- exit 124, or 137 with
+      # no OOM kill after 110 minutes, `--kill-after` ending a teardown SIGINT
+      # did not; an OOM kill of pytest itself also exits 137. Nothing here
+      # fails.
       - name: Containment summary
         if: ${{ !cancelled() }}
         continue-on-error: true
