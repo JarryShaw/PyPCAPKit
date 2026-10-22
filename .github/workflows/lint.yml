@@ -56,11 +56,18 @@ concurrency:
   group: lint-${{ github.event_name == 'pull_request' && github.ref || github.run_id }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
+# #2030: one Discussions category holds every report with no pull request to
+# comment on, one thread per job.
+env:
+  REPORT_CATEGORY: CI reports
+
 jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    outputs:
+      status: ${{ steps.run-report.outputs.status }}
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -97,9 +104,11 @@ jobs:
       # run` prefix, so this and a developer's `make pylint` cannot drift apart.
       # `continue-on-error: true` lets every tool run whatever another found;
       # `set +e` and `status=` keep the summary lines running under the default
-      # `bash -e`.
+      # `bash -e`. Each block goes to lint-summary.md too, for the run report
+      # (#2030).
 
       - name: bandit
+        id: bandit
         continue-on-error: true
         run: |
           set +e
@@ -112,11 +121,12 @@ jobs:
             echo '```'
             sed -n '/^Run metrics:/,$p' bandit.log || echo 'no run metrics in output'
             echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          } | tee -a "$RUNNER_TEMP/lint-summary.md" >> "$GITHUB_STEP_SUMMARY"
 
           exit "$status"
 
       - name: mypy
+        id: mypy
         continue-on-error: true
         run: |
           set +e
@@ -129,7 +139,7 @@ jobs:
             echo '```'
             tail -n 1 mypy.log
             echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          } | tee -a "$RUNNER_TEMP/lint-summary.md" >> "$GITHUB_STEP_SUMMARY"
 
           exit "$status"
 
@@ -141,6 +151,7 @@ jobs:
       # code's real floor, 3.11 (`enum.StrEnum`, `enum.show_flag_values`).
       # Raising either belongs in its own change.
       - name: vermin
+        id: vermin
         continue-on-error: true
         run: |
           set +e
@@ -154,13 +165,14 @@ jobs:
             grep -E '^(Minimum required versions|Incompatible versions|Target versions not met):' vermin.log \
               || echo 'no verdict in output'
             echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          } | tee -a "$RUNNER_TEMP/lint-summary.md" >> "$GITHUB_STEP_SUMMARY"
 
           exit "$status"
 
       # Last of the advisory steps because it is by far the slowest, so the
       # quick verdicts reach the summary first.
       - name: pylint
+        id: pylint
         continue-on-error: true
         run: |
           set +e
@@ -174,7 +186,7 @@ jobs:
             printf 'messages by class (C/E/R/W):\n'
             grep -oE ': [A-Z][0-9]{4}:' pylint.log | grep -oE '[A-Z]' | sort | uniq -c || echo 'none'
             echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          } | tee -a "$RUNNER_TEMP/lint-summary.md" >> "$GITHUB_STEP_SUMMARY"
 
           exit "$status"
 
@@ -183,8 +195,8 @@ jobs:
       # is safe because #2023, #2037 and #2038 fixed every finding it reported.
       # It runs last, though it needs no Python, so that a finding skips none of
       # the advisory steps above, and on `!cancelled()`, so that a failed Python
-      # setup does not skip it. Lint is not among ruleset 23497679's required
-      # checks, so a red Lint does not hold a merge.
+      # setup does not skip it. `Lint` is one of ruleset 23497679's required
+      # checks (#1967), so a red Lint holds a merge.
       #
       # The image's shellcheck is not pinned: a runner image that adds a check
       # can flag unchanged code and turn Lint red on an unrelated pull request.
@@ -199,6 +211,7 @@ jobs:
       # yet (rhysd/actionlint#657, fixed by rhysd/actionlint#654). Drop the
       # pattern once a release with that fix is pinned.
       - name: actionlint
+        id: actionlint
         if: ${{ !cancelled() }}
         timeout-minutes: 5
         env:
@@ -228,6 +241,100 @@ jobs:
             printf 'findings by rule:\n%s\n' "${rules:-none}"
             printf 'shellcheck findings by code:\n%s\n' "${shellcheck:-none}"
             echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
+          } | tee -a "$RUNNER_TEMP/lint-summary.md" >> "$GITHUB_STEP_SUMMARY"
 
           exit "$status"
+
+      # #2030: the report the `discussion` job posts, on the schedule and on
+      # dispatch, never on a pull request, whose run has checks of its own:
+      # each tool's outcome, then the blocks the steps above wrote to the
+      # summary. `status=warning` where an advisory step failed. Both steps
+      # are `continue-on-error`, so a report never fails the run.
+      - name: Write the run report
+        id: run-report
+        if: ${{ !cancelled() && github.event_name != 'pull_request' }}
+        continue-on-error: true
+        env:
+          BANDIT: ${{ steps.bandit.outcome }}
+          MYPY: ${{ steps.mypy.outcome }}
+          VERMIN: ${{ steps.vermin.outcome }}
+          PYLINT: ${{ steps.pylint.outcome }}
+          ACTIONLINT: ${{ steps.actionlint.outcome }}
+        run: |
+          status=success
+          for outcome in "$BANDIT" "$MYPY" "$VERMIN" "$PYLINT"; do
+            if [ "$outcome" = failure ]; then
+              status=warning
+            fi
+          done
+          report="$RUNNER_TEMP/lint-report.md"
+          {
+            echo '### Lint'
+            echo
+            echo "- bandit, advisory: ${BANDIT:-not run}"
+            echo "- mypy, advisory: ${MYPY:-not run}"
+            echo "- vermin, advisory: ${VERMIN:-not run}"
+            echo "- pylint, advisory: ${PYLINT:-not run}"
+            echo "- actionlint, blocking: ${ACTIONLINT:-not run}"
+            if [ -s "$RUNNER_TEMP/lint-summary.md" ]; then
+              echo
+              cat "$RUNNER_TEMP/lint-summary.md"
+            fi
+          } > "$report"
+          echo "status=$status" >> "$GITHUB_OUTPUT"
+          cat "$report"
+
+      - name: Upload the run report
+        if: ${{ !cancelled() && github.event_name != 'pull_request' }}
+        continue-on-error: true
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: lint-report
+          path: ${{ runner.temp }}/lint-report.md
+          retention-days: 14
+
+  # #2030: posts the report `lint` uploaded to the thread `lint: weekly lint
+  # report`, every run, as a scheduled report: Lint has no push trigger, and a
+  # dispatch is a deliberate report, as in ci-timing.yml. Never on a pull
+  # request. A green job whose advisory steps failed reports `warning`. The job
+  # and its steps are `continue-on-error`; util/discussion_report.py writes a
+  # warning rather than failing.
+  discussion:
+    name: Post the lint report
+    needs: [ lint ]
+    if: ${{ always() && github.event_name != 'pull_request' && needs.lint.result != 'skipped' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    permissions:
+      contents: read
+      discussions: write
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # A run that never wrote a report uploaded none; the script then warns.
+      - name: Download the report
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: lint-report
+          path: report
+
+      - name: Post the report to Discussions
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          LINT_RESULT: ${{ needs.lint.result }}
+          LINT_STATUS: ${{ needs.lint.outputs.status }}
+        run: |
+          if [ "$LINT_RESULT" = success ]; then
+            status="${LINT_STATUS:-success}"
+          else
+            status="$LINT_RESULT"
+          fi
+          python3 util/discussion_report.py --category "$REPORT_CATEGORY" \
+            --title 'lint: weekly lint report' --report report/lint-report.md \
+            --mode scheduled --status "$status"
