@@ -618,6 +618,20 @@ def stuck(project: 'dict[str, Any]', subdir: 'str', pythons: 'list[str]', have: 
     return f'no release up to {have} has wheels for all of {_tags(pythons)} on {subdir} at once'
 
 
+def lost(project: 'dict[str, Any]', subdir: 'str', pythons: 'list[str]', pin: 'str') -> 'str':
+    """Why the release ``pin`` names no longer qualifies on ``subdir``, for its warning (#2028).
+
+    It names the conda Pythons the pinned release has no wheel for there, or
+    says PyPI lists no such release, as :func:`_releases` weighs them.
+
+    """
+    from packaging.version import Version  # pylint: disable=import-outside-toplevel
+    wheels = next((files for version, _, files in _releases(project) if version == Version(pin)), None)
+    if wheels is None:
+        return f'PyPI lists no stable release {pin}'
+    return f'{pin} has no wheel for {_tags(lacking(wheels, subdir, pythons))} on {subdir}'
+
+
 #: What :func:`_fetch` raises when PyPI cannot be read: :class:`OSError` for a
 #: failed request, and :class:`ValueError` for a reply that is not JSON, as
 #: requests releases before its own ``JSONDecodeError`` raise it.
@@ -636,9 +650,10 @@ def refresh(table: 'dict[str, dict[str, Pin]]', fetch: 'Callable[[str], dict[str
     reaches the installed version that way, or already pins it, is dropped, as
     the other platforms vendor that version. A package or pin it cannot settle
     stays as it is, and so does a pin no release up to the installed version has
-    a wheel for every conda Python, which :func:`stuck` warns about (#2025). Each
-    note is a workflow command, ``notice`` for a change and ``warning`` for a pin
-    left alone, and its text.
+    a wheel for every conda Python, which :func:`stuck` warns about (#2025), or
+    whose own release no longer has one when an older release does, which
+    :func:`lost` warns about (#2028). Each note is a workflow command,
+    ``notice`` for a change and ``warning`` for a pin left alone, and its text.
 
     """
     from packaging.version import Version  # pylint: disable=import-outside-toplevel
@@ -684,6 +699,12 @@ def refresh(table: 'dict[str, dict[str, Pin]]', fetch: 'Callable[[str], dict[str
                 # #2025: a pin no release can move to used to stay without a word.
                 notes.append(('warning', f'{name} {pin.version} on {subdir} stays as it is, and may no longer '
                                          f'hold: {stuck(project, subdir, pythons, have)}'))
+            elif Version(newest) < current < ceiling:
+                # #2028: the pinned release itself lost a wheel, which used to pass without a word too.
+                notes.append(('warning', f'{name} {pin.version} on {subdir} stays as it is, and may no longer '
+                                         f'hold: {lost(project, subdir, pythons, pin.version)}, and the '
+                                         f'newest release up to {have} with wheels for all of {_tags(pythons)} '
+                                         f'there is {newest}'))
     return {name: platforms for name, platforms in result.items() if platforms}, notes
 
 

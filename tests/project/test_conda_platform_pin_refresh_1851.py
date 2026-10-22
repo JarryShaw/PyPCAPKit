@@ -10,7 +10,8 @@
   review-by date, drops it once it reaches the installed release or if it
   already pins it, and leaves it, with a warning, when PyPI cannot be read or
   when no release has a wheel for every conda Python, naming the Pythons no
-  release has one for (#2025).
+  release has one for (#2025), or when the pinned release has lost the wheel an
+  older release still has, naming the Pythons it lacks (#2028).
   ``--refresh-pins`` rewrites :file:`conda/platform-pins.toml` only on a change.
 * :func:`conda_vendor._fetch` reads PyPI through :mod:`requests`, a stand-in
   here, and raises each of its errors as :class:`OSError`. It imports requests
@@ -144,6 +145,17 @@ def recorded(**more: 'list[dict[str, Any]]') -> 'dict[str, Any]':
 
 #: A later release with an Intel macOS wheel again, as the stand-in for upstream shipping one.
 INTEL_AGAIN = files('51.0.0', 'cp311-abi3-macosx_10_9_universal2', 'cp311-abi3-manylinux_2_34_x86_64')
+
+
+def lost_wheel() -> 'dict[str, Any]':
+    """The recording with 48.0.1's cp311 osx-64 wheel yanked, and 47.0.0 still serving every Python (#2028).
+
+    48.0.1 keeps a cp312 ``abi3`` universal2 wheel, so it lacks cp311 alone.
+
+    """
+    yanked = files('48.0.1', 'cp311-abi3-macosx_10_9_universal2', yanked=True)[:1]
+    return recorded(**{'47.0.0': files('47.0.0', 'cp311-abi3-macosx_10_9_universal2'),
+                       '48.0.1': yanked + files('48.0.1', 'cp312-abi3-macosx_10_9_universal2')})
 
 
 def table(version: 'str' = '48.0.1', review_by: 'datetime.date' = datetime.date(2026, 12, 1),
@@ -393,6 +405,39 @@ class BumpTests(unittest.TestCase):
                                              'hold: no release up to 3.0 has wheels for all of cp311, cp312 '
                                              'on osx-64 at once')])
 
+    def test_a_pin_whose_release_lost_a_wheel_warns_with_the_tag_it_lacks(self) -> None:
+        # #2028: 47.0.0 still has every wheel, so the 48.0.1 pin used to stay without a word.
+        result, notes = self.refresh(lost_wheel())
+        self.assertEqual(result, table())
+        self.assertEqual(notes, [('warning', 'cryptography 48.0.1 on osx-64 stays as it is, and may no longer '
+                                             'hold: 48.0.1 has no wheel for cp311 on osx-64, and the newest '
+                                             'release up to 52.0.0 with wheels for all of cp311, cp312, cp313, '
+                                             'cp314, cp315 there is 47.0.0')])
+
+    def test_a_pin_whose_release_lost_every_wheel_warns_for_every_tag(self) -> None:
+        # #2028: 49.0.0 has arm64 macOS wheels alone, and 48.0.1 has universal2 ones.
+        result, notes = self.refresh(recorded(), pins=table('49.0.0'))
+        self.assertEqual(result, table('49.0.0'))
+        self.assertEqual(notes, [('warning', 'cryptography 49.0.0 on osx-64 stays as it is, and may no longer '
+                                             'hold: 49.0.0 has no wheel for cp311, cp312, cp313, cp314, cp315 '
+                                             'on osx-64, and the newest release up to 52.0.0 with wheels for '
+                                             'all of cp311, cp312, cp313, cp314, cp315 there is 48.0.1')])
+
+    def test_a_pin_pypi_no_longer_lists_warns(self) -> None:
+        # #2028: a pinned release gone from PyPI, or a pre-release, is not one newest_wheel weighs.
+        for version in ('48.5.0', '49.0.0rc1'):
+            with self.subTest(pin=version):
+                result, notes = self.refresh(recorded(**{'49.0.0rc1': INTEL_AGAIN}), pins=table(version))
+                self.assertEqual(result, table(version))
+                self.assertEqual(notes, [('warning', f'cryptography {version} on osx-64 stays as it is, and may no '
+                                                     f'longer hold: PyPI lists no stable release {version}, and '
+                                                     'the newest release up to 52.0.0 with wheels for all of '
+                                                     'cp311, cp312, cp313, cp314, cp315 there is 48.0.1')])
+
+    def test_a_pin_above_the_installed_release_is_not_called_lost(self) -> None:
+        # #2028: 49.0.0 is above the installed 48.5.0, so newest_wheel never weighed it.
+        self.assertEqual(self.refresh(recorded(), installed='48.5.0', pins=table('49.0.0')), (table('49.0.0'), []))
+
     def test_a_package_not_installed_leaves_the_pin_and_warns(self) -> None:
         result, notes = self.refresh(recorded(**{'51.0.0': INTEL_AGAIN}), installed=None)
         self.assertEqual(result, table())
@@ -547,6 +592,35 @@ class RefreshCommandTests(unittest.TestCase):
         self.assertEqual(output, '::warning title=Platform pins::cryptography 48.0.1 on osx-64 stays as it is, '
                                  'and may no longer hold: no release up to 52.0.0 has a wheel for cp38 '
                                  'on osx-64\n')
+
+    def test_a_pin_whose_release_lost_a_wheel_is_warned_about_and_passes(self) -> None:
+        # #2028: the step stays green, as the workflow's non-blocking rule has it, but says so.
+        module = vendor()
+        with Scratch(table()) as scratch:
+            before = scratch.table.read_bytes()
+            module._fetch = lambda name: lost_wheel()
+            with mock.patch.object(module, 'conda_pythons', lambda: list(PYTHONS)):
+                status, output = scratch.main('--refresh-pins')
+            after = scratch.table.read_bytes()
+        self.assertEqual(status, 0)
+        self.assertEqual(after, before)
+        self.assertEqual(output, '::warning title=Platform pins::cryptography 48.0.1 on osx-64 stays as it is, '
+                                 'and may no longer hold: 48.0.1 has no wheel for cp311 on osx-64, and the newest '
+                                 'release up to 52.0.0 with wheels for all of cp311, cp312, cp313, cp314, cp315 '
+                                 'there is 47.0.0\n')
+
+    def test_a_pin_still_the_newest_to_qualify_passes_silently(self) -> None:
+        # #2028: 48.0.1 is the newest release with an osx-64 wheel for every Python, so it is not lost.
+        module = vendor()
+        with Scratch(table()) as scratch:
+            before = scratch.table.read_bytes()
+            module._fetch = lambda name: recorded(**{'47.0.0': files('47.0.0', 'cp311-abi3-macosx_10_9_universal2')})
+            with mock.patch.object(module, 'conda_pythons', lambda: list(PYTHONS)):
+                status, output = scratch.main('--refresh-pins')
+            after = scratch.table.read_bytes()
+        self.assertEqual(status, 0)
+        self.assertEqual(after, before)
+        self.assertEqual(output, '')
 
 
 class CheckTests(unittest.TestCase):
