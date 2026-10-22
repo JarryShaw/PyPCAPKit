@@ -795,7 +795,10 @@ so it adds no context to the ruleset. No ``Compat``, ``engine-tests`` or
 ``pypcap-parity`` leg runs PyPy. On PyPy 8.0, which setup-python's ``pypy3.11``
 is, PyPI has no Linux wheel of |cryptography|_, so the install step builds it
 with the image's Rust and ``libssl-dev``, and none of ``lxml``, so the ``test``
-extra carries ``lxml`` on CPython only.
+extra carries ``lxml`` on CPython only. On ``pypy3.10`` the ``crypto`` and ``all``
+extras cap |cryptography|_ below 46, as 45.0.7 is the newest release with a Linux
+``pp310`` wheel and the newest release's sdist does not build there (`#2040
+<https://github.com/JarryShaw/PyPCAPKit/issues/2040>`__).
 
 On PyPy an xdist worker's RSS grows with every test it runs, rather than in a few
 heavy modules, so a PyPy leg's ``Run unit tests`` hands its pytest command to

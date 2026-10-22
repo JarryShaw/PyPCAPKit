@@ -124,7 +124,18 @@ pcapkit-vendor = "pcapkit.vendor.__main__:main"
 # for CLI display
 cli = [ "emoji" ]
 # for ESP payload decryption, c.f. pcapkit.protocols.internet.esp
-crypto = [ "cryptography>=3.4" ]
+#
+# Capped below 46 on PyPy older than 3.11 (#2040), and nowhere else, which the
+# complementary marker on the first line keeps. 45.0.7 is the newest release
+# with a manylinux ``pp310`` wheel: 46.0.0 through 46.0.3 ship ``pp310`` wheels
+# for macOS x86_64 and Windows only, and 46.0.4 onwards none at all. Without the
+# cap, pip on a Linux PyPy 3.10 builds the newest release's sdist, and that
+# build stops at PyO3's minimum supported version, 3.11. ``all`` below repeats
+# both lines.
+crypto = [
+    "cryptography>=3.4; platform_python_implementation != 'PyPy' or python_version >= '3.11'",
+    "cryptography>=3.4,<46; platform_python_implementation == 'PyPy' and python_version < '3.11'",
+]
 # for NGAP decoding, c.f. pcapkit.protocols.application.ngap. Counted among
 # ``all``'s *core addons* by the owner's ruling on #910 -- everything needed for
 # the library itself to work at full functionality -- even though the
@@ -260,7 +271,14 @@ vendor = [ "requests[socks]", "beautifulsoup4[html5lib]", "pycrate" ]
 # only as pre-releases, and ``all`` should not be how somebody ends up with a
 # beta they did not ask for. Install either explicitly: ``pip install
 # pypcapkit[PyPCAP]`` or ``pip install pypcapkit[PCAP_CT]``.
-all = [ "emoji", "cryptography>=3.4", "pycrate" ]
+#
+# The two ``cryptography`` lines are the ``crypto`` extra's, cap included (#2040).
+all = [
+    "emoji",
+    "cryptography>=3.4; platform_python_implementation != 'PyPy' or python_version >= '3.11'",
+    "cryptography>=3.4,<46; platform_python_implementation == 'PyPy' and python_version < '3.11'",
+    "pycrate",
+]
 # Not for an end user -- for CI, which has a different need entirely: pylint,
 # mypy and Sphinx's autodoc all resolve imports against whatever is installed,
 # so narrowing ``all`` above would otherwise have made every one of
