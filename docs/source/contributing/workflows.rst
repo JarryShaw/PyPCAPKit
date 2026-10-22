@@ -1203,6 +1203,10 @@ does; each has tests under :file:`tests/project/` that run it.
        (`#1963 <https://github.com/JarryShaw/PyPCAPKit/issues/1963>`__), and in
        ``unit-tests.yml``'s ``test`` and ``test-ktlo``, on PyPy's legs (`#2005
        <https://github.com/JarryShaw/PyPCAPKit/issues/2005>`__).
+   * - :file:`util/regenerate_samples.py`
+     - ``Regenerate sample captures`` in ``unit-tests.yml``'s ``integration`` and
+       ``pypcap-parity`` (and so their KTLO twins), at the job's ``ANNOTATION_LEVEL``,
+       and ``gate``, at ``error``.
 
 The summaries run on the image's ``/usr/bin/python3`` rather than the leg's
 interpreter, which may have failed to set up or be too broken to run anything, so
@@ -1210,7 +1214,9 @@ they need only the standard library, as ``classify_changes.py`` does on the
 runner's ``python3``. :file:`util/pytest_shards.py` runs on ``/usr/bin/python3``
 too, standard library only, so on GraalPy's leg the leg's interpreter runs pytest
 alone; on PyPy's legs the leg's interpreter runs the script as well, under the
-file-size cap every test command of ``unit-tests.yml`` takes. Both ``changes`` jobs check out on every event, since the script is in the
+file-size cap every test command of ``unit-tests.yml`` takes.
+:file:`util/regenerate_samples.py` is standard library only but runs on the leg's
+interpreter, since the generator it runs imports ``pcapkit``. Both ``changes`` jobs check out on every event, since the script is in the
 tree. ``create-release.yml``'s ``pypi`` job keeps its own copy of
 the KTLO summary's shell until its shell moves to scripts too; a project pin runs
 that copy and the script on the same steps and requires the same output.
