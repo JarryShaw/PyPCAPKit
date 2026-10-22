@@ -32,6 +32,11 @@ import os
 import subprocess  # nosec B404
 import sys
 
+try:  # #2047: run as `python util/<script>.py`, with util/ first on sys.path
+    import _actions
+except ImportError:  # imported as util.<script>, or loaded by path, from the repository root
+    from util import _actions
+
 __all__ = ['CODE_DIRS', 'is_docs', 'main']
 
 #: Directories whose every file is code, a Markdown one included.
@@ -57,8 +62,10 @@ def main() -> 'int':
                               capture_output=True, text=True, check=False)
         files = [path for path in diff.stdout.split('\0') if path]
         if diff.returncode != 0 or not files:
-            print(f'::warning title=Could not list the changed files::git diff exited {diff.returncode} '
-                  f'with {len(files)} files: {diff.stderr.strip()}. Treating the diff as code.')
+            # #2047: unescaped, as before the helper, so git's stderr keeps its lines.
+            _actions.annotate('warning', f'git diff exited {diff.returncode} with {len(files)} files: '
+                              f'{diff.stderr.strip()}. Treating the diff as code.',
+                              title='Could not list the changed files', escape=False)
         else:
             code_files = [path for path in files if not is_docs(path)]
             print(f'{len(files)} changed files, {len(code_files)} of them code:')
@@ -67,8 +74,7 @@ def main() -> 'int':
             if not code_files:
                 code = 'false'
     print(f'code={code}')
-    with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as file:
-        print(f'code={code}', file=file)
+    _actions.set_output('code', code)
     return 0
 
 

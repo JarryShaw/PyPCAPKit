@@ -53,6 +53,11 @@ import sys
 import warnings
 from typing import TYPE_CHECKING, NamedTuple
 
+try:  # #2047: run as `python util/<script>.py`, with util/ first on sys.path
+    import _actions
+except ImportError:  # imported as util.<script>, or loaded by path, from the repository root
+    from util import _actions
+
 if TYPE_CHECKING:
     from typing import Optional
 
@@ -154,8 +159,8 @@ def main(argv: 'Optional[list[str]]' = None) -> int:
 
     paths = args.paths or os.environ.get('CHANGED_FILES', '').split()
     if not paths:
-        print('::error title=No changed files to classify::neither arguments nor $CHANGED_FILES '
-              'name a path, so this cannot say the change is documentation only')
+        _actions.annotate('error', 'neither arguments nor $CHANGED_FILES name a path, so this cannot say '
+                          'the change is documentation only', title='No changed files to classify')
         return 1
 
     code = False
@@ -167,13 +172,10 @@ def main(argv: 'Optional[list[str]]' = None) -> int:
     if code:
         print('A code change: the version is bumped.')
     else:
-        print(f'::notice title=Comments and docstrings only::none of the {len(paths)} changed '
-              f'file(s) changes code, so the version is not bumped (#1674).')
+        _actions.annotate('notice', f'none of the {len(paths)} changed file(s) changes code, so the '
+                          'version is not bumped (#1674).', title='Comments and docstrings only')
 
-    output = os.environ.get('GITHUB_OUTPUT')
-    if output:
-        with open(output, 'a', encoding='utf-8') as file:
-            print(f'code_changed={str(code).lower()}', file=file)
+    _actions.set_output('code_changed', str(code).lower(), required=False)
     return 0
 
 

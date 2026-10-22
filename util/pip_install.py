@@ -43,6 +43,11 @@ import subprocess  # nosec: B404
 import sys
 from typing import TYPE_CHECKING
 
+try:  # #2047: run as `python util/<script>.py`, with util/ first on sys.path
+    import _actions
+except ImportError:  # imported as util.<script>, or loaded by path, from the repository root
+    from util import _actions
+
 if TYPE_CHECKING:
     from typing import Optional
 
@@ -62,17 +67,6 @@ NO_REASON = b"pip failed without an ERROR line; see this step's log"
 TITLE = 'pcapkit did not install on '
 #: The end of the annotation's message.
 SKIPPED = b'. The rest of this leg is skipped.'
-
-
-def emit(data: 'bytes') -> 'None':
-    """Write ``data`` to standard output as it is, at once."""
-    sys.stdout.buffer.write(data)
-    sys.stdout.buffer.flush()
-
-
-def status_of(code: 'int') -> 'int':
-    """``code`` as the shell reports it: a signal ``N`` as ``128 + N``."""
-    return code if code >= 0 else 128 - code
 
 
 def reason(output: 'bytes') -> 'bytes':
@@ -106,27 +100,18 @@ def main(argv: 'Optional[list[str]]' = None) -> 'int':
     sys.stdout.flush()
     upgraded = subprocess.run([sys.executable, '-m', 'pip', *UPGRADE], check=False)  # nosec: B603
     if upgraded.returncode != 0:
-        return status_of(upgraded.returncode)
+        return _actions.exit_status(upgraded.returncode)
 
-    output = bytearray()
-    with open(log_path, 'wb') as log:
-        with subprocess.Popen([sys.executable, '-m', 'pip', 'install', '-e', args.editable],  # nosec: B603
-                              stdout=subprocess.PIPE, stderr=subprocess.STDOUT) as process:
-            assert process.stdout is not None  # nosec: B101
-            for line in process.stdout:
-                emit(line)
-                log.write(line)
-                log.flush()
-                output.extend(line)
-        status = process.returncode
+    status, output = _actions.run([sys.executable, '-m', 'pip', 'install', '-e', args.editable], log_path)
     if status == 0:
         return 0
 
     # The runner splits the properties on `,` before it un-escapes `%2C`, so the
-    # leg's `(KTLO, non-blocking)` would end the title at "(KTLO" (#1633).
-    title = (TITLE + leg.replace(',', '%2C')).encode('utf-8', 'surrogateescape')
-    message = reason(bytes(output)).replace(b'%', b'%25') + SKIPPED
-    emit(b'::' + level.encode('utf-8') + b' title=' + title + b'::' + message + b'\n')
+    # leg's `(KTLO, non-blocking)` would end the title at "(KTLO" (#1633). #2047:
+    # escaped as before the helper, so pip's bytes pass through as they are.
+    message = reason(output).replace(b'%', b'%25') + SKIPPED
+    _actions.say(_actions.annotation(level, message.decode('utf-8', 'surrogateescape'),
+                                     title=TITLE + leg.replace(',', '%2C'), escape=False))
     return 1
 
 

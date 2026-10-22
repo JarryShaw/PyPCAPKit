@@ -39,6 +39,11 @@ import subprocess  # nosec B404
 import sys
 from typing import TYPE_CHECKING
 
+try:  # #2047: run as `python util/<script>.py`, with util/ first on sys.path
+    import _actions
+except ImportError:  # imported as util.<script>, or loaded by path, from the repository root
+    from util import _actions
+
 if TYPE_CHECKING:
     from typing import Optional, TextIO
 
@@ -87,8 +92,8 @@ def check(log: 'str' = LOG) -> 'int':
         print(f'  pid {pid}: {atexit_.get(pid, "no atexit/sigterm entry -- died before saving")}')
     if len(root) != 1 or not workers or missing:
         why = f'no data file from pid {missing}' if missing else 'the process log is missing or unreadable'
-        with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as page:  # pylint: disable=unspecified-encoding
-            print(f'**Coverage not reported:** {why} (#1387); a total would under-count.', file=page)
+        _actions.summary(f'**Coverage not reported:** {why} (#1387); a total would under-count.')
+        # #2047: the command stays literal, where #1672's scan of a KTLO step's scripts reads it.
         print(f'::error::Coverage data is incomplete: {why}.')
         return 1
     return 0
@@ -129,7 +134,7 @@ def summary(page: 'TextIO') -> 'int':
 
 
 def _summary_to_job_page() -> 'int':
-    with open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8') as page:
+    with _actions.open_summary() as page:
         return summary(page)
 
 

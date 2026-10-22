@@ -33,6 +33,11 @@ import os
 import sys
 from typing import TYPE_CHECKING
 
+try:  # #2047: run as `python util/<script>.py`, with util/ first on sys.path
+    import _actions
+except ImportError:  # imported as util.<script>, or loaded by path, from the repository root
+    from util import _actions
+
 if TYPE_CHECKING:
     from typing import Any, Optional
 
@@ -62,8 +67,9 @@ def main(argv: 'Optional[list[str]]' = None) -> 'int':
         print(f'{leg}: no step failed.')
         return 0
     # The runner splits an annotation's properties on `,`, so the title's are escaped.
+    # #2047: the command stays literal, where #1672's scan of a KTLO step's scripts reads it.
     title = leg.replace(',', '%2C')
-    with open(os.environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8') as summary:
+    with _actions.open_summary() as summary:
         for step in failed:
             print(f"::warning title={step} failed on {title}::{REASONS[args.tier]}; see the {step} step's log.")
             print(f'- {leg}: step `{step}` failed; non-blocking, so this job still succeeds.', file=summary)
