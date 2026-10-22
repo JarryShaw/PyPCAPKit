@@ -484,7 +484,7 @@ class TimeLimitTests(unittest.TestCase):
                 expire(signal.SIGALRM, None)
             self.assertEqual(signal.alarm(0), 1)
 
-    @unittest.skipUnless(sys.implementation.name == 'cpython' and sys.version_info >= (3, 8),
+    @unittest.skipUnless(sys.implementation.name == 'cpython',
                          'needs a finaliser run on the last reference, and sys.unraisablehook')
     def test_a_raise_a_finaliser_drops_is_raised_again(self) -> None:
         """#1892: the first raise lands in a finaliser and is lost; the repeat is not.

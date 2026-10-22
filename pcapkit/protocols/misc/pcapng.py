@@ -51,7 +51,6 @@ import platform
 import re
 import struct
 import sys
-import textwrap
 import time
 from typing import TYPE_CHECKING, cast, overload
 
@@ -257,10 +256,6 @@ if TYPE_CHECKING:
 
     _FlagsEnum = TypeVar('_FlagsEnum', 'PacketDirection', 'PacketReception')
     _S = TypeVar('_S', bound='Schema | bytes')
-
-# check Python version
-py37 = ((version_info := sys.version_info).major >= 3 and version_info.minor >= 7)
-py38 = ((version_info := sys.version_info).major >= 3 and version_info.minor >= 8)
 
 # Ethernet address pattern
 PAT_MAC_ADDR = re.compile(rb'(?i)(?:[0-9a-f]{2}[:-]){5}[0-9a-f]{2}')
@@ -2040,7 +2035,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         with localcontext(prec=64):
             if timestamp is None:
-                if py37 and self.nanosecond:
+                if self.nanosecond:
                     timestamp = decimal.Decimal(time.time_ns()) / 1_000_000_000
                 else:
                     timestamp = decimal.Decimal(time.time())
@@ -2064,11 +2059,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             Colon (``:``) separated *hex* encoded MAC address.
 
         """
-        if py38:
-            _addr = addr.hex(':')
-        else:
-            _addr = ':'.join(textwrap.wrap(addr.hex(), 2))
-        return _addr
+        return addr.hex(':')
 
     def _read_eui_addr(self, addr: 'bytes') -> 'str':
         """Read EUI address.
@@ -2080,11 +2071,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             Colon (``:``) separated *hex* encoded EUI address.
 
         """
-        if py38:
-            _addr = addr.hex(':')
-        else:
-            _addr = ':'.join(textwrap.wrap(addr.hex(), 2))
-        return _addr
+        return addr.hex(':')
 
     def _make_mac_addr(self, addr: 'str | bytes | bytearray') -> 'bytes':
         """Make MAC address.

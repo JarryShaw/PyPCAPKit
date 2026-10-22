@@ -63,12 +63,11 @@ use, is enough on its own to carry the privacy.
 now pins that privacy under the new name, since the mechanical underscore signal it
 used to double-check is gone.
 
-One sentinel is deliberately **not** held to any of this: ``_NOT_FOUND = object()``
-at :file:`pcapkit/utilities/compat.py`, line 73, inside the ``cached_property``
-backport for interpreters below 3.8. It is ported code and exempt, and
-:meth:`SentinelPopulationTests.test_the_vendored_bare_object_sentinel_is_left_alone`
-pins that as an exemption rather than leaving it to read as an oversight against the
-"why a class and not ``object()``" rule.
+Ported code is deliberately **not** held to any of this. The case that settled it,
+``_NOT_FOUND = object()`` in :file:`pcapkit/utilities/compat.py`'s ``cached_property``
+backport for interpreters below 3.8, went with that backport (#2051);
+:meth:`SentinelPopulationTests.test_the_vendored_bare_object_sentinel_went_with_its_backport`
+pins that, and the exemption stays in the conventions doc as a rule.
 
 On the tree before this change, four of these fail:
 
@@ -497,20 +496,19 @@ class SentinelPopulationTests(_ReimportCase):
         """"Why a Class and Not ``object()``" read as a blanket rule with no exception."""
         section = _sentinel_section()
 
+        self.assertIn('**Ported code is exempt.**', section)
         self.assertIn('_NOT_FOUND', section)
-        self.assertIn('pcapkit/utilities/compat.py', section)
 
-    def test_the_vendored_bare_object_sentinel_is_left_alone(self) -> 'None':
-        """The carve-out, asserted against the source it carves out.
+    def test_the_vendored_bare_object_sentinel_went_with_its_backport(self) -> 'None':
+        """The carve-out's case is gone with the 3.8 floor (#2051).
 
-        Read rather than imported: the backport is inside ``if sys.version_info <
-        (3, 8):``, so on any interpreter that runs this suite the branch is dead and
-        ``_NOT_FOUND`` is never bound. A test that imported it would pass
-        vacuously.
+        Read rather than imported, as the backport it sat in was never bound on
+        an interpreter that runs this suite.
 
         """
         source = (ROOT / 'pcapkit' / 'utilities' / 'compat.py').read_text(encoding='utf-8')
-        self.assertRegex(source, r'(?m)^\s+_NOT_FOUND = object\(\)$')
+        self.assertNotIn('_NOT_FOUND', source)
+        self.assertRegex(source, r'(?m)^from functools import cached_property$')
 
     def test_the_sentinel_table_has_a_row_per_sentinel_and_no_more(self) -> 'None':
         """Counted from the table itself, so a fifth sentinel cannot be half-added."""

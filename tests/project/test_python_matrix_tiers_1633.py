@@ -7,9 +7,9 @@ Python 3.10 reached end-of-life on 2026-10-01 and 3.15.0 was released on
 * **Supported** -- 3.11 to 3.15, in every matrix (unit tests, compatibility,
   conda, PyPI), blocking as before.
 * **KTLO** -- end-of-life versions that still build and test (3.10 wherever it
-  ran, plus 3.7, 3.8 and 3.9 in the test matrices), never blocking: not CI, not
+  ran, plus 3.8 and 3.9 in the test matrices), never blocking: not CI, not
   a release, not a required context.
-* ``requires-python`` stays ``>=3.6, <4``.
+* ``requires-python`` stayed ``>=3.6, <4``, until #2051 raised it to ``>=3.8``.
 
 A KTLO leg can block in more ways than one, so each is pinned on its own: a job
 that ``required-checks`` or ``release_status`` aggregates through one
@@ -23,13 +23,12 @@ the prose that states the tiers back against the matrices. #1672 later made
 every KTLO leg conclude ``success``, Compat's included, and report a failed step
 as a warning; :mod:`tests.project.test_ktlo_legs_stay_green_1672` pins that.
 
-3.7 joined the tier afterwards, at the owner's request, and cannot install or
-import pcapkit: the ``test`` extra's ``pytest>=8`` needs 3.8, and the sources use
-3.8 syntax. So each of its legs fails a step by design, and
-:class:`TestPython37IsKTLO` pins that they fail fast and say why, at warning level
--- the install and verify steps are executed with ``python`` stubbed, and each
-annotation is parsed as the runner parses it. 3.6 stays out: setup-python builds
-it only for retired images.
+3.7 joined the tier afterwards, at the owner's request, and left it with #2051,
+whose ``>=3.8`` pip enforces at install, so no leg runs below that floor. A KTLO
+leg that cannot install or compile still fails fast and says why, at warning
+level, and :class:`TestAKTLOLegFailsFast` pins that -- the install and verify
+steps are executed with ``python`` stubbed, and each annotation is parsed as the
+runner parses it.
 
 Since #1660 the tiers are declared once, in :file:`.github/python-versions.toml`,
 and every matrix is read from it, so the expectations below are read from it
@@ -77,8 +76,7 @@ def tier(impl: 'str', name: 'str') -> 'tuple[str, ...]':
 SUPPORTED = tier('cpython', 'supported')
 KTLO = tier('cpython', 'ktlo')
 #: The image each version needs where ``ubuntu-latest`` cannot provide it:
-#: setup-python has no Ubuntu 26.04 build of 3.7-3.9, and ubuntu-22.04, 3.7's, is
-#: deprecated and retires 2027-04-17.
+#: setup-python has no Ubuntu 26.04 build of 3.8 or 3.9.
 PINNED_OS = {v: entry['runner'] for v, entry in TIERS['versions']['cpython'].items() if 'runner' in entry}
 #: The KTLO versions a job pinned to ``ubuntu-latest`` runs.
 KTLO_ON_LATEST = tuple(v for v in KTLO if v not in PINNED_OS)
@@ -127,16 +125,17 @@ KTLO_LEGS = (
     ('python-compatibility.yml', 'compatibility', KTLO),
     ('create-release.yml', 'pypi', KTLO_ON_LATEST + tier('pypy', 'ktlo')),
 )
-#: The jobs 3.7 joins (#1633), each as (workflow, job, install-or-verify step).
-LEGACY_37 = (
+#: The jobs a KTLO leg that cannot install or compile stops in, each as
+#: (workflow, job, install-or-verify step).
+KTLO_STEPS = (
     ('unit-tests.yml', 'test-ktlo', 'Install package and test dependencies'),
     ('unit-tests.yml', 'integration-ktlo', 'Install package, test and generator dependencies'),
     ('python-compatibility.yml', 'compatibility', 'Verify package'),
 )
 
 #: Claims the tier split made false, each worded as it was somewhere before #1633,
-#: or before 3.7 joined the KTLO tier. A denylist: it catches these phrasings
-#: coming back and examines no others.
+#: or while 3.7 was in the KTLO tier, before #2051. A denylist: it catches these
+#: phrasings coming back and examines no others.
 RETIRED_CLAIMS = re.compile('|'.join((
     r'3\.15 as an allowed-to-fail leg',
     r'3\.15 runs allowed-to-fail',
@@ -145,17 +144,15 @@ RETIRED_CLAIMS = re.compile('|'.join((
     r'CI covers \**3\.10',
     r'runs on 3\.10 through 3\.1[45]',
     r'repository supports 3\.10',
-    r'matrix floor is 3\.(?:10|8)',
-    r'3\.6 and 3\.7 are (?:in no matrix|left out|not run)',
-    r'KTLO tier \(3\.8-3\.10\)',
-    r'3\.8 through 3\.10\** are KTLO',
-    r'end-of-life (?:versions that still run, )?3\.8(?:-| to | through )3\.10',
-    r'the 3\.8-3\.10 legs',
-    r'KTLO legs 3\.8-3\.10',
-    r'3\.8 to 3\.10 are best-effort',
-    r'3\.8, 3\.9 and 3\.10 are end-of-life',
-    r"CI's range starts at 3\.8",
-    r'oldest tested leg is ``Python 3\.8',
+    r'matrix floor is 3\.10',
+    # #2051: 3.7 is below requires-python, and in no matrix.
+    r'KTLO tier \(3\.7-3\.10\)',
+    r'3\.7 through 3\.10\** are KTLO',
+    r'end-of-life (?:versions that still run, )?3\.7(?:-| to | through )3\.10',
+    r'3\.7 to 3\.10 are best-effort',
+    r'3\.7 cannot import',
+    r'3\.7 fails "Verify',
+    r'declares \**Python 3\.6',
     r"3\.7's legs are red by design",
     # #1672: no KTLO leg shows red, Compat's included, and a failed KTLO step's
     # own annotation is a warning.
@@ -268,10 +265,11 @@ class TestTheSupportedTierBlocks(unittest.TestCase):
         listed = re.findall(r'"Programming Language :: Python :: (3\.\d+)"', text)
         self.assertEqual(listed, list(SUPPORTED))
 
-    def test_requires_python_is_unchanged(self) -> None:
-        """The owner's ruling: KTLO keeps old versions installable, it does not raise the floor."""
+    def test_requires_python_is_the_oldest_ktlo_version(self) -> None:
+        """#2051 raised the floor to 3.8, the oldest version a KTLO leg runs."""
         text = (ROOT / 'pyproject.toml').read_text(encoding='utf-8')
-        self.assertEqual(re.findall(r'(?m)^requires-python = (.+)$', text), ['">=3.6, <4"'])
+        self.assertEqual(re.findall(r'(?m)^requires-python = (.+)$', text), ['">=3.8"'])
+        self.assertEqual(min(KTLO, key=lambda v: tuple(map(int, v.split('.')))), '3.8')
 
     def test_ci_timing_pairs_the_coverage_leg_with_supported_legs_only(self) -> None:
         spec = importlib.util.spec_from_file_location('ci_timing_1633', ROOT / 'util' / 'ci_timing.py')
@@ -497,20 +495,20 @@ PIP_37 = ('INFO: pip is looking at multiple versions of pypcapkit[crypto,dpkt,ng
           'ERROR: Could not find a version that satisfies the requirement pytest>=8; '
           'extra == "test" (from pypcapkit[crypto,dpkt,ngap,test]) (from versions: 7.4.4)\n'
           'ERROR: No matching distribution found for pytest>=8; extra == "test"')
-LEG_37 = 'Python 3.7 (KTLO, non-blocking)'
-#: :data:`LEG_37` as a ``title=`` property must carry it: ``,`` escaped (see :func:`runner_parse`).
-TITLE_37 = 'Python 3.7 (KTLO%2C non-blocking)'
-#: The 3.7 leg's matrix entry, and a supported leg's, as :meth:`TestPython37IsKTLO.run_step` takes them.
-KTLO_37 = {'python-version': '3.7', 'ktlo': True}
+LEG_KTLO = 'Python 3.8 (KTLO, non-blocking)'
+#: :data:`LEG_KTLO` as a ``title=`` property must carry it: ``,`` escaped (see :func:`runner_parse`).
+TITLE_KTLO = 'Python 3.8 (KTLO%2C non-blocking)'
+#: A KTLO leg's matrix entry, and a supported leg's, as :meth:`TestAKTLOLegFailsFast.run_step` takes them.
+KTLO_LEG = {'python-version': '3.8', 'ktlo': True}
 SUPPORTED_312 = {'python-version': '3.12'}
 #: Every KTLO leg's install step, as (workflow, job, step): it needs setup-python's ``python`` (#1672).
 INSTALLS = (
-    LEGACY_37[0], LEGACY_37[1],
+    KTLO_STEPS[0], KTLO_STEPS[1],
     ('unit-tests.yml', 'pypcap-parity', 'Install package, test and generator dependencies'),
     ('python-compatibility.yml', 'compatibility', 'Install package'),
 )
-#: The install steps of the 3.7 legs, each running util/pip_install.py (#1967).
-INSTALLS_37 = (LEGACY_37[0], LEGACY_37[1], INSTALLS[3])
+#: The install steps of :data:`KTLO_STEPS`, each running util/pip_install.py (#1967).
+INSTALLS_KTLO = (KTLO_STEPS[0], KTLO_STEPS[1], INSTALLS[3])
 
 
 def workflow_commands(output: 'str') -> 'list[str]':
@@ -531,8 +529,8 @@ def runner_parse(line: 'str') -> 'Optional[tuple[str, dict[str, str], str]]':
     properties end at the first ``::`` after the leading one (``:69``), and are
     split on every ``,`` (``:100``, ``propertiesStr.Split(new[] { ',' }, ...)``)
     *before* ``%2C`` becomes a comma (``:30``, ``:106``). A piece holding no
-    ``=`` is dropped without a word, so ``title=on 3.7 (KTLO, non-blocking)``
-    renders as "on 3.7 (KTLO".
+    ``=`` is dropped without a word, so ``title=on 3.8 (KTLO, non-blocking)``
+    renders as "on 3.8 (KTLO".
 
     """
     message = line.lstrip()
@@ -562,20 +560,25 @@ def titles(output: 'str') -> 'list[str]':
     return [command[1].get('title', '') for command in parsed if command is not None]
 
 
-class TestPython37IsKTLO(unittest.TestCase):
-    """3.7 runs, non-blocking, and stops at the first failure with one warning."""
+class TestAKTLOLegFailsFast(unittest.TestCase):
+    """A KTLO leg runs non-blocking, and stops at the first failure with one warning.
+
+    Its inputs are what 3.7.16 printed while 3.7 had legs: pip refusing the ``test``
+    extra, and compileall failing on 3.8 syntax.
+
+    """
 
     def setUp(self) -> None:
         if shutil.which('bash') is None:  # pragma: no cover
             self.skipTest('bash is needed to run the workflow shell')
-        tmp = tempfile.TemporaryDirectory(prefix='pcapkit-1633-37-')  # pylint: disable=consider-using-with
+        tmp = tempfile.TemporaryDirectory(prefix='pcapkit-1633-ktlo-')  # pylint: disable=consider-using-with
         self.addCleanup(tmp.cleanup)
         self.tmp = pathlib.Path(tmp.name)
 
     def run_step(self, name: 'str', job_id: 'str', step_name: 'str', stub: 'str',
                  env: 'dict[str, str]', leg: 'Optional[dict[str, Any]]' = None,
                  ) -> 'subprocess.CompletedProcess[str]':
-        """Step ``step_name`` on ``leg`` (3.7's by default) under its shell, ``python`` stubbed.
+        """Step ``step_name`` on ``leg`` (:data:`KTLO_LEG` by default) under its shell, ``python`` stubbed.
 
         ``LEG`` and the job's ``ANNOTATION_LEVEL`` get the values their expressions
         take on that leg; ``-eo pipefail`` is what ``shell: bash`` runs, and ``-e``
@@ -583,7 +586,7 @@ class TestPython37IsKTLO(unittest.TestCase):
         the stub is its ``pip``.
 
         """
-        leg = KTLO_37 if leg is None else leg
+        leg = KTLO_LEG if leg is None else leg
         spec = job(name, job_id)
         step = next(step for step in spec['steps'] if step.get('name') == step_name)
         self.assertIn(step.get('shell'), ('bash', None))
@@ -610,20 +613,18 @@ class TestPython37IsKTLO(unittest.TestCase):
                                        RUNNER_TEMP=str(self.tmp), **env),
                               cwd=ROOT, capture_output=True, text=True, check=False, timeout=60)
 
-    def test_37_is_a_ktlo_leg_of_exactly_the_three_test_matrices(self) -> None:
-        """On ubuntu-22.04; not engine-tests or pypcap-parity (``ubuntu-latest`` only), nor a release leg."""
-        for name, job_id, _ in LEGACY_37:
-            spec = job(name, job_id)
-            with self.subTest(workflow=name, job=job_id):
-                found = [leg for leg in legs(name, job_id) if leg['python-version'] == '3.7']
-                self.assertEqual(found, [{'python-version': '3.7', 'ktlo': True, 'os': 'ubuntu-22.04'}])
-                self.assertTrue(spec['name'].endswith((' (KTLO)', "${{ matrix.ktlo && ' (KTLO)' || '' }}")))
-        joined = {(name, job_id) for name, job_id, _ in MATRICES + KTLO_LEGS
-                  if '3.7' in [leg['python-version'] for leg in legs(name, job_id)]}
-        engines = [versions for _, versions in engine_inputs()]
-        if '3.7' in ' '.join(engines).split():
-            joined.add(('unit-tests.yml', 'engine-tests'))
-        self.assertEqual(joined, {(name, job_id) for name, job_id, _ in LEGACY_37})
+    def test_no_leg_runs_below_requires_python(self) -> None:
+        """#2051: pip refuses an interpreter below 3.8, so a leg there could only prove that."""
+        def below(version: 'str') -> 'bool':
+            return bool(re.fullmatch(r'3\.\d+', version)) and tuple(map(int, version.split('.'))) < (3, 8)
+
+        jobs = {(name, job_id) for name, job_id, *_ in MATRICES + KTLO_LEGS + KTLO_STEPS}
+        found = [f'{name} {job_id}: {leg["python-version"]}' for name, job_id in sorted(jobs)
+                 for leg in legs(name, job_id) if below(str(leg['python-version']))]
+        found += [f'unit-tests.yml engine-tests: {version}' for _, versions in engine_inputs()
+                  for version in versions.split() if below(version)]
+        self.assertEqual(found, [])
+        self.assertNotIn('3.7', TIERS['versions']['cpython'])
 
     def test_a_leg_that_cannot_install_stops_there(self) -> None:
         """The install needs setup-python's interpreter, and every later step needs the install.
@@ -652,29 +653,29 @@ class TestPython37IsKTLO(unittest.TestCase):
                     self.assertIn("steps.install.outcome == 'success'", condition)
 
     def test_a_failed_install_fails_once_naming_pips_reason(self) -> None:
-        for name, job_id, install in INSTALLS_37:
+        for name, job_id, install in INSTALLS_KTLO:
             with self.subTest(job=job_id):
                 result = self.run_step(name, job_id, install, PIP_STUB, {'PIP_OUTPUT': PIP_37, 'PIP_STATUS': '1'})
                 self.assertNotEqual(result.returncode, 0)
                 self.assertEqual(workflow_commands(result.stdout + result.stderr), [
-                    f'::warning title=pcapkit did not install on {TITLE_37}::No matching distribution found '
+                    f'::warning title=pcapkit did not install on {TITLE_KTLO}::No matching distribution found '
                     'for pytest>=8; extra == "test". The rest of this leg is skipped.'])
-                self.assertEqual(titles(result.stdout), [f'pcapkit did not install on {LEG_37}'])
+                self.assertEqual(titles(result.stdout), [f'pcapkit did not install on {LEG_KTLO}'])
                 self.assertEqual((self.tmp / 'pip-install.log').read_text(encoding='utf-8'), PIP_37 + '\n')
 
     def test_an_install_failure_without_an_error_line_is_still_named(self) -> None:
         for output, reason in (('Killed', "pip failed without an ERROR line; see this step's log"),
                                ('ERROR: 100% of the index timed out', '100%25 of the index timed out')):
             with self.subTest(output=output):
-                result = self.run_step('unit-tests.yml', 'test', LEGACY_37[0][2], PIP_STUB,
+                result = self.run_step('unit-tests.yml', 'test', KTLO_STEPS[0][2], PIP_STUB,
                                        {'PIP_OUTPUT': output, 'PIP_STATUS': '1'})
                 self.assertNotEqual(result.returncode, 0)
                 self.assertEqual(workflow_commands(result.stdout), [
-                    f'::warning title=pcapkit did not install on {TITLE_37}::{reason}. '
+                    f'::warning title=pcapkit did not install on {TITLE_KTLO}::{reason}. '
                     'The rest of this leg is skipped.'])
 
     def test_a_clean_install_passes_without_an_annotation(self) -> None:
-        for name, job_id, install in INSTALLS_37:
+        for name, job_id, install in INSTALLS_KTLO:
             with self.subTest(job=job_id):
                 result = self.run_step(name, job_id, install, PIP_STUB,
                                        {'PIP_OUTPUT': 'Successfully installed pypcapkit-1.5.0', 'PIP_STATUS': '0'})
@@ -684,10 +685,10 @@ class TestPython37IsKTLO(unittest.TestCase):
     def test_the_compatibility_leg_names_its_first_compile_error(self) -> None:
         cases = (
             ({'COMPILE_OUTPUT': COMPILE_37, 'COMPILE_STATUS': '1', 'IMPORT_STATUS': '0'},
-             [f'::warning title=pcapkit does not compile on {TITLE_37}::2 modules fail to compile, the first at '
+             [f'::warning title=pcapkit does not compile on {TITLE_KTLO}::2 modules fail to compile, the first at '
               'File "pcapkit/const/ftp/command.py", line 286; see this step\'s log.']),
             ({'COMPILE_OUTPUT': '', 'COMPILE_STATUS': '0', 'IMPORT_STATUS': '1'},
-             [f"::warning title=pcapkit does not import on {TITLE_37}::See the traceback in this step's log."]),
+             [f"::warning title=pcapkit does not import on {TITLE_KTLO}::See the traceback in this step's log."]),
             ({'COMPILE_OUTPUT': '', 'COMPILE_STATUS': '0', 'IMPORT_STATUS': '0'}, []),
         )  # type: tuple[tuple[dict[str, str], list[str]], ...]
         for env, expected in cases:
@@ -697,7 +698,7 @@ class TestPython37IsKTLO(unittest.TestCase):
                 self.assertEqual(bool(result.returncode), bool(expected), result.stderr)
                 self.assertEqual(workflow_commands(result.stdout), expected)
                 for title in titles(result.stdout):
-                    self.assertTrue(title.endswith(f' on {LEG_37}'), title)
+                    self.assertTrue(title.endswith(f' on {LEG_KTLO}'), title)
                 if env['COMPILE_STATUS'] != '0':
                     self.assertIn('SyntaxError: invalid syntax', result.stdout)
 
@@ -706,7 +707,7 @@ class TestPython37IsKTLO(unittest.TestCase):
         cases = [(name, job_id, install, PIP_STUB, {'PIP_OUTPUT': PIP_37, 'PIP_STATUS': '1'},
                   '::error title=pcapkit did not install on Python 3.12::No matching distribution found '
                   'for pytest>=8; extra == "test". The rest of this leg is skipped.')
-                 for name, job_id, install in INSTALLS_37]
+                 for name, job_id, install in INSTALLS_KTLO]
         cases.append(('python-compatibility.yml', 'compatibility', 'Verify package', VERIFY_STUB,
                       {'COMPILE_OUTPUT': '', 'COMPILE_STATUS': '0', 'IMPORT_STATUS': '1'},
                       "::error title=pcapkit does not import on Python 3.12::See the traceback in this step's log."))

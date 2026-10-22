@@ -546,6 +546,15 @@ class TestTheTiers(unittest.TestCase):
         self.assertNotIn('3.6', result.entries)
         self.assertNotIn('3.5', result.entries)
 
+    def test_a_dropped_version_with_builds_left_is_not_re_added(self) -> None:
+        """#2051 dropped 3.7 by hand, below ``requires-python``, while setup-python still builds it."""
+        sources = add_build(as_of_the_file(snapshot()), '3.7.17', True, (('linux', '24.04', 'x64'),))
+        current = {version: entry for version, entry in frozen()['versions']['cpython'].items()
+                   if version != '3.7'}
+        result = updater().compute_cpython(current, context(sources))
+        self.assertNotIn('3.7', result.entries)
+        self.assertIn('3.8', result.entries)
+
     def test_each_implementation_is_one_entry(self) -> None:
         """Another implementation is one more source and entry here, and its spelling in python_versions.py.
 

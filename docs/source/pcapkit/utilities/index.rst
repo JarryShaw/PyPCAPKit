@@ -32,14 +32,6 @@ following objects and functions:
 
    * - Compatibility Target
      - Minimal Required Version
-   * - :mod:`pathlib`
-     - Python 3.5
-   * - :exc:`ModuleNotFoundError`
-     - Python 3.6
-   * - :class:`collections.abc.Collection`
-     - Python 3.6
-   * - :func:`functools.cached_property`
-     - Python 3.8
    * - :class:`collections.abc.Mapping[KT, VT] <collections.abc.Mapping>`
      - Python 3.9
    * - :class:`tuple[T, ...] <tuple>`
@@ -67,6 +59,11 @@ following objects and functions:
    * - :class:`types.UnionType`, or :data:`None` below it
      - Python 3.10
 
+It also exports :mod:`pathlib`, :exc:`ModuleNotFoundError`,
+:class:`collections.abc.Collection` and :func:`functools.cached_property` as the
+standard library has them. Their fallbacks were for interpreters below Python 3.8,
+which 1.5.0 no longer installs on (:issue:`2051`).
+
 .. function:: final(f)
 
    :func:`typing.final` from Python 3.11 on, and ``typing_extensions.final``
@@ -93,11 +90,14 @@ following objects and functions:
 
    The interpreter's own default thread exception hook, even when
    :func:`threading.excepthook` has been replaced:
-   :data:`threading.__excepthook__` from Python 3.10 on, ``_thread._excepthook``
-   on 3.8 and 3.9, and :data:`None` below 3.8, which has no thread exception hook.
+   :data:`threading.__excepthook__` from Python 3.10 on, and ``_thread._excepthook``
+   on 3.8 and 3.9.
 
 .. class:: cached_property(func)
 
-   :func:`functools.cached_property` from Python 3.8 on. Below 3.8 it is a backport
-   of CPython's own implementation, kept verbatim so that it can be diffed against
-   upstream.
+   :func:`functools.cached_property` itself.
+
+   .. versionchanged:: 1.5.0
+
+      No longer a backport below Python 3.8, which 1.5.0 no longer installs on
+      (:issue:`2051`).

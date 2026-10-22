@@ -540,9 +540,7 @@ class LinkProtocolUnitTests(unittest.TestCase):
         self.assertEqual(schema.src, b'\x11\x22\x33\x44\x55\x66')
         self.assertEqual(schema.type, EtherType.Internet_Protocol_version_6)
 
-        with mock.patch('pcapkit.protocols.link.ethernet.py38', False):
-            self.assertEqual(maker._read_mac_addr(b'\xaa\xbb\xcc\xdd\xee\xff'),
-                             'aa:bb:cc:dd:ee:ff')
+        self.assertEqual(maker._read_mac_addr(b'\xaa\xbb\xcc\xdd\xee\xff'), 'aa:bb:cc:dd:ee:ff')
         with self.assertRaises(ProtocolError):
             maker._make_mac_addr('not-a-mac')
 
@@ -582,9 +580,8 @@ class LinkProtocolUnitTests(unittest.TestCase):
 
         arp = object.__new__(ARP)
         self.assertEqual(arp._read_addr_resolve(b'\x01\x02', Hardware.Experimental_Ethernet), '0102')
-        with mock.patch('pcapkit.protocols.link.arp.py38', False):
-            self.assertEqual(arp._read_addr_resolve(b'\x00\x11\x22\x33\x44\x55', Hardware.Ethernet),
-                             '00:11:22:33:44:55')
+        self.assertEqual(arp._read_addr_resolve(b'\x00\x11\x22\x33\x44\x55', Hardware.Ethernet),
+                         '00:11:22:33:44:55')
         self.assertEqual(arp._read_proto_resolve(b'\x20\x01\x0d\xb8' + b'\x00' * 12,
                                                  EtherType.Internet_Protocol_version_6),
                          ip_address('2001:db8::'))

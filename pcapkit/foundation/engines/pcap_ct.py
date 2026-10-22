@@ -209,7 +209,7 @@ class PCAP_CT(EngineBase['RawFrame']):
         1.11.0b29 installs and reads :file:`examples/captures/in.pcap` identically
         on both, so this engine covers the whole range the project supports. The
         floor in the ``PCAP_CT`` extra's markers exists only because
-        :file:`pyproject.toml` advertises ``requires-python >= 3.6``, and on
+        :file:`pyproject.toml` advertises ``requires-python >= 3.8``, and on
         an interpreter below 3.10 the distributions simply will not be installed --
         which the import test then reports correctly on its own.
 

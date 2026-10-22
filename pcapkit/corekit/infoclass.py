@@ -1006,8 +1006,7 @@ class MultiInfo(_MultiInfo[KT, VT], MultiDict[KT, VT]):
     __iter__ = MultiDict.__iter__  # type: ignore[assignment]
     __len__ = MultiDict.__len__
     __contains__ = MultiDict.__contains__
-    if sys.version_info >= (3, 8):  # pragma: no branch -- dict reversal is Python 3.8 and up
-        __reversed__ = MultiDict.__reversed__
+    __reversed__ = MultiDict.__reversed__
     __hash__ = None  # type: ignore[assignment]
     __repr__ = MultiDict.__repr__
     __str__ = MultiDict.__str__
@@ -1099,8 +1098,7 @@ class OrderedMultiInfo(_MultiInfo[KT, VT], OrderedMultiDict[KT, VT]):
     __iter__ = OrderedMultiDict.__iter__  # type: ignore[assignment]
     __len__ = OrderedMultiDict.__len__
     __contains__ = OrderedMultiDict.__contains__
-    if sys.version_info >= (3, 8):  # pragma: no branch -- dict reversal is Python 3.8 and up
-        __reversed__ = OrderedMultiDict.__reversed__
+    __reversed__ = OrderedMultiDict.__reversed__
     __eq__ = OrderedMultiDict.__eq__
     __ne__ = _ne
     __hash__ = None

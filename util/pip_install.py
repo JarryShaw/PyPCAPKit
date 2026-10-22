@@ -30,7 +30,7 @@ On a KTLO leg the level is ``warning`` and the step carries ``continue-on-error`
 so every later step, which waits on the install's ``outcome``, is skipped. An
 ``ANNOTATION_LEVEL`` other than ``error`` or ``warning`` exits 2 before pip runs.
 The script is standard library only, and runs on every interpreter the matrices
-hold, 3.7 and the experimental tier included.
+hold, the experimental tier included.
 
 """
 

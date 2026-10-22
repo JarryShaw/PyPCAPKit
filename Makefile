@@ -179,8 +179,8 @@ vermin:
 # Make at the redirect, with the report left unread in the file and the line
 # that would have opened it never reached -- useless as a log.
 # This one writes to stdout and lets vermin's failure propagate, which is what
-# `targets = 3.6` in vermin.ini is for: vermin exits non-zero when the target is
-# not met, and the code's real floor is 3.11.
+# `targets = 3.8` in vermin.ini is for: vermin exits non-zero when the target is
+# not met, and it detects 3.11.
 vermin-ci:
 	$(RUN) vermin pcapkit $(VERMIN_FLAGS) pcapkit
 

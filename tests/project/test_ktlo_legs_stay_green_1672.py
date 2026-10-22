@@ -50,7 +50,7 @@ import unittest.mock
 from typing import TYPE_CHECKING, NamedTuple
 
 from tests.project.test_python_matrix_tiers_1633 import (EXPERIMENTAL_GUARD, EXPERIMENTAL_JOB, KTLO_GUARD,
-                                                         KTLO_LEGS, LEG_37, TITLE_37, annotation_level,
+                                                         KTLO_LEGS, LEG_KTLO, TITLE_KTLO, annotation_level,
                                                          is_experimental, is_ktlo, is_nonblocking, job,
                                                          leg_label, legs, titles, workflow,
                                                          workflow_commands)
@@ -472,7 +472,7 @@ class TestAKTLOFailureIsAWarning(unittest.TestCase):
                         self.assertIn((name, job_id), LEVELLED)
 
     def summary(self, steps: 'dict[str, str]') -> 'tuple[subprocess.CompletedProcess[str], str]':
-        """``KTLO summary`` on 3.7, given each step's ``outcome``; its result and job summary."""
+        """``KTLO summary`` on a KTLO leg, given each step's ``outcome``; its result and job summary."""
         return self.run_summary(summary_step(job('unit-tests.yml', 'test'))['run'], steps)
 
     def run_summary(self, script: 'str', steps: 'dict[str, str]',
@@ -483,23 +483,23 @@ class TestAKTLOFailureIsAWarning(unittest.TestCase):
                    for key, outcome in steps.items()}
         page = self.tmp / 'summary.md'
         page.write_text('', encoding='utf-8')
-        env = {'LEG': LEG_37, 'STEPS': json.dumps(context, indent=2), 'GITHUB_STEP_SUMMARY': str(page)}
+        env = {'LEG': LEG_KTLO, 'STEPS': json.dumps(context, indent=2), 'GITHUB_STEP_SUMMARY': str(page)}
         result = bash(script, env, self.tmp) if inline else run_summary(script, env)
         return result, page.read_text(encoding='utf-8')
 
     def test_the_summary_warns_once_per_failed_step(self) -> None:
         def warning(step: 'str') -> 'str':
-            return (f'::warning title={step} failed on {TITLE_37}::KTLO legs never block (#1633), so this job '
+            return (f'::warning title={step} failed on {TITLE_KTLO}::KTLO legs never block (#1633), so this job '
                     f"still succeeds (#1672); see the {step} step's log.")
 
         def line(step: 'str') -> 'str':
-            return f'- {LEG_37}: step `{step}` failed; non-blocking, so this job still succeeds.\n'
+            return f'- {LEG_KTLO}: step `{step}` failed; non-blocking, so this job still succeeds.\n'
 
         result, page = self.summary({'checkout': 'success', 'python': 'success', 'install': 'failure',
                                      'parallelism': 'skipped', 'tests': 'skipped'})
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(workflow_commands(result.stdout), [warning('install')])
-        self.assertEqual(titles(result.stdout), [f'install failed on {LEG_37}'])
+        self.assertEqual(titles(result.stdout), [f'install failed on {LEG_KTLO}'])
         self.assertEqual(page, line('install'))
 
         result, page = self.summary({'checkout': 'failure', 'python': 'failure', 'install': 'skipped'})
@@ -512,7 +512,7 @@ class TestAKTLOFailureIsAWarning(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertEqual(workflow_commands(result.stdout), [])
         self.assertEqual(page, '')
-        self.assertIn(f'{LEG_37}: no step failed.', result.stdout)
+        self.assertIn(f'{LEG_KTLO}: no step failed.', result.stdout)
 
     def test_the_inline_release_copy_reports_as_the_script_does(self) -> None:
         """``pypi``'s ``KTLO summary`` keeps its shell (#1967), so it must not drift from the script."""

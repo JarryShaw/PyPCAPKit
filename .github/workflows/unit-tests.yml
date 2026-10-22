@@ -123,8 +123,8 @@ jobs:
       # PyPCAPFile is not here either: #751's `engine-tests` and
       # `pypcap-parity` jobs cover its gated methods.
       #
-      # #1633: a KTLO leg that cannot install -- such as 3.7 -- fails fast and
-      # once: util/pip_install.py writes one annotation naming pip's last ERROR
+      # #1633: a KTLO leg that cannot install fails fast and once:
+      # util/pip_install.py writes one annotation naming pip's last ERROR
       # line, and every later step needs `steps.install.outcome == 'success'`,
       # so it is skipped rather than failing against a missing package. The
       # install needs its own interpreter: if setup-python failed, the image's
@@ -309,11 +309,9 @@ jobs:
   # rest, so the Unit Tests run its `workflow_run` consumers read stays green.
   #
   # A version `ubuntu-latest` cannot provide carries its `runner` from the
-  # file as `os`: 3.8 and 3.9 need ubuntu-24.04, and 3.7 ubuntu-22.04, the
-  # newest image setup-python builds them for. 3.7 cannot install -- the `test`
-  # extra's `pytest>=8` needs 3.8 -- so the leg stops at its install step.
-  # ubuntu-22.04 is deprecated (actions/runner-images#14254); a brownout fails
-  # the leg before any step runs, which only the job-level guard contains.
+  # file as `os`: 3.8 and 3.9 need ubuntu-24.04, the newest image
+  # setup-python builds them for. A brownout of a deprecated image fails the
+  # leg before any step runs, which only the job-level guard contains.
   test-ktlo:
     name: Python ${{ matrix.python-version }} (KTLO)
     if: ${{ inputs.gate-only != true && needs.changes.outputs.code != 'false' }}

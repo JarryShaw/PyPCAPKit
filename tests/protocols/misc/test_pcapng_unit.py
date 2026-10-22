@@ -595,10 +595,9 @@ class PCAPNGUnitTests(unittest.TestCase):
         instant = datetime.datetime.fromtimestamp(6, datetime.timezone.utc)
         self.assertEqual(pcapng._make_timestamp(instant, interface_id=0), (0, 4_000_000))
 
-        with mock.patch('pcapkit.protocols.misc.pcapng.py38', False):
-            self.assertEqual(pcapng._read_mac_addr(b'\x00\x01\x02\x03\x04\x05'), '00:01:02:03:04:05')
-            self.assertEqual(pcapng._read_eui_addr(bytes.fromhex('023456fffe789abc')),
-                             '02:34:56:ff:fe:78:9a:bc')
+        self.assertEqual(pcapng._read_mac_addr(b'\x00\x01\x02\x03\x04\x05'), '00:01:02:03:04:05')
+        self.assertEqual(pcapng._read_eui_addr(bytes.fromhex('023456fffe789abc')),
+                         '02:34:56:ff:fe:78:9a:bc')
 
         proto_map = PCAPNG.__dict__['__proto__']
         block_map = PCAPNG.__dict__['__block__']

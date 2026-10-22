@@ -697,19 +697,19 @@ grepping every workflow file for its name:
      - ``unit-tests.yml``
    * - ``Compat Python 3.11``
      - job ``compatibility``, matrix leg ``3.11``
-     - ``python-compatibility.yml``, ``.github/python-versions.toml:20``
+     - ``python-compatibility.yml``, ``.github/python-versions.toml:19``
    * - ``Compat Python 3.12``
      - job ``compatibility``, matrix leg ``3.12``
-     - ``python-compatibility.yml``, ``.github/python-versions.toml:21``
+     - ``python-compatibility.yml``, ``.github/python-versions.toml:20``
    * - ``Compat Python 3.13``
      - job ``compatibility``, matrix leg ``3.13``
-     - ``python-compatibility.yml``, ``.github/python-versions.toml:22``
+     - ``python-compatibility.yml``, ``.github/python-versions.toml:21``
    * - ``Compat Python 3.14``
      - job ``compatibility``, matrix leg ``3.14``
-     - ``python-compatibility.yml``, ``.github/python-versions.toml:23``
+     - ``python-compatibility.yml``, ``.github/python-versions.toml:22``
    * - ``Compat Python 3.15``
      - job ``compatibility``, matrix leg ``3.15``
-     - ``python-compatibility.yml``, ``.github/python-versions.toml:24``
+     - ``python-compatibility.yml``, ``.github/python-versions.toml:23``
 
 That is the list after `#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__,
 which added ``Compat Python 3.15`` and removed ``Compat Python 3.10``. Moving a version
@@ -719,8 +719,8 @@ between the tiers below means editing the ruleset in the same change.
 ``required-checks`` job in ``unit-tests.yml``. ``Compat Python`` is defined by
 one, the ``name:`` of the ``compatibility`` job in ``python-compatibility.yml``, whose
 ``matrix`` comes from :file:`.github/python-versions.toml`: the required legs
-are its supported tier (``python-versions.toml:20-24``), and its KTLO legs
-(``python-versions.toml:16-19``) have names ending in ``(KTLO)``, so no required
+are its supported tier (``python-versions.toml:19-23``), and its KTLO legs
+(``python-versions.toml:16-18``) have names ending in ``(KTLO)``, so no required
 context matches one. The comment above ``required-checks`` mentions the string
 without defining it.
 
@@ -749,7 +749,7 @@ Python versions are tiered -- supported and KTLO
 (`#1660 <https://github.com/JarryShaw/PyPCAPKit/issues/1660>`__, below) -- in
 :file:`.github/python-versions.toml` (see `Python Versions`_).
 The **supported** tier, 3.11-3.15, blocks: a failed leg fails ``Required checks passed`` or its own
-required ``Compat`` context. The **KTLO** (*keep the lights on*) tier -- end-of-life 3.7-3.10, still built and
+required ``Compat`` context. The **KTLO** (*keep the lights on*) tier -- end-of-life 3.8-3.10, still built and
 tested -- never blocks, is never a required context, and never shows a commit or a
 pull request red (`#1672 <https://github.com/JarryShaw/PyPCAPKit/issues/1672>`__). In ``unit-tests.yml`` the KTLO legs are jobs of their own
 since `#1738 <https://github.com/JarryShaw/PyPCAPKit/issues/1738>`__: ``test-ktlo``,
@@ -777,7 +777,7 @@ with supported legs. Every job holding KTLO legs works the same way:
   report the same way.
 * Never job-level ``continue-on-error`` alone: it passes the *run*, but the leg's
   check run still concludes ``failure``, which showed every commit red while
-  ``Compat Python 3.7 (KTLO)`` carried it. ``unit-tests.yml``'s KTLO jobs
+  the ``Compat Python 3.7 (KTLO)`` leg carried it. ``unit-tests.yml``'s KTLO jobs
   carry it on top of the step-level guards, as a backstop for the failures no step
   contains, as ``experimental.yml``'s job does; it "prevents a workflow run from
   failing when a job fails" (`Workflow syntax
@@ -817,16 +817,10 @@ the kills into ``MemoryError``\ s. Each run but the last writes a JUnit file of 
 own beside ``junit.xml``, which ``Upload test timings`` takes too, and the step
 fails if any run did.
 
-3.7 can neither install the ``test`` extra nor import the package, so each 3.7 leg
-fails one step, with a warning saying why -- ``test`` and ``integration`` at the
-install step, the ``Compat`` leg at ``Verify package`` -- and concludes
-``success``. They run on ``ubuntu-22.04``, which retires on 2027-04-17 after
-brownouts from 2027-03-23 (actions/runner-images#14254). A brownout fails a
-``test-ktlo`` or ``integration-ktlo`` leg before any step runs, where no step-level
-``continue-on-error`` reaches; since `#1738 <https://github.com/JarryShaw/PyPCAPKit/issues/1738>`__ that fails nothing gating, but the leg's
-check run reads red, so they must still go before then (`#1660 <https://github.com/JarryShaw/PyPCAPKit/issues/1660>`__). 3.6 is
-in no matrix: setup-python builds it only for retired Ubuntu images. Nor are
-3.7-3.9 in ``engine-tests``, which installs every interpreter on
+Nothing below ``requires-python``'s 3.8 is in any matrix (`#2051
+<https://github.com/JarryShaw/PyPCAPKit/issues/2051>`__): pip refuses such an
+interpreter at install, so a leg there could only prove the refusal. Nor are
+3.8 and 3.9 in ``engine-tests``, which installs every interpreter on
 ``ubuntu-latest``, where setup-python has no Ubuntu 26.04 build of any of them. Nor
 are they in ``pypcap-parity``, which also runs on ``ubuntu-latest``; none of them
 was measured on that job.
@@ -1248,7 +1242,7 @@ file-size cap every test command of ``unit-tests.yml`` takes.
 :file:`util/regenerate_samples.py` is standard library only but runs on the leg's
 interpreter, since the generator it runs imports ``pcapkit``, and so does
 :file:`util/pip_install.py`, since it installs into that interpreter; it runs on
-every version the matrices hold, 3.7 and the experimental tier included. :file:`util/apt_packages.py` runs on
+every version the matrices hold, the experimental tier included. :file:`util/apt_packages.py` runs on
 ``/usr/bin/python3``, as the apt shell needed no interpreter of the leg's, and runs
 under ``sudo`` the commands that shell ran. Its ``plan`` and ``install`` both read
 the job's ``APT_PACKAGES``, so the cache key always describes the set installed.

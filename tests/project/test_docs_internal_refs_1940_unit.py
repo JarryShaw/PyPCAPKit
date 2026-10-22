@@ -102,7 +102,8 @@ CONVERTED = (
      ':class:`~pcapkit.const.ftp.command.CommandType`'),
     ('docs/source/contributing/conventions/sentinel-convention.rst', '``NoDefaultType``',
      ':class:`~pcapkit.corekit.sentinels.NoDefaultType`'),
-    ('docs/source/contributing/conventions/documentation.rst', '``cached_property``',
+    # Moved here from documentation.rst with the backport it named (#2051).
+    ('docs/source/contributing/conventions/sentinel-convention.rst', '``cached_property``',
      ':class:`~pcapkit.utilities.compat.cached_property`'),
     ('docs/source/contributing/releasing.rst', '``pcapkit.__version__``',
      ':data:`pcapkit.__version__`'),

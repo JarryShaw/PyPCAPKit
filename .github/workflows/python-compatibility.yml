@@ -49,9 +49,8 @@ jobs:
     # 23497679's required contexts. A KTLO leg is suffixed ` (KTLO)`, so no
     # required context can match it, and its steps carry `continue-on-error`,
     # as in unit-tests.yml's `test` job: job-level, a failed leg's check run
-    # concluded `failure`, so every commit showed red (#1672). 3.7 fails "Verify
-    # package" by design. No 3.6: setup-python builds it only for retired
-    # Ubuntu images.
+    # concluded `failure`, so every commit showed red (#1672). Nothing below
+    # `requires-python`'s 3.8 runs (#2051).
     name: Compat Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}
     needs: [python-versions]
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
@@ -87,9 +86,9 @@ jobs:
           LEG: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}
         run: python util/pip_install.py -e .
 
-      # One annotation saying why, so a failed leg -- such as 3.7's, where the
-      # install succeeds and the sources do not compile -- is legible from the
-      # run summary; a warning on a KTLO leg (#1672). Each title escapes `,` as
+      # One annotation saying why, so a failed leg -- an install that succeeds
+      # with sources that do not compile -- is legible from the run summary; a
+      # warning on a KTLO leg (#1672). Each title escapes `,` as
       # `%2C`: the runner splits a command's properties on `,`, so the KTLO
       # title would stop at "(KTLO" (actions/runner
       # src/Runner.Common/ActionCommand.cs:100, at 5f0b3ddcc).

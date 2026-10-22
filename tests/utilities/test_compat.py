@@ -6,8 +6,10 @@ interpreter provides, and a fallback for the oldest interpreter the package
 supports. Only one of the two can run on any given interpreter, so the only way
 to test the other is to lie to the module about which interpreter it is on --
 :meth:`CompatTests.load_compat_as` executes the file a second time with
-:data:`sys.version_info` faked to ``(3, 5)``. ``default_threading_excepthook``
-has a third, for 3.8 and 3.9 only, which a fake ``(3, 9)`` reaches instead.
+:data:`sys.version_info` faked to ``(3, 8)``, the oldest interpreter
+``requires-python`` admits (#2051), which takes every fallback at once. A fake
+``(3, 9)`` checks the identity ``default_threading_excepthook``'s 3.8 and 3.9
+branch rests on.
 
 That lie is not free, and containing its cost is most of what this module is
 about. A fake version is process-global for as long as it is installed, so *any*
@@ -51,6 +53,8 @@ those in CI on this file's behalf.
 """
 from __future__ import annotations
 
+import _thread
+import contextlib
 import decimal
 import enum
 import importlib
@@ -58,6 +62,7 @@ import inspect
 import subprocess
 import sys
 import textwrap
+import threading
 import types
 import unittest
 import urllib.parse
@@ -115,12 +120,13 @@ __tier__ = 'ALL'
 #:
 #: The list is **read off** :file:`pcapkit/utilities/compat.py`, not arrived at by
 #: running the test until it stopped complaining, and that distinction is the
-#: point of having it. Every import statement on a branch reachable at ``(3, 5)``:
-#: :mod:`collections.abc` (line 34), :mod:`pathlib` (63), :mod:`threading` (67),
-#: :mod:`typing` (4, 68, 126), :mod:`urllib.parse` (137, 138), :mod:`aenum` (173),
-#: :mod:`typing_extensions` (191, 245), :mod:`contextlib` (196), :mod:`decimal`
-#: (197), :mod:`enum` (222). A fake ``(3, 9)`` reaches three more: :mod:`builtins`
-#: (31), :mod:`functools` (123) and :mod:`_thread` (270).
+#: point of having it. Every module imported at ``(3, 8)``: :mod:`builtins`,
+#: :mod:`collections.abc`, :mod:`functools`, :mod:`pathlib` and :mod:`typing`,
+#: which no version gate guards any more (#2051), and, behind the gates that
+#: remain, :mod:`urllib.parse`, :mod:`aenum`, :mod:`typing_extensions`,
+#: :mod:`contextlib`, :mod:`decimal`, :mod:`enum` and :mod:`_thread`.
+#: :mod:`threading` stays on the list because :meth:`CompatTests.load_compat_as`
+#: reads :data:`threading.excepthook` for PyPy's stand-in ``_thread._excepthook``.
 #:
 #: Four of those never actually surface, and *why* is the point. Three --
 #: :mod:`collections.abc`, :mod:`contextlib` and :mod:`pathlib` -- are imported at
@@ -146,14 +152,10 @@ WARM_BEFORE_FAKING = ('_thread', 'aenum', 'builtins', 'collections.abc', 'contex
 #: already owes them (issue #674).
 #:
 #: Excluding them is safe for a reason that does not extend to the third-party
-#: modules this file *does* check, and the distinction is the point. Four
-#: :mod:`pcapkit` modules do memoise the interpreter version at import time in the
-#: same shape :mod:`aenum` does -- ``py37``/``py38`` in
-#: :mod:`pcapkit.protocols.misc.pcap.frame`, :mod:`pcapkit.protocols.misc.pcapng`,
-#: :mod:`pcapkit.protocols.link.ethernet` and :mod:`pcapkit.protocols.link.arp`.
-#: None of them is reachable from the branches faked here, and if one became
-#: reachable it would still be harmless: the region is restored around every
-#: test, so the next import recomputes the value from source. A third-party
+#: modules this file *does* check, and the distinction is the point. Were a
+#: :mod:`pcapkit` module to memoise the interpreter version at import time, as
+#: :mod:`aenum` does, it would still be harmless: the region is restored around
+#: every test, so the next import recomputes the value from source. A third-party
 #: module is never purged, which is exactly why its cache is permanent and why the
 #: assertion is aimed there.
 OWN_MODULE_PREFIX = 'pcapkit'
@@ -285,7 +287,7 @@ class CompatTests(unittest.TestCase):
             module_name: Dotted name to execute the file under. Must not be the
                 name the real module holds, or the faked module would be bound
                 over it.
-            version: The :data:`sys.version_info` to fake. ``(3, 5)`` takes
+            version: The :data:`sys.version_info` to fake. ``(3, 8)`` takes
                 every fallback at once.
 
         Returns:
@@ -297,7 +299,13 @@ class CompatTests(unittest.TestCase):
             importlib.import_module(name)
 
         before = frozenset(sys.modules)
-        with mock.patch.object(sys, 'version_info', version):
+        with contextlib.ExitStack() as stack:
+            stack.enter_context(mock.patch.object(sys, 'version_info', version))
+            if not hasattr(_thread, '_excepthook'):
+                # PyPy's _thread has none, which the 3.8 and 3.9 branch imports;
+                # no tier runs a PyPy before 3.10 (#1958), so a stand-in will do.
+                stack.enter_context(mock.patch.object(_thread, '_excepthook', threading.excepthook,
+                                                      create=True))
             compat = load_module(module_name, 'pcapkit/utilities/compat.py')
 
         leaked = sorted(
@@ -417,7 +425,7 @@ class CompatTests(unittest.TestCase):
             import sys
             import threading
 
-            STARTUP = threading.excepthook if sys.version_info >= (3, 8) else None
+            STARTUP = threading.excepthook
 
             def host_hook(args):
                 pass
@@ -440,12 +448,12 @@ class CompatTests(unittest.TestCase):
         """The regression test for issue #687.
 
         Named rather than folded into
-        :meth:`test_python35_fallback_implementations`, because the invariant it
+        :meth:`test_python38_fallback_implementations`, because the invariant it
         pins has nothing to do with the shims: it is about what faking a version
         around a real ``import`` costs whatever else is in the process.
 
         Self-contained on purpose: it installs the fake itself rather than relying
-        on :meth:`test_python35_fallback_implementations` having run first. Under
+        on :meth:`test_python38_fallback_implementations` having run first. Under
         :mod:`unittest` a class's methods run in alphabetical order and under
         :program:`pytest` in definition order, so which of the two goes first is a
         property of their names and their position in this file -- neither of
@@ -461,6 +469,10 @@ class CompatTests(unittest.TestCase):
         when this file ran before them under :mod:`unittest`. Asserting on it
         here costs two lines and no ``import pcapkit``, which keeps this module in
         the unit tier (see :mod:`tests._tiers`).
+
+        It fakes ``(3, 5)`` rather than ``(3, 8)``, the oldest supported: this
+        module takes the same branches at both, and only below 3.6 does a
+        poisoned :mod:`aenum` also fail the closing lines, not just the readings.
 
         """
         purge_modules(['pcapkit.utilities.compat_py35_probe'])
@@ -484,12 +496,10 @@ class CompatTests(unittest.TestCase):
 
         self.assertEqual(TransportProtocolLike.TCP.value, 6)
 
-    def test_python35_fallback_implementations(self) -> None:
-        purge_modules(['pcapkit.utilities.compat_py35'])
-        compat = self.load_compat_as('pcapkit.utilities.compat_py35', (3, 5))
+    def test_python38_fallback_implementations(self) -> None:
+        purge_modules(['pcapkit.utilities.compat_py38'])
+        compat = self.load_compat_as('pcapkit.utilities.compat_py38', (3, 8))
 
-        self.assertTrue(issubclass(compat.ModuleNotFoundError, ImportError))
-        self.assertIsNone(compat.default_threading_excepthook)
         self.assertIsNone(compat.UnionType)
 
         # The reader infoclass and protocol used below 3.10 (#1692, #1709): the
@@ -501,63 +511,6 @@ class CompatTests(unittest.TestCase):
             a: int
 
         self.assertIs(compat.get_annotations(Annotated), Annotated.__dict__['__annotations__'])
-
-        class CollectionLike:
-            def __len__(self): return 0
-            def __iter__(self): return iter(())
-            def __contains__(self, item): return False
-
-        class BrokenCollection:
-            __len__ = None
-            def __iter__(self): return iter(())
-            def __contains__(self, item): return False
-
-        class BaseCollection:
-            def __len__(self): return 0
-            def __iter__(self): return iter(())
-            def __contains__(self, item): return False
-
-        class DerivedCollection(BaseCollection):
-            pass
-
-        class MissingCollection:
-            def __len__(self): return 0
-            def __iter__(self): return iter(())
-
-        self.assertTrue(compat.Collection.__subclasshook__(CollectionLike))
-        self.assertTrue(compat.Collection.__subclasshook__(DerivedCollection))
-        self.assertEqual(compat.Collection.__subclasshook__(BrokenCollection), NotImplemented)
-        self.assertEqual(compat.Collection.__subclasshook__(MissingCollection), NotImplemented)
-
-        class Demo:
-            def __init__(self) -> None:
-                self.calls = 0
-
-            @compat.cached_property
-            def value(self) -> int:
-                self.calls += 1
-                return 10
-
-        demo = Demo()
-        self.assertEqual(demo.value, 10)
-        self.assertEqual(demo.value, 10)
-        self.assertEqual(demo.calls, 1)
-        self.assertIs(Demo.__dict__['value'].__get__(None, Demo), Demo.__dict__['value'])
-        self.assertEqual(Demo.__dict__['value'].__get__(demo, Demo), 10)
-
-        prop = compat.cached_property(lambda self: 1)
-        prop.__set_name__(Demo, 'first')
-        prop.__set_name__(Demo, 'first')
-        with self.assertRaises(TypeError):
-            prop.__set_name__(Demo, 'second')
-
-        class SlotDemo:
-            __slots__ = ()
-
-        prop = compat.cached_property(lambda self: 1)
-        prop.__set_name__(SlotDemo, 'value')
-        with self.assertRaises(TypeError):
-            prop.__get__(SlotDemo(), SlotDemo)
 
         original_prec = decimal.getcontext().prec
         with compat.localcontext(prec=9) as ctx:

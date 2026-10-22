@@ -146,10 +146,12 @@ jobs:
       # `vermin-ci`, not `vermin`: that target redirects the report into temp/,
       # out of this log. Same flags, via $(VERMIN_FLAGS).
       #
-      # Blocking needs a decision, not a cleanup, and not CI's: vermin.ini's
-      # `targets = 3.6` and `requires-python`'s `>=3.6, <4` both sit below the
-      # code's real floor, 3.11 (`enum.StrEnum`, `enum.show_flag_values`).
-      # Raising either belongs in its own change.
+      # Blocking needs a decision, not a cleanup, and not CI's. vermin.ini's
+      # `targets = 3.8` matches `requires-python` (#2051), but vermin still
+      # reports 3.11: `--no-parse-comments` ignores the `# novermin` markers on
+      # compat.py's version-gated imports (`enum.StrEnum`,
+      # `enum.show_flag_values`), and evaluated annotations put some
+      # `pcapkit.foundation` modules at 3.9.
       - name: vermin
         id: vermin
         continue-on-error: true
