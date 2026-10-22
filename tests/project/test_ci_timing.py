@@ -1163,7 +1163,7 @@ class TestTimingArtifacts(unittest.TestCase):
 
 
 class TestReviewWorkflow(unittest.TestCase):
-    """:file:`ci-timing.yml` stays read-only, weekly, and off Unit Tests' runs."""
+    """:file:`ci-timing.yml` stays read-only but for posting its report (#2030), weekly, and off Unit Tests' runs."""
 
     def setUp(self) -> 'None':
         self.text = REVIEW.read_text(encoding='utf-8')
@@ -1177,13 +1177,15 @@ class TestReviewWorkflow(unittest.TestCase):
                 self.assertNotRegex(self.code, rf'(?m)^  {trigger}:')
 
     def test_permissions_are_read_only(self) -> 'None':
+        """But for the ``discussion`` job's ``discussions: write``, pinned in test_discussion_report_2030."""
         block = re.search(r'(?ms)^permissions:\n(.*?)(?=^\S)', self.code).group(1)
         self.assertEqual(sorted(block.split()), ['actions:', 'contents:', 'read', 'read'])
-        self.assertNotIn('write', self.code)
+        self.assertEqual(re.findall(r'(?m)^\s+([\w-]+):\s*write\s*$', self.code), ['discussions'])
 
     def test_the_job(self) -> 'None':
         specs = ci_timing.parse_workflow(self.text)
-        self.assertEqual([(spec['name'], spec['timeout']) for spec in specs], [('CI timing report', 40)])
+        self.assertEqual([(spec['name'], spec['timeout']) for spec in specs],
+                         [('CI timing report', 40), ('Post the CI timing report', 10)])
         self.assertIn('python util/ci_timing.py', self.code)
         # The upload and the baseline download name the same artifact.
         self.assertIn('name: ci-timing-report', self.code)

@@ -557,7 +557,9 @@ cancelled at 95% of its cap or later timed out and counts, even in a run that re
 ``cancelled`` for that reason; one cancelled earlier was superseded and does not. A
 step cap written as an expression differs by leg and reads as none.
 The report goes to the job summary and to the ``ci-timing-report`` artifact (90
-days), and the newest earlier report is the next run's baseline. It is not a
+days), and the newest earlier report is the next run's baseline. The
+``discussion`` job then posts it to the ``ci-timing: weekly CI timing report``
+thread (see `CI Reports`_). It is not a
 ``workflow_run`` on Unit Tests, which would add a job per run to a runner pool
 measured saturated at 20 concurrent jobs.
 
@@ -1213,6 +1215,9 @@ does; each has tests under :file:`tests/project/` that run it.
        ``experimental`` and ``python-compatibility.yml``'s ``compatibility``, at the
        job's ``ANNOTATION_LEVEL``, and of ``unittest-ordering``, ``project-tests`` and
        ``gate``, at ``error``.
+   * - :file:`util/discussion_report.py`
+     - ``Post the report to Discussions`` in the ``discussion`` job of
+       ``ci-timing.yml`` and of ``cron-vendor.yml`` (see `CI Reports`_).
 
 The summaries run on the image's ``/usr/bin/python3`` rather than the leg's
 interpreter, which may have failed to set up or be too broken to run anything, so
@@ -1228,6 +1233,46 @@ every version the matrices hold, 3.7 and the experimental tier included. Both ``
 tree. ``create-release.yml``'s ``pypi`` job keeps its own copy of
 the KTLO summary's shell until its shell moves to scripts too; a project pin runs
 that copy and the script on the same steps and requires the same output.
+
+.. _CI Reports:
+
+CI Reports (`#2030 <https://github.com/JarryShaw/PyPCAPKit/issues/2030>`__)
+---------------------------------------------------------------------------
+
+A report with no pull request to comment on goes to GitHub Discussions. One
+category, ``CI reports``, holds every report, and each job has one thread in it,
+titled ``<workflow file stem>: <job or report name>``. A run adds a comment to its
+job's thread rather than opening a new one; the comment links the run, names its
+commit and its status, and ends in a hidden ``<!-- report-status: ... -->``
+marker. How often depends on the script's ``--mode``:
+
+* ``scheduled``: every run posts, on ``schedule`` and on ``workflow_dispatch``,
+  since a manual run is a deliberate report.
+* ``push``, for a run on a push or a ``workflow_run`` relay of one: a run that
+  warned or failed posts every time, and a green run posts only where the
+  thread's newest marker is not ``success``, so one "back to green" comment
+  follows a bad run and later green runs stay silent. A thread with no marker
+  counts as green.
+
+``ci-timing.yml`` posts as ``scheduled`` to ``ci-timing: weekly CI timing
+report``. ``cron-vendor.yml`` posts to ``cron-vendor: vendor constant update
+report``, as ``push`` on its ``workflow_run`` and ``scheduled`` otherwise, and
+reports ``warning`` where ``vendor-update`` passed over a failed target or test
+gate. A failed or cancelled ``head`` skips ``vendor-update``, so its
+``discussion`` job runs on ``always()`` and then posts a line of its own with
+``head``'s result; a skip on purpose, on a pull request's ``workflow_run`` or a
+verdict for another commit, skips it too. The category is the workflow-level ``REPORT_CATEGORY``. The API cannot
+create one, so it is made by hand, in Settings, Discussions.
+
+The reporting job uploads its report as an artifact, and a ``discussion`` job of
+its own downloads it and runs :file:`util/discussion_report.py`, which finds the
+category and the thread by name and opens the thread on first use. That job alone
+holds ``discussions: write``, beside ``contents: read`` for its checkout, so every
+other job keeps its permissions. It uses ``GITHUB_TOKEN`` and first-party actions
+only. Reporting never fails a run: a missing category, a missing report or a
+failed API call is one warning, and the job is ``continue-on-error``, since a
+failed Vendor Update run is one Create Release reads as not updated. A CI timing
+run failed by a HARD threshold is posted all the same, on ``always()``.
 
 .. _Action Pins:
 

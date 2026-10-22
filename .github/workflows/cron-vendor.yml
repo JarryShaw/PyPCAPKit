@@ -32,6 +32,11 @@ concurrency:
   group: vendor-update-${{ github.event.workflow_run.head_sha || github.ref }}
   cancel-in-progress: false
 
+# #2030: one Discussions category holds every report with no pull request to
+# comment on, one thread per job.
+env:
+  REPORT_CATEGORY: CI reports
+
 jobs:
   # #1967: the test gate on the schedule, `verdict` on a `workflow_run`;
   # shared with Conda Update and GitHub Pages.
@@ -61,6 +66,9 @@ jobs:
         github.event.workflow_run.head_branch == 'main' &&
         needs.head.outputs.verified == 'true'
       ))
+    # #2030: `warning` where the job passed over a failed target or test gate.
+    outputs:
+      status: ${{ steps.run-report.outputs.status }}
     concurrency:
       group: repository-maintenance
       cancel-in-progress: false
@@ -106,6 +114,7 @@ jobs:
           python -m pip install -e '.[all,vendor]'
 
       - name: Update Vendor
+        id: crawl
         run: |
           set -x
 
@@ -119,6 +128,7 @@ jobs:
           pcapkit-vendor 2> "$RUNNER_TEMP/vendor-stderr.log"
           vendor_exit=$?
           set -e
+          echo "status=$vendor_exit" >> "$GITHUB_OUTPUT"
 
           # Replayed whatever the exit: each failing target's name and
           # exception, plus its VendorRuntimeWarning. `|| true` so a log that
@@ -306,3 +316,124 @@ jobs:
           git remote set-url origin git@github.com:JarryShaw/PyPCAPKit.git
           git pull --rebase origin "${GITHUB_REF#refs/heads/}"
           git push origin "HEAD:${GITHUB_REF}"
+
+      # #2030: the run's outcome for the `discussion` job to post, read from the
+      # crawl's log and the steps above, and `status=warning` where a target or
+      # the test gate failed without failing the job. `continue-on-error` on
+      # both, since a failure here would fail the run Create Release reads.
+      - name: Write the run report
+        id: run-report
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        env:
+          CRAWL_STATUS: ${{ steps.crawl.outputs.status }}
+          TESTS: ${{ steps.vendor-tests.outcome }}
+          FILES_CHANGED: ${{ steps.verify-changed-files.outputs.files_changed }}
+          COMMITTED: ${{ steps.commit.outcome == 'success' || steps.commit-docs.outputs.committed == 'true' }}
+        run: |
+          if [ "$CRAWL_STATUS" = 0 ] && [ "$TESTS" = success ]; then
+            echo "status=success" >> "$GITHUB_OUTPUT"
+          else
+            echo "status=warning" >> "$GITHUB_OUTPUT"
+          fi
+          {
+            echo '### Vendor Update'
+            echo
+            if [ -z "$CRAWL_STATUS" ]; then
+              echo '- Crawl: did not finish'
+            elif [ "$CRAWL_STATUS" = 0 ]; then
+              echo '- Crawl: every target succeeded'
+            else
+              echo "- Crawl: pcapkit-vendor exited $CRAWL_STATUS; these targets failed and kept their modules:"
+              echo
+              echo '```'
+              grep -E '^[A-Za-z_][A-Za-z0-9_.]* failed: ' "$RUNNER_TEMP/vendor-stderr.log" ||
+                echo '(no target name could be read from stderr)'
+              echo '```'
+              echo
+            fi
+            echo "- Test gate: ${TESTS:-not run}"
+            if [ "$COMMITTED" = true ]; then
+              echo "- Committed: $(git log -1 --format=%s)"
+            elif [ "$FILES_CHANGED" = true ]; then
+              echo '- Committed: nothing, though the crawl changed files'
+            elif [ "$FILES_CHANGED" = false ]; then
+              echo '- Committed: nothing, as nothing changed'
+            else
+              echo '- Committed: nothing, as the job stopped first'
+            fi
+          } > "$RUNNER_TEMP/vendor-report.md"
+          cat "$RUNNER_TEMP/vendor-report.md"
+
+      - name: Upload the run report
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: vendor-report
+          path: ${{ runner.temp }}/vendor-report.md
+          retention-days: 14
+
+  # #2030: posts `vendor-update`'s report, and a short one of its own where
+  # `head` failed or was cancelled, since a failed gate skips `vendor-update`.
+  # `always()`, so that skip does not skip this job, but no deliberate skip
+  # runs it: where `vendor-update` skipped because the verdict did not cover
+  # the commit or the run is a pull request's, so does this, and a run whose
+  # every job skipped still concludes `skipped` for Create Release. Job-level
+  # `continue-on-error` as well as the steps', so nothing here can fail the run
+  # Create Release reads; util/discussion_report.py writes a warning instead.
+  discussion:
+    name: Post the vendor report
+    needs: [ head, vendor-update ]
+    if: >-
+      ${{ always() && (needs.vendor-update.result != 'skipped' ||
+      needs.head.result == 'failure' || needs.head.result == 'cancelled') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    permissions:
+      contents: read
+      discussions: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # A run that never wrote a report uploaded none; the script then warns.
+      - name: Download the report
+        if: needs.vendor-update.result != 'skipped'
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: vendor-report
+          path: report
+
+      # A `workflow_run` follows a push to main, so it posts as a push run: only
+      # when it warned or failed, and once more on the next green run. The
+      # schedule posts every run. A green job that warned reports `warning`, and
+      # a run whose gate stopped `vendor-update` reports the gate's result.
+      - name: Post the report to Discussions
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          MODE: ${{ github.event_name == 'workflow_run' && 'push' || 'scheduled' }}
+          HEAD_RESULT: ${{ needs.head.result }}
+          VENDOR_RESULT: ${{ needs.vendor-update.result }}
+          VENDOR_STATUS: ${{ needs.vendor-update.outputs.status }}
+        run: |
+          if [ "$VENDOR_RESULT" = skipped ]; then
+            status="$HEAD_RESULT"
+            mkdir -p report
+            {
+              echo '### Vendor Update'
+              echo
+              echo "- Gate: $HEAD_RESULT, so vendor-update did not run and nothing was crawled or committed"
+            } > report/vendor-report.md
+          elif [ "$VENDOR_RESULT" = success ] && [ -n "$VENDOR_STATUS" ]; then
+            status="$VENDOR_STATUS"
+          else
+            status="$VENDOR_RESULT"
+          fi
+          python3 util/discussion_report.py --category "$REPORT_CATEGORY" \
+            --title 'cron-vendor: vendor constant update report' --report report/vendor-report.md \
+            --mode "$MODE" --status "$status"
