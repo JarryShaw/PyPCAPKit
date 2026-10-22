@@ -1869,9 +1869,9 @@ class DependencyGateSelectionTests(unittest.TestCase):
         """Ambiguity fails loudly instead of the first line winning."""
         doctored = doctored_workflow(
             self,
-            "python -m pip install -e '.[test,DPKT,crypto,NGAP]'",
+            "python util/pip_install.py -e '.[test,DPKT,crypto,NGAP]'",
             "python -m pip install -e '.[test,DPKT,crypto,NGAP]'\n"
-            "          python -m pip install -e '.[Scapy]'",
+            "          python util/pip_install.py -e '.[Scapy]'",
         )
         with self.assertRaises(AssertionError) as caught:
             _dependency_gates.pytest_jobs(doctored)
@@ -2572,8 +2572,8 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
         """
         doctored = doctored_workflow(
             self,
-            "python -m pip install -e '.[test,Scapy,DPKT,cli,PyShark,PyPCAP,PyPCAPFile]'",
-            "python -m pip install -e '.[test,Scapy,DPKT,cli,PyShark,PCAP_CT,PyPCAPFile]'",
+            "python util/pip_install.py -e '.[test,Scapy,DPKT,cli,PyShark,PyPCAP,PyPCAPFile]'",
+            "python util/pip_install.py -e '.[test,Scapy,DPKT,cli,PyShark,PCAP_CT,PyPCAPFile]'",
         )
 
         gaps = {(gap.flag, gap.job) for gap in _dependency_gates.dependency_gate_gaps(doctored)}
@@ -2649,8 +2649,8 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
         """
         doctored = doctored_workflow(
             self,
-            "python -m pip install -e '.[test,DPKT,crypto,NGAP]'",
-            "python -m pip install -e '.[test,DPKT,crypto,NGAP,vendor]'",
+            "python util/pip_install.py -e '.[test,DPKT,crypto,NGAP]'",
+            "python util/pip_install.py -e '.[test,DPKT,crypto,NGAP,vendor]'",
         )
 
         gaps = {(gap.flag, gap.job) for gap in _dependency_gates.dependency_gate_gaps(doctored)}
@@ -2678,8 +2678,8 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
         """
         doctored_pypcap_parity = doctored_workflow(
             self,
-            "python -m pip install -e '.[test,Scapy,DPKT,cli,PyShark,PyPCAP,PyPCAPFile]'",
-            "python -m pip install -e '.[test,Scapy,DPKT,cli,PyShark,PCAP_CT,PyPCAPFile]'",
+            "python util/pip_install.py -e '.[test,Scapy,DPKT,cli,PyShark,PyPCAP,PyPCAPFile]'",
+            "python util/pip_install.py -e '.[test,Scapy,DPKT,cli,PyShark,PCAP_CT,PyPCAPFile]'",
         )
         doctored_engine_tests = doctored_workflow(
             self,
@@ -2747,8 +2747,8 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
         """
         doctored = doctored_workflow(
             self,
-            "python -m pip install -e '.[test,Scapy,DPKT,cli,PyShark,PyPCAP,PyPCAPFile]'",
-            "python -m pip install -e '.[test,Scapy,DPKT,cli,PyShark,PCAP_CT,PyPCAPFile]'",
+            "python util/pip_install.py -e '.[test,Scapy,DPKT,cli,PyShark,PyPCAP,PyPCAPFile]'",
+            "python util/pip_install.py -e '.[test,Scapy,DPKT,cli,PyShark,PCAP_CT,PyPCAPFile]'",
         )
 
         findings = {(f.job, f.flag) for f in _dependency_gates.ambiguous_satisfactions(doctored)}

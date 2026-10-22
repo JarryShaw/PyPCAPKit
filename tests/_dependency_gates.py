@@ -103,8 +103,8 @@ if TYPE_CHECKING:
     from typing import Iterator, Optional
 
 __all__ = [
-    'WORKFLOW', 'PYPROJECT', 'LATEST_LEG_CONDITION', 'CORE', 'MODULE_PROVIDERS', 'NON_DISTRIBUTION_FLAGS',
-    'MUTUALLY_EXCLUSIVE_IMPORTS', 'DEPENDENCY_GATE_EXCLUSIONS',
+    'WORKFLOW', 'PYPROJECT', 'LATEST_LEG_CONDITION', 'EDITABLE_INSTALL', 'CORE', 'MODULE_PROVIDERS',
+    'NON_DISTRIBUTION_FLAGS', 'MUTUALLY_EXCLUSIVE_IMPORTS', 'DEPENDENCY_GATE_EXCLUSIONS',
     'Requirement', 'Gate', 'Job', 'Gap', 'Exclusion', 'AmbiguousProvider',
     'requirement_key', 'provided_by', 'declared_requirements', 'extras_providing',
     'module_providers', 'contested_imports',
@@ -136,6 +136,10 @@ PYPROJECT = _tiers.ROOT / 'pyproject.toml'
 #: The ``if:`` of a step that runs on the ``latest`` leg alone (#1958), which is
 #: how :func:`pytest_jobs` tells that leg's install line from every leg's.
 LATEST_LEG_CONDITION = 'matrix.python-version == needs.python-versions.outputs.latest'
+#: An editable install of the checkout, its one group the extras: pip's own
+#: ``pip install -e '.[...]'``, or ``util/pip_install.py -e '.[...]'``, which runs
+#: it for most install steps (#1967). Every reader of an install line uses it.
+EDITABLE_INSTALL = re.compile(r"(?:pip install|util/pip_install\.py) -e '\.\[([^]]*)\]'")
 
 #: Stands in for ``[project] dependencies`` where an extra name is expected:
 #: what ``pip install -e .`` installs with no extra asked for at all. Spelled
@@ -1245,7 +1249,7 @@ def _engine_matrix_variants(name: 'str', section: 'str') -> 'Optional[tuple[Job,
         )
     declared_engines = frozenset(re.findall(r'-[ \t]*(\w+)', declared_match.group(1)))
 
-    base_installs = re.findall(r"pip install -e '\.\[([^]]*)\]'", code)
+    base_installs = EDITABLE_INSTALL.findall(code)
     if len(base_installs) != 1:
         raise AssertionError(
             f'the {name!r} job varies by matrix.engine but has {len(base_installs)} '
@@ -1339,14 +1343,14 @@ def pytest_jobs(workflow: 'Optional[pathlib.Path]' = None) -> 'tuple[Job, ...]':
         # install line, read apart from the one every leg runs.
         latest_steps = [step for step in steps if LATEST_LEG_CONDITION in step.partition('run:')[0]]
         latest_installs = [extras for step in latest_steps
-                           for extras in re.findall(r"pip install -e '\.\[([^]]*)\]'", step)]
+                           for extras in EDITABLE_INSTALL.findall(step)]
         if len(latest_installs) > 1:
             raise AssertionError(
                 f'the {name!r} job has {len(latest_installs)} latest-only '
                 f"\"pip install -e '.[...]'\" lines, and this guard cannot tell which "
                 f'extras that leg would have'
             )
-        installs = re.findall(r"pip install -e '\.\[([^]]*)\]'", section)
+        installs = EDITABLE_INSTALL.findall(section)
         installs = [extras for extras in installs if extras not in latest_installs] \
             if latest_installs else installs
         if len(installs) != 1:

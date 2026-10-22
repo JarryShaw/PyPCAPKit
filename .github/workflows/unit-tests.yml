@@ -174,13 +174,12 @@ jobs:
       # why.
       #
       # #1633: a KTLO leg that cannot install -- such as 3.7 -- fails fast and
-      # once: one annotation names pip's last ERROR line (its title's `,` as
-      # `%2C`, as the runner splits properties on `,`), and every later step
-      # needs `steps.install.outcome == 'success'`, so it is skipped rather
-      # than failing against a missing package. The install needs its own
-      # interpreter: if setup-python failed, the image's `python` would be
-      # tested under this leg's name. On a supported leg either fails the job;
-      # on a KTLO leg the annotation is a warning (#1672).
+      # once: util/pip_install.py writes one annotation naming pip's last ERROR
+      # line, and every later step needs `steps.install.outcome == 'success'`,
+      # so it is skipped rather than failing against a missing package. The
+      # install needs its own interpreter: if setup-python failed, the image's
+      # `python` would be tested under this leg's name. On a supported leg
+      # either fails the job; on a KTLO leg the annotation is a warning (#1672).
       - name: Install package and test dependencies
         id: install
         if: ${{ steps.python.outcome == 'success' }}
@@ -188,14 +187,7 @@ jobs:
         shell: bash
         env:
           LEG: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}
-        run: |
-          python -m pip install -U pip setuptools wheel
-          if ! python -m pip install -e '.[test,DPKT,crypto,NGAP]' 2>&1 | tee "$RUNNER_TEMP/pip-install.log"; then
-            reason=$(sed -n 's/^ERROR: //p' "$RUNNER_TEMP/pip-install.log" | tail -n 1)
-            if [ -z "$reason" ]; then reason="pip failed without an ERROR line; see this step's log"; fi
-            echo "::${ANNOTATION_LEVEL} title=pcapkit did not install on ${LEG//,/%2C}::${reason//%/%25}. The rest of this leg is skipped."
-            exit 1
-          fi
+        run: python util/pip_install.py -e '.[test,DPKT,crypto,NGAP]'
 
       # #1958, the owner's ruling E: latest CPython runs the whole suite, so its
       # leg installs everything the suite gates on that pip can install there --
@@ -491,14 +483,7 @@ jobs:
         shell: bash
         env:
           LEG: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}
-        run: |
-          python -m pip install -U pip setuptools wheel
-          if ! python -m pip install -e '.[test,Scapy,DPKT,cli]' 2>&1 | tee "$RUNNER_TEMP/pip-install.log"; then
-            reason=$(sed -n 's/^ERROR: //p' "$RUNNER_TEMP/pip-install.log" | tail -n 1)
-            if [ -z "$reason" ]; then reason="pip failed without an ERROR line; see this step's log"; fi
-            echo "::${ANNOTATION_LEVEL} title=pcapkit did not install on ${LEG//,/%2C}::${reason//%/%25}. The rest of this leg is skipped."
-            exit 1
-          fi
+        run: python util/pip_install.py -e '.[test,Scapy,DPKT,cli]'
 
       # #1958: the `test` job's step of the same name. On `latest` this job runs
       # the whole fixture tier, so it installs the whole suite's set too.
@@ -1296,13 +1281,14 @@ jobs:
       # As in the `test` job (#1672): the install needs this leg's interpreter,
       # and the steps after it need the install, so a KTLO leg whose setup or
       # install failed stops there instead of testing the image's `python`.
+      # util/pip_install.py annotates a failed install, as in `test`.
       - name: Install package, test and generator dependencies
         id: install
         if: ${{ steps.python.outcome == 'success' }}
         continue-on-error: ${{ matrix.ktlo == true }}
-        run: |
-          python -m pip install -U pip setuptools wheel
-          python -m pip install -e '.[test,Scapy,DPKT,cli,PyShark,PyPCAP,PyPCAPFile]'
+        env:
+          LEG: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}
+        run: python util/pip_install.py -e '.[test,Scapy,DPKT,cli,PyShark,PyPCAP,PyPCAPFile]'
 
       # See the `integration` job above.
       - name: Regenerate sample captures
@@ -1569,11 +1555,12 @@ jobs:
       # DPKT/crypto/NGAP join `test` for the same reason the `test` job above
       # installs them: this leg's root-level modules and its own directory's
       # modules both reach gates that would otherwise skip silently rather
-      # than run.
+      # than run. This job has no KTLO leg, so a failed install is an error.
       - name: Install package and test dependencies
-        run: |
-          python -m pip install -U pip setuptools wheel
-          python -m pip install -e '.[test,DPKT,crypto,NGAP]'
+        env:
+          ANNOTATION_LEVEL: error
+          LEG: Python ${{ steps.python-versions.outputs.latest }}
+        run: python util/pip_install.py -e '.[test,DPKT,crypto,NGAP]'
 
       - name: Report available parallelism
         run: |
@@ -1711,11 +1698,13 @@ jobs:
           cache: pip
 
       # The whole suite's set, the line `test` adds on `latest` (#1958), so a
-      # gated pin runs here exactly as the rest of its tier does there.
+      # gated pin runs here exactly as the rest of its tier does there. No KTLO
+      # leg, so a failed install is an error.
       - name: Install package and test dependencies
-        run: |
-          python -m pip install -U pip setuptools wheel
-          python -m pip install -e '.[test,Scapy,DPKT,crypto,cli,NGAP,vendor,docs,PyShark]'
+        env:
+          ANNOTATION_LEVEL: error
+          LEG: Python ${{ steps.python-versions.outputs.latest }}
+        run: python util/pip_install.py -e '.[test,Scapy,DPKT,crypto,cli,NGAP,vendor,docs,PyShark]'
 
       # See the `test` job above for why this step exists.
       - name: Report available parallelism
@@ -1798,11 +1787,13 @@ jobs:
       # #1958: `vendor`, `docs` and `PyShark` join them, so this is the set the
       # `latest` legs install (see `test`'s "Install the whole suite's
       # dependencies on latest" step), and the html5lib, Sphinx and PyShark
-      # gates run here as they do there.
+      # gates run here as they do there. No KTLO leg, so a failed install is an
+      # error.
       - name: Install package, test and generator dependencies
-        run: |
-          python -m pip install -U pip setuptools wheel
-          python -m pip install -e '.[test,Scapy,DPKT,crypto,cli,NGAP,vendor,docs,PyShark]'
+        env:
+          ANNOTATION_LEVEL: error
+          LEG: Python ${{ needs.python-versions.outputs.latest }}
+        run: python util/pip_install.py -e '.[test,Scapy,DPKT,crypto,cli,NGAP,vendor,docs,PyShark]'
 
       # See the `integration` job above. This job has no KTLO leg, so a
       # failure is always an error.
