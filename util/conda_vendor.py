@@ -103,7 +103,7 @@ EXTRAS = ('all',)
 #: ``sys.platform``, ``platform.system()`` and ``platform.machine()`` read on its
 #: runner: ``ubuntu-latest``, the Intel ``macos-26-intel`` and the arm64
 #: ``macos-latest``. Each leg publishes only its own runner's platform (#1822).
-#: Their Windows legs are commented out, and with them the recipe's ``bld.bat``.
+#: They have no Windows leg (#1967), so the recipe's ``bld.bat`` goes unused.
 PLATFORMS = {
     'linux-64': ('linux', 'Linux', 'x86_64'),
     'osx-64': ('darwin', 'Darwin', 'x86_64'),
