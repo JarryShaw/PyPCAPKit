@@ -122,9 +122,10 @@ def plan() -> 'int':
     for attempt in range(1, ATTEMPTS + 1):
         if call(['sudo', 'timeout', str(UPDATE_BOUND), 'apt-get', 'update']).returncode == 0:
             break
-        # #2047: each command stays literal, where #1672's scan of a KTLO step's scripts reads it.
-        _actions.say(f'::warning title=apt-get update attempt {attempt} of {ATTEMPTS} failed '
-                     f'({os.environ["APT_SET"]})::apt-get update failed or exceeded its {UPDATE_BOUND}s bound.')
+        # #2047: unescaped, as before the helper, and through `say`, which writes a lone surrogate as its byte.
+        _actions.say(_actions.annotation(
+            'warning', f'apt-get update failed or exceeded its {UPDATE_BOUND}s bound.',
+            title=f'apt-get update attempt {attempt} of {ATTEMPTS} failed ({os.environ["APT_SET"]})', escape=False))
         if attempt == ATTEMPTS:
             return 1
 
@@ -173,9 +174,10 @@ def fallback(mirrors: 'str', suffix: 'str') -> 'None':
             first = file.read().split(b'\n', 1)[0].split(b'\t', 1)[0]
     except OSError:
         first = b''
-    _actions.say(f'::warning title=apt retry on a fallback mirror{suffix}::Retrying against '
-                 f'{first.decode("utf-8", "surrogateescape")} instead of azure.archive.ubuntu.com, '
-                 'resuming the partial download.')
+    _actions.say(_actions.annotation(
+        'warning', f'Retrying against {first.decode("utf-8", "surrogateescape")} instead of '
+        'azure.archive.ubuntu.com, resuming the partial download.',
+        title=f'apt retry on a fallback mirror{suffix}', escape=False))
 
 
 def install(mirrors: 'str', name: 'Optional[str]') -> 'int':
@@ -193,8 +195,9 @@ def install(mirrors: 'str', name: 'Optional[str]') -> 'int':
                 and call(['sudo', 'DEBIAN_FRONTEND=noninteractive', 'timeout', str(INSTALL_BOUND),
                           'apt-get', 'install', '-y', '--no-install-recommends', *wanted]).returncode == 0:
             return 0
-        _actions.say(f'::warning title=apt attempt {attempt} of {ATTEMPTS} failed{suffix}::apt-get update or '
-                     'install failed or exceeded its per-attempt bound; retrying once.')
+        _actions.say(_actions.annotation(
+            'warning', 'apt-get update or install failed or exceeded its per-attempt bound; retrying once.',
+            title=f'apt attempt {attempt} of {ATTEMPTS} failed{suffix}', escape=False))
         call(['sudo', 'dpkg', '--configure', '-a'])
         if attempt == 1:
             fallback(mirrors, suffix)

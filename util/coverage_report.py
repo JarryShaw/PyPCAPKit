@@ -93,8 +93,8 @@ def check(log: 'str' = LOG) -> 'int':
     if len(root) != 1 or not workers or missing:
         why = f'no data file from pid {missing}' if missing else 'the process log is missing or unreadable'
         _actions.summary(f'**Coverage not reported:** {why} (#1387); a total would under-count.')
-        # #2047: the command stays literal, where #1672's scan of a KTLO step's scripts reads it.
-        print(f'::error::Coverage data is incomplete: {why}.')
+        # #2047: unescaped, as before the helper.
+        _actions.annotate('error', f'Coverage data is incomplete: {why}.', escape=False)
         return 1
     return 0
 

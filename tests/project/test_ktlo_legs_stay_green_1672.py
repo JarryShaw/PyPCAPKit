@@ -35,6 +35,7 @@ fails a step rather than being cancelled with its job:
 
 from __future__ import annotations
 
+import ast
 import functools
 import json
 import os
@@ -45,6 +46,7 @@ import subprocess
 import sys
 import tempfile
 import unittest
+import unittest.mock
 from typing import TYPE_CHECKING, NamedTuple
 
 from tests.project.test_python_matrix_tiers_1633 import (EXPERIMENTAL_GUARD, EXPERIMENTAL_JOB, KTLO_GUARD,
@@ -103,6 +105,13 @@ KTLO_COMMANDS = frozenset({LEVEL, 'warning', 'notice', 'group', 'endgroup'})
 #: A workflow command a script writes, by its name: ``say`` is the printer of
 #: util/apt_packages.py and util/regenerate_samples.py (#1967).
 COMMAND = re.compile(r'''(?:echo|printf|(?:print|say)\(f?)\s*["']::([^\s:"']+)''')
+#: An annotation written through util/_actions.py (#2047), by its level: the
+#: first argument of ``annotate()`` or ``annotation()``, or their ``level=``.
+HELPERS = frozenset({'annotate', 'annotation'})
+#: The same call in a step's shell, where the level is a literal.
+HELPER_CALL = re.compile(r'''\bannotat(?:e|ion)\(\s*(?:level\s*=\s*)?["'](\w+)["']''')
+#: The level of a helper call the scan cannot read, which no step a KTLO leg runs may write.
+UNREAD = '{?}'
 #: A status-check function: an ``if:`` holding none gets ``success() &&`` prepended.
 STATUS_FUNCTION = re.compile(r'\b(?:success|failure|cancelled|always)\(\)')
 #: A ``needs`` output a step's ``if:`` reads, such as the tier file's (#1660).
@@ -287,18 +296,55 @@ def scenarios(name: 'str', job_id: 'str', spec: 'dict[str, Any]',
     return found
 
 
+def helper_levels(text: 'str') -> 'set[str]':
+    """The level of each annotation the Python source ``text`` writes through util/_actions.py (#2047).
+
+    A call of ``annotate`` or ``annotation`` as any module's attribute, or as a name
+    imported from ``_actions``, counts. Its level is the first argument, or else
+    ``level=``: a string literal as itself, a name ``n`` as ``{n}``, as an f-string's
+    ``::{n}`` reads, and anything else as :data:`UNREAD`.
+
+    """
+    tree = ast.parse(text)
+    names = {}  # type: dict[str, str]
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom) and (node.module or '').rpartition('.')[2] == '_actions':
+            names.update((alias.asname or alias.name, alias.name) for alias in node.names if alias.name in HELPERS)
+    found = set()  # type: set[str]
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        func = node.func
+        if not (isinstance(func, ast.Attribute) and func.attr in HELPERS
+                or isinstance(func, ast.Name) and func.id in names):
+            continue
+        if node.args and not isinstance(node.args[0], ast.Starred):
+            level = node.args[0]  # type: Optional[ast.expr]
+        else:
+            level = next((keyword.value for keyword in node.keywords if keyword.arg == 'level'), None)
+        if isinstance(level, ast.Constant) and isinstance(level.value, str):
+            found.add(level.value)
+        elif isinstance(level, ast.Name):
+            found.add('{' + level.id + '}')
+        else:
+            found.add(UNREAD)
+    return found
+
+
 def commands(script: 'str') -> 'set[str]':
     """The workflow commands ``script`` writes, and each ``util/`` script it runs (#1967).
 
     A script's ``::{level}``, where it reads ``ANNOTATION_LEVEL`` into ``level`` as
-    :file:`util/regenerate_samples.py` does, is the shell's ``${ANNOTATION_LEVEL}``.
+    :file:`util/regenerate_samples.py` does, is the shell's ``${ANNOTATION_LEVEL}``;
+    so is a ``level`` it passes to util/_actions.py's annotations (#2047).
 
     """
-    found = set(COMMAND.findall(script))
+    found = set(COMMAND.findall(script)) | set(HELPER_CALL.findall(script))
     for path in set(UTIL_SCRIPT.findall(script)):
         text = (ROOT / path).read_text(encoding='utf-8')
         levelled = "level = os.environ['ANNOTATION_LEVEL']" in text
-        found |= {LEVEL if name == '{level}' and levelled else name for name in COMMAND.findall(text)}
+        written = set(COMMAND.findall(text)) | helper_levels(text)
+        found |= {LEVEL if name == '{level}' and levelled else name for name in written}
     return found
 
 
@@ -746,6 +792,85 @@ class TestASlowExperimentalLegTimesOutAStepNotTheJob(unittest.TestCase):
         self.assertEqual([tuple(head.split(', ')) + (last,) for head, last in stated],
                          [tuple(str(cap) for cap in EXPERIMENTAL_CAPS.values())])
         self.assertEqual(re.findall(r"minutes, under the job's (\d+)", page), [str(EXPERIMENTAL_JOB_CAP)])
+
+
+class TestTheScanReadsTheHelpersAnnotations(unittest.TestCase):
+    """#2047: an annotation a ``util/`` script writes through util/_actions.py is read at its level.
+
+    :func:`commands` is what keeps an ``::error`` out of every step a KTLO leg
+    runs, so a script moving its annotations onto the helper must not move them out
+    of its sight. A seeded check appends its call to a copy of ``KTLO summary``'s
+    script, :file:`util/leg_summary.py`, and scans the step as it runs it.
+
+    """
+
+    def scan(self, seed: 'str', script: 'str' = SUMMARY_RUN) -> 'set[str]':
+        """:func:`commands` of ``script``, with ``seed`` appended to the scripts it runs."""
+        with tempfile.TemporaryDirectory() as tmp:
+            for path in set(UTIL_SCRIPT.findall(script)):
+                target = pathlib.Path(tmp) / path
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text((ROOT / path).read_text(encoding='utf-8') + '\n' + seed + '\n', encoding='utf-8')
+            with unittest.mock.patch(f'{__name__}.ROOT', pathlib.Path(tmp)):
+                return commands(script)
+
+    def test_each_scripts_annotations_are_read(self) -> None:
+        """The scripts on the helper are read as writing the levels they do, not as writing none."""
+        for script, found in ((SUMMARY_RUN, {'warning'}), (EXPERIMENTAL_SUMMARY_RUN, {'warning'}),
+                              ('/usr/bin/python3 util/apt_packages.py install --name "$ENGINE"', {'warning'}),
+                              ("python util/pip_install.py -e '.[test]'", {LEVEL}),
+                              ('python util/coverage_report.py', {'error'})):
+            with self.subTest(script=script):
+                self.assertEqual(commands(script), found)
+
+    def test_a_helper_error_is_caught(self) -> None:
+        for seed in ("_actions.annotate('error', 'seeded')",
+                     "_actions.annotate(level='error', message='seeded')",
+                     "_actions.annotate(message='seeded', level='error')",
+                     "print(_actions.annotation('error', 'seeded', title='t'))",
+                     "util._actions.annotate('error', 'seeded')",
+                     "from _actions import annotate as report\nreport('error', 'seeded')",
+                     "from util._actions import annotation\nprint(annotation('error', 'seeded'))"):
+            with self.subTest(seed=seed):
+                found = self.scan(seed)
+                self.assertIn('error', found)
+                self.assertFalse(found <= KTLO_COMMANDS)
+
+    def test_a_level_it_cannot_read_is_caught(self) -> None:
+        """A level the scan cannot tell is a warning counts as one no KTLO step may write."""
+        for seed, unread in (("_actions.annotate(LEVEL, 'seeded')", '{LEVEL}'),
+                             ("_actions.annotate(*('error', 'seeded'))", UNREAD),
+                             ("_actions.annotate(**{'level': 'error', 'message': 'seeded'})", UNREAD),
+                             ("_actions.annotate(LEVELS[0], 'seeded')", UNREAD)):
+            with self.subTest(seed=seed):
+                found = self.scan(seed)
+                self.assertIn(unread, found)
+                self.assertFalse(found <= KTLO_COMMANDS)
+
+    def test_a_helper_warning_is_accepted(self) -> None:
+        for seed in ("_actions.annotate('warning', 'seeded')", "_actions.annotation(level='notice', message='m')"):
+            with self.subTest(seed=seed):
+                self.assertLessEqual(self.scan(seed), KTLO_COMMANDS)
+
+    def test_the_jobs_level_is_the_shells(self) -> None:
+        """A ``level`` read from ``ANNOTATION_LEVEL`` is ``${ANNOTATION_LEVEL}``, as an f-string's is."""
+        seed = "level = os.environ['ANNOTATION_LEVEL']\n_actions.annotate(level, 'seeded')"
+        self.assertEqual(self.scan(seed), {'warning', LEVEL})
+
+    def test_a_helper_call_in_the_shell_is_read(self) -> None:
+        for script, found in (("python -c \"import _actions; _actions.annotate('error', 'm')\"", {'error'}),
+                              ("python -c \"import _actions; _actions.annotation(level='notice', message='m')\"",
+                               {'notice'})):
+            with self.subTest(script=script):
+                self.assertEqual(commands(script), found)
+
+    def test_a_literal_command_is_still_read(self) -> None:
+        for script in ('echo "::error::m"', "printf '::error::%s\\n' m"):
+            with self.subTest(script=script):
+                self.assertEqual(commands(script), {'error'})
+        for seed in ('print(f"::error title={x}::m")', "_actions.say('::error::m')"):
+            with self.subTest(seed=seed):
+                self.assertIn('error', self.scan(seed))
 
 
 if __name__ == '__main__':
