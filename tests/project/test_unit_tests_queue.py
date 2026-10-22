@@ -605,30 +605,10 @@ class TestDocsOnlyPathRunsEveryDocsReader(unittest.TestCase):
         self.assertIn('tests.corekit.test_sentinel_exports_unit', docs_readers())
 
 
-#: Every ``unit-tests.yml:N`` or ``unit-tests.yml:N-M`` citation in these documents,
-#: as (text the cited first line must contain, text the last line must contain).
-#: A citation the table does not account for fails, and so does a table entry no
-#: citation matches -- so moving a job without renumbering the prose fails here.
-CITATIONS: 'dict[str, list[tuple[str, Optional[str]]]]' = {
-    'docs/source/contributing/releasing.rst': [
-        ('  gate:', 'run: python util/cap_file_size.py python -m pytest -q -n auto --dist load'),
-        ('  changelog:', 'fi'),
-    ],
-    'docs/source/contributing/workflows.rst': [
-        ('# Deliberately *not* gated on ``gate-only``', '# this is neither expensive'),
-        ('name: Required checks passed', None),
-        ('and a `Compat Python` one per supported version', None),
-        ("# Ruleset 23497679's required_status_checks", '# them.'),
-        ('  required-checks:', 'echo "All required jobs reported an accepted result."'),
-        ('if: ${{ always() && inputs.gate-only != true }}', None),
-        ('# The KTLO tier (#1633)', '`ubuntu-latest` moves to 26.04 from 2026-10-19.'),
-    ],
-}
-
-
 #: The workflows the prose cites by job and step name, never by line number:
 #: trimming a comment in one moves every line below it (#1967).
-BY_NAME = ('create-release.yml', 'python-compatibility.yml', 'coverage-comment.yml')
+BY_NAME = ('unit-tests.yml', 'create-release.yml', 'python-compatibility.yml',
+           'coverage-comment.yml')
 
 #: A document that names one of :data:`BY_NAME` may still cite another file bare,
 #: as ``:N``; each such citation is listed here with the file it does cite, and
@@ -674,32 +654,6 @@ class TestWorkflowsCitedByName(unittest.TestCase):
                                  f'{document} cites these bare; name the job and step, or list '
                                  f'the file they cite in BARE_ELSEWHERE')
                 self.assertEqual(elsewhere - bare, set(), f'{document} no longer cites these bare')
-
-
-class TestDocCitationsResolve(unittest.TestCase):
-    """The prose's ``unit-tests.yml`` line numbers land where it says."""
-
-    def test_every_citation_lands_on_its_anchor(self) -> None:
-        """Each ``unit-tests.yml`` citation's range starts and ends on the line its anchor names."""
-        lines = WORKFLOW.read_text(encoding='utf-8').splitlines()
-        for document in documents():
-            text = (ROOT / document).read_text(encoding='utf-8')
-            cited = [(int(m.group(1)), int(m.group(2) or m.group(1)))
-                     for m in re.finditer(r'unit-tests\.yml:(\d+)(?:-(\d+))?', text)]
-            anchors = CITATIONS.get(document, [])
-            unmatched = list(anchors)
-            for first, last in cited:
-                with self.subTest(document=document, citation=f'{first}-{last}'):
-                    self.assertLessEqual(last, len(lines))
-                    hit = next((a for a in anchors if a[0] in lines[first - 1]
-                                and (a[1] is None or a[1] in lines[last - 1])), None)
-                    self.assertIsNotNone(
-                        hit, f'{document} cites unit-tests.yml:{first}-{last}, which is '
-                             f'{lines[first - 1].strip()!r} .. {lines[last - 1].strip()!r}')
-                    if hit in unmatched:
-                        unmatched.remove(hit)
-            with self.subTest(document=document):
-                self.assertFalse(unmatched, f'{document}: no citation lands on {unmatched}')
 
 
 if __name__ == '__main__':
