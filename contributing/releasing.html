@@ -543,7 +543,7 @@ landed and is ready to go out.</p>
 asserts the two agree, and <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> job calls
 <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> with
 <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code>, which runs the <strong>full</strong> suite rather than the tiered
-subset an ordinary push runs (its <code class="docutils literal notranslate"><span class="pre">gate</span></code> job, <code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1798-1873</span></code>).
+subset an ordinary push runs (its <code class="docutils literal notranslate"><span class="pre">gate</span></code> job).
 That gate runs whenever a release will – a moved <code class="docutils literal notranslate"><span class="pre">__version__</span></code> is exactly
 what makes <code class="docutils literal notranslate"><span class="pre">version_check</span></code>’s evidence read “not yet published” – and every
 publishing job’s <code class="docutils literal notranslate"><span class="pre">needs:</span></code> requires it to have succeeded, so a
@@ -552,8 +552,8 @@ Either run the script, or move both fields by hand in the same commit.</p>
 <p>This is the <strong>only</strong> edit a person makes to get a release started – the tag,
 the Release, and every upload are the workflow’s job from here. Other
 checks run unconditionally on the same path, though none is a step in <em>this</em>
-process: the <code class="docutils literal notranslate"><span class="pre">changelog</span></code> job (<code class="docutils literal notranslate"><span class="pre">unit-tests.yml:1641-1667</span></code>) fails outright if
-<code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> has drifted from its source entry under
+process: the <code class="docutils literal notranslate"><span class="pre">changelog</span></code> job’s “Check CHANGELOG.md is in step with its source
+entry” step fails outright if <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> has drifted from its source entry under
 <code class="file docutils literal notranslate"><span class="pre">docs/source/changelog/</span></code>, and <code class="docutils literal notranslate"><span class="pre">github</span></code>’s “Select release body” step
 warns, without failing, if that entry’s heading still reads “unreleased”. Each
 enforces what the changelog convention
