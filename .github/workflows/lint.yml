@@ -5,12 +5,13 @@ name: "Lint"
 # them: it appears only in cron-vendor.yml, as a formatter that rewrites the
 # generated constants, not as a check.
 #
-# Every step is advisory (`continue-on-error: true`): none is clean, and a job
-# that is red the day it lands teaches everyone to scroll past red. Promote a
-# step by deleting its `continue-on-error` once its count reaches zero. Each
-# step writes its result to the run summary; read the numbers there. This
-# header records no counts on purpose: most of those #753 recorded had drifted
-# by the time it was filed.
+# Every step but actionlint is advisory (`continue-on-error: true`): none is
+# clean, and a job that is red the day it lands teaches everyone to scroll past
+# red. Promote a step by deleting its `continue-on-error` once its count reaches
+# zero, and move it below the advisory steps, as a failed step skips every step
+# after it. Each step writes its result to the run summary; read the numbers
+# there. This header records no counts on purpose: most of those #753 recorded
+# had drifted by the time it was filed.
 #
 # pylint's R class moves without the code moving: `R0401` cyclic-import
 # depends on module-processing order, so runs on one tree disagree on it. A
@@ -36,9 +37,9 @@ name: "Lint"
 #     `no-member` false positives off the same metaprogramming.
 
 on:
-  # No `push: [main]`: these steps gate nothing, so a second advisory run per
-  # merge, on a commit its pull request already linted, buys no information
-  # while competing for oversubscribed runners. The schedule covers main's drift.
+  # No `push: [main]`: a second run per merge, on a commit its pull request
+  # already linted, buys no information while competing for oversubscribed
+  # runners. The schedule covers main's drift.
   pull_request:
     branches: [main]
   schedule:
@@ -63,52 +64,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      # actionlint checks every workflow, running the image's shellcheck over
-      # each `run:` block. First, as it needs no Python. It is advisory; whether
-      # it should block now that it reports nothing is open on #1967.
-      #
-      # The release binary is pinned by version and sha256, from the release's
-      # checksums file. Dependabot does not see this pin; bump both together.
-      # The workflows use YAML anchors, which actionlint reads from 1.7.10 on.
-      #
-      # The `-ignore` hides a false positive: `concurrency.queue` is a documented
-      # GitHub key (project-status.yml uses it) that no actionlint release knows
-      # yet (rhysd/actionlint#657, fixed by rhysd/actionlint#654). Drop the
-      # pattern once a release with that fix is pinned.
-      - name: actionlint
-        continue-on-error: true
-        timeout-minutes: 5
-        env:
-          ACTIONLINT_VERSION: 1.7.12
-          ACTIONLINT_SHA256: 8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8
-        run: |
-          archive="actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
-          curl -fsSL --retry 3 -o "$RUNNER_TEMP/$archive" \
-            "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/$archive"
-          echo "$ACTIONLINT_SHA256  $RUNNER_TEMP/$archive" | sha256sum -c -
-          tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP" actionlint
-          "$RUNNER_TEMP/actionlint" -version
-
-          set +e
-          "$RUNNER_TEMP/actionlint" -oneline -no-color \
-            -ignore '^unexpected key "queue" for "concurrency" section\.' 2>&1 | tee actionlint.log
-          status=${PIPESTATUS[0]}
-          set -e
-
-          # Without pipefail a pipeline's status is uniq's, so an empty count
-          # is caught by its output, not its status.
-          rules=$(grep -oE '\[[a-z-]+\]$' actionlint.log | sort | uniq -c)
-          shellcheck=$(grep -oE 'SC[0-9]+:[a-z]+' actionlint.log | sort | uniq -c)
-          {
-            echo '### actionlint'
-            echo '```'
-            printf 'findings by rule:\n%s\n' "${rules:-none}"
-            printf 'shellcheck findings by code:\n%s\n' "${shellcheck:-none}"
-            echo '```'
-          } >> "$GITHUB_STEP_SUMMARY"
-
-          exit "$status"
 
       # One interpreter, not a matrix: these tools read the source, so more
       # interpreters would only repeat the same findings. `latest` from
@@ -203,8 +158,8 @@ jobs:
 
           exit "$status"
 
-      # Last because it is by far the slowest, so the quick verdicts reach the
-      # summary first.
+      # Last of the advisory steps because it is by far the slowest, so the
+      # quick verdicts reach the summary first.
       - name: pylint
         continue-on-error: true
         run: |
@@ -218,6 +173,60 @@ jobs:
             echo '```'
             printf 'messages by class (C/E/R/W):\n'
             grep -oE ': [A-Z][0-9]{4}:' pylint.log | grep -oE '[A-Z]' | sort | uniq -c || echo 'none'
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+          exit "$status"
+
+      # actionlint checks every workflow, running the image's shellcheck over
+      # each `run:` block. It blocks, as #1967 ruled: a finding fails Lint. That
+      # is safe because #2023, #2037 and #2038 fixed every finding it reported.
+      # It runs last, though it needs no Python, so that a finding skips none of
+      # the advisory steps above, and on `!cancelled()`, so that a failed Python
+      # setup does not skip it. Lint is not among ruleset 23497679's required
+      # checks, so a red Lint does not hold a merge.
+      #
+      # The image's shellcheck is not pinned: a runner image that adds a check
+      # can flag unchanged code and turn Lint red on an unrelated pull request.
+      # Fix the script it flags; that is what the check is for.
+      #
+      # The release binary is pinned by version and sha256, from the release's
+      # checksums file. Dependabot does not see this pin; bump both together.
+      # The workflows use YAML anchors, which actionlint reads from 1.7.10 on.
+      #
+      # The `-ignore` hides a false positive: `concurrency.queue` is a documented
+      # GitHub key (project-status.yml uses it) that no actionlint release knows
+      # yet (rhysd/actionlint#657, fixed by rhysd/actionlint#654). Drop the
+      # pattern once a release with that fix is pinned.
+      - name: actionlint
+        if: ${{ !cancelled() }}
+        timeout-minutes: 5
+        env:
+          ACTIONLINT_VERSION: 1.7.12
+          ACTIONLINT_SHA256: 8aca8db96f1b94770f1b0d72b6dddcb1ebb8123cb3712530b08cc387b349a3d8
+        run: |
+          archive="actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
+          curl -fsSL --retry 3 -o "$RUNNER_TEMP/$archive" \
+            "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/$archive"
+          echo "$ACTIONLINT_SHA256  $RUNNER_TEMP/$archive" | sha256sum -c -
+          tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP" actionlint
+          "$RUNNER_TEMP/actionlint" -version
+
+          set +e
+          "$RUNNER_TEMP/actionlint" -oneline -no-color \
+            -ignore '^unexpected key "queue" for "concurrency" section\.' 2>&1 | tee actionlint.log
+          status=${PIPESTATUS[0]}
+          set -e
+
+          # Without pipefail a pipeline's status is uniq's, so an empty count
+          # is caught by its output, not its status.
+          rules=$(grep -oE '\[[a-z-]+\]$' actionlint.log | sort | uniq -c)
+          shellcheck=$(grep -oE 'SC[0-9]+:[a-z]+' actionlint.log | sort | uniq -c)
+          {
+            echo '### actionlint'
+            echo '```'
+            printf 'findings by rule:\n%s\n' "${rules:-none}"
+            printf 'shellcheck findings by code:\n%s\n' "${shellcheck:-none}"
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
