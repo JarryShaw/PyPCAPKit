@@ -48,6 +48,7 @@ import pathlib
 import re
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 from typing import TYPE_CHECKING
@@ -454,15 +455,17 @@ class TestNoKTLOLegCanFailTheRelease(unittest.TestCase):
                                  "${{ matrix.python-version != '3.15' && matrix.python-version || '' }}")
 
 
-#: ``python`` for an install step: ``pip install -U`` passes, ``pip install -e`` prints
+#: ``pip`` for an install step, which runs util/pip_install.py on the real
+#: interpreter (#1967): ``pip install -U`` passes, ``pip install -e`` prints
 #: ``$PIP_OUTPUT`` and exits ``$PIP_STATUS``.
 PIP_STUB = '''\
-case "$*" in
-  "-m pip install -U pip setuptools wheel") exit 0 ;;
-  "-m pip install -e "*) printf '%s\\n' "$PIP_OUTPUT"; exit "$PIP_STATUS" ;;
-esac
-echo "unexpected python $*" >&2
-exit 99
+import os, sys
+if sys.argv[1:] == ['install', '-U', 'pip', 'setuptools', 'wheel']:
+    sys.exit(0)
+if sys.argv[1:3] == ['install', '-e']:
+    print(os.environ['PIP_OUTPUT'])
+    sys.exit(int(os.environ['PIP_STATUS']))
+sys.exit('unexpected pip ' + ' '.join(sys.argv[1:]))
 '''
 #: ``python`` for ``Verify package``: compileall and the import, each scripted by env.
 VERIFY_STUB = '''\
@@ -573,25 +576,35 @@ class TestPython37IsKTLO(unittest.TestCase):
         """Step ``step_name`` on ``leg`` (3.7's by default) under ``shell: bash``, ``python`` stubbed.
 
         ``LEG`` and the job's ``ANNOTATION_LEVEL`` get the values their expressions
-        take on that leg, and ``-eo pipefail`` is what ``shell: bash`` runs.
+        take on that leg, and ``-eo pipefail`` is what ``shell: bash`` runs. With
+        :data:`PIP_STUB`, ``python`` is this interpreter and the stub is its ``pip``.
 
         """
         leg = KTLO_37 if leg is None else leg
         spec = job(name, job_id)
         step = next(step for step in spec['steps'] if step.get('name') == step_name)
-        self.assertEqual(step.get('shell'), 'bash', 'pipefail is what keeps `tee` from hiding a failure')
+        self.assertEqual(step.get('shell'), 'bash')
         self.assertEqual(step['env']['LEG'], leg_template(name, job_id))
         self.assertEqual(spec['env']['ANNOTATION_LEVEL'], annotation_level(name, job_id))
         env = dict(env, LEG=leg_label(leg), ANNOTATION_LEVEL='warning' if is_nonblocking(leg) else 'error')
         bin_dir = self.tmp / 'bin'
         bin_dir.mkdir(exist_ok=True)
         python = bin_dir / 'python'
-        python.write_text('#!/bin/bash\n' + stub, encoding='utf-8')
-        python.chmod(0o755)
+        if python.is_symlink() or python.exists():
+            python.unlink()  # never write a stub through the link to this interpreter
+        if stub is PIP_STUB:
+            python.symlink_to(sys.executable)
+            (self.tmp / 'stub' / 'pip').mkdir(parents=True, exist_ok=True)
+            (self.tmp / 'stub' / 'pip' / '__init__.py').write_text('', encoding='utf-8')
+            (self.tmp / 'stub' / 'pip' / '__main__.py').write_text(stub, encoding='utf-8')
+            env = dict(env, PYTHONPATH=str(self.tmp / 'stub'))
+        else:
+            python.write_text('#!/bin/bash\n' + stub, encoding='utf-8')
+            python.chmod(0o755)
         return subprocess.run(['bash', '--noprofile', '--norc', '-eo', 'pipefail', '-c', step['run']],
                               env=dict(os.environ, PATH=f'{bin_dir}{os.pathsep}{os.environ["PATH"]}',
                                        RUNNER_TEMP=str(self.tmp), **env),
-                              capture_output=True, text=True, check=False, timeout=60)
+                              cwd=ROOT, capture_output=True, text=True, check=False, timeout=60)
 
     def test_37_is_a_ktlo_leg_of_exactly_the_three_test_matrices(self) -> None:
         """On ubuntu-22.04; not engine-tests or pypcap-parity (``ubuntu-latest`` only), nor a release leg."""

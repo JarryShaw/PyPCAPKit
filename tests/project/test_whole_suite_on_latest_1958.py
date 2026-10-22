@@ -15,7 +15,6 @@ the gaps; :file:`tests/test_tier_guard.py` checks its reading of the workflow.
 from __future__ import annotations
 
 import pathlib
-import re
 import tempfile
 import unittest
 
@@ -67,7 +66,7 @@ def step(job_id: 'str', name: 'str') -> 'dict[str, object]':
 
 
 def extras(run: 'object') -> 'frozenset[str]':
-    found = re.findall(r"pip install -e '\.\[([^]]*)\]'", str(run))
+    found = _dependency_gates.EDITABLE_INSTALL.findall(str(run))
     if len(found) != 1:
         raise AssertionError(f'expected one editable install in {run!r}, found {len(found)}')
     return frozenset(extra.strip() for extra in found[0].split(','))
