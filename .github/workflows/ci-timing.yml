@@ -3,10 +3,12 @@ name: CI Timing
 # The periodic CI-duration review (#1538). util/ci_timing.py reads the last
 # week of runs through the API, writes a report to the job summary and an
 # artifact, and fails when a HARD threshold fires (status 1; 2 and 3 are an
-# unreadable API and a crash). GitHub emails a scheduled workflow's failures to
-# whoever last edited its cron line, so no `issues: write` is needed. The
-# thresholds are in docs/source/contributing/workflows.rst, the response to one
-# in conventions/process.rst.
+# unreadable API and a crash), which GitHub emails to whoever last edited the
+# cron line. The `discussion` job then posts the report to this job's thread in
+# the Discussions category REPORT_CATEGORY names (#2030); it alone holds a write
+# scope, and a report it cannot post is a warning. The thresholds are in
+# docs/source/contributing/workflows.rst, the response to one in
+# conventions/process.rst.
 #
 # Not a `workflow_run` on Unit Tests: that adds a job per run to a runner pool
 # already measured saturated.
@@ -35,6 +37,11 @@ permissions:
 concurrency:
   group: ci-timing
   cancel-in-progress: false
+
+# #2030: one Discussions category holds every report with no pull request to
+# comment on, one thread per job.
+env:
+  REPORT_CATEGORY: CI reports
 
 jobs:
   report:
@@ -117,3 +124,42 @@ jobs:
             report.json
             report.md
           retention-days: 90
+
+  # #2030: posts the report the `report` job uploaded, on `always()` like that
+  # job's own upload, so a run failed by a HARD threshold or stopped by a cap
+  # is posted too. util/discussion_report.py writes a warning rather than
+  # failing; `continue-on-error` covers the rest.
+  discussion:
+    name: Post the CI timing report
+    needs: [ report ]
+    if: ${{ always() && needs.report.result != 'skipped' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    permissions:
+      contents: read
+      discussions: write
+
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      # A run that never wrote a report uploaded none; the script then warns.
+      - name: Download the report
+        continue-on-error: true
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: ci-timing-report
+          path: report
+
+      - name: Post the report to Discussions
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          STATUS: ${{ needs.report.result }}
+        # `scheduled` on dispatch too: a manual run is a deliberate report.
+        run: |
+          python3 util/discussion_report.py --category "$REPORT_CATEGORY" \
+            --title 'ci-timing: weekly CI timing report' --report report/report.md \
+            --mode scheduled --status "$STATUS"
