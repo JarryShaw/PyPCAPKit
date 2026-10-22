@@ -65,8 +65,8 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # actionlint checks every workflow, running the image's shellcheck over
-      # each `run:` block. First, as it needs no Python. It stays advisory while
-      # shellcheck findings remain in unit-tests.yml and experimental.yml (#1967).
+      # each `run:` block. First, as it needs no Python. It is advisory; whether
+      # it should block now that it reports nothing is open on #1967.
       #
       # The release binary is pinned by version and sha256, from the release's
       # checksums file. Dependabot does not see this pin; bump both together.
