@@ -21330,6 +21330,9 @@ class TCP(AppType):
     #: [TCP] NVMe over Fabrics Discovery Service
     nvme_disc = 8009, 'nvme-disc', TransportProtocol.tcp
 
+    #: [TCP] Reserved
+    reserved_8011 = 8011, 'reserved', TransportProtocol.tcp
+
     #: [TCP] Configuration Cloud Service
     cfg_cloud = 8015, 'cfg-cloud', TransportProtocol.tcp
 

@@ -3899,7 +3899,7 @@ class AppType(EnumRegistry, StrEnum):
         if 7983 <= value <= 7997:
             #: [N/A] Unassigned
             return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
-        if 8011 <= value <= 8014:
+        if 8012 <= value <= 8014:
             #: [N/A] Unassigned
             return cls._unregistered_member(value, 'unassigned', TransportProtocol.undefined)
         if 8028 <= value <= 8031:

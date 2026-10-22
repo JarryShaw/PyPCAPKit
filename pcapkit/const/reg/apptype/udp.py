@@ -20764,6 +20764,10 @@ class UDP(AppType):
     #: [UDP] Reserved
     reserved_8009 = 8009, 'reserved', TransportProtocol.udp
 
+    #: [UDP] The UDP destination port number for the IP/UDP encapsulated BIER Echo
+    #: Reply message. [RFC-ietf-bier-ping-29]
+    bier_echo = 8011, 'bier-echo', TransportProtocol.udp
+
     #: [UDP] Reserved
     reserved_8015 = 8015, 'reserved', TransportProtocol.udp
 
