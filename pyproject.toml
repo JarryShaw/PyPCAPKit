@@ -1,10 +1,14 @@
 [build-system]
 requires = [
-    # 62.3.0 is the first release whose ``package-data`` globs read ``**`` as any
-    # depth, which the ``pcapkit._extern`` entry below needs (#1814). Measured:
-    # 61.0.0 and 62.2.0 read it as ``*``, and ship only the files one directory
-    # down from it.
-    "setuptools>=62.3.0",
+    # 69.0.0 is the first release that ships ``pcapkit/py.typed`` unasked
+    # (pypa/setuptools#3136, in its NEWS.rst): nothing here declares the file, so
+    # a wheel built with 68.2.2 or older leaves it out and type checkers read the
+    # package as untyped (#2062). Measured on both sides of the bump. It also
+    # keeps what the earlier floor of 62.3.0 was for: ``package-data`` globs that
+    # read ``**`` as any depth, which the ``pcapkit._extern`` entry below needs
+    # (#1814) -- 61.0.0 and 62.2.0 read it as ``*``, measured. 69.0.0 still
+    # supports Python 3.8, the ``requires-python`` floor.
+    "setuptools>=69.0.0",
 ]
 build-backend = "setuptools.build_meta"
 

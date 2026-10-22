@@ -24,7 +24,7 @@ requirements:
     - git
     - python
     - pip
-    - setuptools>=62.3.0
+    - setuptools>=69.0.0
 
     # - dictdumper~=0.8.0  # for formatted output
     # - chardet            # for bytes decode
@@ -43,7 +43,7 @@ requirements:
   host:
     - python
     - pip
-    - setuptools>=62.3.0
+    - setuptools>=69.0.0
 
     # - dictdumper~=0.8.0  # for formatted output
     # - chardet            # for bytes decode
