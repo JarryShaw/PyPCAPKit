@@ -74,6 +74,11 @@ KEPT = {
     'docs/source/ext.rst': (
         r'PCAP \(``cap``/``pcap``\)',
     ),
+    # Pasted from examples/benchmark/report.py, which keeps its output plain
+    # docutils and so cannot use the rst_epilog link.
+    'docs/source/index.rst': (
+        r'both ``pcap`` providers',
+    ),
 }
 
 #: Pages and modules that name the module, each of which links it.

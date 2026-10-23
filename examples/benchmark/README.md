@@ -28,8 +28,7 @@ pair:
 | Python | environments | why |
 | --- | --- | --- |
 | 3.10, 3.11 | `-pypcap` and `-pcap_ct` | both `pcap` providers install, and they are mutually exclusive |
-| 3.12, 3.13, 3.14 | `-pcap_ct` only | `pypcap` cannot be installed at all, so a second virtualenv would compile for minutes to produce nothing |
-| 3.15 | opt-in, `-pcap_ct` only | no released image; see below |
+| 3.12 to 3.15 | `-pcap_ct` only | `pypcap` cannot be installed at all, so a second virtualenv would compile for minutes to produce nothing |
 
 A version named with `--pythons` that is not in the file is a typo rather than a
 column.
@@ -169,7 +168,7 @@ them silently narrows the table:
   mechanism `/opt/install-failures/` uses for `pypcap`, one level up.
 - the reporting pass turns each of those files into a column of `--` **with the
   reason attached** -- in the per-version table's notes, and in the `Test
-  Environment` block as a `Python 3.15 (not measured)` row, so neither snippet
+  Environment` block as a `Python <version> (not measured)` row, so neither snippet
   reads as a complete matrix when it is not.
 - only a run in which *every* version failed exits without a table, since then there
   is genuinely nothing to report.
@@ -358,7 +357,7 @@ would undo that, and would leak machine identity into a public README.
 - **measure: 1.5-2 hours.** 1,000 rounds x 3 passes in every environment, and **almost
   all of it is** `pyshark`, which spawns a `tshark` process per extraction and is
   two to three orders of magnitude slower than anything else in the table. It runs in
-  every environment but 3.14's, where it cannot run at all.
+  every environment but 3.14's and 3.15's, where it cannot run at all.
 
 Ways to cut it, in descending order of how much they save:
 
@@ -384,7 +383,7 @@ so.
 --repeats N      passes over the whole engine set (default 3)
 --engines LIST   comma-separated; must include 'default', which every ratio uses
 --pythons LIST   comma-separated Python versions (default: every 'default'-tier
-                 row of python-images.txt, i.e. 3.10 through 3.14)
+                 row of python-images.txt, i.e. 3.10 through 3.15)
 --quick          --rounds 50 --repeats 2
 --platform P     docker platform; defaults to this machine's architecture
 --out DIR        where to write results (default examples/benchmark/out)
@@ -395,26 +394,13 @@ From the repository root: `make bench` runs `run.sh` with no arguments,
 `make bench-quick` runs a reduced smoke matrix, and `make bench-test` runs the
 self-tests below.
 
-## Python 3.15
+## A new Python version
 
-Opt-in, and allowed to fail -- the benchmark's own choice, not CI's: the repository's CI
-runs 3.15 as a blocking, supported leg (#1633). There is no released
-`python:3.15-slim-bookworm`; the
-pins file names a `3.15-rc` digest, which freezes one particular release candidate
-and will name an older one as time passes. Measure it with:
-
-```shell
-examples/benchmark/run.sh --pythons 3.10,3.11,3.12,3.13,3.14,3.15
-```
-
-If that image cannot be built or the run fails in it, the result is a `3.15` column
-of `--` with the reason attached, not a missing column and not an aborted run.
-
-As it happens the pinned rc **does** build and measure: every pinned requirement
-installs on it, and `default`, `dpkt`, `scapy` and `pcap_ct` all produced
-figures. `pypcap`, `pypcapfile` and `pyshark` come back unmeasured with the same
-reasons they give on 3.14. That is a fact about one release candidate on one day
-rather than a promise about 3.15, which is why the row stays opt-in.
+A version joins the default matrix once its `python:<version>-slim-bookworm` image
+is released; the pins file says how to add the row. A release candidate can be
+measured before then as an `opt-in` row, named with `--pythons`. If its image cannot
+be built or the run fails in it, the result is a column of `--` with the reason
+attached, not a missing column and not an aborted run.
 
 ## Self-tests
 

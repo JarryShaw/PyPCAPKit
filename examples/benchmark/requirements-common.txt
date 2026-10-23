@@ -12,6 +12,7 @@ dictdumper==0.8.4.post6
 chardet==7.7.0
 aenum==3.1.17
 tbtrim==0.3.1
+typing-extensions==4.16.0; python_version < "3.11"
 
 # Engines available in every environment. Only `pypcap` and `pcap_ct` have to be
 # separated -- see requirements-pypcap.txt for why.
