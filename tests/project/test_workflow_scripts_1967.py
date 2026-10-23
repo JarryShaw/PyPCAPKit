@@ -225,7 +225,8 @@ class TestCoverageReport(_Scratch):
                     if step.get('name') == 'Report coverage')
         self.assertEqual(step['run'], 'python util/coverage_report.py')
         self.assertEqual(step['shell'], 'bash')
-        self.assertEqual(set(step['env']), {'SHA', 'PYTHON', 'TESTS_OUTCOME'})
+        # #2030: and the job's copy of its summary.
+        self.assertEqual(set(step['env']), {'SHA', 'PYTHON', 'TESTS_OUTCOME', 'JOB_SUMMARY_COPY'})
         self.assertTrue(re.search(r"steps\.tests\.outcome", step['env']['TESTS_OUTCOME']))
 
 

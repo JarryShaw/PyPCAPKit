@@ -1138,6 +1138,8 @@ class TestTimingArtifacts(unittest.TestCase):
                   for pin in _workflows.PINNED.finditer(self.text) if pin['action'] == 'actions/upload-artifact')
                  if found is not None]
         self.assertGreaterEqual(len(names), 5)
+        # #2030: a name holding the job's id is its job's alone, however many jobs write it.
+        names = [name for name in names if '${{ github.job }}' not in name]
         self.assertEqual(len(names), len(set(names)), names)
 
     def test_both_pytest_runs_write_the_file_the_upload_reads(self) -> 'None':

@@ -163,7 +163,10 @@ class TestTheWorkflowsPage(unittest.TestCase):
         node = re.search(r'(?m)^ +\w+\["[^"<]+<br/>experimental\.yml"\]\n', page)
         self.assertIsNotNone(node)
         assert node is not None
-        self.assertEqual(problems(page.replace(node.group(0), ''), FILES), ['no graph node for experimental.yml'])
+        # Each graph that draws it defines it, the second for CI Reports' edge (#2030), which then dangles too.
+        self.assertEqual(problems(page.replace(node.group(0), ''), FILES),
+                         ["ci-reports.yml: no graph edge 'None ==>|workflow_run: completed| RP'",
+                          'no graph node for experimental.yml'])
 
 
 if __name__ == '__main__':

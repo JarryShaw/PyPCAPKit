@@ -64,6 +64,8 @@ PARITY = ('unit-tests.yml', 'pypcap-parity')
 INTEGRATION_STEP = 'Run full test suite'
 #: Every workflow that waits on "Unit Tests" completing, with ``workflow_run``.
 CONSUMERS = ('coverage-comment.yml', 'deploy-pages.yml', 'cron-vendor.yml', 'cron-conda.yml')
+#: The workflows that wait on "Experimental Tests" completing, to post its report alone (#2030).
+REPORTERS = ('ci-reports.yml',)
 #: Each job's ``timeout-minutes``, and its capped steps', by ``id``: ``test``'s are
 #: main's, ``experimental``'s are sized for GraalPy (88-113 minutes, estimate).
 #: #1938 adds the watcher's interpreter and its requests, capped too.
@@ -481,7 +483,11 @@ class TestTheExperimentalLegsAreAWorkflowOfTheirOwn(unittest.TestCase):
         self.assertIn("needs.changes.outputs.code != 'false'", self.unit['jobs']['test']['if'])
 
     def test_nothing_waits_on_it(self) -> None:
-        """No ``workflow_run`` names it, nothing calls it, and no ``needs:`` anywhere names its job."""
+        """No ``workflow_run`` names it but a reporter's, nothing calls it, and no ``needs:`` anywhere names its job.
+
+        #2030: :data:`REPORTERS` take its finished runs to Discussions, which holds up nothing.
+
+        """
         self.assertNotIn('workflow_call', triggers(self.own))
         consumers = []
         for path in sorted((ROOT / '.github' / 'workflows').glob('*.yml')):
@@ -491,7 +497,7 @@ class TestTheExperimentalLegsAreAWorkflowOfTheirOwn(unittest.TestCase):
                 consumers.append(path.name)
             text = path.read_text(encoding='utf-8')
             with self.subTest(workflow=path.name):
-                self.assertNotIn(self.own['name'], waits)
+                self.assertIs(self.own['name'] in waits, path.name in REPORTERS)
                 code = [line for line in text.splitlines() if not line.lstrip().startswith('#')]
                 self.assertFalse([line for line in code if 'experimental.yml' in line])
                 for job_id, job_spec in (spec.get('jobs') or {}).items():
@@ -521,7 +527,9 @@ class TestTheExperimentalLegsAreAWorkflowOfTheirOwn(unittest.TestCase):
         spec = self.own['jobs']['experimental']
         self.assertIs(spec.get('continue-on-error'), True)
         self.assertEqual(spec['env'], {'ANNOTATION_LEVEL': 'warning'})
-        self.assertEqual(spec['steps'][-1]['name'], 'Experimental summary')
+        # #2030: the last step but the two that name and upload the job's summary.
+        self.assertEqual([entry['name'] for entry in spec['steps'][-3:]],
+                         ['Experimental summary', 'Name the job summary', 'Upload the job summary'])
         expected = {'experimental.yml': ['experimental'],
                     'unit-tests.yml': ['test-ktlo', 'integration-ktlo', 'pypcap-parity-ktlo']}
         for name in ('unit-tests.yml', 'experimental.yml'):

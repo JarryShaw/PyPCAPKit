@@ -11,7 +11,9 @@ Every job holding a KTLO leg now works one way: each step that can fail on the
 leg carries ``continue-on-error: ${{ matrix.ktlo == true }}`` and an ``id``; a
 step that needs an earlier one waits on that step's ``outcome``; the last step,
 ``KTLO summary``, reports each failed ``outcome`` as a warning and a job-summary
-line; and a step's own annotations take the job's ``ANNOTATION_LEVEL``.
+line; and a step's own annotations take the job's ``ANNOTATION_LEVEL``. #2030:
+only the two steps that name and upload the job's copy of its summary,
+:data:`JOB_SUMMARY_STEPS`, follow a summary, masked on every leg.
 
 :func:`run_leg` steps through a job the way the runner does -- the implicit
 ``success()`` GitHub prepends to an ``if:`` without a status function, and a
@@ -121,6 +123,12 @@ OUTPUTS = {
     'apt-plan': {'key': 'apt-debs-ImageOS-X64-set-0123456789abcdef', 'restore-prefix': 'apt-debs-ImageOS-X64-set-'},
     'apt-cache': {'cache-matched-key': 'apt-debs-ImageOS-X64-set-0123456789abcdef', 'cache-hit': 'false'},
 }
+#: #2030: the steps after a summary, on ``always()`` and masked on every leg, that
+#: name and upload the job's copy of its summary for util/check_suite_report.py.
+#: They end every job with a KTLO or experimental leg but :data:`INLINE_SUMMARY`'s.
+JOB_SUMMARY_STEPS = ('Name the job summary', 'Upload the job summary')
+#: The ``env:`` entry by which a summary step copies its lines there too (#2030).
+SUMMARY_COPY = {'JOB_SUMMARY_COPY': '${{ runner.temp }}/job-summary.md'}
 SUMMARY = 'KTLO summary'
 SUMMARY_IF = '${{ !cancelled() && matrix.ktlo == true }}'
 SUMMARY_ENV = {'LEG': "Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}",
@@ -175,6 +183,16 @@ class Step(NamedTuple):
 
 def label(step: 'dict[str, Any]') -> 'str':
     return step.get('name') or step.get('uses')
+
+
+def summary_tail(where: 'tuple[str, str]') -> 'tuple[str, ...]':
+    """The steps that follow the summary of the job ``where``, ``(workflow, job)`` (#2030)."""
+    return () if where == INLINE_SUMMARY else JOB_SUMMARY_STEPS
+
+
+def summary_env(where: 'tuple[str, str]', env: 'dict[str, str]') -> 'dict[str, str]':
+    """The summary step's ``env:`` for the job ``where``, which copies its lines unless inline (#2030)."""
+    return dict(env) if where == INLINE_SUMMARY else dict(env, **SUMMARY_COPY)
 
 
 def summary_step(spec: 'dict[str, Any]') -> 'dict[str, Any]':
@@ -411,24 +429,38 @@ class TestNoKTLOFailureTurnsAJobRed(unittest.TestCase):
         for name, job_id in KTLO_JOBS:
             spec = job(name, job_id)
             summary = summary_step(spec)
+            position = spec['steps'].index(summary)
+            tail = summary_tail((name, job_id))
             with self.subTest(workflow=name, job=job_id):
-                self.assertIs(spec['steps'][-1], summary)
+                self.assertEqual(position, len(spec['steps']) - 1 - len(tail))
                 self.assertEqual(summary.get('if'), SUMMARY_IF)
                 self.assertEqual(summary.get('continue-on-error'), KTLO_GUARD)
                 self.assertEqual(summary.get('shell'), 'bash')
-                self.assertEqual(summary.get('env'), SUMMARY_ENV)
+                self.assertEqual(summary.get('env'), summary_env((name, job_id), SUMMARY_ENV))
                 if (name, job_id) != INLINE_SUMMARY:
                     self.assertEqual(summary['run'], SUMMARY_RUN)
             blocking = BLOCKS_EVERY_LEG.get((name, job_id), ())
             for leg in filter(is_ktlo, legs(name, job_id)):
                 for index, _, record in scenarios(name, job_id, spec, leg):
                     step = spec['steps'][index]
-                    if step is summary or label(step) in blocking:
+                    if step is summary or label(step) in blocking or label(step) in tail:
                         continue
                     with self.subTest(workflow=name, job=job_id, python=leg['python-version'], step=label(step)):
-                        self.assertNotEqual(record[-1].outcome, 'skipped')
+                        self.assertNotEqual(record[position].outcome, 'skipped')
                         if step.get('continue-on-error') is not True:
                             self.assertIn('id', step)
+
+    def test_only_the_job_summary_steps_follow_the_summary(self) -> None:
+        """#2030: they run whatever came before, ``always()``, and nothing they do fails a leg."""
+        for where in KTLO_JOBS + (EXPERIMENTAL_JOB,):
+            spec = job(*where)
+            tail = summary_tail(where)
+            steps = spec['steps'][len(spec['steps']) - len(tail):]
+            with self.subTest(workflow=where[0], job=where[1]):
+                self.assertEqual([label(step) for step in steps], list(tail))
+                for step in steps:
+                    self.assertEqual(step.get('if'), '${{ always() }}')
+                    self.assertIs(step.get('continue-on-error'), True)
 
 
 class TestAKTLOFailureIsAWarning(unittest.TestCase):
@@ -612,7 +644,7 @@ class TestASupportedLegStillFails(unittest.TestCase):
             by_id = {step['id']: step for step in spec['steps'] if 'id' in step}
             masked = [label(step) for step in spec['steps'] if step.get('continue-on-error') is True]
             with self.subTest(workflow=name, job=job_id):
-                self.assertEqual(masked, list(MASKED_ON_EVERY_LEG.get((name, job_id), ())))
+                self.assertEqual(masked, [*MASKED_ON_EVERY_LEG.get((name, job_id), ()), *summary_tail((name, job_id))])
             for leg in (leg for leg in legs(name, job_id) if not is_nonblocking(leg)):
                 clean, record = run_leg(name, job_id, spec, leg)
                 with self.subTest(workflow=name, job=job_id, python=leg['python-version']):
@@ -631,11 +663,12 @@ class TestASupportedLegStillFails(unittest.TestCase):
         """``test`` has one, ``KTLO summary``; ``Experimental summary`` left it with its legs (#1732)."""
         spec = job('unit-tests.yml', 'test')
         self.assertNotIn(EXPERIMENTAL_SUMMARY, [label(step) for step in spec['steps']])
-        self.assertIs(spec['steps'][-1], summary_step(spec))
+        position = len(spec['steps']) - 1 - len(JOB_SUMMARY_STEPS)
+        self.assertIs(spec['steps'][position], summary_step(spec))
         for leg in (leg for leg in legs('unit-tests.yml', 'test') if not is_nonblocking(leg)):
             for _, _, record in scenarios('unit-tests.yml', 'test', spec, leg):
                 with self.subTest(python=leg['python-version']):
-                    self.assertEqual(record[-1].outcome, 'skipped')
+                    self.assertEqual(record[position].outcome, 'skipped')
 
     def test_a_supported_engine_cell_still_fails_its_job_as_an_error(self) -> None:
         spec = job('unit-tests.yml', 'engine-tests')
@@ -671,17 +704,17 @@ class TestAnExperimentalLegIsNonBlockingTheSameWay(unittest.TestCase):
                     self.assertEqual(conclusion, 'success')
 
     def test_every_failure_it_masks_reaches_the_experimental_summary(self) -> None:
-        """It runs after any failure on an experimental leg, as the job's last step."""
-        self.assertIs(self.spec['steps'][-1], self.summary)
+        """It runs after any failure on an experimental leg, as the job's last step but the job summary's."""
+        self.assertEqual(self.position, len(self.spec['steps']) - 1 - len(JOB_SUMMARY_STEPS))
         self.assertNotIn(SUMMARY, [label(step) for step in self.spec['steps']])
         self.assertEqual(self.summary.get('if'), EXPERIMENTAL_SUMMARY_IF)
         self.assertEqual(self.summary.get('continue-on-error'), EXPERIMENTAL_GUARD)
         self.assertEqual(self.summary.get('shell'), 'bash')
-        self.assertEqual(self.summary.get('env'), EXPERIMENTAL_SUMMARY_ENV)
+        self.assertEqual(self.summary.get('env'), summary_env(EXPERIMENTAL_JOB, EXPERIMENTAL_SUMMARY_ENV))
         for leg in self.legs:
             for index, _, record in scenarios(*EXPERIMENTAL_JOB, self.spec, leg):
                 step = self.spec['steps'][index]
-                if step is self.summary:
+                if step is self.summary or label(step) in JOB_SUMMARY_STEPS:
                     continue
                 with self.subTest(python=leg['python-version'], step=label(step)):
                     self.assertNotEqual(record[self.position].outcome, 'skipped')

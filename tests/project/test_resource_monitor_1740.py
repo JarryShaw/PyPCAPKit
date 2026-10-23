@@ -545,7 +545,9 @@ class TestItGatesNothing(unittest.TestCase):
             with self.subTest(workflow=path.name):
                 self.assertNotIn('resource-monitor', path.read_text(encoding='utf-8'))
         self.assertIs(job(*EXPERIMENTAL).get('continue-on-error'), True)
-        self.assertEqual(steps()[-1]['name'], 'Experimental summary')
+        # #2030: last but the two that name and upload the job's summary.
+        self.assertEqual([entry['name'] for entry in steps()[-3:]],
+                         ['Experimental summary', 'Name the job summary', 'Upload the job summary'])
 
     def test_the_caps_and_check_name_are_unchanged(self) -> None:
         spec = job(*EXPERIMENTAL)

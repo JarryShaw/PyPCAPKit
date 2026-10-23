@@ -20,6 +20,14 @@ and ``escapeData`` and ``escapeProperty`` in ``@actions/core``'s ``command.ts``:
 a command's message escapes ``%``, ``\\r`` and ``\\n``, and each property's value
 escapes ``:`` and ``,`` as well.
 
+A step that sets ``JOB_SUMMARY_COPY`` to a file has :func:`summary` and
+:func:`open_summary` append what they write to that file too, the job's copy of
+its summary (#2030). GitHub serves no job summary through its API, so the jobs
+whose runs :file:`util/check_suite_report.py` reports upload the copy as an
+artifact for the report to fold in. Only a step that writes the summary sets it,
+never one that runs the test suite, whose tests write summaries of their own
+through this module.
+
 """
 
 from __future__ import annotations
@@ -34,11 +42,13 @@ if TYPE_CHECKING:
     from os import PathLike
     from typing import IO, Iterator, Mapping, Optional, Sequence, Tuple, Union
 
-__all__ = ['LEVELS', 'escape_data', 'escape_property', 'annotation', 'annotate', 'group',
+__all__ = ['LEVELS', 'SUMMARY_COPY', 'escape_data', 'escape_property', 'annotation', 'annotate', 'group',
            'set_output', 'summary', 'open_summary', 'emit', 'say', 'exit_status', 'run']
 
 #: The annotation commands, by level.
 LEVELS = ('error', 'warning', 'notice')
+#: The variable naming the job's copy of its summary (#2030).
+SUMMARY_COPY = 'JOB_SUMMARY_COPY'
 
 
 def escape_data(text: 'str') -> 'str':
@@ -118,22 +128,88 @@ def set_output(name: 'str', value: 'str', *, required: 'bool' = True,
     return True
 
 
+class _Teed:
+    """The summary, open to append to, whose writes go to the job's copy of it too (#2030).
+
+    The copy is best effort: once a write to it fails it is closed and left
+    behind, and the summary is written all the same.
+
+    """
+
+    def __init__(self, page: 'IO[str]', copy: 'IO[str]') -> 'None':
+        self._page = page
+        self._copy = copy  # type: Optional[IO[str]]
+
+    def _drop(self) -> 'None':
+        copy, self._copy = self._copy, None
+        if copy is not None:
+            with contextlib.suppress(OSError):
+                copy.close()
+
+    def write(self, text: 'str') -> 'int':
+        """Write ``text`` to the summary and to the copy; the characters written to the summary."""
+        written = self._page.write(text)
+        if self._copy is not None:
+            try:
+                self._copy.write(text)
+            except OSError:
+                self._drop()
+        return written
+
+    def flush(self) -> 'None':
+        """Flush the summary and the copy."""
+        self._page.flush()
+        if self._copy is not None:
+            try:
+                self._copy.flush()
+            except OSError:
+                self._drop()
+
+    def close(self) -> 'None':
+        """Close the summary and the copy."""
+        try:
+            self._page.close()
+        finally:
+            self._drop()
+
+    def __enter__(self) -> '_Teed':
+        return self
+
+    def __exit__(self, *_: 'object') -> 'None':
+        self.close()
+
+
 def open_summary(*, environ: 'Optional[Mapping[str, str]]' = None) -> 'IO[str]':
-    """``$GITHUB_STEP_SUMMARY``, open to append to, in UTF-8; :exc:`KeyError` where it is unset."""
-    return open((os.environ if environ is None else environ)['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8')
+    """``$GITHUB_STEP_SUMMARY``, open to append to, in UTF-8; :exc:`KeyError` where it is unset.
+
+    Where ``$JOB_SUMMARY_COPY`` names a file that opens, what is written goes
+    there too; one that does not open is left out.
+
+    """
+    environ = os.environ if environ is None else environ
+    # Both are the caller's to close, as the file this returned before #2030 was.
+    page = open(environ['GITHUB_STEP_SUMMARY'], 'a', encoding='utf-8')  # pylint: disable=consider-using-with
+    path = environ.get(SUMMARY_COPY)
+    if not path:
+        return page
+    try:
+        copy = open(path, 'a', encoding='utf-8')  # pylint: disable=consider-using-with
+    except OSError:
+        return page
+    return _Teed(page, copy)  # type: ignore[return-value]
 
 
 def summary(*lines: 'str', required: 'bool' = True, environ: 'Optional[Mapping[str, str]]' = None) -> 'bool':
     """Append each of ``lines``, and a newline, to ``$GITHUB_STEP_SUMMARY``; whether it was written.
 
     Where ``$GITHUB_STEP_SUMMARY`` is unset, a ``required`` write raises
-    :exc:`KeyError` and any other writes nothing.
+    :exc:`KeyError` and any other writes nothing. The lines go to
+    ``$JOB_SUMMARY_COPY`` too, as :func:`open_summary` writes.
 
     """
-    path = _path('GITHUB_STEP_SUMMARY', required, environ)
-    if path is None:
+    if _path('GITHUB_STEP_SUMMARY', required, environ) is None:
         return False
-    with open(path, 'a', encoding='utf-8') as file:
+    with open_summary(environ=environ) as file:
         for text in lines:
             file.write(text + '\n')
     return True
