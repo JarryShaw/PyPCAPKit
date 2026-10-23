@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 """The GitHub Actions plumbing the :file:`util/` scripts share (#2047).
 
-Workflow commands, ``$GITHUB_OUTPUT`` and ``$GITHUB_STEP_SUMMARY`` writes, and
-the run that copies a command's output to the log and to a file, written once
-here instead of in each script. A script that the steps run as ``python
-util/<script>.py`` has :file:`util/` first on :data:`sys.path`, so it imports
-this module as ``_actions``; imported as ``util.<script>``, or loaded by path,
-from the repository root, it imports ``util._actions``.
+Workflow commands, ``$GITHUB_OUTPUT`` and ``$GITHUB_STEP_SUMMARY`` writes, the
+run that copies a command's output to the log and to a file, and a variable
+read as bytes on Windows too (#2120), written once here instead of in each
+script. A script that the steps run as ``python util/<script>.py`` has
+:file:`util/` first on :data:`sys.path`, so it imports this module as
+``_actions``; imported as ``util.<script>``, or loaded by path, from the
+repository root, it imports ``util._actions``.
 
 The scripts run on the image's ``/usr/bin/python3``, or on a leg's own
 interpreter, which may be 3.7, GraalPy or a free-threaded build, and
@@ -44,7 +45,7 @@ if TYPE_CHECKING:
     from typing import IO, Iterator, Mapping, Optional, Sequence, Tuple, Union
 
 __all__ = ['LEVELS', 'SUMMARY_COPY', 'escape_data', 'escape_property', 'annotation', 'annotate', 'group',
-           'set_output', 'summary', 'open_summary', 'emit', 'say', 'exit_status', 'run']
+           'set_output', 'summary', 'open_summary', 'emit', 'say', 'exit_status', 'run', 'getenvb']
 
 #: The annotation commands, by level.
 LEVELS = ('error', 'warning', 'notice')
@@ -253,3 +254,18 @@ def run(command: 'Sequence[str]', log_path: 'Union[str, PathLike[str]]') -> 'Tup
                 output.extend(line)
         status = process.returncode
     return status, bytes(output)
+
+
+def getenvb(name: 'str') -> 'bytes':
+    """``$name``, as bytes; :exc:`KeyError` where it is unset.
+
+    That is :data:`os.environb`'s value where :data:`os.supports_bytes_environ`
+    holds, and :data:`os.environ`'s, encoded as :func:`os.fsencode` encodes it,
+    where it does not, as on Windows, which has no :data:`os.environb`.
+
+    """
+    if os.supports_bytes_environ:
+        return os.environb[name.encode()]
+    # #2120: Windows keeps its environment as text and has no os.environb, so
+    # reading it there raised AttributeError on the win-64 conda leg.
+    return os.fsencode(os.environ[name])

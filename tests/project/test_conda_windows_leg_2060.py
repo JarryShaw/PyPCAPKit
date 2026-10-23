@@ -20,6 +20,9 @@ phase 2 adds it, with the uploads.
   :file:`util/conda_vendor.py` reads a ``.pyd``'s PE machine, and ``--smoke``
   takes a Windows package's ``Lib/site-packages``, or from Python 3.15 its
   ``lib/python/site-packages`` (conda-forge's CFEP-27), whose path names no Python.
+* :class:`TestTheEnvironmentWithoutEnvironb`: the scripts read their variables
+  where :data:`os.environb` is missing, as on Windows (#2120), where
+  ``release_conda.py build`` died reading ``PCAPKIT_CONDA_OS``.
 
 Nothing here runs on Windows; what a real Conda Update run shows is the rest.
 
@@ -28,6 +31,7 @@ Nothing here runs on Windows; what a real Conda Update run shows is the rest.
 from __future__ import annotations
 
 import bz2
+import contextlib
 import copy
 import io
 import json
@@ -45,10 +49,10 @@ from unittest import mock
 from tests import _workflows
 from tests.project.test_conda_native_platforms_1822 import DISTRIBUTION, SHIM, elf, load, pe
 from tests.project.test_release_gates import PUBLISHING_MARKERS, STATUS, evaluate_condition
-from util import release_conda
+from util import _actions, release_conda, release_tiers
 
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Any, Iterator
 
 #: Test tier (#1958): reads the workflow and recipe files, and drives the script offline.
 __tier__ = 'LATEST'
@@ -368,6 +372,71 @@ class TestTheWindowsLayout(unittest.TestCase):
         status, log = self.smoke('py27_0')
         self.assertEqual(status, 1, log)
         self.assertIn('is built for python2.7, and this is ', log)
+
+
+@contextlib.contextmanager
+def without_environb(**environ: 'str') -> 'Iterator[None]':
+    """``os`` as Windows has it, no :data:`os.environb`, with ``environ`` set and nothing else (#2120)."""
+    environb = os.environb
+    with mock.patch.dict(os.environ, environ, clear=True), \
+            mock.patch.object(os, 'supports_bytes_environ', False):
+        del os.environb
+        try:
+            yield
+        finally:
+            os.environb = environb
+
+
+class TestTheEnvironmentWithoutEnvironb(unittest.TestCase):
+    """#2120: each ``var()``, and the helper they share, on an ``os`` with no ``environb``."""
+
+    VALUE = 'caf\xe9 windows-latest'
+
+    def test_the_emulation_has_no_environb(self) -> None:
+        with without_environb():
+            self.assertFalse(hasattr(os, 'environb'))
+        self.assertTrue(hasattr(os, 'environb'))
+
+    def test_the_helper_reads_os_environ(self) -> None:
+        with without_environb(PCAPKIT_CONDA_OS=self.VALUE):
+            self.assertEqual(_actions.getenvb('PCAPKIT_CONDA_OS'), os.fsencode(self.VALUE))
+            with self.assertRaises(KeyError):
+                _actions.getenvb('PCAPKIT_UNSET')
+
+    def test_the_helper_reads_os_environb_where_it_exists(self) -> None:
+        with mock.patch.dict(os.environb, {b'PCAPKIT_CONDA_OS': b'\xff'}):
+            self.assertEqual(_actions.getenvb('PCAPKIT_CONDA_OS'), b'\xff')
+
+    def test_each_var_reads_the_value_and_refuses_an_unset_one(self) -> None:
+        for module in (release_conda.release_published, release_tiers):
+            with self.subTest(module=module.__name__), without_environb(PCAPKIT_CONDA_OS=self.VALUE):
+                self.assertEqual(module.var('PCAPKIT_CONDA_OS'), os.fsencode(self.VALUE))
+                with self.assertRaises(module.Unbound) as caught:
+                    module.var('PCAPKIT_UNSET')
+                self.assertEqual(str(caught.exception), 'PCAPKIT_UNSET')
+
+    def test_build_gets_past_its_variables(self) -> None:
+        """``build`` reads both variables and runs ``conda build``, where it raised AttributeError."""
+        with tempfile.TemporaryDirectory() as temp:
+            output = os.path.join(temp, 'output')
+            out_dir = os.path.join(temp, 'compilation-x')
+            with without_environb(PCAPKIT_CONDA_OS=WINDOWS, PCAPKIT_PYTHON_VERSION='3.15', GITHUB_OUTPUT=output), \
+                    mock.patch.object(release_conda.tempfile, 'mkdtemp', return_value=out_dir), \
+                    mock.patch.object(release_conda, 'call', return_value=7) as call:
+                status = release_conda.main(['build'])
+            with open(output, encoding='utf-8') as file:
+                written = file.read()
+        self.assertEqual(status, 7)
+        call.assert_called_once_with('conda', 'build', '.', '--package-format', '.tar.bz2', '--no-anaconda-upload',
+                                     '--output-folder', out_dir, '--python', '3.15')
+        self.assertEqual(written, f'out_dir={out_dir}\n')
+
+    def test_build_still_names_an_unset_variable(self) -> None:
+        err = io.StringIO()
+        with without_environb(), mock.patch.object(release_conda, 'call') as call, mock.patch('sys.stderr', err):
+            status = release_conda.main(['build'])
+        self.assertEqual((status, err.getvalue()), (1, 'PCAPKIT_CONDA_OS: unbound variable\n'))
+        call.assert_not_called()
 
 
 if __name__ == '__main__':
