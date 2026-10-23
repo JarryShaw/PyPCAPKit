@@ -1927,6 +1927,11 @@ class _deadline:  # pylint: disable=invalid-name
             # Cancel before restoring, so an alarm firing between the two
             # cannot be delivered to whatever handler was installed before.
             signal.alarm(0)
+            # Cancelling does not withdraw an alarm that has fired but is not yet
+            # delivered, which on GraalPy it can still be: delivered once the
+            # previous handler is back -- ``SIG_DFL``, under pytest -- it ends the
+            # worker (#2084, #2090). Ignoring the signal discards a pending one.
+            signal.signal(signal.SIGALRM, signal.SIG_IGN)
             signal.signal(signal.SIGALRM, self.previous)
             self.armed = False
 

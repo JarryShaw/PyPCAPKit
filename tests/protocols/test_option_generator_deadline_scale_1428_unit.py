@@ -528,6 +528,41 @@ class GeneratorDeadlineScaleTests(unittest.TestCase):
             {'raised': result, 'pending': pending, 'restored': handler is self.handler},
             {'raised': None, 'pending': 0, 'restored': True})
 
+    @unittest.skipUnless(hasattr(signal, 'pthread_sigmask'), 'needs signal.pthread_sigmask')
+    def test_a_firing_still_pending_as_the_deadline_cancels_is_discarded(self) -> None:
+        """#2090: a firing not yet delivered by the restore is never delivered.
+
+        GraalPy delivers a signal asynchronously, so one that fired just before the
+        cancel can still be pending once :meth:`_deadline.__exit__` has put the
+        previous handler back -- ``SIG_DFL``, under pytest, which ends the worker
+        (#2084). Blocking the signal stands in for that delay: it is sent from
+        inside the cancel and stays pending until the ``with`` has been left, and
+        the handler put back must not then receive it.
+        """
+        real_alarm = signal.alarm
+        handled = []  # type: list[int]
+        signal.signal(signal.SIGALRM, lambda signum, frame: handled.append(signum))
+        sent = []  # type: list[int]
+
+        def firing_alarm(seconds: int) -> int:
+            if not seconds and not sent:
+                sent.append(signal.SIGALRM)
+                signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGALRM})
+                signal.pthread_kill(threading.get_ident(), signal.SIGALRM)
+            return real_alarm(seconds)
+
+        try:
+            with mock.patch.object(signal, 'alarm', firing_alarm):
+                with self.options._deadline(5):  # pylint: disable=protected-access
+                    pass
+        finally:
+            # Unblocked, a signal still pending is delivered before this returns.
+            signal.pthread_sigmask(signal.SIG_UNBLOCK, {signal.SIGALRM})
+            pending = real_alarm(0)
+            signal.signal(signal.SIGALRM, self.handler)
+        self.assertEqual({'sent': sent, 'handled': handled, 'pending': pending},
+                         {'sent': [signal.SIGALRM], 'handled': [], 'pending': 0})
+
 
 if __name__ == '__main__':
     unittest.main()
