@@ -1704,9 +1704,10 @@ does; each has tests under <code class="file docutils literal notranslate"><span
 <tbody>
 <tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">util/leg_summary.py</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">KTLO</span> <span class="pre">summary</span></code> in <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">test</span></code>, <code class="docutils literal notranslate"><span class="pre">integration</span></code> and
-<code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> (and so their KTLO twins) and <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>’s
-<code class="docutils literal notranslate"><span class="pre">compatibility</span></code>, as <code class="docutils literal notranslate"><span class="pre">leg_summary.py</span> <span class="pre">ktlo</span></code>; <code class="docutils literal notranslate"><span class="pre">Experimental</span> <span class="pre">summary</span></code> in
-<code class="docutils literal notranslate"><span class="pre">experimental.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">experimental</span></code>, as <code class="docutils literal notranslate"><span class="pre">leg_summary.py</span> <span class="pre">experimental</span></code>.</p></td>
+<code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> (and so their KTLO twins), <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>’s
+<code class="docutils literal notranslate"><span class="pre">compatibility</span></code> and <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">pypi</span></code>, as <code class="docutils literal notranslate"><span class="pre">leg_summary.py</span>
+<span class="pre">ktlo</span></code>; <code class="docutils literal notranslate"><span class="pre">Experimental</span> <span class="pre">summary</span></code> in <code class="docutils literal notranslate"><span class="pre">experimental.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">experimental</span></code>,
+as <code class="docutils literal notranslate"><span class="pre">leg_summary.py</span> <span class="pre">experimental</span></code>.</p></td>
 <td><p>No.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/classify_changes.py</span></code></p></td>
@@ -1805,6 +1806,13 @@ after a checkout of <code class="file docutils literal notranslate"><span class=
 <code class="docutils literal notranslate"><span class="pre">python3</span></code> (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/888">#888</a>).</p></td>
 <td><p>No.</p></td>
 </tr>
+<tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/release_conda.py</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Check</span> <span class="pre">whether</span> <span class="pre">this</span> <span class="pre">leg</span> <span class="pre">is</span> <span class="pre">already</span> <span class="pre">on</span> <span class="pre">Anaconda</span></code> in <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s
+<code class="docutils literal notranslate"><span class="pre">conda</span></code>, as <code class="docutils literal notranslate"><span class="pre">release_conda.py</span> <span class="pre">leg</span></code>; <code class="docutils literal notranslate"><span class="pre">Build</span> <span class="pre">conda</span> <span class="pre">packages</span></code> and <code class="docutils literal notranslate"><span class="pre">Upload</span>
+<span class="pre">conda</span> <span class="pre">packages</span> <span class="pre">to</span> <span class="pre">Anaconda</span> <span class="pre">(Intel)</span></code> in that job and in <code class="docutils literal notranslate"><span class="pre">cron-conda.yml</span></code>’s
+<code class="docutils literal notranslate"><span class="pre">conda-dist</span></code>, as <code class="docutils literal notranslate"><span class="pre">release_conda.py</span> <span class="pre">build</span></code> and <code class="docutils literal notranslate"><span class="pre">upload</span></code> (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1822">#1822</a>, <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2044">#2044</a>).</p></td>
+<td><p>No.</p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -1826,13 +1834,13 @@ Its bounds are still <code class="docutils literal notranslate"><span class="pre
 uutils’ <code class="docutils literal notranslate"><span class="pre">timeout</span></code> behaves as GNU’s (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2020">#2020</a>), and the bound reaches
 apt’s own children, which a timeout in the script, running as the runner’s user,
 could not signal. Both <code class="docutils literal notranslate"><span class="pre">changes</span></code> jobs check out on every event, since the script is in the
-tree. <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">pypi</span></code> job keeps its own copy of
-the KTLO summary’s shell until its shell moves to scripts too; a project pin runs
-that copy and the script on the same steps and requires the same output.
-The release scripts run as <code class="docutils literal notranslate"><span class="pre">python3</span></code>, from a checkout of the whole tree, and are
+tree. The release scripts run as <code class="docutils literal notranslate"><span class="pre">python3</span></code>, from a checkout of the whole tree, and are
 standard library only: <code class="file docutils literal notranslate"><span class="pre">util/release_tags.py</span></code> on the image’s
 own, since <code class="docutils literal notranslate"><span class="pre">github</span></code> has no setup-python and <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> run the check
-before theirs, and <code class="file docutils literal notranslate"><span class="pre">util/release_upload.py</span></code> on the leg’s, after it. A project
+before theirs, and <code class="file docutils literal notranslate"><span class="pre">util/release_upload.py</span></code> on the leg’s, after it.
+<code class="file docutils literal notranslate"><span class="pre">util/release_conda.py</span></code> runs <code class="docutils literal notranslate"><span class="pre">leg</span></code> on the image’s <code class="docutils literal notranslate"><span class="pre">python3</span></code>, before
+setup-python, <code class="docutils literal notranslate"><span class="pre">build</span></code> on conda’s base <code class="docutils literal notranslate"><span class="pre">python</span></code> under the login shell, from
+<code class="file docutils literal notranslate"><span class="pre">conda/pypcapkit</span></code>, and <code class="docutils literal notranslate"><span class="pre">upload</span></code> on setup-python’s. A project
 pin runs each on the cases the shell it replaced handled and requires the same
 status, output and calls.
 <code class="file docutils literal notranslate"><span class="pre">util/_actions.py</span></code> is standard library only, and keeps to 3.7’s syntax,
