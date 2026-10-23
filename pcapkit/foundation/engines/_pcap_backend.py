@@ -132,6 +132,14 @@ def installed_distributions() -> 'tuple[str, ...]':
     only way to see the distribution the import did *not* resolve to -- which is
     exactly the collision worth reporting.
 
+    Only the existence of a ``dist-info`` is asked about, through
+    :func:`importlib.metadata.distributions` rather than
+    :func:`importlib.metadata.distribution`. From Python 3.15 the latter parses
+    every candidate's ``METADATA`` file to prefer one that has metadata, and since
+    this runs on every ``pcap_ct`` extraction, that parse made the engine about
+    2.3x slower per packet (:issue:`2110`). Either call finds a distribution
+    exactly when the other does.
+
     Returns:
         The installed subset of :data:`DISTRIBUTIONS`, in that order.
 
@@ -139,9 +147,8 @@ def installed_distributions() -> 'tuple[str, ...]':
     found = []  # type: list[str]
     for name in DISTRIBUTIONS:
         try:
-            importlib.metadata.distribution(name)
-        except importlib.metadata.PackageNotFoundError:
-            continue
+            if next(iter(importlib.metadata.distributions(name=name)), None) is None:
+                continue
         except Exception:  # pylint: disable=broad-except
             # A corrupt or unreadable ``dist-info`` is not a reason to fail an
             # extraction. Detection is a courtesy; treat "cannot tell" as "not
@@ -187,7 +194,8 @@ def probe() -> 'Probe':
     """Import |pcap|_ and report what was found.
 
     Not cached. The cost after a successful first call is a :data:`sys.modules`
-    lookup, and a cache would make the answer depend on when it was first asked --
+    lookup plus the ``dist-info`` scan in :func:`installed_distributions`, and a
+    cache would make the answer depend on when it was first asked --
     which the tests, and anything that manipulates :data:`sys.path`, would have to
     work around. It is idempotent instead, via :func:`_purge`.
 

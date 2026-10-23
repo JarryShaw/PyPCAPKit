@@ -159,12 +159,10 @@ class InstalledDistributionsTests(unittest.TestCase):
 
         from pcapkit.foundation.engines import _pcap_backend
 
-        def distribution(name):
-            if name in present:
-                return mock.Mock(version='stub')
-            raise importlib.metadata.PackageNotFoundError(name)
+        def distributions(*, name):
+            return iter([mock.Mock(version='stub')] if name in present else [])
 
-        with mock.patch('importlib.metadata.distribution', side_effect=distribution):
+        with mock.patch('importlib.metadata.distributions', side_effect=distributions):
             return _pcap_backend.installed_distributions()
 
     def test_reports_only_what_is_installed_in_a_fixed_order(self) -> None:
@@ -180,8 +178,29 @@ class InstalledDistributionsTests(unittest.TestCase):
 
         # Detection is a courtesy; a corrupt ``dist-info`` must not be able to
         # fail an extraction.
-        with mock.patch('importlib.metadata.distribution', side_effect=ValueError('corrupt')):
+        with mock.patch('importlib.metadata.distributions', side_effect=ValueError('corrupt')):
             self.assertEqual(_pcap_backend.installed_distributions(), ())
+
+    def test_finds_a_dist_info_without_reading_its_metadata(self) -> None:
+        import importlib.metadata
+        import os
+        import sys
+        import tempfile
+
+        from pcapkit.foundation.engines import _pcap_backend
+
+        # From Python 3.15 ``importlib.metadata.distribution`` parses every
+        # candidate's METADATA, which ran on each pcap_ct extraction (#2110).
+        # Existence is all that is asked, so a METADATA read is now an error.
+        def unread(self, filename):
+            raise AssertionError(f'read {filename} of {self}')
+
+        with tempfile.TemporaryDirectory() as site:
+            os.mkdir(os.path.join(site, 'pcap_ct-1.3.0b3.dist-info'))
+            with mock.patch.object(sys, 'path', [site, *sys.path]), \
+                    mock.patch.object(importlib.metadata.PathDistribution, 'read_text', unread), \
+                    mock.patch('importlib.metadata.distribution', side_effect=AssertionError):
+                self.assertIn('pcap-ct', _pcap_backend.installed_distributions())
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
