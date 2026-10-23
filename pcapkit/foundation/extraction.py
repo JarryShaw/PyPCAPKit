@@ -18,6 +18,7 @@ import functools
 import importlib
 import io
 import os
+import stat
 import sys
 import types
 import weakref
@@ -134,6 +135,26 @@ def _release_input(ifile: 'IO[bytes]') -> 'None':
         # Nothing useful can be reported from a finaliser, and raising here
         # would only produce an "Exception ignored in __del__" on stderr.
         pass
+
+
+def _can_seek(stream: 'IO[bytes]') -> 'bool':
+    """Whether ``stream`` can really seek, rather than only saying it can.
+
+    On Windows before CPython 3.16, a pipe reports :meth:`~io.IOBase.seekable`
+    and its ``seek`` silently does nothing (:issue:`2097`), so the answer is
+    trusted only for a regular file, or for a stream with no descriptor to ask.
+
+    Args:
+        stream: The input stream.
+
+    """
+    if not stream.seekable():
+        return False
+    try:
+        mode = os.fstat(stream.fileno()).st_mode
+    except (AttributeError, OSError, ValueError):
+        return True
+    return stat.S_ISREG(mode)
 
 
 class Extractor(Generic[_P]):
@@ -1462,7 +1483,8 @@ class Extractor(Generic[_P]):
             logger.debug('reading from the pre-opened stream %r', fin)
             self._ifile = cast('BufferedReader', fin)
 
-        if not self._ifile.seekable():
+        # NOTE: a Windows pipe says it is seekable and then does not seek (#2097).
+        if not _can_seek(self._ifile):
             logger.debug('input stream is not seekable, wrapping it in SeekableReader')
             # NOTE: ``stream_closing`` decides whether closing the wrapper also
             # closes the stream underneath it, so it follows *ownership*: only a
