@@ -740,7 +740,8 @@ class TestTheWorkflowCommands(unittest.TestCase):
         self.assertEqual(out.getvalue(), f'::notice title=Superseded::pull request #1938 is {ODD_DATA}. {outcome}\n')
         self.assertEqual(files.summary.read_bytes(),
                          f'- Superseded: pull request #1938 is {ODD_STATE}. {outcome}\n'.encode())
-        self.assertEqual(files.read(files.output), '')
+        # A stop records ``stopped=true`` for Upload test timings (#2073).
+        self.assertEqual(files.read(files.output), 'stopped=true\n')
 
 
 class Server(http.server.ThreadingHTTPServer):
