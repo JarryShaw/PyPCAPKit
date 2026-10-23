@@ -662,10 +662,7 @@ class TestTheWorkflowsPost(unittest.TestCase):
         spec = load('cron-vendor.yml')
         self.assertNotIn('name', spec['jobs']['vendor-update'])
         self.assertEqual([job.get('name', job_id) for job_id, job in spec['jobs'].items()].count('vendor-update'), 1)
-        # #1967: Create Release's vendor_update runs util/release_vendor_update.py, which selects it.
-        self.assertIn('run: python3 util/release_vendor_update.py',
-                      (WORKFLOWS / 'create-release.yml').read_text(encoding='utf-8'))
-        release = (ROOT / 'util' / 'release_vendor_update.py').read_text(encoding='utf-8')
+        release = (WORKFLOWS / 'create-release.yml').read_text(encoding='utf-8')
         self.assertIn('select(.name == "vendor-update")', release)
 
     def test_the_vendor_report_steps_never_fail_the_job(self) -> None:

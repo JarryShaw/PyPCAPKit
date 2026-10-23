@@ -1,16 +1,19 @@
 # -*- coding: utf-8 -*-
-"""#1967: :file:`util/release_status.py` and :file:`util/release_vendor_update.py`, run as Create Release runs them.
+"""#1967: :file:`util/release_status.py`, and ``vendor_update``'s inline shell, run as Create Release runs them.
 
 * :class:`TestTheFormerShellAgrees` runs the shell ``release_status``'s "Report
-  why this run did or did not release anything" and ``vendor_update``'s "Read
-  whether its vendor-update job ran" held before the scripts, on the cases
-  below, and each script on the same, and requires the same status, standard
-  output and error, ``$GITHUB_OUTPUT``, ``$GITHUB_STEP_SUMMARY`` and ``gh``
-  calls. Both step bodies are kept here verbatim, and each case table is checked
-  to reach every branch of its shell.
-* :class:`TestTheStepsRunTheScripts` pins each step to its script, after a
-  checkout of :file:`util/` alone, and the scripts to the standard library and
-  Python 3.7's syntax.
+  why this run did or did not release anything" held before the script, on the
+  cases below, and the script on the same, and requires the same status,
+  standard output and error, ``$GITHUB_OUTPUT``, ``$GITHUB_STEP_SUMMARY`` and
+  ``gh`` calls. The former body is kept here verbatim, and the case table is
+  checked to reach every branch of it.
+* :class:`TestTheVendorUpdateStaysInline` pins ``vendor_update``'s "Read whether
+  its vendor-update job ran", which #1967 moved to a script and then put back
+  inline as too plain to need one, to its shell verbatim, with no checkout, and
+  runs that ``run:`` on its own case table, which reaches each of its branches.
+* :class:`TestTheStepsRunTheScripts` pins ``release_status``'s step to its
+  script, after a checkout of :file:`util/` alone, and the script to the
+  standard library and Python 3.7's syntax.
 
 The shell ran as a step with no ``shell:`` runs on the runner, ``bash -e``, and
 ``bash`` prefixes each of its own errors with the script's path and line, which
@@ -206,9 +209,9 @@ FORMER_STATUS = textwrap.dedent(r'''
     exit 1
 ''').lstrip()
 
-#: "Read whether its vendor-update job ran" in ``vendor_update``, as it held
-#: before :file:`util/release_vendor_update.py`.
-FORMER_VENDOR = textwrap.dedent(r'''
+#: "Read whether its vendor-update job ran" in ``vendor_update``: its ``run:``,
+#: which a script held for a while (#1967).
+VENDOR_SHELL = textwrap.dedent(r'''
     set -uo pipefail
 
     if ! result="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${PCAPKIT_VENDOR_RUN_ID}/jobs" \
@@ -235,9 +238,10 @@ FORMER_VENDOR = textwrap.dedent(r'''
 JOBS = {
     'release_status': ('Report why this run did or did not release anything', 'python3 util/release_status.py',
                        {'contents': 'read'}),
-    'vendor_update': ('Read whether its vendor-update job ran', 'python3 util/release_vendor_update.py',
-                      {'actions': 'read', 'contents': 'read'}),
 }
+#: ``vendor_update``'s one step, and its permissions: the listing's alone.
+VENDOR_STEP = 'Read whether its vendor-update job ran'
+VENDOR_PERMISSIONS = {'actions': 'read'}
 #: The checkout each job opens with: this run's commit, :file:`util/` alone.
 CHECKOUT = {'ref': '${{ github.sha }}', 'sparse-checkout': 'util', 'persist-credentials': False}
 
@@ -378,7 +382,7 @@ VENDOR_CASES = (
     ('neither', b'success\n', {'PCAPKIT_VENDOR_RUN_ID': UNSET, 'GITHUB_REPOSITORY': UNSET}),
 )
 
-#: Each way the former ``vendor_update`` shell ends: ``name -> (status,
+#: Each way the ``vendor_update`` shell ends: ``name -> (status,
 #: $GITHUB_OUTPUT, its standard output, as a pattern)``.
 VENDOR_BRANCHES = {
     'not listed': (0, '', r'::warning title=Vendor Update not read \(#1748\)::could not list the jobs of '),
@@ -451,6 +455,19 @@ class _Stand(unittest.TestCase):
         """The state each leaves: :meth:`former` on ``shell``, then ``python3 util/<script>`` as its step runs it."""
         return self.former(shell, env, reply), self.state([sys.executable, str(UTIL / script)], env, reply)
 
+    def branches(self, shell: 'str', cases: 'list[tuple[str, dict[str, str], bytes]]',
+                 classify: 'Callable[[tuple[object, ...]], list[str]]') -> 'dict[str, list[str]]':
+        """Each case's branch, as ``classify(state)`` names it from ``shell``'s run."""
+        reached = {}  # type: dict[str, list[str]]
+        for name, env, reply in cases:
+            old = self.former(shell, env, reply)
+            branch = classify(old)
+            with self.subTest(case=name):
+                self.assertEqual(len(branch), 1, f'{name} matches {branch}: {old!r}')
+            for found in branch:
+                reached.setdefault(found, []).append(name)
+        return reached
+
 
 def status_env_names() -> 'list[str]':
     """The variables ``release_status``'s step's ``env:`` sets, each of them, as Actions does."""
@@ -496,9 +513,6 @@ class TestTheFormerShellAgrees(_Stand):
         base.update(STATUS_BASE)
         return self.env(base, overrides)
 
-    def vendor_env(self, overrides: 'dict[str, Optional[str]]') -> 'dict[str, str]':
-        return self.env({'GH_TOKEN': 'not-a-token', 'PCAPKIT_VENDOR_RUN_ID': '38650191283'}, overrides)
-
     def test_the_cases_set_what_the_step_sets(self) -> None:
         """The base sets every ``env:`` name, as Actions does, so an unset one is a case's own."""
         self.assertEqual(sorted(STATUS_BASE), sorted(status_env_names()))
@@ -508,26 +522,6 @@ class TestTheFormerShellAgrees(_Stand):
             with self.subTest(case=name):
                 old, new = self.run_both(FORMER_STATUS, 'release_status.py', self.status_env(overrides))
                 self.assertEqual(new, old)
-
-    def test_the_vendor_update(self) -> None:
-        for name, reply, overrides in VENDOR_CASES:
-            with self.subTest(case=name):
-                old, new = self.run_both(FORMER_VENDOR, 'release_vendor_update.py', self.vendor_env(overrides),
-                                         reply)
-                self.assertEqual(new, old)
-
-    def branches(self, shell: 'str', cases: 'list[tuple[str, dict[str, str], bytes]]',
-                 classify: 'Callable[[tuple[object, ...]], list[str]]') -> 'dict[str, list[str]]':
-        """Each case's branch, as ``classify(state)`` names it from the former shell's run."""
-        reached = {}  # type: dict[str, list[str]]
-        for name, env, reply in cases:
-            old = self.former(shell, env, reply)
-            branch = classify(old)
-            with self.subTest(case=name):
-                self.assertEqual(len(branch), 1, f'{name} matches {branch}: {old!r}')
-            for found in branch:
-                reached.setdefault(found, []).append(name)
-        return reached
 
     def test_every_status_branch_is_reached(self) -> None:
         """The curated cases alone reach each of :data:`STATUS_BRANCHES`, each case exactly one."""
@@ -543,19 +537,6 @@ class TestTheFormerShellAgrees(_Stand):
                                 classify)
         self.assertEqual(sorted(reached), sorted(STATUS_BRANCHES))
 
-    def test_every_vendor_branch_is_reached(self) -> None:
-        def classify(state: 'tuple[object, ...]') -> 'list[str]':
-            status, stdout, stderr, output = state[0], str(state[1]), str(state[2]), state[3]
-            written = str(output)[len('earlier=1\n'):] if output is not None else ''
-            return [name for name, (code, lines, pattern) in VENDOR_BRANCHES.items()
-                    if status == code and written == lines and re.match(pattern, stdout)
-                    and (pattern != '$' or stdout == '')
-                    and (name != 'an unset variable' or 'unbound variable' in stderr)]
-        reached = self.branches(FORMER_VENDOR,
-                                [(name, self.vendor_env(overrides), reply) for name, reply, overrides in VENDOR_CASES],
-                                classify)
-        self.assertEqual(sorted(reached), sorted(VENDOR_BRANCHES))
-
     def test_the_samples_reach_past_the_early_exits(self) -> None:
         """So agreement on them is agreement on the reconciliation, not only on case 1."""
         titles = set()
@@ -568,8 +549,39 @@ class TestTheFormerShellAgrees(_Stand):
                 self.assertIn(title, titles)
 
 
+@unittest.skipIf(not BASH, 'needs bash, which runs the step')
+class TestTheVendorUpdateStaysInline(_Stand):
+    """``vendor_update`` runs its shell inline (#1967), and that shell ends each way it should."""
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.found = steps(WORKFLOW, 'vendor_update')
+
+    def vendor_env(self, overrides: 'dict[str, Optional[str]]') -> 'dict[str, str]':
+        return self.env({'GH_TOKEN': 'not-a-token', 'PCAPKIT_VENDOR_RUN_ID': '38650191283'}, overrides)
+
+    def test_the_step_holds_its_shell_and_nothing_checks_out(self) -> None:
+        self.assertEqual([step.get('name') for step in self.found], [VENDOR_STEP])
+        self.assertEqual(self.found[0]['run'], VENDOR_SHELL)
+        self.assertEqual(load(WORKFLOW)['jobs']['vendor_update']['permissions'], VENDOR_PERMISSIONS)
+
+    def test_every_branch_is_reached(self) -> None:
+        """Each case of :data:`VENDOR_CASES` ends one way, and between them every way."""
+        def classify(state: 'tuple[object, ...]') -> 'list[str]':
+            status, stdout, stderr, output = state[0], str(state[1]), str(state[2]), state[3]
+            written = str(output)[len('earlier=1\n'):] if output is not None else ''
+            return [name for name, (code, lines, pattern) in VENDOR_BRANCHES.items()
+                    if status == code and written == lines and re.match(pattern, stdout)
+                    and (pattern != '$' or stdout == '')
+                    and (name != 'an unset variable' or 'unbound variable' in stderr)]
+        reached = self.branches(self.found[0]['run'],
+                                [(name, self.vendor_env(overrides), reply) for name, reply, overrides in VENDOR_CASES],
+                                classify)
+        self.assertEqual(sorted(reached), sorted(VENDOR_BRANCHES))
+
+
 class TestTheStepsRunTheScripts(unittest.TestCase):
-    """Each job checks out :file:`util/` alone, at this run's commit, and runs its script on the image's ``python3``."""
+    """The job checks out :file:`util/` alone, at this run's commit, and runs its script on the image's ``python3``."""
 
     def test_each_job_checks_out_util_then_runs_its_script(self) -> None:
         blocks = job_blocks((ROOT / '.github' / 'workflows' / WORKFLOW).read_text(encoding='utf-8'))
@@ -589,14 +601,14 @@ class TestTheStepsRunTheScripts(unittest.TestCase):
     def test_no_step_holds_the_former_shell(self) -> None:
         for job, found in sorted(load(WORKFLOW)['jobs'].items()):
             for step in found.get('steps', []):
-                for line in ('reconciled_github', 'Stranded partial release', 'select(.name == "vendor-update")'):
+                for line in ('reconciled_github', 'Stranded partial release'):
                     with self.subTest(job=job, step=step.get('name'), line=line):
                         self.assertNotIn(line, step.get('run', ''))
 
     def test_the_scripts_need_only_util_and_python_3_7(self) -> None:
         """The sparse checkout holds :file:`util/`, and the image's ``python3`` nothing installed."""
         allowed = {'__future__', 'argparse', 'os', 'subprocess', 'sys', 'typing', '_actions', 'util'}
-        for name in ('release_status.py', 'release_vendor_update.py'):
+        for name in ('release_status.py',):
             with self.subTest(script=name):
                 tree = ast.parse((UTIL / name).read_text(encoding='utf-8'), feature_version=(3, 7))
                 imported = {alias.name.split('.')[0] for node in ast.walk(tree) if isinstance(node, ast.Import)
