@@ -497,6 +497,7 @@ from pcapkit.protocols.schema.internet.mh import \
 from pcapkit.protocols.schema.internet.mh import VendorSpecificOption as Schema_VendorSpecificOption
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.exceptions import EnumValueError, ProtocolError, UnsupportedCall
+from pcapkit.utilities.timestamp import fromtimestamp
 from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
 if TYPE_CHECKING:
@@ -4088,8 +4089,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         data = Data_TimestampOption(
             type=schema.type,
             length=self._mh_option_length(schema.length),
-            timestamp=datetime.datetime.fromtimestamp(
-                seconds + fraction / 65536, tz=datetime.timezone.utc),
+            # not the stdlib's ``fromtimestamp``, which takes no time after 3000
+            # on Windows (#2099)
+            timestamp=fromtimestamp(seconds + fraction / 65536, datetime.timezone.utc),
             pmip_timestamp=Data_PMIPv6Timestamp(seconds=seconds, fraction=fraction),
         )
         return data

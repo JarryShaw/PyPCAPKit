@@ -288,18 +288,6 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
             self.assertEqual(Frame.read(no_read, _read=False).number, 5)
             self.assertEqual(no_read._file.tell(), 0)
 
-        real_datetime = datetime.datetime
-
-        class FakeDateTime:
-            calls = 0
-
-            @classmethod
-            def fromtimestamp(cls, *args):
-                if cls.calls == 0:
-                    cls.calls += 1
-                    raise ValueError
-                return real_datetime.fromtimestamp(*args)
-
         bad_time = object.__new__(Frame)
         bad_time.__header__ = Schema_Frame(ts_sec=1, ts_usec=0,
                                            incl_len=0, orig_len=0, packet=b'')
@@ -307,12 +295,10 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
         bad_time._nsec = False
         bad_time._fnum = 6
         bad_time._file = io.BytesIO(b'')
-        # Faked through the module's name in frame.py, not through
-        # ``datetime.datetime`` itself: PyPy's datetime is pure Python and
-        # reads its own ``datetime`` global, so faking that fails the real call
-        # the fake hands on to (#1958).
-        fake_module = SimpleNamespace(**dict(vars(datetime), datetime=FakeDateTime))
-        with mock.patch('pcapkit.protocols.misc.pcap.frame.datetime', fake_module), \
+        # Faked through frame.py's own binding of
+        # :func:`pcapkit.utilities.timestamp.fromtimestamp`, which it calls
+        # instead of :meth:`datetime.datetime.fromtimestamp` since #2099.
+        with mock.patch('pcapkit.protocols.misc.pcap.frame.fromtimestamp', side_effect=ValueError), \
                 mock.patch.object(Frame, '_decode_next_layer',
                                   lambda self, info, proto=None, length=None, packet=None: info), \
                 mock.patch('pcapkit.protocols.misc.pcap.frame.warn') as warn:
