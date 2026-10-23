@@ -58,7 +58,9 @@ from __future__ import annotations
 import inspect
 import unittest
 
-from pcapkit.corekit.enum import EnumLookup
+# EnumLookup is imported in each test, not here (#2115): an earlier module in
+# the same process may re-import pcapkit, and the base has to come from the same
+# import as the class it is checked against.
 
 #: Test tier (#1958): exercises metaclass, ABC or enum machinery, which differs by
 #: interpreter.
@@ -79,6 +81,7 @@ class ReparentedBasesTests(unittest.TestCase):
         from aenum import IntEnum
 
         from pcapkit.const.reg.apptype.apptype import TransportProtocol
+        from pcapkit.corekit.enum import EnumLookup
 
         self.assertEqual(TransportProtocol.__bases__, (EnumLookup, IntEnum))
         self.assertIn(EnumLookup, TransportProtocol.__mro__)
@@ -86,12 +89,14 @@ class ReparentedBasesTests(unittest.TestCase):
     def test_finalised_state(self) -> None:
         import enum
 
+        from pcapkit.corekit.enum import EnumLookup
         from pcapkit.corekit.infoclass import FinalisedState
 
         self.assertEqual(FinalisedState.__bases__, (EnumLookup, enum.IntEnum))
         self.assertIn(EnumLookup, FinalisedState.__mro__)
 
     def test_completion(self) -> None:
+        from pcapkit.corekit.enum import EnumLookup
         from pcapkit.foundation.reassembly.data.data import Completion
         from pcapkit.utilities.compat import StrEnum
 
@@ -99,6 +104,7 @@ class ReparentedBasesTests(unittest.TestCase):
         self.assertIn(EnumLookup, Completion.__mro__)
 
     def test_ftp_type(self) -> None:
+        from pcapkit.corekit.enum import EnumLookup
         from pcapkit.protocols.application.ftp import Type as FTPType
         from pcapkit.utilities.compat import StrEnum
 
@@ -106,6 +112,7 @@ class ReparentedBasesTests(unittest.TestCase):
         self.assertIn(EnumLookup, FTPType.__mro__)
 
     def test_httpv1_type(self) -> None:
+        from pcapkit.corekit.enum import EnumLookup
         from pcapkit.protocols.application.httpv1 import Type as HTTPv1Type
         from pcapkit.utilities.compat import StrEnum
 
@@ -115,12 +122,14 @@ class ReparentedBasesTests(unittest.TestCase):
     def test_criticality(self) -> None:
         from aenum import IntEnum
 
+        from pcapkit.corekit.enum import EnumLookup
         from pcapkit.protocols.application.ngap import Criticality
 
         self.assertEqual(Criticality.__bases__, (EnumLookup, IntEnum))
         self.assertIn(EnumLookup, Criticality.__mro__)
 
     def test_pdu_kind(self) -> None:
+        from pcapkit.corekit.enum import EnumLookup
         from pcapkit.protocols.application.ngap import PDUKind
         from pcapkit.utilities.compat import StrEnum
 
@@ -130,6 +139,7 @@ class ReparentedBasesTests(unittest.TestCase):
     def test_packet_direction(self) -> None:
         import enum
 
+        from pcapkit.corekit.enum import EnumLookup
         from pcapkit.protocols.misc.pcapng import PacketDirection
 
         self.assertEqual(PacketDirection.__bases__, (EnumLookup, enum.IntEnum))
@@ -138,12 +148,14 @@ class ReparentedBasesTests(unittest.TestCase):
     def test_packet_reception(self) -> None:
         import enum
 
+        from pcapkit.corekit.enum import EnumLookup
         from pcapkit.protocols.misc.pcapng import PacketReception
 
         self.assertEqual(PacketReception.__bases__, (EnumLookup, enum.IntEnum))
         self.assertIn(EnumLookup, PacketReception.__mro__)
 
     def test_wireguard_key_label(self) -> None:
+        from pcapkit.corekit.enum import EnumLookup
         from pcapkit.protocols.misc.pcapng import WireGuardKeyLabel
         from pcapkit.utilities.compat import StrEnum
 
@@ -166,12 +178,14 @@ class HttpV2FlagsHierarchyTests(unittest.TestCase):
     def test_frame_type_flags_itself(self) -> None:
         import enum
 
+        from pcapkit.corekit.enum import EnumLookup
         from pcapkit.protocols.schema.application.httpv2 import FrameType
 
         self.assertEqual(FrameType.Flags.__bases__, (EnumLookup, enum.IntFlag))
         self.assertIn(EnumLookup, FrameType.Flags.__mro__)
 
     def test_all_six_concrete_subclasses_carry_it_transitively(self) -> None:
+        from pcapkit.corekit.enum import EnumLookup
         from pcapkit.protocols.schema.application.httpv2 import (ContinuationFrame, DataFrame,
                                                                    FrameType, HeadersFrame,
                                                                    PingFrame, PushPromiseFrame,

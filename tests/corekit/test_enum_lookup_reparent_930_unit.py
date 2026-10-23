@@ -143,10 +143,13 @@ import pkgutil
 import sys
 import unittest
 
-from pcapkit.corekit.enum import EnumLookup
-from pcapkit.utilities.exceptions import EnumKeyError, EnumValueError
 from pcapkit.utilities.logging import logger
 from tests.utilities._harness import capture
+
+# EnumLookup and the enum exceptions are imported in each test, not here
+# (#2115): an earlier module in the same process may re-import pcapkit, and they
+# have to come from the same import as the class under test. ``logger`` is a
+# named logging.getLogger() logger, the same object in every import.
 
 #: Test tier (#1958): exercises threading, locking or warning and exception hooks, which
 #: differ by interpreter.
@@ -177,6 +180,7 @@ class ReparentedBasesTests(unittest.TestCase):
         from aenum import IntFlag
 
         from pcapkit.const.ftp.command import CommandType
+        from pcapkit.corekit.enum import EnumLookup
 
         self.assertEqual(CommandType.__bases__, (EnumLookup, IntFlag))
         self.assertIn(EnumLookup, CommandType.__mro__)
@@ -187,6 +191,7 @@ class ReparentedBasesTests(unittest.TestCase):
         from aenum import IntEnum
 
         from pcapkit.const.ftp.command import ConformanceRequirement
+        from pcapkit.corekit.enum import EnumLookup
 
         self.assertEqual(ConformanceRequirement.__bases__, (EnumLookup, IntEnum))
         self.assertIn(EnumLookup, ConformanceRequirement.__mro__)
@@ -196,6 +201,7 @@ class ReparentedBasesTests(unittest.TestCase):
     def test_esp_status(self) -> None:
         import enum
 
+        from pcapkit.corekit.enum import EnumLookup
         from pcapkit.protocols.internet.esp import ESPStatus
 
         self.assertEqual(ESPStatus.__bases__, (EnumLookup, enum.IntEnum))
@@ -211,6 +217,7 @@ class ReparentedBasesTests(unittest.TestCase):
         class alongside the other six."""
         from aenum import IntEnum
 
+        from pcapkit.corekit.enum import EnumLookup
         from pcapkit.protocols.internet.mh import FastBindingAcknowledgmentStatus
 
         self.assertEqual(FastBindingAcknowledgmentStatus.__bases__, (EnumLookup, IntEnum))
@@ -222,6 +229,7 @@ class ReparentedBasesTests(unittest.TestCase):
         """Same history as :class:`FastBindingAcknowledgmentStatus`."""
         from aenum import IntEnum
 
+        from pcapkit.corekit.enum import EnumLookup
         from pcapkit.protocols.internet.mh import IPv6AddressPrefixCode
 
         self.assertEqual(IPv6AddressPrefixCode.__bases__, (EnumLookup, IntEnum))
@@ -232,6 +240,7 @@ class ReparentedBasesTests(unittest.TestCase):
     def test_localized_routing_status(self) -> None:
         from aenum import IntEnum
 
+        from pcapkit.corekit.enum import EnumLookup
         from pcapkit.protocols.internet.mh import LocalizedRoutingStatus
 
         self.assertEqual(LocalizedRoutingStatus.__bases__, (EnumLookup, IntEnum))
@@ -242,6 +251,7 @@ class ReparentedBasesTests(unittest.TestCase):
     def test_lma_address_code(self) -> None:
         from aenum import IntEnum
 
+        from pcapkit.corekit.enum import EnumLookup
         from pcapkit.protocols.internet.mh import LMAAddressCode
 
         self.assertEqual(LMAAddressCode.__bases__, (EnumLookup, IntEnum))
@@ -362,6 +372,7 @@ class FailedLookupTests(unittest.TestCase):
 
     def test_command_type(self) -> None:
         from pcapkit.const.ftp.command import CommandType
+        from pcapkit.utilities.exceptions import EnumKeyError, EnumValueError
 
         with self.assertRaises(KeyError) as name_miss:
             CommandType.get('NOT_A_REAL_MEMBER')
@@ -373,6 +384,7 @@ class FailedLookupTests(unittest.TestCase):
 
     def test_conformance_requirement(self) -> None:
         from pcapkit.const.ftp.command import ConformanceRequirement
+        from pcapkit.utilities.exceptions import EnumKeyError, EnumValueError
 
         with self.assertRaises(KeyError) as name_miss:
             ConformanceRequirement.get('NOT_A_REAL_MEMBER')
@@ -384,6 +396,7 @@ class FailedLookupTests(unittest.TestCase):
 
     def test_esp_status(self) -> None:
         from pcapkit.protocols.internet.esp import ESPStatus
+        from pcapkit.utilities.exceptions import EnumKeyError, EnumValueError
 
         with self.assertRaises(KeyError) as name_miss:
             ESPStatus.get('NOT_A_REAL_MEMBER')
@@ -398,6 +411,7 @@ class FailedLookupTests(unittest.TestCase):
         resolves through the base's own ``get`` -- the same mechanism
         :meth:`test_localized_routing_status` below exercises."""
         from pcapkit.protocols.internet.mh import FastBindingAcknowledgmentStatus
+        from pcapkit.utilities.exceptions import EnumKeyError, EnumValueError
 
         with self.assertRaises(KeyError) as name_miss:
             FastBindingAcknowledgmentStatus.get('NOT_A_REAL_MEMBER')
@@ -409,6 +423,7 @@ class FailedLookupTests(unittest.TestCase):
 
     def test_ipv6_address_prefix_code(self) -> None:
         from pcapkit.protocols.internet.mh import IPv6AddressPrefixCode
+        from pcapkit.utilities.exceptions import EnumKeyError, EnumValueError
 
         with self.assertRaises(KeyError) as name_miss:
             IPv6AddressPrefixCode.get('NOT_A_REAL_MEMBER')
@@ -424,6 +439,7 @@ class FailedLookupTests(unittest.TestCase):
         unchanged rather than wrapping it, since it is already a
         :exc:`~pcapkit.utilities.exceptions.BaseError`."""
         from pcapkit.protocols.internet.mh import LocalizedRoutingStatus
+        from pcapkit.utilities.exceptions import EnumKeyError, EnumValueError
 
         with self.assertRaises(KeyError) as name_miss:
             LocalizedRoutingStatus.get('NOT_A_REAL_MEMBER')
@@ -435,6 +451,7 @@ class FailedLookupTests(unittest.TestCase):
 
     def test_lma_address_code(self) -> None:
         from pcapkit.protocols.internet.mh import LMAAddressCode
+        from pcapkit.utilities.exceptions import EnumKeyError, EnumValueError
 
         with self.assertRaises(KeyError) as name_miss:
             LMAAddressCode.get('NOT_A_REAL_MEMBER')
@@ -509,6 +526,7 @@ class InheritedQuietnessTests(unittest.TestCase):
         is quiet now, matching the base."""
         from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
                                                    IPv6AddressPrefixCode)
+        from pcapkit.utilities.exceptions import EnumKeyError
 
         for cls in (FastBindingAcknowledgmentStatus, IPv6AddressPrefixCode):
             with self.subTest(cls=cls.__name__):
@@ -526,6 +544,7 @@ class InheritedQuietnessTests(unittest.TestCase):
         ``get`` is quiet for the same reason ``get`` itself is."""
         from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
                                                    IPv6AddressPrefixCode)
+        from pcapkit.utilities.exceptions import EnumKeyError
 
         for cls in (FastBindingAcknowledgmentStatus, IPv6AddressPrefixCode):
             with self.subTest(cls=cls.__name__):
@@ -557,6 +576,7 @@ class InheritedQuietnessTests(unittest.TestCase):
         """
         from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
                                                    IPv6AddressPrefixCode)
+        from pcapkit.utilities.exceptions import EnumKeyError
 
         for cls in (FastBindingAcknowledgmentStatus, IPv6AddressPrefixCode):
             with self.subTest(cls=cls.__name__):
@@ -649,6 +669,7 @@ class NonCanonicalKeyConvergenceTests(unittest.TestCase):
         from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
                                                    IPv6AddressPrefixCode, LMAAddressCode,
                                                    LocalizedRoutingStatus)
+        from pcapkit.utilities.exceptions import EnumValueError
 
         for cls in (CommandType, ConformanceRequirement, ESPStatus,
                     LocalizedRoutingStatus, LMAAddressCode,
@@ -676,6 +697,8 @@ class ZeroRemainOutsideEnumLookupTests(unittest.TestCase):
         self.assertGreater(len(self._every_enum()), 100)
 
     def test_zero_enumerations_remain_outside_the_hierarchy(self) -> None:
+        from pcapkit.corekit.enum import EnumLookup
+
         outside = [name for cls, name in self._every_enum().items()
                   if not issubclass(cls, EnumLookup)]
         self.assertEqual(outside, [], f'still outside EnumLookup: {sorted(outside)}')

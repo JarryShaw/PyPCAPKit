@@ -70,6 +70,11 @@ from pcapkit.utilities.exceptions import EnumKeyError, EnumValueError
 from pcapkit.utilities.logging import DEVMODE, logger
 from tests.utilities._harness import capture
 
+# The fixture classes below are built on this load-time import, and so are the
+# tests that use only them. A test that imports a pcapkit class lazily takes the
+# enum exceptions from that same lazy import instead (#2115): an earlier module
+# in the same process may re-import pcapkit in between.
+
 if TYPE_CHECKING:
     from typing import Any
 
@@ -122,7 +127,7 @@ class EnumKeyErrorClassTests(unittest.TestCase):
     :exc:`~pcapkit.utilities.exceptions.MissingKeyError` reused."""
 
     def test_it_is_a_key_error_and_an_in_library_error(self) -> 'None':
-        from pcapkit.utilities.exceptions import BaseError
+        from pcapkit.utilities.exceptions import BaseError, EnumKeyError
 
         self.assertTrue(issubclass(EnumKeyError, BaseError))
         self.assertTrue(issubclass(EnumKeyError, KeyError))
@@ -144,14 +149,14 @@ class EnumKeyErrorClassTests(unittest.TestCase):
         which is the distinction :mod:`pcapkit.toolkit.scapy` relies on when it
         converts one into the other.
         """
-        from pcapkit.utilities.exceptions import MissingKeyError
+        from pcapkit.utilities.exceptions import EnumKeyError, MissingKeyError
 
         self.assertFalse(issubclass(EnumKeyError, MissingKeyError))
         self.assertFalse(issubclass(MissingKeyError, EnumKeyError))
 
     def test_the_value_half_is_unchanged(self) -> 'None':
         """The pair, so that a future edit cannot quietly reshape one half."""
-        from pcapkit.utilities.exceptions import BaseError
+        from pcapkit.utilities.exceptions import BaseError, EnumValueError
 
         self.assertTrue(issubclass(EnumValueError, BaseError))
         self.assertTrue(issubclass(EnumValueError, ValueError))
@@ -374,6 +379,7 @@ class TransportProtocolCaseFoldingTests(unittest.TestCase):
 
     def test_the_override_no_longer_converts_the_name_miss(self) -> 'None':
         from pcapkit.const.reg.apptype.apptype import TransportProtocol
+        from pcapkit.utilities.exceptions import EnumKeyError
 
         with self.assertRaises(EnumKeyError) as caught:
             TransportProtocol.get('quic')
@@ -384,6 +390,7 @@ class TransportProtocolCaseFoldingTests(unittest.TestCase):
 
     def test_the_value_miss_is_the_in_library_value_error(self) -> 'None':
         from pcapkit.const.reg.apptype.apptype import TransportProtocol
+        from pcapkit.utilities.exceptions import EnumValueError
 
         with self.assertRaises(EnumValueError) as caught:
             TransportProtocol.get(0x20)
@@ -450,6 +457,7 @@ class CriticalityGetDeletionTests(unittest.TestCase):
 
     def test_a_name_miss_now_reports_in_the_stdlib_shape(self) -> 'None':
         from pcapkit.protocols.application.ngap import Criticality
+        from pcapkit.utilities.exceptions import EnumKeyError
 
         with self.assertRaises(EnumKeyError) as caught:
             Criticality.get('nosuch')
@@ -469,6 +477,7 @@ class CriticalityGetDeletionTests(unittest.TestCase):
         ``_value2member_map_`` and never through the constructor, so no path
         here can mint a fourth value."""
         from pcapkit.protocols.application.ngap import Criticality
+        from pcapkit.utilities.exceptions import EnumKeyError
 
         before = len(Criticality.__members__)
         with self.assertRaises(EnumKeyError):
@@ -477,6 +486,7 @@ class CriticalityGetDeletionTests(unittest.TestCase):
 
     def test_a_value_miss_still_goes_through_missing(self) -> 'None':
         from pcapkit.protocols.application.ngap import Criticality
+        from pcapkit.utilities.exceptions import EnumValueError
 
         with self.assertRaises(EnumValueError) as caught:
             Criticality.get(3)
@@ -498,6 +508,7 @@ class MobilityHeaderNameMissTests(unittest.TestCase):
     def test_a_name_miss_is_key_shaped(self) -> 'None':
         from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
                                                    IPv6AddressPrefixCode)
+        from pcapkit.utilities.exceptions import EnumKeyError
 
         for enum_cls in (FastBindingAcknowledgmentStatus, IPv6AddressPrefixCode):
             with self.subTest(enum=enum_cls.__name__):
@@ -511,6 +522,7 @@ class MobilityHeaderNameMissTests(unittest.TestCase):
     def test_a_value_miss_stays_value_shaped(self) -> 'None':
         from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
                                                    IPv6AddressPrefixCode)
+        from pcapkit.utilities.exceptions import EnumValueError
 
         for enum_cls, unassigned in ((FastBindingAcknowledgmentStatus, 77),
                                      (IPv6AddressPrefixCode, 200)):
@@ -535,6 +547,7 @@ class MobilityHeaderNameMissTests(unittest.TestCase):
     def test_neither_class_grows(self) -> 'None':
         from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
                                                    IPv6AddressPrefixCode)
+        from pcapkit.utilities.exceptions import EnumKeyError
 
         for enum_cls in (FastBindingAcknowledgmentStatus, IPv6AddressPrefixCode):
             with self.subTest(enum=enum_cls.__name__):
