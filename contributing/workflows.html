@@ -1688,11 +1688,14 @@ without the script, and runs the script against a small limit.</p>
 </section>
 <section id="workflow-scripts-1967">
 <h2>Workflow Scripts (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1967">#1967</a>)<a class="headerlink" href="#workflow-scripts-1967" title="Link to this heading">¶</a></h2>
-<p>Shell that several steps repeat lives in a <code class="file docutils literal notranslate"><span class="pre">util/</span></code> script, which the steps
-run, rather than in a composite action: a composite action’s inner steps cannot
-take <code class="docutils literal notranslate"><span class="pre">timeout-minutes</span></code>, so each calling step keeps its own, with its <code class="docutils literal notranslate"><span class="pre">shell:</span></code>,
-<code class="docutils literal notranslate"><span class="pre">if:</span></code>, <code class="docutils literal notranslate"><span class="pre">env:</span></code> and <code class="docutils literal notranslate"><span class="pre">continue-on-error</span></code>. Each script’s docstring says what it
-does; each has tests under <code class="file docutils literal notranslate"><span class="pre">tests/project/</span></code> that run it.</p>
+<p>Shell that several steps repeat, or that has real logic – branches, or a bug
+history a test should pin – lives in a <code class="file docutils literal notranslate"><span class="pre">util/</span></code> script, which the steps run,
+rather than in a composite action: a composite action’s inner steps cannot take
+<code class="docutils literal notranslate"><span class="pre">timeout-minutes</span></code>, so each calling step keeps its own, with its <code class="docutils literal notranslate"><span class="pre">shell:</span></code>,
+<code class="docutils literal notranslate"><span class="pre">if:</span></code>, <code class="docutils literal notranslate"><span class="pre">env:</span></code> and <code class="docutils literal notranslate"><span class="pre">continue-on-error</span></code>. A few plain commands stay inline even
+where repeated, as the apt seed steps do, since they read more easily than a call
+to a script. Each script’s docstring says what it does; each has tests under
+<code class="file docutils literal notranslate"><span class="pre">tests/project/</span></code> that run it.</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -1755,9 +1758,11 @@ Experimental Tests and Python Compatibility (see <a class="reference internal" h
 </tr>
 <tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">util/apt_packages.py</span></code></p></td>
 <td><p>The apt steps of <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> and <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code>
-(and so its KTLO twin): the plan, seed, install and collect steps, as
-<code class="docutils literal notranslate"><span class="pre">apt_packages.py</span> <span class="pre">plan</span></code>, <code class="docutils literal notranslate"><span class="pre">seed</span></code>, <code class="docutils literal notranslate"><span class="pre">install</span></code> and <code class="docutils literal notranslate"><span class="pre">collect</span></code>. The
-<code class="docutils literal notranslate"><span class="pre">actions/cache</span></code> steps and the AppArmor step (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2019">#2019</a>) stay as they were.</p></td>
+(and so its KTLO twin): the plan, install and collect steps, as
+<code class="docutils literal notranslate"><span class="pre">apt_packages.py</span> <span class="pre">plan</span></code>, <code class="docutils literal notranslate"><span class="pre">install</span></code> and <code class="docutils literal notranslate"><span class="pre">collect</span></code>. The
+<code class="docutils literal notranslate"><span class="pre">actions/cache</span></code> steps, the seed steps (<code class="docutils literal notranslate"><span class="pre">Seed</span> <span class="pre">apt's</span> <span class="pre">archive</span> <span class="pre">with</span> <span class="pre">this</span>
+<span class="pre">engine's</span> <span class="pre">cached</span> <span class="pre">.deb</span> <span class="pre">files</span></code> and <code class="docutils literal notranslate"><span class="pre">Seed</span> <span class="pre">apt's</span> <span class="pre">archive</span> <span class="pre">with</span> <span class="pre">the</span> <span class="pre">cached</span> <span class="pre">.deb</span>
+<span class="pre">files</span></code>) and the AppArmor step (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2019">#2019</a>) stay inline.</p></td>
 <td><p>No.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/_actions.py</span></code></p></td>
@@ -1788,25 +1793,19 @@ Reports</a>).</p></td>
 after a checkout of <code class="file docutils literal notranslate"><span class="pre">util/</span></code> alone (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/888">#888</a>).</p></td>
 <td><p>No.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">util/release_vendor_update.py</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">Read</span> <span class="pre">whether</span> <span class="pre">its</span> <span class="pre">vendor-update</span> <span class="pre">job</span> <span class="pre">ran</span></code> in <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s
-<code class="docutils literal notranslate"><span class="pre">vendor_update</span></code>, on the image’s <code class="docutils literal notranslate"><span class="pre">python3</span></code> after a checkout of
-<code class="file docutils literal notranslate"><span class="pre">util/</span></code> alone (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1748">#1748</a>).</p></td>
-<td><p>No.</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/release_tiers.py</span></code></p></td>
+<tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">util/release_tiers.py</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">Read</span> <span class="pre">the</span> <span class="pre">released</span> <span class="pre">Python</span> <span class="pre">versions</span></code> in <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s
 <code class="docutils literal notranslate"><span class="pre">version_check</span></code>, on setup-python’s <code class="docutils literal notranslate"><span class="pre">python3</span></code> (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1660">#1660</a>).</p></td>
 <td><p>No.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">util/release_published.py</span></code></p></td>
+<tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/release_published.py</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">Check</span> <span class="pre">PyPI</span> <span class="pre">publish</span> <span class="pre">completeness</span></code> and <code class="docutils literal notranslate"><span class="pre">Check</span> <span class="pre">Anaconda</span> <span class="pre">publish</span>
 <span class="pre">completeness</span></code> in <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">version_check</span></code>, as
 <code class="docutils literal notranslate"><span class="pre">release_published.py</span> <span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">anaconda</span></code>, on setup-python’s
 <code class="docutils literal notranslate"><span class="pre">python3</span></code> (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/888">#888</a>).</p></td>
 <td><p>No.</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/release_conda.py</span></code></p></td>
+<tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">util/release_conda.py</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">Check</span> <span class="pre">whether</span> <span class="pre">this</span> <span class="pre">leg</span> <span class="pre">is</span> <span class="pre">already</span> <span class="pre">on</span> <span class="pre">Anaconda</span></code> in <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s
 <code class="docutils literal notranslate"><span class="pre">conda</span></code>, as <code class="docutils literal notranslate"><span class="pre">release_conda.py</span> <span class="pre">leg</span></code>; <code class="docutils literal notranslate"><span class="pre">Build</span> <span class="pre">conda</span> <span class="pre">packages</span></code> and <code class="docutils literal notranslate"><span class="pre">Upload</span>
 <span class="pre">conda</span> <span class="pre">packages</span> <span class="pre">to</span> <span class="pre">Anaconda</span> <span class="pre">(Intel)</span></code> in that job and in <code class="docutils literal notranslate"><span class="pre">cron-conda.yml</span></code>’s
