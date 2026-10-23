@@ -974,6 +974,8 @@ class ExtractorTests(unittest.TestCase):
                 extractor = Extractor(str(capture), str(pathlib.Path(tempdir) / 'out'),
                                       format='json', auto=False, verbose=True, ip=True,
                                       tcp=True, reassembly=False, trace=False)
+            # closed inside the ``with``: Windows cannot delete a file still open (#2101)
+            extractor._ifile.close()
         run.assert_called_once()
         self.assertEqual(extractor.input, str(capture))
         self.assertTrue(extractor._flag_v)
@@ -983,7 +985,6 @@ class ExtractorTests(unittest.TestCase):
         self.assertTrue(extractor._ipv6)
         self.assertTrue(extractor._tcp)
         self.assertEqual(extractor.magic_number, b'\xa1\xb2\xc3\xd4')
-        extractor._ifile.close()
 
     def test_auto_mode_call_raises_the_class_the_docstring_names(self) -> None:
         # #490: __call__'s docstring promises ``CallableError`` under auto mode --
@@ -1005,7 +1006,8 @@ class ExtractorTests(unittest.TestCase):
             with mock.patch.object(Extractor, 'run'):
                 extractor = Extractor(str(capture), str(pathlib.Path(tempdir) / 'out'),
                                       format='json', auto=True, nofile=True)
-        self.addCleanup(extractor._ifile.close)
+            # closed inside the ``with``: Windows cannot delete a file still open (#2101)
+            extractor._ifile.close()
 
         with self.assertRaises(CallableError):
             extractor()
@@ -1094,6 +1096,9 @@ class ExtractorTests(unittest.TestCase):
         which keeps PCAP (#1264). Returns the extractor and the patched
         module-level ``warn``.
 
+        The capture is closed before returning, while the caller's temporary
+        directory still exists: Windows cannot delete a file still open (#2101).
+
         """
         from pcapkit.foundation.extraction import Extractor
 
@@ -1104,7 +1109,7 @@ class ExtractorTests(unittest.TestCase):
                                       format='json', auto=False, nofile=True, trace=True,
                                       tcp=True, trace_fout=str(temp / f'flows-{tag}'),
                                       **kwargs)  # type: ignore[arg-type]
-        self.addCleanup(extractor._ifile.close)
+        extractor._ifile.close()
         return extractor, warn
 
     def test_pcap_trace_format_is_replaced_only_for_dict_frame_engines(self) -> None:
@@ -1250,7 +1255,8 @@ class ExtractorTests(unittest.TestCase):
                     extractor = Extractor(str(temp / 'sample.pcap'), str(temp / f'out-{engine}'),
                                           format='pcap', engine=engine, auto=False,
                                           nofile=True)  # type: ignore[arg-type]
-                self.addCleanup(extractor._ifile.close)
+                # closed inside the ``with``: Windows cannot delete a file still open (#2101)
+                extractor._ifile.close()
                 if self._warned(warn, "'format=pcap'"):
                     warned.add(engine)
 
