@@ -12,9 +12,10 @@ name: Project Status
 # the classic "pwn request". The job below:
 #
 #   * never checks out the repository, at any ref, and has no `uses:` step at all;
-#   * fetches util/project_status.py through the API at `github.sha`, which under
+#   * fetches util/project_status.py, and util/_actions.py, which it imports
+#     (#2047), through the API at `github.sha`, which under
 #     `pull_request_target` is the tip of the *base* branch, never the PR head --
-#     so editing the script in a pull request changes nothing about its own run;
+#     so editing either in a pull request changes nothing about its own run;
 #   * takes nothing from the event payload but the item number, passed through
 #     `env:` rather than interpolated into the script, and re-reads labels and
 #     state from the API.
@@ -84,10 +85,13 @@ jobs:
             exit 0
           fi
 
-          # The base branch's copy of the script -- see the security note above.
-          gh api -H 'Accept: application/vnd.github.raw' \
-            "repos/${GITHUB_REPOSITORY}/contents/util/project_status.py?ref=${SCRIPT_REF}" \
-            > "${RUNNER_TEMP}/project_status.py"
+          # The base branch's copy of the script, and of util/_actions.py, which
+          # it imports from beside it (#2047) -- see the security note above.
+          for script in project_status.py _actions.py; do
+            gh api -H 'Accept: application/vnd.github.raw' \
+              "repos/${GITHUB_REPOSITORY}/contents/util/${script}?ref=${SCRIPT_REF}" \
+              > "${RUNNER_TEMP}/${script}"
+          done
 
           if [ -n "$ITEM" ]; then
             python3 "${RUNNER_TEMP}/project_status.py" --item "$ITEM"

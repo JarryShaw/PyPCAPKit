@@ -1160,6 +1160,8 @@ RELEASED_STEP = 'Read the released Python versions'
 #: The tier file as #1677 added it, before the first weekly proposal, and its reader.
 FIRST_TIERS = ROOT / 'tests' / 'project' / 'python_versions_fixtures' / 'python-versions.toml'
 READER = ROOT / 'util' / 'python_versions.py'
+#: What :data:`READER` imports from beside it (#2047).
+HELPER = ROOT / 'util' / '_actions.py'
 #: A ``curl`` answering 200 with ``$REPLY`` as the body it writes to ``-o``.
 FAKE_CURL = '#!/bin/sh\nwhile [ $# -gt 0 ]; do [ "$1" = -o ] && cp "$REPLY" "$2"; shift; done\nprintf 200\n'
 
@@ -1195,6 +1197,8 @@ class TestTheCountsAreOfTheReleasedTiers(ScratchRepository):
         (self.seed / 'util').mkdir()
         shutil.copyfile(FIRST_TIERS, tiers)
         shutil.copyfile(READER, self.seed / 'util' / 'python_versions.py')
+        # #2047: the reader imports the helper from beside it.
+        shutil.copyfile(HELPER, self.seed / 'util' / '_actions.py')
         self.added = self.commit(self.VERSION, '0', 'the tier file')
         self.values = {self.added: self.read(tiers)}
         line = '"pypy3.11" = { tier = "supported" }\n'
@@ -1287,6 +1291,26 @@ class TestTheCountsAreOfTheReleasedTiers(ScratchRepository):
         self.assertEqual(written, self.values[self.added])
         self.assertIn(f'::notice title=Released before the tier file::v{self.VERSION} predates '
                       f'.github/python-versions.toml; counting the tiers {self.added} added it with.', result.stdout)
+
+    def test_the_released_reader_runs_with_its_own_helper(self) -> None:
+        """#2047: the reader is copied out of the tree with the helper it imports, where its commit has one."""
+        self.push(self.added, f'refs/tags/v{self.VERSION}')
+        self.checkout(self.grown)
+        result, written = self.released(exists=True)
+        self.assertEqual(written, self.values[self.added])
+        self.assertNotIn('Error', result.stdout + result.stderr)
+
+    def test_a_reader_from_before_the_helper_runs_alone(self) -> None:
+        """A commit without util/_actions.py, whose reader imports nothing from it, is read as before."""
+        (self.seed / 'util' / '_actions.py').unlink()
+        (self.seed / 'util' / 'python_versions.py').write_text(
+            "import sys\nprint({'pypi-wheels': 'cp37 cp38', 'conda-builds': 'py37 py38'}[sys.argv[-1]])\n",
+            encoding='utf-8')
+        older = self.commit(self.VERSION, '0', 'a reader from before the helper')
+        self.push(older, f'refs/tags/v{self.VERSION}')
+        self.checkout(self.grown)
+        _, written = self.released(exists=True)
+        self.assertEqual(written, {'pypi-wheels': 'cp37 cp38', 'conda-builds': 'py37 py38'})
 
     def test_a_finished_release_reads_complete_after_the_tiers_grow(self) -> None:
         """The two checks, fed the step's answer and, as before it, this run's tiers."""

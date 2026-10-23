@@ -23,6 +23,7 @@ import io
 import json
 import os
 import pathlib
+import re
 import shutil
 import signal
 import subprocess  # nosec B404
@@ -624,6 +625,122 @@ class TestWatch(unittest.TestCase):
         code = superseded.main(['watch', '--interval', '0.1', '--', sys.executable, '-c', 'import time; time.sleep(0.5)'],
                                env=files.env(GITHUB_EVENT_NAME='workflow_dispatch'), transport=api, out=io.StringIO())
         self.assertEqual((code, api.requests), (0, []))
+
+
+#: A pull request state each escape of a message changes: ``%``, CR and LF.
+ODD_STATE = 'odd 50%\r\nstate: a, b'
+#: :data:`ODD_STATE` as a message holds it.
+ODD_DATA = 'odd 50%25%0D%0Astate: a, b'
+
+
+class TestTheWorkflowCommands(unittest.TestCase):
+    """#2047: the whole of what ``check`` and ``watch`` print, append to the summary and output, byte for byte.
+
+    The tests above read the commands one by one; these pin each run's whole
+    standard output and files, with text each escape changes, so moving the
+    writes onto util/_actions.py can be shown to change nothing.
+
+    """
+
+    def setUp(self) -> None:
+        tmp = tempfile.TemporaryDirectory(prefix='pcapkit-2047-')  # pylint: disable=consider-using-with
+        self.addCleanup(tmp.cleanup)
+        self.event = pathlib.Path(tmp.name, 'event.json')
+        self.event.write_text(json.dumps({'pull_request': {'number': 1938, 'head': {'sha': OURS}}}),
+                              encoding='utf-8')
+
+    def run_main(self, argv: 'List[str]', files: 'Files', **env: 'str') -> 'Tuple[int, str]':
+        out = io.StringIO()
+        code = superseded.main(argv, env=files.env(GITHUB_EVENT_NAME='pull_request',
+                                                   GITHUB_EVENT_PATH=str(self.event), **env),
+                               transport=FakeApi(pull_is(ODD_STATE)), out=out,
+                               run=lambda argv: 1, kill=lambda pid, signum: None)
+        return code, out.getvalue()
+
+    def test_the_gate(self) -> None:
+        for superseded_state, current in ((ODD_STATE, 'false'), ('open', 'true')):
+            with self.subTest(state=superseded_state):
+                files = Files(self)
+                files.output.write_bytes(b'before\n')
+                files.summary.write_bytes(b'before\n')
+                out = io.StringIO()
+                code = superseded.main(['check'], env=files.env(GITHUB_EVENT_NAME='pull_request',
+                                                                GITHUB_EVENT_PATH=str(self.event)),
+                                       transport=FakeApi(pull_is(superseded_state)), out=out)
+                self.assertEqual(code, 0)
+                self.assertEqual(files.output.read_bytes(), f'before\ncurrent={current}\n'.encode())
+                skipped = 'The rest of this run is skipped, so none of its jobs fails or is cancelled.'
+                if current == 'true':
+                    self.assertEqual(out.getvalue(), f'current: {OURS[:9]} is the head of pull request #1938\n')
+                    self.assertEqual(files.summary.read_bytes(), b'before\n')
+                    continue
+                self.assertEqual(out.getvalue(), f'superseded: pull request #1938 is {ODD_STATE}\n'
+                                                 f'::notice title=Superseded::pull request #1938 is {ODD_DATA}. '
+                                                 f'{skipped}\n')
+                self.assertEqual(files.summary.read_bytes(),
+                                 f'before\n- Superseded: pull request #1938 is {ODD_STATE}. {skipped}\n'.encode())
+
+    def test_no_output_or_summary_file(self) -> None:
+        """Unset or empty, neither is written; a summary that will not open is said in the log."""
+        for name, value in (('unset', None), ('empty', '')):
+            with self.subTest(files=name):
+                files = Files(self)
+                env = files.env()
+                for key in ('GITHUB_OUTPUT', 'GITHUB_STEP_SUMMARY'):
+                    if value is None:
+                        del env[key]
+                    else:
+                        env[key] = value
+                code = superseded.main(['check'], env=env, transport=FakeApi(main_at(NEWER)), out=io.StringIO())
+                self.assertEqual(code, 0)
+                self.assertEqual(sorted(path.name for path in files.root.iterdir()), [])
+        files = Files(self)
+        out = io.StringIO()
+        code = superseded.main(['check'], env=files.env(GITHUB_STEP_SUMMARY=str(files.root)),
+                               transport=FakeApi(main_at(NEWER)), out=out)
+        self.assertEqual(code, 0)
+        reason = f'main is at {NEWER[:9]}, no longer at {OURS[:9]}'
+        self.assertEqual(out.getvalue(), f'superseded: {reason}\n::notice title=Superseded::{reason}. The rest of '
+                                         'this run is skipped, so none of its jobs fails or is cancelled.\n'
+                                         f"Could not write the job summary: [Errno 21] Is a directory: "
+                                         f"'{files.root}'\n")
+        self.assertEqual(files.output.read_bytes(), b'current=false\n')
+
+    @unittest.skipUnless(POSIX, 'the watcher signals a process group, as on the Ubuntu runners')
+    def test_a_watch_that_cannot_stop_the_tests(self) -> None:
+        """The warning escapes the scope's ``%`` and line break too; the summary keeps them."""
+        files = Files(self)
+        files.summary.write_bytes(b'before\n')
+        scope = 'odd%\nscope'
+        code, printed = self.run_main(['watch', '--interval', '0.1', '--grace', '0.2', '--kill-wait', '0.2',
+                                       '--scope', scope, '--', *SLEEPER], files)
+        self.assertEqual(code, superseded.STOP_FAILED)
+        match = re.search(r'the session of pid (\d+) ', printed)
+        self.assertIsNotNone(match, printed)
+        pid = match.group(1) if match else ''
+        os.kill(int(pid), signal.SIGKILL)
+        reason = (f'pull request #1938 is {ODD_STATE}, but SIGTERM and SIGKILL to the scope {scope} and the session '
+                  f'of pid {pid} did not end it within 0 s. The tests may run on until their timeout.')
+        escaped = reason.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
+        self.assertEqual(printed, f'::warning title=Superseded run not stopped::{escaped}\n')
+        self.assertIn('odd%25%0Ascope', escaped)
+        self.assertEqual(files.summary.read_bytes(), f'before\n- Superseded run not stopped: {reason}\n'.encode())
+        self.assertEqual(files.read(files.output), '')
+
+    @unittest.skipUnless(POSIX, 'the watcher signals a process group, as on the Ubuntu runners')
+    def test_a_watch_that_stops_the_tests(self) -> None:
+        files = Files(self)
+        out = io.StringIO()
+        env = files.env(GITHUB_EVENT_NAME='pull_request', GITHUB_EVENT_PATH=str(self.event))
+        code = superseded.watch(SLEEPER, superseded.Context.from_env(env),
+                                superseded.Api('token', FakeApi(pull_is(ODD_STATE))), env, out, interval=0.1,
+                                grace=5, clock=iter([0.0, 7.9]).__next__)
+        self.assertEqual(code, 0)
+        outcome = 'The tests were stopped after 7 s, and this step succeeds.'
+        self.assertEqual(out.getvalue(), f'::notice title=Superseded::pull request #1938 is {ODD_DATA}. {outcome}\n')
+        self.assertEqual(files.summary.read_bytes(),
+                         f'- Superseded: pull request #1938 is {ODD_STATE}. {outcome}\n'.encode())
+        self.assertEqual(files.read(files.output), '')
 
 
 class Server(http.server.ThreadingHTTPServer):

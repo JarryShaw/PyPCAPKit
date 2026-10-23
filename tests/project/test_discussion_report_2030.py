@@ -438,6 +438,66 @@ class TestTheFailuresWarn(_FakeGitHub):
                 self.assertEqual(self.calls(), [])
 
 
+class TestTheWorkflowCommands(_FakeGitHub):
+    """#2047: the whole of what the script prints and appends to the summary, byte for byte.
+
+    The tests above read the warning with ``assertIn``; these pin each run's whole
+    standard output and summary file, with text each escape changes, so moving the
+    writes onto util/_actions.py can be shown to change nothing.
+
+    """
+
+    def test_a_post_prints_two_lines_and_appends_one(self) -> None:
+        title = 'ci-timing: 50% [odd], title'
+        self.summary.write_bytes(b'before\n')
+        result = self.script(title=title)
+        url = f'https://github.com/{REPO}/discussions/100'
+        self.assertEqual((result.returncode, result.stdout, result.stderr),
+                         (0, f"Opened the thread {title!r}: {url}\nPosted the report: {url}#discussioncomment-1\n", ''))
+        self.assertEqual(self.summary.read_bytes(),
+                         f'before\nThe report was posted to [{title}]({url}#discussioncomment-1).\n'.encode())
+        # A second post finds the thread, and appends a second line.
+        result = self.script(title=title)
+        self.assertEqual(result.stdout, f'Posted the report: {url}#discussioncomment-2\n')
+        self.assertEqual(self.summary.read_bytes().count(b'\n'), 3)
+
+    def test_no_summary_file_or_one_that_will_not_open(self) -> None:
+        """Unset or empty, nothing is written; a directory, the post still succeeds, silently."""
+        url = f'https://github.com/{REPO}/discussions/100'
+        for name, value in (('unset', None), ('empty', ''), ('a directory', str(self.tmp))):
+            with self.subTest(summary=name):
+                self.update(discussions=[])
+                env = self.env()
+                if value is None:
+                    del env['GITHUB_STEP_SUMMARY']
+                else:
+                    env['GITHUB_STEP_SUMMARY'] = value
+                result = self.script(env=env)
+                self.assertEqual((result.returncode, result.stdout, result.stderr),
+                                 (0, f"Opened the thread {TITLE!r}: {url}\nPosted the report: {url}"
+                                     '#discussioncomment-1\n', ''))
+                self.assertFalse(self.summary.exists())
+
+    def test_each_warning_is_one_escaped_line(self) -> None:
+        """``%`` and LF in the message escape; the title, which holds neither ``:`` nor ``,``, is as written.
+
+        The stand-in's standard error reaches the script through universal
+        newlines, so a CR arrives as LF; the helper's own tests pin CR.
+
+        """
+        self.update(fail={'op': 'discussionCategories', 'message': 'a 50%\nb: c, d'})
+        self.summary.write_bytes(b'before\n')
+        result = self.script()
+        self.assertEqual((result.returncode, result.stdout),
+                         (0, '::warning title=CI report not posted::gh api graphql exited 1: gh: a 50%25%0Ab: '
+                             'c, d. The report was not posted.\n'))
+        self.assertEqual(self.summary.read_bytes(), b'before\n')
+        missing = self.tmp / '50%.md'
+        result = self.script(report=missing)
+        self.assertEqual(result.stdout, f"::warning title=CI report not posted::the report '{self.tmp}/50%25.md' "
+                                        'could not be read (No such file or directory), so nothing was posted.\n')
+
+
 #: ``(workflow, reporting job, the thread's title, the artifact, the file in it)``.
 POSTERS = (
     ('ci-timing.yml', 'report', 'ci-timing: weekly CI timing report', 'ci-timing-report', 'report.md'),

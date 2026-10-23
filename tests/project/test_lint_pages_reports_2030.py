@@ -159,12 +159,13 @@ class TestTheWorkflowsPost(unittest.TestCase):
         self.assertEqual(download['with'], {'name': 'lint-report', 'path': 'report'})
         self.assertIs(download['continue-on-error'], True)
 
-    def test_pages_reads_no_artifact_and_checks_out_the_script_alone(self) -> None:
+    def test_pages_reads_no_artifact_and_checks_out_the_script_and_its_helper(self) -> None:
         job = load(PAGES)['jobs']['discussion']
         uses = [entry['uses'] for entry in job['steps'] if 'uses' in entry]
         self.assertEqual(len(uses), 1)
         self.assertTrue(pinned(uses[0], 'actions/checkout'))
-        self.assertEqual(job['steps'][0]['with'], {'sparse-checkout': 'util/discussion_report.py\n',
+        # The script imports util/_actions.py (#2047).
+        self.assertEqual(job['steps'][0]['with'], {'sparse-checkout': 'util/_actions.py\nutil/discussion_report.py\n',
                                                    'sparse-checkout-cone-mode': False,
                                                    'persist-credentials': False})
 

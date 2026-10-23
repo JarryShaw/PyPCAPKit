@@ -478,6 +478,50 @@ class TestTheFileAndTheScript(unittest.TestCase):
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual(self.parse_github_output(output.read_text(encoding='utf-8')), live_outputs())
 
+    def test_the_workflow_commands_byte_for_byte(self) -> None:
+        """#2047: the whole of each run's output, so moving it onto util/_actions.py can be shown to change nothing.
+
+        Each multi-line output's delimiter is fresh, so it is read as ``EOF`` once
+        each is shown to open and close one value, and to differ from the others.
+
+        """
+        values = live_outputs()
+        output = self.tmp / 'github-output'
+        output.write_bytes(b'before\n')
+        self.assertEqual(self.main('--github-output', github_output=str(output)),
+                         (0, ''.join(f'{name}: {value}'.replace('\n', ' ') + '\n' for name, value in values.items())))
+        written = output.read_bytes().decode('utf-8')
+        delimiters = re.findall(r'^[\w-]+<<(EOF_[0-9a-f]{32})$', written, re.M)
+        self.assertEqual(len(delimiters), sum('\n' in value for value in values.values()))
+        self.assertEqual(len(set(delimiters)), len(delimiters))
+        for delimiter in delimiters:
+            self.assertEqual(written.count(delimiter), 2)
+        self.assertEqual(re.sub(r'EOF_[0-9a-f]{32}', 'EOF', written), 'before\n' + ''.join(
+            f'{name}<<EOF\n{value}\nEOF\n' if '\n' in value else f'{name}={value}\n' for name, value in values.items()))
+        error = '::error title=GITHUB_OUTPUT is not set::--github-output only works inside a workflow step\n'
+        for env in (None, ''):
+            with self.subTest(github_output=env):
+                self.assertEqual(self.main('--github-output', github_output=env), (1, error))
+        names = ', '.join(values)
+        self.assertEqual(self.main('latest', 'a%b\r\nc'),
+                         (1, f'::error title=Cannot read the Python version tiers::{script().FILE}: no output named '
+                             f'a%25b%0D%0Ac; there are {names}\n'))
+        self.assertEqual(output.read_bytes().decode('utf-8'), written)
+
+    def test_the_file_named_in_an_error_is_escaped(self) -> None:
+        """#2047: ``--file``'s ``%`` and line breaks are escaped, as the error text's always were.
+
+        Before util/_actions.py the path went out as written, so a ``%`` in it read
+        as the start of an escape, and a line break split the command in two.
+
+        """
+        missing = self.tmp / '50%\nmissing.toml'
+        escaped = str(missing).replace('%', '%25').replace('\n', '%0A')
+        repr_escaped = repr(str(missing)).replace('%', '%25')
+        self.assertEqual(self.main('--file', str(missing), 'latest'),
+                         (1, f'::error title=Cannot read the Python version tiers::{escaped}: [Errno 2] No such file '
+                             f'or directory: {repr_escaped}\n'))
+
     def test_the_script_runs_on_every_runners_own_python3(self) -> None:
         """Standard library only, tomllib's 3.11 the floor, and each image that runs it newer.
 
@@ -491,8 +535,10 @@ class TestTheFileAndTheScript(unittest.TestCase):
                     for alias in node.names}
         imported |= {node.module.split('.')[0] for node in ast.walk(tree)
                      if isinstance(node, ast.ImportFrom) and node.module and not node.level}
-        self.assertLessEqual(imported, {'__future__', 'argparse', 'json', 'os', 'pathlib', 're', 'sys',
-                                        'tomllib', 'typing', 'uuid'})
+        # util/_actions.py (#2047), as `_actions` or `util._actions`, is held to the
+        # standard library by tests/project/test_actions_helper_2047.py.
+        self.assertLessEqual(imported, {'__future__', '_actions', 'argparse', 'json', 'os', 'pathlib', 're', 'sys',
+                                        'tomllib', 'typing', 'util'})
         self.assertIn('tomllib', imported)
         found = 0
         for name, spec in workflows():
@@ -812,7 +858,7 @@ class TestEveryVersionComesFromTheFile(unittest.TestCase):
         self.assertIsNotNone(condition, step['if'])
         self.assertEqual(resolve('create-release.yml', 'pypi', '${{ %s }}' % condition.group(1)), latest)  # type: ignore[union-attr]
 
-    def test_the_versions_jobs_read_two_files_and_write_nothing(self) -> None:
+    def test_the_versions_jobs_read_the_tiers_and_write_nothing(self) -> None:
         """``unit-tests.yml`` is a reusable workflow whose callers grant only ``contents: read``."""
         for name in ('unit-tests.yml', 'python-compatibility.yml'):
             spec = workflow(name)
@@ -822,7 +868,7 @@ class TestEveryVersionComesFromTheFile(unittest.TestCase):
                 checkout = job['steps'][0]
                 self.assertTrue(checkout['uses'].startswith('actions/checkout@'))
                 self.assertEqual(checkout['with']['sparse-checkout'].split(),
-                                 ['.github/python-versions.toml', 'util/python_versions.py'])
+                                 ['.github/python-versions.toml', 'util/_actions.py', 'util/python_versions.py'])
                 self.assertIs(checkout['with']['sparse-checkout-cone-mode'], False)
                 self.assertEqual(job['steps'][1]['run'].strip(), SCRIPT_STEP)
                 self.assertNotIn('if', job)

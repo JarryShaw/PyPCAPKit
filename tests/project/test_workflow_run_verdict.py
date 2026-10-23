@@ -320,6 +320,73 @@ class TestTheRuleOnRealRunShapes(unittest.TestCase):
                 self.assertIn('::error', result.stdout)
                 self.assertIsNone(verified)
 
+    def _commands(self, verdict: 'str', head: 'str', *argv: 'str',
+                  output: 'Optional[bytes]' = b'before\n') -> 'tuple[int, str, Optional[bytes]]':
+        """#2047: the script's status, whole stdout and ``$GITHUB_OUTPUT``, which holds ``output`` first.
+
+        ``output=None`` leaves ``$GITHUB_OUTPUT`` unset, and the file is then
+        :data:`None` where nothing created it.
+
+        """
+        self._git('checkout', '-q', '--detach', head)
+        path = self.root / 'output'
+        if path.exists():
+            path.unlink()
+        env = dict(self.env, VERDICT_SHA=verdict)
+        if output is not None:
+            path.write_bytes(output)
+            env['GITHUB_OUTPUT'] = str(path)
+        result = subprocess.run([sys.executable, str(SCRIPT), *argv], cwd=self.repo, env=env, capture_output=True,
+                                timeout=scale_timeout(60))
+        self.assertEqual(result.stderr, b'')
+        return result.returncode, result.stdout.decode('utf-8'), path.read_bytes() if path.exists() else None
+
+    def test_the_workflow_commands_byte_for_byte(self) -> None:
+        """#2047: each answer's whole output, so moving it onto util/_actions.py can be shown to change nothing."""
+        verdict, head = self.sha['9083163f5'], self.sha['2e941bbb7']
+        refused = (f"::notice title=Skipped as the verdict is for another commit::{self.sha['bbcabf1dd']} after the "
+                   f'verified {verdict} was authored by {HUMAN[1]} and committed by {GITHUB[1]}, not by the bot. '
+                   f'{head} gets its own Unit Tests run, which triggers this workflow again.\n')
+        self.assertEqual(self._commands(verdict, head), (0, refused, b'before\nverified=false\n'))
+        self.assertEqual(self._commands(verdict, head, output=None), (0, refused, None))
+        covered = (f"Unit Tests verified {self.sha['2e941bbb7']}; the 1 commit(s) after it up to "
+                   f"{self.sha['f4f94bcad']} are bot commits to conda/build, conda/requirements.txt only.\n")
+        self.assertEqual(self._commands(self.sha['2e941bbb7'], self.sha['f4f94bcad']),
+                         (0, covered, b'before\nverified=true\n'))
+        self.assertEqual(self._commands('main', head),
+                         (1, "::error title=No verdict to compare::VERDICT_SHA is 'main', not a commit sha\n",
+                          b'before\n'))
+        self.assertEqual(self._commands(verdict, head, '--head', 'no-such-ref'),
+                         (1, "::error title=No commit to compare::'no-such-ref' is not a commit in this checkout\n",
+                          b'before\n'))
+        self.assertEqual(self._commands(self.sha['2e941bbb7'], head, '--head', self.sha['f4f94bcad'], '--exit-code'),
+                         (0, covered, b'before\n'))
+
+    def test_the_workflow_commands_escape_what_they_interpolate(self) -> None:
+        """#2047: ``%`` and LF in a path, and ``%`` in a sha or a ref, are escaped: one command, one line.
+
+        Before util/_actions.py these went out as written: a bot commit to a path
+        holding a line break split its notice in two, the second line read as a
+        log line, or as a workflow command of its own where it began ``::``.
+
+        """
+        base = self.sha['f4f94bcad']
+        odd = 'conda/50%\n::error::x.txt'
+        bump = self._commit('Bumped build to 4', ['conda/build', odd], BOT, BOT)
+        status, printed, output = self._commands(base, bump)
+        self.assertEqual((status, output), (0, b'before\nverified=false\n'))
+        self.assertEqual(printed, f'::notice title=Skipped as the verdict is for another commit::bot commit {bump} '
+                                  f'after the verified {base} touches conda/50%25%0A::error::x.txt, which is not '
+                                  f'bot-managed. {bump} gets its own Unit Tests run, which triggers this workflow '
+                                  'again.\n')
+        self.assertEqual(printed.count('\n'), 1)
+        self.assertEqual(self._commands('50%', bump),
+                         (1, "::error title=No verdict to compare::VERDICT_SHA is '50%25', not a commit sha\n",
+                          b'before\n'))
+        self.assertEqual(self._commands(base, bump, '--head', 'v50%'),
+                         (1, "::error title=No commit to compare::'v50%25' is not a commit in this checkout\n",
+                          b'before\n'))
+
     def test_the_harness_git_runs_no_maintenance(self) -> None:
         """No git process outlives the command that started it.
 

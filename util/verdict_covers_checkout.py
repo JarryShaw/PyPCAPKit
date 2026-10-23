@@ -46,6 +46,11 @@ import subprocess  # nosec B404
 import sys
 from typing import TYPE_CHECKING, NamedTuple
 
+try:  # #2047: run as `python util/<script>.py`, with util/ first on sys.path
+    import _actions
+except ImportError:  # imported as util.<script>, or loaded by path, from the repository root
+    from util import _actions
+
 if TYPE_CHECKING:
     from typing import Optional
 
@@ -137,11 +142,11 @@ def main(argv: 'Optional[list[str]]' = None) -> int:
 
     verdict = os.environ.get('VERDICT_SHA', '')
     if _SHA.match(verdict) is None:
-        print(f'::error title=No verdict to compare::VERDICT_SHA is {verdict!r}, not a commit sha')
+        _actions.annotate('error', f'VERDICT_SHA is {verdict!r}, not a commit sha', title='No verdict to compare')
         return 1
     resolved = _git('rev-parse', '--verify', '--quiet', f'{args.head}^{{commit}}', check=False)
     if resolved.returncode != 0:
-        print(f'::error title=No commit to compare::{args.head!r} is not a commit in this checkout')
+        _actions.annotate('error', f'{args.head!r} is not a commit in this checkout', title='No commit to compare')
         return 1
     head = resolved.stdout.strip()
 
@@ -152,13 +157,10 @@ def main(argv: 'Optional[list[str]]' = None) -> int:
     if decision.verified:
         print(decision.reason)
     else:
-        print(f'::notice title=Skipped as the verdict is for another commit::{decision.reason} '
-              f'{head} gets its own Unit Tests run, which triggers this workflow again.')
+        _actions.annotate('notice', f'{decision.reason} {head} gets its own Unit Tests run, which triggers this '
+                          'workflow again.', title='Skipped as the verdict is for another commit')
 
-    output = os.environ.get('GITHUB_OUTPUT')
-    if output:
-        with open(output, 'a', encoding='utf-8') as file:
-            print(f'verified={str(decision.verified).lower()}', file=file)
+    _actions.set_output('verified', str(decision.verified).lower(), required=False)
     return 0
 
 

@@ -39,6 +39,10 @@ import io
 import os
 import pathlib
 import re
+import shutil
+import subprocess  # nosec B404
+import sys
+import tempfile
 import unittest
 from unittest import mock
 
@@ -801,6 +805,110 @@ class TestBoardSync(unittest.TestCase):
         fake = FakeGraphQL([item(4, 'blocked', on_board=None)], options=options)
         self.run_main(['--item', '4'], fake)
         self.assertEqual(fake.mutations[-1], ('set', 'PVTI_new', 'live-Blocked'))
+
+
+class TestTheWorkflowCommands(unittest.TestCase):
+    """#2047: the whole of what the script prints, byte for byte, its annotations through util/_actions.py."""
+
+    def run_main(self, argv, fake, token='x'):
+        env = {} if token is None else {'GH_TOKEN': token}
+        out = io.StringIO()
+        with mock.patch.dict(os.environ, env, clear=True), contextlib.redirect_stdout(out):
+            code = project_status.main(argv, graphql=fake, today=datetime.date(2026, 10, 5))
+        return code, out.getvalue()
+
+    def test_a_missing_token(self) -> None:
+        fake = FakeGraphQL([item(1, 'wip')])
+        for token in (None, ''):
+            with self.subTest(token=token):
+                self.assertEqual(self.run_main(['--item', '1'], fake, token=token),
+                                 (0, '::notice title=Project Status::GH_TOKEN is not set (the PROJECT_TOKEN secret '
+                                     'is missing), so the project board was not updated.\n'))
+
+    def test_a_truncated_reconcile(self) -> None:
+        """One warning per search, then the sync's own lines; ``:`` and ``,`` in a message are as written."""
+        fake = FakeGraphQL([item(1, 'wip', on_board='Pending')], issue_count=1001)
+        self.assertEqual(self.run_main(['--reconcile', '--repo', 'JarryShaw/PyPCAPKit'], fake), (0, (
+            "::warning title=Project Status::search 'repo:JarryShaw/PyPCAPKit is:open' matched 1001 item(s) but "
+            'returned 1; this reconcile is partial (search caps at 1000).\n'
+            "::warning title=Project Status::search 'repo:JarryShaw/PyPCAPKit is:closed closed:>=2026-09-28' "
+            'matched 1001 item(s) but returned 0; this reconcile is partial (search caps at 1000).\n'
+            "#1: set Status to 'WIP'\n"
+            '1 of 1 item(s) changed\n')))
+
+    def test_a_percent_in_the_repository_is_escaped(self) -> None:
+        """Before util/_actions.py the query went out as written; ``%`` is not in a repository name GitHub allows."""
+        fake = FakeGraphQL([], issue_count=1)
+        code, printed = self.run_main(['--reconcile', '--repo', 'o/50%'], fake)
+        self.assertEqual(code, 0)
+        self.assertEqual(printed.splitlines()[0], "::warning title=Project Status::search 'repo:o/50%25 is:open' "
+                                                  'matched 1 item(s) but returned 0; this reconcile is partial '
+                                                  '(search caps at 1000).')
+
+
+#: The stand-in ``gh``: the contents API answered from the tree at :data:`ROOT`
+#: for the ref ``$FAKE_REF``, logged to ``$FAKE_LOG``; GraphQL refused.
+FAKE_GH = '''\
+import os, pathlib, sys
+
+with open(os.environ['FAKE_LOG'], 'a', encoding='utf-8') as log:
+    log.write(' '.join(sys.argv[1:]) + '\\n')
+if sys.argv[1:3] == ['api', 'graphql']:
+    sys.exit('gh: no network here')
+path, _, ref = sys.argv[-1].partition('?ref=')
+prefix = 'repos/' + os.environ['GITHUB_REPOSITORY'] + '/contents/'
+if sys.argv[1:4] != ['api', '-H', 'Accept: application/vnd.github.raw'] or not path.startswith(prefix) \\
+        or ref != os.environ['FAKE_REF']:
+    sys.exit('unexpected: %r' % (sys.argv[1:],))
+sys.stdout.write((pathlib.Path(os.environ['FAKE_ROOT']) / path[len(prefix):]).read_text(encoding='utf-8'))
+'''
+
+
+class TestTheStepRunsTheFetchedScript(unittest.TestCase):
+    """#2047: the step fetches util/_actions.py beside the script, at the same ref, and the script imports it."""
+
+    def setUp(self) -> None:
+        if os.name == 'nt' or shutil.which('bash') is None:  # pragma: no cover
+            self.skipTest('the step is a bash script')
+        tmp = tempfile.TemporaryDirectory(prefix='pcapkit-2047-')  # pylint: disable=consider-using-with
+        self.addCleanup(tmp.cleanup)
+        self.tmp = pathlib.Path(tmp.name)
+        self.bin = self.tmp / 'bin'
+        self.bin.mkdir()
+        (self.bin / 'gh.py').write_text(FAKE_GH, encoding='utf-8')
+        for name, text in (('gh', f'#!/bin/sh\nexec "{sys.executable}" "{self.bin / "gh.py"}" "$@"\n'),
+                           ('python3', f'#!/bin/sh\nexec "{sys.executable}" "$@"\n')):
+            (self.bin / name).write_text(text, encoding='utf-8')
+            (self.bin / name).chmod(0o755)
+        self.temp = self.tmp / 'runner-temp'
+        self.temp.mkdir()
+        self.log = self.tmp / 'gh.log'
+        [self.script] = [value for path, value in scan(WORKFLOW.read_text(encoding='utf-8')) if path[-1] == 'run']
+        env = {key: value for key, value in os.environ.items() if not key.startswith(('GITHUB_', 'GH_', 'PYTHON'))}
+        self.env = dict(env, PATH=f'{self.bin}{os.pathsep}{env.get("PATH", "")}', GH_TOKEN='x', ITEM='7',
+                        SCRIPT_REF='0123abc', FAKE_REF='0123abc', FAKE_ROOT=str(ROOT), FAKE_LOG=str(self.log),
+                        GITHUB_REPOSITORY='JarryShaw/PyPCAPKit', RUNNER_TEMP=str(self.temp))
+
+    def test_both_files_are_fetched_and_the_import_finds_the_helper(self) -> None:
+        result = subprocess.run(['bash', '-e', '-c', self.script], cwd=self.tmp, env=self.env,  # nosec B603 B607
+                                capture_output=True, text=True, check=False, timeout=60)
+        # The board cannot be read here, so the run ends there: after the import.
+        self.assertNotIn('ModuleNotFoundError', result.stderr)
+        self.assertIn('RuntimeError: gh api graphql failed (1): gh: no network here', result.stderr)
+        self.assertNotEqual(result.returncode, 0)
+        contents = 'api -H Accept: application/vnd.github.raw repos/JarryShaw/PyPCAPKit/contents/util/{}?ref=0123abc'
+        self.assertEqual(self.log.read_text(encoding='utf-8').splitlines()[:2],
+                         [contents.format('project_status.py'), contents.format('_actions.py')])
+        self.assertEqual(sorted(path.name for path in self.temp.glob('*.py')), ['_actions.py', 'project_status.py'])
+        for name in ('_actions.py', 'project_status.py'):
+            self.assertEqual((self.temp / name).read_bytes(), (ROOT / 'util' / name).read_bytes())
+        # And the copy imports the copy beside it, not the tree's.
+        imported = subprocess.run([sys.executable, '-X', 'importtime', str(self.temp / 'project_status.py'), '--help'],
+                                  cwd=self.tmp, env=self.env, capture_output=True, text=True, check=False, timeout=60)
+        self.assertEqual(imported.returncode, 0, imported.stderr[-2000:])
+        modules = re.findall(r'^import time:.*\|\s*(\S+)\s*$', imported.stderr, re.M)
+        self.assertIn('_actions', modules)
+        self.assertNotIn('util', modules)
 
 
 if __name__ == '__main__':

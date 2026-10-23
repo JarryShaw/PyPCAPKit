@@ -4197,8 +4197,9 @@ class CondaStepHarness(CondaWorkflowMixin):
         (seed / 'conda' / 'requirements.txt').write_text(
             '\n'.join(self.REQUIREMENTS) + '\n', encoding='utf-8')
         (seed / 'util').mkdir()
-        shutil.copyfile(ROOT / 'util' / 'verdict_covers_checkout.py',
-                        seed / 'util' / 'verdict_covers_checkout.py')
+        # It imports util/_actions.py from beside it (#2047).
+        for script in ('verdict_covers_checkout.py', '_actions.py'):
+            shutil.copyfile(ROOT / 'util' / script, seed / 'util' / script)
         self._git(seed, 'add', '.')
         self._git(seed, 'commit', '-m', 'base')
         self._git(seed, 'push', self.REMOTE, 'HEAD:refs/heads/main')

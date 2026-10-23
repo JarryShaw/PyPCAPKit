@@ -23,6 +23,8 @@ Standard library and the :program:`gh` CLI only, because the workflow runs it wi
 the runner's own ``python3`` and installs nothing. The token is ``GH_TOKEN``, which
 :program:`gh` reads itself; without one the script emits a ``::notice::`` and exits
 0, so a repository without the ``PROJECT_TOKEN`` secret skips rather than fails.
+Its annotations go through :file:`util/_actions.py` (#2047), which the workflow
+fetches beside it, at the same commit.
 
 """
 
@@ -36,6 +38,11 @@ import os
 import subprocess  # nosec B404
 import sys
 from typing import TYPE_CHECKING
+
+try:  # #2047: run as `python util/<script>.py`, or from beside util/_actions.py, with its directory on sys.path
+    import _actions
+except ImportError:  # imported as util.<script>, or loaded by path, from the repository root
+    from util import _actions
 
 if TYPE_CHECKING:
     from typing import Any, Callable, Iterable, Optional
@@ -260,8 +267,8 @@ def search_items(graphql: 'GraphQL', query: 'str') -> 'list[dict[str, Any]]':
             break
         after = page['pageInfo']['endCursor']
     if total > SEARCH_LIMIT or len(items) < total:
-        print(f'::warning title=Project Status::search {query!r} matched {total} item(s) but '
-              f'returned {len(items)}; this reconcile is partial (search caps at {SEARCH_LIMIT}).')
+        _actions.annotate('warning', f'search {query!r} matched {total} item(s) but returned {len(items)}; this '
+                          f'reconcile is partial (search caps at {SEARCH_LIMIT}).', title='Project Status')
     return items
 
 
@@ -285,8 +292,8 @@ def main(argv: 'Optional[list[str]]' = None, graphql: 'GraphQL' = gh_graphql,
     args = parser.parse_args(argv)
 
     if not os.environ.get('GH_TOKEN'):
-        print('::notice title=Project Status::GH_TOKEN is not set (the PROJECT_TOKEN secret is '
-              'missing), so the project board was not updated.')
+        _actions.annotate('notice', 'GH_TOKEN is not set (the PROJECT_TOKEN secret is missing), so the project '
+                          'board was not updated.', title='Project Status')
         return 0
 
     board = Board(graphql, dry_run=args.dry_run)

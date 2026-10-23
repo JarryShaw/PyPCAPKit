@@ -54,6 +54,7 @@ jobs:
         with:
           sparse-checkout: |
             .github/python-versions.toml
+            util/_actions.py
             util/python_versions.py
             util/superseded.py
           sparse-checkout-cone-mode: false
@@ -100,6 +101,7 @@ jobs:
         with:
           sparse-checkout: |
             .github/python-versions.toml
+            util/_actions.py
             util/python_versions.py
           sparse-checkout-cone-mode: false
           persist-credentials: false
