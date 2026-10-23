@@ -1812,6 +1812,12 @@ after a checkout of <code class="file docutils literal notranslate"><span class=
 <code class="docutils literal notranslate"><span class="pre">conda-dist</span></code>, as <code class="docutils literal notranslate"><span class="pre">release_conda.py</span> <span class="pre">build</span></code> and <code class="docutils literal notranslate"><span class="pre">upload</span></code> (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1822">#1822</a>, <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2044">#2044</a>).</p></td>
 <td><p>No.</p></td>
 </tr>
+<tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/release_reset_build.py</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Reset</span> <span class="pre">Build</span> <span class="pre">Number</span></code> in <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">tag</span></code>, on the image’s
+<code class="docutils literal notranslate"><span class="pre">python3</span></code> (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1634">#1634</a>).
+<code class="docutils literal notranslate"><span class="pre">Create</span> <span class="pre">Tag</span></code> before it stays inline.</p></td>
+<td><p>No.</p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -1837,7 +1843,8 @@ tree. The release scripts run as <code class="docutils literal notranslate"><spa
 standard library only: <code class="file docutils literal notranslate"><span class="pre">util/release_tags.py</span></code> on the image’s
 own, since <code class="docutils literal notranslate"><span class="pre">github</span></code> has no setup-python and <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> run the check
 before theirs, and <code class="file docutils literal notranslate"><span class="pre">util/release_upload.py</span></code> on the leg’s, after it.
-<code class="file docutils literal notranslate"><span class="pre">util/release_conda.py</span></code> runs <code class="docutils literal notranslate"><span class="pre">leg</span></code> on the image’s <code class="docutils literal notranslate"><span class="pre">python3</span></code>, before
+<code class="file docutils literal notranslate"><span class="pre">util/release_reset_build.py</span></code> runs on the image’s own too, as <code class="docutils literal notranslate"><span class="pre">tag</span></code> has no
+setup-python. <code class="file docutils literal notranslate"><span class="pre">util/release_conda.py</span></code> runs <code class="docutils literal notranslate"><span class="pre">leg</span></code> on the image’s <code class="docutils literal notranslate"><span class="pre">python3</span></code>, before
 setup-python, <code class="docutils literal notranslate"><span class="pre">build</span></code> on conda’s base <code class="docutils literal notranslate"><span class="pre">python</span></code> under the login shell, from
 <code class="file docutils literal notranslate"><span class="pre">conda/pypcapkit</span></code>, and <code class="docutils literal notranslate"><span class="pre">upload</span></code> on setup-python’s. A project
 pin runs each on the cases the shell it replaced handled and requires the same

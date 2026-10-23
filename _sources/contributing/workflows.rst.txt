@@ -1322,6 +1322,11 @@ to a script. Each script's docstring says what it does; each has tests under
        <https://github.com/JarryShaw/PyPCAPKit/issues/1822>`__, `#2044
        <https://github.com/JarryShaw/PyPCAPKit/issues/2044>`__).
      - No.
+   * - :file:`util/release_reset_build.py`
+     - ``Reset Build Number`` in ``create-release.yml``'s ``tag``, on the image's
+       ``python3`` (`#1634 <https://github.com/JarryShaw/PyPCAPKit/issues/1634>`__).
+       ``Create Tag`` before it stays inline.
+     - No.
 
 The summaries run on the image's ``/usr/bin/python3`` rather than the leg's
 interpreter, which may have failed to set up or be too broken to run anything, so
@@ -1346,7 +1351,8 @@ tree. The release scripts run as ``python3``, from a checkout of the whole tree,
 standard library only: :file:`util/release_tags.py` on the image's
 own, since ``github`` has no setup-python and ``pypi`` and ``conda`` run the check
 before theirs, and :file:`util/release_upload.py` on the leg's, after it.
-:file:`util/release_conda.py` runs ``leg`` on the image's ``python3``, before
+:file:`util/release_reset_build.py` runs on the image's own too, as ``tag`` has no
+setup-python. :file:`util/release_conda.py` runs ``leg`` on the image's ``python3``, before
 setup-python, ``build`` on conda's base ``python`` under the login shell, from
 :file:`conda/pypcapkit`, and ``upload`` on setup-python's. A project
 pin runs each on the cases the shell it replaced handled and requires the same
