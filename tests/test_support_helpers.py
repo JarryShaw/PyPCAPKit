@@ -620,6 +620,41 @@ class TimeLimitTests(unittest.TestCase):
         self.assertEqual(sent, [signal.SIGALRM])
         self.assert_nothing_left_behind(own_handler)
 
+    @unittest.skipUnless(hasattr(signal, 'pthread_sigmask'),
+                         'signal.pthread_sigmask is unavailable')
+    def test_a_repeat_still_pending_as_the_block_is_left_is_discarded(self) -> None:
+        """A deadline fired but not yet delivered by the way out is never delivered.
+
+        GraalPy delivers a signal asynchronously, so one that fired just before the
+        cancel can still be pending once the previous handler is back -- under
+        pytest that is ``SIG_DFL``, and it ended the worker (#2084). Blocking the
+        signal stands in for that delay here: it is sent from inside the cancel and
+        stays pending until the ``with`` has been left, and this class's handler
+        must not then receive it.
+
+        """
+        own_handler = signal.getsignal(signal.SIGALRM)
+        real_alarm = signal.alarm
+        sent = []  # type: list[int]
+
+        def alarm(seconds: int) -> int:
+            if seconds == 0 and not sent:
+                sent.append(signal.SIGALRM)
+                signal.pthread_sigmask(signal.SIG_BLOCK, {signal.SIGALRM})
+                signal.pthread_kill(threading.get_ident(), signal.SIGALRM)
+            return real_alarm(seconds)
+
+        try:
+            with mock.patch.object(signal, 'alarm', side_effect=alarm):
+                with time_limit(5):
+                    pass
+        finally:
+            # Unblocked, a signal still pending is delivered before this returns.
+            signal.pthread_sigmask(signal.SIG_UNBLOCK, {signal.SIGALRM})
+
+        self.assertEqual(sent, [signal.SIGALRM])
+        self.assert_nothing_left_behind(own_handler)
+
     def test_an_enclosing_alarm_survives_a_deadline_that_repeated(self) -> None:
         """An outer deadline comes back, less the body's seconds, after a repeat."""
         own_handler = signal.getsignal(signal.SIGALRM)
