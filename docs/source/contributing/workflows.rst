@@ -1017,7 +1017,11 @@ not those that mention one, such as a docstring a traceback prints, and xdist's 
 down`` lines. From it and the monitor's last sample, ``Containment summary`` warns
 ``No memory cap``, ``tests lost a process to the OOM killer``, ``tests timed out at 110
 minutes``, ``tests raised MemoryError`` or ``tests lost an xdist worker``, each a
-warning of its own. A timeout is exit 124, or 137 with no OOM kill
+warning of its own. Its closing line gives the exit status, but where the watcher
+stopped the run and wrote ``stopped=true`` it reads ``tests were stopped as
+superseded``, not ``tests exited 0``, and adds no warning, since the ``Superseded``
+notice already says why (`#2077
+<https://github.com/JarryShaw/PyPCAPKit/issues/2077>`__). A timeout is exit 124, or 137 with no OOM kill
 after 110 minutes: ``--kill-after``'s SIGKILL to a teardown SIGINT did not end, where an
 OOM kill of pytest exits 137 too. ``Experimental summary``, the job's last step but the job summary's and the
 KTLO summary's script, still warns of every failed step, ``tests`` included. The 2 GiB,

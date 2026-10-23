@@ -516,13 +516,17 @@ jobs:
       # worker xdist replaced (#1753), and a timeout -- exit 124, or 137 with
       # no OOM kill after 110 minutes, `--kill-after` ending a teardown SIGINT
       # did not; an OOM kill of pytest itself also exits 137. Nothing here
-      # fails.
+      # fails. #2077: a run the watcher stopped as superseded exits 0, so the
+      # watcher's `stopped=true` makes the closing line say the tests were
+      # stopped, not that they exited 0; its `Superseded` notice already says
+      # why, so the stop itself gets no warning.
       - name: Containment summary
         if: ${{ !cancelled() }}
         continue-on-error: true
         shell: bash
         env:
           LEG: Python ${{ matrix.python-version }} (experimental, non-blocking)
+          STOPPED: ${{ steps.tests.outputs.stopped }}
         run: |
           status="$RUNNER_TEMP/tests-status"
           if [ ! -s "$status" ]; then
@@ -558,7 +562,12 @@ jobs:
           if [ "$crashed" -gt 0 ] 2>/dev/null; then
             warn "tests lost an xdist worker" "${crashed} xdist worker(s) went down, each failing the test it ran, and xdist replaces up to 30; exit ${code}, scope ${scope}; ${last}."
           fi
-          echo "$LEG: tests exited ${code} after ${elapsed} s, scope ${scope}, ${oom} OOM kill(s), ${errors} MemoryError line(s), ${crashed:-0} worker(s) down; ${last}."
+          if [ "$STOPPED" = true ]; then
+            ended="were stopped as superseded"
+          else
+            ended="exited ${code}"
+          fi
+          echo "$LEG: tests ${ended} after ${elapsed} s, scope ${scope}, ${oom} OOM kill(s), ${errors} MemoryError line(s), ${crashed:-0} worker(s) down; ${last}."
 
       # #1660: an experimental leg's report, as unit-tests.yml `test`'s `KTLO
       # summary` is a KTLO leg's, and for the same reasons: the same script,
