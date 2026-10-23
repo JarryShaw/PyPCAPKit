@@ -9,6 +9,11 @@ whose ``__all__`` lists the name. PyPy 8.0 binds it in :mod:`builtins`, so there
 :mod:`pcapkit.utilities.compat` binds the name in ``aenum._common`` and imports
 aenum again.
 
+GraalPy fails the same import differently (#2083): its ``from ... import *``
+treats a name missing from ``__all__`` as if ``__all__`` were absent, so it binds
+the module's public names and none of its ``_`` ones, and aenum then fails with
+:exc:`NameError` on ``_Addendum`` instead.
+
 Each test runs a fresh interpreter, so that this module's own imports have not
 loaded aenum already. :class:`TheAenumPremiseTests` binds the builtin on any
 interpreter and shows aenum still fails without the fix, which tells when an
@@ -32,6 +37,9 @@ __tier__ = 'ALL'
 REPO_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 #: Whether the shim in pcapkit/utilities/compat.py runs here.
 ON_PYPY = sys.implementation.name == 'pypy'
+#: Whether a name missing from ``__all__`` fails a star import with :exc:`NameError`
+#: on a later ``_`` name rather than with :exc:`AttributeError` (#2083).
+ON_GRAALPY = sys.implementation.name == 'graalpy'
 
 
 def run_child(code: 'str') -> 'subprocess.CompletedProcess[str]':
@@ -51,8 +59,8 @@ class TheAenumPremiseTests(unittest.TestCase):
             builtins.NoneType = type(None)
             try:
                 import aenum
-            except AttributeError as error:
-                print('FAILED', error)
+            except (AttributeError, NameError) as error:
+                print('FAILED', type(error).__name__, error)
             else:
                 print('IMPORTED')
         ''')
@@ -60,7 +68,19 @@ class TheAenumPremiseTests(unittest.TestCase):
         self.assertEqual(proc.stdout.split()[0], 'FAILED',
                          'aenum imports with builtins.NoneType bound; the shim in '
                          'pcapkit/utilities/compat.py may no longer be needed')
-        self.assertIn("'NoneType'", proc.stdout)
+        if ON_GRAALPY:
+            # NOTE: GraalPy's ``ImportStarNode.doImport`` (oracle/graalpython,
+            # ``graalpython/com.oracle.graal.python/src/com/oracle/graal/python/
+            # nodes/bytecode/ImportStarNode.java``) catches the AttributeError of
+            # a missing ``__all__`` name in the handler for a missing ``__all__``,
+            # whose module-dict fallback skips ``_`` names. So ``_common``'s
+            # star import binds no ``_Addendum`` and ``_constant`` fails on it
+            # (#2083). An AttributeError here means GraalPy now matches CPython.
+            self.assertEqual(proc.stdout.split()[1], 'NameError', proc.stdout)
+            self.assertIn("'_Addendum'", proc.stdout)
+        else:
+            self.assertEqual(proc.stdout.split()[1], 'AttributeError', proc.stdout)
+            self.assertIn("'NoneType'", proc.stdout)
 
 
 @unittest.skipUnless(ON_PYPY, 'the shim runs on PyPy alone')
