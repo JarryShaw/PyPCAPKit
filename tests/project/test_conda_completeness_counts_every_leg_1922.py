@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """``version_check``'s Anaconda completeness check counts every platform the ``conda`` legs publish (#1922).
 
-* The platforms it counts are the ones the ``conda`` job's ``os`` legs map to,
-  read from that job's matrix and its ``case "${{ matrix.os }}"`` arms.
+* The platforms it counts, :file:`util/release_published.py`'s ``SUBDIRS``
+  since #1967, are the ones the ``conda`` job's ``os`` legs map to, read from
+  that job's matrix and its ``case "${{ matrix.os }}"`` arms.
 * Run as the workflow runs it, with ``curl`` stubbed, a release reads complete
   only with each of those platforms for each build, so a missing ``osx-arm64``
   upload reads incomplete and the ``conda`` gate runs the leg that lacks it.
@@ -17,11 +18,13 @@ import pathlib
 import re
 import shutil
 import subprocess  # nosec: B404
+import sys
 import tempfile
 import unittest
 from typing import TYPE_CHECKING
 
 from tests import _workflows
+from util import release_published
 
 try:
     import yaml
@@ -38,8 +41,6 @@ BUILDS = ('py313', 'py314')
 
 #: A ``case "${{ matrix.os }}" in`` arm setting ``target_platform``.
 ARM = re.compile(r'^\s*([\w.-]+)\)\s*\n\s*target_platform="([^"]*)"', re.MULTILINE)
-#: The check's own list of platforms, which sets both its count and its set.
-SUBDIRS = re.compile(r'^\s*export PCAPKIT_CONDA_SUBDIRS="([^"]*)"\s*$', re.MULTILINE)
 
 
 def jobs() -> 'dict[str, Any]':
@@ -70,16 +71,15 @@ class TheCheckCountsTheLegs(unittest.TestCase):
     """What the check counts is what the legs publish."""
 
     def test_the_check_lists_each_published_platform(self) -> None:
-        listed = SUBDIRS.findall(check()['run'])
-        self.assertEqual(len(listed), 1, 'the check names its platforms in one PCAPKIT_CONDA_SUBDIRS list')
-        self.assertEqual(sorted(listed[0].split()), sorted(published()))
+        """Its one list of platforms, which sets both its count and its set."""
+        self.assertEqual(check()['run'].split()[:3], ['python3', 'util/release_published.py', 'anaconda'])
+        self.assertEqual(sorted(release_published.SUBDIRS.split()), sorted(published()))
         self.assertIn('osx-arm64', published())
 
 
-@unittest.skipIf(shutil.which('bash') is None or shutil.which('python3') is None,
-                 'bash and python3 are needed to run the workflow shell')
+@unittest.skipIf(shutil.which('python3') is None, 'python3 is needed to run the count')
 class TheCheckRunsAsTheWorkflowRunsIt(unittest.TestCase):
-    """The step's script, with ``curl`` answering from a fake Anaconda release."""
+    """The step's script, on this interpreter, with ``curl`` answering from a fake Anaconda release."""
 
     def complete(self, distributions: 'list[tuple[str, str]]') -> 'tuple[str, str]':
         """``PCAPKIT_CONDA_COMPLETE`` and the log for a release holding these (platform, build) pairs."""
@@ -96,8 +96,9 @@ class TheCheckRunsAsTheWorkflowRunsIt(unittest.TestCase):
             curl.chmod(0o755)
             output = scratch / 'output'
             output.write_text('', encoding='utf-8')
-            result = subprocess.run(  # nosec: B603 B607
-                ['bash', '-e', '-c', step['run'].replace('/tmp/anaconda_release.json', str(scratch / 'release.json'))],
+            words = step['run'].replace('/tmp/anaconda_release.json', str(scratch / 'release.json')).split()
+            result = subprocess.run(  # nosec: B603
+                [sys.executable, str(ROOT / words[1]), *words[2:]],
                 env=dict(os.environ, PATH=f'{scratch}{os.pathsep}{os.environ["PATH"]}', REPLY=str(reply),
                          GITHUB_OUTPUT=str(output), PCAPKIT_VERSION='1.5.0', PCAPKIT_CONDA_BUILDS=' '.join(BUILDS)),
                 capture_output=True, text=True, check=False, timeout=60)

@@ -252,42 +252,7 @@ jobs:
           PCAPKIT_TAG_EXISTS: ${{ steps.check_tag.outputs.exists }}
           PCAPKIT_PYPI_WHEELS: ${{ steps.python-versions.outputs.pypi-wheels }}
           PCAPKIT_CONDA_BUILDS: ${{ steps.python-versions.outputs.conda-builds }}
-        run: |
-          set -euo pipefail
-
-          wheels="$PCAPKIT_PYPI_WHEELS"
-          builds="$PCAPKIT_CONDA_BUILDS"
-          tiers=.github/python-versions.toml
-          if [ "$PCAPKIT_TAG_EXISTS" = true ]; then
-            # The checkout fetched every tag, but not one pushed since.
-            git rev-parse -q --verify "refs/tags/${PCAPKIT_TAG}^{commit}" > /dev/null \
-              || git fetch -q --no-tags origin "+refs/tags/${PCAPKIT_TAG}:refs/tags/${PCAPKIT_TAG}"
-            from="$(git rev-parse "refs/tags/${PCAPKIT_TAG}^{commit}")"
-            if ! git cat-file -e "${from}:${tiers}" 2> /dev/null; then
-              from="$(git log --diff-filter=A --format=%H -- "$tiers" | tail -n 1)"
-              if [ -z "$from" ]; then
-                echo "::error title=No tier file in the history::${tiers} was never added to this checkout's history."
-                exit 1
-              fi
-              echo "::notice title=Released before the tier file::${PCAPKIT_TAG} predates ${tiers}; counting the tiers ${from} added it with."
-            fi
-            if [ "$from" != "$(git rev-parse HEAD)" ]; then
-              released="$(mktemp -d)"
-              git show "${from}:${tiers}" > "${released}/python-versions.toml"
-              git show "${from}:util/python_versions.py" > "${released}/python_versions.py"
-              # #2047: the reader imports util/_actions.py from beside it, from the
-              # commit that has it.
-              if git cat-file -e "${from}:util/_actions.py" 2> /dev/null; then
-                git show "${from}:util/_actions.py" > "${released}/_actions.py"
-              fi
-              wheels="$(python3 "${released}/python_versions.py" --file "${released}/python-versions.toml" pypi-wheels)"
-              builds="$(python3 "${released}/python_versions.py" --file "${released}/python-versions.toml" conda-builds)"
-            fi
-          fi
-
-          echo "${PCAPKIT_TAG}: counting the wheels ${wheels} and the conda builds ${builds}"
-          echo "pypi-wheels=${wheels}" >> "$GITHUB_OUTPUT"
-          echo "conda-builds=${builds}" >> "$GITHUB_OUTPUT"
+        run: python3 util/release_tiers.py
 
       # PyPI evidence: a wheel per supported-tier leg (``PCAPKIT_PYPI_WHEELS``;
       # #1633 -- a KTLO wheel neither completes the release nor, failing, leaves
@@ -303,44 +268,7 @@ jobs:
         env:
           PCAPKIT_VERSION: ${{ steps.get_version.outputs.PCAPKIT_VERSION }}
           PCAPKIT_PYPI_WHEELS: ${{ steps.released.outputs.pypi-wheels }}
-        run: |
-          set -euo pipefail
-
-          # One wheel per supported leg, plus the sdist.
-          read -r -a wheels <<< "$PCAPKIT_PYPI_WHEELS"
-          expected=$(( ${#wheels[@]} + 1 ))
-          # `--retry-connrefused` and `|| echo 000` keep a pypi.org outage from
-          # failing `version_check` under `set -e`, which every publisher
-          # requires; "incomplete" is the safe default.
-          status="$(curl -s --retry 3 --retry-connrefused \
-            -o /tmp/pypi_release.json -w '%{http_code}' \
-            "https://pypi.org/pypi/pypcapkit/${PCAPKIT_VERSION}/json" || echo 000)"
-
-          count=0
-          if [ "$status" = "200" ]; then
-            # One line per `printf` argument, so the block scalar's indentation
-            # never reaches the source `python3 -` reads: indented `python3 -c`
-            # source compiles only on Python 3.14 (3.9 through 3.13 raise
-            # `IndentationError: unexpected indent`, measured). Not leaning on
-            # the setup-python above: the conda job's check runs before its own.
-            count="$(printf '%s\n' \
-              "import json, os" \
-              "with open('/tmp/pypi_release.json') as f:" \
-              "    data = json.load(f)" \
-              "supported = set(os.environ['PCAPKIT_PYPI_WHEELS'].split())" \
-              "names = [u.get('filename', '') for u in data.get('urls', [])]" \
-              "wheels = {n.split('-')[2] for n in names if n.endswith('.whl') and n.count('-') == 4}" \
-              "print(len(wheels & supported) + any(n.endswith('.tar.gz') for n in names))" \
-              | python3 -)"
-          fi
-
-          complete=false
-          if [ "$count" -ge "$expected" ]; then
-            complete=true
-          fi
-
-          echo "http $status, found $count of $expected expected files for ${PCAPKIT_VERSION} on PyPI"
-          echo "PCAPKIT_PYPI_COMPLETE=$complete" >> "$GITHUB_OUTPUT"
+        run: python3 util/release_published.py pypi /tmp/pypi_release.json
 
       # Anaconda evidence, as PyPI's above, per platform and Python: the
       # job-level cost saver, under which ``conda``'s per-leg checks, the
@@ -351,46 +279,7 @@ jobs:
         env:
           PCAPKIT_VERSION: ${{ steps.get_version.outputs.PCAPKIT_VERSION }}
           PCAPKIT_CONDA_BUILDS: ${{ steps.released.outputs.conda-builds }}
-        run: |
-          set -euo pipefail
-
-          # Each platform the ``conda`` legs publish, for each supported version.
-          export PCAPKIT_CONDA_SUBDIRS="linux-64 osx-64 osx-arm64"
-          read -r -a subdirs <<< "$PCAPKIT_CONDA_SUBDIRS"
-          read -r -a builds <<< "$PCAPKIT_CONDA_BUILDS"
-          expected=$(( ${#subdirs[@]} * ${#builds[@]} ))
-          # Same coupling risk, and the same fix, as the PyPI check above.
-          status="$(curl -s --retry 3 --retry-connrefused \
-            -o /tmp/anaconda_release.json -w '%{http_code}' \
-            "https://api.anaconda.org/release/jarryshaw/pypcapkit/${PCAPKIT_VERSION}" || echo 000)"
-
-          count=0
-          if [ "$status" = "200" ]; then
-            # The same `printf` form as the PyPI check above.
-            count="$(printf '%s\n' \
-              "import json, os" \
-              "with open('/tmp/anaconda_release.json') as f:" \
-              "    data = json.load(f)" \
-              "platforms = set(os.environ['PCAPKIT_CONDA_SUBDIRS'].split())" \
-              "py_tags = set(os.environ['PCAPKIT_CONDA_BUILDS'].split())" \
-              "seen = {" \
-              "    (d.get('attrs', {}).get('subdir'), tag)" \
-              "    for d in data.get('distributions', [])" \
-              "    for tag in py_tags" \
-              "    if d.get('attrs', {}).get('build', '').startswith(tag + '_')" \
-              "    and d.get('attrs', {}).get('subdir') in platforms" \
-              "}" \
-              "print(len(seen))" \
-              | python3 -)"
-          fi
-
-          complete=false
-          if [ "$count" -ge "$expected" ]; then
-            complete=true
-          fi
-
-          echo "http $status, found $count of $expected expected platform/Python combinations for ${PCAPKIT_VERSION} on Anaconda"
-          echo "PCAPKIT_CONDA_COMPLETE=$complete" >> "$GITHUB_OUTPUT"
+        run: python3 util/release_published.py anaconda /tmp/anaconda_release.json
 
       # #1748: resolved as #1634's check in ``github``, ``pypi`` and ``conda``
       # resolves it, so the gates skip exactly the runs that check would refuse.

@@ -2190,6 +2190,10 @@ class TestNothingPublishesWithoutTheGate(WorkflowMixin, unittest.TestCase):
                 self.assertTrue(gate_coverage_violations(mutant, self.jobs))
 
 
+#: ``version_check``'s PyPI and Anaconda evidence checks, since #1967.
+EVIDENCE_SCRIPT = 'util/release_published.py'
+
+
 class TestEvidenceBasedGating(WorkflowMixin, unittest.TestCase):
     """#888: ``tag``, ``pypi`` and ``conda`` read their own evidence now,
     instead of ``PCAPKIT_TAG_EXISTS`` -- the tag ``github`` creates, which
@@ -2421,15 +2425,16 @@ class TestEvidenceBasedGating(WorkflowMixin, unittest.TestCase):
         make the evidence check always read 0 files.
 
         """
-        block = self.jobs['version_check']
-        self.assertIn('pypi.org/pypi/pypcapkit/', block)
-        self.assertIn("data.get('urls'", block)
+        # #1967: the step runs util/release_published.py, which holds the check.
+        self.assertIn(f'run: python3 {EVIDENCE_SCRIPT} pypi ', self.jobs['version_check'])
+        script = (ROOT / EVIDENCE_SCRIPT).read_text(encoding='utf-8')
+        self.assertIn("PYPI_URL = 'https://pypi.org/pypi/pypcapkit/'", script)
+        self.assertIn("data.get('urls'", script)
 
     def test_conda_evidence_checks_every_platform(self) -> None:
-        block = self.jobs['version_check']
-        self.assertIn('linux-64', block)
-        self.assertIn('osx-64', block)
-        self.assertIn('osx-arm64', block)
+        self.assertIn(f'run: python3 {EVIDENCE_SCRIPT} anaconda ', self.jobs['version_check'])
+        script = (ROOT / EVIDENCE_SCRIPT).read_text(encoding='utf-8')
+        self.assertIn("SUBDIRS = 'linux-64 osx-64 osx-arm64'", script)
 
 
 class TestGateExpressionsEvaluateCorrectly(WorkflowMixin, unittest.TestCase):
@@ -3559,18 +3564,30 @@ class TestPythonSnippetsSurviveOlderInterpreters(WorkflowMixin, unittest.TestCas
     itself put there -- this class is what actually runs each snippet under
     an older interpreter to check that claim, rather than trusting it.
 
+    Since #1967 the PyPI and Anaconda evidence checks in ``version_check`` feed
+    ``python3 -`` from :file:`util/release_published.py` instead, so this runs
+    those snippets too, as that script builds them.
+
     """
+
+    def snippets(self) -> 'list[str]':
+        """The workflow's ``printf`` snippets, then the evidence script's."""
+        from util import release_published  # pylint: disable=import-outside-toplevel
+        return printf_python_snippets(self.text) + [  # type: ignore[attr-defined]
+            source('/tmp/release.json') for source in (release_published.pypi_source,
+                                                      release_published.anaconda_source)]
 
     def test_the_scan_found_the_snippets(self) -> None:
         """A scan that finds nothing would pass every test below it."""
         snippets = printf_python_snippets(self.text)  # type: ignore[attr-defined]
         self.assertEqual(
-            len(snippets), 3,
-            'expected exactly 3 printf-fed python3 snippets (the PyPI and '
-            'Anaconda evidence checks in version_check, plus the per-leg '
-            'check in conda); found a different count -- if that is '
-            'intended, this expectation needs revisiting alongside it',
+            len(snippets), 1,
+            'expected exactly 1 printf-fed python3 snippet (the per-leg '
+            'check in conda; version_check\'s two run from '
+            'util/release_published.py since #1967); found a different count '
+            '-- if that is intended, this expectation needs revisiting alongside it',
         )
+        self.assertEqual(len(self.snippets()), 3)
 
     def test_each_snippet_runs_without_an_indentation_error(self) -> None:
         interpreter = pre_314_interpreter()
@@ -3581,7 +3598,7 @@ class TestPythonSnippetsSurviveOlderInterpreters(WorkflowMixin, unittest.TestCas
             [interpreter, '--version'], capture_output=True, text=True,
         ).stdout.strip()
 
-        for index, snippet in enumerate(printf_python_snippets(self.text)):  # type: ignore[attr-defined]
+        for index, snippet in enumerate(self.snippets()):
             with self.subTest(snippet=index):
                 # `$target_platform`/`$py_tag` are bash interpolation the real
                 # step performs before Python ever sees this text; harmless

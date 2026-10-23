@@ -391,10 +391,13 @@ class TestNoKTLOLegCanFailTheRelease(unittest.TestCase):
         curl.chmod(0o755)
         output = self.tmp / 'output'
         output.write_text('', encoding='utf-8')
-        result = bash(script.replace('/tmp/pypi_release.json', str(self.tmp / 'release.json')),
-                      {'PATH': f'{bin_dir}{os.pathsep}{os.environ["PATH"]}', 'REPLY': str(reply),
-                       'GITHUB_OUTPUT': str(output), 'PCAPKIT_VERSION': '1.5.0',
-                       'PCAPKIT_PYPI_WHEELS': wheels})
+        # #1967: ``python3 util/release_published.py pypi ...``, on this interpreter.
+        command = script_command(script.replace('/tmp/pypi_release.json', str(self.tmp / 'release.json')))
+        assert command is not None, script
+        result = subprocess.run(command, env=dict(os.environ, PATH=f'{bin_dir}{os.pathsep}{os.environ["PATH"]}',
+                                                  REPLY=str(reply), GITHUB_OUTPUT=str(output),
+                                                  PCAPKIT_VERSION='1.5.0', PCAPKIT_PYPI_WHEELS=wheels),
+                                capture_output=True, text=True, check=False, timeout=60)
         self.assertEqual(result.returncode, 0, result.stderr)
         return dict(line.split('=', 1) for line in output.read_text(encoding='utf-8').split())['PCAPKIT_PYPI_COMPLETE']
 

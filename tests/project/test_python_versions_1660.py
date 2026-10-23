@@ -908,8 +908,11 @@ class TestTheAnacondaCheckCountsTheFile(unittest.TestCase):
             curl.chmod(0o755)
             output = scratch / 'output'
             output.write_text('', encoding='utf-8')
+            # #1967: ``python3 util/release_published.py anaconda ...``, on this interpreter.
+            words = step['run'].replace('/tmp/anaconda_release.json', str(scratch / 'release.json')).split()
+            self.assertEqual(words[:2], ['python3', 'util/release_published.py'])
             result = subprocess.run(
-                ['bash', '-e', '-c', step['run'].replace('/tmp/anaconda_release.json', str(scratch / 'release.json'))],
+                [sys.executable, str(ROOT / words[1]), *words[2:]],
                 env=dict(os.environ, PATH=f'{scratch}{os.pathsep}{os.environ["PATH"]}', REPLY=str(reply),
                          GITHUB_OUTPUT=str(output), PCAPKIT_VERSION='1.5.0', PCAPKIT_CONDA_BUILDS=builds),
                 capture_output=True, text=True, check=False, timeout=60)
