@@ -1,44 +1,30 @@
 name: Project Status
 
-# Keeps the *Status* field of the project board (users/JarryShaw/projects/2) in
-# line with each item's state labels. The board's built-in workflows add items and
-# set Done on close and merge, but no built-in workflow observes a label change, so
-# this one makes every other transition. The mapping lives in
-# util/project_status.py:status_for and is documented under "Milestones and the
-# Project Board" in docs/source/contributing/conventions/process.rst; the tests in
-# tests/project/test_project_status.py hold the two to each other.
+# Keeps the project board's Status field (users/JarryShaw/projects/2) in line with
+# each item's state labels, which no built-in board workflow observes. The mapping
+# is util/project_status.py:status_for; it and the PROJECT_TOKEN setup are
+# documented under "Milestones and the Project Board" in
+# docs/source/contributing/conventions/process.rst.
 #
-# SECURITY. `pull_request_target` is used for one reason only: a pull request from
-# a fork gets no secrets under `pull_request`, and PROJECT_TOKEN is a secret. The
-# price is that this workflow runs with that secret *on events a stranger can
-# cause*, so it must never execute anything the pull request supplies -- the
-# classic "pwn request". Concretely, the job below:
+# SECURITY. `pull_request_target` is used only because a fork's `pull_request` run
+# gets no secrets, and PROJECT_TOKEN is one. So this runs with a secret on events a
+# stranger can cause, and must never execute anything the pull request supplies --
+# the classic "pwn request". The job below:
 #
 #   * never checks out the repository, at any ref, and has no `uses:` step at all;
 #   * fetches util/project_status.py through the API at `github.sha`, which under
 #     `pull_request_target` is the tip of the *base* branch, never the PR head --
 #     so editing the script in a pull request changes nothing about its own run;
-#   * takes nothing from the event payload except the item number, passed through
-#     `env:` rather than interpolated into the script, and re-reads everything else
-#     (labels, state) from the API.
+#   * takes nothing from the event payload but the item number, passed through
+#     `env:` rather than interpolated into the script, and re-reads labels and
+#     state from the API.
 #
-# tests/project/test_project_status.py asserts each of them over this file, so a
-# later edit that breaks one fails a test rather than a security review.
+# tests/project/test_project_status.py asserts each of these over this file.
 #
-# `workflow_dispatch` is the other way in, and it is not a fork boundary: it runs
-# the workflow file *of the branch selected* with PROJECT_TOKEN in scope. Only
-# someone with write access can dispatch, and write access can already change any
-# workflow, so this trusts collaborators rather than forks -- the same trust the
-# rest of the repository's secrets rely on.
-#
-# Event runs and reconciles are in different concurrency groups, so a reconcile
-# can write an older Status over a fresher one. That self-repairs on the item's
-# next event or the next nightly run; one global group instead would let a
-# reconcile hold every event run.
-#
-# PROJECT_TOKEN is a classic PAT with `project` and `repo` scopes, because
-# GITHUB_TOKEN cannot write a user-owned project. Without it every run skips with a
-# `::notice::` instead of failing.
+# `workflow_dispatch` is not a fork boundary: it runs the selected branch's file
+# with PROJECT_TOKEN in scope. Only write access can dispatch, and write access can
+# already change any workflow, so this trusts collaborators rather than forks --
+# the same trust the rest of the repository's secrets rely on.
 
 on:
   issues:
@@ -56,24 +42,24 @@ on:
 # The job uses PROJECT_TOKEN only, never GITHUB_TOKEN.
 permissions: {}
 
-# Event runs are keyed on the item number, so a label swap -- which fires an
-# `unlabeled` and a `labeled` within the same second -- serializes on one item.
-# Issues and pull requests share one number space, so the key cannot collide
-# across the two event types.
+# Event runs are keyed on the item number, so the `unlabeled` and `labeled` of a
+# label swap, fired within the same second, serialize on one item. Issues and pull
+# requests share one number space, so keys cannot collide across the two.
 #
-# Nothing in a group is cancelled: a cancelled run stays on the PR head as a
-# failed Sync Status check even after a newer run has fixed the board. So there
-# is no `cancel-in-progress`, and that is not enough on its own: by default a
-# group holds one pending run and cancels it when a newer one arrives.
-# `queue: max` lets up to 100 wait instead; only a run past that is cancelled.
+# Nothing is cancelled: a cancelled run stays on the PR head as a failed Sync
+# Status check even after a newer run has fixed the board. Omitting
+# `cancel-in-progress` is not enough, because by default a group holds one pending
+# run and cancels it when a newer one arrives; `queue: max` lets up to 100 wait,
+# and only a run past that is cancelled.
 # GitHub documents both, and that the two keys together are a validation error:
 # https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency
 #
-# Queue order is not guaranteed, but the board still ends right: runs on one
-# item never overlap and each re-reads the labels, so the last to execute reads
-# the final labels and writes last. The cost is one run per event, not one per
-# burst. Scheduled and manual reconciles share their own group, queued the same
-# way.
+# Queue order is not guaranteed, but runs on one item never overlap and each
+# re-reads the labels, so the last to execute writes the final state. The cost is
+# one run per event, not one per burst. Scheduled and manual reconciles share a
+# separate group, so a reconcile can write an older Status over a fresher one; that
+# self-repairs on the item's next event or the next nightly run, while one global
+# group would let a reconcile hold every event run.
 concurrency:
   group: project-status-${{ (github.event.issue.number || github.event.pull_request.number) && format('item-{0}', github.event.issue.number || github.event.pull_request.number) || 'reconcile' }}
   queue: max
