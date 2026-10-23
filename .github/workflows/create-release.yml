@@ -275,6 +275,11 @@ jobs:
               released="$(mktemp -d)"
               git show "${from}:${tiers}" > "${released}/python-versions.toml"
               git show "${from}:util/python_versions.py" > "${released}/python_versions.py"
+              # #2047: the reader imports util/_actions.py from beside it, from the
+              # commit that has it.
+              if git cat-file -e "${from}:util/_actions.py" 2> /dev/null; then
+                git show "${from}:util/_actions.py" > "${released}/_actions.py"
+              fi
               wheels="$(python3 "${released}/python_versions.py" --file "${released}/python-versions.toml" pypi-wheels)"
               builds="$(python3 "${released}/python_versions.py" --file "${released}/python-versions.toml" conda-builds)"
             fi

@@ -8,6 +8,8 @@
   function's exact output, GitHub's escaping included.
 * :class:`TestScriptsImportIt` loads each script that imports the helper in the
   ways the steps and the tests do, and runs it as the steps do.
+* :class:`TestTheStepsCheckItOut` holds every sparse checkout of such a script
+  to listing the helper too.
 
 """
 
@@ -29,10 +31,11 @@ import unittest
 from typing import TYPE_CHECKING
 from unittest import mock
 
+from tests._workflows import WORKFLOWS, load
 from util import _actions
 
 if TYPE_CHECKING:
-    from typing import Iterator, Optional
+    from typing import Any, Iterator, Optional
 
 #: Test tier (#1958): reads and runs the tree's own scripts, a question about the tree.
 __tier__ = 'LATEST'
@@ -41,9 +44,10 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 HELPER = ROOT / 'util' / '_actions.py'
 #: The scripts that import the helper.
 SCRIPTS = ('apt_packages', 'check_suite_report', 'ci_timing', 'classify_changes', 'codeql_report',
-           'coverage_report', 'leg_summary', 'pip_install', 'regenerate_samples', 'release_status', 'release_tags',
-           'release_upload', 'release_vendor_update', 'update_python_versions', 'vendor_code_changed',
-           'vendor_test_gate')
+           'coverage_report', 'discussion_report', 'leg_summary', 'pip_install', 'project_status',
+           'python_versions', 'regenerate_samples', 'release_status', 'release_tags', 'release_upload',
+           'release_vendor_update', 'superseded', 'update_python_versions', 'vendor_code_changed',
+           'vendor_test_gate', 'verdict_covers_checkout')
 #: The top-level modules the helper may import, each in Python 3.7's standard
 #: library: the running interpreter's :data:`sys.stdlib_module_names` would
 #: pass ``tomllib``, which 3.7 lacks.
@@ -56,16 +60,21 @@ RUNS = {
     'classify_changes': ([], {'OWN_PR': 'false'}),
     'codeql_report': (['--help'], {}),
     'coverage_report': (['--help'], {}),
+    'discussion_report': (['--help'], {}),
     'leg_summary': (['ktlo'], {'LEG': 'Python 3.8 (KTLO, non-blocking)', 'STEPS': '{}'}),
     'pip_install': (['--help'], {}),
+    'project_status': (['--help'], {}),
+    'python_versions': (['latest'], {}),
     'regenerate_samples': (['--help'], {}),
     'release_status': (['--help'], {}),
     'release_tags': (['--help'], {}),
     'release_upload': (['--help'], {}),
     'release_vendor_update': (['--help'], {}),
+    'superseded': (['--help'], {}),
     'update_python_versions': (['--help'], {}),
     'vendor_code_changed': (['--help'], {}),
     'vendor_test_gate': (['--help'], {}),
+    'verdict_covers_checkout': (['--help'], {}),
 }
 #: ``-X importtime``'s line for a module, by its name.
 IMPORT_TIME = re.compile(r'^import time:.*\|\s*(\S+)\s*$', re.M)
@@ -328,6 +337,43 @@ class TestScriptsImportIt(unittest.TestCase):
                 self.assertNotIn('util._actions', modules)
                 if name == 'classify_changes':
                     self.assertEqual(output.read_text(encoding='utf-8'), 'code=true\n')
+
+
+def sparse_checkouts_missing_the_helper(spec: 'Any') -> 'list[tuple[str, list[str]]]':
+    """Each job of the workflow ``spec`` whose sparse checkout lists a script of :data:`SCRIPTS` but not the helper."""
+    found = []
+    for job_id, job in (spec.get('jobs') or {}).items():
+        for step in job.get('steps') or []:
+            listed = str((step.get('with') or {}).get('sparse-checkout') or '').split()
+            scripts = [path for path in listed if path.startswith('util/') and path.endswith('.py')
+                       and path[len('util/'):-len('.py')] in SCRIPTS]
+            if scripts and 'util/_actions.py' not in listed:
+                found.append((job_id, scripts))
+    return found
+
+
+class TestTheStepsCheckItOut(unittest.TestCase):
+    """A sparse checkout of a script that imports the helper holds the helper too, or the import fails."""
+
+    def test_every_sparse_checkout_of_a_script_lists_the_helper(self) -> None:
+        checked = 0
+        for path in sorted(WORKFLOWS.glob('*.yml')):
+            with self.subTest(workflow=path.name):
+                spec = load(path.name)
+                self.assertEqual(sparse_checkouts_missing_the_helper(spec), [])
+                checked += sum('sparse-checkout' in (step.get('with') or {}) for job in spec['jobs'].values()
+                               for step in job.get('steps') or [])
+        self.assertGreater(checked, 0, 'no sparse checkout was found to check')
+
+    def test_the_check_sees_a_missing_helper(self) -> None:
+        def spec(*listed: 'str') -> 'Any':
+            return {'jobs': {'j': {'steps': [{'with': {'sparse-checkout': ''.join(f'{p}\n' for p in listed)}}]}}}
+
+        self.assertEqual(sparse_checkouts_missing_the_helper(spec('.github/python-versions.toml',
+                                                                  'util/python_versions.py')),
+                         [('j', ['util/python_versions.py'])])
+        self.assertEqual(sparse_checkouts_missing_the_helper(spec('util/_actions.py', 'util/python_versions.py')), [])
+        self.assertEqual(sparse_checkouts_missing_the_helper(spec('util/no_helper_here.py')), [])
 
 
 if __name__ == '__main__':

@@ -503,8 +503,10 @@ release waits for the next Vendor Update on ``main``.
 that runs with a secret on an event a fork can cause: it writes the project board's
 *Status* field with ``PROJECT_TOKEN``, which a fork's ``pull_request`` run would not
 receive. It therefore never checks out the repository and has no ``uses:`` step. It
-fetches :file:`util/project_status.py` through the API at ``github.sha`` -- the base
-branch's tip under that event -- and takes only the item number from the payload.
+fetches :file:`util/project_status.py`, and :file:`util/_actions.py`, which it imports
+(`#2047 <https://github.com/JarryShaw/PyPCAPKit/issues/2047>`__), through the API at
+``github.sha`` -- the base branch's tip under that event -- and takes only the item
+number from the payload.
 ``tests/project/test_project_status.py`` asserts this over the file. Without the
 secret it skips with a ``::notice::``. The Status mapping it applies is documented in
 :doc:`conventions/process`.
@@ -1369,7 +1371,8 @@ does while its findings stand, and ``failure`` where actionlint failed the job.
 ``cron-vendor.yml``'s rules: ``push`` on its ``workflow_run``, ``scheduled`` on its
 ``schedule``, and never on a pull request or a verdict for another commit. Its
 report is the results of ``head``, ``deploy-pages`` and ``publish-pages``, so it
-uploads no artifact, and its ``discussion`` job checks out the script alone. The
+uploads no artifact, and its ``discussion`` job checks out the script and
+:file:`util/_actions.py`, which it imports, alone. The
 ``--status`` is the publish's result after a green build, the build's where the
 build did not pass, and the gate's where the gate skipped the build.
 

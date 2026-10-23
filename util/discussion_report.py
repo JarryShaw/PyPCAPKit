@@ -59,6 +59,11 @@ import subprocess  # nosec: B404
 import sys
 from typing import TYPE_CHECKING
 
+try:  # #2047: run as `python util/<script>.py`, with util/ first on sys.path
+    import _actions
+except ImportError:  # imported as util.<script>, or loaded by path, from the repository root
+    from util import _actions
+
 if TYPE_CHECKING:
     from typing import Any, Optional
 
@@ -154,14 +159,9 @@ def graphql(query: 'str', variables: 'dict[str, Any]') -> 'dict[str, Any]':
     return answer['data']
 
 
-def escape(message: 'str') -> 'str':
-    """``message`` as a workflow command's message must hold it."""
-    return message.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
-
-
 def warn(message: 'str') -> 'int':
     """Write the one ``::warning`` of a report not posted; the exit status, 0."""
-    print(f'::warning title={TITLE}::{escape(message)}', flush=True)
+    _actions.annotate('warning', message, title=TITLE)
     return 0
 
 
@@ -259,13 +259,10 @@ def post(category_name: 'str', title: 'str', report: 'str', env: 'dict[str, str]
     comment = graphql(COMMENT_MUTATION, {'discussion': thread['id'],
                                          'body': compose(report, line, status)})['addDiscussionComment']['comment']
     print(f'Posted the report: {comment["url"]}', flush=True)
-    summary = env.get('GITHUB_STEP_SUMMARY')
-    if summary:
-        try:
-            with open(summary, 'a', encoding='utf-8') as file:
-                print(f'The report was posted to [{title}]({comment["url"]}).', file=file)
-        except OSError:
-            pass
+    try:
+        _actions.summary(f'The report was posted to [{title}]({comment["url"]}).', required=False, environ=env)
+    except OSError:
+        pass
     return 0
 
 

@@ -70,6 +70,11 @@ try:
 except ImportError:  # pragma: no cover -- every test interpreter has it
     requests = None  # type: ignore[assignment]
 
+try:  # #2047: run as `python util/<script>.py`, with util/ first on sys.path
+    import _actions
+except ImportError:  # imported as util.<script>, or loaded by path, from the repository root
+    from util import _actions
+
 if TYPE_CHECKING:
     from types import FrameType
     from typing import IO, Any, Callable, Dict, List, Mapping, Optional, Sequence, Tuple
@@ -241,21 +246,13 @@ def check(context: 'Context', api: 'Api') -> 'Verdict':
                                 'so the commit counts as current', error=True)
 
 
-def escape(message: 'str') -> 'str':
-    """``message`` as a workflow command's message must hold it."""
-    return message.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
-
-
 def report(verdict: 'Verdict', outcome: 'str', env: 'Mapping[str, str]', out: 'IO[str]') -> 'None':
     """The ``Superseded`` notice, and its job-summary line where the job has a summary file."""
-    print(f'::notice title=Superseded::{escape(verdict.reason)}. {escape(outcome)}', file=out, flush=True)
-    summary = env.get('GITHUB_STEP_SUMMARY')
-    if summary:
-        try:
-            with open(summary, 'a', encoding='utf-8') as file:
-                print(f'- Superseded: {verdict.reason}. {outcome}', file=file)
-        except OSError as error:
-            print(f'Could not write the job summary: {error}', file=out, flush=True)
+    _actions.annotate('notice', f'{verdict.reason}. {outcome}', title='Superseded', stream=out)
+    try:
+        _actions.summary(f'- Superseded: {verdict.reason}. {outcome}', required=False, environ=env)
+    except OSError as error:
+        print(f'Could not write the job summary: {error}', file=out, flush=True)
 
 
 def gate(context: 'Context', api: 'Api', env: 'Mapping[str, str]', out: 'IO[str]') -> 'int':
@@ -264,10 +261,7 @@ def gate(context: 'Context', api: 'Api', env: 'Mapping[str, str]', out: 'IO[str]
     print(f'{verdict.state}: {verdict.reason}', file=out, flush=True)
     if not verdict.current:
         report(verdict, 'The rest of this run is skipped, so none of its jobs fails or is cancelled.', env, out)
-    output = env.get('GITHUB_OUTPUT')
-    if output:
-        with open(output, 'a', encoding='utf-8') as file:
-            print(f'current={str(verdict.current).lower()}', file=file)
+    _actions.set_output('current', str(verdict.current).lower(), required=False, environ=env)
     return 0
 
 
@@ -396,14 +390,11 @@ def watch(command: 'Sequence[str]', context: 'Context', api: 'Api', env: 'Mappin
             where = f'the scope {scope} and ' if scope else ''
             reason = (f'{verdict.reason}, but SIGTERM and SIGKILL to {where}the session of pid {child.pid} '
                       f'did not end it within {int(grace + kill_wait)} s. The tests may run on until their timeout.')
-            print(f'::warning title=Superseded run not stopped::{escape(reason)}', file=out, flush=True)
-            summary = env.get('GITHUB_STEP_SUMMARY')
-            if summary:
-                try:
-                    with open(summary, 'a', encoding='utf-8') as file:
-                        print(f'- Superseded run not stopped: {reason}', file=file)
-                except OSError:
-                    pass
+            _actions.annotate('warning', reason, title='Superseded run not stopped', stream=out)
+            try:
+                _actions.summary(f'- Superseded run not stopped: {reason}', required=False, environ=env)
+            except OSError:
+                pass
             return STOP_FAILED
     finally:
         for signum, handler in previous.items():

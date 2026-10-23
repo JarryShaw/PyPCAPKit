@@ -51,6 +51,10 @@ it to the same legs in the same order.
 
 Run without arguments it prints every output; with names, just their values.
 
+Its annotations and outputs go through :file:`util/_actions.py` (#2047), so a
+sparse checkout of this script lists that file too, and Create Release, which
+runs a released commit's copy of it, copies that commit's helper beside it.
+
 """
 
 from __future__ import annotations
@@ -62,8 +66,12 @@ import pathlib
 import re
 import sys
 import tomllib
-import uuid
 from typing import TYPE_CHECKING
+
+try:  # #2047: run as `python util/<script>.py`, with util/ first on sys.path
+    import _actions
+except ImportError:  # imported as util.<script>, or loaded by path, from the repository root
+    from util import _actions
 
 if TYPE_CHECKING:
     from typing import Any, Callable, Optional
@@ -336,15 +344,10 @@ def outputs(data: 'dict[str, Any]') -> 'dict[str, str]':
     return found
 
 
-def write_github_output(values: 'dict[str, str]', path: 'str') -> 'None':
-    """Append ``values`` to a ``$GITHUB_OUTPUT`` file, a multi-line one under a fresh delimiter."""
-    with open(path, 'a', encoding='utf-8') as file:
-        for name, value in values.items():
-            if '\n' in value:
-                delimiter = f'EOF_{uuid.uuid4().hex}'
-                file.write(f'{name}<<{delimiter}\n{value}\n{delimiter}\n')
-            else:
-                file.write(f'{name}={value}\n')
+def write_github_output(values: 'dict[str, str]') -> 'None':
+    """Append ``values`` to ``$GITHUB_OUTPUT``, a multi-line one under a fresh delimiter."""
+    for name, value in values.items():
+        _actions.set_output(name, value)
 
 
 def main(argv: 'Optional[list[str]]' = None) -> 'int':
@@ -360,16 +363,15 @@ def main(argv: 'Optional[list[str]]' = None) -> 'int':
         if unknown:
             raise ValueError(f'no output named {", ".join(unknown)}; there are {", ".join(values)}')
     except (OSError, ValueError) as error:  # tomllib.TOMLDecodeError is a ValueError
-        message = str(error).replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
-        print(f'::error title=Cannot read the Python version tiers::{args.file}: {message}')
+        _actions.annotate('error', f'{args.file}: {error}', title='Cannot read the Python version tiers')
         return 1
 
     if args.github_output:
-        path = os.environ.get('GITHUB_OUTPUT')
-        if not path:
-            print('::error title=GITHUB_OUTPUT is not set::--github-output only works inside a workflow step')
+        if not os.environ.get('GITHUB_OUTPUT'):
+            _actions.annotate('error', '--github-output only works inside a workflow step',
+                              title='GITHUB_OUTPUT is not set')
             return 1
-        write_github_output(values, path)
+        write_github_output(values)
     for name in args.names:
         print(values[name])
     if not args.names:

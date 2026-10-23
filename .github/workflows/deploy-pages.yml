@@ -199,7 +199,8 @@ jobs:
   # `deploy-pages` ran or `head`'s gate failed, so never on a pull request's
   # run or a verdict for another commit,
   # which skip `deploy-pages` deliberately. It reads no artifact, and checks
-  # out the script alone. The job and its step are `continue-on-error`;
+  # out the script and util/_actions.py, which it imports (#2047), alone. The
+  # job and its step are `continue-on-error`;
   # util/discussion_report.py writes a warning rather than failing.
   discussion:
     name: Post the Pages report
@@ -218,6 +219,7 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           sparse-checkout: |
+            util/_actions.py
             util/discussion_report.py
           sparse-checkout-cone-mode: false
           persist-credentials: false
