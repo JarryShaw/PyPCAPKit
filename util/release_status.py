@@ -13,8 +13,8 @@ In order, the first that applies:
 
 1. ``version_check`` skipped: why, quiet where the trigger had nothing to do --
    the release App's own tag push (#1634), a Vendor Update that concluded
-   ``skipped``, or one that skipped ``vendor-update`` (#1748) -- and a warning
-   otherwise.
+   ``skipped``, one that skipped ``vendor-update`` (#1748), or a manual one,
+   which builds only -- and a warning otherwise.
 2. ``version_check`` did not succeed: a warning.
 3. The release test gate failed or was cancelled: a warning.
 4. The version is tagged at another commit and every publisher skipped (#1748):
@@ -94,6 +94,10 @@ def skipped_version_check() -> 'None':
         say('notice', 'Nothing to release', "the release App's bot pushed this tag from the Create Release run "
                                             'that released its commit, so this run correctly released nothing '
                                             '(#1634).')
+    elif var('PCAPKIT_EVENT_NAME') == 'workflow_run' \
+            and os.environ.get('PCAPKIT_WORKFLOW_RUN_EVENT', '') == 'workflow_dispatch':
+        say('notice', 'Nothing to release', 'the triggering Vendor Update run was a manual, build-only run, '
+                                            'which pushes nothing, so this run correctly released nothing.')
     elif var('PCAPKIT_EVENT_NAME') == 'workflow_run' and var('PCAPKIT_WORKFLOW_RUN_CONCLUSION') == 'skipped':
         say('notice', 'Nothing to release', 'the triggering Vendor Update run found nothing to update, so this '
                                             'run correctly released nothing.')

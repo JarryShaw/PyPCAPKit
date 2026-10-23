@@ -54,7 +54,8 @@ PERMISSIONS = {
 NEEDS = {LINT: ['lint'], PAGES: ['head', 'deploy-pages', 'publish-pages']}
 IFS = {
     LINT: "${{ always() && github.event_name != 'pull_request' && needs.lint.result != 'skipped' }}",
-    PAGES: "${{ always() && github.event_name != 'pull_request' && (needs.deploy-pages.result != 'skipped' || "
+    PAGES: "${{ always() && github.event_name != 'pull_request' && github.event_name != 'workflow_dispatch' && "
+           "(needs.deploy-pages.result != 'skipped' || "
            "needs.head.result == 'failure' || needs.head.result == 'cancelled') }}",
 }
 #: The ``--mode`` and ``--status`` each workflow passes, and the step's ``env:``
@@ -172,7 +173,9 @@ class TestTheWorkflowsPost(unittest.TestCase):
     def test_the_mode_follows_the_event(self) -> None:
         """Lint has no push trigger; GitHub Pages' ``workflow_run`` follows a push, so ``push``."""
         self.assertEqual(sorted(load(LINT)['on']), ['pull_request', 'schedule', 'workflow_dispatch'])
-        self.assertEqual(sorted(load(PAGES)['on']), ['pull_request', 'schedule', 'workflow_run'])
+        # A manual run posts nothing; tests/project/test_build_only_dispatch.py pins it.
+        self.assertEqual(sorted(load(PAGES)['on']),
+                         ['pull_request', 'schedule', 'workflow_dispatch', 'workflow_run'])
         expression = step(PAGES, 'discussion', POST)['env']['MODE']
         for event, mode in (('schedule', 'scheduled'), ('workflow_run', 'push')):
             with self.subTest(event=event):

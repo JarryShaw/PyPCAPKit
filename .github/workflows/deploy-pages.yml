@@ -17,6 +17,10 @@ on:
     - cron: '0 2 * * 6' # Saturdays at 02:00 UTC
   pull_request:
     branches: [main]
+  # A build-only run of the dispatched ref: `head`'s test gate and the Sphinx
+  # build, whose site is kept as the `pages-html` artifact. Nothing is
+  # published to gh-pages and no report is posted.
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -29,9 +33,10 @@ permissions:
 # one whose verdict is for an older commit only runs `head` and skips, and in a
 # shared group would cancel a pending run whose verdict matches. Coalescing
 # then happens in `deploy-pages`' own `ci-` group, which only a run whose
-# verdict covers its checkout reaches.
+# verdict covers its checkout reaches. A manual run publishes nothing, so it is
+# keyed on itself here and in that group, and never displaces a pending run.
 concurrency:
-  group: pages-${{ github.event.workflow_run.head_sha || github.ref }}
+  group: pages-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.event.workflow_run.head_sha || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 # #2030: one Discussions category holds every report with no pull request to
@@ -65,7 +70,7 @@ jobs:
         github.event.workflow_run.head_branch == 'main' &&
         needs.head.outputs.verified == 'true'
       ))
-    concurrency: ci-${{ github.ref }} # Recommended if you intend to make multiple deployments in quick succession.
+    concurrency: ci-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.ref }} # Recommended if you intend to make multiple deployments in quick succession.
     runs-on: macos-latest
     steps:
       - name: Checkout 🛎️
@@ -126,15 +131,15 @@ jobs:
 
   # #1968: the push to `gh-pages`, split out so that the job running the tree's
   # own code, a pull request's included, holds only `contents: read`. This one
-  # runs no project code, and never on a pull request. `deploy-pages`' result is
-  # checked explicitly under `!cancelled()`: a skip anywhere in the chain skips
-  # a job left with the implicit `success()` (#1632).
+  # runs no project code, and never on a pull request or a manual run.
+  # `deploy-pages`' result is checked explicitly under `!cancelled()`: a skip
+  # anywhere in the chain skips a job left with the implicit `success()` (#1632).
   publish-pages:
     name: Publish to gh-pages
     needs: [ deploy-pages ]
     if: >-
       !cancelled() && needs.deploy-pages.result == 'success' &&
-      github.event_name != 'pull_request'
+      github.event_name != 'pull_request' && github.event_name != 'workflow_dispatch'
     concurrency:
       group: publish-pages-${{ github.ref }}
       cancel-in-progress: false
@@ -198,7 +203,8 @@ jobs:
   # next green run, and the schedule posts every run. It runs where
   # `deploy-pages` ran or `head`'s gate failed, so never on a pull request's
   # run or a verdict for another commit,
-  # which skip `deploy-pages` deliberately. It reads no artifact, and checks
+  # which skip `deploy-pages` deliberately, nor on a manual run, which the
+  # thread would read as a real one. It reads no artifact, and checks
   # out the script and util/_actions.py, which it imports (#2047), alone. The
   # job and its step are `continue-on-error`;
   # util/discussion_report.py writes a warning rather than failing.
@@ -206,7 +212,8 @@ jobs:
     name: Post the Pages report
     needs: [ head, deploy-pages, publish-pages ]
     if: >-
-      ${{ always() && github.event_name != 'pull_request' && (needs.deploy-pages.result != 'skipped' ||
+      ${{ always() && github.event_name != 'pull_request' && github.event_name != 'workflow_dispatch' &&
+      (needs.deploy-pages.result != 'skipped' ||
       needs.head.result == 'failure' || needs.head.result == 'cancelled') }}
     runs-on: ubuntu-latest
     timeout-minutes: 10

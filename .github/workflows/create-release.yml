@@ -22,8 +22,11 @@ name: Create Release
 # ref, such a run, 38499295798, displaced the pending 38499150441. A tag push
 # keeps its tag's group. The one pending run, and ``run_id`` being unique:
 # https://docs.github.com/en/actions/how-tos/write-workflows/choose-when-workflows-run/control-workflow-concurrency
+#
+# A manual Vendor Update (``workflow_dispatch``) builds only and pushes
+# nothing, so the run it raises releases nothing and is keyed on its own id too.
 concurrency:
-  group: create-release-${{ (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success') && github.ref || github.run_id }}
+  group: create-release-${{ (github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'workflow_dispatch')) && github.ref || github.run_id }}
   cancel-in-progress: false
 
 # Environments: every job with an effect outside this run declares one, one per
@@ -139,7 +142,9 @@ jobs:
   vendor_update:
     name: Triggering Vendor Update
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' }}
+    if: >-
+      ${{ github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event != 'workflow_dispatch' }}
     timeout-minutes: 5
     permissions:
       actions: read
@@ -185,14 +190,15 @@ jobs:
     # uploads from another concurrency group. Whether that push fires with the
     # bot's ``github.actor_id`` is unmeasured; if not, this never matches.
     #
-    # #1748: and a Vendor Update whose ``vendor-update`` job skipped.
-    # ``!cancelled()`` because ``vendor_update`` skips on a push, and a skipped
+    # #1748: and a Vendor Update whose ``vendor-update`` job skipped, or a
+    # manual one, which builds only. ``!cancelled()`` because ``vendor_update`` skips on a push, and a skipped
     # need skips its dependents unless the ``if:`` says otherwise:
     # https://docs.github.com/en/actions/how-tos/write-workflows/choose-what-workflows-do/use-jobs
     needs: [ vendor_update ]
     if: >-
       ${{ !cancelled() &&
-      (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success') &&
+      (github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event != 'workflow_dispatch')) &&
       !(github.event_name == 'push' && github.actor_id == vars.RELEASE_APP_BOT_ID) &&
       needs.vendor_update.outputs.updated != 'false' }}
     permissions:
@@ -934,6 +940,7 @@ jobs:
         env:
           PCAPKIT_EVENT_NAME: ${{ github.event_name }}
           PCAPKIT_WORKFLOW_RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          PCAPKIT_WORKFLOW_RUN_EVENT: ${{ github.event.workflow_run.event }}
           PCAPKIT_VENDOR_UPDATED: ${{ needs.vendor_update.outputs.updated }}
           PCAPKIT_ACTOR_ID: ${{ github.actor_id }}
           PCAPKIT_RELEASE_APP_BOT_ID: ${{ vars.RELEASE_APP_BOT_ID }}

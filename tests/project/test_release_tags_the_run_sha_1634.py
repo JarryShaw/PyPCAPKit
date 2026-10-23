@@ -459,7 +459,8 @@ class TestTheAppsTagPushReleasesNothing(WorkflowMixin, unittest.TestCase):
     """
 
     GUARD = "!(github.event_name == 'push' && github.actor_id == vars.RELEASE_APP_BOT_ID)"
-    TRIGGER = "(github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success')"
+    TRIGGER = ("(github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' && "
+               "github.event.workflow_run.event != 'workflow_dispatch'))")
 
     #: Edits a review round could make, each of which some row must catch.
     MUTATIONS = {
@@ -1566,6 +1567,7 @@ class CondaDistMixin(WorkflowMixin):
         """Whether the action's ``if:`` lets it run, given the release check's ``outputs``."""
         return evaluate_condition(self.upload()['if'], {
             'matrix': {'os': runner}, 'steps': {'release': {'outputs': outputs}},
+            'github': {'event_name': 'schedule'},
         })
 
 
@@ -1613,7 +1615,8 @@ class TestCondaUpdateNeverMakesTheRelease(CondaDistMixin, unittest.TestCase):
         check = self.step('conda-dist', RELEASE_CHECK_STEP)
         self.assertEqual(self.index('conda-dist', RELEASE_CHECK_STEP) + 1, self.index('conda-dist', UPLOAD_STEP))
         self.assertEqual(check.get('id'), 'release')
-        self.assertEqual(check.get('if'), "${{ matrix.os == 'ubuntu-latest' }}")
+        self.assertEqual(check.get('if'),
+                         "${{ github.event_name != 'workflow_dispatch' && matrix.os == 'ubuntu-latest' }}")
         self.assertEqual(check.get('shell'), 'bash')
         self.assertEqual(check.get('env'), {'GH_TOKEN': '${{ secrets.GITHUB_TOKEN }}',
                                             'PCAPKIT_RELEASE_TAG': CONDA_RELEASE_TAG})
@@ -1621,24 +1624,31 @@ class TestCondaUpdateNeverMakesTheRelease(CondaDistMixin, unittest.TestCase):
 
     def test_the_anaconda_upload_is_not_gated_on_it(self) -> None:
         # #2044: gated on the leg alone; #2060: Windows publishes nothing.
+        # A manual run uploads nothing (tests/project/test_build_only_dispatch.py).
         self.assertEqual(self.step('conda-dist', 'Upload conda packages to Anaconda').get('if'),
-                         "${{ matrix.os != 'macos-26-intel' && matrix.os != 'windows-latest' }}")
+                         "${{ github.event_name != 'workflow_dispatch' && "
+                         "matrix.os != 'macos-26-intel' && matrix.os != 'windows-latest' }}")
         self.assertEqual(self.step('conda-dist', 'Upload conda packages to Anaconda (Intel)').get('if'),
-                         "${{ matrix.os == 'macos-26-intel' }}")
+                         "${{ github.event_name != 'workflow_dispatch' && matrix.os == 'macos-26-intel' }}")
 
     def test_an_update_targets_the_default_branch(self) -> None:
         """``github.ref_name`` is the default branch on this workflow's triggers.
 
         "Events that trigger workflows" gives ``GITHUB_REF`` as "Default branch"
         for both ``schedule`` and ``workflow_run``, so the triggers are pinned
-        too: another one could name another ref.
+        too: another one could name another ref. ``workflow_dispatch`` does, the
+        dispatched branch, so the upload never runs on it.
         """
         self.assertEqual(self.upload()['with'].get('commit'), DEFAULT_BRANCH)
         lines = CONDA_WORKFLOW.read_text(encoding='utf-8').splitlines()
         start = lines.index('on:') + 1
         end = next(i for i in range(start, len(lines)) if lines[i] and not lines[i].startswith((' ', '#')))
         triggers = [m.group(1) for line in lines[start:end] for m in [re.match(r'^  ([a-z_]+):', line)] if m]
-        self.assertEqual(triggers, ['schedule', 'workflow_run'])
+        self.assertEqual(triggers, ['schedule', 'workflow_run', 'workflow_dispatch'])
+        self.assertFalse(evaluate_condition(self.upload()['if'], {
+            'matrix': {'os': 'ubuntu-latest'}, 'steps': {'release': {'outputs': {'published': 'true'}}},
+            'github': {'event_name': 'workflow_dispatch'},
+        }))
 
 
 #: A ``gh`` failing as it does without a token, for the check's other branch.

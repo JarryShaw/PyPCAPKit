@@ -256,6 +256,9 @@ STATUS_BASE = {
     'PCAPKIT_CONDA_TAG_EXISTS': 'false', 'PCAPKIT_PYPI_COMPLETE': 'false', 'PCAPKIT_CONDA_COMPLETE': 'false',
     'PCAPKIT_RELEASED_AT': RUN, 'PCAPKIT_RELEASED_ELSEWHERE': 'false', 'PCAPKIT_PYPI_KTLO_310': '',
     'PCAPKIT_PYPI_KTLO_PYPY310': '',
+    # The Vendor Update's own event. Only a manual one reads differently, a
+    # branch the former shell never had; test_build_only_dispatch.py pins it.
+    'PCAPKIT_WORKFLOW_RUN_EVENT': 'push',
 }
 #: Every publisher skipped, and each one's evidence.
 ALL_SKIPPED = {'PCAPKIT_GITHUB_JOB': 'skipped', 'PCAPKIT_TAG_JOB': 'skipped', 'PCAPKIT_PYPI_JOB': 'skipped',

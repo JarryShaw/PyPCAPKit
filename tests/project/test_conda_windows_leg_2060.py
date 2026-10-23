@@ -67,17 +67,22 @@ def spec() -> 'dict[str, Any]':
     return _workflows.job(*JOB)
 
 
-def context(os_label: 'str') -> 'dict[str, object]':
-    """A leg on ``os_label`` where every earlier step succeeded and the release exists."""
+def context(os_label: 'str', event_name: 'str' = 'schedule') -> 'dict[str, object]':
+    """A leg on ``os_label`` where every earlier step succeeded and the release exists.
+
+    On the schedule unless ``event_name`` says otherwise: a manual run uploads
+    nothing on any leg, which :mod:`tests.project.test_build_only_dispatch` pins.
+
+    """
     steps = {step['id']: {'outcome': 'success', 'conclusion': 'success',
                           'outputs': {'published': 'true'}}
              for step in spec()['steps'] if 'id' in step}
-    return {'matrix': {'os': os_label}, 'steps': steps,
+    return {'matrix': {'os': os_label}, 'steps': steps, 'github': {'event_name': event_name},
             STATUS: {'cancelled': False, 'success': True, 'failure': False}}
 
 
-def runs(step: 'dict[str, Any]', os_label: 'str') -> 'bool':
-    return evaluate_condition(str(step.get('if', 'true')), context(os_label))
+def runs(step: 'dict[str, Any]', os_label: 'str', event_name: 'str' = 'schedule') -> 'bool':
+    return evaluate_condition(str(step.get('if', 'true')), context(os_label, event_name))
 
 
 def sensitive(step: 'dict[str, Any]') -> 'bool':
@@ -131,11 +136,13 @@ class TestTheWindowsLegNeverBlocks(unittest.TestCase):
         steps = spec()['steps']
         self.assertEqual(steps[-1].get('name'), SUMMARY)
         others = [os_label for os_label in spec()['strategy']['matrix']['os'] if os_label != WINDOWS]
-        for step in steps[:-1]:
-            if not runs(step, WINDOWS):
+        # A manual run's own steps, which build the dispatched commit, as well.
+        for event_name, step in ((event_name, step) for event_name in ('schedule', 'workflow_dispatch')
+                                 for step in steps[:-1]):
+            if not runs(step, WINDOWS, event_name):
                 continue
             name = step.get('name') or step.get('uses')
-            with self.subTest(step=name):
+            with self.subTest(event=event_name, step=name):
                 self.assertIn('id', step)
                 guard = str(step.get('continue-on-error'))
                 self.assertTrue(evaluate_condition(guard, context(WINDOWS)))

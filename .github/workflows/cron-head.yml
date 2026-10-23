@@ -23,7 +23,7 @@ permissions:
 
 jobs:
   # Runs only when no completed Unit Tests run has verified this tree, i.e. on
-  # the schedule. A `workflow_run` carries its own verdict, read by `verdict`
+  # the schedule or a manual run (`workflow_dispatch`). A `workflow_run` carries its own verdict, read by `verdict`
   # below, and a pull request never acts, so both skip the gate (#715).
   unit-tests:
     name: Test gate

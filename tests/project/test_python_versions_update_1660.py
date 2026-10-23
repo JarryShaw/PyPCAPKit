@@ -1607,7 +1607,8 @@ class TestTheWorkflow(unittest.TestCase):
         # #1748 added the triggering Vendor Update's own reading, which names no branch either.
         self.assertEqual(' '.join(spec['jobs']['version_check']['if'].split()),
                          "${{ !cancelled() && (github.event_name != 'workflow_run' || "
-                         "github.event.workflow_run.conclusion == 'success') && !(github.event_name == 'push' "
+                         "(github.event.workflow_run.conclusion == 'success' && "
+                         "github.event.workflow_run.event != 'workflow_dispatch')) && !(github.event_name == 'push' "
                          "&& github.actor_id == vars.RELEASE_APP_BOT_ID) && "
                          "needs.vendor_update.outputs.updated != 'false' }}")
 

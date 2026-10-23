@@ -85,8 +85,13 @@ def legs(name: 'str', job_id: 'str') -> 'list[str]':
 
 
 def runs(entry: 'dict[str, Any]', os: 'str', published: 'str' = 'false') -> 'bool':
-    """Whether ``entry`` runs on leg ``os``, with ``check_leg`` having found ``published``."""
-    context = {'matrix': {'os': os},
+    """Whether ``entry`` runs on leg ``os``, with ``check_leg`` having found ``published``.
+
+    On the schedule: a manual run of cron-conda.yml uploads nothing on any leg,
+    which tests/project/test_build_only_dispatch.py pins.
+
+    """
+    context = {'matrix': {'os': os}, 'github': {'event_name': 'schedule'},
                'steps': {'check_leg': {'outputs': {'PCAPKIT_LEG_EXISTS': published}}}}  # type: dict[str, object]
     return evaluate_condition(str(entry.get('if', 'true')), context)
 

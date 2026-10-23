@@ -13,13 +13,20 @@ on:
   workflow_run:
     workflows: ["Unit Tests"]
     types: [completed]
+  # A build-only run of the dispatched ref, so the schedule's build and smoke
+  # tests, the Windows leg's included, can be debugged without waiting for
+  # Saturday: `conda-update` refreshes and bumps but pushes nothing, and
+  # `conda-dist` builds that tree. No step that pushes, tags, uploads or posts
+  # runs on this event, and no job enters an environment.
+  workflow_dispatch:
 
 # Never cancelled in progress: a cancelled run can leave the bump half-applied,
 # and two runs uploading one version to Anaconda is worse than dropping a
 # superseded duplicate. Keyed as cron-vendor.yml's group is, and why (#1643);
-# `conda-update`'s `repository-maintenance` group serialises the writes.
+# `conda-update`'s `repository-maintenance` group serialises the writes. A manual
+# run writes nothing, so it is keyed on itself in both, as in cron-vendor.yml.
 concurrency:
-  group: conda-update-${{ github.event.workflow_run.head_sha || github.ref }}
+  group: conda-update-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.event.workflow_run.head_sha || github.ref }}
   cancel-in-progress: false
 
 # #2030: one Discussions category holds every report with no pull request to
@@ -39,8 +46,9 @@ jobs:
   conda-update:
     name: Update requirements.txt
     runs-on: ubuntu-latest
-    # #1968: as for cron-vendor.yml's `vendor-update`.
-    environment: conda-tag
+    # #1968: as for cron-vendor.yml's `vendor-update`, which says why a
+    # manual run names none.
+    environment: ${{ github.event_name != 'workflow_dispatch' && 'conda-tag' || '' }}
     needs: [ head ]
     # As cron-vendor.yml's `vendor-update` (#1643); without the `push`/`main`
     # checks a green PR would upload a conda distribution built from its tree.
@@ -53,12 +61,13 @@ jobs:
         needs.head.outputs.verified == 'true'
       ))
     concurrency:
-      group: repository-maintenance
+      group: ${{ github.event_name == 'workflow_dispatch' && format('repository-maintenance-{0}', github.run_id) || 'repository-maintenance' }}
       cancel-in-progress: false
     permissions:
       contents: write
     steps:
       - name: Load maintenance deploy key
+        if: github.event_name != 'workflow_dispatch'
         uses: webfactory/ssh-agent@e83874834305fe9a4a2997156cb26c5de65a8555 # v0.10.0
         with:
           ssh-private-key: ${{ secrets.PYPCAPKIT_ACTIONS_DEPLOY_KEY }}
@@ -165,7 +174,7 @@ jobs:
       # which would land under a build already tagged.
       - name: Push Changes
         id: push-changes
-        if: steps.verify-changed-files.outputs.files_changed == 'true'
+        if: github.event_name != 'workflow_dispatch' && steps.verify-changed-files.outputs.files_changed == 'true'
         run: |
           git remote set-url origin git@github.com:JarryShaw/PyPCAPKit.git
           git fetch origin "${GITHUB_REF#refs/heads/}"
@@ -225,8 +234,9 @@ jobs:
               ;;
           esac
 
+      # A manual run builds whether or not anything changed.
       - name: Get Version
-        if: steps.verify-changed-files.outputs.files_changed == 'true'
+        if: steps.verify-changed-files.outputs.files_changed == 'true' || github.event_name == 'workflow_dispatch'
         id: get_version
         run: |
           set -ex
@@ -237,6 +247,25 @@ jobs:
             echo "PCAPKIT_BUILD=$(cat conda/build)"
           } >> "$GITHUB_OUTPUT"
 
+      # A manual run pushes nothing, so `conda-dist` gets this job's changes as
+      # a patch on the dispatched commit. The first line keeps the file from
+      # being empty when nothing changed.
+      - name: Save the changes for conda-dist
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          {
+            echo "Conda Update's changes to $GITHUB_SHA"
+            git diff --binary "$GITHUB_SHA"
+          } > "$RUNNER_TEMP/conda-changes.patch"
+
+      - name: Upload the changes for conda-dist
+        if: github.event_name == 'workflow_dispatch'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: conda-changes
+          path: ${{ runner.temp }}/conda-changes.patch
+          retention-days: 1
+
       # #2030: the run's outcome for the `discussion` job to post: what the pin
       # refresh moved or warned about, the files the run changed, and the build
       # it pushed. `status=warning` where a pin warned, which is what needs a
@@ -246,6 +275,7 @@ jobs:
         if: ${{ !cancelled() }}
         continue-on-error: true
         env:
+          EVENT_NAME: ${{ github.event_name }}
           FILES_CHANGED: ${{ steps.verify-changed-files.outputs.files_changed }}
           CHANGED_FILES: ${{ steps.verify-changed-files.outputs.changed_files }}
           PUSH: ${{ steps.push-changes.outcome }}
@@ -277,7 +307,9 @@ jobs:
               echo '- Changed: nothing, so no build was bumped'
             fi
             # `commit` is written only beside `pushed=true`.
-            if [ -n "$COMMIT" ]; then
+            if [ "$EVENT_NAME" = workflow_dispatch ]; then
+              echo '- Pushed: nothing, as a manual run only builds'
+            elif [ -n "$COMMIT" ]; then
               echo "- Pushed: build $(cat conda/build) as $COMMIT"
             elif [ "$PUSH" = success ]; then
               echo "- Pushed: nothing; Push Changes' notice says why"
@@ -332,8 +364,11 @@ jobs:
     # `needs.conda-update.result == 'success'` restores the lost check, so a
     # failed or cancelled update, which still publishes its finished steps'
     # outputs, is never tagged. Same shape as create-release.yml's `tag` job.
+    #
+    # Never on a manual run, which pushed nothing to tag.
     if: >-
-      !cancelled() && needs.conda-update.result == 'success' &&
+      !cancelled() && github.event_name != 'workflow_dispatch' &&
+      needs.conda-update.result == 'success' &&
       needs.conda-update.outputs.CONDA_CHANGED == 'true'
     permissions:
       contents: write
@@ -393,17 +428,21 @@ jobs:
     name: Conda deployment (update) on ${{ matrix.os }} with Python ${{ matrix.python-version }}
     runs-on: ${{ matrix.os }}
     # #1968: `ANACONDA_TOKEN` is an `anaconda` environment secret, as for
-    # create-release.yml's `conda`; keep it free of reviewers.
-    environment: anaconda
+    # create-release.yml's `conda`; keep it free of reviewers. A manual run,
+    # whose uploads all skip, names no environment.
+    environment: ${{ github.event_name != 'workflow_dispatch' && 'anaconda' || '' }}
     needs: [ conda-tag, conda-update ]
     # #1632, as for `conda-tag`. `conda-tag` must succeed, with no `skipped`
     # escape as create-release.yml's `conda` job grants its `tag`: the checkout
     # pins the tag, which names the pushed commit only then, and `conda-tag`
-    # skips only when no bump was pushed.
+    # skips only when no bump was pushed. A manual run, which never tags,
+    # builds the dispatched commit with `conda-update`'s changes applied.
     if: >-
       !cancelled() && needs.conda-update.result == 'success' &&
-      needs.conda-tag.result == 'success' &&
-      needs.conda-update.outputs.CONDA_CHANGED == 'true'
+      (github.event_name == 'workflow_dispatch' || (
+        needs.conda-tag.result == 'success' &&
+        needs.conda-update.outputs.CONDA_CHANGED == 'true'
+      ))
     permissions:
       contents: write
     # #2060: the Windows leg builds and smoke-tests only, and never blocks. Each
@@ -433,12 +472,44 @@ jobs:
       # No persisted token: nothing here runs `git` with credentials, and the
       # Windows leg builds a package nobody has published yet (#2060).
       - id: checkout
+        if: github.event_name != 'workflow_dispatch'
         continue-on-error: ${{ matrix.os == 'windows-latest' }}
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: conda-${{ needs.conda-update.outputs.PCAPKIT_VERSION }}+${{ needs.conda-update.outputs.PCAPKIT_BUILD }}
           fetch-depth: 0
           persist-credentials: false
+
+      # A manual run: no tag exists, so the dispatched commit, and then the
+      # changes `conda-update` made to it and did not push.
+      - id: checkout-dispatched
+        if: github.event_name == 'workflow_dispatch'
+        continue-on-error: ${{ matrix.os == 'windows-latest' }}
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Download conda-update's changes
+        id: download-changes
+        if: github.event_name == 'workflow_dispatch'
+        continue-on-error: ${{ matrix.os == 'windows-latest' }}
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: conda-changes
+          path: ${{ runner.temp }}/conda-changes
+
+      - name: Apply conda-update's changes
+        id: apply-changes
+        if: github.event_name == 'workflow_dispatch'
+        continue-on-error: ${{ matrix.os == 'windows-latest' }}
+        shell: bash
+        env:
+          PATCH_FILE: ${{ runner.temp }}/conda-changes/conda-changes.patch
+        run: |
+          if grep -q '^diff --git ' "$PATCH_FILE"; then
+            git apply "$PATCH_FILE"
+          fi
 
       - id: setup-python
         continue-on-error: ${{ matrix.os == 'windows-latest' }}
@@ -542,8 +613,10 @@ jobs:
       # #2044: not on macos-26-intel, whose leg "Upload conda packages to
       # Anaconda (Intel)" uploads instead. #2060: nor on windows-latest, which
       # publishes nothing until a run has shown its package works.
+      # Neither upload, nor the GitHub Release steps after them, runs on a
+      # manual run.
       - name: Upload conda packages to Anaconda
-        if: ${{ matrix.os != 'macos-26-intel' && matrix.os != 'windows-latest' }}
+        if: ${{ github.event_name != 'workflow_dispatch' && matrix.os != 'macos-26-intel' && matrix.os != 'windows-latest' }}
         uses: anaconda/actions/upload-package@a6f488910b4a1e4f3fe01736241ca1b92b4b355a # v0.3.1
         with:
           token: ${{ secrets.ANACONDA_TOKEN }}
@@ -556,7 +629,7 @@ jobs:
       # from the action here: `--skip-existing` keeps a file anaconda.org
       # already has, where the action's `force: true` replaces it.
       - name: Upload conda packages to Anaconda (Intel)
-        if: ${{ matrix.os == 'macos-26-intel' }}
+        if: ${{ github.event_name != 'workflow_dispatch' && matrix.os == 'macos-26-intel' }}
         shell: bash
         env:
           ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
@@ -577,7 +650,7 @@ jobs:
       # the GitHub upload is skipped; the build is on anaconda.org regardless.
       - name: Check the GitHub release exists
         id: release
-        if: ${{ matrix.os == 'ubuntu-latest' }}
+        if: ${{ github.event_name != 'workflow_dispatch' && matrix.os == 'ubuntu-latest' }}
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -615,7 +688,7 @@ jobs:
       # name and notes. Each ``omit*DuringUpdate`` leaves its field undefined
       # (:210-252), and Octokit drops it (dist/index.js:38369-38388).
       - name: Upload package to GitHub Release
-        if: ${{ matrix.os == 'ubuntu-latest' && steps.release.outputs.published == 'true' }}
+        if: ${{ github.event_name != 'workflow_dispatch' && matrix.os == 'ubuntu-latest' && steps.release.outputs.published == 'true' }}
         uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
         with:
           allowUpdates: true
@@ -643,12 +716,13 @@ jobs:
   # #2030: posts `conda-update`'s report with the tag and upload results, and a
   # short one of its own where `head` failed or was cancelled, as cron-vendor.yml's
   # `discussion` job does, whose comment gives the rules. It waits for
-  # `conda-dist`, so the report says whether the build reached Anaconda.
+  # `conda-dist`, so the report says whether the build reached Anaconda. Never
+  # on a manual run, which the thread would read as a real one.
   discussion:
     name: Post the conda report
     needs: [ head, conda-update, conda-tag, conda-dist ]
     if: >-
-      ${{ always() && (needs.conda-update.result != 'skipped' ||
+      ${{ always() && github.event_name != 'workflow_dispatch' && (needs.conda-update.result != 'skipped' ||
       needs.head.result == 'failure' || needs.head.result == 'cancelled') }}
     runs-on: ubuntu-latest
     timeout-minutes: 10

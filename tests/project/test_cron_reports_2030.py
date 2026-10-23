@@ -73,7 +73,8 @@ ARGS = {
 #: Each ``discussion`` job's ``needs:`` and ``if:``.
 NEEDS = {CONDA: ['head', 'conda-update', 'conda-tag', 'conda-dist'], VERSIONS: ['detect']}
 IFS = {
-    CONDA: "${{ always() && (needs.conda-update.result != 'skipped' || needs.head.result == 'failure' || "
+    CONDA: "${{ always() && github.event_name != 'workflow_dispatch' && (needs.conda-update.result != 'skipped' || "
+           "needs.head.result == 'failure' || "
            "needs.head.result == 'cancelled') }}",
     VERSIONS: "${{ always() && needs.detect.result != 'skipped' }}",
 }
@@ -156,7 +157,8 @@ class TestTheWorkflowsPost(unittest.TestCase):
     def test_the_mode_follows_the_event(self) -> None:
         """Python Versions is always ``scheduled``; Conda Update's ``workflow_run`` follows a push, so ``push``."""
         self.assertEqual(sorted(load(VERSIONS)['on']), ['schedule', 'workflow_dispatch'])
-        self.assertEqual(sorted(load(CONDA)['on']), ['schedule', 'workflow_run'])
+        # A manual run posts nothing; tests/project/test_build_only_dispatch.py pins it.
+        self.assertEqual(sorted(load(CONDA)['on']), ['schedule', 'workflow_dispatch', 'workflow_run'])
         expression = step(CONDA, 'discussion', 'Post the report to Discussions')['env']['MODE']
         for event, mode in (('schedule', 'scheduled'), ('workflow_run', 'push')):
             with self.subTest(event=event):

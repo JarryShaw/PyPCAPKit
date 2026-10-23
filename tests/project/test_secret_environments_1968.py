@@ -11,6 +11,11 @@ The scan covers every workflow, so a new job reading one of these secrets is
 held to the same rule. YAML drops comments, so a secret named only in a comment
 does not count.
 
+A manual run (``workflow_dispatch``) builds only and names no environment, so a
+job may name its environment through an expression; :func:`environment` reads
+the name it gives every other event, where the secrets are read.
+:mod:`tests.project.test_build_only_dispatch` pins the manual run's side.
+
 """
 
 from __future__ import annotations
@@ -20,6 +25,7 @@ import unittest
 from typing import TYPE_CHECKING
 
 from tests._workflows import WORKFLOWS, load, loads
+from tests.project.test_release_gates import evaluate_expression
 
 if TYPE_CHECKING:
     from typing import Any, Optional
@@ -34,11 +40,13 @@ SECRET_ENVIRONMENTS = {
 SECRET = re.compile(r'\bsecrets\.(\w+)')
 
 
-def environment(job: 'dict[str, Any]') -> 'Optional[str]':
-    """The environment ``job`` names, in either spelling, or :data:`None`."""
+def environment(job: 'dict[str, Any]', event_name: 'str' = 'schedule') -> 'Optional[str]':
+    """The environment ``job`` names on ``event_name``, in either spelling, or :data:`None`."""
     value = job.get('environment')
     if isinstance(value, dict):
-        return value.get('name')
+        value = value.get('name')
+    if isinstance(value, str) and value.startswith('${{'):
+        value = str(evaluate_expression(value, {'github': {'event_name': event_name}}))
     return value
 
 
@@ -84,6 +92,11 @@ class TestSecretsReachTheirJobs(unittest.TestCase):
         self.assertIsNone(environment({}))
         self.assertEqual(environment({'environment': 'anaconda'}), 'anaconda')
         self.assertEqual(environment({'environment': {'name': 'anaconda', 'url': 'x'}}), 'anaconda')
+
+    def test_an_expression_is_read_per_event(self) -> None:
+        job = {'environment': "${{ github.event_name != 'workflow_dispatch' && 'anaconda' || '' }}"}
+        self.assertEqual(environment(job), 'anaconda')
+        self.assertEqual(environment(job, 'workflow_dispatch'), '')
 
 
 if __name__ == '__main__':

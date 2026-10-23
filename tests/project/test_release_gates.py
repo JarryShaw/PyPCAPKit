@@ -4019,13 +4019,23 @@ class TestCondaBumpIsTaggedAndUploaded(CondaWorkflowMixin, unittest.TestCase):
         Here ``conda-tag`` skips only when no bump was committed, in which case
         there is nothing for ``conda-dist`` to upload either.
 
+        ``conda-dist``'s tag and bump clauses sit behind the manual run's escape,
+        the last conjunct, which uploads nothing (see
+        :mod:`tests.project.test_build_only_dispatch`); they are checked as the
+        conjuncts they are on every other event.
+
         """
         predecessors = {'conda-tag': ('conda-update',),
                         'conda-dist': ('conda-update', 'conda-tag')}
+        escape = "&&(github.event_name=='workflow_dispatch'||("
         for job, required in sorted(predecessors.items()):
             with self.subTest(job=job):
                 condition = declared_if(self.jobs[job])
                 compact = re.sub(r'\s+', '', condition)
+                if job == 'conda-dist':
+                    self.assertEqual(compact.count(escape), 1, compact)
+                    self.assertTrue(compact.endswith('))'), compact)
+                    compact = compact.replace(escape, '&&')[:-2]
                 self.assertTrue(
                     calls_status_check(condition),
                     f'`{job}`\'s `if:` ({condition!r}) calls no status-check '

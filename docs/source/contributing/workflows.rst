@@ -64,21 +64,21 @@ At a Glance
      - --
      - Sat 10:00
      - **Unit Tests**
-     - --
+     - ``workflow_dispatch``
    * - Conda Update
      - :file:`cron-conda.yml`
      - --
      - --
      - Sat 18:00
      - **Unit Tests**
-     - --
+     - ``workflow_dispatch``
    * - GitHub Pages
      - :file:`deploy-pages.yml`
      - --
      - ``main``
      - Sat 02:00
      - **Unit Tests**
-     - --
+     - ``workflow_dispatch``
    * - Cron Head
      - :file:`cron-head.yml`
      - --
@@ -192,14 +192,17 @@ than starting a new one.
 
        PR --> GP
        SAT -->|02:00| GP
+       DISPATCH --> GP
 
        SAT -->|18:00| CU
+       DISPATCH --> CU
 
        PR --> LT
        SAT -->|06:00| LT
        DISPATCH --> LT
 
        SAT -->|10:00| VU
+       DISPATCH --> VU
 
        MON -->|05:41| PV
        DISPATCH --> PV
@@ -250,9 +253,9 @@ call it is the part that reading a single file cannot show, and it is
 deliberate rather than redundant. Vendor Update, Conda Update and GitHub Pages
 each call **Cron Head** as their ``head`` job (dotted, above), and its test gate
 calls ``unit-tests.yml`` with ``gate-only: true`` **only when the caller's
-trigger is** ``schedule`` -- the gate's ``if:`` skips ``workflow_run`` and
-``pull_request`` -- so only on the Saturday path, where no completed Unit Tests
-run exists yet to read a verdict from. On the ``workflow_run`` path (thick
+trigger is** ``schedule`` or ``workflow_dispatch`` -- the gate's ``if:`` skips
+``workflow_run`` and ``pull_request`` -- so only on the Saturday path and a
+manual run, where no completed Unit Tests run exists yet to read a verdict from. On the ``workflow_run`` path (thick
 arrows), each reads the verdict Unit Tests already reached instead of re-running
 the gate a second time, and acts on it only once the head's ``verdict`` job,
 described under the edge list below, says it is a verdict on the commit it
@@ -347,8 +350,8 @@ Update and GitHub Pages used to carry each. It holds ``contents: read`` and no
 more, which is what each caller grants its ``head`` job and what
 ``unit-tests.yml`` is called with. Every expression in it reads the caller's ``github`` context, so its jobs decide on
 the event that started the caller and check out the caller's ``github.sha``. A
-job of the call skips on every path -- the gate everywhere but the schedule,
-``verdict`` everywhere but a ``workflow_run`` -- so each acting job keeps
+job of the call skips on every path -- the gate everywhere but the schedule and
+a manual run, ``verdict`` everywhere but a ``workflow_run`` -- so each acting job keeps
 ``!cancelled()``, for the reason the skip-cascade section below gives, and
 treats a ``head`` result other than ``failure`` as passing.
 
@@ -375,6 +378,16 @@ Spread, each ``head`` gates alone, and Conda Update runs once Vendor Update's
 Create Release has had the day to publish, so its ``Check the GitHub release
 exists`` step finds the release rather than skipping the GitHub upload
 (`#1634 <https://github.com/JarryShaw/PyPCAPKit/issues/1634>`__).
+
+To debug Vendor Update, Conda Update or GitHub Pages without waiting for
+Saturday, start a manual run on a branch, as in ``gh workflow run cron-conda.yml
+--ref <branch>``. A manual run is build-only: Cron Head's test gate and every
+build and test step the schedule runs still run -- each ``conda-dist`` leg,
+Windows included, builds the dispatched commit with ``conda-update``'s changes
+applied -- while every step that pushes, tags, uploads, deploys or posts a
+report skips, no job that runs names an environment, and the Create Release run
+it raises releases nothing. :file:`tests/project/test_build_only_dispatch.py`
+pins this.
 
 ``gate-only: true`` selects not only ``unit-tests.yml``'s ``gate`` (the full
 suite, on ``latest``) but also ``changelog`` (checks ``CHANGELOG.md`` against its
@@ -413,7 +426,8 @@ above -- carries:
 
    if: >-
      ${{ !cancelled() &&
-     (github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success') &&
+     (github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' &&
+     github.event.workflow_run.event != 'workflow_dispatch')) &&
      !(github.event_name == 'push' && github.actor_id == vars.RELEASE_APP_BOT_ID) &&
      needs.vendor_update.outputs.updated != 'false' }}
 
@@ -429,7 +443,9 @@ anything other than ``success`` -- including
 for a Vendor Update that concluded ``success`` with ``vendor-update`` skipped --
 its ``verdict`` job found the Unit Tests verdict was for another commit -- which
 the ``vendor_update`` job reads from that run's jobs first (observed on run
-38650191283). ``!cancelled()`` keeps a skipped ``vendor_update``, on a push, from
+38650191283). It is false for a manual, build-only Vendor Update as well, which
+pushed nothing, and so is ``vendor_update``'s own ``if:``.
+``!cancelled()`` keeps a skipped ``vendor_update``, on a push, from
 skipping it. ``unit-tests`` then depends on that job with
 ``needs: [ version_check ]`` and an ``if:`` that
 calls no status-check function, so a skipped dependency skips it too -- and

@@ -15,6 +15,11 @@ on:
   workflow_run:
     workflows: ["Unit Tests"]
     types: [completed]
+  # A build-only run of the dispatched ref, to debug the crawl and its test
+  # gate without waiting for Saturday: it crawls, tests and commits locally,
+  # and pushes nothing, posts nothing and enters no environment. Create
+  # Release, which a completed run raises, releases nothing for one either.
+  workflow_dispatch:
 
 # Nothing by default, since a pull request's Unit Tests run can raise
 # `workflow_run`; each job declares its own `permissions:`.
@@ -27,9 +32,10 @@ permissions: {}
 # "any existing pending job or workflow in the same concurrency group will be
 # canceled" (GitHub, "Control the concurrency of workflows and jobs"). The
 # repository writes are serialised by `vendor-update`'s `repository-maintenance`
-# group, shared with cron-conda, not by this one.
+# group, shared with cron-conda, not by this one. A manual run writes nothing,
+# so it is keyed on itself here and there, and never displaces a pending run.
 concurrency:
-  group: vendor-update-${{ github.event.workflow_run.head_sha || github.ref }}
+  group: vendor-update-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.event.workflow_run.head_sha || github.ref }}
   cancel-in-progress: false
 
 # #2030: one Discussions category holds every report with no pull request to
@@ -50,8 +56,9 @@ jobs:
     runs-on: macos-latest
     # #1968: the deploy key is a `conda-tag` environment secret, readable only
     # by a job naming it. Keep it free of required reviewers, or every
-    # scheduled bump waits for an approval.
-    environment: conda-tag
+    # scheduled bump waits for an approval. A manual run, which never pushes,
+    # names no environment, so the deploy key reaches none of its steps.
+    environment: ${{ github.event_name != 'workflow_dispatch' && 'conda-tag' || '' }}
     needs: [ head ]
     # `head`'s jobs skip on every path, so this job must not inherit a skip;
     # `!cancelled()`, not `always()`, so cancelling still cancels and a failed
@@ -70,12 +77,13 @@ jobs:
     outputs:
       status: ${{ steps.run-report.outputs.status }}
     concurrency:
-      group: repository-maintenance
+      group: ${{ github.event_name == 'workflow_dispatch' && format('repository-maintenance-{0}', github.run_id) || 'repository-maintenance' }}
       cancel-in-progress: false
     permissions:
       contents: write
     steps:
       - name: Load maintenance deploy key
+        if: github.event_name != 'workflow_dispatch'
         uses: webfactory/ssh-agent@e83874834305fe9a4a2997156cb26c5de65a8555 # v0.10.0
         with:
           ssh-private-key: ${{ secrets.PYPCAPKIT_ACTIONS_DEPLOY_KEY }}
@@ -311,7 +319,9 @@ jobs:
           echo "committed=true" >> "$GITHUB_OUTPUT"
 
       - name: Push changes
-        if: steps.commit.outcome == 'success' || steps.commit-docs.outputs.committed == 'true'
+        if: >-
+          github.event_name != 'workflow_dispatch' &&
+          (steps.commit.outcome == 'success' || steps.commit-docs.outputs.committed == 'true')
         run: |
           git remote set-url origin git@github.com:JarryShaw/PyPCAPKit.git
           git pull --rebase origin "${GITHUB_REF#refs/heads/}"
@@ -382,11 +392,12 @@ jobs:
   # every job skipped still concludes `skipped` for Create Release. Job-level
   # `continue-on-error` as well as the steps', so nothing here can fail the run
   # Create Release reads; util/discussion_report.py writes a warning instead.
+  # Never on a manual run, which the thread would read as a real one.
   discussion:
     name: Post the vendor report
     needs: [ head, vendor-update ]
     if: >-
-      ${{ always() && (needs.vendor-update.result != 'skipped' ||
+      ${{ always() && github.event_name != 'workflow_dispatch' && (needs.vendor-update.result != 'skipped' ||
       needs.head.result == 'failure' || needs.head.result == 'cancelled') }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
