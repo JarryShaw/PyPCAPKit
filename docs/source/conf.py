@@ -21,6 +21,8 @@ from docutils import nodes
 from sphinx import addnodes
 from sphinx.errors import NoUri
 from sphinx.ext.autodoc.preserve_defaults import DefaultValue, update_default_value
+from sphinx.ext.napoleon.docstring import GoogleDocstring
+from sphinx.locale import _ as translate
 from sphinx.transforms.post_transforms import SphinxPostTransform
 from sphinx.util import logging as sphinx_logging
 from sphinx.util.inspect import safe_getattr, stringify_signature
@@ -570,6 +572,74 @@ def resolve_builtins_exactly(app: 'Sphinx', doctree: 'document') -> None:  # pyl
                 and 'refwarn' not in attributes
                 and attributes.get('reftarget') in BUILTIN_NAMES):
             del attributes['refspecific']
+
+
+def warning_reference(name: str) -> str:
+    """Write a ``Warns:`` entry's warning class as the link ``Raises:`` would make.
+
+    Napoleon turns a ``Raises:`` entry into a ``:raises:`` field, whose Python
+    domain field type links the exception. A ``Warns:`` entry goes into a plain
+    field instead, holding the class name in bold and linking nothing
+    (:issue:`2094`). The ``exc`` role written here searches the way that field
+    type does: a leading dot asks for the search by suffix, from the current
+    module and class outwards, so a bare ``RegistryWarning`` finds
+    :class:`~pcapkit.utilities.warnings.RegistryWarning` from any module. A
+    ``~`` prefix still shortens the title to the last component. A builtin name
+    gets no dot, which is what :func:`resolve_builtins_exactly` leaves of the
+    field type's search, so ``UserWarning`` is linked to the Python docs.
+
+    Several names separated by commas get a link each. A name holding a
+    backtick is markup already, a role or a literal, and is kept as written.
+
+    Args:
+        name: The entry's name, as napoleon read it.
+
+    Returns:
+        The reStructuredText linking the warning class or classes.
+
+    """
+    if '`' in name:
+        return name
+    references = []
+    for part in name.split(','):
+        part = part.strip()
+        if not part:
+            continue
+        title = '~' if part.startswith('~') else ''
+        target = part.lstrip('~')
+        if target not in BUILTIN_NAMES and not target.startswith('.'):
+            target = f'.{target}'
+        references.append(f':exc:`{title}{target}`')
+    return ', '.join(references)
+
+
+def parse_warns_section(self: 'GoogleDocstring', section: str) -> 'List[str]':  # pylint: disable=unused-argument
+    """Napoleon's ``Warns:`` section, with each warning class linked (:issue:`2094`).
+
+    :func:`setup` installs this in place of napoleon's own parser, which reads
+    the same fields and formats them the same way but leaves the name in bold.
+    It is replaced on ``GoogleDocstring``, which ``NumpyDocstring`` inherits it
+    from, so a NumPy ``Warns`` section is linked too. An entry that names a
+    type as well, the ``name (type): description`` form, is not a warning
+    class on its own and is left as napoleon formats it.
+
+    The two napoleon methods this calls are private, used against the Sphinx
+    release ``docs/requirements.txt`` pins, as napoleon's own parser does.
+
+    Args:
+        self: The docstring being parsed.
+        section: The section's header.
+
+    Returns:
+        The section as a ``Warns`` field, napoleon's layout unchanged.
+
+    """
+    fields = []
+    for name, type_, desc in self._consume_fields():  # pylint: disable=protected-access
+        if name and not type_:
+            name, type_ = '', warning_reference(name)
+        fields.append((name, type_, desc))
+    return self._format_fields(translate('Warns'), fields)  # pylint: disable=protected-access
 
 
 #: Enum member docstrings as autodoc read them, held from
@@ -1227,6 +1297,9 @@ def setup(app: 'Sphinx') -> None:
     # connects at the default 500.
     app.connect('autodoc-process-docstring', save_enum_member_docstring, priority=400)
     app.connect('autodoc-process-docstring', restore_enum_member_docstring, priority=600)
+    # NB: napoleon looks its section parsers up afresh for every docstring it
+    # parses, so replacing one on the class reaches every docstring of the build.
+    GoogleDocstring._parse_warns_section = parse_warns_section  # pylint: disable=protected-access
     # NB: ``aenum``'s metaclass derives from the standard library's, and autodoc
     # picks a getter by :func:`isinstance` on the class it reads, so one covers both.
     app.add_autodoc_attrgetter(enum.EnumMeta, read_own_enum_new)
