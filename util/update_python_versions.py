@@ -105,6 +105,11 @@ import time
 import tomllib
 from typing import TYPE_CHECKING, NamedTuple
 
+try:  # #2047: run as `python util/<script>.py`, with util/ first on sys.path
+    import _actions
+except ImportError:  # imported as util.<script>, or loaded by path, from the repository root
+    from util import _actions
+
 if TYPE_CHECKING:
     from typing import Any, Callable, Iterable, Optional
 
@@ -1402,24 +1407,18 @@ def open_pull_requests(branch: 'str') -> 'list[str]':
 ###############################################################################
 
 
-def escape(text: 'str', title: 'bool' = False) -> 'str':
-    """``text`` for a workflow command: data escapes, and in a title ``,`` and ``:`` too."""
-    text = text.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
-    return text.replace(':', '%3A').replace(',', '%2C') if title else text
-
-
 def annotate(notes: 'Iterable[dict[str, str]]') -> 'None':
     levels = {'held': 'notice', 'warning': 'warning', 'manual': 'warning'}
     for note in notes:
-        print(f'::{levels[note["kind"]]} title={escape("Python version tiers", title=True)}::{escape(note["text"])}')
+        level = levels[note['kind']]
+        _actions.annotate(level, note['text'], title='Python version tiers')
 
 
-def write_output(path: 'Optional[str]', values: 'dict[str, str]') -> 'None':
-    if not path:
+def write_output(values: 'dict[str, str]') -> 'None':
+    if not os.environ.get('GITHUB_OUTPUT'):
         raise RuntimeError('--github-output needs $GITHUB_OUTPUT')
-    with open(path, 'a', encoding='utf-8') as file:
-        for name, value in values.items():
-            file.write(f'{name}={value}\n')
+    for name, value in values.items():
+        _actions.set_output(name, value)
 
 
 def command_update(args: 'argparse.Namespace', root: 'pathlib.Path' = ROOT) -> 'int':
@@ -1440,23 +1439,23 @@ def command_update(args: 'argparse.Namespace', root: 'pathlib.Path' = ROOT) -> '
     publish, status = changed, 0
     if changed and args.proposal_branch:
         held = proposed(root, args.proposal_branch)
-        branch = escape(args.proposal_branch)
-        if held is not None and not open_pull_requests(args.proposal_branch):
-            print(f'::notice title=Proposing afresh::{branch} has no open pull request, so what it holds was merged '
-                  'or closed; publish recreates it from main.')
+        branch = args.proposal_branch
+        if held is not None and not open_pull_requests(branch):
+            _actions.annotate('notice', f'{branch} has no open pull request, so what it holds was merged or closed; '
+                              'publish recreates it from main.', title='Proposing afresh')
             held = None
         held = held or []
         if plan['fingerprint'] in held:
             publish = False
-            print(f'::notice title=Already proposed::{branch} already proposes these tiers ({plan["fingerprint"]}); '
-                  'close its pull request to have them proposed again.')
+            _actions.annotate('notice', f'{branch} already proposes these tiers ({plan["fingerprint"]}); close its '
+                              'pull request to have them proposed again.', title='Already proposed')
         elif foreign(held):
             # publish would refuse, so no approval is asked for that.
             publish, status = False, 1
             older = ', '.join(sorted({found for found in held if found})) or 'none'
-            print(f'::error title=Not overwriting {escape(args.proposal_branch, title=True)}::it holds commits this '
-                  f'workflow did not make and proposes {older}, not these tiers ({plan["fingerprint"]}); merge or '
-                  'close its pull request, or delete the branch, to have them proposed.')
+            _actions.annotate('error', f'it holds commits this workflow did not make and proposes {older}, not these '
+                              f'tiers ({plan["fingerprint"]}); merge or close its pull request, or delete the '
+                              'branch, to have them proposed.', title=f'Not overwriting {branch}')
     if args.diff:
         for path, text in new_texts.items():
             old = (root / path).read_bytes().decode('utf-8')
@@ -1479,9 +1478,8 @@ def command_update(args: 'argparse.Namespace', root: 'pathlib.Path' = ROOT) -> '
         (out / 'commit-message.txt').write_text(commit_message(plan), encoding='utf-8')
     print(f'{len(plan["changed_files"])} file(s) to change: {" ".join(plan["changed_files"]) or "none"}')
     if args.github_output:
-        write_output(os.environ.get('GITHUB_OUTPUT'), {'changed': str(changed).lower(),
-                                                        'publish': str(publish).lower(),
-                                                        'fingerprint': plan['fingerprint']})
+        write_output({'changed': str(changed).lower(), 'publish': str(publish).lower(),
+                      'fingerprint': plan['fingerprint']})
     return status
 
 
@@ -1492,10 +1490,7 @@ def command_body(args: 'argparse.Namespace', root: 'pathlib.Path' = ROOT) -> 'in
     description = describe_plan(plan, (args.audit_outcome, audit_failures(log)), args.run_url)
     body = fill_template((root / TEMPLATE).read_text(encoding='utf-8'), description, args.audit_outcome)
     (out / 'pr-body.md').write_text(body, encoding='utf-8')
-    summary = os.environ.get('GITHUB_STEP_SUMMARY')
-    if summary:
-        with open(summary, 'a', encoding='utf-8') as file:
-            file.write(f'## {plan["title"]}\n\n{description}\n')
+    _actions.summary(f'## {plan["title"]}', '', description, required=False)
     return 0
 
 
@@ -1535,7 +1530,7 @@ def command_publish(args: 'argparse.Namespace', root: 'pathlib.Path' = ROOT) -> 
         shutil.copyfile(out / 'files' / path, root / path)
     git(root, 'add', '--', *plan['changed_files'])
     if not git(root, 'diff', '--cached', '--quiet', check=False).returncode:
-        print('::notice title=Nothing to propose::this commit already holds the proposal')
+        _actions.annotate('notice', 'this commit already holds the proposal', title='Nothing to propose')
         return 0
     git(root, '-c', f'user.name={slug}[bot]', '-c', f'user.email={email}', 'commit', '--quiet',
         '-F', str(out / 'commit-message.txt'))
@@ -1545,11 +1540,11 @@ def command_publish(args: 'argparse.Namespace', root: 'pathlib.Path' = ROOT) -> 
     lease = '' if found is None else found[0]
     recreate = found is not None and not open_pull_requests(BRANCH)
     if recreate:
-        print(f'::notice title=Recreating {escape(BRANCH, title=True)}::it has no open pull request, so what it '
-              'holds was merged or closed; it restarts from main.')
+        _actions.annotate('notice', 'it has no open pull request, so what it holds was merged or closed; it restarts '
+                          'from main.', title=f'Recreating {BRANCH}')
     elif found is not None and foreign(found[1]):
-        print(f'::error title=Not overwriting {escape(BRANCH, title=True)}::it holds commits this workflow '
-              'did not make; merge or close its pull request, or delete the branch, and re-run.')
+        _actions.annotate('error', 'it holds commits this workflow did not make; merge or close its pull request, '
+                          'or delete the branch, and re-run.', title=f'Not overwriting {BRANCH}')
         return 1
     if not recreate:
         pushed = push(root, BRANCH, lease)
@@ -1557,9 +1552,9 @@ def command_publish(args: 'argparse.Namespace', root: 'pathlib.Path' = ROOT) -> 
         # would change them, which this token may not do; a new branch does not.
         recreate = bool(pushed.returncode and lease and WORKFLOWS_REFUSAL in pushed.stderr)
         if recreate:
-            print(f'::warning title=Recreating {escape(BRANCH, title=True)}::moving it would change workflow files '
-                  'main changed since, which needs the workflows permission; its pull request closes and a new one '
-                  'opens.')
+            _actions.annotate('warning', 'moving it would change workflow files main changed since, which needs the '
+                              'workflows permission; its pull request closes and a new one opens.',
+                              title=f'Recreating {BRANCH}')
     if recreate:
         git(root, 'push', f'--force-with-lease=refs/heads/{BRANCH}:{lease}', 'origin', f':refs/heads/{BRANCH}')
         pushed = push(root, BRANCH, '')
@@ -1570,11 +1565,11 @@ def command_publish(args: 'argparse.Namespace', root: 'pathlib.Path' = ROOT) -> 
     body = str(out / 'pr-body.md')
     if number:
         gh('pr', 'edit', number[0], '--repo', repo, '--title', plan['title'], '--body-file', body)
-        print(f'::notice title=Updated the proposal::pull request #{number[0]}')
+        _actions.annotate('notice', f'pull request #{number[0]}', title='Updated the proposal')
     else:
         url = gh('pr', 'create', '--repo', repo, '--base', BASE, '--head', BRANCH, '--title', plan['title'],
                  '--body-file', body).strip()
-        print(f'::notice title=Opened the proposal::{escape(url)}')
+        _actions.annotate('notice', url, title='Opened the proposal')
     return 0
 
 
@@ -1602,8 +1597,8 @@ def main(argv: 'Optional[list[str]]' = None, root: 'pathlib.Path' = ROOT) -> 'in
     try:
         return run(args, root)
     except (OSError, ValueError, RuntimeError, KeyError) as error:
-        message = escape(f'{type(error).__name__}: {error}')
-        print(f'::error title=Cannot {args.command} the Python version tiers::{message}')
+        _actions.annotate('error', f'{type(error).__name__}: {error}',
+                          title=f'Cannot {args.command} the Python version tiers')
         return 1
 
 

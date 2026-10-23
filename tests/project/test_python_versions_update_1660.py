@@ -1369,6 +1369,204 @@ class TestDetectAgainstAHandEditedBranch(ScratchOrigin):
 
 
 ###############################################################################
+# The workflow commands
+###############################################################################
+
+
+#: A branch name each escape changes: ``%`` in a message, ``:`` and ``,`` too in a title.
+ODD_BRANCH = 'bot/a%b:c,d'
+#: :data:`ODD_BRANCH` in a message, and in a title.
+ODD_DATA, ODD_TITLE = 'bot/a%25b:c,d', 'bot/a%25b%3Ac%2Cd'
+#: The fingerprint of :meth:`TestTheWorkflowCommands.plan`.
+FINGERPRINT = '0123456789abcdef'
+
+
+class TestTheWorkflowCommands(unittest.TestCase):
+    """#2047: every annotation, step output and summary line the script writes, byte for byte.
+
+    The other tests read the commands with ``assertIn``; these pin each whole
+    line, in order, with text each escape changes, so moving the writes onto
+    util/_actions.py can be shown to change nothing. The plan, ``git``, ``gh``
+    and the branch lookups are stubbed: only the writing is under test.
+
+    """
+
+    def setUp(self) -> None:
+        self.module = updater()
+        tmp = tempfile.TemporaryDirectory(prefix='pcapkit-2047-')  # pylint: disable=consider-using-with
+        self.addCleanup(tmp.cleanup)
+        self.tmp = pathlib.Path(tmp.name)
+
+    @staticmethod
+    def plan(**extra: 'Any') -> 'dict[str, Any]':
+        """A plan that moves nothing and changes the tier file, with ``extra``."""
+        plan = {'changes': [], 'latest': ['3.14', '3.14'], 'renamed': [], 'required': {'add': [], 'remove': []},
+                'notes': [], 'changed_files': ['.github/python-versions.toml'], 'fingerprint': FINGERPRINT}
+        plan.update(extra)
+        return plan
+
+    def main(self, argv: 'list[str]', environ: 'dict[str, str]', *patches: 'Any') -> 'tuple[int, str]':
+        """``main(argv)`` with ``environ`` for the ``GITHUB_`` and ``APP_`` variables, under ``patches``."""
+        base = {key: value for key, value in os.environ.items() if not key.startswith(('GITHUB_', 'APP_'))}
+        stdout = io.StringIO()
+        with contextlib.ExitStack() as stack:
+            stack.enter_context(mock.patch.dict(os.environ, dict(base, **environ), clear=True))
+            for patch in patches:
+                stack.enter_context(patch)
+            stack.enter_context(contextlib.redirect_stdout(stdout))
+            status = self.module.main(argv, root=self.tmp)
+        return status, stdout.getvalue()
+
+    def update(self, plan: 'dict[str, Any]', argv: 'list[str]', environ: 'dict[str, str]',
+               *patches: 'Any') -> 'tuple[int, str]':
+        """``update`` computing ``plan``, the sources neither fetched nor parsed."""
+        return self.main(['update', *argv], environ, mock.patch.object(self.module, 'read_sources', return_value={}),
+                         mock.patch.object(self.module, 'parse_sources', return_value={}),
+                         mock.patch.object(self.module, 'compute_plan', return_value=(plan, {})), *patches)
+
+    def test_the_notes(self) -> None:
+        """Each note at its kind's level, under one title; a kind with no level fails the command."""
+        given = [{'kind': 'held', 'text': '3.16 is a pre-release: 50% built,\nso held'},
+                 {'kind': 'warning', 'text': 'a\r\nb'}, {'kind': 'manual', 'text': 'retire: x, y'}]
+        status, printed = self.update(self.plan(notes=given, changed_files=[]), [], {})
+        self.assertEqual(status, 0)
+        self.assertEqual(printed, '::notice title=Python version tiers::3.16 is a pre-release: 50%25 built,%0Aso held\n'
+                                  '::warning title=Python version tiers::a%0D%0Ab\n'
+                                  '::warning title=Python version tiers::retire: x, y\n'
+                                  '0 file(s) to change: none\n')
+        status, printed = self.update(self.plan(notes=[given[2], {'kind': 'other', 'text': 't'}]), [], {})
+        self.assertEqual(status, 1)
+        self.assertEqual(printed, '::warning title=Python version tiers::retire: x, y\n'
+                                  "::error title=Cannot update the Python version tiers::KeyError: 'other'\n")
+
+    def test_the_proposal_branch_and_the_outputs(self) -> None:
+        """What ``--proposal-branch`` finds, as its annotation, and ``--github-output``'s three outputs."""
+        afresh = (f'::notice title=Proposing afresh::{ODD_DATA} has no open pull request, so what it holds was '
+                  'merged or closed; publish recreates it from main.\n')
+        already = (f'::notice title=Already proposed::{ODD_DATA} already proposes these tiers ({FINGERPRINT}); '
+                   'close its pull request to have them proposed again.\n')
+
+        def refused(older: 'str') -> 'str':
+            return (f'::error title=Not overwriting {ODD_TITLE}::it holds commits this workflow did not make and '
+                    f'proposes {older}, not these tiers ({FINGERPRINT}); merge or close its pull request, or delete '
+                    'the branch, to have them proposed.\n')
+
+        changed = '1 file(s) to change: .github/python-versions.toml\n'
+        for held, opened, status, annotation, publish in (
+                (['fedcba9876543210'], [], 0, afresh, 'true'), ([None, FINGERPRINT], ['7'], 0, already, 'false'),
+                ([None, 'fedcba9876543210', '0000000000000000', 'fedcba9876543210'], ['7'], 1,
+                 refused('0000000000000000, fedcba9876543210'), 'false'),
+                ([None], ['7'], 1, refused('none'), 'false'), (['fedcba9876543210'], ['7'], 0, '', 'true')):
+            with self.subTest(held=held, opened=opened):
+                output = self.tmp / 'output'
+                output.write_text('before\n', encoding='utf-8')
+                found, printed = self.update(
+                    self.plan(), ['--proposal-branch', ODD_BRANCH, '--github-output'], {'GITHUB_OUTPUT': str(output)},
+                    mock.patch.object(self.module, 'proposed', return_value=held),
+                    mock.patch.object(self.module, 'open_pull_requests', return_value=opened))
+                self.assertEqual((found, printed), (status, annotation + changed))
+                self.assertEqual(output.read_bytes(),
+                                 f'before\nchanged=true\npublish={publish}\nfingerprint={FINGERPRINT}\n'.encode())
+
+    def test_no_output_file(self) -> None:
+        """``--github-output`` with ``$GITHUB_OUTPUT`` unset or empty fails, naming it, after the summary line."""
+        for environ in ({}, {'GITHUB_OUTPUT': ''}):
+            with self.subTest(environ=environ):
+                self.assertEqual(self.update(self.plan(), ['--github-output'], environ),
+                                 (1, '1 file(s) to change: .github/python-versions.toml\n'
+                                     '::error title=Cannot update the Python version tiers::RuntimeError: '
+                                     '--github-output needs $GITHUB_OUTPUT\n'))
+        output = self.tmp / 'output'
+        self.assertEqual(self.update(self.plan(changed_files=[]), ['--github-output'], {'GITHUB_OUTPUT': str(output)}),
+                         (0, '0 file(s) to change: none\n'))
+        self.assertEqual(output.read_bytes(), f'changed=false\npublish=false\nfingerprint={FINGERPRINT}\n'.encode())
+
+    def test_a_failure_is_one_escaped_error(self) -> None:
+        for command, argv in (('update', ['update']), ('body', ['body', str(self.tmp)]),
+                              ('publish', ['publish', str(self.tmp)])):
+            with self.subTest(command=command):
+                error = RuntimeError('50%\nof: a, b')
+                self.assertEqual(self.main(argv, {}, mock.patch.object(self.module, 'read_sources', side_effect=error),
+                                           mock.patch.object(pathlib.Path, 'read_text', side_effect=error)),
+                                 (1, f'::error title=Cannot {command} the Python version tiers::RuntimeError: '
+                                     '50%25%0Aof: a, b\n'))
+
+    def test_the_step_summary(self) -> None:
+        """``body`` appends its title and description to ``$GITHUB_STEP_SUMMARY``, and writes nothing without it."""
+        out = self.tmp / 'proposal'
+        out.mkdir()
+        (out / 'plan.json').write_text(json.dumps({'title': 'ci(python): 3.16, 50% (#1660)'}), encoding='utf-8')
+        (self.tmp / '.github').mkdir()
+        (self.tmp / self.module.TEMPLATE).write_text('template\n', encoding='utf-8')
+        summary = self.tmp / 'summary'
+        patches = (mock.patch.object(self.module, 'describe_plan', return_value='| a |\n\nlast:, 50%'),
+                   mock.patch.object(self.module, 'fill_template', return_value='body\n'))
+        for environ, written in (({'GITHUB_STEP_SUMMARY': str(summary)},
+                                  'before\n## ci(python): 3.16, 50% (#1660)\n\n| a |\n\nlast:, 50%\n'),
+                                 ({}, None), ({'GITHUB_STEP_SUMMARY': ''}, None)):
+            with self.subTest(environ=environ):
+                if written:
+                    summary.write_text('before\n', encoding='utf-8')
+                elif summary.exists():
+                    summary.unlink()
+                self.assertEqual(self.main(['body', str(out)], environ, *patches), (0, ''))
+                self.assertEqual(summary.read_bytes() if summary.exists() else None,
+                                 None if written is None else written.encode())
+                self.assertEqual(sorted(path.name for path in self.tmp.iterdir()),
+                                 ['.github', 'proposal'] + (['summary'] if written else []))
+                self.assertEqual((out / 'pr-body.md').read_bytes(), b'body\n')
+
+    def publish(self, staged: 'bool', found: 'Any', opened: 'list[list[str]]', pushed: 'list[tuple[int, str]]',
+                url: 'str' = '') -> 'tuple[int, str]':
+        """``publish`` of an empty proposal to :data:`ODD_BRANCH`, ``git`` and ``gh`` stubbed.
+
+        ``staged`` is whether the commit changes anything, ``found`` what
+        :func:`ahead` reads, ``opened`` each :func:`open_pull_requests` in turn,
+        ``pushed`` each :func:`push`'s status and standard error, ``url`` what
+        ``gh pr create`` prints.
+
+        """
+        out = self.tmp / 'proposal'
+        out.mkdir(exist_ok=True)
+        (out / 'plan.json').write_text(json.dumps({'title': 't', 'changed_files': []}), encoding='utf-8')
+
+        def git(_: 'pathlib.Path', *argv: 'str', check: 'bool' = True) -> 'subprocess.CompletedProcess[str]':
+            del check
+            return subprocess.CompletedProcess(['git', *argv], int(staged and argv[:1] == ('diff',)), '', '')
+
+        return self.main(['publish', str(out)], {'APP_SLUG': 'pypcapkit-release', 'GITHUB_REPOSITORY': 'o/r'},
+                         mock.patch.object(self.module, 'BRANCH', ODD_BRANCH),
+                         mock.patch.object(self.module, 'git', side_effect=git),
+                         mock.patch.object(self.module, 'ahead', return_value=found),
+                         mock.patch.object(self.module, 'open_pull_requests', side_effect=opened),
+                         mock.patch.object(self.module, 'push', side_effect=[
+                             subprocess.CompletedProcess(['git'], code, '', stderr) for code, stderr in pushed]),
+                         mock.patch.object(self.module, 'gh', return_value=url))
+
+    def test_publishing(self) -> None:
+        recreating = (f'::notice title=Recreating {ODD_TITLE}::it has no open pull request, so what it holds was '
+                      'merged or closed; it restarts from main.\n')
+        behind = (f'::warning title=Recreating {ODD_TITLE}::moving it would change workflow files main changed '
+                  'since, which needs the workflows permission; its pull request closes and a new one opens.\n')
+        refusal = f'remote: refusing {self.module.WORKFLOWS_REFUSAL}'
+        for name, staged, found, opened, pushed, url, expected in (
+                ('nothing to propose', False, None, [], [], '',
+                 (0, '::notice title=Nothing to propose::this commit already holds the proposal\n')),
+                ('recreated', True, ('abc', ['f1']), [[], []], [(0, '')], 'https://x.invalid/pull/9?q=50%\n',
+                 (0, recreating + '::notice title=Opened the proposal::https://x.invalid/pull/9?q=50%25\n')),
+                ('foreign', True, ('abc', [None]), [['7']], [], '',
+                 (1, f'::error title=Not overwriting {ODD_TITLE}::it holds commits this workflow did not make; '
+                     'merge or close its pull request, or delete the branch, and re-run.\n')),
+                ('behind', True, ('abc', ['f1']), [['7'], ['7']], [(1, refusal), (0, '')], '',
+                 (0, behind + '::notice title=Updated the proposal::pull request #7\n')),
+                ('refused', True, None, [], [(1, 'denied\nreally\n')], '',
+                 (1, '::error title=Cannot publish the Python version tiers::RuntimeError: git push exited 1: '
+                     'denied%0Areally\n'))):
+            with self.subTest(name):
+                self.assertEqual(self.publish(staged, found, opened, pushed, url), expected)
+
+
+###############################################################################
 # The workflow
 ###############################################################################
 
