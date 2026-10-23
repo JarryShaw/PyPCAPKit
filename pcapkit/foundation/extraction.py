@@ -30,6 +30,7 @@ from pcapkit.corekit.context import ContextRegistry
 from pcapkit.corekit.io import PeekableStream, SeekableReader
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.dumpkit.common import make_dumper
+from pcapkit.foundation.engines import _pcap_backend
 from pcapkit.foundation.engines.engine import Engine, EngineBase
 from pcapkit.foundation.engines.pcap import PCAP as PCAP_Engine
 from pcapkit.foundation.engines.pcapng import PCAPNG as PCAPNG_Engine
@@ -277,6 +278,9 @@ class Extractor(Generic[_P]):
         _exnam: 'Engines'
         #: Extraction engine instance.
         _exeng: 'EngineBase[_P]'
+        #: The pcap backend probe, shared by engine selection and the engine's
+        #: constructor so that an extraction probes once (:issue:`2113`).
+        _exprb: '_pcap_backend.Memo'
 
         #: Input file object.
         _ifile: 'BufferedReader'
@@ -865,7 +869,8 @@ class Extractor(Generic[_P]):
         eng = self._select_engine()
         if eng is not None:
             logger.debug('using engine %s (%s)', eng.name, eng.module)
-            self._exeng = eng(self)
+            with self._exprb:
+                self._exeng = eng(self)
             self._exeng.run()
             self._open_output()
 
@@ -927,7 +932,13 @@ class Extractor(Generic[_P]):
             # failure to escape from the engine's constructor instead. The base
             # class answers :data:`None`, so only engines with a real limitation
             # override it.
-            reason = eng.unsupported_reason()
+            #
+            # NOTE: one probe serves both calls of this method and the engine's
+            # constructor in ``run``, rather than one each (#2113).
+            if not hasattr(self, '_exprb'):
+                self._exprb = _pcap_backend.Memo()
+            with self._exprb:
+                reason = eng.unsupported_reason()
             if reason is not None:
                 logger.debug('engine %s is unavailable: %s', eng.name, reason)
                 warn(f'engine {eng.name} is not supported on this interpreter '

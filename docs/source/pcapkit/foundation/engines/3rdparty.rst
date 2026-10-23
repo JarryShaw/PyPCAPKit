@@ -489,6 +489,11 @@ cycle.
 
    .. automethod:: describe
 
+.. autoclass:: pcapkit.foundation.engines._pcap_backend.Memo
+   :no-members:
+
+   .. autoattribute:: found
+
 .. autofunction:: pcapkit.foundation.engines._pcap_backend.probe
 
 .. autofunction:: pcapkit.foundation.engines._pcap_backend.identify
