@@ -14,8 +14,10 @@ a stream past more octets than one read or seek can take.
 
 """
 import io
+import os
 import sys
 import tempfile
+import weakref
 from typing import TYPE_CHECKING, cast
 
 from pcapkit.utilities import config
@@ -30,6 +32,21 @@ if TYPE_CHECKING:
     from typing_extensions import Buffer
 
 __all__ = ['SeekableReader', 'PeekableStream', 'NamedStream', 'advance']
+
+
+def _discard_buffer(file: 'IO[bytes]', path: 'str') -> 'None':
+    """Close and remove the temporary file a :class:`SeekableReader` saved its buffer to.
+
+    Args:
+        file: The open buffer file.
+        path: Its path.
+
+    """
+    file.close()
+    try:
+        os.unlink(path)
+    except FileNotFoundError:  # pragma: no cover
+        pass
 
 
 class SeekableReader(io.BufferedReader):
@@ -99,6 +116,8 @@ class SeekableReader(io.BufferedReader):
         _buffer_path: 'str'
         #: File to save buffer.
         _buffer_file: 'IO[bytes] | None'
+        #: Closes and removes the buffer file when it is a temporary one.
+        _buffer_discard: 'weakref.finalize | None'
 
     @property
     def closed(self) -> 'bool':
@@ -131,10 +150,21 @@ class SeekableReader(io.BufferedReader):
         self._buffer_size = buffer_size
         self._read_ahead_size = buffer_size
 
+        self._buffer_discard = None
         if buffer_save:
             if buffer_path is None:
-                self._buffer_file = tempfile.NamedTemporaryFile('wb', buffering=0)
-                self._buffer_path = self._buffer_file.name
+                # NOTE: the buffer is read back by name, which Windows refuses for
+                # a ``NamedTemporaryFile`` while it is open (#2098). A ``mkstemp``
+                # file it allows; this removes it on close, or at collection.
+                fd, self._buffer_path = tempfile.mkstemp()
+                try:
+                    self._buffer_file = open(fd, 'wb', buffering=0)
+                except BaseException:
+                    os.close(fd)
+                    os.unlink(self._buffer_path)
+                    raise
+                self._buffer_discard = weakref.finalize(self, _discard_buffer, self._buffer_file,
+                                                        self._buffer_path)
             else:
                 self._buffer_file = open(buffer_path, 'wb', buffering=0)
                 self._buffer_path = buffer_path
@@ -332,7 +362,9 @@ class SeekableReader(io.BufferedReader):
 
         if self._closing:
             self._stream.close()
-        if self._buffer_file is not None:
+        if self._buffer_discard is not None:
+            self._buffer_discard()
+        elif self._buffer_file is not None:
             self._buffer_file.close()
         self._buffer_view.release()
         self._buffer.close()
