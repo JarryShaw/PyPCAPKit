@@ -15,6 +15,7 @@ a stream past more octets than one read or seek can take.
 """
 import io
 import os
+import stat
 import sys
 import tempfile
 import weakref
@@ -863,6 +864,26 @@ class SeekableReader(io.BufferedReader):
         return buf
 
 
+def _can_seek(stream: 'IO[bytes]') -> 'bool':
+    """Whether ``stream`` can really seek, rather than only saying it can.
+
+    On Windows before CPython 3.16, a pipe reports :meth:`~io.IOBase.seekable`
+    and its ``seek`` silently does nothing (:issue:`2097`), so the answer is
+    trusted only for a regular file, or for a stream with no descriptor to ask.
+
+    Args:
+        stream: The input stream.
+
+    """
+    if not stream.seekable():
+        return False
+    try:
+        mode = os.fstat(stream.fileno()).st_mode
+    except (AttributeError, OSError, ValueError):
+        return True
+    return stat.S_ISREG(mode)
+
+
 #: Octets :func:`advance` reads and discards at a time when
 #: :data:`~pcapkit.utilities.config.READ_CHUNK` sets no limit.
 _DISCARD_CHUNK = 1 << 20
@@ -880,14 +901,16 @@ def advance(file: 'IO[bytes]', count: 'int', /) -> 'None':
     as far as the limit; the next record still starts where this one declares it
     ends (:issue:`1975`). A seekable stream gets there by relative seeks, none
     longer than :data:`sys.maxsize`, and may land past its end, as an absolute seek
-    would. A :class:`SeekableReader`, or a stream that cannot seek, reads the
+    would. A :class:`SeekableReader`, or a stream that cannot seek -- including
+    one that only says it can, as a Windows pipe does (:issue:`2108`) -- reads the
     octets and discards them, no more than
     :data:`~pcapkit.utilities.config.READ_CHUNK` at a time, and stops at the end
     of the stream: a :class:`SeekableReader` seek reads at most a buffer's worth
     past what it holds, so a longer one would stop short of the target.
 
     """
-    if isinstance(file, SeekableReader) or not file.seekable():
+    # NOTE: a frame reader built on a caller's stream sees it unwrapped (#2108).
+    if isinstance(file, SeekableReader) or not _can_seek(file):
         chunk = _DISCARD_CHUNK if config.READ_CHUNK == -1 else config.READ_CHUNK
         chunk = min(chunk, sys.maxsize)
         while count > 0:
