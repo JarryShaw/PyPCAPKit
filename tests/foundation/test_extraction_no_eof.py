@@ -92,6 +92,16 @@ while it waits to be killed. The child also asserts which tree it imported, sinc
 this project is usually installed editable and an editable finder will happily
 serve a different checkout than the one under test.
 
+The timeout bounds the extraction, not the interpreter's warm-up (#2085). On
+GraalPy 25.4.4 a child spends 4-8s importing :mod:`pcapkit` and 7-13s on its
+first extraction, which imports five more modules and is otherwise cold code:
+about 21 CPU-seconds before the case under test begins, after which every case
+here takes 0.02-0.06s. CPython takes 0.9s in all. A single 30s timeout over the
+whole child therefore failed four of eleven GraalPy runs on ``main``, the other
+exhausted-input cases in each finishing at 25-30s, and called it #620. So the
+child warms up with one plain extraction and prints :data:`READY`; that phase
+gets :data:`STARTUP`, and only what follows counts against :data:`DEADLINE`.
+
 """
 
 from __future__ import annotations
@@ -100,6 +110,7 @@ import importlib.util
 import subprocess  # nosec: B404
 import sys
 import textwrap
+import threading
 import types
 import unittest
 import warnings
@@ -115,10 +126,20 @@ __tier__ = 'ALL'
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 
-#: Seconds allowed to an extraction of a six-frame, 605-byte capture. It takes
-#: well under a tenth of a second when it terminates at all, so this is loose
-#: enough not to flake on a loaded machine and still far short of forever.
+#: Seconds allowed to an extraction of a six-frame, 605-byte capture, once the
+#: child has warmed up. Measured at 0.02-0.06s on GraalPy 25.4.4 and under 0.01s
+#: on CPython, so this is loose enough not to flake on a loaded machine and still
+#: far short of forever.
 DEADLINE = 30
+
+#: Seconds allowed to a child before it prints :data:`READY`: interpreter start,
+#: importing :mod:`pcapkit`, and one plain extraction (#2085). That is 0.9s on
+#: CPython and about 21 CPU-seconds on GraalPy 25.4.4 -- 11s of wall on an idle
+#: 16-core host, 21s pinned to 4 CPUs beside 3 busy ones, and up to 30s on the
+#: GraalPy leg's runner, where the whole child was cut off at 30s. The sibling
+#: CLI child in ``test_extraction_non_seekable_stream_1586_unit.py`` took 52.9s
+#: on the same runner and is allowed 120s; this matches it.
+STARTUP = 120
 
 #: Address-space ceiling for a child process, in bytes. A child that hangs is
 #: going to be killed on the timeout anyway; this stops it consuming the host in
@@ -130,6 +151,10 @@ ADDRESS_SPACE_CAP = 2 * 1024 ** 3
 #: "the extraction did not finish" from "the child failed for some other reason".
 SENTINEL = 'NO-EOF-RETURNED'
 
+#: Printed, alone on its line, by a child that has warmed up. :data:`DEADLINE`
+#: starts here.
+READY = 'NO-EOF-READY'
+
 #: How a child caps its address space. GraalPy's ``resource`` has no ``setrlimit``
 #: (#1963); a child there is held by the heap cap the leg gives every GraalPy
 #: process, in ``GRAAL_PYTHON_VM_ARGS``, which it inherits.
@@ -137,7 +162,8 @@ CHILD_CAP = ('' if sys.implementation.name == 'graalpy'
              else 'resource.setrlimit(resource.RLIMIT_AS, ({cap}, {cap}))')
 
 #: Preamble for every child: cap the address space, put the tree under test first
-#: on ``sys.path``, and *prove* that is the tree which got imported.
+#: on ``sys.path``, *prove* that is the tree which got imported, and warm up with
+#: a plain extraction of the capture, which terminates on every tree.
 CHILD_PREAMBLE = """
 import resource, sys, warnings
 """ + CHILD_CAP + """
@@ -146,19 +172,102 @@ warnings.simplefilter('ignore')
 import pcapkit
 assert pcapkit.__file__.startswith({root!r}), 'wrong tree: ' + pcapkit.__file__
 print('TREE ' + pcapkit.__file__, flush=True)
+pcapkit.extract(fin={capture!r}, nofile=True, store=False)
+print({ready!r}, flush=True)
 """
+
+
+class ChildTimeout(Exception):
+    """A child outlived one of the two allowances :func:`run_child` gives it.
+
+    Args:
+        phase: ``'startup'`` if it never printed :data:`READY`, else
+            ``'deadline'``.
+        seconds: The allowance it outlived.
+        output: Everything it printed before it was killed.
+
+    """
+
+    def __init__(self, phase: 'str', seconds: 'float', output: 'str') -> None:
+        super().__init__(phase, seconds, output)
+        self.phase = phase
+        self.seconds = seconds
+        self.output = output
+
+
+def run_child(argv: 'list[str]', startup: 'float', deadline: 'float',
+              cwd: 'str | None' = None) -> 'tuple[int, str]':
+    """Run ``argv`` to completion, timing its warm-up and its work separately.
+
+    The child gets ``startup`` seconds to print :data:`READY` alone on a line, and
+    ``deadline`` seconds from then to exit. A child that exits without printing it
+    is waited on for ``deadline`` seconds, so a crash is reported as such.
+
+    Args:
+        argv: The command.
+        startup: Seconds allowed before :data:`READY`.
+        deadline: Seconds allowed after it.
+        cwd: Working directory for the child.
+
+    Returns:
+        The child's exit status and its output, stderr merged into stdout.
+
+    Raises:
+        ChildTimeout: If either allowance ran out; the child has been killed.
+
+    """
+    proc = subprocess.Popen(  # nosec: B603
+        argv, stdin=subprocess.DEVNULL, stdout=subprocess.PIPE,
+        stderr=subprocess.STDOUT, text=True, errors='replace', cwd=cwd,
+    )
+    lines = []  # type: list[str]
+    settled = threading.Event()
+
+    def drain() -> None:
+        assert proc.stdout is not None  # nosec: B101
+        for line in proc.stdout:
+            lines.append(line)
+            if line.rstrip('\r\n') == READY:
+                settled.set()
+        settled.set()  # end of output: nothing more is coming
+
+    reader = threading.Thread(target=drain, daemon=True)
+    reader.start()
+    timed_out = None  # type: tuple[str, float] | None
+    try:
+        if not settled.wait(startup):
+            timed_out = ('startup', startup)
+        else:
+            try:
+                proc.wait(deadline)
+            except subprocess.TimeoutExpired:
+                timed_out = ('deadline', deadline)
+    finally:
+        if proc.poll() is None:
+            proc.kill()
+        proc.wait()
+        reader.join(10)
+        assert proc.stdout is not None  # nosec: B101
+        proc.stdout.close()
+    output = ''.join(lines)
+    if timed_out is not None:
+        raise ChildTimeout(timed_out[0], timed_out[1], output)
+    return proc.returncode, output
 
 
 class ChildBoundedTestCase(unittest.TestCase):
     """Runs a snippet of extraction in a child process under a hard timeout."""
 
-    #: Binds ``capture`` in the child to the committed six-frame, 605-byte capture
-    #: the issue uses. Resolved in the parent, because
-    #: :func:`~tests._support.sample_path` is what enforces the suite's tier rule.
-    CAPTURE = 'capture = {!r}'.format(sample_path('in.pcap'))
+    #: The committed six-frame, 605-byte capture the issue uses. Resolved in the
+    #: parent, because :func:`~tests._support.sample_path` is what enforces the
+    #: suite's tier rule.
+    CAPTURE_PATH = sample_path('in.pcap')
+
+    #: Binds ``capture`` in the child to :attr:`CAPTURE_PATH`.
+    CAPTURE = 'capture = {!r}'.format(CAPTURE_PATH)
 
     def run_bounded(self, body: 'str') -> 'str':
-        """Execute ``body`` in a child process and return its stdout.
+        """Execute ``body`` in a child process and return its output.
 
         Args:
             body: Python source, dedented for you, run after
@@ -170,43 +279,96 @@ class ChildBoundedTestCase(unittest.TestCase):
 
         Raises:
             AssertionError: If the child did not finish inside :data:`DEADLINE`
-                seconds, as :func:`~tests._support.scale_timeout` scales them,
-                which is the failure mode #620 is about, or if it exited non-zero.
+                seconds of warming up, which is the failure mode #620 is about;
+                if it did not warm up inside :data:`STARTUP` seconds; or if it
+                exited non-zero. Both allowances are scaled by
+                :func:`~tests._support.scale_timeout`.
 
         """
-        script = CHILD_PREAMBLE.format(cap=ADDRESS_SPACE_CAP, root=str(ROOT)) \
+        script = CHILD_PREAMBLE.format(cap=ADDRESS_SPACE_CAP, root=str(ROOT),
+                                       capture=self.CAPTURE_PATH, ready=READY) \
             + textwrap.dedent(body)
-        # Scaled like the in-process deadline, so one setting stretches both.
-        deadline = scale_timeout(DEADLINE)
+        # Scaled like the in-process deadline, so one setting stretches all three.
         try:
-            completed = subprocess.run(  # nosec: B603
-                [sys.executable, '-c', script],
-                capture_output=True, text=True, timeout=deadline, check=False,
-                cwd=str(ROOT),
-            )
-        except subprocess.TimeoutExpired as exc:
-            # NOTE: ``TimeoutExpired.output`` is :class:`bytes` even under
-            # ``text=True`` on CPython 3.14 -- measured, not assumed -- but that is
-            # an implementation detail, and this suite runs on 3.8 through 3.15.
-            # Accept either rather than turning the informative "did not
-            # terminate" failure into an ``AttributeError`` on some other version.
-            partial = exc.output or b''
-            if isinstance(partial, bytes):
-                partial = partial.decode(errors='replace')
+            returncode, output = run_child([sys.executable, '-c', script],
+                                           startup=scale_timeout(STARTUP),
+                                           deadline=scale_timeout(DEADLINE),
+                                           cwd=str(ROOT))
+        except ChildTimeout as exc:
+            if exc.phase == 'startup':
+                raise AssertionError(
+                    f'the child did not warm up within {exc.seconds}s -- starting, '
+                    'importing pcapkit and one plain extraction, before any no_eof '
+                    f'case ran -- so this is not #620. Child output so far:\n{exc.output}'
+                ) from exc
             raise AssertionError(
-                f'the extraction did not return within {deadline}s, which is the '
-                f'non-termination #620 reports. Child output so far:\n{partial}'
+                f'the extraction did not return within {exc.seconds}s, which is the '
+                f'non-termination #620 reports. Child output so far:\n{exc.output}'
             ) from exc
 
-        output = completed.stdout + completed.stderr
-        self.assertEqual(completed.returncode, 0,
-                         f'child exited {completed.returncode}:\n{output}')
+        self.assertEqual(returncode, 0, f'child exited {returncode}:\n{output}')
         self.assertIn('TREE ' + str(ROOT), output,
                       'the child imported a different tree than the one under '
                       f'test, so its result says nothing:\n{output}')
         self.assertIn(SENTINEL, output,
                       f'the child never reached the end of the extraction:\n{output}')
         return output
+
+
+class ChildAllowances(unittest.TestCase):
+    """:func:`run_child` charges warm-up to :data:`STARTUP`, not :data:`DEADLINE`.
+
+    #2085: one timeout over the whole child failed GraalPy runs whose extraction
+    had not even begun, and reported them as #620. These children are bare
+    interpreters that sleep, so the cases need no capture and no runtime
+    dependencies.
+
+    """
+
+    def child(self, source: 'str') -> 'list[str]':
+        """A child running ``source``, with :data:`READY` bound as ``READY``."""
+        return [sys.executable, '-c', f'import sys, time\nREADY = {READY!r}\n'
+                + textwrap.dedent(source)]
+
+    def test_a_slow_warm_up_is_not_charged_to_the_deadline(self) -> None:
+        """Four seconds to get ready, then an instant exit, passes a 2s deadline."""
+        returncode, output = run_child(self.child("""
+            time.sleep(4)
+            print(READY, flush=True)
+            print('done', flush=True)
+        """), startup=scale_timeout(60), deadline=scale_timeout(2))
+        self.assertEqual(returncode, 0, output)
+        self.assertIn('done', output)
+
+    def test_a_child_that_hangs_after_warming_up_meets_the_deadline(self) -> None:
+        """The #620 shape: ready, then never returning."""
+        with self.assertRaises(ChildTimeout) as caught:
+            run_child(self.child("""
+                print(READY, flush=True)
+                print('spinning', flush=True)
+                time.sleep(600)
+            """), startup=scale_timeout(60), deadline=1)
+        self.assertEqual(caught.exception.phase, 'deadline')
+        self.assertIn('spinning', caught.exception.output)
+
+    def test_a_child_that_never_warms_up_meets_the_startup_allowance(self) -> None:
+        """Hung before :data:`READY` is a startup failure, not a #620 one."""
+        with self.assertRaises(ChildTimeout) as caught:
+            run_child(self.child("""
+                print('starting', flush=True)
+                time.sleep(600)
+            """), startup=1, deadline=scale_timeout(60))
+        self.assertEqual(caught.exception.phase, 'startup')
+        self.assertIn('starting', caught.exception.output)
+
+    def test_a_child_that_dies_before_warming_up_reports_its_status(self) -> None:
+        """A crash is not waited on for the whole startup allowance."""
+        returncode, output = run_child(self.child("""
+            print('crashing', flush=True)
+            sys.exit(3)
+        """), startup=scale_timeout(60), deadline=scale_timeout(60))
+        self.assertEqual(returncode, 3, output)
+        self.assertIn('crashing', output)
 
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
