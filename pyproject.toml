@@ -14,9 +14,11 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "pypcapkit"
-# ``readme`` is static, not supplied by ``setup.py`` (#1968): Dependabot replaces
-# ``setup.py`` with a stub that passes no long description, so a dynamic one fails
-# to build the Pipfile's editable ``pypcapkit`` and every pip update job with it.
+# ``readme`` is static (#1968). There is no ``setup.py`` (#2061), so
+# ``fetch_project_file`` in Dependabot's Python file fetcher fetches
+# ``pyproject.toml`` in its place, and its Pipfile updater writes that file as is:
+# only a ``setup.py`` is stubbed. A static ``readme`` keeps the Pipfile's editable
+# ``pypcapkit`` from depending on what a stub would supply.
 dynamic = [ "version" ]
 authors = [
     { name="Jarry Shaw", email="jarryshaw@icloud.com" },

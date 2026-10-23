@@ -2963,6 +2963,16 @@ Changed
   the lights on*) legs go with it, and ``coverage-comment.yml`` lists no install
   failure as by design any more, which closes :issue:`2040` (:issue:`2051`,
   :pr:`2053`).
+* ``setup.py`` is gone, and ``pyproject.toml`` is the only build configuration. With
+  the 3.8 floor it was a Python 2 guard and a bare ``setup()``: the wheel's files are
+  identical without it, ``pip install -e .`` goes through PEP 660, pip still refuses
+  3.7 as "requires a different Python", and on 2.7 it fails on the ``setuptools``
+  build requirement before it would reach ``setup.py``.
+  ``examples/benchmark/Dockerfile`` stops copying it, and a test fails should
+  ``setup.py`` return or a ``COPY`` there name a file the repository does not track.
+  Dependabot now fetches ``pyproject.toml`` in ``setup.py``'s place and passes it
+  through unstubbed; the static ``readme`` stays, as it does not depend on what a stub
+  would supply (:issue:`2061`, :pr:`2066`).
 * renames with no compatibility alias left behind: ``examples/sample`` and
   ``examples/samples`` -- one letter apart, holding different things -- are now
   ``examples/captures`` and ``examples/generators``.

@@ -402,7 +402,7 @@ _RUNNING_CALLS = frozenset({
 _IMPORT_TEXT = re.compile(rf'(?:\b(?:import|from)|-m)\s+{PROJECT_PIN_PACKAGE}(?:\.\w+)*(?![\w/.])')
 #: A string that is wholly a relative path, e.g. ``util/ci_timing.py`` or ``tests/cli``.
 _PATH_TEXT = re.compile(r'[\w.-]+(?:/[\w.-]+)*/?\Z')
-#: A string that is wholly a dotted module name, e.g. ``tests.project.test_setup``.
+#: A string that is wholly a dotted module name, e.g. ``tests.project.test_no_setup_py_2061``.
 _DOTTED_NAME = re.compile(r'[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)+\Z')
 
 #: What a module asks of the running interpreter when it branches on it:
