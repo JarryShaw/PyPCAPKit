@@ -29,10 +29,11 @@ superseded, it sends SIGTERM, then SIGKILL after ``--grace`` seconds, to the
 session or, with ``--scope UNIT``, to every process of that systemd scope
 (``sudo -n systemctl kill``): ``COMMAND`` then starts a root-owned ``sudo``, and
 the tests run in the scope as the runner's user, out of reach of a signal to
-the session's group (:func:`stop`). Where ``COMMAND`` exits, it writes the notice and the summary
-line and exits 0. Otherwise it exits with ``COMMAND``'s own status, ``128 + N``
-for a signal ``N`` as a shell reports it, so a test failure on a current commit
-reads as it did without the watcher. SIGINT, SIGTERM and SIGHUP sent to the
+the session's group (:func:`stop`). Where ``COMMAND`` exits, it writes the notice, the summary
+line and ``stopped=true`` to ``$GITHUB_OUTPUT``, and exits 0: a stopped pytest writes no JUnit
+file, so the upload after it reads the output and expects none (#2073). Otherwise it exits
+with ``COMMAND``'s own status, ``128 + N`` for a signal ``N`` as a shell reports it, so a test
+failure on a current commit reads as it did without the watcher. SIGINT, SIGTERM and SIGHUP sent to the
 watcher are passed on to ``COMMAND``.
 
 Every wait is bounded. Where ``COMMAND`` outlives SIGKILL by ``--kill-wait``
@@ -270,6 +271,17 @@ def gate(context: 'Context', api: 'Api', env: 'Mapping[str, str]', out: 'IO[str]
     return 0
 
 
+def stopped(env: 'Mapping[str, str]', out: 'IO[str]') -> 'None':
+    """``stopped=true`` in ``$GITHUB_OUTPUT``, so a later step can tell a stopped run from one that ran (#2073)."""
+    output = env.get('GITHUB_OUTPUT')
+    if output:
+        try:
+            with open(output, 'a', encoding='utf-8') as file:
+                print('stopped=true', file=file)
+        except OSError as error:
+            print(f'Could not write the step output: {error}', file=out, flush=True)
+
+
 def exit_status(returncode: 'int') -> 'int':
     """``returncode`` as a shell reports it: ``128 + N`` for a process ended by signal ``N``."""
     return 128 - returncode if returncode < 0 else returncode
@@ -379,6 +391,7 @@ def watch(command: 'Sequence[str]', context: 'Context', api: 'Api', env: 'Mappin
             if stop(child, grace, scope=scope, kill_wait=kill_wait, run=run, kill=kill):
                 elapsed = int(clock() - started)
                 report(verdict, f'The tests were stopped after {elapsed} s, and this step succeeds.', env, out)
+                stopped(env, out)
                 return 0
             where = f'the scope {scope} and ' if scope else ''
             reason = (f'{verdict.reason}, but SIGTERM and SIGKILL to {where}the session of pid {child.pid} '
