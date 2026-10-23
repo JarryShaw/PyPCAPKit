@@ -543,71 +543,14 @@ jobs:
           fi
 
       # A commit of its own on ``main``, only ever fast-forwarded by a plain push
-      # of one commit onto the tip just fetched. It sets ``conda/build`` to 0, so
-      # the next Conda Update bump of this version is ``+1`` -- unless:
-      #
-      #   * this run's commit is not on ``main`` -- left alone, with a warning;
-      #   * the tip already says 0 -- usual, as util/bump_version.py writes 0;
-      #   * the tip carries another ``__version__`` -- its counter, left alone;
-      #   * origin has a ``conda-<version>+N`` tag other than ``+0`` -- rewinding
-      #     would let a later bump reuse that number; left alone, with a warning.
-      #
-      # A rejected push means ``main`` moved: the decision is made again from a
-      # fresh fetch, three times at most.
+      # of one commit onto the tip just fetched, setting ``conda/build`` to 0 so
+      # the next Conda Update bump of this version is ``+1``. The script's
+      # docstring says when it leaves ``main`` alone instead (#1967).
       - name: Reset Build Number
         env:
           PCAPKIT_VERSION: ${{ needs.version_check.outputs.PCAPKIT_VERSION }}
           PCAPKIT_RUN_SHA: ${{ github.sha }}
-        run: |
-          set -euo pipefail
-
-          run_commit="$(git rev-parse --verify "${PCAPKIT_RUN_SHA}^{commit}")"
-          run_version="$(git show "${run_commit}:pcapkit/__init__.py" | sed -n 's/^__version__ = //p')"
-          builds="refs/tags/conda-${PCAPKIT_VERSION}+"
-
-          for attempt in 1 2 3; do
-            git fetch --quiet origin "+refs/heads/main:refs/remotes/origin/main"
-            tip="$(git rev-parse refs/remotes/origin/main)"
-
-            if ! git merge-base --is-ancestor "$run_commit" "$tip"; then
-              echo "::warning title=conda/build not reset::${run_commit} is not on main (tip ${tip}), so main is left alone; its conda/build still reads what it did."
-              exit 0
-            fi
-            tip_build="$(git show "${tip}:conda/build" | tr -d '[:space:]')"
-            if [ "$tip_build" = "0" ]; then
-              echo "::notice title=No conda build reset needed::main (${tip}) already carries conda/build 0."
-              exit 0
-            fi
-            tip_version="$(git show "${tip}:pcapkit/__init__.py" | sed -n 's/^__version__ = //p')"
-            if [ "$tip_version" != "$run_version" ]; then
-              echo "::notice title=conda/build not reset::main (${tip}) has moved on to __version__ ${tip_version}; its conda/build ${tip_build} counts that version's builds."
-              exit 0
-            fi
-            tagged="$(git ls-remote --tags --refs origin "${builds}*")"
-            taken=""
-            while read -r _ ref; do
-              build="${ref#"$builds"}"
-              if [ "$build" != "$ref" ] && [ "$build" != "0" ]; then
-                taken="${taken:+${taken} }+${build}"
-              fi
-            done <<< "$tagged"
-            if [ -n "$taken" ]; then
-              echo "::warning title=conda/build not reset::conda-${PCAPKIT_VERSION} is already tagged at ${taken}; resetting conda/build ${tip_build} on main (${tip}) to 0 would let a later Conda Update bump reuse one of those build numbers."
-              exit 0
-            fi
-
-            git switch --quiet --force --detach "$tip"
-            printf 0 > conda/build
-            git commit --quiet -m"Reset conda build number" -m"conda-${PCAPKIT_VERSION}+0 was tagged at ${run_commit}." -- conda/build
-            if git push origin "HEAD:refs/heads/main"; then
-              echo "conda/build reset from ${tip_build} to 0 on main in $(git rev-parse HEAD), on top of ${tip}"
-              exit 0
-            fi
-            echo "push to main rejected on attempt ${attempt}; fetching again"
-          done
-
-          echo "::error title=conda/build not reset::main kept moving; three pushes were rejected. ${run_commit} is tagged regardless -- reset conda/build on main by hand if no conda-${PCAPKIT_VERSION}+N tag other than +0 exists."
-          exit 1
+        run: python3 util/release_reset_build.py
 
   pypi:
     name: PyPI distribution for Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}
