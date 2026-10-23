@@ -52,6 +52,13 @@ It fetches with :mod:`requests`, as util/ci_timing.py does. Without it the
 script still runs, and every request fails, so the commit counts as current:
 the gate writes ``current=true``, and the watcher runs the tests to the end.
 
+``watch --summary-copy PATH`` appends each summary line it writes to ``PATH``
+too, the job's copy of its summary that experimental.yml uploads for
+util/check_suite_report.py to fold into its report (#2078). It is an option,
+not util/_actions.py's ``JOB_SUMMARY_COPY`` in the step's environment, because
+``COMMAND`` inherits the watcher's environment, and the tests it runs must not
+write to the copy.
+
 """
 
 from __future__ import annotations
@@ -352,12 +359,17 @@ def stop(child: 'subprocess.Popen[bytes]', grace: 'float', *, scope: 'str' = '',
 def watch(command: 'Sequence[str]', context: 'Context', api: 'Api', env: 'Mapping[str, str]', out: 'IO[str]', *,
           interval: 'float' = INTERVAL, grace: 'float' = GRACE, scope: 'str' = '', kill_wait: 'float' = KILL_WAIT,
           run: 'Callable[[Sequence[str]], int]' = run_command, kill: 'Callable[[int, int], None]' = signal_session,
-          clock: 'Callable[[], float]' = time.monotonic) -> 'int':
+          clock: 'Callable[[], float]' = time.monotonic, summary_copy: 'str' = '') -> 'int':
     """Run ``command``, stopping it once ``context``'s commit is superseded.
 
     :data:`STOP_FAILED` where it cannot be stopped: see the module's docstring.
+    Each summary line goes to ``summary_copy`` too, where given (#2078): it
+    joins ``env``, which the watcher's own writes read, and never reaches the
+    command, whose environment is the watcher's process environment.
 
     """
+    if summary_copy:
+        env = dict(env, **{_actions.SUMMARY_COPY: summary_copy})
     started = clock()
     # A session of its own, so a signal to the group reaches every process the command started.
     child = subprocess.Popen(list(command), start_new_session=True)  # nosec B603 pylint: disable=consider-using-with
@@ -414,6 +426,8 @@ def main(argv: 'Optional[List[str]]' = None, *, env: 'Optional[Mapping[str, str]
     watcher.add_argument('--grace', type=float, default=GRACE, help='seconds from SIGTERM to SIGKILL')
     watcher.add_argument('--kill-wait', type=float, default=KILL_WAIT, help='seconds to wait after SIGKILL')
     watcher.add_argument('--scope', default='', help='the systemd scope the command runs its tests in, if any')
+    watcher.add_argument('--summary-copy', default='', help="the job's copy of its summary, which gets each summary "
+                                                            'line too (#2078)')
     watcher.add_argument('command', nargs=argparse.REMAINDER, help='the command, after --')
     args = parser.parse_args(argv)
 
@@ -428,7 +442,7 @@ def main(argv: 'Optional[List[str]]' = None, *, env: 'Optional[Mapping[str, str]
         if not command:
             parser.error('watch needs a command after --')
         return watch(command, context, api, env, out, interval=args.interval, grace=args.grace, scope=args.scope,
-                     kill_wait=args.kill_wait, run=run, kill=kill)
+                     kill_wait=args.kill_wait, run=run, kill=kill, summary_copy=args.summary_copy)
     parser.error('name an action: check or watch')
     return 2  # unreachable: parser.error exits
 
