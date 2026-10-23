@@ -4,7 +4,7 @@
 The install step of each :file:`.github/workflows/unit-tests.yml` job that installs
 the package -- ``test``, ``integration``, ``pypcap-parity`` (and so their KTLO
 twins), ``unittest-ordering``, ``project-tests`` and ``gate`` -- and of the
-``experimental`` job of :file:`.github/workflows/experimental.yml` and the
+``experimental`` and ``windows`` jobs of :file:`.github/workflows/experimental.yml` and the
 ``compatibility`` job of :file:`.github/workflows/python-compatibility.yml` runs,
 from the checkout's root and on the leg's own interpreter::
 

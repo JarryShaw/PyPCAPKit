@@ -530,7 +530,8 @@ class TestTheExperimentalLegsAreAWorkflowOfTheirOwn(unittest.TestCase):
         # #2030: the last step but the two that name and upload the job's summary.
         self.assertEqual([entry['name'] for entry in spec['steps'][-3:]],
                          ['Experimental summary', 'Name the job summary', 'Upload the job summary'])
-        expected = {'experimental.yml': ['experimental'],
+        # #2060: the Windows leg's job, as tests/project/test_windows_test_leg_2060.py pins.
+        expected = {'experimental.yml': ['experimental', 'windows'],
                     'unit-tests.yml': ['test-ktlo', 'integration-ktlo', 'pypcap-parity-ktlo']}
         for name in ('unit-tests.yml', 'experimental.yml'):
             with self.subTest(workflow=name):

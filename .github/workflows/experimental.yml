@@ -9,7 +9,8 @@ name: Experimental Tests
 # `needs:` one in another workflow.
 #
 # Its check names, `Python <version> (experimental)`, are the ones the legs had
-# in unit-tests.yml; no required context of ruleset 23497679 names one.
+# in unit-tests.yml, and `windows`'s is `Python <latest> on Windows
+# (experimental)` (#2060); no required context of ruleset 23497679 names one.
 #
 # The same events and `changes` job as unit-tests.yml, so a docs-only pull
 # request skips the legs here as it skips `test` there.
@@ -593,6 +594,135 @@ jobs:
         shell: bash
         env:
           JOB_NAME: Python ${{ matrix.python-version }} (experimental)
+        run: if [ -s "$RUNNER_TEMP/job-summary.md" ]; then printf '%s\n' "$JOB_NAME" > "$RUNNER_TEMP/job-summary.name"; fi
+
+      - name: Upload the job summary
+        if: ${{ always() }}
+        continue-on-error: true
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: job-summary-${{ github.job }}-${{ strategy.job-index }}
+          path: |
+            ${{ runner.temp }}/job-summary.md
+            ${{ runner.temp }}/job-summary.name
+          if-no-files-found: ignore
+          retention-days: 7
+
+  # #2060: the unit tier on Windows before the win-64 conda package is
+  # published, so its first release has had a test run. One leg, on `latest`,
+  # the newest CPython the conda builds target. Non-blocking by `experimental`'s
+  # mechanics: every step that can fail is `continue-on-error`, the long ones
+  # have caps under the job's, `Experimental summary` reports each failure as a
+  # warning, and the job-level guard covers a lost runner. None of
+  # `experimental`'s Linux containment runs here: no scope or `prlimit`, nor
+  # util/cap_file_size.py, which needs `resource`; no resource monitor, which
+  # reads /proc; no superseded watcher, which signals a process group. So the
+  # tests' cap is the step's own. Every `run:` is Git Bash's.
+  windows:
+    name: Python ${{ needs.python-versions.outputs.latest }} on Windows (experimental)
+    if: >-
+      ${{ !cancelled() && needs.changes.result == 'success' && needs.python-versions.result == 'success'
+      && needs.current.outputs.current != 'false' && needs.changes.outputs.code != 'false' }}
+    needs: [current, changes, python-versions]
+    runs-on: windows-latest
+    timeout-minutes: 80
+    continue-on-error: true
+    env:
+      ANNOTATION_LEVEL: warning
+
+    steps:
+      # The image's Git checks text out with CRLF, which `* text=auto` leaves to
+      # it; LF keeps the tree the tests read the one the other legs read.
+      - name: Keep LF line endings
+        id: eol
+        continue-on-error: true
+        shell: bash
+        run: |
+          git config --global core.autocrlf false
+          git config --global core.eol lf
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        id: checkout
+        continue-on-error: true
+
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+        id: python
+        if: ${{ steps.checkout.outcome == 'success' }}
+        continue-on-error: true
+        timeout-minutes: 5
+        with:
+          python-version: ${{ needs.python-versions.outputs.latest }}
+          cache: pip
+
+      - name: Install package and test dependencies
+        id: install
+        if: ${{ steps.python.outcome == 'success' }}
+        continue-on-error: true
+        timeout-minutes: 10
+        shell: bash
+        env:
+          LEG: Python ${{ needs.python-versions.outputs.latest }} on Windows (experimental, non-blocking)
+        run: python util/pip_install.py -e '.[test,DPKT,crypto,NGAP]'
+
+      - name: Report available parallelism
+        id: parallelism
+        if: ${{ steps.install.outcome == 'success' }}
+        continue-on-error: true
+        shell: bash
+        run: python -c "import os; print('cpu_count', os.cpu_count())"
+
+      # `experimental`'s selection, the `ALL` tier (#1958), asked of
+      # tests/_tiers.py on the leg's own CPython, as `test` asks it.
+      - name: Run unit tests
+        id: tests
+        if: ${{ steps.install.outcome == 'success' }}
+        continue-on-error: true
+        timeout-minutes: 60
+        shell: bash
+        run: |
+          if ! skipped=$(python -c "from tests._tiers import latest_tier_paths; print(' '.join(latest_tier_paths()))"); then
+            echo "::${ANNOTATION_LEVEL} title=Could not compute the LATEST tier::tests._tiers.latest_tier_paths() failed -- see the traceback above."
+            exit 1
+          fi
+          set -- -q -n auto --dist load \
+            --durations=30 --durations-min=1.0 --junitxml="$RUNNER_TEMP/junit.xml" \
+            --ignore=tests/integration \
+            --ignore-glob='*_runtime.py' \
+            --ignore-glob='*_regression.py'
+          for module in $skipped; do
+            set -- "$@" --ignore="$module"
+          done
+          python -m pytest "$@"
+
+      - name: Upload test timings
+        if: ${{ !cancelled() && steps.install.outcome == 'success' }}
+        continue-on-error: true
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: junit-experimental-windows-${{ needs.python-versions.outputs.latest }}
+          path: ${{ runner.temp }}/junit.xml
+          if-no-files-found: warn
+          retention-days: 14
+
+      # `experimental`'s, on setup-python's `python`, or the image's where that
+      # failed, since Windows has no /usr/bin/python3, as cron-conda.yml's
+      # `Windows summary` runs it (#2060).
+      - name: Experimental summary
+        if: ${{ !cancelled() }}
+        continue-on-error: true
+        shell: bash
+        env:
+          LEG: Python ${{ needs.python-versions.outputs.latest }} on Windows (experimental, non-blocking)
+          STEPS: ${{ toJSON(steps) }}
+          JOB_SUMMARY_COPY: ${{ runner.temp }}/job-summary.md
+        run: python util/leg_summary.py experimental
+
+      - name: Name the job summary
+        if: ${{ always() }}
+        continue-on-error: true
+        shell: bash
+        env:
+          JOB_NAME: Python ${{ needs.python-versions.outputs.latest }} on Windows (experimental)
         run: if [ -s "$RUNNER_TEMP/job-summary.md" ]; then printf '%s\n' "$JOB_NAME" > "$RUNNER_TEMP/job-summary.name"; fi
 
       - name: Upload the job summary
