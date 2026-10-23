@@ -3985,8 +3985,9 @@ member for it (<a class="extlink-issue reference external" href="https://github.
 <span class="sig-name descname"><span class="pre">undefined</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">0</span></span><a class="headerlink" href="#pcapkit.const.reg.apptype.apptype.TransportProtocol.undefined" title="Link to this definition">¶</a></dt>
 <dd><p>No transport protocol. <code class="docutils literal notranslate"><span class="pre">TransportProtocol(0)</span> <span class="pre">is</span> <span class="pre">undefined</span></code> and
 <code class="docutils literal notranslate"><span class="pre">bool(undefined)</span></code> is <code class="docutils literal notranslate"><span class="pre">False</span></code>; it is the <code class="docutils literal notranslate"><span class="pre">proto</span></code> sentinel default
-for <code class="docutils literal notranslate"><span class="pre">__transport__</span></code>, <code class="docutils literal notranslate"><span class="pre">__new__</span></code>, <code class="docutils literal notranslate"><span class="pre">get</span></code> and <code class="docutils literal notranslate"><span class="pre">get_all</span></code>, and what
-the base registry’s <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> extends unassigned/reserved rows from.</p>
+for <code class="docutils literal notranslate"><span class="pre">__transport__</span></code>, <code class="docutils literal notranslate"><span class="pre">__new__</span></code>, <code class="docutils literal notranslate"><span class="pre">get</span></code> and <code class="docutils literal notranslate"><span class="pre">get_all</span></code>. The base
+registry’s <code class="docutils literal notranslate"><span class="pre">_missing_</span></code> answered its unassigned and reserved spans with
+it until <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2048">#2048</a>; they answer with the asking registry’s transport.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -7187,7 +7188,8 @@ with no row of its own resolves to an unregistered member that is
 not added to the registry (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a>). Its name is the label of
 the IANA span holding the port, whatever that label is –
 <code class="docutils literal notranslate"><span class="pre">reserved</span></code>, <code class="docutils literal notranslate"><span class="pre">unassigned</span></code>, or a service name such as <code class="docutils literal notranslate"><span class="pre">swx</span></code> –
-or <code class="docutils literal notranslate"><span class="pre">unknown</span></code> when no span holds it.</p>
+or <code class="docutils literal notranslate"><span class="pre">unknown</span></code> when no span holds it, either way carrying this
+registry’s own transport (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2048">#2048</a>).</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><strong>ValueError</strong></a> – If called on a class that holds no members, i.e. on

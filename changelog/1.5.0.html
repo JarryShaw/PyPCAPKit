@@ -860,6 +860,14 @@ nothing (<a class="extlink-issue reference external" href="https://github.com/Ja
 as <a class="reference internal" href="../pcapkit/const/http.html#pcapkit.const.http.method.Method.get" title="pcapkit.const.http.method.Method.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Method.get()</span></code></a> does. <code class="docutils literal notranslate"><span class="pre">get(b'\x01')</span></code> minted a member keyed by <code class="docutils literal notranslate"><span class="pre">bytes</span></code>, and
 <code class="docutils literal notranslate"><span class="pre">get(-1)</span></code> raised <code class="docutils literal notranslate"><span class="pre">AttributeError</span></code> whatever its <code class="docutils literal notranslate"><span class="pre">default</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1824">#1824</a>,
 <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/1826">#1826</a>).</p></li>
+<li><p>IANA’s port spans that name no transport answer
+<a class="reference internal" href="../pcapkit/const/reg.html#pcapkit.const.reg.apptype.apptype.AppType.get" title="pcapkit.const.reg.apptype.apptype.AppType.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">AppType.get()</span></code></a> with the asking registry’s transport rather than
+<code class="docutils literal notranslate"><span class="pre">TransportProtocol.undefined</span></code>, as its <code class="docutils literal notranslate"><span class="pre">unknown</span></code> fallback for a port in no span
+already did: <code class="docutils literal notranslate"><span class="pre">TCP.get(8012)</span></code> is <code class="docutils literal notranslate"><span class="pre">unassigned</span> <span class="pre">[tcp]</span></code>. A port IANA lists on other
+transports only stays <code class="docutils literal notranslate"><span class="pre">unknown</span></code>: 8011 is <code class="docutils literal notranslate"><span class="pre">reserved</span> <span class="pre">[tcp]</span></code> and
+<code class="docutils literal notranslate"><span class="pre">bier-echo</span> <span class="pre">[udp]</span></code>, and <code class="docutils literal notranslate"><span class="pre">unknown</span> <span class="pre">[dccp]</span></code> and <code class="docutils literal notranslate"><span class="pre">unknown</span> <span class="pre">[sctp]</span></code>. Lookups still
+mint nothing (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/860">#860</a>) and an out-of-range port still raises (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2048">#2048</a>,
+<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2052">#2052</a>).</p></li>
 </ul>
 </section>
 </section>

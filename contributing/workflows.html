@@ -616,7 +616,15 @@ itself, job by job from a version bump to a published package, is on
 <td><p><strong>Unit Tests</strong></p></td>
 <td><p>–</p></td>
 </tr>
-<tr class="row-even"><td><p>CI Timing</p></td>
+<tr class="row-even"><td><p>CI Reports</p></td>
+<td><p><code class="file docutils literal notranslate"><span class="pre">ci-reports.yml</span></code></p></td>
+<td><p>–</p></td>
+<td><p>–</p></td>
+<td><p>–</p></td>
+<td><p><strong>Experimental Tests</strong>, <strong>Python Compatibility</strong></p></td>
+<td><p>–</p></td>
+</tr>
+<tr class="row-odd"><td><p>CI Timing</p></td>
 <td><p><code class="file docutils literal notranslate"><span class="pre">ci-timing.yml</span></code></p></td>
 <td><p>–</p></td>
 <td><p>–</p></td>
@@ -624,7 +632,7 @@ itself, job by job from a version bump to a published package, is on
 <td><p>–</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">workflow_dispatch</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p>Python Versions</p></td>
+<tr class="row-even"><td><p>Python Versions</p></td>
 <td><p><code class="file docutils literal notranslate"><span class="pre">cron-python-versions.yml</span></code></p></td>
 <td><p>–</p></td>
 <td><p>–</p></td>
@@ -637,8 +645,8 @@ itself, job by job from a version bump to a published package, is on
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Only Coverage Comment fires <em>exclusively</em> on <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code>: it has
-nothing to do without a completed Unit Tests run. Each of the others
+<p>Only Coverage Comment and CI Reports fire <em>exclusively</em> on <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code>:
+neither has anything to do without a completed run to report. Each of the others
 that carry one pairs it with a direct trigger of its own – a Saturday
 <code class="docutils literal notranslate"><span class="pre">schedule</span></code> for Vendor Update, Conda Update and GitHub Pages, a <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag
 push for Create Release – for the path where no upstream run exists yet to
@@ -729,12 +737,17 @@ than starting a new one.</p>
     CH[&quot;Cron Head&lt;br/&gt;cron-head.yml&quot;]
     CC[&quot;Coverage Comment&lt;br/&gt;coverage-comment.yml&quot;]
     CR[&quot;Create Release&lt;br/&gt;create-release.yml&quot;]
+    EX[&quot;Experimental Tests&lt;br/&gt;experimental.yml&quot;]
+    PC[&quot;Python Compatibility&lt;br/&gt;python-compatibility.yml&quot;]
+    RP[&quot;CI Reports&lt;br/&gt;ci-reports.yml&quot;]
 
     UT ==&gt;|workflow_run: completed| VU
     UT ==&gt;|workflow_run: completed| CU
     UT ==&gt;|workflow_run: completed| GP
     VU ==&gt;|workflow_run: completed| CR
     UT ==&gt;|workflow_run: completed| CC
+    EX ==&gt;|workflow_run: completed| RP
+    PC ==&gt;|workflow_run: completed| RP
 
     VU -.-&gt; CH
     CU -.-&gt; CH
@@ -774,13 +787,17 @@ re-derives the list:</p>
 <strong>Create Release</strong> fires on completion of <strong>Vendor Update</strong>.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/coverage-comment.yml</span></code>, its <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> trigger –
 <strong>Coverage Comment</strong> fires on completion of <strong>Unit Tests</strong>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">.github/workflows/ci-reports.yml</span></code>, its <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> trigger –
+<strong>CI Reports</strong> fires on completion of <strong>Experimental Tests</strong> and of <strong>Python
+Compatibility</strong>.</p></li>
 </ul>
 <p><code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> fires for <em>every</em> completion of the named workflow –
 success, failure, or skipped – and regardless of what triggered it,
 including a pull request’s own run of Unit Tests. Every
 downstream workflow therefore re-checks <code class="docutils literal notranslate"><span class="pre">github.event.workflow_run.event</span></code>
 and <code class="docutils literal notranslate"><span class="pre">.head_branch</span></code> (or, for Create Release and Coverage Comment,
-<code class="docutils literal notranslate"><span class="pre">.conclusion</span></code>) itself before doing anything with an outward effect; none of
+<code class="docutils literal notranslate"><span class="pre">.conclusion</span></code>; for CI Reports, the event alone) itself before doing anything
+with an outward effect; none of
 the filtering happens in the <code class="docutils literal notranslate"><span class="pre">on:</span></code> block.</p>
 <p>Those checks say nothing about <em>which</em> commit was verified. A <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code>
 checks out <code class="docutils literal notranslate"><span class="pre">github.sha</span></code>, <code class="docutils literal notranslate"><span class="pre">main</span></code>’s tip when the event is raised, not
@@ -1275,8 +1292,9 @@ Its <code class="docutils literal notranslate"><span class="pre">outcome</span><
 and <code class="docutils literal notranslate"><span class="pre">required-checks</span></code> read <code class="docutils literal notranslate"><span class="pre">success</span></code>. A step that needs an earlier one’s work
 waits on that step’s <code class="docutils literal notranslate"><span class="pre">outcome</span></code>: a leg that cannot install stops there, and a
 <code class="docutils literal notranslate"><span class="pre">pypi</span></code> leg stops at its first failure.</p></li>
-<li><p>The last step, <code class="docutils literal notranslate"><span class="pre">KTLO</span> <span class="pre">summary</span></code>, runs on KTLO legs only and reports each failed
-<code class="docutils literal notranslate"><span class="pre">outcome</span></code> as a warning and a job-summary line, through
+<li><p>The last step but the job summary’s (see <a class="reference internal" href="#ci-reports">CI Reports</a>), <code class="docutils literal notranslate"><span class="pre">KTLO</span> <span class="pre">summary</span></code>,
+runs on KTLO legs only and reports each failed <code class="docutils literal notranslate"><span class="pre">outcome</span></code> as a warning and a
+job-summary line, through
 <code class="file docutils literal notranslate"><span class="pre">util/leg_summary.py</span></code> (see <a class="reference internal" href="#workflow-scripts-1967">Workflow Scripts (#1967)</a>). A step’s own annotations take
 <code class="docutils literal notranslate"><span class="pre">ANNOTATION_LEVEL</span></code>: <code class="docutils literal notranslate"><span class="pre">warning</span></code> on a KTLO leg, <code class="docutils literal notranslate"><span class="pre">error</span></code> on a supported one.
 <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code>’ KTLO cells, a step of their own with <code class="docutils literal notranslate"><span class="pre">continue-on-error:</span> <span class="pre">true</span></code>,
@@ -1331,7 +1349,8 @@ else: no <code class="docutils literal notranslate"><span class="pre">integratio
 context. They were legs of <code class="docutils literal notranslate"><span class="pre">test</span></code> until <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1732">#1732</a>, which moved them to a
 workflow of their own, by the owner’s ruling that nothing waits on them. <strong>That
 workflow reports separately and holds up nothing</strong>: a job cannot <code class="docutils literal notranslate"><span class="pre">needs:</span></code> one in
-another workflow, nothing calls it, and no <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> names it, so the Unit
+another workflow, nothing calls it, and no <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> names it but CI
+Reports’, which posts its finished runs (see <a class="reference internal" href="#ci-reports">CI Reports</a>), so the Unit
 Tests run completes without it, and with it <code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code>,
 <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code> and the workflows that wait on Unit Tests completing
 (<code class="docutils literal notranslate"><span class="pre">coverage-comment.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">deploy-pages.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">cron-vendor.yml</span></code> and
@@ -1378,7 +1397,7 @@ API the script cannot read counts as current, so it never stops the tests, and i
 asks with <code class="docutils literal notranslate"><span class="pre">If-None-Match</span></code>, as a <code class="docutils literal notranslate"><span class="pre">304</span></code> answer costs no rate limit.</p>
 <p>The legs never block, by the KTLO mechanics above: every step that can fail has
 <code class="docutils literal notranslate"><span class="pre">continue-on-error:</span> <span class="pre">true</span></code>, their annotations are warnings, and <code class="docutils literal notranslate"><span class="pre">Experimental</span>
-<span class="pre">summary</span></code>, the job’s last step, reports each failed step. A failure no step
+<span class="pre">summary</span></code>, the job’s last step but the job summary’s, reports each failed step. A failure no step
 contains, such as a lost runner, fails the job, and the job’s own
 <code class="docutils literal notranslate"><span class="pre">continue-on-error:</span> <span class="pre">true</span></code> keeps it from failing the run: it “prevents a workflow
 run from failing when a job fails” (<a class="reference external" href="https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idcontinue-on-error">Workflow syntax</a>),
@@ -1481,7 +1500,7 @@ not those that mention one, such as a docstring a traceback prints, and xdist’
 <span class="pre">minutes</span></code>, <code class="docutils literal notranslate"><span class="pre">tests</span> <span class="pre">raised</span> <span class="pre">MemoryError</span></code> or <code class="docutils literal notranslate"><span class="pre">tests</span> <span class="pre">lost</span> <span class="pre">an</span> <span class="pre">xdist</span> <span class="pre">worker</span></code>, each a
 warning of its own. A timeout is exit 124, or 137 with no OOM kill
 after 110 minutes: <code class="docutils literal notranslate"><span class="pre">--kill-after</span></code>’s SIGKILL to a teardown SIGINT did not end, where an
-OOM kill of pytest exits 137 too. <code class="docutils literal notranslate"><span class="pre">Experimental</span> <span class="pre">summary</span></code>, the job’s last step and the
+OOM kill of pytest exits 137 too. <code class="docutils literal notranslate"><span class="pre">Experimental</span> <span class="pre">summary</span></code>, the job’s last step but the job summary’s and the
 KTLO summary’s script, still warns of every failed step, <code class="docutils literal notranslate"><span class="pre">tests</span></code> included. The 2 GiB,
 <code class="docutils literal notranslate"><span class="pre">-n</span> <span class="pre">3</span></code> and 12G are estimates for a 16 GB, 4-CPU runner until a run shows them. At 3
 workers rather than 4, GraalPy’s tests should take about 117-151 minutes (an inference
@@ -1707,32 +1726,48 @@ job’s <code class="docutils literal notranslate"><span class="pre">ANNOTATION_
 <tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">util/discussion_report.py</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">Post</span> <span class="pre">the</span> <span class="pre">report</span> <span class="pre">to</span> <span class="pre">Discussions</span></code> in the <code class="docutils literal notranslate"><span class="pre">discussion</span></code> job of
 <code class="docutils literal notranslate"><span class="pre">ci-timing.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">cron-vendor.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">cron-conda.yml</span></code>,
-<code class="docutils literal notranslate"><span class="pre">cron-python-versions.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">lint.yml</span></code> and <code class="docutils literal notranslate"><span class="pre">deploy-pages.yml</span></code> (see
-<a class="reference internal" href="#ci-reports">CI Reports</a>).</p></td>
+<code class="docutils literal notranslate"><span class="pre">cron-python-versions.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">lint.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">deploy-pages.yml</span></code>,
+<code class="docutils literal notranslate"><span class="pre">codeql-analysis.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">coverage-comment.yml</span></code> and <code class="docutils literal notranslate"><span class="pre">ci-reports.yml</span></code>
+(see <a class="reference internal" href="#ci-reports">CI Reports</a>).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/apt_packages.py</span></code></p></td>
+<tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/check_suite_report.py</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Write</span> <span class="pre">the</span> <span class="pre">run</span> <span class="pre">report</span></code> in the <code class="docutils literal notranslate"><span class="pre">discussion</span></code> job of
+<code class="docutils literal notranslate"><span class="pre">coverage-comment.yml</span></code>, for Unit Tests, and of <code class="docutils literal notranslate"><span class="pre">ci-reports.yml</span></code>, for
+Experimental Tests and Python Compatibility (see <a class="reference internal" href="#ci-reports">CI Reports</a>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">util/apt_packages.py</span></code></p></td>
 <td><p>The apt steps of <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> and <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code>
 (and so its KTLO twin): the plan, seed, install and collect steps, as
 <code class="docutils literal notranslate"><span class="pre">apt_packages.py</span> <span class="pre">plan</span></code>, <code class="docutils literal notranslate"><span class="pre">seed</span></code>, <code class="docutils literal notranslate"><span class="pre">install</span></code> and <code class="docutils literal notranslate"><span class="pre">collect</span></code>. The
 <code class="docutils literal notranslate"><span class="pre">actions/cache</span></code> steps and the AppArmor step (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2019">#2019</a>) stay as they were.</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">util/_actions.py</span></code></p></td>
+<tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/_actions.py</span></code></p></td>
 <td><p>No step: it is imported by the scripts that share its annotations, step
 outputs, job summary lines and logged runs (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2047">#2047</a>).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/codeql_report.py</span></code></p></td>
+<tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">util/codeql_report.py</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">Write</span> <span class="pre">the</span> <span class="pre">report</span></code> in <code class="docutils literal notranslate"><span class="pre">codeql-analysis.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">discussion</span></code> (see <a class="reference internal" href="#ci-reports">CI
 Reports</a>).</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">util/release_tags.py</span></code></p></td>
+<tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/release_tags.py</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">Check</span> <span class="pre">the</span> <span class="pre">release</span> <span class="pre">tags</span> <span class="pre">name</span> <span class="pre">this</span> <span class="pre">run's</span> <span class="pre">commit</span></code> in <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s
 <code class="docutils literal notranslate"><span class="pre">github</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code>, as <code class="docutils literal notranslate"><span class="pre">release_tags.py</span> <span class="pre">check</span></code>, and <code class="docutils literal notranslate"><span class="pre">Check</span>
 <span class="pre">which</span> <span class="pre">commit</span> <span class="pre">the</span> <span class="pre">version's</span> <span class="pre">tag</span> <span class="pre">names</span></code> in its <code class="docutils literal notranslate"><span class="pre">version_check</span></code>, as
 <code class="docutils literal notranslate"><span class="pre">release_tags.py</span> <span class="pre">owner</span></code> (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1634">#1634</a>, <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1748">#1748</a>).</p></td>
 </tr>
-<tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/release_upload.py</span></code></p></td>
+<tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">util/release_upload.py</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">Upload</span> <span class="pre">package</span> <span class="pre">to</span> <span class="pre">GitHub</span> <span class="pre">Release</span></code> in <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and
 <code class="docutils literal notranslate"><span class="pre">conda</span></code> (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1640">#1640</a>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/release_status.py</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Report</span> <span class="pre">why</span> <span class="pre">this</span> <span class="pre">run</span> <span class="pre">did</span> <span class="pre">or</span> <span class="pre">did</span> <span class="pre">not</span> <span class="pre">release</span> <span class="pre">anything</span></code> in
+<code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">release_status</span></code>, on the image’s <code class="docutils literal notranslate"><span class="pre">python3</span></code>
+after a checkout of <code class="file docutils literal notranslate"><span class="pre">util/</span></code> alone (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/888">#888</a>).</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">util/release_vendor_update.py</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Read</span> <span class="pre">whether</span> <span class="pre">its</span> <span class="pre">vendor-update</span> <span class="pre">job</span> <span class="pre">ran</span></code> in <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s
+<code class="docutils literal notranslate"><span class="pre">vendor_update</span></code>, on the image’s <code class="docutils literal notranslate"><span class="pre">python3</span></code> after a checkout of
+<code class="file docutils literal notranslate"><span class="pre">util/</span></code> alone (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1748">#1748</a>).</p></td>
 </tr>
 </tbody>
 </table>
@@ -1836,34 +1871,65 @@ run failed by a HARD threshold is posted all the same, on <code class="docutils 
 a Python Versions run failed by its audit. The report steps of <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code>,
 <code class="docutils literal notranslate"><span class="pre">conda-update</span></code> and <code class="docutils literal notranslate"><span class="pre">detect</span></code> are <code class="docutils literal notranslate"><span class="pre">continue-on-error</span></code> on <code class="docutils literal notranslate"><span class="pre">!cancelled()</span></code>,
 and come last in each job.</p>
-<p>Unit Tests push runs post as <code class="docutils literal notranslate"><span class="pre">push</span></code> to <code class="docutils literal notranslate"><span class="pre">unit-tests:</span> <span class="pre">&lt;branch&gt;</span> <span class="pre">push</span> <span class="pre">runs</span></code>, so
-<code class="docutils literal notranslate"><span class="pre">main</span></code>’s thread is <code class="docutils literal notranslate"><span class="pre">unit-tests:</span> <span class="pre">main</span> <span class="pre">push</span> <span class="pre">runs</span></code>. <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> is a
-reusable workflow whose callers grant <code class="docutils literal notranslate"><span class="pre">contents:</span> <span class="pre">read</span></code>, so the post comes from
-<code class="docutils literal notranslate"><span class="pre">coverage-comment.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> relay instead: its <code class="docutils literal notranslate"><span class="pre">discussion</span></code> job
-takes a run whose event is <code class="docutils literal notranslate"><span class="pre">push</span></code>, and <code class="docutils literal notranslate"><span class="pre">comment</span></code> keeps a pull request’s. Each
-job holds its own scopes, <code class="docutils literal notranslate"><span class="pre">discussion</span></code> alone <code class="docutils literal notranslate"><span class="pre">discussions:</span> <span class="pre">write</span></code>, with
-<code class="docutils literal notranslate"><span class="pre">contents:</span> <span class="pre">read</span></code> for a checkout of the default branch’s script, never the run’s
-head, and <code class="docutils literal notranslate"><span class="pre">checks:</span> <span class="pre">read</span></code> for the run’s check suite. Its <code class="docutils literal notranslate"><span class="pre">Write</span> <span class="pre">the</span> <span class="pre">run</span> <span class="pre">report</span></code>
-step reads that suite in a single GraphQL call rather than any artifact, and
-renders every name and annotation it quotes as a code span. The report links the
-run, names its commit and conclusion, the jobs that did not pass, and the warning
-and failure annotations of the jobs that did. The conclusion becomes the
-<code class="docutils literal notranslate"><span class="pre">--status</span></code>: <code class="docutils literal notranslate"><span class="pre">success</span></code>, <code class="docutils literal notranslate"><span class="pre">cancelled</span></code> (and <code class="docutils literal notranslate"><span class="pre">stale</span></code>), <code class="docutils literal notranslate"><span class="pre">skipped</span></code> (and
-<code class="docutils literal notranslate"><span class="pre">neutral</span></code>), and <code class="docutils literal notranslate"><span class="pre">failure</span></code> for anything else, <code class="docutils literal notranslate"><span class="pre">timed_out</span></code> and
-<code class="docutils literal notranslate"><span class="pre">startup_failure</span></code> among them. A green run reports <code class="docutils literal notranslate"><span class="pre">warning</span></code> where a job failed
-without failing it, or a job that passed holds a warning or failure annotation, as
-a KTLO leg whose tests fail does (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1672">#1672</a>). The exception is the
-step’s <code class="docutils literal notranslate"><span class="pre">EXPECTED</span></code> list: the annotations a job writes on every run by design,
-today the install failures of the KTLO legs that cannot install, which neither
-count nor appear in the report. Each entry is a job, a level and a title prefix,
-an empty prefix matching only an empty title, so a reworded message still
-matches, and anything else those jobs write still counts.
-<code class="file docutils literal notranslate"><span class="pre">tests/project/test_unit_tests_push_reports_2030.py</span></code> pins the list, so a
-leg that starts to install, or a new by-design annotation, changes it and the
-pin together. The script labels the
-run it links with <code class="docutils literal notranslate"><span class="pre">GITHUB_WORKFLOW</span></code>, so the post step sets <code class="docutils literal notranslate"><span class="pre">Unit</span> <span class="pre">Tests</span></code> for
-that one command. A push relay’s concurrency group is its own run’s, since a
-group cancels a pending run when a newer one joins it.</p>
+<p>The test workflows report through a <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> relay, so none of their own
+jobs gains a write scope: <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> is a reusable workflow whose callers
+grant <code class="docutils literal notranslate"><span class="pre">contents:</span> <span class="pre">read</span></code>. Unit Tests’ push runs go through
+<code class="docutils literal notranslate"><span class="pre">coverage-comment.yml</span></code>, whose <code class="docutils literal notranslate"><span class="pre">discussion</span></code> job takes a run whose event is
+<code class="docutils literal notranslate"><span class="pre">push</span></code> while <code class="docutils literal notranslate"><span class="pre">comment</span></code> keeps a pull request’s. Experimental Tests’ and Python
+Compatibility’s go through <code class="docutils literal notranslate"><span class="pre">ci-reports.yml</span></code>, whose <code class="docutils literal notranslate"><span class="pre">discussion</span></code> job takes a
+<code class="docutils literal notranslate"><span class="pre">push</span></code> or <code class="docutils literal notranslate"><span class="pre">schedule</span></code> run and never a pull request’s. Both <code class="docutils literal notranslate"><span class="pre">discussion</span></code> jobs
+run the same steps, and alone hold <code class="docutils literal notranslate"><span class="pre">discussions:</span> <span class="pre">write</span></code>, with <code class="docutils literal notranslate"><span class="pre">contents:</span> <span class="pre">read</span></code>
+for a checkout of the default branch’s scripts, never the run’s head,
+<code class="docutils literal notranslate"><span class="pre">checks:</span> <span class="pre">read</span></code> for the run’s check suite and <code class="docutils literal notranslate"><span class="pre">actions:</span> <span class="pre">read</span></code> for its
+artifacts. A push run posts as <code class="docutils literal notranslate"><span class="pre">push</span></code> to <code class="docutils literal notranslate"><span class="pre">&lt;workflow</span> <span class="pre">file</span> <span class="pre">stem&gt;:</span> <span class="pre">&lt;branch&gt;</span> <span class="pre">push</span>
+<span class="pre">runs</span></code>, so <code class="docutils literal notranslate"><span class="pre">main</span></code>’s Unit Tests thread is <code class="docutils literal notranslate"><span class="pre">unit-tests:</span> <span class="pre">main</span> <span class="pre">push</span> <span class="pre">runs</span></code>; a
+scheduled one posts as <code class="docutils literal notranslate"><span class="pre">scheduled</span></code> to <code class="docutils literal notranslate"><span class="pre">&lt;workflow</span> <span class="pre">file</span> <span class="pre">stem&gt;:</span> <span class="pre">&lt;branch&gt;</span> <span class="pre">scheduled</span>
+<span class="pre">runs</span></code>. Each relayed run’s concurrency group is its own, since a group cancels a
+pending run when a newer one joins it.</p>
+<p><code class="docutils literal notranslate"><span class="pre">Write</span> <span class="pre">the</span> <span class="pre">run</span> <span class="pre">report</span></code> runs <code class="file docutils literal notranslate"><span class="pre">util/check_suite_report.py</span></code>, which reads the
+run’s check suite in a single GraphQL call and renders every name and annotation
+it quotes as a code span. The report links the run, names its commit and
+conclusion, the jobs that did not pass, and the warning and failure annotations
+that count. The conclusion becomes the <code class="docutils literal notranslate"><span class="pre">--status</span></code>: <code class="docutils literal notranslate"><span class="pre">success</span></code>, <code class="docutils literal notranslate"><span class="pre">cancelled</span></code>
+(and <code class="docutils literal notranslate"><span class="pre">stale</span></code>), <code class="docutils literal notranslate"><span class="pre">skipped</span></code> (and <code class="docutils literal notranslate"><span class="pre">neutral</span></code>), and <code class="docutils literal notranslate"><span class="pre">failure</span></code> for anything else,
+<code class="docutils literal notranslate"><span class="pre">timed_out</span></code> and <code class="docutils literal notranslate"><span class="pre">startup_failure</span></code> among them. A green run reports <code class="docutils literal notranslate"><span class="pre">warning</span></code>
+where a job failed without failing it, or where an annotation counts:</p>
+<ul class="simple">
+<li><p>On a push run, by the owner’s ruling, an annotation counts only on a
+non-blocking leg, whose steps are forced to succeed: a job named <code class="docutils literal notranslate"><span class="pre">(KTLO)</span></code> or
+<code class="docutils literal notranslate"><span class="pre">(experimental)</span></code>, as a KTLO leg whose tests fail warns (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1672">#1672</a>), or an annotation
+titled <code class="docutils literal notranslate"><span class="pre">(KTLO,</span> <span class="pre">non-blocking)</span></code>, as <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code>’ KTLO cells write. A passing
+blocking job’s annotations neither count nor appear, unless the run failed.</p></li>
+<li><p>On any other run, which posts every time, every annotation on a passing job
+counts.</p></li>
+<li><p>pip’s <code class="docutils literal notranslate"><span class="pre">Retrying</span> <span class="pre">...</span> <span class="pre">after</span> <span class="pre">connection</span></code> lines never count, on any leg, and
+neither do the annotations a workflow’s <code class="docutils literal notranslate"><span class="pre">expected</span></code> list in the script holds as
+written on every run by design. Each entry is a job, a level and a title
+prefix, an empty prefix matching only an empty title, so a reworded message
+still matches. Every list is empty today, and
+<code class="file docutils literal notranslate"><span class="pre">tests/project/test_unit_tests_push_reports_2030.py</span></code> pins them.</p></li>
+</ul>
+<p>A run whose legs all skipped tested nothing, as when <code class="docutils literal notranslate"><span class="pre">current</span></code> found its commit
+superseded or <code class="docutils literal notranslate"><span class="pre">changes</span></code> found no code changed, so where it did not fail it
+posts nothing, rather than a “back to green” after a bad report. The legs are the
+jobs those gates skip, which the script names by a pattern per workflow and the
+test file holds to the jobs’ <code class="docutils literal notranslate"><span class="pre">if:</span></code>.</p>
+<p>The report ends in each job’s summary, one <code class="docutils literal notranslate"><span class="pre">&lt;details&gt;</span></code> block a job, in the check
+suite’s order. GitHub serves no job summary through its API, so every step that
+writes one copies it to the job’s <code class="docutils literal notranslate"><span class="pre">job-summary.md</span></code>: the scripts through
+<code class="file docutils literal notranslate"><span class="pre">util/_actions.py</span></code>, where the step sets <code class="docutils literal notranslate"><span class="pre">JOB_SUMMARY_COPY</span></code>, and the shell
+with <code class="docutils literal notranslate"><span class="pre">tee</span></code>. No step that runs the tests sets it, since a test writing the
+summary through the helper would write into the copy. The job then ends in <code class="docutils literal notranslate"><span class="pre">Name</span>
+<span class="pre">the</span> <span class="pre">job</span> <span class="pre">summary</span></code>, which writes the job’s name beside it, and <code class="docutils literal notranslate"><span class="pre">Upload</span> <span class="pre">the</span> <span class="pre">job</span>
+<span class="pre">summary</span></code>, which uploads both as the <code class="docutils literal notranslate"><span class="pre">job-summary-&lt;job&gt;-&lt;index&gt;</span></code> artifact (7
+days) for the report to download; both run on <code class="docutils literal notranslate"><span class="pre">always()</span></code> and are
+<code class="docutils literal notranslate"><span class="pre">continue-on-error</span></code>. The summaries share the room a comment leaves, smallest first,
+and one cut to fit links the run. <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">unit</span> <span class="pre">tests</span></code> in <code class="docutils literal notranslate"><span class="pre">experimental.yml</span></code> does
+not copy its summary, so the line <code class="file docutils literal notranslate"><span class="pre">util/superseded.py</span></code> writes there for a
+stopped run stays in the job’s summary alone. The post step runs only where the
+report step’s <code class="docutils literal notranslate"><span class="pre">post</span></code> output is <code class="docutils literal notranslate"><span class="pre">true</span></code>, and sets <code class="docutils literal notranslate"><span class="pre">GITHUB_WORKFLOW</span></code> to the
+relayed run’s workflow, which <code class="file docutils literal notranslate"><span class="pre">util/discussion_report.py</span></code> labels the run
+with.</p>
 <p><code class="docutils literal notranslate"><span class="pre">codeql-analysis.yml</span></code> posts to <code class="docutils literal notranslate"><span class="pre">codeql-analysis:</span> <span class="pre">CodeQL</span> <span class="pre">report</span></code>, as
 <code class="docutils literal notranslate"><span class="pre">scheduled</span></code> on its <code class="docutils literal notranslate"><span class="pre">schedule</span></code> and <code class="docutils literal notranslate"><span class="pre">push</span></code> on a push to <code class="docutils literal notranslate"><span class="pre">main</span></code>, and never on
 a pull request, whose findings belong to the pull request. Its <code class="docutils literal notranslate"><span class="pre">discussion</span></code> job

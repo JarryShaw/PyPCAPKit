@@ -645,8 +645,9 @@
 
 <span class="s1">    #: No transport protocol. ``TransportProtocol(0) is undefined`` and</span>
 <span class="s1">    #: ``bool(undefined)`` is ``False``; it is the ``proto`` sentinel default</span>
-<span class="s1">    #: for ``__transport__``, ``__new__``, ``get`` and ``get_all``, and what</span>
-<span class="s1">    #: the base registry's ``_missing_`` extends unassigned/reserved rows from.</span>
+<span class="s1">    #: for ``__transport__``, ``__new__``, ``get`` and ``get_all``. The base</span>
+<span class="s1">    #: registry's ``_missing_`` answered its unassigned and reserved spans with</span>
+<span class="s1">    #: it until :issue:`2048`; they answer with the asking registry's transport.</span>
 <span class="s1">    undefined = cast('TransportProtocol', 0)</span>
 
 <span class="s1">    #: Transmission Control Protocol.</span>
@@ -1086,7 +1087,8 @@
 <span class="s1">            not added to the registry (:issue:`860`). Its name is the label of</span>
 <span class="s1">            the IANA span holding the port, whatever that label is --</span>
 <span class="s1">            ``reserved``, ``unassigned``, or a service name such as ``swx`` --</span>
-<span class="s1">            or ``unknown`` when no span holds it.</span>
+<span class="s1">            or ``unknown`` when no span holds it, either way carrying this</span>
+<span class="s1">            registry's own transport (:issue:`2048`).</span>
 
 <span class="s1">        Raises:</span>
 <span class="s1">            ValueError: If called on a class that holds no members, i.e. on</span>
@@ -1133,7 +1135,10 @@
 <span class="s1">        # access could reach) -- and this was the second, independent mint site</span>
 <span class="s1">        # on this method, distinct from the one inside :meth:`_missing_` itself:</span>
 <span class="s1">        # neither is a value anyone asked to be named, so both build an</span>
-<span class="s1">        # unregistered member instead of registering one.</span>
+<span class="s1">        # unregistered member instead of registering one. A port IANA lists on</span>
+<span class="s1">        # other transports only is in no span on this one: 8011, reserved on</span>
+<span class="s1">        # TCP and ``bier-echo`` on UDP, answers ``unknown`` on DCCP and SCTP</span>
+<span class="s1">        # (#2048).</span>
 <span class="s1">        ret = owner._missing_(key)</span>
 <span class="s1">        if ret is None:</span>
 <span class="s1">            ret = owner._unregistered_member(key, 'unknown', owner.__transport__)</span>
@@ -1444,7 +1449,8 @@
 <span class="s1">        if cls.__registry__ is None:</span>
 <span class="s1">            raise ValueError(f'</span><span class="se">{{</span><span class="s1">value!r</span><span class="se">}}</span><span class="s1"> is not a valid </span><span class="se">{{</span><span class="s1">cls.__name__</span><span class="se">}}</span><span class="s1">')</span>
 <span class="s1">        # NOTE: most spans are IANA's unassigned and reserved markers, which name</span>
-<span class="s1">        # no transport protocol and so answer every registry. A span that does name</span>
+<span class="s1">        # no transport protocol and so answer every registry, each with its own</span>
+<span class="s1">        # transport (#2048). A span that does name</span>
 <span class="s1">        # one tests ``cls.__transport__`` and answers that registry alone --</span>
 <span class="s1">        # GitHub issue #760, where source order decided instead and a UDP lookup in</span>
 <span class="s1">        # 6000-6063 came back carrying ``tcp``. A registry a named span excludes</span>
@@ -1760,6 +1766,10 @@
                 <span class="c1"># no test and keeps answering every registry.</span>
                 <span class="n">flag</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">flag</span><span class="p">([</span><span class="n">proto</span><span class="p">])</span>
                 <span class="n">claim</span> <span class="o">=</span> <span class="s1">''</span> <span class="k">if</span> <span class="n">proto</span> <span class="o">==</span> <span class="s1">'undefined'</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">' and cls.__transport__ is </span><span class="si">{</span><span class="n">flag</span><span class="si">}</span><span class="s1">'</span>
+                <span class="c1"># NOTE: GitHub issue #2048. A span naming no transport protocol</span>
+                <span class="c1"># answers each registry with that registry's own, rather than</span>
+                <span class="c1"># with ``undefined``.</span>
+                <span class="n">answer</span> <span class="o">=</span> <span class="s1">'cls.__transport__'</span> <span class="k">if</span> <span class="n">proto</span> <span class="o">==</span> <span class="s1">'undefined'</span> <span class="k">else</span> <span class="n">flag</span>
 
                 <span class="c1"># NOTE: GitHub issue #860. A port in this span resolves to an</span>
                 <span class="c1"># unregistered member rather than an extend_enum(...)-ed,</span>
@@ -1770,7 +1780,7 @@
                 <span class="c1"># range.</span>
                 <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'if </span><span class="si">{</span><span class="n">start</span><span class="si">}</span><span class="s1"> &lt;= value &lt;= </span><span class="si">{</span><span class="n">stop</span><span class="si">}{</span><span class="n">claim</span><span class="si">}</span><span class="s1">:'</span><span class="p">)</span>
                 <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'    #: </span><span class="si">{</span><span class="n">cmmt</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
-                <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'    return cls._unregistered_member(value, </span><span class="si">{</span><span class="n">svc</span><span class="si">!r}</span><span class="s1">, </span><span class="si">{</span><span class="n">flag</span><span class="si">}</span><span class="s1">)'</span><span class="p">)</span>
+                <span class="n">miss</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'    return cls._unregistered_member(value, </span><span class="si">{</span><span class="n">svc</span><span class="si">!r}</span><span class="s1">, </span><span class="si">{</span><span class="n">answer</span><span class="si">}</span><span class="s1">)'</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">line</span><span class="p">,</span> <span class="n">miss</span>
 
