@@ -1219,54 +1219,66 @@ does; each has tests under :file:`tests/project/` that run it.
 
    * - Script
      - Run by
+     - By hand
    * - :file:`util/leg_summary.py`
      - ``KTLO summary`` in ``unit-tests.yml``'s ``test``, ``integration`` and
        ``pypcap-parity`` (and so their KTLO twins) and ``python-compatibility.yml``'s
        ``compatibility``, as ``leg_summary.py ktlo``; ``Experimental summary`` in
        ``experimental.yml``'s ``experimental``, as ``leg_summary.py experimental``.
+     - No.
    * - :file:`util/classify_changes.py`
      - ``Classify the diff`` in the ``changes`` job of ``unit-tests.yml`` and of
        ``experimental.yml``.
+     - No.
    * - :file:`util/coverage_report.py`
      - ``Report coverage`` in ``unit-tests.yml``'s ``test``, on the coverage leg.
+     - No.
    * - :file:`util/pytest_shards.py`
      - ``Run unit tests`` in ``experimental.yml``'s ``experimental``, on GraalPy's leg
        (`#1963 <https://github.com/JarryShaw/PyPCAPKit/issues/1963>`__), and in
        ``unit-tests.yml``'s ``test`` and ``test-ktlo``, on PyPy's legs (`#2005
        <https://github.com/JarryShaw/PyPCAPKit/issues/2005>`__).
+     - No.
    * - :file:`util/regenerate_samples.py`
      - ``Regenerate sample captures`` in ``unit-tests.yml``'s ``integration`` and
        ``pypcap-parity`` (and so their KTLO twins), at the job's ``ANNOTATION_LEVEL``,
        and ``gate``, at ``error``.
+     - No: ``make samples`` runs the generator itself.
    * - :file:`util/pip_install.py`
      - The install step of ``unit-tests.yml``'s ``test``, ``integration`` and
        ``pypcap-parity`` (and so their KTLO twins), ``experimental.yml``'s
        ``experimental`` and ``python-compatibility.yml``'s ``compatibility``, at the
        job's ``ANNOTATION_LEVEL``, and of ``unittest-ordering``, ``project-tests`` and
        ``gate``, at ``error``.
+     - No: install with ``pip install -e '.[test,DPKT,crypto,NGAP]'``.
    * - :file:`util/discussion_report.py`
      - ``Post the report to Discussions`` in the ``discussion`` job of
        ``ci-timing.yml``, ``cron-vendor.yml``, ``cron-conda.yml``,
        ``cron-python-versions.yml``, ``lint.yml``, ``deploy-pages.yml``,
        ``codeql-analysis.yml``, ``coverage-comment.yml`` and ``ci-reports.yml``
        (see `CI Reports`_).
+     - No.
    * - :file:`util/check_suite_report.py`
      - ``Write the run report`` in the ``discussion`` job of
        ``coverage-comment.yml``, for Unit Tests, and of ``ci-reports.yml``, for
        Experimental Tests and Python Compatibility (see `CI Reports`_).
+     - No.
    * - :file:`util/apt_packages.py`
      - The apt steps of ``unit-tests.yml``'s ``engine-tests`` and ``pypcap-parity``
        (and so its KTLO twin): the plan, seed, install and collect steps, as
        ``apt_packages.py plan``, ``seed``, ``install`` and ``collect``. The
        ``actions/cache`` steps and the AppArmor step (`#2019
        <https://github.com/JarryShaw/PyPCAPKit/issues/2019>`__) stay as they were.
+     - No.
    * - :file:`util/_actions.py`
      - No step: it is imported by the scripts that share its annotations, step
        outputs, job summary lines and logged runs (`#2047
        <https://github.com/JarryShaw/PyPCAPKit/issues/2047>`__).
+     - No: imported only.
    * - :file:`util/codeql_report.py`
      - ``Write the report`` in ``codeql-analysis.yml``'s ``discussion`` (see `CI
        Reports`_).
+     - No.
    * - :file:`util/release_tags.py`
      - ``Check the release tags name this run's commit`` in ``create-release.yml``'s
        ``github``, ``pypi`` and ``conda``, as ``release_tags.py check``, and ``Check
@@ -1274,27 +1286,33 @@ does; each has tests under :file:`tests/project/` that run it.
        ``release_tags.py owner`` (`#1634
        <https://github.com/JarryShaw/PyPCAPKit/issues/1634>`__, `#1748
        <https://github.com/JarryShaw/PyPCAPKit/issues/1748>`__).
+     - No.
    * - :file:`util/release_upload.py`
      - ``Upload package to GitHub Release`` in ``create-release.yml``'s ``pypi`` and
        ``conda`` (`#1640 <https://github.com/JarryShaw/PyPCAPKit/issues/1640>`__).
+     - No.
    * - :file:`util/release_status.py`
      - ``Report why this run did or did not release anything`` in
        ``create-release.yml``'s ``release_status``, on the image's ``python3``
        after a checkout of :file:`util/` alone (`#888
        <https://github.com/JarryShaw/PyPCAPKit/issues/888>`__).
+     - No.
    * - :file:`util/release_vendor_update.py`
      - ``Read whether its vendor-update job ran`` in ``create-release.yml``'s
        ``vendor_update``, on the image's ``python3`` after a checkout of
        :file:`util/` alone (`#1748 <https://github.com/JarryShaw/PyPCAPKit/issues/1748>`__).
+     - No.
    * - :file:`util/release_tiers.py`
      - ``Read the released Python versions`` in ``create-release.yml``'s
        ``version_check``, on setup-python's ``python3`` (`#1660
        <https://github.com/JarryShaw/PyPCAPKit/issues/1660>`__).
+     - No.
    * - :file:`util/release_published.py`
      - ``Check PyPI publish completeness`` and ``Check Anaconda publish
        completeness`` in ``create-release.yml``'s ``version_check``, as
        ``release_published.py pypi`` and ``anaconda``, on setup-python's
        ``python3`` (`#888 <https://github.com/JarryShaw/PyPCAPKit/issues/888>`__).
+     - No.
 
 The summaries run on the image's ``/usr/bin/python3`` rather than the leg's
 interpreter, which may have failed to set up or be too broken to run anything, so
@@ -1326,6 +1344,51 @@ pin runs each on the cases the shell it replaced handled and requires the same
 status, output and calls.
 :file:`util/_actions.py` is standard library only, and keeps to 3.7's syntax,
 since the scripts on ``/usr/bin/python3`` and on every leg's interpreter import it.
+
+The scripts a person runs as well, or alone, sit beside the CI-only ones in
+:file:`util/` rather than in a directory of their own (`#2050
+<https://github.com/JarryShaw/PyPCAPKit/issues/2050>`__). Every :file:`util/`
+script not listed here is CI-only.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Script
+     - Run by
+     - By hand
+   * - :file:`util/bump_version.py`
+     - ``Bump Version`` in ``cron-vendor.yml``'s ``vendor-update``.
+     - ``python util/bump_version.py``, committed to ``main``, to release what is
+       not a vendor refresh (see :doc:`releasing`).
+   * - :file:`util/changelog_md.py`
+     - ``Check CHANGELOG.md is in step with its source entry`` in
+       ``unit-tests.yml``'s ``changelog``, as ``changelog_md.py --check``.
+     - ``python util/changelog_md.py`` after editing the newest changelog entry,
+       to regenerate :file:`CHANGELOG.md`.
+   * - :file:`util/run_unittest_leg.py`
+     - ``unit-tests.yml``'s ``unittest-ordering``, once per leg, and
+       ``project-tests``.
+     - ``python util/run_unittest_leg.py <directory>`` over the :file:`tests/`
+       directory a change touches, when it moves imports or module state (see
+       :doc:`conventions/test-coverage`).
+   * - :file:`util/conda_vendor.py`
+     - ``Refresh the platform pins`` and ``Setup Conda Distribution`` in
+       ``cron-conda.yml``'s ``conda-update``; ``Smoke-test the vendored packages``
+       in its ``conda-dist`` and ``create-release.yml``'s ``conda``, as
+       ``conda_vendor.py --smoke``.
+     - ``python util/conda_vendor.py --check``, which no workflow runs: whether
+       :file:`conda/requirements.txt` is stale or a platform pin is past its
+       review-by date.
+   * - :file:`util/ci_timing.py`
+     - ``Report CI timing`` in ``ci-timing.yml``'s ``report``.
+     - ``GH_TOKEN=$(gh auth token) python util/ci_timing.py --repo
+       JarryShaw/PyPCAPKit``, for a report off the weekly schedule.
+   * - :file:`util/pyshark_encap_map.py`
+     - No workflow: it refuses a Wireshark that does not sweep as 4.6.9 does, as
+       a runner's packaged one does not.
+     - ``python util/pyshark_encap_map.py`` regenerates the tables in
+       :file:`pcapkit/toolkit/pyshark.py`; ``--check`` exits non-zero if they have
+       drifted.
 
 .. _CI Reports:
 
