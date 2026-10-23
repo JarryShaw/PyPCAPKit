@@ -209,7 +209,8 @@ class TestTheGate(unittest.TestCase):
 
     def test_every_other_job_needs_it_and_skips_on_its_output(self) -> None:
         others = [job_id for job_id in self.jobs if job_id != GATE]
-        self.assertEqual(sorted(others), ['changes', 'experimental', 'python-versions'])
+        # #2060: `windows`, the Windows leg, skips with the rest.
+        self.assertEqual(sorted(others), ['changes', 'experimental', 'python-versions', 'windows'])
         for job_id in others:
             body = self.jobs[job_id]
             needs = body['needs'] if isinstance(body['needs'], list) else [body['needs']]
@@ -237,7 +238,7 @@ class TestTheGate(unittest.TestCase):
         return runs
 
     def test_a_superseded_commit_skips_every_job_and_anything_else_runs_them(self) -> None:
-        for job_id in ('python-versions', 'changes', 'experimental'):
+        for job_id in ('python-versions', 'changes', 'experimental', 'windows'):
             with self.subTest(job=job_id):
                 self.assertFalse(self.run_if(job_id, 'false'))
                 self.assertTrue(self.run_if(job_id, 'true'))
@@ -248,16 +249,17 @@ class TestTheGate(unittest.TestCase):
                 self.assertTrue(self.run_if(job_id, '', gate='cancelled'))
                 # A cancelled run stays cancelled.
                 self.assertFalse(self.run_if(job_id, 'true', cancelled=True))
-        # A docs-only pull request still skips the legs.
-        self.assertFalse(self.run_if('experimental', 'true', code='false'))
-        # And the legs still need the jobs they read: `!cancelled()` drops only the implicit `success()`.
-        for job_id in ('changes', 'python-versions'):
-            for result in ('failure', 'skipped', 'cancelled'):
-                with self.subTest(needs=job_id, result=result):
-                    self.assertFalse(self.run_if('experimental', 'true', **{
-                        'versions' if job_id == 'python-versions' else 'changes': result}))
-        # Superseded: `changes` and `python-versions` skip, and the legs with them.
-        self.assertFalse(self.run_if('experimental', 'false', versions='skipped', changes='skipped'))
+        for legs in ('experimental', 'windows'):
+            # A docs-only pull request still skips the legs.
+            self.assertFalse(self.run_if(legs, 'true', code='false'))
+            # And the legs still need the jobs they read: `!cancelled()` drops only the implicit `success()`.
+            for job_id in ('changes', 'python-versions'):
+                for result in ('failure', 'skipped', 'cancelled'):
+                    with self.subTest(legs=legs, needs=job_id, result=result):
+                        self.assertFalse(self.run_if(legs, 'true', **{
+                            'versions' if job_id == 'python-versions' else 'changes': result}))
+            # Superseded: `changes` and `python-versions` skip, and the legs with them.
+            self.assertFalse(self.run_if(legs, 'false', versions='skipped', changes='skipped'))
 
     def test_the_legs_and_the_tests_step_read_with_the_token(self) -> None:
         self.assertEqual(set(job(NAME, 'experimental')['permissions'].values()), {'read'})

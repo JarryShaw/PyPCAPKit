@@ -13,7 +13,9 @@ Each step that can fail on a KTLO or experimental leg carries an ``id`` and a
 
 :file:`.github/workflows/cron-conda.yml`'s ``Windows summary`` runs it as
 ``python util/leg_summary.py conda-windows``, since a Windows image has no
-``/usr/bin/python3`` (#2060).
+``/usr/bin/python3`` (#2060), and :file:`.github/workflows/experimental.yml`'s
+``windows`` job runs its ``Experimental summary`` as ``python util/leg_summary.py
+experimental`` for the same reason.
 
 with ``LEG``, the leg's display name, and ``STEPS``, ``${{ toJSON(steps) }}``, in
 the environment. ``STEPS`` holds each earlier step with an ``id``, and its

@@ -94,7 +94,8 @@ SUMMARISED = (
     ('unit-tests.yml', 'test'), ('unit-tests.yml', 'test-ktlo'), ('unit-tests.yml', 'integration'),
     ('unit-tests.yml', 'integration-ktlo'), ('unit-tests.yml', 'engine-tests'),
     ('unit-tests.yml', 'pypcap-parity'), ('unit-tests.yml', 'pypcap-parity-ktlo'),
-    ('experimental.yml', 'experimental'), ('python-compatibility.yml', 'compatibility'),
+    ('experimental.yml', 'experimental'), ('experimental.yml', 'windows'),
+    ('python-compatibility.yml', 'compatibility'),
 )
 #: The steps that copy the summary through util/_actions.py's JOB_SUMMARY_COPY.
 COPYING = ('Report coverage', 'KTLO summary', 'Experimental summary')
@@ -424,10 +425,11 @@ class TestTheJobSummaries(unittest.TestCase):
                 for step in (save, upload):
                     self.assertEqual(step['if'], '${{ always() }}')
                     self.assertIs(step['continue-on-error'], True)
-                # The name the job's check run carries, on every leg.
-                for leg in legs(name, job_id):
-                    self.assertEqual(interpolate(save['env']['JOB_NAME'], {'matrix': leg}),
-                                     interpolate(job['name'], {'matrix': leg}))
+                # The name the job's check run carries, on every leg; #2060's `windows` has one.
+                for leg in (legs(name, job_id) if 'strategy' in job else [{}]):
+                    context = {'matrix': leg, 'needs': NEEDS}
+                    self.assertEqual(interpolate(save['env']['JOB_NAME'], context),
+                                     interpolate(job['name'], context))
 
     @unittest.skipIf(not BASH, 'needs bash')
     def test_the_name_is_written_beside_a_summary_alone(self) -> None:

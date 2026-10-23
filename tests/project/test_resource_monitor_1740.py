@@ -18,6 +18,7 @@ path, as #1732's split requires.
 
 from __future__ import annotations
 
+import json
 import os
 import pathlib
 import re
@@ -566,7 +567,10 @@ class TestItGatesNothing(unittest.TestCase):
         self.assertTrue(ci_timing.JUNIT_ARTIFACT.startswith('junit-'))
         self.assertEqual([path.name for path in sorted((ROOT / 'util').glob('*.py'))
                           if 'resource-monitor' in path.read_text(encoding='utf-8')], [])
-        self.assertEqual(list(workflow(EXPERIMENTAL[0])['jobs']), ['current', 'python-versions', 'changes', 'experimental'])
+        # #2060's `windows` runs no monitor and downloads nothing.
+        jobs = workflow(EXPERIMENTAL[0])['jobs']
+        self.assertEqual(list(jobs), ['current', 'python-versions', 'changes', 'experimental', 'windows'])
+        self.assertNotIn('resource-monitor', json.dumps(jobs['windows']))
 
 
 class TestTheDocsSayIt(unittest.TestCase):

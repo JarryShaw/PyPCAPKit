@@ -1030,6 +1030,30 @@ workers rather than 4, GraalPy's tests should take about 117-151 minutes (an inf
 from the 88-113 above, not measured), so its leg may end on the 110-minute timeout as a
 warning: that is expected, blocks nothing, and leaves the caps as they are.
 
+**The Windows leg.** :file:`experimental.yml`'s ``windows`` job runs the ``ALL`` tier
+on ``windows-latest`` under ``latest``, the newest CPython the conda builds target, as
+``Python <latest> on Windows (experimental)`` (`#2060
+<https://github.com/JarryShaw/PyPCAPKit/issues/2060>`__), so the first published
+``win-64`` conda package has had a test run. It needs ``current``, ``changes`` and
+``python-versions`` and runs on ``experimental``'s condition, and it is non-blocking by
+the same mechanics: every step continues on error, setup-python, the install and ``Run
+unit tests`` are capped at 5, 10 and 60 minutes within its 80, the job carries
+``continue-on-error: true``, and ``Experimental summary`` reports each failed step as a
+warning, on setup-python's ``python`` or the image's, since Windows has no
+``/usr/bin/python3``. Every ``run:`` is Git Bash's (``shell: bash``). ``Keep LF line
+endings`` sets ``core.autocrlf false`` and ``core.eol lf`` before the checkout, so the
+tests read the tree the other legs read, not the CRLF one the image's Git writes under
+``* text=auto``. ``Run unit tests`` asks ``latest_tier_paths()`` on the leg's CPython,
+as ``test`` does, and passes ``test``'s flags. None of the Linux containment above runs
+there: Windows has no cgroup scope, ``prlimit`` or ``RLIMIT_FSIZE``, so no
+:file:`util/cap_file_size.py`; no ``/proc`` for the resource monitor; and no process
+group for :file:`util/superseded.py`'s watcher, so the step's cap bounds the tests, and
+a run superseded once the leg has started runs it to its end. Python Versions' weekly
+job moves ``latest`` only to a branch setup-python builds for every label a job
+installs it on, but counts no job with ``continue-on-error: true``, so this leg
+never holds ``latest`` back for the blocking jobs.
+:file:`tests/project/test_windows_test_leg_2060.py` pins the job.
+
 Test Tiers
 ----------
 
@@ -1103,7 +1127,8 @@ Which legs run which tier:
      - ``ALL`` and ``LATEST``, less the project pins
    * - ``project-tests``
      - the project pins
-   * - ``test`` off ``latest``, PyPy's among them, ``test-ktlo``, ``experimental``
+   * - ``test`` off ``latest``, PyPy's among them, ``test-ktlo``, ``experimental``,
+       ``windows``
      - ``ALL``
    * - ``integration`` on ``latest``
      - ``ALL`` and ``LATEST``
@@ -1198,8 +1223,9 @@ a lower hard limit, and execs the command, so the step's exit status and
 inherits the cap. A write past it raises ``OSError: [Errno 27] File too large`` in
 Python, since CPython ignores ``SIGXFSZ``, so the test errors; any other program is
 killed by the signal, whose default action the script restores before it execs.
-``experimental.yml``'s legs get the same 2 GiB through ``prlimit --fsize`` (see
-above).
+``experimental.yml``'s ``experimental`` legs get the same 2 GiB through
+``prlimit --fsize`` (see above); its ``windows`` leg has no cap, as Windows has no
+``RLIMIT_FSIZE``.
 
 :file:`tests/project/test_file_size_caps_1969.py` fails when a command in
 ``unit-tests.yml`` runs pytest, unittest or :file:`util/run_unittest_leg.py`

@@ -21,7 +21,8 @@ execs, as :mod:`subprocess` does for a child, since an ignored signal stays
 ignored across ``exec``.
 
 :data:`LIMIT` is the one copy of the number; :file:`.github/workflows/experimental.yml`
-gives its legs the same cap through ``prlimit --fsize``.
+gives its ``experimental`` legs the same cap through ``prlimit --fsize``. Its
+``windows`` leg has none: :mod:`resource` is POSIX-only (#2060).
 
 """
 

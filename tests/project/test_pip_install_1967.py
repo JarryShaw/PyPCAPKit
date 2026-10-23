@@ -13,8 +13,8 @@
   its guards and environment, and every other ``pip install`` in
   ``unit-tests.yml`` to a listed step that keeps its shell.
 * :class:`TestTheOtherWorkflowsRunTheScript` does the same for the install of
-  ``experimental.yml``'s ``experimental`` and ``python-compatibility.yml``'s
-  ``compatibility``.
+  ``experimental.yml``'s ``experimental`` and ``windows`` (#2060) and
+  ``python-compatibility.yml``'s ``compatibility``.
 
 """
 
@@ -89,6 +89,17 @@ ELSEWHERE = {
         'timeout-minutes': 10,
         'shell': 'bash',
         'env': {'LEG': 'Python ${{ matrix.python-version }} (experimental, non-blocking)'},
+        'run': "python util/pip_install.py -e '.[test,DPKT,crypto,NGAP]'",
+    }, 'warning'),
+    # #2060: the Windows leg's, the same install on `latest`.
+    ('experimental.yml', 'windows'): ({
+        'name': 'Install package and test dependencies',
+        'id': 'install',
+        'if': "${{ steps.python.outcome == 'success' }}",
+        'continue-on-error': True,
+        'timeout-minutes': 10,
+        'shell': 'bash',
+        'env': {'LEG': 'Python ${{ needs.python-versions.outputs.latest }} on Windows (experimental, non-blocking)'},
         'run': "python util/pip_install.py -e '.[test,DPKT,crypto,NGAP]'",
     }, 'warning'),
     ('python-compatibility.yml', 'compatibility'): ({

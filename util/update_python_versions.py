@@ -20,7 +20,9 @@ these sources:
 The labels whose builds count are read from the workflows, not written here: the
 label the Python matrix jobs default to (``matrix.os || 'ubuntu-latest'``), the
 labels of an ``os`` axis, which run the supported tier, and the ``runs-on`` of
-each job that installs ``latest``. A ``-latest`` label counts as its image and
+each job that installs ``latest``, but a non-blocking one (``continue-on-error:
+true``), such as experimental.yml's Windows leg (#2060), which nothing gating waits
+on, so it holds ``latest`` back nowhere. A ``-latest`` label counts as its image and
 every newer one in the table, since GitHub moves the label to the newest image.
 
 The rules are the owner's, from #1633 and #1660:
@@ -562,7 +564,8 @@ def workflow_labels(workflows: 'dict[str, Any]') -> 'dict[str, list[str]]':
         ``default``, plus each label of a literal ``os`` axis (the conda jobs).
     ``latest``
         The ``runs-on`` of every job whose setup-python reads ``latest``, or the
-        label its ``matrix.os || '...'`` falls back to.
+        label its ``matrix.os || '...'`` falls back to, but a job with
+        ``continue-on-error: true``, which fails no run (#2060).
 
     """
     default, axis, latest = set(), set(), set()  # type: set[str], set[str], set[str]
@@ -576,8 +579,11 @@ def workflow_labels(workflows: 'dict[str, Any]') -> 'dict[str, list[str]]':
                 if output is None and 'matrix.python-version' not in text:
                     continue  # a pin the tier file exempts
                 if output == 'latest':
-                    # #1938: experimental's legs set up `latest` beside their own version, on the
-                    # label `matrix.os || '...'` falls back to, as `default` reads it.
+                    # #2060: a job whose failure fails no run holds `latest` back nowhere, since
+                    # nothing gating waits on it: experimental.yml's `windows`, and the watcher
+                    # experimental's legs set up beside their own version (#1938).
+                    if job.get('continue-on-error') is True:
+                        continue
                     match = DEFAULT_LABEL.fullmatch(runs_on)
                     if match:
                         latest.add(match.group(1))
