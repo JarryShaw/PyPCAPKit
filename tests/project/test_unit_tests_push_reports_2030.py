@@ -155,7 +155,8 @@ PYPY = ('Python pypy3.10 (KTLO)', 'SUCCESS', [
     ('NOTICE', '', 'The ubuntu-latest label will migrate to Ubuntu 26')])
 
 #: A stand-in ``gh``: ``api graphql -f ...``, the check-suite query, answers
-#: ``$FAKE_SUITE_ANSWER``; ``run download`` copies ``$FAKE_ARTIFACTS``' folders;
+#: ``$FAKE_SUITE_ANSWER``; ``run download`` copies ``$FAKE_ARTIFACTS``' folders,
+#: or, given ``say:TEXT``, fails printing ``TEXT``;
 #: both log their arguments to ``$FAKE_SUITE_LOG``. ``api graphql --input -``, the
 #: posting script's own calls, goes to the stand-in GitHub beside it.
 FAKE_GH = textwrap.dedent('''\
@@ -169,6 +170,9 @@ FAKE_GH = textwrap.dedent('''\
         source = os.environ.get('FAKE_ARTIFACTS')
         if source == 'fail':
             print('HTTP 403: Resource not accessible by integration', file=sys.stderr)
+            sys.exit(1)
+        if source.startswith('say:'):
+            print(source[4:], file=sys.stderr)
             sys.exit(1)
         if not source or not os.listdir(source):
             print('no valid artifacts found to download', file=sys.stderr)
@@ -728,6 +732,32 @@ class TestTheReport(unittest.TestCase):
         self.assertIn('The job summaries could not be read: `HTTP 403: Resource not accessible by integration`.',
                       report)
         self.assertIn('::warning title=CI report not written::The job summaries could not be read', stdout)
+
+    def test_each_nothing_to_download_wording_is_no_summary(self) -> None:
+        # #2074: each way gh's pkg/cmd/run/download/download.go says it found nothing.
+        for text in ('no valid artifacts found to download',
+                     'no artifact matches any of the names or patterns provided',
+                     'no artifact matches any of the names provided'):
+            with self.subTest(text=text):
+                outputs, report, stdout = self.report('success', check_runs(GREEN), FAKE_ARTIFACTS=f'say:{text}')
+                self.assertEqual(outputs['post'], 'true')
+                self.assertNotIn('Job summaries', report)
+                self.assertNotIn('could not be read', report)
+                self.assertNotIn('::warning', stdout)
+
+    def test_a_genuine_download_error_still_warns(self) -> None:
+        # The last holds a wording inside a longer line, which is not gh saying it.
+        for text in ('error fetching artifacts: HTTP 401: Bad credentials (https://api.github.com/repos/'
+                     'JarryShaw/PyPCAPKit/actions/runs/1/artifacts?per_page=100)',
+                     'error fetching artifacts: HTTP 404: Not Found (https://api.github.com/repos/'
+                     'JarryShaw/PyPCAPKit/actions/runs/1/artifacts?per_page=100)',
+                     'error fetching artifacts: Get "https://api.github.com/repos/JarryShaw/PyPCAPKit/actions/'
+                     'runs/1/artifacts?per_page=100": dial tcp: lookup api.github.com: no such host',
+                     'error downloading job-summary-test-0: unexpected EOF (not: no valid artifacts found to download)'):
+            with self.subTest(text=text):
+                _, report, stdout = self.report('success', check_runs(GREEN), FAKE_ARTIFACTS=f'say:{text}')
+                self.assertIn(f'The job summaries could not be read: `{text}`.', report)
+                self.assertIn('::warning title=CI report not written::The job summaries could not be read', stdout)
 
 
 class TestTheDownload(unittest.TestCase):

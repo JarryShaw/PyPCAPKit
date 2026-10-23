@@ -128,6 +128,15 @@ NONBLOCKING_NOTE = re.compile(r'\((?:KTLO|experimental), non-blocking\)')
 ARTIFACT = 'job-summary-*'
 SHA = re.compile(r'[0-9a-f]{40}')
 RUN_PAGE = re.compile(r'https://[\w.-]+/[\w.-]+/[\w.-]+/actions/runs/\d+')
+#: What ``gh run download`` says, failing, where it found nothing to download, as
+#: :file:`pkg/cmd/run/download/download.go` in cli/cli writes each (#2074): a run
+#: with no artifact that has not expired, and one with none :data:`ARTIFACT`
+#: matches, worded the latter way since gh 2.11.0 and the former before it.
+NOTHING = frozenset({
+    'no valid artifacts found to download',
+    'no artifact matches any of the names or patterns provided',
+    'no artifact matches any of the names provided',
+})
 #: A mention, which a summary's text must not make.
 MENTION = re.compile(r'@(?=[A-Za-z0-9])')
 #: What the report joins its job summaries' blocks by.
@@ -237,8 +246,11 @@ def download(repo: 'str', run_id: 'str', directory: 'pathlib.Path') -> 'tuple[li
         return [], f'gh could not run: {error}'
     if proc.returncode:
         text = proc.stderr.strip() or proc.stdout.strip()
-        # A run whose jobs wrote no summary uploaded no artifact, which gh reports so.
-        return [], '' if 'no valid artifacts' in text else (text.splitlines() or ['gh failed'])[-1]
+        # A run whose jobs wrote no summary uploaded no artifact it matches, which
+        # gh reports as one of NOTHING's lines; anything else is an error.
+        if any(line.strip() in NOTHING for line in text.splitlines()):
+            return [], ''
+        return [], (text.splitlines() or ['gh failed'])[-1]
     found = []
     # gh puts each artifact a pattern matches in a folder of its name; a lone
     # one unpacked into the directory itself is read there too.
