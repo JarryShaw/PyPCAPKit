@@ -60,6 +60,9 @@ __tier__ = 'ALL'
 #: The unit-tier workflow job, for :class:`WorkflowAgreementTests`. Absent from a
 #: source distribution, which is why that test skips rather than fails.
 WORKFLOW = _tiers.ROOT / '.github' / 'workflows' / 'unit-tests.yml'
+#: The ``bash`` the workflow steps run under, by absolute path: on Windows a bare
+#: ``bash`` resolves to System32's WSL launcher, not the Git Bash this finds (#2103).
+BASH = shutil.which('bash')
 
 
 def write_module(directory: 'pathlib.Path', name: 'str', source: 'str') -> 'pathlib.Path':
@@ -254,7 +257,7 @@ class WorkflowAgreementTests(unittest.TestCase):
         )
         self.assertIn('pytest', run_block)
 
-    @unittest.skipIf(shutil.which('bash') is None, 'the steps are bash scripts')
+    @unittest.skipIf(BASH is None, 'the steps are bash scripts')
     def test_the_legs_leave_out_exactly_the_latest_tier_or_the_pins(self) -> None:
         """#1958: run as bash runs them, the ``test`` legs but ``latest`` ignore each ``LATEST`` module.
 
@@ -293,7 +296,7 @@ class WorkflowAgreementTests(unittest.TestCase):
         self.assertIn('LATEST_TIER: ${{ steps.tier.outputs.paths }}', tests)
         self.assertIn('for module in $LATEST_TIER; do\n            set -- "$@" --ignore="$module"', tests)
 
-    @unittest.skipIf(shutil.which('bash') is None, 'the steps are bash scripts')
+    @unittest.skipIf(BASH is None, 'the steps are bash scripts')
     def test_a_leg_that_stops_ignoring_the_latest_tier_is_caught(self) -> None:
         """The check above, against a ``test`` step that computes the list and then drops it."""
         if not WORKFLOW.is_file():
@@ -305,7 +308,7 @@ class WorkflowAgreementTests(unittest.TestCase):
             with self.subTest(latest=latest):
                 self.assertEqual(leg_ignores(text.replace(loop, ':'), latest), [])
 
-    @unittest.skipIf(shutil.which('bash') is None, 'the steps are bash scripts')
+    @unittest.skipIf(BASH is None, 'the steps are bash scripts')
     def test_a_leg_that_asks_for_the_wrong_list_is_caught(self) -> None:
         """Off ``latest``, the pins alone are not the ``LATEST`` tier; on it, the tier is not the pins."""
         if not WORKFLOW.is_file():
@@ -354,7 +357,7 @@ def stubbed_argv(script: 'str', env: 'dict[str, str]') -> 'list[str]':
         full = dict(os.environ, **env, ARGS_FILE=str(record), RUNNER_TEMP=temp, REAL_PYTHON=sys.executable,
                     PATH=temp + os.pathsep + os.environ.get('PATH', ''))
         full.pop('PYTHONSAFEPATH', None)  # the runner sets none, and it would hide tests/ from `-c`
-        result = subprocess.run(['bash', '-e', '-c', script], env=full, cwd=str(_tiers.ROOT),
+        result = subprocess.run([BASH, '-e', '-c', script], env=full, cwd=str(_tiers.ROOT),
                                 capture_output=True, text=True, check=False, timeout=120)
         if result.returncode:
             raise AssertionError(f'the step failed: {result.stdout[-1000:]}{result.stderr[-1000:]}')
