@@ -1507,16 +1507,26 @@ class Extractor(Generic[_P]):
         # NOTE: we use peek() to read the magic number, as the file pointer
         # will not be moved after reading; however, the returned bytes object
         # may not be exactly 4 bytes, so we use [:4] to get the first 4 bytes
-        self._magic = self._ifile.peek(4)[:4]
-        if len(self._magic) < 4:
-            # NOTE: ``peek`` makes at most one read of the stream, which a pipe or a
-            # raw stream may answer with fewer than four octets, so a short peek is
-            # not a short file. Read them instead, and seek back (#1586).
-            position = self._ifile.tell()
-            self._magic = self._ifile.read(4)
-            self._ifile.seek(position, os.SEEK_SET)
+        try:
+            self._magic = self._ifile.peek(4)[:4]
+            if len(self._magic) < 4:
+                # NOTE: ``peek`` makes at most one read of the stream, which a pipe or a
+                # raw stream may answer with fewer than four octets, so a short peek is
+                # not a short file. Read them instead, and seek back (#1586).
+                position = self._ifile.tell()
+                self._magic = self._ifile.read(4)
+                self._ifile.seek(position, os.SEEK_SET)
 
-        self.run()    # start extraction
+            self.run()    # start extraction
+        except BaseException:
+            # NOTE: a constructor that raises leaves the caller nothing to close,
+            # and Windows cannot delete a file still open (#2100). Only the input
+            # is released: ``_cleanup`` would need an engine, which an unknown
+            # format never gets, and would finish a trace that never ran.
+            if self._owns_input():
+                self._ifile.close()
+            self._detach_finalizer()
+            raise
 
     def __iter__(self) -> 'Extractor':
         """Iterate and parse PCAP frame.
