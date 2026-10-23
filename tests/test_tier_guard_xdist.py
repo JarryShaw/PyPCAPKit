@@ -703,3 +703,95 @@ class ProbeLeftoverCheckTests(unittest.TestCase):
 
         self.assertTrue(self.probe_path.exists(), 'setUp removed a probe it did not write')
         self._assert_lock_free()
+
+
+#: What :class:`ProbeLockNestedRunTests` runs in a child, as a nested
+#: :program:`pytest` would: take a test's shared hold on the lock file named by
+#: ``sys.argv[1]``, under the environment the parent's hold handed down.
+_NESTED_READER = '''
+import pathlib, sys, unittest.mock
+from tests import conftest
+with unittest.mock.patch.object(conftest, '_tier_guard_lock_path',
+                                return_value=pathlib.Path(sys.argv[1])):
+    with conftest._tier_guard_reader_hold():
+        print('IN', flush=True)
+'''
+
+
+@unittest.skipUnless(_conftest.fcntl is not None, 'fcntl unavailable on this platform')
+class ProbeLockNestedRunTests(unittest.TestCase):
+    """A process under a test's shared hold does not ask for the lock again (#2082).
+
+    :mod:`tests.project.test_module_isolation` runs a nested :program:`pytest`
+    inside its shared hold. A writer arriving meanwhile holds the gate while it
+    waits on that hold, so a nested shared request waited behind it, and the
+    hold waited on the nested run: on GraalPy the run's ``subprocess.run``
+    timeout, 600 s, was what broke it, with the writer and every other reader
+    stalled as long.
+
+    """
+
+    def setUp(self) -> None:
+        _redirect_tier_guard_lock(self, 'pcapkit-2082-')
+        patcher = unittest.mock.patch.object(_conftest, 'TIER_GUARD_LOCK_POLL', 0.01, create=True)
+        patcher.start()
+        self.addCleanup(patcher.stop)
+        environ = unittest.mock.patch.dict(os.environ)
+        environ.start()
+        self.addCleanup(environ.stop)
+        os.environ.pop(_conftest.TIER_GUARD_HELD_ENV, None)
+
+    def _held(self, suffix: 'str', operation: 'int') -> 'bool':
+        """Whether ``operation`` on the lock file plus ``suffix`` would block."""
+        fcntl = _conftest.fcntl
+        path = _conftest._tier_guard_lock_path()
+        with open(path.with_name(path.name + suffix), 'a', encoding='utf-8') as handle:
+            try:
+                fcntl.flock(handle.fileno(), operation | fcntl.LOCK_NB)
+            except BlockingIOError:
+                return True
+            fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
+            return False
+
+    def test_a_nested_run_does_not_queue_behind_a_waiting_writer(self) -> None:
+        """Fails on the code before this change: the child times out at the gate."""
+        order = []  # type: list[str]
+
+        def writer() -> None:
+            with _conftest._tier_guard_lock(exclusive=True):
+                order.append('W')
+
+        with _conftest._tier_guard_reader_hold():
+            thread = threading.Thread(target=writer, daemon=True)
+            thread.start()
+            self.addCleanup(thread.join, 10)
+            end = time.monotonic() + 10
+            while not self._held('.gate', _conftest.fcntl.LOCK_SH):
+                self.assertLess(time.monotonic(), end, 'the writer never took the gate')
+                time.sleep(0.01)
+            try:
+                child = subprocess.run(  # nosec: B603
+                    [sys.executable, '-c', _NESTED_READER, str(_conftest._tier_guard_lock_path())],
+                    cwd=str(_tiers.ROOT), env=_child_environ(), capture_output=True, text=True,
+                    timeout=120, check=False,
+                )
+            except subprocess.TimeoutExpired:
+                self.fail('the nested reader queued behind the writer the outer hold keeps waiting')
+            self.assertEqual((child.returncode, child.stdout), (0, 'IN\n'), child.stderr)
+            self.assertEqual(order, [], 'the writer got in under the outer hold')
+        thread.join(10)
+        self.assertEqual(order, ['W'], 'the writer never got the lock once the hold ended')
+
+    def test_the_variable_names_the_hold_only_while_it_lasts(self) -> None:
+        """Set for the hold and put back after; another lock file's value is no hold."""
+        name = _conftest.TIER_GUARD_HELD_ENV
+        for before in (None, '/elsewhere/tier-guard.lock'):
+            with self.subTest(before=before):
+                if before is not None:
+                    os.environ[name] = before
+                with _conftest._tier_guard_reader_hold():
+                    self.assertEqual(os.environ.get(name), str(_conftest._tier_guard_lock_path()))
+                    self.assertTrue(self._held('', _conftest.fcntl.LOCK_EX),
+                                    'the hold did not take the lock')
+                self.assertEqual(os.environ.get(name), before)
+                self.assertFalse(self._held('', _conftest.fcntl.LOCK_EX))
