@@ -1282,6 +1282,15 @@ does; each has tests under :file:`tests/project/` that run it.
      - ``Read whether its vendor-update job ran`` in ``create-release.yml``'s
        ``vendor_update``, on the image's ``python3`` after a checkout of
        :file:`util/` alone (`#1748 <https://github.com/JarryShaw/PyPCAPKit/issues/1748>`__).
+   * - :file:`util/release_tiers.py`
+     - ``Read the released Python versions`` in ``create-release.yml``'s
+       ``version_check``, on setup-python's ``python3`` (`#1660
+       <https://github.com/JarryShaw/PyPCAPKit/issues/1660>`__).
+   * - :file:`util/release_published.py`
+     - ``Check PyPI publish completeness`` and ``Check Anaconda publish
+       completeness`` in ``create-release.yml``'s ``version_check``, as
+       ``release_published.py pypi`` and ``anaconda``, on setup-python's
+       ``python3`` (`#888 <https://github.com/JarryShaw/PyPCAPKit/issues/888>`__).
 
 The summaries run on the image's ``/usr/bin/python3`` rather than the leg's
 interpreter, which may have failed to set up or be too broken to run anything, so

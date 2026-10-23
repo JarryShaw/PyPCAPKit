@@ -1236,7 +1236,9 @@ class TestTheCountsAreOfTheReleasedTiers(ScratchRepository):
         self.output.write_text('', encoding='utf-8')
         env = dict(self.env, REPLY=str(self.tmp / 'reply.json'), PCAPKIT_VERSION=self.VERSION,
                    PCAPKIT_PYPI_WHEELS=wheels, PCAPKIT_CONDA_BUILDS=builds)
-        result = subprocess.run([BASH, '-e', str(self.tmp / 'check.sh')], cwd=self.tmp, env=env, capture_output=True,
+        # #1967: ``python3 util/release_published.py ...``, on this interpreter.
+        command = script_command(script) or [BASH, '-e', str(self.tmp / 'check.sh')]
+        result = subprocess.run(command, cwd=self.tmp, env=env, capture_output=True,
                                 text=True, check=False, timeout=scale_timeout(60))
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         written = dict(line.split('=', 1) for line in self.output.read_text(encoding='utf-8').splitlines())
