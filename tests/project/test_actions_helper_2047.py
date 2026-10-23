@@ -41,7 +41,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 HELPER = ROOT / 'util' / '_actions.py'
 #: The scripts that import the helper.
 SCRIPTS = ('apt_packages', 'ci_timing', 'classify_changes', 'codeql_report', 'coverage_report', 'leg_summary',
-           'pip_install', 'regenerate_samples', 'vendor_code_changed', 'vendor_test_gate')
+           'pip_install', 'regenerate_samples', 'release_tags', 'release_upload', 'vendor_code_changed',
+           'vendor_test_gate')
 #: The top-level modules the helper may import, each in Python 3.7's standard
 #: library: the running interpreter's :data:`sys.stdlib_module_names` would
 #: pass ``tomllib``, which 3.7 lacks.
@@ -56,6 +57,8 @@ RUNS = {
     'leg_summary': (['ktlo'], {'LEG': 'Python 3.8 (KTLO, non-blocking)', 'STEPS': '{}'}),
     'pip_install': (['--help'], {}),
     'regenerate_samples': (['--help'], {}),
+    'release_tags': (['--help'], {}),
+    'release_upload': (['--help'], {}),
     'vendor_code_changed': (['--help'], {}),
     'vendor_test_gate': (['--help'], {}),
 }

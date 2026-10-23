@@ -1234,6 +1234,16 @@ does; each has tests under :file:`tests/project/` that run it.
    * - :file:`util/codeql_report.py`
      - ``Write the report`` in ``codeql-analysis.yml``'s ``discussion`` (see `CI
        Reports`_).
+   * - :file:`util/release_tags.py`
+     - ``Check the release tags name this run's commit`` in ``create-release.yml``'s
+       ``github``, ``pypi`` and ``conda``, as ``release_tags.py check``, and ``Check
+       which commit the version's tag names`` in its ``version_check``, as
+       ``release_tags.py owner`` (`#1634
+       <https://github.com/JarryShaw/PyPCAPKit/issues/1634>`__, `#1748
+       <https://github.com/JarryShaw/PyPCAPKit/issues/1748>`__).
+   * - :file:`util/release_upload.py`
+     - ``Upload package to GitHub Release`` in ``create-release.yml``'s ``pypi`` and
+       ``conda`` (`#1640 <https://github.com/JarryShaw/PyPCAPKit/issues/1640>`__).
 
 The summaries run on the image's ``/usr/bin/python3`` rather than the leg's
 interpreter, which may have failed to set up or be too broken to run anything, so
@@ -1257,6 +1267,12 @@ could not signal. Both ``changes`` jobs check out on every event, since the scri
 tree. ``create-release.yml``'s ``pypi`` job keeps its own copy of
 the KTLO summary's shell until its shell moves to scripts too; a project pin runs
 that copy and the script on the same steps and requires the same output.
+The release scripts run as ``python3``, from a checkout of the whole tree, and are
+standard library only: :file:`util/release_tags.py` on the image's
+own, since ``github`` has no setup-python and ``pypi`` and ``conda`` run the check
+before theirs, and :file:`util/release_upload.py` on the leg's, after it. A project
+pin runs each on the cases the shell it replaced handled and requires the same
+status, output and calls.
 :file:`util/_actions.py` is standard library only, and keeps to 3.7's syntax,
 since the scripts on ``/usr/bin/python3`` and on every leg's interpreter import it.
 

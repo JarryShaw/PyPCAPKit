@@ -402,20 +402,7 @@ jobs:
         env:
           PCAPKIT_TAG: v${{ steps.get_version.outputs.PCAPKIT_VERSION }}
           PCAPKIT_RUN_SHA: ${{ github.sha }}
-        run: |
-          set -euo pipefail
-
-          run_commit="$(git rev-parse --verify "${PCAPKIT_RUN_SHA}^{commit}")"
-          git fetch --quiet --force origin "refs/tags/${PCAPKIT_TAG}:refs/tags/${PCAPKIT_TAG}" || true
-          tagged="$(git rev-parse -q --verify "refs/tags/${PCAPKIT_TAG}^{commit}" || true)"
-          elsewhere=false
-          if [ -n "$tagged" ] && [ "$tagged" != "$run_commit" ]; then
-            elsewhere=true
-          fi
-
-          echo "${PCAPKIT_TAG} -> ${tagged:-no commit}; this run's commit is ${run_commit}; released elsewhere: ${elsewhere}"
-          echo "PCAPKIT_RELEASED_AT=${tagged}" >> "$GITHUB_OUTPUT"
-          echo "PCAPKIT_RELEASED_ELSEWHERE=${elsewhere}" >> "$GITHUB_OUTPUT"
+        run: python3 util/release_tags.py owner
 
     outputs:
       PCAPKIT_VERSION: ${{ steps.get_version.outputs.PCAPKIT_VERSION }}
@@ -563,19 +550,7 @@ jobs:
         env:
           PCAPKIT_TAGS: v${{ needs.version_check.outputs.PCAPKIT_VERSION }}
           PCAPKIT_RUN_SHA: ${{ github.sha }}
-        run: |
-          set -euo pipefail
-
-          run_commit="$(git rev-parse --verify "${PCAPKIT_RUN_SHA}^{commit}")"
-          for tag in ${PCAPKIT_TAGS}; do
-            git fetch --quiet --force origin "refs/tags/${tag}:refs/tags/${tag}" || true
-            tagged="$(git rev-parse -q --verify "refs/tags/${tag}^{commit}" || true)"
-            if [ "$tagged" != "$run_commit" ]; then
-              echo "::error title=${tag} is not this run's commit (#1634)::${tag} resolves to '${tagged:-no commit}', but this run was created for ${run_commit}. Refusing to publish this tree under it: every artefact of a release comes from its tag's commit, so finish that release by re-running the run created for that commit."
-              exit 1
-            fi
-            echo "${tag} -> ${run_commit}"
-          done
+        run: python3 util/release_tags.py check
 
       # #1634: a refusal is most likely the workflow-file rule quoted at "Mint
       # the release App's token", which GitHub's 2023-11-02 changelog words more
@@ -793,19 +768,7 @@ jobs:
         env:
           PCAPKIT_TAGS: v${{ needs.version_check.outputs.PCAPKIT_VERSION }}
           PCAPKIT_RUN_SHA: ${{ github.sha }}
-        run: |
-          set -euo pipefail
-
-          run_commit="$(git rev-parse --verify "${PCAPKIT_RUN_SHA}^{commit}")"
-          for tag in ${PCAPKIT_TAGS}; do
-            git fetch --quiet --force origin "refs/tags/${tag}:refs/tags/${tag}" || true
-            tagged="$(git rev-parse -q --verify "refs/tags/${tag}^{commit}" || true)"
-            if [ "$tagged" != "$run_commit" ]; then
-              echo "::error title=${tag} is not this run's commit (#1634)::${tag} resolves to '${tagged:-no commit}', but this run was created for ${run_commit}. Refusing to publish this tree under it: every artefact of a release comes from its tag's commit, so finish that release by re-running the run created for that commit."
-              exit 1
-            fi
-            echo "${tag} -> ${run_commit}"
-          done
+        run: python3 util/release_tags.py check
 
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         id: setup
@@ -881,35 +844,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PCAPKIT_RELEASE_TAG: v${{ needs.version_check.outputs.PCAPKIT_VERSION }}
           PCAPKIT_ASSETS: dist/*
-        run: |
-          set -euo pipefail
-
-          published="$(gh release view "$PCAPKIT_RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[] | [.name, .state] | @tsv')"
-          while IFS= read -r pattern; do
-            [ -n "$pattern" ] || continue
-            for file in $pattern; do
-              if [ ! -f "$file" ]; then
-                echo "::error title=Nothing to upload::'${pattern}' matches no file, so ${PCAPKIT_RELEASE_TAG} would go without it."
-                exit 1
-              fi
-              name="${file##*/}"
-              state=""
-              while IFS=$'\t' read -r asset asset_state; do
-                [ "$asset" != "$name" ] || state="$asset_state"
-              done <<< "$published"
-              if [ "$state" = uploaded ]; then
-                echo "::notice title=${name} already on ${PCAPKIT_RELEASE_TAG}::Left as published (#1640): this run's rebuild is not byte-identical to it."
-                continue
-              fi
-              if [ -n "$state" ]; then
-                echo "::warning title=${name} uploaded again::${PCAPKIT_RELEASE_TAG} holds it in state '${state}', not 'uploaded' -- an upload that failed partway -- so it is deleted and this file uploaded in its place."
-                gh release upload "$PCAPKIT_RELEASE_TAG" "$file" --repo "$GITHUB_REPOSITORY" --clobber
-              else
-                gh release upload "$PCAPKIT_RELEASE_TAG" "$file" --repo "$GITHUB_REPOSITORY"
-              fi
-              echo "${name} -> ${PCAPKIT_RELEASE_TAG}"
-            done
-          done <<< "$PCAPKIT_ASSETS"
+        run: python3 util/release_upload.py
 
       # #1633: this KTLO leg's outcome despite ``continue-on-error``, for
       # ``release_status``. ``steps.*.outcome`` covers every step with an ``id``:
@@ -1000,19 +935,7 @@ jobs:
         env:
           PCAPKIT_TAGS: v${{ needs.version_check.outputs.PCAPKIT_VERSION }} conda-${{ needs.version_check.outputs.PCAPKIT_VERSION }}+0
           PCAPKIT_RUN_SHA: ${{ github.sha }}
-        run: |
-          set -euo pipefail
-
-          run_commit="$(git rev-parse --verify "${PCAPKIT_RUN_SHA}^{commit}")"
-          for tag in ${PCAPKIT_TAGS}; do
-            git fetch --quiet --force origin "refs/tags/${tag}:refs/tags/${tag}" || true
-            tagged="$(git rev-parse -q --verify "refs/tags/${tag}^{commit}" || true)"
-            if [ "$tagged" != "$run_commit" ]; then
-              echo "::error title=${tag} is not this run's commit (#1634)::${tag} resolves to '${tagged:-no commit}', but this run was created for ${run_commit}. Refusing to publish this tree under it: every artefact of a release comes from its tag's commit, so finish that release by re-running the run created for that commit."
-              exit 1
-            fi
-            echo "${tag} -> ${run_commit}"
-          done
+        run: python3 util/release_tags.py check
 
       # #888: the per-leg correctness fix. Uncached, per ``version_check``'s
       # Anaconda check, so this reads the live state.
@@ -1267,35 +1190,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PCAPKIT_RELEASE_TAG: v${{ needs.version_check.outputs.PCAPKIT_VERSION }}
           PCAPKIT_ASSETS: ${{ steps.conda_build.outputs.packages }}
-        run: |
-          set -euo pipefail
-
-          published="$(gh release view "$PCAPKIT_RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[] | [.name, .state] | @tsv')"
-          while IFS= read -r pattern; do
-            [ -n "$pattern" ] || continue
-            for file in $pattern; do
-              if [ ! -f "$file" ]; then
-                echo "::error title=Nothing to upload::'${pattern}' matches no file, so ${PCAPKIT_RELEASE_TAG} would go without it."
-                exit 1
-              fi
-              name="${file##*/}"
-              state=""
-              while IFS=$'\t' read -r asset asset_state; do
-                [ "$asset" != "$name" ] || state="$asset_state"
-              done <<< "$published"
-              if [ "$state" = uploaded ]; then
-                echo "::notice title=${name} already on ${PCAPKIT_RELEASE_TAG}::Left as published (#1640): this run's rebuild is not byte-identical to it."
-                continue
-              fi
-              if [ -n "$state" ]; then
-                echo "::warning title=${name} uploaded again::${PCAPKIT_RELEASE_TAG} holds it in state '${state}', not 'uploaded' -- an upload that failed partway -- so it is deleted and this file uploaded in its place."
-                gh release upload "$PCAPKIT_RELEASE_TAG" "$file" --repo "$GITHUB_REPOSITORY" --clobber
-              else
-                gh release upload "$PCAPKIT_RELEASE_TAG" "$file" --repo "$GITHUB_REPOSITORY"
-              fi
-              echo "${name} -> ${PCAPKIT_RELEASE_TAG}"
-            done
-          done <<< "$PCAPKIT_ASSETS"
+        run: python3 util/release_upload.py
 
   # #888: a run that released nothing says why, in one place. ``version_check``
   # can skip before any evidence exists, and ``unit-tests`` can fail or skip
