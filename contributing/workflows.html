@@ -1724,6 +1724,16 @@ outputs, job summary lines and logged runs (<a class="reference external" href="
 <td><p><code class="docutils literal notranslate"><span class="pre">Write</span> <span class="pre">the</span> <span class="pre">report</span></code> in <code class="docutils literal notranslate"><span class="pre">codeql-analysis.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">discussion</span></code> (see <a class="reference internal" href="#ci-reports">CI
 Reports</a>).</p></td>
 </tr>
+<tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">util/release_tags.py</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Check</span> <span class="pre">the</span> <span class="pre">release</span> <span class="pre">tags</span> <span class="pre">name</span> <span class="pre">this</span> <span class="pre">run's</span> <span class="pre">commit</span></code> in <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s
+<code class="docutils literal notranslate"><span class="pre">github</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code>, as <code class="docutils literal notranslate"><span class="pre">release_tags.py</span> <span class="pre">check</span></code>, and <code class="docutils literal notranslate"><span class="pre">Check</span>
+<span class="pre">which</span> <span class="pre">commit</span> <span class="pre">the</span> <span class="pre">version's</span> <span class="pre">tag</span> <span class="pre">names</span></code> in its <code class="docutils literal notranslate"><span class="pre">version_check</span></code>, as
+<code class="docutils literal notranslate"><span class="pre">release_tags.py</span> <span class="pre">owner</span></code> (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1634">#1634</a>, <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1748">#1748</a>).</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/release_upload.py</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">Upload</span> <span class="pre">package</span> <span class="pre">to</span> <span class="pre">GitHub</span> <span class="pre">Release</span></code> in <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and
+<code class="docutils literal notranslate"><span class="pre">conda</span></code> (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1640">#1640</a>).</p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -1748,6 +1758,12 @@ could not signal. Both <code class="docutils literal notranslate"><span class="p
 tree. <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">pypi</span></code> job keeps its own copy of
 the KTLO summary’s shell until its shell moves to scripts too; a project pin runs
 that copy and the script on the same steps and requires the same output.
+The release scripts run as <code class="docutils literal notranslate"><span class="pre">python3</span></code>, from a checkout of the whole tree, and are
+standard library only: <code class="file docutils literal notranslate"><span class="pre">util/release_tags.py</span></code> on the image’s
+own, since <code class="docutils literal notranslate"><span class="pre">github</span></code> has no setup-python and <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> run the check
+before theirs, and <code class="file docutils literal notranslate"><span class="pre">util/release_upload.py</span></code> on the leg’s, after it. A project
+pin runs each on the cases the shell it replaced handled and requires the same
+status, output and calls.
 <code class="file docutils literal notranslate"><span class="pre">util/_actions.py</span></code> is standard library only, and keeps to 3.7’s syntax,
 since the scripts on <code class="docutils literal notranslate"><span class="pre">/usr/bin/python3</span></code> and on every leg’s interpreter import it.</p>
 </section>
@@ -2012,6 +2028,14 @@ it, so the scheduled jobs reading them name it too
 <li><p>Conda Update’s <code class="docutils literal notranslate"><span class="pre">conda-dist</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">anaconda</span></code></p></li>
 <li><p>Vendor Update’s <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">conda-tag</span></code></p></li>
 </ul>
+<p><code class="docutils literal notranslate"><span class="pre">conda-dist</span></code> also has a <code class="docutils literal notranslate"><span class="pre">windows-latest</span></code> leg, which builds and smoke-tests a
+<code class="docutils literal notranslate"><span class="pre">win-64</span></code> package and publishes nothing
+(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>). Every upload
+step is gated off it, and those are the only steps that read <code class="docutils literal notranslate"><span class="pre">ANACONDA_TOKEN</span></code>,
+so no step on that leg receives the secret.
+<code class="file docutils literal notranslate"><span class="pre">tests/project/test_conda_windows_leg_2060.py</span></code> checks both. Each step that
+can fail there continues on error, and <code class="docutils literal notranslate"><span class="pre">Windows</span> <span class="pre">summary</span></code> reports each failure
+as a warning, as <code class="docutils literal notranslate"><span class="pre">KTLO</span> <span class="pre">summary</span></code> does for a KTLO leg, so the leg stays green.</p>
 <p>A required reviewer on <code class="docutils literal notranslate"><span class="pre">conda-tag</span></code> or <code class="docutils literal notranslate"><span class="pre">anaconda</span></code> would therefore hold every
 scheduled bump for an approval, besides the release-graph reason
 <a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a> gives for keeping them without one. Each run of these jobs

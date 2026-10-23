@@ -3474,6 +3474,16 @@ longer maintained, so the conversion goes: the <code class="docutils literal not
 the lights on</em>) legs go with it, and <code class="docutils literal notranslate"><span class="pre">coverage-comment.yml</span></code> lists no install
 failure as by design any more, which closes <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2040">#2040</a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2051">#2051</a>,
 <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2053">#2053</a>).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">setup.py</span></code> is gone, and <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> is the only build configuration. With
+the 3.8 floor it was a Python 2 guard and a bare <code class="docutils literal notranslate"><span class="pre">setup()</span></code>: the wheel’s files are
+identical without it, <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">.</span></code> goes through PEP 660, pip still refuses
+3.7 as “requires a different Python”, and on 2.7 it fails on the <code class="docutils literal notranslate"><span class="pre">setuptools</span></code>
+build requirement before it would reach <code class="docutils literal notranslate"><span class="pre">setup.py</span></code>.
+<code class="docutils literal notranslate"><span class="pre">examples/benchmark/Dockerfile</span></code> stops copying it, and a test fails should
+<code class="docutils literal notranslate"><span class="pre">setup.py</span></code> return or a <code class="docutils literal notranslate"><span class="pre">COPY</span></code> there name a file the repository does not track.
+Dependabot now fetches <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> in <code class="docutils literal notranslate"><span class="pre">setup.py</span></code>’s place and passes it
+through unstubbed; the static <code class="docutils literal notranslate"><span class="pre">readme</span></code> stays, as it does not depend on what a stub
+would supply (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2061">#2061</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2066">#2066</a>).</p></li>
 <li><p>renames with no compatibility alias left behind: <code class="docutils literal notranslate"><span class="pre">examples/sample</span></code> and
 <code class="docutils literal notranslate"><span class="pre">examples/samples</span></code> – one letter apart, holding different things – are now
 <code class="docutils literal notranslate"><span class="pre">examples/captures</span></code> and <code class="docutils literal notranslate"><span class="pre">examples/generators</span></code>.</p></li>
@@ -3883,6 +3893,11 @@ under one marker (<a class="extlink-issue reference external" href="https://gith
 them up (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1851">#1851</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/1885">#1885</a>); and the release’s conda leg installs none of
 pcapkit’s extras and smoke-tests the package before uploading it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1854">#1854</a>,
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1855">#1855</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/1868">#1868</a>).</p></li>
+<li><p>a wheel built with the oldest setuptools <code class="docutils literal notranslate"><span class="pre">[build-system]</span> <span class="pre">requires</span></code> allowed,
+without build isolation, left out <code class="docutils literal notranslate"><span class="pre">pcapkit/py.typed</span></code>, so type checkers read the
+installed package as untyped. Nothing declares the file, and setuptools ships it
+unasked only from 69.0.0, so that is the floor now, in <code class="docutils literal notranslate"><span class="pre">pyproject.toml</span></code> and the
+Conda recipe alike (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2062">#2062</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2064">#2064</a>).</p></li>
 </ul>
 </section>
 </section>
