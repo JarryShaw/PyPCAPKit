@@ -13,7 +13,10 @@ job stays green while covering less. The assertions are therefore over the
   ``protocols`` leg, so a new ``tests/protocols/<dir>/`` is either inside a
   shard or fails here;
 * every other matrix cell is a bare direct child of ``tests/`` with no
-  ``--exclude``, i.e. runs exactly what it ran before the split.
+  ``--exclude``, i.e. runs exactly what it ran before the split;
+* every ``tests/`` subdirectory holding a test module is a leg, except the
+  :data:`NOT_LEGS` names, each left out for the reason the workflow comment
+  gives (#2115: ``corekit`` was missing, and nothing said so).
 
 The workflow is read with a small hand-rolled scan rather than :mod:`yaml`,
 which comes only with the ``test`` extra of :file:`pyproject.toml`; the same split
@@ -35,6 +38,19 @@ if str(ROOT / 'util') not in sys.path:
     sys.path.insert(0, str(ROOT / 'util'))
 
 import run_unittest_leg as leg  # noqa: E402  pylint: disable=wrong-import-position
+
+#: ``tests/`` subdirectories deliberately not in the matrix, each for the reason
+#: the ``unittest-ordering`` comment in the workflow records (#2115).
+NOT_LEGS = {
+    # fixture-dependent tier only, run under pytest by ``integration``
+    'integration',
+}
+
+
+def _test_directories() -> 'set[str]':
+    """Every direct child of ``tests/`` that holds a ``test_*.py`` module."""
+    return {path.name for path in leg.TESTS_ROOT.iterdir()
+            if path.is_dir() and next(path.rglob('test_*.py'), None) is not None}
 
 
 def _matrix() -> 'list[tuple[str, list[str]]]':
@@ -77,12 +93,30 @@ class TestShardedProtocolsLeg(unittest.TestCase):
         others = [(name, exclude) for name, exclude in _matrix()
                   if name != 'protocols' and not name.startswith('protocols/')]
         self.assertEqual(sorted(name for name, _ in others),
-                         sorted(['cli', 'const', 'dumpkit', 'foundation', 'interface',
-                                 'project', 'toolkit', 'utilities', 'vendor']))
+                         sorted(_test_directories() - NOT_LEGS - {'protocols'}))
         for name, exclude in others:
             self.assertEqual(exclude, [], name)
             self.assertEqual(leg.leg_modules(name),
                              leg.leg_modules(name, ()), name)
+
+    def test_every_tests_subdirectory_is_a_leg(self):
+        """#2115: a ``tests/`` subdirectory left out of the matrix is never run
+        under plain unittest, and the job stays green while covering less."""
+        covered = {name.split('/', 1)[0] for name, _ in _matrix()}
+        self.assertEqual(sorted(_test_directories() - NOT_LEGS - covered), [],
+                         'a tests/ subdirectory is missing from unittest-ordering')
+
+    def test_every_exception_is_real_and_still_left_out(self):
+        covered = {name.split('/', 1)[0] for name, _ in _matrix()}
+        for name in sorted(NOT_LEGS):
+            with self.subTest(name=name):
+                self.assertIn(name, _test_directories(), 'stale NOT_LEGS entry')
+                self.assertNotIn(name, covered, 'a leg now, so drop it from NOT_LEGS')
+
+    def test_integration_has_no_unit_tier_module(self):
+        """The reason ``integration`` is not a leg: the leg would run only the
+        root-level modules."""
+        self.assertEqual(leg.leg_modules('integration'), ())
 
     def test_no_shard_is_empty(self):
         for name, exclude in _matrix():

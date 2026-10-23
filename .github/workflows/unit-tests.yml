@@ -1125,16 +1125,17 @@ jobs:
   # by a root-level module survives. The modules directly in tests/protocols
   # stay in the rest cell, as moving them would split more pairs than it joins.
   #
-  # Deliberately absent from ``leg``:
+  # Every tests/ subdirectory is a leg except those below, and
+  # tests/project/test_unittest_ordering_shards.py fails on a new one left out:
   #
-  #   * tests/corekit -- plain unittest fails its identity subtests, as
-  #     tests/_support.py's purge_modules() docstring documents; pytest is the
-  #     supported runner for exactly that reason, so the leg would be
-  #     permanently red for an accepted characteristic.
   #   * tests/integration -- needs generated captures, and `integration` runs
   #     it under pytest. tests._tiers.is_unit_tier() rejects every one of its
   #     files, so the leg would run the root-level modules alone -- green,
   #     while covering none of it.
+  #
+  # tests/corekit was once left out as permanently red; #2115 found its
+  # failures were test modules mixing two pcapkit imports, fixed them, and
+  # added the leg.
   #
   # The `project` cell keeps the project pins (#1954): whether a module passes
   # in one interpreter, in file order, with no xdist, is a question about the
@@ -1162,6 +1163,7 @@ jobs:
         leg:
           - cli
           - const
+          - corekit
           - dumpkit
           - foundation
           - interface
