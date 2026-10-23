@@ -501,6 +501,9 @@ jobs:
           conda install -n base --override-channels -c conda-forge -y conda-build
           conda build --version
 
+      # #1967: util/release_conda.py, as create-release.yml's step of the same
+      # name, on conda's base `python`, which the login shell activates. #1822:
+      # it fails a package built for another platform than the leg's.
       - name: Build conda packages
         id: conda_build
         continue-on-error: ${{ matrix.os == 'windows-latest' }}
@@ -508,63 +511,10 @@ jobs:
         env:
           PCAPKIT_VERSION: ${{ needs.conda-update.outputs.PCAPKIT_VERSION }}
           PCAPKIT_BUILD: ${{ needs.conda-update.outputs.PCAPKIT_BUILD }}
+          PCAPKIT_CONDA_OS: ${{ matrix.os }}
+          PCAPKIT_PYTHON_VERSION: ${{ matrix.python-version }}
         working-directory: conda/pypcapkit
-        run: |
-          set -euo pipefail
-
-          out_dir="$(mktemp -d -t compilation-XXXXXXXXXX)"
-          echo "out_dir=$out_dir" >> "$GITHUB_OUTPUT"
-
-          conda build . --package-format .tar.bz2 --no-anaconda-upload --output-folder "$out_dir" --python "${{ matrix.python-version }}"
-          host_package="$(find "$out_dir" -type f \( -name '*.tar.bz2' -o -name '*.conda' \) -print | sort | sed -n '1p')"
-          if [ -z "$host_package" ]; then
-            echo "::error::No conda package was built"
-            exit 1
-          fi
-
-          case "${{ matrix.os }}" in
-            macos-latest)
-              target_platform="osx-arm64"
-              ;;
-            macos-26-intel)
-              target_platform="osx-64"
-              ;;
-            ubuntu-latest)
-              target_platform="linux-64"
-              ;;
-            windows-latest)
-              target_platform="win-64"
-              ;;
-            *)
-              target_platform=""
-              ;;
-          esac
-
-          echo "host_package=$host_package" >> "$GITHUB_OUTPUT"
-
-          # #1822: never `conda convert` across architectures. It relabels the
-          # package and copies its binaries unchanged, so the osx-64 package it
-          # made from the arm64 build carried arm64 extensions.
-          host_platform="$(basename "$(dirname "$host_package")")"
-          if [ "$host_platform" != "$target_platform" ]; then
-            echo "::error title=${host_platform} package on a ${target_platform:-unmapped} leg (#1822)::${{ matrix.os }} publishes ${target_platform:-nothing}, and conda built ${host_platform} here; a package is published only for the platform it was built on."
-            exit 1
-          fi
-
-          package_paths="$(find "$out_dir" -type f \( -name '*.tar.bz2' -o -name '*.conda' \) -print | sort)"
-          if [ -z "$package_paths" ]; then
-            echo "::error::No conda packages were found"
-            exit 1
-          fi
-
-          printf '%s\n' "$package_paths"
-          package_paths_csv="$(printf '%s\n' "$package_paths" | paste -sd ',' -)"
-          echo "packages_csv=$package_paths_csv" >> "$GITHUB_OUTPUT"
-          {
-            echo 'packages<<EOF'
-            printf '%s\n' "$package_paths"
-            echo EOF
-          } >> "$GITHUB_OUTPUT"
+        run: python ../../util/release_conda.py build
 
       # #1814: the package's only run requirement is Python, so it has only what
       # it vendors in `pcapkit/_extern`, and package discovery alone ships those
@@ -614,35 +564,7 @@ jobs:
           PCAPKIT_CONDA_CHANNEL: jarryshaw
           PCAPKIT_CONDA_PACKAGES: ${{ steps.conda_build.outputs.packages }}
           PCAPKIT_CONDA_LABELS: ${{ needs.conda-update.outputs.PCAPKIT_CONDA_LABEL }}
-        run: |
-          set -euo pipefail
-
-          conda install -n base --override-channels -c conda-forge -y anaconda-client
-
-          # The action's handling of its `labels:` and `packages:` inputs: a
-          # comma-separated list, each trimmed, and the build step's
-          # newline-separated paths.
-          labels=()
-          IFS=',' read -ra names <<< "$PCAPKIT_CONDA_LABELS"
-          for name in ${names[@]+"${names[@]}"}; do
-            name="$(echo "$name" | xargs)"
-            if [ -n "$name" ]; then
-              labels+=(--label "$name")
-            fi
-          done
-          packages=()
-          while IFS= read -r path; do
-            if [ -n "$path" ]; then
-              packages+=("$path")
-            fi
-          done <<< "$PCAPKIT_CONDA_PACKAGES"
-          if [ "${#packages[@]}" -eq 0 ]; then
-            echo "::error::No conda packages to upload"
-            exit 1
-          fi
-
-          "${CONDA}/bin/anaconda" --token "$ANACONDA_API_TOKEN" upload \
-            --user "$PCAPKIT_CONDA_CHANNEL" --skip-existing ${labels[@]+"${labels[@]}"} "${packages[@]}"
+        run: python3 util/release_conda.py upload
 
       # #1634: the upload below never makes the release. ncipollo/release-action
       # v1.21.0 creates a missing one, and its tag, at ``commit``

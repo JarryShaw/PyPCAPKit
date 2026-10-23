@@ -9,7 +9,9 @@
 
 * :class:`TestNoDeadRunnerCode` pins that no step's ``if:`` or
   ``continue-on-error`` names a runner label the job's matrix lacks, no ``case``
-  arm maps one, and, with no Windows leg, no step is Windows-only. So adding a
+  arm maps one, :file:`util/release_conda.py`, which both jobs' steps run since
+  #1967, maps no label that neither job has a leg on, and, with no Windows leg,
+  no step is Windows-only. So adding a
   Windows leg back means adding its steps back deliberately, rather than
   reviving ones nobody has run. #2060 did so for ``conda-dist``, whose Windows
   steps are therefore live; ``conda`` still has no Windows leg.
@@ -28,9 +30,10 @@ import unittest
 from typing import TYPE_CHECKING
 
 from tests import _workflows
+from util import release_conda
 
 if TYPE_CHECKING:
-    from typing import Any
+    from typing import Any, Optional
 
 #: Test tier (#1958): reads the workflow files, a question about the tree.
 __tier__ = 'LATEST'
@@ -47,11 +50,24 @@ ARM = re.compile(r'^\s*([^\s()]+)\)\s*$', re.MULTILINE)
 WINDOWS = re.compile(r'windows', re.IGNORECASE)
 #: An ``if:`` that runs its step on Windows alone.
 WINDOWS_ONLY = re.compile(r"(?:matrix|runner)\.os\s*==\s*'[^']*windows", re.IGNORECASE)
+#: A ``run:`` that maps the leg through :data:`release_conda.PLATFORMS` (#1967).
+MAPS = re.compile(r'\butil/release_conda\.py (?:leg|build)\b')
 
 
-def dead(spec: 'dict[str, Any]') -> 'list[str]':
-    """What of ``spec``, a job, names a runner its matrix has no leg on."""
+def legs() -> 'set[str]':
+    """Every runner label a conda job has a leg on."""
+    return {label for name, job_id in JOBS for label in _workflows.job(name, job_id)['strategy']['matrix']['os']}
+
+
+def dead(spec: 'dict[str, Any]', every: 'Optional[set[str]]' = None) -> 'list[str]':
+    """What of ``spec``, a job, names a runner its matrix has no leg on.
+
+    The labels :data:`release_conda.PLATFORMS` maps serve both jobs, so they are
+    held to ``every``, the labels either has a leg on, by default :func:`legs`.
+
+    """
     labels = list(spec['strategy']['matrix']['os'])
+    every = legs() if every is None else every
     windows_leg = any(WINDOWS.search(label) for label in labels)
     found = []
     for step in spec['steps']:
@@ -67,6 +83,11 @@ def dead(spec: 'dict[str, Any]') -> 'list[str]':
             for pattern in ARM.findall(block):
                 if pattern != '*' and pattern not in labels:
                     found.append(f'{name}: `case` arm {pattern}, which is no leg')
+        if MAPS.search(str(step.get('run', ''))):
+            found.extend(f'{name}: release_conda.py maps {label}, which no conda job has a leg on'
+                         for label in sorted(set(release_conda.PLATFORMS) - every))
+            found.extend(f'{name}: release_conda.py maps no platform for {label}'
+                         for label in labels if label not in release_conda.PLATFORMS)
     return found
 
 
@@ -127,13 +148,21 @@ class TestTheCheckSeesDeadCode(unittest.TestCase):
         """#2060's steps are live only while the leg is there."""
         spec = copy.deepcopy(_workflows.job('cron-conda.yml', 'conda-dist'))
         spec['strategy']['matrix']['os'].remove('windows-latest')
-        found = dead(spec)
+        found = dead(spec, legs() - {'windows-latest'})
         for line in ('Upload conda packages to Anaconda: `if:` compares matrix.os with windows-latest, which is no leg',
                      'Install and Setup: `continue-on-error:` compares matrix.os with windows-latest, which is no leg',
                      'Windows summary: Windows-only, and no leg is Windows',
-                     'Build conda packages: `case` arm windows-latest, which is no leg'):
+                     'Build conda packages: release_conda.py maps windows-latest, which no conda job has a leg on'):
             with self.subTest(line=line):
                 self.assertIn(line, found)
+
+    def test_a_leg_the_script_does_not_map_is_reported(self) -> None:
+        spec = copy.deepcopy(_workflows.job('create-release.yml', 'conda'))
+        spec['strategy']['matrix']['os'].append('macos-99')
+        self.assertEqual(dead(spec, legs() | {'macos-99'}), [
+            "Check whether this leg is already on Anaconda: release_conda.py maps no platform for macos-99",
+            'Build conda packages: release_conda.py maps no platform for macos-99',
+        ])
 
     def test_a_windows_leg_allows_its_own_steps(self) -> None:
         spec = {'strategy': {'matrix': {'os': ['ubuntu-latest', 'windows-latest']}},

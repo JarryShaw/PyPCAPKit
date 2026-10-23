@@ -21,8 +21,8 @@ only the two steps that name and upload the job's copy of its summary,
 step's failure is tried on every leg instead of read off the text. Expressions go
 through :mod:`tests.project.test_release_gates`'s evaluator, and the scripts that
 write annotations are executed. Both summaries run :file:`util/leg_summary.py`
-(#1967), and :file:`create-release.yml`'s ``pypi`` keeps an inline copy of its
-shell, which is run against the script on the same steps.
+(#1967), :file:`create-release.yml`'s ``pypi``'s too, whose former inline copy
+of its shell is run against the script on the same steps.
 
 #1660 added an experimental tier, free-threaded CPython and GraalPy, as legs of
 ``test`` only; #1732 moved them to a job of their own, ``experimental``, which
@@ -125,7 +125,7 @@ OUTPUTS = {
 }
 #: #2030: the steps after a summary, on ``always()`` and masked on every leg, that
 #: name and upload the job's copy of its summary for util/check_suite_report.py.
-#: They end every job with a KTLO or experimental leg but :data:`INLINE_SUMMARY`'s.
+#: They end every job with a KTLO or experimental leg but :data:`UNCOPIED_SUMMARY`'s.
 JOB_SUMMARY_STEPS = ('Name the job summary', 'Upload the job summary')
 #: The ``env:`` entry by which a summary step copies its lines there too (#2030).
 SUMMARY_COPY = {'JOB_SUMMARY_COPY': '${{ runner.temp }}/job-summary.md'}
@@ -149,8 +149,21 @@ CONDA_WINDOWS_REASON = 'The win-64 conda leg is unpublished and never blocks (#2
 IMAGE_PYTHON = '/usr/bin/python3'
 SUMMARY_RUN = f'{IMAGE_PYTHON} util/leg_summary.py ktlo'
 EXPERIMENTAL_SUMMARY_RUN = f'{IMAGE_PYTHON} util/leg_summary.py experimental'
-#: The ``KTLO summary`` that keeps its shell inline until #1967's ``create-release.yml`` step.
-INLINE_SUMMARY = ('create-release.yml', 'pypi')
+#: The ``KTLO summary`` whose job keeps no copy of its summary: no CI report reads
+#: Create Release's runs (#2030).
+UNCOPIED_SUMMARY = ('create-release.yml', 'pypi')
+#: ``pypi``'s ``KTLO summary`` before it ran :data:`SUMMARY_RUN` (#1967).
+FORMER_RELEASE_SUMMARY = '''\
+failed=$(jq -r 'to_entries[] | select(.value.outcome == "failure") | .key' <<< "$STEPS")
+if [ -z "$failed" ]; then
+  echo "$LEG: no step failed."
+  exit 0
+fi
+while IFS= read -r id; do
+  echo "::warning title=${id} failed on ${LEG//,/%2C}::KTLO legs never block (#1633), so this job still succeeds (#1672); see the ${id} step's log."
+  echo "- ${LEG}: step \\`${id}\\` failed; non-blocking, so this job still succeeds." >> "$GITHUB_STEP_SUMMARY"
+done <<< "$failed"
+'''
 #: A ``util/`` script a ``run:`` invokes, whose own annotations are the step's.
 UTIL_SCRIPT = re.compile(r'\butil/[\w-]+\.py\b')
 #: ``experimental``'s steps with a ``timeout-minutes`` of their own (#1660), by ``id``:
@@ -187,12 +200,12 @@ def label(step: 'dict[str, Any]') -> 'str':
 
 def summary_tail(where: 'tuple[str, str]') -> 'tuple[str, ...]':
     """The steps that follow the summary of the job ``where``, ``(workflow, job)`` (#2030)."""
-    return () if where == INLINE_SUMMARY else JOB_SUMMARY_STEPS
+    return () if where == UNCOPIED_SUMMARY else JOB_SUMMARY_STEPS
 
 
 def summary_env(where: 'tuple[str, str]', env: 'dict[str, str]') -> 'dict[str, str]':
-    """The summary step's ``env:`` for the job ``where``, which copies its lines unless inline (#2030)."""
-    return dict(env) if where == INLINE_SUMMARY else dict(env, **SUMMARY_COPY)
+    """The summary step's ``env:`` for the job ``where``, which copies its lines unless uncopied (#2030)."""
+    return dict(env) if where == UNCOPIED_SUMMARY else dict(env, **SUMMARY_COPY)
 
 
 def summary_step(spec: 'dict[str, Any]') -> 'dict[str, Any]':
@@ -437,8 +450,7 @@ class TestNoKTLOFailureTurnsAJobRed(unittest.TestCase):
                 self.assertEqual(summary.get('continue-on-error'), KTLO_GUARD)
                 self.assertEqual(summary.get('shell'), 'bash')
                 self.assertEqual(summary.get('env'), summary_env((name, job_id), SUMMARY_ENV))
-                if (name, job_id) != INLINE_SUMMARY:
-                    self.assertEqual(summary['run'], SUMMARY_RUN)
+                self.assertEqual(summary['run'], SUMMARY_RUN)
             blocking = BLOCKS_EVERY_LEG.get((name, job_id), ())
             for leg in filter(is_ktlo, legs(name, job_id)):
                 for index, _, record in scenarios(name, job_id, spec, leg):
@@ -548,12 +560,12 @@ class TestAKTLOFailureIsAWarning(unittest.TestCase):
         self.assertEqual(page, '')
         self.assertIn(f'{LEG_KTLO}: no step failed.', result.stdout)
 
-    def test_the_inline_release_copy_reports_as_the_script_does(self) -> None:
-        """``pypi``'s ``KTLO summary`` keeps its shell (#1967), so it must not drift from the script."""
+    def test_the_former_release_copy_reports_as_the_script_does(self) -> None:
+        """``pypi``'s ``KTLO summary`` held its own shell until #1967; the script reports as it did."""
         if shutil.which('jq') is None:  # pragma: no cover
-            self.skipTest('jq, on every Ubuntu runner image, is needed to run the inline KTLO summary')
-        inline = summary_step(job(*INLINE_SUMMARY))['run']
-        self.assertNotIn('leg_summary.py', inline)
+            self.skipTest('jq, on every Ubuntu runner image, is needed to run the former KTLO summary')
+        self.assertEqual(summary_step(job(*UNCOPIED_SUMMARY))['run'], SUMMARY_RUN)
+        inline = FORMER_RELEASE_SUMMARY
         for steps in ({'checkout': 'success', 'python': 'success', 'tests': 'success'},
                       {'checkout': 'success', 'python': 'success', 'install': 'failure', 'tests': 'skipped'},
                       {'checkout': 'failure', 'python': 'failure', 'install': 'skipped'}):

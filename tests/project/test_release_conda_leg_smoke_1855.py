@@ -18,6 +18,7 @@ import pathlib
 import re
 import stat
 import subprocess  # nosec: B404
+import sys
 import tempfile
 import unittest
 from typing import TYPE_CHECKING
@@ -25,6 +26,7 @@ from typing import TYPE_CHECKING
 from tests import _workflows
 from tests._support import scale_timeout
 from tests.project.test_conda_native_platforms_1822 import BASH, CONDA
+from tests.project.test_release_conda_scripts_1967 import read_outputs
 
 try:
     import yaml
@@ -34,7 +36,8 @@ except ImportError:  # pragma: no cover
 if TYPE_CHECKING:
     from typing import Any
 
-WORKFLOWS = pathlib.Path(__file__).resolve().parents[2] / '.github' / 'workflows'
+ROOT = pathlib.Path(__file__).resolve().parents[2]
+WORKFLOWS = ROOT / '.github' / 'workflows'
 #: The conda jobs, as (workflow, job); the first is the one the release mirrors.
 CRON, RELEASE = ('cron-conda.yml', 'conda-dist'), ('create-release.yml', 'conda')
 #: The steps that publish what the leg built.
@@ -96,9 +99,8 @@ class TestEachBuildStepNamesItsPackage(unittest.TestCase):
     def outputs(self, workflow: 'str', job_id: 'str') -> 'tuple[str, str]':
         """The build step's ``$GITHUB_OUTPUT`` on ``ubuntu-latest``, and its log."""
         step = next(step for step in steps(workflow, job_id) if step.get('id') == 'conda_build')
-        script = step['run'].replace('${{ matrix.os }}', 'ubuntu-latest').replace('${{ matrix.python-version }}',
-                                                                                 '3.14')
-        self.assertNotIn('${{', script)
+        # #1967: util/release_conda.py's, run from the recipe's directory.
+        self.assertEqual(step['run'], 'python ../../util/release_conda.py build')
         with tempfile.TemporaryDirectory() as temp:
             scratch = pathlib.Path(temp)
             (scratch / 'bin').mkdir()
@@ -108,10 +110,11 @@ class TestEachBuildStepNamesItsPackage(unittest.TestCase):
             output = scratch / 'output'
             output.write_text('', encoding='utf-8')
             result = subprocess.run(
-                [BASH, '-e', '-c', script], cwd=temp,  # nosec: B603
+                [sys.executable, str(ROOT / 'util' / 'release_conda.py'), 'build'], cwd=temp,  # nosec: B603
                 env=dict(os.environ, PATH=f'{scratch / "bin"}{os.pathsep}{os.environ["PATH"]}',
                          TMPDIR=temp, GITHUB_OUTPUT=str(output), FAKE_SUBDIR='linux-64',
-                         PCAPKIT_VERSION='1.0', PCAPKIT_BUILD='0'),
+                         PCAPKIT_VERSION='1.0', PCAPKIT_BUILD='0', PCAPKIT_CONDA_OS='ubuntu-latest',
+                         PCAPKIT_PYTHON_VERSION='3.14'),
                 capture_output=True, text=True, check=False, timeout=scale_timeout(60))
             return output.read_text(encoding='utf-8'), result.stdout + result.stderr
 
@@ -119,11 +122,12 @@ class TestEachBuildStepNamesItsPackage(unittest.TestCase):
         for workflow, job_id in (CRON, RELEASE):
             written, log = self.outputs(workflow, job_id)
             with self.subTest(workflow=workflow, job=job_id):
-                host = re.findall(r'^host_package=(.*)$', written, re.MULTILINE)
+                outputs = read_outputs(written)
+                host = [value for name, value in outputs if name == 'host_package']
                 self.assertEqual(len(host), 1, f'no host_package output\n{written}{log}')
-                packages = re.search(r'^packages<<EOF\n(.*?)^EOF$', written, re.MULTILINE | re.DOTALL)
-                self.assertIsNotNone(packages, log)
-                self.assertEqual(host, packages.group(1).splitlines())  # type: ignore[union-attr]
+                packages = [value for name, value in outputs if name == 'packages']
+                self.assertEqual(len(packages), 1, log)
+                self.assertEqual(host, packages[0].splitlines())
                 self.assertEqual(pathlib.PurePosixPath(host[0]).parent.name, 'linux-64')
 
 

@@ -761,16 +761,7 @@ jobs:
         env:
           LEG: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}
           STEPS: ${{ toJSON(steps) }}
-        run: |
-          failed=$(jq -r 'to_entries[] | select(.value.outcome == "failure") | .key' <<< "$STEPS")
-          if [ -z "$failed" ]; then
-            echo "$LEG: no step failed."
-            exit 0
-          fi
-          while IFS= read -r id; do
-            echo "::warning title=${id} failed on ${LEG//,/%2C}::KTLO legs never block (#1633), so this job still succeeds (#1672); see the ${id} step's log."
-            echo "- ${LEG}: step \`${id}\` failed; non-blocking, so this job still succeeds." >> "$GITHUB_STEP_SUMMARY"
-          done <<< "$failed"
+        run: /usr/bin/python3 util/leg_summary.py ktlo
 
   conda:
     name: Conda deployment (release) on ${{ matrix.os }} with Python ${{ matrix.python-version }}
@@ -825,60 +816,17 @@ jobs:
         run: python3 util/release_tags.py check
 
       # #888: the per-leg correctness fix. Uncached, per ``version_check``'s
-      # Anaconda check, so this reads the live state.
+      # Anaconda check, so this reads the live state. #1967: util/release_conda.py
+      # holds this step's shell, and the build's and the Intel upload's, which
+      # cron-conda.yml's ``conda-dist`` runs too; before setup-python, so here
+      # on the image's ``python3``.
       - name: Check whether this leg is already on Anaconda
         id: check_leg
         env:
           PCAPKIT_VERSION: ${{ needs.version_check.outputs.PCAPKIT_VERSION }}
-        run: |
-          set -euo pipefail
-
-          case "${{ matrix.os }}" in
-            macos-latest)
-              target_platform="osx-arm64"
-              ;;
-            macos-26-intel)
-              target_platform="osx-64"
-              ;;
-            ubuntu-latest)
-              target_platform="linux-64"
-              ;;
-            *)
-              target_platform=""
-              ;;
-          esac
-          py_tag="py$(echo "${{ matrix.python-version }}" | tr -d '.')"
-
-          # Same coupling risk, and the same fix, as version_check's checks.
-          status="$(curl -s --retry 3 --retry-connrefused \
-            -o /tmp/anaconda_release.json -w '%{http_code}' \
-            "https://api.anaconda.org/release/jarryshaw/pypcapkit/${PCAPKIT_VERSION}" || echo 000)"
-
-          exists=false
-          if [ "$status" = "200" ]; then
-            # The `printf` form of version_check's checks, and needed here: this
-            # runs before setup-python, so `python3` is the image's (3.12 on
-            # ubuntu-latest, 3.13 on macos-latest), and indented `python3 -c`
-            # source would fail under `set -e` -- only on the retry this is for.
-            exists="$(printf '%s\n' \
-              "import json" \
-              "with open('/tmp/anaconda_release.json') as f:" \
-              "    data = json.load(f)" \
-              "target_platform = '$target_platform'" \
-              "py_tag = '$py_tag'" \
-              "found = any(" \
-              "    d.get('attrs', {}).get('subdir') == target_platform" \
-              "    and d.get('attrs', {}).get('build', '').startswith(py_tag + '_')" \
-              "    for d in data.get('distributions', [])" \
-              ")" \
-              "print('true' if found else 'false')" \
-              | python3 -)"
-          fi
-
-          echo "PCAPKIT_LEG_EXISTS=$exists" >> "$GITHUB_OUTPUT"
-          if [ "$exists" = "true" ]; then
-            echo "::notice title=conda leg already published::pypcapkit ${PCAPKIT_VERSION} for ${target_platform} / ${py_tag} is already on anaconda.org/jarryshaw (http ${status}); skipping this leg's upload."
-          fi
+          PCAPKIT_CONDA_OS: ${{ matrix.os }}
+          PCAPKIT_PYTHON_VERSION: ${{ matrix.python-version }}
+        run: python3 util/release_conda.py leg /tmp/anaconda_release.json
 
       - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
@@ -935,6 +883,8 @@ jobs:
           conda install -n base --override-channels -c conda-forge -y conda-build
           conda build --version
 
+      # On conda's base ``python``, which the login shell activates, from this
+      # directory, as conda-dist's step of the same name.
       - name: Build conda packages
         id: conda_build
         shell: bash -el {0}
@@ -944,58 +894,10 @@ jobs:
           # because ``conda/build`` says so: at a hand-tagged commit it may still
           # hold the previous version's counter until ``tag``'s reset (#1634).
           PCAPKIT_BUILD: "0"
+          PCAPKIT_CONDA_OS: ${{ matrix.os }}
+          PCAPKIT_PYTHON_VERSION: ${{ matrix.python-version }}
         working-directory: conda/pypcapkit
-        run: |
-          set -euo pipefail
-
-          out_dir="$(mktemp -d -t compilation-XXXXXXXXXX)"
-          echo "out_dir=$out_dir" >> "$GITHUB_OUTPUT"
-
-          conda build . --package-format .tar.bz2 --no-anaconda-upload --output-folder "$out_dir" --python "${{ matrix.python-version }}"
-          host_package="$(find "$out_dir" -type f \( -name '*.tar.bz2' -o -name '*.conda' \) -print | sort | sed -n '1p')"
-          if [ -z "$host_package" ]; then
-            echo "::error::No conda package was built"
-            exit 1
-          fi
-
-          case "${{ matrix.os }}" in
-            macos-latest)
-              target_platform="osx-arm64"
-              ;;
-            macos-26-intel)
-              target_platform="osx-64"
-              ;;
-            ubuntu-latest)
-              target_platform="linux-64"
-              ;;
-            *)
-              target_platform=""
-              ;;
-          esac
-
-          echo "host_package=$host_package" >> "$GITHUB_OUTPUT"
-
-          # #1822: never ``conda convert`` across architectures; see the matrix.
-          host_platform="$(basename "$(dirname "$host_package")")"
-          if [ "$host_platform" != "$target_platform" ]; then
-            echo "::error title=${host_platform} package on a ${target_platform:-unmapped} leg (#1822)::${{ matrix.os }} publishes ${target_platform:-nothing}, and conda built ${host_platform} here; a package is published only for the platform it was built on."
-            exit 1
-          fi
-
-          package_paths="$(find "$out_dir" -type f \( -name '*.tar.bz2' -o -name '*.conda' \) -print | sort)"
-          if [ -z "$package_paths" ]; then
-            echo "::error::No conda packages were found"
-            exit 1
-          fi
-
-          printf '%s\n' "$package_paths"
-          package_paths_csv="$(printf '%s\n' "$package_paths" | paste -sd ',' -)"
-          echo "packages_csv=$package_paths_csv" >> "$GITHUB_OUTPUT"
-          {
-            echo 'packages<<EOF'
-            printf '%s\n' "$package_paths"
-            echo EOF
-          } >> "$GITHUB_OUTPUT"
+        run: python ../../util/release_conda.py build
 
       # #1855: cron-conda.yml's ``conda-dist`` step of the same name, which says
       # what it checks and why it runs setup-python's interpreter, so a release
@@ -1025,7 +927,8 @@ jobs:
       # parser -- from conda-forge's anaconda-client in base. One difference:
       # `--skip-existing`, so a file anaconda.org already has is skipped where
       # the action, with no `force:`, fails on it. "Check whether this leg is
-      # already on Anaconda" still gates both.
+      # already on Anaconda" still gates both. ``release_conda.py upload`` runs
+      # on setup-python's ``python3``.
       - name: Upload conda packages to Anaconda (Intel)
         if: ${{ matrix.os == 'macos-26-intel' && steps.check_leg.outputs.PCAPKIT_LEG_EXISTS != 'true' }}
         shell: bash
@@ -1035,35 +938,7 @@ jobs:
           PCAPKIT_CONDA_CHANNEL: jarryshaw
           PCAPKIT_CONDA_PACKAGES: ${{ steps.conda_build.outputs.packages }}
           PCAPKIT_CONDA_LABELS: ${{ needs.version_check.outputs.PCAPKIT_CONDA_LABEL }}
-        run: |
-          set -euo pipefail
-
-          conda install -n base --override-channels -c conda-forge -y anaconda-client
-
-          # The action's handling of its `labels:` and `packages:` inputs: a
-          # comma-separated list, each trimmed, and the build step's
-          # newline-separated paths.
-          labels=()
-          IFS=',' read -ra names <<< "$PCAPKIT_CONDA_LABELS"
-          for name in ${names[@]+"${names[@]}"}; do
-            name="$(echo "$name" | xargs)"
-            if [ -n "$name" ]; then
-              labels+=(--label "$name")
-            fi
-          done
-          packages=()
-          while IFS= read -r path; do
-            if [ -n "$path" ]; then
-              packages+=("$path")
-            fi
-          done <<< "$PCAPKIT_CONDA_PACKAGES"
-          if [ "${#packages[@]}" -eq 0 ]; then
-            echo "::error::No conda packages to upload"
-            exit 1
-          fi
-
-          "${CONDA}/bin/anaconda" --token "$ANACONDA_API_TOKEN" upload \
-            --user "$PCAPKIT_CONDA_CHANNEL" --skip-existing ${labels[@]+"${labels[@]}"} "${packages[@]}"
+        run: python3 util/release_conda.py upload
 
       # ``pypi``'s upload script, for the same reasons (#1634, #1640). Not
       # gated on ``check_leg`` as the Anaconda upload is: a leg whose Anaconda
