@@ -438,7 +438,10 @@ jobs:
               set -- bash -c '"$@"' bash "$@"
               watched=pcapkit-tests.scope
             fi
-            set -- "$WATCHER_PYTHON" util/superseded.py watch --interval 60 --grace 30 --scope "$watched" -- "$@"
+            # #2078: its summary line goes to the job's copy as well, through an
+            # option, so the tests, which inherit its environment, never see it.
+            set -- "$WATCHER_PYTHON" util/superseded.py watch --interval 60 --grace 30 --scope "$watched" \
+              --summary-copy "$RUNNER_TEMP/job-summary.md" -- "$@"
           else
             echo "No watcher: its interpreter or requests did not install (${WATCHER:-skipped}), so the tests run unwatched."
           fi
@@ -572,9 +575,9 @@ jobs:
 
       # #2030: the job's summary, for the report ci-reports.yml posts, as in
       # unit-tests.yml's `test` job. `Containment summary` and `Experimental
-      # summary` copy theirs to job-summary.md; `Run unit tests` does not, as
-      # its tests write summaries of their own, so util/superseded.py's line
-      # for a stopped run stays in the job's summary alone.
+      # summary` copy theirs to job-summary.md, and `Run unit tests` passes it
+      # to util/superseded.py's `--summary-copy` (#2078) rather than setting
+      # JOB_SUMMARY_COPY, as its tests write summaries of their own.
       - name: Name the job summary
         if: ${{ always() }}
         continue-on-error: true

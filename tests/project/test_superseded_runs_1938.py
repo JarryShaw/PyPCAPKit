@@ -879,8 +879,8 @@ class TestTheTestsStep(unittest.TestCase):
         capped = 'set -- prlimit --fsize=2147483648 "$gnu_timeout" --signal=INT --kill-after=3m 110m "$@"\n'
         scoped = 'set -- scoped pcapkit-tests.scope "$@"\n'
         named = 'watched=pcapkit-tests.scope\n'
-        watched = ('set -- "$WATCHER_PYTHON" util/superseded.py watch --interval 60 --grace 30 --scope "$watched" '
-                   '-- "$@"\n')
+        watched = ('set -- "$WATCHER_PYTHON" util/superseded.py watch --interval 60 --grace 30 --scope "$watched" \\\n'
+                   '    --summary-copy "$RUNNER_TEMP/job-summary.md" -- "$@"\n')
         self.assertLess(script.index(capped), script.index(scoped))
         self.assertLess(script.index(scoped), script.index(named))
         self.assertLess(script.index(named), script.index(watched))

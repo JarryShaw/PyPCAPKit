@@ -26,7 +26,8 @@ its summary (#2030). GitHub serves no job summary through its API, so the jobs
 whose runs :file:`util/check_suite_report.py` reports upload the copy as an
 artifact for the report to fold in. Only a step that writes the summary sets it,
 never one that runs the test suite, whose tests write summaries of their own
-through this module.
+through this module; :file:`util/superseded.py`, which runs the suite, takes the
+copy's path as its ``--summary-copy`` option instead (#2078).
 
 """
 

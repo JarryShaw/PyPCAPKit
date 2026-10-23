@@ -1448,12 +1448,14 @@ the job summary``, which writes the job's name beside it, and ``Upload the job
 summary``, which uploads both as the ``job-summary-<job>-<index>`` artifact (7
 days) for the report to download; both run on ``always()`` and are
 ``continue-on-error``. The summaries share the room a comment leaves, smallest first,
-and one cut to fit links the run. ``Run unit tests`` in ``experimental.yml`` does
-not copy its summary, so the line :file:`util/superseded.py` writes there for a
-stopped run stays in the job's summary alone. The post step runs only where the
-report step's ``post`` output is ``true``, and sets ``GITHUB_WORKFLOW`` to the
-relayed run's workflow, which :file:`util/discussion_report.py` labels the run
-with.
+and one cut to fit links the run. ``Run unit tests`` in ``experimental.yml`` sets
+no ``JOB_SUMMARY_COPY`` either: the line :file:`util/superseded.py` writes there
+for a stopped run reaches the copy through the watcher's ``--summary-copy``
+option, which the tests it runs never see (`#2078
+<https://github.com/JarryShaw/PyPCAPKit/issues/2078>`__). The post step runs only
+where the report step's ``post`` output is ``true``, and sets ``GITHUB_WORKFLOW``
+to the relayed run's workflow, which :file:`util/discussion_report.py` labels the
+run with.
 
 ``codeql-analysis.yml`` posts to ``codeql-analysis: CodeQL report``, as
 ``scheduled`` on its ``schedule`` and ``push`` on a push to ``main``, and never on
