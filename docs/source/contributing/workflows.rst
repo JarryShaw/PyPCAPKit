@@ -107,6 +107,13 @@ At a Glance
      - --
      - **Unit Tests**
      - --
+   * - CI Reports
+     - :file:`ci-reports.yml`
+     - --
+     - --
+     - --
+     - **Experimental Tests**, **Python Compatibility**
+     - --
    * - CI Timing
      - :file:`ci-timing.yml`
      - --
@@ -124,8 +131,8 @@ At a Glance
 
 .. note::
 
-   Only Coverage Comment fires *exclusively* on ``workflow_run``: it has
-   nothing to do without a completed Unit Tests run. Each of the others
+   Only Coverage Comment and CI Reports fire *exclusively* on ``workflow_run``:
+   neither has anything to do without a completed run to report. Each of the others
    that carry one pairs it with a direct trigger of its own -- a Saturday
    ``schedule`` for Vendor Update, Conda Update and GitHub Pages, a ``v*`` tag
    push for Create Release -- for the path where no upstream run exists yet to
@@ -220,12 +227,17 @@ than starting a new one.
        CH["Cron Head<br/>cron-head.yml"]
        CC["Coverage Comment<br/>coverage-comment.yml"]
        CR["Create Release<br/>create-release.yml"]
+       EX["Experimental Tests<br/>experimental.yml"]
+       PC["Python Compatibility<br/>python-compatibility.yml"]
+       RP["CI Reports<br/>ci-reports.yml"]
 
        UT ==>|workflow_run: completed| VU
        UT ==>|workflow_run: completed| CU
        UT ==>|workflow_run: completed| GP
        VU ==>|workflow_run: completed| CR
        UT ==>|workflow_run: completed| CC
+       EX ==>|workflow_run: completed| RP
+       PC ==>|workflow_run: completed| RP
 
        VU -.-> CH
        CU -.-> CH
@@ -267,13 +279,17 @@ re-derives the list:
   **Create Release** fires on completion of **Vendor Update**.
 * ``.github/workflows/coverage-comment.yml``, its ``workflow_run`` trigger --
   **Coverage Comment** fires on completion of **Unit Tests**.
+* ``.github/workflows/ci-reports.yml``, its ``workflow_run`` trigger --
+  **CI Reports** fires on completion of **Experimental Tests** and of **Python
+  Compatibility**.
 
 ``workflow_run`` fires for *every* completion of the named workflow --
 success, failure, or skipped -- and regardless of what triggered it,
 including a pull request's own run of Unit Tests. Every
 downstream workflow therefore re-checks ``github.event.workflow_run.event``
 and ``.head_branch`` (or, for Create Release and Coverage Comment,
-``.conclusion``) itself before doing anything with an outward effect; none of
+``.conclusion``; for CI Reports, the event alone) itself before doing anything
+with an outward effect; none of
 the filtering happens in the ``on:`` block.
 
 Those checks say nothing about *which* commit was verified. A ``workflow_run``
@@ -769,8 +785,9 @@ with supported legs. Every job holding KTLO legs works the same way:
   and ``required-checks`` read ``success``. A step that needs an earlier one's work
   waits on that step's ``outcome``: a leg that cannot install stops there, and a
   ``pypi`` leg stops at its first failure.
-* The last step, ``KTLO summary``, runs on KTLO legs only and reports each failed
-  ``outcome`` as a warning and a job-summary line, through
+* The last step but the job summary's (see `CI Reports`_), ``KTLO summary``,
+  runs on KTLO legs only and reports each failed ``outcome`` as a warning and a
+  job-summary line, through
   :file:`util/leg_summary.py` (see `Workflow Scripts (#1967)`_). A step's own annotations take
   ``ANNOTATION_LEVEL``: ``warning`` on a KTLO leg, ``error`` on a supported one.
   ``engine-tests``' KTLO cells, a step of their own with ``continue-on-error: true``,
@@ -834,7 +851,8 @@ context. They were legs of ``test`` until `#1732
 <https://github.com/JarryShaw/PyPCAPKit/issues/1732>`__, which moved them to a
 workflow of their own, by the owner's ruling that nothing waits on them. **That
 workflow reports separately and holds up nothing**: a job cannot ``needs:`` one in
-another workflow, nothing calls it, and no ``workflow_run`` names it, so the Unit
+another workflow, nothing calls it, and no ``workflow_run`` names it but CI
+Reports', which posts its finished runs (see `CI Reports`_), so the Unit
 Tests run completes without it, and with it ``Required checks passed``,
 ``unittest-ordering`` and the workflows that wait on Unit Tests completing
 (``coverage-comment.yml``, ``deploy-pages.yml``, ``cron-vendor.yml`` and
@@ -884,7 +902,7 @@ asks with ``If-None-Match``, as a ``304`` answer costs no rate limit.
 
 The legs never block, by the KTLO mechanics above: every step that can fail has
 ``continue-on-error: true``, their annotations are warnings, and ``Experimental
-summary``, the job's last step, reports each failed step. A failure no step
+summary``, the job's last step but the job summary's, reports each failed step. A failure no step
 contains, such as a lost runner, fails the job, and the job's own
 ``continue-on-error: true`` keeps it from failing the run: it "prevents a workflow
 run from failing when a job fails" (`Workflow syntax
@@ -995,7 +1013,7 @@ down`` lines. From it and the monitor's last sample, ``Containment summary`` war
 minutes``, ``tests raised MemoryError`` or ``tests lost an xdist worker``, each a
 warning of its own. A timeout is exit 124, or 137 with no OOM kill
 after 110 minutes: ``--kill-after``'s SIGKILL to a teardown SIGINT did not end, where an
-OOM kill of pytest exits 137 too. ``Experimental summary``, the job's last step and the
+OOM kill of pytest exits 137 too. ``Experimental summary``, the job's last step but the job summary's and the
 KTLO summary's script, still warns of every failed step, ``tests`` included. The 2 GiB,
 ``-n 3`` and 12G are estimates for a 16 GB, 4-CPU runner until a run shows them. At 3
 workers rather than 4, GraalPy's tests should take about 117-151 minutes (an inference
@@ -1219,8 +1237,13 @@ does; each has tests under :file:`tests/project/` that run it.
    * - :file:`util/discussion_report.py`
      - ``Post the report to Discussions`` in the ``discussion`` job of
        ``ci-timing.yml``, ``cron-vendor.yml``, ``cron-conda.yml``,
-       ``cron-python-versions.yml``, ``lint.yml`` and ``deploy-pages.yml`` (see
-       `CI Reports`_).
+       ``cron-python-versions.yml``, ``lint.yml``, ``deploy-pages.yml``,
+       ``codeql-analysis.yml``, ``coverage-comment.yml`` and ``ci-reports.yml``
+       (see `CI Reports`_).
+   * - :file:`util/check_suite_report.py`
+     - ``Write the run report`` in the ``discussion`` job of
+       ``coverage-comment.yml``, for Unit Tests, and of ``ci-reports.yml``, for
+       Experimental Tests and Python Compatibility (see `CI Reports`_).
    * - :file:`util/apt_packages.py`
      - The apt steps of ``unit-tests.yml``'s ``engine-tests`` and ``pypcap-parity``
        (and so its KTLO twin): the plan, seed, install and collect steps, as
@@ -1353,35 +1376,68 @@ a Python Versions run failed by its audit. The report steps of ``vendor-update``
 ``conda-update`` and ``detect`` are ``continue-on-error`` on ``!cancelled()``,
 and come last in each job.
 
-Unit Tests push runs post as ``push`` to ``unit-tests: <branch> push runs``, so
-``main``'s thread is ``unit-tests: main push runs``. ``unit-tests.yml`` is a
-reusable workflow whose callers grant ``contents: read``, so the post comes from
-``coverage-comment.yml``'s ``workflow_run`` relay instead: its ``discussion`` job
-takes a run whose event is ``push``, and ``comment`` keeps a pull request's. Each
-job holds its own scopes, ``discussion`` alone ``discussions: write``, with
-``contents: read`` for a checkout of the default branch's script, never the run's
-head, and ``checks: read`` for the run's check suite. Its ``Write the run report``
-step reads that suite in a single GraphQL call rather than any artifact, and
-renders every name and annotation it quotes as a code span. The report links the
-run, names its commit and conclusion, the jobs that did not pass, and the warning
-and failure annotations of the jobs that did. The conclusion becomes the
-``--status``: ``success``, ``cancelled`` (and ``stale``), ``skipped`` (and
-``neutral``), and ``failure`` for anything else, ``timed_out`` and
-``startup_failure`` among them. A green run reports ``warning`` where a job failed
-without failing it, or a job that passed holds a warning or failure annotation, as
-a KTLO leg whose tests fail does (`#1672
-<https://github.com/JarryShaw/PyPCAPKit/issues/1672>`__). The exception is the
-step's ``EXPECTED`` list: the annotations a job writes on every run by design,
-today the install failures of the KTLO legs that cannot install, which neither
-count nor appear in the report. Each entry is a job, a level and a title prefix,
-an empty prefix matching only an empty title, so a reworded message still
-matches, and anything else those jobs write still counts.
-:file:`tests/project/test_unit_tests_push_reports_2030.py` pins the list, so a
-leg that starts to install, or a new by-design annotation, changes it and the
-pin together. The script labels the
-run it links with ``GITHUB_WORKFLOW``, so the post step sets ``Unit Tests`` for
-that one command. A push relay's concurrency group is its own run's, since a
-group cancels a pending run when a newer one joins it.
+The test workflows report through a ``workflow_run`` relay, so none of their own
+jobs gains a write scope: ``unit-tests.yml`` is a reusable workflow whose callers
+grant ``contents: read``. Unit Tests' push runs go through
+``coverage-comment.yml``, whose ``discussion`` job takes a run whose event is
+``push`` while ``comment`` keeps a pull request's. Experimental Tests' and Python
+Compatibility's go through ``ci-reports.yml``, whose ``discussion`` job takes a
+``push`` or ``schedule`` run and never a pull request's. Both ``discussion`` jobs
+run the same steps, and alone hold ``discussions: write``, with ``contents: read``
+for a checkout of the default branch's scripts, never the run's head,
+``checks: read`` for the run's check suite and ``actions: read`` for its
+artifacts. A push run posts as ``push`` to ``<workflow file stem>: <branch> push
+runs``, so ``main``'s Unit Tests thread is ``unit-tests: main push runs``; a
+scheduled one posts as ``scheduled`` to ``<workflow file stem>: <branch> scheduled
+runs``. Each relayed run's concurrency group is its own, since a group cancels a
+pending run when a newer one joins it.
+
+``Write the run report`` runs :file:`util/check_suite_report.py`, which reads the
+run's check suite in a single GraphQL call and renders every name and annotation
+it quotes as a code span. The report links the run, names its commit and
+conclusion, the jobs that did not pass, and the warning and failure annotations
+that count. The conclusion becomes the ``--status``: ``success``, ``cancelled``
+(and ``stale``), ``skipped`` (and ``neutral``), and ``failure`` for anything else,
+``timed_out`` and ``startup_failure`` among them. A green run reports ``warning``
+where a job failed without failing it, or where an annotation counts:
+
+* On a push run, by the owner's ruling, an annotation counts only on a
+  non-blocking leg, whose steps are forced to succeed: a job named ``(KTLO)`` or
+  ``(experimental)``, as a KTLO leg whose tests fail warns (`#1672
+  <https://github.com/JarryShaw/PyPCAPKit/issues/1672>`__), or an annotation
+  titled ``(KTLO, non-blocking)``, as ``engine-tests``' KTLO cells write. A passing
+  blocking job's annotations neither count nor appear, unless the run failed.
+* On any other run, which posts every time, every annotation on a passing job
+  counts.
+* pip's ``Retrying ... after connection`` lines never count, on any leg, and
+  neither do the annotations a workflow's ``expected`` list in the script holds as
+  written on every run by design. Each entry is a job, a level and a title
+  prefix, an empty prefix matching only an empty title, so a reworded message
+  still matches. Every list is empty today, and
+  :file:`tests/project/test_unit_tests_push_reports_2030.py` pins them.
+
+A run whose legs all skipped tested nothing, as when ``current`` found its commit
+superseded or ``changes`` found no code changed, so where it did not fail it
+posts nothing, rather than a "back to green" after a bad report. The legs are the
+jobs those gates skip, which the script names by a pattern per workflow and the
+test file holds to the jobs' ``if:``.
+
+The report ends in each job's summary, one ``<details>`` block a job, in the check
+suite's order. GitHub serves no job summary through its API, so every step that
+writes one copies it to the job's ``job-summary.md``: the scripts through
+:file:`util/_actions.py`, where the step sets ``JOB_SUMMARY_COPY``, and the shell
+with ``tee``. No step that runs the tests sets it, since a test writing the
+summary through the helper would write into the copy. The job then ends in ``Name
+the job summary``, which writes the job's name beside it, and ``Upload the job
+summary``, which uploads both as the ``job-summary-<job>-<index>`` artifact (7
+days) for the report to download; both run on ``always()`` and are
+``continue-on-error``. The summaries share the room a comment leaves, smallest first,
+and one cut to fit links the run. ``Run unit tests`` in ``experimental.yml`` does
+not copy its summary, so the line :file:`util/superseded.py` writes there for a
+stopped run stays in the job's summary alone. The post step runs only where the
+report step's ``post`` output is ``true``, and sets ``GITHUB_WORKFLOW`` to the
+relayed run's workflow, which :file:`util/discussion_report.py` labels the run
+with.
 
 ``codeql-analysis.yml`` posts to ``codeql-analysis: CodeQL report``, as
 ``scheduled`` on its ``schedule`` and ``push`` on a push to ``main``, and never on

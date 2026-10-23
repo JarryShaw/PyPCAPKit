@@ -231,7 +231,7 @@ jobs:
       # measured process saved its data (#1387). coverage-comment.yml posts the
       # PR comment from the artifact, since callers of this reusable workflow
       # grant only `contents: read`. `!cancelled()` so a failing test still
-      # reports what it measured.
+      # reports what it measured. #2030: its summary goes to the job's copy too.
       - name: Report coverage
         if: ${{ !cancelled() && matrix.coverage }}
         shell: bash
@@ -239,6 +239,7 @@ jobs:
           SHA: ${{ github.sha }}
           PYTHON: ${{ matrix.python-version }}
           TESTS_OUTCOME: ${{ steps.tests.outcome }}
+          JOB_SUMMARY_COPY: ${{ runner.temp }}/job-summary.md
         run: python util/coverage_report.py
 
       # #1423: this log is the only record of a measured process that saved no
@@ -281,12 +282,12 @@ jobs:
           path: ${{ runner.temp }}/junit*.xml
           retention-days: 14
 
-      # #1672: the last step of every KTLO matrix job, util/leg_summary.py
-      # (#1967). Each step above that can fail on a KTLO leg has an `id` and
-      # `continue-on-error: ${{ matrix.ktlo == true }}`, so its failure leaves
-      # the job at success; this step makes it visible again, one warning and
-      # one job-summary line per failed step, from each `outcome` in
-      # `toJSON(steps)`. It runs on the image's /usr/bin/python3, as the leg's
+      # #1672: the last step of every KTLO matrix job but the job summary's
+      # two, util/leg_summary.py (#1967). Each step above that can fail on a
+      # KTLO leg has an `id` and `continue-on-error: ${{ matrix.ktlo == true }}`,
+      # so its failure leaves the job at success; this step makes it visible
+      # again, one warning and one job-summary line per failed step, from each
+      # `outcome` in `toJSON(steps)`. It runs on the image's /usr/bin/python3, as the leg's
       # may have failed to set up. The runner's own `Process completed with
       # exit code N.` error for a failed `run:` step cannot be removed, but
       # does not change the job's conclusion.
@@ -297,7 +298,34 @@ jobs:
         env:
           LEG: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}
           STEPS: ${{ toJSON(steps) }}
+          JOB_SUMMARY_COPY: ${{ runner.temp }}/job-summary.md
         run: /usr/bin/python3 util/leg_summary.py ktlo
+
+      # #2030: the job's summary, for the push report util/check_suite_report.py
+      # writes, as the API serves none. Each step above that writes the summary
+      # copies it to job-summary.md, through util/_actions.py's
+      # JOB_SUMMARY_COPY or a `tee`; this names the job beside it, and the
+      # upload takes both. On `always()`, so a failed or timed-out leg's
+      # summary is kept too, and masked, as a diagnostic upload is.
+      - name: Name the job summary
+        if: ${{ always() }}
+        continue-on-error: true
+        shell: bash
+        env:
+          JOB_NAME: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}
+        run: if [ -s "$RUNNER_TEMP/job-summary.md" ]; then printf '%s\n' "$JOB_NAME" > "$RUNNER_TEMP/job-summary.name"; fi
+
+      - name: Upload the job summary
+        if: ${{ always() }}
+        continue-on-error: true
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: job-summary-${{ github.job }}-${{ strategy.job-index }}
+          path: |
+            ${{ runner.temp }}/job-summary.md
+            ${{ runner.temp }}/job-summary.name
+          if-no-files-found: ignore
+          retention-days: 7
 
   # The KTLO tier (#1633): end-of-life versions that still build and test but
   # never block. #1738, the owner's option A: their legs are this job's, not
@@ -457,7 +485,29 @@ jobs:
         env:
           LEG: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}
           STEPS: ${{ toJSON(steps) }}
+          JOB_SUMMARY_COPY: ${{ runner.temp }}/job-summary.md
         run: /usr/bin/python3 util/leg_summary.py ktlo
+
+      # #2030: see the `test` job's steps of the same names.
+      - name: Name the job summary
+        if: ${{ always() }}
+        continue-on-error: true
+        shell: bash
+        env:
+          JOB_NAME: Integration Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}
+        run: if [ -s "$RUNNER_TEMP/job-summary.md" ]; then printf '%s\n' "$JOB_NAME" > "$RUNNER_TEMP/job-summary.name"; fi
+
+      - name: Upload the job summary
+        if: ${{ always() }}
+        continue-on-error: true
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: job-summary-${{ github.job }}-${{ strategy.job-index }}
+          path: |
+            ${{ runner.temp }}/job-summary.md
+            ${{ runner.temp }}/job-summary.name
+          if-no-files-found: ignore
+          retention-days: 7
 
   # `integration`'s KTLO legs, apart for the reasons on `test-ktlo` (#1738).
   integration-ktlo:
@@ -716,7 +766,7 @@ jobs:
               exit 1
             fi
             echo "::notice title=$ENGINE is not installable on Python $PY (expected)::pip exited $status, matching this cell's recorded expectation ('not-installable'), and the output does not match a transient-failure pattern. No tests run for this cell -- this is a deliberate skip, not a pass."
-            echo "| $PY | $ENGINE | $EXPECT | not installable (expected) |" >> "$GITHUB_STEP_SUMMARY"
+            echo "| $PY | $ENGINE | $EXPECT | not installable (expected) |" | tee -a "$RUNNER_TEMP/job-summary.md" >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
 
@@ -741,14 +791,14 @@ jobs:
             echo "::${ANNOTATION_LEVEL} title=$ENGINE tests failed on Python $PY::See the 'Python $PY ($ENGINE)' group in this step's log."
             exit 1
           fi
-          echo "| $PY | $ENGINE | $EXPECT | passed |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| $PY | $ENGINE | $EXPECT | passed |" | tee -a "$RUNNER_TEMP/job-summary.md" >> "$GITHUB_STEP_SUMMARY"
           CELL
           {
             echo "### Engine cells: $ENGINE"
             echo
             echo "| Python | Engine | Expect | Result |"
             echo "| --- | --- | --- | --- |"
-          } >> "$GITHUB_STEP_SUMMARY"
+          } | tee -a "$RUNNER_TEMP/job-summary.md" >> "$GITHUB_STEP_SUMMARY"
 
       # See the `test` job above for why this step exists.
       - name: Report available parallelism
@@ -770,7 +820,7 @@ jobs:
             echo "::group::Python $py ($ENGINE)"
             if ! bash "$RUNNER_TEMP/engine-cell.sh" "$py"; then
               failed+=("$py")
-              echo "| $py | $ENGINE | | FAILED |" >> "$GITHUB_STEP_SUMMARY"
+              echo "| $py | $ENGINE | | FAILED |" | tee -a "$RUNNER_TEMP/job-summary.md" >> "$GITHUB_STEP_SUMMARY"
             fi
             echo "::endgroup::"
           done
@@ -795,7 +845,7 @@ jobs:
             echo "::group::Python $py ($ENGINE)"
             if ! bash "$RUNNER_TEMP/engine-cell.sh" "$py"; then
               failed+=("$py")
-              echo "| $py | $ENGINE | | FAILED (KTLO, non-blocking) |" >> "$GITHUB_STEP_SUMMARY"
+              echo "| $py | $ENGINE | | FAILED (KTLO, non-blocking) |" | tee -a "$RUNNER_TEMP/job-summary.md" >> "$GITHUB_STEP_SUMMARY"
             fi
             echo "::endgroup::"
           done
@@ -803,6 +853,28 @@ jobs:
             echo "::warning title=$ENGINE failed on Python ${failed[*]} (KTLO%2C non-blocking)::${failed[*]} is end-of-life and KTLO per #1633; this does not fail the job."
             exit 1
           fi
+
+      # #2030: see the `test` job's steps of the same names; the steps above
+      # copy the cells' table themselves, with `tee`.
+      - name: Name the job summary
+        if: ${{ always() }}
+        continue-on-error: true
+        shell: bash
+        env:
+          JOB_NAME: Engines (${{ matrix.engine }})
+        run: if [ -s "$RUNNER_TEMP/job-summary.md" ]; then printf '%s\n' "$JOB_NAME" > "$RUNNER_TEMP/job-summary.name"; fi
+
+      - name: Upload the job summary
+        if: ${{ always() }}
+        continue-on-error: true
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: job-summary-${{ github.job }}-${{ strategy.job-index }}
+          path: |
+            ${{ runner.temp }}/job-summary.md
+            ${{ runner.temp }}/job-summary.name
+          if-no-files-found: ignore
+          retention-days: 7
 
   # #751's ruling: try building upstream PyPCAP in CI, and drop it if CI is
   # not a good fit. If a clean run of this job's install step goes red -- not
@@ -979,7 +1051,29 @@ jobs:
         env:
           LEG: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}
           STEPS: ${{ toJSON(steps) }}
+          JOB_SUMMARY_COPY: ${{ runner.temp }}/job-summary.md
         run: /usr/bin/python3 util/leg_summary.py ktlo
+
+      # #2030: see the `test` job's steps of the same names.
+      - name: Name the job summary
+        if: ${{ always() }}
+        continue-on-error: true
+        shell: bash
+        env:
+          JOB_NAME: PyPCAP/PyPCAPFile parity Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}
+        run: if [ -s "$RUNNER_TEMP/job-summary.md" ]; then printf '%s\n' "$JOB_NAME" > "$RUNNER_TEMP/job-summary.name"; fi
+
+      - name: Upload the job summary
+        if: ${{ always() }}
+        continue-on-error: true
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: job-summary-${{ github.job }}-${{ strategy.job-index }}
+          path: |
+            ${{ runner.temp }}/job-summary.md
+            ${{ runner.temp }}/job-summary.name
+          if-no-files-found: ignore
+          retention-days: 7
 
   # `pypcap-parity`'s KTLO legs, apart for the reasons on `test-ktlo` (#1738).
   # Same apt set and cache key; `pypcap-parity`'s supported leg saves it.

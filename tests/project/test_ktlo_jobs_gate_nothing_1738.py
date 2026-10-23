@@ -158,8 +158,10 @@ class TestTheKTLOJobsKeepTheirMechanics(unittest.TestCase):
                 self.assertEqual((spec['runs-on'], spec['timeout-minutes']), (gate['runs-on'], gate['timeout-minutes']))
                 self.assertEqual(spec['env']['ANNOTATION_LEVEL'], gate['env']['ANNOTATION_LEVEL'])
                 self.assertTrue(all(leg.get('ktlo') is True for leg in matrix_legs(twin)))
-                self.assertEqual(spec['steps'][-1]['name'], 'KTLO summary')
-                self.assertEqual(spec['steps'][-1]['continue-on-error'], KTLO_GUARD)
+                # #2030: last but the two that name and upload the job's summary.
+                self.assertEqual([step['name'] for step in spec['steps'][-3:]],
+                                 ['KTLO summary', 'Name the job summary', 'Upload the job summary'])
+                self.assertEqual(spec['steps'][-3]['continue-on-error'], KTLO_GUARD)
 
     def test_each_has_the_job_level_backstop(self) -> None:
         for twin in TWINS.values():

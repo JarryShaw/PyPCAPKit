@@ -632,7 +632,8 @@ class TestAKTLOLegFailsFast(unittest.TestCase):
         ``outcome``, not ``conclusion``: ``continue-on-error`` turns a failed step's
         conclusion into ``success``, so only its outcome still says it failed. #1672
         brought Compat and ``pypcap-parity`` in; ``KTLO summary`` is the one step
-        that has to run after a failed install, to report it.
+        that has to run after a failed install, to report it, with the two after
+        it that keep that report for the run's Discussions post (#2030).
 
         """
         for name, job_id, install in INSTALLS:
@@ -647,7 +648,8 @@ class TestAKTLOLegFailsFast(unittest.TestCase):
                 condition = str(step.get('if', ''))
                 if 'matrix.coverage' in condition:
                     continue  # the `latest` leg only, which a failed install fails anyway
-                if step.get('name') in ('KTLO summary', 'Experimental summary'):
+                if step.get('name') in ('KTLO summary', 'Experimental summary', 'Name the job summary',
+                                        'Upload the job summary'):
                     continue
                 with self.subTest(workflow=name, job=job_id, step=step.get('name') or step.get('uses')):
                     self.assertIn("steps.install.outcome == 'success'", condition)

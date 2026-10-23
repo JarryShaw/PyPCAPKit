@@ -40,9 +40,9 @@ __tier__ = 'LATEST'
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 HELPER = ROOT / 'util' / '_actions.py'
 #: The scripts that import the helper.
-SCRIPTS = ('apt_packages', 'ci_timing', 'classify_changes', 'codeql_report', 'coverage_report', 'leg_summary',
-           'pip_install', 'regenerate_samples', 'release_tags', 'release_upload', 'update_python_versions',
-           'vendor_code_changed', 'vendor_test_gate')
+SCRIPTS = ('apt_packages', 'check_suite_report', 'ci_timing', 'classify_changes', 'codeql_report',
+           'coverage_report', 'leg_summary', 'pip_install', 'regenerate_samples', 'release_tags', 'release_upload',
+           'update_python_versions', 'vendor_code_changed', 'vendor_test_gate')
 #: The top-level modules the helper may import, each in Python 3.7's standard
 #: library: the running interpreter's :data:`sys.stdlib_module_names` would
 #: pass ``tomllib``, which 3.7 lacks.
@@ -50,6 +50,7 @@ STDLIB_37 = frozenset({'__future__', 'contextlib', 'os', 'subprocess', 'sys', 't
 #: A trivial run of each script, ``(arguments, environment)``, that gets past its imports.
 RUNS = {
     'apt_packages': (['--help'], {}),
+    'check_suite_report': (['--help'], {}),
     'ci_timing': (['--help'], {}),
     'classify_changes': ([], {'OWN_PR': 'false'}),
     'codeql_report': (['--help'], {}),

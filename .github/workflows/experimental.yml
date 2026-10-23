@@ -4,8 +4,9 @@ name: Experimental Tests
 # workflow of its own so that nothing waits on its legs (#1732): a
 # `workflow_run` consumer of "Unit Tests" fires only once that run completes,
 # and GraalPy's leg can take the job's whole cap. No `workflow_run` names this
-# workflow, it has no `workflow_call` trigger, and a job cannot `needs:` one in
-# another workflow.
+# workflow but ci-reports.yml's, which posts a finished run's report and holds
+# up nothing (#2030); it has no `workflow_call` trigger, and a job cannot
+# `needs:` one in another workflow.
 #
 # Its check names, `Python <version> (experimental)`, are the ones the legs had
 # in unit-tests.yml; no required context of ruleset 23497679 names one.
@@ -526,7 +527,7 @@ jobs:
           last=${last:-no resource-monitor sample}
           warn() {
             echo "::warning title=${1} on ${LEG//,/%2C}::${2//%/%25} Experimental legs never block (#1660), so this job still succeeds."
-            echo "- ${LEG}: ${1}; non-blocking, so this job still succeeds." >> "$GITHUB_STEP_SUMMARY"
+            echo "- ${LEG}: ${1}; non-blocking, so this job still succeeds." | tee -a "$RUNNER_TEMP/job-summary.md" >> "$GITHUB_STEP_SUMMARY"
           }
           code=$(value exit) scope=$(value scope) elapsed=$(value elapsed)
           oom=$(value oom_kills) errors=$(value memory_errors) crashed=$(value crashed_workers)
@@ -559,4 +560,30 @@ jobs:
         env:
           LEG: Python ${{ matrix.python-version }} (experimental, non-blocking)
           STEPS: ${{ toJSON(steps) }}
+          JOB_SUMMARY_COPY: ${{ runner.temp }}/job-summary.md
         run: /usr/bin/python3 util/leg_summary.py experimental
+
+      # #2030: the job's summary, for the report ci-reports.yml posts, as in
+      # unit-tests.yml's `test` job. `Containment summary` and `Experimental
+      # summary` copy theirs to job-summary.md; `Run unit tests` does not, as
+      # its tests write summaries of their own, so util/superseded.py's line
+      # for a stopped run stays in the job's summary alone.
+      - name: Name the job summary
+        if: ${{ always() }}
+        continue-on-error: true
+        shell: bash
+        env:
+          JOB_NAME: Python ${{ matrix.python-version }} (experimental)
+        run: if [ -s "$RUNNER_TEMP/job-summary.md" ]; then printf '%s\n' "$JOB_NAME" > "$RUNNER_TEMP/job-summary.name"; fi
+
+      - name: Upload the job summary
+        if: ${{ always() }}
+        continue-on-error: true
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: job-summary-${{ github.job }}-${{ strategy.job-index }}
+          path: |
+            ${{ runner.temp }}/job-summary.md
+            ${{ runner.temp }}/job-summary.name
+          if-no-files-found: ignore
+          retention-days: 7

@@ -122,4 +122,28 @@ jobs:
         env:
           LEG: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}
           STEPS: ${{ toJSON(steps) }}
+          JOB_SUMMARY_COPY: ${{ runner.temp }}/job-summary.md
         run: /usr/bin/python3 util/leg_summary.py ktlo
+
+      # #2030: the job's summary, for the report ci-reports.yml posts, as in
+      # unit-tests.yml's `test` job: `KTLO summary` copies its lines to
+      # job-summary.md, and these name the job and upload both.
+      - name: Name the job summary
+        if: ${{ always() }}
+        continue-on-error: true
+        shell: bash
+        env:
+          JOB_NAME: Compat Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO)' || '' }}
+        run: if [ -s "$RUNNER_TEMP/job-summary.md" ]; then printf '%s\n' "$JOB_NAME" > "$RUNNER_TEMP/job-summary.name"; fi
+
+      - name: Upload the job summary
+        if: ${{ always() }}
+        continue-on-error: true
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: job-summary-${{ github.job }}-${{ strategy.job-index }}
+          path: |
+            ${{ runner.temp }}/job-summary.md
+            ${{ runner.temp }}/job-summary.name
+          if-no-files-found: ignore
+          retention-days: 7

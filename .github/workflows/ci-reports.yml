@@ -1,0 +1,97 @@
+name: CI Reports
+
+# #2030: posts the runs of Experimental Tests and Python Compatibility that have
+# no pull request to comment on, a push or the schedule, to their threads in the
+# Discussions category REPORT_CATEGORY names, as coverage-comment.yml's
+# `discussion` job posts Unit Tests'. A `workflow_run` relay, so neither
+# workflow's own jobs gain a write scope, and every report is read when its run
+# has finished.
+#
+# `workflow_run` runs this file as it is on the default branch. The job checks
+# out the default branch's scripts alone, never the run's head; the run's
+# fields reach the scripts as `env:`, and its jobs' summaries, from their
+# `job-summary-*` artifacts, are data the report quotes.
+on:
+  workflow_run:
+    workflows: ["Experimental Tests", "Python Compatibility"]
+    types: [completed]
+
+# The job holds its own scopes.
+permissions: {}
+
+# Each relayed run's group is its own: a group cancels a pending run when a
+# newer one joins it, which would drop that run's report.
+concurrency:
+  group: ci-reports-${{ github.event.workflow_run.id }}
+  cancel-in-progress: false
+
+# One Discussions category holds every report with no pull request to comment
+# on, one thread per job.
+env:
+  REPORT_CATEGORY: CI reports
+
+jobs:
+  # A push run posts as `push` to `<workflow file stem>: <branch> push runs`,
+  # and a scheduled one as `scheduled` to `... scheduled runs`;
+  # util/check_suite_report.py names the thread and the mode. Never a pull
+  # request's run, whose checks are its report. The steps are
+  # coverage-comment.yml `discussion`'s, which
+  # tests/project/test_unit_tests_push_reports_2030.py holds identical. The job
+  # and its steps are `continue-on-error`; both scripts warn instead of failing.
+  discussion:
+    name: Post the run report
+    if: ${{ github.event.workflow_run.event == 'push' || github.event.workflow_run.event == 'schedule' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    continue-on-error: true
+    permissions:
+      actions: read
+      checks: read
+      contents: read
+      discussions: write
+
+    steps:
+      # The default branch, which is what `workflow_run` checks out, and only
+      # the scripts; nothing from the run's head.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          sparse-checkout: |
+            util/_actions.py
+            util/check_suite_report.py
+            util/discussion_report.py
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      # The run's fields are data, in `env:`, where the script reads them.
+      - name: Write the run report
+        id: report
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WORKFLOW: ${{ github.event.workflow_run.name }}
+          SUITE: ${{ github.event.workflow_run.check_suite_node_id }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+          RUN_EVENT: ${{ github.event.workflow_run.event }}
+          RUN_CONCLUSION: ${{ github.event.workflow_run.conclusion }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+          HEAD_BRANCH: ${{ github.event.workflow_run.head_branch }}
+        run: python3 util/check_suite_report.py --report report/run-report.md
+
+      # The script labels the run it links with GITHUB_WORKFLOW, which names
+      # this workflow, so the command sets the relayed run's for that process.
+      - name: Post the report to Discussions
+        if: ${{ steps.report.outputs.post == 'true' }}
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          WORKFLOW: ${{ github.event.workflow_run.name }}
+          TITLE: ${{ steps.report.outputs.title }}
+          MODE: ${{ steps.report.outputs.mode }}
+          STATUS: ${{ steps.report.outputs.status }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+          HEAD_SHA: ${{ github.event.workflow_run.head_sha }}
+        run: |
+          GITHUB_WORKFLOW="$WORKFLOW" python3 util/discussion_report.py --category "$REPORT_CATEGORY" \
+            --title "$TITLE" --report report/run-report.md \
+            --mode "$MODE" --status "$STATUS" --run-url "$RUN_URL" --sha "$HEAD_SHA"
