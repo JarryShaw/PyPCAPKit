@@ -503,8 +503,10 @@ release waits for the next Vendor Update on ``main``.
 that runs with a secret on an event a fork can cause: it writes the project board's
 *Status* field with ``PROJECT_TOKEN``, which a fork's ``pull_request`` run would not
 receive. It therefore never checks out the repository and has no ``uses:`` step. It
-fetches :file:`util/project_status.py` through the API at ``github.sha`` -- the base
-branch's tip under that event -- and takes only the item number from the payload.
+fetches :file:`util/project_status.py`, and :file:`util/_actions.py`, which it imports
+(`#2047 <https://github.com/JarryShaw/PyPCAPKit/issues/2047>`__), through the API at
+``github.sha`` -- the base branch's tip under that event -- and takes only the item
+number from the payload.
 ``tests/project/test_project_status.py`` asserts this over the file. Without the
 secret it skips with a ``::notice::``. The Status mapping it applies is documented in
 :doc:`conventions/process`.
@@ -892,7 +894,11 @@ in it, since they run as the runner's user under a root-owned ``sudo`` and in
 ``/etc/sudoers`` sets ``use_pty``, which sudoers(5) says has no effect where ``sudo``
 has no terminal, as in a step; the scope is reached by name either way. Once the
 command exits, the watcher writes a ``Superseded`` notice and a job-summary line and
-exits 0, so the leg ends green and frees its runner. Every wait is bounded: where the
+exits 0, so the leg ends green and frees its runner. It also writes ``stopped=true``
+to the step's outputs: pytest, stopped, writes no ``junit.xml``, so ``Upload test
+timings`` then sets ``if-no-files-found: ignore`` rather than warn of the missing
+file the notice already explains (`#2073
+<https://github.com/JarryShaw/PyPCAPKit/issues/2073>`__). Every wait is bounded: where the
 command outlives SIGKILL by 15 seconds, it writes a ``Superseded run not stopped``
 warning and exits 70, not 0, since the tests may run on, holding the step's output,
 until ``timeout`` or the step's cap ends them, and the failed step is then a warning
@@ -1011,7 +1017,11 @@ not those that mention one, such as a docstring a traceback prints, and xdist's 
 down`` lines. From it and the monitor's last sample, ``Containment summary`` warns
 ``No memory cap``, ``tests lost a process to the OOM killer``, ``tests timed out at 110
 minutes``, ``tests raised MemoryError`` or ``tests lost an xdist worker``, each a
-warning of its own. A timeout is exit 124, or 137 with no OOM kill
+warning of its own. Its closing line gives the exit status, but where the watcher
+stopped the run and wrote ``stopped=true`` it reads ``tests were stopped as
+superseded``, not ``tests exited 0``, and adds no warning, since the ``Superseded``
+notice already says why (`#2077
+<https://github.com/JarryShaw/PyPCAPKit/issues/2077>`__). A timeout is exit 124, or 137 with no OOM kill
 after 110 minutes: ``--kill-after``'s SIGKILL to a teardown SIGINT did not end, where an
 OOM kill of pytest exits 137 too. ``Experimental summary``, the job's last step but the job summary's and the
 KTLO summary's script, still warns of every failed step, ``tests`` included. The 2 GiB,
@@ -1209,54 +1219,66 @@ does; each has tests under :file:`tests/project/` that run it.
 
    * - Script
      - Run by
+     - By hand
    * - :file:`util/leg_summary.py`
      - ``KTLO summary`` in ``unit-tests.yml``'s ``test``, ``integration`` and
        ``pypcap-parity`` (and so their KTLO twins) and ``python-compatibility.yml``'s
        ``compatibility``, as ``leg_summary.py ktlo``; ``Experimental summary`` in
        ``experimental.yml``'s ``experimental``, as ``leg_summary.py experimental``.
+     - No.
    * - :file:`util/classify_changes.py`
      - ``Classify the diff`` in the ``changes`` job of ``unit-tests.yml`` and of
        ``experimental.yml``.
+     - No.
    * - :file:`util/coverage_report.py`
      - ``Report coverage`` in ``unit-tests.yml``'s ``test``, on the coverage leg.
+     - No.
    * - :file:`util/pytest_shards.py`
      - ``Run unit tests`` in ``experimental.yml``'s ``experimental``, on GraalPy's leg
        (`#1963 <https://github.com/JarryShaw/PyPCAPKit/issues/1963>`__), and in
        ``unit-tests.yml``'s ``test`` and ``test-ktlo``, on PyPy's legs (`#2005
        <https://github.com/JarryShaw/PyPCAPKit/issues/2005>`__).
+     - No.
    * - :file:`util/regenerate_samples.py`
      - ``Regenerate sample captures`` in ``unit-tests.yml``'s ``integration`` and
        ``pypcap-parity`` (and so their KTLO twins), at the job's ``ANNOTATION_LEVEL``,
        and ``gate``, at ``error``.
+     - No: ``make samples`` runs the generator itself.
    * - :file:`util/pip_install.py`
      - The install step of ``unit-tests.yml``'s ``test``, ``integration`` and
        ``pypcap-parity`` (and so their KTLO twins), ``experimental.yml``'s
        ``experimental`` and ``python-compatibility.yml``'s ``compatibility``, at the
        job's ``ANNOTATION_LEVEL``, and of ``unittest-ordering``, ``project-tests`` and
        ``gate``, at ``error``.
+     - No: install with ``pip install -e '.[test,DPKT,crypto,NGAP]'``.
    * - :file:`util/discussion_report.py`
      - ``Post the report to Discussions`` in the ``discussion`` job of
        ``ci-timing.yml``, ``cron-vendor.yml``, ``cron-conda.yml``,
        ``cron-python-versions.yml``, ``lint.yml``, ``deploy-pages.yml``,
        ``codeql-analysis.yml``, ``coverage-comment.yml`` and ``ci-reports.yml``
        (see `CI Reports`_).
+     - No.
    * - :file:`util/check_suite_report.py`
      - ``Write the run report`` in the ``discussion`` job of
        ``coverage-comment.yml``, for Unit Tests, and of ``ci-reports.yml``, for
        Experimental Tests and Python Compatibility (see `CI Reports`_).
+     - No.
    * - :file:`util/apt_packages.py`
      - The apt steps of ``unit-tests.yml``'s ``engine-tests`` and ``pypcap-parity``
        (and so its KTLO twin): the plan, seed, install and collect steps, as
        ``apt_packages.py plan``, ``seed``, ``install`` and ``collect``. The
        ``actions/cache`` steps and the AppArmor step (`#2019
        <https://github.com/JarryShaw/PyPCAPKit/issues/2019>`__) stay as they were.
+     - No.
    * - :file:`util/_actions.py`
      - No step: it is imported by the scripts that share its annotations, step
        outputs, job summary lines and logged runs (`#2047
        <https://github.com/JarryShaw/PyPCAPKit/issues/2047>`__).
+     - No: imported only.
    * - :file:`util/codeql_report.py`
      - ``Write the report`` in ``codeql-analysis.yml``'s ``discussion`` (see `CI
        Reports`_).
+     - No.
    * - :file:`util/release_tags.py`
      - ``Check the release tags name this run's commit`` in ``create-release.yml``'s
        ``github``, ``pypi`` and ``conda``, as ``release_tags.py check``, and ``Check
@@ -1264,18 +1286,33 @@ does; each has tests under :file:`tests/project/` that run it.
        ``release_tags.py owner`` (`#1634
        <https://github.com/JarryShaw/PyPCAPKit/issues/1634>`__, `#1748
        <https://github.com/JarryShaw/PyPCAPKit/issues/1748>`__).
+     - No.
    * - :file:`util/release_upload.py`
      - ``Upload package to GitHub Release`` in ``create-release.yml``'s ``pypi`` and
        ``conda`` (`#1640 <https://github.com/JarryShaw/PyPCAPKit/issues/1640>`__).
+     - No.
    * - :file:`util/release_status.py`
      - ``Report why this run did or did not release anything`` in
        ``create-release.yml``'s ``release_status``, on the image's ``python3``
        after a checkout of :file:`util/` alone (`#888
        <https://github.com/JarryShaw/PyPCAPKit/issues/888>`__).
+     - No.
    * - :file:`util/release_vendor_update.py`
      - ``Read whether its vendor-update job ran`` in ``create-release.yml``'s
        ``vendor_update``, on the image's ``python3`` after a checkout of
        :file:`util/` alone (`#1748 <https://github.com/JarryShaw/PyPCAPKit/issues/1748>`__).
+     - No.
+   * - :file:`util/release_tiers.py`
+     - ``Read the released Python versions`` in ``create-release.yml``'s
+       ``version_check``, on setup-python's ``python3`` (`#1660
+       <https://github.com/JarryShaw/PyPCAPKit/issues/1660>`__).
+     - No.
+   * - :file:`util/release_published.py`
+     - ``Check PyPI publish completeness`` and ``Check Anaconda publish
+       completeness`` in ``create-release.yml``'s ``version_check``, as
+       ``release_published.py pypi`` and ``anaconda``, on setup-python's
+       ``python3`` (`#888 <https://github.com/JarryShaw/PyPCAPKit/issues/888>`__).
+     - No.
 
 The summaries run on the image's ``/usr/bin/python3`` rather than the leg's
 interpreter, which may have failed to set up or be too broken to run anything, so
@@ -1307,6 +1344,51 @@ pin runs each on the cases the shell it replaced handled and requires the same
 status, output and calls.
 :file:`util/_actions.py` is standard library only, and keeps to 3.7's syntax,
 since the scripts on ``/usr/bin/python3`` and on every leg's interpreter import it.
+
+The scripts a person runs as well, or alone, sit beside the CI-only ones in
+:file:`util/` rather than in a directory of their own (`#2050
+<https://github.com/JarryShaw/PyPCAPKit/issues/2050>`__). Every :file:`util/`
+script not listed here is CI-only.
+
+.. list-table::
+   :header-rows: 1
+
+   * - Script
+     - Run by
+     - By hand
+   * - :file:`util/bump_version.py`
+     - ``Bump Version`` in ``cron-vendor.yml``'s ``vendor-update``.
+     - ``python util/bump_version.py``, committed to ``main``, to release what is
+       not a vendor refresh (see :doc:`releasing`).
+   * - :file:`util/changelog_md.py`
+     - ``Check CHANGELOG.md is in step with its source entry`` in
+       ``unit-tests.yml``'s ``changelog``, as ``changelog_md.py --check``.
+     - ``python util/changelog_md.py`` after editing the newest changelog entry,
+       to regenerate :file:`CHANGELOG.md`.
+   * - :file:`util/run_unittest_leg.py`
+     - ``unit-tests.yml``'s ``unittest-ordering``, once per leg, and
+       ``project-tests``.
+     - ``python util/run_unittest_leg.py <directory>`` over the :file:`tests/`
+       directory a change touches, when it moves imports or module state (see
+       :doc:`conventions/test-coverage`).
+   * - :file:`util/conda_vendor.py`
+     - ``Refresh the platform pins`` and ``Setup Conda Distribution`` in
+       ``cron-conda.yml``'s ``conda-update``; ``Smoke-test the vendored packages``
+       in its ``conda-dist`` and ``create-release.yml``'s ``conda``, as
+       ``conda_vendor.py --smoke``.
+     - ``python util/conda_vendor.py --check``, which no workflow runs: whether
+       :file:`conda/requirements.txt` is stale or a platform pin is past its
+       review-by date.
+   * - :file:`util/ci_timing.py`
+     - ``Report CI timing`` in ``ci-timing.yml``'s ``report``.
+     - ``GH_TOKEN=$(gh auth token) python util/ci_timing.py --repo
+       JarryShaw/PyPCAPKit``, for a report off the weekly schedule.
+   * - :file:`util/pyshark_encap_map.py`
+     - No workflow: it refuses a Wireshark that does not sweep as 4.6.9 does, as
+       a runner's packaged one does not.
+     - ``python util/pyshark_encap_map.py`` regenerates the tables in
+       :file:`pcapkit/toolkit/pyshark.py`; ``--check`` exits non-zero if they have
+       drifted.
 
 .. _CI Reports:
 
@@ -1365,7 +1447,8 @@ does while its findings stand, and ``failure`` where actionlint failed the job.
 ``cron-vendor.yml``'s rules: ``push`` on its ``workflow_run``, ``scheduled`` on its
 ``schedule``, and never on a pull request or a verdict for another commit. Its
 report is the results of ``head``, ``deploy-pages`` and ``publish-pages``, so it
-uploads no artifact, and its ``discussion`` job checks out the script alone. The
+uploads no artifact, and its ``discussion`` job checks out the script and
+:file:`util/_actions.py`, which it imports, alone. The
 ``--status`` is the publish's result after a green build, the build's where the
 build did not pass, and the gate's where the gate skipped the build.
 
@@ -1441,12 +1524,14 @@ the job summary``, which writes the job's name beside it, and ``Upload the job
 summary``, which uploads both as the ``job-summary-<job>-<index>`` artifact (7
 days) for the report to download; both run on ``always()`` and are
 ``continue-on-error``. The summaries share the room a comment leaves, smallest first,
-and one cut to fit links the run. ``Run unit tests`` in ``experimental.yml`` does
-not copy its summary, so the line :file:`util/superseded.py` writes there for a
-stopped run stays in the job's summary alone. The post step runs only where the
-report step's ``post`` output is ``true``, and sets ``GITHUB_WORKFLOW`` to the
-relayed run's workflow, which :file:`util/discussion_report.py` labels the run
-with.
+and one cut to fit links the run. ``Run unit tests`` in ``experimental.yml`` sets
+no ``JOB_SUMMARY_COPY`` either: the line :file:`util/superseded.py` writes there
+for a stopped run reaches the copy through the watcher's ``--summary-copy``
+option, which the tests it runs never see (`#2078
+<https://github.com/JarryShaw/PyPCAPKit/issues/2078>`__). The post step runs only
+where the report step's ``post`` output is ``true``, and sets ``GITHUB_WORKFLOW``
+to the relayed run's workflow, which :file:`util/discussion_report.py` labels the
+run with.
 
 ``codeql-analysis.yml`` posts to ``codeql-analysis: CodeQL report``, as
 ``scheduled`` on its ``schedule`` and ``push`` on a push to ``main``, and never on
