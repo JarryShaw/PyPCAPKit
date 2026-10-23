@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """Each conda package carries binaries for its own platform (#1822).
 
-* Both conda jobs map each runner label of their ``os`` axis to the conda
+* Both conda jobs map each runner label of their ``os`` axis, through
+  :file:`util/release_conda.py`'s ``PLATFORMS`` since #1967, to the conda
   platform of that runner's own architecture, as GitHub's runner-images table
   gives it (the snapshot in :file:`python_versions_fixtures`), and between them
   build exactly :data:`conda_vendor.PLATFORMS`; win-64 only in Conda Update,
@@ -36,6 +37,8 @@ from typing import TYPE_CHECKING
 from unittest import mock
 
 from tests import _workflows
+from tests.project.test_release_conda_scripts_1967 import read_outputs
+from util import release_conda
 
 try:
     import tomllib
@@ -94,18 +97,10 @@ def job(name: 'str', job_id: 'str') -> 'dict[str, Any]':
     return _workflows.job(WORKFLOWS / name, job_id)
 
 
-#: A ``case "${{ matrix.os }}" in`` arm setting ``target_platform``.
-ARM = re.compile(r'^\s*([\w.-]+)\)\s*\n\s*target_platform="([^"]*)"', re.MULTILINE)
-
-
 def mappings(spec: 'dict[str, Any]') -> 'list[dict[str, str]]':
-    """Each ``case "${{ matrix.os }}"`` of the job's steps, as label to platform."""
-    found = []
-    for step in spec.get('steps', []):
-        for block in re.findall(r'case "\$\{\{ matrix\.os \}\}" in\n(.*?)\n\s*esac', str(step.get('run', '')),
-                                re.DOTALL):
-            found.append(dict(ARM.findall(block)))
-    return found
+    """The label-to-platform map each of the job's steps that maps its leg reads (#1967)."""
+    return [dict(release_conda.PLATFORMS) for step in spec.get('steps', [])
+            if re.search(r'\butil/release_conda\.py (?:leg|build)\b', str(step.get('run', '')))]
 
 
 class RunnerMappingTests(unittest.TestCase):
@@ -173,8 +168,8 @@ class NoConvertTests(unittest.TestCase):
     def build(self, name: 'str', job_id: 'str', label: 'str', built: 'str') -> 'tuple[int, str, list[str]]':
         """The job's build step on ``label`` where conda builds ``built``: status, log, packages."""
         step = next(step for step in job(name, job_id)['steps'] if step.get('id') == 'conda_build')
-        script = step['run'].replace('${{ matrix.os }}', label).replace('${{ matrix.python-version }}', '3.14')
-        self.assertNotIn('${{', script)
+        self.assertEqual(step['run'], 'python ../../util/release_conda.py build')
+        self.assertEqual(step['env']['PCAPKIT_CONDA_OS'], '${{ matrix.os }}')
         with tempfile.TemporaryDirectory() as temp:
             scratch = pathlib.Path(temp)
             (scratch / 'bin').mkdir()
@@ -184,14 +179,14 @@ class NoConvertTests(unittest.TestCase):
             output = scratch / 'output'
             output.write_text('', encoding='utf-8')
             result = subprocess.run(
-                [BASH, '-e', '-c', script], cwd=temp,  # nosec: B603
+                [sys.executable, str(ROOT / 'util' / 'release_conda.py'), 'build'], cwd=temp,  # nosec: B603
                 env=dict(os.environ, PATH=f'{scratch / "bin"}{os.pathsep}{os.environ["PATH"]}',
                          TMPDIR=temp, GITHUB_OUTPUT=str(output), FAKE_SUBDIR=built,
-                         PCAPKIT_VERSION='1.0', PCAPKIT_BUILD='0'),
+                         PCAPKIT_VERSION='1.0', PCAPKIT_BUILD='0', PCAPKIT_CONDA_OS=label,
+                         PCAPKIT_PYTHON_VERSION='3.14'),
                 capture_output=True, text=True, check=False, timeout=60)
-            written = output.read_text(encoding='utf-8')
-        packages = re.search(r'^packages<<EOF\n(.*?)^EOF$', written, re.MULTILINE | re.DOTALL)
-        found = [] if packages is None else packages.group(1).splitlines()
+            written = dict(read_outputs(output.read_text(encoding='utf-8')))
+        found = written['packages'].splitlines() if 'packages' in written else []
         return result.returncode, result.stdout + result.stderr, [path.split('/')[-2] for path in found]
 
     def test_a_leg_publishes_only_the_package_conda_built(self) -> None:

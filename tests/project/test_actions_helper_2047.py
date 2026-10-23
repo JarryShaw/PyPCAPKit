@@ -45,9 +45,9 @@ HELPER = ROOT / 'util' / '_actions.py'
 #: The scripts that import the helper.
 SCRIPTS = ('apt_packages', 'check_suite_report', 'ci_timing', 'classify_changes', 'codeql_report',
            'coverage_report', 'discussion_report', 'leg_summary', 'pip_install', 'project_status',
-           'python_versions', 'regenerate_samples', 'release_published', 'release_status', 'release_tags',
-           'release_tiers', 'release_upload', 'release_vendor_update', 'superseded', 'update_python_versions',
-           'vendor_code_changed', 'vendor_test_gate', 'verdict_covers_checkout')
+           'python_versions', 'regenerate_samples', 'release_conda', 'release_published', 'release_status',
+           'release_tags', 'release_tiers', 'release_upload', 'release_vendor_update', 'superseded',
+           'update_python_versions', 'vendor_code_changed', 'vendor_test_gate', 'verdict_covers_checkout')
 #: The top-level modules the helper may import, each in Python 3.7's standard
 #: library: the running interpreter's :data:`sys.stdlib_module_names` would
 #: pass ``tomllib``, which 3.7 lacks.
@@ -66,6 +66,7 @@ RUNS = {
     'project_status': (['--help'], {}),
     'python_versions': (['latest'], {}),
     'regenerate_samples': (['--help'], {}),
+    'release_conda': (['--help'], {}),
     'release_published': (['--help'], {}),
     'release_status': (['--help'], {}),
     'release_tags': (['--help'], {}),

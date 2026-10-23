@@ -44,6 +44,7 @@ from unittest import mock
 from tests import _workflows
 from tests.project.test_conda_native_platforms_1822 import DISTRIBUTION, SHIM, elf, load, pe
 from tests.project.test_release_gates import PUBLISHING_MARKERS, STATUS, evaluate_condition
+from util import release_conda
 
 if TYPE_CHECKING:
     from typing import Any
@@ -174,8 +175,11 @@ class TestTheWindowsLegNeverBlocks(unittest.TestCase):
                     self.assertTrue(str(step.get('shell', '')).startswith('bash'))
 
     def test_the_build_step_maps_the_leg_to_win_64(self) -> None:
+        # #1967: util/release_conda.py maps it, which the step runs with the leg's label.
         build = next(step for step in spec()['steps'] if step.get('id') == 'conda_build')
-        self.assertRegex(build['run'], r'\n\s*windows-latest\)\n\s*target_platform="win-64"\n')
+        self.assertEqual(build['run'], 'python ../../util/release_conda.py build')
+        self.assertEqual(build['env']['PCAPKIT_CONDA_OS'], '${{ matrix.os }}')
+        self.assertEqual(release_conda.PLATFORMS[WINDOWS], 'win-64')
 
     def test_the_smoke_test_runs_python_exe_on_windows(self) -> None:
         smoke = next(step for step in spec()['steps'] if step.get('id') == 'smoke')

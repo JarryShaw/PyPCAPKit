@@ -12,9 +12,10 @@ anaconda-client, with ``--skip-existing``.
 
 Each step's ``if:`` is evaluated per matrix leg with
 :func:`tests.project.test_release_gates.evaluate_condition`. The CLI step's
-script is run with a stand-in ``conda`` and ``anaconda``, and the arguments it
-passes are compared with those :func:`action_arguments` builds as the action's
-"Upload to anaconda.org" step does.
+script, :file:`util/release_conda.py` ``upload`` since #1967, is run with a
+stand-in ``conda`` and ``anaconda``, and the arguments it passes are compared
+with those :func:`action_arguments` builds as the action's "Upload to
+anaconda.org" step does.
 
 """
 
@@ -24,6 +25,7 @@ import os
 import pathlib
 import stat
 import subprocess  # nosec: B404
+import sys
 import tempfile
 import textwrap
 import unittest
@@ -48,6 +50,9 @@ ACTION = 'anaconda/actions/upload-package'
 #: The leg whose upload-package CLI download returns 404.
 INTEL = 'macos-26-intel'
 SECRET = '${{ secrets.ANACONDA_TOKEN }}'
+#: The CLI step's ``run:`` (#1967), and the script it runs.
+CLI_RUN = 'python3 util/release_conda.py upload'
+SCRIPT = pathlib.Path(__file__).resolve().parents[2] / 'util' / 'release_conda.py'
 #: The CLI step's ``env:`` key for each action input it carries.
 CARRIED = {'token': 'ANACONDA_API_TOKEN', 'channel': 'PCAPKIT_CONDA_CHANNEL',
            'packages': 'PCAPKIT_CONDA_PACKAGES', 'labels': 'PCAPKIT_CONDA_LABELS'}
@@ -151,8 +156,8 @@ class TestTheCLIStepMatchesTheAction(unittest.TestCase):
             entry = step(name, job_id, CLI_STEP)
             with self.subTest(workflow=name, job=job_id):
                 self.assertEqual(entry['env']['ANACONDA_API_TOKEN'], SECRET)
-                self.assertNotIn('${{', entry['run'])
-                self.assertIn('--token "$ANACONDA_API_TOKEN"', entry['run'])
+                self.assertEqual(entry['run'], CLI_RUN)
+        self.assertIn("'--token', env('ANACONDA_API_TOKEN')", SCRIPT.read_text(encoding='utf-8'))
 
     def test_it_carries_the_actions_inputs(self) -> None:
         for name, job_id in JOBS:
@@ -207,7 +212,8 @@ class TestTheCLIStepMatchesTheAction(unittest.TestCase):
                        CONDA=str(scratch / 'base'), FAKE_LOG=str(log), ANACONDA_API_TOKEN='TOKEN',
                        ANACONDA_CLI_FORCE_NEW='1', PCAPKIT_CONDA_CHANNEL=str(entry['env']['PCAPKIT_CONDA_CHANNEL']),
                        PCAPKIT_CONDA_PACKAGES=packages, PCAPKIT_CONDA_LABELS=labels)
-            result = subprocess.run([str(BASH), '-e', '-c', entry['run']], cwd=temp, env=env,  # nosec: B603
+            self.assertEqual(entry['run'], CLI_RUN)
+            result = subprocess.run([sys.executable, str(SCRIPT), 'upload'], cwd=temp, env=env,  # nosec: B603
                                     capture_output=True, text=True, check=False, timeout=scale_timeout(60))
             self.assertEqual(result.returncode, status, result.stdout + result.stderr)
             blocks = log.read_text(encoding='utf-8').split('\n\n')

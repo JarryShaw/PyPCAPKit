@@ -274,9 +274,9 @@ WORKFLOW = ROOT / '.github' / 'workflows' / 'create-release.yml'
 PUBLISHING_MARKERS = {
     'pypa/gh-action-pypi-publish': 'uploads a distribution to PyPI or TestPyPI',
     'anaconda/actions/upload-package': 'uploads a package to anaconda.org',
-    # #2044: the ``macos-26-intel`` leg's ``anaconda … upload``, which calls the
-    # anaconda-client binary by path; a bare ``anaconda`` on ``PATH`` is not matched.
-    '/bin/anaconda"': 'uploads a package to anaconda.org with the anaconda-client CLI',
+    # #2044: the ``macos-26-intel`` leg's ``anaconda … upload``, which
+    # util/release_conda.py makes since #1967; a bare ``anaconda`` is not matched.
+    'util/release_conda.py upload': 'uploads a package to anaconda.org with the anaconda-client CLI',
     'softprops/action-gh-release': 'creates a public GitHub Release, and the tag it names',
     # ``pypi`` and ``conda`` attach their files with ``gh release upload`` since
     # #1634, which util/release_upload.py runs since #1967.
@@ -2387,7 +2387,12 @@ class TestEvidenceBasedGating(WorkflowMixin, unittest.TestCase):
 
         """
         block = self.jobs['conda']
-        self.assertIn('api.anaconda.org/release/jarryshaw/pypcapkit', block)
+        # #1967: the step runs util/release_conda.py, which reads release_published.py's endpoint.
+        self.assertIn('run: python3 util/release_conda.py leg ', block)
+        self.assertIn('release_published.ANACONDA_URL',
+                      (ROOT / 'util' / 'release_conda.py').read_text(encoding='utf-8'))
+        self.assertIn("ANACONDA_URL = 'https://api.anaconda.org/release/jarryshaw/pypcapkit/'",
+                      (ROOT / EVIDENCE_SCRIPT).read_text(encoding='utf-8'))
         self.assertIn('PCAPKIT_LEG_EXISTS', block)
         self.assertIn(
             "steps.check_leg.outputs.PCAPKIT_LEG_EXISTS != 'true'", block,
@@ -2404,7 +2409,10 @@ class TestEvidenceBasedGating(WorkflowMixin, unittest.TestCase):
         cannot say *which* leg was already published.
 
         """
-        self.assertIn('::notice title=conda leg already published', self.jobs['conda'])
+        # #1967: util/release_conda.py's, which the step runs.
+        self.assertIn('run: python3 util/release_conda.py leg ', self.jobs['conda'])
+        self.assertIn('::notice title=conda leg already published',
+                      (ROOT / 'util' / 'release_conda.py').read_text(encoding='utf-8'))
 
     def test_version_check_exposes_the_new_evidence_outputs(self) -> None:
         """The three outputs the jobs above actually read have to exist for
@@ -3565,27 +3573,29 @@ class TestPythonSnippetsSurviveOlderInterpreters(WorkflowMixin, unittest.TestCas
     an older interpreter to check that claim, rather than trusting it.
 
     Since #1967 the PyPI and Anaconda evidence checks in ``version_check`` feed
-    ``python3 -`` from :file:`util/release_published.py` instead, so this runs
-    those snippets too, as that script builds them.
+    ``python3 -`` from :file:`util/release_published.py` instead, and ``conda``'s
+    per-leg check from :file:`util/release_conda.py`, so this runs those
+    snippets, as those scripts build them.
 
     """
 
     def snippets(self) -> 'list[str]':
-        """The workflow's ``printf`` snippets, then the evidence script's."""
-        from util import release_published  # pylint: disable=import-outside-toplevel
+        """The workflow's ``printf`` snippets, then the evidence scripts'."""
+        from util import release_conda, release_published  # pylint: disable=import-outside-toplevel
         return printf_python_snippets(self.text) + [  # type: ignore[attr-defined]
             source('/tmp/release.json') for source in (release_published.pypi_source,
-                                                      release_published.anaconda_source)]
+                                                      release_published.anaconda_source)] + [
+            release_conda.leg_source('/tmp/release.json', 'linux-64', 'py310')]
 
     def test_the_scan_found_the_snippets(self) -> None:
         """A scan that finds nothing would pass every test below it."""
         snippets = printf_python_snippets(self.text)  # type: ignore[attr-defined]
         self.assertEqual(
-            len(snippets), 1,
-            'expected exactly 1 printf-fed python3 snippet (the per-leg '
-            'check in conda; version_check\'s two run from '
-            'util/release_published.py since #1967); found a different count '
-            '-- if that is intended, this expectation needs revisiting alongside it',
+            len(snippets), 0,
+            'expected no printf-fed python3 snippet: since #1967 version_check\'s '
+            'two run from util/release_published.py and conda\'s per-leg check '
+            'from util/release_conda.py; found some -- if that is intended, this '
+            'expectation needs revisiting alongside it',
         )
         self.assertEqual(len(self.snippets()), 3)
 
@@ -3600,16 +3610,8 @@ class TestPythonSnippetsSurviveOlderInterpreters(WorkflowMixin, unittest.TestCas
 
         for index, snippet in enumerate(self.snippets()):
             with self.subTest(snippet=index):
-                # `$target_platform`/`$py_tag` are bash interpolation the real
-                # step performs before Python ever sees this text; harmless
-                # stand-ins reproduce the same shape without needing bash here.
-                source = (
-                    snippet
-                    .replace('$target_platform', 'linux-64')
-                    .replace('$py_tag', 'py310')
-                )
                 result = subprocess.run(
-                    [interpreter, '-'], input=source, capture_output=True,
+                    [interpreter, '-'], input=snippet, capture_output=True,
                     text=True, timeout=scale_timeout(10),
                 )
                 self.assertNotIn(

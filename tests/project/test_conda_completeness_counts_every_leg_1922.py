@@ -3,7 +3,8 @@
 
 * The platforms it counts, :file:`util/release_published.py`'s ``SUBDIRS``
   since #1967, are the ones the ``conda`` job's ``os`` legs map to, read from
-  that job's matrix and its ``case "${{ matrix.os }}"`` arms.
+  that job's matrix and :file:`util/release_conda.py`'s ``PLATFORMS``, which its
+  steps run.
 * Run as the workflow runs it, with ``curl`` stubbed, a release reads complete
   only with each of those platforms for each build, so a missing ``osx-arm64``
   upload reads incomplete and the ``conda`` gate runs the leg that lacks it.
@@ -15,7 +16,6 @@ from __future__ import annotations
 import json
 import os
 import pathlib
-import re
 import shutil
 import subprocess  # nosec: B404
 import sys
@@ -24,7 +24,7 @@ import unittest
 from typing import TYPE_CHECKING
 
 from tests import _workflows
-from util import release_published
+from util import release_conda, release_published
 
 try:
     import yaml
@@ -39,10 +39,6 @@ WORKFLOW = ROOT / '.github' / 'workflows' / 'create-release.yml'
 STEP = 'Check Anaconda publish completeness'
 BUILDS = ('py313', 'py314')
 
-#: A ``case "${{ matrix.os }}" in`` arm setting ``target_platform``.
-ARM = re.compile(r'^\s*([\w.-]+)\)\s*\n\s*target_platform="([^"]*)"', re.MULTILINE)
-
-
 def jobs() -> 'dict[str, Any]':
     if yaml is None:  # pragma: no cover
         raise unittest.SkipTest('PyYAML, from the test extra, is not installed')
@@ -54,17 +50,11 @@ def check() -> 'dict[str, Any]':
 
 
 def published() -> 'set[str]':
-    """The platform each ``conda`` leg publishes, from its matrix and each ``case`` of its steps."""
+    """The platform each ``conda`` leg publishes, from its matrix and the script its steps run (#1967)."""
     spec = jobs()['conda']
-    labels = spec['strategy']['matrix']['os']
-    found = set()
-    for step in spec['steps']:
-        for block in re.findall(r'case "\$\{\{ matrix\.os \}\}" in\n(.*?)\n\s*esac', str(step.get('run', '')),
-                                re.DOTALL):
-            arms = dict(ARM.findall(block))
-            found.add(frozenset(arms[label] for label in labels))
-    assert len(found) == 1, found
-    return set(found.pop())
+    runs = [str(step.get('run', '')) for step in spec['steps'] if 'util/release_conda.py' in str(step.get('run', ''))]
+    assert len(runs) == 3, runs  # the leg check, the build and the Intel upload
+    return {release_conda.PLATFORMS[label] for label in spec['strategy']['matrix']['os']}
 
 
 class TheCheckCountsTheLegs(unittest.TestCase):
