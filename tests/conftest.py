@@ -45,6 +45,7 @@ import errno
 import gc
 import hashlib
 import importlib
+import os
 import pathlib
 import sys
 import tempfile
@@ -529,9 +530,10 @@ collect_ignore = [f'protocols/{PROBE_MODULE_NAME}']
 #: shared hold (spanning the whole test, including the blocking
 #: ``subprocess.run``) would wait on an inner exclusive request that cannot be
 #: granted until the outer test finishes: the same deadlock shape as above, one
-#: level removed. Today it never selects either, so nothing here triggers it;
-#: a future change to that selection should keep it that way, or add the
-#: module in question here too.
+#: level removed. Today it never selects either; a future change to that
+#: selection should keep it that way, or add the module in question here too.
+#: The nested run's own *shared* holds are a different matter, and
+#: :data:`TIER_GUARD_HELD_ENV` covers them.
 _LOCK_MANAGED_ELSEWHERE = frozenset({PROBE_MODULE_NAME, 'test_tier_guard_xdist.py'})
 
 #: Whether :func:`_tier_guard_flock` polls with ``LOCK_NB`` instead of blocking
@@ -549,6 +551,17 @@ TIER_GUARD_LOCK_POLLS = sys.implementation.name == 'graalpy'
 #: :data:`TIER_GUARD_LOCK_POLLS` is set. :func:`time.sleep` releases the GIL on
 #: GraalPy as on CPython.
 TIER_GUARD_LOCK_POLL = 0.05
+
+#: Set, to :func:`_tier_guard_lock_path`, while :func:`_tier_guard_reader_hold`
+#: holds the lock shared, so that a nested :program:`pytest` the test spawns
+#: inherits it and does not ask for that lock again (#2082). The writer's gate
+#: makes a second shared request wait behind any writer already queued, and the
+#: writer waits on the outer hold, which waits on the nested run: a deadlock
+#: that only the nested run's ``subprocess.run`` timeout ends, as
+#: :mod:`tests.project.test_module_isolation` hit on GraalPy, whose slow start
+#: leaves the writer time to queue. The outer hold already keeps the writer out
+#: for as long as the nested run lasts, so skipping the inner one loses nothing.
+TIER_GUARD_HELD_ENV = 'PCAPKIT_TEST_TIER_GUARD_HELD'
 
 
 def _tier_guard_lock_path() -> 'pathlib.Path':
@@ -659,6 +672,32 @@ def _tier_guard_lock(exclusive: 'bool') -> 'Iterator[None]':
             fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
 
 
+@contextlib.contextmanager
+def _tier_guard_reader_hold() -> 'Iterator[None]':
+    """A test's shared hold, unless an ancestor process already has one (#2082).
+
+    Takes :func:`_tier_guard_lock` shared and sets :data:`TIER_GUARD_HELD_ENV`
+    for the block, putting the variable back as it was afterwards. Where the
+    variable already names this lock file, the hold is an ancestor's that spans
+    this whole process, so the lock is not asked for again.
+
+    """
+    held = str(_tier_guard_lock_path())
+    if os.environ.get(TIER_GUARD_HELD_ENV) == held:
+        yield
+        return
+    with _tier_guard_lock(exclusive=False):
+        previous = os.environ.get(TIER_GUARD_HELD_ENV)
+        os.environ[TIER_GUARD_HELD_ENV] = held
+        try:
+            yield
+        finally:
+            if previous is None:
+                os.environ.pop(TIER_GUARD_HELD_ENV, None)
+            else:
+                os.environ[TIER_GUARD_HELD_ENV] = previous
+
+
 @pytest.fixture(autouse=True)
 def _tier_guard_reader_lock(request: 'pytest.FixtureRequest') -> 'Iterator[None]':
     """Hold the probe/scan mutex shared, for every unit-tier test but the two
@@ -670,7 +709,7 @@ def _tier_guard_reader_lock(request: 'pytest.FixtureRequest') -> 'Iterator[None]
     :class:`~tests.test_tier_guard.SuiteIsCleanTests`, so the protection is
     structural and covers a similarly-scanning test written later without this
     fixture changing at all -- and it never has to touch that module's own
-    source to do it.
+    source to do it. :func:`_tier_guard_reader_hold` takes the hold.
 
     """
     location = getattr(request.node, 'path', None) or getattr(request.node, 'fspath', None)
@@ -678,5 +717,5 @@ def _tier_guard_reader_lock(request: 'pytest.FixtureRequest') -> 'Iterator[None]
     if path is None or path.name in _LOCK_MANAGED_ELSEWHERE or not is_unit_tier(path):
         yield
         return
-    with _tier_guard_lock(exclusive=False):
+    with _tier_guard_reader_hold():
         yield
