@@ -165,8 +165,9 @@ class TransportProtocol(EnumLookup, IntEnum):
 
     #: No transport protocol. ``TransportProtocol(0) is undefined`` and
     #: ``bool(undefined)`` is ``False``; it is the ``proto`` sentinel default
-    #: for ``__transport__``, ``__new__``, ``get`` and ``get_all``, and what
-    #: the base registry's ``_missing_`` extends unassigned/reserved rows from.
+    #: for ``__transport__``, ``__new__``, ``get`` and ``get_all``. The base
+    #: registry's ``_missing_`` answered its unassigned and reserved spans with
+    #: it until :issue:`2048`; they answer with the asking registry's transport.
     undefined = cast('TransportProtocol', 0)
 
     #: Transmission Control Protocol.
@@ -606,7 +607,8 @@ class {NAME}(EnumRegistry, StrEnum):
             not added to the registry (:issue:`860`). Its name is the label of
             the IANA span holding the port, whatever that label is --
             ``reserved``, ``unassigned``, or a service name such as ``swx`` --
-            or ``unknown`` when no span holds it.
+            or ``unknown`` when no span holds it, either way carrying this
+            registry's own transport (:issue:`2048`).
 
         Raises:
             ValueError: If called on a class that holds no members, i.e. on
@@ -653,7 +655,10 @@ class {NAME}(EnumRegistry, StrEnum):
         # access could reach) -- and this was the second, independent mint site
         # on this method, distinct from the one inside :meth:`_missing_` itself:
         # neither is a value anyone asked to be named, so both build an
-        # unregistered member instead of registering one.
+        # unregistered member instead of registering one. A port IANA lists on
+        # other transports only is in no span on this one: 8011, reserved on
+        # TCP and ``bier-echo`` on UDP, answers ``unknown`` on DCCP and SCTP
+        # (#2048).
         ret = owner._missing_(key)
         if ret is None:
             ret = owner._unregistered_member(key, 'unknown', owner.__transport__)
@@ -964,7 +969,8 @@ class {NAME}(EnumRegistry, StrEnum):
         if cls.__registry__ is None:
             raise ValueError(f'{{value!r}} is not a valid {{cls.__name__}}')
         # NOTE: most spans are IANA's unassigned and reserved markers, which name
-        # no transport protocol and so answer every registry. A span that does name
+        # no transport protocol and so answer every registry, each with its own
+        # transport (#2048). A span that does name
         # one tests ``cls.__transport__`` and answers that registry alone --
         # GitHub issue #760, where source order decided instead and a UDP lookup in
         # 6000-6063 came back carrying ``tcp``. A registry a named span excludes
@@ -1278,6 +1284,10 @@ class AppType(Vendor):
                 # no test and keeps answering every registry.
                 flag = self.flag([proto])
                 claim = '' if proto == 'undefined' else f' and cls.__transport__ is {flag}'
+                # NOTE: GitHub issue #2048. A span naming no transport protocol
+                # answers each registry with that registry's own, rather than
+                # with ``undefined``.
+                answer = 'cls.__transport__' if proto == 'undefined' else flag
 
                 # NOTE: GitHub issue #860. A port in this span resolves to an
                 # unregistered member rather than an extend_enum(...)-ed,
@@ -1288,7 +1298,7 @@ class AppType(Vendor):
                 # range.
                 miss.append(f'if {start} <= value <= {stop}{claim}:')
                 miss.append(f'    #: {cmmt}')
-                miss.append(f'    return cls._unregistered_member(value, {svc!r}, {flag})')
+                miss.append(f'    return cls._unregistered_member(value, {svc!r}, {answer})')
 
         return line, miss
 

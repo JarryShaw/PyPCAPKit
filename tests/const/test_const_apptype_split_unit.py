@@ -670,9 +670,11 @@ class AppTypeSplitTests(unittest.TestCase):
         it returns silently, because a shadowed branch is unreachable rather than
         wrong. This asserts the invariant over every branch instead of over the two
         spans that happen to collide: a branch minting a member for a named
-        transport protocol is claimed by that registry, and one minting for
-        ``undefined`` claims nothing, since IANA's unassigned and reserved markers
-        belong to whichever registry was asked.
+        transport protocol is claimed by that registry, and one answering with
+        ``cls.__transport__`` claims nothing, since IANA's unassigned and reserved
+        markers belong to whichever registry was asked. Such a branch answered
+        ``undefined`` until GitHub issue #2048, which made it answer with the
+        asking registry's own transport, so none answers ``undefined`` now.
 
         "Every branch" is checked against the same source parsed with :mod:`ast`:
         the pattern has to find one branch per ``_unregistered_member`` call in
@@ -698,7 +700,7 @@ class AppTypeSplitTests(unittest.TestCase):
         # the call's own name changed here and not the shape of what follows.
         branches = re.findall(r'\n        if (.+?):\n            #:.*?\n            '
                               r"return cls\._unregistered_member\(value, .+?, "
-                              r'TransportProtocol\.(\w+)\)',
+                              r'(?:TransportProtocol\.(\w+)|cls\.__transport__)\)',
                               source)
         function = ast.parse(textwrap.dedent(source)).body[0]
         calls = [node for node in ast.walk(function)
@@ -706,13 +708,15 @@ class AppTypeSplitTests(unittest.TestCase):
                  and node.func.attr == '_unregistered_member']
         self.assertNotEqual(branches, [])
         self.assertEqual(len(branches), len(calls))
-        # Both kinds are present, so neither half of the loop below is vacuous.
-        self.assertEqual({proto == 'undefined' for _, proto in branches}, {True, False})
+        # Both kinds are present, so neither half of the loop below is vacuous;
+        # an empty capture is a branch answering ``cls.__transport__``.
+        self.assertEqual({proto == '' for _, proto in branches}, {True, False})
+        self.assertNotIn('undefined', {proto for _, proto in branches})
 
         for condition, proto in branches:
             with self.subTest(condition=condition):
                 claim = 'cls.__transport__ is TransportProtocol.%s' % proto
-                if proto == 'undefined':
+                if proto == '':
                     self.assertNotIn('cls.__transport__', condition)
                 else:
                     # NOTE: anchored at the end rather than a bare `assertIn`,
