@@ -55,6 +55,7 @@ from typing import TYPE_CHECKING
 from tests.project.test_python_versions_1660 import legs as expand
 from tests.project.test_python_versions_1660 import matrix, resolve, setups, workflow
 from tests.project.test_python_versions_1660 import script as versions_script
+from tests.project.test_release_tags_the_run_sha_1634 import script_command
 
 if TYPE_CHECKING:
     from typing import Any, Optional
@@ -237,6 +238,11 @@ def bash(script: 'str', env: 'dict[str, str]') -> 'subprocess.CompletedProcess[s
                           capture_output=True, text=True, check=False, timeout=60)
 
 
+def release_status() -> 'dict[str, Any]':
+    """``release_status``'s step that reports, the one after its checkout."""
+    return next(step for step in job('create-release.yml', 'release_status')['steps'] if 'run' in step)
+
+
 class TestTheSupportedTierBlocks(unittest.TestCase):
     """The supported tier everywhere, and nothing softens a supported leg."""
 
@@ -407,7 +413,7 @@ class TestNoKTLOLegCanFailTheRelease(unittest.TestCase):
     def test_each_ktlo_leg_records_its_outcome_for_release_status(self) -> None:
         spec = job('create-release.yml', 'pypi')
         record = next(step for step in spec['steps'] if step.get('id') == 'ktlo')
-        status = job('create-release.yml', 'release_status')['steps'][0]['env']
+        status = release_status()['env']
         for leg in (leg for leg in legs('create-release.yml', 'pypi') if is_ktlo(leg)):
             key = 'ktlo_' + leg['python-version'].replace('.', '')
             with self.subTest(leg=leg['python-version']):
@@ -423,7 +429,9 @@ class TestNoKTLOLegCanFailTheRelease(unittest.TestCase):
                     self.assertEqual(output.read_text(encoding='utf-8'), f'{key}={expected}\n')
 
     def test_release_status_reports_a_failed_ktlo_leg_without_warning(self) -> None:
-        script = job('create-release.yml', 'release_status')['steps'][0]['run']
+        # #1967: ``python3 util/release_status.py``, on this interpreter.
+        command = script_command(release_status()['run'])
+        assert command is not None
         base = {'PCAPKIT_EVENT_NAME': 'push', 'PCAPKIT_WORKFLOW_RUN_CONCLUSION': '',
                 'PCAPKIT_UNIT_TESTS': 'success', 'PCAPKIT_VERSION_CHECK': 'success',
                 'PCAPKIT_GITHUB_JOB': 'success', 'PCAPKIT_TAG_JOB': 'success',
@@ -431,9 +439,10 @@ class TestNoKTLOLegCanFailTheRelease(unittest.TestCase):
                 'PCAPKIT_VERSION': '1.5.0', 'PCAPKIT_TAG_EXISTS': 'false',
                 'PCAPKIT_CONDA_TAG_EXISTS': 'false', 'PCAPKIT_PYPI_COMPLETE': 'false',
                 'PCAPKIT_CONDA_COMPLETE': 'false'}
-        clean = bash(script, base)
-        failed = bash(script, dict(base, PCAPKIT_PYPI_KTLO_310='failure',
-                                   PCAPKIT_PYPI_KTLO_PYPY310='failure'))
+        clean, failed = (subprocess.run(command, env=dict(os.environ, **env), capture_output=True, text=True,
+                                        check=False, timeout=60)
+                         for env in (base, dict(base, PCAPKIT_PYPI_KTLO_310='failure',
+                                                PCAPKIT_PYPI_KTLO_PYPY310='failure')))
         self.assertEqual((clean.returncode, failed.returncode), (0, 0), failed.stderr)
         self.assertIn('::notice title=Release complete::', failed.stdout)
         self.assertRegex(failed.stdout, r'::notice title=KTLO legs \(non-blocking\)::pypi 3\.10=failure '

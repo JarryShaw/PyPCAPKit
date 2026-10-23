@@ -150,9 +150,9 @@ RUN_SHA_STEPS = {
 #: commit Vendor Update ran *on*, ``945c3c3d8`` for run 38008819343, not its bump.
 UPSTREAM_COMMIT = re.compile(r'\bworkflow_run\.head_|\bhead_commit\b')
 
-#: The jobs that check out the repository, which is every job with steps but
-#: ``release_status``.
-CHECKOUT_JOBS = ('version_check', 'github', 'tag', 'pypi', 'conda')
+#: The jobs that check out the repository, which is every job with steps:
+#: ``vendor_update`` and ``release_status`` check out util/ for their scripts (#1967).
+CHECKOUT_JOBS = ('vendor_update', 'version_check', 'github', 'tag', 'pypi', 'conda', 'release_status')
 
 #: Git commands that move a checkout onto ``main``'s history or rewrite it.
 #: ``merge-base`` is a read, so it is excluded from ``git merge``.
@@ -496,13 +496,16 @@ class TestTheAppsTagPushReleasesNothing(WorkflowMixin, unittest.TestCase):
 
     def test_release_status_reads_what_version_check_compares(self) -> None:
         """The quiet notice is the guard's own test, so the two must not drift apart."""
-        env = self.steps['release_status'][0]['env']
+        step = self.step('release_status', REPORT_STEP)
+        env = step['env']
         self.assertEqual(env.get('PCAPKIT_EVENT_NAME'), '${{ github.event_name }}')
         self.assertEqual(env.get('PCAPKIT_ACTOR_ID'), '${{ github.actor_id }}')
         self.assertEqual(env.get('PCAPKIT_RELEASE_APP_BOT_ID'), '${{ vars.RELEASE_APP_BOT_ID }}')
-        script = self.steps['release_status'][0]['run']
-        self.assertIn('[ "$PCAPKIT_EVENT_NAME" = "push" ] && [ -n "$PCAPKIT_RELEASE_APP_BOT_ID" ]', script)
-        self.assertIn('[ "$PCAPKIT_ACTOR_ID" = "$PCAPKIT_RELEASE_APP_BOT_ID" ]', script)
+        # #1967: the step runs util/release_status.py, which compares them.
+        self.assertEqual(step['run'], 'python3 util/release_status.py')
+        script = (UTIL / 'release_status.py').read_text(encoding='utf-8')
+        self.assertIn("if event == 'push' and var('PCAPKIT_RELEASE_APP_BOT_ID') \\\n", script)
+        self.assertIn("and var('PCAPKIT_ACTOR_ID') == var('PCAPKIT_RELEASE_APP_BOT_ID'):", script)
 
 
 class TestTagNeverMovesOntoMain(WorkflowMixin, unittest.TestCase):
