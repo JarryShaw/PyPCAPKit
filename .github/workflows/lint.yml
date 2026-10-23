@@ -1,45 +1,31 @@
 name: "Lint"
 
-# vermin, pylint, mypy and bandit, which had Makefile targets but no CI
-# presence, plus actionlint over the workflows (#1967). `isort` is not among
-# them: it appears only in cron-vendor.yml, as a formatter that rewrites the
-# generated constants, not as a check.
+# vermin, pylint, mypy and bandit, plus actionlint over the workflows (#1967).
+# `isort` is not among them: it appears only in cron-vendor.yml, as a formatter
+# that rewrites the generated constants, not as a check.
 #
-# Every step but actionlint is advisory (`continue-on-error: true`): none is
-# clean, and a job that is red the day it lands teaches everyone to scroll past
-# red. Promote a step by deleting its `continue-on-error` once its count reaches
-# zero, and move it below the advisory steps, as a failed step skips every step
-# after it. Each step writes its result to the run summary; read the numbers
-# there. This header records no counts on purpose: most of those #753 recorded
-# had drifted by the time it was filed.
+# Every step but actionlint is advisory (`continue-on-error: true`), because none
+# is clean and a job red from day one teaches everyone to ignore red. Promote a
+# step by deleting its `continue-on-error` once it is clean, and move it below
+# the advisory steps, as a failed step skips every step after it. Counts are in
+# the run summary, not here: written-down counts drift (#753).
 #
-# pylint's R class moves without the code moving: `R0401` cyclic-import
-# depends on module-processing order, so runs on one tree disagree on it. A
-# change in R alone is no evidence that anything changed.
-#
-# #767's `PYLINT_FLAGS` cleanup was flag hygiene, not enablement. It dropped
-# `--disable=` entries pylint no longer recognises (`R0022`, `W0012`; loading
-# the unloaded `eq-without-hash` plugin instead found no `W1641`) and the dead
-# `pylint.extensions.emptystring` plugin (`E0013`), whose check still runs as
-# core C1804 `use-implicit-booleaness-not-comparison-to-string` -- measured
-# with `--list-msgs-enabled`, contrary to #767's premise. Every message the
-# `pylint` step tallies is now about the code.
+# pylint's `R0401` cyclic-import depends on module-processing order, so runs on
+# one tree disagree on it; a change in the R class alone is not evidence.
 #
 # Promotion order, cheapest first:
-#   * bandit -- most findings are B104 on `address: ... = '0.0.0.0'` default
-#     arguments in MH/MIP option builders, which bind no socket; triage the
-#     rest with `# nosec`.
+#   * bandit -- mostly B104 on `'0.0.0.0'` default arguments in MH/MIP option
+#     builders, which bind no socket; triage the rest with `# nosec`.
 #   * mypy -- part of its output is `unused-ignore`, risk-free to delete.
 #   * vermin -- blocked on a decision, not on cleanup: see its step.
 #   * pylint -- not realistically promotable: `unused-argument`,
 #     `redefined-builtin` and `super-init-not-called` are inherent to the
-#     schema DSL, and `--enable=E,F` leaves `unsubscriptable-object` and
-#     `no-member` false positives off the same metaprogramming.
+#     schema DSL, and its metaprogramming yields `unsubscriptable-object` and
+#     `no-member` false positives.
 
 on:
-  # No `push: [main]`: a second run per merge, on a commit its pull request
-  # already linted, buys no information while competing for oversubscribed
-  # runners. The schedule covers main's drift.
+  # No `push: [main]`: the pull request already linted the commit, and runners
+  # are oversubscribed. The schedule covers main's drift.
   pull_request:
     branches: [main]
   schedule:
@@ -75,10 +61,8 @@ jobs:
       # One interpreter, not a matrix: these tools read the source, so more
       # interpreters would only repeat the same findings. `latest` from
       # .github/python-versions.toml, like every single-interpreter job (#1661).
-      # Measured at 0bc157660, setup-python's 3.14.8 and 3.15.0 give identical
-      # reports bar R0401 (see the header). To test a 3.15 without C `_decimal`,
-      # use setup-python's build, which has none: faking it with
-      # `sys.modules['_decimal'] = None` crashes astroid on 3.14.8 too (#1677).
+      # To test a Python without C `_decimal`, use setup-python's build, which
+      # has none: faking it via `sys.modules` crashes astroid (#1677).
       - name: Read the Python versions
         id: python-versions
         run: python3 util/python_versions.py --github-output
@@ -87,11 +71,10 @@ jobs:
         with:
           python-version: ${{ steps.python-versions.outputs.latest }}
 
-      # `.[all,dev]`: pylint and mypy resolve imports, so findings depend on what
-      # is importable, and `dev` carries the engines #910 took out of `all`.
-      # `pypcap` and `pypcapfile` are `python_version < '3.12'` and `pcap-ct` is
-      # in no extra installed here, so pylint's `import-error` messages for them
-      # are by design.
+      # `.[all,dev]`: pylint and mypy resolve imports, and `dev` carries the
+      # engines #910 took out of `all`. pylint's `import-error` for `pypcap` and
+      # `pypcapfile` (`python_version < '3.12'`) and `pcap-ct` (in no extra
+      # installed here) is expected.
       - name: Install package and lint tools
         run: |
           set -x
@@ -100,12 +83,10 @@ jobs:
           python -m pip install -e '.[all,dev]'
           python -m pip install -U vermin pylint mypy bandit
 
-      # Each step runs its Makefile target, `RUN=` emptying the local `pipenv
-      # run` prefix, so this and a developer's `make pylint` cannot drift apart.
-      # `continue-on-error: true` lets every tool run whatever another found;
-      # `set +e` and `status=` keep the summary lines running under the default
-      # `bash -e`. Each block goes to lint-summary.md too, for the run report
-      # (#2030).
+      # Each step runs its Makefile target with `RUN=` emptying the `pipenv run`
+      # prefix, so CI and a local `make pylint` cannot drift apart. `set +e` and
+      # `status=` keep the summary lines running under the default `bash -e`;
+      # each block also goes to lint-summary.md for the run report (#2030).
 
       - name: bandit
         id: bandit
@@ -146,11 +127,10 @@ jobs:
       # `vermin-ci`, not `vermin`: that target redirects the report into temp/,
       # out of this log. Same flags, via $(VERMIN_FLAGS).
       #
-      # Blocking needs a decision, not a cleanup, and not CI's. vermin.ini's
-      # `targets = 3.8` matches `requires-python` (#2051), but vermin still
-      # reports 3.11: `--no-parse-comments` ignores the `# novermin` markers on
-      # compat.py's version-gated imports (`enum.StrEnum`,
-      # `enum.show_flag_values`), and evaluated annotations put some
+      # Blocking needs a decision, not a cleanup. vermin.ini's `targets = 3.8`
+      # matches `requires-python` (#2051), but vermin reports 3.11:
+      # `--no-parse-comments` ignores the `# novermin` markers on compat.py's
+      # version-gated imports, and evaluated annotations put some
       # `pcapkit.foundation` modules at 3.9.
       - name: vermin
         id: vermin
@@ -171,8 +151,7 @@ jobs:
 
           exit "$status"
 
-      # Last of the advisory steps because it is by far the slowest, so the
-      # quick verdicts reach the summary first.
+      # Last of the advisory steps as the slowest, so quick verdicts land first.
       - name: pylint
         id: pylint
         continue-on-error: true
@@ -193,25 +172,22 @@ jobs:
           exit "$status"
 
       # actionlint checks every workflow, running the image's shellcheck over
-      # each `run:` block. It blocks, as #1967 ruled: a finding fails Lint. That
-      # is safe because #2023, #2037 and #2038 fixed every finding it reported.
-      # It runs last, though it needs no Python, so that a finding skips none of
-      # the advisory steps above, and on `!cancelled()`, so that a failed Python
-      # setup does not skip it. `Lint` is one of ruleset 23497679's required
-      # checks (#1967), so a red Lint holds a merge.
+      # each `run:` block. It blocks (#1967), and `Lint` is a required check of
+      # ruleset 23497679, so a finding holds a merge. It runs last so a finding
+      # skips none of the advisory steps, and on `!cancelled()` so a failed
+      # Python setup does not skip it.
       #
-      # The image's shellcheck is not pinned: a runner image that adds a check
-      # can flag unchanged code and turn Lint red on an unrelated pull request.
-      # Fix the script it flags; that is what the check is for.
+      # The image's shellcheck is not pinned, so a new runner image can flag
+      # unchanged code; fix the script it flags.
       #
-      # The release binary is pinned by version and sha256, from the release's
-      # checksums file. Dependabot does not see this pin; bump both together.
-      # The workflows use YAML anchors, which actionlint reads from 1.7.10 on.
+      # The binary is pinned by version and sha256 from the release's checksums
+      # file; Dependabot does not see it, so bump both together. The workflows'
+      # YAML anchors need actionlint 1.7.10 or later.
       #
-      # The `-ignore` hides a false positive: `concurrency.queue` is a documented
-      # GitHub key (project-status.yml uses it) that no actionlint release knows
-      # yet (rhysd/actionlint#657, fixed by rhysd/actionlint#654). Drop the
-      # pattern once a release with that fix is pinned.
+      # The `-ignore` hides a false positive on `concurrency.queue`, a documented
+      # key (project-status.yml uses it) no actionlint release knows yet
+      # (rhysd/actionlint#657, fixed by rhysd/actionlint#654). Drop it once a
+      # release with the fix is pinned.
       - name: actionlint
         id: actionlint
         if: ${{ !cancelled() }}
@@ -247,11 +223,10 @@ jobs:
 
           exit "$status"
 
-      # #2030: the report the `discussion` job posts, on the schedule and on
-      # dispatch, never on a pull request, whose run has checks of its own:
-      # each tool's outcome, then the blocks the steps above wrote to the
-      # summary. `status=warning` where an advisory step failed. Both steps
-      # are `continue-on-error`, so a report never fails the run.
+      # #2030: the report the `discussion` job posts, never on a pull request,
+      # whose run has checks of its own. `status=warning` where an advisory step
+      # failed. Both report steps are `continue-on-error`, so a report never
+      # fails the run.
       - name: Write the run report
         id: run-report
         if: ${{ !cancelled() && github.event_name != 'pull_request' }}
@@ -295,12 +270,10 @@ jobs:
           path: ${{ runner.temp }}/lint-report.md
           retention-days: 14
 
-  # #2030: posts the report `lint` uploaded to the thread `lint: weekly lint
-  # report`, every run, as a scheduled report: Lint has no push trigger, and a
-  # dispatch is a deliberate report, as in ci-timing.yml. Never on a pull
-  # request. A green job whose advisory steps failed reports `warning`. The job
-  # and its steps are `continue-on-error`; util/discussion_report.py writes a
-  # warning rather than failing.
+  # #2030: posts `lint`'s report on every run but a pull request's, in
+  # `scheduled` mode: Lint has no push trigger, and a dispatch is a deliberate
+  # report, as in ci-timing.yml. The job and its steps are `continue-on-error`,
+  # and util/discussion_report.py warns rather than failing.
   discussion:
     name: Post the lint report
     needs: [ lint ]
