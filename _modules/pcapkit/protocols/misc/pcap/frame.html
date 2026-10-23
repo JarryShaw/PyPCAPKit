@@ -543,9 +543,6 @@
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Frame'</span><span class="p">]</span>
 
-<span class="c1"># check Python version</span>
-<span class="n">py37</span> <span class="o">=</span> <span class="p">((</span><span class="n">version_info</span> <span class="o">:=</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">)</span><span class="o">.</span><span class="n">major</span> <span class="o">&gt;=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">version_info</span><span class="o">.</span><span class="n">minor</span> <span class="o">&gt;=</span> <span class="mi">7</span><span class="p">)</span>
-
 
 <div class="viewcode-block" id="Frame">
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcap.html#pcapkit.protocols.misc.pcap.frame.Frame">[docs]</a>
@@ -1109,7 +1106,7 @@
 <span class="sd">        """</span>
         <span class="k">with</span> <span class="n">localcontext</span><span class="p">(</span><span class="n">prec</span><span class="o">=</span><span class="mi">64</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">timestamp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">py37</span> <span class="ow">and</span> <span class="n">nanosecond</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">nanosecond</span><span class="p">:</span>
                     <span class="n">timestamp</span> <span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time_ns</span><span class="p">())</span> <span class="o">/</span> <span class="mi">1_000_000_000</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">timestamp</span> <span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>

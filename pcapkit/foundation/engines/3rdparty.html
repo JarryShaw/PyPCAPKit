@@ -1495,7 +1495,7 @@ Measured on 3.10.20 and 3.14.7: <code class="docutils literal notranslate"><span
 1.11.0b29 installs and reads <code class="file docutils literal notranslate"><span class="pre">examples/captures/in.pcap</span></code> identically
 on both, so this engine covers the whole range the project supports. The
 floor in the <code class="docutils literal notranslate"><span class="pre">PCAP_CT</span></code> extra’s markers exists only because
-<code class="file docutils literal notranslate"><span class="pre">pyproject.toml</span></code> advertises <code class="docutils literal notranslate"><span class="pre">requires-python</span> <span class="pre">&gt;=</span> <span class="pre">3.6</span></code>, and on
+<code class="file docutils literal notranslate"><span class="pre">pyproject.toml</span></code> advertises <code class="docutils literal notranslate"><span class="pre">requires-python</span> <span class="pre">&gt;=</span> <span class="pre">3.8</span></code>, and on
 an interpreter below 3.10 the distributions simply will not be installed –
 which the import test then reports correctly on its own.</p>
 <dl class="field-list simple">

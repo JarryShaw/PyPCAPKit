@@ -520,8 +520,6 @@
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ipaddress</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">textwrap</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.arp.hardware</span><span class="w"> </span><span class="kn">import</span> <span class="n">Hardware</span> <span class="k">as</span> <span class="n">Enum_Hardware</span>
@@ -548,9 +546,6 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'ARP'</span><span class="p">,</span> <span class="s1">'InARP'</span><span class="p">]</span>
-
-<span class="c1"># check Python version</span>
-<span class="n">py38</span> <span class="o">=</span> <span class="p">((</span><span class="n">version_info</span> <span class="o">:=</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">)</span><span class="o">.</span><span class="n">major</span> <span class="o">&gt;=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">version_info</span><span class="o">.</span><span class="n">minor</span> <span class="o">&gt;=</span> <span class="mi">8</span><span class="p">)</span>
 
 <span class="c1"># Ethernet address pattern, of any number of octets (``hlen`` is not fixed at 6)</span>
 <span class="n">PAT_MAC_ADDR</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rb</span><span class="s1">'(?i)(?:[0-9a-f]</span><span class="si">{2}</span><span class="s1">(?:[:-][0-9a-f]</span><span class="si">{2}</span><span class="s1">)*)?'</span><span class="p">)</span>
@@ -878,10 +873,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="n">htype</span> <span class="o">==</span> <span class="n">Enum_Hardware</span><span class="o">.</span><span class="n">Ethernet</span><span class="p">:</span>  <span class="c1"># Ethernet</span>
-            <span class="k">if</span> <span class="n">py38</span><span class="p">:</span>
-                <span class="n">_addr</span> <span class="o">=</span> <span class="n">addr</span><span class="o">.</span><span class="n">hex</span><span class="p">(</span><span class="s1">':'</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">_addr</span> <span class="o">=</span> <span class="s1">':'</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">textwrap</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="n">addr</span><span class="o">.</span><span class="n">hex</span><span class="p">(),</span> <span class="mi">2</span><span class="p">))</span>
+            <span class="n">_addr</span> <span class="o">=</span> <span class="n">addr</span><span class="o">.</span><span class="n">hex</span><span class="p">(</span><span class="s1">':'</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">_addr</span> <span class="o">=</span> <span class="n">addr</span><span class="o">.</span><span class="n">hex</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">_addr</span></div>

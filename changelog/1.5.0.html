@@ -3248,6 +3248,10 @@ be suppressed will raise. Suppress them deliberately with
 means no record at any level and no longer sets <code class="docutils literal notranslate"><span class="pre">sys.tracebacklimit</span></code>, and the
 <code class="docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.DEVMODE</span></code> re-export is gone; its home is
 <a class="reference internal" href="../pcapkit/utilities/logging.html#module-pcapkit.utilities.logging" title="pcapkit.utilities.logging"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.logging</span></code></a>.</p></li>
+<li><p><a class="reference internal" href="../pcapkit/utilities/index.html#module-pcapkit.utilities.compat" title="pcapkit.utilities.compat"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.compat</span></code></a> exports <a class="reference external" href="https://docs.python.org/3/library/pathlib.html#module-pathlib" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pathlib</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ModuleNotFoundError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ModuleNotFoundError</span></code></a>,
+<a class="reference external" href="https://docs.python.org/3/library/collections.abc.html#collections.abc.Collection" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">collections.abc.Collection</span></code></a> and <a class="reference external" href="https://docs.python.org/3/library/functools.html#functools.cached_property" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">functools.cached_property()</span></code></a> as the
+standard library has them: their fallbacks for interpreters below 3.8 are removed
+with that floor (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2051">#2051</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2053">#2053</a>).</p></li>
 </ul>
 </section>
 <section id="id15">
@@ -3462,6 +3466,14 @@ ships them (<a class="extlink-issue reference external" href="https://github.com
 <section id="id18">
 <h3>Changed<a class="headerlink" href="#id18" title="Link to this heading">¶</a></h3>
 <ul class="simple">
+<li><p><strong>a breaking change to</strong> <code class="docutils literal notranslate"><span class="pre">requires-python</span></code>: it is <code class="docutils literal notranslate"><span class="pre">&gt;=3.8</span></code>, so pip refuses an
+older interpreter at install, as “requires a different Python”. The sources use 3.8
+syntax, and the <code class="docutils literal notranslate"><span class="pre">bpc-*</span></code> backport tools that converted it for 3.6 and 3.7 are no
+longer maintained, so the conversion goes: the <code class="docutils literal notranslate"><span class="pre">bpc-*</span></code> requirements,
+<code class="docutils literal notranslate"><span class="pre">refactor()</span></code> and the <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> build commands that ran it. The 3.7 KTLO (<em>keep
+the lights on</em>) legs go with it, and <code class="docutils literal notranslate"><span class="pre">coverage-comment.yml</span></code> lists no install
+failure as by design any more, which closes <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2040">#2040</a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2051">#2051</a>,
+<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2053">#2053</a>).</p></li>
 <li><p>renames with no compatibility alias left behind: <code class="docutils literal notranslate"><span class="pre">examples/sample</span></code> and
 <code class="docutils literal notranslate"><span class="pre">examples/samples</span></code> – one letter apart, holding different things – are now
 <code class="docutils literal notranslate"><span class="pre">examples/captures</span></code> and <code class="docutils literal notranslate"><span class="pre">examples/generators</span></code>.</p></li>

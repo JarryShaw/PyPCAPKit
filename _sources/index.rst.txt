@@ -11,9 +11,8 @@ analysis.
 
 .. important::
 
-   The whole project declares **Python 3.6** or later. CI supports 3.11 to 3.15, and
-   still tests the end-of-life 3.7 to 3.10 without letting a failure block anything;
-   3.7 cannot import the package.
+   The whole project requires **Python 3.8** or later. CI supports 3.11 to 3.15, and
+   still tests the end-of-life 3.8 to 3.10 without letting a failure block anything.
 
 .. .. contents::
 ..    :depth: 2
@@ -245,32 +244,16 @@ Installation
 
 .. note::
 
-   The sources themselves use 3.8 syntax; the ``bpc-walrus``/``bpc-poseur``
-   backport tools in :file:`setup.py` convert it at install time, which is what
-   makes the **3.6** lower bound possible. Measured: 3.9 and 3.8 import and
-   extract straight from source with no conversion needed, and 3.7 needs the
-   conversion.
-
-.. warning::
-
-   **The conversion is blocked by an upstream bug**, so below 3.8 the declaration
-   is intent rather than something that works. ``bpc-poseur`` 0.4.3.post1 crashes
-   on positional-only parameters declared on a *method* rather than a plain
-   function, and exits 0 so the build does not notice; such methods -- including
-   those on :class:`~pcapkit.corekit.io.SeekableReader` and others across
-   the protocols, foundation, dumpkit and corekit modules -- then survive into the
-   installed package and ``import pcapkit`` fails with :exc:`SyntaxError`.
-
-   It is a one-line fix upstream -- ``poseur.py:744`` passes ``cls_ctx=name.name``
-   where ``name`` is already a parso ``Name`` and wants ``.value`` -- and with it
-   applied, ``walrus`` then ``poseur`` produce a file Python 3.7 parses cleanly.
+   The sources use 3.8 syntax, so ``requires-python`` is ``>=3.8`` and pip
+   refuses an older interpreter. Before 1.5.0 the ``bpc-*`` backport tools
+   converted it at install time; they are no longer maintained, and the
+   conversion is gone (:issue:`2051`).
 
 .. note::
 
-   3.7 to 3.10 are end-of-life and best-effort: CI builds and tests them, but a
-   failure there blocks nothing, and on 3.7 the import fails as described above.
-   Individual *engines* also stop earlier than the library does; see
-   `Engine prerequisites`_.
+   3.8 to 3.10 are end-of-life and best-effort: CI builds and tests them, but a
+   failure there blocks nothing. Individual *engines* also stop earlier than the
+   library does; see `Engine prerequisites`_.
 
 Run the following to install the current version from PyPI:
 

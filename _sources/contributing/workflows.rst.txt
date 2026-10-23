@@ -689,24 +689,27 @@ grepping every workflow file for its name:
    * - Required context
      - Emitted by
      - Where
+   * - ``Lint``
+     - job ``lint``, required since `#1967 <https://github.com/JarryShaw/PyPCAPKit/issues/1967>`__
+     - ``lint.yml``
    * - ``Required checks passed``
      - job ``required-checks``
      - ``unit-tests.yml``
    * - ``Compat Python 3.11``
      - job ``compatibility``, matrix leg ``3.11``
-     - ``python-compatibility.yml``, ``.github/python-versions.toml:20``
+     - ``python-compatibility.yml``, ``.github/python-versions.toml:19``
    * - ``Compat Python 3.12``
      - job ``compatibility``, matrix leg ``3.12``
-     - ``python-compatibility.yml``, ``.github/python-versions.toml:21``
+     - ``python-compatibility.yml``, ``.github/python-versions.toml:20``
    * - ``Compat Python 3.13``
      - job ``compatibility``, matrix leg ``3.13``
-     - ``python-compatibility.yml``, ``.github/python-versions.toml:22``
+     - ``python-compatibility.yml``, ``.github/python-versions.toml:21``
    * - ``Compat Python 3.14``
      - job ``compatibility``, matrix leg ``3.14``
-     - ``python-compatibility.yml``, ``.github/python-versions.toml:23``
+     - ``python-compatibility.yml``, ``.github/python-versions.toml:22``
    * - ``Compat Python 3.15``
      - job ``compatibility``, matrix leg ``3.15``
-     - ``python-compatibility.yml``, ``.github/python-versions.toml:24``
+     - ``python-compatibility.yml``, ``.github/python-versions.toml:23``
 
 That is the list after `#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__,
 which added ``Compat Python 3.15`` and removed ``Compat Python 3.10``. Moving a version
@@ -716,8 +719,8 @@ between the tiers below means editing the ruleset in the same change.
 ``required-checks`` job in ``unit-tests.yml``. ``Compat Python`` is defined by
 one, the ``name:`` of the ``compatibility`` job in ``python-compatibility.yml``, whose
 ``matrix`` comes from :file:`.github/python-versions.toml`: the required legs
-are its supported tier (``python-versions.toml:20-24``), and its KTLO legs
-(``python-versions.toml:16-19``) have names ending in ``(KTLO)``, so no required
+are its supported tier (``python-versions.toml:19-23``), and its KTLO legs
+(``python-versions.toml:16-18``) have names ending in ``(KTLO)``, so no required
 context matches one. The comment above ``required-checks`` mentions the string
 without defining it.
 
@@ -746,7 +749,7 @@ Python versions are tiered -- supported and KTLO
 (`#1660 <https://github.com/JarryShaw/PyPCAPKit/issues/1660>`__, below) -- in
 :file:`.github/python-versions.toml` (see `Python Versions`_).
 The **supported** tier, 3.11-3.15, blocks: a failed leg fails ``Required checks passed`` or its own
-required ``Compat`` context. The **KTLO** (*keep the lights on*) tier -- end-of-life 3.7-3.10, still built and
+required ``Compat`` context. The **KTLO** (*keep the lights on*) tier -- end-of-life 3.8-3.10, still built and
 tested -- never blocks, is never a required context, and never shows a commit or a
 pull request red (`#1672 <https://github.com/JarryShaw/PyPCAPKit/issues/1672>`__). In ``unit-tests.yml`` the KTLO legs are jobs of their own
 since `#1738 <https://github.com/JarryShaw/PyPCAPKit/issues/1738>`__: ``test-ktlo``,
@@ -774,7 +777,7 @@ with supported legs. Every job holding KTLO legs works the same way:
   report the same way.
 * Never job-level ``continue-on-error`` alone: it passes the *run*, but the leg's
   check run still concludes ``failure``, which showed every commit red while
-  ``Compat Python 3.7 (KTLO)`` carried it. ``unit-tests.yml``'s KTLO jobs
+  the ``Compat Python 3.7 (KTLO)`` leg carried it. ``unit-tests.yml``'s KTLO jobs
   carry it on top of the step-level guards, as a backstop for the failures no step
   contains, as ``experimental.yml``'s job does; it "prevents a workflow run from
   failing when a job fails" (`Workflow syntax
@@ -814,16 +817,10 @@ the kills into ``MemoryError``\ s. Each run but the last writes a JUnit file of 
 own beside ``junit.xml``, which ``Upload test timings`` takes too, and the step
 fails if any run did.
 
-3.7 can neither install the ``test`` extra nor import the package, so each 3.7 leg
-fails one step, with a warning saying why -- ``test`` and ``integration`` at the
-install step, the ``Compat`` leg at ``Verify package`` -- and concludes
-``success``. They run on ``ubuntu-22.04``, which retires on 2027-04-17 after
-brownouts from 2027-03-23 (actions/runner-images#14254). A brownout fails a
-``test-ktlo`` or ``integration-ktlo`` leg before any step runs, where no step-level
-``continue-on-error`` reaches; since `#1738 <https://github.com/JarryShaw/PyPCAPKit/issues/1738>`__ that fails nothing gating, but the leg's
-check run reads red, so they must still go before then (`#1660 <https://github.com/JarryShaw/PyPCAPKit/issues/1660>`__). 3.6 is
-in no matrix: setup-python builds it only for retired Ubuntu images. Nor are
-3.7-3.9 in ``engine-tests``, which installs every interpreter on
+Nothing below ``requires-python``'s 3.8 is in any matrix (`#2051
+<https://github.com/JarryShaw/PyPCAPKit/issues/2051>`__): pip refuses such an
+interpreter at install, so a leg there could only prove the refusal. Nor are
+3.8 and 3.9 in ``engine-tests``, which installs every interpreter on
 ``ubuntu-latest``, where setup-python has no Ubuntu 26.04 build of any of them. Nor
 are they in ``pypcap-parity``, which also runs on ``ubuntu-latest``; none of them
 was measured on that job.
@@ -1221,8 +1218,9 @@ does; each has tests under :file:`tests/project/` that run it.
        ``gate``, at ``error``.
    * - :file:`util/discussion_report.py`
      - ``Post the report to Discussions`` in the ``discussion`` job of
-       ``ci-timing.yml``, ``cron-vendor.yml``, ``cron-conda.yml`` and
-       ``cron-python-versions.yml`` (see `CI Reports`_).
+       ``ci-timing.yml``, ``cron-vendor.yml``, ``cron-conda.yml``,
+       ``cron-python-versions.yml``, ``lint.yml`` and ``deploy-pages.yml`` (see
+       `CI Reports`_).
    * - :file:`util/apt_packages.py`
      - The apt steps of ``unit-tests.yml``'s ``engine-tests`` and ``pypcap-parity``
        (and so its KTLO twin): the plan, seed, install and collect steps, as
@@ -1233,6 +1231,9 @@ does; each has tests under :file:`tests/project/` that run it.
      - No step: it is imported by the scripts that share its annotations, step
        outputs, job summary lines and logged runs (`#2047
        <https://github.com/JarryShaw/PyPCAPKit/issues/2047>`__).
+   * - :file:`util/codeql_report.py`
+     - ``Write the report`` in ``codeql-analysis.yml``'s ``discussion`` (see `CI
+       Reports`_).
 
 The summaries run on the image's ``/usr/bin/python3`` rather than the leg's
 interpreter, which may have failed to set up or be too broken to run anything, so
@@ -1244,7 +1245,7 @@ file-size cap every test command of ``unit-tests.yml`` takes.
 :file:`util/regenerate_samples.py` is standard library only but runs on the leg's
 interpreter, since the generator it runs imports ``pcapkit``, and so does
 :file:`util/pip_install.py`, since it installs into that interpreter; it runs on
-every version the matrices hold, 3.7 and the experimental tier included. :file:`util/apt_packages.py` runs on
+every version the matrices hold, the experimental tier included. :file:`util/apt_packages.py` runs on
 ``/usr/bin/python3``, as the apt shell needed no interpreter of the leg's, and runs
 under ``sudo`` the commands that shell ran. Its ``plan`` and ``install`` both read
 the job's ``APT_PACKAGES``, so the cache key always describes the set installed.
@@ -1306,6 +1307,20 @@ hand-edit note, for a failed audit of a changed tree, or for an unset
 because ``pr`` waits for the owner's approval of ``github-release``, and the pull
 request it opens is its own record.
 
+``lint.yml`` has no push trigger, so it posts as ``scheduled`` to ``lint: weekly
+lint report``, on ``schedule`` and ``workflow_dispatch``, never on a pull request,
+whose run has checks of its own. Its report lists each tool step's outcome, then
+the blocks those steps wrote to the job summary, which each also appends to a file
+the report reads. It reports ``warning`` where an advisory step failed, as each
+does while its findings stand, and ``failure`` where actionlint failed the job.
+``deploy-pages.yml`` posts to ``deploy-pages: documentation build report`` by
+``cron-vendor.yml``'s rules: ``push`` on its ``workflow_run``, ``scheduled`` on its
+``schedule``, and never on a pull request or a verdict for another commit. Its
+report is the results of ``head``, ``deploy-pages`` and ``publish-pages``, so it
+uploads no artifact, and its ``discussion`` job checks out the script alone. The
+``--status`` is the publish's result after a green build, the build's where the
+build did not pass, and the gate's where the gate skipped the build.
+
 The category is the workflow-level ``REPORT_CATEGORY``. The API cannot
 create one, so it is made by hand, in Settings, Discussions.
 
@@ -1352,6 +1367,22 @@ run it links with ``GITHUB_WORKFLOW``, so the post step sets ``Unit Tests`` for
 that one command. A push relay's concurrency group is its own run's, since a
 group cancels a pending run when a newer one joins it.
 
+``codeql-analysis.yml`` posts to ``codeql-analysis: CodeQL report``, as
+``scheduled`` on its ``schedule`` and ``push`` on a push to ``main``, and never on
+a pull request, whose findings belong to the pull request. Its ``discussion`` job
+runs after ``analyze`` and alone holds ``security-events: read``, beside
+``discussions: write`` and ``contents: read``. ``Write the report`` runs
+:file:`util/codeql_report.py`, which lists the default branch's open CodeQL alerts
+by severity, read through GitHub's `List code scanning alerts for a repository
+<https://docs.github.com/en/rest/code-scanning/code-scanning#list-code-scanning-alerts-for-a-repository>`__
+endpoint, and hands on the step output ``status`` that ``Post the report to
+Discussions`` passes as ``--status``. A ``success`` of ``analyze`` reports
+``warning`` while any alert is open and ``success`` at none, so every push run
+with an open alert posts and the first run back at none posts once; any other
+result of ``analyze`` stands. Where the alerts cannot be read, the step writes a
+warning, the report marks them unavailable, and ``analyze``'s result stands
+unchanged.
+
 .. _Action Pins:
 
 Action Pins (`#1968 <https://github.com/JarryShaw/PyPCAPKit/issues/1968>`__)
@@ -1389,8 +1420,9 @@ actionlint runs the image's shellcheck over each ``run:`` block. Unlike Lint's
 other steps, this one blocks: a finding fails the job, as the owner ruled on #1967
 once #2023, #2037 and #2038 had fixed every finding it reported. It runs last and
 on ``!cancelled()``, so a finding skips none of the advisory steps and a failed
-Python setup does not skip it. Lint is not a required check of ruleset 23497679, so
-a red Lint does not hold a merge. The image's shellcheck is not pinned, so a runner
+Python setup does not skip it. ``Lint`` is a required check of ruleset 23497679
+(`#1967 <https://github.com/JarryShaw/PyPCAPKit/issues/1967>`__), so a red Lint
+holds a merge. The image's shellcheck is not pinned, so a runner
 image that adds a check can turn Lint red on unchanged code; the fix is to the
 script it flags. The step's run summary counts the findings by actionlint rule and
 by shellcheck code.

@@ -501,9 +501,8 @@
 analysis.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
-<p>The whole project declares <strong>Python 3.6</strong> or later. CI supports 3.11 to 3.15, and
-still tests the end-of-life 3.7 to 3.10 without letting a failure block anything;
-3.7 cannot import the package.</p>
+<p>The whole project requires <strong>Python 3.8</strong> or later. CI supports 3.11 to 3.15, and
+still tests the end-of-life 3.8 to 3.10 without letting a failure block anything.</p>
 </div>
 <div class="toctree-wrapper compound">
 </div>
@@ -819,31 +818,16 @@ compared with a measured row.</p>
 <h2>Installation<a class="headerlink" href="#installation" title="Link to this heading">¶</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The sources themselves use 3.8 syntax; the <code class="docutils literal notranslate"><span class="pre">bpc-walrus</span></code>/<code class="docutils literal notranslate"><span class="pre">bpc-poseur</span></code>
-backport tools in <code class="file docutils literal notranslate"><span class="pre">setup.py</span></code> convert it at install time, which is what
-makes the <strong>3.6</strong> lower bound possible. Measured: 3.9 and 3.8 import and
-extract straight from source with no conversion needed, and 3.7 needs the
-conversion.</p>
-</div>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p><strong>The conversion is blocked by an upstream bug</strong>, so below 3.8 the declaration
-is intent rather than something that works. <code class="docutils literal notranslate"><span class="pre">bpc-poseur</span></code> 0.4.3.post1 crashes
-on positional-only parameters declared on a <em>method</em> rather than a plain
-function, and exits 0 so the build does not notice; such methods – including
-those on <a class="reference internal" href="pcapkit/corekit/io.html#pcapkit.corekit.io.SeekableReader" title="pcapkit.corekit.io.SeekableReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">SeekableReader</span></code></a> and others across
-the protocols, foundation, dumpkit and corekit modules – then survive into the
-installed package and <code class="docutils literal notranslate"><span class="pre">import</span> <span class="pre">pcapkit</span></code> fails with <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#SyntaxError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">SyntaxError</span></code></a>.</p>
-<p>It is a one-line fix upstream – <code class="docutils literal notranslate"><span class="pre">poseur.py:744</span></code> passes <code class="docutils literal notranslate"><span class="pre">cls_ctx=name.name</span></code>
-where <code class="docutils literal notranslate"><span class="pre">name</span></code> is already a parso <code class="docutils literal notranslate"><span class="pre">Name</span></code> and wants <code class="docutils literal notranslate"><span class="pre">.value</span></code> – and with it
-applied, <code class="docutils literal notranslate"><span class="pre">walrus</span></code> then <code class="docutils literal notranslate"><span class="pre">poseur</span></code> produce a file Python 3.7 parses cleanly.</p>
+<p>The sources use 3.8 syntax, so <code class="docutils literal notranslate"><span class="pre">requires-python</span></code> is <code class="docutils literal notranslate"><span class="pre">&gt;=3.8</span></code> and pip
+refuses an older interpreter. Before 1.5.0 the <code class="docutils literal notranslate"><span class="pre">bpc-*</span></code> backport tools
+converted it at install time; they are no longer maintained, and the
+conversion is gone (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2051">#2051</a>).</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>3.7 to 3.10 are end-of-life and best-effort: CI builds and tests them, but a
-failure there blocks nothing, and on 3.7 the import fails as described above.
-Individual <em>engines</em> also stop earlier than the library does; see
-<a class="reference internal" href="#engine-prerequisites">Engine prerequisites</a>.</p>
+<p>3.8 to 3.10 are end-of-life and best-effort: CI builds and tests them, but a
+failure there blocks nothing. Individual <em>engines</em> also stop earlier than the
+library does; see <a class="reference internal" href="#engine-prerequisites">Engine prerequisites</a>.</p>
 </div>
 <p>Run the following to install the current version from PyPI:</p>
 <div class="highlight-shell notranslate"><div class="highlight"><pre><span></span>pip<span class="w"> </span>install<span class="w"> </span>pypcapkit

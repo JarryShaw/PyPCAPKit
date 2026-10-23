@@ -524,8 +524,6 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">functools</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ipaddress</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">struct</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">textwrap</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.ethertype</span><span class="w"> </span><span class="kn">import</span> <span class="n">EtherType</span> <span class="k">as</span> <span class="n">Enum_EtherType</span>
@@ -558,11 +556,6 @@
     <span class="s1">'packet2timestamp'</span><span class="p">,</span> <span class="s1">'ipv4_header'</span><span class="p">,</span> <span class="s1">'packet2chain'</span><span class="p">,</span> <span class="s1">'packet2dict'</span><span class="p">,</span>
     <span class="s1">'ipv4_reassembly'</span><span class="p">,</span> <span class="s1">'ipv6_reassembly'</span><span class="p">,</span> <span class="s1">'tcp_reassembly'</span><span class="p">,</span> <span class="s1">'tcp_traceflow'</span><span class="p">,</span>
 <span class="p">]</span>
-
-<span class="c1">#: Whether :meth:`bytes.hex` supports the ``sep`` argument (Python 3.8+), as used</span>
-<span class="c1">#: below by :func:`_parse_mac_address` -- mirrors the same guard in</span>
-<span class="c1">#: :meth:`pcapkit.protocols.link.ethernet.Ethernet._read_mac_addr`.</span>
-<span class="n">py38</span> <span class="o">=</span> <span class="p">((</span><span class="n">version_info</span> <span class="o">:=</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">)</span><span class="o">.</span><span class="n">major</span> <span class="o">&gt;=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">version_info</span><span class="o">.</span><span class="n">minor</span> <span class="o">&gt;=</span> <span class="mi">8</span><span class="p">)</span>
 
 <span class="c1">#: IPv4 **DF** (don't fragment) bit, within the three-bit flags field.</span>
 <span class="n">IPV4_FLAG_DF</span> <span class="o">=</span> <span class="mb">0b010</span>
@@ -694,7 +687,7 @@
         <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'invalid PyPCAPFile MAC address: </span><span class="si">{</span><span class="n">value</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
     <span class="n">raw</span> <span class="o">=</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">raw</span><span class="p">)</span> <span class="o">==</span> <span class="mi">6</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">raw</span><span class="o">.</span><span class="n">hex</span><span class="p">(</span><span class="s1">':'</span><span class="p">)</span> <span class="k">if</span> <span class="n">py38</span> <span class="k">else</span> <span class="s1">':'</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">textwrap</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="n">raw</span><span class="o">.</span><span class="n">hex</span><span class="p">(),</span> <span class="mi">2</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">raw</span><span class="o">.</span><span class="n">hex</span><span class="p">(</span><span class="s1">':'</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">raw</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="s1">'ascii'</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">UnicodeDecodeError</span> <span class="k">as</span> <span class="n">error</span><span class="p">:</span>

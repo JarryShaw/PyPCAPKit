@@ -531,7 +531,6 @@
 <span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">struct</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
-<span class="kn">import</span><span class="w"> </span><span class="nn">textwrap</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">time</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
 
@@ -737,10 +736,6 @@
 
     <span class="n">_FlagsEnum</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_FlagsEnum'</span><span class="p">,</span> <span class="s1">'PacketDirection'</span><span class="p">,</span> <span class="s1">'PacketReception'</span><span class="p">)</span>
     <span class="n">_S</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">'_S'</span><span class="p">,</span> <span class="n">bound</span><span class="o">=</span><span class="s1">'Schema | bytes'</span><span class="p">)</span>
-
-<span class="c1"># check Python version</span>
-<span class="n">py37</span> <span class="o">=</span> <span class="p">((</span><span class="n">version_info</span> <span class="o">:=</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">)</span><span class="o">.</span><span class="n">major</span> <span class="o">&gt;=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">version_info</span><span class="o">.</span><span class="n">minor</span> <span class="o">&gt;=</span> <span class="mi">7</span><span class="p">)</span>
-<span class="n">py38</span> <span class="o">=</span> <span class="p">((</span><span class="n">version_info</span> <span class="o">:=</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span><span class="p">)</span><span class="o">.</span><span class="n">major</span> <span class="o">&gt;=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">version_info</span><span class="o">.</span><span class="n">minor</span> <span class="o">&gt;=</span> <span class="mi">8</span><span class="p">)</span>
 
 <span class="c1"># Ethernet address pattern</span>
 <span class="n">PAT_MAC_ADDR</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">rb</span><span class="s1">'(?i)(?:[0-9a-f]</span><span class="si">{2}</span><span class="s1">[:-])</span><span class="si">{5}</span><span class="s1">[0-9a-f]</span><span class="si">{2}</span><span class="s1">'</span><span class="p">)</span>
@@ -2588,7 +2583,7 @@
 <span class="sd">        """</span>
         <span class="k">with</span> <span class="n">localcontext</span><span class="p">(</span><span class="n">prec</span><span class="o">=</span><span class="mi">64</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">timestamp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">py37</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">nanosecond</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">nanosecond</span><span class="p">:</span>
                     <span class="n">timestamp</span> <span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time_ns</span><span class="p">())</span> <span class="o">/</span> <span class="mi">1_000_000_000</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">timestamp</span> <span class="o">=</span> <span class="n">decimal</span><span class="o">.</span><span class="n">Decimal</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">())</span>
@@ -2612,11 +2607,7 @@
 <span class="sd">            Colon (``:``) separated *hex* encoded MAC address.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">py38</span><span class="p">:</span>
-            <span class="n">_addr</span> <span class="o">=</span> <span class="n">addr</span><span class="o">.</span><span class="n">hex</span><span class="p">(</span><span class="s1">':'</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">_addr</span> <span class="o">=</span> <span class="s1">':'</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">textwrap</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="n">addr</span><span class="o">.</span><span class="n">hex</span><span class="p">(),</span> <span class="mi">2</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">_addr</span>
+        <span class="k">return</span> <span class="n">addr</span><span class="o">.</span><span class="n">hex</span><span class="p">(</span><span class="s1">':'</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_read_eui_addr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">addr</span><span class="p">:</span> <span class="s1">'bytes'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Read EUI address.</span>
@@ -2628,11 +2619,7 @@
 <span class="sd">            Colon (``:``) separated *hex* encoded EUI address.</span>
 
 <span class="sd">        """</span>
-        <span class="k">if</span> <span class="n">py38</span><span class="p">:</span>
-            <span class="n">_addr</span> <span class="o">=</span> <span class="n">addr</span><span class="o">.</span><span class="n">hex</span><span class="p">(</span><span class="s1">':'</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">_addr</span> <span class="o">=</span> <span class="s1">':'</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">textwrap</span><span class="o">.</span><span class="n">wrap</span><span class="p">(</span><span class="n">addr</span><span class="o">.</span><span class="n">hex</span><span class="p">(),</span> <span class="mi">2</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">_addr</span>
+        <span class="k">return</span> <span class="n">addr</span><span class="o">.</span><span class="n">hex</span><span class="p">(</span><span class="s1">':'</span><span class="p">)</span>
 
 <div class="viewcode-block" id="PCAPNG._make_mac_addr">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_mac_addr">[docs]</a>

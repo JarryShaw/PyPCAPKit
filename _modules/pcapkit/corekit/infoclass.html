@@ -1542,8 +1542,7 @@
     <span class="fm">__iter__</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="o">.</span><span class="fm">__iter__</span>  <span class="c1"># type: ignore[assignment]</span>
     <span class="fm">__len__</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="o">.</span><span class="fm">__len__</span>
     <span class="fm">__contains__</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="o">.</span><span class="fm">__contains__</span>
-    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>  <span class="c1"># pragma: no branch -- dict reversal is Python 3.8 and up</span>
-        <span class="fm">__reversed__</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="o">.</span><span class="fm">__reversed__</span>
+    <span class="fm">__reversed__</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="o">.</span><span class="fm">__reversed__</span>
     <span class="fm">__hash__</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore[assignment]</span>
     <span class="fm">__repr__</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="o">.</span><span class="fm">__repr__</span>
     <span class="fm">__str__</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="o">.</span><span class="fm">__str__</span>
@@ -1641,8 +1640,7 @@
     <span class="fm">__iter__</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="fm">__iter__</span>  <span class="c1"># type: ignore[assignment]</span>
     <span class="fm">__len__</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="fm">__len__</span>
     <span class="fm">__contains__</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="fm">__contains__</span>
-    <span class="k">if</span> <span class="n">sys</span><span class="o">.</span><span class="n">version_info</span> <span class="o">&gt;=</span> <span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">8</span><span class="p">):</span>  <span class="c1"># pragma: no branch -- dict reversal is Python 3.8 and up</span>
-        <span class="fm">__reversed__</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="fm">__reversed__</span>
+    <span class="fm">__reversed__</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="fm">__reversed__</span>
     <span class="fm">__eq__</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="fm">__eq__</span>
     <span class="fm">__ne__</span> <span class="o">=</span> <span class="n">_ne</span>
     <span class="fm">__hash__</span> <span class="o">=</span> <span class="kc">None</span>
