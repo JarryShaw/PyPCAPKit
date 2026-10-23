@@ -14,8 +14,9 @@ A run concludes ``skipped`` only when nothing in it ran, and ``verdict`` has to
 run to decide, so Vendor Update cannot conclude anything but ``success`` there
 without going red or cancelled. Create Release's ``vendor_update`` job reads the
 triggering run's jobs instead, and ``version_check`` skips on ``updated ==
-'false'``. Its script, :file:`util/release_vendor_update.py` since #1967, runs
-here against a stand-in ``gh`` that applies the real ``--jq`` filter with ``jq``.
+'false'``. Its step's inline shell runs here under ``bash -e``, as a step with no
+``shell:`` runs, against a stand-in ``gh`` that applies the real ``--jq`` filter
+with ``jq``.
 
 """
 
@@ -32,7 +33,7 @@ from typing import TYPE_CHECKING
 from tests._support import scale_timeout
 from tests.project.test_release_gates import (NULL, WORKFLOW, declared_if, declared_needs,
                                               evaluate_condition, job_blocks, release_context)
-from tests.project.test_release_tags_the_run_sha_1634 import script_command, workflow_steps
+from tests.project.test_release_tags_the_run_sha_1634 import workflow_steps
 
 if TYPE_CHECKING:
     from typing import Any, Optional
@@ -86,10 +87,11 @@ class TestTheJob(unittest.TestCase):
                 context = release_context(event_name=event_name, workflow_run_conclusion=conclusion)
                 self.assertEqual(evaluate_condition(condition, context), expected)
 
-    def test_it_reads_the_triggering_runs_jobs_with_read_scopes_only(self) -> None:
-        """``actions: read`` for the listing; ``contents: read`` for the checkout of its script (#1967)."""
+    def test_it_reads_the_triggering_runs_jobs_with_actions_read_only(self) -> None:
+        """``actions: read`` for the listing, and nothing else: the job checks nothing out (#1967)."""
         block = self.jobs['vendor_update']
-        self.assertIn('    permissions:\n      actions: read\n      contents: read\n    outputs:', block)
+        self.assertIn('    permissions:\n      actions: read\n    outputs:', block)
+        self.assertEqual([step.get('name') for step in self.steps['vendor_update']], [STEP])
         self.assertIn('updated: ${{ steps.updated.outputs.updated }}', block)
         step = named(self.steps['vendor_update'], STEP)
         self.assertEqual(step.get('id'), 'updated')
@@ -114,18 +116,11 @@ class TestTheJob(unittest.TestCase):
 
 @unittest.skipIf(shutil.which('jq') is None or shutil.which('bash') is None, 'needs jq and bash on PATH')
 class TestTheScript(unittest.TestCase):
-    """``vendor_update``'s step against the two real shapes and the ones it cannot read.
-
-    It runs ``python3 util/release_vendor_update.py`` (#1967), here on this
-    interpreter.
-
-    """
+    """``vendor_update``'s step against the two real shapes and the ones it cannot read."""
 
     @classmethod
     def setUpClass(cls) -> None:
-        run = named(workflow_steps(WORKFLOW.read_text(encoding='utf-8'))['vendor_update'], STEP)['run']
-        cls.command = script_command(run)
-        assert cls.command is not None, run
+        cls.script = named(workflow_steps(WORKFLOW.read_text(encoding='utf-8'))['vendor_update'], STEP)['run']
 
     def setUp(self) -> None:
         self.tmp = pathlib.Path(tempfile.mkdtemp(prefix='pcapkit-1748-'))
@@ -133,6 +128,7 @@ class TestTheScript(unittest.TestCase):
         (self.tmp / 'bin').mkdir()
         (self.tmp / 'bin' / 'gh').write_text(FAKE_GH, encoding='utf-8')
         (self.tmp / 'bin' / 'gh').chmod(0o755)
+        (self.tmp / 'step.sh').write_text(self.script, encoding='utf-8')
 
     def run_step(self, reply: 'Optional[dict[str, Any]]',
                  fail: 'bool' = False) -> 'tuple[subprocess.CompletedProcess[str], str]':
@@ -146,8 +142,8 @@ class TestTheScript(unittest.TestCase):
             'REPLY': str(self.tmp / 'reply.json'), 'ARGS': str(self.tmp / 'args'),
             'GH_FAIL': '1' if fail else '',
         }
-        result = subprocess.run(self.command, cwd=self.tmp, env=env, capture_output=True,
-                                text=True, check=False, timeout=scale_timeout(30))
+        result = subprocess.run(['bash', '-e', str(self.tmp / 'step.sh')], cwd=self.tmp, env=env,
+                                capture_output=True, text=True, check=False, timeout=scale_timeout(30))
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         return result, output.read_text(encoding='utf-8')
 

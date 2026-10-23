@@ -46,7 +46,7 @@ HELPER = ROOT / 'util' / '_actions.py'
 SCRIPTS = ('apt_packages', 'check_suite_report', 'ci_timing', 'classify_changes', 'codeql_report',
            'coverage_report', 'discussion_report', 'leg_summary', 'pip_install', 'project_status',
            'python_versions', 'regenerate_samples', 'release_conda', 'release_published', 'release_status',
-           'release_tags', 'release_tiers', 'release_upload', 'release_vendor_update', 'superseded',
+           'release_tags', 'release_tiers', 'release_upload', 'superseded',
            'update_python_versions', 'vendor_code_changed', 'vendor_test_gate', 'verdict_covers_checkout')
 #: The top-level modules the helper may import, each in Python 3.7's standard
 #: library: the running interpreter's :data:`sys.stdlib_module_names` would
@@ -72,7 +72,6 @@ RUNS = {
     'release_tags': (['--help'], {}),
     'release_tiers': (['--help'], {}),
     'release_upload': (['--help'], {}),
-    'release_vendor_update': (['--help'], {}),
     'superseded': (['--help'], {}),
     'update_python_versions': (['--help'], {}),
     'vendor_code_changed': (['--help'], {}),

@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
 """#1967: :file:`util/apt_packages.py`, the apt steps of ``engine-tests`` and ``pypcap-parity``.
 
-* :class:`TestPlan`, :class:`TestSeed`, :class:`TestInstall` and :class:`TestCollect`
-  run each subcommand in this process with :func:`subprocess.run` stubbed, so every
-  command it would run, and every failure of one, is checked without ``sudo`` or apt.
+* :class:`TestPlan`, :class:`TestInstall` and :class:`TestCollect` run each
+  subcommand in this process with :func:`subprocess.run` stubbed, so every command
+  it would run, and every failure of one, is checked without ``sudo`` or apt.
 * :class:`TestTheFormerShellAgrees` runs the shell the steps held before the script,
   and then the steps' own ``run:``, against the same stand-in ``sudo``, ``timeout``,
   ``apt-get``, ``dpkg``, ``dpkg-deb``, ``dpkg-query`` and ``debconf-set-selections``,
-  and requires the same status, output, commands and files.
-* :class:`TestTheStepsRunTheScript` pins each apt step to the script with its
-  ``id``, ``if:``, ``continue-on-error`` and ``timeout-minutes``, the KTLO twin to
-  the same steps, and the AppArmor step (#2019) to its inline shell; no other step
-  in any workflow keeps apt shell of its own, and #1672's scan of what a KTLO leg
-  may write sees the script's warnings.
+  and requires the same status, output, commands and files. The seed steps, which
+  #1967 put back inline as one copy and a count, run their own ``run:`` there.
+* :class:`TestTheStepsRunTheScript` pins each apt step to the script, or the seed
+  steps to their shell, with its ``id``, ``if:``, ``continue-on-error`` and
+  ``timeout-minutes``, the KTLO twin to the same steps, and the AppArmor step
+  (#2019) to its inline shell; no other step in any workflow keeps apt shell of its
+  own, and #1672's scan of what a KTLO leg may write sees the script's warnings.
 
 The retry, the fallback mirror and the cache key are also run through the steps by
 :mod:`tests.project.test_unit_tests_queue` and :mod:`tests.project.test_workflow_apt_cache`.
@@ -213,35 +214,6 @@ class TestPlan(_InProcess):
                 self.environ[name] = 'restored' if name != 'GITHUB_OUTPUT' else str(self.output)
 
 
-class TestSeed(_InProcess):
-    """The restored files into apt's archive with ``sudo cp``, then their count."""
-
-    def test_the_files_are_copied_and_counted(self) -> None:
-        cache = self.runner_temp / 'apt-debs'
-        (cache / 'nested').mkdir(parents=True)
-        for name in ('b.deb', 'a.deb', 'nested/c.deb', 'notes.txt'):
-            (cache / name).write_bytes(b'')
-        status, output, runner = self.main(['seed', '--archives', str(self.archives)], answers())
-        self.assertEqual(status, 0)
-        self.assertEqual(runner.commands, [['sudo', 'cp', str(cache / 'a.deb'), str(cache / 'b.deb'),
-                                            f'{self.archives}/']])
-        self.assertEqual(output, 'Seeded 3 .deb files\n')
-
-    def test_the_default_archive_is_apts(self) -> None:
-        (self.runner_temp / 'apt-debs').mkdir()
-        (self.runner_temp / 'apt-debs' / 'a.deb').write_bytes(b'')
-        _, _, runner = self.main(['seed'], answers())
-        self.assertEqual(runner.commands[0][-1], '/var/cache/apt/archives/')
-
-    def test_nothing_restored_fails_on_the_pattern(self) -> None:
-        for code, expected in ((1, 1), (-15, 143)):
-            with self.subTest(code=code):
-                status, output, runner = self.main(['seed', '--archives', str(self.archives)], answers(cp=(code, b'')))
-                self.assertEqual((status, output), (expected, ''))
-                self.assertEqual(runner.commands, [['sudo', 'cp', str(self.runner_temp / 'apt-debs' / '*.deb'),
-                                                    f'{self.archives}/']])
-
-
 class TestInstall(_InProcess):
     """debconf for tshark, then up to two update-and-install attempts, the second on a fallback mirror."""
 
@@ -421,8 +393,8 @@ class TestArguments(_InProcess):
     """One subcommand, and only its own options."""
 
     def test_refused(self) -> None:
-        for args in ([], ['update'], ['plan', 'extra'], ['seed', '--mirrors', 'x'], ['install', 'tshark'],
-                     ['collect', '--name', 'x']):
+        for args in ([], ['update'], ['plan', 'extra'], ['seed'], ['plan', '--archives', 'x'],
+                     ['install', 'tshark'], ['collect', '--name', 'x']):
             with self.subTest(args=args), contextlib.redirect_stderr(io.StringIO()):
                 with self.assertRaises(SystemExit) as raised:
                     self.main(args, answers())
@@ -449,7 +421,8 @@ FORMER_PLAN = textwrap.dedent(r'''
       echo "key=${prefix}$(printf '%s\n' "$plan" | sha256sum | cut -c1-16)" >> "$GITHUB_OUTPUT"
     fi
 ''').lstrip()  # noqa: E501
-FORMER_SEED = textwrap.dedent(r'''
+#: The seed steps' ``run:``, which a ``seed`` subcommand held for a while (#1967).
+SEED = textwrap.dedent(r'''
     set -eu
     sudo cp "$RUNNER_TEMP"/apt-debs/*.deb /var/cache/apt/archives/
     echo "Seeded $(find "$RUNNER_TEMP/apt-debs" -name '*.deb' | wc -l) .deb files"
@@ -511,7 +484,7 @@ ENGINE_STEPS = (
     ("Plan this engine's system packages", 'apt-plan', "env.APT_PACKAGES != ''", None, 4,
      f'{IMAGE_PYTHON} {SCRIPT} plan'),
     ("Seed apt's archive with this engine's cached .deb files", None,
-     "steps.apt-cache.outputs.cache-matched-key != ''", None, None, f'{IMAGE_PYTHON} {SCRIPT} seed'),
+     "steps.apt-cache.outputs.cache-matched-key != ''", None, None, SEED),
     ("Install this engine's system packages", None, None, None, 10,
      f'{IMAGE_PYTHON} {SCRIPT} install --name "$ENGINE"'),
     ("Collect this engine's installed .deb files for the cache", None,
@@ -522,7 +495,7 @@ KTLO = '${{ matrix.ktlo == true }}'
 PARITY_STEPS = (
     ('Plan the system packages', 'apt-plan', "env.APT_PACKAGES != ''", KTLO, 4, f'{IMAGE_PYTHON} {SCRIPT} plan'),
     ("Seed apt's archive with the cached .deb files", 'apt-seed', "steps.apt-cache.outputs.cache-matched-key != ''",
-     KTLO, None, f'{IMAGE_PYTHON} {SCRIPT} seed'),
+     KTLO, None, SEED),
     ('Install libpcap headers, a C toolchain, and tshark', 'apt-install', None, KTLO, 10,
      f'{IMAGE_PYTHON} {SCRIPT} install'),
     ('Collect the installed .deb files for the cache', None, ENGINE_STEPS[3][2], None, None,
@@ -530,7 +503,7 @@ PARITY_STEPS = (
 )
 SITES = {'engine-tests': ENGINE_STEPS, 'pypcap-parity': PARITY_STEPS}
 #: Each step's former shell, by the subcommand that replaced it.
-FORMER = {'plan': FORMER_PLAN, 'seed': FORMER_SEED, 'collect': FORMER_COLLECT}
+FORMER = {'plan': FORMER_PLAN, 'collect': FORMER_COLLECT}
 APPARMOR = 'Let tshark read the checkout past its AppArmor profile'
 #: Text only the apt steps' former shell held.
 INLINE = ('apt-get', 'dpkg', 'debconf-set-selections', 'apt-mirrors', '/var/cache/apt', 'apt_install')
@@ -653,6 +626,8 @@ class TestTheFormerShellAgrees(unittest.TestCase):
         """``(job, step, former shell, env)`` for every apt step but the installs."""
         for job, sites in SITES.items():
             for name, _, _, _, _, run in sites:
+                if SCRIPT not in run:
+                    continue
                 command = run.split(f'{SCRIPT} ', 1)[1].split()[0]
                 if command in FORMER:
                     yield job, name, FORMER[command], {}
@@ -676,23 +651,42 @@ class TestTheFormerShellAgrees(unittest.TestCase):
         self.assertTrue(keyed)
 
     def test_seed(self) -> None:
+        """The seed steps' own shell: ``sudo cp`` of the top-level files, then the count of every ``.deb``."""
+        cache = self.runner_temp / 'apt-debs'
+
         def nothing() -> None:
             pass
 
         def restored() -> None:
-            (self.runner_temp / 'apt-debs' / 'deep').mkdir(parents=True)
+            (cache / 'deep').mkdir(parents=True)
             for name in ('a.deb', 'b.deb', 'deep/c.deb', 'readme'):
-                (self.runner_temp / 'apt-debs' / name).write_text(name, encoding='utf-8')
+                (cache / name).write_text(name, encoding='utf-8')
 
-        for job, step, former, _ in self.scenarios():
-            if former is not FORMER_SEED:
-                continue
+        seeds = [(job, name, run) for job, sites in SITES.items() for name, *_, run in sites if run == SEED]
+        self.assertEqual([job for job, _, _ in seeds], list(SITES))
+        for job, step, _ in seeds:
+            run = next(item for item in steps(WORKFLOW, job) if item.get('name') == step)['run']
+            script = run.replace('/var/cache/apt/archives', str(self.archives))
             for prepare in (restored, nothing):
                 with self.subTest(job=job, restored=prepare is restored):
-                    old, new = self.both(job, step, former, prepare)
-                    self.assertEqual(new, old)
-                    self.assertEqual(sorted(path.name for path in self.archives.iterdir()),
-                                     ['a.deb', 'b.deb'] if prepare is restored else [])
+                    self.reset()
+                    prepare()
+                    result = subprocess.run(['bash', '-e', '-c', script], cwd=ROOT, env=self.env(),  # nosec: B603
+                                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT, check=False,
+                                            timeout=120)
+                    output = result.stdout.decode('utf-8', 'replace')
+                    copied = sorted(path.name for path in self.archives.iterdir())
+                    if prepare is restored:
+                        self.assertEqual((result.returncode, output, copied),
+                                         (0, 'Seeded 3 .deb files\n', ['a.deb', 'b.deb']))
+                        self.assertEqual(self.calls.read_text(encoding='utf-8'),
+                                         f'sudo cp {cache}/a.deb {cache}/b.deb {self.archives}/\n')
+                    else:
+                        # The unmatched glob stays the pattern, so `cp` fails on it and nothing is counted.
+                        self.assertEqual((result.returncode, copied), (1, []))
+                        self.assertNotIn('Seeded', output)
+                        self.assertEqual(self.calls.read_text(encoding='utf-8'),
+                                         f'sudo cp {cache}/*.deb {self.archives}/\n')
 
     def test_collect(self) -> None:
         def archive(broken: 'bool') -> 'Callable[[], None]':
@@ -745,7 +739,7 @@ class TestTheFormerShellAgrees(unittest.TestCase):
 
 
 class TestTheStepsRunTheScript(unittest.TestCase):
-    """Each apt step is one call of the script with its guards; no step keeps apt shell."""
+    """Each apt step is one call of the script, or the seed steps' shell, with its guards; no step keeps apt shell."""
 
     def test_each_site_runs_the_script_with_its_guards(self) -> None:
         for job, sites in {**SITES, 'pypcap-parity-ktlo': PARITY_STEPS}.items():
@@ -765,10 +759,10 @@ class TestTheStepsRunTheScript(unittest.TestCase):
                 self.assertEqual(positions[3], positions[2] + 2)
 
     def test_a_ktlo_leg_reads_only_warnings_from_it(self) -> None:
-        """#1672's scan of a step's commands sees the script's, which are warnings alone."""
+        """#1672's scan of a step's commands sees the script's, which are warnings alone; the seed's, none."""
         for name, *_, run in PARITY_STEPS:
             with self.subTest(step=name):
-                self.assertEqual(commands(run), {'warning'})
+                self.assertEqual(commands(run), {'warning'} if SCRIPT in run else set())
                 self.assertLessEqual(commands(run), KTLO_COMMANDS)
 
     def test_the_ktlo_twin_runs_the_same_steps(self) -> None:
@@ -794,9 +788,12 @@ class TestTheStepsRunTheScript(unittest.TestCase):
     def test_no_step_keeps_apt_shell(self) -> None:
         found = []
         covered = {name for sites in SITES.values() for name, *_ in sites}
+        seeds = {name for sites in SITES.values() for name, *_, run in sites if run == SEED}
         for path in sorted(WORKFLOWS.glob('*.yml')):
             for job, spec in (load(path).get('jobs') or {}).items():
                 for item in spec.get('steps') or ():
+                    if path.name == WORKFLOW and item.get('name') in seeds and item.get('run') == SEED:
+                        continue  # pinned to its shell above
                     run = '\n'.join(line for line in str(item.get('run', '')).splitlines()
                                     if not line.lstrip().startswith('#'))
                     found.extend(f'{path.name} {job} {item.get("name")!r}: {piece}'

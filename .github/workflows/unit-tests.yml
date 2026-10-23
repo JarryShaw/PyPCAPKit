@@ -630,9 +630,10 @@ jobs:
       # bound. APT_PACKAGES, the job's env, is what both the plan and the
       # install read, so the key always describes the set installed.
       #
-      # The plan, seed, install and collect steps run util/apt_packages.py
-      # (#1967); its docstring says what each subcommand does. `pypcap-parity`
-      # runs the same steps; every body but the install's is identical to these.
+      # The plan, install and collect steps run util/apt_packages.py (#1967);
+      # its docstring says what each subcommand does. The seed step, one copy
+      # and a count, stays inline. `pypcap-parity` runs the same steps; every
+      # body but the install's is identical to these.
       - name: Plan this engine's system packages
         id: apt-plan
         if: env.APT_PACKAGES != ''
@@ -650,7 +651,10 @@ jobs:
 
       - name: Seed apt's archive with this engine's cached .deb files
         if: steps.apt-cache.outputs.cache-matched-key != ''
-        run: /usr/bin/python3 util/apt_packages.py seed
+        run: |
+          set -eu
+          sudo cp "$RUNNER_TEMP"/apt-debs/*.deb /var/cache/apt/archives/
+          echo "Seeded $(find "$RUNNER_TEMP/apt-debs" -name '*.deb' | wc -l) .deb files"
 
       - name: Install this engine's system packages
         timeout-minutes: 10
@@ -961,7 +965,10 @@ jobs:
         id: apt-seed
         if: steps.apt-cache.outputs.cache-matched-key != ''
         continue-on-error: ${{ matrix.ktlo == true }}
-        run: /usr/bin/python3 util/apt_packages.py seed
+        run: |
+          set -eu
+          sudo cp "$RUNNER_TEMP"/apt-debs/*.deb /var/cache/apt/archives/
+          echo "Seeded $(find "$RUNNER_TEMP/apt-debs" -name '*.deb' | wc -l) .deb files"
 
       - name: Install libpcap headers, a C toolchain, and tshark
         id: apt-install

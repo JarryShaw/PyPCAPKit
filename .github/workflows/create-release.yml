@@ -136,10 +136,6 @@ jobs:
   # in that run's place, so the displaced run's release waits for the next run
   # on ``main``: the tip's own Vendor Update if the tip's Unit Tests run has not
   # completed yet, else the next push's or Saturday's.
-  #
-  # #1967: util/release_vendor_update.py holds the step's shell, so the job
-  # checks out util/ alone, for it and util/_actions.py, which is all
-  # ``contents: read`` is for.
   vendor_update:
     name: Triggering Vendor Update
     runs-on: ubuntu-latest
@@ -147,23 +143,34 @@ jobs:
     timeout-minutes: 5
     permissions:
       actions: read
-      contents: read
     outputs:
       updated: ${{ steps.updated.outputs.updated }}
     steps:
-      - name: Checkout code
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          ref: ${{ github.sha }}
-          sparse-checkout: util
-          persist-credentials: false
-
       - name: Read whether its vendor-update job ran
         id: updated
         env:
           GH_TOKEN: ${{ github.token }}
           PCAPKIT_VENDOR_RUN_ID: ${{ github.event.workflow_run.id }}
-        run: python3 util/release_vendor_update.py
+        run: |
+          set -uo pipefail
+
+          if ! result="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${PCAPKIT_VENDOR_RUN_ID}/jobs" \
+                           --paginate --jq '.jobs[] | select(.name == "vendor-update") | .conclusion')"; then
+            echo "::warning title=Vendor Update not read (#1748)::could not list the jobs of Vendor Update run ${PCAPKIT_VENDOR_RUN_ID}, so this run treats it as one that updated."
+            exit 0
+          fi
+          case "$result" in
+            success)
+              echo "updated=true" >> "$GITHUB_OUTPUT"
+              ;;
+            skipped)
+              echo "updated=false" >> "$GITHUB_OUTPUT"
+              echo "Vendor Update run ${PCAPKIT_VENDOR_RUN_ID} skipped vendor-update: its verdict did not cover the commit it checked out."
+              ;;
+            *)
+              echo "::warning title=Vendor Update not read (#1748)::Vendor Update run ${PCAPKIT_VENDOR_RUN_ID} reports vendor-update as '${result//$'\n'/ }', so this run treats it as one that updated."
+              ;;
+          esac
 
   version_check:
     name: Check Version

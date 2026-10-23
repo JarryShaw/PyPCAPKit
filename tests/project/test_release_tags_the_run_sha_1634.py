@@ -150,9 +150,10 @@ RUN_SHA_STEPS = {
 #: commit Vendor Update ran *on*, ``945c3c3d8`` for run 38008819343, not its bump.
 UPSTREAM_COMMIT = re.compile(r'\bworkflow_run\.head_|\bhead_commit\b')
 
-#: The jobs that check out the repository, which is every job with steps:
-#: ``vendor_update`` and ``release_status`` check out util/ for their scripts (#1967).
-CHECKOUT_JOBS = ('vendor_update', 'version_check', 'github', 'tag', 'pypi', 'conda', 'release_status')
+#: The jobs that check out the repository, which is every job with steps but
+#: ``vendor_update``, whose shell is inline: ``release_status`` checks out util/
+#: for its script (#1967).
+CHECKOUT_JOBS = ('version_check', 'github', 'tag', 'pypi', 'conda', 'release_status')
 
 #: Git commands that move a checkout onto ``main``'s history or rewrite it.
 #: ``merge-base`` is a read, so it is excluded from ``git merge``.

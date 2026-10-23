@@ -1208,11 +1208,14 @@ without the script, and runs the script against a small limit.
 Workflow Scripts (`#1967 <https://github.com/JarryShaw/PyPCAPKit/issues/1967>`__)
 ---------------------------------------------------------------------------------
 
-Shell that several steps repeat lives in a :file:`util/` script, which the steps
-run, rather than in a composite action: a composite action's inner steps cannot
-take ``timeout-minutes``, so each calling step keeps its own, with its ``shell:``,
-``if:``, ``env:`` and ``continue-on-error``. Each script's docstring says what it
-does; each has tests under :file:`tests/project/` that run it.
+Shell that several steps repeat, or that has real logic -- branches, or a bug
+history a test should pin -- lives in a :file:`util/` script, which the steps run,
+rather than in a composite action: a composite action's inner steps cannot take
+``timeout-minutes``, so each calling step keeps its own, with its ``shell:``,
+``if:``, ``env:`` and ``continue-on-error``. A few plain commands stay inline even
+where repeated, as the apt seed steps do, since they read more easily than a call
+to a script. Each script's docstring says what it does; each has tests under
+:file:`tests/project/` that run it.
 
 .. list-table::
    :header-rows: 1
@@ -1266,10 +1269,12 @@ does; each has tests under :file:`tests/project/` that run it.
      - No.
    * - :file:`util/apt_packages.py`
      - The apt steps of ``unit-tests.yml``'s ``engine-tests`` and ``pypcap-parity``
-       (and so its KTLO twin): the plan, seed, install and collect steps, as
-       ``apt_packages.py plan``, ``seed``, ``install`` and ``collect``. The
-       ``actions/cache`` steps and the AppArmor step (`#2019
-       <https://github.com/JarryShaw/PyPCAPKit/issues/2019>`__) stay as they were.
+       (and so its KTLO twin): the plan, install and collect steps, as
+       ``apt_packages.py plan``, ``install`` and ``collect``. The
+       ``actions/cache`` steps, the seed steps (``Seed apt's archive with this
+       engine's cached .deb files`` and ``Seed apt's archive with the cached .deb
+       files``) and the AppArmor step (`#2019
+       <https://github.com/JarryShaw/PyPCAPKit/issues/2019>`__) stay inline.
      - No.
    * - :file:`util/_actions.py`
      - No step: it is imported by the scripts that share its annotations, step
@@ -1297,11 +1302,6 @@ does; each has tests under :file:`tests/project/` that run it.
        ``create-release.yml``'s ``release_status``, on the image's ``python3``
        after a checkout of :file:`util/` alone (`#888
        <https://github.com/JarryShaw/PyPCAPKit/issues/888>`__).
-     - No.
-   * - :file:`util/release_vendor_update.py`
-     - ``Read whether its vendor-update job ran`` in ``create-release.yml``'s
-       ``vendor_update``, on the image's ``python3`` after a checkout of
-       :file:`util/` alone (`#1748 <https://github.com/JarryShaw/PyPCAPKit/issues/1748>`__).
      - No.
    * - :file:`util/release_tiers.py`
      - ``Read the released Python versions`` in ``create-release.yml``'s

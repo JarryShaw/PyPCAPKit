@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
-"""Plan, seed, install and collect a job's system packages (#1967).
+"""Plan, install and collect a job's system packages (#1967).
 
-The apt steps of :file:`.github/workflows/unit-tests.yml`'s ``engine-tests`` and
-``pypcap-parity`` jobs (and so ``pypcap-parity-ktlo``) run, from the checkout's
-root and on the image's ``/usr/bin/python3``::
+The plan, install and collect steps of :file:`.github/workflows/unit-tests.yml`'s
+``engine-tests`` and ``pypcap-parity`` jobs (and so ``pypcap-parity-ktlo``) run, from
+the checkout's root and on the image's ``/usr/bin/python3``::
 
     /usr/bin/python3 util/apt_packages.py plan
-    /usr/bin/python3 util/apt_packages.py seed
     /usr/bin/python3 util/apt_packages.py install [--name NAME]
     /usr/bin/python3 util/apt_packages.py collect
 
@@ -24,9 +23,6 @@ shell ran, ``sudo`` included, and writes the same lines and annotations:
    ``apt-debs-<ImageOS>-<RUNNER_ARCH>-<APT_SET>-``, and ``key``, that prefix and the
    first 16 hex digits of the lines' SHA-256, are appended to ``$GITHUB_OUTPUT``.
    ``ImageOS`` is ``unknown`` when unset or empty.
-``seed``
-   ``sudo cp $RUNNER_TEMP/apt-debs/*.deb /var/cache/apt/archives/``, its status the
-   script's on a failure, then how many ``.deb`` files that directory holds.
 ``install``
    Nothing when ``APT_PACKAGES`` is empty. Otherwise, when it names ``tshark``,
    pre-seeds debconf against its "non-superusers may capture" prompt, then up to
@@ -84,7 +80,7 @@ UPDATE_BOUND = 60
 INSTALL_BOUND = 180
 #: The runner image's ``mirror+file:`` list, which ``install`` edits before its retry.
 MIRRORS = '/etc/apt/apt-mirrors.txt'
-#: apt's archive, which ``seed`` fills and ``collect`` reads.
+#: apt's archive, which ``collect`` reads.
 ARCHIVES = '/var/cache/apt/archives'
 #: The cached ``.deb`` files, under ``$RUNNER_TEMP``.
 CACHE_DIR = 'apt-debs'
@@ -142,17 +138,6 @@ def plan() -> 'int':
         digest = hashlib.sha256(listed + b'\n').hexdigest()[:16]
         _actions.set_output('restore-prefix', prefix)
         _actions.set_output('key', prefix + digest)
-    return 0
-
-
-def seed(archives: 'str') -> 'int':
-    """Copy the restored ``.deb`` files into apt's archive."""
-    cache = os.path.join(os.environ['RUNNER_TEMP'], CACHE_DIR)
-    # An unmatched glob stays the pattern, as the shell's does, so `cp` fails on it.
-    copied = call(['sudo', 'cp', *(debs(cache) or [os.path.join(cache, '*.deb')]), archives + '/'])
-    if copied.returncode != 0:
-        return _actions.exit_status(copied.returncode)
-    _actions.say(f'Seeded {count_debs(cache)} .deb files')
     return 0
 
 
@@ -242,10 +227,8 @@ def main(argv: 'Optional[list[str]]' = None) -> 'int':
     commands = parser.add_subparsers(dest='command', metavar='COMMAND')
     commands.required = True
     commands.add_parser('plan', help='update the indexes and write the cache key')
-    for command, text in (('seed', 'copy the restored .deb files into apt\'s archive'),
-                          ('collect', 'copy the installed versions\' .deb files into the cache')):
-        sub = commands.add_parser(command, help=text)
-        sub.add_argument('--archives', default=ARCHIVES, help=f'apt\'s archive (default: {ARCHIVES})')
+    sub = commands.add_parser('collect', help='copy the installed versions\' .deb files into the cache')
+    sub.add_argument('--archives', default=ARCHIVES, help=f'apt\'s archive (default: {ARCHIVES})')
     sub = commands.add_parser('install', help='install APT_PACKAGES, retrying once')
     sub.add_argument('--name', help='what the annotation titles name, in parentheses')
     sub.add_argument('--mirrors', default=MIRRORS, help=f'the mirror list (default: {MIRRORS})')
@@ -253,7 +236,6 @@ def main(argv: 'Optional[list[str]]' = None) -> 'int':
 
     run = {
         'plan': plan,
-        'seed': lambda: seed(args.archives),
         'install': lambda: install(args.mirrors, args.name),
         'collect': lambda: collect(args.archives),
     }[args.command]  # type: Callable[[], int]
