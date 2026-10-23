@@ -528,10 +528,9 @@ def block_scalar_after(block: 'str', key: 're.Pattern[str]') -> 'str':
     first line in ``block`` matching ``key``.
 
     Only used for :data:`_RUN_LITERAL` against a block holding exactly one
-    ``run:`` -- ``release_status``, which has one step, or a single step
-    narrowed by :func:`step_block` -- since it is ambiguous for a block with
-    more than one, which is why this is not the general-purpose
-    ``run:`` extractor the rest of this module reaches for. Dedents by the
+    ``run:`` -- a single step narrowed by :func:`step_block` -- since it is
+    ambiguous for a block with more than one, which is why this is not the
+    general-purpose ``run:`` extractor the rest of this module reaches for. Dedents by the
     body's *own* first line, the same rule a real YAML literal block scalar
     follows, rather than assuming a fixed indent.
 
@@ -3169,6 +3168,11 @@ class TestMarkersStillMatch(WorkflowMixin, unittest.TestCase):
                 self.assertEqual(publishing_reasons(self.jobs[name]), [])
 
 
+#: ``release_status``'s step, and the script it runs since #1967.
+RELEASE_STATUS_STEP = 'Report why this run did or did not release anything'
+RELEASE_STATUS_SCRIPT = 'util/release_status.py'
+
+
 class TestReleaseStatusReportsHonestly(WorkflowMixin, unittest.TestCase):
     """#888's other job: a run that released nothing must say why, in one
     place, regardless of which upstream job or gate made it release nothing.
@@ -3217,23 +3221,27 @@ class TestReleaseStatusReportsHonestly(WorkflowMixin, unittest.TestCase):
         the way every other branch does.
 
         """
-        block = self.jobs['release_status']
-        self.assertIn('::error title=Stranded partial release (#888)', block)
-        self.assertIn('exit 1', block)
+        # #1967: the step runs util/release_status.py, whose one exit 1 is this.
+        script = (ROOT / RELEASE_STATUS_SCRIPT).read_text(encoding='utf-8')
+        self.assertIn(f'run: python3 {RELEASE_STATUS_SCRIPT}', self.jobs['release_status'])
+        self.assertIn("say('error', 'Stranded partial release (#888)',", script)
+        after = script.split("say('error', 'Stranded partial release (#888)',")[1].split('\ndef ')[0]
+        self.assertEqual(after.count('return 1'), 1)
 
     def test_routine_skips_are_quiet(self) -> None:
         """The steady state -- nothing to release, or a release that just
         completed -- must not read as a problem.
 
         """
-        block = self.jobs['release_status']
-        self.assertIn('::notice title=Nothing to release', block)
-        self.assertIn('::notice title=Release complete', block)
+        script = (ROOT / RELEASE_STATUS_SCRIPT).read_text(encoding='utf-8')
+        self.assertIn("say('notice', 'Nothing to release',", script)
+        self.assertIn("say('notice', 'Release complete',", script)
 
 
 class TestReleaseStatusScriptExecutesCorrectly(WorkflowMixin, unittest.TestCase):
-    """Actually runs ``release_status``'s shell script, rather than only
-    grepping it, over a table of the shapes a real run can take.
+    """Actually runs ``release_status``'s script, rather than only grepping it,
+    over a table of the shapes a real run can take: the step's ``python3
+    util/release_status.py`` (#1967), on this interpreter.
 
     A cross-review of the #888 change found that an earlier revision of this
     script demanded the same outcome (all four release jobs ``skipped``, or
@@ -3249,9 +3257,10 @@ class TestReleaseStatusScriptExecutesCorrectly(WorkflowMixin, unittest.TestCase)
     @classmethod
     def setUpClass(cls) -> None:
         super().setUpClass()
-        if shutil.which('bash') is None:
-            raise unittest.SkipTest('bash not found on PATH')
-        cls.script = block_scalar_after(cls.jobs['release_status'], _RUN_LITERAL)  # type: ignore[attr-defined]
+        step = step_block(cls.jobs['release_status'], RELEASE_STATUS_STEP)  # type: ignore[attr-defined]
+        run = re.search(r'^\s*run: python3 (util/\w+\.py)\s*$', step, re.M)
+        assert run is not None, step
+        cls.command = [sys.executable, str(ROOT / run.group(1))]
 
     def _run(self, overrides: 'dict[str, str]') -> 'subprocess.CompletedProcess[str]':
         env = {
@@ -3278,7 +3287,7 @@ class TestReleaseStatusScriptExecutesCorrectly(WorkflowMixin, unittest.TestCase)
         }
         env.update(overrides)
         return subprocess.run(  # type: ignore[return-value]
-            ['bash', '-c', self.script],  # type: ignore[attr-defined]
+            self.command,  # type: ignore[attr-defined]
             env=env, capture_output=True, text=True, timeout=scale_timeout(10),
         )
 

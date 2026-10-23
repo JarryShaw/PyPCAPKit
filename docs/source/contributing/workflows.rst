@@ -1267,6 +1267,15 @@ does; each has tests under :file:`tests/project/` that run it.
    * - :file:`util/release_upload.py`
      - ``Upload package to GitHub Release`` in ``create-release.yml``'s ``pypi`` and
        ``conda`` (`#1640 <https://github.com/JarryShaw/PyPCAPKit/issues/1640>`__).
+   * - :file:`util/release_status.py`
+     - ``Report why this run did or did not release anything`` in
+       ``create-release.yml``'s ``release_status``, on the image's ``python3``
+       after a checkout of :file:`util/` alone (`#888
+       <https://github.com/JarryShaw/PyPCAPKit/issues/888>`__).
+   * - :file:`util/release_vendor_update.py`
+     - ``Read whether its vendor-update job ran`` in ``create-release.yml``'s
+       ``vendor_update``, on the image's ``python3`` after a checkout of
+       :file:`util/` alone (`#1748 <https://github.com/JarryShaw/PyPCAPKit/issues/1748>`__).
 
 The summaries run on the image's ``/usr/bin/python3`` rather than the leg's
 interpreter, which may have failed to set up or be too broken to run anything, so
