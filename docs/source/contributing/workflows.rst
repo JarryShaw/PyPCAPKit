@@ -1548,6 +1548,15 @@ it, so the scheduled jobs reading them name it too
 * Conda Update's ``conda-dist`` -- ``environment: anaconda``
 * Vendor Update's ``vendor-update`` -- ``environment: conda-tag``
 
+``conda-dist`` also has a ``windows-latest`` leg, which builds and smoke-tests a
+``win-64`` package and publishes nothing
+(`#2060 <https://github.com/JarryShaw/PyPCAPKit/issues/2060>`__). Every upload
+step is gated off it, and those are the only steps that read ``ANACONDA_TOKEN``,
+so no step on that leg receives the secret.
+:file:`tests/project/test_conda_windows_leg_2060.py` checks both. Each step that
+can fail there continues on error, and ``Windows summary`` reports each failure
+as a warning, as ``KTLO summary`` does for a KTLO leg, so the leg stays green.
+
 A required reviewer on ``conda-tag`` or ``anaconda`` would therefore hold every
 scheduled bump for an approval, besides the release-graph reason
 :doc:`releasing` gives for keeping them without one. Each run of these jobs

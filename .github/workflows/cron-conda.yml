@@ -406,6 +406,12 @@ jobs:
       needs.conda-update.outputs.CONDA_CHANGED == 'true'
     permissions:
       contents: write
+    # #2060: the Windows leg builds and smoke-tests only, and never blocks. Each
+    # step that can fail on it has an `id`, and a `continue-on-error` true on
+    # `windows-latest` alone, so a failure leaves the leg at success, and
+    # `Windows summary` reports it as a warning, as the KTLO legs do (#1672).
+    # No job-level `continue-on-error`, which would still turn the leg's check
+    # red (#1672), so a lost runner fails the job.
     strategy:
       fail-fast: false
       matrix:
@@ -415,25 +421,37 @@ jobs:
           - macos-latest
           - macos-26-intel
           - ubuntu-latest
-          # No Windows leg since 2023, and no Windows steps (#1967): adding the leg
-          # back means writing its steps, as test_conda_no_windows_steps_1967 pins.
+          # #2060: builds and smoke-tests win-64, and publishes nothing until
+          # its runs pass. Every upload step below is gated off it, so the
+          # `ANACONDA_TOKEN` this job's `environment:` holds reaches no step on it.
+          - windows-latest
         # #1633: the supported tier, from .github/python-versions.toml through
         # `conda-update` (#1660); create-release.yml's ``conda`` job says why
         # there is no KTLO 3.10 leg.
         python-version: ${{ fromJSON(needs.conda-update.outputs.PYTHON_CONDA) }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      # No persisted token: nothing here runs `git` with credentials, and the
+      # Windows leg builds a package nobody has published yet (#2060).
+      - id: checkout
+        continue-on-error: ${{ matrix.os == 'windows-latest' }}
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           ref: conda-${{ needs.conda-update.outputs.PCAPKIT_VERSION }}+${{ needs.conda-update.outputs.PCAPKIT_BUILD }}
           fetch-depth: 0
+          persist-credentials: false
 
-      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
+      - id: setup-python
+        continue-on-error: ${{ matrix.os == 'windows-latest' }}
+        uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97 # v7.0.0
         with:
           python-version: ${{ matrix.python-version }}
 
       # #1854: pcapkit is not installed here; see create-release.yml's step of
-      # the same name.
+      # the same name. `shell: bash` here and below, as Windows runs `pwsh`.
       - name: Install and Setup
+        id: install
+        continue-on-error: ${{ matrix.os == 'windows-latest' }}
+        shell: bash
         run: |
           set -x
 
@@ -441,8 +459,12 @@ jobs:
 
       # #1827: pip evaluates conda/requirements.txt's platform markers here,
       # on this leg's own runner, so Intel macOS fetches its own cryptography
-      # pin; the recipe's build.sh installs whatever this downloaded.
+      # pin; the recipe's build.sh, or bld.bat on Windows, installs whatever
+      # this downloaded.
       - name: Setup Conda Distribution
+        id: download
+        continue-on-error: ${{ matrix.os == 'windows-latest' }}
+        shell: bash
         run: |
           set -x
 
@@ -451,6 +473,8 @@ jobs:
 
       # See create-release.yml's step of the same name for the 3.15 exception.
       - name: Conda environment creation and activation
+        id: miniconda
+        continue-on-error: ${{ matrix.os == 'windows-latest' }}
         uses: conda-incubator/setup-miniconda@be893c923ea9cf1cf7cd510fbdde27c7e18cbdcb # v4.1.0
         env:
           PCAPKIT_VERSION: ${{ needs.conda-update.outputs.PCAPKIT_VERSION }}
@@ -467,13 +491,19 @@ jobs:
           conda-remove-defaults: false
           show-channel-urls: true
 
+      # A login shell, as for the build below: on Windows only that one has the
+      # `conda` setup-miniconda's `conda init` defines.
       - name: Install conda build tools
+        id: conda-build-tools
+        continue-on-error: ${{ matrix.os == 'windows-latest' }}
+        shell: bash -el {0}
         run: |
           conda install -n base --override-channels -c conda-forge -y conda-build
           conda build --version
 
       - name: Build conda packages
         id: conda_build
+        continue-on-error: ${{ matrix.os == 'windows-latest' }}
         shell: bash -el {0}
         env:
           PCAPKIT_VERSION: ${{ needs.conda-update.outputs.PCAPKIT_VERSION }}
@@ -501,6 +531,9 @@ jobs:
               ;;
             ubuntu-latest)
               target_platform="linux-64"
+              ;;
+            windows-latest)
+              target_platform="win-64"
               ;;
             *)
               target_platform=""
@@ -540,17 +573,27 @@ jobs:
       # site-packages on the path. #1822: it also fails unless the package and
       # every native binary in it are for this runner's platform.
       # setup-python's interpreter, not conda's: it is the matrix version the
-      # package was built for, which conda's base is not on 3.15.
+      # package was built for, which conda's base is not on 3.15. On Windows it
+      # is `python.exe` at the top of `pythonLocation`, not under `bin/` (#2060).
       - name: Smoke-test the vendored packages
+        id: smoke
+        if: steps.conda_build.outcome == 'success'
+        continue-on-error: ${{ matrix.os == 'windows-latest' }}
+        shell: bash
         env:
           PCAPKIT_CONDA_PACKAGE: ${{ steps.conda_build.outputs.host_package }}
         run: |
-          "${pythonLocation}/bin/python" util/conda_vendor.py --smoke "$PCAPKIT_CONDA_PACKAGE"
+          python="${pythonLocation}/bin/python"
+          if [ "$RUNNER_OS" = Windows ]; then
+            python="$(cygpath -u "$pythonLocation")/python.exe"
+          fi
+          "$python" util/conda_vendor.py --smoke "$PCAPKIT_CONDA_PACKAGE"
 
       # #2044: not on macos-26-intel, whose leg "Upload conda packages to
-      # Anaconda (Intel)" uploads instead.
+      # Anaconda (Intel)" uploads instead. #2060: nor on windows-latest, which
+      # publishes nothing until a run has shown its package works.
       - name: Upload conda packages to Anaconda
-        if: ${{ matrix.os != 'macos-26-intel' }}
+        if: ${{ matrix.os != 'macos-26-intel' && matrix.os != 'windows-latest' }}
         uses: anaconda/actions/upload-package@a6f488910b4a1e4f3fe01736241ca1b92b4b355a # v0.3.1
         with:
           token: ${{ secrets.ANACONDA_TOKEN }}
@@ -662,6 +705,18 @@ jobs:
           omitPrereleaseDuringUpdate: true
           tag: "v${{ needs.conda-update.outputs.PCAPKIT_VERSION }}"
           token: "${{ secrets.GITHUB_TOKEN }}"
+
+      # #2060: the Windows leg's last step, as `KTLO summary` is a KTLO leg's
+      # (#1672): one warning per failed step, from each `outcome`. setup-python's
+      # `python`, or the image's where that failed.
+      - name: Windows summary
+        if: ${{ !cancelled() && matrix.os == 'windows-latest' }}
+        continue-on-error: true
+        shell: bash
+        env:
+          LEG: conda-dist on ${{ matrix.os }} with Python ${{ matrix.python-version }} (unpublished, non-blocking)
+          STEPS: ${{ toJSON(steps) }}
+        run: python util/leg_summary.py conda-windows
 
   # #2030: posts `conda-update`'s report with the tag and upload results, and a
   # short one of its own where `head` failed or was cancelled, as cron-vendor.yml's

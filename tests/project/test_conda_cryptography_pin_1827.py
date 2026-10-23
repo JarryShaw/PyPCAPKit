@@ -183,11 +183,11 @@ class CheckTests(unittest.TestCase):
 
     def test_an_override_no_build_can_use_fails(self) -> None:
         lines = written()
-        pins = pinned(('cryptography', 'osx-64', '48.0.1'), ('cryptography', 'win-64', '1.0'),
+        pins = pinned(('cryptography', 'osx-64', '48.0.1'), ('cryptography', 'linux-aarch64', '1.0'),
                       ('gone', 'osx-64', '1.0'))
         with mock.patch.object(vendor(), 'PLATFORM_PINS', pins):
             problems = self.problems('\n'.join(lines))
-        self.assertEqual(problems, ['override: cryptography is pinned for win-64, which no conda leg builds',
+        self.assertEqual(problems, ['override: cryptography is pinned for linux-aarch64, which no conda leg builds',
                                     'override: gone is pinned for osx-64, and no conda build vendors it'])
 
     def test_the_writer_refuses_an_override_no_build_can_use(self) -> None:

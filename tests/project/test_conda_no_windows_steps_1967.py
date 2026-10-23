@@ -7,12 +7,16 @@
 (Windows)``, the ``matrix.os != 'windows-latest'`` guards on their twins, and a
 ``windows-latest`` arm in each ``case "${{ matrix.os }}"``: code no run reached.
 
-* :class:`TestNoDeadRunnerCode` pins that no step's ``if:`` names a runner label
-  the job's matrix lacks, no ``case`` arm maps one, and, with no Windows leg, no
-  step is Windows-only. So adding a Windows leg back means adding its steps back
-  deliberately, rather than reviving ones nobody has run.
+* :class:`TestNoDeadRunnerCode` pins that no step's ``if:`` or
+  ``continue-on-error`` names a runner label the job's matrix lacks, no ``case``
+  arm maps one, and, with no Windows leg, no step is Windows-only. So adding a
+  Windows leg back means adding its steps back deliberately, rather than
+  reviving ones nobody has run. #2060 did so for ``conda-dist``, whose Windows
+  steps are therefore live; ``conda`` still has no Windows leg.
 * :class:`TestTheCheckSeesDeadCode` feeds :func:`dead` the jobs as they stood
-  before, rebuilt from the current ones, so the pin cannot pass by reading nothing.
+  before, rebuilt from the current ones, so the pin cannot pass by reading
+  nothing, and ``conda-dist`` without its Windows leg, whose steps must then read
+  as dead.
 
 """
 
@@ -53,9 +57,10 @@ def dead(spec: 'dict[str, Any]') -> 'list[str]':
     for step in spec['steps']:
         name = str(step.get('name') or step.get('uses') or step.get('id'))
         condition = str(step.get('if', ''))
-        for label in GUARD.findall(condition):
-            if label not in labels:
-                found.append(f'{name}: `if:` compares matrix.os with {label}, which is no leg')
+        for key in ('if', 'continue-on-error'):
+            for label in GUARD.findall(str(step.get(key, ''))):
+                if label not in labels:
+                    found.append(f'{name}: `{key}:` compares matrix.os with {label}, which is no leg')
         if not windows_leg and (WINDOWS_ONLY.search(condition) or WINDOWS.search(str(step.get('name', '')))):
             found.append(f'{name}: Windows-only, and no leg is Windows')
         for block in CASE.findall(str(step.get('run', ''))):
@@ -74,12 +79,28 @@ class TestNoDeadRunnerCode(unittest.TestCase):
                 self.assertEqual(dead(_workflows.job(name, job_id)), [])
 
 
+def without_windows(step: 'dict[str, Any]') -> 'dict[str, Any]':
+    """``step`` without #2060's Windows guard, ``case`` arm or ``if:`` clause."""
+    step = {key: value for key, value in step.items()
+            if not (key == 'continue-on-error' and WINDOWS.search(str(value)))}
+    if 'if' in step:
+        step['if'] = str(step['if']).replace(" && matrix.os != 'windows-latest'", '')
+    if 'run' in step:
+        step['run'] = re.sub(r'\n\s*windows-latest\)\n[^\n]*\n\s*;;', '', str(step['run']))
+    return step
+
+
 class TestTheCheckSeesDeadCode(unittest.TestCase):
     """:func:`dead` reports each kind of dead code the jobs held before #1967."""
 
     def test_it_reports_a_windows_step_guard_and_arm(self) -> None:
         for name, job_id in JOBS:
             spec = copy.deepcopy(_workflows.job(name, job_id))
+            # #2060: conda-dist as it stood before its Windows leg came back.
+            spec['strategy']['matrix']['os'] = [os for os in spec['strategy']['matrix']['os']
+                                                if not WINDOWS.search(os)]
+            spec['steps'] = [without_windows(step) for step in spec['steps']
+                             if not WINDOWS.search(str(step.get('name', '')))]
             install = next(step for step in spec['steps'] if step.get('name') == 'Install and Setup')
             install['if'] = "${{ matrix.os != 'windows-latest' }}"
             spec['steps'].append({'name': 'Install and Setup (Windows)',
@@ -101,6 +122,18 @@ class TestTheCheckSeesDeadCode(unittest.TestCase):
                     'Install and Setup (Windows): Windows-only, and no leg is Windows',
                     'Map the leg: `case` arm windows-latest, which is no leg',
                 ])
+
+    def test_dropping_conda_dists_windows_leg_leaves_its_steps_dead(self) -> None:
+        """#2060's steps are live only while the leg is there."""
+        spec = copy.deepcopy(_workflows.job('cron-conda.yml', 'conda-dist'))
+        spec['strategy']['matrix']['os'].remove('windows-latest')
+        found = dead(spec)
+        for line in ('Upload conda packages to Anaconda: `if:` compares matrix.os with windows-latest, which is no leg',
+                     'Install and Setup: `continue-on-error:` compares matrix.os with windows-latest, which is no leg',
+                     'Windows summary: Windows-only, and no leg is Windows',
+                     'Build conda packages: `case` arm windows-latest, which is no leg'):
+            with self.subTest(line=line):
+                self.assertIn(line, found)
 
     def test_a_windows_leg_allows_its_own_steps(self) -> None:
         spec = {'strategy': {'matrix': {'os': ['ubuntu-latest', 'windows-latest']}},

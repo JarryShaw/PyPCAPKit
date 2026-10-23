@@ -236,9 +236,12 @@ class Target(NamedTuple):
     arch: str
 
 
-#: An image's family and version, at the start of the table's Image cell.
-IMAGE = re.compile(r'(Ubuntu|macOS)\s+(\d+(?:\.\d+)?)\b')
-PLATFORM = {'ubuntu': 'linux', 'macos': 'darwin'}
+#: An image's family and version, at the start of the table's Image cell:
+#: ``Windows Server 2025`` reads as ``windows`` 2025, for the conda job's
+#: ``windows-latest`` leg (#2060).
+IMAGE = re.compile(r'(Ubuntu|macOS|Windows)(?:\s+Server)?\s+(\d+(?:\.\d+)?)\b')
+#: setup-python's manifest ``platform`` for each family.
+PLATFORM = {'ubuntu': 'linux', 'macos': 'darwin', 'windows': 'win32'}
 
 
 def numeric(version: 'str') -> 'tuple[int, ...]':
@@ -276,7 +279,7 @@ def markdown_tables(text: 'str') -> 'list[list[list[Any]]]':
 
 
 def parse_images(text: 'str') -> 'list[Image]':
-    """The Ubuntu and macOS rows of the runner-images README's image table.
+    """The Ubuntu, macOS and Windows rows of the runner-images README's image table.
 
     The labels are the code spans of the YAML Label cell, read from its tokens,
     so a span holding an escaped pipe reads as GitHub shows it, without the

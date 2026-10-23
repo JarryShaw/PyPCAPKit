@@ -4,11 +4,12 @@
 * Both conda jobs map each runner label of their ``os`` axis to the conda
   platform of that runner's own architecture, as GitHub's runner-images table
   gives it (the snapshot in :file:`python_versions_fixtures`), and between them
-  publish exactly :data:`conda_vendor.PLATFORMS`.
+  build exactly :data:`conda_vendor.PLATFORMS`; win-64 only in Conda Update,
+  which does not publish it yet (#2060).
 * Neither job runs ``conda convert``. Run as the job runs it, with a stand-in
   ``conda``, a leg publishes the one package conda built, and fails before any
   upload when that is not the platform its label maps to.
-* ``--smoke`` reads each native binary's ELF or Mach-O header and fails on one
+* ``--smoke`` reads each native binary's ELF, Mach-O or PE header and fails on one
   that is not for the package's platform, and on a package that is not for the
   runner's own.
 
@@ -65,8 +66,11 @@ JOBS = (('cron-conda.yml', 'conda-dist'), ('create-release.yml', 'conda'))
 #: Intel, per https://docs.github.com/en/actions/reference/runners/github-hosted-runners
 #: as read on 2026-10-16; the test below checks the snapshot of the image table too.
 LEGS = {'macos-latest': 'osx-arm64', 'macos-26-intel': 'osx-64', 'ubuntu-latest': 'linux-64'}
+#: Each job's legs: Conda Update's add #2060's unpublished ``windows-latest``.
+JOB_LEGS = {('cron-conda.yml', 'conda-dist'): dict(LEGS, **{'windows-latest': 'win-64'}),
+            ('create-release.yml', 'conda'): LEGS}
 #: ``platform.machine()``, as the runner-images table names the architecture.
-ARCH = {'x86_64': 'x64', 'arm64': 'arm64'}
+ARCH = {'x86_64': 'x64', 'arm64': 'arm64', 'AMD64': 'x64'}
 
 _MODULES = {}  # type: dict[str, Any]
 
@@ -117,7 +121,7 @@ class RunnerMappingTests(unittest.TestCase):
             self.assertTrue(blocks, f'{name} {job_id} maps no runner label')
             for block in blocks:
                 with self.subTest(workflow=name, job=job_id):
-                    self.assertEqual({label: block.get(label) for label in labels}, LEGS)
+                    self.assertEqual({label: block.get(label) for label in labels}, JOB_LEGS[(name, job_id)])
                 for label in labels:
                     sys_platform, _, machine = vendor.PLATFORMS[block[label]]
                     with self.subTest(workflow=name, job=job_id, label=label):
@@ -127,8 +131,9 @@ class RunnerMappingTests(unittest.TestCase):
 
     def test_the_legs_are_the_vendored_platforms(self) -> None:
         """What conda/requirements.txt is derived for is what the legs build."""
-        self.assertEqual(sorted(load('conda_vendor').PLATFORMS), sorted(LEGS.values()))
-        self.assertEqual(sorted(load('conda_vendor').BINARIES), sorted(LEGS.values()))
+        built = sorted({platform for legs in JOB_LEGS.values() for platform in legs.values()})
+        self.assertEqual(sorted(load('conda_vendor').PLATFORMS), built)
+        self.assertEqual(sorted(load('conda_vendor').BINARIES), built)
 
 
 #: Stands in for ``conda``: ``build`` writes an empty package under
@@ -191,7 +196,7 @@ class NoConvertTests(unittest.TestCase):
 
     def test_a_leg_publishes_only_the_package_conda_built(self) -> None:
         for name, job_id in JOBS:
-            for label, platform in LEGS.items():
+            for label, platform in JOB_LEGS[(name, job_id)].items():
                 with self.subTest(workflow=name, label=label):
                     status, log, packages = self.build(name, job_id, label, platform)
                     self.assertEqual(status, 0, log)
@@ -219,6 +224,13 @@ def macho(cpu: 'int') -> 'bytes':
     return b'\xcf\xfa\xed\xfe' + cpu.to_bytes(4, 'little') + bytes(4) + (8).to_bytes(4, 'little') + bytes(16)
 
 
+def pe(machine: 'int', offset: 'int' = 0x80) -> 'bytes':
+    """A PE image's header for COFF ``Machine``, its ``PE\\0\\0`` at ``offset`` (#2060)."""
+    head = bytearray(b'MZ\x90\x00' + bytes(offset - 4))
+    head[0x3c:0x40] = offset.to_bytes(4, 'little')
+    return bytes(head) + b'PE\0\0' + machine.to_bytes(2, 'little') + bytes(18)
+
+
 def fat(*cpus: 'int') -> 'bytes':
     """A universal Mach-O's header with a slice per ``cputype``."""
     return b'\xca\xfe\xba\xbe' + len(cpus).to_bytes(4, 'big') + b''.join(
@@ -235,12 +247,16 @@ STUBS = {
     'macho-arm64': (macho(ARM64), ('Mach-O', {'arm64'})),
     'universal2': (fat(X86_64, ARM64), ('Mach-O', {'x86_64', 'arm64'})),
     'fat-arm64': (fat(ARM64), ('Mach-O', {'arm64'})),
+    'pe-x86_64': (pe(0x8664), ('PE', {'x86_64'})),
+    'pe-arm64': (pe(0xaa64), ('PE', {'arm64'})),
+    'pe-i386': (pe(0x014c), ('PE', {'i386'})),
 }
 #: The stubs a package for each platform may carry.
 ACCEPTS = {
     'linux-64': {'elf-x86_64'},
     'osx-64': {'macho-x86_64', 'universal2'},
     'osx-arm64': {'macho-arm64', 'universal2', 'fat-arm64'},
+    'win-64': {'pe-x86_64'},
 }
 
 
@@ -289,8 +305,8 @@ class ArchitectureTests(unittest.TestCase):
             (root / 'pkg' / 'libffi.so.8').write_text('not a library', encoding='utf-8')
             count, problems = vendor.foreign(root, 'linux-64')
         self.assertEqual(count, 0)
-        self.assertEqual(problems, ['pkg/_native.pyd: neither ELF nor Mach-O, so its machine is unknown',
-                                    'pkg/libffi.so.8: neither ELF nor Mach-O, so its machine is unknown'])
+        self.assertEqual(problems, ['pkg/_native.pyd: not ELF, Mach-O or PE, so its machine is unknown',
+                                    'pkg/libffi.so.8: not ELF, Mach-O or PE, so its machine is unknown'])
 
     def test_noarch_carries_no_binary(self) -> None:
         vendor = load('conda_vendor')
@@ -303,7 +319,7 @@ class ArchitectureTests(unittest.TestCase):
         vendor = load('conda_vendor')
         for here, subdir in ((('Linux', 'x86_64'), 'linux-64'), (('Darwin', 'x86_64'), 'osx-64'),
                              (('Darwin', 'arm64'), 'osx-arm64'), (('Linux', 'aarch64'), None),
-                             (('Windows', 'AMD64'), None)):
+                             (('Windows', 'AMD64'), 'win-64'), (('Windows', 'ARM64'), None)):
             with self.subTest(here=here), mock.patch.object(vendor.platform, 'system', return_value=here[0]), \
                     mock.patch.object(vendor.platform, 'machine', return_value=here[1]):
                 self.assertEqual(vendor.runner_platform(), subdir)

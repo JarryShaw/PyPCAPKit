@@ -1570,9 +1570,9 @@ class TestCondaUpdateNeverMakesTheRelease(CondaDistMixin, unittest.TestCase):
         self.assertNotIn('${{', check['run'])
 
     def test_the_anaconda_upload_is_not_gated_on_it(self) -> None:
-        # #2044: gated on the leg alone.
+        # #2044: gated on the leg alone; #2060: Windows publishes nothing.
         self.assertEqual(self.step('conda-dist', 'Upload conda packages to Anaconda').get('if'),
-                         "${{ matrix.os != 'macos-26-intel' }}")
+                         "${{ matrix.os != 'macos-26-intel' && matrix.os != 'windows-latest' }}")
         self.assertEqual(self.step('conda-dist', 'Upload conda packages to Anaconda (Intel)').get('if'),
                          "${{ matrix.os == 'macos-26-intel' }}")
 
