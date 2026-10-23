@@ -530,8 +530,10 @@ class TestTheContainmentRuns(unittest.TestCase):
         self.assertEqual(position(SUMMARY) + 1, position('Experimental summary'))
         self.assertEqual(step(SUMMARY).get('if'), '${{ !cancelled() }}')
         self.assertIs(step(SUMMARY).get('continue-on-error'), True)
+        # #2077: and the watcher's `stopped`, so a superseded stop reads as one.
         self.assertEqual(step(SUMMARY).get('env'),
-                         {'LEG': 'Python ${{ matrix.python-version }} (experimental, non-blocking)'})
+                         {'LEG': 'Python ${{ matrix.python-version }} (experimental, non-blocking)',
+                          'STOPPED': '${{ steps.tests.outputs.stopped }}'})
         self.assertNotIn('tests-status', step('Experimental summary')['run'])
 
 
