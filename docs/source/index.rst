@@ -122,8 +122,8 @@ Engine Comparison
 -----------------
 
 Being a **comprehensive** packet processor costs speed: :mod:`pcapkit`'s own
-engine takes about *0.2* milliseconds per packet, slower than most of the
-third-party engines below.
+engine is slower than every third-party engine below except `PyShark`_, as
+`Test Results`_ measures.
 
 :mod:`pcapkit` also supports alternative extraction engines for speed:
 `Scapy`_, `DPKT`_, `PyShark`_, `PyPCAP`_, `pcap-ct`_ and `PyPCAPFile`_,
@@ -173,23 +173,19 @@ Engine Support by Python Version
 --------------------------------
 
 Which engines can run at all, by interpreter. Verified by installing each engine
-and extracting a capture on 3.10 through 3.14; 3.15 remains inferred.
+and extracting a capture on 3.10 through 3.15.
 
-================== ======== ======== ======== =========== ======== ===========
-Engine              3.10     3.11     3.12     3.13         3.14     3.15 [*]_
-================== ======== ======== ======== =========== ======== ===========
-``pcapkit``         yes      yes      yes      yes         yes      yes
-``dpkt``            yes      yes      yes      yes         yes      yes
-``scapy``           yes      yes      yes      yes         yes      yes
-``pcap_ct``         yes      yes      yes      yes         yes      yes
-``pypcap``          yes      yes      no       no          no       no
-``pypcapfile``      yes      yes      no       no          no       no
-``pyshark`` [*]_    yes      yes      yes      yes         no       no
-================== ======== ======== ======== =========== ======== ===========
-
-.. [*] Inferred rather than measured: no 3.15 interpreter was available.
-.. [*] |pyshark|_ also needs Wireshark's :program:`tshark`, which was absent here,
-   so only the interpreter half of each verdict in this row was verified.
+================== ======== ======== ======== ======== ======== ========
+Engine              3.10     3.11     3.12     3.13     3.14     3.15
+================== ======== ======== ======== ======== ======== ========
+``pcapkit``         yes      yes      yes      yes      yes      yes
+``dpkt``            yes      yes      yes      yes      yes      yes
+``scapy``           yes      yes      yes      yes      yes      yes
+``pcap_ct``         yes      yes      yes      yes      yes      yes
+``pypcap``          yes      yes      no       no       no       no
+``pypcapfile``      yes      yes      no       no       no       no
+``pyshark``         yes      yes      yes      yes      no       no
+================== ======== ======== ======== ======== ======== ========
 
 ``pypcap`` and ``pypcapfile`` stop at 3.11, and ``pyshark`` at 3.13, for the
 reasons under `Engine prerequisites`_. **Python 3.11 is the last version on which
@@ -202,42 +198,135 @@ Test Environment
 
 .. list-table::
 
-   * - Operating System
-     - macOS 26.6.2
-   * - Chip
-     - Apple M2 Pro
-   * - Memory
-     - 16 GB
+   * - Image (3.10)
+     - ``pcapkit-benchmark:py3.10 (sha256:6308e38915a2613714069a05800c1a14e4486ee260eddb5619727e82b971a004)``
+   * - Image (3.11)
+     - ``pcapkit-benchmark:py3.11 (sha256:1af87ef232d03c867d0c504d75586132994a41bc4f6c3da36db0d6dd37d22fa7)``
+   * - Image (3.12)
+     - ``pcapkit-benchmark:py3.12 (sha256:26a6605738070c5ff5670a12a41c88086745865096363e680577523e5957546a)``
+   * - Image (3.13)
+     - ``pcapkit-benchmark:py3.13 (sha256:584e631d430bd7abdd696492229dd4b0e13a0d92687dba8968c0910ef4727b67)``
+   * - Image (3.14)
+     - ``pcapkit-benchmark:py3.14 (sha256:6c09093cf744db366ad7f1e5fa00ccf8f6ba9e167c298acc52e87acf393d2fa3)``
+   * - Image (3.15)
+     - ``pcapkit-benchmark:py3.15 (sha256:78d25409346c3c97f1df809a69cd021418c6146ba2c096ff00e7d97530addd53)``
+   * - ``pcapkit`` revision
+     - ``cfabfb2d3``
+   * - Python
+     - CPython 3.10.21, 3.11.16, 3.12.14, 3.13.15, 3.14.7, 3.15.1
+   * - Architecture
+     - ``x86_64``
+   * - Capture
+     - ``in.pcap`` -- 605 bytes, SHA-256 ``7aabadca49b329c6...``
+   * - Packets per extraction
+     - 6
+   * - Iterations
+     - 1000 timed extractions per engine per pass, the first discarded as a warm-up
+   * - Passes
+     - 3 over the whole engine set, in 8 environments: ``3.10-pcap_ct``, ``3.10-pypcap``, ``3.11-pcap_ct``, ``3.11-pypcap``, ``3.12-pcap_ct``, ``3.13-pcap_ct``, ``3.14-pcap_ct``, ``3.15-pcap_ct``
+   * - tshark
+     - ``TShark (Wireshark) 4.0.17 (Git v4.0.17 packaged as 4.0.17-0+deb12u3).``
+   * - libpcap
+     - ``libpcap version 1.10.3 (with TPACKET_V3)``
+
+Resolved package versions:
+
+============== ============ =========== ============ =========== ============ ============ ============ ============
+Package        3.10-pcap_ct 3.10-pypcap 3.11-pcap_ct 3.11-pypcap 3.12-pcap_ct 3.13-pcap_ct 3.14-pcap_ct 3.15-pcap_ct
+============== ============ =========== ============ =========== ============ ============ ============ ============
+``dpkt``       1.9.8        1.9.8       1.9.8        1.9.8       1.9.8        1.9.8        1.9.8        1.9.8
+``libpcap``    1.11.0b29    *absent*    1.11.0b29    *absent*    1.11.0b29    1.11.0b29    1.11.0b29    1.11.0b29
+``lxml``       6.1.3        6.1.3       6.1.3        6.1.3       6.1.3        6.1.3        6.1.3        6.1.3
+``pcap-ct``    1.3.0b3      *absent*    1.3.0b3      *absent*    1.3.0b3      1.3.0b3      1.3.0b3      1.3.0b3
+``pypcap``     *absent*     1.3.0       *absent*     1.3.0       *absent*     *absent*     *absent*     *absent*
+``pypcapfile`` 0.12.0       0.12.0      0.12.0       0.12.0      0.12.0       0.12.0       0.12.0       0.12.0
+``pypcapkit``  1.5.0b14     1.5.0b14    1.5.0b14     1.5.0b14    1.5.0b14     1.5.0b14     1.5.0b14     1.5.0b14
+``pyshark``    0.6          0.6         0.6          0.6         0.6          0.6          0.6          0.6
+``scapy``      2.8.0        2.8.0       2.8.0        2.8.0       2.8.0        2.8.0        2.8.0        2.8.0
+============== ============ =========== ============ =========== ============ ============ ============ ============
 
 Test Results
 ------------
 
-Measured with ``examples/legacy_smoke/test_time.py``: 1,000 timed
-extractions of ``examples/captures/in.pcap`` per engine and Python version. The
-first extraction is discarded as a warm-up. Values are milliseconds per packet.
+Measured with ``examples/benchmark/run.sh``: 1000 timed
+extractions of ``examples/captures/in.pcap`` per engine and Python version.
+The first extraction is discarded as a warm-up. Values are milliseconds per
+packet, the median of 3 passes.
 
-=================== ======= ======= ======= ======= =======
-Engine              3.10    3.11    3.12    3.13    3.14
-=================== ======= ======= ======= ======= =======
-``pypcapfile`` [1]_ 0.0133  0.0093      --      --      --
-``dpkt``             0.0163  0.0113  0.0118  0.0117  0.0125
-``pypcap`` [2]_      0.0289  0.0212      --      --      --
-``pcap_ct``          0.0364  0.0320  0.0366  0.0322  0.0396
-``scapy``            0.1082  0.0822  0.0877  0.0832  0.0967
-``pcapkit``          0.2342  0.1906  0.1985  0.1920  0.2392
-``pyshark`` [3]_    18.8158 18.7852 19.2694 20.3751      --
-=================== ======= ======= ======= ======= =======
+All columns come from one run on one machine, differing in the interpreter
+and nothing else, so they may be compared with each other. They may not be
+compared with figures from another machine: absolute times are a property of
+the host as much as of the engine.
+
+================ ======= ======= ======= ======= ======= =======
+Engine           3.10    3.11    3.12    3.13    3.14    3.15
+================ ======= ======= ======= ======= ======= =======
+``pypcapfile`` †  0.0320  0.0259      --      --      --      --
+``dpkt``          0.0583  0.0465  0.0503  0.0533  0.0530  0.0523
+``pypcap`` †      0.1018  0.0890      --      --      --      --
+``pcap_ct``       0.1134  0.0988  0.1149  0.1167  0.1178  0.2702
+``scapy``         0.1896  0.1607  0.1882  0.1813  0.1816  0.1776
+``pcapkit``       0.5204  0.4301  0.4869  0.4949  0.4887  0.4814
+``pyshark`` †    30.9862 31.0405 30.7182 31.4615      --      --
+================ ======= ======= ======= ======= ======= =======
 
 The unavailable cells were attempted. They are not zeroes and must not be
 compared with a measured row.
 
-.. [1] `PyPCAPFile`_ 0.12.0 imports :mod:`imp`, which Python removed in 3.12.
+``†`` not measured, or not measured in full, for the
+reason recorded at the time:
 
-.. [2] `PyPCAP`_ 1.3.0 does not build on Python 3.12+: its pre-generated
-   :file:`pcap.c` does not compile against that C API.
+* ``pypcapfile`` on 3.12 -- pypcapfile does not support Python 3.12; its linklayer module imports \`imp\`, removed in Python 3.12
+* ``pypcapfile`` on 3.13 -- pypcapfile does not support Python 3.13; its linklayer module imports \`imp\`, removed in Python 3.12
+* ``pypcapfile`` on 3.14 -- pypcapfile does not support Python 3.14; its linklayer module imports \`imp\`, removed in Python 3.12
+* ``pypcapfile`` on 3.15 -- pypcapfile does not support Python 3.15; its linklayer module imports \`imp\`, removed in Python 3.12
+* ``pypcap`` on 3.12, 3.13, 3.14, 3.15 -- pypcap is not installable on this interpreter, so it was not built into this image: pypcap 1.3.0 ships a pcap.c pre-generated by Cython 0.29.32, which does not compile against the Python 3.12+ C API. The engine is unsupported here rather than broken here.
+* ``pyshark`` on 3.14 -- pyshark does not support Python 3.14; it builds its event loop with \`asyncio.get\_event\_loop\_policy().get\_event\_loop()\`, which raises RuntimeError from Python 3.14 when no current event loop exists
+* ``pyshark`` on 3.15 -- pyshark does not support Python 3.15; it builds its event loop with \`asyncio.get\_event\_loop\_policy().get\_event\_loop()\`, which raises RuntimeError from Python 3.14 when no current event loop exists
 
-.. [3] `PyShark`_ 0.6 cannot create the implicit event loop it expects on Python
-   3.14; it ran on 3.10--3.13.
+Test Results (Relative)
+-----------------------
+
+Times relative to ``pcapkit``, which is 1 by definition; lower is
+faster. Each ratio is taken against the baseline measured in the same
+environment on the same pass, so the machine cancels out. "Observed range" is
+the smallest and largest ratio actually seen across the passes.
+
+Ratios are pooled across every environment in the run, which means across
+every Python version measured as well as both ``pcap`` providers. The
+observed range therefore includes any disagreement between interpreters
+about an engine; the per-version table is where that is broken out.
+
+============== ============= ============== =======
+Engine         Relative time Observed range Samples
+============== ============= ============== =======
+``pypcapfile`` 0.0613        0.0597-0.0623  12
+``dpkt``       0.108         0.101-0.139    24
+``pypcap``     0.203         0.198-0.209    6
+``pcap_ct`` ‡  0.236         0.215-0.566    18
+``scapy`` ‡    0.372         0.355-0.388    24
+``pcapkit``    1             *baseline*     24
+``pyshark`` ¶  63.6          58.7-72.9      18
+============== ============= ============== =======
+
+The single absolute figure, for converting the ratios back: ``pcapkit``
+itself ran at **0.4879 ms per packet** on this run
+(0.425-0.522 across 24 passes). Absolute times are a property of the
+machine as much as of the engine, which is why every other figure here is a
+ratio.
+
+Run-to-run spread: the median row varied by 8.9% of its ratio across
+the passes and the widest by 149%. A gap between two rows that is
+smaller than that is noise, not a result.
+
+``‡`` this run does not separate these rows: their observed
+ranges overlap, so the order their medians suggest is not established.
+
+``¶`` measured, but on less evidence than the rows beside it.
+What was collected is real; what was lost is named here rather than left to
+be inferred from the pass count:
+
+* ``pyshark`` -- 2 individual extraction(s) failed and were discarded
 
 Installation
 ============

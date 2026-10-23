@@ -54,17 +54,14 @@
 # can say the engine is unsupported on the interpreter rather than that it failed
 # here.
 #
-# ## 3.15
+# ## Adding a version
 #
-# Opt-in, and allowed to fail. There is no released `python:3.15-slim-bookworm`;
-# `3.15-rc-slim-bookworm` is a release candidate and the tag moves with every rc, so
-# the digest below freezes one particular candidate and will name an older rc as
-# time passes -- bump it deliberately, or drop the row when 3.15 ships. Opt-in is
-# this file's own tier, not CI's: the repository's CI runs 3.15 as a blocking,
-# supported leg (#1633). `run.sh --pythons ...,3.15` measures it, a plain
-# `run.sh` does not, and a
-# version that cannot be built is reported as a missing column with the reason
-# rather than dropped.
+# A new interpreter gets a row once `python:<version>-slim-bookworm` is a released
+# image, pinned by the digest of that day's index. A release candidate stays out of
+# the default tier: its tag moves with every rc, so a pinned rc names an older
+# candidate as time passes. `opt-in` exists for such a row -- `run.sh --pythons`
+# measures it, a plain `run.sh` does not -- and a version that cannot be built is
+# reported as a missing column with the reason rather than dropped.
 #
 # version  base image                                                                            pypcap      tier
 3.10       python:3.10-slim-bookworm@sha256:68d914ec641a0b69267ce65184d000a2bc3a9ee2590ab702b82250ab2385735a       pypcap      default
@@ -72,4 +69,4 @@
 3.12       python:3.12-slim-bookworm@sha256:782412e85d0f0984994c290652577d4018aff08145c85b262bb63dc0c7522254       no-pypcap   default
 3.13       python:3.13-slim-bookworm@sha256:ed86c82274b3c69b52fb5820f358f0bd7df0b603332063cb5c6e32bd220c3e6e       no-pypcap   default
 3.14       python:3.14-slim-bookworm@sha256:9ab8d9c8514b44f90cf0029dd42fdd7e9e211e639c8b995304cc04568dee900f       no-pypcap   default
-3.15       python:3.15-rc-slim-bookworm@sha256:984bee69a9c4abf834e9c458a0d81ef10332a3c9d3a8666e566f46cc23935599    no-pypcap   opt-in
+3.15       python:3.15-slim-bookworm@sha256:575f8bc12ec26542e0678bc6b60e385218248019d433157ec327264a78c3a853       no-pypcap   default

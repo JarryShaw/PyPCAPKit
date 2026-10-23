@@ -929,8 +929,10 @@ def render_versions_rst(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, An
                if version in measured_series}
 
     lines = []  # type: list[str]
+    # Underlined with `-`, the level these sections take in docs/source/index.rst, so
+    # the snippet pastes there verbatim; `render_rst` follows suit.
     lines.append('Test Results')
-    lines.append('~~~~~~~~~~~~')
+    lines.append('------------')
     lines.append('')
     lines.append(f"Measured with ``examples/benchmark/run.sh``: {first['rounds']} timed")
     lines.append('extractions of ``examples/captures/in.pcap`` per engine and Python version.')
@@ -1044,7 +1046,7 @@ def render_rst(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, Any]]',
     lines = []  # type: list[str]
 
     lines.append('Test Environment')
-    lines.append('~~~~~~~~~~~~~~~~')
+    lines.append('----------------')
     lines.append('')
     lines.append('.. list-table::')
     lines.append('')
@@ -1066,7 +1068,7 @@ def render_rst(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, Any]]',
     # about.
     heading = 'Test Results (Relative)'
     lines.append(heading)
-    lines.append('~' * len(heading))
+    lines.append('-' * len(heading))
     lines.append('')
     lines.append(f'Times relative to ``{BASELINE_LABEL}``, which is 1 by definition; lower is')
     lines.append('faster. Each ratio is taken against the baseline measured in the same')
