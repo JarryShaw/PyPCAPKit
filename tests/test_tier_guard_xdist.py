@@ -196,10 +196,10 @@ class XdistSubprocessTests(unittest.TestCase):
 
     #: Sorts late and is unambiguously a probe, in case a stray copy is ever left
     #: behind by an interrupted run. Kept as an alias of
-    #: :data:`tests.conftest.PROBE_MODULE_NAME` rather than a second literal --
+    #: :data:`tests._tiers.PROBE_MODULE_NAME` rather than a second literal --
     #: that name is what tells :func:`tests.conftest._tier_guard_reader_lock` to
     #: leave this class's own writes unlocked, and the two must never drift.
-    PROBE_NAME = _conftest.PROBE_MODULE_NAME
+    PROBE_NAME = _tiers.PROBE_MODULE_NAME
 
     def setUp(self) -> None:
         reason = _tiers.guard_unavailable_reason()
@@ -292,7 +292,7 @@ _CRASH_PLUGIN_SOURCE = textwrap.dedent(f"""
 
 
     def _crashing_run(args, *posargs, **kwargs):
-        if any(str(arg).endswith({_conftest.PROBE_MODULE_NAME!r}) for arg in args):
+        if any(str(arg).endswith({_tiers.PROBE_MODULE_NAME!r}) for arg in args):
             os._exit(1)
         return _run(args, *posargs, **kwargs)
 
@@ -323,7 +323,7 @@ class ProbeWorkerCrashTests(unittest.TestCase):
         if reason is not None:
             self.skipTest(f'git cannot answer here: {reason}')
 
-        self.probe_path = _tiers.TESTS_ROOT / 'protocols' / _conftest.PROBE_MODULE_NAME
+        self.probe_path = _tiers.TESTS_ROOT / 'protocols' / _tiers.PROBE_MODULE_NAME
         # Exclusive for the whole throwaway session and until the stale probe is
         # gone, so a concurrent SuiteIsCleanTests never sees it; LIFO cleanups
         # unlink while still holding the lock, as in XdistSubprocessTests.
@@ -618,7 +618,7 @@ class ProbeLeftoverCheckTests(unittest.TestCase):
         root = pathlib.Path(tempfile.mkdtemp(prefix='pcapkit-1758-'))
         self.addCleanup(shutil.rmtree, root, ignore_errors=True)
         (root / 'protocols').mkdir()
-        self.probe_path = root / 'protocols' / _conftest.PROBE_MODULE_NAME
+        self.probe_path = root / 'protocols' / _tiers.PROBE_MODULE_NAME
         for patcher in (
             unittest.mock.patch.object(_tiers, 'TESTS_ROOT', root),
             unittest.mock.patch.object(_tiers, 'guard_unavailable_reason', return_value=None),

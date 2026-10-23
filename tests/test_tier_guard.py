@@ -51,7 +51,7 @@ import textwrap
 import unittest
 import unittest.mock
 
-from tests import _dependency_gates, _tiers
+from tests import _dependency_gates, _tiers, conftest as _conftest
 
 #: Test tier (#1958): tests/conftest.py runs this guard at collection on every leg,
 #: with that leg's own ast module.
@@ -1328,12 +1328,83 @@ class SuiteIsCleanTests(unittest.TestCase):
         if reason is not None:
             self.skipTest(f'git cannot answer here: {reason}')
 
+        # Where the tier lock is a no-op, the probe on disk may be another
+        # worker's live one, a violation nobody committed (#2114). Under the
+        # lock it is only ever a leftover, so it is scanned there.
+        unlocked = _conftest.fcntl is None
         findings = []  # type: list[str]
         for path in sorted(_tiers.TESTS_ROOT.rglob('*.py')):
-            if _tiers.is_unit_tier(path):
+            if _tiers.is_unit_tier(path) and not (unlocked and _tiers.is_probe_module(path)):
                 findings.extend(_tiers.audit_module(path))
 
         self.assertEqual(findings, [], '\n\n'.join(findings))
+
+
+class ProbeModuleTests(unittest.TestCase):
+    """The xdist probe never reaches a tier listing, on disk or just gone (#2114).
+
+    :class:`tests.test_tier_guard_xdist.XdistSubprocessTests` writes the probe
+    and removes it under a lock that is a no-op off POSIX, so on Windows a
+    listing can see it and :func:`~tests._tiers.module_tier` then find it gone.
+    Each test builds its own :file:`tests/` in a temporary directory, so none
+    touches the tree or contends with a real probe.
+
+    """
+
+    def setUp(self) -> None:
+        root = pathlib.Path(tempfile.mkdtemp(prefix='pcapkit-2114-')).resolve()
+        self.addCleanup(shutil.rmtree, root, ignore_errors=True)
+        tests = root / 'tests'
+        (tests / 'protocols').mkdir(parents=True)
+        (tests / 'test_kept.py').write_text('', encoding='utf-8')
+        self.probe = tests / 'protocols' / _tiers.PROBE_MODULE_NAME
+        self.probe.write_text('', encoding='utf-8')
+        for patcher in (unittest.mock.patch.object(_tiers, 'ROOT', root),
+                        unittest.mock.patch.object(_tiers, 'TESTS_ROOT', tests)):
+            patcher.start()
+            self.addCleanup(patcher.stop)
+
+    def test_the_probe_on_disk_is_not_a_suite_module(self) -> None:
+        """Only the reserved path is left out: the same name elsewhere is listed."""
+        elsewhere = _tiers.TESTS_ROOT / _tiers.PROBE_MODULE_NAME
+        elsewhere.write_text('', encoding='utf-8')
+        self.assertTrue(_tiers.is_probe_module(self.probe))
+        self.assertTrue(_tiers.is_probe_module(f'tests/protocols/{_tiers.PROBE_MODULE_NAME}'))
+        self.assertFalse(_tiers.is_probe_module(elsewhere))
+        self.assertEqual(_tiers.suite_modules(),
+                         ('tests/test_kept.py', f'tests/{_tiers.PROBE_MODULE_NAME}'))
+
+    def test_a_probe_removed_mid_listing_does_not_break_the_tiers(self) -> None:
+        """As on the Windows leg: the probe is removed between the walk and the tier read.
+
+        Fails without the fix with the Windows leg's ``ValueError: ... is not a
+        test module (tests/**/test_*.py), so it has no test tier``.
+
+        """
+        real = _tiers._test_module
+
+        def removed_first(path: 'pathlib.Path | str') -> 'pathlib.Path':
+            self.probe.unlink(missing_ok=True)
+            return real(path)
+
+        with unittest.mock.patch.object(_tiers, '_test_module', side_effect=removed_first):
+            self.assertEqual(_tiers.latest_tier_paths.__wrapped__(), ('tests/test_kept.py',))
+            self.assertEqual(_tiers.all_tier_paths.__wrapped__(), ())
+        self.assertFalse(self.probe.exists())
+
+    def test_the_whole_suite_scan_skips_the_probe_only_where_unlocked(self) -> None:
+        """:class:`SuiteIsCleanTests` still reports a leftover probe wherever the lock works."""
+        case = SuiteIsCleanTests('test_no_unit_tier_module_depends_on_a_generated_capture')
+        method = case.test_no_unit_tier_module_depends_on_a_generated_capture
+        with unittest.mock.patch.object(_tiers, 'guard_unavailable_reason', return_value=None), \
+                unittest.mock.patch.object(_tiers, 'audit_module',
+                                           side_effect=lambda path: [str(path)] * _tiers.is_probe_module(path)):
+            with unittest.mock.patch.object(_conftest, 'fcntl', None):
+                method()
+            with unittest.mock.patch.object(_conftest, 'fcntl', object()):
+                with self.assertRaises(AssertionError) as caught:
+                    method()
+        self.assertIn(str(self.probe), str(caught.exception))
 
 
 class DegradationTests(unittest.TestCase):

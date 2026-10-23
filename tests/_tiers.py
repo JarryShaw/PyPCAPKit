@@ -185,6 +185,7 @@ __all__ = [
     'FIXTURE_TIER_SUFFIXES', 'FIXTURE_TIER_DIRS', 'FIXTURE_TIER_SELECTOR',
     'TIER_ALL', 'TIER_LATEST', 'TIERS', 'TIER_MARKER', 'LATEST_TIER_SELECTOR', 'FIXTURE_ALL_TIER_SELECTOR',
     'InvalidTierError', 'DEFAULT_TIER', 'suite_modules', 'declared_tier', 'branches_on_interpreter', 'module_tier',
+    'PROBE_MODULE_NAME', 'is_probe_module',
     'all_tier_paths', 'latest_tier_paths',
     'PROJECT_PINS_DIR', 'PROJECT_PINS_SELECTOR', 'PROJECT_PIN_PACKAGE', 'LOADABLE_DIRS',
     'varies_by_interpreter', 'is_project_pin', 'project_pin_paths',
@@ -200,6 +201,14 @@ __all__ = [
 ROOT = pathlib.Path(__file__).resolve().parents[1]
 #: Directory holding the test suite, which is what tier membership is relative to.
 TESTS_ROOT = ROOT / 'tests'
+#: Reserved name for the probe module
+#: :class:`tests.test_tier_guard_xdist.XdistSubprocessTests` writes to disk, at
+#: :func:`is_probe_module`'s path, to reproduce a real tier violation under a real
+#: :program:`pytest` run. Defined here, and imported by :mod:`tests.conftest`,
+#: which has to recognise the probe without importing that module: the nested
+#: :program:`pytest` subprocess the probe test spawns loads the conftest but never
+#: collects ``test_tier_guard_xdist.py`` at all.
+PROBE_MODULE_NAME = 'test_zzz_xdist_guard_probe_unit.py'
 #: Directory holding the sample captures, committed and generated alike.
 SAMPLE_ROOT = ROOT / 'examples' / 'captures'
 #: Command that rebuilds every generated capture. ``make samples`` runs it too.
@@ -881,15 +890,36 @@ def varies_by_interpreter(path: 'pathlib.Path | str') -> 'bool':
     return False
 
 
+def is_probe_module(path: 'pathlib.Path | str') -> 'bool':
+    """Whether ``path`` is the reserved probe module, :data:`PROBE_MODULE_NAME` in :file:`tests/protocols/`.
+
+    Never a suite module, though it is a ``test_*.py`` file while it exists:
+    :mod:`tests.conftest`'s ``collect_ignore`` keeps it out of every recursive
+    collection, and :func:`suite_modules` leaves it out.
+
+    Args:
+        path: Path to a module, absolute or relative to :data:`ROOT`.
+
+    """
+    candidate = pathlib.Path(path)
+    if not candidate.is_absolute():
+        candidate = ROOT / candidate
+    return candidate == TESTS_ROOT / 'protocols' / PROBE_MODULE_NAME
+
+
 def suite_modules() -> 'tuple[str, ...]':
     """Every test module under :file:`tests/`, relative to :data:`ROOT`, sorted.
 
     What pytest collects and :file:`util/run_unittest_leg.py` discovers: the
-    ``test_*.py`` files, ``python_files`` in :file:`pyproject.toml`.
+    ``test_*.py`` files, ``python_files`` in :file:`pyproject.toml`, less the
+    :func:`probe module <is_probe_module>`, which pytest never collects either.
 
     """
+    # The probe comes and goes under another worker's feet, and the tier lock
+    # that serialises it is a no-op off POSIX: listed, it fails module_tier()
+    # once it has gone (#2114).
     return tuple(sorted(path.relative_to(ROOT).as_posix() for path in TESTS_ROOT.rglob('test_*.py')
-                        if '__pycache__' not in path.parts))
+                        if '__pycache__' not in path.parts and not is_probe_module(path)))
 
 
 def _test_module(path: 'pathlib.Path | str') -> 'pathlib.Path':

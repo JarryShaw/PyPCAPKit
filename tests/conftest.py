@@ -57,7 +57,7 @@ from typing import TYPE_CHECKING
 import pytest
 
 from tests._support import ISOLATED_PREFIXES, restore_modules, snapshot_modules
-from tests._tiers import (ROOT, TierGuardWarning, audit_module, guard_unavailable_reason,
+from tests._tiers import (PROBE_MODULE_NAME, ROOT, TierGuardWarning, audit_module, guard_unavailable_reason,
                           is_unit_tier)
 
 try:
@@ -487,17 +487,9 @@ def pytest_collection_modifyitems(session: 'pytest.Session', config: 'pytest.Con
         raise pytest.UsageError(message)
 
 
-#: Reserved name for the probe module
-#: :class:`tests.test_tier_guard_xdist.XdistSubprocessTests` writes to disk to
-#: reproduce a real tier violation under a real :program:`pytest` run. Defined
-#: here rather than duplicated as a literal in that module because
-#: :func:`_tier_guard_reader_lock` below has to recognise it without importing
-#: that module: the nested :program:`pytest` subprocess the probe test spawns
-#: loads this conftest but never collects ``test_tier_guard_xdist.py`` at all.
-PROBE_MODULE_NAME = 'test_zzz_xdist_guard_probe_unit.py'
-
-#: Keeps the probe out of every session that does not name it on the command
-#: line (GitHub issue #1756). A worker that dies mid-probe never runs the
+#: Keeps the probe, :data:`tests._tiers.PROBE_MODULE_NAME`, out of every
+#: session that does not name it on the command line (GitHub issue #1756),
+#: as :func:`tests._tiers.suite_modules` keeps it out of the tiers. A worker that dies mid-probe never runs the
 #: probe's cleanup, and xdist's replacement worker then collects ``tests/``
 #: afresh: without this, its collection-time audit finds the stale probe, sets
 #: ``session.shouldfail``, and the controller interrupts the whole session.
@@ -506,14 +498,15 @@ PROBE_MODULE_NAME = 'test_zzz_xdist_guard_probe_unit.py'
 #: ``session.isinitpath``), so the probe's own nested run, which passes the
 #: probe's path explicitly, still collects and audits it. Only this one
 #: reserved path is ignored, and :class:`tests.test_tier_guard.SuiteIsCleanTests`
-#: still scans it on disk like any other module.
+#: still scans it on disk like any other module wherever :func:`_tier_guard_lock`
+#: can keep the live probe out of that scan.
 collect_ignore = [f'protocols/{PROBE_MODULE_NAME}']
 
 #: Module names whose own tests manage :func:`_tier_guard_lock` themselves and
 #: must not also take the shared hold :func:`_tier_guard_reader_lock` puts on
 #: every other unit-tier test.
 #:
-#: :data:`PROBE_MODULE_NAME` is excluded because it runs *inside* the writer's
+#: :data:`~tests._tiers.PROBE_MODULE_NAME` is excluded because it runs *inside* the writer's
 #: exclusive hold by construction (that hold is what protects it), so taking a
 #: shared one too would be a self-deadlock: the same lock file, opened twice by
 #: the one process tree that also has to wait on itself to finish before either
@@ -607,7 +600,7 @@ def _tier_guard_lock(exclusive: 'bool') -> 'Iterator[None]':
     module on disk with :meth:`pathlib.Path.rglob`, which is sound against a
     committed tree but not against a concurrent write:
     :class:`~tests.test_tier_guard_xdist.XdistSubprocessTests` deliberately
-    writes a real violation to disk, under :data:`PROBE_MODULE_NAME`, to
+    writes a real violation to disk, under :data:`~tests._tiers.PROBE_MODULE_NAME`, to
     reproduce the tier guard's own collection-time diagnostic end to end.
     Serially the two never overlap; under the ``-n auto --dist load`` this
     suite's CI jobs now use, pytest-xdist may hand the two tests to different
@@ -626,11 +619,12 @@ def _tier_guard_lock(exclusive: 'bool') -> 'Iterator[None]':
     well as threads of one process, which is what makes the two truly unable to
     overlap rather than merely unlikely to.
 
-    A no-op wherever :data:`fcntl` is :data:`None` -- true only off POSIX, where
-    nothing in this suite's CI turns ``-n auto`` on either (every job that does
-    runs ``ubuntu-latest``; see :file:`.github/workflows/unit-tests.yml` and
-    :file:`.github/workflows/python-compatibility.yml`), so a platform this
-    cannot protect is exactly as exposed to the race as it always was, not more.
+    A no-op wherever :data:`fcntl` is :data:`None` -- true only off POSIX, such
+    as the Windows leg of :file:`.github/workflows/experimental.yml`, which runs
+    ``-n auto`` too. Nothing that has to stay correct there relies on the lock
+    (#2114): :func:`tests._tiers.suite_modules` never lists the probe, and
+    :class:`~tests.test_tier_guard.SuiteIsCleanTests` skips it where this is a
+    no-op. :func:`msvcrt.locking` is no substitute, since it has no shared mode.
 
     Linux :func:`fcntl.flock` grants a shared request whenever no exclusive
     hold is *granted*, however long a writer has been waiting, so readers whose
