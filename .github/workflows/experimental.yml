@@ -489,7 +489,11 @@ jobs:
 
       # As `test`'s, under a name of its own: ci-timing.yml reads `test`'s
       # `junit-unit-*` files alone, and this one is the record of GraalPy's
-      # runtime. The glob takes each shard's JUnit file too (#1963).
+      # runtime. The glob takes each shard's JUnit file too (#1963). #2073: a
+      # run the watcher stopped as superseded has pytest killed before it
+      # writes junit.xml, and its `Superseded` notice already says why, so the
+      # watcher's `stopped=true` turns the missing-file warning off; a run that
+      # ran to its end and wrote no file still warns.
       - name: Upload test timings
         if: ${{ !cancelled() && steps.install.outcome == 'success' }}
         continue-on-error: true
@@ -497,6 +501,7 @@ jobs:
         with:
           name: junit-experimental-${{ matrix.python-version }}
           path: ${{ runner.temp }}/junit*.xml
+          if-no-files-found: ${{ steps.tests.outputs.stopped == 'true' && 'ignore' || 'warn' }}
           retention-days: 14
 
       # #1740: what `tests-status` and the monitor's last sample say about the

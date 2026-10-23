@@ -892,7 +892,11 @@ in it, since they run as the runner's user under a root-owned ``sudo`` and in
 ``/etc/sudoers`` sets ``use_pty``, which sudoers(5) says has no effect where ``sudo``
 has no terminal, as in a step; the scope is reached by name either way. Once the
 command exits, the watcher writes a ``Superseded`` notice and a job-summary line and
-exits 0, so the leg ends green and frees its runner. Every wait is bounded: where the
+exits 0, so the leg ends green and frees its runner. It also writes ``stopped=true``
+to the step's outputs: pytest, stopped, writes no ``junit.xml``, so ``Upload test
+timings`` then sets ``if-no-files-found: ignore`` rather than warn of the missing
+file the notice already explains (`#2073
+<https://github.com/JarryShaw/PyPCAPKit/issues/2073>`__). Every wait is bounded: where the
 command outlives SIGKILL by 15 seconds, it writes a ``Superseded run not stopped``
 warning and exits 70, not 0, since the tests may run on, holding the step's output,
 until ``timeout`` or the step's cap ends them, and the failed step is then a warning
