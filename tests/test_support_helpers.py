@@ -96,7 +96,8 @@ STALL = 1.5
 
 #: :func:`signal.alarm` itself, for :meth:`TimeLimitTests.spin` to reach while
 #: :meth:`TimeLimitTests.held_deadline` stands in for the name.
-_ALARM = signal.alarm
+#: ``None`` where there is no :func:`signal.alarm`, as on Windows, whose cases skip (#2102).
+_ALARM = getattr(signal, 'alarm', None)
 
 
 class Closeable:
@@ -239,7 +240,7 @@ class PropagationTests(unittest.TestCase):
             close_extractor(Extractor(Closeable(KeyboardInterrupt()), Closeable()))
 
 
-@unittest.skipUnless(hasattr(signal, 'SIGALRM'), 'signal.alarm is unavailable')
+@unittest.skipUnless(hasattr(signal, 'SIGALRM'), 'signal.alarm is unavailable, as on Windows (#2102)')
 class TimeLimitTests(unittest.TestCase):
     """A deadline that arrives, and an enclosing one that survives.
 

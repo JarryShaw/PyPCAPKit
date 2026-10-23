@@ -65,7 +65,8 @@ STALL = 1.5
 
 #: :func:`signal.alarm` itself, for :class:`_Spin` to reach while its
 #: :meth:`_Spin.alarm` stands in for the name.
-_ALARM = signal.alarm
+#: ``None`` where there is no :func:`signal.alarm`, as on Windows, whose cases skip (#2102).
+_ALARM = getattr(signal, 'alarm', None)
 
 
 def _load_generator() -> 'types.ModuleType':
@@ -214,7 +215,7 @@ class _RaiseAt:
         return parsed
 
 
-@unittest.skipUnless(hasattr(signal, 'SIGALRM'), 'needs signal.SIGALRM')
+@unittest.skipUnless(hasattr(signal, 'SIGALRM'), 'signal.alarm is unavailable, as on Windows (#2102)')
 class GeneratorDeadlineScaleTests(unittest.TestCase):
     """:data:`DEADLINE`, as armed under each value of the scale."""
 

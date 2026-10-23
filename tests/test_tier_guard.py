@@ -365,6 +365,7 @@ def stubbed_argv(script: 'str', env: 'dict[str, str]') -> 'list[str]':
 class PythonStubTests(unittest.TestCase):
     """#1969: :data:`PYTHON_STUB` records the command util/cap_file_size.py caps without a real ``python``."""
 
+    @unittest.skipIf(os.name == 'nt', 'util/cap_file_size.py is POSIX-only (#2102)')
     def test_the_capped_command_is_recorded_without_the_real_interpreter(self) -> None:
         with tempfile.TemporaryDirectory() as temp:
             for name, text in (('python', PYTHON_STUB), ('real', '#!/bin/sh\necho "$@" >> "$REAL_LOG"\n')):

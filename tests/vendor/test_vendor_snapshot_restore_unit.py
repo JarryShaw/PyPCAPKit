@@ -339,10 +339,12 @@ class SnapshotRestoreTests(unittest.TestCase):
         # collapsing rounds 6-8's three separate mode-permutation tests into
         # one -- restore preserves mode as a side effect of shutil.copy2
         # plus a rename, uniformly, rather than needing a case-by-case check.
-        mode = stat.S_IMODE(os.stat(const_file).st_mode)
-        self.assertEqual(mode, 0o640,
-                         f'a destination that existed at 0o640 must still be 0o640 after a '
-                         f'failed run, not {oct(mode)}')
+        # Windows chmod sets only the read-only bit, so 0o640 reads back as 0o666 (#2102).
+        if os.name != 'nt':
+            mode = stat.S_IMODE(os.stat(const_file).st_mode)
+            self.assertEqual(mode, 0o640,
+                             f'a destination that existed at 0o640 must still be 0o640 after a '
+                             f'failed run, not {oct(mode)}')
         self.assertEqual(os.listdir(self._tempdir.name), ['const.py'],
                          'a failed run must not leave a backup file behind')
 

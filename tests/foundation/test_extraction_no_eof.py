@@ -107,6 +107,7 @@ gets :data:`STARTUP`, and only what follows counts against :data:`DEADLINE`.
 from __future__ import annotations
 
 import importlib.util
+import os
 import subprocess  # nosec: B404
 import sys
 import textwrap
@@ -157,15 +158,16 @@ READY = 'NO-EOF-READY'
 
 #: How a child caps its address space. GraalPy's ``resource`` has no ``setrlimit``
 #: (#1963); a child there is held by the heap cap the leg gives every GraalPy
-#: process, in ``GRAAL_PYTHON_VM_ARGS``, which it inherits.
-CHILD_CAP = ('' if sys.implementation.name == 'graalpy'
-             else 'resource.setrlimit(resource.RLIMIT_AS, ({cap}, {cap}))')
+#: process, in ``GRAAL_PYTHON_VM_ARGS``, which it inherits. Windows has no
+#: ``resource`` at all (#2102), so a child there is left uncapped too.
+CHILD_CAP = ('' if sys.implementation.name == 'graalpy' or os.name == 'nt'
+             else 'import resource\nresource.setrlimit(resource.RLIMIT_AS, ({cap}, {cap}))')
 
 #: Preamble for every child: cap the address space, put the tree under test first
 #: on ``sys.path``, *prove* that is the tree which got imported, and warm up with
 #: a plain extraction of the capture, which terminates on every tree.
 CHILD_PREAMBLE = """
-import resource, sys, warnings
+import sys, warnings
 """ + CHILD_CAP + """
 sys.path.insert(0, {root!r})
 warnings.simplefilter('ignore')
