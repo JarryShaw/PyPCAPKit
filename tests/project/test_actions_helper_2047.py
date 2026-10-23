@@ -40,8 +40,8 @@ __tier__ = 'LATEST'
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 HELPER = ROOT / 'util' / '_actions.py'
 #: The scripts that import the helper.
-SCRIPTS = ('apt_packages', 'classify_changes', 'codeql_report', 'coverage_report', 'leg_summary', 'pip_install',
-           'regenerate_samples', 'vendor_code_changed')
+SCRIPTS = ('apt_packages', 'ci_timing', 'classify_changes', 'codeql_report', 'coverage_report', 'leg_summary',
+           'pip_install', 'regenerate_samples', 'vendor_code_changed', 'vendor_test_gate')
 #: The top-level modules the helper may import, each in Python 3.7's standard
 #: library: the running interpreter's :data:`sys.stdlib_module_names` would
 #: pass ``tomllib``, which 3.7 lacks.
@@ -49,6 +49,7 @@ STDLIB_37 = frozenset({'__future__', 'contextlib', 'os', 'subprocess', 'sys', 't
 #: A trivial run of each script, ``(arguments, environment)``, that gets past its imports.
 RUNS = {
     'apt_packages': (['--help'], {}),
+    'ci_timing': (['--help'], {}),
     'classify_changes': ([], {'OWN_PR': 'false'}),
     'codeql_report': (['--help'], {}),
     'coverage_report': (['--help'], {}),
@@ -56,6 +57,7 @@ RUNS = {
     'pip_install': (['--help'], {}),
     'regenerate_samples': (['--help'], {}),
     'vendor_code_changed': (['--help'], {}),
+    'vendor_test_gate': (['--help'], {}),
 }
 #: ``-X importtime``'s line for a module, by its name.
 IMPORT_TIME = re.compile(r'^import time:.*\|\s*(\S+)\s*$', re.M)

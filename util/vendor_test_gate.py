@@ -73,6 +73,11 @@ import tempfile
 import time
 from typing import TYPE_CHECKING, NamedTuple
 
+try:  # #2047: run as `python util/<script>.py`, with util/ first on sys.path
+    import _actions
+except ImportError:  # imported as util.<script>, or loaded by path, from the repository root
+    from util import _actions
+
 try:
     import psutil
 except ImportError:  # the test extra installs it on CPython only
@@ -218,11 +223,6 @@ def _ps_group_rss(pgid: 'int') -> 'Optional[int]':
     return total
 
 
-def escape(text: 'str') -> 'str':
-    """``text`` as the data of a workflow command."""
-    return text.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A')
-
-
 class Gate:
     """The test command, run on some of ``changes`` at a time."""
 
@@ -278,21 +278,20 @@ class Gate:
 
         cache = tempfile.mkdtemp(prefix='vendor-test-gate-')
         env['PYTHONPYCACHEPREFIX'] = cache
-        print(f'::group::{label}', flush=True)
         try:
-            child = subprocess.Popen(self.command, env=env,  # nosec B603
-                                     start_new_session=True, preexec_fn=cap)
-            try:
-                stopped = self._watch(child)
-            finally:
-                # Whatever the run left running in its session goes with it,
-                # and the run itself is reaped, however this was left.
-                with contextlib.suppress(ProcessLookupError, PermissionError):
-                    os.killpg(child.pid, signal.SIGKILL)
-                with contextlib.suppress(subprocess.TimeoutExpired):
-                    child.wait(timeout=GRACE)
+            with _actions.group(label):
+                child = subprocess.Popen(self.command, env=env,  # nosec B603
+                                         start_new_session=True, preexec_fn=cap)
+                try:
+                    stopped = self._watch(child)
+                finally:
+                    # Whatever the run left running in its session goes with it,
+                    # and the run itself is reaped, however this was left.
+                    with contextlib.suppress(ProcessLookupError, PermissionError):
+                        os.killpg(child.pid, signal.SIGKILL)
+                    with contextlib.suppress(subprocess.TimeoutExpired):
+                        child.wait(timeout=GRACE)
         finally:
-            print('::endgroup::', flush=True)
             shutil.rmtree(cache, ignore_errors=True)
         if stopped:
             return stopped
@@ -374,15 +373,15 @@ def report(changes: 'Sequence[Change]', kept: 'FrozenSet[str]', reason: 'str', g
                     "HEAD's copy of it stays, as #872 does for a sub-vendor that raised. The other "
                     'regenerated modules passed and go on to be committed.')
             for path in discarded:
-                print(f'::warning title=Vendor test gate discarded a module::{escape(path)}: '
-                      f"{escape(command)} fails with it on top of HEAD's tree, so HEAD's copy is kept "
-                      'and the rest of the regeneration is committed; see the step summary')
+                _actions.annotate('warning', f"{path}: {command} fails with it on top of HEAD's tree, so "
+                                  "HEAD's copy is kept and the rest of the regeneration is committed; "
+                                  'see the step summary', title='Vendor test gate discarded a module')
         else:
             heading = 'discarded every regenerated module'
             body = (f"{reason}. HEAD's copy of every module is kept, so nothing from this crawl is "
                     f'committed. The tests are `{command}`.')
-            print(f'::warning title=Vendor test gate discarded every regenerated module::'
-                  f'{escape(reason)}; see the step summary')
+            _actions.annotate('warning', f'{reason}; see the step summary',
+                              title='Vendor test gate discarded every regenerated module')
         lines = [f'### :warning: Vendor test gate {heading}', '', body, '',
                  '| Module | Kept |', '| --- | --- |']
         lines.extend(f'| `{change.path}` | {"yes" if change.path in kept else "no"} |' for change in changes)
@@ -390,20 +389,14 @@ def report(changes: 'Sequence[Change]', kept: 'FrozenSet[str]', reason: 'str', g
         lines.extend(f'| {run.number} | {run.modules} of {len(changes)} | {run.result} | {run.seconds:.0f} |'
                      for run in gate.runs)
     if gate.unsampled:
-        print(f'::warning title=Vendor test gate could not sample memory::{SAMPLER} could not read '
-              "the run's memory, so the memory cap was not enforced on every sample")
-    summary = os.environ.get('GITHUB_STEP_SUMMARY')
-    if summary:
-        with open(summary, 'a', encoding='utf-8') as file:
-            print('\n'.join(lines), file=file)
+        _actions.annotate('warning', f"{SAMPLER} could not read the run's memory, so the memory cap "
+                          'was not enforced on every sample', title='Vendor test gate could not sample memory')
+    _actions.summary(*lines, required=False)
     return verdict
 
 
 def write_verdict(verdict: 'str') -> None:
-    output = os.environ.get('GITHUB_OUTPUT')
-    if output:
-        with open(output, 'a', encoding='utf-8') as file:
-            print(f'verdict={verdict}', file=file)
+    _actions.set_output('verdict', verdict, required=False)
 
 
 def _terminate(signum: 'int', frame: 'object') -> 'NoReturn':  # pylint: disable=unused-argument
@@ -452,8 +445,8 @@ def main(argv: 'Optional[list[str]]' = None) -> int:
         strays = [path for path in changed_modules() if path not in set(paths)]
         apply(snapshot(strays), frozenset())
         for path in strays:
-            print(f'::warning title=Vendor test gate restored a module::{escape(path)} changed '
-                  'during the test runs, so it is put back as HEAD has it')
+            _actions.annotate('warning', f'{path} changed during the test runs, so it is put back as HEAD has it',
+                              title='Vendor test gate restored a module')
     except BaseException:
         apply(changes, frozenset())
         raise
