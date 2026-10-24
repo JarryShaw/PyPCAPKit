@@ -567,11 +567,20 @@ def workflow_labels(workflows: 'dict[str, Any]') -> 'dict[str, list[str]]':
         label its ``matrix.os || '...'`` falls back to, but a job with
         ``continue-on-error: true``, which fails no run (#2060).
 
+    A job whose ``os`` axis is read from the workflow's inputs counts in none of
+    them: it runs where its dispatcher chooses, as :file:`benchmark.yml`'s
+    ``benchmark`` does, and gates nothing (#2125). So a job that gates a run must not
+    take its runner from an input: it would be left out of the tiers' labels.
+
     """
     default, axis, latest = set(), set(), set()  # type: set[str], set[str], set[str]
     for name, spec in workflows.items():
         for job_id, job in (spec.get('jobs') or {}).items():
             runs_on = str(job.get('runs-on', ''))
+            matrix = (job.get('strategy') or {}).get('matrix')
+            axis_labels = matrix.get('os') if isinstance(matrix, dict) else None
+            if isinstance(axis_labels, list) and any('inputs.' in str(label) for label in axis_labels):
+                continue
             for step in setup_steps(job):
                 text = str((step.get('with') or {}).get('python-version', '')).strip()
                 read = READ.fullmatch(text)

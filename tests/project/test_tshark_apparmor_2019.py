@@ -37,6 +37,10 @@ APPARMOR = '/etc/apparmor.d'
 #: An AppArmor file rule in ``file ACCESS FILEGLOB,`` form granting read on a tree
 #: (apparmor.d(5), FILE RULE), the form the shipped tshark profile itself uses.
 RULE = re.compile(r'^file r (/\S+)/\*\*,$')
+#: #2125: jobs of other workflows that install tshark and run the step, as
+#: (workflow, job). Each is pinned by its workflow's own test, as
+#: :mod:`tests.project.test_benchmark_workflow_2125`.
+ELSEWHERE = {('benchmark.yml', 'benchmark')}
 STUBS = {
     'sudo': 'exec env "$@"\n',
     'apparmor_parser': 'echo "$@" >> "$STUB_LOG"\n',
@@ -79,7 +83,7 @@ class TestEveryTsharkInstallIsFollowed(unittest.TestCase):
                             re.search(r'\butil/apt_packages\.py install\b', run)
                             and re.search(r'\btshark\b', packages)):
                         found.add((path.name, job_id))
-        self.assertEqual(found, {(WORKFLOW, job_id) for job_id, _ in SITES})
+        self.assertEqual(found, {(WORKFLOW, job_id) for job_id, _ in SITES} | ELSEWHERE)
 
     def test_one_body_everywhere(self) -> None:
         """The jobs run one script, so a fix to it cannot reach only some of them."""

@@ -9,6 +9,9 @@ the checkout's root and on the image's ``/usr/bin/python3``::
     /usr/bin/python3 util/apt_packages.py install [--name NAME]
     /usr/bin/python3 util/apt_packages.py collect
 
+:file:`.github/workflows/benchmark.yml`'s ``benchmark`` job runs ``install`` alone,
+with no cache to plan or collect for (#2125).
+
 ``APT_PACKAGES``, the job's environment, names the packages, separated by
 whitespace, for both ``plan`` and ``install``, so the cache key cannot describe a
 set other than the one installed. Each subcommand runs the commands the steps'

@@ -314,6 +314,50 @@ Not pinned, deliberately:
   has uncommitted changes under `pcapkit/` -- a revision that does not say so is a
   claim about code that was not measured.
 
+## On GitHub Actions
+
+[`.github/workflows/benchmark.yml`](../../.github/workflows/benchmark.yml) runs the same
+measurement weekly and on dispatch, **without Docker** (#2125), through
+[`native.sh`](native.sh): `run.sh` with the interpreters already on the machine in
+place of the images. A hosted runner is already a fresh VM per job, so containers would
+add a build per version and no isolation. `native.sh` builds the virtualenvs the
+`Dockerfile` builds, with `pypcap` where `python-images.txt`'s column says so, runs
+`benchmark.py` in each and `report.py` over them all, with `run.sh`'s exit statuses.
+The workflow measures the engines' interpreters from `.github/python-versions.toml`, all
+in one job, since the per-version table's absolute times compare only within one
+machine, and posts the ratio table to the `benchmark: weekly engine benchmark report`
+thread in the `CI reports` Discussions category.
+
+What a native run does not pin, against the containers:
+
+- **The interpreter's patch release** is setup-python's newest build for that runner.
+  It differs by OS: on macOS and Windows, 3.10 to 3.12 stop at their last binary
+  release (3.12.10, say) where Linux has the newest. The report names every patch.
+- **tshark and libpcap** are the runner's -- apt on Ubuntu, Homebrew on macOS,
+  Chocolatey on Windows -- and the report records their versions. Windows has no
+  libpcap, since Npcap's free edition cannot install unattended, so the `pcap`
+  engines are rows with their reason there.
+- **The Image row** names the runner label and its image version, in place of a base
+  image. Both are public image names, not a machine.
+- **Absolute times** come from whatever shared hardware the job landed on, so they
+  compare only within one run. The ratios are what carry from run to run -- within
+  an OS family. Across families they disagree: on one dispatch per runner, Windows'
+  `pypcapfile` ratio was about 44% above Ubuntu's.
+
+**The default runner is `ubuntu-26.04-arm`**, the fastest runner that
+measures every environment and engine. One dispatch per runner (run 40047570595, on
+#2128) had the `pcapkit` baseline at 0.580 ms per packet there against 0.757 on
+`ubuntu-latest`, about 23% less time per packet, and both measured every environment
+and every engine. `macos-latest` was faster still, at 0.339, but it and Windows could
+measure neither `pcap_ct` nor `pypcap`, so they stay dispatch choices only.
+
+The docs' tables stay hand-updated, from `run.sh` or from a report. To compare runners,
+dispatch once per runner; dropping pyshark makes it minutes rather than hours:
+
+```shell
+gh workflow run benchmark.yml -f runner=ubuntu-latest -f engines=default,dpkt,scapy,pypcap,pcap_ct,pypcapfile
+```
+
 ## Output
 
 Everything lands in `--out` (default `examples/benchmark/out/`, which is
