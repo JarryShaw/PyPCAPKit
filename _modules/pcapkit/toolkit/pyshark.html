@@ -498,7 +498,7 @@
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">decimal</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">ipaddress</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.linktype</span><span class="w"> </span><span class="kn">import</span> <span class="n">LinkType</span> <span class="k">as</span> <span class="n">Enum_LinkType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.traceflow.data.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">TF_TCP_Packet</span>
@@ -541,7 +541,7 @@
 <span class="c1">#: Each is below except ``frame.encap_type`` 32 (``editcap -T hhdlc``, DLT 121), left out because</span>
 <span class="c1">#: :class:`~pcapkit.const.reg.linktype.LinkType` has no member for 121. An encapsulation absent</span>
 <span class="c1">#: from this table raises rather than resolving to a near-miss DLT.</span>
-<span class="n">ENCAP_TYPE_TO_LINKTYPE</span> <span class="o">=</span> <span class="p">{</span>
+<span class="n">ENCAP_TYPE_TO_LINKTYPE</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'dict[int, Enum_LinkType]'</span><span class="p">,</span> <span class="p">{</span>
     <span class="mi">1</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ETHERNET</span><span class="p">,</span>                     <span class="c1"># ether</span>
     <span class="mi">2</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IEEE802_5</span><span class="p">,</span>                    <span class="c1"># tr</span>
     <span class="mi">3</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">SLIP</span><span class="p">,</span>                         <span class="c1"># slip</span>
@@ -694,7 +694,7 @@
     <span class="mi">222</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">SILABS_DEBUG_CHANNEL</span><span class="p">,</span>       <span class="c1"># silabs-dch</span>
     <span class="mi">223</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">MDB</span><span class="p">,</span>                        <span class="c1"># mdb</span>
     <span class="mi">225</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">DECT_NR</span><span class="p">,</span>                    <span class="c1"># dect_nr</span>
-<span class="p">}</span>  <span class="c1"># type: dict[int, Enum_LinkType]</span>
+<span class="p">})</span>  <span class="c1"># a cast, as mypy reads aenum members as int (#2145)</span>
 
 <span class="c1">#: Wireshark display-filter name -&gt; :class:`~pcapkit.const.reg.linktype.LinkType` member, used by</span>
 <span class="c1">#: :func:`tcp_traceflow` **only** when the frame layer carries no ``frame.encap_type`` field for</span>
@@ -738,7 +738,7 @@
 <span class="c1">#: ``frame.encap_type`` is the primary key; ``eth`` and ``tr`` additionally check out against</span>
 <span class="c1">#: Wireshark's own registrations (``packet-eth.c`` on ``WTAP_ENCAP_ETHERNET``, ``packet-tr.c`` on</span>
 <span class="c1">#: ``WTAP_ENCAP_TOKEN_RING``).</span>
-<span class="n">FILTER_NAME_TO_LINKTYPE</span> <span class="o">=</span> <span class="p">{</span>
+<span class="n">FILTER_NAME_TO_LINKTYPE</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'dict[str, Enum_LinkType]'</span><span class="p">,</span> <span class="p">{</span>
     <span class="s1">'alp'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">ATSC_ALP</span><span class="p">,</span>                             <span class="c1"># alp</span>
     <span class="s1">'ap1394'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">APPLE_IP_OVER_IEEE1394</span><span class="p">,</span>            <span class="c1"># ap1394</span>
     <span class="s1">'atm'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">SUNATM</span><span class="p">,</span>                               <span class="c1"># atm-pdus</span>
@@ -797,7 +797,7 @@
     <span class="s1">'vsock'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">VSOCK</span><span class="p">,</span>                              <span class="c1"># vsock</span>
     <span class="s1">'wpan-nonask-phy'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">IEEE802_15_4_NONASK_PHY</span><span class="p">,</span>  <span class="c1"># wpan-nonask-phy</span>
     <span class="s1">'xra'</span><span class="p">:</span> <span class="n">Enum_LinkType</span><span class="o">.</span><span class="n">DOCSIS31_XRA31</span><span class="p">,</span>                       <span class="c1"># docsis31_xra31</span>
-<span class="p">}</span>  <span class="c1"># type: dict[str, Enum_LinkType]</span>
+<span class="p">})</span>  <span class="c1"># a cast, as mypy reads aenum members as int (#2145)</span>
 
 <span class="c1">#: PyShark's text for a boolean field -&gt; its value. tshark 4.x spells one ``'True'``/``'False'``</span>
 <span class="c1">#: (measured for ``tcp.flags_syn``, ``tcp.flags_fin`` and ``tcp.flags_reset`` with PyShark 0.6</span>

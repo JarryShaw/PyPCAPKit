@@ -769,7 +769,7 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[_TP]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Payload protocol."""</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_protocol</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># type: ignore[unreachable] # pylint: disable=import-outside-toplevel # isort:skip</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.misc.raw</span><span class="w"> </span><span class="kn">import</span> <span class="n">Raw</span>  <span class="c1"># pylint: disable=import-outside-toplevel # isort:skip</span>
             <span class="k">return</span> <span class="n">Raw</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_protocol</span>
 
@@ -913,7 +913,7 @@
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_protocol</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>  <span class="c1"># type: ignore[unreachable]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">buffer</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'_TP'</span><span class="p">,</span> <span class="n">buffer</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'_TP'</span><span class="p">,</span> <span class="n">buffer</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
 
@@ -984,7 +984,7 @@
 <span class="w">        </span><span class="sd">"""Field instance."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_field</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">:</span> <span class="s1">'Callable[[dict[str, Any]], FieldBase[_TC]]'</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="n">NoValueField</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># type: ignore[assignment,return-value]</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">selector</span><span class="p">:</span> <span class="s1">'Callable[[dict[str, Any]], FieldBase[_TC]]'</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="n">NoValueField</span><span class="p">())</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
         <span class="c1">#self._name = '&lt;switch&gt;'</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_field</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'FieldBase[_TC]'</span><span class="p">,</span> <span class="n">NoValueField</span><span class="p">())</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_selector</span> <span class="o">=</span> <span class="n">selector</span>

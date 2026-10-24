@@ -1548,7 +1548,7 @@
     <span class="fm">__hash__</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># type: ignore[assignment]</span>
     <span class="fm">__repr__</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="o">.</span><span class="fm">__repr__</span>
     <span class="fm">__str__</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="o">.</span><span class="fm">__str__</span>
-    <span class="n">__copy__</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="o">.</span><span class="n">__copy__</span>  <span class="c1"># type: ignore[assignment]</span>
+    <span class="n">__copy__</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="o">.</span><span class="n">__copy__</span>
     <span class="n">keys</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="o">.</span><span class="n">keys</span>
     <span class="n">values</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="o">.</span><span class="n">values</span>
     <span class="n">items</span> <span class="o">=</span> <span class="n">MultiDict</span><span class="o">.</span><span class="n">items</span>  <span class="c1"># type: ignore[assignment]</span>
@@ -1648,7 +1648,7 @@
     <span class="fm">__hash__</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="fm">__repr__</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="fm">__repr__</span>
     <span class="fm">__str__</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="fm">__str__</span>
-    <span class="n">__copy__</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="n">__copy__</span>  <span class="c1"># type: ignore[assignment]</span>
+    <span class="n">__copy__</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="n">__copy__</span>
     <span class="n">keys</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="n">keys</span>
     <span class="n">values</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="n">values</span>
     <span class="n">items</span> <span class="o">=</span> <span class="n">OrderedMultiDict</span><span class="o">.</span><span class="n">items</span>  <span class="c1"># type: ignore[assignment]</span>
@@ -1849,7 +1849,7 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">hint</span> <span class="o">=</span> <span class="n">typing</span><span class="o">.</span><span class="n">get_type_hints</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">SimpleNamespace</span><span class="p">(</span><span class="vm">__annotations__</span><span class="o">=</span><span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">ann</span><span class="p">}),</span>
                                              <span class="n">globalns</span><span class="p">,</span> <span class="n">localns</span><span class="p">)[</span><span class="n">key</span><span class="p">]</span>
-            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># pylint: disable=broad-except</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># pylint: disable=broad-except  # nosec: B112  # unresolvable: not nested</span>
                 <span class="k">continue</span>
 
             <span class="n">info_cls</span> <span class="o">=</span> <span class="n">_as_info_type</span><span class="p">(</span><span class="n">hint</span><span class="p">)</span>

@@ -643,7 +643,7 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">importlib</span><span class="o">.</span><span class="n">metadata</span><span class="o">.</span><span class="n">distributions</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)),</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">continue</span>
-        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># pylint: disable=broad-except</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># pylint: disable=broad-except  # nosec: B112  # see below</span>
             <span class="c1"># A corrupt or unreadable ``dist-info`` is not a reason to fail an</span>
             <span class="c1"># extraction. Detection is a courtesy; treat "cannot tell" as "not</span>
             <span class="c1"># installed" and let the import attempt be the authority.</span>

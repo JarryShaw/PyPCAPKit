@@ -510,7 +510,7 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'PyPCAP'</span><span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Iterator</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Protocol</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcap</span><span class="w"> </span><span class="kn">import</span> <span class="n">pcap</span> <span class="k">as</span> <span class="n">Handle</span>
 
@@ -526,7 +526,7 @@
     <span class="c1">#: iteration yields. Deliberately *not* named ``Frame``, so that it is not</span>
     <span class="c1">#: mistaken for :class:`pcapkit.protocols.misc.pcap.frame.Frame`, which is</span>
     <span class="c1">#: what the built-in engines return.</span>
-    <span class="n">RawFrame</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]</span>
+    <span class="n">RawFrame</span> <span class="o">=</span> <span class="n">Tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="PyPCAP">

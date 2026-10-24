@@ -1196,7 +1196,7 @@
 <div class="viewcode-block" id="SCTP.register">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP.register">[docs]</a>
     <span class="nd">@classmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_PayloadProtocolIdentifier | int'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=line-too-long</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">register</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">code</span><span class="p">:</span> <span class="s1">'Enum_PayloadProtocolIdentifier | int'</span><span class="p">,</span> <span class="n">protocol</span><span class="p">:</span> <span class="s1">'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>  <span class="c1"># pylint: disable=line-too-long</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">"""Register a new protocol class for a payload protocol identifier.</span>
 
 <span class="sd">        Notes:</span>
@@ -1504,7 +1504,7 @@
 
 <span class="sd">        """</span>
         <span class="k">return</span> <span class="n">ProtocolBase</span><span class="o">.</span><span class="n">_decode_next_layer</span><span class="p">(</span>  <span class="c1"># pylint: disable=protected-access</span>
-            <span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">,</span> <span class="n">proto</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type,return-value]</span></div>
+            <span class="bp">self</span><span class="p">,</span> <span class="n">dict_</span><span class="p">,</span> <span class="n">proto</span><span class="p">,</span> <span class="n">length</span><span class="p">,</span> <span class="n">packet</span><span class="o">=</span><span class="n">packet</span><span class="p">)</span>  <span class="c1"># type: ignore[arg-type]</span></div>
 
 
 <div class="viewcode-block" id="SCTP._read_sctp_chunks">
