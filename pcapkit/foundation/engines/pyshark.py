@@ -326,5 +326,10 @@ class PyShark(EngineBase['PySharkPacket']):
         This method is to be used for closing the engine instance. It is to
         close the engine instance after the extraction process is finished.
 
+        A no-op if :meth:`run` never opened the capture, which is the case when
+        the :class:`~pcapkit.foundation.extraction.Extractor` constructor raises
+        before it (:issue:`2107`).
+
         """
-        self._extmp.close()
+        if self._extmp is not None:
+            self._extmp.close()
