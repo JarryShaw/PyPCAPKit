@@ -20,7 +20,7 @@ import json
 import re
 import string
 import types
-import xml.sax.saxutils
+import xml.sax.saxutils  # nosec: B406  # escape() only, nothing parsed
 from typing import TYPE_CHECKING
 
 import aenum

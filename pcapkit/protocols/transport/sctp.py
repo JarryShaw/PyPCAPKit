@@ -704,7 +704,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
         return schema
 
     @classmethod
-    def register(cls, code: 'Enum_PayloadProtocolIdentifier | int', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':  # type: ignore[override] # pylint: disable=line-too-long
+    def register(cls, code: 'Enum_PayloadProtocolIdentifier | int', protocol: 'ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]') -> 'None':  # pylint: disable=line-too-long
         r"""Register a new protocol class for a payload protocol identifier.
 
         Notes:
@@ -982,7 +982,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         """
         return ProtocolBase._decode_next_layer(  # pylint: disable=protected-access
-            self, dict_, proto, length, packet=packet)  # type: ignore[arg-type,return-value]
+            self, dict_, proto, length, packet=packet)  # type: ignore[arg-type]
 
     def _read_sctp_chunks(self) -> 'Chunks':
         """Read SCTP chunk list.

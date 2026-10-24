@@ -22,7 +22,7 @@ from pcapkit.utilities.warnings import AttributeWarning, EngineWarning, warn
 __all__ = ['PCAP_CT']
 
 if TYPE_CHECKING:
-    from typing import Iterator, Optional, Protocol, Type
+    from typing import Iterator, Optional, Protocol, Tuple, Type
 
     from pcap import pcap as Handle
 
@@ -39,7 +39,7 @@ if TYPE_CHECKING:
     #: so that it is not mistaken for
     #: :class:`pcapkit.protocols.misc.pcap.frame.Frame`, which is what the
     #: built-in engines return.
-    RawFrame = tuple[float, bytes]
+    RawFrame = Tuple[float, bytes]
 
 
 class PCAP_CT(EngineBase['RawFrame']):

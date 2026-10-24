@@ -866,7 +866,7 @@ def tcp_traceflow(packet: 'Packet', *, data_link: 'Enum_LinkType',
 
     tcp = TCP(segment)
     hdr_len = tcp.data_offset  # at least ``TCP_MIN_HEADER_LEN``, see ``_transport``
-    return TF_TCP_Packet(  # type: ignore[type-var]
+    return TF_TCP_Packet(
         protocol=data_link,                                 # data link type from savefile header
         index=count,                                        # frame number
         frame=packet2dict(packet, data_link=data_link),     # extracted packet

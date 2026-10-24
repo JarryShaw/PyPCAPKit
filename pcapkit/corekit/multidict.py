@@ -192,7 +192,7 @@ class MultiDict(dict, Generic[_KT, _VT]):
         if key in self:
             lst = super().__getitem__(key)
             if len(lst) > 0:
-                return lst[0]  # type: ignore[no-any-return]
+                return lst[0]
         raise MissingKeyError(key, quiet=True)
 
     def __setitem__(self, key: '_KT', value: '_VT') -> 'None':
@@ -216,7 +216,7 @@ class MultiDict(dict, Generic[_KT, _VT]):
     @overload
     def get(self, key: '_KT', default: '_VT | _T' = ...) -> '_VT | _T': ...
 
-    def get(self, key: '_KT', default: '_VT | _T' = None) -> '_VT | _T':  # type: ignore[assignment,misc]
+    def get(self, key: '_KT', default: '_VT | _T' = None) -> '_VT | _T':  # type: ignore[assignment]
         try:
             return self[key]
         except MissingKeyError:
@@ -291,7 +291,7 @@ class MultiDict(dict, Generic[_KT, _VT]):
         if key not in self:
             super().__setitem__(key, list(default_list or ()))
 
-        return super().__getitem__(key)  # type: ignore[no-any-return]
+        return super().__getitem__(key)
 
     def items(self, multi: 'bool' = False) -> 'Iterable[tuple[_KT, _VT]]':  # type: ignore[override]
         """Return an iterator of ``(key, value)`` pairs.
@@ -390,7 +390,7 @@ class MultiDict(dict, Generic[_KT, _VT]):
         rv.update(other)
         return rv
 
-    def __ior__(self, other: 'Mapping[_KT, _VT | list[_VT] | tuple[_VT, ...] | set[_VT]] | Iterable[tuple[_KT, _VT]]') -> 'Self':  # type: ignore[override,misc] # pylint: disable=line-too-long
+    def __ior__(self, other: 'Mapping[_KT, _VT | list[_VT] | tuple[_VT, ...] | set[_VT]] | Iterable[tuple[_KT, _VT]]') -> 'Self':  # type: ignore[override] # pylint: disable=line-too-long
         if not isinstance(other, (cabc.Mapping, cabc.Iterable)):
             return NotImplemented
 
@@ -404,7 +404,7 @@ class MultiDict(dict, Generic[_KT, _VT]):
     @overload
     def pop(self, key: '_KT', default: '_T') -> '_VT | _T': ...  # pylint: disable=arguments-differ
 
-    def pop(self, key: '_KT', default: '_VT | _T' = _missing) -> '_VT | _T':  # type: ignore[assignment,misc]
+    def pop(self, key: '_KT', default: '_VT | _T' = _missing) -> '_VT | _T':  # type: ignore[assignment]
         """Pop the first item for a list on the dict.  Afterwards the
         key is removed from the dict, so additional values are discarded:
 
@@ -451,7 +451,7 @@ class MultiDict(dict, Generic[_KT, _VT]):
         """Pop the list for a key from the dict.  If the key is not in the dict
         an empty list is returned.
         """
-        return super().pop(key, [])  # type: ignore[no-any-return]
+        return super().pop(key, [])
 
     def popitemlist(self) -> 'tuple[_KT, list[_VT]]':
         """Pop a ``(key, list)`` tuple from the dict."""
@@ -551,7 +551,7 @@ class OrderedMultiDict(MultiDict[_KT, _VT]):
 
     def __getitem__(self, key: '_KT') -> '_VT':
         if key in self:
-            return dict.__getitem__(self, key)[0].value  # type: ignore[no-any-return]
+            return dict.__getitem__(self, key)[0].value
         raise MissingKeyError(key, quiet=True)
 
     def __setitem__(self, key: '_KT', value: '_VT') -> 'None':
@@ -598,7 +598,7 @@ class OrderedMultiDict(MultiDict[_KT, _VT]):
             yield values
 
     def add(self, key: '_KT', value: '_VT') -> 'None':
-        dict.setdefault(self, key, []).append(_omd_bucket(self, key, value))  # type: ignore[misc]
+        dict.setdefault(self, key, []).append(_omd_bucket(self, key, value))
 
     def getlist(self, key: '_KT') -> 'list[_VT]':
         rv: 'list[_omd_bucket[_KT, _VT]]'
@@ -634,7 +634,7 @@ class OrderedMultiDict(MultiDict[_KT, _VT]):
     @overload
     def pop(self, key: '_KT', default: '_T') -> '_VT | _T': ...  # pylint: disable=arguments-differ
 
-    def pop(self, key: '_KT', default: '_VT | _T' = _missing) -> '_VT | _T':  # type: ignore[assignment,misc]
+    def pop(self, key: '_KT', default: '_VT | _T' = _missing) -> '_VT | _T':  # type: ignore[assignment]
         buckets: 'list[_omd_bucket[_KT, _VT]]'
 
         try:

@@ -149,8 +149,11 @@ RUN ?= pipenv run
 # flags in each. Note the `pcapkit` before the flags as well as after: that is how this
 # recipe has always read, and vermin de-duplicates the paths (it reports the
 # same number of files analyzed either way), so it is preserved verbatim rather
-# than tidied.
-VERMIN_FLAGS = --backport argparse --backport enum --backport importlib --backport ipaddress --backport typing --backport typing_extensions --no-parse-comments --eval-annotations -vv
+# than tidied. `--no-parse-comments` is gone (#2145): it came with the first
+# vermin recipe, with no recorded reason, and made vermin ignore the
+# `# novermin` markers on compat.py's version-gated imports. The cost of parsing
+# them is that a marker silences its whole line, so keep them on guarded lines.
+VERMIN_FLAGS = --backport argparse --backport enum --backport importlib --backport ipaddress --backport typing --backport typing_extensions --eval-annotations -vv
 # `pylint.extensions.emptystring` no longer exists (#767): the check it provided,
 # `compare-to-empty-string`, was folded into the core `refactoring` checker at
 # pylint 3.0 as `use-implicit-booleaness-not-comparison-to-string` (C1804), with
@@ -180,7 +183,7 @@ vermin:
 # that would have opened it never reached -- useless as a log.
 # This one writes to stdout and lets vermin's failure propagate, which is what
 # `targets = 3.8` in vermin.ini is for: vermin exits non-zero when the target is
-# not met, and it detects 3.11.
+# not met.
 vermin-ci:
 	$(RUN) vermin pcapkit $(VERMIN_FLAGS) pcapkit
 

@@ -35,7 +35,7 @@ _IT = TypeVar('_IT', bound='tuple')
 _BT = TypeVar('_BT', bound='Info')
 
 if TYPE_CHECKING:
-    from typing import Any, Callable, Optional, Type
+    from typing import Any, Callable, List, Optional, Type
 
     from typing_extensions import Self
 
@@ -43,7 +43,7 @@ if TYPE_CHECKING:
     from pcapkit.corekit.module import ModuleDescriptor
     from pcapkit.protocols.protocol import ProtocolBase
 
-    CallbackFn = Callable[[list[_DT]], None]
+    CallbackFn = Callable[[List[_DT]], None]
 
 __all__ = ['Reassembly']
 

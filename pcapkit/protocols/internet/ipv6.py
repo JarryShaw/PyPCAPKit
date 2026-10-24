@@ -563,7 +563,7 @@ class IPv6(IP[Data_IPv6, Schema_IPv6],
             token = _frame_depth.set(depth + len(_protos))
             try:
                 next_ = self._import_next_layer(proto, packet=packet, version=6, extension=True,
-                                                payload=payload)  # type: ignore[misc,call-arg,arg-type]
+                                                payload=payload)  # type: ignore[misc,call-arg]
             finally:
                 _frame_depth.reset(token)
             info = next_.info

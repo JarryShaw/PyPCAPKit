@@ -471,13 +471,17 @@ def _key_repr(key: 'int | str') -> str:
 
 def render_dict(name: str, entries: 'dict[Any, tuple[Any, list[str]]]',
                  value_type: str) -> str:
-    """Render one ``NAME = { ... }`` block, byte-for-byte as it is committed.
+    """Render one ``NAME = cast(..., { ... })`` block, byte-for-byte as it is committed.
+
+    The literal is wrapped in :func:`typing.cast` rather than annotated,
+    because mypy reads an :mod:`aenum` member as its ``int`` value, so a
+    ``dict[..., Enum_LinkType]`` annotation fails on every entry (#2145).
 
     Args:
         name: The dict's variable name, e.g. ``ENCAP_TYPE_TO_LINKTYPE``.
         entries: Key -> (enum member, [source names]), key-ascending.
-        value_type: The key type's spelling in the trailing
-            ``# type: dict[...]`` comment (``int`` or ``str``).
+        value_type: The key type's spelling in the ``cast`` target,
+            ``dict[...]`` (``int`` or ``str``).
 
     Returns:
         The complete block, ending in a single newline.
@@ -490,17 +494,17 @@ def render_dict(name: str, entries: 'dict[Any, tuple[Any, list[str]]]',
 
     width = max((len(code) for code, _ in rows), default=0) + 2
 
-    lines = [f'{name} = {{']
+    lines = [f"{name} = cast('dict[{value_type}, Enum_LinkType]', {{"]
     for code, comment in rows:
         lines.append(f'{code.ljust(width)}# {comment}')
-    lines.append(f'}}  # type: dict[{value_type}, Enum_LinkType]')
+    lines.append('})  # a cast, as mypy reads aenum members as int (#2145)')
     return '\n'.join(lines) + '\n'
 
 
 def _replace_block(text: str, name: str, replacement: str) -> str:
-    """Swap ``NAME = { ... }`` for *replacement* in *text*.
+    """Swap ``NAME = cast(..., { ... })`` for *replacement* in *text*.
 
-    The block is found by its opening ``NAME = {`` line and its first
+    The block is found by its opening ``NAME = ...{`` line and its first
     closing ``}`` line after that -- sufficient here because no value in
     either table is itself a mapping, so no line before the close can start
     with ``}``.
@@ -520,7 +524,7 @@ def _replace_block(text: str, name: str, replacement: str) -> str:
     """
     lines = text.split('\n')
     start = next((index for index, line in enumerate(lines)
-                  if line == f'{name} = {{'), None)
+                  if line.startswith(f'{name} = ') and line.endswith('{')), None)
     if start is None:
         raise EncapSweepError(f'{TARGET} has no {name!r} block to replace')
     end = next((index for index in range(start + 1, len(lines))

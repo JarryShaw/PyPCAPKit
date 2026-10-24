@@ -668,5 +668,5 @@ class Command(EnumRegistry, StrEnum):
             raise ValueError(f'{value!r} is not a valid {cls.__name__}')
         name = value.upper()
         if name in cls._member_map_:
-            return cls._member_map_[name]  # type: ignore[return-value]
+            return cls._member_map_[name]
         return cls._unregistered_member(value, name)

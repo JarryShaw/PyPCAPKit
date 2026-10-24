@@ -597,7 +597,7 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
         self._extf = extension
 
         # call super __post_init__
-        super().__post_init__(file, length, version=version, extension=extension, **kwargs)  # type: ignore[arg-type]
+        super().__post_init__(file, length, version=version, extension=extension, **kwargs)
 
     def __length_hint__(self) -> 'int':
         """Return an estimated length for the object.

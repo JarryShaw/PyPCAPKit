@@ -1068,7 +1068,7 @@ class Option(EnumSchema[Enum_OptionType]):
     __excluded__ = ['__enum__', '__namespace__']
 
     #: Namespace of PCAP-NG option type numbers.
-    __namespace__: 'str' = None  # type: ignore[assignment]
+    __namespace__: 'str' = None
     #: Mapping of PCAP-NG option type numbers to schemas.
     __enum__: 'DefaultDict[str, DefaultDict[Enum_OptionType, Type[Option]]]' = collections.defaultdict(
         lambda: Option.registry['opt'], {

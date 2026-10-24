@@ -434,7 +434,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
         """
         next_ = cast('ProtocolBase',  # type: ignore[redundant-cast]
                      self._import_next_layer(proto, length, packet=packet, version=version,
-                                             payload=payload))  # type: ignore[arg-type,misc,call-arg]
+                                             payload=payload))  # type: ignore[misc,call-arg]
         info, chain = next_.info, next_.protochain
 
         # make next layer protocol name

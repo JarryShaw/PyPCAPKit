@@ -99,7 +99,7 @@ def read_limit(name: 'str', default: 'int', *, minimum: 'int' = 0,
     try:
         value = int(text)
     except ValueError:
-        value = None  # type: ignore[assignment]
+        value = None
     if value is None or (value < minimum and not (risk is not None and value == -1)):
         warn(f'{variable}={text!r} is not {accepted}; using the default, {default}',
              ConfigWarning, stacklevel=_importer_stacklevel())
