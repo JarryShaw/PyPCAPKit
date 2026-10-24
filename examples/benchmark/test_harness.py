@@ -1522,6 +1522,137 @@ class TestNotAttempted:
             'one sentence wrapped | across two lines.'
 
 
+#: The loader errors ``pcap-ct`` raised on the runners of #2129, abridged.
+LOADER_ERRORS = {
+    'macos': "dlopen(libc.so.6, 0x0006): tried: 'libc.so.6' (no such file), "
+             "'/usr/lib/libc.so.6' (no such file, not in dyld cache)",
+    'windows': 'Cannot find npcap/wpcap.dll or wpcap.dll library',
+}
+
+
+def fake_pcap(root, body):
+    """Install a stand-in ``pcap`` package under *root* whose ``__init__`` is *body*.
+
+    Args:
+        root: Directory to put on :data:`sys.path`.
+        body: Source of ``pcap/__init__.py``.
+
+    Returns:
+        *root*, as a string.
+
+    """
+    package = root / 'pcap'
+    package.mkdir(parents=True)
+    (package / '__init__.py').write_text(body, encoding='utf-8')
+    # pcap-ct ships ``pcap`` as a package that binds a ``_pcap`` submodule, which is
+    # how pcapkit tells it from upstream pypcap; a *body* that imports cleanly has to
+    # bind it too.
+    (package / '_pcap.py').write_text('', encoding='utf-8')
+    return str(root)
+
+
+def tiny_pcap(path):
+    """Write a little-endian PCAP holding one zero-padded Ethernet frame.
+
+    Args:
+        path: Where to write it.
+
+    Returns:
+        *path*, as a string.
+
+    """
+    import struct  # pylint: disable=import-outside-toplevel
+
+    frame = b'\xff' * 6 + b'\x00\x11\x22\x33\x44\x55' + b'\x08\x06' + b'\x00' * 46
+    header = struct.pack('<IHHiIII', 0xa1b2c3d4, 2, 4, 0, 0, 65535, 1)
+    record = struct.pack('<IIII', 0, 0, len(frame), len(frame))
+    path.write_bytes(header + record + frame)
+    return str(path)
+
+
+class TestLoaderFailure:
+    """A ``pcap`` module that will not load is a reason, not a fatal error (#2129).
+
+    On macOS and Windows, ``pcap-ct``'s libpcap loader raises :exc:`OSError` with a
+    message that does not mention libpcap. ``pypcap``'s preflight let it escape, and
+    the whole ``pcap_ct`` environment exited before measuring anything.
+
+    """
+
+    @pytest.fixture
+    def harness(self, monkeypatch, tmp_path):
+        """:mod:`benchmark`, with no image notes and no ``pcap`` module cached."""
+        benchmark = pytest.importorskip('benchmark')
+        monkeypatch.setattr(benchmark, 'INSTALL_FAILURES', str(tmp_path / 'absent'))
+        monkeypatch.setattr(benchmark, 'NOT_ATTEMPTED', str(tmp_path / 'absent'))
+        for name in [name for name in sys.modules
+                     if name == 'pcap' or name.startswith('pcap.')]:
+            monkeypatch.delitem(sys.modules, name)
+        yield benchmark
+        for name in [name for name in sys.modules
+                     if name == 'pcap' or name.startswith('pcap.')]:
+            del sys.modules[name]
+
+    @pytest.mark.parametrize('runner', sorted(LOADER_ERRORS))
+    def test_the_loader_error_is_the_reason_and_the_run_carries_on(
+            self, harness, monkeypatch, tmp_path, runner):
+        """Both ``pcap`` engines are unmeasured with the loader's message; ``default`` runs."""
+        message = LOADER_ERRORS[runner]
+        monkeypatch.syspath_prepend(fake_pcap(tmp_path / 'site', f'raise OSError({message!r})\n'))
+
+        document = harness.run(tiny_pcap(tmp_path / 'one.pcap'), ('default', 'pypcap', 'pcap_ct'),
+                               rounds=2, repeats=1, label='3.10-pcap_ct')
+
+        results = {entry['engine']: entry for entry in document['results']}
+        assert results['default']['status'] == 'measured'
+        for engine in ('pypcap', 'pcap_ct'):
+            assert results[engine]['status'] == 'unmeasured'
+            assert message in results[engine]['reason']
+            assert 'not installed' not in results[engine]['reason']
+
+    @pytest.mark.parametrize('runner', sorted(LOADER_ERRORS))
+    def test_preflight_names_the_loader_error_for_pypcap(self, harness, monkeypatch, tmp_path,
+                                                         runner):
+        """``pypcap`` declares nothing itself, so the harness has to ask the import."""
+        message = LOADER_ERRORS[runner]
+        monkeypatch.syspath_prepend(fake_pcap(tmp_path / 'site', f'raise OSError({message!r})\n'))
+
+        reason, driver = harness.preflight('pypcap', str(tmp_path / 'unused.pcap'))
+        assert reason == f'the `pcap` module is installed but unusable -- OSError: {message}'
+        assert driver is None
+
+    def test_an_oserror_reading_the_capture_is_still_fatal(self, harness, monkeypatch,
+                                                           tmp_path):
+        """Only the import is in scope: a ``pcap`` module that loads, then fails, re-raises.
+
+        The message mentions libpcap on purpose. Matching on that word is what the
+        harness did before, and it would have swallowed this real failure.
+
+        """
+        monkeypatch.syspath_prepend(fake_pcap(tmp_path / 'site',
+                                              "from . import _pcap\n__version__ = '1.3.0b3'\n"))
+
+        def _unreadable(engine, capture):
+            """Fail the way libpcap does on a damaged savefile."""
+            raise OSError('libpcap: truncated dump file; tried to read 16 header bytes')
+
+        monkeypatch.setattr(harness, '_extract', _unreadable)
+        with pytest.raises(OSError, match='truncated dump file'):
+            harness.preflight('pcap_ct', str(tmp_path / 'unused.pcap'))
+
+    def test_an_engine_without_a_pcap_module_is_not_probed(self, harness, monkeypatch):
+        """``dpkt`` and the rest never import ``pcap``, so their import is not asked."""
+        from pcapkit.foundation.engines import _pcap_backend  # pylint: disable=import-outside-toplevel
+
+        def _no_probe():
+            """Fail the test if the probe is reached."""
+            raise AssertionError('probed the pcap module for an engine that never imports it')
+
+        monkeypatch.setattr(_pcap_backend, 'probe', _no_probe)
+        for engine in ('default', 'dpkt', 'scapy', 'pyshark', 'pypcapfile'):
+            assert harness._loader_failure(engine) is None  # pylint: disable=protected-access
+
+
 class TestRoundTrip:
     """The JSON contract between the two halves of the harness."""
 

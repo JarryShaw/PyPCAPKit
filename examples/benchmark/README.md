@@ -491,7 +491,9 @@ back to `pcapkit`'s parser refuses to report a number.
 - A row you expected is `*not measured*` -- read the reason. It comes from the
   engine's own `unsupported_reason()`, which names the actual cause rather than
   guessing at one -- except for `pypcap` on 3.12+, where the interpreter ceiling is
-  reported instead.
+  reported instead. A `pcap` module that is installed but will not load, such as
+  `pcap-ct`'s libpcap loader finding no library on macOS or Windows, is reported
+  with the loader's own error for both `pypcap` and `pcap_ct`.
 - A whole column is `--` -- read the note under the table, and
   `out/missing/<version>.txt`. The version was attempted; the build or the run
   failed, and the reason is recorded rather than the column dropped.

@@ -269,6 +269,45 @@ def _declared_reason(engine: 'str') -> 'Optional[str]':
         return f'{type(exc).__name__}: {exc}'
 
 
+def _loader_failure(engine: 'str') -> 'Optional[str]':
+    """Why a ``pcap``-module engine cannot load its ``pcap`` module here (#2129).
+
+    ``pypcap`` and ``pcap_ct`` both import the ``pcap`` module, and ``pcap-ct``'s
+    import runs a :manpage:`libpcap(3)` loader that raises :exc:`OSError` when the
+    library it looks for is absent -- ``dlopen(libc.so.6 ...)`` on macOS,
+    ``Cannot find npcap/wpcap.dll`` on Windows. ``pcap_ct`` declares that through
+    its own ``unsupported_reason()``; ``pypcap`` does not, so the :exc:`OSError`
+    escapes the extraction and would end the whole environment.
+
+    Asked of the import itself, through the same probe the engines use, rather than
+    by matching the wording of an exception from the extraction. That keeps the
+    scope to the import: an :exc:`OSError` from opening or reading the capture is
+    still a real failure, and is re-raised.
+
+    Args:
+        engine: Engine name, as passed to ``pcapkit.extract``.
+
+    Returns:
+        The loader's error, or :data:`None` for an engine that does not import the
+        ``pcap`` module, when the module imports, or when it is simply not
+        installed -- which the extraction already reports.
+
+    """
+    from pcapkit.foundation.engines import _pcap_backend  # pylint: disable=import-outside-toplevel
+    from pcapkit.foundation.extraction import Extractor  # pylint: disable=import-outside-toplevel
+
+    registered = Extractor.__engine__.get(engine)
+    klass = getattr(registered, 'klass', registered)
+    if getattr(klass, '__engine_distribution__', None) not in _pcap_backend.DISTRIBUTIONS:
+        return None
+    # ``probe`` purges a half-imported ``pcap`` after a failure, so the next engine
+    # to ask sees the same loader error rather than the residue of this attempt.
+    found = _pcap_backend.probe()
+    if found.name is None and not found.missing:
+        return f'the `pcap` module is installed but unusable -- {found.failure}'
+    return None
+
+
 def _extract(engine: 'str', capture: 'str') -> 'Extractor':
     """One extraction, with the arguments the legacy timing script used.
 
@@ -292,8 +331,8 @@ def _extract(engine: 'str', capture: 'str') -> 'Extractor':
 def _unavailable(exc: 'Exception') -> 'Optional[str]':
     """Explain *exc* if it means the engine cannot run here.
 
-    A last resort behind :func:`_declared_reason`, for the failures no engine
-    declares in advance.
+    A last resort behind :func:`_declared_reason` and :func:`_loader_failure`, for
+    the failures no engine declares in advance.
 
     Args:
         exc: Exception the engine raised.
@@ -314,10 +353,9 @@ def _unavailable(exc: 'Exception') -> 'Optional[str]':
         version = '.'.join(str(part) for part in sys.version_info[:3])
         return (f'{exc} -- pyshark asks for an implicit asyncio event loop, which '
                 f'Python {version} no longer provides')
-    # ``pcap-ct`` with no system libpcap raises OSError from its loader, which is
-    # not an ImportError and so reaches here.
-    if isinstance(exc, OSError) and 'libpcap' in str(exc):
-        return f'{exc} -- no system libpcap for the `pcap` module to load'
+    # No OSError is matched here by its wording: a ``pcap`` module that will not load
+    # is answered before the attempt by :func:`_loader_failure` (#2129), and any other
+    # OSError -- reading the capture, say -- is a real failure.
     return None
 
 
@@ -406,10 +444,11 @@ def preflight(engine: 'str', capture: 'str') -> 'tuple[Optional[str], Optional[s
 
     These sources are consulted, in this order, and the order is the point: what the
     image recorded about not installing the engine at all (:func:`_not_attempted`),
-    then the engine's own ``unsupported_reason()``, then an actual attempt. The first
-    wins outright where it exists, since an engine the interpreter rules out cannot
-    describe its own ceiling -- it can only report what it finds in the environment
-    that ceiling produced.
+    then the engine's own ``unsupported_reason()``, then whether a ``pcap``-module
+    engine's module loads at all (:func:`_loader_failure`), then an actual attempt.
+    The first wins outright where it exists, since an engine the interpreter rules
+    out cannot describe its own ceiling -- it can only report what it finds in the
+    environment that ceiling produced.
 
     Args:
         engine: Engine name to try.
@@ -448,6 +487,8 @@ def preflight(engine: 'str', capture: 'str') -> 'tuple[Optional[str], Optional[s
         return f'{text} -- {build_failure}' if build_failure else text
 
     reason = _declared_reason(engine)
+    if reason is None:
+        reason = _loader_failure(engine)
     if reason is not None:
         return _reason(reason), None
 
