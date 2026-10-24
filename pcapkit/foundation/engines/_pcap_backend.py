@@ -27,6 +27,7 @@ It is *only* detection -- nothing here is engine behaviour -- and it imports
 nothing from :mod:`pcapkit`, so it cannot introduce an import cycle.
 
 """
+import contextvars
 import importlib
 import importlib.metadata
 import sys
@@ -36,7 +37,7 @@ from pcapkit.corekit.infoclass import Info, info_final
 
 __all__ = [
     'PYPCAP', 'PCAP_CT', 'DISTRIBUTIONS', 'ENGINE_NAMES',
-    'Probe', 'probe', 'identify', 'installed_distributions',
+    'Probe', 'Memo', 'probe', 'identify', 'installed_distributions',
     'wrong_backend_reason', 'collision_reason',
 ]
 
@@ -190,14 +191,51 @@ def _purge() -> 'None':
         del sys.modules[name]
 
 
+class Memo:
+    """One extraction's :func:`probe`, taken at most once (:issue:`2113`).
+
+    Engine selection asks
+    :meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason` in
+    the :class:`~pcapkit.foundation.extraction.Extractor` constructor and again in
+    :meth:`~pcapkit.foundation.extraction.Extractor.run`, and the engine's own
+    constructor probes once more. While a memo is entered, :func:`probe` answers
+    from it, probing on first use. Each extraction holds its own memo, so nothing
+    is cached across extractions.
+
+    """
+
+    __slots__ = ('found', '_tokens')
+
+    def __init__(self) -> 'None':
+        #: The probe taken under this memo, or :data:`None` before the first.
+        self.found = None  # type: Optional[Probe]
+        self._tokens = []  # type: list[contextvars.Token[Optional[Memo]]]
+
+    def __enter__(self) -> 'Memo':
+        self._tokens.append(_MEMO.set(self))
+        return self
+
+    def __exit__(self, *exc: 'object') -> 'None':
+        _MEMO.reset(self._tokens.pop())
+
+
+#: The :class:`Memo` entered in this context, if any. A
+#: :class:`~contextvars.ContextVar` so that one thread's extraction never answers
+#: another's.
+_MEMO: 'contextvars.ContextVar[Optional[Memo]]' = contextvars.ContextVar('_MEMO', default=None)
+
+
 def probe() -> 'Probe':
     """Import |pcap|_ and report what was found.
 
-    Not cached. The cost after a successful first call is a :data:`sys.modules`
-    lookup plus the ``dist-info`` scan in :func:`installed_distributions`, and a
-    cache would make the answer depend on when it was first asked --
-    which the tests, and anything that manipulates :data:`sys.path`, would have to
-    work around. It is idempotent instead, via :func:`_purge`.
+    Not cached, except within a :class:`Memo`, which an extraction enters so
+    that its engine selection and engine constructor share one probe
+    (:issue:`2113`). The cost after a successful first call is a
+    :data:`sys.modules` lookup plus the ``dist-info`` scan in
+    :func:`installed_distributions`, and a process-wide cache would make the
+    answer depend on when it was first asked -- which the tests, and anything that
+    manipulates :data:`sys.path`, would have to work around. It is idempotent
+    instead, via :func:`_purge`.
 
     Note:
         The bare ``except Exception`` is deliberate and is much of the point of
@@ -214,6 +252,16 @@ def probe() -> 'Probe':
         A :class:`Probe` describing the outcome.
 
     """
+    memo = _MEMO.get()
+    if memo is None:
+        return _probe()
+    if memo.found is None:
+        memo.found = _probe()
+    return memo.found
+
+
+def _probe() -> 'Probe':
+    """:func:`probe`, without consulting a :class:`Memo`."""
     installed = installed_distributions()
 
     try:
