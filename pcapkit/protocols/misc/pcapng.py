@@ -210,9 +210,9 @@ from pcapkit.protocols.schema.misc.pcapng import ZigBeeNWKKey as Schema_ZigBeeNW
 from pcapkit.protocols.schema.misc.pcapng import zigbee_key_held
 from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.compat import StrEnum, localcontext
+from pcapkit.utilities.datetime import fromtimestamp, totimestamp
 from pcapkit.utilities.exceptions import (BaseError, EnumValueError, FormatError, ProtocolError,
                                           StreamEOFError, UnsupportedCall, stacklevel)
-from pcapkit.utilities.timestamp import fromtimestamp, totimestamp
 from pcapkit.utilities.warnings import (AttributeWarning, DeprecatedFormatWarning, ProtocolWarning,
                                         RegistryWarning, warn)
 

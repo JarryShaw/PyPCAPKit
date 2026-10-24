@@ -496,8 +496,8 @@ from pcapkit.protocols.schema.internet.mh import \
     UpdateNotificationMessage as Schema_UpdateNotificationMessage
 from pcapkit.protocols.schema.internet.mh import VendorSpecificOption as Schema_VendorSpecificOption
 from pcapkit.protocols.schema.schema import Schema
+from pcapkit.utilities.datetime import fromtimestamp, totimestamp
 from pcapkit.utilities.exceptions import EnumValueError, ProtocolError, UnsupportedCall
-from pcapkit.utilities.timestamp import fromtimestamp, totimestamp
 from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
 if TYPE_CHECKING:

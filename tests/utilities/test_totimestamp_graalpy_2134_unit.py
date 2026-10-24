@@ -10,7 +10,7 @@ back another instant than the one encoded.
 
 :class:`GraalPyDateTime` applies GraalPy's rule on any interpreter, and the
 encoders are run under :func:`graalpy_timestamps`, which turns on
-:func:`pcapkit.utilities.timestamp.totimestamp`'s GraalPy branch.
+:func:`pcapkit.utilities.datetime.totimestamp`'s GraalPy branch.
 
 :mod:`pcapkit` is imported inside each test, after
 :func:`~tests._support.reimport_once_per_class`.
@@ -70,8 +70,8 @@ def graal(instant: 'datetime.datetime') -> 'GraalPyDateTime':
 
 @contextlib.contextmanager
 def graalpy_timestamps() -> 'Iterator[None]':
-    """Run :func:`~pcapkit.utilities.timestamp.totimestamp` as it runs on GraalPy."""
-    with mock.patch('pcapkit.utilities.timestamp._TIMESTAMP_TRUNCATES', True):
+    """Run :func:`~pcapkit.utilities.datetime.totimestamp` as it runs on GraalPy."""
+    with mock.patch('pcapkit.utilities.datetime._TIMESTAMP_TRUNCATES', True):
         yield
 
 
@@ -92,7 +92,7 @@ class TestGraalPyEmulation(unittest.TestCase):
 
 
 class TestToTimestamp(unittest.TestCase):
-    """:func:`pcapkit.utilities.timestamp.totimestamp` is CPython's :meth:`~datetime.datetime.timestamp`."""
+    """:func:`pcapkit.utilities.datetime.totimestamp` is CPython's :meth:`~datetime.datetime.timestamp`."""
 
     def setUp(self) -> None:
         from tests._support import reimport_once_per_class
@@ -100,7 +100,7 @@ class TestToTimestamp(unittest.TestCase):
         reimport_once_per_class(self)
 
     def test_aware_is_the_seconds_since_the_epoch(self) -> None:
-        from pcapkit.utilities.timestamp import totimestamp
+        from pcapkit.utilities.datetime import totimestamp
 
         for instant in INSTANTS:
             with self.subTest(instant=instant):
@@ -108,7 +108,7 @@ class TestToTimestamp(unittest.TestCase):
 
     @unittest.skipIf(sys.implementation.name == 'graalpy', "GraalPy's own timestamp() is the defect")
     def test_is_the_stdlib_call_off_graalpy(self) -> None:
-        from pcapkit.utilities.timestamp import totimestamp
+        from pcapkit.utilities.datetime import totimestamp
 
         naive = datetime.datetime(1950, 6, 1, 12, 0, 0, 500_000)
         for instant in (*INSTANTS, naive):
@@ -116,7 +116,7 @@ class TestToTimestamp(unittest.TestCase):
                 self.assertEqual(totimestamp(instant).hex(), instant.timestamp().hex())
 
     def test_graalpys_lost_second_is_restored(self) -> None:
-        from pcapkit.utilities.timestamp import totimestamp
+        from pcapkit.utilities.datetime import totimestamp
 
         with graalpy_timestamps():
             for instant in INSTANTS:
@@ -124,14 +124,14 @@ class TestToTimestamp(unittest.TestCase):
                     self.assertEqual(totimestamp(graal(instant)), (instant - EPOCH).total_seconds())
 
     def test_naive_is_local_time_everywhere(self) -> None:
-        from pcapkit.utilities.timestamp import totimestamp
+        from pcapkit.utilities.datetime import totimestamp
 
         naive = datetime.datetime(1950, 6, 1, 12, 0, 0, 500_000)
         with graalpy_timestamps():
             self.assertEqual(totimestamp(naive), naive.timestamp())
 
     def test_an_offsetless_zone_fails_as_on_cpython(self) -> None:
-        from pcapkit.utilities.timestamp import totimestamp
+        from pcapkit.utilities.datetime import totimestamp
 
         class NoOffset(datetime.tzinfo):
             def utcoffset(self, dt: 'object') -> None:

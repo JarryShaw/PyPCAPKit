@@ -2,9 +2,9 @@
 """Timestamp Conversion
 ======================
 
-.. module:: pcapkit.utilities.timestamp
+.. module:: pcapkit.utilities.datetime
 
-:mod:`pcapkit.utilities.timestamp` converts a UNIX timestamp to an aware
+:mod:`pcapkit.utilities.datetime` converts a UNIX timestamp to an aware
 :class:`~datetime.datetime` without the C library's range (:issue:`2099`), and
 a :class:`~datetime.datetime` back to a UNIX timestamp without GraalPy's lost
 second before 1970 (:issue:`2134`).

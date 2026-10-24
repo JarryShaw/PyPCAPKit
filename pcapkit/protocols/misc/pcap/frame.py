@@ -48,8 +48,8 @@ from pcapkit.protocols.schema.misc.pcap.frame import RECORD_HEADER_LEN
 from pcapkit.protocols.schema.misc.pcap.frame import Frame as Schema_Frame
 from pcapkit.protocols.schema.misc.pcap.header import RESOLUTION
 from pcapkit.utilities.compat import localcontext
+from pcapkit.utilities.datetime import fromtimestamp, totimestamp
 from pcapkit.utilities.exceptions import StreamEOFError, UnsupportedCall, stacklevel
-from pcapkit.utilities.timestamp import fromtimestamp, totimestamp
 from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
 if TYPE_CHECKING:

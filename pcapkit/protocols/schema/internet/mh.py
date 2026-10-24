@@ -61,8 +61,8 @@ from pcapkit.corekit.fields.numbers import (EnumField, UInt8Field, UInt16Field, 
                                             UInt64Field)
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField, StringField
 from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final
+from pcapkit.utilities.datetime import fromtimestamp
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
-from pcapkit.utilities.timestamp import fromtimestamp
 
 __all__ = [
     'MH',

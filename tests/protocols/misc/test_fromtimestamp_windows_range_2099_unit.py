@@ -110,10 +110,10 @@ class TestWindowsRangeEmulation(unittest.TestCase):
 
 
 class TestFromTimestamp(unittest.TestCase):
-    """:func:`pcapkit.utilities.timestamp.fromtimestamp` against the stdlib inside the CRT range."""
+    """:func:`pcapkit.utilities.datetime.fromtimestamp` against the stdlib inside the CRT range."""
 
     def test_matches_the_stdlib_where_both_can_answer(self) -> None:
-        from pcapkit.utilities.timestamp import fromtimestamp
+        from pcapkit.utilities.datetime import fromtimestamp
 
         zones = (UTC, datetime.timezone(datetime.timedelta(hours=-5)),
                  datetime.timezone(datetime.timedelta(seconds=86399)))
@@ -131,7 +131,7 @@ class TestFromTimestamp(unittest.TestCase):
                     self.assertIs(type(actual), _REAL_DATETIME)
 
     def test_errors_are_cpythons(self) -> None:
-        from pcapkit.utilities.timestamp import fromtimestamp
+        from pcapkit.utilities.datetime import fromtimestamp
 
         cases = (
             (float('nan'), ValueError), (float('inf'), OverflowError), (2.0**63, OverflowError),

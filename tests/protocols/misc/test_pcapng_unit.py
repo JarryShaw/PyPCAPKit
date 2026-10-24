@@ -559,7 +559,7 @@ class PCAPNGUnitTests(unittest.TestCase):
                                             section=types.SimpleNamespace(byteorder='little'))
         pcapng._type = BlockType.Enhanced_Packet_Block
         # Faked through pcapng.py's own binding of
-        # :func:`pcapkit.utilities.timestamp.fromtimestamp`, which it calls
+        # :func:`pcapkit.utilities.datetime.fromtimestamp`, which it calls
         # instead of :meth:`datetime.datetime.fromtimestamp` since #2099.
         with mock.patch('pcapkit.protocols.misc.pcapng.fromtimestamp', side_effect=ValueError), \
                 mock.patch('pcapkit.protocols.misc.pcapng.warn') as warn:
