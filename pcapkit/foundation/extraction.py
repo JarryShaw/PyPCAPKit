@@ -26,7 +26,7 @@ from typing import TYPE_CHECKING, Generic, TypeVar, cast
 from dictdumper.dumper import Dumper
 
 from pcapkit.corekit.context import ContextRegistry
-from pcapkit.corekit.io import PeekableStream, SeekableReader, _can_seek
+from pcapkit.corekit.io import PeekableStream, SeekableReader, can_seek
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.dumpkit.common import make_dumper
 from pcapkit.foundation.engines import _pcap_backend
@@ -1474,7 +1474,7 @@ class Extractor(Generic[_P]):
             self._ifile = cast('BufferedReader', fin)
 
         # NOTE: a Windows pipe says it is seekable and then does not seek (#2097).
-        if not _can_seek(self._ifile):
+        if not can_seek(self._ifile):
             logger.debug('input stream is not seekable, wrapping it in SeekableReader')
             # NOTE: ``stream_closing`` decides whether closing the wrapper also
             # closes the stream underneath it, so it follows *ownership*: only a

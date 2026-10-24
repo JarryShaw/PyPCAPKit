@@ -101,5 +101,32 @@ class TestAdvanceOnLyingPipe(unittest.TestCase):
         self.assertEqual(stream.tell(), 25)
 
 
+class TestCanSeekIsPublic(unittest.TestCase):
+    """:func:`~pcapkit.corekit.io.can_seek` is public, as :mod:`pcapkit.foundation.extraction` imports it."""
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    def test_can_seek_is_exported_and_the_private_name_is_gone(self) -> None:
+        """No alias keeps the old private name importable."""
+        from pcapkit.corekit import io as corekit_io  # pylint: disable=import-outside-toplevel
+
+        self.assertIn('can_seek', corekit_io.__all__)
+        self.assertFalse(hasattr(corekit_io, '_can_seek'))
+
+    def test_can_seek_tells_a_lying_pipe_from_a_seekable_stream(self) -> None:
+        """A pipe claiming to seek does not; a stream without a descriptor is trusted."""
+        from pcapkit.corekit.io import can_seek  # pylint: disable=import-outside-toplevel
+
+        read_fd, write_fd = os.pipe()
+        os.close(write_fd)
+        pipe = LyingPipe(read_fd)
+        try:
+            self.assertFalse(can_seek(pipe))  # type: ignore[arg-type]
+        finally:
+            pipe.close()
+        self.assertTrue(can_seek(io.BytesIO(b'')))
+
+
 if __name__ == '__main__':
     unittest.main()

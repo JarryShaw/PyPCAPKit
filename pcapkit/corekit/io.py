@@ -32,7 +32,7 @@ if TYPE_CHECKING:
 
     from typing_extensions import Buffer
 
-__all__ = ['SeekableReader', 'PeekableStream', 'NamedStream', 'advance']
+__all__ = ['SeekableReader', 'PeekableStream', 'NamedStream', 'advance', 'can_seek']
 
 
 def _discard_buffer(file: 'IO[bytes]', path: 'str') -> 'None':
@@ -864,7 +864,7 @@ class SeekableReader(io.BufferedReader):
         return buf
 
 
-def _can_seek(stream: 'IO[bytes]') -> 'bool':
+def can_seek(stream: 'IO[bytes]') -> 'bool':
     """Whether ``stream`` can really seek, rather than only saying it can.
 
     On Windows before CPython 3.16, a pipe reports :meth:`~io.IOBase.seekable`
@@ -910,7 +910,7 @@ def advance(file: 'IO[bytes]', count: 'int', /) -> 'None':
 
     """
     # NOTE: a frame reader built on a caller's stream sees it unwrapped (#2108).
-    if isinstance(file, SeekableReader) or not _can_seek(file):
+    if isinstance(file, SeekableReader) or not can_seek(file):
         chunk = _DISCARD_CHUNK if config.READ_CHUNK == -1 else config.READ_CHUNK
         chunk = min(chunk, sys.maxsize)
         while count > 0:
