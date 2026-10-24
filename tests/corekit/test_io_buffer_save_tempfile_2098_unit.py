@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import builtins
 import errno
-import gc
 import importlib.util
 import io
 import os
@@ -22,7 +21,7 @@ import unittest
 import warnings
 from unittest import mock
 
-from tests._support import bootstrap_core_modules, load_module, reimport_once_per_class
+from tests._support import bootstrap_core_modules, collect_until, load_module, reimport_once_per_class
 
 #: Test tier (#1958): exercises finalisation and stream semantics.
 __tier__ = 'ALL'
@@ -86,10 +85,12 @@ class TestBufferFile(unittest.TestCase):
         reader = self.SeekableReader(io.BytesIO(b'abcdefghij'), buffer_size=4, buffer_save=True)
         path = reader._buffer_path  # pylint: disable=protected-access
         reader.read()
+        # the reader's finaliser runs in the collection on CPython, and can run
+        # after it returns on GraalPy, so this waits as long as it may (#2134)
         with warnings.catch_warnings():
             warnings.simplefilter('ignore', ResourceWarning)
             del reader
-            gc.collect()
+            collect_until(lambda: not os.path.exists(path))
         self.assertFalse(os.path.exists(path))
 
     def test_a_buffer_path_the_caller_gave_is_kept(self) -> None:

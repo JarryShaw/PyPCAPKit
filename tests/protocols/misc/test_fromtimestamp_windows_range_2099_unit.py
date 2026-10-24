@@ -34,7 +34,8 @@ if TYPE_CHECKING:
     from typing import Any, Iterator
 
 #: Test tier (#1958): splits floats into seconds and microseconds, which PyPy's
-#: and GraalPy's pure-Python datetime do in code of their own.
+#: and GraalPy's pure-Python datetime do in code of their own, and gates one
+#: error class on GraalPy.
 __tier__ = 'ALL'
 
 UTC = datetime.timezone.utc
@@ -47,6 +48,16 @@ YEAR_1 = -62135510400
 YEAR_9999 = 253402214399
 
 _REAL_DATETIME = datetime.datetime
+
+#: What :meth:`datetime.timezone.fromutc` raises for a result before year 1.
+#: CPython's C and pure-Python ``datetime`` both raise :exc:`OverflowError`, as
+#: ``datetime + timedelta`` does. GraalPy's ``FromUtcNode`` adds the offset to a
+#: Java ``LocalDateTime``, which has no year-1 floor, and its constructor then
+#: raises ``ValueError: year 0 is out of range`` (#2134, measured on GraalPy
+#: 25.4.4; graalpython ``TimeZoneBuiltins.java`` and ``DatetimeModuleBuiltins
+#: .addOffsetToDateTime`` at graal-25.4.4, no upstream issue filed yet). Its
+#: ``datetime + timedelta`` still raises :exc:`OverflowError`.
+ZONE_OVERFLOW = ValueError if sys.implementation.name == 'graalpy' else OverflowError
 
 
 class WindowsDateTime(_REAL_DATETIME):
@@ -99,10 +110,10 @@ class TestWindowsRangeEmulation(unittest.TestCase):
 
 
 class TestFromTimestamp(unittest.TestCase):
-    """:func:`pcapkit.utilities.timestamp.fromtimestamp` against the stdlib inside the CRT range."""
+    """:func:`pcapkit.utilities.datetime.fromtimestamp` against the stdlib inside the CRT range."""
 
     def test_matches_the_stdlib_where_both_can_answer(self) -> None:
-        from pcapkit.utilities.timestamp import fromtimestamp
+        from pcapkit.utilities.datetime import fromtimestamp
 
         zones = (UTC, datetime.timezone(datetime.timedelta(hours=-5)),
                  datetime.timezone(datetime.timedelta(seconds=86399)))
@@ -120,7 +131,7 @@ class TestFromTimestamp(unittest.TestCase):
                     self.assertIs(type(actual), _REAL_DATETIME)
 
     def test_errors_are_cpythons(self) -> None:
-        from pcapkit.utilities.timestamp import fromtimestamp
+        from pcapkit.utilities.datetime import fromtimestamp
 
         cases = (
             (float('nan'), ValueError), (float('inf'), OverflowError), (2.0**63, OverflowError),
@@ -130,7 +141,7 @@ class TestFromTimestamp(unittest.TestCase):
             with self.subTest(timestamp=value), self.assertRaises(error):
                 fromtimestamp(value, UTC)
         # the instant is in range and the zone pushes it out
-        with self.assertRaises(OverflowError):
+        with self.assertRaises(ZONE_OVERFLOW):
             fromtimestamp(-62135596800.0, datetime.timezone(datetime.timedelta(hours=-5)))
 
 

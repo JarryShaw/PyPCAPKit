@@ -496,8 +496,8 @@ from pcapkit.protocols.schema.internet.mh import \
     UpdateNotificationMessage as Schema_UpdateNotificationMessage
 from pcapkit.protocols.schema.internet.mh import VendorSpecificOption as Schema_VendorSpecificOption
 from pcapkit.protocols.schema.schema import Schema
+from pcapkit.utilities.datetime import fromtimestamp, totimestamp
 from pcapkit.utilities.exceptions import EnumValueError, ProtocolError, UnsupportedCall
-from pcapkit.utilities.timestamp import fromtimestamp
 from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
 if TYPE_CHECKING:
@@ -8383,7 +8383,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         if timestamp is None:
             interval = interval or datetime.datetime.now(datetime.timezone.utc)
 
-            int_ts = interval.timestamp()
+            int_ts = totimestamp(interval)
             ts_sec = math.floor(int_ts)
             ts_frc = min(round((int_ts - ts_sec) * 2**32), 0xFFFF_FFFF)  # 1/2**32 seconds per unit
 

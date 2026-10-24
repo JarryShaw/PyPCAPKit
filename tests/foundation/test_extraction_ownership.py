@@ -51,16 +51,11 @@ import gc
 import importlib.util
 import io
 import os
-import sys
 import time
 import unittest
-from typing import TYPE_CHECKING
 from unittest import mock
 
-from tests._support import sample_path
-
-if TYPE_CHECKING:
-    from typing import Callable
+from tests._support import collect_until, sample_path
 
 #: Test tier (#1958): depends on garbage collection, weak references or object
 #: finalisation.
@@ -72,39 +67,6 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 #: Whether file descriptors can be counted on this platform. ``/proc/self/fd`` is
 #: Linux; the :func:`builtins.open` measurement below covers the rest.
 HAS_PROC_FD = os.path.isdir('/proc/self/fd')
-
-#: Seconds :func:`collect_until` keeps collecting for a finaliser after the first
-#: :func:`gc.collect`. CPython runs the finaliser before ``collect`` returns, so it
-#: gets no grace. GraalPy's ``collect`` forces a full Java GC, sleeps 15 ms "just
-#: trying to give the GC more time" and then runs only the weak reference
-#: callbacks queued by then (graalpython ``GcModuleBuiltins.javaCollect``, at
-#: graal-25.4.4), so on a loaded runner the finaliser can run after it returns
-#: (#1963). A finaliser that never runs still fails once the grace is spent.
-#: PyPy frees the extractor, and so runs the finaliser, one collection later
-#: than CPython: the class still defines ``__del__`` (#1958, measured on PyPy
-#: 8.0.1), so a short grace lets a second collection run there.
-FINALISER_GRACE = {'graalpy': 10.0, 'pypy': 1.0}.get(sys.implementation.name, 0.0)
-
-
-def collect_until(done: 'Callable[[], bool]', grace: float = FINALISER_GRACE) -> bool:
-    """Collect garbage until ``done()`` holds or ``grace`` seconds have passed.
-
-    Args:
-        done: Zero-argument callable, checked after each collection.
-        grace: Seconds to keep collecting after the first collection.
-
-    Returns:
-        Whether ``done()`` held before the grace ran out.
-
-    """
-    deadline = time.monotonic() + grace
-    while True:
-        gc.collect()
-        if done():
-            return True
-        if time.monotonic() >= deadline:
-            return False
-        time.sleep(0.05)
 
 
 def fd_count(target: str) -> int:

@@ -296,7 +296,7 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
         bad_time._fnum = 6
         bad_time._file = io.BytesIO(b'')
         # Faked through frame.py's own binding of
-        # :func:`pcapkit.utilities.timestamp.fromtimestamp`, which it calls
+        # :func:`pcapkit.utilities.datetime.fromtimestamp`, which it calls
         # instead of :meth:`datetime.datetime.fromtimestamp` since #2099.
         with mock.patch('pcapkit.protocols.misc.pcap.frame.fromtimestamp', side_effect=ValueError), \
                 mock.patch.object(Frame, '_decode_next_layer',

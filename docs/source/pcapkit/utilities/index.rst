@@ -18,7 +18,7 @@ conversion, and wrappers around third-party libraries. It imports nothing from
    logging
    config
    chardet
-   timestamp
+   datetime
 
 Version Compatibility
 =====================
