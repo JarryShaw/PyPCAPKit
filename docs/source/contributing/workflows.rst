@@ -1625,6 +1625,34 @@ result of ``analyze`` stands. Where the alerts cannot be read, the step writes a
 warning, the report marks them unavailable, and ``analyze``'s result stands
 unchanged.
 
+.. _CodeQL Configuration:
+
+CodeQL Configuration (`#2130 <https://github.com/JarryShaw/PyPCAPKit/issues/2130>`__)
+-------------------------------------------------------------------------------------
+
+``Initialize CodeQL`` in ``codeql-analysis.yml`` reads
+:file:`.github/codeql/codeql-config.yml` through its ``config-file`` input. The
+config's ``paths-ignore`` leaves out :file:`tests` and changes nothing else, so the
+default queries still run over :mod:`pcapkit` and every other path. Python is not
+built, so an ignored file is left out of the analysis (`Specifying directories to
+scan
+<https://docs.github.com/en/code-security/reference/code-scanning/workflow-configuration-options#specifying-directories-to-scan>`__)
+and cannot be the source of a data flow.
+
+``py/clear-text-logging-sensitive-data`` and
+``py/clear-text-storage-sensitive-data`` call a value secret from its name alone,
+by CodeQL's `sensitive-data heuristics
+<https://github.com/github/codeql/blob/main/shared/concepts/codeql/concepts/internal/SensitiveDataHeuristics.qll>`__.
+The tests that build a pcapng Decryption Secrets Block call its bytes
+``secrets``. Through :func:`~pcapkit.interface.core.extract` those bytes reached
+``logger`` calls in :mod:`pcapkit.foundation.extraction` and the buffer file's
+write in :mod:`pcapkit.corekit.io`, and each alert's dismissal was lost whenever
+a pull request moved the line it named. The alert on the ``logger`` call in
+:mod:`pcapkit.utilities.warnings` begins in :mod:`pcapkit` itself, at the block's
+``secrets_length`` field, the spec's name for it, so it is still raised and still
+dismissed by hand. :file:`tests/project/test_codeql_config_2130.py` pins the
+config and the input.
+
 .. _Action Pins:
 
 Action Pins (`#1968 <https://github.com/JarryShaw/PyPCAPKit/issues/1968>`__)
