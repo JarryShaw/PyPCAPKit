@@ -14,7 +14,9 @@ does not count.
 A manual run (``workflow_dispatch``) builds only and names no environment, so a
 job may name its environment through an expression; :func:`environment` reads
 the name it gives every other event, where the secrets are read.
-:mod:`tests.project.test_build_only_dispatch` pins the manual run's side.
+:mod:`tests.project.test_build_only_dispatch` pins the manual run's side. In
+Conda Update the expression reads its ``mode`` job's ``publishes``, which is
+'true' on every other event and on a manual run with ``publish`` (#2060).
 
 """
 
@@ -40,13 +42,21 @@ SECRET_ENVIRONMENTS = {
 SECRET = re.compile(r'\bsecrets\.(\w+)')
 
 
-def environment(job: 'dict[str, Any]', event_name: 'str' = 'schedule') -> 'Optional[str]':
-    """The environment ``job`` names on ``event_name``, in either spelling, or :data:`None`."""
+def environment(job: 'dict[str, Any]', event_name: 'str' = 'schedule',
+                publish: 'bool' = False) -> 'Optional[str]':
+    """The environment ``job`` names on ``event_name``, in either spelling, or :data:`None`.
+
+    ``publish`` is a manual run's input of that name, as Conda Update's ``mode``
+    job reads it from ``main``.
+
+    """
     value = job.get('environment')
     if isinstance(value, dict):
         value = value.get('name')
     if isinstance(value, str) and value.startswith('${{'):
-        value = str(evaluate_expression(value, {'github': {'event_name': event_name}}))
+        publishes = 'true' if publish or event_name != 'workflow_dispatch' else 'false'
+        value = str(evaluate_expression(value, {'github': {'event_name': event_name},
+                                                'needs': {'mode': {'outputs': {'publishes': publishes}}}}))
     return value
 
 
@@ -97,6 +107,10 @@ class TestSecretsReachTheirJobs(unittest.TestCase):
         job = {'environment': "${{ github.event_name != 'workflow_dispatch' && 'anaconda' || '' }}"}
         self.assertEqual(environment(job), 'anaconda')
         self.assertEqual(environment(job, 'workflow_dispatch'), '')
+        job = {'environment': "${{ needs.mode.outputs.publishes == 'true' && 'anaconda' || '' }}"}
+        self.assertEqual(environment(job), 'anaconda')
+        self.assertEqual(environment(job, 'workflow_dispatch'), '')
+        self.assertEqual(environment(job, 'workflow_dispatch', publish=True), 'anaconda')
 
 
 if __name__ == '__main__':

@@ -1628,8 +1628,9 @@ def job_runs(jobs: 'dict[str, str]', name: 'str', context: 'dict[str, object]') 
 #: The jobs :file:`cron-conda.yml` declares. Named so that a scenario row can
 #: be keyed on them and ``test_the_scan_found_the_jobs`` fails loudly when the
 #: graph is renamed or extended, rather than leaving a new job unchecked.
-#: ``head`` is the call to :data:`HEAD_WORKFLOW`, and has no ``if:`` of its own.
-CONDA_JOBS = ('head', 'conda-update', 'conda-tag', 'conda-dist')
+#: ``head`` is the call to :data:`HEAD_WORKFLOW`, and has no ``if:`` of its own;
+#: ``mode`` says whether the run publishes (#2060).
+CONDA_JOBS = ('head', 'mode', 'conda-update', 'conda-tag', 'conda-dist')
 #: The job posting the run's report (#2030). It gates nothing, so no row is
 #: keyed on it; :file:`tests/project/test_cron_reports_2030.py` pins it.
 CONDA_REPORTER = 'discussion'
@@ -1675,7 +1676,10 @@ def conda_context(unit_tests: 'str' = 'skipped',
                   workflow_run_event: 'str' = 'push',
                   head_branch: 'str' = 'main',
                   cancelled: 'bool' = False,
-                  outputs_present: 'bool' = True) -> 'dict[str, object]':
+                  outputs_present: 'bool' = True,
+                  mode: 'Optional[str]' = None,
+                  publishes: 'object' = None,
+                  bump: 'object' = None) -> 'dict[str, object]':
     """The ``needs``/``github``/status context one row of :data:`CONDA_ROWS` stands for.
 
     **The defaults are run 38325136710**, the broken run in #1632: a
@@ -1702,18 +1706,32 @@ def conda_context(unit_tests: 'str' = 'skipped',
     ``outputs_present=False`` is the shape a ``conda-update`` that never ran
     leaves behind: no step wrote anything, which Actions serves as ``null``
     rather than as ``''``. ``pushed=NULL`` is the narrower shape where Push
-    Changes did not write it -- and the only one allowed when ``files_changed``
-    is not ``'true'``, since that step is skipped then.
+    Changes did not write it -- and the only one allowed when ``bump`` is not
+    ``'true'``, since that step is skipped then.
 
     ``commit`` is the sha Push Changes writes beside ``pushed=true`` and only
     then; left out, it is :data:`PUSHED_COMMIT` when ``pushed`` is ``'true'``
     and ``NULL`` otherwise.
 
+    ``mode``, ``publishes`` and ``bump`` are #2060's. ``mode`` is the result of
+    the job of that name, which skips a pull request's Unit Tests run and
+    succeeds otherwise unless a row says so; ``publishes`` its output, left out
+    'true' but on ``workflow_dispatch``, where it is 'false' -- a manual run
+    without ``publish`` -- and :data:`NULL` when ``mode`` did not succeed.
+    ``bump`` is Decide whether to bump's output, ``files_changed`` when left
+    out; a manual run with ``publish`` sets it 'true' over a 'false' one.
+
     """
-    if files_changed != 'true' and pushed is not NULL:
+    if mode is None:
+        mode = 'skipped' if event_name == 'workflow_run' and workflow_run_event != 'push' else 'success'
+    if publishes is None:
+        publishes = NULL if mode != 'success' else 'false' if event_name == 'workflow_dispatch' else 'true'
+    if bump is None:
+        bump = files_changed
+    if bump != 'true' and pushed is not NULL:
         raise AssertionError(
-            f'Push Changes is skipped unless files_changed is \'true\', so it cannot '
-            f'have written pushed={pushed!r} with files_changed={files_changed!r}'
+            f'Push Changes is skipped unless bump is \'true\', so it cannot '
+            f'have written pushed={pushed!r} with bump={bump!r}'
         )
     if commit is None:
         commit = PUSHED_COMMIT if pushed == 'true' else NULL
@@ -1727,6 +1745,7 @@ def conda_context(unit_tests: 'str' = 'skipped',
     if outputs_present:
         steps = {
             'verify-changed-files': {'outputs': {'files_changed': files_changed}},
+            'bump': {'outputs': {'bump': bump}},
             'push-changes': {'outputs': {'pushed': pushed, 'commit': commit}},
             # The values runs 38325136710 and 38325153882 both produced, for
             # the same reason the results above are a real run's: a row reads
@@ -1745,6 +1764,7 @@ def conda_context(unit_tests: 'str' = 'skipped',
                 'outputs': {} if verified is NULL else {'verified': verified},
                 'jobs': {'unit-tests': {'result': unit_tests}, 'verdict': {'result': verdict}},
             },
+            'mode': {'result': mode, 'outputs': {} if publishes is NULL else {'publishes': publishes}},
             'conda-update': {'result': conda_update, 'steps': steps},
             'conda-tag': {'result': conda_tag},
             'conda-dist': {'result': conda_dist},
@@ -1822,7 +1842,7 @@ CONDA_ROWS = [
      {'verdict': True, 'conda-update': True, 'conda-tag': True, 'conda-dist': True}),
     ('the Saturday schedule, the gate green',
      conda_context(event_name='schedule', unit_tests='success', verdict='skipped', verified=NULL),
-     {'unit-tests': True, 'verdict': False, 'conda-update': True, 'conda-tag': True,
+     {'unit-tests': True, 'verdict': False, 'mode': True, 'conda-update': True, 'conda-tag': True,
       'conda-dist': True}),
     ('the Saturday schedule, the gate failed',
      conda_context(event_name='schedule', unit_tests='failure', verdict='skipped', verified=NULL,
@@ -1869,7 +1889,8 @@ CONDA_ROWS = [
      conda_context(workflow_run_event='pull_request', verdict='skipped', verified=NULL,
                    conda_update='skipped', conda_tag='skipped', conda_dist='skipped',
                    outputs_present=False),
-     {'verdict': False, 'conda-update': False, 'conda-tag': False, 'conda-dist': False}),
+     {'verdict': False, 'mode': False, 'conda-update': False, 'conda-tag': False,
+      'conda-dist': False}),
     ('Unit Tests failed on main',
      conda_context(workflow_run_conclusion='failure', verdict='skipped', verified=NULL,
                    conda_update='skipped', conda_tag='skipped', conda_dist='skipped',
@@ -1880,6 +1901,25 @@ CONDA_ROWS = [
                    conda_update='skipped', conda_tag='skipped', conda_dist='skipped',
                    outputs_present=False),
      {'verdict': False, 'conda-update': False, 'conda-tag': False, 'conda-dist': False}),
+    # #2060: a manual run. Without `publish` it builds what `conda-update`
+    # left and tags nothing, as before; with it from `main`, the build is
+    # bumped although nothing changed, then tagged and uploaded as the
+    # schedule's is; with it from another ref, `mode` fails and nothing runs.
+    ('a manual run without publish, nothing changed',
+     conda_context(event_name='workflow_dispatch', unit_tests='success', verdict='skipped',
+                   verified=NULL, files_changed='false', pushed=NULL, conda_tag='skipped'),
+     {'unit-tests': True, 'verdict': False, 'mode': True, 'conda-update': True,
+      'conda-tag': False, 'conda-dist': True}),
+    ('a manual run with publish on main, nothing changed, so the bump is forced',
+     conda_context(event_name='workflow_dispatch', unit_tests='success', verdict='skipped',
+                   verified=NULL, publishes='true', files_changed='false', bump='true'),
+     {'unit-tests': True, 'mode': True, 'conda-update': True, 'conda-tag': True,
+      'conda-dist': True}),
+    ('a manual run with publish off main, which mode refuses',
+     conda_context(event_name='workflow_dispatch', unit_tests='success', verdict='skipped',
+                   verified=NULL, mode='failure', conda_update='skipped', conda_tag='skipped',
+                   conda_dist='skipped', outputs_present=False),
+     {'conda-update': False, 'conda-tag': False, 'conda-dist': False}),
 ]
 
 
@@ -4019,15 +4059,16 @@ class TestCondaBumpIsTaggedAndUploaded(CondaWorkflowMixin, unittest.TestCase):
         Here ``conda-tag`` skips only when no bump was committed, in which case
         there is nothing for ``conda-dist`` to upload either.
 
-        ``conda-dist``'s tag and bump clauses sit behind the manual run's escape,
-        the last conjunct, which uploads nothing (see
+        ``conda-dist``'s tag and bump clauses sit behind the build-only run's
+        escape, the last conjunct, which uploads nothing (see
         :mod:`tests.project.test_build_only_dispatch`); they are checked as the
-        conjuncts they are on every other event.
+        conjuncts they are on every run that publishes. Each also needs
+        ``mode``, for its ``publishes`` output rather than its result (#2060).
 
         """
         predecessors = {'conda-tag': ('conda-update',),
                         'conda-dist': ('conda-update', 'conda-tag')}
-        escape = "&&(github.event_name=='workflow_dispatch'||("
+        escape = "&&(needs.mode.outputs.publishes!='true'||("
         for job, required in sorted(predecessors.items()):
             with self.subTest(job=job):
                 condition = declared_if(self.jobs[job])
@@ -4049,7 +4090,7 @@ class TestCondaBumpIsTaggedAndUploaded(CondaWorkflowMixin, unittest.TestCase):
                     f'cancelled run',
                 )
                 self.assertEqual(
-                    set(declared_needs(self.jobs[job])), set(required),
+                    set(declared_needs(self.jobs[job])), {*required, 'mode'},
                     f'`{job}`\'s `needs:` and the clauses asserted here disagree, '
                     f'so at least one predecessor is not being checked',
                 )

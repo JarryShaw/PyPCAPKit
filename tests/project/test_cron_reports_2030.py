@@ -50,8 +50,9 @@ POSTERS = (
 )
 #: Every job's own ``permissions:``, and the top-level block, as before #2030.
 PERMISSIONS = {
-    CONDA: {None: {'contents': 'read'}, 'head': {'contents': 'read'}, 'conda-update': {'contents': 'write'},
-            'conda-tag': {'contents': 'write'}, 'conda-dist': {'contents': 'write'}},
+    CONDA: {None: {'contents': 'read'}, 'mode': {}, 'head': {'contents': 'read'},
+            'conda-update': {'contents': 'write'}, 'conda-tag': {'contents': 'write'},
+            'conda-dist': {'contents': 'write'}},
     VERSIONS: {None: {}, 'detect': {'contents': 'read', 'pull-requests': 'read'}, 'pr': {'actions': 'read'}},
 }
 #: The ``--mode`` and ``--status`` each workflow passes, and the step's ``env:``
@@ -71,9 +72,9 @@ ARGS = {
     }),
 }
 #: Each ``discussion`` job's ``needs:`` and ``if:``.
-NEEDS = {CONDA: ['head', 'conda-update', 'conda-tag', 'conda-dist'], VERSIONS: ['detect']}
+NEEDS = {CONDA: ['head', 'conda-update', 'conda-tag', 'conda-dist', 'mode'], VERSIONS: ['detect']}
 IFS = {
-    CONDA: "${{ always() && github.event_name != 'workflow_dispatch' && (needs.conda-update.result != 'skipped' || "
+    CONDA: "${{ always() && needs.mode.outputs.publishes == 'true' && (needs.conda-update.result != 'skipped' || "
            "needs.head.result == 'failure' || "
            "needs.head.result == 'cancelled') }}",
     VERSIONS: "${{ always() && needs.detect.result != 'skipped' }}",
@@ -157,10 +158,11 @@ class TestTheWorkflowsPost(unittest.TestCase):
     def test_the_mode_follows_the_event(self) -> None:
         """Python Versions is always ``scheduled``; Conda Update's ``workflow_run`` follows a push, so ``push``."""
         self.assertEqual(sorted(load(VERSIONS)['on']), ['schedule', 'workflow_dispatch'])
-        # A manual run posts nothing; tests/project/test_build_only_dispatch.py pins it.
+        # A manual run posts nothing unless `publish` is set, and then as the
+        # schedule does (#2060); tests/project/test_build_only_dispatch.py pins the first.
         self.assertEqual(sorted(load(CONDA)['on']), ['schedule', 'workflow_dispatch', 'workflow_run'])
         expression = step(CONDA, 'discussion', 'Post the report to Discussions')['env']['MODE']
-        for event, mode in (('schedule', 'scheduled'), ('workflow_run', 'push')):
+        for event, mode in (('schedule', 'scheduled'), ('workflow_run', 'push'), ('workflow_dispatch', 'scheduled')):
             with self.subTest(event=event):
                 self.assertEqual(evaluate(expression, {'github': {'event_name': event}}), mode)
 
@@ -192,23 +194,32 @@ class TestTheWorkflowsPost(unittest.TestCase):
     def test_the_conda_report_runs_on_a_failed_gate_but_not_a_deliberate_skip(self) -> None:
         """As cron-vendor's: a pull request's ``workflow_run``, or a verdict for another commit, posts nothing."""
         jobs = job_blocks((WORKFLOWS / CONDA).read_text(encoding='utf-8'))
-        # `(event, head, conda-update, whether discussion runs)`; tag and upload skip.
+        # `(event, head, conda-update, whether discussion runs, mode's `publishes`)`;
+        # tag and upload skip. #2060: a manual run posts only with `publish`,
+        # and one `mode` refused, which wrote no `publishes`, posts nothing.
         rows = (
-            ('schedule', 'success', 'success', True),
-            ('schedule', 'success', 'failure', True),
-            ('schedule', 'failure', 'skipped', True),
-            ('schedule', 'cancelled', 'skipped', True),
-            ('workflow_run', 'success', 'success', True),
-            ('workflow_run', 'failure', 'skipped', True),
-            ('workflow_run', 'success', 'skipped', False),
-            ('workflow_run', 'skipped', 'skipped', False),
+            ('schedule', 'success', 'success', True, 'true'),
+            ('schedule', 'success', 'failure', True, 'true'),
+            ('schedule', 'failure', 'skipped', True, 'true'),
+            ('schedule', 'cancelled', 'skipped', True, 'true'),
+            ('workflow_run', 'success', 'success', True, 'true'),
+            ('workflow_run', 'failure', 'skipped', True, 'true'),
+            ('workflow_run', 'success', 'skipped', False, 'true'),
+            ('workflow_run', 'skipped', 'skipped', False, 'true'),
+            ('workflow_dispatch', 'success', 'success', False, 'false'),
+            ('workflow_dispatch', 'failure', 'skipped', False, 'false'),
+            ('workflow_dispatch', 'success', 'success', True, 'true'),
+            ('workflow_dispatch', 'failure', 'skipped', True, 'true'),
+            ('workflow_dispatch', 'success', 'skipped', False, None),
         )
-        for event, head, update, expected in rows:
+        for event, head, update, expected, publishes in rows:
             needs = {'head': {'result': head}, 'conda-update': {'result': update, 'outputs': {}},
-                     'conda-tag': {'result': 'skipped'}, 'conda-dist': {'result': 'skipped'}}
+                     'conda-tag': {'result': 'skipped'}, 'conda-dist': {'result': 'skipped'},
+                     'mode': {'result': 'failure' if publishes is None else 'success',
+                              'outputs': {} if publishes is None else {'publishes': publishes}}}
             context = {STATUS: {'cancelled': False}, 'github': {'event_name': event, 'event': {}},
                        'needs': needs}  # type: dict[str, Any]
-            with self.subTest(event=event, head=head, conda_update=update):
+            with self.subTest(event=event, head=head, conda_update=update, publishes=publishes):
                 self.assertEqual(job_runs(jobs, 'discussion', context), expected)
         [download] = [entry for entry in load(CONDA)['jobs']['discussion']['steps']
                       if pinned(entry.get('uses'), 'actions/download-artifact')]
@@ -313,6 +324,28 @@ class TestTheCondaReport(_ReportStep):
 
     def pins(self, *lines: 'str') -> 'None':
         (self.temp / 'platform-pins.log').write_text(''.join(f'{line}\n' for line in lines), encoding='utf-8')
+
+    def report(self, **env: 'str') -> 'tuple[str, str]':
+        """As a run that publishes, the schedule's or a ``workflow_run``'s, unless ``env`` says otherwise."""
+        return super().report(**{'PUBLISHES': 'true', **env})
+
+    def test_a_build_only_run(self) -> None:
+        """A manual run without ``publish``, for which ``mode`` wrote 'false'."""
+        self.pins()
+        for files_changed in ('true', 'false'):
+            with self.subTest(files_changed=files_changed):
+                text, _ = self.report(PUBLISHES='false', FILES_CHANGED=files_changed, BUMP=files_changed,
+                                      CHANGED_FILES='conda/requirements.txt', PUSH='skipped')
+                self.assertTrue(text.endswith('- Pushed: nothing, as a manual run only builds\n'), text)
+
+    def test_a_forced_bump(self) -> None:
+        """#2060: a manual run with ``publish``, bumped and pushed although nothing changed."""
+        self.pins('pcapkit/_extern: 12 distributions')
+        sha = 'f4f94bcad' + '0' * 31
+        self.assertEqual(self.report(FILES_CHANGED='false', BUMP='true', PUSH='success', COMMIT=sha), (
+            '### Conda Update\n\n- Platform pins: none moved, and none warned\n'
+            '- Changed: nothing, and the build was bumped anyway, as a manual run with publish asks\n'
+            f'- Pushed: build 4 as {sha}\n', 'success'))
 
     def test_a_quiet_run(self) -> None:
         self.pins('pcapkit/_extern: 12 distributions')

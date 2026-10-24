@@ -1679,7 +1679,7 @@ class CondaDistMixin(WorkflowMixin):
         """Whether the action's ``if:`` lets it run, given the release check's ``outputs``."""
         return evaluate_condition(self.upload()['if'], {
             'matrix': {'os': runner}, 'steps': {'release': {'outputs': outputs}},
-            'github': {'event_name': 'schedule'},
+            'github': {'event_name': 'schedule'}, 'needs': {'mode': {'outputs': {'publishes': 'true'}}},
         })
 
 
@@ -1728,7 +1728,7 @@ class TestCondaUpdateNeverMakesTheRelease(CondaDistMixin, unittest.TestCase):
         self.assertEqual(self.index('conda-dist', RELEASE_CHECK_STEP) + 1, self.index('conda-dist', UPLOAD_STEP))
         self.assertEqual(check.get('id'), 'release')
         self.assertEqual(check.get('if'),
-                         "${{ github.event_name != 'workflow_dispatch' && matrix.os == 'ubuntu-latest' }}")
+                         "${{ needs.mode.outputs.publishes == 'true' && matrix.os == 'ubuntu-latest' }}")
         self.assertEqual(check.get('shell'), 'bash')
         self.assertEqual(check.get('env'), {'GH_TOKEN': '${{ secrets.GITHUB_TOKEN }}',
                                             'PCAPKIT_RELEASE_TAG': CONDA_RELEASE_TAG})
@@ -1736,14 +1736,14 @@ class TestCondaUpdateNeverMakesTheRelease(CondaDistMixin, unittest.TestCase):
 
     def test_the_anaconda_upload_is_not_gated_on_it(self) -> None:
         # #2044, #2060: gated on the leg alone, Intel and Windows with their own steps.
-        # A manual run uploads nothing (tests/project/test_build_only_dispatch.py).
+        # A build-only run uploads nothing (tests/project/test_build_only_dispatch.py).
         self.assertEqual(self.step('conda-dist', 'Upload conda packages to Anaconda').get('if'),
-                         "${{ github.event_name != 'workflow_dispatch' && "
+                         "${{ needs.mode.outputs.publishes == 'true' && "
                          "matrix.os != 'macos-26-intel' && matrix.os != 'windows-latest' }}")
         self.assertEqual(self.step('conda-dist', 'Upload conda packages to Anaconda (Intel)').get('if'),
-                         "${{ github.event_name != 'workflow_dispatch' && matrix.os == 'macos-26-intel' }}")
+                         "${{ needs.mode.outputs.publishes == 'true' && matrix.os == 'macos-26-intel' }}")
         self.assertEqual(self.step('conda-dist', 'Upload conda packages to Anaconda (Windows)').get('if'),
-                         "${{ github.event_name != 'workflow_dispatch' && matrix.os == 'windows-latest' }}")
+                         "${{ needs.mode.outputs.publishes == 'true' && matrix.os == 'windows-latest' }}")
 
     def test_an_update_targets_the_default_branch(self) -> None:
         """``github.ref_name`` is the default branch on this workflow's triggers.
@@ -1751,7 +1751,8 @@ class TestCondaUpdateNeverMakesTheRelease(CondaDistMixin, unittest.TestCase):
         "Events that trigger workflows" gives ``GITHUB_REF`` as "Default branch"
         for both ``schedule`` and ``workflow_run``, so the triggers are pinned
         too: another one could name another ref. ``workflow_dispatch`` does, the
-        dispatched branch, so the upload never runs on it.
+        dispatched branch, so the upload runs on it only with ``publish``, which
+        ``mode`` refuses on any branch but ``main`` (#2060).
         """
         self.assertEqual(self.upload()['with'].get('commit'), DEFAULT_BRANCH)
         lines = CONDA_WORKFLOW.read_text(encoding='utf-8').splitlines()
@@ -1759,10 +1760,13 @@ class TestCondaUpdateNeverMakesTheRelease(CondaDistMixin, unittest.TestCase):
         end = next(i for i in range(start, len(lines)) if lines[i] and not lines[i].startswith((' ', '#')))
         triggers = [m.group(1) for line in lines[start:end] for m in [re.match(r'^  ([a-z_]+):', line)] if m]
         self.assertEqual(triggers, ['schedule', 'workflow_run', 'workflow_dispatch'])
-        self.assertFalse(evaluate_condition(self.upload()['if'], {
-            'matrix': {'os': 'ubuntu-latest'}, 'steps': {'release': {'outputs': {'published': 'true'}}},
-            'github': {'event_name': 'workflow_dispatch'},
-        }))
+        for publishes in ('false', 'true'):
+            with self.subTest(publishes=publishes):
+                self.assertIs(evaluate_condition(self.upload()['if'], {
+                    'matrix': {'os': 'ubuntu-latest'}, 'steps': {'release': {'outputs': {'published': 'true'}}},
+                    'github': {'event_name': 'workflow_dispatch'},
+                    'needs': {'mode': {'outputs': {'publishes': publishes}}},
+                }), publishes == 'true')
 
 
 #: A ``gh`` failing as it does without a token, for the check's other branch.

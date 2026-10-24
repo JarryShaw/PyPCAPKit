@@ -393,13 +393,39 @@ exists`` step finds the release rather than skipping the GitHub upload
 
 To debug Vendor Update, Conda Update or GitHub Pages without waiting for
 Saturday, start a manual run on a branch, as in ``gh workflow run cron-conda.yml
---ref <branch>``. A manual run is build-only: Cron Head's test gate and every
-build and test step the schedule runs still run -- each ``conda-dist`` leg,
+--ref <branch>``. A manual run is build-only by default: Cron Head's test gate
+and every build and test step the schedule runs still run -- each ``conda-dist`` leg,
 Windows included, builds the dispatched commit with ``conda-update``'s changes
 applied -- while every step that pushes, tags, uploads, deploys or posts a
 report skips, no job that runs names an environment, and the Create Release run
 it raises releases nothing. :file:`tests/project/test_build_only_dispatch.py`
 pins this.
+
+Conda Update's manual run also takes a ``publish`` input, off by default, for
+putting a version's missing platform files on Anaconda (:issue:`2060`). A
+scheduled run uploads only a build it bumped, and it bumps only when
+``Verify Changed files`` sees a change, which :file:`util/conda_vendor.py` does
+not make when no dependency moved. ``gh workflow run cron-conda.yml --ref main
+-f publish=true`` therefore runs as the schedule does, through the same test
+gate, environments and ``repository-maintenance`` group, but with the build
+bumped regardless: ``Decide whether to bump`` says so although nothing changed,
+so ``Bump Version``, ``Commit Changes`` and ``Push Changes`` run, ``conda-tag``
+tags the pushed commit, every ``conda-dist`` leg uploads it, the GitHub
+Release steps run, and ``discussion`` posts the report as ``scheduled``. The
+``mode`` job is the one place the input is read: its ``publishes`` output is
+``'true'`` on the schedule, on a ``workflow_run`` and on such a run, and
+``'false'`` on any other manual run, and every step or job that publishes or
+names an environment requires it to be ``'true'``. On any ref but ``main``,
+``publish`` fails ``mode`` with an ``::error``, so the run fails and
+``conda-update`` never starts. The workflow-level concurrency group stays keyed
+on the run, so a manual run never displaces a pending scheduled one.
+No later run repeats a forced bump, so where ``Push Changes`` does not push it
+because ``main`` moved past the checkout or during the push, the run stays
+green having published nothing, and says so in a warning and in its report
+(:issue:`2060`); the remedy is to dispatch Conda Update again with ``publish``
+on ``main``. Where another run already pushed the same build, that run tags and
+uploads it, and a second dispatch is needed only if it did not.
+:file:`tests/project/test_conda_publish_dispatch_2060.py` pins this.
 
 ``gate-only: true`` selects not only ``unit-tests.yml``'s ``gate`` (the full
 suite, on ``latest``) but also ``changelog`` (checks ``CHANGELOG.md`` against its
@@ -1818,12 +1844,15 @@ it, so the scheduled jobs reading them name it too
 * Conda Update's ``conda-dist`` -- ``environment: anaconda``
 * Vendor Update's ``vendor-update`` -- ``environment: conda-tag``
 
+A manual run names neither, except Conda Update's with ``publish``, whose jobs
+name them as the schedule's do (:issue:`2060`).
+
 Both ``conda-dist`` and the release ``conda`` job have a ``windows-latest`` leg,
 which builds, smoke-tests and publishes the ``win-64`` package (:issue:`2060`).
 It blocks as the other legs do: no step continues on error. Its one step that
 reads ``ANACONDA_TOKEN`` is ``Upload conda packages to Anaconda (Windows)``, the
 Intel leg's anaconda-client call (:issue:`2044`) under ``bash -el``, which skips a
-manual run as every upload does.
+build-only manual run as every upload does.
 :file:`tests/project/test_conda_windows_leg_2060.py` pins the leg.
 
 A required reviewer on ``conda-tag`` or ``anaconda`` would therefore hold every
