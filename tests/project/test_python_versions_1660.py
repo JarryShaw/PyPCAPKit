@@ -836,7 +836,9 @@ class TestEveryVersionComesFromTheFile(unittest.TestCase):
                         if where in exemptions or 'matrix.python-version' in text:
                             continue
                         output = script_output(name, job_id, READ.fullmatch(text).group(2))  # type: ignore[union-attr]
-                        expected = {'engine-tests': ('engine-supported', 'engine-ktlo')}.get(job_id, ('latest',))
+                        # #2125: benchmark.yml's `benchmark` installs the engines' interpreters too.
+                        expected = {'engine-tests': ('engine-supported', 'engine-ktlo'),
+                                    'benchmark': ('engine-supported', 'engine-ktlo')}.get(job_id, ('latest',))
                         self.assertIn(output, expected)
 
     def test_every_single_interpreter_job_runs_latest(self) -> None:

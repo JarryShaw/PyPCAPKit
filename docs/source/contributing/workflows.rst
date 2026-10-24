@@ -128,6 +128,13 @@ At a Glance
      - Mon 05:41
      - --
      - ``workflow_dispatch``
+   * - Engine Benchmark
+     - :file:`benchmark.yml`
+     - --
+     - --
+     - Wed 03:17
+     - --
+     - ``workflow_dispatch``
 
 .. note::
 
@@ -157,6 +164,7 @@ than starting a new one.
        PR["pull_request: main"]
        SAT["schedule: Saturday"]
        MON["schedule: Monday"]
+       WED["schedule: Wednesday"]
        DISPATCH["workflow_dispatch"]
        DAILY["schedule: daily"]
        ISSUES["issues"]
@@ -173,6 +181,7 @@ than starting a new one.
        VU["Vendor Update<br/>cron-vendor.yml"]
        PV["Python Versions<br/>cron-python-versions.yml"]
        CT["CI Timing<br/>ci-timing.yml"]
+       BM["Engine Benchmark<br/>benchmark.yml"]
        PS["Project Status<br/>project-status.yml"]
        CR["Create Release<br/>create-release.yml"]
 
@@ -210,6 +219,9 @@ than starting a new one.
        MON -->|07:23| CT
        DISPATCH --> CT
 
+       WED -->|03:17| BM
+       DISPATCH --> BM
+
        DISPATCH --> PS
        DAILY -->|00:37| PS
        ISSUES --> PS
@@ -218,7 +230,7 @@ than starting a new one.
        TAG --> CR
 
        classDef trig fill:none,stroke-dasharray:2 2
-       class PUSH,PR,SAT,MON,DISPATCH,DAILY,ISSUES,PRT,TAG trig
+       class PUSH,PR,SAT,MON,WED,DISPATCH,DAILY,ISSUES,PRT,TAG trig
 
 .. mermaid::
 
@@ -1301,8 +1313,8 @@ to a script. Each script's docstring says what it does; each has tests under
      - ``Post the report to Discussions`` in the ``discussion`` job of
        ``ci-timing.yml``, ``cron-vendor.yml``, ``cron-conda.yml``,
        ``cron-python-versions.yml``, ``lint.yml``, ``deploy-pages.yml``,
-       ``codeql-analysis.yml``, ``coverage-comment.yml`` and ``ci-reports.yml``
-       (see `CI Reports`_).
+       ``codeql-analysis.yml``, ``coverage-comment.yml``, ``ci-reports.yml`` and
+       ``benchmark.yml`` (see `CI Reports`_).
      - No.
    * - :file:`util/check_suite_report.py`
      - ``Write the run report`` in the ``discussion`` job of
@@ -1312,7 +1324,8 @@ to a script. Each script's docstring says what it does; each has tests under
    * - :file:`util/apt_packages.py`
      - The apt steps of ``unit-tests.yml``'s ``engine-tests`` and ``pypcap-parity``
        (and so its KTLO twin): the plan, install and collect steps, as
-       ``apt_packages.py plan``, ``install`` and ``collect``. The
+       ``apt_packages.py plan``, ``install`` and ``collect``, and of
+       ``benchmark.yml``'s ``benchmark``, as ``install`` alone. The
        ``actions/cache`` steps, the seed steps (``Seed apt's archive with this
        engine's cached .deb files`` and ``Seed apt's archive with the cached .deb
        files``) and the AppArmor step (`#2019
@@ -1469,8 +1482,12 @@ marker. How often depends on the script's ``--mode``:
   counts as green.
 
 ``ci-timing.yml`` posts as ``scheduled`` to ``ci-timing: weekly CI timing
-report``. ``cron-vendor.yml`` posts to ``cron-vendor: vendor constant update
-report``, as ``push`` on its ``workflow_run`` and ``scheduled`` otherwise, and
+report``, and ``benchmark.yml`` to ``benchmark: weekly engine benchmark report``:
+the ratio table :file:`examples/benchmark/native.sh` writes, with its
+absolute-time footnote and the runner it ran on, reporting ``warning`` where a
+Python version was not measured in full (:issue:`2125`). ``cron-vendor.yml``
+posts to ``cron-vendor: vendor constant update report``, as ``push`` on its
+``workflow_run`` and ``scheduled`` otherwise, and
 reports ``warning`` where ``vendor-update`` passed over a failed target or test
 gate. A failed or cancelled ``head`` skips ``vendor-update``, so its
 ``discussion`` job runs on ``always()`` and then posts a line of its own with

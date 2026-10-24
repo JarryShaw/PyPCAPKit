@@ -502,6 +502,10 @@ PARITY_STEPS = (
      f'{IMAGE_PYTHON} {SCRIPT} collect'),
 )
 SITES = {'engine-tests': ENGINE_STEPS, 'pypcap-parity': PARITY_STEPS}
+#: #2125: steps of other workflows that run the script's ``install`` alone, with no
+#: cache to plan or collect for, as (workflow, step name). Each is pinned by its
+#: workflow's own test, as :mod:`tests.project.test_benchmark_workflow_2125`.
+ELSEWHERE = {('benchmark.yml', 'Install libpcap headers and tshark')}
 #: Each step's former shell, by the subcommand that replaced it.
 FORMER = {'plan': FORMER_PLAN, 'collect': FORMER_COLLECT}
 APPARMOR = 'Let tshark read the checkout past its AppArmor profile'
@@ -798,7 +802,8 @@ class TestTheStepsRunTheScript(unittest.TestCase):
                                     if not line.lstrip().startswith('#'))
                     found.extend(f'{path.name} {job} {item.get("name")!r}: {piece}'
                                  for piece in INLINE if piece in run)
-                    if SCRIPT in run and (path.name, item.get('name')) not in {(WORKFLOW, name) for name in covered}:
+                    listed = {(WORKFLOW, name) for name in covered} | ELSEWHERE
+                    if SCRIPT in run and (path.name, item.get('name')) not in listed:
                         found.append(f'{path.name} {job} {item.get("name")!r}: unlisted')
         self.assertEqual(found, [])
 
