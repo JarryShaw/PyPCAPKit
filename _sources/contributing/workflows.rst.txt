@@ -1376,7 +1376,8 @@ to a script. Each script's docstring says what it does; each has tests under
        conda packages to Anaconda (Intel)`` in that job and in ``cron-conda.yml``'s
        ``conda-dist``, as ``release_conda.py build`` and ``upload`` (`#1822
        <https://github.com/JarryShaw/PyPCAPKit/issues/1822>`__, `#2044
-       <https://github.com/JarryShaw/PyPCAPKit/issues/2044>`__).
+       <https://github.com/JarryShaw/PyPCAPKit/issues/2044>`__), and ``Upload conda
+       packages to Anaconda (Windows)`` in both as ``upload`` (:issue:`2060`).
      - No.
    * - :file:`util/release_reset_build.py`
      - ``Reset Build Number`` in ``create-release.yml``'s ``tag``, on the image's
@@ -1624,6 +1625,34 @@ result of ``analyze`` stands. Where the alerts cannot be read, the step writes a
 warning, the report marks them unavailable, and ``analyze``'s result stands
 unchanged.
 
+.. _CodeQL Configuration:
+
+CodeQL Configuration (`#2130 <https://github.com/JarryShaw/PyPCAPKit/issues/2130>`__)
+-------------------------------------------------------------------------------------
+
+``Initialize CodeQL`` in ``codeql-analysis.yml`` reads
+:file:`.github/codeql/codeql-config.yml` through its ``config-file`` input. The
+config's ``paths-ignore`` leaves out :file:`tests` and changes nothing else, so the
+default queries still run over :mod:`pcapkit` and every other path. Python is not
+built, so an ignored file is left out of the analysis (`Specifying directories to
+scan
+<https://docs.github.com/en/code-security/reference/code-scanning/workflow-configuration-options#specifying-directories-to-scan>`__)
+and cannot be the source of a data flow.
+
+``py/clear-text-logging-sensitive-data`` and
+``py/clear-text-storage-sensitive-data`` call a value secret from its name alone,
+by CodeQL's `sensitive-data heuristics
+<https://github.com/github/codeql/blob/main/shared/concepts/codeql/concepts/internal/SensitiveDataHeuristics.qll>`__.
+The tests that build a pcapng Decryption Secrets Block call its bytes
+``secrets``. Through :func:`~pcapkit.interface.core.extract` those bytes reached
+``logger`` calls in :mod:`pcapkit.foundation.extraction` and the buffer file's
+write in :mod:`pcapkit.corekit.io`, and each alert's dismissal was lost whenever
+a pull request moved the line it named. The alert on the ``logger`` call in
+:mod:`pcapkit.utilities.warnings` begins in :mod:`pcapkit` itself, at the block's
+``secrets_length`` field, the spec's name for it, so it is still raised and still
+dismissed by hand. :file:`tests/project/test_codeql_config_2130.py` pins the
+config and the input.
+
 .. _Action Pins:
 
 Action Pins (`#1968 <https://github.com/JarryShaw/PyPCAPKit/issues/1968>`__)
@@ -1789,14 +1818,13 @@ it, so the scheduled jobs reading them name it too
 * Conda Update's ``conda-dist`` -- ``environment: anaconda``
 * Vendor Update's ``vendor-update`` -- ``environment: conda-tag``
 
-``conda-dist`` also has a ``windows-latest`` leg, which builds and smoke-tests a
-``win-64`` package and publishes nothing
-(`#2060 <https://github.com/JarryShaw/PyPCAPKit/issues/2060>`__). Every upload
-step is gated off it, and those are the only steps that read ``ANACONDA_TOKEN``,
-so no step on that leg receives the secret.
-:file:`tests/project/test_conda_windows_leg_2060.py` checks both. Each step that
-can fail there continues on error, and ``Windows summary`` reports each failure
-as a warning, as ``KTLO summary`` does for a KTLO leg, so the leg stays green.
+Both ``conda-dist`` and the release ``conda`` job have a ``windows-latest`` leg,
+which builds, smoke-tests and publishes the ``win-64`` package (:issue:`2060`).
+It blocks as the other legs do: no step continues on error. Its one step that
+reads ``ANACONDA_TOKEN`` is ``Upload conda packages to Anaconda (Windows)``, the
+Intel leg's anaconda-client call (:issue:`2044`) under ``bash -el``, which skips a
+manual run as every upload does.
+:file:`tests/project/test_conda_windows_leg_2060.py` pins the leg.
 
 A required reviewer on ``conda-tag`` or ``anaconda`` would therefore hold every
 scheduled bump for an approval, besides the release-graph reason

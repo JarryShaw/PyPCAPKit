@@ -307,7 +307,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/logging.html">Logging System</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/timestamp.html">Timestamp Conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -1866,7 +1866,8 @@ after a checkout of <code class="file docutils literal notranslate"><span class=
 <td><p><code class="docutils literal notranslate"><span class="pre">Check</span> <span class="pre">whether</span> <span class="pre">this</span> <span class="pre">leg</span> <span class="pre">is</span> <span class="pre">already</span> <span class="pre">on</span> <span class="pre">Anaconda</span></code> in <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s
 <code class="docutils literal notranslate"><span class="pre">conda</span></code>, as <code class="docutils literal notranslate"><span class="pre">release_conda.py</span> <span class="pre">leg</span></code>; <code class="docutils literal notranslate"><span class="pre">Build</span> <span class="pre">conda</span> <span class="pre">packages</span></code> and <code class="docutils literal notranslate"><span class="pre">Upload</span>
 <span class="pre">conda</span> <span class="pre">packages</span> <span class="pre">to</span> <span class="pre">Anaconda</span> <span class="pre">(Intel)</span></code> in that job and in <code class="docutils literal notranslate"><span class="pre">cron-conda.yml</span></code>’s
-<code class="docutils literal notranslate"><span class="pre">conda-dist</span></code>, as <code class="docutils literal notranslate"><span class="pre">release_conda.py</span> <span class="pre">build</span></code> and <code class="docutils literal notranslate"><span class="pre">upload</span></code> (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1822">#1822</a>, <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2044">#2044</a>).</p></td>
+<code class="docutils literal notranslate"><span class="pre">conda-dist</span></code>, as <code class="docutils literal notranslate"><span class="pre">release_conda.py</span> <span class="pre">build</span></code> and <code class="docutils literal notranslate"><span class="pre">upload</span></code> (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1822">#1822</a>, <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2044">#2044</a>), and <code class="docutils literal notranslate"><span class="pre">Upload</span> <span class="pre">conda</span>
+<span class="pre">packages</span> <span class="pre">to</span> <span class="pre">Anaconda</span> <span class="pre">(Windows)</span></code> in both as <code class="docutils literal notranslate"><span class="pre">upload</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>).</p></td>
 <td><p>No.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/release_reset_build.py</span></code></p></td>
@@ -2112,6 +2113,28 @@ result of <code class="docutils literal notranslate"><span class="pre">analyze</
 warning, the report marks them unavailable, and <code class="docutils literal notranslate"><span class="pre">analyze</span></code>’s result stands
 unchanged.</p>
 </section>
+<section id="codeql-configuration-2130">
+<span id="codeql-configuration"></span><h2>CodeQL Configuration (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2130">#2130</a>)<a class="headerlink" href="#codeql-configuration-2130" title="Link to this heading">¶</a></h2>
+<p><code class="docutils literal notranslate"><span class="pre">Initialize</span> <span class="pre">CodeQL</span></code> in <code class="docutils literal notranslate"><span class="pre">codeql-analysis.yml</span></code> reads
+<code class="file docutils literal notranslate"><span class="pre">.github/codeql/codeql-config.yml</span></code> through its <code class="docutils literal notranslate"><span class="pre">config-file</span></code> input. The
+config’s <code class="docutils literal notranslate"><span class="pre">paths-ignore</span></code> leaves out <code class="file docutils literal notranslate"><span class="pre">tests</span></code> and changes nothing else, so the
+default queries still run over <a class="reference internal" href="../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> and every other path. Python is not
+built, so an ignored file is left out of the analysis (<a class="reference external" href="https://docs.github.com/en/code-security/reference/code-scanning/workflow-configuration-options#specifying-directories-to-scan">Specifying directories to
+scan</a>)
+and cannot be the source of a data flow.</p>
+<p><code class="docutils literal notranslate"><span class="pre">py/clear-text-logging-sensitive-data</span></code> and
+<code class="docutils literal notranslate"><span class="pre">py/clear-text-storage-sensitive-data</span></code> call a value secret from its name alone,
+by CodeQL’s <a class="reference external" href="https://github.com/github/codeql/blob/main/shared/concepts/codeql/concepts/internal/SensitiveDataHeuristics.qll">sensitive-data heuristics</a>.
+The tests that build a pcapng Decryption Secrets Block call its bytes
+<code class="docutils literal notranslate"><span class="pre">secrets</span></code>. Through <a class="reference internal" href="../pcapkit/interface/core.html#pcapkit.interface.core.extract" title="pcapkit.interface.core.extract"><code class="xref py py-func docutils literal notranslate"><span class="pre">extract()</span></code></a> those bytes reached
+<code class="docutils literal notranslate"><span class="pre">logger</span></code> calls in <a class="reference internal" href="../pcapkit/foundation/extraction.html#module-pcapkit.foundation.extraction" title="pcapkit.foundation.extraction"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation.extraction</span></code></a> and the buffer file’s
+write in <a class="reference internal" href="../pcapkit/corekit/io.html#module-pcapkit.corekit.io" title="pcapkit.corekit.io"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.io</span></code></a>, and each alert’s dismissal was lost whenever
+a pull request moved the line it named. The alert on the <code class="docutils literal notranslate"><span class="pre">logger</span></code> call in
+<a class="reference internal" href="../pcapkit/utilities/warnings.html#module-pcapkit.utilities.warnings" title="pcapkit.utilities.warnings"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings</span></code></a> begins in <a class="reference internal" href="../pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> itself, at the block’s
+<code class="docutils literal notranslate"><span class="pre">secrets_length</span></code> field, the spec’s name for it, so it is still raised and still
+dismissed by hand. <code class="file docutils literal notranslate"><span class="pre">tests/project/test_codeql_config_2130.py</span></code> pins the
+config and the input.</p>
+</section>
 <section id="action-pins-1968">
 <span id="action-pins"></span><h2>Action Pins (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1968">#1968</a>)<a class="headerlink" href="#action-pins-1968" title="Link to this heading">¶</a></h2>
 <p>A tag or a branch is a reference its owner can move, so every <code class="docutils literal notranslate"><span class="pre">uses:</span></code> of an
@@ -2261,14 +2284,13 @@ it, so the scheduled jobs reading them name it too
 <li><p>Conda Update’s <code class="docutils literal notranslate"><span class="pre">conda-dist</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">anaconda</span></code></p></li>
 <li><p>Vendor Update’s <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">conda-tag</span></code></p></li>
 </ul>
-<p><code class="docutils literal notranslate"><span class="pre">conda-dist</span></code> also has a <code class="docutils literal notranslate"><span class="pre">windows-latest</span></code> leg, which builds and smoke-tests a
-<code class="docutils literal notranslate"><span class="pre">win-64</span></code> package and publishes nothing
-(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>). Every upload
-step is gated off it, and those are the only steps that read <code class="docutils literal notranslate"><span class="pre">ANACONDA_TOKEN</span></code>,
-so no step on that leg receives the secret.
-<code class="file docutils literal notranslate"><span class="pre">tests/project/test_conda_windows_leg_2060.py</span></code> checks both. Each step that
-can fail there continues on error, and <code class="docutils literal notranslate"><span class="pre">Windows</span> <span class="pre">summary</span></code> reports each failure
-as a warning, as <code class="docutils literal notranslate"><span class="pre">KTLO</span> <span class="pre">summary</span></code> does for a KTLO leg, so the leg stays green.</p>
+<p>Both <code class="docutils literal notranslate"><span class="pre">conda-dist</span></code> and the release <code class="docutils literal notranslate"><span class="pre">conda</span></code> job have a <code class="docutils literal notranslate"><span class="pre">windows-latest</span></code> leg,
+which builds, smoke-tests and publishes the <code class="docutils literal notranslate"><span class="pre">win-64</span></code> package (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>).
+It blocks as the other legs do: no step continues on error. Its one step that
+reads <code class="docutils literal notranslate"><span class="pre">ANACONDA_TOKEN</span></code> is <code class="docutils literal notranslate"><span class="pre">Upload</span> <span class="pre">conda</span> <span class="pre">packages</span> <span class="pre">to</span> <span class="pre">Anaconda</span> <span class="pre">(Windows)</span></code>, the
+Intel leg’s anaconda-client call (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2044">#2044</a>) under <code class="docutils literal notranslate"><span class="pre">bash</span> <span class="pre">-el</span></code>, which skips a
+manual run as every upload does.
+<code class="file docutils literal notranslate"><span class="pre">tests/project/test_conda_windows_leg_2060.py</span></code> pins the leg.</p>
 <p>A required reviewer on <code class="docutils literal notranslate"><span class="pre">conda-tag</span></code> or <code class="docutils literal notranslate"><span class="pre">anaconda</span></code> would therefore hold every
 scheduled bump for an approval, besides the release-graph reason
 <a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a> gives for keeping them without one. Each run of these jobs
@@ -2363,6 +2385,7 @@ repeating it here.</p>
 <li><a class="reference internal" href="#file-size-caps-1969">File Size Caps (#1969)</a></li>
 <li><a class="reference internal" href="#workflow-scripts-1967">Workflow Scripts (#1967)</a></li>
 <li><a class="reference internal" href="#ci-reports-2030">CI Reports (#2030)</a></li>
+<li><a class="reference internal" href="#codeql-configuration-2130">CodeQL Configuration (#2130)</a></li>
 <li><a class="reference internal" href="#action-pins-1968">Action Pins (#1968)</a></li>
 <li><a class="reference internal" href="#workflow-lint-1967">Workflow Lint (#1967)</a></li>
 <li><a class="reference internal" href="#dependency-updates-1968">Dependency Updates (#1968)</a></li>

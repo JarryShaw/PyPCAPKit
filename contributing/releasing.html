@@ -307,7 +307,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/logging.html">Logging System</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/timestamp.html">Timestamp Conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -812,9 +812,9 @@ exists.</p></li>
 already idempotent (<code class="docutils literal notranslate"><span class="pre">skip-existing:</span> <span class="pre">true</span></code> on every upload step), so the
 check exists only to save the cost of the build matrix, not for correctness.</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">conda</span></code> compares Anaconda’s aggregate count against the expected one (the
-<code class="docutils literal notranslate"><span class="pre">linux-64</span></code>, <code class="docutils literal notranslate"><span class="pre">osx-64</span></code> and <code class="docutils literal notranslate"><span class="pre">osx-arm64</span></code> files for each Python version of
-its matrix, one platform per <code class="docutils literal notranslate"><span class="pre">os</span></code> leg,
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1922">#1922</a>) as the same
+<code class="docutils literal notranslate"><span class="pre">linux-64</span></code>, <code class="docutils literal notranslate"><span class="pre">osx-64</span></code>, <code class="docutils literal notranslate"><span class="pre">osx-arm64</span></code> and <code class="docutils literal notranslate"><span class="pre">win-64</span></code> files for each Python
+version of its matrix, one platform per <code class="docutils literal notranslate"><span class="pre">os</span></code> leg,
+<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1922">#1922</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>) as the same
 kind of job-level cost saver, and <em>also</em>
 checks, per matrix leg, whether that leg’s own platform/Python distribution
 is already there – this second check is the actual correctness fix, because
@@ -824,9 +824,10 @@ rather than being absorbed. The <code class="docutils literal notranslate"><span
 action’s CLI download returns 404 there, so its “Upload conda packages to
 Anaconda (Intel)” step runs <code class="docutils literal notranslate"><span class="pre">anaconda</span> <span class="pre">upload</span> <span class="pre">--skip-existing</span></code> instead
 (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2044">#2044</a>), which skips
-such a file. Conda Update’s Intel leg runs the same step, so it keeps a file
-anaconda.org already has, where the action’s <code class="docutils literal notranslate"><span class="pre">force:</span> <span class="pre">true</span></code> on its other legs
-replaces it.</p></li>
+such a file. The <code class="docutils literal notranslate"><span class="pre">windows-latest</span></code> leg’s “Upload conda packages to Anaconda
+(Windows)” makes the same call (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>). Conda Update’s Intel and
+Windows legs run the same steps, so they keep a file anaconda.org already has,
+where the action’s <code class="docutils literal notranslate"><span class="pre">force:</span> <span class="pre">true</span></code> on its other legs replaces it.</p></li>
 </ul>
 <p>These evidence checks all run inside <code class="docutils literal notranslate"><span class="pre">version_check</span></code>, curling PyPI’s and
 Anaconda’s public, unauthenticated JSON APIs; the per-leg check runs inside
@@ -840,7 +841,11 @@ release, and counting it would read a finished release as incomplete, run the
 gate and <code class="docutils literal notranslate"><span class="pre">pypi</span></code>, and fail <a class="reference internal" href="#one-commit-per-release">One Commit per Release</a>’s tag check on every run
 until the next release. A tag older than the file, as <code class="docutils literal notranslate"><span class="pre">v1.5.0b12</span></code> is, counts
 the tiers the file was added with, which the change for <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1660">#1660</a> copied unchanged from the
-workflows of the time.</p>
+workflows of the time.
+The Anaconda count’s platforms follow the same rule, from the <code class="docutils literal notranslate"><span class="pre">SUBDIRS</span></code> line
+of <code class="file docutils literal notranslate"><span class="pre">util/release_published.py</span></code> at the tag’s commit or, for a tag older
+than that file, the line it was added with, so a version released before
+<code class="docutils literal notranslate"><span class="pre">win-64</span></code> was published is not read as lacking it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>).</p>
 <p>On the tag-push path <code class="docutils literal notranslate"><span class="pre">startsWith(github.ref_name,</span> <span class="pre">'v')</span></code> bypasses the
 evidence check unconditionally; on the <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> path it falls through
 to whichever evidence that job owns.</p>

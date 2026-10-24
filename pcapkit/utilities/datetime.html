@@ -5,10 +5,10 @@
     <meta name="color-scheme" content="light dark"><meta name="viewport" content="width=device-width, initial-scale=1" />
 <meta property="og:title" content="Timestamp Conversion" />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/utilities/timestamp.html" />
+<meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/utilities/datetime.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.utilities.timestamp converts a UNIX timestamp to an aware datetime without the C library’s range (#2099). It is shared by the PCAP and PCAP-NG readers and the MH timestamp options, which is..." />
-<meta name="description" content="pcapkit.utilities.timestamp converts a UNIX timestamp to an aware datetime without the C library’s range (#2099). It is shared by the PCAP and PCAP-NG readers and the MH timestamp options, which is..." />
+<meta property="og:description" content="pcapkit.utilities.datetime converts a UNIX timestamp to an aware datetime without the C library’s range (#2099), and a datetime back to a UNIX timestamp without GraalPy’s lost second before 1970 (#..." />
+<meta name="description" content="pcapkit.utilities.datetime converts a UNIX timestamp to an aware datetime without the C library’s range (#2099), and a datetime back to a UNIX timestamp without GraalPy’s lost second before 1970 (#..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="Core Utilities" href="../corekit/index.html"><link rel="prev" title="Character Set Detection" href="chardet.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -474,12 +474,12 @@
         </a>
         <div class="content-icon-container">
           <div class="view-this-page">
-  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/main/docs/source/pcapkit/utilities/timestamp.rst?plain=true" title="View this page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/blob/main/docs/source/pcapkit/utilities/datetime.rst?plain=true" title="View this page">
     <svg><use href="#svg-eye"></use></svg>
     <span class="visually-hidden">View this page</span>
   </a>
 </div><div class="edit-this-page">
-  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/main/docs/source/pcapkit/utilities/timestamp.rst" rel="edit" title="Edit this page">
+  <a class="muted-link" href="https://github.com/JarryShaw/PyPCAPKit/edit/main/docs/source/pcapkit/utilities/datetime.rst" rel="edit" title="Edit this page">
     <svg><use href="#svg-pencil"></use></svg>
     <span class="visually-hidden">Edit this page</span>
   </a>
@@ -496,32 +496,74 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <section id="module-pcapkit.utilities.timestamp">
-<span id="timestamp-conversion"></span><h1>Timestamp Conversion<a class="headerlink" href="#module-pcapkit.utilities.timestamp" title="Link to this heading">¶</a></h1>
-<p><a class="reference internal" href="#module-pcapkit.utilities.timestamp" title="pcapkit.utilities.timestamp"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.timestamp</span></code></a> converts a UNIX timestamp to an aware
-<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a> without the C library’s range (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2099">#2099</a>). It is
-shared by the PCAP and PCAP-NG readers and the MH timestamp options, which is
-why it lives here rather than beside any one of them.</p>
+          <section id="module-pcapkit.utilities.datetime">
+<span id="timestamp-conversion"></span><h1>Timestamp Conversion<a class="headerlink" href="#module-pcapkit.utilities.datetime" title="Link to this heading">¶</a></h1>
+<p><a class="reference internal" href="#module-pcapkit.utilities.datetime" title="pcapkit.utilities.datetime"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities.datetime</span></code></a> converts a UNIX timestamp to an aware
+<a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a> without the C library’s range (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2099">#2099</a>), and
+a <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a> back to a UNIX timestamp without GraalPy’s lost
+second before 1970 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2134">#2134</a>). It is shared by the PCAP and PCAP-NG readers
+and writers and the MH timestamp options, which is why it lives here rather than
+beside any one of them.</p>
 <dl class="py function">
-<dt class="sig sig-object py" id="pcapkit.utilities.timestamp.fromtimestamp">
-<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.timestamp.</span></span><span class="sig-name descname"><span class="pre">fromtimestamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tz</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/timestamp.html#fromtimestamp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.timestamp.fromtimestamp" title="Link to this definition">¶</a></dt>
-<dd><p><code class="docutils literal notranslate"><span class="pre">datetime.datetime.fromtimestamp(timestamp,</span> <span class="pre">tz)</span></code> as 64-bit Linux computes
-it, on every platform: whole seconds and microseconds split from a float as
-CPython splits them, rounding half to even, then added to the UNIX epoch and
-rendered in <code class="docutils literal notranslate"><span class="pre">tz</span></code>. The standard library breaks the instant down with the C
-library’s <code class="docutils literal notranslate"><span class="pre">gmtime()</span></code>, whose range on Windows is 1970 to 3000, so there it
-raises <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#OSError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OSError</span></code></a> for instants <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a> holds.</p>
+<dt class="sig sig-object py" id="pcapkit.utilities.datetime.fromtimestamp">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.datetime.</span></span><span class="sig-name descname"><span class="pre">fromtimestamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">timestamp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">tz</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/datetime.html#fromtimestamp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.datetime.fromtimestamp" title="Link to this definition">¶</a></dt>
+<dd><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime.fromtimestamp" title="(in Python v3.15)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">datetime.datetime.fromtimestamp()</span></code></a> with a <code class="docutils literal notranslate"><span class="pre">tz</span></code>, minus the C library’s range.</p>
+<p>The result equals <code class="docutils literal notranslate"><span class="pre">datetime.datetime.fromtimestamp(timestamp,</span> <span class="pre">tz)</span></code> on
+64-bit Linux for every <code class="docutils literal notranslate"><span class="pre">timestamp</span></code> that call accepts, on every platform:
+whole seconds and microseconds split from a float as CPython splits them,
+rounding half to even, then added to the UNIX epoch and rendered in <code class="docutils literal notranslate"><span class="pre">tz</span></code>.
+The standard library breaks the instant down with the C library’s
+<code class="docutils literal notranslate"><span class="pre">gmtime()</span></code>, whose range on Windows is 1970 to 3000, so there it raises
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#OSError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OSError</span></code></a> for instants <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a> holds.</p>
 <dl class="field-list simple">
-<dt class="field-odd">Raises<span class="colon">:</span></dt>
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><strong>ValueError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">timestamp</span></code> is NaN or names a year outside 1 to 9999</p></li>
-<li><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#OverflowError" title="(in Python v3.15)"><strong>OverflowError</strong></a> – if <code class="docutils literal notranslate"><span class="pre">timestamp</span></code> is past a 64-bit <code class="docutils literal notranslate"><span class="pre">time_t</span></code>, or <code class="docutils literal notranslate"><span class="pre">tz</span></code>
-moves the result out of range</p></li>
+<li><p><strong>timestamp</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a> | <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">int</span></code></a></span>) – Seconds since the UNIX epoch.</p></li>
+<li><p><strong>tz</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.tzinfo" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tzinfo</span></code></a></span>) – Timezone the result is rendered in.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>The instant <code class="docutils literal notranslate"><span class="pre">timestamp</span></code> names, rendered in <code class="docutils literal notranslate"><span class="pre">tz</span></code>.</p>
+</dd>
+<dt class="field-even">Raises<span class="colon">:</span></dt>
+<dd class="field-even"><ul class="simple">
+<li><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><strong>ValueError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">timestamp</span></code> is NaN, or names a year outside 1 to 9999.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#OverflowError" title="(in Python v3.15)"><strong>OverflowError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">timestamp</span></code> is past a 64-bit <code class="docutils literal notranslate"><span class="pre">time_t</span></code>, or <code class="docutils literal notranslate"><span class="pre">tz</span></code>
+    moves the result out of the range <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a> holds.</p></li>
 </ul>
 </dd>
 </dl>
 <div class="versionadded">
 <p><span class="versionmodified added">Added in version 1.5.0: </span>Every capture and MH timestamp is converted with it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2099">#2099</a>).</p>
+</div>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.utilities.datetime.totimestamp">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.utilities.datetime.</span></span><span class="sig-name descname"><span class="pre">totimestamp</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dt</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/utilities/datetime.html#totimestamp"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.utilities.datetime.totimestamp" title="Link to this definition">¶</a></dt>
+<dd><p><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime.timestamp" title="(in Python v3.15)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">datetime.datetime.timestamp()</span></code></a>, as CPython computes it, on every interpreter.</p>
+<p>For an aware <code class="docutils literal notranslate"><span class="pre">dt</span></code> that is <code class="docutils literal notranslate"><span class="pre">(dt</span> <span class="pre">-</span> <span class="pre">epoch).total_seconds()</span></code>. GraalPy’s own
+counts the whole seconds toward zero, so there an instant before 1970 with a
+fraction of a second comes out one second late, and this computes it as
+CPython does. A naive <code class="docutils literal notranslate"><span class="pre">dt</span></code> is local time, and is <code class="docutils literal notranslate"><span class="pre">dt.timestamp()</span></code>
+everywhere.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>dt</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a></span>) – Moment to convert.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#float" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">float</span></code></a></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Seconds since the UNIX epoch.</p>
+</dd>
+</dl>
+<div class="versionadded">
+<p><span class="versionmodified added">Added in version 1.5.0: </span>The PCAP and PCAP-NG writers and the MH replay protection option convert
+a <a class="reference external" href="https://docs.python.org/3/library/datetime.html#datetime.datetime" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">datetime</span></code></a> with it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2134">#2134</a>).</p>
 </div>
 </dd></dl>
 

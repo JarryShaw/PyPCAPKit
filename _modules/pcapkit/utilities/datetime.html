@@ -5,7 +5,7 @@
     <meta name="color-scheme" content="light dark"><link rel="index" title="Index" href="../../../genindex.html"><link rel="search" title="Search" href="../../../search.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
-        <title>pcapkit.utilities.timestamp - PyPCAPKit</title>
+        <title>pcapkit.utilities.datetime - PyPCAPKit</title>
       <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d111a655" />
     <link rel="stylesheet" type="text/css" href="../../../_static/styles/furo.css?v=7bdb33bb" />
     <link rel="stylesheet" type="text/css" href="../../../_static/sphinx_autodoc_typehints.css?v=057ac668" />
@@ -300,7 +300,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/logging.html">Logging System</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/timestamp.html">Timestamp Conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -479,27 +479,30 @@
           </label>
         </div>
         <article role="main" id="furo-main-content">
-          <h1>Source code for pcapkit.utilities.timestamp</h1><div class="highlight"><pre>
+          <h1>Source code for pcapkit.utilities.datetime</h1><div class="highlight"><pre>
 <span></span><span class="c1"># -*- coding: utf-8 -*-</span>
 <span class="sd">"""Timestamp Conversion</span>
 <span class="sd">======================</span>
 
-<span class="sd">.. module:: pcapkit.utilities.timestamp</span>
+<span class="sd">.. module:: pcapkit.utilities.datetime</span>
 
-<span class="sd">:mod:`pcapkit.utilities.timestamp` converts a UNIX timestamp to an aware</span>
-<span class="sd">:class:`~datetime.datetime` without the C library's range (:issue:`2099`).</span>
+<span class="sd">:mod:`pcapkit.utilities.datetime` converts a UNIX timestamp to an aware</span>
+<span class="sd">:class:`~datetime.datetime` without the C library's range (:issue:`2099`), and</span>
+<span class="sd">a :class:`~datetime.datetime` back to a UNIX timestamp without GraalPy's lost</span>
+<span class="sd">second before 1970 (:issue:`2134`).</span>
 
 <span class="sd">"""</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">datetime</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">math</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">operator</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">tzinfo</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'fromtimestamp'</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'fromtimestamp'</span><span class="p">,</span> <span class="s1">'totimestamp'</span><span class="p">]</span>
 
 <span class="c1"># A UNIX timestamp as an aware datetime, without the C library (#2099).</span>
 <span class="c1"># :meth:`datetime.datetime.fromtimestamp` breaks the instant down with the</span>
@@ -517,7 +520,9 @@
 <span class="c1"># a 64-bit ``time_t`` or a ``tz`` offset that pushes the result out of range.</span>
 <span class="c1"># The one exception is a year past what a C ``int`` holds, from about 6.7e16</span>
 <span class="c1"># seconds, where glibc's own ``gmtime_r`` fails first and CPython raises</span>
-<span class="c1"># :exc:`OSError` instead; this raises :exc:`ValueError` there too.</span>
+<span class="c1"># :exc:`OSError` instead; this raises :exc:`ValueError` there too. On GraalPy a</span>
+<span class="c1"># :class:`~datetime.timezone` whose offset pushes the result out of range raises</span>
+<span class="c1"># :exc:`ValueError` from its own ``fromutc``, which this does not change (#2134).</span>
 <span class="n">_EPOCH</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="p">(</span><span class="mi">1970</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="n">tzinfo</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
 <span class="c1">#: First and last whole second since the UNIX epoch in years 1 to 9999.</span>
 <span class="n">_EPOCH_MIN</span> <span class="o">=</span> <span class="o">-</span><span class="mi">62_135_596_800</span>
@@ -527,23 +532,46 @@
 <span class="c1">#: A 64-bit ``time_t`` holds ``[-_TIME_T, _TIME_T)``.</span>
 <span class="n">_TIME_T</span> <span class="o">=</span> <span class="mi">2</span><span class="o">**</span><span class="mi">63</span>
 
+<span class="c1"># GraalPy's :meth:`datetime.datetime.timestamp` of an aware datetime counts the</span>
+<span class="c1"># whole seconds since the epoch toward zero and then adds the fraction, so an</span>
+<span class="c1"># instant before 1970 that has one comes out a second late: 23:59:59.5 on</span>
+<span class="c1"># December 31, 1969, UTC, gives ``0.5``, not ``-0.5`` (#2134, measured on</span>
+<span class="c1"># GraalPy 25.4.4). ``TimestampNode`` takes ``ChronoUnit.SECONDS.between`` of the</span>
+<span class="c1"># epoch and the instant, which truncates (graalpython, DateTimeBuiltins.java, at</span>
+<span class="c1"># graal-25.4.4; no upstream issue is filed yet). CPython and PyPy compute</span>
+<span class="c1"># ``(dt - epoch).total_seconds()`` for an aware datetime, which is right, so</span>
+<span class="c1"># there :func:`totimestamp` is the stdlib call itself.</span>
+<span class="n">_TIMESTAMP_TRUNCATES</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">implementation</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">'graalpy'</span>
+
 
 <div class="viewcode-block" id="fromtimestamp">
-<a class="viewcode-back" href="../../../pcapkit/utilities/timestamp.html#pcapkit.utilities.timestamp.fromtimestamp">[docs]</a>
+<a class="viewcode-back" href="../../../pcapkit/utilities/datetime.html#pcapkit.utilities.datetime.fromtimestamp">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">fromtimestamp</span><span class="p">(</span><span class="n">timestamp</span><span class="p">:</span> <span class="s1">'float | int'</span><span class="p">,</span> <span class="n">tz</span><span class="p">:</span> <span class="s1">'tzinfo'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'datetime.datetime'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">""":meth:`datetime.datetime.fromtimestamp` with a ``tz``, minus the C library's range.</span>
 
 <span class="sd">    The result equals ``datetime.datetime.fromtimestamp(timestamp, tz)`` on</span>
-<span class="sd">    64-bit Linux for every ``timestamp`` that call accepts, on every platform.</span>
+<span class="sd">    64-bit Linux for every ``timestamp`` that call accepts, on every platform:</span>
+<span class="sd">    whole seconds and microseconds split from a float as CPython splits them,</span>
+<span class="sd">    rounding half to even, then added to the UNIX epoch and rendered in ``tz``.</span>
+<span class="sd">    The standard library breaks the instant down with the C library's</span>
+<span class="sd">    ``gmtime()``, whose range on Windows is 1970 to 3000, so there it raises</span>
+<span class="sd">    :exc:`OSError` for instants :class:`~datetime.datetime` holds.</span>
 
 <span class="sd">    Args:</span>
 <span class="sd">        timestamp: Seconds since the UNIX epoch.</span>
 <span class="sd">        tz: Timezone the result is rendered in.</span>
 
+<span class="sd">    Returns:</span>
+<span class="sd">        The instant ``timestamp`` names, rendered in ``tz``.</span>
+
 <span class="sd">    Raises:</span>
 <span class="sd">        ValueError: If ``timestamp`` is NaN, or names a year outside 1 to 9999.</span>
 <span class="sd">        OverflowError: If ``timestamp`` is past a 64-bit ``time_t``, or ``tz``</span>
 <span class="sd">            moves the result out of the range :class:`~datetime.datetime` holds.</span>
+
+<span class="sd">    .. versionadded:: 1.5.0</span>
+
+<span class="sd">       Every capture and MH timestamp is converted with it (:issue:`2099`).</span>
 
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">timestamp</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
@@ -562,6 +590,35 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'year is out of range for timestamp </span><span class="si">{</span><span class="n">timestamp</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
     <span class="n">utc</span> <span class="o">=</span> <span class="n">_EPOCH</span> <span class="o">+</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">seconds</span><span class="p">,</span> <span class="n">microseconds</span><span class="o">=</span><span class="n">micro</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">tz</span><span class="o">.</span><span class="n">fromutc</span><span class="p">(</span><span class="n">utc</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tzinfo</span><span class="o">=</span><span class="n">tz</span><span class="p">))</span></div>
+
+
+
+<div class="viewcode-block" id="totimestamp">
+<a class="viewcode-back" href="../../../pcapkit/utilities/datetime.html#pcapkit.utilities.datetime.totimestamp">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">totimestamp</span><span class="p">(</span><span class="n">dt</span><span class="p">:</span> <span class="s1">'datetime.datetime'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'float'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">""":meth:`datetime.datetime.timestamp`, as CPython computes it, on every interpreter.</span>
+
+<span class="sd">    For an aware ``dt`` that is ``(dt - epoch).total_seconds()``. GraalPy's own</span>
+<span class="sd">    counts the whole seconds toward zero, so there an instant before 1970 with a</span>
+<span class="sd">    fraction of a second comes out one second late, and this computes it as</span>
+<span class="sd">    CPython does. A naive ``dt`` is local time, and is ``dt.timestamp()``</span>
+<span class="sd">    everywhere.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        dt: Moment to convert.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Seconds since the UNIX epoch.</span>
+
+<span class="sd">    .. versionadded:: 1.5.0</span>
+
+<span class="sd">       The PCAP and PCAP-NG writers and the MH replay protection option convert</span>
+<span class="sd">       a :class:`~datetime.datetime` with it (:issue:`2134`).</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">_TIMESTAMP_TRUNCATES</span> <span class="ow">and</span> <span class="n">dt</span><span class="o">.</span><span class="n">tzinfo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="n">dt</span> <span class="o">-</span> <span class="n">_EPOCH</span><span class="p">)</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">dt</span><span class="o">.</span><span class="n">timestamp</span><span class="p">()</span></div>
 
 </pre></div>
         </article>

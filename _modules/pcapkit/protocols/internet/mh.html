@@ -300,7 +300,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/logging.html">Logging System</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
-<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/timestamp.html">Timestamp Conversion</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/datetime.html">Timestamp Conversion</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -978,8 +978,8 @@
     <span class="n">UpdateNotificationMessage</span> <span class="k">as</span> <span class="n">Schema_UpdateNotificationMessage</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.internet.mh</span><span class="w"> </span><span class="kn">import</span> <span class="n">VendorSpecificOption</span> <span class="k">as</span> <span class="n">Schema_VendorSpecificOption</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">Schema</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">fromtimestamp</span><span class="p">,</span> <span class="n">totimestamp</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumValueError</span><span class="p">,</span> <span class="n">ProtocolError</span><span class="p">,</span> <span class="n">UnsupportedCall</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.timestamp</span><span class="w"> </span><span class="kn">import</span> <span class="n">fromtimestamp</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -9343,7 +9343,7 @@
         <span class="k">if</span> <span class="n">timestamp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">interval</span> <span class="o">=</span> <span class="n">interval</span> <span class="ow">or</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">(</span><span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
 
-            <span class="n">int_ts</span> <span class="o">=</span> <span class="n">interval</span><span class="o">.</span><span class="n">timestamp</span><span class="p">()</span>
+            <span class="n">int_ts</span> <span class="o">=</span> <span class="n">totimestamp</span><span class="p">(</span><span class="n">interval</span><span class="p">)</span>
             <span class="n">ts_sec</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">int_ts</span><span class="p">)</span>
             <span class="n">ts_frc</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="nb">round</span><span class="p">((</span><span class="n">int_ts</span> <span class="o">-</span> <span class="n">ts_sec</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="o">**</span><span class="mi">32</span><span class="p">),</span> <span class="mh">0xFFFF_FFFF</span><span class="p">)</span>  <span class="c1"># 1/2**32 seconds per unit</span>
 
