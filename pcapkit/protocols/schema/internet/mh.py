@@ -62,6 +62,7 @@ from pcapkit.corekit.fields.numbers import (EnumField, UInt8Field, UInt16Field, 
 from pcapkit.corekit.fields.strings import BitField, BytesField, PaddingField, StringField
 from pcapkit.protocols.schema.schema import EnumSchema, Schema, schema_final
 from pcapkit.utilities.logging import SPHINX_TYPE_CHECKING
+from pcapkit.utilities.timestamp import fromtimestamp
 
 __all__ = [
     'MH',
@@ -848,7 +849,9 @@ class MesgIDOption(Option, code=Enum_Option.MESG_ID_OPTION_TYPE):
         ts_sec = self.seconds - 2_208_988_800  # 70 years
         ts_frac = self.fraction / 2**32  # fraction of a second
 
-        self.timestamp = datetime.datetime.fromtimestamp(ts_sec + ts_frac, tz=datetime.timezone.utc)
+        # not the stdlib's ``fromtimestamp``, which takes no time before 1970,
+        # i.e. no NTP time before 2_208_988_800, on Windows (#2099)
+        self.timestamp = fromtimestamp(ts_sec + ts_frac, datetime.timezone.utc)
 
         return self
 

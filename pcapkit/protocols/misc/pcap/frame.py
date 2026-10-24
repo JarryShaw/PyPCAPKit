@@ -49,6 +49,7 @@ from pcapkit.protocols.schema.misc.pcap.frame import Frame as Schema_Frame
 from pcapkit.protocols.schema.misc.pcap.header import RESOLUTION
 from pcapkit.utilities.compat import localcontext
 from pcapkit.utilities.exceptions import StreamEOFError, UnsupportedCall, stacklevel
+from pcapkit.utilities.timestamp import fromtimestamp
 from pcapkit.utilities.warnings import ProtocolWarning, RegistryWarning, warn
 
 if TYPE_CHECKING:
@@ -287,8 +288,9 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
             # aware UTC datetime too, and so does the PCAP-NG reader, which fills
             # the same
             # :attr:`Data_Frame.time <pcapkit.protocols.data.misc.pcap.frame.Frame.time>`
-            # field through :func:`pcapkit.toolkit.pcapng.block2frame`.
-            _time = datetime.datetime.fromtimestamp(_irat[0] / _irat[1], datetime.timezone.utc)
+            # field through :func:`pcapkit.toolkit.pcapng.block2frame`. Converted
+            # without the C library, as the PCAP-NG reader does (#2099).
+            _time = fromtimestamp(_irat[0] / _irat[1], datetime.timezone.utc)
         except ValueError:
             warn(f'PCAP: invalid timestamp: {_epch}', ProtocolWarning, stacklevel=stacklevel())
             _time = datetime.datetime.fromtimestamp(0, datetime.timezone.utc)

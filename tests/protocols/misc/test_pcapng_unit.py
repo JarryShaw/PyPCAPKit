@@ -555,30 +555,16 @@ class PCAPNGUnitTests(unittest.TestCase):
         with mock.patch('pcapkit.protocols.misc.pcapng.datetime.datetime', NoTimezoneDateTime):
             self.assertEqual(PCAPNG._get_local_timezone(), datetime.timezone.utc)
 
-        real_datetime = datetime.datetime
-
-        class FakeDateTime:
-            calls = 0
-
-            @classmethod
-            def fromtimestamp(cls, *args):
-                if cls.calls == 0:
-                    cls.calls += 1
-                    raise ValueError
-                return real_datetime.fromtimestamp(*args)
-
         pcapng._ctx = types.SimpleNamespace(interfaces=[interface],
                                             section=types.SimpleNamespace(byteorder='little'))
         pcapng._type = BlockType.Enhanced_Packet_Block
-        # Faked through the module's name in pcapng.py, not through
-        # ``datetime.datetime`` itself: PyPy's datetime is pure Python and
-        # reads its own ``datetime`` global, so faking that fails the real call
-        # the fake hands on to (#1958).
-        fake_module = types.SimpleNamespace(**dict(vars(datetime), datetime=FakeDateTime))
-        with mock.patch('pcapkit.protocols.misc.pcapng.datetime', fake_module), \
+        # Faked through pcapng.py's own binding of
+        # :func:`pcapkit.utilities.timestamp.fromtimestamp`, which it calls
+        # instead of :meth:`datetime.datetime.fromtimestamp` since #2099.
+        with mock.patch('pcapkit.protocols.misc.pcapng.fromtimestamp', side_effect=ValueError), \
                 mock.patch('pcapkit.protocols.misc.pcapng.warn') as warn:
             timestamp, epoch = pcapng._read_timestamp(0, 1, interface_id=0)
-        self.assertEqual(timestamp, real_datetime.fromtimestamp(0, datetime.timezone.utc))
+        self.assertEqual(timestamp, datetime.datetime.fromtimestamp(0, datetime.timezone.utc))
         # #361: 1 unit at if_tsresol=1e9 plus the 2s if_tsoffset. The leading
         # ``Decimal(7200)`` this used to carry was this interface's if_tzone
         # (+02:00) leaking into the epoch; the fallback datetime above is aware

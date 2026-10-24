@@ -212,6 +212,7 @@ from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.compat import StrEnum, localcontext
 from pcapkit.utilities.exceptions import (BaseError, EnumValueError, FormatError, ProtocolError,
                                           StreamEOFError, UnsupportedCall, stacklevel)
+from pcapkit.utilities.timestamp import fromtimestamp
 from pcapkit.utilities.warnings import (AttributeWarning, DeprecatedFormatWarning, ProtocolWarning,
                                         RegistryWarning, warn)
 
@@ -1877,10 +1878,12 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         try:
             # NOTE: ``tzone`` survives only here, as the zone the instant is
             # *rendered* in -- which is all a ``tzinfo`` can affect on an aware
-            # datetime. It never moves the instant itself.
-            ts_datetime = datetime.datetime.fromtimestamp(ts_ratio[0] / ts_ratio[1], tzone)
-        # an epoch past what ``datetime`` or the platform's ``time_t`` holds,
-        # e.g. from an extreme ``if_tsoffset``, raises one of these
+            # datetime. It never moves the instant itself. Not the stdlib's
+            # ``fromtimestamp``, whose range is the C library's: Windows' takes
+            # nothing before 1970 or after 3000 (#2099).
+            ts_datetime = fromtimestamp(ts_ratio[0] / ts_ratio[1], tzone)
+        # an epoch past what ``datetime`` or a 64-bit ``time_t`` holds, e.g.
+        # from an extreme ``if_tsoffset``, raises one of these
         except (ValueError, OverflowError, OSError):
             warn(f'PCAP-NG: [Block {self._type}] invalid timestamp: {timestamp_epoch}',
                  ProtocolWarning, stacklevel=stacklevel())
