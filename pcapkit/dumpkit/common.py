@@ -597,7 +597,7 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                 else:
                     result = render_enum(o)
             else:
-                result = super(type(self), self).object_hook(o)
+                result = super().object_hook(o)
 
             if escape_strings and isinstance(result, str):
                 # NOTE: XML 1.0 has no spelling at all for some characters, not
