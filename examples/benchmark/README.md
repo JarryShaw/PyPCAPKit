@@ -1,7 +1,7 @@
 # Engine Benchmark Suite
 
 A containerised benchmark that produces the engine speed table in the project docs,
-`docs/source/index.rst` -- the whole table, every supported Python version, in one
+`docs/source/engines.rst` -- the whole table, every supported Python version, in one
 run. One command, on any machine with Docker, and the output is two paste-ready
 reStructuredText snippets:
 
@@ -85,7 +85,7 @@ includes any disagreement *between* interpreters, which is real uncertainty abou
 engine and is not something to average away; the per-version table is where it gets
 broken out.
 
-One absolute figure survives inside the ratio snippet, as a footnote: the `default`
+One absolute figure survives inside the ratio snippet, in a paragraph: the `default`
 engine's own milliseconds per packet. That is what lets a reader convert the ratios
 back into times on the machine the run happened on.
 
@@ -95,13 +95,27 @@ one is `Test Results (Relative)` so that pasting both does not produce two secti
 with one name. The `Test Environment` block, which serves both, is in
 `table.rst`.
 
+**Notes are footnotes.** A row or column that needs explaining carries a reST
+auto-symbol footnote reference, `[*]_`, with the reason as the footnote body: an
+engine with gaps in the per-version table, a version that was not measured or not in
+full, a ratio row that lost a pass or was not measured. Rows whose ranges overlap all
+point at one labelled footnote, `[#overlap]_`, since an auto-symbol body answers only
+one reference. Each body follows its own table, in the order of its references, which
+is how docutils pairs auto-symbols. docutils numbers footnotes page-wide, so the
+snippets paste beside the page's own footnotes with nothing to renumber or convert.
+
+The per-version lead names the script that ran: `native.sh` passes
+`--runner examples/benchmark/native.sh`, and on Actions `--workflow` with the
+workflow's name; `run.sh` passes its own name to the reporting container. Run by hand,
+`report.py` names `benchmark.py`, which measured every figure.
+
 **The run-to-run spread is reported too.** A single pass cannot tell a real difference
 between two engines from the machine having been briefly busy, so the whole engine set
 is measured several times (`--repeats`, default 3) and every row carries the range
-actually observed. Rows whose ranges overlap are marked `‡`: this run does not
-establish which of them is faster, and printing their medians as though it did would
-be inventing precision. The footnote states the median and the widest spread seen, so
-a reader can judge any gap in the table for themselves.
+actually observed. Rows whose ranges overlap share the `[#overlap]_` footnote: this
+run does not establish which of them is faster, and printing their medians as though
+it did would be inventing precision. A paragraph under the table states the median and
+the widest spread seen, so a reader can judge any gap in the table for themselves.
 
 ## The property that matters most
 
@@ -139,8 +153,8 @@ So failure is contained, and counted, at each level below:
   what would not be honest is discarding it silently, so the count and the first
   reason are reported.
 - **A failed pass** costs that engine that pass, not the run. The row is built from
-  the passes that did work, its `Passes` count shows fewer, and it is marked `¶`
-  with what was lost. If *every* pass failed, the engine becomes `*not measured*`
+  the passes that did work, its `Passes` count shows fewer, and it carries a footnote
+  naming what was lost. If *every* pass failed, the engine becomes `*not measured*`
   with the exception as its reason.
 
 Some things are never tolerated, because tolerating them would mean reporting a number
@@ -456,10 +470,11 @@ No docker needed. These cover the parts of a benchmark that *can* be checked wit
 a stopwatch, which is more than it sounds: that a ratio is taken against the right
 baseline, that machine drift cancels, that repeats are paired one to one rather than
 averaged first, that the environments stitch together correctly, that an unmeasured
-engine keeps its reason, that the overlap marking neither over- nor under-claims, and
-that the emitted reStructuredText parses under **plain docutils** with no warnings and
+engine keeps its reason, that the overlap marking neither over- nor under-claims,
+that every footnote reference resolves to its own row's or column's body, beside the
+page's own footnotes too, and that the emitted reStructuredText parses under **plain docutils** with no warnings and
 uses no Sphinx-only roles. That last one is a conservative choice rather than a
-hard requirement: the snippets land in `docs/source/index.rst`, which Sphinx
+hard requirement: the snippets land in `docs/source/engines.rst`, which Sphinx
 renders, so a `:mod:` role would survive there. Keeping them docutils-clean is what
 lets a table be pasted into any reStructuredText a plain docutils reader will see --
 where a `:mod:` role comes out as a visible error block while looking perfectly fine

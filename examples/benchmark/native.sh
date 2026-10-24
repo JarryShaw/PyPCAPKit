@@ -274,7 +274,12 @@ if [ "${#DOCUMENTS[@]}" -eq 0 ] || [ -z "${REPORTER}" ]; then
     exit 1
 fi
 
-REPORT_ARGS=()
+# The per-version table names the script that ran, and on Actions the workflow that
+# ran it, which is the one fact here report.py cannot read from the documents.
+REPORT_ARGS=(--runner examples/benchmark/native.sh)
+if [ -n "${GITHUB_WORKFLOW:-}" ]; then
+    REPORT_ARGS+=(--workflow "${GITHUB_WORKFLOW}")
+fi
 for path in "${OUT_DIR}"/missing/*.txt; do
     if [ -e "${path}" ]; then
         REPORT_ARGS+=(--missing "$(basename "${path}" .txt)=$(tr '\n' ' ' < "${path}")")

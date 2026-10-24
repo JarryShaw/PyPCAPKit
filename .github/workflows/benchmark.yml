@@ -96,11 +96,13 @@ jobs:
     # One leg, on the dispatch's runner, or `ubuntu-26.04-arm` on the schedule,
     # which has no inputs; spelt as the other matrix jobs spell their runner.
     runs-on: ${{ matrix.os || 'ubuntu-26.04-arm' }}
-    # Unmeasured on a hosted runner; the first dispatch measures it. Locally a
-    # full matrix took about two hours (the README's "How long it takes"),
-    # nearly all of it a tshark per pyshark extraction, so this leaves room for
-    # a slower runner under the six-hour job limit.
-    timeout-minutes: 300
+    # Run 40062653380 measured this job at about 38 minutes on `ubuntu-26.04-arm`
+    # with every version and engine, 04:36:11Z to 05:14:34Z, nearly all of it a
+    # tshark per pyshark extraction. `ubuntu-latest` took about 30% longer per
+    # packet in run 40047570595, so roughly 50 minutes by that ratio; 90 leaves
+    # room for that or a busy host, and stops a hung extraction in an hour and
+    # a half rather than at the six-hour job limit.
+    timeout-minutes: 90
     strategy:
       matrix:
         os: [ "${{ inputs.runner || 'ubuntu-26.04-arm' }}" ]

@@ -16,7 +16,7 @@ compared with anything. A ratio against the ``default`` engine *measured in the 
 environment on the same repeat* divides the machine out. It is also what makes
 mutually exclusive environments joinable at all: ``pypcap`` and ``pcap_ct`` both
 provide the top-level :mod:`pcap` module and cannot coexist, and ``default`` is the
-engine present in every environment. One absolute number survives, as a footnote:
+engine present in every environment. One absolute number survives, below the table:
 the baseline's own milliseconds per packet, which is what a reader needs to convert
 the ratios back.
 
@@ -36,14 +36,20 @@ the per-version table separates them and answers a question about interpreters.
 **Why the spread is reported.** A single pass cannot distinguish a real difference
 between two engines from the machine having been briefly busy. So the whole set is
 measured several times and each row carries the range actually observed. Rows
-whose ranges overlap are marked: this run does not establish which of them is
+whose ranges overlap share a footnote: this run does not establish which of them is
 faster, and reporting their medians as though it did would be inventing precision.
+
+**Why the notes are footnotes.** Every row or column that needs explaining carries a
+reStructuredText footnote reference, ``[*]_`` for a note of its own and ``[#overlap]_``
+for the one note several rows share, and the bodies follow the table they annotate.
+docutils numbers them page-wide, so a snippet pastes beside the page's own footnotes
+without renumbering anything.
 
 The emitted markup is plain reStructuredText for **docutils**. No Sphinx-only
 roles (``:mod:``, ``:func:``, ``:manpage:``) appear in it -- only double-backtick
 literals -- because docutils does not know them and renders them as errors.
 
-The snippets land in :file:`docs/source/index.rst`, which Sphinx renders, so a
+The snippets land in :file:`docs/source/engines.rst`, which Sphinx renders, so a
 Sphinx-only role would in fact survive there. Staying docutils-clean is kept
 deliberately anyway: it is what lets a table be pasted into any reStructuredText
 a plain docutils reader will see, the project README having been one such
@@ -56,6 +62,7 @@ import json
 import math
 import statistics
 import sys
+import textwrap
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -73,20 +80,40 @@ BASELINE = 'default'
 #: How the baseline is spelled in the report.
 BASELINE_LABEL = 'pcapkit'
 
-#: Marks a row whose observed range overlaps another row's, i.e. a gap this run
-#: does not resolve. A double dagger rather than a footnote reference, so the
-#: emitted snippet cannot collide with footnote numbers already on the page it is
-#: pasted into.
+#: A reStructuredText auto-symbol footnote reference, which is how the emitted tables
+#: mark a row or a column that carries a note: one reference per noted row, matched to
+#: the ``.. [*]`` bodies emitted directly after the table, in the same order.
+#:
+#: These used to be literal symbols with a hand-written legend, on the theory that a
+#: footnote reference could collide with footnote numbers already on the page the
+#: snippet is pasted into. It cannot: docutils assigns auto-symbols and auto-numbers
+#: page-wide, in document order, so a snippet's footnotes simply take the next free
+#: symbols and numbers wherever they land -- and :file:`docs/source/engines.rst` used
+#: footnotes for these tables before this module did.
+FOOTNOTE = '[*]_'
+
+#: Label of the one footnote every overlapping row shares. Auto-numbered and labelled
+#: rather than an auto-symbol, because an auto-symbol body answers exactly one
+#: reference and this note is referenced from several rows.
+OVERLAP_LABEL = 'overlap'
+
+#: Marks, in the plain-text report only, a row whose observed range overlaps another
+#: row's, i.e. a gap this run does not resolve. The RST snippets use the footnote
+#: :data:`OVERLAP_LABEL` instead.
 OVERLAP_MARK = '‡'
 
-#: Marks a row that was not measured, and points at the note carrying the reason.
-UNMEASURED_MARK = '†'
-
-#: Marks a measured row that lost a pass, or had extractions discarded. The number
-#: is still reported -- what was collected is real -- but it rests on less evidence
-#: than the rows beside it, and that has to be visible rather than inferable from
-#: the pass count.
+#: Marks, in the plain-text report only, a measured row that lost a pass, or had
+#: extractions discarded. The number is still reported -- what was collected is real
+#: -- but it rests on less evidence than the rows beside it, and that has to be visible
+#: rather than inferable from the pass count. The RST snippets use a footnote.
 PARTIAL_MARK = '¶'
+
+#: Width the emitted prose is wrapped to, footnote bodies included.
+WIDTH = 79
+
+#: What the per-version lead says measured the run when it is not told. Always true,
+#: since every figure comes out of it; ``--runner`` names the script that drove it.
+DEFAULT_RUNNER = 'examples/benchmark/benchmark.py'
 
 #: Characters that begin reStructuredText inline markup, and therefore have to be
 #: neutralised in any text this module did not write itself. See :func:`_escape`.
@@ -115,7 +142,7 @@ def _escape(text: 'str') -> 'str':
     * anything ending ``::`` -- *literal block expected; none found*.
 
     Each of those turns the snippet this module promises can be pasted into
-    :file:`docs/source/index.rst` verbatim into a visible error block, and the failure
+    :file:`docs/source/engines.rst` verbatim into a visible error block, and the failure
     is invisible here because the harness's own fixtures are all well-behaved English.
 
     Args:
@@ -136,6 +163,55 @@ def _escape(text: 'str') -> 'str':
     if text.endswith(':'):
         text = text[:-1] + '\\:'
     return text
+
+
+def _wrap(text: 'str', initial: 'str' = '', subsequent: 'str' = '') -> 'list[str]':
+    """Wrap prose this module wrote to :data:`WIDTH`.
+
+    Only on spaces: never inside a word, and never at a hyphen, which would split an
+    observed range such as ``0.0600-0.0702`` across two lines.
+
+    Args:
+        text: Prose, on one line.
+        initial: Prefix of the first line.
+        subsequent: Prefix of every later line.
+
+    Returns:
+        The wrapped lines.
+
+    """
+    return textwrap.wrap(text, WIDTH, initial_indent=initial, subsequent_indent=subsequent,
+                         break_long_words=False, break_on_hyphens=False)
+
+
+def _footnote(label: 'str', lead: 'str', tail: 'str' = '',
+              bullets: 'Sequence[str]' = ()) -> 'list[str]':
+    """Render one footnote body, ``.. [label]``, with its text indented under it.
+
+    Text from outside this module is never wrapped, only this module's own prose. A
+    wrapped line is a fresh start for the parser, and an outside reason that happened
+    to put a run of ``=`` or a ``* `` at the start of one would turn the body into a
+    section title or a list: so outside text goes on the end of the last wrapped line,
+    as *tail*, or on a line of its own, as a bullet.
+
+    Args:
+        label: ``*`` for an auto-symbol footnote, or ``#name`` for a labelled
+            auto-numbered one.
+        lead: This module's prose, wrapped.
+        tail: Escaped outside text, appended to the last line of *lead* as it is,
+            including any separator it needs.
+        bullets: Escaped outside text, one bullet each, after a blank line.
+
+    Returns:
+        The footnote's lines, without a trailing blank.
+
+    """
+    lines = _wrap(lead, f'.. [{label}] ', '   ')
+    lines[-1] += tail
+    if bullets:
+        lines.append('')
+        lines.extend(f'   * {bullet}' for bullet in bullets)
+    return lines
 
 
 class Row:
@@ -290,8 +366,8 @@ def _fixed(value: 'float', decimals: 'int' = 4) -> 'str':
     down rather than one at a time, and significant figures give each row a different
     number of decimal places -- ``0.01700`` above ``14.74`` -- which is precisely the
     layout that makes a column impossible to scan. Fixed places line the decimal
-    points up, and they are also what the table this replaces in
-    :file:`docs/source/index.rst` has always used, so a regenerated table is a diff
+    points up, and they are also what the table on
+    :file:`docs/source/engines.rst` has always used, so a regenerated table is a diff
     of the numbers rather than a diff of the formatting.
 
     Args:
@@ -882,10 +958,12 @@ def _package_table(documents: 'Sequence[dict[str, Any]]') -> 'list[str]':
 
 def render_versions_rst(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, Any]]',
                         missing: 'Sequence[tuple[str, str]]' = (),
-                        emulated: 'Optional[str]' = None) -> 'str':
+                        emulated: 'Optional[str]' = None,
+                        runner: 'Optional[str]' = None,
+                        workflow: 'Optional[str]' = None) -> 'str':
     """Render the per-version table of absolute milliseconds per packet.
 
-    This is the snippet that replaces :file:`docs/source/index.rst`'s **Test Results** section
+    This is the snippet that replaces :file:`docs/source/engines.rst`'s **Test Results** section
     outright: engines down the side, Python versions across the top, ``--`` for a cell
     that could not be measured. It is self-contained -- heading, prose, table, notes --
     because it is pasted as a unit, and a note explaining a gap is no use in a
@@ -907,6 +985,10 @@ def render_versions_rst(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, An
             that failed after writing some of its environments keeps the figures it
             managed and is labelled as incomplete rather than as unmeasured.
         emulated: Description of the emulation in play, or :data:`None`.
+        runner: The script that drove the run, as the lead names it; see
+            :data:`DEFAULT_RUNNER`.
+        workflow: The GitHub Actions workflow that ran *runner*, or :data:`None` for
+            a run from a shell.
 
     Returns:
         reStructuredText, ready to paste.
@@ -929,13 +1011,19 @@ def render_versions_rst(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, An
                if version in measured_series}
 
     lines = []  # type: list[str]
-    # Underlined with `-`, the level these sections take in docs/source/index.rst, so
+    # Underlined with `-`, the level these sections take in docs/source/engines.rst, so
     # the snippet pastes there verbatim; `render_rst` follows suit.
     lines.append('Test Results')
     lines.append('------------')
     lines.append('')
-    lines.append(f"Measured with ``examples/benchmark/run.sh``: {first['rounds']} timed")
-    lines.append('extractions of ``examples/captures/in.pcap`` per engine and Python version.')
+    # The script that actually ran, not a fixed one: `native.sh` and `run.sh` both end in
+    # this report, and naming the wrong one tells a reader to reproduce the figures a way
+    # they were not taken.
+    by = f'``{runner or DEFAULT_RUNNER}``'
+    if workflow:
+        by += f', which the {_escape(workflow)} workflow runs'
+    lines.extend(_wrap(f"Measured with {by}: {first['rounds']} timed extractions of "
+                       f"``examples/captures/in.pcap`` per engine and Python version."))
     lines.append('The first extraction is discarded as a warm-up. Values are milliseconds per')
     lines.append(f"packet, the median of {first['repeats']} passes.")
     lines.append('')
@@ -945,63 +1033,72 @@ def render_versions_rst(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, An
     lines.append('the host as much as of the engine.')
     lines.append('')
 
-    body = []  # type: list[list[str]]
-    for row in rows:
-        by_series = grid.get(row.engine, {})
-        gaps = [series for series in columns
-                if series not in by_series and series not in absent]
-        # Marked for a gap in a column that produced something only. A blank under a
-        # version whose image never built is explained by the column's own note, and
-        # tagging the engine for it would blame the engine for someone else's failure.
-        name = f'``{row.label}``' + (f' {UNMEASURED_MARK}' if gaps else '')
-        cells = [name]
-        for series in columns:
-            values = by_series.get(series)
-            cells.append(_fixed(statistics.median(values)) if values else '--')
-        body.append(cells)
+    # Auto-symbol footnotes pair with their references in document order, so the bodies
+    # are collected in the order the references appear: the header row first, then the
+    # engines from the top.
+    notes = []  # type: list[list[str]]
 
     # Marked when there is a note about the column itself, whether that is "nothing was
     # measured here" or "not everything was". A note nothing in the table points at is a
     # note a reader has no reason to look for.
     headers = ['Engine']
     for series in columns:
-        noted = series in absent or series in partial
-        headers.append(f'{series} {UNMEASURED_MARK}' if noted else series)
+        if series in absent:
+            notes.append(_footnote('*', 'Not measured at all, for the reason recorded at the '
+                                        'time:', bullets=[f'Python {series} -- '
+                                                          f'{_escape(absent[series])}']))
+        elif series in partial:
+            notes.append(_footnote('*', 'Measured, but the run did not complete, so this column '
+                                        'may be missing engines that would otherwise have a '
+                                        'figure, for the reason recorded at the time:',
+                                   bullets=[f'Python {series} -- {_escape(partial[series])}']))
+        else:
+            headers.append(series)
+            continue
+        headers.append(f'{series} {FOOTNOTE}')
+
+    body = []  # type: list[list[str]]
+    for row in rows:
+        by_series = grid.get(row.engine, {})
+        # Marked for a gap in a column that produced something only. A blank under a
+        # version whose image never built is explained by the column's own note, and
+        # tagging the engine for it would blame the engine for someone else's failure.
+        gaps = [series for series in columns
+                if series not in by_series and series not in absent]
+        name = f'``{row.label}``'
+        if gaps:
+            name += f' {FOOTNOTE}'
+            # Every gap gets a line, including one no environment explained: a footnote
+            # reference with no body is a docutils error, not a blank.
+            by_reason = {}  # type: dict[str, list[str]]
+            for series in gaps:
+                reason = reasons.get(row.engine, {}).get(series, 'no reason recorded')
+                by_reason.setdefault(reason, []).append(series)
+            # Grouped by reason rather than one bullet per cell: the usual case is one
+            # sentence true of several consecutive versions, and repeating it for each
+            # makes the notes longer than the table they annotate.
+            notes.append(_footnote('*', 'Not measured, for the reason recorded at the time:',
+                                   bullets=[f'on {", ".join(series_list)} -- {_escape(reason)}'
+                                            for reason, series_list in by_reason.items()]))
+        cells = [name]
+        for series in columns:
+            values = by_series.get(series)
+            cells.append(_fixed(statistics.median(values)) if values else '--')
+        body.append(cells)
+
     lines.extend(_simple_table(headers, body, numeric=True))
     lines.append('')
 
     # The owner's own sentence about the old hand-maintained table, kept word for word:
     # it is the right warning, and a regenerated table that rewords it would show up as
-    # a diff in the prose every time the numbers changed.
+    # a diff in the prose every time the numbers changed. It sits between the table and
+    # the footnotes, where docs/source/engines.rst has it.
     lines.append('The unavailable cells were attempted. They are not zeroes and must not be')
     lines.append('compared with a measured row.')
     lines.append('')
 
-    notes = []  # type: list[str]
-    for version, reason in sorted(absent.items(), key=lambda pair: _series_key(pair[0])):
-        notes.append(f'* Python {version} -- not measured at all: {_escape(reason)}')
-    for version, reason in sorted(partial.items(), key=lambda pair: _series_key(pair[0])):
-        notes.append(f'* Python {version} -- measured, but the run did not complete, so this '
-                     f'column may be missing engines that would otherwise have a figure: '
-                     f'{_escape(reason)}')
-    for row in rows:
-        by_reason = {}  # type: dict[str, list[str]]
-        for series, reason in sorted(reasons.get(row.engine, {}).items(), key=lambda pair:
-                                     _series_key(pair[0])):
-            if series in absent:
-                continue
-            by_reason.setdefault(reason, []).append(series)
-        # Grouped by reason rather than one bullet per cell: the usual case is one
-        # sentence true of several consecutive versions, and repeating it for each
-        # makes the notes longer than the table they annotate.
-        for reason, series_list in by_reason.items():
-            notes.append(f'* ``{row.label}`` on {", ".join(series_list)} -- {_escape(reason)}')
-
-    if notes:
-        lines.append(f'``{UNMEASURED_MARK}`` not measured, or not measured in full, for the')
-        lines.append('reason recorded at the time:')
-        lines.append('')
-        lines.extend(notes)
+    for note in notes:
+        lines.extend(note)
         lines.append('')
 
     if emulated:
@@ -1088,6 +1185,27 @@ def render_rst(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, Any]]',
         lines.append('about an engine; the per-version table is where that is broken out.')
         lines.append('')
 
+    # Computed before the table rather than after it, because the overlap note below
+    # the table depends on it: with no spread observed, "their ranges overlap" is not
+    # what happened, and the note says so instead.
+    spreads = [row.spread for row in rows if row.measured and len(row.ratios) > 1]
+
+    # Auto-symbol bodies pair with their references in document order, so they are
+    # collected row by row. The overlap note is the one labelled body, since several rows
+    # point at it; its position does not matter, and it goes first.
+    notes = []  # type: list[list[str]]
+    # Only emitted when a row actually carries it: an explanation of a note nothing
+    # points at reads as though the run failed to separate rows it in fact separated
+    # cleanly -- and docutils would warn about an unreferenced footnote besides.
+    if marked:
+        if spreads:
+            overlap = ('This run does not separate these rows: their observed ranges overlap, '
+                       'so the order their medians suggest is not established.')
+        else:
+            overlap = ('Measured on a single pass, so no run-to-run spread was observed and no '
+                       'gap between rows is established. Re-run with more passes.')
+        notes.append(_footnote(f'#{OVERLAP_LABEL}', overlap))
+
     body = []  # type: list[list[str]]
     for row in rows:
         name = f'``{row.label}``'
@@ -1099,15 +1217,34 @@ def render_rst(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, Any]]',
                 observed = (_range(row.low, row.high)
                             if len(row.ratios) > 1 else '*single pass*')
             if row.engine in marked:
-                name += f' {OVERLAP_MARK}'
+                name += f' [#{OVERLAP_LABEL}]_'
             if row.partial:
-                name += f' {PARTIAL_MARK}'
+                name += f' {FOOTNOTE}'
+                lead = ('Measured, but on less evidence than the rows beside it. What was '
+                        'collected is real; what was lost is named here rather than left to be '
+                        'inferred from the pass count:')
+                if row.discarded:
+                    lead += (f' {row.discarded} individual extraction(s) failed and were '
+                             f'discarded')
+                failures = '; '.join(_escape(failure) for failure in row.failures)
+                if not failures:
+                    tail = '.'
+                elif row.discarded:
+                    tail = f'; {failures}'
+                else:
+                    tail = f' {failures}'
+                notes.append(_footnote('*', lead, tail))
             body.append([name, relative, observed, str(len(row.ratios))])
         else:
-            body.append([f'{name} {UNMEASURED_MARK}', '*not measured*', '--', '0'])
+            body.append([f'{name} {FOOTNOTE}', '*not measured*', '--', '0'])
+            notes.append(_footnote('*', 'Not measured, for the reason the engine itself gives:',
+                                   f' {_escape(row.reason)}'))
 
     lines.extend(_simple_table(['Engine', 'Relative time', 'Observed range', 'Samples'], body))
     lines.append('')
+    for note in notes:
+        lines.extend(note)
+        lines.append('')
 
     absolutes = baseline_absolutes(documents)
     if absolutes:
@@ -1123,49 +1260,14 @@ def render_rst(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, Any]]',
         lines.append('ratio.')
         lines.append('')
 
-    # The spread is reported whether or not any row is marked -- it is what tells a
-    # reader which gaps in the table are large enough to mean anything. The marker's
-    # legend, by contrast, is only emitted when a row actually carries it: an
-    # explanation of a symbol that does not appear reads as though the run failed to
-    # separate rows it in fact separated cleanly.
-    spreads = [row.spread for row in rows if row.measured and len(row.ratios) > 1]
+    # The spread is reported whether or not any row carries the overlap note -- it is
+    # what tells a reader which gaps in the table are large enough to mean anything.
     if spreads:
         lines.append(f'Run-to-run spread: the median row varied by '
                      f'{_significant(statistics.median(spreads) * 100, 2)}% of its ratio across')
         lines.append(f'the passes and the widest by {_significant(max(spreads) * 100, 2)}%. '
                      f'A gap between two rows that is')
         lines.append('smaller than that is noise, not a result.')
-        lines.append('')
-
-    if marked:
-        if spreads:
-            lines.append(f'``{OVERLAP_MARK}`` this run does not separate these rows: their observed')
-            lines.append('ranges overlap, so the order their medians suggest is not established.')
-        else:
-            lines.append(f'``{OVERLAP_MARK}`` measured on a single pass, so no run-to-run spread was')
-            lines.append('observed and no gap between rows is established. Re-run with more passes.')
-        lines.append('')
-
-    partial = [row for row in rows if row.measured and row.partial]
-    if partial:
-        lines.append(f'``{PARTIAL_MARK}`` measured, but on less evidence than the rows beside it.')
-        lines.append('What was collected is real; what was lost is named here rather than left to')
-        lines.append('be inferred from the pass count:')
-        lines.append('')
-        for row in partial:
-            detail = []  # type: list[str]
-            if row.discarded:
-                detail.append(f'{row.discarded} individual extraction(s) failed and were discarded')
-            detail.extend(_escape(failure) for failure in row.failures)
-            lines.append(f'* ``{row.label}`` -- ' + '; '.join(detail))
-        lines.append('')
-
-    unmeasured = [row for row in rows if not row.measured]
-    if unmeasured:
-        lines.append(f'``{UNMEASURED_MARK}`` not measured, for the reason the engine itself gives:')
-        lines.append('')
-        for row in unmeasured:
-            lines.append(f'* ``{row.label}`` -- {_escape(row.reason)}')
         lines.append('')
 
     if emulated:
@@ -1333,6 +1435,11 @@ def main(argv: 'Optional[list[str]]' = None) -> 'int':
                         help=('a Python version that produced no measurements, and why; '
                               'repeatable. It becomes a column of "--" with the reason '
                               'attached, rather than an absent column'))
+    parser.add_argument('--runner', default=None, metavar='SCRIPT',
+                        help=('the script that drove the run, as the per-version table '
+                              f'names it (default: {DEFAULT_RUNNER})'))
+    parser.add_argument('--workflow', default=None, metavar='NAME',
+                        help='the GitHub Actions workflow that ran --runner, if any')
     parser.add_argument('--rst-out', default=None,
                         help='also write just the ratio RST snippet here')
     parser.add_argument('--versions-rst-out', default=None,
@@ -1362,11 +1469,12 @@ def main(argv: 'Optional[list[str]]' = None) -> 'int':
 
     rows = collect(documents)
     print(render_text(rows, documents, args.image, args.emulated, missing))
-    versions_snippet = render_versions_rst(rows, documents, missing, args.emulated)
+    versions_snippet = render_versions_rst(rows, documents, missing, args.emulated,
+                                           args.runner, args.workflow)
     snippet = render_rst(rows, documents, args.image, args.emulated, missing)
 
     print('-' * 78)
-    print('reStructuredText below, ready to paste into docs/source/index.rst')
+    print('reStructuredText below, ready to paste into docs/source/engines.rst')
     print('-' * 78)
     print()
     print(versions_snippet)
