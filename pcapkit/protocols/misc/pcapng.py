@@ -212,7 +212,7 @@ from pcapkit.protocols.schema.schema import Schema
 from pcapkit.utilities.compat import StrEnum, localcontext
 from pcapkit.utilities.exceptions import (BaseError, EnumValueError, FormatError, ProtocolError,
                                           StreamEOFError, UnsupportedCall, stacklevel)
-from pcapkit.utilities.timestamp import fromtimestamp
+from pcapkit.utilities.timestamp import fromtimestamp, totimestamp
 from pcapkit.utilities.warnings import (AttributeWarning, DeprecatedFormatWarning, ProtocolWarning,
                                         RegistryWarning, warn)
 
@@ -2044,7 +2044,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
                     timestamp = decimal.Decimal(time.time())
             else:
                 if isinstance(timestamp, datetime.datetime):
-                    timestamp = timestamp.timestamp()
+                    timestamp = totimestamp(timestamp)
                 timestamp = decimal.Decimal(timestamp)
 
             ts_info = int(

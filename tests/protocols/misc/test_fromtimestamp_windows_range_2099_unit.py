@@ -34,7 +34,8 @@ if TYPE_CHECKING:
     from typing import Any, Iterator
 
 #: Test tier (#1958): splits floats into seconds and microseconds, which PyPy's
-#: and GraalPy's pure-Python datetime do in code of their own.
+#: and GraalPy's pure-Python datetime do in code of their own, and gates one
+#: error class on GraalPy.
 __tier__ = 'ALL'
 
 UTC = datetime.timezone.utc
@@ -47,6 +48,16 @@ YEAR_1 = -62135510400
 YEAR_9999 = 253402214399
 
 _REAL_DATETIME = datetime.datetime
+
+#: What :meth:`datetime.timezone.fromutc` raises for a result before year 1.
+#: CPython's C and pure-Python ``datetime`` both raise :exc:`OverflowError`, as
+#: ``datetime + timedelta`` does. GraalPy's ``FromUtcNode`` adds the offset to a
+#: Java ``LocalDateTime``, which has no year-1 floor, and its constructor then
+#: raises ``ValueError: year 0 is out of range`` (#2134, measured on GraalPy
+#: 25.4.4; graalpython ``TimeZoneBuiltins.java`` and ``DatetimeModuleBuiltins
+#: .addOffsetToDateTime`` at graal-25.4.4, no upstream issue filed yet). Its
+#: ``datetime + timedelta`` still raises :exc:`OverflowError`.
+ZONE_OVERFLOW = ValueError if sys.implementation.name == 'graalpy' else OverflowError
 
 
 class WindowsDateTime(_REAL_DATETIME):
@@ -130,7 +141,7 @@ class TestFromTimestamp(unittest.TestCase):
             with self.subTest(timestamp=value), self.assertRaises(error):
                 fromtimestamp(value, UTC)
         # the instant is in range and the zone pushes it out
-        with self.assertRaises(OverflowError):
+        with self.assertRaises(ZONE_OVERFLOW):
             fromtimestamp(-62135596800.0, datetime.timezone(datetime.timedelta(hours=-5)))
 
 

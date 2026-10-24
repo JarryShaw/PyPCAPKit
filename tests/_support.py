@@ -4,6 +4,7 @@ import abc
 import collections.abc
 import contextlib
 import functools
+import gc
 import hashlib
 import importlib.util
 import inspect
@@ -15,7 +16,7 @@ import sys
 import time
 import types
 import unittest
-from typing import Iterable, Iterator, Optional
+from typing import Callable, Iterable, Iterator, Optional
 
 from tests._tiers import (ROOT, SAMPLE_ROOT, REGENERATE_SAMPLES_CMD,
                           GeneratedFixtureInUnitTierError, check_unit_tier_read)
@@ -1168,3 +1169,39 @@ def close_extractor(extractor: object) -> None:
         _close_quietly(stream)
     finally:
         _close_quietly(engine)
+
+
+#: Seconds :func:`collect_until` keeps collecting for a finaliser after the first
+#: :func:`gc.collect`. CPython runs the finaliser before ``collect`` returns, so it
+#: gets no grace. GraalPy's ``collect`` forces a full Java GC, sleeps 15 ms "just
+#: trying to give the GC more time" and then runs only the weak reference
+#: callbacks queued by then (graalpython ``GcModuleBuiltins.javaCollect``, at
+#: graal-25.4.4), so on a loaded runner the finaliser can run after it returns
+#: (#1963). A finaliser that never runs still fails once the grace is spent.
+#: PyPy frees an extractor, and so runs the finaliser, one collection later
+#: than CPython: the class still defines ``__del__`` (#1958, measured on PyPy
+#: 8.0.1), so a short grace lets a second collection run there. Shared by
+#: every test that waits on a finaliser, a reader's buffer file among them
+#: (#2134).
+FINALISER_GRACE = {'graalpy': 10.0, 'pypy': 1.0}.get(sys.implementation.name, 0.0)
+
+
+def collect_until(done: 'Callable[[], bool]', grace: float = FINALISER_GRACE) -> bool:
+    """Collect garbage until ``done()`` holds or ``grace`` seconds have passed.
+
+    Args:
+        done: Zero-argument callable, checked after each collection.
+        grace: Seconds to keep collecting after the first collection.
+
+    Returns:
+        Whether ``done()`` held before the grace ran out.
+
+    """
+    deadline = time.monotonic() + grace
+    while True:
+        gc.collect()
+        if done():
+            return True
+        if time.monotonic() >= deadline:
+            return False
+        time.sleep(0.05)
