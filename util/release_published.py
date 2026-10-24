@@ -11,7 +11,7 @@ after setup-python, in two forms:
     appends ``PCAPKIT_PYPI_COMPLETE`` to ``$GITHUB_OUTPUT``.
 ``python3 util/release_published.py anaconda /tmp/anaconda_release.json``
     The step "Check Anaconda publish completeness". It expects a distribution
-    for each platform in :data:`SUBDIRS`, the ones the ``conda`` legs publish,
+    for each platform the version was released for, :func:`released_subdirs`,
     and each build in ``PCAPKIT_CONDA_BUILDS``, reads
     ``https://api.anaconda.org/release/jarryshaw/pypcapkit/<PCAPKIT_VERSION>``'s
     ``distributions`` and appends ``PCAPKIT_CONDA_COMPLETE``.
@@ -57,11 +57,16 @@ except ImportError:  # imported as util.<script>, or loaded by path, from the re
 if TYPE_CHECKING:
     from typing import Callable, Optional, Tuple, Union
 
-__all__ = ['SUBDIRS', 'PYPI_URL', 'ANACONDA_URL', 'INDEXES', 'pypi_source', 'anaconda_source', 'Unbound', 'Failed',
-           'var', 'words', 'fetch', 'count', 'integer', 'complete', 'check', 'pypi', 'anaconda', 'main']
+__all__ = ['SUBDIRS', 'SCRIPT', 'SUBDIRS_LINE', 'PYPI_URL', 'ANACONDA_URL', 'INDEXES', 'pypi_source',
+           'anaconda_source', 'Unbound', 'Failed', 'var', 'words', 'fetch', 'count', 'integer', 'complete', 'check',
+           'git', 'released_subdirs', 'pypi', 'anaconda', 'main']
 
-#: Each platform the ``conda`` legs publish, for each supported build (#1922).
-SUBDIRS = 'linux-64 osx-64 osx-arm64'
+#: Each platform the ``conda`` legs publish, for each supported build (#1922, #2060).
+SUBDIRS = 'linux-64 osx-64 osx-arm64 win-64'
+#: This script, whose :data:`SUBDIRS` line at a tag's commit names what that
+#: version was released for (#2060), and that line.
+SCRIPT = 'util/release_published.py'
+SUBDIRS_LINE = re.compile(rb"^SUBDIRS = '([^'\n]*)'$", re.MULTILINE)
 #: The per-version endpoints, before the version.
 PYPI_URL = 'https://pypi.org/pypi/pypcapkit/'
 ANACONDA_URL = 'https://api.anaconda.org/release/jarryshaw/pypcapkit/'
@@ -138,17 +143,18 @@ def words(value: 'bytes') -> 'list[bytes]':
     return [word for word in re.split(rb'[ \t]+', value.split(b'\n', 1)[0]) if word]
 
 
-def command(args: 'list[Union[str, bytes]]', source: 'Optional[bytes]' = None) -> 'Tuple[int, bytes]':
+def command(args: 'list[Union[str, bytes]]', source: 'Optional[bytes]' = None,
+            quiet: 'bool' = False) -> 'Tuple[int, bytes]':
     """Run ``args``, ``source`` on its standard input: its status as the shell reports it, and its output.
 
-    Its standard error goes where the script's does. A command missing from
-    ``PATH`` is status 127.
+    Its standard error goes where the script's does, or with ``quiet`` nowhere.
+    A command missing from ``PATH`` is status 127.
 
     """
     sys.stdout.flush()
     try:
         result = subprocess.run([os.fsencode(arg) for arg in args], input=source,  # nosec: B603 B607
-                                stdout=subprocess.PIPE, check=False)
+                                stdout=subprocess.PIPE, stderr=subprocess.DEVNULL if quiet else None, check=False)
     except FileNotFoundError:
         print(f'{os.fsdecode(args[0])}: command not found', file=sys.stderr, flush=True)
         return 127, b''
@@ -224,6 +230,42 @@ def check(index: 'str', expected: 'int', url: 'bytes', path: 'str', source: 'Cal
     return 0
 
 
+def git(*args: 'Union[str, bytes]') -> 'Optional[bytes]':
+    """``git args``' output without its trailing newlines, its errors dropped; :data:`None` where it fails."""
+    status, output = command(['git', *args], quiet=True)
+    return None if status else output.rstrip(b'\n')
+
+
+def released_subdirs() -> 'bytes':
+    """The platforms the version was released for, as its tag's commit lists them (#2060).
+
+    Until ``PCAPKIT_TAG_EXISTS`` is ``true``, :data:`SUBDIRS`. Once the tag
+    ``v<PCAPKIT_VERSION>`` exists, the :data:`SUBDIRS_LINE` of :data:`SCRIPT` at
+    its commit, which "Read the released Python versions" fetched where the
+    checkout lacked it; a commit older than :data:`SCRIPT` reads the line the
+    script was added with, as that step reads the first tier file. So a version
+    is not expected to have a platform its release did not publish: no tag
+    before #2060 lists win-64. Where ``git`` fails or the line does not parse,
+    :data:`SUBDIRS`, with a ``::warning``.
+
+    """
+    if var('PCAPKIT_TAG_EXISTS') != b'true':
+        return SUBDIRS.encode()
+    tag = b'v' + var('PCAPKIT_VERSION')
+    script = SCRIPT.encode()
+    start = git('rev-parse', '-q', '--verify', b'refs/tags/' + tag + b'^{commit}')
+    if start is not None and git('cat-file', '-e', start + b':' + script) is None:
+        added = git('log', '--diff-filter=A', '--format=%H', '--', script)
+        start = added.rsplit(b'\n', 1)[-1] if added else None
+    text = git('show', start + b':' + script) if start else None
+    found = SUBDIRS_LINE.search(text) if text is not None else None
+    if found:
+        return found.group(1)
+    _actions.emit(b'::warning title=Platforms of ' + tag + b' not read (#2060)::' + script
+                  + b"'s SUBDIRS did not read at that tag, so this counts this commit's: " + SUBDIRS.encode() + b'\n')
+    return SUBDIRS.encode()
+
+
 def pypi(path: 'str') -> 'int':
     """``PCAPKIT_PYPI_COMPLETE``: one wheel per supported leg, plus the sdist."""
     expected = len(words(var('PCAPKIT_PYPI_WHEELS'))) + 1
@@ -231,10 +273,12 @@ def pypi(path: 'str') -> 'int':
 
 
 def anaconda(path: 'str') -> 'int':
-    """``PCAPKIT_CONDA_COMPLETE``: each platform the ``conda`` legs publish, for each supported version."""
+    """``PCAPKIT_CONDA_COMPLETE``: each platform the version was released for, for each supported version."""
+    builds = var('PCAPKIT_CONDA_BUILDS')
+    subdirs = released_subdirs()
     # Exported, as the step did, so curl and the snippet see it.
-    os.environ['PCAPKIT_CONDA_SUBDIRS'] = SUBDIRS
-    expected = len(words(SUBDIRS.encode())) * len(words(var('PCAPKIT_CONDA_BUILDS')))
+    os.environ['PCAPKIT_CONDA_SUBDIRS'] = os.fsdecode(subdirs)
+    expected = len(words(subdirs)) * len(words(builds))
     return check('anaconda', expected, ANACONDA_URL.encode() + var('PCAPKIT_VERSION'), path, anaconda_source)
 
 

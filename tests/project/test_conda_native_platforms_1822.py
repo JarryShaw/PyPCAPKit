@@ -5,8 +5,7 @@
   :file:`util/release_conda.py`'s ``PLATFORMS`` since #1967, to the conda
   platform of that runner's own architecture, as GitHub's runner-images table
   gives it (the snapshot in :file:`python_versions_fixtures`), and between them
-  build exactly :data:`conda_vendor.PLATFORMS`; win-64 only in Conda Update,
-  which does not publish it yet (#2060).
+  build exactly :data:`conda_vendor.PLATFORMS`, win-64 included (#2060).
 * Neither job runs ``conda convert``. Run as the job runs it, with a stand-in
   ``conda``, a leg publishes the one package conda built, and fails before any
   upload when that is not the platform its label maps to.
@@ -68,10 +67,10 @@ JOBS = (('cron-conda.yml', 'conda-dist'), ('create-release.yml', 'conda'))
 #: What each leg publishes. ``macos-latest`` is arm64 and ``macos-26-intel``
 #: Intel, per https://docs.github.com/en/actions/reference/runners/github-hosted-runners
 #: as read on 2026-10-16; the test below checks the snapshot of the image table too.
-LEGS = {'macos-latest': 'osx-arm64', 'macos-26-intel': 'osx-64', 'ubuntu-latest': 'linux-64'}
-#: Each job's legs: Conda Update's add #2060's unpublished ``windows-latest``.
-JOB_LEGS = {('cron-conda.yml', 'conda-dist'): dict(LEGS, **{'windows-latest': 'win-64'}),
-            ('create-release.yml', 'conda'): LEGS}
+LEGS = {'macos-latest': 'osx-arm64', 'macos-26-intel': 'osx-64', 'ubuntu-latest': 'linux-64',
+        'windows-latest': 'win-64'}
+#: Each job's legs, the same since #2060 gave the release job its Windows one.
+JOB_LEGS = {('cron-conda.yml', 'conda-dist'): LEGS, ('create-release.yml', 'conda'): LEGS}
 #: ``platform.machine()``, as the runner-images table names the architecture.
 ARCH = {'x86_64': 'x64', 'arm64': 'arm64', 'AMD64': 'x64'}
 

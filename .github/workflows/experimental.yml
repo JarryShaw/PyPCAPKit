@@ -705,8 +705,7 @@ jobs:
           retention-days: 14
 
       # `experimental`'s, on setup-python's `python`, or the image's where that
-      # failed, since Windows has no /usr/bin/python3, as cron-conda.yml's
-      # `Windows summary` runs it (#2060).
+      # failed, since Windows has no /usr/bin/python3 (#2060).
       - name: Experimental summary
         if: ${{ !cancelled() }}
         continue-on-error: true

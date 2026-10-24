@@ -343,9 +343,9 @@ checks *is* the one it is about to create:
   already idempotent (``skip-existing: true`` on every upload step), so the
   check exists only to save the cost of the build matrix, not for correctness.
 * ``conda`` compares Anaconda's aggregate count against the expected one (the
-  ``linux-64``, ``osx-64`` and ``osx-arm64`` files for each Python version of
-  its matrix, one platform per ``os`` leg,
-  `#1922 <https://github.com/JarryShaw/PyPCAPKit/issues/1922>`__) as the same
+  ``linux-64``, ``osx-64``, ``osx-arm64`` and ``win-64`` files for each Python
+  version of its matrix, one platform per ``os`` leg,
+  `#1922 <https://github.com/JarryShaw/PyPCAPKit/issues/1922>`__, :issue:`2060`) as the same
   kind of job-level cost saver, and *also*
   checks, per matrix leg, whether that leg's own platform/Python distribution
   is already there -- this second check is the actual correctness fix, because
@@ -355,9 +355,10 @@ checks *is* the one it is about to create:
   action's CLI download returns 404 there, so its "Upload conda packages to
   Anaconda (Intel)" step runs ``anaconda upload --skip-existing`` instead
   (`#2044 <https://github.com/JarryShaw/PyPCAPKit/issues/2044>`__), which skips
-  such a file. Conda Update's Intel leg runs the same step, so it keeps a file
-  anaconda.org already has, where the action's ``force: true`` on its other legs
-  replaces it.
+  such a file. The ``windows-latest`` leg's "Upload conda packages to Anaconda
+  (Windows)" makes the same call (:issue:`2060`). Conda Update's Intel and
+  Windows legs run the same steps, so they keep a file anaconda.org already has,
+  where the action's ``force: true`` on its other legs replaces it.
 
 These evidence checks all run inside ``version_check``, curling PyPI's and
 Anaconda's public, unauthenticated JSON APIs; the per-leg check runs inside
@@ -374,6 +375,10 @@ gate and ``pypi``, and fail `One Commit per Release`_'s tag check on every run
 until the next release. A tag older than the file, as ``v1.5.0b12`` is, counts
 the tiers the file was added with, which the change for `#1660 <https://github.com/JarryShaw/PyPCAPKit/issues/1660>`__ copied unchanged from the
 workflows of the time.
+The Anaconda count's platforms follow the same rule, from the ``SUBDIRS`` line
+of :file:`util/release_published.py` at the tag's commit or, for a tag older
+than that file, the line it was added with, so a version released before
+``win-64`` was published is not read as lacking it (:issue:`2060`).
 
 On the tag-push path ``startsWith(github.ref_name, 'v')`` bypasses the
 evidence check unconditionally; on the ``workflow_run`` path it falls through

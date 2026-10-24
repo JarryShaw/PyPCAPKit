@@ -1376,7 +1376,8 @@ to a script. Each script's docstring says what it does; each has tests under
        conda packages to Anaconda (Intel)`` in that job and in ``cron-conda.yml``'s
        ``conda-dist``, as ``release_conda.py build`` and ``upload`` (`#1822
        <https://github.com/JarryShaw/PyPCAPKit/issues/1822>`__, `#2044
-       <https://github.com/JarryShaw/PyPCAPKit/issues/2044>`__).
+       <https://github.com/JarryShaw/PyPCAPKit/issues/2044>`__), and ``Upload conda
+       packages to Anaconda (Windows)`` in both as ``upload`` (:issue:`2060`).
      - No.
    * - :file:`util/release_reset_build.py`
      - ``Reset Build Number`` in ``create-release.yml``'s ``tag``, on the image's
@@ -1789,14 +1790,13 @@ it, so the scheduled jobs reading them name it too
 * Conda Update's ``conda-dist`` -- ``environment: anaconda``
 * Vendor Update's ``vendor-update`` -- ``environment: conda-tag``
 
-``conda-dist`` also has a ``windows-latest`` leg, which builds and smoke-tests a
-``win-64`` package and publishes nothing
-(`#2060 <https://github.com/JarryShaw/PyPCAPKit/issues/2060>`__). Every upload
-step is gated off it, and those are the only steps that read ``ANACONDA_TOKEN``,
-so no step on that leg receives the secret.
-:file:`tests/project/test_conda_windows_leg_2060.py` checks both. Each step that
-can fail there continues on error, and ``Windows summary`` reports each failure
-as a warning, as ``KTLO summary`` does for a KTLO leg, so the leg stays green.
+Both ``conda-dist`` and the release ``conda`` job have a ``windows-latest`` leg,
+which builds, smoke-tests and publishes the ``win-64`` package (:issue:`2060`).
+It blocks as the other legs do: no step continues on error. Its one step that
+reads ``ANACONDA_TOKEN`` is ``Upload conda packages to Anaconda (Windows)``, the
+Intel leg's anaconda-client call (:issue:`2044`) under ``bash -el``, which skips a
+manual run as every upload does.
+:file:`tests/project/test_conda_windows_leg_2060.py` pins the leg.
 
 A required reviewer on ``conda-tag`` or ``anaconda`` would therefore hold every
 scheduled bump for an approval, besides the release-graph reason

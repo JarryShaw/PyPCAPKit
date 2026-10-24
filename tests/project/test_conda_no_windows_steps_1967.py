@@ -13,8 +13,8 @@
   #1967, maps no label that neither job has a leg on, and, with no Windows leg,
   no step is Windows-only. So adding a
   Windows leg back means adding its steps back deliberately, rather than
-  reviving ones nobody has run. #2060 did so for ``conda-dist``, whose Windows
-  steps are therefore live; ``conda`` still has no Windows leg.
+  reviving ones nobody has run. #2060 did so for both jobs, whose Windows
+  steps are therefore live.
 * :class:`TestTheCheckSeesDeadCode` feeds :func:`dead` the jobs as they stood
   before, rebuilt from the current ones, so the pin cannot pass by reading
   nothing, and ``conda-dist`` without its Windows leg, whose steps must then read
@@ -144,17 +144,18 @@ class TestTheCheckSeesDeadCode(unittest.TestCase):
                     'Map the leg: `case` arm windows-latest, which is no leg',
                 ])
 
-    def test_dropping_conda_dists_windows_leg_leaves_its_steps_dead(self) -> None:
-        """#2060's steps are live only while the leg is there."""
-        spec = copy.deepcopy(_workflows.job('cron-conda.yml', 'conda-dist'))
-        spec['strategy']['matrix']['os'].remove('windows-latest')
-        found = dead(spec, legs() - {'windows-latest'})
-        for line in ('Upload conda packages to Anaconda: `if:` compares matrix.os with windows-latest, which is no leg',
-                     'Install and Setup: `continue-on-error:` compares matrix.os with windows-latest, which is no leg',
-                     'Windows summary: Windows-only, and no leg is Windows',
-                     'Build conda packages: release_conda.py maps windows-latest, which no conda job has a leg on'):
-            with self.subTest(line=line):
-                self.assertIn(line, found)
+    def test_dropping_the_windows_legs_leaves_their_steps_dead(self) -> None:
+        """#2060's steps are live only while the legs are there."""
+        for name, job_id in JOBS:
+            spec = copy.deepcopy(_workflows.job(name, job_id))
+            spec['strategy']['matrix']['os'].remove('windows-latest')
+            found = dead(spec, legs() - {'windows-latest'})
+            for line in (
+                    'Upload conda packages to Anaconda: `if:` compares matrix.os with windows-latest, which is no leg',
+                    'Upload conda packages to Anaconda (Windows): Windows-only, and no leg is Windows',
+                    'Build conda packages: release_conda.py maps windows-latest, which no conda job has a leg on'):
+                with self.subTest(workflow=name, job=job_id, line=line):
+                    self.assertIn(line, found)
 
     def test_a_leg_the_script_does_not_map_is_reported(self) -> None:
         spec = copy.deepcopy(_workflows.job('create-release.yml', 'conda'))

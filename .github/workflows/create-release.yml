@@ -75,8 +75,9 @@ concurrency:
 # exists, ``pypi`` PyPI's file count, and ``conda`` Anaconda's aggregate count
 # (a cost saver) plus, per leg, its own distribution -- the correctness fix,
 # since ``anaconda/actions/upload-package`` has no ``skip-existing``, only
-# ``force:``, never set here. The ``macos-26-intel`` leg uploads with the
-# anaconda-client CLI and ``--skip-existing`` instead (#2044).
+# ``force:``, never set here. The ``macos-26-intel`` and ``windows-latest``
+# legs upload with the anaconda-client CLI and ``--skip-existing`` instead
+# (#2044, #2060).
 #
 # GitHub skips a job whose ``needs:`` skipped before evaluating its ``if:``,
 # unless the ``if:`` calls a status-check function, and ``github`` skips on
@@ -292,6 +293,8 @@ jobs:
         env:
           PCAPKIT_VERSION: ${{ steps.get_version.outputs.PCAPKIT_VERSION }}
           PCAPKIT_CONDA_BUILDS: ${{ steps.released.outputs.conda-builds }}
+          # #2060: once tagged, the platforms its tag's commit published.
+          PCAPKIT_TAG_EXISTS: ${{ steps.check_tag.outputs.exists }}
         run: python3 util/release_published.py anaconda /tmp/anaconda_release.json
 
       # #1748: resolved as #1634's check in ``github``, ``pypi`` and ``conda``
@@ -749,8 +752,9 @@ jobs:
           - macos-latest
           - macos-26-intel
           - ubuntu-latest
-          # No Windows leg since 2023, and no Windows steps (#1967): adding the leg
-          # back means writing its steps, as test_conda_no_windows_steps_1967 pins.
+          # #2060: win-64, once Conda Update's leg had built and smoke-tested it
+          # green. Its `run:` steps name `bash`, as Windows runs `pwsh`.
+          - windows-latest
         # #1633, #1660: the supported tier only. No KTLO 3.10 leg: the list
         # util/conda_vendor.py derives omits typing-extensions, which
         # pcapkit/utilities/compat.py imports below 3.11, and pins each
@@ -775,9 +779,11 @@ jobs:
       # Anaconda check, so this reads the live state. #1967: util/release_conda.py
       # holds this step's shell, and the build's and the Intel upload's, which
       # cron-conda.yml's ``conda-dist`` runs too; before setup-python, so here
-      # on the image's ``python3``.
+      # on the image's ``python3``. On Windows, Git Bash hands it ``/tmp`` as
+      # the user's temporary directory.
       - name: Check whether this leg is already on Anaconda
         id: check_leg
+        shell: bash
         env:
           PCAPKIT_VERSION: ${{ needs.version_check.outputs.PCAPKIT_VERSION }}
           PCAPKIT_CONDA_OS: ${{ matrix.os }}
@@ -795,12 +801,14 @@ jobs:
       # installed here: on ``macos-26-intel`` they resolve a cryptography with
       # no Intel wheel, which pip has to compile or fail on.
       - name: Install and Setup
+        shell: bash
         run: |
           set -x
 
           python -m pip install -U pip setuptools wheel
 
       - name: Setup Conda Distribution
+        shell: bash
         run: |
           set -x
 
@@ -836,7 +844,10 @@ jobs:
           conda-remove-defaults: false
           show-channel-urls: true
 
+      # A login shell, as for the build below: on Windows only that one has the
+      # `conda` setup-miniconda's `conda init` defines.
       - name: Install conda build tools
+        shell: bash -el {0}
         run: |
           conda install -n base --override-channels -c conda-forge -y conda-build
           conda build --version
@@ -862,15 +873,21 @@ jobs:
       # package is checked as a Conda Update bump's is, before anything below
       # uploads it. Not gated on ``check_leg``, since the GitHub upload is not.
       - name: Smoke-test the vendored packages
+        shell: bash
         env:
           PCAPKIT_CONDA_PACKAGE: ${{ steps.conda_build.outputs.host_package }}
         run: |
-          "${pythonLocation}/bin/python" util/conda_vendor.py --smoke "$PCAPKIT_CONDA_PACKAGE"
+          python="${pythonLocation}/bin/python"
+          if [ "$RUNNER_OS" = Windows ]; then
+            python="$(cygpath -u "$pythonLocation")/python.exe"
+          fi
+          "$python" util/conda_vendor.py --smoke "$PCAPKIT_CONDA_PACKAGE"
 
       # #2044: not on macos-26-intel, whose leg "Upload conda packages to
-      # Anaconda (Intel)" uploads instead.
+      # Anaconda (Intel)" uploads instead, nor, #2060, on windows-latest, whose
+      # "Upload conda packages to Anaconda (Windows)" does.
       - name: Upload conda packages to Anaconda
-        if: ${{ matrix.os != 'macos-26-intel' && steps.check_leg.outputs.PCAPKIT_LEG_EXISTS != 'true' }}
+        if: ${{ matrix.os != 'macos-26-intel' && matrix.os != 'windows-latest' && steps.check_leg.outputs.PCAPKIT_LEG_EXISTS != 'true' }}
         uses: anaconda/actions/upload-package@a6f488910b4a1e4f3fe01736241ca1b92b4b355a # v0.3.1
         with:
           token: ${{ secrets.ANACONDA_TOKEN }}
@@ -897,6 +914,21 @@ jobs:
           PCAPKIT_CONDA_PACKAGES: ${{ steps.conda_build.outputs.packages }}
           PCAPKIT_CONDA_LABELS: ${{ needs.version_check.outputs.PCAPKIT_CONDA_LABEL }}
         run: python3 util/release_conda.py upload
+
+      # #2060: the Intel leg's call, on win-64, under a login shell as "Build
+      # conda packages" is: only there is base active, so the script can start
+      # `conda` as base's `Scripts\conda.exe`, and `python` is base's. The
+      # script runs base's `Scripts\anaconda.exe`.
+      - name: Upload conda packages to Anaconda (Windows)
+        if: ${{ matrix.os == 'windows-latest' && steps.check_leg.outputs.PCAPKIT_LEG_EXISTS != 'true' }}
+        shell: bash -el {0}
+        env:
+          ANACONDA_API_TOKEN: ${{ secrets.ANACONDA_TOKEN }}
+          ANACONDA_CLI_FORCE_NEW: "1"
+          PCAPKIT_CONDA_CHANNEL: jarryshaw
+          PCAPKIT_CONDA_PACKAGES: ${{ steps.conda_build.outputs.packages }}
+          PCAPKIT_CONDA_LABELS: ${{ needs.version_check.outputs.PCAPKIT_CONDA_LABEL }}
+        run: python util/release_conda.py upload
 
       # ``pypi``'s upload script, for the same reasons (#1634, #1640). Not
       # gated on ``check_leg`` as the Anaconda upload is: a leg whose Anaconda

@@ -38,7 +38,9 @@ Asserted here, over :file:`.github/workflows/create-release.yml`:
   other commit, which is likewise run, not just read;
 * once the version is tagged, ``version_check``'s PyPI and Anaconda counts are
   of the tiers at the tag's commit, not this run's (#1660), run against a
-  scratch repository, so a tier added since cannot fail the check above;
+  scratch repository, so a tier added since cannot fail the check above; and
+  its Anaconda count is of the platforms the tag's commit published (#2060), so
+  a version released before win-64 is not read as lacking it;
 * every step handed ``PCAPKIT_RUN_SHA`` is handed ``github.sha``, and no
   expression names ``workflow_run.head_sha`` -- the scratch-repository tests
   inject their own values, so these are what tie them to the job;
@@ -73,6 +75,7 @@ from tests._support import scale_timeout
 from tests.project import test_release_gates as gates
 from tests.project.test_release_gates import (declared_environment, declared_if, evaluate_condition,
                                               evaluate_expression, job_blocks, strip_comments)
+from util import release_published
 
 if TYPE_CHECKING:
     from typing import Any, Optional
@@ -647,11 +650,14 @@ class TestUploadsStayOffUpdateARelease(WorkflowMixin, unittest.TestCase):
         already has is what stops the replacement #1640 measured.
         """
         self.assertEqual(self.step('conda', UPLOAD_STEP).get('if'), "${{ matrix.os == 'ubuntu-latest' }}")
-        # #2044: each Anaconda upload also names its legs.
+        # #2044, #2060: each Anaconda upload also names its legs.
         self.assertEqual(self.step('conda', 'Upload conda packages to Anaconda').get('if'),
-                         "${{ matrix.os != 'macos-26-intel' && steps.check_leg.outputs.PCAPKIT_LEG_EXISTS != 'true' }}")
+                         "${{ matrix.os != 'macos-26-intel' && matrix.os != 'windows-latest' && "
+                         "steps.check_leg.outputs.PCAPKIT_LEG_EXISTS != 'true' }}")
         self.assertEqual(self.step('conda', 'Upload conda packages to Anaconda (Intel)').get('if'),
                          "${{ matrix.os == 'macos-26-intel' && steps.check_leg.outputs.PCAPKIT_LEG_EXISTS != 'true' }}")
+        self.assertEqual(self.step('conda', 'Upload conda packages to Anaconda (Windows)').get('if'),
+                         "${{ matrix.os == 'windows-latest' && steps.check_leg.outputs.PCAPKIT_LEG_EXISTS != 'true' }}")
 
 
 class TestEveryScriptIsHandedTheRunSha(WorkflowMixin, unittest.TestCase):
@@ -1236,8 +1242,9 @@ class TestTheCountsAreOfTheReleasedTiers(ScratchRepository):
         (self.tmp / 'reply.json').write_text(json.dumps(reply), encoding='utf-8')
         (self.tmp / 'check.sh').write_text(script, encoding='utf-8')
         self.output.write_text('', encoding='utf-8')
+        # #2060: the platforms of an untagged version, which TestTheCountsAreOfTheReleasedPlatforms varies.
         env = dict(self.env, REPLY=str(self.tmp / 'reply.json'), PCAPKIT_VERSION=self.VERSION,
-                   PCAPKIT_PYPI_WHEELS=wheels, PCAPKIT_CONDA_BUILDS=builds)
+                   PCAPKIT_PYPI_WHEELS=wheels, PCAPKIT_CONDA_BUILDS=builds, PCAPKIT_TAG_EXISTS='false')
         # #1967: ``python3 util/release_published.py ...``, on this interpreter.
         command = script_command(script) or [BASH, '-e', str(self.tmp / 'check.sh')]
         result = subprocess.run(command, cwd=self.tmp, env=env, capture_output=True,
@@ -1325,13 +1332,118 @@ class TestTheCountsAreOfTheReleasedTiers(ScratchRepository):
         files = [f'pypcapkit-{self.VERSION}-{tag}-none-any.whl' for tag in released['pypi-wheels'].split()]
         pypi = {'urls': [{'filename': name} for name in files + [f'pypcapkit-{self.VERSION}.tar.gz']]}
         conda = {'distributions': [{'attrs': {'subdir': platform, 'build': f'{build}_0'}}
-                                   for platform in ('linux-64', 'osx-64', 'osx-arm64')
+                                   for platform in ('linux-64', 'osx-64', 'osx-arm64', 'win-64')
                                    for build in released['conda-builds'].split()]}
         step = 'Check PyPI publish completeness'
         self.assertEqual(self.complete(step, written['pypi-wheels'], '', pypi), 'true')
         self.assertEqual(self.complete(step, run['pypi-wheels'], '', pypi), 'false')
         step = 'Check Anaconda publish completeness'
         self.assertEqual(self.complete(step, '', written['conda-builds'], conda), 'true')
+
+
+class TestTheCountsAreOfTheReleasedPlatforms(ScratchRepository):
+    """``version_check`` counts the conda platforms a tagged version was released for (#2060).
+
+    ``pre`` is tagged before util/release_published.py existed, as every tag up to
+    v1.5.0b14 is; ``added`` adds it with the three platforms #1967 transcribed
+    from the step's shell; ``windows`` adds win-64, as #2060 did; the run is on
+    ``windows``. Counting this run's platforms for a version tagged earlier read
+    v1.5.0b14 as lacking win-64, and Release status warned that it was unfinished
+    on every run.
+
+    """
+
+    VERSION = '1.5.0b14'
+    BUILDS = 'py311 py312'
+    BEFORE = 'linux-64 osx-64 osx-arm64'
+    STEP = 'Check Anaconda publish completeness'
+
+    def setUp(self) -> None:
+        super().setUp()
+        self.bin = self.tmp / 'bin'
+        self.bin.mkdir()
+        (self.bin / 'curl').write_text(FAKE_CURL, encoding='utf-8')
+        (self.bin / 'curl').chmod(0o755)
+        self.env['PATH'] = f'{self.bin}{os.pathsep}{self.env["PATH"]}'
+        self.output = self.tmp / 'github-output'
+        self.env['GITHUB_OUTPUT'] = str(self.output)
+        self.pre = self.commit(self.VERSION, '0', 'before the script')
+        (self.seed / 'util').mkdir()
+        self.script = self.seed / 'util' / 'release_published.py'
+        self.script.write_text(f"SUBDIRS = '{self.BEFORE}'\n", encoding='utf-8')
+        self.added = self.commit(self.VERSION, '0', 'the script')
+        self.script.write_text(f"SUBDIRS = '{self.BEFORE} win-64'\n", encoding='utf-8')
+        self.windows = self.commit(self.VERSION, '0', 'win-64')
+        self.push(self.windows, 'refs/heads/main')
+
+    def count(self, exists: 'bool', platforms: 'str') -> 'tuple[str, str]':
+        """``PCAPKIT_CONDA_COMPLETE`` and the log, on ``windows``, for a release of ``platforms``' builds."""
+        reply = {'distributions': [{'attrs': {'subdir': platform, 'build': f'{build}_0'}}
+                                   for platform in platforms.split() for build in self.BUILDS.split()]}
+        (self.tmp / 'reply.json').write_text(json.dumps(reply), encoding='utf-8')
+        self.output.write_text('', encoding='utf-8')
+        run = self.step('version_check', self.STEP)['run'].replace('/tmp/anaconda_release.json',
+                                                                    str(self.tmp / 'release.json'))
+        env = dict(self.env, REPLY=str(self.tmp / 'reply.json'), PCAPKIT_VERSION=self.VERSION,
+                   PCAPKIT_CONDA_BUILDS=self.BUILDS, PCAPKIT_TAG_EXISTS=str(exists).lower())
+        command = script_command(run)
+        assert command is not None, run
+        result = subprocess.run(command, cwd=self.work, env=env, capture_output=True, text=True, check=False,
+                                timeout=scale_timeout(60))
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        written = dict(line.split('=', 1) for line in self.output.read_text(encoding='utf-8').splitlines())
+        return written['PCAPKIT_CONDA_COMPLETE'], result.stdout
+
+    def test_the_step_is_handed_whether_the_tag_exists(self) -> None:
+        self.assertEqual(self.step('version_check', self.STEP)['env']['PCAPKIT_TAG_EXISTS'],
+                         '${{ steps.check_tag.outputs.exists }}')
+        ids = [step.get('id') for step in self.steps['version_check']]
+        self.assertLess(ids.index('released'), ids.index('check_conda'))
+
+    def test_the_line_read_at_a_tag_is_the_scripts(self) -> None:
+        """So rewording ``SUBDIRS`` fails here, not on a release."""
+        text = (ROOT / release_published.SCRIPT).read_bytes()
+        self.assertEqual([found.group(1) for found in release_published.SUBDIRS_LINE.finditer(text)],
+                         [release_published.SUBDIRS.encode()])
+
+    def test_before_the_tag_this_runs_platforms_count(self) -> None:
+        self.checkout(self.windows)
+        self.assertEqual(self.count(False, self.BEFORE)[0], 'false')
+        state, log = self.count(False, release_published.SUBDIRS)
+        self.assertEqual(state, 'true', log)
+        self.assertIn('found 8 of 8 expected', log)
+
+    def test_a_tag_publishing_win_64_needs_it(self) -> None:
+        """A version released with win-64 that lacks it is unfinished, so a re-run of its run can finish it."""
+        self.push(self.windows, f'refs/tags/v{self.VERSION}')
+        self.checkout(self.windows)
+        self.assertEqual(self.count(True, self.BEFORE)[0], 'false')
+        self.assertEqual(self.count(True, f'{self.BEFORE} win-64')[0], 'true')
+
+    def test_a_tag_before_win_64_does_not_need_it(self) -> None:
+        self.push(self.added, f'refs/tags/v{self.VERSION}')
+        self.checkout(self.windows)
+        state, log = self.count(True, self.BEFORE)
+        self.assertEqual(state, 'true', log)
+        self.assertIn('found 6 of 6 expected', log)
+        self.assertNotIn('::warning', log)
+        # It still needs every platform it was released for.
+        self.assertEqual(self.count(True, 'linux-64 osx-arm64')[0], 'false')
+
+    def test_a_tag_older_than_the_script_counts_the_platforms_it_was_added_with(self) -> None:
+        """As v1.5.0b14 (``6a9b666a1``) is: tagged before #1967 (``79934ddd9``) added the script."""
+        self.push(self.pre, f'refs/tags/v{self.VERSION}')
+        self.checkout(self.windows)
+        state, log = self.count(True, self.BEFORE)
+        self.assertEqual(state, 'true', log)
+        self.assertIn('found 6 of 6 expected', log)
+
+    def test_a_tag_it_cannot_read_counts_this_runs_platforms_and_warns(self) -> None:
+        self.checkout(self.windows)
+        state, log = self.count(True, self.BEFORE)
+        self.assertEqual(state, 'false')
+        self.assertIn(f'::warning title=Platforms of v{self.VERSION} not read (#2060)::', log)
+        self.assertIn('found 6 of 8 expected', log)
 
 
 @unittest.skipIf(not BASH, 'needs bash on PATH')
@@ -1623,13 +1735,15 @@ class TestCondaUpdateNeverMakesTheRelease(CondaDistMixin, unittest.TestCase):
         self.assertNotIn('${{', check['run'])
 
     def test_the_anaconda_upload_is_not_gated_on_it(self) -> None:
-        # #2044: gated on the leg alone; #2060: Windows publishes nothing.
+        # #2044, #2060: gated on the leg alone, Intel and Windows with their own steps.
         # A manual run uploads nothing (tests/project/test_build_only_dispatch.py).
         self.assertEqual(self.step('conda-dist', 'Upload conda packages to Anaconda').get('if'),
                          "${{ github.event_name != 'workflow_dispatch' && "
                          "matrix.os != 'macos-26-intel' && matrix.os != 'windows-latest' }}")
         self.assertEqual(self.step('conda-dist', 'Upload conda packages to Anaconda (Intel)').get('if'),
                          "${{ github.event_name != 'workflow_dispatch' && matrix.os == 'macos-26-intel' }}")
+        self.assertEqual(self.step('conda-dist', 'Upload conda packages to Anaconda (Windows)').get('if'),
+                         "${{ github.event_name != 'workflow_dispatch' && matrix.os == 'windows-latest' }}")
 
     def test_an_update_targets_the_default_branch(self) -> None:
         """``github.ref_name`` is the default branch on this workflow's triggers.

@@ -231,11 +231,10 @@ KTLO_AT_MAIN = [{'python-version': '3.7', 'ktlo': True, 'os': 'ubuntu-22.04'},
                 {'python-version': '3.9', 'ktlo': True, 'os': 'ubuntu-24.04'},
                 {'python-version': '3.10', 'ktlo': True}]
 CONDA_AT_MAIN = {'os': ['macos-latest', 'ubuntu-latest'], 'python-version': SUPPORTED_AT_MAIN}
-#: The conda jobs' ``os`` axis since #1822, which added the Intel macOS runner.
+#: The conda jobs' ``os`` axis since #1822, which added the Intel macOS runner,
+#: and #2060, which added the Windows one.
 CONDA_JOBS = (('create-release.yml', 'conda'), ('cron-conda.yml', 'conda-dist'))
-CONDA_OS = ['macos-latest', 'macos-26-intel', 'ubuntu-latest']
-#: The extra leg each conda job has beyond :data:`CONDA_OS`: #2060's unpublished Windows one.
-CONDA_EXTRA_OS = {('create-release.yml', 'conda'): [], ('cron-conda.yml', 'conda-dist'): ['windows-latest']}
+CONDA_OS = ['macos-latest', 'macos-26-intel', 'ubuntu-latest', 'windows-latest']
 MAIN_MATRICES = {
     ('unit-tests.yml', 'test'): {
         'python-version': SUPPORTED_AT_MAIN,
@@ -636,8 +635,9 @@ class TestNothingMovedButLatest(unittest.TestCase):
                     if leg['python-version'] == TIERS_AT_MAIN['latest']:
                         leg['coverage'] = True
             if (name, job_id) in CONDA_JOBS:
-                # #1822: an Intel macOS leg per version, so osx-64 is built natively.
-                expected = legs(dict(spec, os=CONDA_OS + CONDA_EXTRA_OS[(name, job_id)]))
+                # #1822: an Intel macOS leg per version, so osx-64 is built natively;
+                # #2060: and a Windows one, for win-64.
+                expected = legs(dict(spec, os=CONDA_OS))
             expected = with_pypy(name, job_id, expected)
             if (name, job_id) in KTLO_TWINS:
                 # #1738: the KTLO legs, in MAIN's order, are the twin job's.
@@ -916,7 +916,8 @@ class TestTheAnacondaCheckCountsTheFile(unittest.TestCase):
             result = subprocess.run(
                 [sys.executable, str(ROOT / words[1]), *words[2:]],
                 env=dict(os.environ, PATH=f'{scratch}{os.pathsep}{os.environ["PATH"]}', REPLY=str(reply),
-                         GITHUB_OUTPUT=str(output), PCAPKIT_VERSION='1.5.0', PCAPKIT_CONDA_BUILDS=builds),
+                         GITHUB_OUTPUT=str(output), PCAPKIT_VERSION='1.5.0', PCAPKIT_CONDA_BUILDS=builds,
+                         PCAPKIT_TAG_EXISTS='false'),
                 capture_output=True, text=True, check=False, timeout=60)
             self.assertEqual(result.returncode, 0, result.stderr)
             written = dict(line.split('=', 1) for line in output.read_text(encoding='utf-8').split())
@@ -924,7 +925,8 @@ class TestTheAnacondaCheckCountsTheFile(unittest.TestCase):
 
     def test_each_platform_needs_each_supported_build(self) -> None:
         builds = live_outputs()['conda-builds'].split()
-        every = [(platform, build) for platform in ('linux-64', 'osx-64', 'osx-arm64') for build in builds]
+        every = [(platform, build) for platform in ('linux-64', 'osx-64', 'osx-arm64', 'win-64')
+                 for build in builds]
         ktlo = [('linux-64', 'py' + version.replace('.', ''))
                 for version in script().tier(script().load(), 'cpython', 'ktlo')]
         self.assertEqual(self.complete(every), 'true')
