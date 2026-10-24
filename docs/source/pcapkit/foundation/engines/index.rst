@@ -180,9 +180,9 @@ distribution is present, and a version check would refuse a working build.
 
 .. seealso::
 
-   The :doc:`project overview <../../../index>` covers the installation
-   prerequisites in full, including how ``pypcap``'s :file:`setup.py` looks
-   for :file:`pcap.h` and why a Homebrew ``libpcap`` is not always found.
+   The :ref:`engine prerequisites <engine-prerequisites>` cover installation in
+   full, including how ``pypcap``'s :file:`setup.py` looks for :file:`pcap.h` and
+   why a Homebrew ``libpcap`` is not always found.
 
 Choosing Between PyPCAP and PCAP_CT
 -----------------------------------

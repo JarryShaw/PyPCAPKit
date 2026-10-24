@@ -43,8 +43,8 @@ Engines are on demand; `all` bundles only the core addons the library needs for
 full functionality. Some engines also need something beyond `pip install` -- a
 `tshark` binary, a C compiler, `libpcap` headers, or an older interpreter -- and
 `pypcap`/`pcap-ct` must never be installed together. The
-[installation guide](https://jarryshaw.github.io/PyPCAPKit/#installation) gives each
-constraint and its reason. `pcapkit` enforces them in code: asking for an engine
+[engine prerequisites](https://jarryshaw.github.io/PyPCAPKit/engines.html#engine-prerequisites)
+give each constraint and its reason. `pcapkit` enforces them in code: asking for an engine
 that cannot run in the current environment warns with the cause and falls back to
 its own parser.
 
@@ -89,9 +89,9 @@ reference. Pages worth knowing by name:
 |---|---|
 | [API reference](https://jarryshaw.github.io/PyPCAPKit/pcapkit/index.html) | Every module, protocol and constant |
 | [Module structure](https://jarryshaw.github.io/PyPCAPKit/#module-structure) | What each subpackage is for |
-| [Engine comparison](https://jarryshaw.github.io/PyPCAPKit/#engine-comparison) | Which engines exist, which Python versions they run on, and measured speed per packet |
+| [Engine comparison](https://jarryshaw.github.io/PyPCAPKit/engines.html) | Which engines exist, which Python versions they run on, what each needs installed, and measured speed per packet |
 | [Engine support](https://jarryshaw.github.io/PyPCAPKit/pcapkit/foundation/engines/index.html) | What each engine does *not* support, and how the gap is surfaced |
-| [Installation](https://jarryshaw.github.io/PyPCAPKit/#installation) | Extras, engine prerequisites and the local development setup |
+| [Installation](https://jarryshaw.github.io/PyPCAPKit/#installation) | Extras and the local development setup |
 | [Testing](https://jarryshaw.github.io/PyPCAPKit/contributing/testing.html) | Running the suite, and the sample captures it needs |
 | [How to ...](https://jarryshaw.github.io/PyPCAPKit/demo.html) | Worked examples, library and CLI |
 | [Extensions](https://jarryshaw.github.io/PyPCAPKit/ext.html) | Registering your own protocols, engines and dumpers |

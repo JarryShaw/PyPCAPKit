@@ -76,7 +76,7 @@ KEPT = {
     ),
     # Pasted from examples/benchmark/report.py, which keeps its output plain
     # docutils and so cannot use the rst_epilog link.
-    'docs/source/index.rst': (
+    'docs/source/engines.rst': (
         r'both ``pcap`` providers',
     ),
 }
@@ -85,6 +85,7 @@ KEPT = {
 LINKING = (
     'docs/source/contributing/conventions/process.rst',
     'docs/source/contributing/pep.rst',
+    'docs/source/engines.rst',
     'docs/source/ext.rst',
     'docs/source/index.rst',
     NOTE_PAGE,

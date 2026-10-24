@@ -52,15 +52,12 @@ EXEMPT = {
     'docs/source/contributing/pep.rst': (
         r'``pyshark``, ``pypcap`` and\s+``pcap_ct`` disable',
     ),
-    'docs/source/index.rst': (
+    'docs/source/engines.rst': (
         r'``pypcap`` and ``pypcapfile`` stop at 3\.11, and ``pyshark`` at 3\.13',
+    ),
+    'docs/source/index.rst': (
         r'core addons only: ``emoji``, ``cryptography``',
         r'``dpkt``, ``scapy``, ``pyshark``, ``requests``',
-        # The benchmark tables, pasted from examples/benchmark/report.py, which
-        # keeps them plain docutils and so cannot use an rst_epilog link: a row
-        # with its note marker, and a note naming the row it explains.
-        r'(?m)^``\w+`` [\u2020\u2021\u00b6]',
-        r'(?m)^\* ``\w+`` (?:on 3\.\d+|--) ',
     ),
 }
 
