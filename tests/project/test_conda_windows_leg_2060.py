@@ -18,7 +18,8 @@ phase 2 adds it, with the uploads.
   previous ``FOR`` loop wrote ``%A``, a syntax error in a batch file.
 * :class:`TestPortableExecutable` and :class:`TestTheWindowsLayout`:
   :file:`util/conda_vendor.py` reads a ``.pyd``'s PE machine, and ``--smoke``
-  takes a Windows package's ``Lib/site-packages``, whose path names no Python.
+  takes a Windows package's ``Lib/site-packages``, or from Python 3.15 its
+  ``lib/python/site-packages`` (conda-forge's CFEP-27), whose path names no Python.
 
 Nothing here runs on Windows; what a real Conda Update run shows is the rest.
 
@@ -318,14 +319,25 @@ class TestTheWindowsLayout(unittest.TestCase):
         posix = pathlib.Path('root') / 'lib' / 'python3.14' / 'site-packages'
         self.assertEqual(vendor.built_for(posix, {'build': 'py39_0'}), 'python3.14')
 
-    def smoke(self, build: 'str') -> 'tuple[int, str]':
+    def test_the_cfep_27_layout_is_read_from_the_build_string(self) -> None:
+        """conda-forge's Python 3.15 on Windows has ``lib/python/site-packages``, naming no version."""
+        vendor = load('conda_vendor')
+        site = pathlib.Path('root') / 'lib' / 'python' / 'site-packages'
+        self.assertEqual(vendor.built_for(site, {'build': 'py315_0'}), 'python3.15')
+        self.assertEqual(vendor.built_for(site, {'build': 'h1a2b3c4_0'}),
+                         "lib/python/site-packages with build string 'h1a2b3c4_0'")
+        # Only under lib: anything else named python is not the layout.
+        other = pathlib.Path('root') / 'opt' / 'python' / 'site-packages'
+        self.assertEqual(vendor.built_for(other, {'build': 'py315_0'}), 'python')
+
+    def smoke(self, build: 'str', site: 'str' = 'Lib/site-packages') -> 'tuple[int, str]':
         vendor = load('conda_vendor')
         files = dict({'pcapkit/__init__.py': SHIM.encode()}, **DISTRIBUTION)
         files['pcapkit/_extern/native/_speedups.pyd'] = pe(0x8664)
         files['pcapkit/_extern/native-1.0.dist-info/RECORD'] = (
             b'native/__init__.py,,\nnative/_speedups.pyd,,\nnative-1.0.dist-info/METADATA,,\n'
             b'native-1.0.dist-info/RECORD,,\n')
-        members = {f'Lib/site-packages/{name}': data for name, data in files.items()}
+        members = {f'{site}/{name}': data for name, data in files.items()}
         members['info/index.json'] = json.dumps({'name': 'pypcapkit', 'subdir': 'win-64', 'build': build}).encode()
         with tempfile.TemporaryDirectory() as temp:
             package = pathlib.Path(temp) / 'pypcapkit-0-py_0.tar.bz2'
@@ -344,6 +356,11 @@ class TestTheWindowsLayout(unittest.TestCase):
 
     def test_a_windows_package_for_this_python_passes(self) -> None:
         status, log = self.smoke(f'py{self.PYTHON.replace(".", "")}h0_0')
+        self.assertEqual(status, 0, log)
+        self.assertIn('win-64: 1 native binaries read, none failing', log)
+
+    def test_a_cfep_27_windows_package_for_this_python_passes(self) -> None:
+        status, log = self.smoke(f'py{self.PYTHON.replace(".", "")}h0_0', site='lib/python/site-packages')
         self.assertEqual(status, 0, log)
         self.assertIn('win-64: 1 native binaries read, none failing', log)
 
