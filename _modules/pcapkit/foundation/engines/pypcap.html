@@ -384,6 +384,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Guides &amp; Changelog</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../engines.html">Engine Comparison</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
@@ -613,7 +614,7 @@
 <span class="sd">        import after a failed one does not reproduce the same error.</span>
 
 <span class="sd">        """</span>
-        <span class="k">return</span> <span class="n">_pcap_backend</span><span class="o">.</span><span class="n">wrong_backend_reason</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__engine_distribution__</span><span class="p">,</span> <span class="n">found</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">_pcap_backend</span><span class="o">.</span><span class="n">engine_reason</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__engine_distribution__</span><span class="p">,</span> <span class="n">found</span><span class="p">)</span>
 
 <div class="viewcode-block" id="PyPCAP.unsupported_reason">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pypcap.PyPCAP.unsupported_reason">[docs]</a>
@@ -634,6 +635,16 @@
 <span class="sd">        hypothetical upstream build that someone got working on a newer</span>
 <span class="sd">        interpreter, and would say nothing useful on 3.10 and 3.11, where both</span>
 <span class="sd">        distributions install happily and either could be the one in place.</span>
+
+<span class="sd">        It also reports a |pcap|_ that is installed but cannot load -- one whose</span>
+<span class="sd">        import raises something other than :exc:`ImportError`, such as the</span>
+<span class="sd">        :exc:`OSError` a loader raises when it cannot find :manpage:`libpcap(3)`.</span>
+<span class="sd">        :meth:`Extractor.import_test</span>
+<span class="sd">        &lt;pcapkit.foundation.extraction.Extractor.import_test&gt;` lets that through,</span>
+<span class="sd">        so without this the extraction would die rather than fall back to the</span>
+<span class="sd">        :term:`default engine` (:issue:`2132`). The verdict is</span>
+<span class="sd">        :func:`~pcapkit.foundation.engines._pcap_backend.engine_reason`, shared</span>
+<span class="sd">        with :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT`.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            A phrase naming the real cause, or :data:`None`. An absent |pcap|_</span>
@@ -683,9 +694,9 @@
 
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: If the installed |pcap|_ is `pcap-ct`_ rather</span>
-<span class="sd">                than upstream `PyPCAP`_. This is the same condition</span>
-<span class="sd">                :meth:`unsupported_reason` reports, kept here as well because that</span>
-<span class="sd">                hook is only consulted by</span>
+<span class="sd">                than upstream `PyPCAP`_, or is installed but cannot load. These</span>
+<span class="sd">                are the conditions :meth:`unsupported_reason` reports, kept here as</span>
+<span class="sd">                well because that hook is only consulted by</span>
 <span class="sd">                :meth:`Extractor.run &lt;pcapkit.foundation.extraction.Extractor.run&gt;`;</span>
 <span class="sd">                constructing the engine directly bypasses it, and running</span>
 <span class="sd">                `pcap-ct`_ under the :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` name would</span>
@@ -696,9 +707,8 @@
 <span class="sd">        """</span>
         <span class="c1"># NOTE: the probe comes *before* ``import pcap`` so that this engine and</span>
         <span class="c1"># :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` behave the same way</span>
-        <span class="c1"># here. It matters more for the latter, whose import can raise</span>
-        <span class="c1"># ``OSError`` rather than ``ImportError``, but a shared order is one fewer</span>
-        <span class="c1"># difference between them.</span>
+        <span class="c1"># here. Either import can raise ``OSError`` rather than ``ImportError``</span>
+        <span class="c1"># (#2132), which the probe turns into a reason instead of a crash.</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_backend</span> <span class="o">=</span> <span class="n">_pcap_backend</span><span class="o">.</span><span class="n">probe</span><span class="p">()</span>
 
         <span class="n">collision</span> <span class="o">=</span> <span class="n">_pcap_backend</span><span class="o">.</span><span class="n">collision_reason</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_backend</span><span class="p">)</span>

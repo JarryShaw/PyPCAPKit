@@ -384,6 +384,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Guides &amp; Changelog</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../engines.html">Engine Comparison</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
@@ -519,7 +520,7 @@
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">'PYPCAP'</span><span class="p">,</span> <span class="s1">'PCAP_CT'</span><span class="p">,</span> <span class="s1">'DISTRIBUTIONS'</span><span class="p">,</span> <span class="s1">'ENGINE_NAMES'</span><span class="p">,</span>
     <span class="s1">'Probe'</span><span class="p">,</span> <span class="s1">'Memo'</span><span class="p">,</span> <span class="s1">'probe'</span><span class="p">,</span> <span class="s1">'identify'</span><span class="p">,</span> <span class="s1">'installed_distributions'</span><span class="p">,</span>
-    <span class="s1">'wrong_backend_reason'</span><span class="p">,</span> <span class="s1">'collision_reason'</span><span class="p">,</span>
+    <span class="s1">'wrong_backend_reason'</span><span class="p">,</span> <span class="s1">'engine_reason'</span><span class="p">,</span> <span class="s1">'collision_reason'</span><span class="p">,</span>
 <span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -810,6 +811,43 @@
     <span class="n">suggestion</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"; use 'engine=</span><span class="si">{</span><span class="n">alternative</span><span class="si">}</span><span class="s2">' for it"</span> <span class="k">if</span> <span class="n">alternative</span> <span class="k">else</span> <span class="s1">''</span>
     <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s1">'the installed `pcap` module is </span><span class="si">{</span><span class="n">found</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> '</span>
             <span class="sa">f</span><span class="s1">'(</span><span class="si">{</span><span class="n">found</span><span class="o">.</span><span class="n">version</span><span class="w"> </span><span class="ow">or</span><span class="w"> </span><span class="s2">"unknown version"</span><span class="si">}</span><span class="s1">), not </span><span class="si">{</span><span class="n">wanted</span><span class="si">}{</span><span class="n">suggestion</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="engine_reason">
+<a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines._pcap_backend.engine_reason">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">engine_reason</span><span class="p">(</span><span class="n">wanted</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">found</span><span class="p">:</span> <span class="s1">'Probe'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Optional[str]'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Why the engine driving ``wanted`` cannot run on ``found``, if it cannot.</span>
+
+<span class="sd">    The verdict both engines' ``unsupported_reason()`` give, kept in one place so</span>
+<span class="sd">    that they agree (:issue:`2132`).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        wanted: The distribution the calling engine drives -- :data:`PYPCAP` or</span>
+<span class="sd">            :data:`PCAP_CT`.</span>
+<span class="sd">        found: The result of :func:`probe`.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        :func:`wrong_backend_reason`'s answer when another distribution owns</span>
+<span class="sd">        |pcap|_; a phrase carrying the import failure when |pcap|_ is installed</span>
+<span class="sd">        but raised something other than :exc:`ImportError` -- ``OSError: Cannot</span>
+<span class="sd">        find libpcap.so library`` with no system :manpage:`libpcap(3)`, say; and</span>
+<span class="sd">        :data:`None` otherwise. An absent module is still :data:`None`, since</span>
+<span class="sd">        :meth:`Extractor.import_test</span>
+<span class="sd">        &lt;pcapkit.foundation.extraction.Extractor.import_test&gt;` reports that.</span>
+
+<span class="sd">    """</span>
+    <span class="n">wrong</span> <span class="o">=</span> <span class="n">wrong_backend_reason</span><span class="p">(</span><span class="n">wanted</span><span class="p">,</span> <span class="n">found</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">wrong</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">wrong</span>
+
+    <span class="c1"># ``missing`` separates "not installed", which the import test reports</span>
+    <span class="c1"># well, from a failure that would otherwise escape it -- the missing</span>
+    <span class="c1"># ``libpcap.so`` being the case this exists for.</span>
+    <span class="k">if</span> <span class="n">found</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">found</span><span class="o">.</span><span class="n">missing</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">'the `pcap` module is installed but unusable -- </span><span class="si">{</span><span class="n">found</span><span class="o">.</span><span class="n">failure</span><span class="si">}</span><span class="s1">'</span>
+
+    <span class="k">return</span> <span class="kc">None</span></div>
 
 
 

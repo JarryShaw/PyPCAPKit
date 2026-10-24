@@ -391,6 +391,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Guides &amp; Changelog</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../engines.html">Engine Comparison</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
@@ -714,9 +715,9 @@ check, even though upstream cannot be installed on 3.12 or newer: what matters i
 distribution is present, and a version check would refuse a working build.</p>
 <div class="admonition seealso">
 <p class="admonition-title">See also</p>
-<p>The <a class="reference internal" href="../../../index.html"><span class="doc">project overview</span></a> covers the installation
-prerequisites in full, including how <code class="docutils literal notranslate"><span class="pre">pypcap</span></code>’s <code class="file docutils literal notranslate"><span class="pre">setup.py</span></code> looks
-for <code class="file docutils literal notranslate"><span class="pre">pcap.h</span></code> and why a Homebrew <code class="docutils literal notranslate"><span class="pre">libpcap</span></code> is not always found.</p>
+<p>The <a class="reference internal" href="../../../engines.html#engine-prerequisites"><span class="std std-ref">engine prerequisites</span></a> cover installation in
+full, including how <code class="docutils literal notranslate"><span class="pre">pypcap</span></code>’s <code class="file docutils literal notranslate"><span class="pre">setup.py</span></code> looks for <code class="file docutils literal notranslate"><span class="pre">pcap.h</span></code> and
+why a Homebrew <code class="docutils literal notranslate"><span class="pre">libpcap</span></code> is not always found.</p>
 </div>
 </section>
 <section id="choosing-between-pypcap-and-pcap-ct">
@@ -785,7 +786,9 @@ actually got, via
 name the distribution, version and file actually in use, so a bug report about
 “the pypcap engine” says which one ran;</p></li>
 <li><p>declines to run on the other one, through <code class="docutils literal notranslate"><span class="pre">unsupported_reason()</span></code>, with a
-message naming the <code class="docutils literal notranslate"><span class="pre">engine=</span></code> string that does want it; and</p></li>
+message naming the <code class="docutils literal notranslate"><span class="pre">engine=</span></code> string that does want it, and likewise on a
+<a class="reference internal" href="3rdparty.html#pcap-module"><code class="docutils literal notranslate"><span class="pre">pcap</span></code></a> that is installed but cannot load, falling back to the
+<a class="reference internal" href="../../../glossary.html#term-default-engine"><span class="xref std std-term">default engine</span></a> instead of letting the import error escape; and</p></li>
 <li><p>warns with an <a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.EngineWarning" title="pcapkit.utilities.warnings.EngineWarning"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineWarning</span></code></a> when it finds
 both installed, since that state leaves one engine permanently unselectable
 and nothing else would explain why.</p></li>

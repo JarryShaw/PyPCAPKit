@@ -391,6 +391,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Guides &amp; Changelog</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../engines.html">Engine Comparison</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../glossary.html">Glossary</a></li>
@@ -641,6 +642,14 @@ itself, job by job from a version bump to a published package, is on
 <td><p>–</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">workflow_dispatch</span></code></p></td>
 </tr>
+<tr class="row-odd"><td><p>Engine Benchmark</p></td>
+<td><p><code class="file docutils literal notranslate"><span class="pre">benchmark.yml</span></code></p></td>
+<td><p>–</p></td>
+<td><p>–</p></td>
+<td><p>Wed 03:17</p></td>
+<td><p>–</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">workflow_dispatch</span></code></p></td>
+</tr>
 </tbody>
 </table>
 </div>
@@ -670,6 +679,7 @@ than starting a new one.</p>
     PR[&quot;pull_request: main&quot;]
     SAT[&quot;schedule: Saturday&quot;]
     MON[&quot;schedule: Monday&quot;]
+    WED[&quot;schedule: Wednesday&quot;]
     DISPATCH[&quot;workflow_dispatch&quot;]
     DAILY[&quot;schedule: daily&quot;]
     ISSUES[&quot;issues&quot;]
@@ -686,6 +696,7 @@ than starting a new one.</p>
     VU[&quot;Vendor Update&lt;br/&gt;cron-vendor.yml&quot;]
     PV[&quot;Python Versions&lt;br/&gt;cron-python-versions.yml&quot;]
     CT[&quot;CI Timing&lt;br/&gt;ci-timing.yml&quot;]
+    BM[&quot;Engine Benchmark&lt;br/&gt;benchmark.yml&quot;]
     PS[&quot;Project Status&lt;br/&gt;project-status.yml&quot;]
     CR[&quot;Create Release&lt;br/&gt;create-release.yml&quot;]
 
@@ -723,6 +734,9 @@ than starting a new one.</p>
     MON --&gt;|07:23| CT
     DISPATCH --&gt; CT
 
+    WED --&gt;|03:17| BM
+    DISPATCH --&gt; BM
+
     DISPATCH --&gt; PS
     DAILY --&gt;|00:37| PS
     ISSUES --&gt; PS
@@ -731,7 +745,7 @@ than starting a new one.</p>
     TAG --&gt; CR
 
     classDef trig fill:none,stroke-dasharray:2 2
-    class PUSH,PR,SAT,MON,DISPATCH,DAILY,ISSUES,PRT,TAG trig
+    class PUSH,PR,SAT,MON,WED,DISPATCH,DAILY,ISSUES,PRT,TAG trig
     </pre><pre  class="mermaid">
         flowchart LR
     UT[&quot;Unit Tests&lt;br/&gt;unit-tests.yml&quot;]
@@ -1786,8 +1800,8 @@ job’s <code class="docutils literal notranslate"><span class="pre">ANNOTATION_
 <td><p><code class="docutils literal notranslate"><span class="pre">Post</span> <span class="pre">the</span> <span class="pre">report</span> <span class="pre">to</span> <span class="pre">Discussions</span></code> in the <code class="docutils literal notranslate"><span class="pre">discussion</span></code> job of
 <code class="docutils literal notranslate"><span class="pre">ci-timing.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">cron-vendor.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">cron-conda.yml</span></code>,
 <code class="docutils literal notranslate"><span class="pre">cron-python-versions.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">lint.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">deploy-pages.yml</span></code>,
-<code class="docutils literal notranslate"><span class="pre">codeql-analysis.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">coverage-comment.yml</span></code> and <code class="docutils literal notranslate"><span class="pre">ci-reports.yml</span></code>
-(see <a class="reference internal" href="#ci-reports">CI Reports</a>).</p></td>
+<code class="docutils literal notranslate"><span class="pre">codeql-analysis.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">coverage-comment.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">ci-reports.yml</span></code> and
+<code class="docutils literal notranslate"><span class="pre">benchmark.yml</span></code> (see <a class="reference internal" href="#ci-reports">CI Reports</a>).</p></td>
 <td><p>No.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/check_suite_report.py</span></code></p></td>
@@ -1799,7 +1813,8 @@ Experimental Tests and Python Compatibility (see <a class="reference internal" h
 <tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">util/apt_packages.py</span></code></p></td>
 <td><p>The apt steps of <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> and <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code>
 (and so its KTLO twin): the plan, install and collect steps, as
-<code class="docutils literal notranslate"><span class="pre">apt_packages.py</span> <span class="pre">plan</span></code>, <code class="docutils literal notranslate"><span class="pre">install</span></code> and <code class="docutils literal notranslate"><span class="pre">collect</span></code>. The
+<code class="docutils literal notranslate"><span class="pre">apt_packages.py</span> <span class="pre">plan</span></code>, <code class="docutils literal notranslate"><span class="pre">install</span></code> and <code class="docutils literal notranslate"><span class="pre">collect</span></code>, and of
+<code class="docutils literal notranslate"><span class="pre">benchmark.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">benchmark</span></code>, as <code class="docutils literal notranslate"><span class="pre">install</span></code> alone. The
 <code class="docutils literal notranslate"><span class="pre">actions/cache</span></code> steps, the seed steps (<code class="docutils literal notranslate"><span class="pre">Seed</span> <span class="pre">apt's</span> <span class="pre">archive</span> <span class="pre">with</span> <span class="pre">this</span>
 <span class="pre">engine's</span> <span class="pre">cached</span> <span class="pre">.deb</span> <span class="pre">files</span></code> and <code class="docutils literal notranslate"><span class="pre">Seed</span> <span class="pre">apt's</span> <span class="pre">archive</span> <span class="pre">with</span> <span class="pre">the</span> <span class="pre">cached</span> <span class="pre">.deb</span>
 <span class="pre">files</span></code>) and the AppArmor step (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2019">#2019</a>) stay inline.</p></td>
@@ -1966,8 +1981,12 @@ follows a bad run and later green runs stay silent. A thread with no marker
 counts as green.</p></li>
 </ul>
 <p><code class="docutils literal notranslate"><span class="pre">ci-timing.yml</span></code> posts as <code class="docutils literal notranslate"><span class="pre">scheduled</span></code> to <code class="docutils literal notranslate"><span class="pre">ci-timing:</span> <span class="pre">weekly</span> <span class="pre">CI</span> <span class="pre">timing</span>
-<span class="pre">report</span></code>. <code class="docutils literal notranslate"><span class="pre">cron-vendor.yml</span></code> posts to <code class="docutils literal notranslate"><span class="pre">cron-vendor:</span> <span class="pre">vendor</span> <span class="pre">constant</span> <span class="pre">update</span>
-<span class="pre">report</span></code>, as <code class="docutils literal notranslate"><span class="pre">push</span></code> on its <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> and <code class="docutils literal notranslate"><span class="pre">scheduled</span></code> otherwise, and
+<span class="pre">report</span></code>, and <code class="docutils literal notranslate"><span class="pre">benchmark.yml</span></code> to <code class="docutils literal notranslate"><span class="pre">benchmark:</span> <span class="pre">weekly</span> <span class="pre">engine</span> <span class="pre">benchmark</span> <span class="pre">report</span></code>:
+the ratio table <code class="file docutils literal notranslate"><span class="pre">examples/benchmark/native.sh</span></code> writes, with its
+absolute-time footnote and the runner it ran on, reporting <code class="docutils literal notranslate"><span class="pre">warning</span></code> where a
+Python version was not measured in full (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2125">#2125</a>). <code class="docutils literal notranslate"><span class="pre">cron-vendor.yml</span></code>
+posts to <code class="docutils literal notranslate"><span class="pre">cron-vendor:</span> <span class="pre">vendor</span> <span class="pre">constant</span> <span class="pre">update</span> <span class="pre">report</span></code>, as <code class="docutils literal notranslate"><span class="pre">push</span></code> on its
+<code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> and <code class="docutils literal notranslate"><span class="pre">scheduled</span></code> otherwise, and
 reports <code class="docutils literal notranslate"><span class="pre">warning</span></code> where <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code> passed over a failed target or test
 gate. A failed or cancelled <code class="docutils literal notranslate"><span class="pre">head</span></code> skips <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code>, so its
 <code class="docutils literal notranslate"><span class="pre">discussion</span></code> job runs on <code class="docutils literal notranslate"><span class="pre">always()</span></code> and then posts a line of its own with

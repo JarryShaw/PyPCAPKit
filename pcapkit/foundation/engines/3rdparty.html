@@ -391,6 +391,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Guides &amp; Changelog</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../engines.html">Engine Comparison</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../glossary.html">Glossary</a></li>
@@ -1015,6 +1016,11 @@ naming <code class="docutils literal notranslate"><span class="pre">engine='pcap
 <a class="reference internal" href="#pcapkit.foundation.engines.pypcap.PyPCAP" title="pcapkit.foundation.engines.pypcap.PyPCAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAP</span></code></a> name would report an engine that is
 not the one in use, and the two have different install requirements and different
 version coverage to report.</p>
+<p>A <a class="reference internal" href="#pcap-module"><code class="docutils literal notranslate"><span class="pre">pcap</span></code></a> module that is installed but cannot load – its import raises
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#OSError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OSError</span></code></a>, say, because no <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em> can be found – is reported
+the same way <a class="reference internal" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAP_CT</span></code></a> reports it, so the
+extraction falls back to the <a class="reference internal" href="../../../glossary.html#term-default-engine"><span class="xref std std-term">default engine</span></a> with a warning instead of
+aborting (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2132">#2132</a>).</p>
 </div>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
@@ -1106,6 +1112,14 @@ distribution is actually present: a version check would refuse a
 hypothetical upstream build that someone got working on a newer
 interpreter, and would say nothing useful on 3.10 and 3.11, where both
 distributions install happily and either could be the one in place.</p>
+<p>It also reports a <a class="reference internal" href="#pcap-module"><code class="docutils literal notranslate"><span class="pre">pcap</span></code></a> that is installed but cannot load – one whose
+import raises something other than <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ImportError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ImportError</span></code></a>, such as the
+<a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#OSError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">OSError</span></code></a> a loader raises when it cannot find <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em>.
+<a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor.import_test" title="pcapkit.foundation.extraction.Extractor.import_test"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Extractor.import_test</span></code></a> lets that through,
+so without this the extraction would die rather than fall back to the
+<a class="reference internal" href="../../../glossary.html#term-default-engine"><span class="xref std std-term">default engine</span></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2132">#2132</a>). The verdict is
+<a class="reference internal" href="#pcapkit.foundation.engines._pcap_backend.engine_reason" title="pcapkit.foundation.engines._pcap_backend.engine_reason"><code class="xref py py-func docutils literal notranslate"><span class="pre">engine_reason()</span></code></a>, shared
+with <a class="reference internal" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT"><code class="xref py py-class docutils literal notranslate"><span class="pre">PCAP_CT</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
@@ -1240,9 +1254,9 @@ else would say why.</p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – If the installed <a class="reference internal" href="#pcap-module"><code class="docutils literal notranslate"><span class="pre">pcap</span></code></a> is <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> rather
-    than upstream <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a>. This is the same condition
-    <a class="reference internal" href="#pcapkit.foundation.engines.pypcap.PyPCAP.unsupported_reason" title="pcapkit.foundation.engines.pypcap.PyPCAP.unsupported_reason"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unsupported_reason()</span></code></a> reports, kept here as well because that
-    hook is only consulted by
+    than upstream <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a>, or is installed but cannot load. These
+    are the conditions <a class="reference internal" href="#pcapkit.foundation.engines.pypcap.PyPCAP.unsupported_reason" title="pcapkit.foundation.engines.pypcap.PyPCAP.unsupported_reason"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unsupported_reason()</span></code></a> reports, kept here as
+    well because that hook is only consulted by
     <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor.run" title="pcapkit.foundation.extraction.Extractor.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Extractor.run</span></code></a>;
     constructing the engine directly bypasses it, and running
     <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> under the <a class="reference internal" href="#pcapkit.foundation.engines.pypcap.PyPCAP" title="pcapkit.foundation.engines.pypcap.PyPCAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAP</span></code></a> name would
@@ -2238,6 +2252,34 @@ exactly when the other does.</p>
 <dd class="field-odd"><p>A reason naming what was found and which <code class="docutils literal notranslate"><span class="pre">engine=</span></code> string wants it, or
 <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> when <code class="docutils literal notranslate"><span class="pre">wanted</span></code> is what is installed, or when nothing is –
 an absent module is not this function’s business, since
+<a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor.import_test" title="pcapkit.foundation.extraction.Extractor.import_test"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Extractor.import_test</span></code></a> reports that.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines._pcap_backend.engine_reason">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.engines._pcap_backend.</span></span><span class="sig-name descname"><span class="pre">engine_reason</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">wanted</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">found</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/_pcap_backend.html#engine_reason"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines._pcap_backend.engine_reason" title="Link to this definition">¶</a></dt>
+<dd><p>Why the engine driving <code class="docutils literal notranslate"><span class="pre">wanted</span></code> cannot run on <code class="docutils literal notranslate"><span class="pre">found</span></code>, if it cannot.</p>
+<p>The verdict both engines’ <code class="docutils literal notranslate"><span class="pre">unsupported_reason()</span></code> give, kept in one place so
+that they agree (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2132">#2132</a>).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>wanted</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a></span>) – The distribution the calling engine drives – <a class="reference internal" href="#pcapkit.foundation.engines._pcap_backend.PYPCAP" title="pcapkit.foundation.engines._pcap_backend.PYPCAP"><code class="xref py py-data docutils literal notranslate"><span class="pre">PYPCAP</span></code></a> or
+<a class="reference internal" href="#pcapkit.foundation.engines._pcap_backend.PCAP_CT" title="pcapkit.foundation.engines._pcap_backend.PCAP_CT"><code class="xref py py-data docutils literal notranslate"><span class="pre">PCAP_CT</span></code></a>.</p></li>
+<li><p><strong>found</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="#pcapkit.foundation.engines._pcap_backend.Probe" title="pcapkit.foundation.engines._pcap_backend.Probe"><code class="xref py py-class docutils literal notranslate"><span class="pre">Probe</span></code></a></span>) – The result of <a class="reference internal" href="#pcapkit.foundation.engines._pcap_backend.probe" title="pcapkit.foundation.engines._pcap_backend.probe"><code class="xref py py-func docutils literal notranslate"><span class="pre">probe()</span></code></a>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pcapkit.foundation.engines._pcap_backend.wrong_backend_reason" title="pcapkit.foundation.engines._pcap_backend.wrong_backend_reason"><code class="xref py py-func docutils literal notranslate"><span class="pre">wrong_backend_reason()</span></code></a>’s answer when another distribution owns
+<a class="reference internal" href="#pcap-module"><code class="docutils literal notranslate"><span class="pre">pcap</span></code></a>; a phrase carrying the import failure when <a class="reference internal" href="#pcap-module"><code class="docutils literal notranslate"><span class="pre">pcap</span></code></a> is installed
+but raised something other than <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ImportError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ImportError</span></code></a> – <code class="docutils literal notranslate"><span class="pre">OSError:</span> <span class="pre">Cannot</span>
+<span class="pre">find</span> <span class="pre">libpcap.so</span> <span class="pre">library</span></code> with no system <em class="manpage"><a class="manpage reference external" href="https://linux.die.net/man/3/libpcap">libpcap(3)</a></em>, say; and
+<a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> otherwise. An absent module is still <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a>, since
 <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor.import_test" title="pcapkit.foundation.extraction.Extractor.import_test"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Extractor.import_test</span></code></a> reports that.</p>
 </dd>
 </dl>

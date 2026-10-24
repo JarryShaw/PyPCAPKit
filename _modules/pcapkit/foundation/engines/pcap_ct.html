@@ -384,6 +384,7 @@
 </ul>
 <p class="caption" role="heading"><span class="caption-text">Guides &amp; Changelog</span></p>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../engines.html">Engine Comparison</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../ext.html">Customisation &amp; Extensions</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../demo.html">How to …</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../../glossary.html">Glossary</a></li>
@@ -649,17 +650,7 @@
 <span class="sd">        import after a failed one does not reproduce the same error.</span>
 
 <span class="sd">        """</span>
-        <span class="n">wrong</span> <span class="o">=</span> <span class="n">_pcap_backend</span><span class="o">.</span><span class="n">wrong_backend_reason</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__engine_distribution__</span><span class="p">,</span> <span class="n">found</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">wrong</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">wrong</span>
-
-        <span class="c1"># ``missing`` separates "not installed", which the import test reports</span>
-        <span class="c1"># well, from a failure that would otherwise escape it -- the missing</span>
-        <span class="c1"># ``libpcap.so`` being the case this exists for.</span>
-        <span class="k">if</span> <span class="n">found</span><span class="o">.</span><span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">found</span><span class="o">.</span><span class="n">missing</span><span class="p">:</span>
-            <span class="k">return</span> <span class="sa">f</span><span class="s1">'the `pcap` module is installed but unusable -- </span><span class="si">{</span><span class="n">found</span><span class="o">.</span><span class="n">failure</span><span class="si">}</span><span class="s1">'</span>
-
-        <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">_pcap_backend</span><span class="o">.</span><span class="n">engine_reason</span><span class="p">(</span><span class="bp">cls</span><span class="o">.</span><span class="n">__engine_distribution__</span><span class="p">,</span> <span class="n">found</span><span class="p">)</span>
 
 <div class="viewcode-block" id="PCAP_CT.unsupported_reason">
 <a class="viewcode-back" href="../../../../pcapkit/foundation/engines/3rdparty.html#pcapkit.foundation.engines.pcap_ct.PCAP_CT.unsupported_reason">[docs]</a>
