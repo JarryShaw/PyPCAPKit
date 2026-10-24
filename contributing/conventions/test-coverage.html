@@ -307,6 +307,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/logging.html">Logging System</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../pcapkit/utilities/timestamp.html">Timestamp Conversion</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -644,9 +645,11 @@ when the change moves imports or module state:</p>
 python<span class="w"> </span>util/run_unittest_leg.py<span class="w"> </span>protocols<span class="w"> </span>--exclude<span class="w"> </span>protocols/internet
 </pre></div>
 </div>
-<p>The leg list lives in the workflow, not the script; <code class="file docutils literal notranslate"><span class="pre">tests/corekit/</span></code> and
-<code class="file docutils literal notranslate"><span class="pre">tests/integration/</span></code> are deliberately not legs, for the reasons recorded
-there.</p>
+<p>The leg list lives in the workflow, not the script. Every <code class="file docutils literal notranslate"><span class="pre">tests/</span></code>
+subdirectory is a leg except <code class="file docutils literal notranslate"><span class="pre">tests/integration/</span></code>, which holds no unit-tier
+module and runs under pytest in the <code class="docutils literal notranslate"><span class="pre">integration</span></code> job;
+<code class="file docutils literal notranslate"><span class="pre">tests/project/test_unittest_ordering_shards.py</span></code> fails on a subdirectory
+left out (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2115">#2115</a>).</p>
 </li>
 </ul>
 </section>

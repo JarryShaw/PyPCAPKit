@@ -307,6 +307,7 @@
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/utilities/logging.html">Logging System</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="pcapkit/utilities/chardet.html">Character Set Detection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="pcapkit/utilities/timestamp.html">Timestamp Conversion</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -571,8 +572,8 @@ from the upstream registries.</p>
 <section id="engine-comparison">
 <h3>Engine Comparison<a class="headerlink" href="#engine-comparison" title="Link to this heading">¶</a></h3>
 <p>Being a <strong>comprehensive</strong> packet processor costs speed: <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>’s own
-engine takes about <em>0.2</em> milliseconds per packet, slower than most of the
-third-party engines below.</p>
+engine is slower than every third-party engine below except <a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a>, as
+<a class="reference internal" href="#test-results">Test Results</a> measures.</p>
 <p><a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> also supports alternative extraction engines for speed:
 <a class="reference external" href="https://scapy.net">Scapy</a>, <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a>, <a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a>, <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a>, <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> and <a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a>,
 selected through <code class="docutils literal notranslate"><span class="pre">engine='scapy'</span></code>, <code class="docutils literal notranslate"><span class="pre">'dpkt'</span></code>, <code class="docutils literal notranslate"><span class="pre">'pyshark'</span></code>, <code class="docutils literal notranslate"><span class="pre">'pypcap'</span></code>,
@@ -616,7 +617,7 @@ third-party package.</p>
 <section id="engine-support-by-python-version">
 <h4>Engine Support by Python Version<a class="headerlink" href="#engine-support-by-python-version" title="Link to this heading">¶</a></h4>
 <p>Which engines can run at all, by interpreter. Verified by installing each engine
-and extracting a capture on 3.10 through 3.14; 3.15 remains inferred.</p>
+and extracting a capture on 3.10 through 3.15.</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -626,7 +627,7 @@ and extracting a capture on 3.10 through 3.14; 3.15 remains inferred.</p>
 <th class="head"><p>3.12</p></th>
 <th class="head"><p>3.13</p></th>
 <th class="head"><p>3.14</p></th>
-<th class="head"><p>3.15 <a class="footnote-reference brackets" href="#id3" id="id1" role="doc-noteref"><span class="fn-bracket">[</span>*<span class="fn-bracket">]</span></a></p></th>
+<th class="head"><p>3.15</p></th>
 </tr>
 </thead>
 <tbody>
@@ -678,7 +679,7 @@ and extracting a capture on 3.10 through 3.14; 3.15 remains inferred.</p>
 <td><p>no</p></td>
 <td><p>no</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pyshark</span></code> <a class="footnote-reference brackets" href="#id4" id="id2" role="doc-noteref"><span class="fn-bracket">[</span>†<span class="fn-bracket">]</span></a></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pyshark</span></code></p></td>
 <td><p>yes</p></td>
 <td><p>yes</p></td>
 <td><p>yes</p></td>
@@ -689,17 +690,6 @@ and extracting a capture on 3.10 through 3.14; 3.15 remains inferred.</p>
 </tbody>
 </table>
 </div>
-<aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id3" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">*</a><span class="fn-bracket">]</span></span>
-<p>Inferred rather than measured: no 3.15 interpreter was available.</p>
-</aside>
-<aside class="footnote brackets" id="id4" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id2">†</a><span class="fn-bracket">]</span></span>
-<p><a class="reference external" href="https://kiminewt.github.io/pyshark"><code class="docutils literal notranslate"><span class="pre">pyshark</span></code></a> also needs Wireshark’s <strong class="program">tshark</strong>, which was absent here,
-so only the interpreter half of each verdict in this row was verified.</p>
-</aside>
-</aside>
 <p><code class="docutils literal notranslate"><span class="pre">pypcap</span></code> and <code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code> stop at 3.11, and <code class="docutils literal notranslate"><span class="pre">pyshark</span></code> at 3.13, for the
 reasons under <a class="reference internal" href="#engine-prerequisites">Engine prerequisites</a>. <strong>Python 3.11 is the last version on which
 every engine can run</strong> – and even there <code class="docutils literal notranslate"><span class="pre">pypcap</span></code> and <code class="docutils literal notranslate"><span class="pre">pcap_ct</span></code> remain
@@ -711,14 +701,159 @@ every engine at once.</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <tbody>
-<tr class="row-odd"><td><p>Operating System</p></td>
-<td><p>macOS 26.6.2</p></td>
+<tr class="row-odd"><td><p>Image (3.10)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pcapkit-benchmark:py3.10</span> <span class="pre">(sha256:6308e38915a2613714069a05800c1a14e4486ee260eddb5619727e82b971a004)</span></code></p></td>
 </tr>
-<tr class="row-even"><td><p>Chip</p></td>
-<td><p>Apple M2 Pro</p></td>
+<tr class="row-even"><td><p>Image (3.11)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pcapkit-benchmark:py3.11</span> <span class="pre">(sha256:1af87ef232d03c867d0c504d75586132994a41bc4f6c3da36db0d6dd37d22fa7)</span></code></p></td>
 </tr>
-<tr class="row-odd"><td><p>Memory</p></td>
-<td><p>16 GB</p></td>
+<tr class="row-odd"><td><p>Image (3.12)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pcapkit-benchmark:py3.12</span> <span class="pre">(sha256:26a6605738070c5ff5670a12a41c88086745865096363e680577523e5957546a)</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Image (3.13)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pcapkit-benchmark:py3.13</span> <span class="pre">(sha256:584e631d430bd7abdd696492229dd4b0e13a0d92687dba8968c0910ef4727b67)</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Image (3.14)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pcapkit-benchmark:py3.14</span> <span class="pre">(sha256:6c09093cf744db366ad7f1e5fa00ccf8f6ba9e167c298acc52e87acf393d2fa3)</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Image (3.15)</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">pcapkit-benchmark:py3.15</span> <span class="pre">(sha256:78d25409346c3c97f1df809a69cd021418c6146ba2c096ff00e7d97530addd53)</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pcapkit</span></code> revision</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">cfabfb2d3</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Python</p></td>
+<td><p>CPython 3.10.21, 3.11.16, 3.12.14, 3.13.15, 3.14.7, 3.15.1</p></td>
+</tr>
+<tr class="row-odd"><td><p>Architecture</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">x86_64</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>Capture</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">in.pcap</span></code> – 605 bytes, SHA-256 <code class="docutils literal notranslate"><span class="pre">7aabadca49b329c6...</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>Packets per extraction</p></td>
+<td><p>6</p></td>
+</tr>
+<tr class="row-even"><td><p>Iterations</p></td>
+<td><p>1000 timed extractions per engine per pass, the first discarded as a warm-up</p></td>
+</tr>
+<tr class="row-odd"><td><p>Passes</p></td>
+<td><p>3 over the whole engine set, in 8 environments: <code class="docutils literal notranslate"><span class="pre">3.10-pcap_ct</span></code>, <code class="docutils literal notranslate"><span class="pre">3.10-pypcap</span></code>, <code class="docutils literal notranslate"><span class="pre">3.11-pcap_ct</span></code>, <code class="docutils literal notranslate"><span class="pre">3.11-pypcap</span></code>, <code class="docutils literal notranslate"><span class="pre">3.12-pcap_ct</span></code>, <code class="docutils literal notranslate"><span class="pre">3.13-pcap_ct</span></code>, <code class="docutils literal notranslate"><span class="pre">3.14-pcap_ct</span></code>, <code class="docutils literal notranslate"><span class="pre">3.15-pcap_ct</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>tshark</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">TShark</span> <span class="pre">(Wireshark)</span> <span class="pre">4.0.17</span> <span class="pre">(Git</span> <span class="pre">v4.0.17</span> <span class="pre">packaged</span> <span class="pre">as</span> <span class="pre">4.0.17-0+deb12u3).</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>libpcap</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">libpcap</span> <span class="pre">version</span> <span class="pre">1.10.3</span> <span class="pre">(with</span> <span class="pre">TPACKET_V3)</span></code></p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>Resolved package versions:</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Package</p></th>
+<th class="head"><p>3.10-pcap_ct</p></th>
+<th class="head"><p>3.10-pypcap</p></th>
+<th class="head"><p>3.11-pcap_ct</p></th>
+<th class="head"><p>3.11-pypcap</p></th>
+<th class="head"><p>3.12-pcap_ct</p></th>
+<th class="head"><p>3.13-pcap_ct</p></th>
+<th class="head"><p>3.14-pcap_ct</p></th>
+<th class="head"><p>3.15-pcap_ct</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></p></td>
+<td><p>1.9.8</p></td>
+<td><p>1.9.8</p></td>
+<td><p>1.9.8</p></td>
+<td><p>1.9.8</p></td>
+<td><p>1.9.8</p></td>
+<td><p>1.9.8</p></td>
+<td><p>1.9.8</p></td>
+<td><p>1.9.8</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">libpcap</span></code></p></td>
+<td><p>1.11.0b29</p></td>
+<td><p><em>absent</em></p></td>
+<td><p>1.11.0b29</p></td>
+<td><p><em>absent</em></p></td>
+<td><p>1.11.0b29</p></td>
+<td><p>1.11.0b29</p></td>
+<td><p>1.11.0b29</p></td>
+<td><p>1.11.0b29</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">lxml</span></code></p></td>
+<td><p>6.1.3</p></td>
+<td><p>6.1.3</p></td>
+<td><p>6.1.3</p></td>
+<td><p>6.1.3</p></td>
+<td><p>6.1.3</p></td>
+<td><p>6.1.3</p></td>
+<td><p>6.1.3</p></td>
+<td><p>6.1.3</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code></p></td>
+<td><p>1.3.0b3</p></td>
+<td><p><em>absent</em></p></td>
+<td><p>1.3.0b3</p></td>
+<td><p><em>absent</em></p></td>
+<td><p>1.3.0b3</p></td>
+<td><p>1.3.0b3</p></td>
+<td><p>1.3.0b3</p></td>
+<td><p>1.3.0b3</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pypcap</span></code></p></td>
+<td><p><em>absent</em></p></td>
+<td><p>1.3.0</p></td>
+<td><p><em>absent</em></p></td>
+<td><p>1.3.0</p></td>
+<td><p><em>absent</em></p></td>
+<td><p><em>absent</em></p></td>
+<td><p><em>absent</em></p></td>
+<td><p><em>absent</em></p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code></p></td>
+<td><p>0.12.0</p></td>
+<td><p>0.12.0</p></td>
+<td><p>0.12.0</p></td>
+<td><p>0.12.0</p></td>
+<td><p>0.12.0</p></td>
+<td><p>0.12.0</p></td>
+<td><p>0.12.0</p></td>
+<td><p>0.12.0</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pypcapkit</span></code></p></td>
+<td><p>1.5.0b14</p></td>
+<td><p>1.5.0b14</p></td>
+<td><p>1.5.0b14</p></td>
+<td><p>1.5.0b14</p></td>
+<td><p>1.5.0b14</p></td>
+<td><p>1.5.0b14</p></td>
+<td><p>1.5.0b14</p></td>
+<td><p>1.5.0b14</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pyshark</span></code></p></td>
+<td><p>0.6</p></td>
+<td><p>0.6</p></td>
+<td><p>0.6</p></td>
+<td><p>0.6</p></td>
+<td><p>0.6</p></td>
+<td><p>0.6</p></td>
+<td><p>0.6</p></td>
+<td><p>0.6</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">scapy</span></code></p></td>
+<td><p>2.8.0</p></td>
+<td><p>2.8.0</p></td>
+<td><p>2.8.0</p></td>
+<td><p>2.8.0</p></td>
+<td><p>2.8.0</p></td>
+<td><p>2.8.0</p></td>
+<td><p>2.8.0</p></td>
+<td><p>2.8.0</p></td>
 </tr>
 </tbody>
 </table>
@@ -726,9 +861,14 @@ every engine at once.</p>
 </section>
 <section id="test-results">
 <h4>Test Results<a class="headerlink" href="#test-results" title="Link to this heading">¶</a></h4>
-<p>Measured with <code class="docutils literal notranslate"><span class="pre">examples/legacy_smoke/test_time.py</span></code>: 1,000 timed
-extractions of <code class="docutils literal notranslate"><span class="pre">examples/captures/in.pcap</span></code> per engine and Python version. The
-first extraction is discarded as a warm-up. Values are milliseconds per packet.</p>
+<p>Measured with <code class="docutils literal notranslate"><span class="pre">examples/benchmark/run.sh</span></code>: 1000 timed
+extractions of <code class="docutils literal notranslate"><span class="pre">examples/captures/in.pcap</span></code> per engine and Python version.
+The first extraction is discarded as a warm-up. Values are milliseconds per
+packet, the median of 3 passes.</p>
+<p>All columns come from one run on one machine, differing in the interpreter
+and nothing else, so they may be compared with each other. They may not be
+compared with figures from another machine: absolute times are a property of
+the host as much as of the engine.</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
 <thead>
@@ -738,56 +878,64 @@ first extraction is discarded as a warm-up. Values are milliseconds per packet.<
 <th class="head"><p>3.12</p></th>
 <th class="head"><p>3.13</p></th>
 <th class="head"><p>3.14</p></th>
+<th class="head"><p>3.15</p></th>
 </tr>
 </thead>
 <tbody>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code> <a class="footnote-reference brackets" href="#id8" id="id5" role="doc-noteref"><span class="fn-bracket">[</span>1<span class="fn-bracket">]</span></a></p></td>
-<td><p>0.0133</p></td>
-<td><p>0.0093</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code> †</p></td>
+<td><p>0.0320</p></td>
+<td><p>0.0259</p></td>
+<td><p>–</p></td>
 <td><p>–</p></td>
 <td><p>–</p></td>
 <td><p>–</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></p></td>
-<td><p>0.0163</p></td>
-<td><p>0.0113</p></td>
-<td><p>0.0118</p></td>
-<td><p>0.0117</p></td>
-<td><p>0.0125</p></td>
+<td><p>0.0583</p></td>
+<td><p>0.0465</p></td>
+<td><p>0.0503</p></td>
+<td><p>0.0533</p></td>
+<td><p>0.0530</p></td>
+<td><p>0.0523</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pypcap</span></code> <a class="footnote-reference brackets" href="#id9" id="id6" role="doc-noteref"><span class="fn-bracket">[</span>2<span class="fn-bracket">]</span></a></p></td>
-<td><p>0.0289</p></td>
-<td><p>0.0212</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pypcap</span></code> †</p></td>
+<td><p>0.1018</p></td>
+<td><p>0.0890</p></td>
+<td><p>–</p></td>
 <td><p>–</p></td>
 <td><p>–</p></td>
 <td><p>–</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pcap_ct</span></code></p></td>
-<td><p>0.0364</p></td>
-<td><p>0.0320</p></td>
-<td><p>0.0366</p></td>
-<td><p>0.0322</p></td>
-<td><p>0.0396</p></td>
+<td><p>0.1134</p></td>
+<td><p>0.0988</p></td>
+<td><p>0.1149</p></td>
+<td><p>0.1167</p></td>
+<td><p>0.1178</p></td>
+<td><p>0.2702</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">scapy</span></code></p></td>
-<td><p>0.1082</p></td>
-<td><p>0.0822</p></td>
-<td><p>0.0877</p></td>
-<td><p>0.0832</p></td>
-<td><p>0.0967</p></td>
+<td><p>0.1896</p></td>
+<td><p>0.1607</p></td>
+<td><p>0.1882</p></td>
+<td><p>0.1813</p></td>
+<td><p>0.1816</p></td>
+<td><p>0.1776</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pcapkit</span></code></p></td>
-<td><p>0.2342</p></td>
-<td><p>0.1906</p></td>
-<td><p>0.1985</p></td>
-<td><p>0.1920</p></td>
-<td><p>0.2392</p></td>
+<td><p>0.5204</p></td>
+<td><p>0.4301</p></td>
+<td><p>0.4869</p></td>
+<td><p>0.4949</p></td>
+<td><p>0.4887</p></td>
+<td><p>0.4814</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pyshark</span></code> <a class="footnote-reference brackets" href="#id10" id="id7" role="doc-noteref"><span class="fn-bracket">[</span>3<span class="fn-bracket">]</span></a></p></td>
-<td><p>18.8158</p></td>
-<td><p>18.7852</p></td>
-<td><p>19.2694</p></td>
-<td><p>20.3751</p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pyshark</span></code> †</p></td>
+<td><p>30.9862</p></td>
+<td><p>31.0405</p></td>
+<td><p>30.7182</p></td>
+<td><p>31.4615</p></td>
+<td><p>–</p></td>
 <td><p>–</p></td>
 </tr>
 </tbody>
@@ -795,22 +943,92 @@ first extraction is discarded as a warm-up. Values are milliseconds per packet.<
 </div>
 <p>The unavailable cells were attempted. They are not zeroes and must not be
 compared with a measured row.</p>
-<aside class="footnote-list brackets">
-<aside class="footnote brackets" id="id8" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id5">1</a><span class="fn-bracket">]</span></span>
-<p><a class="reference external" href="https://github.com/kisom/pypcapfile">PyPCAPFile</a> 0.12.0 imports <a class="reference external" href="https://docs.python.org/3/library/imp.html#module-imp" title="(in Python v3.15)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">imp</span></code></a>, which Python removed in 3.12.</p>
-</aside>
-<aside class="footnote brackets" id="id9" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id6">2</a><span class="fn-bracket">]</span></span>
-<p><a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a> 1.3.0 does not build on Python 3.12+: its pre-generated
-<code class="file docutils literal notranslate"><span class="pre">pcap.c</span></code> does not compile against that C API.</p>
-</aside>
-<aside class="footnote brackets" id="id10" role="doc-footnote">
-<span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id7">3</a><span class="fn-bracket">]</span></span>
-<p><a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a> 0.6 cannot create the implicit event loop it expects on Python
-3.14; it ran on 3.10–3.13.</p>
-</aside>
-</aside>
+<p><code class="docutils literal notranslate"><span class="pre">†</span></code> not measured, or not measured in full, for the
+reason recorded at the time:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code> on 3.12 – pypcapfile does not support Python 3.12; its linklayer module imports `imp`, removed in Python 3.12</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code> on 3.13 – pypcapfile does not support Python 3.13; its linklayer module imports `imp`, removed in Python 3.12</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code> on 3.14 – pypcapfile does not support Python 3.14; its linklayer module imports `imp`, removed in Python 3.12</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code> on 3.15 – pypcapfile does not support Python 3.15; its linklayer module imports `imp`, removed in Python 3.12</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pypcap</span></code> on 3.12, 3.13, 3.14, 3.15 – pypcap is not installable on this interpreter, so it was not built into this image: pypcap 1.3.0 ships a pcap.c pre-generated by Cython 0.29.32, which does not compile against the Python 3.12+ C API. The engine is unsupported here rather than broken here.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pyshark</span></code> on 3.14 – pyshark does not support Python 3.14; it builds its event loop with `asyncio.get_event_loop_policy().get_event_loop()`, which raises RuntimeError from Python 3.14 when no current event loop exists</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">pyshark</span></code> on 3.15 – pyshark does not support Python 3.15; it builds its event loop with `asyncio.get_event_loop_policy().get_event_loop()`, which raises RuntimeError from Python 3.14 when no current event loop exists</p></li>
+</ul>
+</section>
+<section id="test-results-relative">
+<h4>Test Results (Relative)<a class="headerlink" href="#test-results-relative" title="Link to this heading">¶</a></h4>
+<p>Times relative to <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code>, which is 1 by definition; lower is
+faster. Each ratio is taken against the baseline measured in the same
+environment on the same pass, so the machine cancels out. “Observed range” is
+the smallest and largest ratio actually seen across the passes.</p>
+<p>Ratios are pooled across every environment in the run, which means across
+every Python version measured as well as both <code class="docutils literal notranslate"><span class="pre">pcap</span></code> providers. The
+observed range therefore includes any disagreement between interpreters
+about an engine; the per-version table is where that is broken out.</p>
+<div class="table-wrapper docutils container">
+<table class="docutils align-default">
+<thead>
+<tr class="row-odd"><th class="head"><p>Engine</p></th>
+<th class="head"><p>Relative time</p></th>
+<th class="head"><p>Observed range</p></th>
+<th class="head"><p>Samples</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code></p></td>
+<td><p>0.0613</p></td>
+<td><p>0.0597-0.0623</p></td>
+<td><p>12</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">dpkt</span></code></p></td>
+<td><p>0.108</p></td>
+<td><p>0.101-0.139</p></td>
+<td><p>24</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pypcap</span></code></p></td>
+<td><p>0.203</p></td>
+<td><p>0.198-0.209</p></td>
+<td><p>6</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pcap_ct</span></code> ‡</p></td>
+<td><p>0.236</p></td>
+<td><p>0.215-0.566</p></td>
+<td><p>18</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">scapy</span></code> ‡</p></td>
+<td><p>0.372</p></td>
+<td><p>0.355-0.388</p></td>
+<td><p>24</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">pcapkit</span></code></p></td>
+<td><p>1</p></td>
+<td><p><em>baseline</em></p></td>
+<td><p>24</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">pyshark</span></code> ¶</p></td>
+<td><p>63.6</p></td>
+<td><p>58.7-72.9</p></td>
+<td><p>18</p></td>
+</tr>
+</tbody>
+</table>
+</div>
+<p>The single absolute figure, for converting the ratios back: <code class="docutils literal notranslate"><span class="pre">pcapkit</span></code>
+itself ran at <strong>0.4879 ms per packet</strong> on this run
+(0.425-0.522 across 24 passes). Absolute times are a property of the
+machine as much as of the engine, which is why every other figure here is a
+ratio.</p>
+<p>Run-to-run spread: the median row varied by 8.9% of its ratio across
+the passes and the widest by 149%. A gap between two rows that is
+smaller than that is noise, not a result.</p>
+<p><code class="docutils literal notranslate"><span class="pre">‡</span></code> this run does not separate these rows: their observed
+ranges overlap, so the order their medians suggest is not established.</p>
+<p><code class="docutils literal notranslate"><span class="pre">¶</span></code> measured, but on less evidence than the rows beside it.
+What was collected is real; what was lost is named here rather than left to
+be inferred from the pass count:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">pyshark</span></code> – 2 individual extraction(s) failed and were discarded</p></li>
+</ul>
 </section>
 </section>
 </section>
@@ -1073,6 +1291,7 @@ pip<span class="w"> </span>install<span class="w"> </span>pypcapkit<span class="
 <li><a class="reference internal" href="#engine-support-by-python-version">Engine Support by Python Version</a></li>
 <li><a class="reference internal" href="#test-environment">Test Environment</a></li>
 <li><a class="reference internal" href="#test-results">Test Results</a></li>
+<li><a class="reference internal" href="#test-results-relative">Test Results (Relative)</a></li>
 </ul>
 </li>
 </ul>

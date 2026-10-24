@@ -307,6 +307,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/logging.html">Logging System</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/chardet.html">Character Set Detection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/timestamp.html">Timestamp Conversion</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -576,7 +577,7 @@ registries <code class="docutils literal notranslate"><span class="pre">sniff</s
 <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor.record_header" title="pcapkit.foundation.extraction.Extractor.record_header"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.extractor.record_header</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Warns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>AttributeWarning</strong> – If <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._exlyr" title="pcapkit.foundation.extraction.Extractor._exlyr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exlyr</span></code></a>
+<dd class="field-odd"><p><a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a> – If <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._exlyr" title="pcapkit.foundation.extraction.Extractor._exlyr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exlyr</span></code></a>
 and/or <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._exptl" title="pcapkit.foundation.extraction.Extractor._exptl"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exptl</span></code></a>
 is provided as the Scapy engine does not support such operations;
 or if <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._exctx" title="pcapkit.foundation.extraction.Extractor._exctx"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exctx</span></code></a>
@@ -677,7 +678,7 @@ as an iterator from <a class="reference external" href="https://dpkt.readthedocs
 <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor.record_header" title="pcapkit.foundation.extraction.Extractor.record_header"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.extractor.record_header</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Warns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>AttributeWarning</strong> – If <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._exlyr" title="pcapkit.foundation.extraction.Extractor._exlyr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exlyr</span></code></a>
+<dd class="field-odd"><p><a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a> – If <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._exlyr" title="pcapkit.foundation.extraction.Extractor._exlyr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exlyr</span></code></a>
 and/or <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._exptl" title="pcapkit.foundation.extraction.Extractor._exptl"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exptl</span></code></a>
 is provided as the DPKT engine does not support such operations;
 or if <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._exctx" title="pcapkit.foundation.extraction.Extractor._exctx"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exctx</span></code></a>
@@ -777,8 +778,7 @@ both up front.</p>
 3.10 and 3.11 return a loop silently, 3.12 returns one with a
 <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#DeprecationWarning" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">DeprecationWarning</span></code></a>, and <strong>3.14 raises</strong>
 <code class="docutils literal notranslate"><span class="pre">RuntimeError:</span> <span class="pre">There</span> <span class="pre">is</span> <span class="pre">no</span> <span class="pre">current</span> <span class="pre">event</span> <span class="pre">loop</span> <span class="pre">in</span> <span class="pre">thread</span> <span class="pre">'MainThread'</span></code>. Python
-3.13 is unchecked and expected to work, being on the deprecated-but-functional
-side of that change.</p>
+3.13 works, being on the deprecated-but-functional side of that change.</p>
 <p><strong>Wireshark’s</strong> <strong class="program">tshark</strong> <strong>binary.</strong> <a class="reference external" href="https://kiminewt.github.io/pyshark"><code class="docutils literal notranslate"><span class="pre">pyshark</span></code></a> shells out to it and
 parses nothing itself. It need not be on <span class="target" id="index-0"></span><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PATH</span></code>: <a class="reference external" href="https://kiminewt.github.io/pyshark"><code class="docutils literal notranslate"><span class="pre">pyshark</span></code></a> consults
 <code class="docutils literal notranslate"><span class="pre">tshark_path</span></code> in its <code class="file docutils literal notranslate"><span class="pre">config.ini</span></code> first, then <span class="target" id="index-1"></span><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PATH</span></code> on POSIX,
@@ -896,7 +896,7 @@ as an iterator from <code class="docutils literal notranslate"><span class="pre"
 <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor.record_header" title="pcapkit.foundation.extraction.Extractor.record_header"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self.extractor.record_header</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Warns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>AttributeWarning</strong> – Warns under the following circumstances:</p>
+<dd class="field-odd"><p><a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a> – Warns under the following circumstances:</p>
 <ul class="simple">
 <li><p>if <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._exlyr" title="pcapkit.foundation.extraction.Extractor._exlyr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exlyr</span></code></a>
 and/or <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._exptl" title="pcapkit.foundation.extraction.Extractor._exptl"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exptl</span></code></a>
@@ -940,6 +940,9 @@ for more operational information.</p>
 <dd><p>Close engine.</p>
 <p>This method is to be used for closing the engine instance. It is to
 close the engine instance after the extraction process is finished.</p>
+<p>A no-op if <a class="reference internal" href="#pcapkit.foundation.engines.pyshark.PyShark.run" title="pcapkit.foundation.engines.pyshark.PyShark.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> never opened the capture, which is the case when
+the <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> constructor raises
+before it (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2107">#2107</a>).</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1140,7 +1143,7 @@ as <a class="reference internal" href="#pcap-module"><code class="docutils liter
 as an iterator from <code class="docutils literal notranslate"><span class="pre">pcap.pcap</span></code>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Warns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>AttributeWarning</strong> – Warns under the following circumstances:</p>
+<dd class="field-odd"><p><a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a> – Warns under the following circumstances:</p>
 <ul class="simple">
 <li><p>if <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._exlyr" title="pcapkit.foundation.extraction.Extractor._exlyr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exlyr</span></code></a>
 and/or <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._exptl" title="pcapkit.foundation.extraction.Extractor._exptl"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exptl</span></code></a>
@@ -1229,7 +1232,7 @@ may both reach it, and <code class="docutils literal notranslate"><span class="p
 <dd><p>Initialise the engine.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Warns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>EngineWarning</strong> – If both distributions that provide <a class="reference internal" href="#pcap-module"><code class="docutils literal notranslate"><span class="pre">pcap</span></code></a> are
+<dd class="field-odd"><p><a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.EngineWarning" title="pcapkit.utilities.warnings.EngineWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EngineWarning</span></code></a> – If both distributions that provide <a class="reference internal" href="#pcap-module"><code class="docutils literal notranslate"><span class="pre">pcap</span></code></a> are
 installed. Only one of them can win the import, so the other is
 shadowed and unreachable – a state worth naming, because
 <code class="docutils literal notranslate"><span class="pre">engine=</span></code> then selects an engine that cannot run and nothing
@@ -1531,7 +1534,7 @@ not a complete statement of what ran. This says which one it was, e.g.
 <dd><p>Initialise the engine.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Warns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>EngineWarning</strong> – If both distributions that provide <a class="reference internal" href="#pcap-module"><code class="docutils literal notranslate"><span class="pre">pcap</span></code></a> are
+<dd class="field-odd"><p><a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.EngineWarning" title="pcapkit.utilities.warnings.EngineWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">EngineWarning</span></code></a> – If both distributions that provide <a class="reference internal" href="#pcap-module"><code class="docutils literal notranslate"><span class="pre">pcap</span></code></a> are
 installed. Only one of them can win the import – measured on
 Python 3.10 with both present, the <code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code> package wins and
 upstream’s extension module is shadowed – so the other is
@@ -1557,7 +1560,7 @@ as <a class="reference internal" href="#pcap-module"><code class="docutils liter
 <code class="docutils literal notranslate"><span class="pre">pcap.pcap</span></code> capture handle and <a class="reference internal" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT._extmp" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT._extmp"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._extmp</span></code></a> as an iterator over it.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Warns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>AttributeWarning</strong> – Warns under the following circumstances:</p>
+<dd class="field-odd"><p><a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a> – Warns under the following circumstances:</p>
 <ul class="simple">
 <li><p>if <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._exlyr" title="pcapkit.foundation.extraction.Extractor._exlyr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exlyr</span></code></a>
 and/or <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._exptl" title="pcapkit.foundation.extraction.Extractor._exptl"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exptl</span></code></a>
@@ -1824,7 +1827,7 @@ what lets the link layer type be inspected (and reported on) <em>before</em> the
 first frame is decoded.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Warns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>AttributeWarning</strong> – Warns under the following circumstances:</p>
+<dd class="field-odd"><p><a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a> – Warns under the following circumstances:</p>
 <ul class="simple">
 <li><p>if <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._exlyr" title="pcapkit.foundation.extraction.Extractor._exlyr"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exlyr</span></code></a>
 and/or <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor._exptl" title="pcapkit.foundation.extraction.Extractor._exptl"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.extractor._exptl</span></code></a>
@@ -1917,7 +1920,7 @@ for more operational information.</p>
 <dd class="field-odd"><p>The decoder class, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> when <a class="reference external" href="https://github.com/kisom/pypcapfile"><code class="docutils literal notranslate"><span class="pre">pcapfile</span></code></a> has none.</p>
 </dd>
 <dt class="field-even">Warns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>AttributeWarning</strong> – If no decoder is available, as frames will then be
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a> – If no decoder is available, as frames will then be
 left hexlified – see <a class="reference internal" href="#pcapkit.foundation.engines.pypcapfile.PyPCAPFile.run" title="pcapkit.foundation.engines.pypcapfile.PyPCAPFile.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> – and no reassembly or flow
 tracing is possible.</p>
 </dd>
@@ -1960,7 +1963,7 @@ the octets present as the frame.</p>
 <dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcap_packet</span></code></span> – Undecoded savefile packets, one per record.</p>
 </dd>
 <dt class="field-odd">Warns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>ProtocolWarning</strong> – If a record’s capture length runs past the data.</p>
+<dd class="field-odd"><p><a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.ProtocolWarning" title="pcapkit.utilities.warnings.ProtocolWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolWarning</span></code></a> – If a record’s capture length runs past the data.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1989,7 +1992,7 @@ bytes.</p></li>
 decoded, or holds no octets at all.</p>
 </dd>
 <dt class="field-even">Warns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>AttributeWarning</strong> – If <a class="reference external" href="https://github.com/kisom/pypcapfile"><code class="docutils literal notranslate"><span class="pre">pcapfile</span></code></a> could not decode the frame, e.g.
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a> – If <a class="reference external" href="https://github.com/kisom/pypcapfile"><code class="docutils literal notranslate"><span class="pre">pcapfile</span></code></a> could not decode the frame, e.g.
 because the capture is truncated. One bad frame should not abort
 the extraction, but it should not pass silently either.</p>
 </dd>
@@ -2110,14 +2113,38 @@ phrase naming the failure when there is no module to describe.</p>
 
 </dd></dl>
 
+<dl class="py class">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines._pcap_backend.Memo">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.engines._pcap_backend.</span></span><span class="sig-name descname"><span class="pre">Memo</span></span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/_pcap_backend.html#Memo"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines._pcap_backend.Memo" title="Link to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference external" href="https://docs.python.org/3/builtins/functions.html#object" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></a></p>
+<p>One extraction’s <a class="reference internal" href="#pcapkit.foundation.engines._pcap_backend.probe" title="pcapkit.foundation.engines._pcap_backend.probe"><code class="xref py py-func docutils literal notranslate"><span class="pre">probe()</span></code></a>, taken at most once (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2113">#2113</a>).</p>
+<p>Engine selection asks
+<a class="reference internal" href="engine.html#pcapkit.foundation.engines.engine.EngineBase.unsupported_reason" title="pcapkit.foundation.engines.engine.EngineBase.unsupported_reason"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unsupported_reason()</span></code></a> in
+the <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a> constructor and again in
+<a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor.run" title="pcapkit.foundation.extraction.Extractor.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a>, and the engine’s own
+constructor probes once more. While a memo is entered, <a class="reference internal" href="#pcapkit.foundation.engines._pcap_backend.probe" title="pcapkit.foundation.engines._pcap_backend.probe"><code class="xref py py-func docutils literal notranslate"><span class="pre">probe()</span></code></a> answers
+from it, probing on first use. Each extraction holds its own memo, so nothing
+is cached across extractions.</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.foundation.engines._pcap_backend.Memo.found">
+<span class="sig-name descname"><span class="pre">found</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="#pcapkit.foundation.engines._pcap_backend.Probe" title="pcapkit.foundation.engines._pcap_backend.Probe"><span class="pre">Probe</span></a><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><span class="pre">None</span></a></span><a class="headerlink" href="#pcapkit.foundation.engines._pcap_backend.Memo.found" title="Link to this definition">¶</a></dt>
+<dd><p>The probe taken under this memo, or <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">None</span></code></a> before the first.</p>
+</dd></dl>
+
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines._pcap_backend.probe">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.engines._pcap_backend.</span></span><span class="sig-name descname"><span class="pre">probe</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/_pcap_backend.html#probe"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines._pcap_backend.probe" title="Link to this definition">¶</a></dt>
 <dd><p>Import <a class="reference internal" href="#pcap-module"><code class="docutils literal notranslate"><span class="pre">pcap</span></code></a> and report what was found.</p>
-<p>Not cached. The cost after a successful first call is a <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.modules" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.modules</span></code></a>
-lookup, and a cache would make the answer depend on when it was first asked –
-which the tests, and anything that manipulates <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.path" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.path</span></code></a>, would have to
-work around. It is idempotent instead, via <a class="reference internal" href="#pcapkit.foundation.engines._pcap_backend._purge" title="pcapkit.foundation.engines._pcap_backend._purge"><code class="xref py py-func docutils literal notranslate"><span class="pre">_purge()</span></code></a>.</p>
+<p>Not cached, except within a <a class="reference internal" href="#pcapkit.foundation.engines._pcap_backend.Memo" title="pcapkit.foundation.engines._pcap_backend.Memo"><code class="xref py py-class docutils literal notranslate"><span class="pre">Memo</span></code></a>, which an extraction enters so
+that its engine selection and engine constructor share one probe
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2113">#2113</a>). The cost after a successful first call is a
+<a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.modules" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.modules</span></code></a> lookup plus the <code class="docutils literal notranslate"><span class="pre">dist-info</span></code> scan in
+<a class="reference internal" href="#pcapkit.foundation.engines._pcap_backend.installed_distributions" title="pcapkit.foundation.engines._pcap_backend.installed_distributions"><code class="xref py py-func docutils literal notranslate"><span class="pre">installed_distributions()</span></code></a>, and a process-wide cache would make the
+answer depend on when it was first asked – which the tests, and anything that
+manipulates <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.path" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.path</span></code></a>, would have to work around. It is idempotent
+instead, via <a class="reference internal" href="#pcapkit.foundation.engines._pcap_backend._purge" title="pcapkit.foundation.engines._pcap_backend._purge"><code class="xref py py-func docutils literal notranslate"><span class="pre">_purge()</span></code></a>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>The bare <code class="docutils literal notranslate"><span class="pre">except</span> <span class="pre">Exception</span></code> is deliberate and is much of the point of
@@ -2175,6 +2202,13 @@ present on upstream <code class="docutils literal notranslate"><span class="pre"
 <p>Asked of the metadata rather than of <a class="reference internal" href="#pcap-module"><code class="docutils literal notranslate"><span class="pre">pcap</span></code></a> itself, because that is the
 only way to see the distribution the import did <em>not</em> resolve to – which is
 exactly the collision worth reporting.</p>
+<p>Only the existence of a <code class="docutils literal notranslate"><span class="pre">dist-info</span></code> is asked about, through
+<a class="reference external" href="https://docs.python.org/3/library/importlib.metadata.html#importlib.metadata.distributions" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">importlib.metadata.distributions()</span></code></a> rather than
+<a class="reference external" href="https://docs.python.org/3/library/importlib.metadata.html#importlib.metadata.distribution" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">importlib.metadata.distribution()</span></code></a>. From Python 3.15 the latter parses
+every candidate’s <code class="docutils literal notranslate"><span class="pre">METADATA</span></code> file to prefer one that has metadata, and since
+this runs on every <code class="docutils literal notranslate"><span class="pre">pcap_ct</span></code> extraction, that parse made the engine about
+2.3x slower per packet (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2110">#2110</a>). Either call finds a distribution
+exactly when the other does.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#tuple" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">str</span></code></a>, <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#Ellipsis" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">...</span></code></a>]</span></p>

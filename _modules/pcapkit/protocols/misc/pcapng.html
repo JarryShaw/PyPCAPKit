@@ -300,6 +300,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/logging.html">Logging System</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/timestamp.html">Timestamp Conversion</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -692,6 +693,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">StrEnum</span><span class="p">,</span> <span class="n">localcontext</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">BaseError</span><span class="p">,</span> <span class="n">EnumValueError</span><span class="p">,</span> <span class="n">FormatError</span><span class="p">,</span> <span class="n">ProtocolError</span><span class="p">,</span>
                                           <span class="n">StreamEOFError</span><span class="p">,</span> <span class="n">UnsupportedCall</span><span class="p">,</span> <span class="n">stacklevel</span><span class="p">)</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.timestamp</span><span class="w"> </span><span class="kn">import</span> <span class="n">fromtimestamp</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span><span class="n">AttributeWarning</span><span class="p">,</span> <span class="n">DeprecatedFormatWarning</span><span class="p">,</span> <span class="n">ProtocolWarning</span><span class="p">,</span>
                                         <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span><span class="p">)</span>
 
@@ -2422,10 +2424,12 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># NOTE: ``tzone`` survives only here, as the zone the instant is</span>
             <span class="c1"># *rendered* in -- which is all a ``tzinfo`` can affect on an aware</span>
-            <span class="c1"># datetime. It never moves the instant itself.</span>
-            <span class="n">ts_datetime</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">ts_ratio</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">ts_ratio</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">tzone</span><span class="p">)</span>
-        <span class="c1"># an epoch past what ``datetime`` or the platform's ``time_t`` holds,</span>
-        <span class="c1"># e.g. from an extreme ``if_tsoffset``, raises one of these</span>
+            <span class="c1"># datetime. It never moves the instant itself. Not the stdlib's</span>
+            <span class="c1"># ``fromtimestamp``, whose range is the C library's: Windows' takes</span>
+            <span class="c1"># nothing before 1970 or after 3000 (#2099).</span>
+            <span class="n">ts_datetime</span> <span class="o">=</span> <span class="n">fromtimestamp</span><span class="p">(</span><span class="n">ts_ratio</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">/</span> <span class="n">ts_ratio</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">tzone</span><span class="p">)</span>
+        <span class="c1"># an epoch past what ``datetime`` or a 64-bit ``time_t`` holds, e.g.</span>
+        <span class="c1"># from an extreme ``if_tsoffset``, raises one of these</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">ValueError</span><span class="p">,</span> <span class="ne">OverflowError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">):</span>
             <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [Block </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_type</span><span class="si">}</span><span class="s1">] invalid timestamp: </span><span class="si">{</span><span class="n">timestamp_epoch</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span>
                  <span class="n">ProtocolWarning</span><span class="p">,</span> <span class="n">stacklevel</span><span class="o">=</span><span class="n">stacklevel</span><span class="p">())</span>

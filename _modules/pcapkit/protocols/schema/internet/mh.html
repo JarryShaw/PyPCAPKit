@@ -300,6 +300,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/logging.html">Logging System</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../../pcapkit/utilities/timestamp.html">Timestamp Conversion</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -542,6 +543,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.fields.strings</span><span class="w"> </span><span class="kn">import</span> <span class="n">BitField</span><span class="p">,</span> <span class="n">BytesField</span><span class="p">,</span> <span class="n">PaddingField</span><span class="p">,</span> <span class="n">StringField</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.schema</span><span class="w"> </span><span class="kn">import</span> <span class="n">EnumSchema</span><span class="p">,</span> <span class="n">Schema</span><span class="p">,</span> <span class="n">schema_final</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.logging</span><span class="w"> </span><span class="kn">import</span> <span class="n">SPHINX_TYPE_CHECKING</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.timestamp</span><span class="w"> </span><span class="kn">import</span> <span class="n">fromtimestamp</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
     <span class="s1">'MH'</span><span class="p">,</span>
@@ -1494,7 +1496,9 @@
         <span class="n">ts_sec</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">seconds</span> <span class="o">-</span> <span class="mi">2_208_988_800</span>  <span class="c1"># 70 years</span>
         <span class="n">ts_frac</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fraction</span> <span class="o">/</span> <span class="mi">2</span><span class="o">**</span><span class="mi">32</span>  <span class="c1"># fraction of a second</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">datetime</span><span class="o">.</span><span class="n">fromtimestamp</span><span class="p">(</span><span class="n">ts_sec</span> <span class="o">+</span> <span class="n">ts_frac</span><span class="p">,</span> <span class="n">tz</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
+        <span class="c1"># not the stdlib's ``fromtimestamp``, which takes no time before 1970,</span>
+        <span class="c1"># i.e. no NTP time before 2_208_988_800, on Windows (#2099)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">timestamp</span> <span class="o">=</span> <span class="n">fromtimestamp</span><span class="p">(</span><span class="n">ts_sec</span> <span class="o">+</span> <span class="n">ts_frac</span><span class="p">,</span> <span class="n">datetime</span><span class="o">.</span><span class="n">timezone</span><span class="o">.</span><span class="n">utc</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span></div>
 

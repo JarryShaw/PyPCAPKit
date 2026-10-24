@@ -300,6 +300,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/logging.html">Logging System</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/timestamp.html">Timestamp Conversion</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -494,8 +495,11 @@
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">io</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">stat</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">sys</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">tempfile</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">weakref</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">cast</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities</span><span class="w"> </span><span class="kn">import</span> <span class="n">config</span>
@@ -509,7 +513,22 @@
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Buffer</span>
 
-<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'SeekableReader'</span><span class="p">,</span> <span class="s1">'PeekableStream'</span><span class="p">,</span> <span class="s1">'NamedStream'</span><span class="p">,</span> <span class="s1">'advance'</span><span class="p">]</span>
+<span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'SeekableReader'</span><span class="p">,</span> <span class="s1">'PeekableStream'</span><span class="p">,</span> <span class="s1">'NamedStream'</span><span class="p">,</span> <span class="s1">'advance'</span><span class="p">,</span> <span class="s1">'can_seek'</span><span class="p">]</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_discard_buffer</span><span class="p">(</span><span class="n">file</span><span class="p">:</span> <span class="s1">'IO[bytes]'</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Close and remove the temporary file a :class:`SeekableReader` saved its buffer to.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        file: The open buffer file.</span>
+<span class="sd">        path: Its path.</span>
+
+<span class="sd">    """</span>
+    <span class="n">file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>  <span class="c1"># pragma: no cover</span>
+        <span class="k">pass</span>
 
 
 <div class="viewcode-block" id="SeekableReader">
@@ -581,6 +600,8 @@
         <span class="n">_buffer_path</span><span class="p">:</span> <span class="s1">'str'</span>
         <span class="c1">#: File to save buffer.</span>
         <span class="n">_buffer_file</span><span class="p">:</span> <span class="s1">'IO[bytes] | None'</span>
+        <span class="c1">#: Closes and removes the buffer file when it is a temporary one.</span>
+        <span class="n">_buffer_discard</span><span class="p">:</span> <span class="s1">'weakref.finalize | None'</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">closed</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
@@ -613,10 +634,21 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_size</span> <span class="o">=</span> <span class="n">buffer_size</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_read_ahead_size</span> <span class="o">=</span> <span class="n">buffer_size</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_discard</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">if</span> <span class="n">buffer_save</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">buffer_path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">NamedTemporaryFile</span><span class="p">(</span><span class="s1">'wb'</span><span class="p">,</span> <span class="n">buffering</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span><span class="o">.</span><span class="n">name</span>
+                <span class="c1"># NOTE: the buffer is read back by name, which Windows refuses for</span>
+                <span class="c1"># a ``NamedTemporaryFile`` while it is open (#2098). A ``mkstemp``</span>
+                <span class="c1"># file it allows; this removes it on close, or at collection.</span>
+                <span class="n">fd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_path</span> <span class="o">=</span> <span class="n">tempfile</span><span class="o">.</span><span class="n">mkstemp</span><span class="p">()</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">fd</span><span class="p">,</span> <span class="s1">'wb'</span><span class="p">,</span> <span class="n">buffering</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+                <span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">close</span><span class="p">(</span><span class="n">fd</span><span class="p">)</span>
+                    <span class="n">os</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_buffer_path</span><span class="p">)</span>
+                    <span class="k">raise</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_discard</span> <span class="o">=</span> <span class="n">weakref</span><span class="o">.</span><span class="n">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">_discard_buffer</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span><span class="p">,</span>
+                                                        <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_path</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span><span class="n">buffer_path</span><span class="p">,</span> <span class="s1">'wb'</span><span class="p">,</span> <span class="n">buffering</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_path</span> <span class="o">=</span> <span class="n">buffer_path</span>
@@ -819,7 +851,9 @@
 
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closing</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_stream</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_discard</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_discard</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_file</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_buffer_view</span><span class="o">.</span><span class="n">release</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_buffer</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
@@ -1377,6 +1411,29 @@
 
 
 
+<div class="viewcode-block" id="can_seek">
+<a class="viewcode-back" href="../../../pcapkit/corekit/io.html#pcapkit.corekit.io.can_seek">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">can_seek</span><span class="p">(</span><span class="n">stream</span><span class="p">:</span> <span class="s1">'IO[bytes]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">"""Whether ``stream`` can really seek, rather than only saying it can.</span>
+
+<span class="sd">    On Windows before CPython 3.16, a pipe reports :meth:`~io.IOBase.seekable`</span>
+<span class="sd">    and its ``seek`` silently does nothing (:issue:`2097`), so the answer is</span>
+<span class="sd">    trusted only for a regular file, or for a stream with no descriptor to ask.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        stream: The input stream.</span>
+
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">stream</span><span class="o">.</span><span class="n">seekable</span><span class="p">():</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">mode</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">fstat</span><span class="p">(</span><span class="n">stream</span><span class="o">.</span><span class="n">fileno</span><span class="p">())</span><span class="o">.</span><span class="n">st_mode</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="n">stat</span><span class="o">.</span><span class="n">S_ISREG</span><span class="p">(</span><span class="n">mode</span><span class="p">)</span></div>
+
+
+
 <span class="c1">#: Octets :func:`advance` reads and discards at a time when</span>
 <span class="c1">#: :data:`~pcapkit.utilities.config.READ_CHUNK` sets no limit.</span>
 <span class="n">_DISCARD_CHUNK</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">20</span>
@@ -1396,14 +1453,16 @@
 <span class="sd">    as far as the limit; the next record still starts where this one declares it</span>
 <span class="sd">    ends (:issue:`1975`). A seekable stream gets there by relative seeks, none</span>
 <span class="sd">    longer than :data:`sys.maxsize`, and may land past its end, as an absolute seek</span>
-<span class="sd">    would. A :class:`SeekableReader`, or a stream that cannot seek, reads the</span>
+<span class="sd">    would. A :class:`SeekableReader`, or a stream that cannot seek -- including</span>
+<span class="sd">    one that only says it can, as a Windows pipe does (:issue:`2108`) -- reads the</span>
 <span class="sd">    octets and discards them, no more than</span>
 <span class="sd">    :data:`~pcapkit.utilities.config.READ_CHUNK` at a time, and stops at the end</span>
 <span class="sd">    of the stream: a :class:`SeekableReader` seek reads at most a buffer's worth</span>
 <span class="sd">    past what it holds, so a longer one would stop short of the target.</span>
 
 <span class="sd">    """</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">SeekableReader</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">file</span><span class="o">.</span><span class="n">seekable</span><span class="p">():</span>
+    <span class="c1"># NOTE: a frame reader built on a caller's stream sees it unwrapped (#2108).</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">SeekableReader</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">can_seek</span><span class="p">(</span><span class="n">file</span><span class="p">):</span>
         <span class="n">chunk</span> <span class="o">=</span> <span class="n">_DISCARD_CHUNK</span> <span class="k">if</span> <span class="n">config</span><span class="o">.</span><span class="n">READ_CHUNK</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="k">else</span> <span class="n">config</span><span class="o">.</span><span class="n">READ_CHUNK</span>
         <span class="n">chunk</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">chunk</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">maxsize</span><span class="p">)</span>
         <span class="k">while</span> <span class="n">count</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>

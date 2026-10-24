@@ -58,6 +58,7 @@ and extracts parameters from a PCAP file.
       :no-value:
 
    .. automethod:: _cleanup
+   .. automethod:: _release
 
    .. autoattribute:: _flag_a
    .. autoattribute:: _flag_d

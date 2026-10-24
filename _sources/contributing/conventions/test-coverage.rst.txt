@@ -150,9 +150,11 @@ Running the Tests
       python util/run_unittest_leg.py protocols/internet
       python util/run_unittest_leg.py protocols --exclude protocols/internet
 
-   The leg list lives in the workflow, not the script; :file:`tests/corekit/` and
-   :file:`tests/integration/` are deliberately not legs, for the reasons recorded
-   there.
+   The leg list lives in the workflow, not the script. Every :file:`tests/`
+   subdirectory is a leg except :file:`tests/integration/`, which holds no unit-tier
+   module and runs under pytest in the ``integration`` job;
+   :file:`tests/project/test_unittest_ordering_shards.py` fails on a subdirectory
+   left out (:issue:`2115`).
 
 Adding a Protocol, Option or Dumper
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

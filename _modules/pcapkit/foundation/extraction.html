@@ -300,6 +300,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/logging.html">Logging System</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../pcapkit/utilities/timestamp.html">Timestamp Conversion</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -506,9 +507,10 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">dictdumper.dumper</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dumper</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.context</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContextRegistry</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">PeekableStream</span><span class="p">,</span> <span class="n">SeekableReader</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.io</span><span class="w"> </span><span class="kn">import</span> <span class="n">PeekableStream</span><span class="p">,</span> <span class="n">SeekableReader</span><span class="p">,</span> <span class="n">can_seek</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.dumpkit.common</span><span class="w"> </span><span class="kn">import</span> <span class="n">make_dumper</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines</span><span class="w"> </span><span class="kn">import</span> <span class="n">_pcap_backend</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.engine</span><span class="w"> </span><span class="kn">import</span> <span class="n">Engine</span><span class="p">,</span> <span class="n">EngineBase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.pcap</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCAP</span> <span class="k">as</span> <span class="n">PCAP_Engine</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.engines.pcapng</span><span class="w"> </span><span class="kn">import</span> <span class="n">PCAPNG</span> <span class="k">as</span> <span class="n">PCAPNG_Engine</span>
@@ -738,6 +740,9 @@
         <span class="n">_exnam</span><span class="p">:</span> <span class="s1">'Engines'</span>
         <span class="c1">#: Extraction engine instance.</span>
         <span class="n">_exeng</span><span class="p">:</span> <span class="s1">'EngineBase[_P]'</span>
+        <span class="c1">#: The pcap backend probe, shared by engine selection and the engine's</span>
+        <span class="c1">#: constructor so that an extraction probes once (:issue:`2113`).</span>
+        <span class="n">_exprb</span><span class="p">:</span> <span class="s1">'_pcap_backend.Memo'</span>
 
         <span class="c1">#: Input file object.</span>
         <span class="n">_ifile</span><span class="p">:</span> <span class="s1">'BufferedReader'</span>
@@ -1343,7 +1348,8 @@
         <span class="n">eng</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_select_engine</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">eng</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'using engine </span><span class="si">%s</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">)'</span><span class="p">,</span> <span class="n">eng</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">eng</span><span class="o">.</span><span class="n">module</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span> <span class="o">=</span> <span class="n">eng</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exprb</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span> <span class="o">=</span> <span class="n">eng</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_open_output</span><span class="p">()</span>
 
@@ -1406,7 +1412,13 @@
             <span class="c1"># failure to escape from the engine's constructor instead. The base</span>
             <span class="c1"># class answers :data:`None`, so only engines with a real limitation</span>
             <span class="c1"># override it.</span>
-            <span class="n">reason</span> <span class="o">=</span> <span class="n">eng</span><span class="o">.</span><span class="n">unsupported_reason</span><span class="p">()</span>
+            <span class="c1">#</span>
+            <span class="c1"># NOTE: one probe serves both calls of this method and the engine's</span>
+            <span class="c1"># constructor in ``run``, rather than one each (#2113).</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">'_exprb'</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_exprb</span> <span class="o">=</span> <span class="n">_pcap_backend</span><span class="o">.</span><span class="n">Memo</span><span class="p">()</span>
+            <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_exprb</span><span class="p">:</span>
+                <span class="n">reason</span> <span class="o">=</span> <span class="n">eng</span><span class="o">.</span><span class="n">unsupported_reason</span><span class="p">()</span>
             <span class="k">if</span> <span class="n">reason</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'engine </span><span class="si">%s</span><span class="s1"> is unavailable: </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="n">eng</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">reason</span><span class="p">)</span>
                 <span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">'engine </span><span class="si">{</span><span class="n">eng</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> is not supported on this interpreter '</span>
@@ -1979,7 +1991,8 @@
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'reading from the pre-opened stream </span><span class="si">%r</span><span class="s1">'</span><span class="p">,</span> <span class="n">fin</span><span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'BufferedReader'</span><span class="p">,</span> <span class="n">fin</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">seekable</span><span class="p">():</span>
+        <span class="c1"># NOTE: a Windows pipe says it is seekable and then does not seek (#2097).</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">can_seek</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="p">):</span>
             <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'input stream is not seekable, wrapping it in SeekableReader'</span><span class="p">)</span>
             <span class="c1"># NOTE: ``stream_closing`` decides whether closing the wrapper also</span>
             <span class="c1"># closes the stream underneath it, so it follows *ownership*: only a</span>
@@ -2024,16 +2037,26 @@
         <span class="c1"># NOTE: we use peek() to read the magic number, as the file pointer</span>
         <span class="c1"># will not be moved after reading; however, the returned bytes object</span>
         <span class="c1"># may not be exactly 4 bytes, so we use [:4] to get the first 4 bytes</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_magic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">peek</span><span class="p">(</span><span class="mi">4</span><span class="p">)[:</span><span class="mi">4</span><span class="p">]</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_magic</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
-            <span class="c1"># NOTE: ``peek`` makes at most one read of the stream, which a pipe or a</span>
-            <span class="c1"># raw stream may answer with fewer than four octets, so a short peek is</span>
-            <span class="c1"># not a short file. Read them instead, and seek back (#1586).</span>
-            <span class="n">position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_magic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_magic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">peek</span><span class="p">(</span><span class="mi">4</span><span class="p">)[:</span><span class="mi">4</span><span class="p">]</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_magic</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">4</span><span class="p">:</span>
+                <span class="c1"># NOTE: ``peek`` makes at most one read of the stream, which a pipe or a</span>
+                <span class="c1"># raw stream may answer with fewer than four octets, so a short peek is</span>
+                <span class="c1"># not a short file. Read them instead, and seek back (#1586).</span>
+                <span class="n">position</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">tell</span><span class="p">()</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_magic</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="n">position</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">SEEK_SET</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>    <span class="c1"># start extraction</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>    <span class="c1"># start extraction</span>
+        <span class="k">except</span> <span class="ne">BaseException</span><span class="p">:</span>
+            <span class="c1"># NOTE: a constructor that raises leaves the caller nothing to close,</span>
+            <span class="c1"># and Windows cannot delete a file still open (#2100). ``_cleanup``</span>
+            <span class="c1"># releases the input and the engine, if one was chosen (#2107);</span>
+            <span class="c1"># ``failed`` keeps it from finishing a trace whose capture never</span>
+            <span class="c1"># reached its end, and from letting an error out of the engine's close</span>
+            <span class="c1"># replace the one being handled here.</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cleanup</span><span class="p">(</span><span class="n">failed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">raise</span></div>
 
 
 <div class="viewcode-block" id="Extractor.__iter__">
@@ -2135,15 +2158,20 @@
 <span class="sd">        wrapper is closed; it was built with ``stream_closing`` off, so closing</span>
 <span class="sd">        it leaves the caller's stream underneath open.</span>
 
+<span class="sd">        Both go through :meth:`_release`, the close path :meth:`_cleanup` shares.</span>
+<span class="sd">        Unlike :meth:`_cleanup`, this neither finishes the flow tracer nor sets</span>
+<span class="sd">        :attr:`_flag_e`: leaving the block is not the end of the capture -- an</span>
+<span class="sd">        extraction with ``auto=False`` may be left before end of file, or on an</span>
+<span class="sd">        error -- so there is nothing it can truthfully report as over, and an</span>
+<span class="sd">        extraction that did reach the end has already been through</span>
+<span class="sd">        :meth:`_cleanup`. An error from the engine's close propagates.</span>
+
 <span class="sd">        """</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'closing </span><span class="si">%s</span><span class="s1"> on context exit after </span><span class="si">%d</span><span class="s1"> frame(s)'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifnm</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frnum</span><span class="p">)</span>
         <span class="c1"># NOTE: ownership, not the ``with`` statement, decides who closes the</span>
         <span class="c1"># input (#610, #1999): entering the block does not hand the caller's</span>
         <span class="c1"># stream over to this class.</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_owns_input</span><span class="p">():</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_detach_finalizer</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_release</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="Extractor.__del__">
@@ -2319,12 +2347,13 @@
 
 <div class="viewcode-block" id="Extractor._cleanup">
 <a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._cleanup">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">_cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_cleanup</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">failed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Cleanup after extraction &amp; analysis.</span>
 
-<span class="sd">        The method calls :meth:`self._exeng.close &lt;pcapkit.foundation.engines.engine.EngineBase.close&gt;`,</span>
-<span class="sd">        sets :attr:`self._flag_e &lt;pcapkit.foundation.extraction.Extractor._flag_e&gt;`</span>
-<span class="sd">        as :data:`True` and closes the input file *if this class opened it*.</span>
+<span class="sd">        The method sets :attr:`self._flag_e &lt;pcapkit.foundation.extraction.Extractor._flag_e&gt;`</span>
+<span class="sd">        as :data:`True` and then calls :meth:`_release`, which closes the input</span>
+<span class="sd">        file *if this class opened it* and calls</span>
+<span class="sd">        :meth:`self._exeng.close &lt;pcapkit.foundation.engines.engine.EngineBase.close&gt;`.</span>
 
 <span class="sd">        That proviso is the whole of it: a handle opened here -- ``fin`` given as</span>
 <span class="sd">        a path, i.e. :attr:`self._flag_s &lt;Extractor._flag_s&gt;` set -- is closed,</span>
@@ -2340,14 +2369,44 @@
 <span class="sd">        caller-supplied stream runs it again -- so ``finish`` is required to be</span>
 <span class="sd">        idempotent rather than guarded here.</span>
 
+<span class="sd">        Arguments:</span>
+<span class="sd">            failed: whether the extraction stopped on an error instead, which is</span>
+<span class="sd">                the constructor raising (:issue:`2100`, :issue:`2107`). The input</span>
+<span class="sd">                and the engine are still released, but the capture has not ended,</span>
+<span class="sd">                so the flow tracer is not finished -- its callbacks would report</span>
+<span class="sd">                flows of a capture that was never read to its end -- and</span>
+<span class="sd">                :attr:`_flag_e` is not set. The constructor may have failed before</span>
+<span class="sd">                choosing an engine, as an unknown format does, and then there is</span>
+<span class="sd">                none to close. An :exc:`Exception` from the engine's close is</span>
+<span class="sd">                logged rather than raised, so it cannot replace the error that</span>
+<span class="sd">                stopped the constructor.</span>
+
 <span class="sd">        """</span>
         <span class="c1"># pylint: disable=attribute-defined-outside-init</span>
         <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'cleaning up after </span><span class="si">%d</span><span class="s1"> frame(s) from </span><span class="si">%s</span><span class="s1">'</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_frnum</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ifnm</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_e</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="n">failed</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_release</span><span class="p">(</span><span class="n">failed</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">return</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_flag_e</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flag_t</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tcp</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_trace</span><span class="o">.</span><span class="n">tcp</span><span class="o">.</span><span class="n">finish</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_release</span><span class="p">()</span></div>
 
+
+<div class="viewcode-block" id="Extractor._release">
+<a class="viewcode-back" href="../../../pcapkit/foundation/extraction.html#pcapkit.foundation.extraction.Extractor._release">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_release</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">failed</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'None'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""Close the input this class owns, and the engine.</span>
+
+<span class="sd">        The one close path, shared by :meth:`_cleanup` and :meth:`__exit__`, so</span>
+<span class="sd">        that the two cannot drift apart on what is released or in which order.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            failed: see :meth:`_cleanup`. When set, a missing engine is skipped and</span>
+<span class="sd">                an :exc:`Exception` from its close is logged rather than raised.</span>
+
+<span class="sd">        """</span>
         <span class="c1"># NOTE: *Ownership* decides who closes the input, not seekability --</span>
         <span class="c1"># see :meth:`_owns_input` and #610. Keying on seekability</span>
         <span class="c1"># (``not self._flag_s``) gets both halves wrong at once: the handle this</span>
@@ -2357,7 +2416,23 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_owns_input</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_ifile</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_detach_finalizer</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">failed</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_exeng</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+            <span class="k">return</span>
+
+        <span class="c1"># NOTE: read through ``__dict__``, as ``_owns_input`` does: a constructor</span>
+        <span class="c1"># that failed before choosing an engine leaves no ``_exeng`` (#2107).</span>
+        <span class="n">engine</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'_exeng'</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">engine</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">engine</span><span class="o">.</span><span class="n">close</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>  <span class="c1"># pylint: disable=broad-except</span>
+            <span class="c1"># NOTE: the error that stopped the constructor is the one to report;</span>
+            <span class="c1"># letting the close's escape here would replace it (#2107).</span>
+            <span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">'engine </span><span class="si">%s</span><span class="s1"> failed to close after the constructor raised'</span><span class="p">,</span>
+                         <span class="nb">type</span><span class="p">(</span><span class="n">engine</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">exc_info</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 </div>
 
 </pre></div>

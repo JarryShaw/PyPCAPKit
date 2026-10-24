@@ -7,8 +7,8 @@
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://pypcapkit.jarryshaw.me/pcapkit/utilities/index.html" />
 <meta property="og:site_name" content="PyPCAPKit" />
-<meta property="og:description" content="pcapkit.utilities holds the cross-cutting services pcapkit is built with: user-refined exceptions and warnings, logging, the tunable limits of config, a compatibility layer, and wrappers around thi..." />
-<meta name="description" content="pcapkit.utilities holds the cross-cutting services pcapkit is built with: user-refined exceptions and warnings, logging, the tunable limits of config, a compatibility layer, and wrappers around thi..." />
+<meta property="og:description" content="pcapkit.utilities holds the cross-cutting services pcapkit is built with: user-refined exceptions and warnings, logging, the tunable limits of config, a compatibility layer, timestamp conversion, a..." />
+<meta name="description" content="pcapkit.utilities holds the cross-cutting services pcapkit is built with: user-refined exceptions and warnings, logging, the tunable limits of config, a compatibility layer, timestamp conversion, a..." />
 <link rel="index" title="Index" href="../../genindex.html"><link rel="search" title="Search" href="../../search.html"><link rel="next" title="User Defined Exceptions" href="exceptions.html"><link rel="prev" title="No-Payload Packet" href="../protocols/misc/null.html">
 
     <!-- Generated with Sphinx 9.1.0 and Furo 2025.12.19 -->
@@ -307,6 +307,7 @@
 <li class="toctree-l3"><a class="reference internal" href="logging.html">Logging System</a></li>
 <li class="toctree-l3"><a class="reference internal" href="config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="chardet.html">Character Set Detection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="timestamp.html">Timestamp Conversion</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -498,8 +499,8 @@
 <span id="module-utilities"></span><h1>Module Utilities<a class="headerlink" href="#module-pcapkit.utilities" title="Link to this heading">¶</a></h1>
 <p><a class="reference internal" href="#module-pcapkit.utilities" title="pcapkit.utilities"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.utilities</span></code></a> holds the cross-cutting services <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> is
 built with: user-refined exceptions and warnings, logging, the tunable limits
-of <a class="reference internal" href="config.html#module-pcapkit.utilities.config" title="pcapkit.utilities.config"><code class="xref py py-mod docutils literal notranslate"><span class="pre">config</span></code></a>, a compatibility layer, and wrappers around
-third-party libraries. It imports nothing from
+of <a class="reference internal" href="config.html#module-pcapkit.utilities.config" title="pcapkit.utilities.config"><code class="xref py py-mod docutils literal notranslate"><span class="pre">config</span></code></a>, a compatibility layer, timestamp
+conversion, and wrappers around third-party libraries. It imports nothing from
 <a class="reference internal" href="../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> outside itself; see <a class="reference internal" href="../../contributing/conventions/utilities-or-corekit.html#utilities-or-corekit"><span class="std std-ref">Choosing Between utilities and corekit</span></a>.</p>
 <div class="toctree-wrapper compound">
 <ul>
@@ -544,6 +545,7 @@ third-party libraries. It imports nothing from
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="chardet.html">Character Set Detection</a></li>
+<li class="toctree-l1"><a class="reference internal" href="timestamp.html">Timestamp Conversion</a></li>
 </ul>
 </div>
 <section id="module-pcapkit.utilities.compat">

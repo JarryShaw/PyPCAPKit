@@ -307,6 +307,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/logging.html">Logging System</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../pcapkit/utilities/timestamp.html">Timestamp Conversion</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -566,7 +567,7 @@ itself, job by job from a version bump to a published package, is on
 <td><p>–</p></td>
 <td><p>Sat 10:00</p></td>
 <td><p><strong>Unit Tests</strong></p></td>
-<td><p>–</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">workflow_dispatch</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p>Conda Update</p></td>
 <td><p><code class="file docutils literal notranslate"><span class="pre">cron-conda.yml</span></code></p></td>
@@ -574,7 +575,7 @@ itself, job by job from a version bump to a published package, is on
 <td><p>–</p></td>
 <td><p>Sat 18:00</p></td>
 <td><p><strong>Unit Tests</strong></p></td>
-<td><p>–</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">workflow_dispatch</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p>GitHub Pages</p></td>
 <td><p><code class="file docutils literal notranslate"><span class="pre">deploy-pages.yml</span></code></p></td>
@@ -582,7 +583,7 @@ itself, job by job from a version bump to a published package, is on
 <td><p><code class="docutils literal notranslate"><span class="pre">main</span></code></p></td>
 <td><p>Sat 02:00</p></td>
 <td><p><strong>Unit Tests</strong></p></td>
-<td><p>–</p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">workflow_dispatch</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p>Cron Head</p></td>
 <td><p><code class="file docutils literal notranslate"><span class="pre">cron-head.yml</span></code></p></td>
@@ -704,14 +705,17 @@ than starting a new one.</p>
 
     PR --&gt; GP
     SAT --&gt;|02:00| GP
+    DISPATCH --&gt; GP
 
     SAT --&gt;|18:00| CU
+    DISPATCH --&gt; CU
 
     PR --&gt; LT
     SAT --&gt;|06:00| LT
     DISPATCH --&gt; LT
 
     SAT --&gt;|10:00| VU
+    DISPATCH --&gt; VU
 
     MON --&gt;|05:41| PV
     DISPATCH --&gt; PV
@@ -759,9 +763,9 @@ call it is the part that reading a single file cannot show, and it is
 deliberate rather than redundant. Vendor Update, Conda Update and GitHub Pages
 each call <strong>Cron Head</strong> as their <code class="docutils literal notranslate"><span class="pre">head</span></code> job (dotted, above), and its test gate
 calls <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> with <code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code> <strong>only when the caller’s
-trigger is</strong> <code class="docutils literal notranslate"><span class="pre">schedule</span></code> – the gate’s <code class="docutils literal notranslate"><span class="pre">if:</span></code> skips <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> and
-<code class="docutils literal notranslate"><span class="pre">pull_request</span></code> – so only on the Saturday path, where no completed Unit Tests
-run exists yet to read a verdict from. On the <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> path (thick
+trigger is</strong> <code class="docutils literal notranslate"><span class="pre">schedule</span></code> or <code class="docutils literal notranslate"><span class="pre">workflow_dispatch</span></code> – the gate’s <code class="docutils literal notranslate"><span class="pre">if:</span></code> skips
+<code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> and <code class="docutils literal notranslate"><span class="pre">pull_request</span></code> – so only on the Saturday path and a
+manual run, where no completed Unit Tests run exists yet to read a verdict from. On the <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> path (thick
 arrows), each reads the verdict Unit Tests already reached instead of re-running
 the gate a second time, and acts on it only once the head’s <code class="docutils literal notranslate"><span class="pre">verdict</span></code> job,
 described under the edge list below, says it is a verdict on the commit it
@@ -852,8 +856,8 @@ Update and GitHub Pages used to carry each. It holds <code class="docutils liter
 more, which is what each caller grants its <code class="docutils literal notranslate"><span class="pre">head</span></code> job and what
 <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> is called with. Every expression in it reads the caller’s <code class="docutils literal notranslate"><span class="pre">github</span></code> context, so its jobs decide on
 the event that started the caller and check out the caller’s <code class="docutils literal notranslate"><span class="pre">github.sha</span></code>. A
-job of the call skips on every path – the gate everywhere but the schedule,
-<code class="docutils literal notranslate"><span class="pre">verdict</span></code> everywhere but a <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> – so each acting job keeps
+job of the call skips on every path – the gate everywhere but the schedule and
+a manual run, <code class="docutils literal notranslate"><span class="pre">verdict</span></code> everywhere but a <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> – so each acting job keeps
 <code class="docutils literal notranslate"><span class="pre">!cancelled()</span></code>, for the reason the skip-cascade section below gives, and
 treats a <code class="docutils literal notranslate"><span class="pre">head</span></code> result other than <code class="docutils literal notranslate"><span class="pre">failure</span></code> as passing.</p>
 <p>Their schedules are eight hours apart on Saturdays: GitHub Pages at 02:00,
@@ -879,6 +883,15 @@ group cancels the one pending there.</p></li>
 Create Release has had the day to publish, so its <code class="docutils literal notranslate"><span class="pre">Check</span> <span class="pre">the</span> <span class="pre">GitHub</span> <span class="pre">release</span>
 <span class="pre">exists</span></code> step finds the release rather than skipping the GitHub upload
 (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1634">#1634</a>).</p>
+<p>To debug Vendor Update, Conda Update or GitHub Pages without waiting for
+Saturday, start a manual run on a branch, as in <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">workflow</span> <span class="pre">run</span> <span class="pre">cron-conda.yml</span>
+<span class="pre">--ref</span> <span class="pre">&lt;branch&gt;</span></code>. A manual run is build-only: Cron Head’s test gate and every
+build and test step the schedule runs still run – each <code class="docutils literal notranslate"><span class="pre">conda-dist</span></code> leg,
+Windows included, builds the dispatched commit with <code class="docutils literal notranslate"><span class="pre">conda-update</span></code>’s changes
+applied – while every step that pushes, tags, uploads, deploys or posts a
+report skips, no job that runs names an environment, and the Create Release run
+it raises releases nothing. <code class="file docutils literal notranslate"><span class="pre">tests/project/test_build_only_dispatch.py</span></code>
+pins this.</p>
 <p><code class="docutils literal notranslate"><span class="pre">gate-only:</span> <span class="pre">true</span></code> selects not only <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">gate</span></code> (the full
 suite, on <code class="docutils literal notranslate"><span class="pre">latest</span></code>) but also <code class="docutils literal notranslate"><span class="pre">changelog</span></code> (checks <code class="docutils literal notranslate"><span class="pre">CHANGELOG.md</span></code> against its
 source entry) and <code class="docutils literal notranslate"><span class="pre">python-versions</span></code>, which reads <code class="docutils literal notranslate"><span class="pre">gate</span></code>’s version (see
@@ -911,7 +924,8 @@ own graph. Create Release’s <code class="docutils literal notranslate"><span c
 above – carries:</p>
 <div class="highlight-yaml notranslate"><div class="highlight"><pre><span></span><span class="nt">if</span><span class="p">:</span><span class="w"> </span><span class="p p-Indicator">&gt;-</span>
 <span class="w">  </span><span class="no">${{ !cancelled() &amp;&amp;</span>
-<span class="w">  </span><span class="no">(github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success') &amp;&amp;</span>
+<span class="w">  </span><span class="no">(github.event_name != 'workflow_run' || (github.event.workflow_run.conclusion == 'success' &amp;&amp;</span>
+<span class="w">  </span><span class="no">github.event.workflow_run.event != 'workflow_dispatch')) &amp;&amp;</span>
 <span class="w">  </span><span class="no">!(github.event_name == 'push' &amp;&amp; github.actor_id == vars.RELEASE_APP_BOT_ID) &amp;&amp;</span>
 <span class="w">  </span><span class="no">needs.vendor_update.outputs.updated != 'false' }}</span>
 </pre></div>
@@ -928,7 +942,9 @@ anything other than <code class="docutils literal notranslate"><span class="pre"
 for a Vendor Update that concluded <code class="docutils literal notranslate"><span class="pre">success</span></code> with <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code> skipped –
 its <code class="docutils literal notranslate"><span class="pre">verdict</span></code> job found the Unit Tests verdict was for another commit – which
 the <code class="docutils literal notranslate"><span class="pre">vendor_update</span></code> job reads from that run’s jobs first (observed on run
-38650191283). <code class="docutils literal notranslate"><span class="pre">!cancelled()</span></code> keeps a skipped <code class="docutils literal notranslate"><span class="pre">vendor_update</span></code>, on a push, from
+38650191283). It is false for a manual, build-only Vendor Update as well, which
+pushed nothing, and so is <code class="docutils literal notranslate"><span class="pre">vendor_update</span></code>’s own <code class="docutils literal notranslate"><span class="pre">if:</span></code>.
+<code class="docutils literal notranslate"><span class="pre">!cancelled()</span></code> keeps a skipped <code class="docutils literal notranslate"><span class="pre">vendor_update</span></code>, on a push, from
 skipping it. <code class="docutils literal notranslate"><span class="pre">unit-tests</span></code> then depends on that job with
 <code class="docutils literal notranslate"><span class="pre">needs:</span> <span class="pre">[</span> <span class="pre">version_check</span> <span class="pre">]</span></code> and an <code class="docutils literal notranslate"><span class="pre">if:</span></code> that
 calls no status-check function, so a skipped dependency skips it too – and
@@ -1514,6 +1530,28 @@ KTLO summary’s script, still warns of every failed step, <code class="docutils
 workers rather than 4, GraalPy’s tests should take about 117-151 minutes (an inference
 from the 88-113 above, not measured), so its leg may end on the 110-minute timeout as a
 warning: that is expected, blocks nothing, and leaves the caps as they are.</p>
+<p><strong>The Windows leg.</strong> <code class="file docutils literal notranslate"><span class="pre">experimental.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">windows</span></code> job runs the <code class="docutils literal notranslate"><span class="pre">ALL</span></code> tier
+on <code class="docutils literal notranslate"><span class="pre">windows-latest</span></code> under <code class="docutils literal notranslate"><span class="pre">latest</span></code>, the newest CPython the conda builds target, as
+<code class="docutils literal notranslate"><span class="pre">Python</span> <span class="pre">&lt;latest&gt;</span> <span class="pre">on</span> <span class="pre">Windows</span> <span class="pre">(experimental)</span></code> (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>), so the first published
+<code class="docutils literal notranslate"><span class="pre">win-64</span></code> conda package has had a test run. It needs <code class="docutils literal notranslate"><span class="pre">current</span></code>, <code class="docutils literal notranslate"><span class="pre">changes</span></code> and
+<code class="docutils literal notranslate"><span class="pre">python-versions</span></code> and runs on <code class="docutils literal notranslate"><span class="pre">experimental</span></code>’s condition, and it is non-blocking by
+the same mechanics: every step continues on error, setup-python, the install and <code class="docutils literal notranslate"><span class="pre">Run</span>
+<span class="pre">unit</span> <span class="pre">tests</span></code> are capped at 5, 10 and 60 minutes within its 80, the job carries
+<code class="docutils literal notranslate"><span class="pre">continue-on-error:</span> <span class="pre">true</span></code>, and <code class="docutils literal notranslate"><span class="pre">Experimental</span> <span class="pre">summary</span></code> reports each failed step as a
+warning, on setup-python’s <code class="docutils literal notranslate"><span class="pre">python</span></code> or the image’s, since Windows has no
+<code class="docutils literal notranslate"><span class="pre">/usr/bin/python3</span></code>. Every <code class="docutils literal notranslate"><span class="pre">run:</span></code> is Git Bash’s (<code class="docutils literal notranslate"><span class="pre">shell:</span> <span class="pre">bash</span></code>). <code class="docutils literal notranslate"><span class="pre">Keep</span> <span class="pre">LF</span> <span class="pre">line</span>
+<span class="pre">endings</span></code> sets <code class="docutils literal notranslate"><span class="pre">core.autocrlf</span> <span class="pre">false</span></code> and <code class="docutils literal notranslate"><span class="pre">core.eol</span> <span class="pre">lf</span></code> before the checkout, so the
+tests read the tree the other legs read, not the CRLF one the image’s Git writes under
+<code class="docutils literal notranslate"><span class="pre">*</span> <span class="pre">text=auto</span></code>. <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">unit</span> <span class="pre">tests</span></code> asks <code class="docutils literal notranslate"><span class="pre">latest_tier_paths()</span></code> on the leg’s CPython,
+as <code class="docutils literal notranslate"><span class="pre">test</span></code> does, and passes <code class="docutils literal notranslate"><span class="pre">test</span></code>’s flags. None of the Linux containment above runs
+there: Windows has no cgroup scope, <code class="docutils literal notranslate"><span class="pre">prlimit</span></code> or <code class="docutils literal notranslate"><span class="pre">RLIMIT_FSIZE</span></code>, so no
+<code class="file docutils literal notranslate"><span class="pre">util/cap_file_size.py</span></code>; no <code class="docutils literal notranslate"><span class="pre">/proc</span></code> for the resource monitor; and no process
+group for <code class="file docutils literal notranslate"><span class="pre">util/superseded.py</span></code>’s watcher, so the step’s cap bounds the tests, and
+a run superseded once the leg has started runs it to its end. Python Versions’ weekly
+job moves <code class="docutils literal notranslate"><span class="pre">latest</span></code> only to a branch setup-python builds for every label a job
+installs it on, but counts no job with <code class="docutils literal notranslate"><span class="pre">continue-on-error:</span> <span class="pre">true</span></code>, so this leg
+never holds <code class="docutils literal notranslate"><span class="pre">latest</span></code> back for the blocking jobs.
+<code class="file docutils literal notranslate"><span class="pre">tests/project/test_windows_test_leg_2060.py</span></code> pins the job.</p>
 </section>
 <section id="test-tiers">
 <h2>Test Tiers<a class="headerlink" href="#test-tiers" title="Link to this heading">¶</a></h2>
@@ -1588,7 +1626,8 @@ runs it at collection on every leg.</p>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">project-tests</span></code></p></td>
 <td><p>the project pins</p></td>
 </tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">test</span></code> off <code class="docutils literal notranslate"><span class="pre">latest</span></code>, PyPy’s among them, <code class="docutils literal notranslate"><span class="pre">test-ktlo</span></code>, <code class="docutils literal notranslate"><span class="pre">experimental</span></code></p></td>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">test</span></code> off <code class="docutils literal notranslate"><span class="pre">latest</span></code>, PyPy’s among them, <code class="docutils literal notranslate"><span class="pre">test-ktlo</span></code>, <code class="docutils literal notranslate"><span class="pre">experimental</span></code>,
+<code class="docutils literal notranslate"><span class="pre">windows</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">ALL</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">integration</span></code> on <code class="docutils literal notranslate"><span class="pre">latest</span></code></p></td>
@@ -1680,8 +1719,9 @@ a lower hard limit, and execs the command, so the step’s exit status and
 inherits the cap. A write past it raises <code class="docutils literal notranslate"><span class="pre">OSError:</span> <span class="pre">[Errno</span> <span class="pre">27]</span> <span class="pre">File</span> <span class="pre">too</span> <span class="pre">large</span></code> in
 Python, since CPython ignores <code class="docutils literal notranslate"><span class="pre">SIGXFSZ</span></code>, so the test errors; any other program is
 killed by the signal, whose default action the script restores before it execs.
-<code class="docutils literal notranslate"><span class="pre">experimental.yml</span></code>’s legs get the same 2 GiB through <code class="docutils literal notranslate"><span class="pre">prlimit</span> <span class="pre">--fsize</span></code> (see
-above).</p>
+<code class="docutils literal notranslate"><span class="pre">experimental.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">experimental</span></code> legs get the same 2 GiB through
+<code class="docutils literal notranslate"><span class="pre">prlimit</span> <span class="pre">--fsize</span></code> (see above); its <code class="docutils literal notranslate"><span class="pre">windows</span></code> leg has no cap, as Windows has no
+<code class="docutils literal notranslate"><span class="pre">RLIMIT_FSIZE</span></code>.</p>
 <p><code class="file docutils literal notranslate"><span class="pre">tests/project/test_file_size_caps_1969.py</span></code> fails when a command in
 <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> runs pytest, unittest or <code class="file docutils literal notranslate"><span class="pre">util/run_unittest_leg.py</span></code>
 without the script, and runs the script against a small limit.</p>
@@ -1767,7 +1807,9 @@ Experimental Tests and Python Compatibility (see <a class="reference internal" h
 </tr>
 <tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/_actions.py</span></code></p></td>
 <td><p>No step: it is imported by the scripts that share its annotations, step
-outputs, job summary lines and logged runs (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2047">#2047</a>).</p></td>
+outputs, job summary lines and logged runs (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2047">#2047</a>), and its
+environment read as bytes where Windows has no <code class="docutils literal notranslate"><span class="pre">os.environb</span></code>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2120">#2120</a>).</p></td>
 <td><p>No: imported only.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">util/codeql_report.py</span></code></p></td>

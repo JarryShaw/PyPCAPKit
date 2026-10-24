@@ -300,6 +300,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/logging.html">Logging System</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/chardet.html">Character Set Detection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../../../pcapkit/utilities/timestamp.html">Timestamp Conversion</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../../../pcapkit/corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -819,8 +820,13 @@
 <span class="sd">        This method is to be used for closing the engine instance. It is to</span>
 <span class="sd">        close the engine instance after the extraction process is finished.</span>
 
+<span class="sd">        A no-op if :meth:`run` never opened the capture, which is the case when</span>
+<span class="sd">        the :class:`~pcapkit.foundation.extraction.Extractor` constructor raises</span>
+<span class="sd">        before it (:issue:`2107`).</span>
+
 <span class="sd">        """</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_extmp</span><span class="o">.</span><span class="n">close</span><span class="p">()</span></div>
 </div>
 
 </pre></div>

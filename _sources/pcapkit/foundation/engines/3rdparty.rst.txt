@@ -115,8 +115,7 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    3.10 and 3.11 return a loop silently, 3.12 returns one with a
    :exc:`DeprecationWarning`, and **3.14 raises**
    ``RuntimeError: There is no current event loop in thread 'MainThread'``. Python
-   3.13 is unchecked and expected to work, being on the deprecated-but-functional
-   side of that change.
+   3.13 works, being on the deprecated-but-functional side of that change.
 
    **Wireshark's** :program:`tshark` **binary.** |pyshark|_ shells out to it and
    parses nothing itself. It need not be on :envvar:`PATH`: |pyshark|_ consults
@@ -489,6 +488,11 @@ cycle.
    .. autoattribute:: installed
 
    .. automethod:: describe
+
+.. autoclass:: pcapkit.foundation.engines._pcap_backend.Memo
+   :no-members:
+
+   .. autoattribute:: found
 
 .. autofunction:: pcapkit.foundation.engines._pcap_backend.probe
 

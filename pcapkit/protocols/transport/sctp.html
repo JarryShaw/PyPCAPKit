@@ -307,6 +307,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/logging.html">Logging System</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../../utilities/chardet.html">Character Set Detection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../../utilities/timestamp.html">Timestamp Conversion</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -841,7 +842,7 @@ PPID rather than by port number.</p>
     class, or not a <a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> subclass.</p>
 </dd>
 <dt class="field-even">Warns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>pcapkit.utilities.warnings.RegistryWarning</strong> – If this PPID is already
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.RegistryWarning" title="pcapkit.utilities.warnings.RegistryWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.RegistryWarning</span></code></a> – If this PPID is already
 registered and the incumbent differs from the replacement; the
 message names both. As with the port-keyed
 <a class="reference internal" href="transport.html#pcapkit.protocols.transport.transport.Transport.register" title="pcapkit.protocols.transport.transport.Transport.register"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Transport.register</span></code></a> it
@@ -867,7 +868,7 @@ with restores that object, unresolved (<a class="extlink-issue reference externa
 </ul>
 </dd>
 <dt class="field-even">Warns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>RegistryWarning</strong> – If a different entry is already registered for
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.RegistryWarning" title="pcapkit.utilities.warnings.RegistryWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RegistryWarning</span></code></a> – If a different entry is already registered for
 <code class="docutils literal notranslate"><span class="pre">code</span></code>; it is overwritten. Handing back the entry already
 stored, or one equal to it, is a silent no-op. Re-registering
 the entry <code class="docutils literal notranslate"><span class="pre">code</span></code> shipped with is accepted like any other,
@@ -888,7 +889,7 @@ so an override can be undone (<a class="extlink-issue reference external" href="
 </ul>
 </dd>
 <dt class="field-even">Warns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>RegistryWarning</strong> – If a different entry is already registered for
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.RegistryWarning" title="pcapkit.utilities.warnings.RegistryWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RegistryWarning</span></code></a> – If a different entry is already registered for
 <code class="docutils literal notranslate"><span class="pre">code</span></code>; it is overwritten. Handing back the entry already
 stored, or one equal to it, is a silent no-op. Re-registering
 the entry <code class="docutils literal notranslate"><span class="pre">code</span></code> shipped with is accepted like any other,
@@ -909,7 +910,7 @@ so an override can be undone (<a class="extlink-issue reference external" href="
 </ul>
 </dd>
 <dt class="field-even">Warns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>RegistryWarning</strong> – If a different entry is already registered for
+<dd class="field-even"><p><a class="reference internal" href="../../utilities/warnings.html#pcapkit.utilities.warnings.RegistryWarning" title="pcapkit.utilities.warnings.RegistryWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RegistryWarning</span></code></a> – If a different entry is already registered for
 <code class="docutils literal notranslate"><span class="pre">code</span></code>; it is overwritten. Handing back the entry already
 stored, or one equal to it, is a silent no-op. Re-registering
 the entry <code class="docutils literal notranslate"><span class="pre">code</span></code> shipped with is accepted like any other,

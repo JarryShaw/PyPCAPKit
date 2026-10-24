@@ -307,6 +307,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../utilities/logging.html">Logging System</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/chardet.html">Character Set Detection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/timestamp.html">Timestamp Conversion</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -2074,7 +2075,7 @@ reassembled; otherwise <a class="reference external" href="https://docs.python.o
     IPv4 address.</p>
 </dd>
 <dt class="field-odd">Warns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>AttributeWarning</strong> – If <code class="docutils literal notranslate"><span class="pre">packet</span></code> is an IPv6 packet straight over Ethernet
+<dd class="field-odd"><p><a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a> – If <code class="docutils literal notranslate"><span class="pre">packet</span></code> is an IPv6 packet straight over Ethernet
 whose Next Header is TCP (see <a class="reference internal" href="#pcapkit.toolkit.pypcapfile._ipv6_carries_tcp" title="pcapkit.toolkit.pypcapfile._ipv6_carries_tcp"><code class="xref py py-func docutils literal notranslate"><span class="pre">_ipv6_carries_tcp()</span></code></a>), which is
 left out, and is the first such frame of its capture to reach either
 <a class="reference internal" href="#pcapkit.toolkit.pypcapfile.tcp_reassembly" title="pcapkit.toolkit.pypcapfile.tcp_reassembly"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_reassembly()</span></code></a> or <a class="reference internal" href="#pcapkit.toolkit.pypcapfile.tcp_traceflow" title="pcapkit.toolkit.pypcapfile.tcp_traceflow"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_traceflow()</span></code></a>. The rest of that
@@ -2113,7 +2114,7 @@ traced; otherwise <a class="reference external" href="https://docs.python.org/3/
     IPv4 address.</p>
 </dd>
 <dt class="field-odd">Warns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>AttributeWarning</strong> – If <code class="docutils literal notranslate"><span class="pre">packet</span></code> is an IPv6 packet straight over Ethernet
+<dd class="field-odd"><p><a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">AttributeWarning</span></code></a> – If <code class="docutils literal notranslate"><span class="pre">packet</span></code> is an IPv6 packet straight over Ethernet
 whose Next Header is TCP (see <a class="reference internal" href="#pcapkit.toolkit.pypcapfile._ipv6_carries_tcp" title="pcapkit.toolkit.pypcapfile._ipv6_carries_tcp"><code class="xref py py-func docutils literal notranslate"><span class="pre">_ipv6_carries_tcp()</span></code></a>), which is
 left out, and is the first such frame of its capture to reach either
 <a class="reference internal" href="#pcapkit.toolkit.pypcapfile.tcp_reassembly" title="pcapkit.toolkit.pypcapfile.tcp_reassembly"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_reassembly()</span></code></a> or <a class="reference internal" href="#pcapkit.toolkit.pypcapfile.tcp_traceflow" title="pcapkit.toolkit.pypcapfile.tcp_traceflow"><code class="xref py py-func docutils literal notranslate"><span class="pre">tcp_traceflow()</span></code></a>. The rest of that

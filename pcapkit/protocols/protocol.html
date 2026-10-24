@@ -307,6 +307,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../utilities/logging.html">Logging System</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/chardet.html">Character Set Detection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/timestamp.html">Timestamp Conversion</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -653,7 +654,7 @@ should be <code class="docutils literal notranslate"><span class="pre">{protocol
     class, or not a <a class="reference internal" href="#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a> subclass.</p>
 </dd>
 <dt class="field-odd">Warns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>pcapkit.utilities.warnings.RegistryWarning</strong> – If <code class="docutils literal notranslate"><span class="pre">code</span></code> is already
+<dd class="field-odd"><p><a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.RegistryWarning" title="pcapkit.utilities.warnings.RegistryWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.RegistryWarning</span></code></a> – If <code class="docutils literal notranslate"><span class="pre">code</span></code> is already
 registered, naming the displaced entry and its replacement so a
 caller can tell <em>what</em> was lost rather than only that something
 was. Fires only when the incumbent differs from the
@@ -1415,7 +1416,7 @@ it and the rest of the frame are kept as
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Warns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>ProtocolWarning</strong> – If the next layer is past <a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.FRAME_LAYER_LIMIT" title="pcapkit.utilities.config.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a>.</p>
+<dd class="field-odd"><p><a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.ProtocolWarning" title="pcapkit.utilities.warnings.ProtocolWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ProtocolWarning</span></code></a> – If the next layer is past <a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.FRAME_LAYER_LIMIT" title="pcapkit.utilities.config.FRAME_LAYER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">FRAME_LAYER_LIMIT</span></code></a>.</p>
 </dd>
 </dl>
 </dd></dl>

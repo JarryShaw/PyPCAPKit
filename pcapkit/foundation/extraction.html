@@ -307,6 +307,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../utilities/logging.html">Logging System</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/chardet.html">Character Set Detection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/timestamp.html">Timestamp Conversion</a></li>
 </ul>
 </li>
 <li class="toctree-l2 has-children"><a class="reference internal" href="../corekit/index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul>
@@ -612,7 +613,7 @@ engines ignore it.</p></li>
 </dd>
 <dt class="field-even">Warns<span class="colon">:</span></dt>
 <dd class="field-even"><ul>
-<li><p><strong>pcapkit.utilities.warnings.FormatWarning</strong> – Warns under the following circumstances:</p>
+<li><p><a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.FormatWarning" title="pcapkit.utilities.warnings.FormatWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.FormatWarning</span></code></a> – Warns under the following circumstances:</p>
 <ul class="simple">
 <li><p>If using PCAP output for TCP flow tracing while the extraction engine is
 PyShark or PyPCAPFile.</p></li>
@@ -624,9 +625,9 @@ one, i.e. DPKT, Scapy, PyShark, PyPCAP, pcap-ct or PyPCAPFile.</p></li>
 requested engine that is unavailable falls back to the default
 engine first, which supports PCAP output.</p>
 </li>
-<li><p><strong>pcapkit.utilities.warnings.EngineWarning</strong> – If the requested extraction
+<li><p><a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.EngineWarning" title="pcapkit.utilities.warnings.EngineWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.EngineWarning</span></code></a> – If the requested extraction
 engine is not available, cf. <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.run" title="pcapkit.foundation.extraction.Extractor.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a>.</p></li>
-<li><p><strong>pcapkit.utilities.warnings.AttributeWarning</strong> – If <code class="docutils literal notranslate"><span class="pre">trace_analyse</span></code> is
+<li><p><a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.AttributeWarning" title="pcapkit.utilities.warnings.AttributeWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.AttributeWarning</span></code></a> – If <code class="docutils literal notranslate"><span class="pre">trace_analyse</span></code> is
 requested while the extraction engine is PyShark.</p></li>
 </ul>
 </dd>
@@ -774,7 +775,7 @@ is kept (<a class="extlink-issue reference external" href="https://github.com/Ja
 <dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.RegistryError" title="pcapkit.utilities.exceptions.RegistryError"><strong>RegistryError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">dumper</span></code> is not a class, or not a <a class="reference internal" href="../dumpkit/common.html#pcapkit.dumpkit.common.Dumper" title="pcapkit.dumpkit.common.Dumper"><code class="xref py py-class docutils literal notranslate"><span class="pre">Dumper</span></code></a> subclass.</p>
 </dd>
 <dt class="field-odd">Warns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>RegistryWarning</strong> – If a different dumper is already registered for
+<dd class="field-odd"><p><a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.RegistryWarning" title="pcapkit.utilities.warnings.RegistryWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RegistryWarning</span></code></a> – If a different dumper is already registered for
 <code class="docutils literal notranslate"><span class="pre">format</span></code>; it is overwritten.</p>
 </dd>
 </dl>
@@ -818,7 +819,7 @@ engine <code class="docutils literal notranslate"><span class="pre">name</span><
     <a class="reference internal" href="engines/engine.html#pcapkit.foundation.engines.engine.Engine" title="pcapkit.foundation.engines.engine.Engine"><code class="xref py py-class docutils literal notranslate"><span class="pre">Engine</span></code></a> subclass.</p>
 </dd>
 <dt class="field-odd">Warns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>RegistryWarning</strong> – If a different class is already registered under
+<dd class="field-odd"><p><a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.RegistryWarning" title="pcapkit.utilities.warnings.RegistryWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RegistryWarning</span></code></a> – If a different class is already registered under
 <code class="docutils literal notranslate"><span class="pre">name</span></code>; it is overwritten.</p>
 </dd>
 </dl>
@@ -863,7 +864,7 @@ itself (GitHub issue <a class="extlink-issue reference external" href="https://g
     <a class="reference internal" href="reassembly/reassembly.html#pcapkit.foundation.reassembly.reassembly.Reassembly" title="pcapkit.foundation.reassembly.reassembly.Reassembly"><code class="xref py py-class docutils literal notranslate"><span class="pre">Reassembly</span></code></a> subclass.</p>
 </dd>
 <dt class="field-odd">Warns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>RegistryWarning</strong> – If a different class is already registered under
+<dd class="field-odd"><p><a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.RegistryWarning" title="pcapkit.utilities.warnings.RegistryWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RegistryWarning</span></code></a> – If a different class is already registered under
 <code class="docutils literal notranslate"><span class="pre">protocol</span></code>; it is overwritten.</p>
 </dd>
 </dl>
@@ -907,7 +908,7 @@ itself (GitHub issue <a class="extlink-issue reference external" href="https://g
     <a class="reference internal" href="traceflow/traceflow.html#pcapkit.foundation.traceflow.traceflow.TraceFlow" title="pcapkit.foundation.traceflow.traceflow.TraceFlow"><code class="xref py py-class docutils literal notranslate"><span class="pre">TraceFlow</span></code></a> subclass.</p>
 </dd>
 <dt class="field-odd">Warns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>RegistryWarning</strong> – If a different class is already registered under
+<dd class="field-odd"><p><a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.RegistryWarning" title="pcapkit.utilities.warnings.RegistryWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RegistryWarning</span></code></a> – If a different class is already registered under
 <code class="docutils literal notranslate"><span class="pre">protocol</span></code>; it is overwritten.</p>
 </dd>
 </dl>
@@ -940,7 +941,7 @@ different driver method:</p>
 </ul>
 <dl class="field-list simple">
 <dt class="field-odd">Warns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>pcapkit.utilities.warnings.EngineWarning</strong> – If the extraction engine is not
+<dd class="field-odd"><p><a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.EngineWarning" title="pcapkit.utilities.warnings.EngineWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.EngineWarning</span></code></a> – If the extraction engine is not
 available: its dependency is not installed, its
 <a class="reference internal" href="engines/engine.html#pcapkit.foundation.engines.engine.EngineBase.unsupported_reason" title="pcapkit.foundation.engines.engine.EngineBase.unsupported_reason"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unsupported_reason()</span></code></a>
 rules it out, or the supplied engine is unknown.</p>
@@ -968,7 +969,7 @@ rules it out, or the supplied engine is unknown.</p>
 </ul>
 </dd>
 <dt class="field-even">Warns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>pcapkit.utilities.warnings.EngineWarning</strong> – If the engine module is not installed.</p>
+<dd class="field-even"><p><a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.EngineWarning" title="pcapkit.utilities.warnings.EngineWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">pcapkit.utilities.warnings.EngineWarning</span></code></a> – If the engine module is not installed.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/types.html#types.ModuleType" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">ModuleType</span></code></a> | <span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
@@ -1141,11 +1142,12 @@ subclass: every built-in derives from the base directly, and the public
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor._cleanup">
-<span class="sig-name descname"><span class="pre">_cleanup</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/foundation/extraction.html#Extractor._cleanup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._cleanup" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">_cleanup</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">failed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/foundation/extraction.html#Extractor._cleanup"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._cleanup" title="Link to this definition">¶</a></dt>
 <dd><p>Cleanup after extraction &amp; analysis.</p>
-<p>The method calls <a class="reference internal" href="engines/engine.html#pcapkit.foundation.engines.engine.EngineBase.close" title="pcapkit.foundation.engines.engine.EngineBase.close"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._exeng.close</span></code></a>,
-sets <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._flag_e" title="pcapkit.foundation.extraction.Extractor._flag_e"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._flag_e</span></code></a>
-as <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a> and closes the input file <em>if this class opened it</em>.</p>
+<p>The method sets <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._flag_e" title="pcapkit.foundation.extraction.Extractor._flag_e"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._flag_e</span></code></a>
+as <a class="reference external" href="https://docs.python.org/3/builtins/constants.html#True" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">True</span></code></a> and then calls <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._release" title="pcapkit.foundation.extraction.Extractor._release"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_release()</span></code></a>, which closes the input
+file <em>if this class opened it</em> and calls
+<a class="reference internal" href="engines/engine.html#pcapkit.foundation.engines.engine.EngineBase.close" title="pcapkit.foundation.engines.engine.EngineBase.close"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._exeng.close</span></code></a>.</p>
 <p>That proviso is the whole of it: a handle opened here – <code class="docutils literal notranslate"><span class="pre">fin</span></code> given as
 a path, i.e. <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._flag_s" title="pcapkit.foundation.extraction.Extractor._flag_s"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._flag_s</span></code></a> set – is closed,
 and a stream the caller supplied is left alone for the caller to close
@@ -1158,6 +1160,40 @@ run. This method can run more than once for one extraction – each call to
 <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.__next__" title="pcapkit.foundation.extraction.Extractor.__next__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__next__()</span></code></a> or <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.__call__" title="pcapkit.foundation.extraction.Extractor.__call__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__call__()</span></code></a> that reaches the end of a
 caller-supplied stream runs it again – so <code class="docutils literal notranslate"><span class="pre">finish</span></code> is required to be
 idempotent rather than guarded here.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>failed</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – whether the extraction stopped on an error instead, which is
+the constructor raising (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2100">#2100</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2107">#2107</a>). The input
+and the engine are still released, but the capture has not ended,
+so the flow tracer is not finished – its callbacks would report
+flows of a capture that was never read to its end – and
+<a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._flag_e" title="pcapkit.foundation.extraction.Extractor._flag_e"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_flag_e</span></code></a> is not set. The constructor may have failed before
+choosing an engine, as an unknown format does, and then there is
+none to close. An <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#Exception" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">Exception</span></code></a> from the engine’s close is
+logged rather than raised, so it cannot replace the error that
+stopped the constructor.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.foundation.extraction.Extractor._release">
+<span class="sig-name descname"><span class="pre">_release</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">failed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/foundation/extraction.html#Extractor._release"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.extraction.Extractor._release" title="Link to this definition">¶</a></dt>
+<dd><p>Close the input this class owns, and the engine.</p>
+<p>The one close path, shared by <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._cleanup" title="pcapkit.foundation.extraction.Extractor._cleanup"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_cleanup()</span></code></a> and <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor.__exit__" title="pcapkit.foundation.extraction.Extractor.__exit__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__exit__()</span></code></a>, so
+that the two cannot drift apart on what is released or in which order.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>failed</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span>) – see <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._cleanup" title="pcapkit.foundation.extraction.Extractor._cleanup"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_cleanup()</span></code></a>. When set, a missing engine is skipped and
+an <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#Exception" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">Exception</span></code></a> from its close is logged rather than raised.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><span class="highlight sphinx_autodoc_typehints-value"><a class="reference external" href="https://docs.python.org/3/builtins/constants.html#None" title="(in Python v3.15)"><code class="xref py py-obj docutils literal notranslate"><span class="kc"><span class="pre">None</span></span></code></a></span></span></p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1470,6 +1506,13 @@ block no longer closes it behind the caller’s back (<a class="extlink-issue re
 <a class="reference internal" href="../corekit/io.html#pcapkit.corekit.io.SeekableReader" title="pcapkit.corekit.io.SeekableReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">SeekableReader</span></code></a> wrapped around it, and that
 wrapper is closed; it was built with <code class="docutils literal notranslate"><span class="pre">stream_closing</span></code> off, so closing
 it leaves the caller’s stream underneath open.</p>
+<p>Both go through <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._release" title="pcapkit.foundation.extraction.Extractor._release"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_release()</span></code></a>, the close path <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._cleanup" title="pcapkit.foundation.extraction.Extractor._cleanup"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_cleanup()</span></code></a> shares.
+Unlike <a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._cleanup" title="pcapkit.foundation.extraction.Extractor._cleanup"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_cleanup()</span></code></a>, this neither finishes the flow tracer nor sets
+<a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._flag_e" title="pcapkit.foundation.extraction.Extractor._flag_e"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_flag_e</span></code></a>: leaving the block is not the end of the capture – an
+extraction with <code class="docutils literal notranslate"><span class="pre">auto=False</span></code> may be left before end of file, or on an
+error – so there is nothing it can truthfully report as over, and an
+extraction that did reach the end has already been through
+<a class="reference internal" href="#pcapkit.foundation.extraction.Extractor._cleanup" title="pcapkit.foundation.extraction.Extractor._cleanup"><code class="xref py py-meth docutils literal notranslate"><span class="pre">_cleanup()</span></code></a>. An error from the engine’s close propagates.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -1526,7 +1569,7 @@ built-in engine is written. Not part of the public API.</p>
 <dd class="field-even"><p><a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.RegistryError" title="pcapkit.utilities.exceptions.RegistryError"><strong>RegistryError</strong></a> – If <code class="docutils literal notranslate"><span class="pre">engine</span></code> is not an <a class="reference internal" href="engines/engine.html#pcapkit.foundation.engines.engine.EngineBase" title="pcapkit.foundation.engines.engine.EngineBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">EngineBase</span></code></a> subclass.</p>
 </dd>
 <dt class="field-odd">Warns<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>RegistryWarning</strong> – If a different class is already registered under
+<dd class="field-odd"><p><a class="reference internal" href="../utilities/warnings.html#pcapkit.utilities.warnings.RegistryWarning" title="pcapkit.utilities.warnings.RegistryWarning"><code class="xref py py-exc docutils literal notranslate"><span class="pre">RegistryWarning</span></code></a> – If a different class is already registered under
 <code class="docutils literal notranslate"><span class="pre">name</span></code>; it is overwritten.</p>
 </dd>
 </dl>

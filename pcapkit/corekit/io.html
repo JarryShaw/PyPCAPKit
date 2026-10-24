@@ -307,6 +307,7 @@
 <li class="toctree-l3"><a class="reference internal" href="../utilities/logging.html">Logging System</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/config.html">Configuration</a></li>
 <li class="toctree-l3"><a class="reference internal" href="../utilities/chardet.html">Character Set Detection</a></li>
+<li class="toctree-l3"><a class="reference internal" href="../utilities/timestamp.html">Timestamp Conversion</a></li>
 </ul>
 </li>
 <li class="toctree-l2 current has-children"><a class="reference internal" href="index.html">Core Utilities</a><input aria-label="Toggle navigation of Core Utilities" checked="" class="toctree-checkbox" id="toctree-checkbox-15" name="toctree-checkbox-15" role="switch" type="checkbox"/><label for="toctree-checkbox-15"><span class="icon"><svg><use href="#svg-arrow-right"></use></svg></span></label><ul class="current">
@@ -501,8 +502,9 @@
 <a class="reference external" href="https://docs.python.org/3/library/io.html#io.BufferedReader" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">io.BufferedReader</span></code></a>, and the stream proxies:
 <a class="reference internal" href="#pcapkit.corekit.io.PeekableStream" title="pcapkit.corekit.io.PeekableStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">PeekableStream</span></code></a>, which adds <code class="docutils literal notranslate"><span class="pre">peek</span></code> to a seekable
 stream, and <a class="reference internal" href="#pcapkit.corekit.io.NamedStream" title="pcapkit.corekit.io.NamedStream"><code class="xref py py-class docutils literal notranslate"><span class="pre">NamedStream</span></code></a>, which gives a stream a
-<code class="docutils literal notranslate"><span class="pre">name</span></code>; and <a class="reference internal" href="#pcapkit.corekit.io.advance" title="pcapkit.corekit.io.advance"><code class="xref py py-func docutils literal notranslate"><span class="pre">advance()</span></code></a>, which moves a stream past
-more octets than one read or seek can take.</p>
+<code class="docutils literal notranslate"><span class="pre">name</span></code>; <a class="reference internal" href="#pcapkit.corekit.io.advance" title="pcapkit.corekit.io.advance"><code class="xref py py-func docutils literal notranslate"><span class="pre">advance()</span></code></a>, which moves a stream past
+more octets than one read or seek can take; and
+<a class="reference internal" href="#pcapkit.corekit.io.can_seek" title="pcapkit.corekit.io.can_seek"><code class="xref py py-func docutils literal notranslate"><span class="pre">can_seek()</span></code></a>, which tells whether a stream really seeks.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="pcapkit.corekit.io.SeekableReader">
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.io.</span></span><span class="sig-name descname"><span class="pre">SeekableReader</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">raw</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_size</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">io.DEFAULT_BUFFER_SIZE</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_save</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">buffer_path</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">stream_closing</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/io.html#SeekableReader"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.io.SeekableReader" title="Link to this definition">¶</a></dt>
@@ -1032,11 +1034,29 @@ a single byte was read.</p>
 as far as the limit; the next record still starts where this one declares it
 ends (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1975">#1975</a>). A seekable stream gets there by relative seeks, none
 longer than <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.maxsize" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.maxsize</span></code></a>, and may land past its end, as an absolute seek
-would. A <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader" title="pcapkit.corekit.io.SeekableReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">SeekableReader</span></code></a>, or a stream that cannot seek, reads the
+would. A <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader" title="pcapkit.corekit.io.SeekableReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">SeekableReader</span></code></a>, or a stream that cannot seek – including
+one that only says it can, as a Windows pipe does (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2108">#2108</a>) – reads the
 octets and discards them, no more than
 <a class="reference internal" href="../utilities/config.html#pcapkit.utilities.config.READ_CHUNK" title="pcapkit.utilities.config.READ_CHUNK"><code class="xref py py-data docutils literal notranslate"><span class="pre">READ_CHUNK</span></code></a> at a time, and stops at the end
 of the stream: a <a class="reference internal" href="#pcapkit.corekit.io.SeekableReader" title="pcapkit.corekit.io.SeekableReader"><code class="xref py py-class docutils literal notranslate"><span class="pre">SeekableReader</span></code></a> seek reads at most a buffer’s worth
 past what it holds, so a longer one would stop short of the target.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.corekit.io.can_seek">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.corekit.io.</span></span><span class="sig-name descname"><span class="pre">can_seek</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">stream</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/corekit/io.html#can_seek"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.corekit.io.can_seek" title="Link to this definition">¶</a></dt>
+<dd><p>Whether <code class="docutils literal notranslate"><span class="pre">stream</span></code> can really seek, rather than only saying it can.</p>
+<p>On Windows before CPython 3.16, a pipe reports <a class="reference external" href="https://docs.python.org/3/library/io.html#io.IOBase.seekable" title="(in Python v3.15)"><code class="xref py py-meth docutils literal notranslate"><span class="pre">seekable()</span></code></a>
+and its <code class="docutils literal notranslate"><span class="pre">seek</span></code> silently does nothing (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2097">#2097</a>), so the answer is
+trusted only for a regular file, or for a stream with no descriptor to ask.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>stream</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.IO" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">IO</span></code></a>[<a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#bytes" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bytes</span></code></a>]</span>) – The input stream.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#bool" title="(in Python v3.15)"><code class="xref py py-class docutils literal notranslate"><span class="pre">bool</span></code></a></span></p>
+</dd>
+</dl>
 </dd></dl>
 
 </section>
