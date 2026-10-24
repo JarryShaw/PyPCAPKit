@@ -49,7 +49,8 @@ from pcapkit.utilities.warnings import (AttributeWarning, EngineWarning, Extract
 if TYPE_CHECKING:
     from io import BufferedReader
     from types import ModuleType, TracebackType
-    from typing import IO, Any, Callable, DefaultDict, Iterable, Mapping, Optional, Type, Union
+    from typing import (IO, Any, Callable, DefaultDict, Iterable, Mapping, Optional, Tuple, Type,
+                        Union)
 
     from dpkt.dpkt import Packet as DPKTPacket
     from pcapfile.structs import pcap_packet as PCAPFilePacket
@@ -84,7 +85,7 @@ if TYPE_CHECKING:
     # One member covers both: they read the same interface, from two independent
     # distributions of it.
     Packet = Union[Frame, PCAPNG, ScapyPacket, DPKTPacket, PySharkPacket,
-                   PCAPFilePacket, tuple[float, bytes]]
+                   PCAPFilePacket, Tuple[float, bytes]]
 
     Protocols = Union[str, ProtocolBase, Type[ProtocolBase]]
     # NOTE: every caller discards the callback's result, so it is typed ``Any``:

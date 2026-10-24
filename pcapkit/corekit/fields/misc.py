@@ -255,7 +255,7 @@ class PayloadField(FieldBase[_TP]):
     def protocol(self) -> 'Type[_TP]':
         """Payload protocol."""
         if self._protocol is None:
-            from pcapkit.protocols.misc.raw import Raw  # type: ignore[unreachable] # pylint: disable=import-outside-toplevel # isort:skip
+            from pcapkit.protocols.misc.raw import Raw  # pylint: disable=import-outside-toplevel # isort:skip
             return Raw
         return self._protocol
 
@@ -391,7 +391,7 @@ class PayloadField(FieldBase[_TP]):
 
         """
         if self._protocol is None:
-            if isinstance(buffer, bytes):  # type: ignore[unreachable]
+            if isinstance(buffer, bytes):
                 return cast('_TP', buffer)
             return cast('_TP', buffer.read())
 
@@ -458,7 +458,7 @@ class SwitchField(FieldBase[_TC]):
         """Field instance."""
         return self._field
 
-    def __init__(self, selector: 'Callable[[dict[str, Any]], FieldBase[_TC]]' = lambda _: NoValueField()) -> 'None':  # type: ignore[assignment,return-value]
+    def __init__(self, selector: 'Callable[[dict[str, Any]], FieldBase[_TC]]' = lambda _: NoValueField()) -> 'None':
         #self._name = '<switch>'
         self._field = cast('FieldBase[_TC]', NoValueField())
         self._selector = selector

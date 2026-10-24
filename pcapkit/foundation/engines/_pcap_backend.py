@@ -150,7 +150,7 @@ def installed_distributions() -> 'tuple[str, ...]':
         try:
             if next(iter(importlib.metadata.distributions(name=name)), None) is None:
                 continue
-        except Exception:  # pylint: disable=broad-except
+        except Exception:  # pylint: disable=broad-except  # nosec: B112  # see below
             # A corrupt or unreadable ``dist-info`` is not a reason to fail an
             # extraction. Detection is a courtesy; treat "cannot tell" as "not
             # installed" and let the import attempt be the authority.

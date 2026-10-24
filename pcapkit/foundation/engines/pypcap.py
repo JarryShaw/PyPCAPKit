@@ -28,7 +28,7 @@ from pcapkit.utilities.warnings import AttributeWarning, EngineWarning, warn
 __all__ = ['PyPCAP']
 
 if TYPE_CHECKING:
-    from typing import Iterator, Optional, Protocol, Type
+    from typing import Iterator, Optional, Protocol, Tuple, Type
 
     from pcap import pcap as Handle
 
@@ -44,7 +44,7 @@ if TYPE_CHECKING:
     #: iteration yields. Deliberately *not* named ``Frame``, so that it is not
     #: mistaken for :class:`pcapkit.protocols.misc.pcap.frame.Frame`, which is
     #: what the built-in engines return.
-    RawFrame = tuple[float, bytes]
+    RawFrame = Tuple[float, bytes]
 
 
 class PyPCAP(EngineBase['RawFrame']):

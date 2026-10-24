@@ -425,12 +425,13 @@ class RenderDictTests(unittest.TestCase):
         block = encap_map.render_dict('FILTER_NAME_TO_LINKTYPE', entries, 'str')
 
         self.assertIn("    'eth': Enum_LinkType.ETHERNET,", block)
-        self.assertTrue(block.rstrip('\n').endswith('}  # type: dict[str, Enum_LinkType]'))
+        self.assertTrue(block.startswith("FILTER_NAME_TO_LINKTYPE = cast('dict[str, Enum_LinkType]', {\n"))
+        self.assertTrue(block.rstrip('\n').endswith('})  # a cast, as mypy reads aenum members as int (#2145)'))
 
     def test_empty_table_still_closes_correctly(self) -> None:
         block = encap_map.render_dict('EMPTY', {}, 'int')
 
-        self.assertEqual(block, 'EMPTY = {\n}  # type: dict[int, Enum_LinkType]\n')
+        self.assertEqual(block, "EMPTY = cast('dict[int, Enum_LinkType]', {\n})  # a cast, as mypy reads aenum members as int (#2145)\n")
 
 
 class ReplaceBlockTests(unittest.TestCase):
@@ -439,19 +440,19 @@ class ReplaceBlockTests(unittest.TestCase):
     TEXT = (
         'BEFORE = 1\n'
         '\n'
-        'ENCAP_TYPE_TO_LINKTYPE = {\n'
+        "ENCAP_TYPE_TO_LINKTYPE = cast('dict[int, Enum_LinkType]', {\n"
         '    1: Enum_LinkType.ETHERNET,  # ether\n'
-        '}  # type: dict[int, Enum_LinkType]\n'
+        '})  # a cast, as mypy reads aenum members as int (#2145)\n'
         '\n'
-        'FILTER_NAME_TO_LINKTYPE = {\n'
+        "FILTER_NAME_TO_LINKTYPE = cast('dict[str, Enum_LinkType]', {\n"
         "    'eth': Enum_LinkType.ETHERNET,  # ether\n"
-        '}  # type: dict[str, Enum_LinkType]\n'
+        '})  # a cast, as mypy reads aenum members as int (#2145)\n'
         '\n'
         'AFTER = 2\n'
     )
 
     def test_surrounding_text_survives_the_swap(self) -> None:
-        replacement = 'ENCAP_TYPE_TO_LINKTYPE = {\n    2: Enum_LinkType.SLIP,  # slip\n}  # type: dict[int, Enum_LinkType]\n'
+        replacement = encap_map.render_dict('ENCAP_TYPE_TO_LINKTYPE', {2: (Enum_LinkType.SLIP, ['slip'])}, 'int')
 
         updated = encap_map._replace_block(self.TEXT, 'ENCAP_TYPE_TO_LINKTYPE', replacement)
 

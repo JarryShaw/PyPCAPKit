@@ -163,7 +163,7 @@ class TLSKeyLabel(Vendor):
             sufs = self.wrap_comment(f'{desc}, c.f., :rfc:`{rfc}{section}`.')
 
             pref = f"{renm} = '{label}'"
-            # NOTE: mirrors the ``# nosec B105`` bandit suppression every
+            # NOTE: mirrors the ``nosec B105`` bandit suppression every
             # such member carried in the hand-written
             # ``pcapkit.protocols.misc.pcapng.TLSKeyLabel`` (#882) --
             # bandit's B105 (hardcoded password string) flags a string

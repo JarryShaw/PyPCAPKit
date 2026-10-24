@@ -16,7 +16,7 @@ cannot be used for it.
 """
 import decimal
 import ipaddress
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from pcapkit.const.reg.linktype import LinkType as Enum_LinkType
 from pcapkit.foundation.traceflow.data.tcp import Packet as TF_TCP_Packet
@@ -59,7 +59,7 @@ __all__ = ['packet2dict', 'tcp_traceflow', 'ENCAP_TYPE_TO_LINKTYPE', 'FILTER_NAM
 #: Each is below except ``frame.encap_type`` 32 (``editcap -T hhdlc``, DLT 121), left out because
 #: :class:`~pcapkit.const.reg.linktype.LinkType` has no member for 121. An encapsulation absent
 #: from this table raises rather than resolving to a near-miss DLT.
-ENCAP_TYPE_TO_LINKTYPE = {
+ENCAP_TYPE_TO_LINKTYPE = cast('dict[int, Enum_LinkType]', {
     1: Enum_LinkType.ETHERNET,                     # ether
     2: Enum_LinkType.IEEE802_5,                    # tr
     3: Enum_LinkType.SLIP,                         # slip
@@ -212,7 +212,7 @@ ENCAP_TYPE_TO_LINKTYPE = {
     222: Enum_LinkType.SILABS_DEBUG_CHANNEL,       # silabs-dch
     223: Enum_LinkType.MDB,                        # mdb
     225: Enum_LinkType.DECT_NR,                    # dect_nr
-}  # type: dict[int, Enum_LinkType]
+})  # a cast, as mypy reads aenum members as int (#2145)
 
 #: Wireshark display-filter name -> :class:`~pcapkit.const.reg.linktype.LinkType` member, used by
 #: :func:`tcp_traceflow` **only** when the frame layer carries no ``frame.encap_type`` field for
@@ -256,7 +256,7 @@ ENCAP_TYPE_TO_LINKTYPE = {
 #: ``frame.encap_type`` is the primary key; ``eth`` and ``tr`` additionally check out against
 #: Wireshark's own registrations (``packet-eth.c`` on ``WTAP_ENCAP_ETHERNET``, ``packet-tr.c`` on
 #: ``WTAP_ENCAP_TOKEN_RING``).
-FILTER_NAME_TO_LINKTYPE = {
+FILTER_NAME_TO_LINKTYPE = cast('dict[str, Enum_LinkType]', {
     'alp': Enum_LinkType.ATSC_ALP,                             # alp
     'ap1394': Enum_LinkType.APPLE_IP_OVER_IEEE1394,            # ap1394
     'atm': Enum_LinkType.SUNATM,                               # atm-pdus
@@ -315,7 +315,7 @@ FILTER_NAME_TO_LINKTYPE = {
     'vsock': Enum_LinkType.VSOCK,                              # vsock
     'wpan-nonask-phy': Enum_LinkType.IEEE802_15_4_NONASK_PHY,  # wpan-nonask-phy
     'xra': Enum_LinkType.DOCSIS31_XRA31,                       # docsis31_xra31
-}  # type: dict[str, Enum_LinkType]
+})  # a cast, as mypy reads aenum members as int (#2145)
 
 #: PyShark's text for a boolean field -> its value. tshark 4.x spells one ``'True'``/``'False'``
 #: (measured for ``tcp.flags_syn``, ``tcp.flags_fin`` and ``tcp.flags_reset`` with PyShark 0.6

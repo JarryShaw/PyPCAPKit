@@ -9002,7 +9002,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
     def _make_opt_ipv4_hoa(self, type: 'Enum_Option', option: 'Optional[Data_IPv4HomeAddressOption]' = None, *,
                            prefix_length: 'int' = 32,
-                           address: 'bytes | str | int | IPv4Address' = '0.0.0.0',
+                           address: 'bytes | str | int | IPv4Address' = '0.0.0.0',  # nosec: B104  # not a bind
                            request_prefix: 'bool' = False,
                            reserved: 'int' = 0,
                            **kwargs: 'Any') -> 'Schema_IPv4HomeAddressOption':
@@ -9048,7 +9048,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                            status_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
                            status_reversed: 'bool' = False,
                            prefix_length: 'int' = 32,
-                           address: 'bytes | str | int | IPv4Address' = '0.0.0.0',
+                           address: 'bytes | str | int | IPv4Address' = '0.0.0.0',  # nosec: B104  # not a bind
                            reserved: 'int' = 0,
                            **kwargs: 'Any') -> 'Schema_IPv4AddressAcknowledgementOption':
         """Make MH IPv4 address acknowledgement option.
@@ -9124,7 +9124,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         )
 
     def _make_opt_ipv4_coa(self, type: 'Enum_Option', option: 'Optional[Data_IPv4CareofAddressOption]' = None, *,
-                           address: 'bytes | str | int | IPv4Address' = '0.0.0.0',
+                           address: 'bytes | str | int | IPv4Address' = '0.0.0.0',  # nosec: B104  # not a bind
                            reserved: 'bytes' = b'\x00\x00',
                            **kwargs: 'Any') -> 'Schema_IPv4CareofAddressOption':
         """Make MH IPv4 care-of address option.
@@ -9260,7 +9260,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
     def _make_opt_ipv4_hoa_req(self, type: 'Enum_Option',
                                                           option: 'Optional[Data_IPv4HomeAddressRequestOption]' = None, *,
                                prefix_length: 'int' = 32,
-                               address: 'bytes | str | int | IPv4Address' = '0.0.0.0',
+                               address: 'bytes | str | int | IPv4Address' = '0.0.0.0',  # nosec: B104  # not a bind
                                reserved: 'int' = 0,
                                **kwargs: 'Any') -> 'Schema_IPv4HomeAddressRequestOption':
         """Make MH IPv4 home address request option.
@@ -9298,7 +9298,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
                                status_namespace: 'Optional[dict[str, int] | dict[int, str] | Type[StdlibEnum] | Type[AenumEnum]]' = None,  # pylint: disable=line-too-long
                                status_reversed: 'bool' = False,
                                prefix_length: 'int' = 32,
-                               address: 'bytes | str | int | IPv4Address' = '0.0.0.0',
+                               address: 'bytes | str | int | IPv4Address' = '0.0.0.0',  # nosec: B104  # not a bind
                                reserved: 'int' = 0,
                                **kwargs: 'Any') -> 'Schema_IPv4HomeAddressReplyOption':
         """Make MH IPv4 home address reply option.
@@ -9341,7 +9341,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
     def _make_opt_ipv4_router(self, type: 'Enum_Option',
                                                          option: 'Optional[Data_IPv4DefaultRouterAddressOption]' = None, *,
-                              address: 'bytes | str | int | IPv4Address' = '0.0.0.0',
+                              address: 'bytes | str | int | IPv4Address' = '0.0.0.0',  # nosec: B104  # not a bind
                               reserved: 'bytes' = b'\x00\x00',
                               **kwargs: 'Any') -> 'Schema_IPv4DefaultRouterAddressOption':
         """Make MH IPv4 default-router address option.
@@ -9909,7 +9909,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
     def _make_opt_alt_ipv4_coa(self, type: 'Enum_Option',
                                                           option: 'Optional[Data_AlternateIPv4CareofAddressOption]' = None, *,
-                               address: 'bytes | str | int | IPv4Address' = '0.0.0.0',
+                               address: 'bytes | str | int | IPv4Address' = '0.0.0.0',  # nosec: B104  # not a bind
                                **kwargs: 'Any') -> 'Schema_AlternateIPv4CareofAddressOption':
         """Make MH alternate IPv4 care-of address option.
 

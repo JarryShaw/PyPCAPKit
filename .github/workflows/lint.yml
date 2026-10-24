@@ -5,19 +5,20 @@ name: "Lint"
 # that rewrites the generated constants, not as a check.
 #
 # Every step but actionlint is advisory (`continue-on-error: true`), because none
-# is clean and a job red from day one teaches everyone to ignore red. Promote a
-# step by deleting its `continue-on-error` once it is clean, and move it below
-# the advisory steps, as a failed step skips every step after it. Counts are in
-# the run summary, not here: written-down counts drift (#753).
+# was clean when added, and a job red from day one teaches everyone to ignore
+# red. Promote a step by deleting its `continue-on-error` once it is clean, and
+# move it below the advisory steps, as a failed step skips every step after it.
+# Counts are in the run summary, not here: written-down counts drift (#753).
 #
 # pylint's `R0401` cyclic-import depends on module-processing order, so runs on
 # one tree disagree on it; a change in the R class alone is not evidence.
 #
 # Promotion order, cheapest first:
-#   * bandit -- mostly B104 on `'0.0.0.0'` default arguments in MH/MIP option
-#     builders, which bind no socket; triage the rest with `# nosec`.
-#   * mypy -- part of its output is `unused-ignore`, risk-free to delete.
-#   * vermin -- blocked on a decision, not on cleanup: see its step.
+#   * bandit -- clean since #2145: each finding was a false positive and carries
+#     a justified `# nosec`. Promotable.
+#   * vermin -- clean since #2145: meets vermin.ini's 3.8 target. Promotable.
+#   * mypy -- #2145 cleared the `unused-ignore`s and the pyshark link-type
+#     tables; the rest is real typing work.
 #   * pylint -- not realistically promotable: `unused-argument`,
 #     `redefined-builtin` and `super-init-not-called` are inherent to the
 #     schema DSL, and its metaprogramming yields `unsubscriptable-object` and
@@ -127,11 +128,10 @@ jobs:
       # `vermin-ci`, not `vermin`: that target redirects the report into temp/,
       # out of this log. Same flags, via $(VERMIN_FLAGS).
       #
-      # Blocking needs a decision, not a cleanup. vermin.ini's `targets = 3.8`
-      # matches `requires-python` (#2051), but vermin reports 3.11:
-      # `--no-parse-comments` ignores the `# novermin` markers on compat.py's
-      # version-gated imports, and evaluated annotations put some
-      # `pcapkit.foundation` modules at 3.9.
+      # vermin.ini's `targets = 3.8` matches `requires-python` (#2051). Comments
+      # are parsed (#2145), so the `# novermin` markers on compat.py's
+      # version-gated imports count, and builtin generics in evaluated
+      # annotations are spelt with `typing` aliases.
       - name: vermin
         id: vermin
         continue-on-error: true

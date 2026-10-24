@@ -1010,7 +1010,7 @@ class MultiInfo(_MultiInfo[KT, VT], MultiDict[KT, VT]):
     __hash__ = None  # type: ignore[assignment]
     __repr__ = MultiDict.__repr__
     __str__ = MultiDict.__str__
-    __copy__ = MultiDict.__copy__  # type: ignore[assignment]
+    __copy__ = MultiDict.__copy__
     keys = MultiDict.keys
     values = MultiDict.values
     items = MultiDict.items  # type: ignore[assignment]
@@ -1104,7 +1104,7 @@ class OrderedMultiInfo(_MultiInfo[KT, VT], OrderedMultiDict[KT, VT]):
     __hash__ = None
     __repr__ = OrderedMultiDict.__repr__
     __str__ = OrderedMultiDict.__str__
-    __copy__ = OrderedMultiDict.__copy__  # type: ignore[assignment]
+    __copy__ = OrderedMultiDict.__copy__
     keys = OrderedMultiDict.keys
     values = OrderedMultiDict.values
     items = OrderedMultiDict.items  # type: ignore[assignment]
@@ -1301,7 +1301,7 @@ def _nested_types(cls: 'Type[Info]') -> 'dict[str, Type[Info]]':
             try:
                 hint = typing.get_type_hints(types.SimpleNamespace(__annotations__={key: ann}),
                                              globalns, localns)[key]
-            except Exception:  # pylint: disable=broad-except
+            except Exception:  # pylint: disable=broad-except  # nosec: B112  # unresolvable: not nested
                 continue
 
             info_cls = _as_info_type(hint)

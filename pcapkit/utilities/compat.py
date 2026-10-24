@@ -8,7 +8,7 @@ from functools import cached_property
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from typing import Any, Iterator, Optional
+    from typing import Any, Iterator, Optional, Type
 
 __all__ = [
     # functions
@@ -127,7 +127,7 @@ if sys.version_info < (3, 11):
         class _ContextManager:
             def __init__(self, new_context: Context) -> None: ...
             def __enter__(self) -> Context: ...
-            def __exit__(self, t: type[BaseException] | None, v: BaseException | None, tb: TracebackType | None) -> None: ...
+            def __exit__(self, t: Type[BaseException] | None, v: BaseException | None, tb: TracebackType | None) -> None: ...
 
     @contextmanager
     def localcontext(ctx: 'Optional[Context]' = None, **kwargs: 'Any') -> '_ContextManager':
@@ -163,7 +163,7 @@ if sys.version_info < (3, 11):
     def show_flag_values(value: 'IntFlag') -> 'list[int]':
         return list(_iter_bits_lsb(value))
 else:
-    from enum import show_flag_values  # type: ignore[attr-defined]  # novermin
+    from enum import show_flag_values  # novermin
 
 if sys.version_info < (3, 10):
     from typing_extensions import TypeAlias
