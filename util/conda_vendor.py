@@ -906,19 +906,26 @@ def runner_platform() -> 'Optional[str]':
                 None)
 
 
+#: The ``site-packages`` of a Windows package, which names no Python: conda-forge's
+#: up to 3.14, and its CFEP-27 one from 3.15 on.
+WINDOWS_SITES = (('Lib', 'site-packages'), ('lib', 'python', 'site-packages'))
+
+
 def built_for(site: 'pathlib.Path', index: 'dict[str, Any]') -> 'str':
     """The ``pythonX.Y`` a package's ``site-packages`` at ``site`` is for, or what it is if not that.
 
     A POSIX package names it in the path, ``lib/pythonX.Y/site-packages``. A
-    Windows one has ``Lib/site-packages`` for every version (#2060), so it is read
+    Windows one does not (#2060): ``Lib/site-packages`` up to 3.14, and from 3.15
+    ``lib/python/site-packages``, conda-forge's CFEP-27 layout. So that is read
     from the ``pyXY`` that starts the build string in ``info/index.json``.
 
     """
-    if site.parent.name != 'Lib':
+    layout = next((parts for parts in WINDOWS_SITES if site.parts[-len(parts):] == parts), None)
+    if layout is None:
         return site.parent.name
     match = re.match(r'py(\d)(\d+)(?![0-9])', str(index.get('build', '')))
     if match is None:
-        return f'Lib/site-packages with build string {index.get("build")!r}'
+        return f'{"/".join(layout)} with build string {index.get("build")!r}'
     return f'python{match.group(1)}.{match.group(2)}'
 
 
