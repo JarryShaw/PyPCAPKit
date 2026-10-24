@@ -1320,8 +1320,9 @@ to a script. Each script's docstring says what it does; each has tests under
      - No.
    * - :file:`util/_actions.py`
      - No step: it is imported by the scripts that share its annotations, step
-       outputs, job summary lines and logged runs (`#2047
-       <https://github.com/JarryShaw/PyPCAPKit/issues/2047>`__).
+       outputs, job summary lines and logged runs (:issue:`2047`), and its
+       environment read as bytes where Windows has no ``os.environb``
+       (:issue:`2120`).
      - No: imported only.
    * - :file:`util/codeql_report.py`
      - ``Write the report`` in ``codeql-analysis.yml``'s ``discussion`` (see `CI

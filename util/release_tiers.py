@@ -76,7 +76,9 @@ class Failed(Exception):
 def var(name: 'str') -> 'bytes':
     """``$name``, as bytes; :exc:`Unbound` where it is unset."""
     try:
-        return os.environb[name.encode()]
+        # #2120: through the helper, which reads os.environ where os.environb is
+        # missing, as on Windows.
+        return _actions.getenvb(name)
     except KeyError:
         raise Unbound(name) from None
 
