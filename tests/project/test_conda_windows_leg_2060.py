@@ -10,8 +10,8 @@ uploads from both with the anaconda-client CLI, as the Intel legs do (#2044).
 * :class:`TestTheWindowsLegPublishes`: on ``windows-latest`` each job runs one
   upload, "Upload conda packages to Anaconda (Windows)", evaluated with
   :func:`tests.project.test_release_gates.evaluate_condition`; it is the Intel
-  step's call in a login shell, and skips a manual run and a leg already on
-  Anaconda. :data:`release_published.SUBDIRS` counts the platform.
+  step's call in a login shell, and skips a build-only manual run and a leg
+  already on Anaconda. :data:`release_published.SUBDIRS` counts the platform.
 * :class:`TestTheWindowsLegBlocks`: no step continues on error and no
   ``Windows summary`` reports, so a failure fails the leg as it does the others;
   each ``run:`` the leg reaches names ``bash``.
@@ -89,24 +89,28 @@ def step(name: 'str', job_id: 'str', step_name: 'str') -> 'dict[str, Any]':
 
 
 def context(job: 'dict[str, Any]', os_label: 'str', event_name: 'str' = 'schedule',
-            published: 'str' = 'false') -> 'dict[str, object]':
+            published: 'str' = 'false', publish: 'bool' = False) -> 'dict[str, object]':
     """A leg on ``os_label`` where every earlier step succeeded and the GitHub release exists.
 
     On the schedule unless ``event_name`` says otherwise: a manual run uploads
-    nothing on any leg, which :mod:`tests.project.test_build_only_dispatch` pins.
-    ``published`` is what the release job's ``check_leg`` found.
+    nothing on any leg, which :mod:`tests.project.test_build_only_dispatch` pins,
+    unless ``publish`` is set (#2060), which Conda Update's ``mode`` job turns
+    into ``publishes``. ``published`` is what the release job's ``check_leg``
+    found.
 
     """
     steps = {entry['id']: {'outcome': 'success', 'conclusion': 'success',
                            'outputs': {'published': 'true', 'PCAPKIT_LEG_EXISTS': published}}
              for entry in job['steps'] if 'id' in entry}
+    publishes = 'true' if publish or event_name != 'workflow_dispatch' else 'false'
     return {'matrix': {'os': os_label}, 'steps': steps, 'github': {'event_name': event_name},
+            'needs': {'mode': {'result': 'success', 'outputs': {'publishes': publishes}}},
             STATUS: {'cancelled': False, 'success': True, 'failure': False}}
 
 
 def runs(job: 'dict[str, Any]', entry: 'dict[str, Any]', os_label: 'str', event_name: 'str' = 'schedule',
-         published: 'str' = 'false') -> 'bool':
-    return evaluate_condition(str(entry.get('if', 'true')), context(job, os_label, event_name, published))
+         published: 'str' = 'false', publish: 'bool' = False) -> 'bool':
+    return evaluate_condition(str(entry.get('if', 'true')), context(job, os_label, event_name, published, publish))
 
 
 def sensitive(entry: 'dict[str, Any]') -> 'bool':
@@ -116,10 +120,10 @@ def sensitive(entry: 'dict[str, Any]') -> 'bool':
 
 
 def publishers(job: 'dict[str, Any]', os_label: 'str', event_name: 'str' = 'schedule',
-               published: 'str' = 'false') -> 'list[str]':
+               published: 'str' = 'false', publish: 'bool' = False) -> 'list[str]':
     """Each step of ``job`` that reads a secret or publishes, and would run on ``os_label``."""
     return [str(entry.get('name') or entry.get('uses')) for entry in job['steps']
-            if sensitive(entry) and runs(job, entry, os_label, event_name, published)]
+            if sensitive(entry) and runs(job, entry, os_label, event_name, published, publish)]
 
 
 class TestTheWindowsLegPublishes(unittest.TestCase):
@@ -149,7 +153,12 @@ class TestTheWindowsLegPublishes(unittest.TestCase):
     def test_a_manual_conda_update_run_publishes_nothing_there(self) -> None:
         job = spec('cron-conda.yml', 'conda-dist')
         self.assertEqual(publishers(job, WINDOWS, event_name='workflow_dispatch'), [])
-        self.assertEqual(job['environment'], "${{ github.event_name != 'workflow_dispatch' && 'anaconda' || '' }}")
+        self.assertEqual(job['environment'], "${{ needs.mode.outputs.publishes == 'true' && 'anaconda' || '' }}")
+
+    def test_a_manual_conda_update_run_with_publish_uploads_there(self) -> None:
+        """#2060: the manual run that gets 1.5.0b14's missing win-64 file onto Anaconda."""
+        job = spec('cron-conda.yml', 'conda-dist')
+        self.assertEqual(publishers(job, WINDOWS, event_name='workflow_dispatch', publish=True), [WINDOWS_UPLOAD])
 
     def test_a_leg_already_on_anaconda_skips_it(self) -> None:
         """#888's per-leg check gates the Windows upload as it does the others."""

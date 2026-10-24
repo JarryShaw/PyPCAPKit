@@ -402,7 +402,8 @@ this run, it *skipped*.
 ``tag``, ``pypi`` and ``conda`` all guard against this the same way the
 other workflows gated on a test run already do for the identical problem --
 ``cron-vendor.yml``, ``deploy-pages.yml`` and ``cron-conda.yml`` each open
-with ``!cancelled() && needs.head.result != 'failure'``, ``head`` being their
+with ``!cancelled()`` and require ``needs.head.result != 'failure'`` (and, in
+``cron-conda.yml``, its ``mode`` job's success, :issue:`2060`), ``head`` being their
 call to ``cron-head.yml``, so that a skipped gate does not cascade-skip them,
 while an outright failure or a genuine run cancellation still does. ``tag``, ``pypi`` and ``conda`` are
 stricter about their *publishing* predecessors -- ``github``, and for

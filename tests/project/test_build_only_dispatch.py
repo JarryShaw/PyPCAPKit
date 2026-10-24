@@ -11,9 +11,12 @@ so that we can easily debug without waiting". So:
   step that pushes, tags, uploads, deploys, posts or reads a secret is
   unreachable on ``workflow_dispatch``. Read conservatively: the step's own
   ``if:``, or its job's, has to hold ``github.event_name != 'workflow_dispatch'``
-  as a top-level ``&&`` conjunct, which makes it false whatever else is true.
-  A job that still runs names no environment, and no run joins a concurrency
-  group a real run waits in.
+  as a top-level ``&&`` conjunct, which makes it false whatever else is true --
+  or, in Conda Update, ``needs.mode.outputs.publishes == 'true'``, which its
+  ``mode`` job writes 'false' on a manual run without ``publish`` (#2060). A
+  job that still runs names no environment, and no run joins a concurrency
+  group a real run waits in. :mod:`tests.project.test_conda_publish_dispatch_2060`
+  covers a manual Conda Update run with ``publish``.
 * :class:`TestAManualRunStillBuilds`: the jobs and steps that build and test
   run on a manual run as they do on the schedule.
 * :class:`TestCreateReleaseIgnoresAManualVendorUpdate`: Create Release, which
@@ -49,6 +52,12 @@ __tier__ = 'LATEST'
 DISPATCH = 'workflow_dispatch'
 #: The guard each publishing step or job carries, whitespace removed.
 GUARD = "github.event_name!='workflow_dispatch'"
+#: Conda Update's form of it (#2060): its `mode` job's verdict, which is 'false'
+#: on a manual run without `publish`, as test_conda_publish_dispatch_2060.py runs it to show.
+PUBLISH_GUARD = "needs.mode.outputs.publishes=='true'"
+#: Each guard's own text, for the scan that strips them.
+_GUARDS = re.compile(r"(github\.event_name != 'workflow_dispatch'|needs\.mode\.outputs\.publishes == 'true')"
+                     r"(\s*&&\s*)?")
 #: Scheduled workflows with no manual run, and why none is needed.
 EXEMPT = {
     'codeql-analysis.yml': 'runs on every push to main and every pull request',
@@ -103,7 +112,7 @@ def conjuncts(condition: 'object') -> 'Optional[list[str]]':
 
 def guarded(entry: 'dict[str, Any]') -> 'bool':
     """Whether ``entry``'s ``if:`` is false on a manual run, whatever else holds."""
-    return GUARD in (conjuncts(entry['if']) or []) if 'if' in entry else False
+    return bool({GUARD, PUBLISH_GUARD} & set(conjuncts(entry['if']) or [])) if 'if' in entry else False
 
 
 def publishes(entry: 'dict[str, Any]') -> 'bool':
@@ -125,11 +134,32 @@ def exposed(workflow: 'dict[str, Any]') -> 'list[str]':
     return found
 
 
+def mode_context(event_name: 'str') -> 'dict[str, Any]':
+    """``github`` and Conda Update's ``mode`` output on ``event_name``, ``publish`` unset."""
+    publishes = 'false' if event_name == DISPATCH else 'true'
+    return {'github': {'event_name': event_name}, 'needs': {'mode': {'outputs': {'publishes': publishes}}}}
+
+
+def job_group(group: 'str', event_name: 'str', run_id: 'str') -> 'str':
+    """A job's ``concurrency:`` group on ``event_name``, each ``${{ }}`` in it evaluated.
+
+    ``format('<prefix>{0}', github.run_id)`` is read as the string it makes, as
+    the evaluator models no ``format``.
+
+    """
+    context = mode_context(event_name)
+    context['github'] = {**context['github'], 'run_id': run_id, 'ref': 'refs/heads/main'}
+    group = re.sub(r"format\('([^'{]*)\{0\}',\s*github\.run_id\)", lambda match: f"'{match.group(1)}{run_id}'",
+                   group)
+    return re.sub(r'\$\{\{(.*?)\}\}', lambda match: str(evaluate_expression('${{' + match.group(1) + '}}', context)),
+                  group)
+
+
 def dispatch_environment(job: 'dict[str, Any]', event_name: 'str' = DISPATCH) -> 'object':
     value = job.get('environment', '')
     if isinstance(value, dict):
         value = value.get('name', '')
-    return evaluate_expression(value, {'github': {'event_name': event_name}}) if '${{' in value else value
+    return evaluate_expression(value, mode_context(event_name)) if '${{' in value else value
 
 
 class TestEveryScheduledWorkflowCanBeStarted(unittest.TestCase):
@@ -171,7 +201,7 @@ class TestAManualRunPublishesNothing(unittest.TestCase):
         }
         for name in BUILD_ONLY:
             text = (WORKFLOWS / name).read_text(encoding='utf-8')
-            stripped = re.sub(r"github\.event_name != 'workflow_dispatch'(\s*&&\s*)?", 'true && ', text)
+            stripped = _GUARDS.sub('true && ', text)
             found = exposed(_workflows.loads(stripped))
             with self.subTest(workflow=name):
                 for publisher in expected[name]:
@@ -185,6 +215,9 @@ class TestAManualRunPublishesNothing(unittest.TestCase):
         self.assertFalse(guarded({'if': "github.event_name != 'workflow_dispatch' || a"}))
         self.assertFalse(guarded({'if': "(github.event_name != 'workflow_dispatch' && a)"}))
         self.assertTrue(guarded({'if': "a && github.event_name != 'workflow_dispatch'"}))
+        self.assertTrue(guarded({'if': "a && needs.mode.outputs.publishes == 'true'"}))
+        self.assertFalse(guarded({'if': "needs.mode.outputs.publishes != 'true' && a"}))
+        self.assertFalse(guarded({'if': "needs.mode.outputs.publishes == 'true' || a"}))
         self.assertFalse(guarded({}))
 
     def test_a_running_job_names_no_environment(self) -> None:
@@ -219,8 +252,9 @@ class TestAManualRunPublishesNothing(unittest.TestCase):
                     if guarded(job) or not shared:
                         continue
                     with self.subTest(job=job_id):
-                        self.assertIn(f"github.event_name == '{DISPATCH}' &&", shared)
-                        self.assertIn('github.run_id', shared)
+                        self.assertNotEqual(job_group(shared, DISPATCH, '1'), job_group(shared, DISPATCH, '2'))
+                        self.assertEqual(job_group(shared, 'schedule', '1'), job_group(shared, 'schedule', '2'))
+                        self.assertNotEqual(job_group(shared, DISPATCH, '1'), job_group(shared, 'schedule', '1'))
 
     def test_no_report_is_posted(self) -> None:
         for name in BUILD_ONLY:
@@ -259,8 +293,9 @@ class TestAManualRunStillBuilds(unittest.TestCase):
         version = next(step for step in _workflows.steps('cron-conda.yml', 'conda-update')
                        if step.get('name') == 'Get Version')
         for event_name, expected in ((DISPATCH, True), ('schedule', False)):
-            context = {'github': {'event_name': event_name},
-                       'steps': {'verify-changed-files': {'outputs': {'files_changed': 'false'}}}}
+            context = {**mode_context(event_name),
+                       'steps': {'verify-changed-files': {'outputs': {'files_changed': 'false'}},
+                                 'bump': {'outputs': {'bump': 'false'}}}}
             with self.subTest(event=event_name):
                 self.assertIs(evaluate_condition(version['if'], context), expected)
 
@@ -274,7 +309,7 @@ class TestAManualRunStillBuilds(unittest.TestCase):
             name = step.get('id') or step.get('name')
             for os_label in _workflows.job('cron-conda.yml', 'conda-dist')['strategy']['matrix']['os']:
                 for event_name in (DISPATCH, 'schedule'):
-                    context = {'github': {'event_name': event_name}, 'matrix': {'os': os_label},
+                    context = {**mode_context(event_name), 'matrix': {'os': os_label},
                                'steps': {'conda_build': {'outcome': 'success'},
                                          'release': {'outputs': {'published': 'true'}}},
                                STATUS: {'cancelled': False}}

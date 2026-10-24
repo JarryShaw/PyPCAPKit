@@ -451,9 +451,13 @@ def _context(event_name: 'str' = 'workflow_run', conclusion: 'str' = 'success',
     if event_name == 'workflow_run':
         github['event'] = {'workflow_run': {'conclusion': conclusion, 'event': event,
                                             'head_branch': head_branch, 'head_sha': head_sha}}
+    # cron-conda.yml's `mode` (#2060), which no other caller has: it skips a pull
+    # request's Unit Tests run and says every other event here publishes.
+    mode = ({'result': 'skipped', 'outputs': {}} if event_name == 'workflow_run' and event != 'push'
+            else {'result': 'success', 'outputs': {'publishes': 'true'}})
     return {
         'github': github,
-        'needs': {'head': {'result': head_result(unit_tests, verdict), 'outputs': outputs}},
+        'needs': {'head': {'result': head_result(unit_tests, verdict), 'outputs': outputs}, 'mode': mode},
         STATUS: {'cancelled': cancelled},
     }
 
@@ -518,9 +522,11 @@ class TestEachWorkflowGatesOnTheVerdict(unittest.TestCase):
         return jobs
 
     def test_each_acting_job_needs_the_head(self) -> None:
+        """And, in Conda Update, `mode`, which says whether the run publishes (#2060)."""
         for workflow, job in ACTING_JOBS.items():
             with self.subTest(workflow=workflow):
-                self.assertEqual(declared_needs(self._jobs(workflow)[job]), ['head'])
+                self.assertEqual(declared_needs(self._jobs(workflow)[job]),
+                                 ['head', 'mode'] if workflow == 'cron-conda.yml' else ['head'])
 
     def test_every_scenario_decides_correctly(self) -> None:
         """The table above, for :data:`HEAD`'s jobs and each acting job."""
