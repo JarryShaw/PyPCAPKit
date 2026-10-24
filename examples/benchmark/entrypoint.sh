@@ -28,6 +28,7 @@ ROUNDS="${BENCH_ROUNDS:-1000}"
 REPEATS="${BENCH_REPEATS:-3}"
 ENGINES="${BENCH_ENGINES:-default,dpkt,scapy,pypcap,pcap_ct,pypcapfile,pyshark}"
 EMULATED="${BENCH_EMULATED:-}"
+RUNNER="${BENCH_RUNNER:-}"
 MODE="${BENCH_MODE:-measure}"
 OUT="${BENCH_OUT:-/out}"
 IN="${BENCH_IN:-/in}"
@@ -104,6 +105,11 @@ done
 # common case, is always.
 if [ -n "$EMULATED" ]; then
     report_args+=(--emulated "$EMULATED")
+fi
+# The script driving this container, for the per-version table to name; `run.sh` sets
+# it. report.py names benchmark.py, which measured every figure, when it is unset.
+if [ -n "$RUNNER" ]; then
+    report_args+=(--runner "$RUNNER")
 fi
 
 # `${report_args[@]+"${report_args[@]}"}` rather than a bare `"${report_args[@]}"`:

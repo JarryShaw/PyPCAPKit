@@ -13,8 +13,9 @@ the ratio table to Discussions.
 * :class:`TestPermissions`: read-only at the top, ``discussions: write`` on the
   ``discussion`` job alone, and no push.
 * :class:`TestTheJobs`: one leg on the chosen runner with the engine tiers
-  installed, running ``native.sh`` and never Docker; the tshark steps as
-  ``unit-tests.yml``'s; the post to ``<workflow file stem>: <report name>``.
+  installed, running ``native.sh`` and never Docker, under a timeout sized from a
+  measured run; the tshark steps as ``unit-tests.yml``'s; the post to
+  ``<workflow file stem>: <report name>``.
 * :class:`TestTheMeasureStep` and :class:`TestTheReportStep` run those steps' own
   ``run:`` scripts under bash, with a stand-in ``native.sh``.
 * :class:`TestNativeScript` runs :file:`examples/benchmark/native.sh` itself on
@@ -241,6 +242,19 @@ class TestTheJobs(unittest.TestCase):
         for job_id in ('python-versions', 'discussion'):
             with self.subTest(job=job_id):
                 self.assertEqual(job(WORKFLOW, job_id)['runs-on'], 'ubuntu-latest')
+
+    def test_the_timeout_is_sized_from_a_measured_run(self) -> None:
+        """Run 40062653380 took about 38 minutes on the default runner with everything.
+
+        The placeholder was 300, which let a hung extraction hold a runner for five
+        hours. 90 leaves over twice the measured time, and the comment names the run.
+
+        """
+        self.assertEqual(job(WORKFLOW, 'benchmark')['timeout-minutes'], 90)
+        text = (WORKFLOWS / WORKFLOW).read_text(encoding='utf-8')
+        comment = text[text.index('  benchmark:\n'):text.index('    timeout-minutes: 90')]
+        self.assertIn('Run 40062653380 measured this job at about 38 minutes', comment)
+        self.assertNotIn('first dispatch measures it', text)
 
     def test_the_engine_tiers_are_installed(self) -> None:
         setups = [item for item in steps(WORKFLOW, 'benchmark')

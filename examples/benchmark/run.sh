@@ -437,6 +437,7 @@ docker create \
     --platform "${PLATFORM}" \
     --env 'BENCH_MODE=report' \
     --env "BENCH_EMULATED=${EMULATED}" \
+    --env 'BENCH_RUNNER=examples/benchmark/run.sh' \
     "${REPORT_IMAGE}" >/dev/null
 
 status=0

@@ -118,6 +118,28 @@ def document(environment, measurements, unmeasured=None, repeats=2, packages=Non
     }
 
 
+def footnote_bodies(snippet):
+    """Every footnote body in *snippet*, each as its lines up to the next blank-led line.
+
+    Args:
+        snippet: Emitted reStructuredText.
+
+    Returns:
+        The bodies, in document order, ``.. [*]`` line first.
+
+    """
+    bodies = []
+    lines = snippet.splitlines()
+    for index, line in enumerate(lines):
+        if not line.startswith('.. ['):
+            continue
+        end = index + 1
+        while end < len(lines) and (not lines[end] or lines[end].startswith('   ')):
+            end += 1
+        bodies.append('\n'.join(lines[index:end]).rstrip())
+    return bodies
+
+
 class TestRatios:
     """The arithmetic that turns milliseconds into comparable numbers."""
 
@@ -455,7 +477,7 @@ class TestRenderedMarkup:
                                      'dpkt': [0.0104, 0.0105],
                                      'scapy': [0.0917, 0.0918]})]
         snippet = report.render_rst(report.collect(clean), clean)
-        assert report.OVERLAP_MARK not in snippet
+        assert f'[#{report.OVERLAP_LABEL}]' not in snippet
         assert 'does not separate these rows' not in snippet
         # ...but the spread is still reported, because it is what makes the gaps
         # above interpretable at all.
@@ -465,7 +487,8 @@ class TestRenderedMarkup:
                                      'dpkt': [0.020, 0.030],
                                      'scapy': [0.025, 0.035]})]
         snippet = report.render_rst(report.collect(muddy), muddy)
-        assert report.OVERLAP_MARK in snippet
+        assert f'``dpkt`` [#{report.OVERLAP_LABEL}]_' in snippet
+        assert f'``scapy`` [#{report.OVERLAP_LABEL}]_' in snippet
         assert 'does not separate these rows' in snippet
 
     def test_provenance_is_present_and_host_free(self):
@@ -611,7 +634,7 @@ class TestFlakyEngines:
                          repeats=3,
                          failures={'pyshark': ['pass 3: TSharkCrashException: retcode 255']})]
         snippet = report.render_rst(report.collect(docs), docs)
-        assert report.PARTIAL_MARK in snippet
+        assert f'``pyshark`` {report.FOOTNOTE}' in snippet
         assert 'TSharkCrashException' in snippet
         assert 'in pypcap, pass 3' in snippet
 
@@ -621,7 +644,7 @@ class TestFlakyEngines:
                          discarded={'pyshark': 2})]
         rows = {row.engine: row for row in report.collect(docs)}
         assert rows['pyshark'].discarded == 4  # two per pass, two passes
-        snippet = report.render_rst(report.collect(docs), docs)
+        snippet = ' '.join(report.render_rst(report.collect(docs), docs).split())
         assert '4 individual extraction(s) failed and were discarded' in snippet
 
     def test_a_clean_row_is_not_marked_partial(self):
@@ -629,7 +652,7 @@ class TestFlakyEngines:
         docs = [document('pypcap', {'default': [0.20, 0.20], 'dpkt': [0.020, 0.020]})]
         rows = {row.engine: row for row in report.collect(docs)}
         assert not rows['dpkt'].partial
-        assert report.PARTIAL_MARK not in report.render_rst(report.collect(docs), docs)
+        assert report.FOOTNOTE not in report.render_rst(report.collect(docs), docs)
 
     def test_every_pass_failing_makes_the_row_unmeasured(self):
         """An engine that never produced a number reports why, not a zero."""
@@ -898,7 +921,7 @@ class TestUnmeasuredByVersion:
 
 
 class TestVersionsMarkup:
-    """The per-version table as it will be pasted into docs/source/index.rst."""
+    """The per-version table as it will be pasted into docs/source/engines.rst."""
 
     def _snippet(self, missing=(), emulated=None, **kwargs):
         """Render the per-version snippet from a whole matrix run."""
@@ -990,13 +1013,13 @@ class TestVersionsMarkup:
     def test_an_engine_with_a_gap_is_marked_and_explained(self):
         """The mark points at a reason, and the reason is the engine's own."""
         snippet, _, _ = self._snippet()
-        assert f'``pypcapfile`` {report.UNMEASURED_MARK}' in snippet
+        assert f'``pypcapfile`` {report.FOOTNOTE}' in snippet
         assert 'pypcapfile does not support Python 3.12' in snippet
 
     def test_a_fully_measured_engine_is_not_marked(self):
         """No mark on a row with nothing to explain."""
         snippet, _, _ = self._snippet()
-        assert f'``dpkt`` {report.UNMEASURED_MARK}' not in snippet
+        assert f'``dpkt`` {report.FOOTNOTE}' not in snippet
 
     def test_one_reason_covering_several_versions_is_stated_once(self):
         """Notes are grouped by reason, not one bullet per empty cell.
@@ -1007,8 +1030,9 @@ class TestVersionsMarkup:
 
         """
         snippet, _, _ = self._snippet()
-        note = [line for line in snippet.splitlines()
-                if line.startswith('* ``pypcap``')]
+        body, = [body for body in footnote_bodies(snippet)
+                 if 'pypcap is not installable' in body]
+        note = [line for line in body.splitlines() if line.startswith('   * on ')]
         assert len(note) == 1
         assert '3.12, 3.13, 3.14' in note[0]
 
@@ -1016,8 +1040,10 @@ class TestVersionsMarkup:
         """A version that produced nothing says so in the table and in a note."""
         snippet, _, _ = self._snippet(
             missing=[('3.15', 'the py3.15 image failed to build')])
-        assert f'3.15 {report.UNMEASURED_MARK}' in snippet
-        assert '* Python 3.15 -- not measured at all: the py3.15 image failed to build' in snippet
+        assert f'3.15 {report.FOOTNOTE}' in snippet
+        body = footnote_bodies(snippet)[0]
+        assert body.startswith('.. [*] Not measured at all')
+        assert '   * Python 3.15 -- the py3.15 image failed to build' in body
 
     def test_a_missing_version_does_not_blame_the_engines(self):
         """No engine is marked for a column that never ran.
@@ -1029,12 +1055,13 @@ class TestVersionsMarkup:
         """
         snippet, _, rows = self._snippet(versions=('3.11',),
                                         missing=[('3.15', 'the image failed to build')])
-        assert f'3.15 {report.UNMEASURED_MARK}' in snippet
+        assert f'3.15 {report.FOOTNOTE}' in snippet
         # Every engine, not a sample: on 3.11 every engine is measurable, so the
         # only mark in the whole table should be the one on the 3.15 column heading.
         for row in rows:
-            assert f'``{row.label}`` {report.UNMEASURED_MARK}' not in snippet
-        assert snippet.count(report.UNMEASURED_MARK) == 2  # the heading, and its legend
+            assert f'``{row.label}`` {report.FOOTNOTE}' not in snippet
+        assert snippet.count(report.FOOTNOTE) == 1  # the heading
+        assert len(footnote_bodies(snippet)) == 1  # and its note
 
     def test_a_partly_measured_version_is_not_called_unmeasured(self):
         """A version can have both figures and a failure note, and both are true.
@@ -1055,7 +1082,7 @@ class TestVersionsMarkup:
         dpkt_row = [line for line in snippet.splitlines() if line.startswith('``dpkt``')][0]
         assert dpkt_row.count('--') == 0
         # ...and an engine with a real gap in it is still marked and still explained.
-        assert f'``pypcapfile`` {report.UNMEASURED_MARK}' in snippet
+        assert f'``pypcapfile`` {report.FOOTNOTE}' in snippet
         assert 'pypcapfile does not support Python 3.12' in snippet
 
     def test_emulation_warning_reaches_the_snippet(self):
@@ -1310,7 +1337,7 @@ class TestHostileReasons:
     def test_both_snippets_still_parse(self, reason):
         """A gcc diagnostic in a reason must not break the pasted table.
 
-        The promise is that these snippets go into docs/source/index.rst verbatim,
+        The promise is that these snippets go into docs/source/engines.rst verbatim,
         and that they stay parseable by plain docutils -- where each of these strings
         produces a visible error block instead of the table.
 
@@ -1397,6 +1424,202 @@ class TestHostileReasons:
 
         # ...and the operator still sees it as it was written.
         assert emulated in report.render_text(rows, docs, emulated=emulated)
+
+
+class TestFootnotes:
+    """Row and column notes are reStructuredText footnotes, as docs/source/engines.rst has them.
+
+    The tables used to mark rows with literal symbols and explain them in a hand-written
+    legend, which had to be converted by hand before the snippet could go on the page.
+    Auto-symbol footnotes pair with their references by order alone, so the order the
+    bodies come out in is checked against what docutils actually resolves, not against
+    a count.
+
+    """
+
+    #: The page's own footnotes, ahead of the snippets, as on docs/source/engines.rst.
+    PAGE = ('A sentence with a note [*]_ and a numbered one [#]_.\n\n'
+            '.. [*] A note that was on the page first.\n\n'
+            '.. [#] A numbered note that was on the page first.\n\n')
+
+    def _snippets(self):
+        """Both snippets, from a run with absent and partial columns, gaps and a lost pass."""
+        docs = matrix(versions=('3.11', '3.12', '3.13'), missing_pyshark=('3.13',))
+        for entry in docs[0]['results']:
+            if entry['engine'] == 'pyshark':
+                entry['failures'] = ['pass 3: TSharkCrashException: retcode 255']
+        missing = [('3.12', 'the 3.12-pypcap container exited non-zero'),
+                   ('3.15', 'no Python 3.15 interpreter was found on this machine')]
+        rows = report.collect(docs)
+        return (report.render_versions_rst(rows, docs, missing),
+                report.render_rst(rows, docs, missing=missing))
+
+    @staticmethod
+    def _resolved(text):
+        """Each footnote reference's cell text, against the body docutils resolved it to."""
+        docutils_core = pytest.importorskip('docutils.core')
+        from docutils import nodes  # pylint: disable=import-outside-toplevel
+
+        messages = []
+        tree = docutils_core.publish_doctree(
+            text, settings_overrides={'halt_level': 2, 'report_level': 2,
+                                      'warning_stream': messages,
+                                      'input_encoding': 'unicode',
+                                      'output_encoding': 'unicode'})
+        assert not messages, f'docutils warned: {messages}\n\n{text}'
+        assert not list(tree.findall(nodes.problematic)), text
+        pairs = []
+        for reference in tree.findall(nodes.footnote_reference):
+            assert reference.get('refid'), f'unresolved footnote reference in\n{text}'
+            footnote = tree.ids[reference['refid']]
+            note = '\n\n'.join(child.astext() for child in footnote.children
+                               if not isinstance(child, nodes.label))
+            pairs.append((reference.parent.astext(), note))
+        return pairs
+
+    def test_no_literal_markers(self):
+        """No symbol for a reader to look up in a legend that is not a footnote."""
+        for snippet in self._snippets():
+            for mark in '†‡¶':
+                assert mark not in snippet, snippet
+            assert 'not measured, or not measured in full, for the' not in snippet
+
+    def test_every_reference_resolves_to_its_own_note(self):
+        """The note a row or column points at is that row's or column's, in both tables."""
+        versions, ratio = self._snippets()
+        pairs = self._resolved(versions)
+        assert len(pairs) == versions.count(report.FOOTNOTE)
+        for cell, note in pairs:
+            if cell.startswith('3.'):
+                assert f'Python {cell.split()[0]} --' in note, (cell, note)
+            else:
+                assert (f'{cell.split()[0]} does not support' in note
+                        or 'pypcap is not installable' in note), (cell, note)
+        notes = {cell.split()[0]: note for cell, note in pairs}
+        assert 'not measured at all' in notes['3.15'].lower()
+        assert 'the run did not complete' in notes['3.12']
+
+        notes = {cell.split()[0]: note for cell, note in self._resolved(ratio)}
+        assert 'TSharkCrashException' in notes['pyshark']
+        assert 'less evidence' in notes['pyshark']
+
+    def test_they_paste_beside_the_page_footnotes(self):
+        """docutils numbers footnotes page-wide, so nothing on the page collides.
+
+        This is the case the literal markers were chosen to avoid, and it does not
+        arise: the page's own notes take the first symbol and number, the snippets'
+        take the next, and every reference still reaches its own body.
+
+        """
+        versions, ratio = self._snippets()
+        pairs = self._resolved(self.PAGE + versions + '\n' + ratio)
+        assert pairs[0][1] == 'A note that was on the page first.'
+        assert pairs[1][1] == 'A numbered note that was on the page first.'
+        notes = {cell.split()[0]: note for cell, note in pairs[2:]}
+        assert 'Python 3.15' in notes['3.15']
+        assert 'pypcapfile does not support' in notes['pypcapfile']
+        assert 'TSharkCrashException' in notes['pyshark']
+
+    def test_overlapping_rows_share_one_labelled_note(self):
+        """An auto-symbol body answers one reference; this note answers several."""
+        docs = [document('pypcap', {'default': [0.200, 0.201], 'dpkt': [0.020, 0.030],
+                                    'scapy': [0.025, 0.035], 'pypcap': [0.028, 0.032]})]
+        snippet = report.render_rst(report.collect(docs), docs)
+        assert snippet.count(f'[#{report.OVERLAP_LABEL}]_') == 3
+        assert snippet.count(f'.. [#{report.OVERLAP_LABEL}]') == 1
+        notes = {note for _, note in self._resolved(snippet)}
+        assert len(notes) == 1
+        assert 'does not separate these rows' in notes.pop()
+
+    def test_a_single_pass_overlap_note_says_so(self):
+        """With no spread observed, "their ranges overlap" would not be what happened."""
+        docs = [document('pypcap', {'default': [0.2], 'dpkt': [0.02]}, repeats=1)]
+        snippet = report.render_rst(report.collect(docs), docs)
+        assert f'.. [#{report.OVERLAP_LABEL}] Measured on a single pass' in snippet
+        assert self._resolved(snippet)
+
+    def test_an_unmeasured_row_carries_its_reason_as_a_footnote(self):
+        """Not measured anywhere: the engine's own reason is the note."""
+        docs = [document('pypcap', {'default': [0.20, 0.20]},
+                         {'pyshark': 'tshark is not installed'})]
+        snippet = report.render_rst(report.collect(docs), docs)
+        assert f'``pyshark`` {report.FOOTNOTE}' in snippet
+        (_, note), = self._resolved(snippet)
+        assert note == ('Not measured, for the reason the engine itself gives: '
+                        'tshark is not installed')
+
+    def test_the_bodies_follow_their_table(self):
+        """Each note sits under its own table, not gathered at the end of the page."""
+        versions, ratio = self._snippets()
+        lines = ratio.splitlines()
+        last_rule = max(index for index, line in enumerate(lines) if line.startswith('===='))
+        assert lines[last_rule + 1] == ''
+        assert lines[last_rule + 2].startswith('.. [')
+        assert ratio.index('.. [') < ratio.index('The single absolute figure')
+
+        lines = versions.splitlines()
+        last_rule = max(index for index, line in enumerate(lines) if line.startswith('===='))
+        # The owner's sentence stays between the table and its notes, where the page has it.
+        assert lines[last_rule + 2].startswith('The unavailable cells were attempted.')
+        assert lines[last_rule + 5].startswith('.. [')
+
+    def test_a_gap_nothing_explained_still_has_a_body(self):
+        """An engine missing from a version's documents altogether is still a gap.
+
+        A literal marker with no legend line was merely unhelpful; a footnote reference
+        with no body is a docutils error on the page.
+
+        """
+        docs = [document('3.11-pcap_ct', {'default': [0.2, 0.2], 'dpkt': [0.02, 0.02]}),
+                document('3.12-pcap_ct', {'default': [0.2, 0.2]}, python='3.12.12')]
+        snippet = report.render_versions_rst(report.collect(docs), docs)
+        assert f'``dpkt`` {report.FOOTNOTE}' in snippet
+        (_, note), = self._resolved(snippet)
+        assert 'on 3.12 -- no reason recorded' in note
+
+    def test_the_lead_names_the_script_that_ran(self):
+        """native.sh and run.sh both end in this report; it names whichever ran."""
+        docs = matrix(versions=('3.11',))
+        rows = report.collect(docs)
+
+        def lead(**kwargs):
+            text = report.render_versions_rst(rows, docs, **kwargs)
+            return ' '.join(text.split('All columns come')[0].split())
+
+        assert 'Measured with ``examples/benchmark/benchmark.py``: 1000 timed' in lead()
+        assert 'Measured with ``examples/benchmark/run.sh``: 1000 timed' in lead(
+            runner='examples/benchmark/run.sh')
+        assert ('Measured with ``examples/benchmark/native.sh``, which the Engine Benchmark '
+                'workflow runs: 1000 timed extractions of ``examples/captures/in.pcap`` per '
+                'engine and Python version.') in lead(runner='examples/benchmark/native.sh',
+                                                      workflow='Engine Benchmark')
+
+    def test_the_command_line_passes_the_runner_through(self, tmp_path, capsys):
+        """And points the reader at the page the snippets go on."""
+        path = tmp_path / '3.11-pcap_ct.json'
+        path.write_text(json.dumps(document('3.11-pcap_ct', {'default': [0.2, 0.2]})),
+                        encoding='utf-8')
+        out = tmp_path / 'versions.rst'
+        assert report.main([str(path), '--runner', 'examples/benchmark/native.sh',
+                            '--workflow', 'Engine Benchmark',
+                            '--versions-rst-out', str(out)]) == 0
+        text = ' '.join(out.read_text(encoding='utf-8').split())
+        assert '``examples/benchmark/native.sh``, which the Engine Benchmark workflow runs' in text
+        printed = capsys.readouterr().out
+        assert 'ready to paste into docs/source/engines.rst' in printed
+        assert 'index.rst' not in printed
+
+    def test_each_script_names_itself(self):
+        """native.sh passes its own name, and run.sh its own through the report container."""
+        here = Path(__file__).resolve().parent
+        native = (here / 'native.sh').read_text(encoding='utf-8')
+        assert 'REPORT_ARGS=(--runner examples/benchmark/native.sh)' in native
+        assert 'REPORT_ARGS+=(--workflow "${GITHUB_WORKFLOW}")' in native
+        run = (here / 'run.sh').read_text(encoding='utf-8')
+        assert "--env 'BENCH_RUNNER=examples/benchmark/run.sh'" in run
+        entrypoint = (here / 'entrypoint.sh').read_text(encoding='utf-8')
+        assert 'RUNNER="${BENCH_RUNNER:-}"' in entrypoint
+        assert 'report_args+=(--runner "$RUNNER")' in entrypoint
 
 
 class TestFixedFormatting:
