@@ -166,17 +166,7 @@ class PCAP_CT(EngineBase['RawFrame']):
         import after a failed one does not reproduce the same error.
 
         """
-        wrong = _pcap_backend.wrong_backend_reason(cls.__engine_distribution__, found)
-        if wrong is not None:
-            return wrong
-
-        # ``missing`` separates "not installed", which the import test reports
-        # well, from a failure that would otherwise escape it -- the missing
-        # ``libpcap.so`` being the case this exists for.
-        if found.name is None and not found.missing:
-            return f'the `pcap` module is installed but unusable -- {found.failure}'
-
-        return None
+        return _pcap_backend.engine_reason(cls.__engine_distribution__, found)
 
     @classmethod
     def unsupported_reason(cls) -> 'Optional[str]':

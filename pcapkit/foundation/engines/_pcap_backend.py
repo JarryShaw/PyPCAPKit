@@ -38,7 +38,7 @@ from pcapkit.corekit.infoclass import Info, info_final
 __all__ = [
     'PYPCAP', 'PCAP_CT', 'DISTRIBUTIONS', 'ENGINE_NAMES',
     'Probe', 'Memo', 'probe', 'identify', 'installed_distributions',
-    'wrong_backend_reason', 'collision_reason',
+    'wrong_backend_reason', 'engine_reason', 'collision_reason',
 ]
 
 if TYPE_CHECKING:
@@ -306,6 +306,40 @@ def wrong_backend_reason(wanted: 'str', found: 'Probe') -> 'Optional[str]':
     suggestion = f"; use 'engine={alternative}' for it" if alternative else ''
     return (f'the installed `pcap` module is {found.name} '
             f'({found.version or "unknown version"}), not {wanted}{suggestion}')
+
+
+def engine_reason(wanted: 'str', found: 'Probe') -> 'Optional[str]':
+    """Why the engine driving ``wanted`` cannot run on ``found``, if it cannot.
+
+    The verdict both engines' ``unsupported_reason()`` give, kept in one place so
+    that they agree (:issue:`2132`).
+
+    Args:
+        wanted: The distribution the calling engine drives -- :data:`PYPCAP` or
+            :data:`PCAP_CT`.
+        found: The result of :func:`probe`.
+
+    Returns:
+        :func:`wrong_backend_reason`'s answer when another distribution owns
+        |pcap|_; a phrase carrying the import failure when |pcap|_ is installed
+        but raised something other than :exc:`ImportError` -- ``OSError: Cannot
+        find libpcap.so library`` with no system :manpage:`libpcap(3)`, say; and
+        :data:`None` otherwise. An absent module is still :data:`None`, since
+        :meth:`Extractor.import_test
+        <pcapkit.foundation.extraction.Extractor.import_test>` reports that.
+
+    """
+    wrong = wrong_backend_reason(wanted, found)
+    if wrong is not None:
+        return wrong
+
+    # ``missing`` separates "not installed", which the import test reports
+    # well, from a failure that would otherwise escape it -- the missing
+    # ``libpcap.so`` being the case this exists for.
+    if found.name is None and not found.missing:
+        return f'the `pcap` module is installed but unusable -- {found.failure}'
+
+    return None
 
 
 def collision_reason(found: 'Probe') -> 'Optional[str]':

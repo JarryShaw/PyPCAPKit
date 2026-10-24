@@ -207,6 +207,12 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    not the one in use, and the two have different install requirements and different
    version coverage to report.
 
+   A |pcap|_ module that is installed but cannot load -- its import raises
+   :exc:`OSError`, say, because no :manpage:`libpcap(3)` can be found -- is reported
+   the same way :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` reports it, so the
+   extraction falls back to the :term:`default engine` with a warning instead of
+   aborting (:issue:`2132`).
+
 .. important::
 
    `PyPCAP`_ is a :manpage:`libpcap(3)` binding aimed primarily at live capture.
@@ -501,6 +507,8 @@ cycle.
 .. autofunction:: pcapkit.foundation.engines._pcap_backend.installed_distributions
 
 .. autofunction:: pcapkit.foundation.engines._pcap_backend.wrong_backend_reason
+
+.. autofunction:: pcapkit.foundation.engines._pcap_backend.engine_reason
 
 .. autofunction:: pcapkit.foundation.engines._pcap_backend.collision_reason
 

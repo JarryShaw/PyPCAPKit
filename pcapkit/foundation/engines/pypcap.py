@@ -130,7 +130,7 @@ class PyPCAP(EngineBase['RawFrame']):
         import after a failed one does not reproduce the same error.
 
         """
-        return _pcap_backend.wrong_backend_reason(cls.__engine_distribution__, found)
+        return _pcap_backend.engine_reason(cls.__engine_distribution__, found)
 
     @classmethod
     def unsupported_reason(cls) -> 'Optional[str]':
@@ -149,6 +149,16 @@ class PyPCAP(EngineBase['RawFrame']):
         hypothetical upstream build that someone got working on a newer
         interpreter, and would say nothing useful on 3.10 and 3.11, where both
         distributions install happily and either could be the one in place.
+
+        It also reports a |pcap|_ that is installed but cannot load -- one whose
+        import raises something other than :exc:`ImportError`, such as the
+        :exc:`OSError` a loader raises when it cannot find :manpage:`libpcap(3)`.
+        :meth:`Extractor.import_test
+        <pcapkit.foundation.extraction.Extractor.import_test>` lets that through,
+        so without this the extraction would die rather than fall back to the
+        :term:`default engine` (:issue:`2132`). The verdict is
+        :func:`~pcapkit.foundation.engines._pcap_backend.engine_reason`, shared
+        with :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT`.
 
         Returns:
             A phrase naming the real cause, or :data:`None`. An absent |pcap|_
@@ -195,9 +205,9 @@ class PyPCAP(EngineBase['RawFrame']):
 
         Raises:
             UnsupportedCall: If the installed |pcap|_ is `pcap-ct`_ rather
-                than upstream `PyPCAP`_. This is the same condition
-                :meth:`unsupported_reason` reports, kept here as well because that
-                hook is only consulted by
+                than upstream `PyPCAP`_, or is installed but cannot load. These
+                are the conditions :meth:`unsupported_reason` reports, kept here as
+                well because that hook is only consulted by
                 :meth:`Extractor.run <pcapkit.foundation.extraction.Extractor.run>`;
                 constructing the engine directly bypasses it, and running
                 `pcap-ct`_ under the :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` name would
@@ -208,9 +218,8 @@ class PyPCAP(EngineBase['RawFrame']):
         """
         # NOTE: the probe comes *before* ``import pcap`` so that this engine and
         # :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` behave the same way
-        # here. It matters more for the latter, whose import can raise
-        # ``OSError`` rather than ``ImportError``, but a shared order is one fewer
-        # difference between them.
+        # here. Either import can raise ``OSError`` rather than ``ImportError``
+        # (#2132), which the probe turns into a reason instead of a crash.
         self._backend = _pcap_backend.probe()
 
         collision = _pcap_backend.collision_reason(self._backend)

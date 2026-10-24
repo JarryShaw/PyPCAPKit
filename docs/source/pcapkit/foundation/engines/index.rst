@@ -235,7 +235,9 @@ actually got, via
   name the distribution, version and file actually in use, so a bug report about
   "the pypcap engine" says which one ran;
 * declines to run on the other one, through ``unsupported_reason()``, with a
-  message naming the ``engine=`` string that does want it; and
+  message naming the ``engine=`` string that does want it, and likewise on a
+  |pcap|_ that is installed but cannot load, falling back to the
+  :term:`default engine` instead of letting the import error escape; and
 * warns with an :class:`~pcapkit.utilities.warnings.EngineWarning` when it finds
   both installed, since that state leaves one engine permanently unselectable
   and nothing else would explain why.
