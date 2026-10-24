@@ -1,18 +1,22 @@
 # -*- coding: utf-8 -*-
-"""#2060, phase 1: Conda Update builds and smoke-tests win-64, and publishes none of it.
+"""#2060: the conda jobs build, smoke-test and publish win-64.
 
-``conda-dist`` in :file:`.github/workflows/cron-conda.yml` gained a
-``windows-latest`` leg. ``create-release.yml``'s ``conda`` job has none yet;
-phase 2 adds it, with the uploads.
+Phase 1 gave ``conda-dist`` in :file:`.github/workflows/cron-conda.yml` a
+non-blocking ``windows-latest`` leg that published nothing. Once its Conda
+Update runs were green, phase 2 gave ``conda`` in
+:file:`.github/workflows/create-release.yml` the leg too, made both blocking, and
+uploads from both with the anaconda-client CLI, as the Intel legs do (#2044).
 
-* :class:`TestTheWindowsLegPublishesNothing`: every step reading a secret or
-  publishing is evaluated on ``windows-latest`` with
-  :func:`tests.project.test_release_gates.evaluate_condition` and must not run.
-  So no step on that leg receives ``ANACONDA_TOKEN``, which the job's
-  ``environment: anaconda`` holds.
-* :class:`TestTheWindowsLegNeverBlocks`: each step that runs there has an ``id``
-  and a ``continue-on-error`` true on that leg alone, and ``Windows summary``,
-  the last step, reports their failures as warnings, as ``KTLO summary`` does (#1672).
+* :class:`TestTheWindowsLegPublishes`: on ``windows-latest`` each job runs one
+  upload, "Upload conda packages to Anaconda (Windows)", evaluated with
+  :func:`tests.project.test_release_gates.evaluate_condition`; it is the Intel
+  step's call in a login shell, and skips a manual run and a leg already on
+  Anaconda. :data:`release_published.SUBDIRS` counts the platform.
+* :class:`TestTheWindowsLegBlocks`: no step continues on error and no
+  ``Windows summary`` reports, so a failure fails the leg as it does the others;
+  each ``run:`` the leg reaches names ``bash``.
+* :class:`TestTheWindowsClient`: ``release_conda.py upload`` runs base's
+  ``Scripts\\anaconda.exe`` on Windows.
 * :class:`TestBldBat`: ``conda/pypcapkit/bld.bat`` does what ``build.sh`` does:
   one install of every downloaded file, then the project, each checked. Its
   previous ``FOR`` loop wrote ``%A``, a syntax error in a batch file.
@@ -24,7 +28,7 @@ phase 2 adds it, with the uploads.
   where :data:`os.environb` is missing, as on Windows (#2120), where
   ``release_conda.py build`` died reading ``PCAPKIT_CONDA_OS``.
 
-Nothing here runs on Windows; what a real Conda Update run shows is the rest.
+Nothing here runs on Windows; what a real run shows is the rest.
 
 """
 
@@ -38,7 +42,6 @@ import json
 import os
 import pathlib
 import re
-import subprocess  # nosec: B404
 import sys
 import tarfile
 import tempfile
@@ -49,7 +52,7 @@ from unittest import mock
 from tests import _workflows
 from tests.project.test_conda_native_platforms_1822 import DISTRIBUTION, SHIM, elf, load, pe
 from tests.project.test_release_gates import PUBLISHING_MARKERS, STATUS, evaluate_condition
-from util import _actions, release_conda, release_tiers
+from util import _actions, leg_summary, release_conda, release_published, release_tiers
 
 if TYPE_CHECKING:
     from typing import Any, Iterator
@@ -59,144 +62,219 @@ __tier__ = 'LATEST'
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 RECIPE = ROOT / 'conda' / 'pypcapkit'
-JOB = ('cron-conda.yml', 'conda-dist')
+#: The conda jobs, as (workflow, job).
+JOBS = (('cron-conda.yml', 'conda-dist'), ('create-release.yml', 'conda'))
 WINDOWS = 'windows-latest'
-SUMMARY = 'Windows summary'
+INTEL = 'macos-26-intel'
+#: The Windows leg's upload, and the Intel one it copies.
+WINDOWS_UPLOAD = 'Upload conda packages to Anaconda (Windows)'
+INTEL_UPLOAD = 'Upload conda packages to Anaconda (Intel)'
 #: The steps that read ``ANACONDA_TOKEN``: the uploads, and nothing else.
-ANACONDA_UPLOADS = ['Upload conda packages to Anaconda', 'Upload conda packages to Anaconda (Intel)']
-#: What publishes besides :data:`PUBLISHING_MARKERS`: the GitHub Release upload.
+ANACONDA_UPLOADS = ['Upload conda packages to Anaconda', INTEL_UPLOAD, WINDOWS_UPLOAD]
+#: What publishes besides :data:`PUBLISHING_MARKERS`: Conda Update's GitHub Release upload.
 MORE_MARKERS = ('ncipollo/release-action',)
+#: The step that ran phase 1's warnings.
+SUMMARY = 'Windows summary'
 
 
-def spec() -> 'dict[str, Any]':
-    return _workflows.job(*JOB)
+def spec(name: 'str', job_id: 'str') -> 'dict[str, Any]':
+    return _workflows.job(name, job_id)
 
 
-def context(os_label: 'str', event_name: 'str' = 'schedule') -> 'dict[str, object]':
-    """A leg on ``os_label`` where every earlier step succeeded and the release exists.
+def step(name: 'str', job_id: 'str', step_name: 'str') -> 'dict[str, Any]':
+    found = [entry for entry in spec(name, job_id)['steps'] if entry.get('name') == step_name]
+    if len(found) != 1:
+        raise AssertionError(f'{name}: {job_id} has {len(found)} steps named {step_name!r}, not one')
+    return found[0]
+
+
+def context(job: 'dict[str, Any]', os_label: 'str', event_name: 'str' = 'schedule',
+            published: 'str' = 'false') -> 'dict[str, object]':
+    """A leg on ``os_label`` where every earlier step succeeded and the GitHub release exists.
 
     On the schedule unless ``event_name`` says otherwise: a manual run uploads
     nothing on any leg, which :mod:`tests.project.test_build_only_dispatch` pins.
+    ``published`` is what the release job's ``check_leg`` found.
 
     """
-    steps = {step['id']: {'outcome': 'success', 'conclusion': 'success',
-                          'outputs': {'published': 'true'}}
-             for step in spec()['steps'] if 'id' in step}
+    steps = {entry['id']: {'outcome': 'success', 'conclusion': 'success',
+                           'outputs': {'published': 'true', 'PCAPKIT_LEG_EXISTS': published}}
+             for entry in job['steps'] if 'id' in entry}
     return {'matrix': {'os': os_label}, 'steps': steps, 'github': {'event_name': event_name},
             STATUS: {'cancelled': False, 'success': True, 'failure': False}}
 
 
-def runs(step: 'dict[str, Any]', os_label: 'str', event_name: 'str' = 'schedule') -> 'bool':
-    return evaluate_condition(str(step.get('if', 'true')), context(os_label, event_name))
+def runs(job: 'dict[str, Any]', entry: 'dict[str, Any]', os_label: 'str', event_name: 'str' = 'schedule',
+         published: 'str' = 'false') -> 'bool':
+    return evaluate_condition(str(entry.get('if', 'true')), context(job, os_label, event_name, published))
 
 
-def sensitive(step: 'dict[str, Any]') -> 'bool':
-    """Whether ``step`` reads a secret or publishes anything."""
-    text = repr(step)
+def sensitive(entry: 'dict[str, Any]') -> 'bool':
+    """Whether ``entry`` reads a secret or publishes anything."""
+    text = repr(entry)
     return 'secrets.' in text or any(marker in text for marker in (*PUBLISHING_MARKERS, *MORE_MARKERS))
 
 
-def windows_publishers(job: 'dict[str, Any]') -> 'list[str]':
-    """Each step of ``job`` that reads a secret or publishes, and would run on the Windows leg."""
-    return [str(step.get('name') or step.get('uses')) for step in job['steps']
-            if sensitive(step) and runs(step, WINDOWS)]
+def publishers(job: 'dict[str, Any]', os_label: 'str', event_name: 'str' = 'schedule',
+               published: 'str' = 'false') -> 'list[str]':
+    """Each step of ``job`` that reads a secret or publishes, and would run on ``os_label``."""
+    return [str(entry.get('name') or entry.get('uses')) for entry in job['steps']
+            if sensitive(entry) and runs(job, entry, os_label, event_name, published)]
 
 
-class TestTheWindowsLegPublishesNothing(unittest.TestCase):
-    """No step that publishes, or reads a secret, runs on ``windows-latest``."""
+class TestTheWindowsLegPublishes(unittest.TestCase):
+    """Each conda job uploads win-64 from its Windows leg, with the anaconda-client CLI."""
 
-    def test_the_leg_exists_in_conda_update_alone(self) -> None:
-        self.assertIn(WINDOWS, spec()['strategy']['matrix']['os'])
-        # Phase 2's: the release job gets the leg with its uploads.
-        self.assertNotIn(WINDOWS, _workflows.job('create-release.yml', 'conda')['strategy']['matrix']['os'])
+    def test_both_jobs_have_the_leg(self) -> None:
+        for name, job_id in JOBS:
+            with self.subTest(workflow=name, job=job_id):
+                self.assertIn(WINDOWS, spec(name, job_id)['strategy']['matrix']['os'])
+        self.assertEqual(release_conda.PLATFORMS[WINDOWS], 'win-64')
 
-    def test_no_secret_or_upload_reaches_the_windows_leg(self) -> None:
-        self.assertEqual(windows_publishers(spec()), [])
+    def test_the_windows_leg_runs_its_own_upload_alone(self) -> None:
+        """On a scheduled bump or a release, so the GitHub Release takes no win-64 file (as none of macOS's)."""
+        for name, job_id in JOBS:
+            with self.subTest(workflow=name, job=job_id):
+                self.assertEqual(publishers(spec(name, job_id), WINDOWS), [WINDOWS_UPLOAD])
+
+    def test_no_other_leg_runs_it(self) -> None:
+        for name, job_id in JOBS:
+            job = spec(name, job_id)
+            for os_label in job['strategy']['matrix']['os']:
+                with self.subTest(workflow=name, job=job_id, os=os_label):
+                    self.assertEqual(runs(job, step(name, job_id, WINDOWS_UPLOAD), os_label), os_label == WINDOWS)
+                    self.assertEqual(sum(runs(job, step(name, job_id, upload), os_label)
+                                         for upload in ANACONDA_UPLOADS), 1)
+
+    def test_a_manual_conda_update_run_publishes_nothing_there(self) -> None:
+        job = spec('cron-conda.yml', 'conda-dist')
+        self.assertEqual(publishers(job, WINDOWS, event_name='workflow_dispatch'), [])
+        self.assertEqual(job['environment'], "${{ github.event_name != 'workflow_dispatch' && 'anaconda' || '' }}")
+
+    def test_a_leg_already_on_anaconda_skips_it(self) -> None:
+        """#888's per-leg check gates the Windows upload as it does the others."""
+        job = spec('create-release.yml', 'conda')
+        self.assertEqual(publishers(job, WINDOWS, published='true'), [])
+        self.assertEqual(job['environment'], 'anaconda')
+        check = next(entry for entry in job['steps'] if entry.get('id') == 'check_leg')
+        self.assertEqual(check['env']['PCAPKIT_CONDA_OS'], '${{ matrix.os }}')
 
     def test_only_the_uploads_read_the_anaconda_token(self) -> None:
-        readers = [step.get('name') for step in spec()['steps'] if 'secrets.ANACONDA_TOKEN' in repr(step)]
-        self.assertEqual(readers, ANACONDA_UPLOADS)
-        self.assertNotIn('ANACONDA_TOKEN', repr({key: value for key, value in spec().items() if key != 'steps'}))
+        for name, job_id in JOBS:
+            job = spec(name, job_id)
+            with self.subTest(workflow=name, job=job_id):
+                readers = [entry.get('name') for entry in job['steps'] if 'secrets.ANACONDA_TOKEN' in repr(entry)]
+                self.assertEqual(readers, ANACONDA_UPLOADS)
 
-    def test_every_other_leg_still_uploads(self) -> None:
-        """So the pin cannot pass by gating every upload off every leg."""
-        steps = [step for step in spec()['steps'] if step.get('name') in ANACONDA_UPLOADS]
-        for os_label in spec()['strategy']['matrix']['os']:
-            if os_label == WINDOWS:
-                continue
-            with self.subTest(os=os_label):
-                self.assertEqual(sum(runs(step, os_label) for step in steps), 1)
+    def test_it_is_the_intel_call_in_a_login_shell(self) -> None:
+        """The Intel step's inputs, on conda's base ``python``, which only ``bash -el`` activates."""
+        for name, job_id in JOBS:
+            names = [entry.get('name') for entry in spec(name, job_id)['steps']]
+            windows, intel = step(name, job_id, WINDOWS_UPLOAD), step(name, job_id, INTEL_UPLOAD)
+            with self.subTest(workflow=name, job=job_id):
+                self.assertEqual(windows['env'], intel['env'])
+                self.assertEqual(windows['shell'], 'bash -el {0}')
+                self.assertEqual(windows['run'], 'python util/release_conda.py upload')
+                self.assertEqual(windows['if'], intel['if'].replace(INTEL, WINDOWS))
+                self.assertNotIn('uses', windows)
+                self.assertEqual(names.index(WINDOWS_UPLOAD), names.index(INTEL_UPLOAD) + 1)
 
-    def test_the_check_sees_an_ungated_upload(self) -> None:
-        job = copy.deepcopy(spec())
-        upload = next(step for step in job['steps'] if step.get('name') == ANACONDA_UPLOADS[0])
-        upload['if'] = upload['if'].replace(f" && matrix.os != '{WINDOWS}'", '')
-        self.assertEqual(windows_publishers(job), [ANACONDA_UPLOADS[0]])
+    def test_the_check_sees_an_upload_gated_off_the_leg(self) -> None:
+        """So :meth:`test_the_windows_leg_runs_its_own_upload_alone` reads the gate, as phase 1 had it."""
+        for name, job_id in JOBS:
+            job = copy.deepcopy(spec(name, job_id))
+            job['steps'] = [entry for entry in job['steps'] if entry.get('name') != WINDOWS_UPLOAD]
+            with self.subTest(workflow=name, job=job_id):
+                self.assertEqual(publishers(job, WINDOWS), [])
+
+    def test_the_completeness_check_counts_every_release_leg(self) -> None:
+        """``version_check`` expects each platform the release legs publish, win-64 among them."""
+        legs = spec('create-release.yml', 'conda')['strategy']['matrix']['os']
+        self.assertEqual(sorted(release_published.SUBDIRS.split()),
+                         sorted(release_conda.PLATFORMS[os_label] for os_label in legs))
+        self.assertIn('win-64', release_published.SUBDIRS.split())
 
 
-class TestTheWindowsLegNeverBlocks(unittest.TestCase):
-    """Each step that can fail on the leg continues, and the summary reports it."""
+class TestTheWindowsLegBlocks(unittest.TestCase):
+    """A failure on the Windows leg fails it, as on every other leg."""
 
-    def test_each_step_it_runs_continues_on_error_there_alone(self) -> None:
-        steps = spec()['steps']
-        self.assertEqual(steps[-1].get('name'), SUMMARY)
-        others = [os_label for os_label in spec()['strategy']['matrix']['os'] if os_label != WINDOWS]
-        # A manual run's own steps, which build the dispatched commit, as well.
-        for event_name, step in ((event_name, step) for event_name in ('schedule', 'workflow_dispatch')
-                                 for step in steps[:-1]):
-            if not runs(step, WINDOWS, event_name):
-                continue
-            name = step.get('name') or step.get('uses')
-            with self.subTest(event=event_name, step=name):
-                self.assertIn('id', step)
-                guard = str(step.get('continue-on-error'))
-                self.assertTrue(evaluate_condition(guard, context(WINDOWS)))
-                for os_label in others:
-                    self.assertFalse(evaluate_condition(guard, context(os_label)), os_label)
-
-    def test_the_summary_runs_on_the_leg_alone_and_last(self) -> None:
-        summary = spec()['steps'][-1]
-        self.assertIs(summary.get('continue-on-error'), True)
-        self.assertEqual(summary.get('shell'), 'bash')
-        self.assertEqual(summary['env']['STEPS'], '${{ toJSON(steps) }}')
-        self.assertEqual(summary['run'], 'python util/leg_summary.py conda-windows')
-        for os_label in spec()['strategy']['matrix']['os']:
-            with self.subTest(os=os_label):
-                self.assertEqual(runs(summary, os_label), os_label == WINDOWS)
-        cancelled = dict(context(WINDOWS), **{STATUS: {'cancelled': True, 'success': False, 'failure': False}})
-        self.assertFalse(evaluate_condition(summary['if'], cancelled))
-
-    def test_the_summary_warns_per_failed_step(self) -> None:
-        with tempfile.TemporaryDirectory() as temp:
-            page = pathlib.Path(temp) / 'summary.md'
-            result = subprocess.run(  # nosec: B603
-                [sys.executable, str(ROOT / 'util' / 'leg_summary.py'), 'conda-windows'],
-                env=dict(os.environ, LEG='conda-dist on windows-latest', GITHUB_STEP_SUMMARY=str(page),
-                         STEPS=json.dumps({'checkout': {'outcome': 'success'}, 'conda_build': {'outcome': 'failure'}})),
-                capture_output=True, text=True, check=False, timeout=60)
-        self.assertEqual(result.returncode, 0, result.stderr)
-        self.assertEqual(result.stdout.splitlines(), [
-            '::warning title=conda_build failed on conda-dist on windows-latest::The win-64 conda leg is '
-            "unpublished and never blocks (#2060), so this job still succeeds; see the conda_build step's log."])
+    def test_no_step_continues_on_error(self) -> None:
+        for name, job_id in JOBS:
+            job = spec(name, job_id)
+            with self.subTest(workflow=name, job=job_id):
+                self.assertNotIn('continue-on-error', job)
+                self.assertEqual([entry.get('name') or entry.get('id') for entry in job['steps']
+                                  if 'continue-on-error' in entry], [])
+                self.assertNotIn(SUMMARY, [entry.get('name') for entry in job['steps']])
+        self.assertNotIn('conda-windows', leg_summary.REASONS)
 
     def test_the_bash_steps_name_their_shell(self) -> None:
         """A ``run:`` step's default shell on Windows is ``pwsh``."""
-        for step in spec()['steps']:
-            if 'run' in step and runs(step, WINDOWS):
-                with self.subTest(step=step.get('name')):
-                    self.assertTrue(str(step.get('shell', '')).startswith('bash'))
+        for name, job_id in JOBS:
+            job = spec(name, job_id)
+            for event_name in ('schedule', 'workflow_dispatch') if name == 'cron-conda.yml' else ('push',):
+                for entry in job['steps']:
+                    if 'run' in entry and runs(job, entry, WINDOWS, event_name):
+                        with self.subTest(workflow=name, step=entry.get('name'), event=event_name):
+                            self.assertTrue(str(entry.get('shell', '')).startswith('bash'))
+
+    def test_conda_runs_in_a_login_shell(self) -> None:
+        """Only ``bash -el`` has base active on Windows, so ``conda`` and base's ``python`` there."""
+        for name, job_id in JOBS:
+            for entry in spec(name, job_id)['steps']:
+                text = str(entry.get('run', ''))
+                if re.search(r'^conda |release_conda\.py (?:build|upload)$', text, re.MULTILINE) \
+                        and entry.get('name') != INTEL_UPLOAD:
+                    with self.subTest(workflow=name, step=entry.get('name')):
+                        self.assertEqual(entry.get('shell'), 'bash -el {0}')
 
     def test_the_build_step_maps_the_leg_to_win_64(self) -> None:
         # #1967: util/release_conda.py maps it, which the step runs with the leg's label.
-        build = next(step for step in spec()['steps'] if step.get('id') == 'conda_build')
-        self.assertEqual(build['run'], 'python ../../util/release_conda.py build')
-        self.assertEqual(build['env']['PCAPKIT_CONDA_OS'], '${{ matrix.os }}')
-        self.assertEqual(release_conda.PLATFORMS[WINDOWS], 'win-64')
+        for name, job_id in JOBS:
+            build = next(entry for entry in spec(name, job_id)['steps'] if entry.get('id') == 'conda_build')
+            with self.subTest(workflow=name, job=job_id):
+                self.assertEqual(build['run'], 'python ../../util/release_conda.py build')
+                self.assertEqual(build['env']['PCAPKIT_CONDA_OS'], '${{ matrix.os }}')
 
     def test_the_smoke_test_runs_python_exe_on_windows(self) -> None:
-        smoke = next(step for step in spec()['steps'] if step.get('id') == 'smoke')
-        self.assertIn('if [ "$RUNNER_OS" = Windows ]; then\n  python="$(cygpath -u "$pythonLocation")/python.exe"\n',
-                      smoke['run'])
+        for name, job_id in JOBS:
+            smoke = step(name, job_id, 'Smoke-test the vendored packages')
+            with self.subTest(workflow=name, job=job_id):
+                self.assertNotIn('if', smoke)
+                self.assertIn('if [ "$RUNNER_OS" = Windows ]; then\n'
+                              '  python="$(cygpath -u "$pythonLocation")/python.exe"\n', smoke['run'])
+
+
+class TestTheWindowsClient(unittest.TestCase):
+    """``release_conda.py upload`` runs base's ``anaconda``, wherever conda keeps it."""
+
+    PACKAGE = 'D:\\out\\win-64\\pypcapkit-0-py314_0.tar.bz2'
+
+    def upload(self, windows: 'bool', conda: 'str') -> 'list[tuple[str, ...]]':
+        calls = []  # type: list[tuple[str, ...]]
+
+        def call(*args: 'str') -> 'int':
+            calls.append(args)
+            return 0
+
+        environ = {'CONDA': conda, 'ANACONDA_API_TOKEN': 'TOKEN', 'PCAPKIT_CONDA_CHANNEL': 'jarryshaw',
+                   'PCAPKIT_CONDA_LABELS': 'main', 'PCAPKIT_CONDA_PACKAGES': self.PACKAGE}
+        with mock.patch.dict(os.environ, environ), mock.patch.object(release_conda, 'WINDOWS', windows), \
+                mock.patch.object(release_conda, 'call', side_effect=call):
+            self.assertEqual(release_conda.main(['upload']), 0)
+        return calls
+
+    def test_windows_runs_scripts_anaconda_exe(self) -> None:
+        calls = self.upload(True, 'C:\\Miniconda')
+        self.assertEqual(calls[0][0], 'conda')
+        self.assertEqual(calls[1], ('C:\\Miniconda\\Scripts\\anaconda.exe', '--token', 'TOKEN', 'upload', '--user',
+                                    'jarryshaw', '--skip-existing', '--label', 'main', self.PACKAGE))
+
+    def test_elsewhere_it_runs_bin_anaconda(self) -> None:
+        self.assertEqual(self.upload(False, '/opt/miniforge')[1][0], '/opt/miniforge/bin/anaconda')
+
+    def test_the_flag_reads_the_running_os(self) -> None:
+        self.assertIs(release_conda.WINDOWS, os.name == 'nt')
 
 
 #: A FOR loop's variable, with the percent signs before it.

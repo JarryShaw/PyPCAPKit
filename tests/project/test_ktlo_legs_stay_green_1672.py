@@ -142,8 +142,6 @@ EXPERIMENTAL_SUMMARY_ENV = {'LEG': 'Python ${{ matrix.python-version }} (experim
 #: Why each summary's warning says the job still succeeds; the scripts differ in nothing else.
 KTLO_REASON = 'KTLO legs never block (#1633), so this job still succeeds (#1672)'
 EXPERIMENTAL_REASON = 'Experimental legs never block (#1660), so this job still succeeds'
-#: #2060: cron-conda.yml's unpublished Windows leg, pinned in test_conda_windows_leg_2060.py.
-CONDA_WINDOWS_REASON = 'The win-64 conda leg is unpublished and never blocks (#2060), so this job still succeeds'
 #: Each summary's command (#1967): the image's interpreter, not the leg's, which may
 #: have failed to set up.
 IMAGE_PYTHON = '/usr/bin/python3'
@@ -735,8 +733,8 @@ class TestAnExperimentalLegIsNonBlockingTheSameWay(unittest.TestCase):
         # One script with the KTLO summary's, so a fix to either reaches both (#1967).
         self.assertEqual(self.summary['run'], EXPERIMENTAL_SUMMARY_RUN)
         self.assertEqual(summary_step(job('unit-tests.yml', 'test'))['run'], SUMMARY_RUN)
-        self.assertEqual(REASONS, {'ktlo': KTLO_REASON, 'experimental': EXPERIMENTAL_REASON,
-                                   'conda-windows': CONDA_WINDOWS_REASON})
+        # #2060: no `conda-windows` tier since the win-64 conda leg blocks as the others do.
+        self.assertEqual(REASONS, {'ktlo': KTLO_REASON, 'experimental': EXPERIMENTAL_REASON})
 
     def test_each_step_names_the_leg_by_its_tier(self) -> None:
         """``LEG`` in an annotation's title: ``(experimental, non-blocking)``."""

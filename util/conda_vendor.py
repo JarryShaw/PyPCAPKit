@@ -103,8 +103,7 @@ EXTRAS = ('all',)
 #: ``sys.platform``, ``platform.system()`` and ``platform.machine()`` read on its
 #: runner: ``ubuntu-latest``, the Intel ``macos-26-intel``, the arm64
 #: ``macos-latest`` and ``windows-latest``. Each leg builds only its own runner's
-#: platform (#1822). The Windows leg, ``cron-conda.yml``'s alone, builds and
-#: smoke-tests with the recipe's ``bld.bat`` and publishes nothing yet (#2060).
+#: platform (#1822). The Windows legs build with the recipe's ``bld.bat`` (#2060).
 PLATFORMS = {
     'linux-64': ('linux', 'Linux', 'x86_64'),
     'osx-64': ('darwin', 'Darwin', 'x86_64'),

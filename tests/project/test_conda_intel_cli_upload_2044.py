@@ -129,7 +129,7 @@ class TestOnlyTheIntelLegUsesTheCLI(unittest.TestCase):
                 self.assertTrue(runs(step(name, job_id, CLI_STEP), INTEL))
 
     def test_every_other_leg_runs_the_action_only(self) -> None:
-        # #2060: but the Windows leg, which runs neither; test_conda_windows_leg_2060 pins that.
+        # #2060: but the Windows leg, whose own CLI step test_conda_windows_leg_2060 pins.
         for name, job_id in JOBS:
             others = [os for os in legs(name, job_id) if os not in (INTEL, 'windows-latest')]
             with self.subTest(workflow=name, job=job_id):

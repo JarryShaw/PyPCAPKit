@@ -53,7 +53,7 @@ def published() -> 'set[str]':
     """The platform each ``conda`` leg publishes, from its matrix and the script its steps run (#1967)."""
     spec = jobs()['conda']
     runs = [str(step.get('run', '')) for step in spec['steps'] if 'util/release_conda.py' in str(step.get('run', ''))]
-    assert len(runs) == 3, runs  # the leg check, the build and the Intel upload
+    assert len(runs) == 4, runs  # the leg check, the build, and the Intel and Windows uploads (#2060)
     return {release_conda.PLATFORMS[label] for label in spec['strategy']['matrix']['os']}
 
 
@@ -74,7 +74,7 @@ class TheCheckRunsAsTheWorkflowRunsIt(unittest.TestCase):
     def complete(self, distributions: 'list[tuple[str, str]]') -> 'tuple[str, str]':
         """``PCAPKIT_CONDA_COMPLETE`` and the log for a release holding these (platform, build) pairs."""
         step = check()
-        self.assertEqual(sorted(step['env']), ['PCAPKIT_CONDA_BUILDS', 'PCAPKIT_VERSION'])
+        self.assertEqual(sorted(step['env']), ['PCAPKIT_CONDA_BUILDS', 'PCAPKIT_TAG_EXISTS', 'PCAPKIT_VERSION'])
         with tempfile.TemporaryDirectory(prefix='pcapkit-1922-') as tmp:
             scratch = pathlib.Path(tmp)
             reply = scratch / 'reply.json'
@@ -90,7 +90,8 @@ class TheCheckRunsAsTheWorkflowRunsIt(unittest.TestCase):
             result = subprocess.run(  # nosec: B603
                 [sys.executable, str(ROOT / words[1]), *words[2:]],
                 env=dict(os.environ, PATH=f'{scratch}{os.pathsep}{os.environ["PATH"]}', REPLY=str(reply),
-                         GITHUB_OUTPUT=str(output), PCAPKIT_VERSION='1.5.0', PCAPKIT_CONDA_BUILDS=' '.join(BUILDS)),
+                         GITHUB_OUTPUT=str(output), PCAPKIT_VERSION='1.5.0', PCAPKIT_CONDA_BUILDS=' '.join(BUILDS),
+                         PCAPKIT_TAG_EXISTS='false'),
                 capture_output=True, text=True, check=False, timeout=60)
             self.assertEqual(result.returncode, 0, result.stderr)
             written = dict(line.split('=', 1) for line in output.read_text(encoding='utf-8').split())

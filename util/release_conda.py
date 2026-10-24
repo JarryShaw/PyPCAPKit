@@ -25,11 +25,14 @@
     the binaries unchanged), gets an ``::error`` and exits 1.
 ``python3 util/release_conda.py upload``
     "Upload conda packages to Anaconda (Intel)" (#2044), on setup-python's
-    ``python3``. It installs conda-forge's anaconda-client into base and runs the
+    ``python3``, and as ``python util/release_conda.py upload`` "Upload conda
+    packages to Anaconda (Windows)" (#2060), under ``bash -el`` on conda's base
+    ``python``. It installs conda-forge's anaconda-client into base and runs the
     call ``anaconda/actions/upload-package`` makes, ``anaconda --token … upload
     --user …``, with ``--skip-existing``: a ``--label`` for each of
     ``PCAPKIT_CONDA_LABELS``' comma-separated names, trimmed, then each line of
     ``PCAPKIT_CONDA_PACKAGES``. With no package it gets an ``::error`` and exits 1.
+    The ``anaconda`` it runs is base's, :func:`client`.
 
 :data:`PLATFORMS` maps each leg of either job to the platform it publishes.
 
@@ -51,6 +54,7 @@ from __future__ import annotations
 
 import argparse
 import fnmatch
+import ntpath
 import os
 import stat
 # conda and anaconda, with fixed argument lists and no shell.
@@ -68,11 +72,10 @@ except ImportError:  # imported as util.<script>, or loaded by path, from the re
 if TYPE_CHECKING:
     from typing import Optional
 
-__all__ = ['PLATFORMS', 'PATTERNS', 'leg_source', 'env', 'call', 'append', 'packages', 'leg', 'build', 'upload',
-           'main']
+__all__ = ['PLATFORMS', 'PATTERNS', 'WINDOWS', 'leg_source', 'env', 'call', 'append', 'packages', 'client', 'leg',
+           'build', 'upload', 'main']
 
-#: The conda platform each runner label builds and publishes (#1822). ``conda``
-#: has no Windows leg; ``conda-dist``'s builds win-64 and publishes nothing (#2060).
+#: The conda platform each runner label builds and publishes (#1822, #2060).
 PLATFORMS = {
     'macos-latest': 'osx-arm64',
     'macos-26-intel': 'osx-64',
@@ -81,6 +84,8 @@ PLATFORMS = {
 }
 #: The names of the files ``conda build`` writes that are packages.
 PATTERNS = ('*.tar.bz2', '*.conda')
+#: Whether this runs on Windows, where conda puts its entry points in ``Scripts``.
+WINDOWS = os.name == 'nt'
 
 
 def leg_source(path: 'str', platform: 'str', py_tag: 'str') -> 'str':
@@ -139,6 +144,13 @@ def packages(out_dir: 'str') -> 'list[str]':
                     and stat.S_ISREG(os.lstat(path).st_mode):
                 found.append(path)
     return sorted(found)
+
+
+def client() -> 'str':
+    """anaconda-client's ``anaconda`` in base, at ``$CONDA``: ``Scripts\\anaconda.exe`` on Windows (#2060)."""
+    if WINDOWS:
+        return ntpath.join(env('CONDA'), 'Scripts', 'anaconda.exe')
+    return env('CONDA') + '/bin/anaconda'
 
 
 def leg(reply: 'str') -> 'int':
@@ -203,7 +215,7 @@ def upload() -> 'int':
     if not files:
         _actions.annotate('error', 'No conda packages to upload', escape=False)
         return 1
-    return call(env('CONDA') + '/bin/anaconda', '--token', env('ANACONDA_API_TOKEN'), 'upload',
+    return call(client(), '--token', env('ANACONDA_API_TOKEN'), 'upload',
                 '--user', env('PCAPKIT_CONDA_CHANNEL'), '--skip-existing', *labels, *files)
 
 

@@ -2442,7 +2442,7 @@ class TestEvidenceBasedGating(WorkflowMixin, unittest.TestCase):
     def test_conda_evidence_checks_every_platform(self) -> None:
         self.assertIn(f'run: python3 {EVIDENCE_SCRIPT} anaconda ', self.jobs['version_check'])
         script = (ROOT / EVIDENCE_SCRIPT).read_text(encoding='utf-8')
-        self.assertIn("SUBDIRS = 'linux-64 osx-64 osx-arm64'", script)
+        self.assertIn("SUBDIRS = 'linux-64 osx-64 osx-arm64 win-64'", script)
 
 
 class TestGateExpressionsEvaluateCorrectly(WorkflowMixin, unittest.TestCase):

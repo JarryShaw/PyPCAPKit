@@ -257,7 +257,8 @@ FORMER_ANACONDA = textwrap.dedent(r'''
     set -euo pipefail
 
     # Each platform the ``conda`` legs publish, for each supported version.
-    export PCAPKIT_CONDA_SUBDIRS="linux-64 osx-64 osx-arm64"
+    # win-64 since the conda job's Windows leg publishes it (#2060).
+    export PCAPKIT_CONDA_SUBDIRS="linux-64 osx-64 osx-arm64 win-64"
     read -r -a subdirs <<< "$PCAPKIT_CONDA_SUBDIRS"
     read -r -a builds <<< "$PCAPKIT_CONDA_BUILDS"
     expected=$(( ${#subdirs[@]} * ${#builds[@]} ))
@@ -432,8 +433,10 @@ PYPI_CASES = (
 )
 
 #: "Check Anaconda publish completeness"'s base, and its platforms.
-ANACONDA_BASE = {'PCAPKIT_VERSION': '1.5.0', 'PCAPKIT_CONDA_BUILDS': 'py311 py312'}
-PLATFORMS = ('linux-64', 'osx-64', 'osx-arm64')
+#: #2060: untagged, as the former shell knew no tag; a tagged version's platforms are
+#: test_release_tags_the_run_sha_1634.TestTheCountsAreOfTheReleasedPlatforms'.
+ANACONDA_BASE = {'PCAPKIT_VERSION': '1.5.0', 'PCAPKIT_CONDA_BUILDS': 'py311 py312', 'PCAPKIT_TAG_EXISTS': 'false'}
+PLATFORMS = ('linux-64', 'osx-64', 'osx-arm64', 'win-64')
 
 
 def distributions(*pairs: 'tuple[str, str]') -> 'str':
@@ -450,7 +453,7 @@ ANACONDA_CASES = (
     ('a platform missing', {}, distributions(*(pair for pair in EVERY if pair[0] != 'osx-64'))),
     ('osx-arm64 missing for one build', {}, distributions(*(pair for pair in EVERY
                                                              if pair != ('osx-arm64', 'py312_0')))),
-    ('another platform is not counted', {}, distributions(*EVERY[1:], ('win-64', 'py311_0'))),
+    ('another platform is not counted', {}, distributions(*EVERY[1:], ('linux-aarch64', 'py311_0'))),
     ('a build without its underscore', {}, distributions(*EVERY[1:], ('linux-64', 'py311'))),
     ('a build of another tag', {}, distributions(*EVERY[1:], ('linux-64', 'py3110_0'))),
     ('no attrs', {}, '{"distributions": [{}]}'),
@@ -467,8 +470,8 @@ ANACONDA_CASES = (
     ('a body that is not json', {}, 'not json'),
     ('a distribution that is a string', {}, '{"distributions": ["x"]}'),
     ('no python3 at all', {'PATH': 'nopython3'}, distributions(*EVERY)),
-    ('a count that is not a number', {'COUNT_REPLY': '6.0'}, distributions()),
-    ('a count past what is expected', {'COUNT_REPLY': '7'}, distributions()),
+    ('a count that is not a number', {'COUNT_REPLY': '8.0'}, distributions()),
+    ('a count past what is expected', {'COUNT_REPLY': '9'}, distributions()),
     ('a version not in utf-8', {'PCAPKIT_VERSION': b'1.5\xff'}, distributions()),
     ('no version variable', {'PCAPKIT_VERSION': UNSET}, distributions(*EVERY)),
     ('no builds variable', {'PCAPKIT_CONDA_BUILDS': UNSET}, distributions(*EVERY)),
@@ -746,10 +749,10 @@ PLANTS = (
      "len(words(var('PCAPKIT_PYPI_WHEELS')))"),
     ('Check PyPI publish completeness', 'release_published.py', 'value >= expected', 'value > expected'),
     ('Check PyPI publish completeness', 'release_published.py', "value.split(b'\\n', 1)[0]", 'value'),
-    ('Check Anaconda publish completeness', 'release_published.py', "SUBDIRS = 'linux-64 osx-64 osx-arm64'",
-     "SUBDIRS = 'linux-64 osx-64'"),
+    ('Check Anaconda publish completeness', 'release_published.py', "SUBDIRS = 'linux-64 osx-64 osx-arm64 win-64'",
+     "SUBDIRS = 'linux-64 osx-64 osx-arm64'"),
     ('Check Anaconda publish completeness', 'release_published.py',
-     "    os.environ['PCAPKIT_CONDA_SUBDIRS'] = SUBDIRS\n", ''),
+     "    os.environ['PCAPKIT_CONDA_SUBDIRS'] = os.fsdecode(subdirs)\n", ''),
     ('Check Anaconda publish completeness', 'release_published.py', "ANACONDA_URL = 'https://api.anaconda.org/",
      "ANACONDA_URL = 'http://api.anaconda.org/"),
 )
