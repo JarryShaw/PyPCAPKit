@@ -813,7 +813,9 @@ jobs:
       # itself" (#1633, measured with conda 26.7.2). So 3.15 leaves base on its
       # own Python: `conda build --python` below builds against 3.15 regardless,
       # measured to build and import pypcapkit-*-py315_0. Drop the exception
-      # once conda publishes a py315 build.
+      # once conda publishes a py315 build. #2123: nor on macos-26-intel, where
+      # changing base's Python rebuilds conda-forge's libmambapy at a version
+      # conda-libmamba-solver cannot drive, failing "Install conda build tools".
       - name: Conda environment creation and activation
         uses: conda-incubator/setup-miniconda@be893c923ea9cf1cf7cd510fbdde27c7e18cbdcb # v4.1.0
         env:
@@ -826,7 +828,7 @@ jobs:
           # that leg installs Miniforge. An empty string names no installer, so
           # the other legs keep the bundled or downloaded Miniconda.
           miniforge-version: ${{ matrix.os == 'macos-26-intel' && 'latest' || '' }}
-          python-version: ${{ matrix.python-version != '3.15' && matrix.python-version || '' }}
+          python-version: ${{ matrix.os != 'macos-26-intel' && matrix.python-version != '3.15' && matrix.python-version || '' }}
           activate-environment: base
           auto-update-conda: false
           auto-activate: true

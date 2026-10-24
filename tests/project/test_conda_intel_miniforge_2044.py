@@ -17,15 +17,29 @@ the runner casts a ``with:`` value, and trimmed as ``core.getInput`` trims it.
 ``installer-url`` first, then Miniforge when ``miniforge-version`` or
 ``miniforge-variant`` is non-empty, else Miniconda.
 
+#2123: with Miniforge, the Intel legs broke twice more. Installing the matrix
+Python into base rebuilt conda-forge's libmambapy at 2.10.0, which
+conda-libmamba-solver 26.10.0 cannot drive, so the Intel legs now leave base's
+Python alone, as 3.15 does everywhere; :class:`TestTheIntelLegsKeepBasesPython`
+pins that. And conda-build 26.9's rpath relocation failed on the vendored chardet
+extensions, so :file:`conda/pypcapkit/meta.yaml` turns it off on osx-64 alone;
+:class:`TestOsx64SkipsBinaryRelocation` evaluates that line's selector as
+conda-build does, for each leg's platform.
+
 """
 
 from __future__ import annotations
 
+import ast
+import pathlib
+import re
 import unittest
 from typing import TYPE_CHECKING
 
 from tests import _workflows
+from tests.project.test_python_versions_1660 import script as versions_script
 from tests.project.test_release_gates import _as_string, evaluate_expression
+from util import release_conda
 
 if TYPE_CHECKING:
     from typing import Any
@@ -108,6 +122,92 @@ class TestTheIntelLegsInstallMiniforge(unittest.TestCase):
                     if received['miniforge-version']:
                         self.assertEqual(received['miniconda-version'], '')
                         self.assertEqual(received['installer-url'], '')
+
+
+def python_input(entry: 'dict[str, Any]', os: 'str', python: 'str') -> 'str':
+    """The ``python-version`` setup-miniconda receives on leg ``os`` with ``python``."""
+    context = {'matrix': {'os': os, 'python-version': python}}  # type: dict[str, object]
+    return _as_string(evaluate_expression(str(entry['with']['python-version']), context)).strip()
+
+
+class TestTheIntelLegsKeepBasesPython(unittest.TestCase):
+    """#2123: no Python install into base on ``macos-26-intel``; the other legs as before."""
+
+    supported = ()  # type: tuple[str, ...]
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        script = versions_script()
+        cls.supported = tuple(script.tier(script.load(), 'cpython', 'supported'))
+
+    def test_the_intel_leg_installs_no_python(self) -> None:
+        self.assertTrue(self.supported, 'no supported CPython to check')
+        for name, job_id in JOBS:
+            for python in self.supported:
+                with self.subTest(workflow=name, job=job_id, python=python):
+                    self.assertEqual(python_input(step(name, job_id), INTEL, python), '')
+
+    def test_the_other_legs_install_the_matrix_python_but_315(self) -> None:
+        for name, job_id in JOBS:
+            for os in legs(name, job_id):
+                if os == INTEL:
+                    continue
+                for python in self.supported:
+                    with self.subTest(workflow=name, job=job_id, os=os, python=python):
+                        expected = '' if python == '3.15' else python
+                        self.assertEqual(python_input(step(name, job_id), os, python), expected)
+
+
+#: The recipe whose ``build:`` section carries the relocation switch.
+META = pathlib.Path(__file__).resolve().parents[2] / 'conda' / 'pypcapkit' / 'meta.yaml'
+#: A ``key: value  # [selector]`` line, as conda-build reads one.
+SELECTED = re.compile(r'^\s*(?P<key>[\w-]+):\s*(?P<value>\S+)\s*#\s*\[(?P<selector>[^\]]+)\]\s*$')
+#: conda-build's ``ARCH_MAP``: the subdir arch names that are not selector names.
+ARCH_MAP = {'32': 'x86', '64': 'x86_64'}
+
+
+def selectors(subdir: 'str') -> 'dict[str, bool]':
+    """The OS and arch selectors conda-build 26.9's ``get_selectors`` sets for ``subdir``."""
+    subdirs = set(release_conda.PLATFORMS.values()) | {subdir, 'linux-aarch64', 'linux-32'}
+    names = {'unix': subdir.startswith(('linux-', 'osx-', 'emscripten-'))}
+    for os in {entry.split('-')[0] for entry in subdirs}:
+        names[os] = subdir.startswith(f'{os}-')
+    for arch in {entry.split('-')[1] for entry in subdirs}:
+        names[ARCH_MAP.get(arch, arch)] = subdir.endswith(f'-{arch}')
+    return names
+
+
+def holds(selector: 'str', names: 'dict[str, bool]') -> 'bool':
+    """Whether ``selector``, of names, ``and``, ``or`` and ``not``, holds; an unknown name raises."""
+    def walk(node: 'ast.AST') -> 'bool':
+        if isinstance(node, ast.BoolOp):
+            values = [walk(value) for value in node.values]
+            return all(values) if isinstance(node.op, ast.And) else any(values)
+        if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.Not):
+            return not walk(node.operand)
+        if isinstance(node, ast.Name):
+            return names[node.id]
+        raise AssertionError(f'unsupported selector {selector!r}')
+    return walk(ast.parse(selector, mode='eval').body)
+
+
+class TestOsx64SkipsBinaryRelocation(unittest.TestCase):
+    """#2123: ``binary_relocation: false`` on osx-64 alone, so the other platforms still relocate."""
+
+    def line(self) -> 're.Match[str]':
+        found = [match for match in map(SELECTED.match, META.read_text(encoding='utf-8').splitlines())
+                 if match and match['key'] == 'binary_relocation']
+        self.assertEqual(len(found), 1, f'{META.name} has {len(found)} selected binary_relocation lines')
+        return found[0]
+
+    def test_the_line_turns_relocation_off(self) -> None:
+        self.assertEqual(self.line()['value'], 'false')
+
+    def test_it_applies_to_the_intel_legs_platform_alone(self) -> None:
+        selector = self.line()['selector']
+        for os, subdir in sorted(release_conda.PLATFORMS.items()):
+            with self.subTest(os=os, subdir=subdir):
+                self.assertEqual(holds(selector, selectors(subdir)), os == INTEL)
 
 
 if __name__ == '__main__':

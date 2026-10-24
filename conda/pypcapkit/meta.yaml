@@ -17,6 +17,10 @@ build:
   entry_points:
     - pcapkit-cli = pcapkit.__main__:main
     - pcapkit-vendor = pcapkit.vendor.__main__:main
+  # #2123: every binary comes from a wheel and links only system libraries, so
+  # none needs an rpath into the prefix. On osx-64, adding one fails on the
+  # vendored chardet extensions, which have no header room for it.
+  binary_relocation: false  # [osx and x86_64]
   #script: "{{ PYTHON }} -m pip install . -vv"
 
 requirements:

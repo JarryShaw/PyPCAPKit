@@ -542,7 +542,8 @@ jobs:
           mkdir -p conda/wheels
           python -m pip download -r conda/requirements.txt -d conda/wheels
 
-      # See create-release.yml's step of the same name for the 3.15 exception.
+      # See create-release.yml's step of the same name for the 3.15 and Intel
+      # exceptions (#2123).
       - name: Conda environment creation and activation
         id: miniconda
         continue-on-error: ${{ matrix.os == 'windows-latest' }}
@@ -554,7 +555,7 @@ jobs:
           # #2044: Miniforge on the Intel leg; see create-release.yml's step of
           # the same name.
           miniforge-version: ${{ matrix.os == 'macos-26-intel' && 'latest' || '' }}
-          python-version: ${{ matrix.python-version != '3.15' && matrix.python-version || '' }}
+          python-version: ${{ matrix.os != 'macos-26-intel' && matrix.python-version != '3.15' && matrix.python-version || '' }}
           activate-environment: base
           auto-update-conda: false
           auto-activate: true

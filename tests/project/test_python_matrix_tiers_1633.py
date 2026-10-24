@@ -462,7 +462,8 @@ class TestNoKTLOLegCanFailTheRelease(unittest.TestCase):
                 setup = next(step for step in spec['steps']
                              if str(step.get('uses', '')).startswith('conda-incubator/setup-miniconda@'))
                 self.assertEqual(setup['with']['python-version'],
-                                 "${{ matrix.python-version != '3.15' && matrix.python-version || '' }}")
+                                 "${{ matrix.os != 'macos-26-intel' && matrix.python-version != '3.15' && "
+                                 "matrix.python-version || '' }}")
 
 
 #: ``pip`` for an install step, which runs util/pip_install.py on the real
