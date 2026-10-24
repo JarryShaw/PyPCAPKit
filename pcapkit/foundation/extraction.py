@@ -1532,12 +1532,12 @@ class Extractor(Generic[_P]):
             self.run()    # start extraction
         except BaseException:
             # NOTE: a constructor that raises leaves the caller nothing to close,
-            # and Windows cannot delete a file still open (#2100). Only the input
-            # is released: ``_cleanup`` would need an engine, which an unknown
-            # format never gets, and would finish a trace that never ran.
-            if self._owns_input():
-                self._ifile.close()
-            self._detach_finalizer()
+            # and Windows cannot delete a file still open (#2100). ``_cleanup``
+            # releases the input and the engine, if one was chosen (#2107);
+            # ``failed`` keeps it from finishing a trace whose capture never
+            # reached its end, and from letting an error out of the engine's close
+            # replace the one being handled here.
+            self._cleanup(failed=True)
             raise
 
     def __iter__(self) -> 'Extractor':
@@ -1625,15 +1625,20 @@ class Extractor(Generic[_P]):
         wrapper is closed; it was built with ``stream_closing`` off, so closing
         it leaves the caller's stream underneath open.
 
+        Both go through :meth:`_release`, the close path :meth:`_cleanup` shares.
+        Unlike :meth:`_cleanup`, this neither finishes the flow tracer nor sets
+        :attr:`_flag_e`: leaving the block is not the end of the capture -- an
+        extraction with ``auto=False`` may be left before end of file, or on an
+        error -- so there is nothing it can truthfully report as over, and an
+        extraction that did reach the end has already been through
+        :meth:`_cleanup`. An error from the engine's close propagates.
+
         """
         logger.debug('closing %s on context exit after %d frame(s)', self._ifnm, self._frnum)
         # NOTE: ownership, not the ``with`` statement, decides who closes the
         # input (#610, #1999): entering the block does not hand the caller's
         # stream over to this class.
-        if self._owns_input():
-            self._ifile.close()
-        self._detach_finalizer()
-        self._exeng.close()
+        self._release()
 
     def __del__(self) -> 'None':
         """Release the input stream if this class still owns an open one.
@@ -1797,12 +1802,13 @@ class Extractor(Generic[_P]):
         previous, self._eof_mark = self._eof_mark, position
         return previous is None or position > previous
 
-    def _cleanup(self) -> 'None':
+    def _cleanup(self, *, failed: 'bool' = False) -> 'None':
         """Cleanup after extraction & analysis.
 
-        The method calls :meth:`self._exeng.close <pcapkit.foundation.engines.engine.EngineBase.close>`,
-        sets :attr:`self._flag_e <pcapkit.foundation.extraction.Extractor._flag_e>`
-        as :data:`True` and closes the input file *if this class opened it*.
+        The method sets :attr:`self._flag_e <pcapkit.foundation.extraction.Extractor._flag_e>`
+        as :data:`True` and then calls :meth:`_release`, which closes the input
+        file *if this class opened it* and calls
+        :meth:`self._exeng.close <pcapkit.foundation.engines.engine.EngineBase.close>`.
 
         That proviso is the whole of it: a handle opened here -- ``fin`` given as
         a path, i.e. :attr:`self._flag_s <Extractor._flag_s>` set -- is closed,
@@ -1818,14 +1824,41 @@ class Extractor(Generic[_P]):
         caller-supplied stream runs it again -- so ``finish`` is required to be
         idempotent rather than guarded here.
 
+        Arguments:
+            failed: whether the extraction stopped on an error instead, which is
+                the constructor raising (:issue:`2100`, :issue:`2107`). The input
+                and the engine are still released, but the capture has not ended,
+                so the flow tracer is not finished -- its callbacks would report
+                flows of a capture that was never read to its end -- and
+                :attr:`_flag_e` is not set. The constructor may have failed before
+                choosing an engine, as an unknown format does, and then there is
+                none to close. An :exc:`Exception` from the engine's close is
+                logged rather than raised, so it cannot replace the error that
+                stopped the constructor.
+
         """
         # pylint: disable=attribute-defined-outside-init
         logger.debug('cleaning up after %d frame(s) from %s', self._frnum, self._ifnm)
-        self._flag_e = True
+        if failed:
+            self._release(failed=True)
+            return
 
+        self._flag_e = True
         if self._flag_t and self._tcp:
             self._trace.tcp.finish()
+        self._release()
 
+    def _release(self, *, failed: 'bool' = False) -> 'None':
+        """Close the input this class owns, and the engine.
+
+        The one close path, shared by :meth:`_cleanup` and :meth:`__exit__`, so
+        that the two cannot drift apart on what is released or in which order.
+
+        Arguments:
+            failed: see :meth:`_cleanup`. When set, a missing engine is skipped and
+                an :exc:`Exception` from its close is logged rather than raised.
+
+        """
         # NOTE: *Ownership* decides who closes the input, not seekability --
         # see :meth:`_owns_input` and #610. Keying on seekability
         # (``not self._flag_s``) gets both halves wrong at once: the handle this
@@ -1835,4 +1868,20 @@ class Extractor(Generic[_P]):
         if self._owns_input():
             self._ifile.close()
         self._detach_finalizer()
-        self._exeng.close()
+
+        if not failed:
+            self._exeng.close()
+            return
+
+        # NOTE: read through ``__dict__``, as ``_owns_input`` does: a constructor
+        # that failed before choosing an engine leaves no ``_exeng`` (#2107).
+        engine = self.__dict__.get('_exeng')
+        if engine is None:
+            return
+        try:
+            engine.close()
+        except Exception:  # pylint: disable=broad-except
+            # NOTE: the error that stopped the constructor is the one to report;
+            # letting the close's escape here would replace it (#2107).
+            logger.debug('engine %s failed to close after the constructor raised',
+                         type(engine).__name__, exc_info=True)
