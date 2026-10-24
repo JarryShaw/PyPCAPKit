@@ -1,0 +1,15 @@
+# Read by `Initialize CodeQL` in codeql-analysis.yml, through its `config-file`
+# input.
+name: "PyPCAPKit CodeQL config"
+
+# #2130: the py/clear-text-logging-sensitive-data and
+# py/clear-text-storage-sensitive-data alerts that came back each time a pull
+# request moved a line in pcapkit/ began in tests/. A test that builds a pcapng
+# Decryption Secrets Block calls its bytes `secrets`, and CodeQL takes a value
+# whose name says secret for secret data. Python is not built, so an ignored
+# path is left out of the database and cannot be a flow source. Both queries,
+# and every other, still run over pcapkit/. The alert at the logger call in
+# pcapkit/utilities/warnings.py begins there instead, at the Decryption Secrets
+# Block's own `secrets_length` field, so this does not clear it.
+paths-ignore:
+  - tests
