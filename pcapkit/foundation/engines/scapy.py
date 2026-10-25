@@ -58,7 +58,7 @@ if TYPE_CHECKING:
     from pcapkit.foundation.extraction import Extractor
 
     class _ScapyPackage(Protocol):
-        """``scapy.all``, as :class:`Scapy` reads it through :attr:`Scapy._expkg` (#1878).
+        """``scapy.all``, as :class:`Scapy` reads it through :attr:`Scapy._expkg` (:issue:`1878`).
 
         Typed by scapy itself, which ships its own type information.
 
@@ -76,16 +76,16 @@ _READER_HOOKS = ('_read_block', '_read_block_shb', '_read_block_idb', '_check_in
 
 #: The most octets a record can hold, as its captured length is 32 bits in a
 #: PCAP record header and in every PCAP-NG packet block. As the ``size`` a
-#: packet is read with, it cuts nothing (#1717).
+#: packet is read with, it cuts nothing (:issue:`1717`).
 _CAPLEN_MAX = 0xFFFF_FFFF
 
 #: The most octets of a PCAP record read in one call, so that a forged captured
-#: length costs only the octets the file holds, as in Scapy 2.8 (#1717).
+#: length costs only the octets the file holds, as in Scapy 2.8 (:issue:`1717`).
 _READ_CHUNK = 0x40000
 
 
 def _read_tsoffset(options: 'bytes', endian: 'str') -> 'int':
-    """Read the ``if_tsoffset`` of a PCAP-NG Interface Description Block (#1549).
+    """Read the ``if_tsoffset`` of a PCAP-NG Interface Description Block (:issue:`1549`).
 
     Read here rather than by `Scapy`_'s ``_read_options``, whose result differs
     by version: keyed by option code in 2.7 and 2.8, and in 2.5 by name, with
@@ -117,7 +117,7 @@ def _reader_type() -> 'Type[PcapReader]':
     comes out with the same digits whether the capture counted microseconds or
     nanoseconds. They drop the link type too, once it has picked the packet's
     first layer, and a layer does not name its link type: a raw IPv4 packet's is
-    :class:`~scapy.layers.inet.IP` (#1517). The PCAP frame record and the flow
+    :class:`~scapy.layers.inet.IP` (:issue:`1517`). The PCAP frame record and the flow
     tracing input of a packet need both, so these subclasses attach them with
     :func:`pcapkit.toolkit.scapy.attach_resolution` and
     :func:`pcapkit.toolkit.scapy.attach_linktype`: from the global header of a
@@ -128,15 +128,15 @@ def _reader_type() -> 'Type[PcapReader]':
     PCAP-NG specification defines a section: an interface ID counts the Interface
     Description Blocks of its own section only. `Scapy`_'s reader keeps appending
     to one table across Section Header Blocks, so a later section's interface 0
-    resolved to the first section's, with its link type and resolution (#1522).
+    resolved to the first section's, with its link type and resolution (:issue:`1522`).
 
     And it dates packets that `Scapy`_ misdates. A Simple Packet
     Block has no timestamp, and `Scapy`_ leaves its packet with the time it was
-    built, so it is set to 0 (#1503). `Scapy`_ ignores an interface's
+    built, so it is set to 0 (:issue:`1503`). `Scapy`_ ignores an interface's
     ``if_tsoffset``, the seconds to add to each of its timestamps, so the
-    subclass reads it and adds it (#1549).
+    subclass reads it and adds it (:issue:`1549`).
 
-    Both subclasses read each record whole (#1717). ``sniff`` reads a packet
+    Both subclasses read each record whole (:issue:`1717`). ``sniff`` reads a packet
     with ``recv()``, whose ``size`` defaults to `Scapy`_'s ``MTU``, 65,535
     octets, and every reader cuts the record to ``size``, so ``recv`` defaults
     to :data:`_CAPLEN_MAX` instead, as does a PCAP-NG block, which `Scapy`_ 2.6

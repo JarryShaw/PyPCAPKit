@@ -319,7 +319,7 @@ FILTER_NAME_TO_LINKTYPE = cast('dict[str, Enum_LinkType]', {
 
 #: PyShark's text for a boolean field -> its value. tshark 4.x spells one ``'True'``/``'False'``
 #: (measured for ``tcp.flags_syn``, ``tcp.flags_fin`` and ``tcp.flags_reset`` with PyShark 0.6
-#: on tshark 4.6.9); ``'1'``/``'0'`` is the spelling this module first parsed (#1514).
+#: on tshark 4.6.9); ``'1'``/``'0'`` is the spelling this module first parsed (:issue:`1514`).
 _BOOLEAN_FIELD = {'1': True, '0': False, 'True': True, 'False': False}  # type: dict[str, bool]
 
 

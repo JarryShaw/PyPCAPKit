@@ -343,7 +343,7 @@ class PCAPNG(EngineBase[P_PCAPNG]):
         :attr:`Context.interfaces <pcapkit.foundation.engines.pcapng.Context.interfaces>`) restart
         with every Section Header Block, so numbering a block by their length gives the first IDB of
         every section the same name. The output dumpers key by name, so a repeated name overwrites
-        the earlier block (#1256). The number is therefore counted across the whole file instead;
+        the earlier block (:issue:`1256`). The number is therefore counted across the whole file instead;
         for a single-section file the two counts agree.
 
         Args:

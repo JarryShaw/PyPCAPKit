@@ -213,7 +213,7 @@ plug-in functions, you may want to install the optional ones:
 
    The ``all`` extra deliberately excludes both ``pypcap`` and ``pcap-ct``, for
    different reasons. Everything
-   else in ``all`` is a pure-Python wheel, whereas ``pypcap`` compiles a C
+   else in ``all`` installs from a published wheel, whereas ``pypcap`` compiles a C
    extension; pulling it into ``all`` would demand a working compiler and the
    `libpcap`_ development files from everyone installing ``pypcapkit[all]``.
    ``pcap-ct`` needs no compiler, but it and its ``libpcap`` dependency are

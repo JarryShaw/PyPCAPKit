@@ -35,7 +35,7 @@ if TYPE_CHECKING:
     from pcapkit.foundation.extraction import Extractor
 
     class _PyPCAPPackage(Protocol):
-        """|pcap|_, as :class:`PyPCAP` reads it through :attr:`PyPCAP._expkg` (#1878)."""
+        """|pcap|_, as :class:`PyPCAP` reads it through :attr:`PyPCAP._expkg` (:issue:`1878`)."""
 
         @property
         def pcap(self) -> 'Type[Handle]': ...

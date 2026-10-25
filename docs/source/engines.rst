@@ -72,7 +72,7 @@ third-party package.
    ``benchmark-out`` artifact. :file:`examples/benchmark/run.sh` produces the same
    tables on any machine with Docker, and :file:`examples/benchmark/README.md`
    explains what each one measures. `Test Environment`_ records where the
-   current figures came from.
+   figures on this page came from.
 
 Engine Support by Python Version
 --------------------------------

@@ -34,10 +34,10 @@ code. ``util/vendor_code_changed.py`` compares each changed file with ``HEAD``;
 a crawl whose changes are all to comments or docstrings is committed as
 "Updated vendor documentation without a version bump" instead, so it reaches
 ``main`` without starting a release
-(`#1674 <https://github.com/JarryShaw/PyPCAPKit/issues/1674>`__). A crawl that
+(:issue:`1674`). A crawl that
 finds nothing commits nothing. The bump commit carries every module the crawl
 wrote under ``pcapkit/const/``, new and deleted ones included
-(`#1685 <https://github.com/JarryShaw/PyPCAPKit/issues/1685>`__), and is what
+(:issue:`1685`), and is what
 starts the automated path described below.
 
 The same script is also the manual entry point: run
@@ -115,7 +115,7 @@ Update that did not conclude ``success`` or skipped ``vendor-update`` (below).
 Past it, a ``v*`` ref always runs the gate; on ``main`` it
 runs only when the version is not tagged at another commit and some target's
 evidence is not yet ``'true'``
-(`#1052 <https://github.com/JarryShaw/PyPCAPKit/issues/1052>`__), so the
+(:issue:`1052`), so the
 common Vendor Update run that bumped nothing costs a minute, not a full-suite
 run.
 
@@ -124,12 +124,12 @@ cancels it (the ``concurrency`` block), since two Vendor Update runs
 completing close together raise two runs on the same tip. A group holds one
 pending run, which a newer one cancels, so a run whose Vendor Update did not
 conclude ``success`` is keyed on its own ``github.run_id`` instead
-(`#1705 <https://github.com/JarryShaw/PyPCAPKit/issues/1705>`__). It releases
+(:issue:`1705`). It releases
 nothing, so it neither waits behind a release nor displaces a run waiting
 there; only a newer run that may release, reading ``main``'s newer tip, can.
 A Vendor Update that concluded ``success`` with ``vendor-update`` skipped --
 its Unit Tests verdict was for another commit -- releases nothing either since
-`#1748 <https://github.com/JarryShaw/PyPCAPKit/issues/1748>`__: the
+:issue:`1748`: the
 ``vendor_update`` job reads that run's jobs, and
 ``version_check`` skips. The group cannot see that, so such a run still joins
 the ref's group; if it displaces a pending run, that release waits for the
@@ -139,7 +139,7 @@ One Commit per Release
 ----------------------
 
 Every job that checks out, tags, builds or publishes pins ``github.sha``
-(`#1634 <https://github.com/JarryShaw/PyPCAPKit/issues/1634>`__), so a run
+(:issue:`1634`), so a run
 releases the commit it was created for however long it waits on approval.
 Before that, run 38008819343 was created for ``b6b95bc8e``, approved three
 days later, and tagged ``main``'s tip ``2c0008c3c`` as both ``v1.5.0b9`` and
@@ -160,7 +160,7 @@ the default branch, and ``tag`` pulled ``main`` before tagging.
   publishes a second tree under that version. ``version_check`` resolves the
   ``v*`` tag the same way first, in "Check which commit the version's tag
   names", and off a ``v*`` ref a tag naming another commit skips the gate and every publisher
-  (`#1748 <https://github.com/JarryShaw/PyPCAPKit/issues/1748>`__):
+  (:issue:`1748`):
   ``Release status`` posts a ``::notice`` if that release is complete, or a
   ``::warning`` naming both commits and what is missing, and the run stays
   green. A ``v*`` push of such a version still fails with the
@@ -169,9 +169,10 @@ the default branch, and ``tag`` pulled ``main`` before tagging.
   build, by Conda Update's ``publish`` dispatch (see `Recovery`_).
 * ``pypi`` and ``conda`` attach their files with ``gh release upload``, in
   their "Upload package to GitHub Release" steps, not ``action-gh-release``,
-  which calls Update a release before every upload (3.0.2's ``src/github.ts:631-683``). A file
+  which calls Update a release before every upload (3.0.2's ``release()`` in
+  ``src/github.ts``, on a release that exists). A file
   the release already has is left alone
-  (`#1640 <https://github.com/JarryShaw/PyPCAPKit/issues/1640>`__): the action
+  (:issue:`1640`): the action
   deleted and re-uploaded it, and a rebuild against live PyPI is not
   byte-identical to the published copy. Only an asset in state ``uploaded``
   counts: `Upload a release asset
@@ -184,11 +185,11 @@ the default branch, and ``tag`` pulled ``main`` before tagging.
 * ``gh release upload`` also fails, deliberately, where the action did not.
   With no release for the tag, the upload fails with ``gh``'s
   "release not found", where the action made one, with no notes and
-  ``target_commitish`` unset (``src/github.ts:617-628,1026``), which Create a
+  ``target_commitish`` unset (``release()`` and ``createRelease()`` there), which Create a
   release defaults to "the repository's default branch"; the release is
   ``github``'s to make, at the run's commit. A file pattern matching nothing
   exits 1 with ``::error title=Nothing to upload``, where the action,
-  ``fail_on_unmatched_files`` unset, only warned (``src/run.ts:15-20``) and
+  ``fail_on_unmatched_files`` unset, only warned (``run()`` in ``src/run.ts``) and
   published the release without that file.
 
 Pinning the target may have a cost, and GitHub documents the rule two ways.
@@ -232,35 +233,38 @@ re-checks the target (unmeasured).
 ``cron-conda.yml``'s ``conda-dist`` does: it attaches packages with
 ``ncipollo/release-action`` v1.21.0, pinned to its commit, and
 ``allowUpdates: true``, which updates the release before uploading
-(``src/Action.ts:53-66,107-120``). It therefore
+(``Action.createOrUpdateRelease()`` and ``Action.updateRelease()`` in
+``src/Action.ts``). It therefore
 names the default branch -- ``github.ref_name`` whichever trigger raised it -- as
 ``commit``, which that update sends as ``target_commitish``
-(``src/Releases.ts:150-174``), so the rule checks ``main`` itself; the tag
+(``GithubReleases.update()`` in ``src/Releases.ts``), so the rule checks ``main`` itself; the tag
 stays put, as Update a release calls the target "Unused if the Git tag already
 exists". It also uploads only to a published release, read first with ``gh
 release view``. With none, the action would create one, and its tag, at
-``commit`` (``src/Action.ts:72-92``). Conda Update bumped 1.5.0b9's build
+``commit`` (``Action.checkForMissingReleaseError()`` and
+``Action.updateDraftOrCreateRelease()``). Conda Update bumped 1.5.0b9's build
 three times while that run waited on approval; once ``conda-dist`` runs on
-every bump (`#1632 <https://github.com/JarryShaw/PyPCAPKit/issues/1632>`__),
+every bump (:issue:`1632`),
 that would tag the pending version at ``main``'s tip and fail Create Release's
 tag check. The action would also retarget a draft at ``commit``
-(``src/Action.ts:85-92,107-120``), which ``omitDraftDuringUpdate`` keeps a
+(``Action.updateDraftOrCreateRelease()`` and ``Action.updateRelease()``), which ``omitDraftDuringUpdate`` keeps a
 draft, but Create Release's ``workflow_run`` run finds the draft and resets
-its target to the run's sha (``action-gh-release`` 3.0.2's
-``src/github.ts:636-646,832-866``), so skipping a draft is a precaution
+its target to the run's sha (``action-gh-release`` 3.0.2's ``release()`` and
+``findTagFromReleases()``), so skipping a draft is a precaution
 against retargeting a release Create Release owns.
 Either way the build goes to anaconda.org only, with a ``::notice``. The
 update also sends the release's name, notes and ``prerelease`` and ``draft``
 flags, which unset inputs make the tag, ``""`` and ``false``
-(``src/Inputs.ts:70-92,128-135,210-240``), so the step sets the
-``omit*DuringUpdate`` inputs that leave them out (`#1657
-<https://github.com/JarryShaw/PyPCAPKit/issues/1657>`__).
+(``CoreInputs``' ``updatedReleaseName``, ``updatedReleaseBody``, ``updatedDraft``
+and ``updatedPrerelease`` getters, and the ``name`` and ``body`` they fall back
+on, in ``src/Inputs.ts``), so the step sets the
+``omit*DuringUpdate`` inputs that leave them out (:issue:`1657`).
 
 The Release App
 ---------------
 
-The owner's choice on `#1634
-<https://github.com/JarryShaw/PyPCAPKit/issues/1634>`__: ``github`` creates
+The owner's choice on :issue:`1634`:
+``github`` creates
 the release with a GitHub App installation token, which Create a release
 accepts for a target that changes a workflow file when it has the "Workflows"
 repository permission (write). "Mint the release App's token" runs
@@ -281,8 +285,8 @@ One-time setup:
    permissions at read and write, and install it on this repository only. Add
    **Pull requests** at read and write too, and accept it on the installation:
    the Python Versions workflow's ``pr`` job opens its pull request with a token
-   of this App, with contents and pull requests write only (`#1660
-   <https://github.com/JarryShaw/PyPCAPKit/issues/1660>`__, :doc:`workflows`).
+   of this App, with contents and pull requests write only (:issue:`1660`,
+   :doc:`workflows`).
 2. Add repository variables ``RELEASE_APP_CLIENT_ID``, the App's Client ID, and
    ``RELEASE_APP_BOT_ID``, its bot's user id (``gh api
    "/users/<app-slug>[bot]" --jq .id``, as the action's README reads it).
@@ -309,14 +313,15 @@ according to the token spent: with ``GITHUB_TOKEN`` it lists the setup above;
 with the App's, it points at the App's permissions and installation. For a
 final release, first delete any draft ``v<version>`` the refused run left:
 ``action-gh-release`` creates a non-prerelease as a draft and publishes it
-with Update a release in the same step (``src/github.ts:1025``), and the next
-run would reuse that draft and its target (``:631-647`` there). Then re-run
+with Update a release in the same step (``createRelease()`` in
+``src/github.ts``), and the next run would reuse that draft and its target
+(``:631-647`` there). Then re-run
 the job; that a re-run reads variables and secrets set since is unmeasured.
 
 Per-Job Evidence, Not a Shared Proxy
 ------------------------------------
 
-Until `#888 <https://github.com/JarryShaw/PyPCAPKit/issues/888>`__, every job
+Until :issue:`888`, every job
 past ``version_check`` shared one guard:
 
 .. code-block:: yaml
@@ -340,13 +345,13 @@ checks *is* the one it is about to create:
   exists.
 * ``pypi`` compares PyPI's file count for the version against the expected one
   -- a wheel per supported leg plus the sdist kept only on the 3.15 leg; the
-  :ref:`KTLO <ktlo-tier>` legs' wheels (`#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__) are not counted. This job is
+  :ref:`KTLO <ktlo-tier>` legs' wheels (:issue:`1633`) are not counted. This job is
   already idempotent (``skip-existing: true`` on every upload step), so the
   check exists only to save the cost of the build matrix, not for correctness.
 * ``conda`` compares Anaconda's aggregate count against the expected one (the
   ``linux-64``, ``osx-64``, ``osx-arm64`` and ``win-64`` files for each Python
   version of its matrix, one platform per ``os`` leg,
-  `#1922 <https://github.com/JarryShaw/PyPCAPKit/issues/1922>`__, :issue:`2060`) as the same
+  :issue:`1922`, :issue:`2060`) as the same
   kind of job-level cost saver, and *also*
   checks, per matrix leg, whether that leg's own platform/Python distribution
   is already there -- this second check is the actual correctness fix, because
@@ -355,7 +360,7 @@ checks *is* the one it is about to create:
   rather than being absorbed. The ``macos-26-intel`` leg is the exception: the
   action's CLI download returns 404 there, so its "Upload conda packages to
   Anaconda (Intel)" step runs ``anaconda upload --skip-existing`` instead
-  (`#2044 <https://github.com/JarryShaw/PyPCAPKit/issues/2044>`__), which skips
+  (:issue:`2044`), which skips
   such a file. The ``windows-latest`` leg's "Upload conda packages to Anaconda
   (Windows)" makes the same call (:issue:`2060`). Conda Update's Intel and
   Windows legs run the same steps, so they keep a file anaconda.org already has,
@@ -369,12 +374,12 @@ The PyPI and Anaconda counts are of the tiers the version was released with.
 Until its ``v*`` tag exists, that is this run's
 :file:`.github/python-versions.toml`; once it does, ``version_check`` reads the
 file at the tag's commit with that commit's ``util/python_versions.py``. A
-supported version added since (`#1660
-<https://github.com/JarryShaw/PyPCAPKit/issues/1660>`__) was never built for the
+supported version added since (:issue:`1660`)
+was never built for the
 release, and counting it would read a finished release as incomplete, run the
 gate and ``pypi``, and fail `One Commit per Release`_'s tag check on every run
 until the next release. A tag older than the file, as ``v1.5.0b12`` is, counts
-the tiers the file was added with, which the change for `#1660 <https://github.com/JarryShaw/PyPCAPKit/issues/1660>`__ copied unchanged from the
+the tiers the file was added with, which the change for :issue:`1660` copied unchanged from the
 workflows of the time.
 The Anaconda count's platforms follow the same rule, from the ``SUBDIRS`` line
 of :file:`util/release_published.py` at the tag's commit or, for a tag older
@@ -423,7 +428,7 @@ equality pair skips ``conda`` outright instead.
 cancelled ``version_check`` leaves them nothing to decide on. ``unit-tests`` is
 held to the same bar for a different reason: it is the release test gate, and
 it skips when nothing is publishable
-(`#1052 <https://github.com/JarryShaw/PyPCAPKit/issues/1052>`__), so accepting
+(:issue:`1052`), so accepting
 ``skipped`` there would publish untested. ``github`` names it in ``needs:`` instead and relies on the implicit
 ``success()``. The gate's own ``if:`` is the union of the publishers'
 conditions, with ``!= 'true'`` so unknown evidence runs it; should the two
@@ -465,7 +470,7 @@ that it can run regardless of which of them skipped.
 
 Only ``github-release`` carries a required reviewer; ``conda-tag``,
 ``pypi`` and ``anaconda`` kept their environments but had their reviewers
-removed on `#887 <https://github.com/JarryShaw/PyPCAPKit/issues/887>`__.
+removed on :issue:`887`.
 What still makes one approval mean *the whole release* is the ``needs:``
 graph: ``tag`` and ``pypi`` both depend on ``github``, and ``conda`` depends on
 ``tag`` and ``github`` -- so nothing downstream of ``github`` can
@@ -533,8 +538,8 @@ when ``main``'s tip already says ``0`` (the usual case, since
 :file:`util/bump_version.py` writes ``0``) or carries another ``__version__``,
 nor when origin already has a ``conda-<version>+N`` tag other than ``+0``,
 since rewinding the counter would then reuse a tagged build number; the first
-and last warn. `#1634 <https://github.com/JarryShaw/PyPCAPKit/issues/1634>`__'s own shape -- three Conda Update bumps that `#1632
-<https://github.com/JarryShaw/PyPCAPKit/issues/1632>`__ left untagged -- gets
+and last warn. :issue:`1634`'s own shape -- three Conda Update bumps that :issue:`1632`
+left untagged -- gets
 the reset: ``main``'s 3 becomes 0. A rejected push is retried from a fresh
 fetch, three times at most. Approving ``github-release`` therefore also
 approves a commit landing on the default branch, not only the artefacts that
@@ -556,7 +561,7 @@ existence. ``pypi`` is safe to re-run (``skip-existing: true``), and so is
 ``conda``, because each matrix leg checks Anaconda for its own
 platform/Python distribution before uploading and skips only that leg's
 upload if it is already there. Neither replaces a file the GitHub Release
-already has (`#1640 <https://github.com/JarryShaw/PyPCAPKit/issues/1640>`__).
+already has (:issue:`1640`).
 
 A re-run repeats the tagged commit's own workflow, so it cannot upload
 Anaconda files that commit's ``conda`` legs cannot build: 1.5.0b14's
@@ -592,7 +597,7 @@ With that reconciliation, ``release_status`` reports exactly one of:
 * at least one target skipped despite its own evidence saying it is still
   incomplete, and nothing else failed to explain that (``::error``, and the job
   itself fails) -- the shape
-  `#888 <https://github.com/JarryShaw/PyPCAPKit/issues/888>`__ was actually
+  :issue:`888` was actually
   about.
 
 That last case should be unreachable given the

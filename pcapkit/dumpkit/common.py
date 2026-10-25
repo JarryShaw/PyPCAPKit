@@ -692,7 +692,7 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
                     other character as ``'\\u{0:04x}'.format(ord(char))``, which
                     for a code point above ``U+FFFF`` yields five or six hex
                     digits that a reader takes as one escape and literal text
-                    (GitHub issue #1261). This writes such a character as a
+                    (GitHub issue :issue:`1261`). This writes such a character as a
                     UTF-16 surrogate pair instead, as :func:`json.dumps` does, and
                     every other character exactly as the upstream writer does.
 
@@ -763,7 +763,7 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
 
                 A class, module or routine is written as its name rather than
                 expanded, since its attributes reach the whole type graph
-                (GitHub issue #1372). Every other object is expanded in full
+                (GitHub issue :issue:`1372`). Every other object is expanded in full
                 each time it is met, except one that encloses itself: there
                 it is written as a ``<circular reference: ...>`` marker, so a
                 reference cycle terminates.

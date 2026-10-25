@@ -271,7 +271,7 @@ manual run, where no completed Unit Tests run exists yet to read a verdict from.
 arrows), each reads the verdict Unit Tests already reached instead of re-running
 the gate a second time, and acts on it only once the head's ``verdict`` job,
 described under the edge list below, says it is a verdict on the commit it
-builds (`#1967 <https://github.com/JarryShaw/PyPCAPKit/issues/1967>`__). Create
+builds (:issue:`1967`). Create
 Release has no ``schedule``, and its gate job's ``if:`` reads ``version_check``'s evidence
 rather than the event, so its gate can run whichever way the run was raised, once
 ``version_check`` itself has passed: on a ``v*`` tag push, and on a
@@ -311,7 +311,7 @@ Those checks say nothing about *which* commit was verified. A ``workflow_run``
 checks out ``github.sha``, ``main``'s tip when the event is raised, not
 ``github.event.workflow_run.head_sha``, the commit the completed run tested, and
 in a merge wave the two differ: Conda Update 38325136710 bumped 2e941bbb7 under
-the verdict for 9083163f5 (`#1643 <https://github.com/JarryShaw/PyPCAPKit/issues/1643>`__).
+the verdict for 9083163f5 (:issue:`1643`).
 So Vendor Update, Conda Update and GitHub Pages each run Cron Head's ``verdict``
 job first, in their ``head`` job, and act only when its ``verified`` output says
 the tip is the verified commit, or that commit plus bot commits
@@ -319,24 +319,24 @@ to ``conda/build`` and ``conda/requirements.txt`` alone; otherwise they skip, an
 the tip's own Unit Tests run raises them again. Vendor Update's run still
 concludes ``success`` then, since ``verdict`` ran, so Create Release reads its
 ``vendor-update`` job to tell it from a real one
-(`#1748 <https://github.com/JarryShaw/PyPCAPKit/issues/1748>`__). The rule and its evidence are in
+(:issue:`1748`). The rule and its evidence are in
 ``util/verdict_covers_checkout.py``. Conda Update also writes after the
 checkout, so it applies the same rule a second time: its push rebases onto
 ``main``'s tip only when the commits that brings in pass it, and otherwise
 pushes nothing, and Conda Tag tags the commit that push landed rather than the
-tip (`#1632 <https://github.com/JarryShaw/PyPCAPKit/issues/1632>`__).
+tip (:issue:`1632`).
 
 Vendor Update's own commit raises it again: the push gets a Unit Tests run, whose
 completion starts another crawl. The commit bumps the version only when the crawl
 changed code. If every change is to comments or docstrings, the commit is "Updated
 vendor documentation without a version bump", and the Create Release run that
 follows sees the same version, so it has nothing new to publish
-(`#1674 <https://github.com/JarryShaw/PyPCAPKit/issues/1674>`__). A crawl raised by
+(:issue:`1674`). A crawl raised by
 such a commit's own Unit Tests run does not commit comment changes on top of it,
 so documentation commits cannot chain. The rule is in
 ``util/vendor_code_changed.py``. A bump commit carries every module the crawl
 wrote, a new one included, so the crawl it raises does not find one untracked
-and bump again (`#1685 <https://github.com/JarryShaw/PyPCAPKit/issues/1685>`__).
+and bump again (:issue:`1685`).
 
 Reusable-Workflow Calls (``uses:``)
 -----------------------------------
@@ -356,7 +356,7 @@ starting an independent run after the caller finishes. The calls target
   output is its ``verdict`` job's, and the acting job reads it beside
   ``needs.head.result``.
 
-Cron Head (`#1967 <https://github.com/JarryShaw/PyPCAPKit/issues/1967>`__) is
+Cron Head (:issue:`1967`) is
 one copy of the test gate and the ``verdict`` job, which Conda Update, Vendor
 Update and GitHub Pages used to carry each. It holds ``contents: read`` and no
 more, which is what each caller grants its ``head`` job and what
@@ -369,7 +369,7 @@ treats a ``head`` result other than ``failure`` as passing.
 
 Their schedules are eight hours apart on Saturdays: GitHub Pages at 02:00,
 Vendor Update at 10:00 and Conda Update at 18:00 UTC
-(`#1967 <https://github.com/JarryShaw/PyPCAPKit/issues/1967>`__). The owner's
+(:issue:`1967`). The owner's
 ruling kept a schedule on each and allowed them aligned or spread, and nothing
 orders them:
 
@@ -379,7 +379,7 @@ orders them:
   triggered it, through its ``vendor_update`` job, so the time of the others
   does not matter to it.
 * At one time they cost more. Vendor Update and Conda Update both ran at 10:00
-  until this change, and each scheduled pair read back from 2026-09-26 on
+  until :issue:`1967` spread them, and each scheduled pair read back from 2026-09-26 on
   checked out the same commit -- on 2026-10-17, Conda Update 39023770904 and
   Vendor Update 39023891165 both gated 44ed96fc3, their ``Gate (full suite,
   …)`` jobs taking twelve and ten minutes. Their writing jobs share the ``repository-maintenance`` group, so ``conda-update``
@@ -389,7 +389,7 @@ orders them:
 Spread, each ``head`` gates alone, and Conda Update runs once Vendor Update's
 Create Release has had the day to publish, so its ``Check the GitHub release
 exists`` step finds the release rather than skipping the GitHub upload
-(`#1634 <https://github.com/JarryShaw/PyPCAPKit/issues/1634>`__).
+(:issue:`1634`).
 
 To debug Vendor Update, Conda Update or GitHub Pages without waiting for
 Saturday, start a manual run on a branch, as in ``gh workflow run cron-conda.yml
@@ -453,7 +453,7 @@ existed then -- ``Python ${{ matrix.python-version }}``, ``Integration
 Python …``, ``Engines Python …`` and ``PyPCAP/PyPCAPFile parity Python
 …`` -- all reporting ``skipped``.
 
-The Skip Cascade (`#888 <https://github.com/JarryShaw/PyPCAPKit/issues/888>`__)
+The Skip Cascade (:issue:`888`)
 -------------------------------------------------------------------------------
 
 The relationships above compose into a failure mode worth seeing on its
@@ -477,7 +477,7 @@ anything other than ``success`` -- including
 ``skipped``, which is exactly what Vendor Update's *own* jobs report when
 *their* ``workflow_run``-path guards decline (see ``cron-vendor.yml``'s
 ``vendor-update`` job). Since
-`#1748 <https://github.com/JarryShaw/PyPCAPKit/issues/1748>`__ it is also false
+:issue:`1748` it is also false
 for a Vendor Update that concluded ``success`` with ``vendor-update`` skipped --
 its ``verdict`` job found the Unit Tests verdict was for another commit -- which
 the ``vendor_update`` job reads from that run's jobs first (observed on run
@@ -540,12 +540,12 @@ because the upstream Vendor Update run did not itself conclude ``success``.
 
 Such a run is also kept out of the release's concurrency group
 (its ``concurrency`` block,
-`#1705 <https://github.com/JarryShaw/PyPCAPKit/issues/1705>`__). It is keyed on
+:issue:`1705`). It is keyed on
 its own ``github.run_id`` rather than on the ref, so it cannot cancel a run
 waiting there with release work. Keyed on the ref, run 38499295798 joined at
 02:06:32Z on 2026-10-14, and the pending 38499150441, whose Vendor Update had
 succeeded, was cancelled a second later. A run whose Vendor Update concluded
-``success`` with ``vendor-update`` skipped (`#1748 <https://github.com/JarryShaw/PyPCAPKit/issues/1748>`__) is still keyed on the ref:
+``success`` with ``vendor-update`` skipped (:issue:`1748`) is still keyed on the ref:
 the group reads only the event, which does not say which jobs ran. It can still
 displace a run pending there, and releases nothing in its place, so that
 release waits for the next Vendor Update on ``main``.
@@ -558,14 +558,14 @@ that runs with a secret on an event a fork can cause: it writes the project boar
 *Status* field with ``PROJECT_TOKEN``, which a fork's ``pull_request`` run would not
 receive. It therefore never checks out the repository and has no ``uses:`` step. It
 fetches :file:`util/project_status.py`, and :file:`util/_actions.py`, which it imports
-(`#2047 <https://github.com/JarryShaw/PyPCAPKit/issues/2047>`__), through the API at
+(:issue:`2047`), through the API at
 ``github.sha`` -- the base branch's tip under that event -- and takes only the item
 number from the payload.
 ``tests/project/test_project_status.py`` asserts this over the file. Without the
 secret it skips with a ``::notice::``. The Status mapping it applies is documented in
 :doc:`conventions/process`.
 
-Coverage (`#1063 <https://github.com/JarryShaw/PyPCAPKit/issues/1063>`__)
+Coverage (:issue:`1063`)
 -------------------------------------------------------------------------
 
 Coverage is measured inside an existing leg rather than by a workflow of its
@@ -581,10 +581,10 @@ and re-importing pcapkit, one module's peak RSS was 4.17 GiB under the default
 killed the runner. ``sigterm = true`` and a ``pytest_sessionfinish`` hook in
 :file:`tests/conftest.py` that saves each xdist worker's data early keep a
 worker that dies during shutdown from losing its file
-(`#1423 <https://github.com/JarryShaw/PyPCAPKit/issues/1423>`__). The leg's
+(:issue:`1423`). The leg's
 ``Report coverage`` step then runs :file:`util/coverage_report.py`, which fails,
 posting no total, unless the controller and every xdist worker saved a data file
-(`#1387 <https://github.com/JarryShaw/PyPCAPKit/issues/1387>`__), and otherwise
+(:issue:`1387`), and otherwise
 writes the total and a per-package table to the job summary. The leg uploads the HTML
 report as the ``coverage-html`` artifact (30 days), with the bare numbers as the
 ``coverage-summary`` artifact and the per-process debug log as
@@ -603,19 +603,19 @@ found by a hidden marker, on each push. The first line says when the tests
 failed. Neither workflow's coverage step is a required check. A push run has no
 pull request, so its report goes to Discussions instead (see `CI Reports`_).
 
-CI Timing Review (`#1538 <https://github.com/JarryShaw/PyPCAPKit/issues/1538>`__)
+CI Timing Review (:issue:`1538`)
 ---------------------------------------------------------------------------------
 
 **CI Timing** (:file:`ci-timing.yml`) runs :file:`util/ci_timing.py` every Monday,
 or on dispatch with a ``days`` window and an optional ``concurrency_hours`` runner-pool
 measurement. Through the API it lists every completed run in the window of Unit Tests,
-Python Compatibility, Lint, CodeQL, GitHub Pages and Experimental Tests (`#1732 <https://github.com/JarryShaw/PyPCAPKit/issues/1732>`__, so
+Python Compatibility, Lint, CodeQL, GitHub Pages and Experimental Tests (:issue:`1732`, so
 its two-hour legs stay measured), a day per query because a filtered listing stops
 at 1,000 runs (Pages completed 1,154 in the week to 2026-10-09). It then reads the
 jobs of an evenly spaced sample -- 150 push and 150 pull-request runs of Unit Tests,
 60 runs of each other workflow -- and the summary says how many runs each sample
 holds and which span they cover. For the week to 2026-10-19 that was 677 calls
-(`#1930 <https://github.com/JarryShaw/PyPCAPKit/issues/1930>`__: 49 listing pages,
+(:issue:`1930`: 49 listing pages,
 one per workflow per day and one more per further 100 runs; 601 job reads; 15 for
 the JUnit artifacts; 12 workflow-file reads) of ``GITHUB_TOKEN``'s 1,000 an hour, on
 a read-only token (``actions: read``, ``contents: read``). It took 16.6 minutes,
@@ -714,24 +714,24 @@ fire while the pool stays saturated, and the JUnit timings are what show whether
 :doc:`conventions/process`.
 
 ``H1``, ``H2`` and ``H4`` on a non-blocking job are warnings, not HARD, so they do
-not fail the run (`#1732 <https://github.com/JarryShaw/PyPCAPKit/issues/1732>`__): on every job of :file:`experimental.yml`, which no
+not fail the run (:issue:`1732`): on every job of :file:`experimental.yml`, which no
 required context names, on every :ref:`KTLO <ktlo-tier>` leg, a job whose name ends in ``(KTLO)``
-(`#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__), and on a job whose name ends in ``(experimental)`` in any workflow. That
+(:issue:`1633`), and on a job whose name ends in ``(experimental)`` in any workflow. That
 last covers the experimental legs that ran in :file:`unit-tests.yml` under
 ``test``'s 45-minute cap before the split. The finding keeps its ``H`` id and says it is non-blocking. A
 KTLO leg past its job's ``timeout-minutes`` is still cancelled, and its check run
-reads red, though since `#1738 <https://github.com/JarryShaw/PyPCAPKit/issues/1738>`__ nothing gating waits on it, so that warning is worth
+reads red, though since :issue:`1738` nothing gating waits on it, so that warning is worth
 acting on before the cap.
 
-Work Kept Off the Pull-Request Queue (`#1538 <https://github.com/JarryShaw/PyPCAPKit/issues/1538>`__)
+Work Kept Off the Pull-Request Queue (:issue:`1538`)
 -----------------------------------------------------------------------------------------------------
 
 Cuts in :file:`unit-tests.yml` keep work that cannot gate a merge from competing
 with pull-request jobs for the 20-runner pool. None touches a required check or adds a
 permission to the reusable workflow.
 
-* ``unittest-ordering`` runs on ``main`` pushes only, per `#1052
-  <https://github.com/JarryShaw/PyPCAPKit/issues/1052>`__ item H, and has
+* ``unittest-ordering`` runs on ``main`` pushes only, per :issue:`1052`
+  item H, and has
   ``needs: [test]``, so its cells join the queue once ``test`` finishes rather
   than when the push run is created, ahead of that run's own ``Python`` legs and of
   pull-request jobs created later in a merge wave. Its ``if:`` opens with
@@ -744,7 +744,7 @@ permission to the reusable workflow.
   on every leg. Dropped with it: that file in a venv holding only ``test`` and ``DPKT``.
 
 Another cut, running the then-prerelease 3.15 engine cell on ``main`` pushes only,
-ended with `#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__: 3.15 is
+ended with :issue:`1633`: 3.15 is
 in the supported tier, so its cells block on every run.
 
 Required Status Checks
@@ -762,7 +762,7 @@ grepping every workflow file for its name:
      - Emitted by
      - Where
    * - ``Lint``
-     - job ``lint``, required since `#1967 <https://github.com/JarryShaw/PyPCAPKit/issues/1967>`__
+     - job ``lint``, required since :issue:`1967`
      - ``lint.yml``
    * - ``Required checks passed``
      - job ``required-checks``
@@ -783,7 +783,7 @@ grepping every workflow file for its name:
      - job ``compatibility``, matrix leg ``3.15``
      - ``python-compatibility.yml``, ``.github/python-versions.toml:23``
 
-That is the list after `#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__,
+That is the list after :issue:`1633`,
 which added ``Compat Python 3.15`` and removed ``Compat Python 3.10``. Moving a version
 between the tiers below means editing the ruleset in the same change.
 
@@ -817,14 +817,14 @@ produced -- and never expected -- on those paths.
 .. _ktlo-tier:
 
 Python versions are tiered -- supported and KTLO
-(`#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__), and experimental
-(`#1660 <https://github.com/JarryShaw/PyPCAPKit/issues/1660>`__, below) -- in
+(:issue:`1633`), and experimental
+(:issue:`1660`, below) -- in
 :file:`.github/python-versions.toml` (see `Python Versions`_).
 The **supported** tier, 3.11-3.15, blocks: a failed leg fails ``Required checks passed`` or its own
 required ``Compat`` context. The **KTLO** (*keep the lights on*) tier -- end-of-life 3.8-3.10, still built and
 tested -- never blocks, is never a required context, and never shows a commit or a
-pull request red (`#1672 <https://github.com/JarryShaw/PyPCAPKit/issues/1672>`__). In ``unit-tests.yml`` the KTLO legs are jobs of their own
-since `#1738 <https://github.com/JarryShaw/PyPCAPKit/issues/1738>`__: ``test-ktlo``,
+pull request red (:issue:`1672`). In ``unit-tests.yml`` the KTLO legs are jobs of their own
+since :issue:`1738`: ``test-ktlo``,
 ``integration-ktlo`` and ``pypcap-parity-ktlo``, which neither ``required-checks``
 nor ``unittest-ordering`` ``needs:``, so not even a failure no step can contain, such
 as a lost runner or the job cap, reaches a gate. Each runs its gating twin's steps,
@@ -859,13 +859,13 @@ with supported legs. Every job holding KTLO legs works the same way:
 
 Errors remain on a failed KTLO step, though none changes a conclusion: the
 runner's ``Process completed with exit code N.`` for a ``run:`` step, and an
-action's own. And `#1634 <https://github.com/JarryShaw/PyPCAPKit/issues/1634>`__'s tag check still blocks the ``pypi`` KTLO legs: it fails
+action's own. And :issue:`1634`'s tag check still blocks the ``pypi`` KTLO legs: it fails
 every leg alike, and masked, the leg would go on to publish.
 
 PyPy is tiered the same way. ``test`` and ``integration`` run its supported
 versions after CPython's, and ``test-ktlo`` and ``integration-ktlo`` its KTLO ones,
-each leg running the ``ALL`` test tier (`#1958
-<https://github.com/JarryShaw/PyPCAPKit/issues/1958>`__, see `Test Tiers`_). A
+each leg running the ``ALL`` test tier (:issue:`1958`,
+see `Test Tiers`_). A
 supported PyPy leg blocks through ``Required checks passed``, which needs its job,
 so it adds no context to the ruleset. No ``Compat``, ``engine-tests`` or
 ``pypcap-parity`` leg runs PyPy. On PyPy 8.0, which setup-python's ``pypy3.11``
@@ -873,14 +873,13 @@ is, PyPI has no Linux wheel of |cryptography|_, so the install step builds it
 with the image's Rust and ``libssl-dev``, and none of ``lxml``, so the ``test``
 extra carries ``lxml`` on CPython only. On ``pypy3.10`` the ``crypto`` and ``all``
 extras cap |cryptography|_ below 46, as 45.0.7 is the newest release with a Linux
-``pp310`` wheel and the newest release's sdist does not build there (`#2040
-<https://github.com/JarryShaw/PyPCAPKit/issues/2040>`__).
+``pp310`` wheel and the newest release's sdist does not build there (:issue:`2040`).
 
 On PyPy an xdist worker's RSS grows with every test it runs, rather than in a few
 heavy modules, so a PyPy leg's ``Run unit tests`` hands its pytest command to
 :file:`util/pytest_shards.py`, as GraalPy's leg does (see below), which runs it once per
 directory its ``SHARDS`` names, ``tests/protocols`` and then ``tests/corekit``, and once
-more over the rest, ignoring each (`#2005 <https://github.com/JarryShaw/PyPCAPKit/issues/2005>`__).
+more over the rest, ignoring each (:issue:`2005`).
 Each run starts its workers afresh. Measured on PyPy 8.0.1 at ``-n 4``, one run
 over the whole ``ALL`` tier took each worker to 5.4-5.9 GB and the workers together
 past 20 GB, beyond the runner's 16 GB; split, the largest run peaked at 2.6 GB a
@@ -890,8 +889,8 @@ the kills into ``MemoryError``\ s. Each run but the last writes a JUnit file of 
 own beside ``junit.xml``, which ``Upload test timings`` takes too, and the step
 fails if any run did.
 
-Nothing below ``requires-python``'s 3.8 is in any matrix (`#2051
-<https://github.com/JarryShaw/PyPCAPKit/issues/2051>`__): pip refuses such an
+Nothing below ``requires-python``'s 3.8 is in any matrix (:issue:`2051`):
+pip refuses such an
 interpreter at install, so a leg there could only prove the refusal. Nor are
 3.8 and 3.9 in ``engine-tests``, which installs every interpreter on
 ``ubuntu-latest``, where setup-python has no Ubuntu 26.04 build of any of them. Nor
@@ -903,8 +902,8 @@ setup-python reads them (``3.14t``, ``graalpy-25.4``). Each runs a leg of
 ``experimental``, the matrix job of :file:`.github/workflows/experimental.yml`
 ("Experimental Tests"), named ``Python <version> (experimental)``, and nothing
 else: no ``integration``, ``Compat``, wheel or conda leg, so never a required
-context. They were legs of ``test`` until `#1732
-<https://github.com/JarryShaw/PyPCAPKit/issues/1732>`__, which moved them to a
+context. They were legs of ``test`` until :issue:`1732`,
+which moved them to a
 workflow of their own, by the owner's ruling that nothing waits on them. **That
 workflow reports separately and holds up nothing**: a job cannot ``needs:`` one in
 another workflow, nothing calls it, and no ``workflow_run`` names it but CI
@@ -915,7 +914,7 @@ Tests run completes without it, and with it ``Required checks passed``,
 ``cron-conda.yml``). It runs on Unit Tests' ``push`` and ``pull_request`` events,
 skips a docs-only pull request by the same ``changes`` script, and lets a newer
 commit supersede a run, a pull request's or, unlike Unit Tests, a push to ``main``'s
-(`#1903 <https://github.com/JarryShaw/PyPCAPKit/issues/1903>`__): since nothing
+(:issue:`1903`): since nothing
 waits on the legs, ``main``'s newest commit is the one worth testing, whereas Unit
 Tests keeps a run per push for ``unittest-ordering``, which runs only there.
 
@@ -970,11 +969,11 @@ run from failing when a job fails" (`Workflow syntax
 though the leg's check run still reads ``failure``. A job past its
 ``timeout-minutes`` is cancelled, and that page does not say whether the job-level
 guard covers a cancellation. So setup-python, the install, the watcher's setup-python
-and ``requests`` (`#1938 <https://github.com/JarryShaw/PyPCAPKit/issues/1938>`__,
+and ``requests`` (:issue:`1938`,
 below) and the tests have caps of their own, of 5, 10, 1, 1 and 120 minutes, under
 the job's 140, which leaves 3 for the rest: a step at its cap
-fails rather than cancels, and the guard holds (actions/runner
-``src/Runner.Worker/StepsRunner.cs:322-353``). The runner's ``has timed out`` error
+fails rather than cancels, and the guard holds (actions/runner's
+``StepsRunner.RunStepAsync``). The runner's ``has timed out`` error
 stays, changing no conclusion, as ``Process completed with exit code N.`` does.
 Everything but the install and the tests took under 20 seconds on every uncovered
 leg of runs 38569321543-38569522442. ``test``'s caps are main's: 45 minutes for the
@@ -989,13 +988,13 @@ them: its leg reached 26% of the unit tier in 25 minutes (job 115915976024), whe
 ``List the LATEST tier`` asks ``latest_tier_paths()`` on the runner's own ``python3``,
 before setup-python, so GraalPy does not parse the tree, and ``Run unit tests``
 passes each module it printed as an ``--ignore``. The
-round-trip sweeps of `#1732 <https://github.com/JarryShaw/PyPCAPKit/issues/1732>`__
+round-trip sweeps of :issue:`1732`
 took 8% of the unit tier's time in a serial 3.14 run (86 of 1,031 s), and 10-11% on
 the 3.14, 3.15 and 3.14t legs of run 38581834697, so the rest should take GraalPy
 88-113 minutes (estimate).
 
 GraalPy's leg still loses its runner 18-30 minutes into its tests, with ``The runner
-has received a shutdown signal`` (`#1740 <https://github.com/JarryShaw/PyPCAPKit/issues/1740>`__),
+has received a shutdown signal`` (:issue:`1740`),
 so each experimental leg samples its runner while the tests run. ``Start the resource
 monitor`` writes ``free -m``, ``df -h`` of ``/`` and the workspace's volume,
 ``/proc/loadavg`` and the five processes with the most RSS every 30 seconds, each
@@ -1031,8 +1030,8 @@ warnings:
   is spent exits, xdist fails the test it ran as crashed and starts another, and
   ``--max-worker-restart=30`` allows 30 restarts in all, where three 16-minute heaps need
   about 21 in 110 minutes; xdist's default is 4 a worker, 12 at ``-n 3``.
-* GraalPy's tier runs in shards (`#1963
-  <https://github.com/JarryShaw/PyPCAPKit/issues/1963>`__), so no worker outlives its
+* GraalPy's tier runs in shards (:issue:`1963`),
+  so no worker outlives its
   heap. In job 118912680486, the first full run of the curated ``ALL`` tier, nine
   workers went down at 2.5-3.0 GB RSS, 9-17 minutes into their lives, each failing a
   test that passes alone. So on GraalPy's leg ``Run unit tests`` hands its pytest
@@ -1052,7 +1051,7 @@ warnings:
 * ``timeout --signal=INT --kill-after=3m 110m`` ends pytest under the step's 120-minute
   cap, so it still writes the junit XML, and exits 124; ``prlimit --fsize=2147483648``
   caps any file at 2 GiB. The ``timeout`` is GNU's, ``gnutimeout`` where it exists
-  (#2020): on Ubuntu 26.04 ``timeout`` is uutils', whose ``--kill-after`` sends SIGKILL
+  (:issue:`2020`): on Ubuntu 26.04 ``timeout`` is uutils', whose ``--kill-after`` sends SIGKILL
   with the SIGINT, and to its child alone.
 * Where the scope starts ``true`` under a throwaway unit, ``pcapkit-probe-<pid>.scope``,
   with every flag the tests get (``sudo -n --preserve-env``, ``MemoryMax=12G``,
@@ -1086,8 +1085,8 @@ warning: that is expected, blocks nothing, and leaves the caps as they are.
 
 **The Windows leg.** :file:`experimental.yml`'s ``windows`` job runs the ``ALL`` tier
 on ``windows-latest`` under ``latest``, the newest CPython the conda builds target, as
-``Python <latest> on Windows (experimental)`` (`#2060
-<https://github.com/JarryShaw/PyPCAPKit/issues/2060>`__), so the first published
+``Python <latest> on Windows (experimental)`` (:issue:`2060`),
+so the first published
 ``win-64`` conda package has had a test run. It needs ``current``, ``changes`` and
 ``python-versions`` and runs on ``experimental``'s condition, and it is non-blocking by
 the same mechanics: every step continues on error, setup-python, the install and ``Run
@@ -1111,14 +1110,14 @@ never holds ``latest`` back for the blocking jobs.
 Test Tiers
 ----------
 
-Every test module runs in one of two *test tiers* (`#1958
-<https://github.com/JarryShaw/PyPCAPKit/issues/1958>`__): ``ALL``, which runs on every
+Every test module runs in one of two *test tiers* (:issue:`1958`):
+``ALL``, which runs on every
 leg, and ``LATEST``, which runs on ``latest`` alone. They are orthogonal to the unit
 and fixture-dependent tiers, which decide what a module may read and so which job
 collects it; a test tier decides on which of that job's legs it runs.
 
 ``module_tier()`` in :file:`tests/_tiers.py` decides, in one place, for every
-``tests/**/test_*.py``. ``ALL`` is a curated, opt-in list (#1958, #1963): short enough
+``tests/**/test_*.py``. ``ALL`` is a curated, opt-in list (:issue:`1958`, :issue:`1963`): short enough
 to save time on every leg, the same on every leg so QA stays consistent, and enough
 on its own to validate a change on each interpreter, while ``latest`` runs the whole
 suite as the gate.
@@ -1155,8 +1154,8 @@ or versions:
   ``pypcap`` and ``pypcapfile``, which install below 3.12 only, and Scapy, which the
   ``integration`` and ``pypcap-parity`` legs install on every interpreter and a
   ``test`` leg off ``latest`` skips;
-* the hand-picked round trips, whatever their names, and the #1202 edge-case
-  tables, whose cases are each written out by hand, as the owner ruled on #1958;
+* the hand-picked round trips, whatever their names, and the :issue:`1202` edge-case
+  tables, whose cases are each written out by hand, as the owner ruled on :issue:`1958`;
   and
 * the smoke slice: a representative module per protocol family and per package,
   so each leg still drives the main parse and build paths.
@@ -1164,7 +1163,7 @@ or versions:
 Everything else is ``LATEST``: the per-protocol field-by-field tests, whose
 behaviour is interpreter-independent pure Python, each real sweep -- a round trip
 over every class or registry entry a table enumerates, every offset of a packet or
-every capture, as the owner ruled on #1732 and #1958 -- and the docs, project and
+every capture, as the owner ruled on :issue:`1732` and :issue:`1958` -- and the docs, project and
 structure tests. The vendor extra is installed on ``latest`` alone and the crawlers
 are pure Python, so the vendor modules are ``LATEST``, each saying so, but for the
 file-restore and environment-variable tests, which stay on every leg. The tier guard itself is ``ALL``, since :file:`tests/conftest.py`
@@ -1208,7 +1207,7 @@ rather than lengthening it under coverage, and it is also the job that runs the 
 readers on a docs-only diff.
 
 Latest CPython runs the whole suite, as the sanity check and the gate (the owner's
-ruling on #1958), so it also installs what the whole suite gates on. In ``test`` and
+ruling on :issue:`1958`), so it also installs what the whole suite gates on. In ``test`` and
 ``integration`` the step ``Install the whole suite's dependencies on latest`` runs on
 the ``latest`` leg alone, after the install every leg runs, and adds the engines pip
 can install there (``Scapy``, ``PyShark``), html5lib through ``vendor``, Sphinx and
@@ -1258,11 +1257,11 @@ those pins drive read the tier file on the runner's own ``python3``, and
 :file:`tests/project/test_python_versions_1660.py` checks those skips in a child
 interpreter that cannot import ``tomllib``.
 
-File Size Caps (`#1969 <https://github.com/JarryShaw/PyPCAPKit/issues/1969>`__)
+File Size Caps (:issue:`1969`)
 -------------------------------------------------------------------------------
 
-A test that writes without bound fills the runner's disk rather than failing: `#1372
-<https://github.com/JarryShaw/PyPCAPKit/issues/1372>`__'s ``out.json`` grew to
+A test that writes without bound fills the runner's disk rather than failing: :issue:`1372`'s
+``out.json`` grew to
 several gigabytes on every run. So every pytest and unittest command in
 :file:`.github/workflows/unit-tests.yml` runs as ``python util/cap_file_size.py
 python -m ...``: ``test``'s ``Run unit tests``; ``integration``'s,
@@ -1285,7 +1284,7 @@ killed by the signal, whose default action the script restores before it execs.
 ``unit-tests.yml`` runs pytest, unittest or :file:`util/run_unittest_leg.py`
 without the script, and runs the script against a small limit.
 
-Workflow Scripts (`#1967 <https://github.com/JarryShaw/PyPCAPKit/issues/1967>`__)
+Workflow Scripts (:issue:`1967`)
 ---------------------------------------------------------------------------------
 
 Shell that several steps repeat, or that has real logic -- branches, or a bug
@@ -1307,8 +1306,8 @@ to a script. Each script's docstring says what it does; each has tests under
      - ``KTLO summary`` in ``unit-tests.yml``'s ``test``, ``integration`` and
        ``pypcap-parity`` (and so their KTLO twins), ``python-compatibility.yml``'s
        ``compatibility`` and ``create-release.yml``'s ``pypi``, as ``leg_summary.py
-       ktlo``; ``Experimental summary`` in ``experimental.yml``'s ``experimental``,
-       as ``leg_summary.py experimental``.
+       ktlo``; ``Experimental summary`` in ``experimental.yml``'s ``experimental``
+       and ``windows``, as ``leg_summary.py experimental``.
      - No.
    * - :file:`util/classify_changes.py`
      - ``Classify the diff`` in the ``changes`` job of ``unit-tests.yml`` and of
@@ -1331,7 +1330,8 @@ to a script. Each script's docstring says what it does; each has tests under
    * - :file:`util/pip_install.py`
      - The install step of ``unit-tests.yml``'s ``test``, ``integration`` and
        ``pypcap-parity`` (and so their KTLO twins), ``experimental.yml``'s
-       ``experimental`` and ``python-compatibility.yml``'s ``compatibility``, at the
+       ``experimental`` and ``windows`` and ``python-compatibility.yml``'s
+       ``compatibility``, at the
        job's ``ANNOTATION_LEVEL``, and of ``unittest-ordering``, ``project-tests`` and
        ``gate``, at ``error``.
      - No: install with ``pip install -e '.[test,DPKT,crypto,NGAP]'``.
@@ -1354,8 +1354,8 @@ to a script. Each script's docstring says what it does; each has tests under
        ``benchmark.yml``'s ``benchmark``, as ``install`` alone. The
        ``actions/cache`` steps, the seed steps (``Seed apt's archive with this
        engine's cached .deb files`` and ``Seed apt's archive with the cached .deb
-       files``) and the AppArmor step (`#2019
-       <https://github.com/JarryShaw/PyPCAPKit/issues/2019>`__) stay inline.
+       files``) and the AppArmor step (:issue:`2019`)
+       stay inline.
      - No.
    * - :file:`util/_actions.py`
      - No step: it is imported by the scripts that share its annotations, step
@@ -1371,50 +1371,48 @@ to a script. Each script's docstring says what it does; each has tests under
      - ``Check the release tags name this run's commit`` in ``create-release.yml``'s
        ``github``, ``pypi`` and ``conda``, as ``release_tags.py check``, and ``Check
        which commit the version's tag names`` in its ``version_check``, as
-       ``release_tags.py owner`` (`#1634
-       <https://github.com/JarryShaw/PyPCAPKit/issues/1634>`__, `#1748
-       <https://github.com/JarryShaw/PyPCAPKit/issues/1748>`__).
+       ``release_tags.py owner`` (:issue:`1634`,
+       :issue:`1748`).
      - No.
    * - :file:`util/release_upload.py`
      - ``Upload package to GitHub Release`` in ``create-release.yml``'s ``pypi`` and
-       ``conda`` (`#1640 <https://github.com/JarryShaw/PyPCAPKit/issues/1640>`__).
+       ``conda`` (:issue:`1640`).
      - No.
    * - :file:`util/release_status.py`
      - ``Report why this run did or did not release anything`` in
        ``create-release.yml``'s ``release_status``, on the image's ``python3``
-       after a checkout of :file:`util/` alone (`#888
-       <https://github.com/JarryShaw/PyPCAPKit/issues/888>`__).
+       after a checkout of :file:`util/` alone (:issue:`888`).
      - No.
    * - :file:`util/release_tiers.py`
      - ``Read the released Python versions`` in ``create-release.yml``'s
-       ``version_check``, on setup-python's ``python3`` (`#1660
-       <https://github.com/JarryShaw/PyPCAPKit/issues/1660>`__).
+       ``version_check``, on setup-python's ``python3`` (:issue:`1660`).
      - No.
    * - :file:`util/release_published.py`
      - ``Check PyPI publish completeness`` and ``Check Anaconda publish
        completeness`` in ``create-release.yml``'s ``version_check``, as
        ``release_published.py pypi`` and ``anaconda``, on setup-python's
-       ``python3`` (`#888 <https://github.com/JarryShaw/PyPCAPKit/issues/888>`__).
+       ``python3`` (:issue:`888`).
      - No.
    * - :file:`util/release_conda.py`
      - ``Check whether this leg is already on Anaconda`` in ``create-release.yml``'s
        ``conda``, as ``release_conda.py leg``; ``Build conda packages`` and ``Upload
        conda packages to Anaconda (Intel)`` in that job and in ``cron-conda.yml``'s
-       ``conda-dist``, as ``release_conda.py build`` and ``upload`` (`#1822
-       <https://github.com/JarryShaw/PyPCAPKit/issues/1822>`__, `#2044
-       <https://github.com/JarryShaw/PyPCAPKit/issues/2044>`__), and ``Upload conda
+       ``conda-dist``, as ``release_conda.py build`` and ``upload`` (:issue:`1822`,
+       :issue:`2044`),
+       and ``Upload conda
        packages to Anaconda (Windows)`` in both as ``upload`` (:issue:`2060`).
      - No.
    * - :file:`util/release_reset_build.py`
      - ``Reset Build Number`` in ``create-release.yml``'s ``tag``, on the image's
-       ``python3`` (`#1634 <https://github.com/JarryShaw/PyPCAPKit/issues/1634>`__).
+       ``python3`` (:issue:`1634`).
        ``Create Tag`` before it stays inline.
      - No.
 
 The summaries run on the image's ``/usr/bin/python3`` rather than the leg's
 interpreter, which may have failed to set up or be too broken to run anything, so
 they need only the standard library, as ``classify_changes.py`` does on the
-runner's ``python3``. :file:`util/pytest_shards.py` runs on ``/usr/bin/python3``
+runner's ``python3``. The Windows leg, which has no ``/usr/bin/python3``, runs its
+summary on ``python``, setup-python's or the image's. :file:`util/pytest_shards.py` runs on ``/usr/bin/python3``
 too, standard library only, so on GraalPy's leg the leg's interpreter runs pytest
 alone; on PyPy's legs the leg's interpreter runs the script as well, under the
 file-size cap every test command of ``unit-tests.yml`` takes.
@@ -1426,8 +1424,8 @@ every version the matrices hold, the experimental tier included. :file:`util/apt
 under ``sudo`` the commands that shell ran. Its ``plan`` and ``install`` both read
 the job's ``APT_PACKAGES``, so the cache key always describes the set installed.
 Its bounds are still ``timeout`` run as root inside ``sudo``, given no option, so
-uutils' ``timeout`` behaves as GNU's (`#2020
-<https://github.com/JarryShaw/PyPCAPKit/issues/2020>`__), and the bound reaches
+uutils' ``timeout`` behaves as GNU's (:issue:`2020`),
+and the bound reaches
 apt's own children, which a timeout in the script, running as the runner's user,
 could not signal. Both ``changes`` jobs check out on every event, since the script is in the
 tree. The release scripts run as ``python3``, from a checkout of the whole tree, and are
@@ -1444,8 +1442,8 @@ status, output and calls.
 since the scripts on ``/usr/bin/python3`` and on every leg's interpreter import it.
 
 The scripts a person runs as well, or alone, sit beside the CI-only ones in
-:file:`util/` rather than in a directory of their own (`#2050
-<https://github.com/JarryShaw/PyPCAPKit/issues/2050>`__). Every :file:`util/`
+:file:`util/` rather than in a directory of their own (:pr:`2050`).
+Every :file:`util/`
 script not listed here is CI-only.
 
 .. list-table::
@@ -1490,7 +1488,7 @@ script not listed here is CI-only.
 
 .. _CI Reports:
 
-CI Reports (`#2030 <https://github.com/JarryShaw/PyPCAPKit/issues/2030>`__)
+CI Reports (:issue:`2030`)
 ---------------------------------------------------------------------------
 
 A report with no pull request to comment on goes to GitHub Discussions. One
@@ -1597,8 +1595,8 @@ where a job failed without failing it, or where an annotation counts:
 
 * On a push run, by the owner's ruling, an annotation counts only on a
   non-blocking leg, whose steps are forced to succeed: a job named ``(KTLO)`` or
-  ``(experimental)``, as a KTLO leg whose tests fail warns (`#1672
-  <https://github.com/JarryShaw/PyPCAPKit/issues/1672>`__), or an annotation
+  ``(experimental)``, as a KTLO leg whose tests fail warns (:issue:`1672`),
+  or an annotation
   titled ``(KTLO, non-blocking)``, as ``engine-tests``' KTLO cells write. A passing
   blocking job's annotations neither count nor appear, unless the run failed.
 * On any other run, which posts every time, every annotation on a passing job
@@ -1607,7 +1605,7 @@ where a job failed without failing it, or where an annotation counts:
   neither do the annotations a workflow's ``expected`` list in the script holds as
   written on every run by design. Each entry is a job, a level and a title
   prefix, an empty prefix matching only an empty title, so a reworded message
-  still matches. Every list is empty today, and
+  still matches. Every list is empty, and
   :file:`tests/project/test_unit_tests_push_reports_2030.py` pins them.
 
 A run whose legs all skipped tested nothing, as when ``current`` found its commit
@@ -1629,8 +1627,8 @@ days) for the report to download; both run on ``always()`` and are
 and one cut to fit links the run. ``Run unit tests`` in ``experimental.yml`` sets
 no ``JOB_SUMMARY_COPY`` either: the line :file:`util/superseded.py` writes there
 for a stopped run reaches the copy through the watcher's ``--summary-copy``
-option, which the tests it runs never see (`#2078
-<https://github.com/JarryShaw/PyPCAPKit/issues/2078>`__). The post step runs only
+option, which the tests it runs never see (:issue:`2078`).
+The post step runs only
 where the report step's ``post`` output is ``true``, and sets ``GITHUB_WORKFLOW``
 to the relayed run's workflow, which :file:`util/discussion_report.py` labels the
 run with.
@@ -1653,7 +1651,7 @@ unchanged.
 
 .. _CodeQL Configuration:
 
-CodeQL Configuration (`#2130 <https://github.com/JarryShaw/PyPCAPKit/issues/2130>`__)
+CodeQL Configuration (:issue:`2130`)
 -------------------------------------------------------------------------------------
 
 ``Initialize CodeQL`` in ``codeql-analysis.yml`` reads
@@ -1681,7 +1679,7 @@ config and the input.
 
 .. _Action Pins:
 
-Action Pins (`#1968 <https://github.com/JarryShaw/PyPCAPKit/issues/1968>`__)
+Action Pins (:issue:`1968`)
 ----------------------------------------------------------------------------
 
 A tag or a branch is a reference its owner can move, so every ``uses:`` of an
@@ -1703,7 +1701,7 @@ and when :file:`.github/dependabot.yml` drops the ``github-actions`` ecosystem.
 ``pinned()`` and ``versions()`` in :file:`tests/_workflows.py` read a pin, for a test
 that names a particular action.
 
-Workflow Lint (`#1967 <https://github.com/JarryShaw/PyPCAPKit/issues/1967>`__)
+Workflow Lint (:issue:`1967`)
 ------------------------------------------------------------------------------
 
 Lint's ``lint`` job runs actionlint over every workflow in its ``actionlint`` step.
@@ -1713,11 +1711,11 @@ it. Dependabot does not read this pin, so a bump changes both. The workflows use
 1.7.10 on, and the pin is 1.7.12 or newer.
 
 actionlint runs the image's shellcheck over each ``run:`` block. Unlike Lint's
-other steps, this one blocks: a finding fails the job, as the owner ruled on #1967
-once #2023, #2037 and #2038 had fixed every finding it reported. It runs last and
+other steps, this one blocks: a finding fails the job, as the owner ruled on :issue:`1967`
+once :pr:`2023`, :pr:`2037` and :pr:`2038` had fixed every finding it reported. It runs last and
 on ``!cancelled()``, so a finding skips none of the advisory steps and a failed
 Python setup does not skip it. ``Lint`` is a required check of ruleset 23497679
-(`#1967 <https://github.com/JarryShaw/PyPCAPKit/issues/1967>`__), so a red Lint
+(:issue:`1967`), so a red Lint
 holds a merge. The image's shellcheck is not pinned, so a runner
 image that adds a check can turn Lint red on unchanged code; the fix is to the
 script it flags. The step's run summary counts the findings by actionlint rule and
@@ -1736,11 +1734,11 @@ pins an older release or no checksum, unpacks before it verifies, passes an
 an advisory step or a failed setup would skip it. It fails too when no workflow
 sets ``concurrency.queue`` any more.
 
-Dependency Updates (`#1968 <https://github.com/JarryShaw/PyPCAPKit/issues/1968>`__)
+Dependency Updates (:issue:`1968`)
 -----------------------------------------------------------------------------------
 
 Dependabot opens every dependency bump, weekly, from :file:`.github/dependabot.yml`
-(the owner's ruling on #1968):
+(the owner's ruling on :issue:`1968`):
 
 * ``pip`` over ``/``, ``/docs`` and ``/examples/benchmark``. The docs build pins
   Sphinx and sphinx-autodoc-typehints exactly in :file:`docs/requirements.txt`, and
@@ -1765,7 +1763,7 @@ PyUp runs on its defaults. The PyUp App's installation, and the
 Python Versions
 ---------------
 
-Since `#1660 <https://github.com/JarryShaw/PyPCAPKit/issues/1660>`__,
+Since :issue:`1660`,
 :file:`.github/python-versions.toml` declares every Python version CI runs: one
 line per version, with its tier -- ``supported``, ``ktlo``, ``experimental``, or
 ``pre-release``, which no version carries -- and, where ``ubuntu-latest`` cannot
@@ -1809,8 +1807,8 @@ commits it did not make: when the branch holds some and proposes other tiers,
 ``detect`` fails before asking for the approval. Once that pull request is
 merged or closed, the next run with something to propose recreates the branch
 from ``main``, a closed proposal's tiers included. It reports a pre-release
-instead of writing it. Nor does it retire a job (`#1747
-<https://github.com/JarryShaw/PyPCAPKit/issues/1747>`__): when the tiers leave
+instead of writing it. Nor does it retire a job (:issue:`1747`):
+when the tiers leave
 a matrix job with no leg, as 3.11 reaching end of life leaves
 ``pypcap-parity``, it writes them as computed, warns, and puts the job first in
 the body as a manual step: retire or remove it, and the ``needs:`` that list it,
@@ -1838,7 +1836,7 @@ approval, in ``create-release.yml`` and ``cron-python-versions.yml``:
 ``PYPCAPKIT`` token and ``PYPCAPKIT_ACTIONS_DEPLOY_KEY`` are secrets of
 ``conda-tag``. GitHub gives an environment's secrets only to a job that names
 it, so the scheduled jobs reading them name it too
-(`#1968 <https://github.com/JarryShaw/PyPCAPKit/issues/1968>`__):
+(:issue:`1968`):
 
 * Conda Update's ``conda-update`` and ``conda-tag`` -- ``environment: conda-tag``
 * Conda Update's ``conda-dist`` -- ``environment: anaconda``
@@ -1871,7 +1869,7 @@ for ``publish-pages``, which alone holds ``contents: write`` and never runs on
 a pull request. Its ``Check gh-pages holds no newer build`` step skips the
 deploy when ``gh-pages`` already holds the build of a commit this run's commit
 is behind, so a build that finishes late cannot replace newer documentation
-(`#1968 <https://github.com/JarryShaw/PyPCAPKit/issues/1968>`__). Of these environments, only
+(:issue:`1968`). Of these environments, only
 ``github-release`` carries a required reviewer; :doc:`releasing`
 covers why one approval on that single environment is enough to gate the
 whole release graph, and is the page to read for the reasoning rather than

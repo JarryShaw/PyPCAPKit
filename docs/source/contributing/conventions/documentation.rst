@@ -314,6 +314,17 @@ Format and Mechanics
    :file:`MANIFEST.in` does not reach Markdown, so the READMEs under :file:`examples/`
    ship through ``recursive-include examples *.md``, and any other Markdown file
    ships only if setuptools or an ``include`` line adds it.
+*  **Cite an issue or a pull request by role wherever Sphinx renders the text.** In an
+   ``.rst`` page, a docstring or a ``#:`` doc-comment an issue is ``:issue:`NNN``` and
+   a pull request ``:pr:`NNN```, by what the number is rather than what a URL says: a
+   bare ``#NNN`` there renders as plain text, and a hand-written link to the tracker
+   hides which of the two it names. A plain ``#`` comment, a workflow's YAML comment,
+   :file:`tests/` and any other file nothing renders keep ``#NNN``, which GitHub links
+   itself. A link into another repository or to a Discussion keeps its URL, and
+   ``GH-NNN`` is a deliberate issue form. Ruled on :issue:`1103`;
+   :file:`tests/project/test_docs_issue_pr_roles_1103_unit.py` fails on a bare number
+   or a hand-written link in rendered text, and
+   :file:`tests/project/test_issue_refs_in_comments.py` on a role in a plain comment.
 *  **Prose names the real defining module, not a re-export.** One strand of the
    consistency sweep on :doc:`the roadmap </contributing/pep>`. The sentinels are the
    worked example: every one is defined in :mod:`pcapkit.corekit.sentinels`, and
