@@ -696,7 +696,7 @@ class SchemaField(FieldBase[_TS]):
         new_self._callback(new_self, packet)
         if new_self._length_callback is not None:
             new_self._length = new_self._length_callback(packet)
-            new_self._template = f'{new_self._length}s' if self._length >= 0 else '1024s'  # use a reasonable default
+            new_self._template = f'{new_self._length}s' if new_self._length >= 0 else '1024s'  # use a reasonable default
         return new_self
 
     def pack(self, value: 'Optional[_TS | bytes]', packet: 'dict[str, Any]') -> 'bytes':
