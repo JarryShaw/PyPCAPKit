@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 """``AppType.register`` refuses a port that ``get`` refuses.
 
-GitHub issue #1792. :meth:`~pcapkit.const.reg.apptype.apptype.AppType.register`
-neither called nor overrode
-:meth:`~pcapkit.corekit.enum.EnumLookup._validate_value`, so ``TCP.register(70000,
-'x')`` minted a member, and ``AppType.get(70000, proto='tcp')`` then returned it
-although ``get`` raises :exc:`ValueError` for a port outside ``0``-``65535``
-(#758). ``AppType`` now overrides the hook with :meth:`_missing_`'s own check and
-``register`` calls it after its duplicate check, as the base ``register`` does.
-The override raises :exc:`~pcapkit.utilities.exceptions.EnumValueError`, as the
-registry-protocol convention asks of one, with the message ``get`` raises.
+GitHub issue #1792. Without the fix,
+:meth:`~pcapkit.const.reg.apptype.apptype.AppType.register` neither calls nor
+overrides :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value`, so
+``TCP.register(70000, 'x')`` mints a member, and ``AppType.get(70000,
+proto='tcp')`` then returns it although ``get`` raises :exc:`ValueError` for a
+port outside ``0``-``65535`` (#758). ``AppType`` overrides the hook with
+:meth:`_missing_`'s own check and ``register`` calls it after its duplicate
+check, as the base ``register`` does. The override raises
+:exc:`~pcapkit.utilities.exceptions.EnumValueError`, as the registry-protocol
+convention asks of one, with the message ``get`` raises.
 
 Each test imports the registries after
 :func:`~tests._support.reimport_once_per_class`, whose ``restore`` puts the

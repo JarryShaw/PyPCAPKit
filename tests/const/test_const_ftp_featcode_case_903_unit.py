@@ -46,7 +46,7 @@ reading of the criterion, with ``TransportProtocol`` as his example: when the
 RFC and IANA themselves use upper and lower case for the same field, that mix
 is itself an indication of case insensitivity.
 
-**Pre-change behaviour, measured before the fix** (throwaway process, no
+**Behaviour without the fix, as measured** (throwaway process, no
 probe that could mint; ``_member_map_`` and ``_value2member_map_`` both 15
 entries before and after)::
 
@@ -80,7 +80,7 @@ so there is no second member for the fold to hide -- pinned below by
 :class:`~pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`, whose RFC 9850
 Section 4.2 registry and live IANA CSV agree on upper case in all 10 rows
 with no comparison rule stated anywhere, is measured below as the witness
-that the base is untouched by this change.
+that the base ``get`` stays case-sensitive.
 """
 
 import inspect
@@ -102,7 +102,7 @@ class FEATCodeCaseInsensitiveLookupTests(unittest.TestCase):
     """``get`` resolves a FEAT code whatever case the caller spells it in."""
 
     def test_a_lower_case_placeholder_resolves_from_upper_case(self) -> 'None':
-        """The issue's repro. ``get('BASE')`` used to raise ``KeyError``.
+        """The issue's repro. Without the fix, ``get('BASE')`` raises ``KeyError``.
 
         Upper case is what RFC 2389 Section 3.2 recommends implementations
         transmit, so this is the casing a caller reading a real ``FEAT``

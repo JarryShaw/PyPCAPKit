@@ -10,7 +10,7 @@ GitHub issue #1824. :meth:`~pcapkit.const.ftp.command.Command.get` was a
 which made it a :class:`classmethod` delegating to
 :meth:`~pcapkit.corekit.enum.EnumLookup.get`.
 
-``Command.get`` now follows it: a non-``str`` key goes to the base, whose call
+``Command.get`` follows it: a non-``str`` key goes to the base, whose call
 to ``Command._validate_value`` (added by #1823) raises
 :exc:`~pcapkit.utilities.exceptions.EnumValueError`. ``default`` is not
 forwarded there, exactly as ``Method.get`` forwards none, because this

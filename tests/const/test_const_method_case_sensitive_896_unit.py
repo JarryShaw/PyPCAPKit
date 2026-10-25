@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """``Method.get`` must be case-sensitive, per RFC 9110 Section 9.1.
 
-GitHub issue #896: :meth:`pcapkit.const.http.method.Method.get` used to
-upper-case its ``key`` before looking it up (``name = key.upper()``, then
-``name not in Method._member_map_``), so ``Method.get('get')`` resolved to
+GitHub issue #896: without the fix, :meth:`pcapkit.const.http.method.Method.get`
+upper-cases its ``key`` before looking it up (``name = key.upper()``, then
+``name not in Method._member_map_``), so ``Method.get('get')`` resolves to
 the same object as ``Method.get('GET')`` -- :attr:`Method.GET`. RFC 9110
 Section 9.1 says the opposite is required::
 
@@ -40,14 +40,14 @@ outright would therefore have turned ``Method.get('get')`` from "resolves to
 ``GET``" into "raises ``KeyError``", not into "resolves to an unregistered
 member preserving ``'get'``" as the issue's own *expected behaviour* section
 asks for -- and as :mod:`tests.protocols.application.test_http_unit` and
-:mod:`tests.const.test_const_enum_no_mint` already require elsewhere in this
-change. So the fix keeps ``Method``'s own ``get`` override -- it still needs
-to build that unregistered member on a miss, which the base's ``get`` does
-not do for a ``str`` key -- and only removes the ``.upper()`` folding from
-the *match* it performs before falling through to that fallback. The
-``_unregistered_member`` call it falls through to still canonicalises the
+:mod:`tests.const.test_const_enum_no_mint` also require. So the fix keeps
+``Method``'s own ``get`` override -- it still needs to build that unregistered
+member on a miss, which the base's ``get`` does not do for a ``str`` key -- and
+only removes the ``.upper()`` folding from the *match* it performs before
+falling through to that fallback. The ``_unregistered_member`` call it falls
+through to still canonicalises the
 *name* (the identifier) to upper case, exactly as :meth:`Method._missing_`
-does; only the *value* -- and now, the match against a *registered* name --
+does; only the *value* -- and the match against a *registered* name --
 keeps the caller's exact casing.
 
 This module also pins the crawler and the generated file against each
@@ -87,7 +87,7 @@ def _reconstruct_fixture_csv() -> 'str':
 
     This is the offline substitute for a live crawl against
     ``https://www.iana.org/assignments/http-methods/methods.csv``, which
-    this change must not perform. Faithfulness is what
+    no test here may perform. Faithfulness is what
     :meth:`MethodGetCaseSensitivityTests.
     test_vendor_template_matches_the_generated_module` below checks: feeding
     this fixture back through :meth:`~pcapkit.vendor.http.method.Method.
@@ -185,7 +185,7 @@ class MethodGetCaseSensitivityTests(unittest.TestCase):
         self.assertNotEqual(probed, 'GET')
 
     def test_unregistered_member_preserves_the_callers_casing(self) -> None:
-        """The value of the unregistered member ``get('get')`` now builds is
+        """The value of the unregistered member ``get('get')`` builds is
         exactly what the caller passed -- never upper-cased -- matching the
         convention :meth:`~pcapkit.const.http.method.Method.
         _unregistered_member` documents and :class:`~pcapkit.const.ftp.

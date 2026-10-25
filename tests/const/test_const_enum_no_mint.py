@@ -4,113 +4,96 @@
 The ruling on #775 is that no registry creates a registered enum out of an
 unrecognised or unregistered value, however legitimate but unbounded the values
 are, unless the user or caller explicitly created it -- and lookup never counts as
-asking for a name, only the new :meth:`register` classmethod does. Before this change, both ``get()``'s string
-path and ``_missing_``'s bounded-but-unassigned range branch called
-:func:`aenum.extend_enum`, permanently growing the registry for a value nobody
-asked to be named. Measured on this tree before the fix:
+asking for a name, only the :meth:`register` classmethod does. Without the fix,
+both ``get()``'s string path and ``_missing_``'s bounded-but-unassigned range
+branch call :func:`aenum.extend_enum`, permanently growing the registry for a
+value nobody asked to be named. Measured on a tree without the fix:
 :class:`~pcapkit.const.arp.hardware.Hardware`'s ``__members__`` moved from 41
 entries to 42 after a single ``Hardware(40)`` (40 sits in the documented
 39-255 "Unassigned" range) and stayed at 42 on a second call -- growth that
 never reverses for the life of the process, and that a long-running capture
 walking many such values would accumulate without bound.
 
-Tier 1 touches only the shared ``get()`` template in :mod:`pcapkit.vendor.default`
+Tier 1 covers the shared ``get()`` template in :mod:`pcapkit.vendor.default`
 and the ``_missing_`` range-branch :meth:`~pcapkit.vendor.
-default.Vendor.process` assembles -- see that module for those hunks. It is
-scoped to the registries that inherit both unmodified, which this module's
-:data:`REGISTRIES_WITH_UNASSIGNED_RANGES` and :data:`ALL_REGISTRIES` enumerate;
-the vendor files that replace the shared template wholesale (and whatever
-they generate) are out of scope and untouched.
+default.Vendor.process` assembles -- see that module for those hunks -- and so
+the registries that inherit both unmodified, which this module's
+:data:`REGISTRIES_WITH_UNASSIGNED_RANGES` and :data:`ALL_REGISTRIES` enumerate.
 
-Tier 1 fixed the *mechanism* (a lookup should never mint); it did not decide,
-registry by registry, which of the remaining ``_missing_`` bodies mint
-something worth keeping. That is tier 2; the owner's mint/unmint criterion was
-settled on PR #847 and confirmed on #775 as the core of the ruling: a name
-is minted when it is the final concrete name an assignment gave, and left
-unminted when it is only a notation for the readers. A dynamically or statically
-assigned range is as unspecified as any other -- it gets concrete names when
-something assigns them -- so its placeholder is notation, not a name worth
-registering. Applied registry by registry to every ``_missing_`` that still called
-:func:`~aenum.extend_enum` -- measured
-by an AST walk over ``pcapkit/const/*.py`` rather than estimated, as an earlier
-pass in this programme had -- the ruling converted most
-of them outright (:data:`RULING_CONVERTED_REGISTRIES` below),
-left :class:`~pcapkit.const.reg.ethertype.EtherType` and
-:class:`~pcapkit.const.ipx.socket.Socket` *mixed* (each keeps some branches
-minting and converts others -- see :data:`ETHERTYPE_UNASSIGNED_PROBES` and
-:data:`IPX_SOCKET_UNASSIGNED_PROBES`), and left the bespoke classes
-untouched because they do not inherit :class:`~pcapkit.corekit.enum.
-EnumRegistry` and so have no ``_unregistered_member`` to convert to until
-GitHub issue #860 lands (blocked on #859); :class:`~pcapkit.const.reg.
-apptype.apptype.AppType` is by far the largest of those in still-minting
-branches. :class:`~pcapkit.const.mh.cga_type.CGAType` keeps minting too, but
-for a different reason: its ``Tag_<hex>`` mint is not an IANA-style
-range at all (see its own module for why), so the ruling never touched it.
+Tier 1 fixes the *mechanism* (a lookup should never mint); tier 2 decides,
+registry by registry, which ``_missing_`` bodies mint something worth keeping.
+The owner's mint/unmint criterion was settled on PR #847 and confirmed on #775
+as the core of the ruling: a name is minted when it is the final concrete name
+an assignment gave, and left unminted when it is only a notation for the
+readers. A dynamically or statically assigned range is as unspecified as any
+other -- it gets concrete names when something assigns them -- so its
+placeholder is notation, not a name worth registering. Applied registry by
+registry to every ``_missing_`` calling :func:`~aenum.extend_enum` -- measured
+by an AST walk over ``pcapkit/const/*.py`` rather than estimated -- the ruling
+converts them (:data:`RULING_CONVERTED_REGISTRIES` below).
+:class:`~pcapkit.const.mh.cga_type.CGAType` keeps minting, for a different
+reason: its ``Tag_<hex>`` mint is not an IANA-style range at all (see its own
+module for why), so the ruling does not cover it.
 
-GitHub issue #860 (step 2, PR 1) brought every one of those classes except
-:class:`~pcapkit.const.reg.apptype.apptype.AppType` onto
-:class:`~pcapkit.corekit.enum.EnumRegistry` and converted their branches --
-see :data:`BESPOKE_UNMINT_CONVERTED_REGISTRIES` and
+GitHub issue #860 (step 2) brings the bespoke classes -- the vendor files that
+replace the shared template wholesale, and what they generate -- onto
+:class:`~pcapkit.corekit.enum.EnumRegistry` and converts their branches -- see
+:data:`BESPOKE_UNMINT_CONVERTED_REGISTRIES` and
 :class:`BespokeOpenVocabularyUnmintConvertedTests` below. Two distinct
 shapes:
 
-Range-bounded registries whose old mint used a manufactured
-placeholder label (``Unassigned``, ``Unknown_%d``, ``opt_unknown_%d``):
+Range-bounded registries whose mint used a manufactured placeholder label
+(``Unassigned``, ``Unknown_%d``, ``opt_unknown_%d``):
 :class:`~pcapkit.const.http.status_code.StatusCode`,
 :class:`~pcapkit.const.ftp.return_code.ReturnCode`,
 :class:`~pcapkit.const.ftp.return_code.ResponseKind`,
 :class:`~pcapkit.const.ftp.return_code.GroupingInformation` and
 :class:`~pcapkit.const.pcapng.option_type.OptionType`,
-unambiguous under the mint/unmint criterion from the first measurement.
+unambiguous under the mint/unmint criterion.
 Each carries a custom ``__new__`` with extra per-member attributes (unlike
-any of the tier-2 registries above), so each needed its own
+any of the tier-2 registries above), so each has its own
 ``_unregistered_member`` override reconstructing those attributes rather
 than the shared base's generic one, and :class:`StatusCode` and
-:class:`ReturnCode` had their own hand-written
-``get()`` replaced by the base's -- see :class:`BespokeGetReplacementTests`
-for the ``default == -1`` -> ``NO_DEFAULT`` behaviour change that implies.
+:class:`ReturnCode` use the base's ``get()`` rather than a hand-written one
+-- see :class:`BespokeGetReplacementTests` for the ``default == -1`` ->
+``NO_DEFAULT`` behaviour change that implies.
 :class:`OptionType` keeps its own ``get()`` (genuine multi-namespace
-dispatch the base does not replicate), but round 2 review found that
-``get()`` still minted on both its int/namespace path and its ``str`` path
--- the same "leaving ``get()`` minting while ``_missing_`` does not
-contradicts the ruling" argument that converted :class:`Command`'s and
-:class:`Method`'s own ``get()`` mint sites below, just missed the first
-time round for the third registry that has one. Both are now
-``_unregistered_member`` calls too; see
+dispatch the base does not replicate), and both its int/namespace path and
+its ``str`` path are ``_unregistered_member`` calls too -- the same
+"leaving ``get()`` minting while ``_missing_`` does not contradicts the
+ruling" argument that converts :class:`Command`'s and :class:`Method`'s own
+``get()`` mint sites below; see
 :meth:`BespokeUnmintConvertedRegistriesTests.
 test_optiontype_get_int_path_no_longer_mints`,
 ``..._namespace_path_...`` and ``..._str_path_...``.
 
-Open-vocabulary registries whose old mint used the exact, unmodified
-observed value as its own name rather than any manufactured label:
+Open-vocabulary registries whose mint used the exact, unmodified observed
+value as its own name rather than any manufactured label:
 :class:`~pcapkit.const.ftp.command.FEATCode`,
 :class:`~pcapkit.const.ftp.command.Command` and
 :class:`~pcapkit.const.http.method.Method` -- a single ``_missing_`` branch each,
-initially left minting pending the owner's ruling (this measurement's own
-report flagged them as genuinely ambiguous under the criterion, since
-nothing about them is a manufactured placeholder). GitHub issue #860 is
-where the owner settled it: ``get()`` must not mint, because only
-``register()`` creates a new registry entry -- for these registries
-only IANA-registered values are legitimate, and ``get()`` does not have
-enough information to construct one itself. That rule is about ``get()``
-in its own right, and it extends just as much to
-``_missing_`` -- :class:`Command` needs ``feat``/``desc``/``type``/``conf``
+genuinely ambiguous under the criterion, since nothing about them is a
+manufactured placeholder. GitHub issue #860 is where the owner settled it:
+``get()`` must not mint, because only ``register()`` creates a new registry
+entry -- for these registries only IANA-registered values are legitimate,
+and ``get()`` does not have enough information to construct one itself.
+That rule is about ``get()`` in its own right, and it extends just as much
+to ``_missing_`` -- :class:`Command` needs ``feat``/``desc``/``type``/``conf``
 and :class:`Method` needs ``safe``/``idempotent``, neither of which a bare
 wire string carries -- so both classes' own ``get()`` (a second, independent
 mint site bypassing ``_missing_`` entirely) converts too, alongside
-``_missing_``; :class:`FEATCode` has no custom ``__new__``, and had no
-``get()`` of its own at the time either, so only its one ``_missing_`` branch
-was in play. (It has one now -- GitHub issue #903's audit gave it a
-case-insensitive ``get`` per :rfc:`5797#section-2` -- but that override never
-calls ``cls(key)``, so it added no mint site to this file's concern.)
+``_missing_``. :class:`FEATCode` has no custom ``__new__``, and its
+case-insensitive ``get`` (GitHub issue #903's audit, per
+:rfc:`5797#section-2`) never calls ``cls(key)``, so only its one
+``_missing_`` branch is in play.
 
-GitHub issue #860 step 2's PR 2 converted the last of those classes:
-:class:`~pcapkit.const.reg.apptype.apptype.AppType` and its four per-transport
+GitHub issue #860 step 2's PR 2 covers
+:class:`~pcapkit.const.reg.apptype.apptype.AppType` and its per-transport
 registries (:class:`~pcapkit.const.reg.apptype.tcp.TCP`,
 :class:`~pcapkit.const.reg.apptype.udp.UDP`,
 :class:`~pcapkit.const.reg.apptype.sctp.SCTP`,
-:class:`~pcapkit.const.reg.apptype.dccp.DCCP`) now mix in
-:class:`~pcapkit.corekit.enum.EnumRegistry` and no longer mint on either of
+:class:`~pcapkit.const.reg.apptype.dccp.DCCP`), which mix in
+:class:`~pcapkit.corekit.enum.EnumRegistry` and mint on neither of
 AppType's mint sites -- its ``_missing_`` branches, and the one more inside
 ``get()`` itself. See :class:`AppTypeUnmintConvertedTests` below, including
 the deliberate scope decision on those branches that name a real (if
@@ -125,44 +108,43 @@ the generated data join two kinds with ``/`` and would break under a plain
 ``IntEnum``; see :class:`BespokeOpenVocabularyUnmintConvertedTests`'s own
 ``test_commandtype_is_untouched``.
 :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`, by contrast,
-*did* change -- on a different ruling than CommandType's, not the same one.
-GitHub PR #836 is what first retired ``|``-composite decoding: once
-``TransportProtocol`` is no longer a ``Flag``, a ``|``-joined value is not parsed
-and accepted but treated as a whole, instead of being split. GitHub issue #860
-later drew the further consequence once nothing decoded a composite any more:
-the power-of-two spacing existed only for the ``tcp | udp``-style code that
-composition served, and since the new logic does not accept that piping, ``auto()``
-is the expected numbering. So it numbers its members sequentially from
-0 -- ``undefined`` a direct, explicit ``0``, the rest continuing from it
-via ``auto()`` with no ``_start_`` needed, per the owner's own further
-ruling settling the declaration shape -- rather than by the power-of-two
-spacing that composition used to need. The owner also ruled, on #860, that no
-test should pin the one behavioural consequence, since it is an obsolete path
-left by an accepted breaking change -- and it is a real consequence,
-not a refusal: a hand-composed ``tcp | udp`` (or a bare, uncomposed ``3``)
-now silently resolves as ``sctp``'s own value through
-:meth:`AppType._dispatch`, where it used to name no registry at all and
-raise. None of the tests below pin that, per the same ruling.
+is not a ``Flag`` -- on a different ruling than CommandType's, not the same
+one. GitHub PR #836 retires ``|``-composite decoding: ``TransportProtocol``
+not being a ``Flag``, a ``|``-joined value is not parsed and accepted but
+treated as a whole, instead of being split. GitHub issue #860 draws the
+further consequence: the power-of-two spacing exists only for the
+``tcp | udp``-style code that composition served, and since the logic does
+not accept that piping, ``auto()`` is the expected numbering. So it numbers
+its members sequentially from 0 -- ``undefined`` a direct, explicit ``0``,
+the rest continuing from it via ``auto()`` with no ``_start_`` needed, per
+the owner's own further ruling settling the declaration shape. The owner
+also ruled, on #860, that no test should pin the one behavioural
+consequence, since it is an obsolete path left by an accepted breaking
+change -- and it is a real consequence, not a refusal: a hand-composed
+``tcp | udp`` (or a bare, uncomposed ``3``) silently resolves as ``sctp``'s
+own value through :meth:`AppType._dispatch`. None of the tests below pin
+that, per the same ruling.
 
-GitHub issue #775's final round closes the two mixed registries themselves:
+GitHub issue #775's final round closes the two registries tier 2 left
+*mixed* (keeping some branches minting and converting others):
 every one of :class:`~pcapkit.const.reg.ethertype.EtherType`'s
-still-minting range branches, and :class:`~pcapkit.const.ipx.socket.Socket`'s
-one (``Registered by Xerox``), now convert to
+range branches, and :class:`~pcapkit.const.ipx.socket.Socket`'s
+``Registered by Xerox`` one, convert to
 :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member` too -- PR #878
-scoped it this way: keeping the existing hex-suffixed name, since this change
-is about not registering rather than renaming. So each keeps the hex-suffixed
-name it always rendered (``Xyplex_0x0888``, not a bare ``Xyplex``) even though
-it no longer registers -- neither is "mixed" any more, both are wholly
-converted like those in :data:`RULING_CONVERTED_REGISTRIES`, and
-:class:`EtherTypeMixedMintTests`/:class:`IPXSocketMixedMintTests` below are
-retitled in place to prove the formerly-kept probe no longer mints rather than
-that it still does. The one consequence worth naming: this reintroduces the
-exact "manufactured, value-suffixed name" shape :func:`is_manufactured` exists
-to flag, on calls that are still safe because :meth:`_unregistered_member`
-never registers regardless of what its ``name`` argument looks like -- see
+scoped it this way: keeping the existing hex-suffixed name, since the
+conversion is about not registering rather than renaming. So each keeps the
+hex-suffixed name (``Xyplex_0x0888``, not a bare ``Xyplex``) even though it
+does not register -- both are wholly converted like those in
+:data:`RULING_CONVERTED_REGISTRIES`, and
+:class:`EtherTypeMixedMintTests`/:class:`IPXSocketMixedMintTests` below
+prove that the probe each once kept minting does not mint. The one
+consequence worth naming: this reintroduces the exact "manufactured,
+value-suffixed name" shape :func:`is_manufactured` exists to flag, on calls
+that are safe because :meth:`_unregistered_member` never registers
+regardless of what its ``name`` argument looks like -- see
 :func:`_is_hex_suffixed_unregistered_name` in
 :class:`UnregisteredMemberNameIsBareTests` for the scoped exemption this
-required, keyed on the ``name`` argument's own shape rather than on the
+requires, keyed on the ``name`` argument's own shape rather than on the
 files it happens to live in.
 
 """
@@ -356,26 +338,24 @@ def _first_unassigned_value(cls: 'type') -> 'int':
     return int(match.group(1))
 
 
-#: (module, class name) for every one of the registries the owner's
-#: #775/#847 ruling converted outright: every ``_missing_`` branch that used
-#: to mint via :func:`~aenum.extend_enum` now returns :meth:`~pcapkit.corekit.
-#: enum.EnumRegistry._unregistered_member` instead, because what it minted was
-#: a bare status word (``Unassigned``, ``Reserved [...]``, ``Reserved for
-#: Private/Experimental Use``, ``Unspecified in the IANA registry``, and
-#: similar) rather than a name anyone assigned. Derived from the same AST walk
-#: that measured the modules still minting on ``main`` before this change:
-#: most of them are here, including the *mixed* registries (:class:`~pcapkit.
+#: (module, class name) for every registry the owner's #775/#847 ruling
+#: converts outright: every ``_missing_`` branch that would mint via
+#: :func:`~aenum.extend_enum` returns :meth:`~pcapkit.corekit.
+#: enum.EnumRegistry._unregistered_member` instead, because what it would
+#: mint is a bare status word (``Unassigned``, ``Reserved [...]``, ``Reserved
+#: for Private/Experimental Use``, ``Unspecified in the IANA registry``, and
+#: similar) rather than a name anyone assigned. Derived from an AST walk over
+#: the modules that mint without the fix, including the registries
+#: tier 2 left *mixed* until #775's final round (:class:`~pcapkit.
 #: const.reg.ethertype.EtherType` and :class:`~pcapkit.const.ipx.socket.
-#: Socket`, which convert some branches and keep minting others -- see
-#: :data:`ETHERTYPE_UNASSIGNED_PROBES` and :data:`IPX_SOCKET_UNASSIGNED_
-#: PROBES`). The rest are untouched: the files whose classes do
-#: not inherit :class:`EnumRegistry` yet and so have no ``_unregistered_
-#: member`` to convert to (:class:`~pcapkit.const.reg.apptype.apptype.
-#: AppType`, :class:`~pcapkit.const.http.status_code.StatusCode`, :mod:
-#: `pcapkit.const.ftp.return_code`, :mod:`pcapkit.const.ftp.command`,
+#: Socket` -- see :data:`ETHERTYPE_UNASSIGNED_PROBES` and
+#: :data:`IPX_SOCKET_UNASSIGNED_PROBES`). Not listed: the bespoke classes
+#: GitHub issue #860 converts instead (:class:`~pcapkit.const.reg.apptype.
+#: apptype.AppType`, :class:`~pcapkit.const.http.status_code.StatusCode`,
+#: :mod:`pcapkit.const.ftp.return_code`, :mod:`pcapkit.const.ftp.command`,
 #: :class:`~pcapkit.const.http.method.Method`, :class:`~pcapkit.const.pcapng.
-#: option_type.OptionType` -- see the module docstring), plus :class:
-#: `~pcapkit.const.mh.cga_type.CGAType`, which the ruling never touched
+#: option_type.OptionType` -- see the module docstring), and :class:
+#: `~pcapkit.const.mh.cga_type.CGAType`, which the ruling does not cover
 #: because its mint is not an IANA-style range at all.
 RULING_CONVERTED_REGISTRIES = (
     ('pcapkit.const.esp.cipher', 'Cipher'),
@@ -474,20 +454,17 @@ RULING_CONVERTED_REGISTRIES = (
 #: are declared). They are proved by :class:`RulingConversionSourceTests` (a
 #: source sweep) instead.
 #:
-#: :class:`~pcapkit.const.reg.ethertype.EtherType` used to be held out for a
-#: second, distinct reason on top of those 13: its *first* converted branch by
-#: source order ("Old Xerox Experimental...", 0x0101-0x01FF) was itself
-#: unreachable, masked by the wider 0x0000-0x05DC branch before it, so a naive
-#: probe would have silently exercised the wrong branch. GitHub issue #862
-#: (fixed by #865) reordered :meth:`pcapkit.vendor.reg.ethertype.EtherType.
-#: process` so the narrower range is tested first, which makes that branch
-#: directly probeable like any other reachable-gap registry -- the same shape
-#: :class:`~pcapkit.const.ipx.socket.Socket` (mixed at the time) already
-#: demonstrates in this list below. EtherType has therefore joined this set;
-#: see :data:`ETHERTYPE_UNASSIGNED_PROBES`'s comment for the probe itself,
-#: still covered explicitly by :class:`EtherTypeMixedMintTests` as well.
-#: #775's final round left neither registry actually mixed -- see that
-#: class's own docstring.
+#: :class:`~pcapkit.const.reg.ethertype.EtherType` is in this list because
+#: :meth:`pcapkit.vendor.reg.ethertype.EtherType.process` tests the narrower
+#: 0x0101-0x01FF range ("Old Xerox Experimental...") before the wider
+#: 0x0000-0x05DC branch that contains it (GitHub issue #862, fixed by #865),
+#: so its *first* converted branch by source order is directly probeable like
+#: any other reachable-gap registry's, as
+#: :class:`~pcapkit.const.ipx.socket.Socket`'s is below. Without that
+#: ordering the branch is masked, and a naive probe would silently exercise
+#: the wrong one. See :data:`ETHERTYPE_UNASSIGNED_PROBES`'s comment for the
+#: probe itself, also covered explicitly by :class:`EtherTypeMixedMintTests`.
+#: Neither registry is mixed -- see that class's own docstring.
 #:
 #: Derived the same way as :data:`RULING_CONVERTED_REGISTRIES`: computed once
 #: by walking each candidate's own bounds for a gap, not hand-picked.
@@ -568,25 +545,20 @@ RULING_CONVERTED_WITH_REACHABLE_GAP = (
 #: "Old Xerox Experimental values. Invalid as an Ethertype since 1983." both
 #: convert, because the label itself says nothing was assigned. Every *other*
 #: named block -- companies the historical list attributes a real code range
-#: to -- used to stay a mint; :data:`ETHERTYPE_FORMERLY_KEPT_PROBE` pins one
-#: (``Xyplex``) as a regression guard, now flipped to prove it no longer
-#: mints either, since #775's final round converts every remaining branch.
+#: to -- kept minting under that original ruling, and #775's final round
+#: converts every remaining branch; :data:`ETHERTYPE_FORMERLY_KEPT_PROBE` pins
+#: one (``Xyplex``) as a regression guard that it does not mint either.
 #:
-#: "Old Xerox Experimental" (0x0101-0x01FF) used to not be behaviourally
-#: probeable: it was a strict subset of the earlier, wider "IEEE802.3 Length
-#: Field" branch (0x0000-0x05DC), which the ``_missing_`` if-chain matched
-#: first and so masked it completely -- the same shape of ordering bug GitHub
-#: issue #841 found in :mod:`pcapkit.const.ipx.socket`, present on ``main``
-#: before this change and not part of #775/#847's ruling, so it was left as a
-#: follow-up rather than reordered as part of that ruling. GitHub issue #862
-#: is that follow-up, fixed by #865: :meth:`pcapkit.vendor.reg.ethertype.
-#: EtherType.process` now tests the narrower Old Xerox range before the wider
-#: IEEE802.3 one, so 0x0101 resolves to Old Xerox and is directly probeable --
-#: it is included below alongside ``DEC Unassigned``, giving it the same
-#: behavioural no-mint proof :class:`EtherTypeMixedMintTests` already gives
-#: DEC Unassigned, rather than the weaker source-text check that stood in for
-#: it before #865 (an order-insensitive string search that would keep passing
-#: even if the ordering regressed).
+#: "Old Xerox Experimental" (0x0101-0x01FF) is a strict subset of the wider
+#: "IEEE802.3 Length Field" branch (0x0000-0x05DC). :meth:`pcapkit.vendor.reg.
+#: ethertype.EtherType.process` tests the narrower range first (GitHub issue
+#: #862, fixed by #865 -- the same shape of ordering bug GitHub issue #841
+#: found in :mod:`pcapkit.const.ipx.socket`), so 0x0101 resolves to Old Xerox
+#: and is directly probeable. It is included below alongside ``DEC
+#: Unassigned``, giving it the same behavioural no-mint proof
+#: :class:`EtherTypeMixedMintTests` gives DEC Unassigned -- stronger than a
+#: source-text check, an order-insensitive string search that would keep
+#: passing even if the ordering regressed.
 ETHERTYPE_OLD_XEROX_LABEL = 'Old_Xerox_Experimental_values_Invalid_as_an_Ethertype_since_1983'
 ETHERTYPE_UNASSIGNED_PROBES = {
     0x8039: 'DEC_Unassigned',
@@ -595,21 +567,20 @@ ETHERTYPE_UNASSIGNED_PROBES = {
 #: The one probe the original ruling kept minting -- Xyplex, 0x0888 -- because
 #: a proprietary protocol has no public name of its own, so the company name
 #: serves as one (#775, #847). #775's final round converts it too, preserving
-#: the hex-suffixed name exactly as the crawler always rendered it (PR #878
-#: scoped it this way: keeping the existing hex-suffixed name, since this
-#: change is about not registering rather than renaming), so this now pins the
-#: opposite of what its name suggests: that the formerly-kept probe no longer
-#: mints either. Kept as its own constant, distinct from
-#: :data:`ETHERTYPE_UNASSIGNED_PROBES`, because
-#: :class:`EtherTypeMixedMintTests` below still wants it named individually in
+#: the hex-suffixed name exactly as the crawler renders it (PR #878 scoped it
+#: this way: keeping the existing hex-suffixed name, since the conversion is
+#: about not registering rather than renaming), so this pins the opposite of
+#: what its name suggests: that this probe does not mint either. Kept as its
+#: own constant, distinct from :data:`ETHERTYPE_UNASSIGNED_PROBES`, because
+#: :class:`EtherTypeMixedMintTests` below wants it named individually in
 #: its own regression test.
 ETHERTYPE_FORMERLY_KEPT_PROBE = (0x0888, 'Xyplex_0x0888')
 
 #: :class:`~pcapkit.const.ipx.socket.Socket` probes for the owner's original
 #: #775/#847 ruling: ``Experimental`` and the three dynamically/statically
 #: assigned labels convert, as notation for the reader rather than a final
-#: concrete assigned name; ``Registered by Xerox``, the company one, used to
-#: keep minting, pinned by :data:`IPX_SOCKET_FORMERLY_KEPT_PROBE`.
+#: concrete assigned name; ``Registered by Xerox``, the company one, kept
+#: minting under it, and is pinned by :data:`IPX_SOCKET_FORMERLY_KEPT_PROBE`.
 IPX_SOCKET_UNASSIGNED_PROBES = {
     0x0025: 'Experimental',
     0x4001: 'Dynamically Assigned Socket Numbers',
@@ -826,14 +797,12 @@ class GetNoLongerMintsTests(unittest.TestCase):
 
     def test_unresolvable_string_key_with_default_in_unassigned_range(self) -> None:
         """The fallback is itself a value lookup (GitHub issue #864), so a
-        default landing in a bounded-unassigned range no longer returns the
+        default landing in a bounded-unassigned range does not return the
         pseudo-member the int path does -- it simply does not resolve, and
-        the original key's own error propagates instead. Before #864 this
-        resolved via ``cls(default)`` -> ``_missing_`` to an unregistered
-        pseudo-member; that is exactly the cost the owner accepted on #864 in
-        choosing a value-only lookup: a default naming a value with no
-        registered member stops resolving, on every registry, where it used
-        to return an unregistered member via ``_missing_``."""
+        the original key's own error propagates instead. That is exactly the
+        cost the owner accepted on #864 in choosing a value-only lookup over
+        ``cls(default)`` -> ``_missing_``: a default naming a value with no
+        registered member does not resolve, on every registry."""
         from pcapkit.const.arp.hardware import Hardware
 
         before = len(Hardware.__members__)
@@ -1000,8 +969,8 @@ def is_manufactured(name_arg: 'Optional[ast.expr]') -> 'bool':
     """Whether an ``_unregistered_member(...)`` call's ``name`` argument is
     built *from the value being looked up*, rather than being independent of
     it -- the one shape #775/#860's ruling forbids, because a label that
-    varies with the value risks the exact ``__members__`` collision minting
-    used to risk. Keyed on *which operand is combined*, not on the format
+    varies with the value risks the exact ``__members__`` collision a mint
+    risks. Keyed on *which operand is combined*, not on the format
     spec: ``'%s_unknown' % namespace`` on :class:`~pcapkit.const.pcapng.
     option_type.OptionType`'s ``get()`` is a ``%``-format and is not
     flagged, because the combined operand is ``namespace`` (one of a
@@ -1042,10 +1011,9 @@ def is_manufactured(name_arg: 'Optional[ast.expr]') -> 'bool':
     than its receiver does: a bare ``value``/``key`` passed as data to
     ``str(...)``, ``operator.mod(...)``, ``.format_map(...)``, or nested
     inside a set/generator/list-comprehension/``map(...)`` argument to
-    ``.join(...)``, is a reference this function used to clear the same
-    way it clears a receiver -- wrongly, since an argument being the value
-    at all is already how each of those shapes glues it to something
-    else. Every argument of any call is therefore walked bluntly for
+    ``.join(...)``, is not to be cleared the way a receiver is, since an
+    argument being the value at all is already how each of those shapes
+    glues it to something else. Every argument of any call is therefore walked bluntly for
     ``value``/``key`` regardless of how deeply it is wrapped, while a
     receiver keeps the narrower, recursive check that preserves
     ``value.upper()``'s exemption.
@@ -1266,7 +1234,7 @@ class UnregisteredMemberNameIsBareTests(unittest.TestCase):
     than pinning one example -- and asserts that every
     ``cls._unregistered_member(...)`` call site's ``name`` argument is not a
     *manufactured* numeric-suffixed label: a bare string constant containing
-    ``%`` (the old ``'Unassigned_%d' % value`` shape, spelled out as a
+    ``%`` (the ``'Unassigned_%d' % value`` mint shape, spelled out as a
     literal), or an equivalent ``%``-formatted :class:`~ast.BinOp` or
     f-string. It therefore covers every call site tier 1's follow-up
     touched, every one tier 2's #775/#847 ruling added, and those #860
@@ -1324,17 +1292,11 @@ class UnregisteredMemberNameIsBareTests(unittest.TestCase):
     since it never calls ``_unregistered_member`` in the first place; minting
     there is the explicit, caller-named path the sweep is not about.
 
-    (Corrected from an earlier draft of this docstring, which estimated
-    the still-minting registries rather than measuring them and named ``pcapkit.const.mh`` and
-    ``BlockType`` as examples -- both were converted by tier 2 and no longer
-    apply; the AST walk in the module docstring above measured the real
-    set.)
-
     GitHub issue #775's final round converts the last minting branches --
     every one of :class:`~pcapkit.const.reg.ethertype.EtherType`'s and
     :class:`~pcapkit.const.ipx.socket.Socket`'s one -- and deliberately keeps
     each one's hex-suffixed name unchanged (PR #878 scoped it this way:
-    keeping the existing hex-suffixed name, since this change is about not
+    keeping the existing hex-suffixed name, since the conversion is about not
     registering rather than renaming). That is the exact manufactured,
     value-suffixed shape :func:`is_manufactured` exists to flag -- unlike
     ``'%s_unknown' % namespace`` above, the substituted operand here really is
@@ -1401,8 +1363,8 @@ class UnregisteredMemberNameIsBareTests(unittest.TestCase):
 
 
 class RulingConversionDoesNotMintTests(unittest.TestCase):
-    """Tier 2's #775/#847 ruling, behaviourally: a value that used to mint a
-    bare status word must now come back as a throwaway pseudo-member instead,
+    """Tier 2's #775/#847 ruling, behaviourally: a value whose label is a
+    bare status word must come back as a throwaway pseudo-member, not a mint,
     the same regression :class:`UnassignedRangeDoesNotMintTests` above proves
     for tier 1's registries. Swept across :data:`RULING_CONVERTED_WITH_REACHABLE_GAP`
     -- the converted registries whose branch a real lookup can
@@ -1456,40 +1418,38 @@ class RulingConversionDoesNotMintTests(unittest.TestCase):
                 self.assertIsNot(first, second)
 
 
-#: :class:`~pcapkit.const.reg.ethertype.EtherType` and :class:`~pcapkit.const.
-#: ipx.socket.Socket` used to be the two *mixed* registries: most of their
-#: ``_missing_`` legitimately kept minting (real attributed names), so the
-#: blanket "no extend_enum left" sweep below did not apply to them.
-#: GitHub issue #775's final round converts every remaining branch on both,
-#: so neither is mixed any more -- kept as an empty-by-construction frozenset
-#: (rather than deleted outright) so the two subtractions below stay
-#: self-documenting about *why* nothing is excluded now, and so a future
-#: registry that goes back to being genuinely mixed has a named place to be
-#: added again. :class:`EtherTypeMixedMintTests` and
-#: :class:`IPXSocketMixedMintTests` (retitled in place, not renamed) now prove
-#: their formerly-kept probe no longer mints either, alongside the rows that
-#: already didn't.
+#: Registries whose ``_missing_`` legitimately keeps minting on some branches
+#: (real attributed names), so the blanket "no extend_enum left" sweep below
+#: does not apply to them. Empty: GitHub issue #775's final round converts
+#: every branch on :class:`~pcapkit.const.reg.ethertype.EtherType` and
+#: :class:`~pcapkit.const.ipx.socket.Socket`, the two tier 2 left *mixed*.
+#: Kept as an empty-by-construction frozenset so the two subtractions below
+#: stay self-documenting about *why* nothing is excluded, and so a future
+#: registry that becomes genuinely mixed has a named place to be added.
+#: :class:`EtherTypeMixedMintTests` and :class:`IPXSocketMixedMintTests` prove
+#: the probe each once kept minting does not mint either, alongside the rows
+#: that never did.
 _MIXED_REGISTRIES = frozenset()  # type: frozenset[tuple[str, str]]
 
 
 class RulingConversionSourceTests(unittest.TestCase):
     """Source-level proof for those of :data:`RULING_CONVERTED_REGISTRIES`
     with no reachable gap (every in-bounds value already names a real member,
-    so no lookup can exercise the branch either before or after this change)
+    so no lookup can exercise the branch)
     -- and, as a completeness check, for the wholly-converted registries:
     none of their ``_missing_`` bodies may call :func:`~aenum.extend_enum`.
     :data:`_MIXED_REGISTRIES` is empty, #775's final round having
     converted both, so nothing is excluded here -- see its own docstring."""
 
     def test_no_reachable_gap_registries_no_longer_call_extend_enum(self) -> None:
-        # EtherType belongs to RULING_CONVERTED_WITH_REACHABLE_GAP: its
-        # masked-branch exclusion (Old Xerox shadowed by the wider IEEE802.3
-        # range) was fixed under GitHub issue #862, and its first converted
-        # branch by source order is directly probeable like any other
-        # reachable-gap registry. The `_MIXED_REGISTRIES` subtraction
-        # below is a defensive no-op -- neither mixed registry needs
-        # removing from `RCR - RG` (EtherType is already in RG;
-        # Socket never appeared in RULING_CONVERTED_REGISTRIES to begin with)
+        # EtherType belongs to RULING_CONVERTED_WITH_REACHABLE_GAP: its Old
+        # Xerox branch is not shadowed by the wider IEEE802.3 range (GitHub
+        # issue #862), so its first converted branch by source order is
+        # directly probeable like any other reachable-gap registry. The
+        # `_MIXED_REGISTRIES` subtraction below is a defensive no-op -- neither
+        # mixed registry needs removing from `RCR - RG` (EtherType is already
+        # in RG; Socket never appeared in RULING_CONVERTED_REGISTRIES to begin
+        # with)
         # -- kept so a mixed registry that regains a masked or absent branch
         # in the future does not silently inflate this count.
         excluded = set(RULING_CONVERTED_REGISTRIES) - set(RULING_CONVERTED_WITH_REACHABLE_GAP) - _MIXED_REGISTRIES
@@ -1511,13 +1471,12 @@ class RulingConversionSourceTests(unittest.TestCase):
                 self.assertNotIn('extend_enum', source)
 
     def test_ethertype_and_socket_no_longer_call_extend_enum_either(self) -> None:
-        """The two former mixed registries, now that nothing excludes them:
-        GitHub issue #775's final round leaves no ``extend_enum`` call on
-        either, the same invariant :meth:`test_every_wholly_converted_
-        registry_no_longer_calls_extend_enum` already proves for the other
-        80 -- named separately because neither is actually a member of
-        :data:`RULING_CONVERTED_REGISTRIES` in Socket's case, so the loop
-        above alone would never reach it."""
+        """The two registries tier 2 left mixed: GitHub issue #775's final
+        round leaves no ``extend_enum`` call on either, the same invariant
+        :meth:`test_every_wholly_converted_registry_no_longer_calls_extend_enum`
+        proves for the rest -- named separately because Socket is not a
+        member of :data:`RULING_CONVERTED_REGISTRIES`, so the loop above alone
+        would never reach it."""
         from pcapkit.const.ipx.socket import Socket
         from pcapkit.const.reg.ethertype import EtherType
 
@@ -1529,15 +1488,14 @@ class RulingConversionSourceTests(unittest.TestCase):
 
 
 class EtherTypeMixedMintTests(unittest.TestCase):
-    """:class:`~pcapkit.const.reg.ethertype.EtherType` was the ruling's mixed
-    case: ``DEC Unassigned`` and the "Old Xerox Experimental..." row converted
-    first, while every other attributed vendor block (a real company's own
-    name for its own code) kept minting. GitHub issue #775's final round
-    converts the rest too -- :meth:`test_formerly_attributed_vendor_block_
-    no_longer_mints` below proves the one named probe (``Xyplex``) that used
-    to be this class's own regression guard for "still mints" now proves the
-    opposite, and the class is no longer actually mixed (retitled in place
-    rather than renamed, so history stays easy to follow)."""
+    """:class:`~pcapkit.const.reg.ethertype.EtherType` is tier 2's mixed
+    case: tier 2's ruling converts ``DEC Unassigned`` and the "Old Xerox
+    Experimental..." row and leaves every other attributed vendor block (a
+    real company's own name for its own code) minting. GitHub issue #775's
+    final round converts those too, so no branch mints -- ``EtherType(0x0888)``
+    resolves to an unregistered ``Xyplex_0x0888`` -- and the class keeps its
+    tier-2 name. :meth:`test_formerly_attributed_vendor_block_
+    no_longer_mints` below pins that one named probe (``Xyplex``)."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self, restore=True)
@@ -1557,29 +1515,14 @@ class EtherTypeMixedMintTests(unittest.TestCase):
                 self.assertEqual(before, len(EtherType.__members__))
                 self.assertNotIn(value, EtherType._value2member_map_)  # type: ignore[attr-defined]
 
-    # ``test_masked_old_xerox_row_converts_by_source`` retired here, not simply
-    # deleted: it used to prove 0x0101-0x01FF converts *by source* (an
-    # order-insensitive string search for the two calls in
-    # EtherType._missing_'s text) because the row was unreachable at runtime,
-    # masked by the wider 0x0000-0x05DC branch that preceded it. GitHub issue
-    # #862, fixed by #865, reordered the generator so that row is no longer
-    # masked, and 0x0101 is now one of the values ``test_unassigned_rows_do_
-    # not_mint`` above probes directly via ``ETHERTYPE_UNASSIGNED_PROBES`` --
-    # a strictly stronger, behavioural proof of the same fact (it also catches
-    # a regression the old source check would have missed: the string search
-    # never checked *order*, so it would keep passing even if the ordering
-    # regressed and 0x0101 started minting again). Nothing this test checked
-    # is left unchecked; it is subsumed rather than replaced by a weaker test.
-
     def test_formerly_attributed_vendor_block_no_longer_mints(self) -> None:
-        """The regression guard this class used to carry the other way: this
-        exact probe (``Xyplex``, 0x0888) used to prove the ruling *kept*
-        minting a real attributed name; GitHub issue #775's final round
-        converts it, preserving the hex-suffixed name exactly as the crawler
-        always rendered it -- PR #878 scoped it this way: keeping the existing
-        hex-suffixed name, since this change is about not registering rather
-        than renaming. Same shape as :meth:`test_unassigned_rows_do_not_mint`
-        above, just for the one probe that used to be the exception."""
+        """``Xyplex`` (0x0888), the real attributed name tier 2's ruling
+        *kept* minting: GitHub issue #775's final round converts it,
+        preserving the hex-suffixed name exactly as the crawler renders it --
+        PR #878 scoped it this way: keeping the existing hex-suffixed name,
+        since the conversion is about not registering rather than renaming.
+        Same shape as :meth:`test_unassigned_rows_do_not_mint` above, for the
+        one probe tier 2 kept as the exception."""
         from pcapkit.const.reg.ethertype import EtherType
 
         value, name = ETHERTYPE_FORMERLY_KEPT_PROBE
@@ -1599,10 +1542,12 @@ class EtherTypeMixedMintTests(unittest.TestCase):
 
 
 class IPXSocketMixedMintTests(unittest.TestCase):
-    """:class:`~pcapkit.const.ipx.socket.Socket` was the ruling's other mixed
-    case: ``Experimental`` and the three dynamically/statically assigned
-    labels converted first, while ``Registered by Xerox``, the company one,
-    kept minting. GitHub issue #775's final round converts it too; see
+    """:class:`~pcapkit.const.ipx.socket.Socket` is tier 2's other mixed
+    case: tier 2's ruling converts ``Experimental`` and the three
+    dynamically/statically assigned labels and leaves ``Registered by
+    Xerox``, the company one, minting. GitHub issue #775's final round
+    converts it too, so ``Socket(0x0010)`` resolves to an unregistered
+    ``Registered by Xerox_0x0010``; see
     :meth:`test_registered_by_xerox_no_longer_mints` below."""
 
     def setUp(self) -> None:
@@ -1624,11 +1569,10 @@ class IPXSocketMixedMintTests(unittest.TestCase):
                 self.assertNotIn(value, Socket._value2member_map_)  # type: ignore[attr-defined]
 
     def test_registered_by_xerox_no_longer_mints(self) -> None:
-        """The regression guard this class used to carry the other way: this
-        exact probe (``Registered by Xerox``, 0x0010) used to prove the
-        ruling *kept* minting the company name; GitHub issue #775's final
-        round converts it, preserving the hex-suffixed name exactly as the
-        crawler always rendered it -- same ruling, same reasoning as
+        """``Registered by Xerox`` (0x0010), the company name tier 2's ruling
+        *kept* minting: GitHub issue #775's final round converts it,
+        preserving the hex-suffixed name exactly as the crawler renders it --
+        same ruling, same reasoning as
         :meth:`EtherTypeMixedMintTests.
         test_formerly_attributed_vendor_block_no_longer_mints`."""
         from pcapkit.const.ipx.socket import Socket
@@ -1678,7 +1622,7 @@ class BespokeUnmintConvertedRegistriesTests(unittest.TestCase):
     attributes unset and make ``str()``/``repr()`` raise on the result. Each
     class therefore overrides :meth:`_unregistered_member` to reconstruct
     them the same way ``__new__`` would. These tests exercise that
-    reconstruction directly, not just that lookup no longer mints.
+    reconstruction directly, not just that lookup does not mint.
 
     """
 
@@ -1776,8 +1720,8 @@ class BespokeUnmintConvertedRegistriesTests(unittest.TestCase):
     def test_responsekind_and_groupinginformation_unregistered_member_bare_name(self) -> None:
         """Neither has a custom ``__new__``, so the base's generic
         ``_unregistered_member`` needs no override for either -- pinned here
-        so a future edit that adds one notices it changed something that
-        used to be free."""
+        so a future edit that adds one notices it is changing something the
+        base provides for free."""
         from pcapkit.const.ftp.return_code import GroupingInformation, ResponseKind
 
         self.assertNotIn('_unregistered_member', ResponseKind.__dict__)
@@ -1803,8 +1747,7 @@ class BespokeUnmintConvertedRegistriesTests(unittest.TestCase):
         unregistered lookup either -- growing it would silently defeat the
         whole point of *unregistered* through a side channel the generic
         ``_value2member_map_``/``__members__`` assertions above cannot see.
-        This is deliberately the opposite of what the pre-conversion mint did
-        (it *did* add to ``__members_ns__``, every time), so it is pinned
+        A mint *does* add to ``__members_ns__``, every time, so this is pinned
         both ways: the table must not grow, and the value must not appear in
         it, either directly under the resolving namespace."""
         from pcapkit.const.pcapng.option_type import OptionType
@@ -1825,16 +1768,16 @@ class BespokeUnmintConvertedRegistriesTests(unittest.TestCase):
         self.assertIsNot(first, second)
 
     def test_optiontype_get_int_path_no_longer_mints(self) -> None:
-        """:meth:`OptionType.get` used to mint directly on a miss (bypassing
-        ``_missing_`` entirely) -- a second, independent mint site #869's
-        first pass left alone. Round 2 review measured it live on the
-        wire-facing path (:meth:`pcapkit.protocols.misc.pcapng.PCAPNG.
-        _make_pcapng_options` calls ``get()`` with raw option-code bytes),
-        and the owner's ruling names ``get`` explicitly -- the same reason
+        """Guards against :meth:`OptionType.get` minting directly on a miss
+        (bypassing ``_missing_`` entirely) -- a second, independent mint
+        site, on the wire-facing path round 2 review measured live
+        (:meth:`pcapkit.protocols.misc.pcapng.PCAPNG._make_pcapng_options`
+        calls ``get()`` with raw option-code bytes). The owner's ruling names
+        ``get`` explicitly -- the same reason
         :class:`~pcapkit.const.ftp.command.Command`/:class:`~pcapkit.const.
-        http.method.Method`'s own ``get()`` mint sites converted. Leaving
-        this one minting while ``_missing_`` did not would have been the
-        exact contradiction that conversion was for."""
+        http.method.Method`'s own ``get()`` mint sites convert. Leaving this
+        one minting while ``_missing_`` does not would be the exact
+        contradiction that conversion is for."""
         from pcapkit.const.pcapng.option_type import OptionType
 
         before = len(OptionType.__members__)
@@ -1874,11 +1817,11 @@ class BespokeUnmintConvertedRegistriesTests(unittest.TestCase):
         self.assertIsNot(first, second)
 
     def test_optiontype_get_str_path_no_longer_mints(self) -> None:
-        """The subtler of the two: ``get()``'s ``str``-keyed branch used to
-        mint ``key`` itself as the member's *name*, with ``default`` as its
-        value -- the same "no information to register one properly"
-        reasoning as the int path, just with the roles of ``key`` and
-        ``default`` swapped in the old ``extend_enum`` call."""
+        """The subtler of the two: guards against ``get()``'s ``str``-keyed
+        branch minting ``key`` itself as the member's *name*, with
+        ``default`` as its value -- the same "no information to register one
+        properly" reasoning as the int path, just with the roles of ``key``
+        and ``default`` swapped in the ``extend_enum`` call."""
         from pcapkit.const.pcapng.option_type import OptionType
 
         before = len(OptionType.__members__)
@@ -1913,7 +1856,7 @@ class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
     :class:`~pcapkit.const.ftp.command.Command` needs ``feat``/``desc``/``type``/``conf`` and
     :class:`~pcapkit.const.http.method.Method` needs
     ``safe``/``idempotent``, neither of which a bare wire string carries, so
-    minting used to register a permanently hollowed-out member for each.
+    minting registers a permanently hollowed-out member for each.
     :class:`~pcapkit.const.ftp.command.FEATCode` has no custom ``__new__``
     at all and needed no override.
 
@@ -1921,17 +1864,17 @@ class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
     independent mint site bypassing ``_missing_`` entirely, the same shape
     as :class:`~pcapkit.const.pcapng.option_type.OptionType`'s) are
     converted, since the owner's reasoning names ``get`` explicitly and
-    leaving it minting while ``_missing_`` did not would have been a
-    direct contradiction. ``Command``/``Method``'s ``_unregistered_member``
+    leaving it minting while ``_missing_`` does not would be a direct
+    contradiction. ``Command``/``Method``'s ``_unregistered_member``
     override canonicalises the member's *name* to upper case and keeps the
     caller's own casing as its value, so ``get('frob')`` and ``get('FROB')``
     are unequal, and a repeated ``get('frob')`` is equal but, with nothing
-    cached any more, never again *identical* -- see the production
-    regression test this forced,
+    cached, never *identical* -- see the production regression test,
     ``tests/protocols/application/test_ftp_unit.py::FTPUnitTests::test_command_get_is_case_insensitive``,
     which pins exactly that with ``assertEqual``, ``assertIsNot`` and
-    ``assertNotEqual``. Its HTTP twin was replaced under #896 by
-    ``tests/protocols/application/test_http_unit.py::HTTPUnitTests::test_method_get_is_now_case_sensitive``.
+    ``assertNotEqual``. Its HTTP counterpart is
+    ``tests/protocols/application/test_http_unit.py::HTTPUnitTests::test_method_get_is_now_case_sensitive``
+    (#896).
 
     """
 
@@ -1942,12 +1885,12 @@ class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
         """The guard against the import-time mutation coming back -- count-
         agnostic on purpose.
 
-        Before this fix, importing :mod:`pcapkit.const.ftp.command` minted
+        Without the fix, importing :mod:`pcapkit.const.ftp.command` mints
         :class:`~pcapkit.const.ftp.command.FEATCode` members as a side
         effect of evaluating :class:`~pcapkit.const.ftp.command.Command`'s
         own class body -- each row referencing an upper-case ``FEAT code``
-        called ``FEATCode('AUTH')`` etc., and :meth:`FEATCode._missing_`
-        minted one the first time. The generator now declares every ``FEAT
+        calls ``FEATCode('AUTH')`` etc., and :meth:`FEATCode._missing_`
+        mints one the first time. The generator declares every ``FEAT
         code`` the live IANA registry's own column names as a real member,
         so every :class:`Command` row references one by plain attribute
         access and nothing is minted merely by importing the module.
@@ -1979,7 +1922,7 @@ class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
         :class:`~pcapkit.const.ftp.command.FEATCode` member as every other
         row naming the same code -- not a fresh, unregistered one apiece,
         which is what calling ``FEATCode(...)`` at class-body-evaluation
-        time used to build."""
+        time would build."""
         from pcapkit.const.ftp.command import Command, FEATCode
 
         self.assertIs(Command.AUTH.feat, FEATCode.AUTH)  # type: ignore[attr-defined]
@@ -2015,12 +1958,10 @@ class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
     def test_command_missing_no_longer_mints(self) -> None:
         """Same convention as :class:`~pcapkit.const.ftp.command.FEATCode`'s:
         the *value* is exactly what was observed (``value == 'wire casing'``
-        holds), matching ``main``'s own pre-#860 behaviour for this class --
-        only the *name* is canonicalised. Verified directly against a
-        measured regression risk: swapping the value for the canonicalised
-        name (as an earlier revision of this conversion did) would make
-        ``Command('xyzw') == 'xyzw'`` false, which never held on ``main``
-        and would have been #869's one real behaviour break."""
+        holds), matching what a mint does for this class -- only the *name*
+        is canonicalised. Swapping the value for the canonicalised name would
+        make ``Command('xyzw') == 'xyzw'`` false, a real behaviour break for
+        any caller comparing a member with its wire string."""
         from pcapkit.const.ftp.command import Command, CommandType, ConformanceRequirement
 
         before = len(Command.__members__)
@@ -2046,10 +1987,10 @@ class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
         """The value keeps the caller's own casing (see :meth:`Command.
         _unregistered_member`'s own docstring) -- so a repeated call with
         the *same* casing is equal but not identical, while a *different*
-        casing is a genuinely different value and correctly not equal. On
-        ``main`` minting's cache made both calls return the identical,
-        first-seen-casing object regardless; losing that is #860's one
-        observable behaviour change here, not a casing change."""
+        casing is a genuinely different value and correctly not equal. A
+        minting lookup caches instead, returning the identical,
+        first-seen-casing object for both calls; not caching is #860's one
+        observable difference here, not a casing change."""
         from pcapkit.const.ftp.command import Command
 
         before = len(Command.__members__)
@@ -2070,22 +2011,13 @@ class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
         """Same convention as :class:`~pcapkit.const.ftp.command.FEATCode`'s
         and :class:`~pcapkit.const.ftp.command.Command`'s: an *unregistered*
         member's value is the caller's own casing, with real :class:`str`
-        content. This test used to also pin a genuine asymmetry with every
-        *registered* member of this class, tracked as GitHub issue #870:
-        :meth:`Method.__new__` called ``str.__new__(cls)`` with no argument
-        at all, so every declared member's own :class:`str` payload was
-        permanently empty regardless of value (``str(Method.GET) == ''``,
-        ``Method.GET == 'GET'`` was :obj:`False`) -- true on ``main`` at
-        ``60b85e3a4`` as well as when this test was first written. #870
-        fixed :meth:`Method.__new__` to ``str.__new__(cls, value)``,
-        mirroring :class:`~pcapkit.const.ftp.command.Command`'s own
-        ``__new__``, so a registered member now carries its value as its
-        :class:`str` payload too -- see
-        :mod:`tests.const.test_const_str_payload_870_unit` for the direct
-        pin of that fix, registry-wide. What is left here is what this
-        test was always really about: the *unregistered* path, which
-        already carried real content before #870 (it bypasses ``__new__``
-        entirely) and is unaffected by that fix."""
+        content. The *unregistered* path bypasses ``__new__`` entirely, so it
+        is independent of GitHub issue #870's fix to :meth:`Method.__new__`
+        (``str.__new__(cls, value)``, mirroring
+        :class:`~pcapkit.const.ftp.command.Command`'s own ``__new__``), which
+        gives a *registered* member its value as its :class:`str` payload too
+        -- see :mod:`tests.const.test_const_str_payload_870_unit` for the
+        direct pin of that fix, registry-wide."""
         from pcapkit.const.http.method import Method
 
         before = len(Method.__members__)
@@ -2136,11 +2068,11 @@ class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
         those.
 
         ``Method.get`` is probed with its exact registered casing
-        (``'GET'``), not the lower-cased ``'get'`` this test used before
-        GitHub issue #896: ``Command``'s FTP command codes stay
-        case-insensitive per :rfc:`959#section-5`, but the HTTP method
-        token :rfc:`9110#section-9.1` covers is case-sensitive, so
-        ``Method.get('get')`` no longer resolves to :attr:`Method.GET` --
+        (``'GET'``), not the lower-cased ``'get'``: ``Command``'s FTP command
+        codes stay case-insensitive per :rfc:`959#section-5`, but the HTTP
+        method token :rfc:`9110#section-9.1` covers is case-sensitive
+        (GitHub issue #896), so ``Method.get('get')`` does not resolve to
+        :attr:`Method.GET` --
         see :class:`BespokeGetUnchangedTests`'s
         ``test_method_get_is_now_case_sensitive`` for that behaviour
         directly. ``Method('GET')`` (the constructor, reaching
@@ -2191,23 +2123,21 @@ class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
 
 class BespokeGetReplacementTests(unittest.TestCase):
     """:class:`~pcapkit.const.http.status_code.StatusCode` and
-    :class:`~pcapkit.const.ftp.return_code.ReturnCode` are the
-    converted classes whose hand-written ``get()`` -- on the
-    ``default == -1`` convention #857/#859 already retired everywhere else
-    -- was removed in favour of the base's :meth:`~pcapkit.corekit.enum.
-    EnumRegistry.get`, which uses :data:`~pcapkit.corekit.sentinels.NO_DEFAULT`
-    and never mints while resolving ``default`` (#864).
+    :class:`~pcapkit.const.ftp.return_code.ReturnCode` are the converted
+    classes that use the base's :meth:`~pcapkit.corekit.enum.EnumRegistry.get`
+    -- which uses :data:`~pcapkit.corekit.sentinels.NO_DEFAULT` and never
+    mints while resolving ``default`` (#864) -- rather than a hand-written
+    ``get()`` on the ``default == -1`` convention #857/#859 retired.
 
-    Verified before this replacement that no caller in :mod:`pcapkit` or
-    :mod:`tests` depends on the retired form: ``grep`` found exactly one
+    Measured when the hand-written form was replaced, so that no caller in
+    :mod:`pcapkit` or :mod:`tests` depends on it: ``grep`` found exactly one
     production call site each (:mod:`pcapkit.protocols.application.httpv1`
     and :mod:`pcapkit.protocols.application.ftp`), neither passing a
     ``default`` or a ``str`` key -- both call ``get(<int>)`` with no default,
-    which raises identically either way on an unresolvable key. Their own
-    ``str``-key ``get()`` branch (look up-or-mint *by name*, keyed on
-    ``default``) had no caller anywhere in this tree and is simply gone; the
-    base's ``str``-key path does an ordinary name-then-value lookup instead
-    and never mints.
+    which raises identically either way on an unresolvable key. The
+    hand-written ``str``-key branch (look up-or-mint *by name*, keyed on
+    ``default``) had no caller anywhere in the tree; the base's ``str``-key
+    path does an ordinary name-then-value lookup instead and never mints.
 
     """
 
@@ -2216,20 +2146,20 @@ class BespokeGetReplacementTests(unittest.TestCase):
 
     def test_statuscode_get_omitted_default_still_raises(self) -> None:
         """The one production call site's shape: no default passed, so an
-        unresolvable key must still raise -- true under both the old
-        ``default == -1`` convention and the new ``NO_DEFAULT`` one."""
+        unresolvable key must raise -- true under both the ``default == -1``
+        convention and the ``NO_DEFAULT`` one."""
         from pcapkit.const.http.status_code import StatusCode
 
         with self.assertRaises(ValueError):
             StatusCode.get(9999)
 
     def test_statuscode_get_minus_one_is_now_an_ordinary_default(self) -> None:
-        """Behaviour change, stated plainly: ``-1`` used to be the sentinel
-        for *no default*; it is now just an :class:`int` that -- like any
-        other -- is only honoured if it already names a registered member.
-        ``-1`` never has, on this registry, so passing it explicitly now
-        raises the *original* key's error instead of re-raising because it
-        matched the old sentinel."""
+        """``-1`` is not the sentinel for *no default* (it is under the
+        retired ``default == -1`` convention); it is just an :class:`int`
+        that -- like any other -- is only honoured if it already names a
+        registered member. ``-1`` does not, on this registry, so passing it
+        explicitly raises the *original* key's error rather than a re-raise
+        for matching a sentinel."""
         from pcapkit.const.http.status_code import StatusCode
 
         with self.assertRaises(ValueError) as caught:
@@ -2237,8 +2167,8 @@ class BespokeGetReplacementTests(unittest.TestCase):
         self.assertIn('9999', str(caught.exception))
 
     def test_statuscode_get_default_never_mints(self) -> None:
-        """#864's ruling, on this registry for the first time: a ``default``
-        landing inside a now-converted unassigned range does not resolve to
+        """#864's ruling, on this registry: a ``default`` landing inside a
+        converted unassigned range does not resolve to
         an unregistered member the way ``key`` does -- it simply does not
         resolve, and ``key``'s own error propagates."""
         from pcapkit.const.http.status_code import StatusCode
@@ -2287,18 +2217,17 @@ class BespokeGetUnchangedTests(unittest.TestCase):
     :mod:`tests.const.test_const_method_case_sensitive_896_unit`
     (``test_command_get_stays_case_insensitive``).
 
-    :class:`Method` used to resolve case-insensitively the same way (#583),
-    but GitHub issue #896 retired that: RFC 9110 Section 9.1 makes the HTTP
-    method token case-sensitive, unlike FTP's command codes (RFC 959 Section
-    5.3), so ``Method.get('Get')`` no longer returns :attr:`Method.GET` --
-    see ``test_method_get_is_now_case_sensitive`` below, which replaces the
-    case-insensitive pin this class used to carry for it. ``Method`` still
-    keeps its own ``get()`` rather than the base's, because it still needs to
-    build an unregistered member preserving the caller's own casing on a
-    miss (the base's generic ``get()`` only ever raises or falls back to an
+    :class:`Method` does not resolve that way: it is case-sensitive (GitHub
+    issue #896, over #583's case-insensitive lookup), since RFC 9110 Section
+    9.1 makes the HTTP method token case-sensitive, unlike FTP's command codes
+    (RFC 959 Section 5.3), so ``Method.get('Get')`` does not return :attr:`Method.GET`
+    -- see ``test_method_get_is_now_case_sensitive`` below. ``Method`` keeps
+    its own ``get()`` rather than the base's, because it needs to build an
+    unregistered member preserving the caller's own casing on a miss (the
+    base's generic ``get()`` only ever raises or falls back to an
     already-registered ``default`` for a ``str`` key, per
-    :meth:`~pcapkit.corekit.enum.EnumRegistry.get`'s own docstring) -- what
-    #896 changed is only whether the lookup that precedes that fallback is
+    :meth:`~pcapkit.corekit.enum.EnumRegistry.get`'s own docstring) -- #896
+    concerns only whether the lookup that precedes that fallback is
     case-sensitive.
 
     :class:`OptionType`'s ``get()`` does its own multi-namespace dispatch via
@@ -2313,11 +2242,8 @@ class BespokeGetUnchangedTests(unittest.TestCase):
     def test_method_get_is_now_case_sensitive(self) -> None:
         """GitHub issue #896: only the exact registered casing resolves.
 
-        Replaces this class's own ``test_method_get_is_still_case_
-        insensitive``, whose title and body pinned the opposite -- that
-        ``Method.get('Get')``/``Method.get('get')`` resolved to
-        :attr:`Method.GET`. RFC 9110 Section 9.1 makes the method token
-        case-sensitive, so a differently-cased probe now builds its own
+        RFC 9110 Section 9.1 makes the method token case-sensitive, so a
+        differently-cased probe such as ``Method.get('Get')`` builds its own
         unregistered member (preserving the caller's casing, same
         convention as :meth:`Method._unregistered_member`) rather than
         resolving to :attr:`Method.GET`.
@@ -2362,7 +2288,7 @@ class AppTypeUnmintConvertedTests(unittest.TestCase):
     :class:`~pcapkit.corekit.enum.EnumRegistry` and stopped from minting.
 
     Largest of the bespoke classes #860 step 2 converts: an AST walk over
-    :meth:`AppType._missing_` on ``c411d072a`` found range-bounded branches
+    :meth:`AppType._missing_` finds range-bounded branches
     -- placeholders (``unassigned_<port>`` and ``reserved_<port>``), and
     branches naming a real service IANA assigns to a whole span rather than
     to one declared member each (``x11`` for TCP and again for UDP,
@@ -2393,30 +2319,28 @@ class AppTypeUnmintConvertedTests(unittest.TestCase):
     ``TCP.register(6010, 'x11')`` explicitly.
 
     Unlike every bespoke class #860 step 2's PR 1 converted,
-    :meth:`AppType.get` already existed before #874 and does genuine
-    transport-protocol dispatch through :meth:`~AppType._dispatch` -- so,
-    unlike :class:`~pcapkit.const.http.status_code.StatusCode`/
+    :meth:`AppType.get` does genuine transport-protocol dispatch through
+    :meth:`~AppType._dispatch` -- so, unlike
+    :class:`~pcapkit.const.http.status_code.StatusCode`/
     :class:`~pcapkit.const.ftp.return_code.ReturnCode`, it keeps its own
     ``get()`` rather than being replaced by the base's; and, unlike
     :class:`~pcapkit.const.ftp.command.Command`/
     :class:`~pcapkit.const.http.method.Method`/
     :class:`~pcapkit.const.pcapng.option_type.OptionType`, its own
-    ``_unregistered_member`` override reconstructs three attributes
-    (``svc``, ``port``, ``proto``) rather than one or two, because
+    ``_unregistered_member`` override reconstructs three attributes (``svc``,
+    ``port``, ``proto``) rather than one or two, because
     :meth:`AppType.__new__` sets all three and none is optional for
     :meth:`__repr__`/:meth:`__str__`/:meth:`__int__`/the comparison
     operators/:attr:`~AppType.aliases` to run on the result without raising.
 
-    :meth:`AppType.register` arrived with #874. ``AppType`` already had a
-    working ``get``/``get_all``/``register_alias`` of its own, but never a
-    working ``register`` -- and the base's generic one (which calls
-    ``cls.__new__(cls, value)`` with only ``value``) would have built a
+    :meth:`AppType.register` comes from #874. The base's generic one (which
+    calls ``cls.__new__(cls, value)`` with only ``value``) would build a
     member with ``svc='<null>'`` and ``proto=TransportProtocol.undefined``,
-    silently wrong, the moment this class mixed in
+    silently wrong, if this class mixed in
     :class:`~pcapkit.corekit.enum.EnumRegistry` without an override. Scoped
     like :meth:`~AppType.register_alias` to **this** per-transport registry
     rather than dispatched through :meth:`~AppType._dispatch`, for the same
-    reason register_alias already was: minting on one transport must never
+    reason register_alias is: minting on one transport must never
     leak onto a transport IANA never assigned the service to.
 
     """
@@ -2427,8 +2351,8 @@ class AppTypeUnmintConvertedTests(unittest.TestCase):
     def test_apptype_family_carries_the_registry_protocol(self) -> None:
         """#842's ruling is that ``get``/``get_all``/``register``/
         ``register_alias`` exist on every registry -- #860 step 2 PR 2 is
-        what actually delivers that for this family, including ``register``,
-        which none of the five had a working version of before #874."""
+        what actually delivers that for this family, including ``register``
+        (#874)."""
         from pcapkit.const.reg.apptype.apptype import AppType
         from pcapkit.const.reg.apptype.dccp import DCCP
         from pcapkit.const.reg.apptype.sctp import SCTP
@@ -2494,10 +2418,10 @@ class AppTypeUnmintConvertedTests(unittest.TestCase):
         lookup cannot come back carrying TCP's label -- and 6665-6669 is the
         sharper case, ``ircu`` on TCP but IANA's own ``reserved`` marker on
         UDP for the *same* span, so a merged branch could not have kept both.
-        Converting ``extend_enum(...)`` to ``_unregistered_member(...)`` left
-        every ``if``/``cls.__transport__ is ...`` test untouched -- this pins
-        that the dispatch survived the conversion, not just that minting
-        stopped."""
+        Every ``if``/``cls.__transport__ is ...`` test has the same shape
+        whether its branch ends in ``extend_enum(...)`` or
+        ``_unregistered_member(...)`` -- this pins the dispatch, not just
+        that nothing mints."""
         from pcapkit.const.reg.apptype.tcp import TCP
         from pcapkit.const.reg.apptype.udp import UDP
 
@@ -2520,8 +2444,8 @@ class AppTypeUnmintConvertedTests(unittest.TestCase):
 
     def test_get_second_mint_site_no_longer_mints(self) -> None:
         """54321 is not a declared member and not inside any of
-        ``_missing_``'s ranges either, so it used to reach :meth:`AppType.
-        get`'s own, second, independent ``extend_enum(...)`` call --
+        ``_missing_``'s ranges either, so it reaches :meth:`AppType.
+        get`'s own, second, independent mint site --
         distinct from the one inside ``_missing_``, and easy to miss when
         converting only the latter (exactly what round 2 review of #860 step
         2 PR 1 caught on :class:`~pcapkit.const.pcapng.option_type.
@@ -2546,9 +2470,9 @@ class AppTypeUnmintConvertedTests(unittest.TestCase):
         """The asymmetry #874 leaves in place, deliberately: a direct
         ``TCP(54321)`` has no ``get()`` around it to catch ``_missing_``'s
         :obj:`None` answer and build an ``'unknown'`` member from it, so it
-        still raises exactly as it did on ``main`` -- only :meth:`AppType.
-        get` gained the fallback, matching the constructor's own long-
-        standing behaviour of raising rather than minting for a value inside
+        raises -- only :meth:`AppType.get` has the fallback, the constructor
+        keeping its own behaviour of raising rather than minting for a value
+        inside
         ``0..65535`` but outside every declared member and every
         ``_missing_`` span."""
         from pcapkit.const.reg.apptype.tcp import TCP
@@ -2587,11 +2511,10 @@ class AppTypeUnmintConvertedTests(unittest.TestCase):
     def test_register_mints_a_real_member_and_refuses_a_duplicate_port(self) -> None:
         """``AppType._value_`` is the formatted ``'svc [port - proto]'``
         string, not the bare port -- so ``TCP(port)`` is not how a
-        registered member is reached at all, on ``main`` as well as here
-        (verified directly: ``TCP(80)`` raises for the real, declared
-        ``http`` member too). ``TCP.get(port)`` and the ``__registry__``
-        side table are the two things a real ``register()`` call is checked
-        against below."""
+        registered member is reached at all (verified directly: ``TCP(80)``
+        raises for the real, declared ``http`` member too). ``TCP.get(port)``
+        and the ``__registry__`` side table are the two things a real
+        ``register()`` call is checked against below."""
         from pcapkit.const.reg.apptype.tcp import TCP
 
         port = 59991
@@ -2617,10 +2540,10 @@ class AppTypeUnmintConvertedTests(unittest.TestCase):
             AppType.register(1234, 'x')
 
     def test_register_alias_still_works_after_the_sanitizer_refactor(self) -> None:
-        """:meth:`AppType.register`/:meth:`AppType.register_alias` now share
+        """:meth:`AppType.register`/:meth:`AppType.register_alias` share
         :meth:`AppType._sanitize_identifier` rather than each carrying its
-        own copy of the sanitising steps -- this is the regression check
-        that the refactor changed nothing observable about the alias path."""
+        own copy of the sanitising steps -- this checks the alias path
+        through it."""
         from pcapkit.const.reg.apptype.tcp import TCP
 
         port = 59992
@@ -2649,11 +2572,11 @@ class AppTypeUnmintConvertedTests(unittest.TestCase):
     def test_apptype_unrecognised_proto_is_still_refused(self) -> None:
         """A ``proto`` naming no registry at all -- not one of the two real
         collision cases ``auto()`` introduced, just an ordinary invalid value
-        -- is still refused by :meth:`AppType._dispatch`, unaffected by
-        #874. (Deliberately not a composite like ``tcp | udp``: under
-        ``auto()`` that now equals ``sctp`` numerically and dispatches
-        there rather than raising, which is the one accepted, explicitly
-        untested consequence of the ``auto()`` change -- see
+        -- is refused by :meth:`AppType._dispatch`, as #874 leaves it.
+        (Deliberately not a composite like ``tcp | udp``: under ``auto()``
+        that equals ``sctp`` numerically and dispatches there rather than
+        raising, which is the one accepted, explicitly untested consequence
+        of the ``auto()`` numbering -- see
         :class:`TransportProtocolAutoTests`.)"""
         from pcapkit.const.reg.apptype.apptype import AppType
 
@@ -2663,15 +2586,16 @@ class AppTypeUnmintConvertedTests(unittest.TestCase):
 
 class TransportProtocolAutoTests(unittest.TestCase):
     """:class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`'s
-    ``auto()`` conversion, #860 step 2 PR 2's other change. The owner ruled on
-    #860 that, since ``|`` composition is no longer allowed, ``auto()`` in place
-    of power-of-two spacing is the right move -- a breaking change, but an
+    ``auto()`` numbering, from #860 step 2 PR 2. The owner ruled on #860
+    that, since ``|`` composition is not allowed, ``auto()`` in place of
+    power-of-two spacing is the right move -- a breaking change, but an
     accepted one. On the one behavioural consequence -- a hand-composed
-    ``tcp | udp`` now equalling ``sctp`` numerically (``1 | 2 == 3``), where it
-    used to name no member at all and be refused as a whole -- the same thread
-    settled that no test should pin it: the path is obsolete after the breaking
-    change, and a test would preserve it as though it still mattered. So this class deliberately covers only the values and the
-    stale comment's removal, not the composition consequence: no test here
+    ``tcp | udp`` equalling ``sctp`` numerically (``1 | 2 == 3``) rather than
+    naming no member and being refused as a whole -- the same thread settled
+    that no test should pin it: the path is obsolete after the breaking
+    change, and a test would preserve it as though it still mattered. So this
+    class deliberately covers only the values and the stale comment's
+    absence, not the composition consequence: no test here
     calls ``_dispatch`` with a composed value at all, unlike
     :meth:`AppTypeUnmintConvertedTests.
     test_apptype_unrecognised_proto_is_still_refused`, which uses an
@@ -2689,10 +2613,10 @@ class TransportProtocolAutoTests(unittest.TestCase):
         self.assertEqual(int(TransportProtocol.dccp), 4)
 
     def test_still_not_a_registry(self) -> None:
-        """Unaffected by #874: ``TransportProtocol`` never minted through
+        """``TransportProtocol`` does not mint through
         :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`, and
-        does not mix in :class:`~pcapkit.corekit.enum.EnumRegistry` now
-        either -- only ``AppType`` and its four transport subclasses do."""
+        does not mix in :class:`~pcapkit.corekit.enum.EnumRegistry` -- only
+        ``AppType`` and its transport subclasses do."""
         from pcapkit.const.reg.apptype.apptype import TransportProtocol
         from pcapkit.corekit.enum import EnumRegistry
 
@@ -2700,25 +2624,25 @@ class TransportProtocolAutoTests(unittest.TestCase):
 
     def test_get_still_refuses_an_unrecognised_name(self) -> None:
         """GitHub PR #836's ruling against extending ``TransportProtocol``
-        at all is untouched by the ``auto()`` change -- :meth:`~pcapkit.const.
-        reg.apptype.apptype.TransportProtocol.get` still has no ``_missing_``
-        of its own and still refuses outright rather than minting.
+        at all holds under the ``auto()`` numbering -- :meth:`~pcapkit.const.
+        reg.apptype.apptype.TransportProtocol.get` has no ``_missing_`` of its
+        own and refuses outright rather than minting.
 
-        :exc:`KeyError`-shaped since GitHub issue #923, which retired the
-        override's ``KeyError`` -> ``ValueError`` conversion; the refusal itself
-        is what this test is about and that is unchanged."""
+        :exc:`KeyError`-shaped: the override does no ``KeyError`` ->
+        ``ValueError`` conversion (GitHub issue #923); the refusal itself is
+        what this test is about."""
         from pcapkit.const.reg.apptype.apptype import TransportProtocol
 
         with self.assertRaises(KeyError):
             TransportProtocol.get('not-a-real-transport')
 
     def test_stale_power_of_two_comment_is_gone(self) -> None:
-        """Per GitHub issue #860: the in-code comment claiming
-        the values "must keep" power-of-two spacing contradicted the PR #836
-        ruling that nothing composes a ``TransportProtocol`` any
-        more, and is deleted rather than merely superseded -- checked
-        against the generated source itself, not the docstring here, so a
-        regeneration that reintroduces it fails this test."""
+        """Per GitHub issue #860: an in-code comment claiming the values
+        "must keep" power-of-two spacing contradicts the PR #836 ruling that
+        nothing composes a ``TransportProtocol``, so the generated source
+        carries none -- checked against the generated source itself, not the
+        docstring here, so a regeneration that reintroduces it fails this
+        test."""
         import pcapkit.const.reg.apptype.apptype as apptype_module
 
         source = pathlib.Path(apptype_module.__file__).read_text(encoding='utf-8')

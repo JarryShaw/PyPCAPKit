@@ -160,7 +160,7 @@ class DefaultSignatureTests(unittest.TestCase):
     def test_default_still_names_the_unregistered_members_value(self) -> None:
         """Omitted or ``None``, ``default`` uses ``key`` itself; supplied,
         it replaces the *value* of the freshly minted unregistered member --
-        unchanged from before #908, and distinct from the base's own
+        the same with or without #908's fix, and distinct from the base's own
         ``default``, which must already name a registered value."""
         from pcapkit.const.http.method import Method
 
@@ -192,8 +192,8 @@ class HTTPv1EndToEndTests(unittest.TestCase):
     def test_a_baseline_control_request_line_reports_the_registrys_idempotent_flag(
             self) -> None:
         """``_RE_METHOD`` admits the hyphen, so this request line reaches
-        ``Enum_Method.get(...)`` in ``httpv1.HTTP._read_start_line`` and used to come back
-        with ``idempotent=False`` -- the wrong answer for a parse that
+        ``Enum_Method.get(...)`` in ``httpv1.HTTP._read_start_line``, which without the
+        fix comes back with ``idempotent=False`` -- the wrong answer for a parse that
         otherwise succeeds silently. Pins the whole path, not only the
         direct ``Method.get`` call above."""
         from pcapkit.const.http.method import Method
@@ -252,24 +252,24 @@ class NonStrKeyTests(unittest.TestCase):
         )
 
     def test_an_int_key_raises_value_error(self) -> None:
-        """Was :exc:`AttributeError` from ``key.upper()`` before #908."""
+        """Without #908's fix, this raises :exc:`AttributeError` from ``key.upper()``."""
         from pcapkit.const.http.method import Method
 
         with self.assertRaises(ValueError):
             Method.get(42)
 
     def test_a_none_key_raises_value_error(self) -> None:
-        """Was :exc:`AttributeError` from ``key.upper()`` before #908."""
+        """Without #908's fix, this raises :exc:`AttributeError` from ``key.upper()``."""
         from pcapkit.const.http.method import Method
 
         with self.assertRaises(ValueError):
             Method.get(None)  # type: ignore[arg-type]
 
     def test_a_bytes_key_raises_instead_of_returning_a_bytes_valued_member(self) -> None:
-        """The one that changed from a *return* to a raise.
+        """The one case that *returns* rather than raises without the fix.
 
-        Before #908 this handed back a member whose ``name`` and ``value``
-        were both ``b'GET'``. ``bytes`` is the plausible mistake here, since
+        Without #908's fix this hands back a member whose ``name`` and
+        ``value`` are both ``b'GET'``. ``bytes`` is the plausible mistake here, since
         ``_RE_METHOD`` (in ``pcapkit/protocols/application/http.py``) is a
         bytes pattern and ``httpv1`` is bytes throughout -- the live call in
         ``httpv1.HTTP._read_start_line`` is safe only because it wraps the match in

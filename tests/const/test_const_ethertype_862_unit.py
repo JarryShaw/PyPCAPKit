@@ -18,14 +18,13 @@ Unlike #841's IPX socket table, the range bounds here are not literals in the
 crawler -- :mod:`pcapkit.vendor.reg.ethertype` fetches the live IANA CSV on
 every regeneration, so there is no local data table to hand-reorder. The fix
 is therefore general rather than a special case for these two constants:
-:meth:`~pcapkit.vendor.reg.ethertype.EtherType.process` now collects every
+:meth:`~pcapkit.vendor.reg.ethertype.EtherType.process` collects every
 range row's ``(start, stop, body)`` before rendering, and
 :meth:`~pcapkit.vendor.reg.ethertype.EtherType._insert_range` places each new
 range immediately ahead of the first already-placed range that fully contains
 it, leaving every non-overlapping pair in the CSV's own row order. Sweeping
-every range test in the committed, generated file (measured directly against
-``main`` at ``70fa92010``, the #861 merge commit this issue was blocked on)
-found this to be the *only* containment pair among them -- no other subsumed
+every range test in the committed, generated file finds this to be the *only*
+containment pair among them -- no other subsumed
 range exists in :class:`~pcapkit.const.reg.ethertype.EtherType`, so
 :class:`EtherTypeGeneratorGeneralOrderingTests` below pins the algorithm
 itself against synthetic nested ranges rather than a second real-world pair.
@@ -167,15 +166,12 @@ class EtherTypeGeneratorRangeOrderingTests(unittest.TestCase):
     def test_both_ranges_still_render_with_their_own_body(self) -> None:
         # Reordering must not lose either range or swap their bodies.
         #
-        # NOTE: the second assertion used to check for the ``extend_enum``
-        # form ("IEEE802.3 Length Field" was one of the ranges GitHub issue
-        # #775's original ruling left minting). #775's final round converts
-        # every remaining range branch on this crawler -- see
-        # tests/const/test_const_enum_no_mint.py's own docstring -- so this
-        # now checks for the ``_unregistered_member`` form instead, keeping
-        # the hex-suffixed name exactly as before; only the registration
-        # mechanism changed, because PR #878 scoped the change as not
-        # registering rather than renaming.
+        # NOTE: the second assertion checks for the ``_unregistered_member``
+        # form, not ``extend_enum``: #775's final round converts every range
+        # branch on this crawler -- see
+        # tests/const/test_const_enum_no_mint.py's own docstring. The
+        # hex-suffixed name is kept, because PR #878 scoped that conversion
+        # as not registering rather than renaming.
         _enum, miss = self._process_fixture()
         text = '\n'.join(miss)
 
