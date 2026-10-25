@@ -72,22 +72,21 @@ One absence is deliberate and worth flagging, because it looks like an
 oversight and is not: neither fixture contains a datagram that reassembles
 *incompletely*, even though ``test_reassembly.py`` and ``test_analyse.py`` both
 have a branch for one -- a payload that is a tuple of received fragments, and a
-``packet`` of :data:`None`. Nothing prevents that branch any more; it is simply
+``packet`` of :data:`None`. Nothing prevents that branch; it is simply
 that every stream in these two captures arrives whole. Each direction here is
 sent in full and every segment eventually delivered, some of them out of order
 and one retransmitted, so the holes that open all close again before the FIN or
 RST that submits the buffer.
 
-It used to be that no capture could reach that branch at all, which is how the
-absence started. ``submit`` sliced the payload buffer with the bounds of each
-hole, but those bounds were absolute TCP sequence numbers
-(``first=tcp_info.seq`` in ``pcapkit/toolkit/pcap.py``) while the buffer is
-indexed from the start of the direction's data, so with any real initial
-sequence number every slice started far beyond the end of the buffer, every
-fragment came out empty, and ``if data:`` discarded the datagram without a word.
-That is fixed -- ``submit`` converts each hole's absolute bounds into
-offsets into the buffer it is reading, and decides completeness from that
-payload buffer's own gap list -- and GitHub issue #349 records the whole of it.
+``submit`` converts each hole's absolute bounds -- TCP sequence numbers,
+``first=tcp_info.seq`` in ``pcapkit/toolkit/pcap.py`` -- into offsets into the
+buffer it is reading, which is indexed from the start of the direction's data,
+and decides completeness from that payload buffer's own gap list (GitHub issue
+#349). Were it to slice with the absolute bounds instead, every slice would
+start far beyond the end of the buffer for any real initial sequence number,
+every fragment would come out empty, and ``if data:`` would discard the
+datagram without a word, so no capture could reach the incomplete branch at
+all.
 Regenerating these two fixtures to carry a permanently lost segment as well was
 considered and rejected: they are pinned byte-for-byte by the test suite, and a
 stream with a hole in it is cheaper to build segment by segment than to read out

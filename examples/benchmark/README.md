@@ -9,10 +9,10 @@ reStructuredText snippets:
 examples/benchmark/run.sh
 ```
 
-It exists because that table could not previously be completed on **any** single
-machine, and because the numbers in it were not reproducible. Both problems are the
-same problem -- the environment was never pinned and could not hold every engine at
-once -- so the fix is to define the environment precisely and ship it. Once the
+It exists because no **single** environment can complete that table, and because
+numbers measured in an unpinned one are not reproducible. Both problems are the
+same problem -- an environment that is not pinned, and that cannot hold every engine
+at once -- so the fix is to define the environment precisely and ship it. Once the
 environment is a container, the number of them is a loop, which is what makes a
 complete table a single command rather than one hand-run measurement per version
 pasted together.
@@ -78,7 +78,7 @@ file.
 **The ratio table is normalised to the default engine measured in the same
 virtualenv on the same pass.** An absolute timing describes the machine it was taken
 on at least as much as it describes the engine, so a table of absolute numbers cannot
-be reproduced across machines -- which is exactly the state the old table was in. A
+be reproduced across machines. A
 ratio divides the machine out, and pooling it across every interpreter is what makes
 it an answer about engines rather than about one interpreter. The observed range then
 includes any disagreement *between* interpreters, which is real uncertainty about the
@@ -153,7 +153,7 @@ So failure is contained, and counted, at each level below:
   what would not be honest is discarding it silently, so the count and the first
   reason are reported.
 - **A failed pass** costs that engine that pass, not the run. The row is built from
-  the passes that did work, its `Passes` count shows fewer, and it carries a footnote
+  the passes that did work, its `Samples` count shows fewer, and it carries a footnote
   naming what was lost. If *every* pass failed, the engine becomes `*not measured*`
   with the exception as its reason.
 
@@ -235,11 +235,11 @@ The shape comes from `examples/legacy_smoke/test_time.py` so the figures stay
 comparable in kind with what the project has already published: 1,000 timed
 extractions of `examples/captures/in.pcap` per engine, timed with
 `time.perf_counter_ns`, first sample discarded as a warm-up, reported as
-milliseconds per packet. What changed, and why:
+milliseconds per packet. Where this departs from it, and why:
 
-| Change | Why |
+| Departure | Why |
 | --- | --- |
-| The whole set is measured `--repeats` times, not once | one pass gives no way to tell a real gap from noise, which is most of what was wrong with the old table |
+| The whole set is measured `--repeats` times, not once | one pass gives no way to tell a real gap from noise |
 | Every Python version is measured in one run, not one per sitting | the legacy script measures whichever interpreter invokes it, so a complete table was one sitting per version, hand-assembled; a column measured last week is not comparable in absolute terms with one measured today, which is the property the per-version table depends on |
 | A second table reports ratios, with one absolute footnote | absolute times are not comparable across machines, and "which engine is faster" is a question about engines rather than about this host |
 | The driver is asserted on every extraction | the legacy script preflights once; an engine that stops being itself mid-run would go unnoticed |

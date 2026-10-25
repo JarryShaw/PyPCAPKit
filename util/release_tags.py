@@ -22,10 +22,10 @@ Both resolve the tag with :func:`resolve`, so ``owner`` reads "elsewhere"
 exactly where ``check`` would refuse a tag that exists. A failed fetch is
 ignored, since the checkout may already hold the tag, and a tag that does not
 resolve is no commit. ``PCAPKIT_RUN_SHA`` that does not resolve ends the script
-with ``git``'s status, as ``set -e`` ended the step.
+with ``git``'s status, as ``set -e`` would end a shell step.
 
-The steps formerly held this as shell. Its unquoted ``${PCAPKIT_TAGS}`` was
-also subject to pathname expansion, which this skips: every tag is ``v`` or
+``PCAPKIT_TAGS`` is split without the pathname expansion an unquoted shell
+``${PCAPKIT_TAGS}`` would apply, which changes nothing: every tag is ``v`` or
 ``conda-`` and a :pep:`440` version, which holds no ``*``, ``?`` or ``[``.
 
 The ``conda`` legs run it before setup-python, so ``python3`` is the image's,

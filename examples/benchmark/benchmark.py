@@ -700,8 +700,8 @@ def run(capture: 'str', engines: 'tuple[str, ...]', rounds: 'int', repeats: 'int
                 raise
             except Exception as exc:  # pylint: disable=broad-except
                 # A third-party engine gave up partway through this pass. Measured:
-                # `tshark` crashed on the third pass of a real run and, before this
-                # branch existed, took the working engines down with it. The
+                # `tshark` crashed on the third pass of a real run, which without this
+                # branch takes the working engines down with it. The
                 # pass is lost; the run is not, and the loss is recorded rather than
                 # quietly rounded away.
                 failures[engine].append(f'pass {repeat + 1}: {type(exc).__name__}: {exc}')

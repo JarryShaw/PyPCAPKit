@@ -779,7 +779,7 @@ jobs:
       # ``draft``, which unset inputs make the tag, "" and false (the
       # ``CoreInputs`` getters ``name``, ``body``, ``createdPrerelease`` and
       # ``createdDraft`` in src/Inputs.ts, read through its ``updated*``
-      # getters), so each bump wiped the release's name and notes. Each
+      # getters), so unguarded each bump wipes the release's name and notes. Each
       # ``omit*DuringUpdate`` leaves its field undefined (the same ``updated*``
       # getters), and Octokit drops it (@octokit/endpoint's
       # ``removeUndefinedProperties``, called from its ``merge``, bundled in

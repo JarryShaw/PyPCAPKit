@@ -9,7 +9,7 @@ on:
   schedule:
     - cron: '0 10 * * 6' # Saturdays at 10:00 UTC
   # No `push` trigger: Unit Tests' own push run already reaches a verdict, and
-  # calling it again with `gate-only: true` re-ran the gate on the same tree
+  # calling it again with `gate-only: true` would re-run the gate on the same tree
   # (#715). `workflow_run` also fires for a pull request's run; the
   # `vendor-update` job's `if` refuses those, not a `branches:` filter here.
   workflow_run:

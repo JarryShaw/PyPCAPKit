@@ -451,7 +451,7 @@ docker start --attach "${REPORTER}" || status=$?
 docker cp "${REPORTER}:/out/." "${OUT_DIR}/" >/dev/null 2>&1 || status=1
 
 # What actually landed is checked rather than announced. `docker cp` of an empty
-# directory succeeds, so an earlier version of this reported "wrote ... table.rst"
+# directory succeeds, so an announcement would report "wrote ... table.rst"
 # after a run that crashed before writing anything -- which is worse than saying
 # nothing, because it sends the reader looking for a file that is not there.
 echo >&2

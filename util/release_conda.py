@@ -36,15 +36,14 @@
 
 :data:`PLATFORMS` maps each leg of either job to the platform it publishes.
 
-The steps formerly held this as shell, each job its own copy of the build and
-upload, under ``set -euo pipefail``. A failing command ends the script with its
+Both jobs run this one copy of the build and upload. It fails as a shell step
+under ``set -euo pipefail`` would: a failing command ends the script with its
 status, a missing one with 127, and a variable it reads that is unset with
-``<name>: unbound variable`` and status 1, as they ended the step. The build's
-second search for packages, which could find nothing the first had not, is
-gone. Where the shell trimmed a label with ``xargs``, this collapses its white
-space alone, so a quote or backslash is taken as it is rather than failing the
-step: every label is ``main`` or ``dev``. On ``windows-latest`` the paths are
-Windows' own rather than Git Bash's ``/tmp/...``.
+``<name>: unbound variable`` and status 1. The build searches for packages
+once. A label has its white space collapsed and nothing else, so a quote or
+backslash is taken as it is, where ``xargs`` would fail the step on it: every
+label is ``main`` or ``dev``. On ``windows-latest`` the paths are Windows' own
+rather than Git Bash's ``/tmp/...``.
 
 The script is standard library only, and keeps to Python 3.8's syntax.
 

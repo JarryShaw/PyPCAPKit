@@ -1170,10 +1170,9 @@ class TestMatrixProvenance:
     def test_a_packet_count_disagreement_is_reported_not_dropped(self):
         """One capture must yield one frame count on every interpreter.
 
-        If it does not, that is the most important thing in the report -- and the
-        previous behaviour was to print no row at all, which hid precisely the case the
-        row exists to establish. With one interpreter the disagreement was barely
-        possible; across a matrix it is a real failure mode.
+        If it does not, that is the most important thing in the report -- and printing
+        no row at all would hide precisely the case the row exists to establish, which
+        across a matrix is a real failure mode.
 
         """
         docs = matrix(versions=('3.11', '3.12'))
@@ -1196,8 +1195,8 @@ class TestMatrixProvenance:
         """A pass happens once per environment, so samples outnumber passes.
 
         The provenance block says "3 passes ... in 7 environments" and the table's own
-        count is the product of the two. Calling both "Passes" read as a contradiction
-        as soon as there was more than one interpreter.
+        count is the product of the two. Calling both "Passes" would read as a
+        contradiction once there is more than one interpreter.
 
         """
         docs = matrix(versions=('3.11', '3.12'))
@@ -1305,12 +1304,12 @@ class TestHostileReasons:
     or the tail of a pip or gcc log that the Dockerfile recorded because a `pypcap`
     build was allowed to fail. All of it is interpolated into emitted markup as prose,
     and the suite's other fixtures are all well-behaved English -- which is exactly why
-    this went unnoticed until a hostile string was tried.
+    it takes a hostile string to show the failure.
 
     """
 
     #: Strings a compiler or a Python traceback produces without trying, each of which
-    #: broke the emitted snippet under plain docutils before the escaping went in.
+    #: breaks the emitted snippet under plain docutils without the escaping.
     HOSTILE = (
         # `**kwargs` in a gcc diagnostic: inline strong start-string without end-string.
         'gcc: error: **kwargs handling broke the build',
@@ -1394,8 +1393,8 @@ class TestHostileReasons:
     def test_the_emulation_note_is_escaped_too(self):
         """`--emulated` is outside text as much as any reason is.
 
-        `run.sh` composes that sentence itself, which makes it safe in practice and is
-        exactly why it was the last channel left unescaped. It still arrives on the
+        `run.sh` composes that sentence itself, which makes it safe in practice and
+        exactly the channel easiest to leave unescaped. It still arrives on the
         command line, and it reaches markup in two places -- a provenance row and a bold
         paragraph -- so a value with a stray ``*`` in it would break the snippet from a
         direction nobody was watching.
@@ -1429,8 +1428,8 @@ class TestHostileReasons:
 class TestFootnotes:
     """Row and column notes are reStructuredText footnotes, as docs/source/engines.rst has them.
 
-    The tables used to mark rows with literal symbols and explain them in a hand-written
-    legend, which had to be converted by hand before the snippet could go on the page.
+    Literal symbols explained in a hand-written legend would have to be converted by
+    hand before the snippet could go on the page.
     Auto-symbol footnotes pair with their references by order alone, so the order the
     bodies come out in is checked against what docutils actually resolves, not against
     a count.
@@ -1506,7 +1505,7 @@ class TestFootnotes:
     def test_they_paste_beside_the_page_footnotes(self):
         """docutils numbers footnotes page-wide, so nothing on the page collides.
 
-        This is the case the literal markers were chosen to avoid, and it does not
+        This is the collision literal markers would be chosen to avoid, and it does not
         arise: the page's own notes take the first symbol and number, the snippets'
         take the next, and every reference still reaches its own body.
 
@@ -1566,7 +1565,7 @@ class TestFootnotes:
     def test_a_gap_nothing_explained_still_has_a_body(self):
         """An engine missing from a version's documents altogether is still a gap.
 
-        A literal marker with no legend line was merely unhelpful; a footnote reference
+        A literal marker with no legend line would be merely unhelpful; a footnote reference
         with no body is a docutils error on the page.
 
         """
@@ -1635,8 +1634,8 @@ class TestFixedFormatting:
 
         Significant figures -- which every other number in the report uses -- would
         give ``0.01700`` and ``14.74`` different numbers of decimal places in the same
-        column. Four places is also what the hand-maintained table in the docs has
-        always used, so a regenerated table diffs its numbers rather than its layout.
+        column. Four places is also what the hand-maintained table in the docs uses,
+        so a regenerated table diffs its numbers rather than its layout.
 
         """
         assert report._fixed(value) == expected  # pylint: disable=protected-access
@@ -1797,8 +1796,9 @@ class TestLoaderFailure:
     """A ``pcap`` module that will not load is a reason, not a fatal error (#2129).
 
     On macOS and Windows, ``pcap-ct``'s libpcap loader raises :exc:`OSError` with a
-    message that does not mention libpcap. ``pypcap``'s preflight let it escape, and
-    the whole ``pcap_ct`` environment exited before measuring anything.
+    message that does not mention libpcap. Unless the harness asks the import itself,
+    ``pypcap``'s preflight lets it escape, and the whole ``pcap_ct`` environment exits
+    before measuring anything.
 
     """
 
@@ -1848,8 +1848,8 @@ class TestLoaderFailure:
                                                            tmp_path):
         """Only the import is in scope: a ``pcap`` module that loads, then fails, re-raises.
 
-        The message mentions libpcap on purpose. Matching on that word is what the
-        harness did before, and it would have swallowed this real failure.
+        The message mentions libpcap on purpose: matching on that word would swallow
+        this real failure.
 
         """
         monkeypatch.syspath_prepend(fake_pcap(tmp_path / 'site',

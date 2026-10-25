@@ -177,7 +177,7 @@ class CitationFieldError(RuntimeError):
     """Raised when :file:`CITATION.cff` exists but has no ``version`` field.
 
     Subclasses :exc:`RuntimeError` rather than defining a new hierarchy, to match
-    the ``cannot find version`` failure this script already raised for the same
+    the ``cannot find version`` failure this script already raises for the same
     class of problem in :file:`pcapkit/__init__.py`.
 
     """
@@ -190,13 +190,13 @@ def current_version() -> str:
     has, and falls back to scraping :file:`pcapkit/__init__.py` out of the working
     directory when :mod:`pcapkit` cannot be imported.
 
-    The fallback strips whitespace before quotes rather than both at once. The
-    previous spelling, ``strip(" '")``, stopped at the trailing newline and so
-    returned ``"1.5.0b4'\\n"`` -- quote and newline included -- which
+    The fallback strips whitespace before quotes rather than both at once:
+    ``strip(" '")`` stops at the trailing newline and so returns
+    ``"1.5.0b4'\\n"`` -- quote and newline included -- which
     :class:`~packaging.version.Version` rejects outright with
-    :exc:`~packaging.version.InvalidVersion`. The path had therefore never worked;
-    it went unnoticed because the only caller installs the package first, so
-    :mod:`pcapkit` always imports and the fallback is never reached in CI.
+    :exc:`~packaging.version.InvalidVersion`. CI never reaches the fallback,
+    because the only caller installs the package first, so :mod:`pcapkit`
+    always imports.
 
     Returns:
         The current version string.

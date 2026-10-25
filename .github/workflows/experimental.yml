@@ -8,8 +8,8 @@ name: Experimental Tests
 # up nothing (#2030); it has no `workflow_call` trigger, and a job cannot
 # `needs:` one in another workflow.
 #
-# Its check names, `Python <version> (experimental)`, are the ones the legs had
-# in unit-tests.yml, and `windows`'s is `Python <latest> on Windows
+# Its check names, `Python <version> (experimental)`, follow unit-tests.yml's
+# `Python <version>` form, and `windows`'s is `Python <latest> on Windows
 # (experimental)` (#2060); no required context of ruleset 23497679 names one.
 #
 # The same events and `changes` job as unit-tests.yml, so a docs-only pull
@@ -613,7 +613,7 @@ jobs:
           retention-days: 7
 
   # #2060: the unit tier on Windows, the platform of the win-64 conda package,
-  # added so that its first release had a test run. One leg, on `latest`, the
+  # so that its releases have a test run. One leg, on `latest`, the
   # newest CPython the conda builds target. Non-blocking by `experimental`'s
   # mechanics: every step that can fail is `continue-on-error`, the long ones
   # have caps under the job's, `Experimental summary` reports each failure as a

@@ -121,7 +121,7 @@ def plan() -> 'int':
     for attempt in range(1, ATTEMPTS + 1):
         if call(['sudo', 'timeout', str(UPDATE_BOUND), 'apt-get', 'update']).returncode == 0:
             break
-        # #2047: unescaped, as before the helper, and through `say`, which writes a lone surrogate as its byte.
+        # #2047: unescaped, and through `say`, which writes a lone surrogate as its byte.
         _actions.say(_actions.annotation(
             'warning', f'apt-get update failed or exceeded its {UPDATE_BOUND}s bound.',
             title=f'apt-get update attempt {attempt} of {ATTEMPTS} failed ({os.environ["APT_SET"]})', escape=False))

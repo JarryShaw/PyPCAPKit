@@ -21,13 +21,12 @@ A rejected push means ``main`` moved, so the decision is made again from a
 fresh fetch, three times at most, then an ``::error`` and status 1. The tag is
 never touched: it was made before anything here reads ``main``.
 
-The step formerly held this as shell under ``set -euo pipefail``; this prints
-the same lines and annotations, unescaped as ``echo`` wrote them, and runs the
-same ``git`` commands with the same arguments. A ``git`` that fails where the
-shell had no ``if`` ends the script with its status, as ``set -e`` ended the
-step, and a variable the step's ``env:`` names that is unset, which Actions
-never leaves it, ends it with ``<name>: unbound variable`` and status 1 where
-``set -u`` did.
+It behaves as a shell step under ``set -euo pipefail`` would: its lines and
+annotations are unescaped, as ``echo`` writes them, a ``git`` that fails where
+nothing tests its status ends the script with that status, as ``set -e`` would,
+and a variable the step's ``env:`` names that is unset, which Actions never
+leaves it, ends it with ``<name>: unbound variable`` and status 1, as
+``set -u`` would.
 
 ``tag`` has no setup-python, so this runs on the image's ``python3``: standard
 library only, and Python 3.8's syntax. Its ``git switch`` replaces the checkout,
@@ -57,14 +56,14 @@ __all__ = ['ATTEMPTS', 'Unbound', 'var', 'git', 'version_of', 'taken_builds', 'r
 
 #: How many pushes to ``main`` are tried before giving up.
 ATTEMPTS = 3
-#: What ``__version__``'s line starts with; ``sed -n 's/^__version__ = //p'`` printed the rest.
+#: What ``__version__``'s line starts with; ``sed -n 's/^__version__ = //p'`` prints the rest.
 VERSION_PREFIX = '__version__ = '
-#: The bytes ``tr -d '[:space:]'`` deleted.
+#: The bytes ``tr -d '[:space:]'`` deletes.
 SPACE = ' \t\n\v\f\r'
 
 
 class Unbound(Exception):
-    """A variable read as ``$NAME`` that is unset, which ``set -u`` refused."""
+    """A variable read as ``$NAME`` that is unset, which ``set -u`` refuses."""
 
 
 def var(name: 'str') -> 'str':
@@ -96,7 +95,7 @@ def git(*args: 'str', capture: 'bool' = False) -> 'Tuple[int, str]':
 
 
 def version_of(text: 'str') -> 'str':
-    """What ``sed -n 's/^__version__ = //p'`` printed of ``text``, as ``$(...)`` gives it."""
+    """What ``sed -n 's/^__version__ = //p'`` prints of ``text``, as ``$(...)`` gives it."""
     return '\n'.join(line[len(VERSION_PREFIX):] for line in text.split('\n')
                      if line.startswith(VERSION_PREFIX)).rstrip('\n')
 
@@ -104,7 +103,7 @@ def version_of(text: 'str') -> 'str':
 def taken_builds(listing: 'str', builds: 'str') -> 'str':
     """The ``+N`` of each ref in ``git ls-remote``'s ``listing`` under ``builds`` but ``+0``, space-separated.
 
-    Each line is split as ``read -r _ ref`` split it, on spaces and tabs, the
+    Each line is split as ``read -r _ ref`` splits it, on spaces and tabs, the
     first field dropped.
 
     """
@@ -118,7 +117,7 @@ def taken_builds(listing: 'str', builds: 'str') -> 'str':
 
 
 def say(level: 'str', title: 'str', message: 'str') -> 'None':
-    """Print the ``::level`` annotation as the shell's ``echo`` did, unescaped."""
+    """Print the ``::level`` annotation as a shell's ``echo`` does, unescaped."""
     _actions.say(_actions.annotation(level, message, title=title, escape=False))
 
 

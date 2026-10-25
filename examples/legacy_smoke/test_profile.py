@@ -16,10 +16,10 @@ def test() -> 'None':
 
 
 if __name__ == '__main__':
-    # cProfile will not create the directory it dumps into, so `python
-    # test_profile.py` on a fresh checkout used to profile the whole run and then
-    # die with FileNotFoundError. `make profile` does mkdir first; the script
-    # should not need it to.
+    # cProfile will not create the directory it dumps into, so without this
+    # `python test_profile.py` on a fresh checkout profiles the whole run and
+    # then dies with FileNotFoundError. `make profile` does mkdir first; the
+    # script should not need it to.
     os.makedirs(os.path.dirname(STATS), exist_ok=True)
 
     cProfile.run(

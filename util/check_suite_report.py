@@ -89,9 +89,9 @@ class Workflow(NamedTuple):
     expected: 'dict[str, tuple[tuple[str, str], ...]]'
 
 
-#: The workflows reported, by name. No list holds an annotation today: the 3.7
-#: legs that stopped at install went with #2051, and pypy3.10 installs since
-#: #2040's cryptography cap.
+#: The workflows reported, by name. No ``expected`` list holds an annotation: no
+#: leg stops at install by design, since the KTLO floor is 3.8 (#2051) and
+#: pypy3.10 installs under #2040's cryptography cap.
 WORKFLOWS = {
     'Unit Tests': Workflow(
         'unit-tests', re.compile(r'(?:Python |Integration Python |Engines \(|PyPCAP/PyPCAPFile parity Python )'),

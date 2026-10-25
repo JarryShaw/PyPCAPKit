@@ -3,7 +3,7 @@
 
 :file:`pcapkit/foundation/registry/protocols.py` documents the registries that
 decide *which* :class:`~pcapkit.protocols.protocol.Protocol` subclass parses the
-next layer. Nothing enumerated them: several
+next layer. No other module enumerates them: several
 test modules reference ``__proto__``, and
 :file:`tests/protocols/test_registry_runtime.py` checks that a table entry
 *resolves* to the right class object, but that is a weaker property than the one
@@ -37,15 +37,14 @@ on the wire (:class:`~pcapkit.protocols.application.rarp.RARP` reports ``'ARP'``
 :class:`~pcapkit.protocols.misc.raw.Raw` itself is not a defect.
 
 The expected class is deliberately **not** read out of the registry under
-test. An earlier version of this module did exactly that
-(``target=_resolve(entry)``), which made the check self-referential: dispatch
-always "reached" whatever the table currently said, because that was the very
-value being checked against. Deleting an entry was still caught, by the exact
-per-family counts in
+test. Read from there (``target=_resolve(entry)``), the check would be
+self-referential: dispatch would always "reach" whatever the table said,
+because that is the very value being checked against. Deleting an entry would
+still be caught, by the exact per-family counts in
 :meth:`~tests.protocols.test_dispatch_registry_unit.DispatchRegistryTests
 .test_cases_cover_every_table_named_in_the_issue`, but *retargeting* one --
-entry present, registry size unchanged, class wrong -- passed silently, since
-nothing independent of the table said what the table should have held.
+entry present, registry size unchanged, class wrong -- would pass silently,
+since nothing independent of the table would say what the table should hold.
 :data:`PINNED_TARGETS` is that independent record, and :attr:`Case.registered`
 keeps the registry's own current answer alongside it purely as a diagnostic,
 so a mismatch between the two is reported as what it is rather than folded
@@ -100,14 +99,13 @@ EPOCH = 1500000000
 #: Only ``dstport``/``payload`` vary.
 #:
 #: Every key is a parameter :meth:`TCP.make <pcapkit.protocols.transport.tcp.TCP.make>`
-#: declares, which is not a style point: this mapping used to read ``seq=1``,
-#: ``ack=0``, ``ack_flag=False`` and ``urgent_pointer=0``, of which only ``ack``
-#: was a parameter at all -- and it is the acknowledgement *flag*, so the
-#: acknowledgement number was never set while the flag was. The other three were
-#: absorbed by ``make``'s trailing ``**kwargs`` and discarded, so every segment
-#: built here carried sequence number ``0`` however plainly this said ``1``. That
-#: is the same defect as #602, and since #617 an undeclared keyword raises
-#: :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` rather than going quiet.
+#: declares, which is not a style point: ``ack`` is the acknowledgement *flag*,
+#: not the number, and ``seq``, ``ack_flag`` and ``urgent_pointer`` are not
+#: parameters at all. An undeclared keyword raises
+#: :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` (#617); without that
+#: check, ``make``'s trailing ``**kwargs`` absorbs and discards it, and a segment
+#: built from such a mapping carries sequence number ``0`` whatever it says
+#: (#602).
 _TCP_BASE = dict(srcport=50000, seq_no=1, ack_no=0, ns=False, cwr=False, ece=False,
                  urg=False, ack=False, psh=False, rst=False, syn=True,
                  fin=False, window=8192, checksum=b'\x00\x00', urgent=0)
@@ -313,11 +311,9 @@ def _link_payload(code: 'int') -> 'bytes':
         return _ip4(6, _tcp(9999))
     if code == EtherType.Internet_Protocol_version_6:
         return _ip6(6, _tcp(9999))
-    if code == 0x8137:  # Novell IPX -- see KNOWN_DEGRADED.
-        # ``IPX()`` cannot even be constructed with no arguments (#492:
-        # ``Socket(0)`` is not a valid member), so there is no well-formed IPX
-        # payload to probe with; this is a deliberately IPX-shaped run of zero
-        # octets, enough to dispatch to the class and watch it fail to parse.
+    if code == 0x8137:  # Novell IPX.
+        # A run of zero octets the length of an IPX header: dispatch into
+        # IPX is all this probes.
         return b'\x00' * 30
     raise LookupError(f'link: no payload builder for {code!r}')  # pragma: no cover
 
@@ -378,7 +374,7 @@ def _internet_payload(code: 'int') -> 'bytes':
     if code == TransType.IPv6_Opts:
         from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
         return bytes(IPv6_Opts(options=[], next=6, payload=_tcp(9999)))
-    if code == TransType.IPX_in_IP:  # See KNOWN_DEGRADED -- same #492 as Link's IPX.
+    if code == TransType.IPX_in_IP:  # As for Link's IPX.
         return b'\x00' * 30
     if code == TransType.SCTP:
         from pcapkit.const.sctp.chunk import Chunk
@@ -394,12 +390,10 @@ def _internet_payload(code: 'int') -> 'bytes':
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.protocols.internet.hip import HIP
 
-        # Two copies of one parameter, not one -- HIP.make's header length
-        # arithmetic loses four octets for a lone parameter and the packet is
-        # then rejected on the way back in; see HIP_COPIES in
-        # examples/generators/options.py for the full explanation. Only the
-        # dispatch into HIP is under test here, so which parameter travels
-        # inside it does not matter.
+        # Two copies of one parameter, though one round-trips as well (see
+        # HIP_COPIES in examples/generators/options.py). Only the dispatch
+        # into HIP is under test here, so which parameter travels inside it,
+        # and how many, does not matter.
         return bytes(HIP(parameters=[(Parameter.SEQ, {})] * 2, extension=True,
                          next=6, packet=1, version=2, checksum=b'\x00\x00',
                          controls_anonymous=False, shit=0, rhit=0, payload=_tcp(9999)))
@@ -615,19 +609,18 @@ FAMILY_MAP = {family.label: family for family in FAMILIES}
 #: The class each case is *supposed* to dispatch to, pinned independently of
 #: whatever the live registry currently holds.
 #:
-#: This is the fix for a gap in the first version of this harness: with the
-#: expected target read straight out of the table under test
-#: (``target=_resolve(entry)``), a *mis-pointed* entry passed silently --
-#: dispatch always "reached" whatever the corrupted table said, because that
-#: was the very value being checked against. Deleting an entry was still
-#: caught, by the count guard in
+#: With the expected target read straight out of the table under test
+#: (``target=_resolve(entry)``), a *mis-pointed* entry would pass silently --
+#: dispatch would always "reach" whatever the corrupted table said, because
+#: that is the very value being checked against. Deleting an entry would still
+#: be caught, by the count guard in
 #: :meth:`~tests.protocols.test_dispatch_registry_unit.DispatchRegistryTests
 #: .test_cases_cover_every_table_named_in_the_issue`, but retargeting one --
-#: entry present, registry size unchanged, class wrong -- was not caught by
-#: anything. Recording the expected ``(module, name)`` here, by hand, the same
-#: way :data:`KNOWN_DEGRADED` records defects by hand, means a table entry
-#: that no longer says what this module expects is a mismatch against a fixed
-#: point rather than against itself.
+#: entry present, registry size unchanged, class wrong -- would not be caught
+#: by anything. Recording the expected ``(module, name)`` here, by hand, the
+#: same way :data:`KNOWN_DEGRADED` records degraded cases by hand, means a
+#: table entry that does not say what this module expects is a mismatch
+#: against a fixed point rather than against itself.
 #:
 #: Keyed by :attr:`Case.label`. A code whose label is missing here builds a
 #: :class:`Case` with ``target=None`` -- see
@@ -663,18 +656,16 @@ PINNED_TARGETS = {
     'internet/HIP': ('pcapkit.protocols.internet.hip', 'HIP'),
     'internet/SCTP': ('pcapkit.protocols.transport.sctp', 'SCTP'),
     'internet/OSPFIGP': ('pcapkit.protocols.application.ospf', 'OSPF'),
-    # #904: Shim6 (140) previously had no entry at all, and the default
-    # factory made it resolve to Raw. It is registered directly at
-    # IPv6_Ext, which parses the RFC 6564 §4 generic layout it has
-    # never had a dedicated dissector for -- a deliberate addition, not a
-    # regression.
+    # #904: Shim6 (140) is registered directly at IPv6_Ext, which parses
+    # the RFC 6564 §4 generic layout, as Shim6 has no dedicated dissector.
+    # Without the entry the default factory would resolve it to Raw.
     'internet/Shim6': ('pcapkit.protocols.internet.ipv6_ext', 'IPv6_Ext'),
 
     # -- TCP.__proto__ (port) --------------------------------------------------
     'tcp/20': ('pcapkit.protocols.application.ftp', 'FTP_DATA'),
     'tcp/21': ('pcapkit.protocols.application.ftp', 'FTP'),
-    # Repointed from ``httpv1`` to the version-identifying proxy by #682, which
-    # is what makes these two agree with ``udp/80`` and ``udp/8080`` below.
+    # The version-identifying proxy (#682), as for ``udp/80`` and ``udp/8080``
+    # below.
     'tcp/80': ('pcapkit.protocols.application.http', 'HTTP'),
     'tcp/8080': ('pcapkit.protocols.application.http', 'HTTP'),
 
@@ -849,7 +840,7 @@ def probe(case: 'Case') -> 'Outcome':
     The check is against :attr:`Case.target` -- :data:`PINNED_TARGETS`,
     recorded independently of the registry -- not against
     :attr:`Case.registered`, which is only ever what the table under test
-    currently claims. Checking a table against itself is what let a
+    currently claims. Checking a table against itself would let a
     mis-pointed entry pass silently; see :data:`PINNED_TARGETS`.
 
     Args:
@@ -896,15 +887,18 @@ def outcomes(families: 'Optional[tuple[Family, ...]]' = None) -> 'list[Outcome]'
     return [probe(case) for case in cases(families)]
 
 
-#: Codes known to degrade to :class:`~pcapkit.protocols.misc.raw.Raw`,
-#: with the defect that causes it. Recorded, not fixed -- GitHub issue #496 is
-#: a test-harness change and none of these classes is this module's to touch.
+#: Codes known to degrade to :class:`~pcapkit.protocols.misc.raw.Raw`, each
+#: with the ``'error'`` fragments it may report and the reason it degrades.
+#: Recorded, not fixed -- GitHub issue #496 is a test-harness change and none
+#: of these classes is this module's to touch.
 #:
-#: Each entry is checked both ways, the same as
-#: :data:`examples.generators.options.EXPECTED_FAILURES`: a case listed here
-#: must still fail to reach its target, or the entry is stale and the defect it
-#: names has been fixed; a case *not* listed here must reach its target, or a
-#: fresh regression has gone unnoticed.
+#: This copy is what the ``__main__`` summary counts. The checks run against
+#: the copy :class:`~tests.protocols.test_dispatch_registry_unit.DispatchRegistryTests`
+#: keeps of it, both ways, as for
+#: :data:`examples.generators.options.EXPECTED_FAILURES`: a case listed there
+#: must still fail to reach its target, or the entry is stale; a case *not*
+#: listed there must reach its target, or a fresh regression has gone
+#: unnoticed. Nothing holds the two copies to each other.
 KNOWN_DEGRADED = {
     # NGAP is registered for both of its PPIDs. Building a well-formed
     # PER-encoded NGAP-PDU is out of scope for a minimal dispatch probe --
@@ -916,7 +910,7 @@ KNOWN_DEGRADED = {
     # a malformed PDU, and where it is not, NGAP reports the missing
     # dependency instead. Both are the same placeholder-payload limitation, so
     # the entry accepts either -- CI installs ``.[test]``, which deliberately
-    # excludes ``[NGAP]``, and pinning only the first reason failed there.
+    # excludes ``[NGAP]``, so pinning only the first reason would fail there.
     'sctp/PayloadProtocolIdentifier_3GPP_NG_Application_Protocol': (
         ('malformed NGAP-PDU', 'needs the optional "pycrate" dependency'),
         'pcapkit/protocols/application/ngap.py -- b\'ngap-pdu\' is not an '

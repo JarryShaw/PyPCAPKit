@@ -93,7 +93,7 @@ def check(log: 'str' = LOG) -> 'int':
     if len(root) != 1 or not workers or missing:
         why = f'no data file from pid {missing}' if missing else 'the process log is missing or unreadable'
         _actions.summary(f'**Coverage not reported:** {why} (#1387); a total would under-count.')
-        # #2047: unescaped, as before the helper.
+        # #2047: deliberately unescaped.
         _actions.annotate('error', f'Coverage data is incomplete: {why}.', escape=False)
         return 1
     return 0
