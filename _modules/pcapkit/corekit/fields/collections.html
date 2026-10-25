@@ -608,7 +608,7 @@
 
 <span class="sd">        """</span>
         <span class="n">new_self</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">__copy__</span><span class="p">()</span>
-        <span class="n">new_self</span><span class="o">.</span><span class="n">_callback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
+        <span class="n">new_self</span><span class="o">.</span><span class="n">_callback</span><span class="p">(</span><span class="n">new_self</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_length_callback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">new_self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_length_callback</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
             <span class="n">new_self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">new_self</span><span class="o">.</span><span class="n">_length</span><span class="si">}</span><span class="s1">s'</span>
@@ -832,7 +832,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">option_padding</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Length option padding data."""</span>
+<span class="w">        </span><span class="sd">"""Length of option padding data."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_option_padding</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'int | Callable[[dict[str, Any]], int]'</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">_</span><span class="p">:</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span>
@@ -900,9 +900,11 @@
 
 <span class="sd">        Important:</span>
 <span class="sd">            If the option list ended before the specified size limit,</span>
-<span class="sd">            set :attr:`self.option_padding &lt;OptionField.option_padding&gt;`</span>
-<span class="sd">            as the remaining length to the ``packet`` argument such that</span>
-<span class="sd">            the next fields can be aware of such informations.</span>
+<span class="sd">            :attr:`self.option_padding &lt;OptionField.option_padding&gt;` is set</span>
+<span class="sd">            to the remaining length, which :meth:`Schema.unpack</span>
+<span class="sd">            &lt;pcapkit.protocols.schema.schema.Schema.unpack&gt;` records in</span>
+<span class="sd">            ``packet`` as ``__option_padding__`` so that the next fields can</span>
+<span class="sd">            be aware of it.</span>
 
 <span class="sd">        Raises:</span>
 <span class="sd">            FieldValueError: If an option consumes nothing from ``buffer``, since</span>

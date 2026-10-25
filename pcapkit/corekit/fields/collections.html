@@ -674,7 +674,7 @@ comes second cannot be silently misread.</p>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.corekit.fields.collections.OptionField.option_padding">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">option_padding</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.corekit.fields.collections.OptionField.option_padding" title="Link to this definition">¶</a></dt>
-<dd><p>Length option padding data.</p>
+<dd><p>Length of option padding data.</p>
 </dd></dl>
 
 <dl class="py method">
@@ -698,9 +698,10 @@ comes second cannot be silently misread.</p>
 <div class="admonition important">
 <p class="admonition-title">Important</p>
 <p>If the option list ended before the specified size limit,
-set <a class="reference internal" href="#pcapkit.corekit.fields.collections.OptionField.option_padding" title="pcapkit.corekit.fields.collections.OptionField.option_padding"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.option_padding</span></code></a>
-as the remaining length to the <code class="docutils literal notranslate"><span class="pre">packet</span></code> argument such that
-the next fields can be aware of such informations.</p>
+<a class="reference internal" href="#pcapkit.corekit.fields.collections.OptionField.option_padding" title="pcapkit.corekit.fields.collections.OptionField.option_padding"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self.option_padding</span></code></a> is set
+to the remaining length, which <a class="reference internal" href="../../protocols/index.html#pcapkit.protocols.schema.schema.Schema.unpack" title="pcapkit.protocols.schema.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack</span></code></a> records in
+<code class="docutils literal notranslate"><span class="pre">packet</span></code> as <code class="docutils literal notranslate"><span class="pre">__option_padding__</span></code> so that the next fields can
+be aware of it.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Raises<span class="colon">:</span></dt>

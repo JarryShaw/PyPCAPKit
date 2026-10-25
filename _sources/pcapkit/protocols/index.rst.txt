@@ -202,6 +202,8 @@ Header Schema
    .. autoattribute:: __fields__
       :no-value:
 
+   .. automethod:: _cut_short_read
+
 .. autoclass:: pcapkit.protocols.schema.schema.EnumSchema
    :no-members:
    :show-inheritance:
@@ -218,6 +220,10 @@ Header Schema
    .. automethod:: __init_subclass__
 
 .. autodecorator:: pcapkit.protocols.schema.schema.schema_final
+
+.. autofunction:: pcapkit.protocols.schema.schema.keep_short_read
+
+.. autofunction:: pcapkit.protocols.schema.schema.replay_short_read
 
 Internal Definitions
 ~~~~~~~~~~~~~~~~~~~~

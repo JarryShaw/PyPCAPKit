@@ -881,7 +881,9 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            code: IPv6-Route data type code.</span>
-<span class="sd">            meth: Method name or callable to parse and/or construct the data.</span>
+<span class="sd">            meth: Name ``X`` of the ``_read_data_type_X`` and</span>
+<span class="sd">                ``_make_data_type_X`` methods, or a ``(parser, constructor)`` pair</span>
+<span class="sd">                of callables, see :attr:`__routing__`.</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            RegistryWarning: If a different entry is already registered for</span>

@@ -1275,14 +1275,17 @@
 <span class="sd">            bare, unlogged :exc:`ValueError` precisely because the ``except</span>
 <span class="sd">            ValueError`` fallback of :meth:`~pcapkit.corekit.enum.EnumLookup.get`</span>
 <span class="sd">            has to keep catching it (GitHub issues :issue:`584` and</span>
-<span class="sd">            :issue:`647`). The registries that</span>
-<span class="sd">            *do* bound themselves to a width and reject outside it are the</span>
-<span class="sd">            bit-flag ones -- :class:`pcapkit.const.tcp.flags.Flags` among them --</span>
-<span class="sd">            and none of those is named as the namespace of a plain</span>
-<span class="sd">            :class:`EnumField` anywhere in the package, so no in-library guard</span>
-<span class="sd">            loses its force through this method. The distinction is therefore for</span>
-<span class="sd">            a registry registered from outside :mod:`pcapkit.const`, which has no</span>
-<span class="sd">            such obligation to stay quiet.</span>
+<span class="sd">            :issue:`647`). That bare :exc:`ValueError` is also how a generated</span>
+<span class="sd">            guard bounds its registry to a width, rejecting a value outside</span>
+<span class="sd">            ``0 &lt;= value &lt;= N``. Bit-flag registries such as</span>
+<span class="sd">            :class:`pcapkit.const.tcp.flags.Flags` do so, and so do plain ones</span>
+<span class="sd">            such as :class:`pcapkit.const.ipv4.option_number.OptionNumber`, which</span>
+<span class="sd">            is the namespace of a plain :class:`EnumField`. That is harmless:</span>
+<span class="sd">            the out-of-width rejection is the bare :exc:`ValueError` this method</span>
+<span class="sd">            falls back on, so no in-library guard loses its force through this</span>
+<span class="sd">            method. The distinction is therefore for a registry registered from</span>
+<span class="sd">            outside :mod:`pcapkit.const`, which has no such obligation to stay</span>
+<span class="sd">            quiet.</span>
 
 <span class="sd">            Octets carrying bits outside :attr:`~NumberField.bit_length` that</span>
 <span class="sd">            :meth:`NumberField.post_process` recorded resolve to a member that</span>

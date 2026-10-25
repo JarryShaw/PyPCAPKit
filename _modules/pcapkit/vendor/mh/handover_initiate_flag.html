@@ -581,7 +581,7 @@
     <span class="c1">#: Link to registry.</span>
     <span class="n">LINK</span> <span class="o">=</span> <span class="s1">'https://www.iana.org/assignments/mobility-parameters/handover-initiate-flags.csv'</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'list[str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[str]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override] # pylint: disable=arguments-differ,arguments-renamed</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">process</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'list[str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'list[str]'</span><span class="p">:</span>  <span class="c1"># type: ignore[override]</span>
 <span class="w">        </span><span class="sd">"""Process CSV data.</span>
 
 <span class="sd">        Args:</span>
@@ -624,11 +624,11 @@
             <span class="n">enum</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">sufs</span><span class="si">}</span><span class="se">\n</span><span class="s1">    </span><span class="si">{</span><span class="n">pres</span><span class="si">}</span><span class="s1">'</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">enum</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'list[str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>  <span class="c1"># pylint: disable=arguments-differ,arguments-renamed</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">context</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data</span><span class="p">:</span> <span class="s1">'list[str]'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Generate constant context.</span>
 
 <span class="sd">        Args:</span>
-<span class="sd">            soup: Parsed HTML source.</span>
+<span class="sd">            data: CSV data.</span>
 
 <span class="sd">        Returns:</span>
 <span class="sd">            Constant context.</span>

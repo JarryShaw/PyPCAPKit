@@ -526,6 +526,8 @@
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">ClassVar</span><span class="p">,</span> <span class="n">Type</span>
 
+    <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.multidict</span><span class="w"> </span><span class="kn">import</span> <span class="n">OrderedMultiDict</span>
+
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'DeferredPacket'</span><span class="p">]</span>
 
 
@@ -663,13 +665,15 @@
 
 <div class="viewcode-block" id="DeferredPacket.to_dict">
 <a class="viewcode-back" href="../../../pcapkit/corekit/packet.html#pcapkit.corekit.packet.DeferredPacket.to_dict">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'dict[str, Any]'</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'OrderedMultiDict[str, Any]'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Convert the instance into :obj:`dict`.</span>
 
 <span class="sd">        Returns:</span>
-<span class="sd">            The fields, with ``packet`` resolved if it had not been read yet --</span>
-<span class="sd">            a :obj:`dict` holding the placeholder would leak an implementation</span>
-<span class="sd">            detail into what is meant to be plain data.</span>
+<span class="sd">            The fields, as :meth:`Info.to_dict</span>
+<span class="sd">            &lt;pcapkit.corekit.infoclass.Info.to_dict&gt;` exports them, with</span>
+<span class="sd">            ``packet`` resolved if it had not been read yet -- an export</span>
+<span class="sd">            holding the placeholder would leak an implementation detail into</span>
+<span class="sd">            what is meant to be plain data.</span>
 
 <span class="sd">        """</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">__analyse__</span><span class="p">()</span>

@@ -777,6 +777,17 @@ the READMEs included – are Markdown where that applies. <code class="docutils 
 <code class="file docutils literal notranslate"><span class="pre">MANIFEST.in</span></code> does not reach Markdown, so the READMEs under <code class="file docutils literal notranslate"><span class="pre">examples/</span></code>
 ship through <code class="docutils literal notranslate"><span class="pre">recursive-include</span> <span class="pre">examples</span> <span class="pre">*.md</span></code>, and any other Markdown file
 ships only if setuptools or an <code class="docutils literal notranslate"><span class="pre">include</span></code> line adds it.</p></li>
+<li><p><strong>Cite an issue or a pull request by role wherever Sphinx renders the text.</strong> In an
+<code class="docutils literal notranslate"><span class="pre">.rst</span></code> page, a docstring or a <code class="docutils literal notranslate"><span class="pre">#:</span></code> doc-comment an issue is <code class="docutils literal notranslate"><span class="pre">:issue:`NNN`</span></code> and
+a pull request <code class="docutils literal notranslate"><span class="pre">:pr:`NNN`</span></code>, by what the number is rather than what a URL says: a
+bare <code class="docutils literal notranslate"><span class="pre">#NNN</span></code> there renders as plain text, and a hand-written link to the tracker
+hides which of the two it names. A plain <code class="docutils literal notranslate"><span class="pre">#</span></code> comment, a workflow’s YAML comment,
+<code class="file docutils literal notranslate"><span class="pre">tests/</span></code> and any other file nothing renders keep <code class="docutils literal notranslate"><span class="pre">#NNN</span></code>, which GitHub links
+itself. A link into another repository or to a Discussion keeps its URL, and
+<code class="docutils literal notranslate"><span class="pre">GH-NNN</span></code> is a deliberate issue form. Ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1103">#1103</a>;
+<code class="file docutils literal notranslate"><span class="pre">tests/project/test_docs_issue_pr_roles_1103_unit.py</span></code> fails on a bare number
+or a hand-written link in rendered text, and
+<code class="file docutils literal notranslate"><span class="pre">tests/project/test_issue_refs_in_comments.py</span></code> on a role in a plain comment.</p></li>
 <li><p><strong>Prose names the real defining module, not a re-export.</strong> One strand of the
 consistency sweep on <a class="reference internal" href="../pep.html"><span class="doc">the roadmap</span></a>. The sentinels are the
 worked example: every one is defined in <a class="reference internal" href="../../pcapkit/corekit/sentinels.html#module-pcapkit.corekit.sentinels" title="pcapkit.corekit.sentinels"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.sentinels</span></code></a>, and

@@ -861,7 +861,7 @@ A new reassembly or flow tracing class subclasses
        # ``buf`` formatted as a ``Buffer`` instance, to a ``Datagram``
        # instance, which is then submitted to the storage, i.e.,
        # ``self._dtgram``.
-       def submit(self, buf: 'Buffer', * , bufid: 'BufferID') -> 'list[Datagram]':
+       def submit(self, buf: 'Buffer', *, bufid: 'BufferID') -> 'list[Datagram]':
            datagram = ...  # submit algorithm implementation, e.g., to convert
                            # the reassembled datagram to a list of ``Datagram``
                            # instances, which is then returned for further

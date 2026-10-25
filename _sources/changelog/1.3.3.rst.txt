@@ -4,9 +4,11 @@
 * **Fixed** -- errors reading PCAP files from both the CLI and the library
   (:issue:`240`): missing optional CLI dependencies are handled gracefully and console
   output is far less verbose; installation from source, which ``setup.py`` had
-  broken (:issue:`221`); PCAP output during flow tracing (:issue:`180`).
-* **Changed** -- the base protocol data class carries ``packet``; ``Info``
-  iteration skips excluded fields.
+  broken (:issue:`221`).
+
+The PCAP-output fix for flow tracing (:issue:`180`), the base protocol data class's
+``packet`` and ``Info`` iteration skipping excluded fields first shipped in
+``1.3.1.post8``.
 
 1.3.2 was never released. The version string existed in-tree for a few hours on
 2024-11-03 and was superseded by 1.3.3 the same day, so there is no ``v1.3.2``

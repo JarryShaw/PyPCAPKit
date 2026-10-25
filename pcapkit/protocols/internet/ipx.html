@@ -558,6 +558,9 @@ rebuilds a parsed packet rather than raising
 field are kept as
 <a class="reference internal" href="#pcapkit.protocols.schema.internet.ipx.IPX.trailer" title="pcapkit.protocols.schema.internet.ipx.IPX.trailer"><code class="xref py py-attr docutils literal notranslate"><span class="pre">trailer</span></code></a>
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1433">#1433</a>).</p>
+<p>The payload is dissected by IPX Packet Type from a registry of its own,
+<a class="reference internal" href="#pcapkit.protocols.internet.ipx.IPX.__proto__" title="pcapkit.protocols.internet.ipx.IPX.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">__proto__</span></code></a>, rather than looked up as an IP protocol number
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2169">#2169</a>).</p>
 </div>
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipx.IPX.name">
@@ -573,8 +576,8 @@ field are kept as
 
 <dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ipx.IPX.protocol">
-<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">protocol</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType" title="pcapkit.const.reg.transtype.TransType"><span class="pre">TransType</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.ipx.IPX.protocol" title="Link to this definition">¶</a></dt>
-<dd><p>Name of next layer protocol.</p>
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">protocol</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/ipx.html#pcapkit.const.ipx.packet.Packet" title="pcapkit.const.ipx.packet.Packet"><span class="pre">Packet</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.ipx.IPX.protocol" title="Link to this definition">¶</a></dt>
+<dd><p>IPX Packet Type of next layer protocol.</p>
 </dd></dl>
 
 <dl class="py property">
@@ -674,6 +677,19 @@ shifts every later positional argument.</p>
 <dd class="field-even"><p>Numeral registry index of the protocol in <a class="reference external" href="https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml">IANA</a>.</p>
 </dd>
 </dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ipx.IPX.__proto__">
+<span class="sig-name descname"><span class="pre">__proto__</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.DefaultDict" title="(in Python v3.15)"><span class="pre">DefaultDict</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a><span class="p"><span class="pre">,</span></span><span class="w"> </span><a class="reference internal" href="../../corekit/module.html#pcapkit.corekit.module.ModuleDescriptor" title="pcapkit.corekit.module.ModuleDescriptor"><span class="pre">ModuleDescriptor</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span><span class="w"> </span><span class="p"><span class="pre">|</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Type" title="(in Python v3.15)"><span class="pre">Type</span></a><span class="p"><span class="pre">[</span></span><a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><span class="pre">ProtocolBase</span></a><span class="p"><span class="pre">]</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.internet.ipx.IPX.__proto__" title="Link to this definition">¶</a></dt>
+<dd><p>Protocol index mapping for decoding next layer, see
+<a class="reference internal" href="internet.html#pcapkit.protocols.internet.internet.Internet._decode_next_layer" title="pcapkit.protocols.internet.internet.Internet._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._decode_next_layer</span></code></a> &amp;
+<a class="reference internal" href="internet.html#pcapkit.protocols.internet.internet.Internet._import_next_layer" title="pcapkit.protocols.internet.internet.Internet._import_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">self._import_next_layer</span></code></a>. Keyed by
+IPX Packet Type, as in <a class="reference internal" href="../../const/ipx.html#pcapkit.const.ipx.packet.Packet" title="pcapkit.const.ipx.packet.Packet"><code class="xref py py-class docutils literal notranslate"><span class="pre">Packet</span></code></a>, rather
+than by IP protocol number, so this class keeps a registry of its own
+instead of sharing <a class="reference internal" href="internet.html#pcapkit.protocols.internet.internet.Internet.__proto__" title="pcapkit.protocols.internet.internet.Internet.__proto__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Internet.__proto__</span></code></a> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2169">#2169</a>).
+No IPX-native protocol is shipped, so the payload is
+<a class="reference internal" href="../misc/raw.html#pcapkit.protocols.misc.raw.Raw" title="pcapkit.protocols.misc.raw.Raw"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> unless one is registered.</p>
 </dd></dl>
 
 </dd></dl>

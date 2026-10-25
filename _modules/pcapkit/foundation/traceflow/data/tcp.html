@@ -533,7 +533,8 @@
 
 <span class="sd">    """</span>
 
-    <span class="c1">#: Data link type from global header.</span>
+    <span class="c1">#: Data link type: the PCAP global header's, or that of the PCAP-NG</span>
+    <span class="c1">#: interface the packet was captured on.</span>
     <span class="n">protocol</span><span class="p">:</span> <span class="s1">'Enum_LinkType'</span>
     <span class="c1">#: Frame number.</span>
     <span class="n">index</span><span class="p">:</span> <span class="s1">'int'</span>
@@ -596,7 +597,8 @@
     <span class="c1">#: authoritative ordering; :attr:`forward` and :attr:`reverse` are</span>
     <span class="c1">#: subsequences of it.</span>
     <span class="n">index</span><span class="p">:</span> <span class="s1">'list[int]'</span>
-    <span class="c1">#: Flow label generated from ``BUFID``.</span>
+    <span class="c1">#: Flow label, built from the packet that opened the flow, cf.</span>
+    <span class="c1">#: :meth:`TCP.trace &lt;pcapkit.foundation.traceflow.tcp.TCP.trace&gt;`.</span>
     <span class="n">label</span><span class="p">:</span> <span class="s1">'str'</span>
     <span class="c1">#: ``(address, port)`` of the endpoint whose packet opened this flow. It</span>
     <span class="c1">#: defines what "forward" means for the flow, and it is the endpoint the</span>
@@ -659,7 +661,8 @@
     <span class="n">fpout</span><span class="p">:</span> <span class="s1">'Optional[str]'</span>
     <span class="c1">#: Tuple of frame index, **both directions**, in capture order.</span>
     <span class="n">index</span><span class="p">:</span> <span class="s1">'tuple[int, ...]'</span>
-    <span class="c1">#: Flow label generated from ``BUFID``.</span>
+    <span class="c1">#: Flow label, built from the packet that opened the flow, cf.</span>
+    <span class="c1">#: :meth:`TCP.trace &lt;pcapkit.foundation.traceflow.tcp.TCP.trace&gt;`.</span>
     <span class="n">label</span><span class="p">:</span> <span class="s1">'str'</span>
     <span class="c1">#: Frame index of the packets travelling in the direction that opened the</span>
     <span class="c1">#: flow, in capture order. That endpoint is the one the :attr:`label` names</span>

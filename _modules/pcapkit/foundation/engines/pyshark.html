@@ -511,7 +511,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extractor</span>
 
     <span class="k">class</span><span class="w"> </span><span class="nc">_PySharkPackage</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""|pyshark|_, as :class:`PyShark` reads it through :attr:`PyShark._expkg` (#1878)."""</span>
+<span class="w">        </span><span class="sd">"""|pyshark|_, as :class:`PyShark` reads it through :attr:`PyShark._expkg` (:issue:`1878`)."""</span>
 
         <span class="nd">@property</span>
         <span class="k">def</span><span class="w"> </span><span class="nf">FileCapture</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[PySharkFileCapture]'</span><span class="p">:</span> <span class="o">...</span>
@@ -546,10 +546,10 @@
 <span class="sd">    records only.</span>
 
 <span class="sd">    The marker is ``frame.encap_type`` on the record's :func:`_frame_layer`.</span>
-<span class="sd">    Wireshark adds it for ``REC_TYPE_PACKET`` records only:</span>
-<span class="sd">    :file:`epan/dissectors/packet-frame.c` lines 1001-1002 in 4.2.2, and 828-890</span>
-<span class="sd">    in 4.6.9. The summary line is not used, because it differs between those</span>
-<span class="sd">    versions. A record with no ``frame`` layer is not a packet either.</span>
+<span class="sd">    Wireshark adds it for ``REC_TYPE_PACKET`` records only, in ``dissect_frame``</span>
+<span class="sd">    of :file:`epan/dissectors/packet-frame.c`, in 4.2.2 and 4.6.9 alike. The</span>
+<span class="sd">    summary line is not used, because it differs between those versions. A</span>
+<span class="sd">    record with no ``frame`` layer is not a packet either.</span>
 
 <span class="sd">    """</span>
     <span class="n">frame</span> <span class="o">=</span> <span class="n">_frame_layer</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
@@ -605,8 +605,8 @@
 <span class="sd">        error rather than degrading to the default engine with a warning.</span>
 
 <span class="sd">        **The interpreter.** |pyshark|_ 0.6 does</span>
-<span class="sd">        ``asyncio.get_event_loop_policy().get_event_loop()`` at</span>
-<span class="sd">        :file:`pyshark/capture/capture.py:183`, in a fresh interpreter with no</span>
+<span class="sd">        ``asyncio.get_event_loop_policy().get_event_loop()`` in</span>
+<span class="sd">        ``Capture._setup_eventloop``, in a fresh interpreter with no</span>
 <span class="sd">        running loop. Measured: 3.10 and 3.11 return a loop</span>
 <span class="sd">        silently, 3.12 returns one with a :exc:`DeprecationWarning`, and 3.14</span>
 <span class="sd">        raises ``RuntimeError: There is no current event loop in thread</span>

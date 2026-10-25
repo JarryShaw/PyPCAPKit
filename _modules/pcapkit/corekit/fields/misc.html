@@ -493,9 +493,10 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.warnings</span><span class="w"> </span><span class="kn">import</span> <span class="n">RegistryWarning</span><span class="p">,</span> <span class="n">warn</span>
 
 <span class="n">__all__</span> <span class="o">=</span> <span class="p">[</span>
-    <span class="s1">'ConditionalField'</span><span class="p">,</span> <span class="s1">'PayloadField'</span><span class="p">,</span>
+    <span class="s1">'ConditionalField'</span><span class="p">,</span> <span class="s1">'PayloadField'</span><span class="p">,</span> <span class="s1">'SchemaField'</span><span class="p">,</span>
     <span class="s1">'SwitchField'</span><span class="p">,</span> <span class="s1">'ForwardMatchField'</span><span class="p">,</span>
     <span class="s1">'NoValueField'</span><span class="p">,</span>
+    <span class="s1">'nested_packet_context'</span><span class="p">,</span>
 <span class="p">]</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -792,7 +793,8 @@
             <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols</span><span class="w"> </span><span class="kn">import</span> <span class="n">__proto__</span>  <span class="c1"># pylint: disable=import-outside-toplevel</span>
 
             <span class="c1"># NOTE: The registry is keyed on the upper-cased class name, both</span>
-            <span class="c1"># when it is seeded (``pcapkit/protocols/__init__.py:76``) and when</span>
+            <span class="c1"># when it is seeded (the loop over ``__all__`` in</span>
+            <span class="c1"># :mod:`pcapkit.protocols`) and when</span>
             <span class="c1"># ``pcapkit.foundation.registry.protocols.register_protocol`` adds to</span>
             <span class="c1"># it, so a name looked up in any other case would miss every time --</span>
             <span class="c1"># and a miss leaves ``_protocol`` as :obj:`None`, which the property</span>
@@ -1244,7 +1246,7 @@
         <span class="n">new_self</span><span class="o">.</span><span class="n">_callback</span><span class="p">(</span><span class="n">new_self</span><span class="p">,</span> <span class="n">packet</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_length_callback</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">new_self</span><span class="o">.</span><span class="n">_length</span> <span class="o">=</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_length_callback</span><span class="p">(</span><span class="n">packet</span><span class="p">)</span>
-            <span class="n">new_self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">new_self</span><span class="o">.</span><span class="n">_length</span><span class="si">}</span><span class="s1">s'</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_length</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="k">else</span> <span class="s1">'1024s'</span>  <span class="c1"># use a reasonable default</span>
+            <span class="n">new_self</span><span class="o">.</span><span class="n">_template</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">new_self</span><span class="o">.</span><span class="n">_length</span><span class="si">}</span><span class="s1">s'</span> <span class="k">if</span> <span class="n">new_self</span><span class="o">.</span><span class="n">_length</span> <span class="o">&gt;=</span> <span class="mi">0</span> <span class="k">else</span> <span class="s1">'1024s'</span>  <span class="c1"># use a reasonable default</span>
         <span class="k">return</span> <span class="n">new_self</span></div>
 
 

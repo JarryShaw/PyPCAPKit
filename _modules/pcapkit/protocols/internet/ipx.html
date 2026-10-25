@@ -506,12 +506,14 @@
 <span class="sd">.. [*] https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange</span>
 
 <span class="sd">"""</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">collections</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">textwrap</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TYPE_CHECKING</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipx.packet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Packet</span> <span class="k">as</span> <span class="n">Enum_Packet</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.ipx.socket</span><span class="w"> </span><span class="kn">import</span> <span class="n">Socket</span> <span class="k">as</span> <span class="n">Enum_Socket</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.const.reg.transtype</span><span class="w"> </span><span class="kn">import</span> <span class="n">TransType</span> <span class="k">as</span> <span class="n">Enum_TransType</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.corekit.module</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModuleDescriptor</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.ipx</span><span class="w"> </span><span class="kn">import</span> <span class="n">IPX</span> <span class="k">as</span> <span class="n">Data_IPX</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.data.internet.ipx</span><span class="w"> </span><span class="kn">import</span> <span class="n">Address</span> <span class="k">as</span> <span class="n">Data_Address</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.internet.internet</span><span class="w"> </span><span class="kn">import</span> <span class="n">Internet</span>
@@ -519,7 +521,7 @@
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">StdlibEnum</span>
-    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
+    <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">DefaultDict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Type</span>
 
     <span class="kn">from</span><span class="w"> </span><span class="nn">aenum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">AenumEnum</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">typing_extensions</span><span class="w"> </span><span class="kn">import</span> <span class="n">Literal</span>
@@ -545,7 +547,30 @@
 <span class="sd">       :attr:`~pcapkit.protocols.schema.internet.ipx.IPX.trailer`</span>
 <span class="sd">       (:issue:`1433`).</span>
 
+<span class="sd">       The payload is dissected by IPX Packet Type from a registry of its own,</span>
+<span class="sd">       :attr:`__proto__`, rather than looked up as an IP protocol number</span>
+<span class="sd">       (:issue:`2169`).</span>
+
 <span class="sd">    """</span>
+
+    <span class="c1">##########################################################################</span>
+    <span class="c1"># Defaults.</span>
+    <span class="c1">##########################################################################</span>
+
+    <span class="c1">#: Protocol index mapping for decoding next layer, see</span>
+    <span class="c1">#: :meth:`self._decode_next_layer</span>
+    <span class="c1">#: &lt;pcapkit.protocols.internet.internet.Internet._decode_next_layer&gt;` &amp;</span>
+    <span class="c1">#: :meth:`self._import_next_layer</span>
+    <span class="c1">#: &lt;pcapkit.protocols.internet.internet.Internet._import_next_layer&gt;`. Keyed by</span>
+    <span class="c1">#: IPX Packet Type, as in :class:`~pcapkit.const.ipx.packet.Packet`, rather</span>
+    <span class="c1">#: than by IP protocol number, so this class keeps a registry of its own</span>
+    <span class="c1">#: instead of sharing :attr:`Internet.__proto__</span>
+    <span class="c1">#: &lt;pcapkit.protocols.internet.internet.Internet.__proto__&gt;` (:issue:`2169`).</span>
+    <span class="c1">#: No IPX-native protocol is shipped, so the payload is</span>
+    <span class="c1">#: :class:`~pcapkit.protocols.misc.raw.Raw` unless one is registered.</span>
+    <span class="n">__proto__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
+        <span class="k">lambda</span><span class="p">:</span> <span class="n">ModuleDescriptor</span><span class="p">(</span><span class="s1">'pcapkit.protocols.misc.raw'</span><span class="p">,</span> <span class="s1">'Raw'</span><span class="p">),</span>
+    <span class="p">)</span>  <span class="c1"># type: DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]</span>
 
     <span class="c1">##########################################################################</span>
     <span class="c1"># Properties.</span>
@@ -562,8 +587,8 @@
         <span class="k">return</span> <span class="mi">30</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span><span class="w"> </span><span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Enum_TransType'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Name of next layer protocol."""</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">protocol</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Enum_Packet'</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">"""IPX Packet Type of next layer protocol."""</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="o">.</span><span class="n">type</span>
 
     <span class="nd">@property</span>
@@ -729,6 +754,20 @@
             <span class="s1">'trailer'</span><span class="p">:</span> <span class="n">data</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">'trailer'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">),</span>
         <span class="p">}</span></div>
 
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_next_exthdr_depth</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">proto</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span> <span class="n">extension</span><span class="p">:</span> <span class="s1">'bool'</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'int'</span><span class="p">:</span>  <span class="c1"># pylint: disable=unused-argument</span>
+<span class="w">        </span><span class="sd">"""Place the next layer in its chain of IPv6 extension headers.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            proto: next layer IPX Packet Type</span>
+<span class="sd">            extension: if the next layer is parsed as an extension header</span>
+
+<span class="sd">        Returns:</span>
+<span class="sd">            Always ``0``: an IPX Packet Type is not an IP protocol number, so it</span>
+<span class="sd">            never names an IPv6 extension header (:issue:`2169`).</span>
+
+<span class="sd">        """</span>
+        <span class="k">return</span> <span class="mi">0</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_ipx_address</span><span class="p">(</span><span class="n">addr</span><span class="p">:</span> <span class="s1">'Data_Address'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bytes'</span><span class="p">:</span>

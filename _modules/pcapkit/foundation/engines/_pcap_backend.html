@@ -506,7 +506,8 @@
 <span class="sd">the one place that answers that, deliberately shared: the engines must agree on</span>
 <span class="sd">the answer, and a copy of the detection in each would be a chance to disagree.</span>
 <span class="sd">It is *only* detection -- nothing here is engine behaviour -- and it imports</span>
-<span class="sd">nothing from :mod:`pcapkit`, so it cannot introduce an import cycle.</span>
+<span class="sd">nothing from :mod:`pcapkit` but :mod:`pcapkit.corekit.infoclass`, which imports</span>
+<span class="sd">nothing from :mod:`pcapkit.foundation`, so it cannot introduce an import cycle.</span>
 
 <span class="sd">"""</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">contextvars</span>

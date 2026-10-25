@@ -1078,7 +1078,9 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            code: IPv4 option code.</span>
-<span class="sd">            meth: Method name or callable to parse and/or construct the option.</span>
+<span class="sd">            meth: Name ``X`` of the ``_read_opt_X`` and ``_make_opt_X``</span>
+<span class="sd">                methods, or a ``(parser, constructor)`` pair of callables, see</span>
+<span class="sd">                :attr:`__option__`.</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            RegistryWarning: If a different entry is already registered for</span>
@@ -1883,7 +1885,7 @@
                 <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_opt_type</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">),</span>
                 <span class="n">length</span><span class="o">=</span><span class="n">schema_req</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
                 <span class="n">func</span><span class="o">=</span><span class="n">func</span><span class="p">,</span>
-                <span class="n">rate</span><span class="o">=</span><span class="mi">40000</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">rate</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span> <span class="k">if</span> <span class="n">rate</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="n">rate</span><span class="o">=</span><span class="mi">40000</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">rate</span><span class="p">)</span> <span class="o">//</span> <span class="mi">1000</span> <span class="k">if</span> <span class="n">rate</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
                 <span class="n">ttl</span><span class="o">=</span><span class="n">datetime</span><span class="o">.</span><span class="n">timedelta</span><span class="p">(</span><span class="n">seconds</span><span class="o">=</span><span class="n">schema_req</span><span class="o">.</span><span class="n">ttl</span><span class="p">),</span>
                 <span class="n">nonce</span><span class="o">=</span><span class="n">schema_req</span><span class="o">.</span><span class="n">nonce</span><span class="p">[</span><span class="s1">'nonce'</span><span class="p">],</span>
                 <span class="n">reserved</span><span class="o">=</span><span class="n">schema_req</span><span class="o">.</span><span class="n">nonce</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>
@@ -1897,7 +1899,7 @@
                 <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_read_ipv4_opt_type</span><span class="p">(</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">),</span>
                 <span class="n">length</span><span class="o">=</span><span class="n">schema_rep</span><span class="o">.</span><span class="n">length</span><span class="p">,</span>
                 <span class="n">func</span><span class="o">=</span><span class="n">func</span><span class="p">,</span>
-                <span class="n">rate</span><span class="o">=</span><span class="mi">40000</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">rate</span><span class="p">)</span> <span class="o">/</span> <span class="mi">1000</span> <span class="k">if</span> <span class="n">rate</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
+                <span class="n">rate</span><span class="o">=</span><span class="mi">40000</span> <span class="o">*</span> <span class="p">(</span><span class="mi">2</span> <span class="o">**</span> <span class="n">rate</span><span class="p">)</span> <span class="o">//</span> <span class="mi">1000</span> <span class="k">if</span> <span class="n">rate</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span><span class="p">,</span>
                 <span class="n">unused</span><span class="o">=</span><span class="n">schema_rep</span><span class="o">.</span><span class="n">reserved</span><span class="p">,</span>
                 <span class="n">nonce</span><span class="o">=</span><span class="n">schema_rep</span><span class="o">.</span><span class="n">nonce</span><span class="p">[</span><span class="s1">'nonce'</span><span class="p">],</span>
                 <span class="n">reserved</span><span class="o">=</span><span class="n">schema_rep</span><span class="o">.</span><span class="n">nonce</span><span class="p">[</span><span class="s1">'reserved'</span><span class="p">],</span>

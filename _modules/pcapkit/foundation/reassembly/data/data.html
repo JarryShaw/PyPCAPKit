@@ -555,8 +555,9 @@
     <span class="n">COMPLETE</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
 
     <span class="c1">#: Fragments were still outstanding when the buffer was flushed -- at the end</span>
-    <span class="c1">#: of the capture, or when the session was torn down (a TCP FIN/RST, or an</span>
-    <span class="c1">#: IPv4 datagram whose identifier was reused by an unfragmented packet).</span>
+    <span class="c1">#: of the capture, or when the session was torn down (a TCP RST, a TCP SYN on</span>
+    <span class="c1">#: a 4-tuple already buffered, or an IPv4 datagram whose identifier was</span>
+    <span class="c1">#: reused by an unfragmented packet).</span>
     <span class="c1">#: The missing octets may simply not have been captured.</span>
     <span class="n">PARTIAL</span> <span class="o">=</span> <span class="n">auto</span><span class="p">()</span>
 
@@ -601,9 +602,9 @@
 <span class="sd">    :class:`~pcapkit.foundation.reassembly.data.data.ReassemblyData` rather than in</span>
 <span class="sd">    either protocol's data module.</span>
 
-<span class="sd">    IP reassembly is the case that made it necessary. It submits a datagram for</span>
-<span class="sd">    *every* frame -- not only the fragmented ones, since a frame that is not</span>
-<span class="sd">    fragmented in any sense still reaches</span>
+<span class="sd">    IP reassembly is the case that made it necessary. IPv4 reassembly submits a</span>
+<span class="sd">    datagram for *every* frame whose **DF** flag is clear -- not only the</span>
+<span class="sd">    fragmented ones, since an unfragmented frame still reaches</span>
 <span class="sd">    :meth:`IP.reassembly &lt;pcapkit.foundation.reassembly.ip.IP.reassembly&gt;` and is</span>
 <span class="sd">    submitted there as a trivially complete datagram -- so an eager parse would</span>
 <span class="sd">    re-parse captures holding no fragments at all: :file:`http.pcap` has 1117</span>

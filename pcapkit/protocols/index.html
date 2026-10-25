@@ -1031,6 +1031,19 @@ are absent otherwise.</p>
 <dd><p>Mapping of fields.</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.schema.Schema._cut_short_read">
+<span class="sig-name descname"><span class="pre">_cut_short_read</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/schema/schema.html#Schema._cut_short_read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.schema.Schema._cut_short_read" title="Link to this definition">¶</a></dt>
+<dd><p>Cut the packed buffers back to the octets a short read consumed.</p>
+<p>A schema whose data ended inside one of its fields records, as
+<code class="docutils literal notranslate"><span class="pre">__short_read__</span></code>, that field’s name and how many of its octets were
+there (see <a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.unpack" title="pcapkit.protocols.schema.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unpack()</span></code></a>). Its value is read as though the missing
+octets were zeros, so packing it writes the field at full width and
+every field after it besides, none of which was captured. Only the
+octets read are kept here, so a truncated header packs back to exactly
+what was captured (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1458">#1458</a>).</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -1244,6 +1257,50 @@ instantiated (<a class="extlink-issue reference external" href="https://github.c
 </div>
 <dl class="field-list simple">
 </dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.schema.keep_short_read">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.schema.</span></span><span class="sig-name descname"><span class="pre">keep_short_read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protocol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/schema/schema.html#keep_short_read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.schema.keep_short_read" title="Link to this definition">¶</a></dt>
+<dd><p>Carry a parsed header’s short read into the protocol’s info.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>protocol</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference internal" href="protocol.html#pcapkit.protocols.protocol.ProtocolBase" title="pcapkit.protocols.protocol.ProtocolBase"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtocolBase</span></code></a></span>) – Protocol instance, just parsed.</p>
+</dd>
+</dl>
+<p>Called by the layer base classes once a parse is done. When the data ended
+inside one of the header’s fields, <code class="docutils literal notranslate"><span class="pre">info</span></code> gains the <code class="docutils literal notranslate"><span class="pre">__short_read__</span></code>
+record <a class="reference internal" href="#pcapkit.protocols.schema.schema.Schema.unpack" title="pcapkit.protocols.schema.schema.Schema.unpack"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Schema.unpack()</span></code></a> made, so that <a class="reference internal" href="#pcapkit.protocols.schema.schema.replay_short_read" title="pcapkit.protocols.schema.schema.replay_short_read"><code class="xref py py-func docutils literal notranslate"><span class="pre">replay_short_read()</span></code></a> can
+cut the rebuild back to what was captured (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1458">#1458</a>). The key is listed
+in <a class="reference internal" href="#pcapkit.protocols.data.data.Data.__included__" title="pcapkit.protocols.data.data.Data.__included__"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Data.__included__</span></code></a>,
+so <a class="reference internal" href="../corekit/infoclass.html#pcapkit.corekit.infoclass.Info.to_dict" title="pcapkit.corekit.infoclass.Info.to_dict"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Info.to_dict</span></code></a> carries it
+and <code class="docutils literal notranslate"><span class="pre">from_data(info.to_dict())</span></code> replays it too; it is absent for a header
+that was captured whole.</p>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="pcapkit.protocols.schema.schema.replay_short_read">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.schema.schema.</span></span><span class="sig-name descname"><span class="pre">replay_short_read</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">protocol</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../../_modules/pcapkit/protocols/schema/schema.html#replay_short_read"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.protocols.schema.schema.replay_short_read" title="Link to this definition">¶</a></dt>
+<dd><p>Cut a protocol rebuilt by <code class="docutils literal notranslate"><span class="pre">from_data</span></code> back to the octets its header had.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>protocol</strong> (<span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">_PB</span></code></span>) – Protocol instance, just built by <code class="docutils literal notranslate"><span class="pre">from_data</span></code>.</p></li>
+<li><p><strong>data</strong> (<span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Any" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">Any</span></code></a></span>) – The info it was built from.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="docutils literal notranslate"><span class="pre">_PB</span></code></span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><code class="docutils literal notranslate"><span class="pre">protocol</span></code> itself.</p>
+</dd>
+</dl>
+<p>The rebuild packs every field at full width, the missing octets as the
+zeros they were read as. The <code class="docutils literal notranslate"><span class="pre">__short_read__</span></code> record that
+<a class="reference internal" href="#pcapkit.protocols.schema.schema.keep_short_read" title="pcapkit.protocols.schema.schema.keep_short_read"><code class="xref py py-func docutils literal notranslate"><span class="pre">keep_short_read()</span></code></a> left in <code class="docutils literal notranslate"><span class="pre">data</span></code> names the field the capture ended
+inside and how much of it there was, so everything from that point on is
+dropped (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1458">#1458</a>). A header cut short has no payload past it.</p>
 </dd></dl>
 
 <section id="internal-definitions">

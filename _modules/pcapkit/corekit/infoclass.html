@@ -757,9 +757,9 @@
 <span class="sd">      .. note::</span>
 
 <span class="sd">         This is implemented thru the :meth:`__new__` method, which will</span>
-<span class="sd">         inherit the additional and excluded field names from the base</span>
-<span class="sd">         classes, as well as populating the additional and excluded field</span>
-<span class="sd">         from the subclass attributes.</span>
+<span class="sd">         inherit the additional, excluded and included field names from the</span>
+<span class="sd">         base classes, as well as populating the additional, excluded and</span>
+<span class="sd">         included fields from the subclass attributes.</span>
 
 <span class="sd">         .. code-block:: python</span>
 
@@ -1260,9 +1260,9 @@
 <span class="sd">        Important:</span>
 <span class="sd">            We only convert nested :class:`Info` objects into :obj:`dict` if</span>
 <span class="sd">            they are the direct value of the :class:`Info` object's attribute.</span>
-<span class="sd">            Should such :class:`Info` objects be nested within other data,</span>
+<span class="sd">            Should such :class:`Info` objects be nested within other data</span>
 <span class="sd">            types, such as :obj:`list`, :obj:`tuple`, :obj:`set`, etc., we</span>
-<span class="sd">            shall not convert them into :obj:`dict` and remain them intact.</span>
+<span class="sd">            leave them intact rather than converting them into :obj:`dict`.</span>
 
 <span class="sd">        Note:</span>
 <span class="sd">            :meth:`from_dict` reverses the flattening only for keys whose type</span>

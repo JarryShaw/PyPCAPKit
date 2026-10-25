@@ -660,8 +660,9 @@ backwards.</p>
 <dt class="sig sig-object py" id="pcapkit.foundation.reassembly.data.data.Completion.PARTIAL">
 <span class="sig-name descname"><span class="pre">PARTIAL</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'partial'</span></span><a class="headerlink" href="#pcapkit.foundation.reassembly.data.data.Completion.PARTIAL" title="Link to this definition">¶</a></dt>
 <dd><p>Fragments were still outstanding when the buffer was flushed – at the end
-of the capture, or when the session was torn down (a TCP FIN/RST, or an
-IPv4 datagram whose identifier was reused by an unfragmented packet).
+of the capture, or when the session was torn down (a TCP RST, a TCP SYN on
+a 4-tuple already buffered, or an IPv4 datagram whose identifier was
+reused by an unfragmented packet).
 The missing octets may simply not have been captured.</p>
 </dd></dl>
 
@@ -709,9 +710,9 @@ the datagram just reassembled. Nothing about postponing it is specific to any
 one reassembler, which is why this lives beside
 <a class="reference internal" href="#pcapkit.foundation.reassembly.data.data.ReassemblyData" title="pcapkit.foundation.reassembly.data.data.ReassemblyData"><code class="xref py py-class docutils literal notranslate"><span class="pre">ReassemblyData</span></code></a> rather than in
 either protocol’s data module.</p>
-<p>IP reassembly is the case that made it necessary. It submits a datagram for
-<em>every</em> frame – not only the fragmented ones, since a frame that is not
-fragmented in any sense still reaches
+<p>IP reassembly is the case that made it necessary. IPv4 reassembly submits a
+datagram for <em>every</em> frame whose <strong>DF</strong> flag is clear – not only the
+fragmented ones, since an unfragmented frame still reaches
 <a class="reference internal" href="ip/ip.html#pcapkit.foundation.reassembly.ip.IP.reassembly" title="pcapkit.foundation.reassembly.ip.IP.reassembly"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IP.reassembly</span></code></a> and is
 submitted there as a trivially complete datagram – so an eager parse would
 re-parse captures holding no fragments at all: <code class="file docutils literal notranslate"><span class="pre">http.pcap</span></code> has 1117

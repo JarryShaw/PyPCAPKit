@@ -586,10 +586,11 @@ Where a sender <strong>pipelines</strong> – several requests in flight before 
 and are concatenated after all. Measured: two requests sent back to back
 on one acknowledgement number come back as a single datagram carrying
 <code class="docutils literal notranslate"><span class="pre">b'req1req2'</span></code>, which
-<code class="xref py py-meth docutils literal notranslate"><span class="pre">test_pipelined_sends_share_a_datagram_because_the_ack_never_moved()</span></code>
-pins. So this narrows the concatenation to within one exchange rather than
-eliminating it, and an application parser handed a pipelined datagram
-still sees only the first message.</p>
+<code class="docutils literal notranslate"><span class="pre">test_pipelined_sends_share_a_datagram_because_the_ack_never_moved</span></code> in
+<code class="file docutils literal notranslate"><span class="pre">tests/foundation/traceflow/test_tcp.py</span></code> pins. So this narrows the
+concatenation to within one exchange rather than eliminating it, and an
+application parser handed a pipelined datagram still sees only the first
+message.</p>
 <p>A direction that carried one acknowledgement number throughout – a single
 request and its reply, which is what most of the unit tests exercise –
 does collapse to one datagram each way, which is where “one per direction”
@@ -979,7 +980,13 @@ capture order would corrupt.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.tcp.Packet.protocol">
 <span class="sig-name descname"><span class="pre">protocol</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.linktype.LinkType" title="pcapkit.const.reg.linktype.LinkType"><span class="pre">LinkType</span></a></span><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Packet.protocol" title="Link to this definition">¶</a></dt>
-<dd><p>Data link type from global header.</p>
+<dd><p>the PCAP global header’s, or that of the PCAP-NG
+interface the packet was captured on.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Data link type</p>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1122,7 +1129,8 @@ subsequences of it.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.tcp.Buffer.label">
 <span class="sig-name descname"><span class="pre">label</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Buffer.label" title="Link to this definition">¶</a></dt>
-<dd><p>Flow label generated from <code class="docutils literal notranslate"><span class="pre">BUFID</span></code>.</p>
+<dd><p>Flow label, built from the packet that opened the flow, cf.
+<a class="reference internal" href="#pcapkit.foundation.traceflow.tcp.TCP.trace" title="pcapkit.foundation.traceflow.tcp.TCP.trace"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.trace</span></code></a>.</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1206,7 +1214,8 @@ flush <em>this</em> conversation without disturbing any other.</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.traceflow.data.tcp.Index.label">
 <span class="sig-name descname"><span class="pre">label</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/stdtypes.html#str" title="(in Python v3.15)"><span class="pre">str</span></a></span><a class="headerlink" href="#pcapkit.foundation.traceflow.data.tcp.Index.label" title="Link to this definition">¶</a></dt>
-<dd><p>Flow label generated from <code class="docutils literal notranslate"><span class="pre">BUFID</span></code>.</p>
+<dd><p>Flow label, built from the packet that opened the flow, cf.
+<a class="reference internal" href="#pcapkit.foundation.traceflow.tcp.TCP.trace" title="pcapkit.foundation.traceflow.tcp.TCP.trace"><code class="xref py py-meth docutils literal notranslate"><span class="pre">TCP.trace</span></code></a>.</p>
 </dd></dl>
 
 <dl class="py attribute">

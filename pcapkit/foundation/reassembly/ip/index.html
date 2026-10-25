@@ -615,6 +615,10 @@ arrives after its datagram has completed opens a new buffer, which is later
 reported as a separate incomplete datagram; this is intended (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1507">#1507</a>).</p>
 <p>Departures from the procedure above:</p>
 <ul class="simple">
+<li><p>The timer is not set from <code class="docutils literal notranslate"><span class="pre">TLB</span></code> and <code class="docutils literal notranslate"><span class="pre">TTL</span></code>. A buffer is abandoned a fixed
+timeout after its first-arriving fragment, on the capture’s clock – 60
+seconds by default, per <span class="target" id="index-4"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc1122.html#section-3.3.2"><strong>RFC 1122 Section 3.3.2</strong></a> for IPv4 and
+<span class="target" id="index-5"></span><a class="rfc reference external" href="https://datatracker.ietf.org/doc/html/rfc8200.html#section-4.5"><strong>RFC 8200 Section 4.5</strong></a> for IPv6.</p></li>
 <li><p>Only the final fragment’s partial last <code class="docutils literal notranslate"><span class="pre">RCVBT</span></code> block is set. A non-final
 fragment carries a multiple of 8 octets, so one ending mid-block was cut or
 is malformed, and setting its last block would complete the datagram with

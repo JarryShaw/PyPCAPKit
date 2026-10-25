@@ -574,6 +574,21 @@ zero (<a class="extlink-issue reference external" href="https://github.com/Jarry
 </dd></dl>
 
 <dl class="py property">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.ah.AH.alias">
+<span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">alias</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Literal" title="(in Python v3.15)"><span class="pre">Literal</span></a><span class="p"><span class="pre">[</span></span><span class="s"><span class="pre">'AH'</span></span><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.protocols.internet.ah.AH.alias" title="Link to this definition">¶</a></dt>
+<dd><p>Acronym of corresponding protocol.</p>
+<p>Spelled out rather than left to
+<a class="reference internal" href="../protocol.html#pcapkit.protocols.protocol.ProtocolBase.alias" title="pcapkit.protocols.protocol.ProtocolBase.alias"><code class="xref py py-attr docutils literal notranslate"><span class="pre">ProtocolBase.alias</span></code></a>’s
+class-name default, because
+<a class="reference internal" href="ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">IPv6_Ext</span></code></a> sits between
+this class and that default in the MRO and carries its own
+<code class="docutils literal notranslate"><span class="pre">'IPv6-Ext'</span></code> (GitHub issue <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/917">#917</a>). Inheriting it would rename
+this header in every <a class="reference internal" href="../../corekit/protochain.html#pcapkit.corekit.protochain.ProtoChain" title="pcapkit.corekit.protochain.ProtoChain"><code class="xref py py-class docutils literal notranslate"><span class="pre">ProtoChain</span></code></a>
+string and in <a class="reference internal" href="ipv6.html#pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer" title="pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer"><code class="xref py py-meth docutils literal notranslate"><span class="pre">IPv6._decode_next_layer</span></code></a>’s packet
+dict key.</p>
+</dd></dl>
+
+<dl class="py property">
 <dt class="sig sig-object py" id="pcapkit.protocols.internet.ah.AH.length">
 <span class="property"><span class="k"><span class="pre">property</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">length</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)"><span class="pre">int</span></a></span><a class="headerlink" href="#pcapkit.protocols.internet.ah.AH.length" title="Link to this definition">¶</a></dt>
 <dd><p>Header length of current protocol.</p>

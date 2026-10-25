@@ -891,7 +891,7 @@
 <span class="sd">    An option's length is a 16-bit wire field, so one four-octet option header</span>
 <span class="sd">    can declare 65,535 octets of payload. Read as declared, every shortfall</span>
 <span class="sd">    would be zero-padded at the field layer, and the zeros rebuilt as if they</span>
-<span class="sd">    had been captured (#594, #1325). So a payload that runs past the area is</span>
+<span class="sd">    had been captured (:issue:`594`, :issue:`1325`). So a payload that runs past the area is</span>
 <span class="sd">    refused here instead. Inside a block, :class:`OptionAreaField` then keeps</span>
 <span class="sd">    the whole option area as the octets captured, so the block still parses and</span>
 <span class="sd">    rebuilds byte for byte.</span>
@@ -931,7 +931,7 @@
 <span class="sd">    or :func:`bounded_option`. A block has no catch point above its fields, so</span>
 <span class="sd">    raising would abort the whole extraction. This field instead returns the</span>
 <span class="sd">    area as a single :obj:`bytes` item, which packs back verbatim, and reports</span>
-<span class="sd">    no padding after it (#1325).</span>
+<span class="sd">    no padding after it (:issue:`1325`).</span>
 
 <span class="sd">    """</span>
 
@@ -1254,6 +1254,8 @@
 
 
 
+<div class="viewcode-block" id="_cut_last_line">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng._cut_last_line">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_cut_last_line</span><span class="p">(</span><span class="n">schema</span><span class="p">:</span> <span class="s1">'Schema'</span><span class="p">,</span> <span class="n">index</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">lines</span><span class="p">:</span> <span class="s1">'list[str]'</span><span class="p">,</span>
                    <span class="n">packet</span><span class="p">:</span> <span class="s1">'Optional[dict[str, Any]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'bool'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Tell whether a key log line that did not parse is one the capture cut.</span>
@@ -1276,9 +1278,12 @@
 <span class="sd">    """</span>
     <span class="k">if</span> <span class="n">index</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">False</span>
-    <span class="k">return</span> <span class="s1">'__short_read__'</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="vm">__dict__</span> <span class="ow">or</span> <span class="p">(</span><span class="n">packet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_secrets_cut</span><span class="p">(</span><span class="n">packet</span><span class="p">))</span>
+    <span class="k">return</span> <span class="s1">'__short_read__'</span> <span class="ow">in</span> <span class="n">schema</span><span class="o">.</span><span class="vm">__dict__</span> <span class="ow">or</span> <span class="p">(</span><span class="n">packet</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">_secrets_cut</span><span class="p">(</span><span class="n">packet</span><span class="p">))</span></div>
 
 
+
+<div class="viewcode-block" id="_malformed_line_message">
+<a class="viewcode-back" href="../../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.schema.misc.pcapng._malformed_line_message">[docs]</a>
 <span class="k">def</span><span class="w"> </span><span class="nf">_malformed_line_message</span><span class="p">(</span><span class="n">kind</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">,</span> <span class="n">labels</span><span class="p">:</span> <span class="s1">'Callable[[str], Any]'</span><span class="p">,</span> <span class="n">line</span><span class="p">:</span> <span class="s1">'str'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'str'</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">"""Report a key log line that does not parse, without quoting what it holds.</span>
 
@@ -1304,7 +1309,8 @@
         <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: invalid </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1"> key log line with an unrecognised label; '</span>
                 <span class="s1">'line elided, kept as captured'</span><span class="p">)</span>
     <span class="k">return</span> <span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: invalid </span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1"> key log line for label </span><span class="si">{</span><span class="n">name</span><span class="si">!r}</span><span class="s1">; '</span>
-            <span class="s1">'values elided, line kept as captured'</span><span class="p">)</span>
+            <span class="s1">'values elided, line kept as captured'</span><span class="p">)</span></div>
+
 
 
 <div class="viewcode-block" id="dsb_secrets_selector">
@@ -1900,10 +1906,13 @@
 <span class="sd">            This method is expected to directly modify any data stored</span>
 <span class="sd">            in the ``packet`` and thus no return is required.</span>
 
-<span class="sd">            The Byte-Order Magic is not carried by any field of the schema --</span>
-<span class="sd">            :attr:`magic` is the palindromic constant, identical in either byte</span>
-<span class="sd">            order -- so it is seeded here from the byte order the packet data</span>
-<span class="sd">            asks for, and from the host byte order when it asks for none.</span>
+<span class="sd">            :func:`shb_byteorder_callback` takes the byte order from the</span>
+<span class="sd">            Byte-Order Magic as :attr:`match` reads it, and a constructed block</span>
+<span class="sd">            has no :attr:`match` to read -- a forward match packs no octets --</span>
+<span class="sd">            nor can :attr:`magic` stand in, since it holds the same constant in</span>
+<span class="sd">            either byte order. So :attr:`match` is seeded here from the byte</span>
+<span class="sd">            order the packet data asks for, and from the host byte order when it</span>
+<span class="sd">            asks for none; a ``match`` already in ``packet`` is kept.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="s1">'match'</span> <span class="ow">in</span> <span class="n">packet</span><span class="p">:</span>
@@ -2765,7 +2774,7 @@
 <span class="k">class</span><span class="w"> </span><span class="nc">NameResolutionBlock</span><span class="p">(</span><span class="n">BlockType</span><span class="p">,</span> <span class="n">code</span><span class="o">=</span><span class="n">Enum_BlockType</span><span class="o">.</span><span class="n">Name_Resolution_Block</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""Header schema for PCAP-NG Name Resolution Block (NRB)."""</span>
 
-    <span class="c1">#: Record total length.</span>
+    <span class="c1">#: Block total length.</span>
     <span class="n">length</span><span class="p">:</span> <span class="s1">'int'</span> <span class="o">=</span> <span class="n">UInt32Field</span><span class="p">(</span><span class="n">callback</span><span class="o">=</span><span class="n">byteorder_callback</span><span class="p">)</span>
     <span class="c1">#: Name resolution records.</span>
     <span class="n">records</span><span class="p">:</span> <span class="s1">'list[NameResolutionRecord]'</span> <span class="o">=</span> <span class="n">OptionAreaField</span><span class="p">(</span>

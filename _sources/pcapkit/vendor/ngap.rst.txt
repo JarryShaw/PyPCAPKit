@@ -16,8 +16,9 @@ vendor crawlers include:
      - NGAP Protocol IE Identifiers [*]_
 
 Each sources the assignment from |pycrate|_'s already-installed, compiled NGAP
-specification rather than fetching a network registry -- see the module
-docstring below for why.
+specification rather than fetching a network registry: 3GPP publishes TS 38.413
+as a PDF, with no registry kept in step with it that a crawler could fetch
+(:issue:`880`).
 
 NGAP Elementary Procedure Codes
 ===============================

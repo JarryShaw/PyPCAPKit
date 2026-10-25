@@ -1087,7 +1087,7 @@
 <span class="sd">        ``sys.exit(SomeCrawler())``, so running one from a second checkout, or</span>
 <span class="sd">        from a module that never sits under ``vendor/`` at all, resolves</span>
 <span class="sd">        :mod:`pcapkit.vendor` from wherever it is installed while</span>
-<span class="sd">        ``inspect.getfile(cls)`` names a file elsewhere entirely --  and</span>
+<span class="sd">        ``inspect.getfile(cls)`` names a file elsewhere entirely -- and</span>
 <span class="sd">        :meth:`Vendor.__init__ &lt;pcapkit.vendor.default.Vendor.__init__&gt;` then opens that path with ``'w'``, silently</span>
 <span class="sd">        truncating whatever :attr:`~Vendor.__module__` actually names instead of</span>
 <span class="sd">        raising. So the escape is rejected outright, rather than trusted to</span>
@@ -1140,7 +1140,7 @@
 <span class="sd">        arguments.</span>
 
 <span class="sd">        The method will first try to *GET* the content of :attr:`~Vendor.LINK`.</span>
-<span class="sd">        Should any exception raised, it will first try with proxy settings from</span>
+<span class="sd">        Should any exception be raised, it will first try with proxy settings from</span>
 <span class="sd">        :func:`~pcapkit.vendor.default.get_proxies`.</span>
 
 <span class="sd">        .. note::</span>
@@ -1148,7 +1148,7 @@
 <span class="sd">           Since some :attr:`~Vendor.LINK` links are from Wikipedia, etc., they</span>
 <span class="sd">           might not be available in certain areas, e.g. the amazing PRC :)</span>
 
-<span class="sd">        Would proxies failed again, it will prompt for user intervention, i.e.</span>
+<span class="sd">        Should the proxies fail again, it will prompt for user intervention, i.e.</span>
 <span class="sd">        it will use :func:`webbrowser.open` to open the page in browser for you, and</span>
 <span class="sd">        you can manually load that page and save the HTML source at the location</span>
 <span class="sd">        it provides.</span>

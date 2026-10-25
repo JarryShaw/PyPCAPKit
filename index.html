@@ -525,7 +525,7 @@ a command line tool for PCAP extraction.</p>
 <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">PyPCAPKit</span></code></a> project as its CLI support.</p>
 </div>
 </div>
-<p>Unlike popular PCAP extractors such as <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.html#module-scapy" title="(in Scapy v2.8.0.post17)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Scapy</span></code></a>,
+<p>Unlike popular PCAP extractors such as <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.html#module-scapy" title="(in Scapy v2.8.0.post19)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">Scapy</span></code></a>,
 <a class="reference external" href="https://dpkt.readthedocs.io">DPKT</a> and <a class="reference external" href="https://kiminewt.github.io/pyshark">PyShark</a>, <a class="reference internal" href="pcapkit/index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> aims to be more
 comprehensive: more detailed packet information, and a more <em>Pythonic</em>
 interface.</p>
@@ -652,7 +652,7 @@ pip<span class="w"> </span>install<span class="w"> </span>pypcapkit<span class="
 <p class="admonition-title">Important</p>
 <p>The <code class="docutils literal notranslate"><span class="pre">all</span></code> extra deliberately excludes both <code class="docutils literal notranslate"><span class="pre">pypcap</span></code> and <code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code>, for
 different reasons. Everything
-else in <code class="docutils literal notranslate"><span class="pre">all</span></code> is a pure-Python wheel, whereas <code class="docutils literal notranslate"><span class="pre">pypcap</span></code> compiles a C
+else in <code class="docutils literal notranslate"><span class="pre">all</span></code> installs from a published wheel, whereas <code class="docutils literal notranslate"><span class="pre">pypcap</span></code> compiles a C
 extension; pulling it into <code class="docutils literal notranslate"><span class="pre">all</span></code> would demand a working compiler and the
 <a class="reference external" href="https://www.tcpdump.org">libpcap</a> development files from everyone installing <code class="docutils literal notranslate"><span class="pre">pypcapkit[all]</span></code>.
 <code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code> needs no compiler, but it and its <code class="docutils literal notranslate"><span class="pre">libpcap</span></code> dependency are

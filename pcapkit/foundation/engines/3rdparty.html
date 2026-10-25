@@ -508,14 +508,14 @@ support, as is used by <a class="reference internal" href="../extraction.html#pc
 layer registries – <code class="docutils literal notranslate"><span class="pre">conf.l2types</span></code> and the <code class="docutils literal notranslate"><span class="pre">bind_layers</span></code> payload table,
 both of which exist only as import side effects of the layer modules.
 Importing a narrower submodule leaves them empty, and
-<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.utils.html#scapy.utils.PcapReader" title="(in Scapy v2.8.0.post17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PcapReader</span></code></a> then returns every frame as one opaque
-<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Raw" title="(in Scapy v2.8.0.post17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> layer without raising, so the engine would dissect
+<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.utils.html#scapy.utils.PcapReader" title="(in Scapy v2.8.0.post19)"><code class="xref py py-class docutils literal notranslate"><span class="pre">PcapReader</span></code></a> then returns every frame as one opaque
+<a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Raw" title="(in Scapy v2.8.0.post19)"><code class="xref py py-class docutils literal notranslate"><span class="pre">Raw</span></code></a> layer without raising, so the engine would dissect
 nothing and say so only on <a class="reference external" href="https://docs.python.org/3/library/sys.html#sys.stderr" title="(in Python v3.15)"><code class="xref py py-data docutils literal notranslate"><span class="pre">sys.stderr</span></code></a>. Naming the layer modules
 individually is not a cheaper route: it repairs the link layer but leaves the
 payload table short, so <code class="file docutils literal notranslate"><span class="pre">dhcp.pcapng</span></code> still comes back as
 <code class="docutils literal notranslate"><span class="pre">Ethernet</span> <span class="pre">/</span> <span class="pre">IP</span> <span class="pre">/</span> <span class="pre">UDP</span> <span class="pre">/</span> <span class="pre">Raw</span></code>, and such a list would go stale silently as
 <a class="reference external" href="https://scapy.net">Scapy</a> gains layer types.</p>
-<p>One side effect: <code class="docutils literal notranslate"><span class="pre">scapy.all</span></code> loads <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.dcerpc.html#module-scapy.layers.dcerpc" title="(in Scapy v2.8.0.post17)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scapy.layers.dcerpc</span></code></a>, which
+<p>One side effect: <code class="docutils literal notranslate"><span class="pre">scapy.all</span></code> loads <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.layers.dcerpc.html#module-scapy.layers.dcerpc" title="(in Scapy v2.8.0.post19)"><code class="xref py py-mod docutils literal notranslate"><span class="pre">scapy.layers.dcerpc</span></code></a>, which
 reaches <a class="reference external" href="https://scapy.net">Scapy</a>’s TLS layer and there triggers a
 <code class="docutils literal notranslate"><span class="pre">CryptographyDeprecationWarning</span></code> from <a class="reference external" href="https://cryptography.io"><code class="docutils literal notranslate"><span class="pre">cryptography</span></code></a> about
 finite-field Diffie-Hellman. It concerns a key-exchange code path
@@ -568,9 +568,9 @@ category (see <a class="reference internal" href="../../utilities/warnings.html#
 <dl class="py method">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.scapy.Scapy.run">
 <span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../../../_modules/pcapkit/foundation/engines/scapy.html#Scapy.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pcapkit.foundation.engines.scapy.Scapy.run" title="Link to this definition">¶</a></dt>
-<dd><p>Call <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html#scapy.sendrecv.sniff" title="(in Scapy v2.8.0.post17)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scapy.sendrecv.sniff()</span></code></a> to extract PCAP files.</p>
+<dd><p>Call <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html#scapy.sendrecv.sniff" title="(in Scapy v2.8.0.post19)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scapy.sendrecv.sniff()</span></code></a> to extract PCAP files.</p>
 <p>This method assigns <a class="reference internal" href="#pcapkit.foundation.engines.scapy.Scapy._extmp" title="pcapkit.foundation.engines.scapy.Scapy._extmp"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._extmp</span></code></a> as an iterator
-from <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html#scapy.sendrecv.sniff" title="(in Scapy v2.8.0.post17)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scapy.sendrecv.sniff()</span></code></a>, reached through
+from <a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.sendrecv.html#scapy.sendrecv.sniff" title="(in Scapy v2.8.0.post19)"><code class="xref py py-func docutils literal notranslate"><span class="pre">scapy.sendrecv.sniff()</span></code></a>, reached through
 <a class="reference internal" href="#pcapkit.foundation.engines.scapy.Scapy._expkg" title="pcapkit.foundation.engines.scapy.Scapy._expkg"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._expkg</span></code></a> – which <a class="reference internal" href="#pcapkit.foundation.engines.scapy.Scapy.__init__" title="pcapkit.foundation.engines.scapy.Scapy.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">__init__()</span></code></a> binds to
 <code class="docutils literal notranslate"><span class="pre">scapy.all</span></code>, since that is the import that populates the layer
 registries <code class="docutils literal notranslate"><span class="pre">sniff</span></code> needs to dissect anything.</p>
@@ -594,7 +594,7 @@ protocol implementations.</p>
 <dd><p>Read frames with Scapy engine.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post17)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.packet.Packet</span></code></a></span></p>
+<dd class="field-odd"><p><span class="sphinx_autodoc_typehints-type"><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post19)"><code class="xref py py-class docutils literal notranslate"><span class="pre">scapy.packet.Packet</span></code></a></span></p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Parsed frame instance.</p>
@@ -615,7 +615,7 @@ for more operational information.</p>
 
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines.scapy.Scapy._extmp">
-<span class="sig-name descname"><span class="pre">_extmp</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterator" title="(in Python v3.15)"><span class="pre">Iterator</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post17)"><span class="pre">scapy.packet.Packet</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.engines.scapy.Scapy._extmp" title="Link to this definition">¶</a></dt>
+<span class="sig-name descname"><span class="pre">_extmp</span></span><span class="property"><span class="p"><span class="pre">:</span></span><span class="w"> </span><a class="reference external" href="https://docs.python.org/3/library/typing.html#typing.Iterator" title="(in Python v3.15)"><span class="pre">Iterator</span></a><span class="p"><span class="pre">[</span></span><a class="reference external" href="https://scapy.readthedocs.io/en/latest/api/scapy.packet.html#scapy.packet.Packet" title="(in Scapy v2.8.0.post19)"><span class="pre">scapy.packet.Packet</span></a><span class="p"><span class="pre">]</span></span></span><a class="headerlink" href="#pcapkit.foundation.engines.scapy.Scapy._extmp" title="Link to this definition">¶</a></dt>
 <dd><p>Engine extraction temporary storage.</p>
 </dd></dl>
 
@@ -779,7 +779,8 @@ both up front.</p>
 3.10 and 3.11 return a loop silently, 3.12 returns one with a
 <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#DeprecationWarning" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">DeprecationWarning</span></code></a>, and <strong>3.14 raises</strong>
 <code class="docutils literal notranslate"><span class="pre">RuntimeError:</span> <span class="pre">There</span> <span class="pre">is</span> <span class="pre">no</span> <span class="pre">current</span> <span class="pre">event</span> <span class="pre">loop</span> <span class="pre">in</span> <span class="pre">thread</span> <span class="pre">'MainThread'</span></code>. Python
-3.13 works, being on the deprecated-but-functional side of that change.</p>
+3.13 was not measured; it is expected to work, being on the
+deprecated-but-functional side of that change.</p>
 <p><strong>Wireshark’s</strong> <strong class="program">tshark</strong> <strong>binary.</strong> <a class="reference external" href="https://kiminewt.github.io/pyshark"><code class="docutils literal notranslate"><span class="pre">pyshark</span></code></a> shells out to it and
 parses nothing itself. It need not be on <span class="target" id="index-0"></span><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PATH</span></code>: <a class="reference external" href="https://kiminewt.github.io/pyshark"><code class="docutils literal notranslate"><span class="pre">pyshark</span></code></a> consults
 <code class="docutils literal notranslate"><span class="pre">tshark_path</span></code> in its <code class="file docutils literal notranslate"><span class="pre">config.ini</span></code> first, then <span class="target" id="index-1"></span><code class="xref std std-envvar docutils literal notranslate"><span class="pre">PATH</span></code> on POSIX,
@@ -841,8 +842,8 @@ visible to an import. <a class="reference external" href="https://kiminewt.githu
 when it is used, which without this hook escapes from <a class="reference internal" href="#pcapkit.foundation.engines.pyshark.PyShark.run" title="pcapkit.foundation.engines.pyshark.PyShark.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">run()</span></code></a> as a hard
 error rather than degrading to the default engine with a warning.</p>
 <p><strong>The interpreter.</strong> <a class="reference external" href="https://kiminewt.github.io/pyshark"><code class="docutils literal notranslate"><span class="pre">pyshark</span></code></a> 0.6 does
-<code class="docutils literal notranslate"><span class="pre">asyncio.get_event_loop_policy().get_event_loop()</span></code> at
-<code class="file docutils literal notranslate"><span class="pre">pyshark/capture/capture.py:183</span></code>, in a fresh interpreter with no
+<code class="docutils literal notranslate"><span class="pre">asyncio.get_event_loop_policy().get_event_loop()</span></code> in
+<code class="docutils literal notranslate"><span class="pre">Capture._setup_eventloop</span></code>, in a fresh interpreter with no
 running loop. Measured: 3.10 and 3.11 return a loop
 silently, 3.12 returns one with a <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#DeprecationWarning" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">DeprecationWarning</span></code></a>, and 3.14
 raises <code class="docutils literal notranslate"><span class="pre">RuntimeError:</span> <span class="pre">There</span> <span class="pre">is</span> <span class="pre">no</span> <span class="pre">current</span> <span class="pre">event</span> <span class="pre">loop</span> <span class="pre">in</span> <span class="pre">thread</span>
@@ -1257,7 +1258,7 @@ else would say why.</p>
     than upstream <a class="reference external" href="https://github.com/pynetwork/pypcap">PyPCAP</a>, or is installed but cannot load. These
     are the conditions <a class="reference internal" href="#pcapkit.foundation.engines.pypcap.PyPCAP.unsupported_reason" title="pcapkit.foundation.engines.pypcap.PyPCAP.unsupported_reason"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unsupported_reason()</span></code></a> reports, kept here as
     well because that hook is only consulted by
-    <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor.run" title="pcapkit.foundation.extraction.Extractor.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Extractor.run</span></code></a>;
+    <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>’s engine selection;
     constructing the engine directly bypasses it, and running
     <a class="reference external" href="https://pypi.org/project/pcap-ct/">pcap-ct</a> under the <a class="reference internal" href="#pcapkit.foundation.engines.pypcap.PyPCAP" title="pcapkit.foundation.engines.pypcap.PyPCAP"><code class="xref py py-class docutils literal notranslate"><span class="pre">PyPCAP</span></code></a> name would
     misreport what did the work. Via <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>
@@ -1558,9 +1559,11 @@ unreachable, and nothing else would say why
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference internal" href="../../utilities/exceptions.html#pcapkit.utilities.exceptions.UnsupportedCall" title="pcapkit.utilities.exceptions.UnsupportedCall"><strong>UnsupportedCall</strong></a> – If the environment cannot support this engine, for
     either of the reasons <a class="reference internal" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT.unsupported_reason" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT.unsupported_reason"><code class="xref py py-meth docutils literal notranslate"><span class="pre">unsupported_reason()</span></code></a> describes. That
-    hook is only consulted by <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor.run" title="pcapkit.foundation.extraction.Extractor.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Extractor.run</span></code></a>, which degrades to
-    the default engine with a warning; constructing the engine
-    directly bypasses it, so this is the backstop for that path.</p>
+    hook is only consulted by
+    <a class="reference internal" href="../extraction.html#pcapkit.foundation.extraction.Extractor" title="pcapkit.foundation.extraction.Extractor"><code class="xref py py-class docutils literal notranslate"><span class="pre">Extractor</span></code></a>’s engine
+    selection, which degrades to the default engine with a warning;
+    constructing the engine directly bypasses it, so this is the
+    backstop for that path.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -1666,8 +1669,8 @@ may both reach it.</p>
 a second call, where upstream <code class="docutils literal notranslate"><span class="pre">pypcap</span></code> 1.3.0 segfaults on one. The
 <a class="reference internal" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT._closed" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT._closed"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_closed</span></code></a> flag is kept regardless: it is not
 this engine’s business to depend on a pre-release’s undocumented
-forgiveness, and the flag also covers the case of an engine that was
-never opened.</p>
+forgiveness. An engine that was never opened has no
+<a class="reference internal" href="#pcapkit.foundation.engines.pcap_ct.PCAP_CT._handle" title="pcapkit.foundation.engines.pcap_ct.PCAP_CT._handle"><code class="xref py py-attr docutils literal notranslate"><span class="pre">_handle</span></code></a> to close, and is skipped too.</p>
 </div>
 </dd></dl>
 
@@ -2026,8 +2029,9 @@ and <code class="docutils literal notranslate"><span class="pre">import</span> <
 they actually got rather than assume, and this module is the one place that
 answers it – deliberately shared, since the engines must agree and a copy of
 the detection in each would be a chance to disagree. It is <em>only</em> detection,
-and it imports nothing from <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a>, so it cannot introduce an import
-cycle.</p>
+and it imports nothing from <a class="reference internal" href="../../index.html#module-pcapkit" title="pcapkit"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit</span></code></a> but <a class="reference internal" href="../../corekit/infoclass.html#module-pcapkit.corekit.infoclass" title="pcapkit.corekit.infoclass"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.corekit.infoclass</span></code></a>,
+which imports nothing from <a class="reference internal" href="../index.html#module-pcapkit.foundation" title="pcapkit.foundation"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.foundation</span></code></a>, so it cannot introduce an
+import cycle.</p>
 <dl class="py data">
 <dt class="sig sig-object py" id="pcapkit.foundation.engines._pcap_backend.PYPCAP">
 <span class="sig-prename descclassname"><span class="pre">pcapkit.foundation.engines._pcap_backend.</span></span><span class="sig-name descname"><span class="pre">PYPCAP</span></span><span class="property"><span class="w"> </span><span class="p"><span class="pre">=</span></span><span class="w"> </span><span class="pre">'pypcap'</span></span><a class="headerlink" href="#pcapkit.foundation.engines._pcap_backend.PYPCAP" title="Link to this definition">¶</a></dt>

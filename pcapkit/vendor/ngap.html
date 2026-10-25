@@ -514,8 +514,9 @@ vendor crawlers include:</p>
 </table>
 </div>
 <p>Each sources the assignment from <a class="reference external" href="https://github.com/pycrate-org/pycrate"><code class="docutils literal notranslate"><span class="pre">pycrate</span></code></a>’s already-installed, compiled NGAP
-specification rather than fetching a network registry – see the module
-docstring below for why.</p>
+specification rather than fetching a network registry: 3GPP publishes TS 38.413
+as a PDF, with no registry kept in step with it that a crawler could fetch
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/880">#880</a>).</p>
 <section id="module-pcapkit.vendor.ngap.procedure_code">
 <span id="ngap-elementary-procedure-codes"></span><h2>NGAP Elementary Procedure Codes<a class="headerlink" href="#module-pcapkit.vendor.ngap.procedure_code" title="Link to this heading">¶</a></h2>
 <p>This module contains the vendor crawler for <strong>NGAP Elementary Procedure Codes</strong>,

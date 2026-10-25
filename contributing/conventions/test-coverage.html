@@ -553,18 +553,19 @@ envelope of the <code class="docutils literal notranslate"><span class="pre">tcp
 A code that fails is never skipped.</p></li>
 <li><p><strong>A failing case is an entry, never a changed argument.</strong> An <code class="docutils literal notranslate"><span class="pre">EXPECTED_FAILURES</span></code>
 entry records the status, a failure-detail fragment narrow enough to match one
-site, and the defect: the <code class="docutils literal notranslate"><span class="pre">file:line</span></code> that causes it and the issue that tracks it.
+site, and the defect: the function, class or method that causes it, by name, and the
+issue that tracks it.
 Routing a case around a defect hides it: the generator’s <code class="docutils literal notranslate"><span class="pre">HIP_COPIES</span></code> once put two
 parameters in every HIP packet, so the unrepresentable length of a lone one
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/651">#651</a>) was never constructed.
 <code class="docutils literal notranslate"><span class="pre">KNOWN_DEGRADED</span></code> entries have a different shape – a fragment and a reason – and
 they record why the probe’s placeholder payload cannot reach the target, not a
-defect to fix, so the <code class="docutils literal notranslate"><span class="pre">file:line</span></code>-and-issue rule does not apply to them.</p></li>
+defect to fix, so the name-and-issue rule does not apply to them.</p></li>
 <li><p><strong>A regression is fixed; a pre-existing defect is recorded.</strong> A case that a change
 breaks – including a code it registers that does not close – is fixed in that
 change, not added to a table. A newly found defect that predates the change gets an
-entry naming the <code class="docutils literal notranslate"><span class="pre">file:line</span></code> that causes it, as the failure message asks, and an
-issue.</p></li>
+entry naming the function, class or method that causes it, as the failure message
+asks, and an issue.</p></li>
 <li><p><strong>The tables are checked in both directions.</strong> In the option suite, an entry whose
 case starts passing turns <code class="docutils literal notranslate"><span class="pre">test_round_trip_is_identity_or_a_recorded_gap</span></code> red, and
 one naming a case that no longer exists fails

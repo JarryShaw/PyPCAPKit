@@ -502,10 +502,11 @@
 <li><p><strong>Fixed</strong> – errors reading PCAP files from both the CLI and the library
 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/240">#240</a>): missing optional CLI dependencies are handled gracefully and console
 output is far less verbose; installation from source, which <code class="docutils literal notranslate"><span class="pre">setup.py</span></code> had
-broken (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/221">#221</a>); PCAP output during flow tracing (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/180">#180</a>).</p></li>
-<li><p><strong>Changed</strong> – the base protocol data class carries <code class="docutils literal notranslate"><span class="pre">packet</span></code>; <code class="docutils literal notranslate"><span class="pre">Info</span></code>
-iteration skips excluded fields.</p></li>
+broken (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/221">#221</a>).</p></li>
 </ul>
+<p>The PCAP-output fix for flow tracing (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/180">#180</a>), the base protocol data class’s
+<code class="docutils literal notranslate"><span class="pre">packet</span></code> and <code class="docutils literal notranslate"><span class="pre">Info</span></code> iteration skipping excluded fields first shipped in
+<code class="docutils literal notranslate"><span class="pre">1.3.1.post8</span></code>.</p>
 <p>1.3.2 was never released. The version string existed in-tree for a few hours on
 2024-11-03 and was superseded by 1.3.3 the same day, so there is no <code class="docutils literal notranslate"><span class="pre">v1.3.2</span></code>
 tag and no distribution.</p>

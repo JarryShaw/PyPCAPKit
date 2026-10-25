@@ -523,7 +523,7 @@
 <span class="sd">            expiry</span>
 
 <span class="sd">    Example:</span>
-<span class="sd">        &gt;&gt;&gt; from pcapkit.foundation.reassembly import TCP</span>
+<span class="sd">        &gt;&gt;&gt; from pcapkit.foundation.reassembly.tcp import TCP</span>
 <span class="sd">        # Initialise instance:</span>
 <span class="sd">        &gt;&gt;&gt; tcp_reassembly = TCP()</span>
 <span class="sd">        # Call reassembly:</span>
@@ -877,7 +877,7 @@
 <span class="sd">        Covers both an ordinary (or zero-length) forward gap and a tail-side</span>
 <span class="sd">        overlap. Mutates ``fragment`` in place: its ``gap`` list, its</span>
 <span class="sd">        ``conflict`` list, and finally its ``raw``/``len`` via</span>
-<span class="sd">        :meth:`~pcapkit.foundation.reassembly.data.data.Info.__update__`.</span>
+<span class="sd">        :meth:`~pcapkit.corekit.infoclass.Info.__update__`.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            info: :term:`info &lt;reasm.tcp.packet&gt;` dict of the arriving segment</span>
@@ -932,7 +932,7 @@
 <span class="sd">        which may also extend a new tail past the buffered end in the same</span>
 <span class="sd">        call. Mutates ``fragment`` in place: its ``isn``, its ``gap`` list,</span>
 <span class="sd">        its ``conflict`` list, and finally its ``raw``/``len`` via</span>
-<span class="sd">        :meth:`~pcapkit.foundation.reassembly.data.data.Info.__update__`.</span>
+<span class="sd">        :meth:`~pcapkit.corekit.infoclass.Info.__update__`.</span>
 
 <span class="sd">        Arguments:</span>
 <span class="sd">            info: :term:`info &lt;reasm.tcp.packet&gt;` dict of the arriving segment</span>

@@ -511,7 +511,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extractor</span>
 
     <span class="k">class</span><span class="w"> </span><span class="nc">_PCAPCTPackage</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""|pcap|_, as :class:`PCAP_CT` reads it through :attr:`PCAP_CT._expkg` (#1878)."""</span>
+<span class="w">        </span><span class="sd">"""|pcap|_, as :class:`PCAP_CT` reads it through :attr:`PCAP_CT._expkg` (:issue:`1878`)."""</span>
 
         <span class="nd">@property</span>
         <span class="k">def</span><span class="w"> </span><span class="nf">pcap</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[Handle]'</span><span class="p">:</span> <span class="o">...</span>
@@ -740,10 +740,11 @@
 <span class="sd">        Raises:</span>
 <span class="sd">            UnsupportedCall: If the environment cannot support this engine, for</span>
 <span class="sd">                either of the reasons :meth:`unsupported_reason` describes. That</span>
-<span class="sd">                hook is only consulted by :meth:`Extractor.run</span>
-<span class="sd">                &lt;pcapkit.foundation.extraction.Extractor.run&gt;`, which degrades to</span>
-<span class="sd">                the default engine with a warning; constructing the engine</span>
-<span class="sd">                directly bypasses it, so this is the backstop for that path.</span>
+<span class="sd">                hook is only consulted by</span>
+<span class="sd">                :class:`~pcapkit.foundation.extraction.Extractor`'s engine</span>
+<span class="sd">                selection, which degrades to the default engine with a warning;</span>
+<span class="sd">                constructing the engine directly bypasses it, so this is the</span>
+<span class="sd">                backstop for that path.</span>
 
 <span class="sd">        """</span>
         <span class="c1"># NOTE: the probe comes *before* ``import pcap``, and the order is</span>
@@ -962,8 +963,8 @@
 <span class="sd">            a second call, where upstream ``pypcap`` 1.3.0 segfaults on one. The</span>
 <span class="sd">            :attr:`_closed &lt;PCAP_CT._closed&gt;` flag is kept regardless: it is not</span>
 <span class="sd">            this engine's business to depend on a pre-release's undocumented</span>
-<span class="sd">            forgiveness, and the flag also covers the case of an engine that was</span>
-<span class="sd">            never opened.</span>
+<span class="sd">            forgiveness. An engine that was never opened has no</span>
+<span class="sd">            :attr:`_handle &lt;PCAP_CT._handle&gt;` to close, and is skipped too.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span> <span class="ow">or</span> <span class="bp">self</span><span class="o">.</span><span class="n">_handle</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>

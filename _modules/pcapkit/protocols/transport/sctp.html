@@ -955,10 +955,11 @@
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]</span>
 
     <span class="c1">#: Chunk type to method mapping, see :meth:`_read_sctp_chunks` and</span>
-    <span class="c1">#: :meth:`_make_sctp_chunks`. Method names are expected to be referred to</span>
-    <span class="c1">#: the class by ``_read_chunk_${name}`` and ``_make_chunk_${name}``, and if</span>
-    <span class="c1">#: such name not found, the value should then be a method that can parse the</span>
-    <span class="c1">#: chunk by itself.</span>
+    <span class="c1">#: :meth:`_make_sctp_chunks`. A :class:`str` value names the methods</span>
+    <span class="c1">#: ``_read_chunk_${name}`` and ``_make_chunk_${name}``, falling back to</span>
+    <span class="c1">#: :meth:`_read_chunk_donone` and :meth:`_make_chunk_donone` when the class</span>
+    <span class="c1">#: has no such method; any other value is a ``(parser, constructor)`` pair</span>
+    <span class="c1">#: of callables.</span>
     <span class="n">__chunk__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="s1">'donone'</span><span class="p">,</span>
         <span class="p">{</span>
@@ -979,10 +980,11 @@
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[int, str | tuple[ChunkParser, ChunkConstructor]]</span>
 
     <span class="c1">#: Chunk parameter type to method mapping, see</span>
-    <span class="c1">#: :meth:`_read_sctp_parameters` and :meth:`_make_sctp_parameters`. Method</span>
-    <span class="c1">#: names are expected to be referred to the class by ``_read_param_${name}``</span>
-    <span class="c1">#: and ``_make_param_${name}``, and if such name not found, the value should</span>
-    <span class="c1">#: then be a method that can parse the parameter by itself.</span>
+    <span class="c1">#: :meth:`_read_sctp_parameters` and :meth:`_make_sctp_parameters`. A</span>
+    <span class="c1">#: :class:`str` value names the methods ``_read_param_${name}`` and</span>
+    <span class="c1">#: ``_make_param_${name}``, falling back to :meth:`_read_param_donone` and</span>
+    <span class="c1">#: :meth:`_make_param_donone` when the class has no such method; any other</span>
+    <span class="c1">#: value is a ``(parser, constructor)`` pair of callables.</span>
     <span class="n">__parameter__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="s1">'donone'</span><span class="p">,</span>
         <span class="p">{</span>
@@ -998,10 +1000,11 @@
     <span class="p">)</span>  <span class="c1"># type: DefaultDict[int, str | tuple[ParameterParser, ParameterConstructor]]</span>
 
     <span class="c1">#: Error cause code to method mapping, see :meth:`_read_sctp_causes` and</span>
-    <span class="c1">#: :meth:`_make_sctp_causes`. Method names are expected to be referred to</span>
-    <span class="c1">#: the class by ``_read_cause_${name}`` and ``_make_cause_${name}``, and if</span>
-    <span class="c1">#: such name not found, the value should then be a method that can parse the</span>
-    <span class="c1">#: error cause by itself.</span>
+    <span class="c1">#: :meth:`_make_sctp_causes`. A :class:`str` value names the methods</span>
+    <span class="c1">#: ``_read_cause_${name}`` and ``_make_cause_${name}``, falling back to</span>
+    <span class="c1">#: :meth:`_read_cause_donone` and :meth:`_make_cause_donone` when the class</span>
+    <span class="c1">#: has no such method; any other value is a ``(parser, constructor)`` pair</span>
+    <span class="c1">#: of callables.</span>
     <span class="n">__cause__</span> <span class="o">=</span> <span class="n">collections</span><span class="o">.</span><span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="s1">'donone'</span><span class="p">,</span>
         <span class="p">{</span>
@@ -1251,7 +1254,9 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            code: SCTP chunk type.</span>
-<span class="sd">            meth: Method name or callable to parse and/or construct the chunk.</span>
+<span class="sd">            meth: Method name, or a ``(parser, constructor)`` pair of</span>
+<span class="sd">                callables, to parse and construct the chunk; see</span>
+<span class="sd">                :attr:`__chunk__`.</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            RegistryWarning: If a different entry is already registered for</span>
@@ -1277,7 +1282,9 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            code: SCTP chunk parameter type.</span>
-<span class="sd">            meth: Method name or callable to parse and/or construct the parameter.</span>
+<span class="sd">            meth: Method name, or a ``(parser, constructor)`` pair of</span>
+<span class="sd">                callables, to parse and construct the parameter; see</span>
+<span class="sd">                :attr:`__parameter__`.</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            RegistryWarning: If a different entry is already registered for</span>
@@ -1303,7 +1310,9 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            code: SCTP error cause code.</span>
-<span class="sd">            meth: Method name or callable to parse and/or construct the cause.</span>
+<span class="sd">            meth: Method name, or a ``(parser, constructor)`` pair of</span>
+<span class="sd">                callables, to parse and construct the cause; see</span>
+<span class="sd">                :attr:`__cause__`.</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            RegistryWarning: If a different entry is already registered for</span>

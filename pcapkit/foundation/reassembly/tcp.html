@@ -523,7 +523,7 @@ expiry</p></li>
 </dl>
 <div class="admonition-example admonition">
 <p class="admonition-title">Example</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.reassembly.tcp</span><span class="w"> </span><span class="kn">import</span> <span class="n">TCP</span>
 <span class="go"># Initialise instance:</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">tcp_reassembly</span> <span class="o">=</span> <span class="n">TCP</span><span class="p">()</span>
 <span class="go"># Call reassembly:</span>
@@ -770,6 +770,11 @@ SYN’s header and counts as having seen it.</p></li>
          [from octet fragment.first to octet fragment.last];
       HDL &lt;- [one hole from PSN + fragment.len to infinity,
               i.e. HOLE_OPEN_BOUND];
+      IF (SYN is false) {
+         /* the start of the stream is unknown: this hole is the one
+            before the capture */
+         insert one hole from -HOLE_OPEN_BOUND to PSN - 1 into HDL;
+      }
    } ELSE {
       put data from fragment into data buffer with BUFID
          [from octet fragment.first to octet fragment.last];
@@ -781,7 +786,13 @@ SYN’s header and counts as having seen it.</p></li>
       }
    }
 
-   IF (FIN is true or RST is true) {
+   /* a FIN fixes the end of the stream; data sent before it may still
+      arrive after it */
+   IF (FIN is true) {
+      cut every hole in HDL back to end below the FIN;
+   }
+
+   IF (RST is true or HDL holds no hole but the one before the capture) {
       submit datagram to next step;
       free all reassembly resources for this BUFID;
       BREAK.
@@ -803,13 +814,14 @@ update HDL: {
          new_hole.last &lt;- fragment.first - 1;
       }
 
-      IF (fragment.last &lt; hole.last AND FIN is false AND RST is false) {
+      IF (fragment.last &lt; hole.last) {
          create new entry "new_hole" in HDL;
          new_hole.first &lt;- fragment.last + 1;
          new_hole.last &lt;- hole.last;
       }
 
-      BREAK.
+      /* one segment may span several holes */
+      CONTINUE.
    } give up until (no entry from HDL)
 }
 </pre></div>
@@ -829,17 +841,18 @@ list. If there are no more entries, go to step eight.</p></li>
 new hole descriptor <code class="docutils literal notranslate"><span class="pre">new_hole</span></code> with <code class="docutils literal notranslate"><span class="pre">new_hole.first</span></code> equal to
 <code class="docutils literal notranslate"><span class="pre">hole.first</span></code>, and <code class="docutils literal notranslate"><span class="pre">new_hole.last</span></code> equal to <code class="docutils literal notranslate"><span class="pre">fragment.first</span></code>
 minus one (<code class="docutils literal notranslate"><span class="pre">-1</span></code>).</p></li>
-<li><p>If <code class="docutils literal notranslate"><span class="pre">fragment.last</span></code> is less than <code class="docutils literal notranslate"><span class="pre">hole.last</span></code> and neither <code class="docutils literal notranslate"><span class="pre">FIN</span></code>
-nor <code class="docutils literal notranslate"><span class="pre">RST</span></code> is set – TCP has no <em>more fragments</em> flag, so the
-termination flags take its place – then create a new hole
+<li><p>If <code class="docutils literal notranslate"><span class="pre">fragment.last</span></code> is less than <code class="docutils literal notranslate"><span class="pre">hole.last</span></code>, then create a new hole
 descriptor <code class="docutils literal notranslate"><span class="pre">new_hole</span></code>, with <code class="docutils literal notranslate"><span class="pre">new_hole.first</span></code> equal to
 <code class="docutils literal notranslate"><span class="pre">fragment.last</span></code> plus one (<code class="docutils literal notranslate"><span class="pre">+1</span></code>) and <code class="docutils literal notranslate"><span class="pre">new_hole.last</span></code> equal to
 <code class="docutils literal notranslate"><span class="pre">hole.last</span></code>.</p></li>
 <li><p>Go to step one.</p></li>
-<li><p>If the hole descriptor list is now empty, the datagram is now
-complete. Pass it on to the higher level protocol processor
-for further handling. Otherwise, return.</p></li>
+<li><p>If the hole descriptor list holds no hole but the one below a capture
+that missed the handshake, the stream is complete. Pass it on to the
+higher level protocol processor for further handling. Otherwise, return.</p></li>
 </ol>
+<p>TCP has no <em>more fragments</em> flag, so the hole above the last octet received
+stays open until a FIN cuts it back to end at the sequence number the FIN
+occupies. A RST submits the stream as it stands, holes and all.</p>
 </section>
 <section id="terminology">
 <h2>Terminology<a class="headerlink" href="#terminology" title="Link to this heading">¶</a></h2>

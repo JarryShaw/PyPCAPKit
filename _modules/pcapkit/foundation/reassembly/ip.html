@@ -1003,11 +1003,12 @@
                 <span class="n">index</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(</span><span class="n">index</span><span class="p">),</span>
                 <span class="n">header</span><span class="o">=</span><span class="n">header</span><span class="p">,</span>
                 <span class="n">payload</span><span class="o">=</span><span class="n">payload</span><span class="p">,</span>
-                <span class="c1"># NOTE: ``analyze`` is a second full parse of the payload, and a</span>
-                <span class="c1"># datagram is submitted for every frame rather than only for the</span>
-                <span class="c1"># fragmented ones, so running it here charges every caller for a</span>
-                <span class="c1"># result most of them never read. ``Deferred`` postpones it to the</span>
-                <span class="c1"># first read of ``Datagram.packet``.</span>
+                <span class="c1"># NOTE: ``analyze`` is a second full parse of the payload, and an</span>
+                <span class="c1"># IPv4 datagram is submitted for every frame with **DF** clear</span>
+                <span class="c1"># rather than only for the fragmented ones, so running it here</span>
+                <span class="c1"># charges every caller for a result most of them never read.</span>
+                <span class="c1"># ``Deferred`` postpones it to the first read of</span>
+                <span class="c1"># ``Datagram.packet``.</span>
                 <span class="n">packet</span><span class="o">=</span><span class="n">Deferred</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">protocol</span><span class="o">.</span><span class="n">analyze</span><span class="p">,</span> <span class="n">bufid</span><span class="p">[</span><span class="mi">3</span><span class="p">],</span> <span class="n">payload</span><span class="p">),</span>
                 <span class="n">conflict</span><span class="o">=</span><span class="n">conflict</span><span class="p">,</span>
             <span class="p">)</span>

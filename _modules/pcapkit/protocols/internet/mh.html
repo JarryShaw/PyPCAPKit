@@ -1953,11 +1953,11 @@
 <span class="sd">            next: Next header type.</span>
 <span class="sd">            next_default: Default value for next header type field.</span>
 <span class="sd">            next_namespace: Namespace of next header type field.</span>
-<span class="sd">            next_reversed: Whether the bits of next header type field is reversed.</span>
+<span class="sd">            next_reversed: Whether the namespace of next header type field is reversed.</span>
 <span class="sd">            type: Mobility Header type.</span>
 <span class="sd">            type_default: Default value for Mobility Header type field.</span>
 <span class="sd">            type_namespace: Namespace of Mobility Header type field.</span>
-<span class="sd">            type_reversed: Whether the bits of Mobility Header type field is reversed.</span>
+<span class="sd">            type_reversed: Whether the namespace of Mobility Header type field is reversed.</span>
 <span class="sd">            reserved: Reserved octet after the MH type.</span>
 <span class="sd">            chksum: Checksum.</span>
 <span class="sd">            data: Message data.</span>
@@ -2024,7 +2024,9 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            code: MH message type code.</span>
-<span class="sd">            meth: Method name or callable to parse and/or construct the message.</span>
+<span class="sd">            meth: Name ``X`` of the ``_read_msg_X`` and ``_make_msg_X``</span>
+<span class="sd">                methods, or a ``(parser, constructor)`` pair of callables, see</span>
+<span class="sd">                :attr:`__message__`.</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            RegistryWarning: If a different entry is already registered for</span>
@@ -2050,7 +2052,9 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            code: MH option code.</span>
-<span class="sd">            meth: Method name or callable to parse and/or construct the option.</span>
+<span class="sd">            meth: Name ``X`` of the ``_read_opt_X`` and ``_make_opt_X``</span>
+<span class="sd">                methods, or a ``(parser, constructor)`` pair of callables, see</span>
+<span class="sd">                :attr:`__option__`.</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            RegistryWarning: If a different entry is already registered for</span>
@@ -2076,7 +2080,9 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            code: CGA extension code.</span>
-<span class="sd">            meth: Method name or callable to parse and/or construct the extension.</span>
+<span class="sd">            meth: Name ``X`` of the ``_read_ext_X`` and ``_make_ext_X``</span>
+<span class="sd">                methods, or a ``(parser, constructor)`` pair of callables, see</span>
+<span class="sd">                :attr:`__extension__`.</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            RegistryWarning: If a different entry is already registered for</span>
@@ -5273,7 +5279,7 @@
 <span class="sd">        Note:</span>
 <span class="sd">            The ``S`` bit is the **last** bit of the option, not the first -- the</span>
 <span class="sd">            reserved field precedes it rather than following it, which is the</span>
-<span class="sd">            other way round from every other flag in this module.</span>
+<span class="sd">            other way round from most flags in this module.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            schema: Parsed option schema.</span>
@@ -6216,8 +6222,11 @@
 <span class="sd">            :rfc:`3376#section-4.2` IGMP structures. They belong to those protocols</span>
 <span class="sd">            rather than to the mobility header, and each is self-describing through</span>
 <span class="sd">            its own auxiliary-data length and source count, so they are recorded</span>
-<span class="sd">            opaquely here rather than half-decoded. :attr:`protocol` says which of</span>
-<span class="sd">            the two they are: ``143`` for MLDv2, ``131`` for MLDv1.</span>
+<span class="sd">            opaquely here rather than half-decoded.</span>
+<span class="sd">            :attr:`~pcapkit.protocols.data.internet.mh.DynamicIPMulticastSelectorOption.protocol`</span>
+<span class="sd">            says which of the two they are: ``143`` for MLDv2 and ``131`` for MLDv1,</span>
+<span class="sd">            or ``0x12``, ``0x16`` and ``0x22`` for IGMPv1 to IGMPv3</span>
+<span class="sd">            [:rfc:`7028#section-8`].</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            schema: Parsed option schema.</span>
@@ -8998,7 +9007,7 @@
 
         <span class="n">prefix_val</span> <span class="o">=</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">ip_network</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">prefix_val</span><span class="o">.</span><span class="n">version</span> <span class="o">!=</span> <span class="mi">6</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid movile network prefix: </span><span class="si">{</span><span class="n">prefix</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">alias</span><span class="si">}</span><span class="s1">: [OptNo </span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">] invalid mobile network prefix: </span><span class="si">{</span><span class="n">prefix</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
         <span class="n">prefix_length</span> <span class="o">=</span> <span class="n">prefix_val</span><span class="o">.</span><span class="n">prefixlen</span>
         <span class="n">prefix_addr</span> <span class="o">=</span> <span class="n">prefix_val</span><span class="o">.</span><span class="n">network_address</span>
 

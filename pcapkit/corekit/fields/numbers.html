@@ -801,14 +801,17 @@ from its guard, and deliberately so: a generated guard raises a
 bare, unlogged <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> precisely because the <code class="docutils literal notranslate"><span class="pre">except</span>
 <span class="pre">ValueError</span></code> fallback of <a class="reference internal" href="../enum.html#pcapkit.corekit.enum.EnumLookup.get" title="pcapkit.corekit.enum.EnumLookup.get"><code class="xref py py-meth docutils literal notranslate"><span class="pre">get()</span></code></a>
 has to keep catching it (GitHub issues <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/584">#584</a> and
-<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/647">#647</a>). The registries that
-<em>do</em> bound themselves to a width and reject outside it are the
-bit-flag ones – <a class="reference internal" href="../../const/tcp.html#pcapkit.const.tcp.flags.Flags" title="pcapkit.const.tcp.flags.Flags"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.tcp.flags.Flags</span></code></a> among them –
-and none of those is named as the namespace of a plain
-<a class="reference internal" href="#pcapkit.corekit.fields.numbers.EnumField" title="pcapkit.corekit.fields.numbers.EnumField"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumField</span></code></a> anywhere in the package, so no in-library guard
-loses its force through this method. The distinction is therefore for
-a registry registered from outside <a class="reference internal" href="../../const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a>, which has no
-such obligation to stay quiet.</p>
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/647">#647</a>). That bare <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> is also how a generated
+guard bounds its registry to a width, rejecting a value outside
+<code class="docutils literal notranslate"><span class="pre">0</span> <span class="pre">&lt;=</span> <span class="pre">value</span> <span class="pre">&lt;=</span> <span class="pre">N</span></code>. Bit-flag registries such as
+<a class="reference internal" href="../../const/tcp.html#pcapkit.const.tcp.flags.Flags" title="pcapkit.const.tcp.flags.Flags"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.tcp.flags.Flags</span></code></a> do so, and so do plain ones
+such as <a class="reference internal" href="../../const/ipv4.html#pcapkit.const.ipv4.option_number.OptionNumber" title="pcapkit.const.ipv4.option_number.OptionNumber"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.const.ipv4.option_number.OptionNumber</span></code></a>, which
+is the namespace of a plain <a class="reference internal" href="#pcapkit.corekit.fields.numbers.EnumField" title="pcapkit.corekit.fields.numbers.EnumField"><code class="xref py py-class docutils literal notranslate"><span class="pre">EnumField</span></code></a>. That is harmless:
+the out-of-width rejection is the bare <a class="reference external" href="https://docs.python.org/3/builtins/exceptions.html#ValueError" title="(in Python v3.15)"><code class="xref py py-exc docutils literal notranslate"><span class="pre">ValueError</span></code></a> this method
+falls back on, so no in-library guard loses its force through this
+method. The distinction is therefore for a registry registered from
+outside <a class="reference internal" href="../../const/index.html#module-pcapkit.const" title="pcapkit.const"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.const</span></code></a>, which has no such obligation to stay
+quiet.</p>
 <p>Octets carrying bits outside <a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField.bit_length" title="pcapkit.corekit.fields.numbers.NumberField.bit_length"><code class="xref py py-attr docutils literal notranslate"><span class="pre">bit_length</span></code></a> that
 <a class="reference internal" href="#pcapkit.corekit.fields.numbers.NumberField.post_process" title="pcapkit.corekit.fields.numbers.NumberField.post_process"><code class="xref py py-meth docutils literal notranslate"><span class="pre">NumberField.post_process()</span></code></a> recorded resolve to a member that
 records them too, so that packing it writes them back. A registry

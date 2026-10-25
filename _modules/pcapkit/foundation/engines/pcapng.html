@@ -836,8 +836,8 @@
 <span class="sd">        :attr:`Context.interfaces &lt;pcapkit.foundation.engines.pcapng.Context.interfaces&gt;`) restart</span>
 <span class="sd">        with every Section Header Block, so numbering a block by their length gives the first IDB of</span>
 <span class="sd">        every section the same name. The output dumpers key by name, so a repeated name overwrites</span>
-<span class="sd">        the earlier block (#1256). The number is therefore counted across the whole file instead;</span>
-<span class="sd">        for a single-section file it is the same number as before.</span>
+<span class="sd">        the earlier block (:issue:`1256`). The number is therefore counted across the whole file instead;</span>
+<span class="sd">        for a single-section file the two counts agree.</span>
 
 <span class="sd">        Args:</span>
 <span class="sd">            kind: The kind of the block, e.g. ``'Interface Description'``.</span>

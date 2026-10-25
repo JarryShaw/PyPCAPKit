@@ -585,6 +585,8 @@ shared with the PCAP frame header and documented in
 .. autofunction:: pcapkit.protocols.schema.misc.pcapng.zigbee_key_trailing
 .. autofunction:: pcapkit.protocols.schema.misc.pcapng.zigbee_key_held
 .. autofunction:: pcapkit.protocols.schema.misc.pcapng._spb_data_length
+.. autofunction:: pcapkit.protocols.schema.misc.pcapng._cut_last_line
+.. autofunction:: pcapkit.protocols.schema.misc.pcapng._malformed_line_message
 
 Data Models
 -----------

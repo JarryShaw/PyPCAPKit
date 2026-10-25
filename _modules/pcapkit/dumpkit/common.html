@@ -917,7 +917,7 @@
 <span class="sd">            The :attr:`~pcapkit.corekit.infoclass.Info.__excluded__` of a field</span>
 <span class="sd">            model, or of the field model an export was made from -- metadata</span>
 <span class="sd">            such as ``__next_type__``, which only a rebuild reads</span>
-<span class="sd">            (:issue:`2003`). None for an option list, whose keys are its</span>
+<span class="sd">            (:issue:`2003`). Empty for an option list, whose keys are its</span>
 <span class="sd">            options.</span>
 
 <span class="sd">        """</span>
@@ -1188,7 +1188,7 @@
 <span class="sd">                    other character as ``'\\u{0:04x}'.format(ord(char))``, which</span>
 <span class="sd">                    for a code point above ``U+FFFF`` yields five or six hex</span>
 <span class="sd">                    digits that a reader takes as one escape and literal text</span>
-<span class="sd">                    (GitHub issue #1261). This writes such a character as a</span>
+<span class="sd">                    (GitHub issue :issue:`1261`). This writes such a character as a</span>
 <span class="sd">                    UTF-16 surrogate pair instead, as :func:`json.dumps` does, and</span>
 <span class="sd">                    every other character exactly as the upstream writer does.</span>
 
@@ -1259,7 +1259,7 @@
 
 <span class="sd">                A class, module or routine is written as its name rather than</span>
 <span class="sd">                expanded, since its attributes reach the whole type graph</span>
-<span class="sd">                (GitHub issue #1372). Every other object is expanded in full</span>
+<span class="sd">                (GitHub issue :issue:`1372`). Every other object is expanded in full</span>
 <span class="sd">                each time it is met, except one that encloses itself: there</span>
 <span class="sd">                it is written as a ``&lt;circular reference: ...&gt;`` marker, so a</span>
 <span class="sd">                reference cycle terminates.</span>

@@ -1001,7 +1001,9 @@
 <span class="sd">            ext: file extension</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            RegistryError: If ``dumper`` is not a class, or not a :class:`~pcapkit.dumpkit.common.Dumper` subclass.</span>
+<span class="sd">            RegistryError: If ``dumper`` is not a class, or not a</span>
+<span class="sd">                :class:`dictdumper.dumper.Dumper` subclass, such as</span>
+<span class="sd">                :class:`~pcapkit.dumpkit.common.Dumper`.</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            RegistryWarning: If a different dumper is already registered for</span>
@@ -2207,10 +2209,11 @@
 <span class="sd">            :attr:`~object.__dict__` rather than attribute access. That matters</span>
 <span class="sd">            for more than tidiness: ``_flag_s`` is assigned early in</span>
 <span class="sd">            :meth:`__init__` and ``_ifile`` only much later, so a constructor</span>
-<span class="sd">            that fails in between -- an unreadable path, an unknown format --</span>
-<span class="sd">            leaves an instance whose flag says "mine" and which has no stream at</span>
-<span class="sd">            all. The close itself is guarded too, that being what a close during</span>
-<span class="sd">            interpreter shutdown can fail at.</span>
+<span class="sd">            that fails in between -- an unreadable path, or a negative</span>
+<span class="sd">            ``reasm_timeout`` with ``reassembly=True`` and ``ip``, ``ipv4``,</span>
+<span class="sd">            ``ipv6`` or ``tcp`` set -- leaves an instance whose flag says "mine"</span>
+<span class="sd">            and which has no stream at all. The close itself is guarded too, that</span>
+<span class="sd">            being what a close during interpreter shutdown can fail at.</span>
 
 <span class="sd">        """</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_owns_input</span><span class="p">():</span>

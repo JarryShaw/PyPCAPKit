@@ -536,8 +536,6 @@
 <span class="c1">#: A `DPKT`_ packet carries a :attr:`~object.__dict__`, so this is an ordinary</span>
 <span class="c1">#: attribute rather than anything exotic; the name is spelled out here so that</span>
 <span class="c1">#: nothing has to know it by hand.</span>
-<span class="c1">#:</span>
-<span class="c1">#: .. _DPKT: https://dpkt.readthedocs.io</span>
 <span class="n">TIMESTAMP_ATTR</span> <span class="o">=</span> <span class="s1">'__pcapkit_timestamp__'</span>
 
 <span class="c1">#: Attribute a frame's record octets are stashed under.</span>
@@ -549,8 +547,6 @@
 <span class="c1">#: the wire octets out of this buffer instead, which</span>
 <span class="c1">#: :class:`~pcapkit.foundation.engines.dpkt.DPKT` attaches alongside</span>
 <span class="c1">#: :data:`TIMESTAMP_ATTR`.</span>
-<span class="c1">#:</span>
-<span class="c1">#: .. _DPKT: https://dpkt.readthedocs.io</span>
 <span class="n">BUFFER_ATTR</span> <span class="o">=</span> <span class="s1">'__pcapkit_buffer__'</span>
 
 
@@ -1359,7 +1355,8 @@
 <span class="sd">            :func:`ipv4_reassembly`. The PCAP frame record is built from the</span>
 <span class="sd">            exact timestamp attached by :func:`attach_timestamp`, if any; see</span>
 <span class="sd">            :func:`packet2frame`.</span>
-<span class="sd">        data_link: Data link layer protocol (from global header).</span>
+<span class="sd">        data_link: Data link layer protocol: the global header's for PCAP, and</span>
+<span class="sd">            that of the interface the packet was captured on for PCAP-NG.</span>
 <span class="sd">        count: Packet index. If not provided, defaults to ``-1``.</span>
 
 <span class="sd">    Returns:</span>
@@ -1393,7 +1390,7 @@
         <span class="n">wire</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_layer2bytes</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">tcp</span><span class="p">)</span>
 
         <span class="n">data</span> <span class="o">=</span> <span class="n">TF_TCP_Packet</span><span class="p">(</span>  <span class="c1"># type: ignore[type-var]</span>
-            <span class="n">protocol</span><span class="o">=</span><span class="n">data_link</span><span class="p">,</span>                                         <span class="c1"># data link type from global header</span>
+            <span class="n">protocol</span><span class="o">=</span><span class="n">data_link</span><span class="p">,</span>                                         <span class="c1"># data link type</span>
             <span class="n">index</span><span class="o">=</span><span class="n">count</span><span class="p">,</span>                                                <span class="c1"># frame number</span>
             <span class="n">frame</span><span class="o">=</span><span class="n">packet2frame</span><span class="p">(</span><span class="n">packet</span><span class="p">,</span> <span class="n">timestamp</span><span class="p">,</span> <span class="n">data_link</span><span class="o">=</span><span class="n">data_link</span><span class="p">),</span>  <span class="c1"># extracted packet</span>
             <span class="n">syn</span><span class="o">=</span><span class="n">syn</span><span class="p">,</span>                                                    <span class="c1"># TCP synchronise (SYN) flag</span>

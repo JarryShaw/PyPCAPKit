@@ -534,7 +534,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.link.link</span><span class="w"> </span><span class="kn">import</span> <span class="n">Link</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.protocols.schema.link.arp</span><span class="w"> </span><span class="kn">import</span> <span class="n">ARP</span> <span class="k">as</span> <span class="n">Schema_ARP</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.compat</span><span class="w"> </span><span class="kn">import</span> <span class="n">cached_property</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">ProtocolError</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.utilities.exceptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">FieldValueError</span><span class="p">,</span> <span class="n">ProtocolError</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">from</span><span class="w"> </span><span class="nn">enum</span><span class="w"> </span><span class="kn">import</span> <span class="n">IntEnum</span> <span class="k">as</span> <span class="n">StdlibEnum</span>
@@ -919,15 +919,31 @@
 <span class="sd">            is validated and packed, one octet per group (an empty string packs</span>
 <span class="sd">            as no octets); otherwise, a :class:`str` is</span>
 <span class="sd">            taken as the *hex* encoded address that :meth:`_read_addr_resolve`</span>
-<span class="sd">            returns, and :obj:`bytes` are returned as given.</span>
+<span class="sd">            returns, and :class:`bytes`/:class:`bytearray` are returned as</span>
+<span class="sd">            :class:`bytes`.</span>
 
 <span class="sd">        Raises:</span>
+<span class="sd">            FieldValueError: If ``addr`` is a :obj:`bool`, whatever ``htype``</span>
+<span class="sd">                is.</span>
 <span class="sd">            ProtocolError: If ``htype`` is ``1`` and ``addr`` is not a</span>
-<span class="sd">                well-formed MAC address, or if ``htype`` is not ``1`` and</span>
-<span class="sd">                ``addr`` is a :class:`str` that is not *hex* encoded.</span>
+<span class="sd">                well-formed MAC address given as :class:`str`,</span>
+<span class="sd">                :class:`bytes` or :class:`bytearray`, or if ``htype`` is not</span>
+<span class="sd">                ``1`` and ``addr`` is either a :class:`str` that is not *hex*</span>
+<span class="sd">                encoded or none of :class:`str`, :class:`bytes` and</span>
+<span class="sd">                :class:`bytearray`.</span>
 
 <span class="sd">        """</span>
+        <span class="c1"># NOTE: checked before the ``htype`` dispatch, for the same reason as</span>
+        <span class="c1"># in ``_make_proto_resolve``: without it a ``bool`` reaches the MAC</span>
+        <span class="c1"># pattern or falls through unchanged, and fails later as a</span>
+        <span class="c1"># ``TypeError`` (#2166).</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: invalid hardware address: must not be a bool, '</span>
+                <span class="sa">f</span><span class="s1">'not </span><span class="si">{</span><span class="n">addr</span><span class="si">!r}</span><span class="s1"> -- pass int(</span><span class="si">{</span><span class="n">addr</span><span class="si">!r}</span><span class="s1">) if the numeric value is what is wanted'</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">htype</span> <span class="o">==</span> <span class="n">Enum_Hardware</span><span class="o">.</span><span class="n">Ethernet</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">)):</span>
+                <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Invalid MAC address: </span><span class="si">{</span><span class="n">addr</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span>
             <span class="n">_addr</span> <span class="o">=</span> <span class="n">addr</span><span class="o">.</span><span class="n">encode</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="n">addr</span>
             <span class="k">if</span> <span class="n">PAT_MAC_ADDR</span><span class="o">.</span><span class="n">fullmatch</span><span class="p">(</span><span class="n">_addr</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
                 <span class="k">return</span> <span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">_addr</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">b</span><span class="s1">':'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">b</span><span class="s1">'-'</span><span class="p">,</span> <span class="sa">b</span><span class="s1">''</span><span class="p">)</span><span class="o">.</span><span class="n">decode</span><span class="p">())</span>
@@ -937,7 +953,9 @@
                 <span class="k">return</span> <span class="nb">bytes</span><span class="o">.</span><span class="n">fromhex</span><span class="p">(</span><span class="n">addr</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">':'</span><span class="p">,</span> <span class="s1">''</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">'-'</span><span class="p">,</span> <span class="s1">''</span><span class="p">))</span>
             <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Invalid hardware address: </span><span class="si">{</span><span class="n">addr</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
-        <span class="k">return</span> <span class="n">addr</span></div>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'Invalid hardware address: </span><span class="si">{</span><span class="n">addr</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="ARP._make_proto_resolve">
@@ -958,13 +976,18 @@
 <span class="sd">            octets; otherwise, a :class:`str` is taken as the *hex* encoded</span>
 <span class="sd">            address that :meth:`_read_proto_resolve` returns, an</span>
 <span class="sd">            :class:`~ipaddress.IPv4Address`/:class:`~ipaddress.IPv6Address` is</span>
-<span class="sd">            packed, and anything else is returned as given.</span>
+<span class="sd">            packed, and :class:`bytes`/:class:`bytearray` are returned as</span>
+<span class="sd">            :class:`bytes`.</span>
 
 <span class="sd">        Raises:</span>
-<span class="sd">            FieldValueError: If ``addr`` is a :obj:`bool` (see</span>
+<span class="sd">            FieldValueError: If ``addr`` is a :obj:`bool`, whatever ``ptype``</span>
+<span class="sd">                is, or is packed as an IPv4 or IPv6 address and is not a</span>
+<span class="sd">                valid address or not of that version (see</span>
 <span class="sd">                :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`).</span>
-<span class="sd">            ProtocolError: If ``ptype`` is neither IPv4 nor IPv6 and ``addr``</span>
-<span class="sd">                is a :class:`str` that is not *hex* encoded.</span>
+<span class="sd">            ProtocolError: If the address is not packed as IPv4 or IPv6, and</span>
+<span class="sd">                ``addr`` is either a :class:`str` that is not *hex* encoded or</span>
+<span class="sd">                none of :class:`str`, an IP address, :class:`bytes` and</span>
+<span class="sd">                :class:`bytearray`.</span>
 
 <span class="sd">        Notes:</span>
 <span class="sd">            Through :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address` rather than</span>
@@ -985,6 +1008,15 @@
 <span class="sd">            :exc:`AttributeError`, bool or not.</span>
 
 <span class="sd">        """</span>
+        <span class="c1"># NOTE: checked before the ``ptype`` dispatch, for the placement reason</span>
+        <span class="c1"># ``_reject_bool`` in ``pcapkit.corekit.fields.ipaddress`` gives: the</span>
+        <span class="c1"># non-IP branches below never reach ``parse_ip_address``, so without it</span>
+        <span class="c1"># a ``bool`` falls through them unchanged and fails later as a</span>
+        <span class="c1"># ``TypeError`` from ``len()`` (#2166).</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="nb">bool</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="n">FieldValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: invalid protocol address: must not be a bool, '</span>
+                <span class="sa">f</span><span class="s1">'not </span><span class="si">{</span><span class="n">addr</span><span class="si">!r}</span><span class="s1"> -- pass int(</span><span class="si">{</span><span class="n">addr</span><span class="si">!r}</span><span class="s1">) if the numeric value is what is wanted'</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">ptype</span> <span class="o">==</span> <span class="n">Enum_EtherType</span><span class="o">.</span><span class="n">Internet_Protocol_version_4</span> <span class="ow">and</span> <span class="n">plen</span> <span class="ow">in</span> <span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="mi">4</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="s1">'IPv4Address'</span><span class="p">,</span> <span class="n">parse_ip_address</span><span class="p">(</span>
                 <span class="n">addr</span><span class="p">,</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: invalid protocol address'</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="mi">4</span><span class="p">))</span><span class="o">.</span><span class="n">packed</span>
@@ -1000,7 +1032,9 @@
                                     <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">addr</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="kc">None</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="p">(</span><span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv4Address</span><span class="p">,</span> <span class="n">ipaddress</span><span class="o">.</span><span class="n">IPv6Address</span><span class="p">)):</span>
             <span class="k">return</span> <span class="n">addr</span><span class="o">.</span><span class="n">packed</span>
-        <span class="k">return</span> <span class="n">addr</span></div>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">addr</span><span class="p">,</span> <span class="p">(</span><span class="nb">bytes</span><span class="p">,</span> <span class="nb">bytearray</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="nb">bytes</span><span class="p">(</span><span class="n">addr</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: invalid protocol address: </span><span class="si">{</span><span class="n">addr</span><span class="si">!r}</span><span class="s1">'</span><span class="p">)</span></div>
 </div>
 
 

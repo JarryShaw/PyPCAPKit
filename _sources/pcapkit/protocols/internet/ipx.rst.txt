@@ -37,6 +37,9 @@ Octets      Bits        Name                    Description
 
    .. automethod:: __index__
 
+   .. autoattribute:: __proto__
+      :no-value:
+
 Header Schemas
 --------------
 

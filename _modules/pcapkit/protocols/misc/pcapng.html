@@ -1577,7 +1577,9 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            code: PCAP-NG block type code.</span>
-<span class="sd">            meth: Method name or callable to parse and/or construct the block.</span>
+<span class="sd">            meth: Name of the ``_read_block_${name}`` and ``_make_block_${name}``</span>
+<span class="sd">                methods, or a ``(parser, constructor)`` pair of callables; see</span>
+<span class="sd">                :attr:`__block__`.</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            RegistryWarning: If a different entry is already registered for</span>
@@ -1603,7 +1605,9 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            code: PCAP-NG option type code.</span>
-<span class="sd">            meth: Method name or callable to parse and/or construct the option.</span>
+<span class="sd">            meth: Name of the ``_read_option_${name}`` and</span>
+<span class="sd">                ``_make_option_${name}`` methods, or a ``(parser, constructor)``</span>
+<span class="sd">                pair of callables; see :attr:`__option__`.</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            RegistryWarning: If a different entry is already registered for</span>
@@ -1630,7 +1634,9 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            code: PCAP-NG name resolution record type code.</span>
-<span class="sd">            meth: Method name or callable to parse and/or construct the name resolution record.</span>
+<span class="sd">            meth: Name of the ``_read_record_${name}`` and</span>
+<span class="sd">                ``_make_record_${name}`` methods, or a ``(parser, constructor)``</span>
+<span class="sd">                pair of callables; see :attr:`__record__`.</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            RegistryWarning: If a different entry is already registered for</span>
@@ -1656,7 +1662,9 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            code: PCAP-NG decryption secrets type code.</span>
-<span class="sd">            meth: Method name or callable to parse and/or construct the decryption secrets.</span>
+<span class="sd">            meth: Name of the ``_read_secrets_${name}`` and</span>
+<span class="sd">                ``_make_secrets_${name}`` methods, or a ``(parser, constructor)``</span>
+<span class="sd">                pair of callables; see :attr:`__secrets__`.</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            RegistryWarning: If a different entry is already registered for</span>
@@ -4219,7 +4227,7 @@
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [epb_flags] option must be only one, '</span>
                                 <span class="sa">f</span><span class="s1">'but </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_opt</span><span class="p">[</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1"> found.'</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [epb_flags] invalid length (expected 8, got </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s1">)'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [epb_flags] invalid length (expected 4, got </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s1">)'</span><span class="p">)</span>
 
         <span class="n">option</span> <span class="o">=</span> <span class="n">Data_EPB_FlagsOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
@@ -4729,7 +4737,7 @@
             <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [pack_flags] option must be only one, '</span>
                                 <span class="sa">f</span><span class="s1">'but </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_opt</span><span class="p">[</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">]</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1"> found.'</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">schema</span><span class="o">.</span><span class="n">length</span> <span class="o">!=</span> <span class="mi">4</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [pack_flags] invalid length (expected 8, got </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s1">)'</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">ProtocolError</span><span class="p">(</span><span class="sa">f</span><span class="s1">'PCAP-NG: [pack_flags] invalid length (expected 4, got </span><span class="si">{</span><span class="n">schema</span><span class="o">.</span><span class="n">length</span><span class="si">}</span><span class="s1">)'</span><span class="p">)</span>
 
         <span class="n">option</span> <span class="o">=</span> <span class="n">Data_PACK_FlagsOption</span><span class="p">(</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">schema</span><span class="o">.</span><span class="n">type</span><span class="p">,</span>
@@ -5628,7 +5636,7 @@
 
         <span class="c1"># NOTE: ``-n % 4`` is the octet count needed to reach the next 32-bit</span>
         <span class="c1"># boundary, and zero when already there. Integer arithmetic throughout,</span>
-        <span class="c1"># unlike the ``math.ceil(n / 4) * 4 - n`` idiom used elsewhere in this</span>
+        <span class="c1"># unlike the ``math.ceil(n / 4) * 4`` idiom used elsewhere in this</span>
         <span class="c1"># file, which routes a length through a float.</span>
         <span class="n">cb_data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">pack</span><span class="p">()</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">data</span><span class="p">,</span> <span class="n">Schema</span><span class="p">)</span> <span class="k">else</span> <span class="n">data</span>
         <span class="n">cb_data</span> <span class="o">+=</span> <span class="nb">bytes</span><span class="p">(</span><span class="o">-</span><span class="nb">len</span><span class="p">(</span><span class="n">cb_data</span><span class="p">)</span> <span class="o">%</span> <span class="mi">4</span><span class="p">)</span>
@@ -6883,7 +6891,7 @@
 <div class="viewcode-block" id="PCAPNG._make_option_ns_dnsipv6">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_option_ns_dnsipv6">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_option_ns_dnsipv6</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_OptionType'</span><span class="p">,</span> <span class="n">option</span><span class="p">:</span> <span class="s1">'Optional[Data_NS_DNSIP6AddrOption]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                                <span class="n">ip</span><span class="p">:</span> <span class="s1">'str | bytes | IPv6Address | int'</span> <span class="o">=</span> <span class="s1">'8.8.8.8'</span><span class="p">,</span>
+                                <span class="n">ip</span><span class="p">:</span> <span class="s1">'str | bytes | IPv6Address | int'</span> <span class="o">=</span> <span class="s1">'2001:4860:4860::8888'</span><span class="p">,</span>
                                 <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_NS_DNSIP6AddrOption'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make PCAP-NG ``ns_dnsIP6addr`` option.</span>
 
@@ -7485,7 +7493,7 @@
 <div class="viewcode-block" id="PCAPNG._make_record_ipv6">
 <a class="viewcode-back" href="../../../../pcapkit/protocols/misc/pcapng.html#pcapkit.protocols.misc.pcapng.PCAPNG._make_record_ipv6">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">_make_record_ipv6</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="s1">'Enum_RecordType'</span><span class="p">,</span> <span class="n">record</span><span class="p">:</span> <span class="s1">'Optional[Data_IPv6Record]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span>
-                          <span class="n">ip</span><span class="p">:</span> <span class="s1">'IPv6Address | str | bytes | int'</span> <span class="o">=</span> <span class="s1">'127.0.0.1'</span><span class="p">,</span>
+                          <span class="n">ip</span><span class="p">:</span> <span class="s1">'IPv6Address | str | bytes | int'</span> <span class="o">=</span> <span class="s1">'::1'</span><span class="p">,</span>
                           <span class="n">names</span><span class="p">:</span> <span class="s1">'Optional[list[str]]'</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
                           <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Schema_IPv6Record'</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">"""Make PCAP-NG ``nrb_record_ipv6`` name resolution record.</span>

@@ -553,7 +553,7 @@ engines leaving <code class="docutils literal notranslate"><span class="pre">all
 toolchain. <code class="docutils literal notranslate"><span class="pre">dev</span></code> is defined by what the toolchain must be able to <em>see</em>, and the
 workflows that need full resolution install <code class="docutils literal notranslate"><span class="pre">.[all,dev]</span></code>. Do not add
 <code class="docutils literal notranslate"><span class="pre">pypcap</span></code>/<code class="docutils literal notranslate"><span class="pre">pcap-ct</span></code> to it to silence a lint finding; <code class="file docutils literal notranslate"><span class="pre">.github/workflows/lint.yml</span></code>
-carries a tracked <code class="docutils literal notranslate"><span class="pre">import-error</span></code> count that is deliberate rather than accidental.</p>
+expects pylint’s <code class="docutils literal notranslate"><span class="pre">import-error</span></code> for them, deliberately rather than by accident.</p>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
@@ -575,9 +575,9 @@ detail of what actually changed in that version bump. Ruled on
 <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/918">#918</a>.</p>
 <p>Two different things get confused here, so they are named apart:</p>
 <ul class="simple">
-<li><p><strong>A pull request’s commits.</strong> The shared changelog for the 1.5.0 cycle is a
+<li><p><strong>A pull request’s commits.</strong> The shared changelog for the 1.5.0 cycle was a
 long-lived pull request of its own, carrying roughly one commit per code pull
-request, deliberately unsquashed so that what is and is not accounted for stays
+request, and merged unsquashed so that what is and is not accounted for stays
 readable in its log. That is a property of <em>the pull request</em>, and it is not what
 the ruling is about.</p></li>
 <li><p><strong>A changelog file’s entries.</strong> <code class="file docutils literal notranslate"><span class="pre">docs/source/changelog/1.5.0.rst</span></code> groups its
@@ -624,9 +624,9 @@ module the change is <em>about</em>, name the others in the entry’s own text, 
 <strong>not</strong> duplicate the entry into each section. A reader scanning one module’s
 section wants that module’s changes; the same prose appearing twice reads as two
 separate changes. Raised originally on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/918">#918</a>.</p>
-<p>The restructure itself belongs to the shared changelog’s own pull request, which
-owns the file and merges last; doing it earlier would conflict with every open
-change that touches an entry.</p>
+<p>The restructure itself was done on the shared changelog’s own pull request, which
+owned the file and merged last; doing it earlier would have conflicted with every
+open change that touched an entry.</p>
 </div>
 </section>
 <section id="issue-and-pull-request-labels">

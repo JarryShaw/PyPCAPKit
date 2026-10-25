@@ -600,10 +600,11 @@
 <span class="sd">        and are concatenated after all. Measured: two requests sent back to back</span>
 <span class="sd">        on one acknowledgement number come back as a single datagram carrying</span>
 <span class="sd">        ``b'req1req2'``, which</span>
-<span class="sd">        :meth:`test_pipelined_sends_share_a_datagram_because_the_ack_never_moved`</span>
-<span class="sd">        pins. So this narrows the concatenation to within one exchange rather than</span>
-<span class="sd">        eliminating it, and an application parser handed a pipelined datagram</span>
-<span class="sd">        still sees only the first message.</span>
+<span class="sd">        ``test_pipelined_sends_share_a_datagram_because_the_ack_never_moved`` in</span>
+<span class="sd">        :file:`tests/foundation/traceflow/test_tcp.py` pins. So this narrows the</span>
+<span class="sd">        concatenation to within one exchange rather than eliminating it, and an</span>
+<span class="sd">        application parser handed a pipelined datagram still sees only the first</span>
+<span class="sd">        message.</span>
 
 <span class="sd">        A direction that carried one acknowledgement number throughout -- a single</span>
 <span class="sd">        request and its reply, which is what most of the unit tests exercise --</span>

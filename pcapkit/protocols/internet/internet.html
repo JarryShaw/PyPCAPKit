@@ -560,10 +560,13 @@ attribute:</p>
 <tr class="row-odd"><td><p><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType.HIP" title="pcapkit.const.reg.transtype.TransType.HIP"><code class="xref py py-attr docutils literal notranslate"><span class="pre">HIP</span></code></a></p></td>
 <td><p><a class="reference internal" href="hip.html#pcapkit.protocols.internet.hip.HIP" title="pcapkit.protocols.internet.hip.HIP"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.hip.HIP</span></code></a></p></td>
 </tr>
-<tr class="row-even"><td><p><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType.SCTP" title="pcapkit.const.reg.transtype.TransType.SCTP"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SCTP</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType.Shim6" title="pcapkit.const.reg.transtype.TransType.Shim6"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Shim6</span></code></a></p></td>
+<td><p><a class="reference internal" href="ipv6_ext.html#pcapkit.protocols.internet.ipv6_ext.IPv6_Ext" title="pcapkit.protocols.internet.ipv6_ext.IPv6_Ext"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.internet.ipv6_ext.IPv6_Ext</span></code></a></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType.SCTP" title="pcapkit.const.reg.transtype.TransType.SCTP"><code class="xref py py-attr docutils literal notranslate"><span class="pre">SCTP</span></code></a></p></td>
 <td><p><a class="reference internal" href="../transport/sctp.html#pcapkit.protocols.transport.sctp.SCTP" title="pcapkit.protocols.transport.sctp.SCTP"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.transport.sctp.SCTP</span></code></a></p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType.OSPFIGP" title="pcapkit.const.reg.transtype.TransType.OSPFIGP"><code class="xref py py-attr docutils literal notranslate"><span class="pre">OSPFIGP</span></code></a></p></td>
+<tr class="row-even"><td><p><a class="reference internal" href="../../const/reg.html#pcapkit.const.reg.transtype.TransType.OSPFIGP" title="pcapkit.const.reg.transtype.TransType.OSPFIGP"><code class="xref py py-attr docutils literal notranslate"><span class="pre">OSPFIGP</span></code></a></p></td>
 <td><p><a class="reference internal" href="../application/ospf.html#pcapkit.protocols.application.ospf.OSPF" title="pcapkit.protocols.application.ospf.OSPF"><code class="xref py py-class docutils literal notranslate"><span class="pre">pcapkit.protocols.application.ospf.OSPF</span></code></a></p></td>
 </tr>
 </tbody>
@@ -841,6 +844,20 @@ this layer’s place in such a chain, or how many headers
 </dl>
 </dd></dl>
 
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="pcapkit.protocols.internet.internet._exthdr_rebuilt">
+<span class="sig-prename descclassname"><span class="pre">pcapkit.protocols.internet.internet.</span></span><span class="sig-name descname"><span class="pre">_exthdr_rebuilt</span></span><a class="headerlink" href="#pcapkit.protocols.internet.internet._exthdr_rebuilt" title="Link to this definition">¶</a></dt>
+<dd><p>Where the payload <a class="reference internal" href="#pcapkit.protocols.internet.internet.Internet._make_payload" title="pcapkit.protocols.internet.internet.Internet._make_payload"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Internet._make_payload()</span></code></a>
+rebuilds sits in a chain of IPv6 extension headers, should it be one: one past
+the layer it is the payload of, as <a class="reference internal" href="#pcapkit.protocols.internet.internet.Internet._next_exthdr_depth" title="pcapkit.protocols.internet.internet.Internet._next_exthdr_depth"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Internet._next_exthdr_depth()</span></code></a> places
+it while parsing, see <a class="reference internal" href="../../utilities/config.html#pcapkit.utilities.config.EXTENSION_HEADER_LIMIT" title="pcapkit.utilities.config.EXTENSION_HEADER_LIMIT"><code class="xref py py-data docutils literal notranslate"><span class="pre">EXTENSION_HEADER_LIMIT</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/contextvars.html#contextvars.ContextVar" title="(in Python v3.15)">contextvars.ContextVar</a>[<a class="reference external" href="https://docs.python.org/3/builtins/functions.html#int" title="(in Python v3.15)">int</a>]</p>
+</dd>
+</dl>
 </dd></dl>
 
 <section id="extension-header-chains">

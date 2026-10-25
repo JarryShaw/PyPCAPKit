@@ -947,9 +947,16 @@
 <a class="viewcode-back" href="../../../../../pcapkit/protocols/transport/tcp.html#pcapkit.protocols.data.transport.tcp.FastOpenCookie">[docs]</a>
 <span class="nd">@info_final</span>
 <span class="k">class</span><span class="w"> </span><span class="nc">FastOpenCookie</span><span class="p">(</span><span class="n">Option</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">"""Data model for TCP fast open cookie option."""</span>
+<span class="w">    </span><span class="sd">"""Data model for TCP fast open cookie option.</span>
 
-    <span class="c1">#: Cookie.</span>
+<span class="sd">    .. versionchanged:: 1.5.0</span>
+
+<span class="sd">       ``cookie`` is ``b''`` rather than :obj:`None` for a cookie request</span>
+<span class="sd">       (:issue:`2167`).</span>
+
+<span class="sd">    """</span>
+
+    <span class="c1">#: Cookie, ``b''`` for a cookie request.</span>
     <span class="n">cookie</span><span class="p">:</span> <span class="s1">'bytes'</span>
 
     <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>

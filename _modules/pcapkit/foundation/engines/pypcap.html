@@ -517,7 +517,7 @@
     <span class="kn">from</span><span class="w"> </span><span class="nn">pcapkit.foundation.extraction</span><span class="w"> </span><span class="kn">import</span> <span class="n">Extractor</span>
 
     <span class="k">class</span><span class="w"> </span><span class="nc">_PyPCAPPackage</span><span class="p">(</span><span class="n">Protocol</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">"""|pcap|_, as :class:`PyPCAP` reads it through :attr:`PyPCAP._expkg` (#1878)."""</span>
+<span class="w">        </span><span class="sd">"""|pcap|_, as :class:`PyPCAP` reads it through :attr:`PyPCAP._expkg` (:issue:`1878`)."""</span>
 
         <span class="nd">@property</span>
         <span class="k">def</span><span class="w"> </span><span class="nf">pcap</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Type[Handle]'</span><span class="p">:</span> <span class="o">...</span>
@@ -697,7 +697,7 @@
 <span class="sd">                than upstream `PyPCAP`_, or is installed but cannot load. These</span>
 <span class="sd">                are the conditions :meth:`unsupported_reason` reports, kept here as</span>
 <span class="sd">                well because that hook is only consulted by</span>
-<span class="sd">                :meth:`Extractor.run &lt;pcapkit.foundation.extraction.Extractor.run&gt;`;</span>
+<span class="sd">                :class:`~pcapkit.foundation.extraction.Extractor`'s engine selection;</span>
 <span class="sd">                constructing the engine directly bypasses it, and running</span>
 <span class="sd">                `pcap-ct`_ under the :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` name would</span>
 <span class="sd">                misreport what did the work. Via :class:`~pcapkit.foundation.extraction.Extractor`</span>

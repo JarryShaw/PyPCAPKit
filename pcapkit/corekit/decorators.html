@@ -519,12 +519,12 @@ decorators either.</p>
 <p>This decorator function is designed for decorating <em>instance methods</em>.</p>
 </div>
 <p>The decorator will keep the current offset of <a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol._file" title="pcapkit.protocols.protocol.Protocol._file"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._file</span></code></a>,
-then call the decorated function. Afterwards, it will rewind the  offset of
-<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol._file" title="pcapkit.protocols.protocol.Protocol._file"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._file</span></code></a> to the original and returns the return value from
+then call the decorated function. Afterwards, it will rewind the offset of
+<a class="reference internal" href="../protocols/protocol.html#pcapkit.protocols.protocol.Protocol._file" title="pcapkit.protocols.protocol.Protocol._file"><code class="xref py py-attr docutils literal notranslate"><span class="pre">self._file</span></code></a> to the original and return the return value from
 the decorated function.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The decorated function should have following signature:</p>
+<p>The decorated function should have the following signature:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="s1">'pcapkit.protocols.protocol.ProtocolBase'</span><span class="p">,</span>
      <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'typing.Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'typing.Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'typing.Any'</span>
 </pre></div>
@@ -559,7 +559,7 @@ raised, it logs the error and re-parses the current layer’s payload as
 end-of-file <a class="reference internal" href="../utilities/exceptions.html#pcapkit.utilities.exceptions.StructError" title="pcapkit.utilities.exceptions.StructError"><code class="xref py py-exc docutils literal notranslate"><span class="pre">StructError</span></code></a>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The decorated function should have following signature:</p>
+<p>The decorated function should have the following signature:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">func</span><span class="p">(</span><span class="bp">self</span><span class="p">:</span> <span class="s1">'pcapkit.protocols.protocol.ProtocolBase'</span><span class="p">,</span>
      <span class="n">proto</span><span class="p">:</span> <span class="s1">'int'</span><span class="p">,</span> <span class="n">length</span><span class="p">:</span> <span class="s1">'typing.Optional[int]'</span><span class="p">,</span>
      <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="s1">'typing.Any'</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="s1">'typing.Any'</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'pcapkit.protocols.protocol.ProtocolBase'</span>
@@ -599,7 +599,7 @@ and extract necessary information based on the given parameters, then provide
 the revised version of parameter list to the original method.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>The decorated function should have following signature:</p>
+<p>The decorated function should have the following signature:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">func</span><span class="p">(</span><span class="bp">cls</span><span class="p">:</span> <span class="s1">'typing.Type[pcapkit.protocols.schema.schema.Schema]'</span><span class="p">,</span>
      <span class="n">data</span><span class="p">:</span> <span class="s1">'bytes | typing.IO[bytes]'</span><span class="p">,</span>
      <span class="n">length</span><span class="p">:</span> <span class="s1">'Optional[int]'</span><span class="p">,</span>

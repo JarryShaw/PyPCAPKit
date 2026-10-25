@@ -66,13 +66,13 @@ carries only the version being released; this page is the whole recorded history
   transport-layer regression fixed in 1.3.5 -- upgrade past this version
   rather than to it. :doc:`Full changelog <changelog/1.3.4>`.
 * **1.3.3** (2024-11-03) -- Fixed PCAP reading from the CLI and library
-  (:issue:`240`), a source install broken by ``setup.py`` (:issue:`221`), and PCAP output
-  during flow tracing (:issue:`180`); 1.3.2 was never released. :doc:`Full changelog
-  <changelog/1.3.3>`.
+  (:issue:`240`) and a source install broken by ``setup.py`` (:issue:`221`); 1.3.2 was
+  never released. :doc:`Full changelog <changelog/1.3.3>`.
 * **1.3.1** (2023-12-21) -- Renamed ``register_port()`` to
   ``register_apptype()`` with no alias left behind, and revised the
   documentation across ``pcapkit.protocols``, ``pcapkit.corekit`` and
-  ``pcapkit.dumpkit``. :doc:`Full changelog <changelog/1.3.1>`.
+  ``pcapkit.dumpkit``; ``1.3.1.post8`` fixed PCAP output during flow tracing
+  (:issue:`180`). :doc:`Full changelog <changelog/1.3.1>`.
 * **1.3.0** (2023-10-04) -- A redesign of the extension points onto
   metaclasses, adding ``ModuleDescriptor`` so a registry entry can name a
   module and class imported lazily on first use. :doc:`Full changelog

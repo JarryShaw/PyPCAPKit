@@ -988,7 +988,9 @@
 
 <span class="sd">        Args:</span>
 <span class="sd">            code: HTTP frame type code.</span>
-<span class="sd">            meth: Method name or callable to parse and/or construct the frame.</span>
+<span class="sd">            meth: Name of the ``_read_http_${name}`` and ``_make_http_${name}``</span>
+<span class="sd">                methods, or a ``(parser, constructor)`` pair of callables; see</span>
+<span class="sd">                :attr:`__frame__`.</span>
 
 <span class="sd">        Warns:</span>
 <span class="sd">            RegistryWarning: If a different entry is already registered for</span>
@@ -1011,7 +1013,7 @@
     <span class="c1">##########################################################################</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__length_hint__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="s1">'Literal[9]'</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">"""Total length of corresponding protocol."""</span>
+<span class="w">        </span><span class="sd">"""Return an estimated length for the object."""</span>
         <span class="k">return</span> <span class="mi">9</span>
 
     <span class="c1">##########################################################################</span>

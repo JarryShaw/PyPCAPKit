@@ -171,9 +171,10 @@ A constraint that an import cannot reveal is enforced by overriding
 one warning naming the actual cause and a fall back to the built-in parser.
 :class:`~pcapkit.foundation.engines.pyshark.PyShark` checks its Python ceiling and for
 ``tshark``, :class:`~pcapkit.foundation.engines.pypcapfile.PyPCAPFile` its Python ceiling,
-:class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` for a system ``libpcap``, and
-:class:`~pcapkit.foundation.engines.pypcap.PyPCAP` and
-:class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` which distribution owns |pcap|_.
+and :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` and
+:class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT` which distribution owns |pcap|_ and
+whether it loads at all -- for :class:`~pcapkit.foundation.engines.pcap_ct.PCAP_CT`, whether
+a system ``libpcap`` is present (:issue:`2132`).
 :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` deliberately has no Python ceiling
 check, even though upstream cannot be installed on 3.12 or newer: what matters is which
 distribution is present, and a version check would refuse a working build.

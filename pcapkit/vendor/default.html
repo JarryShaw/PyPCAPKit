@@ -687,14 +687,14 @@ the field name will be sanitised as <code class="docutils literal notranslate"><
 call the upper method <a class="reference internal" href="#pcapkit.vendor.default.Vendor.request" title="pcapkit.vendor.default.Vendor.request"><code class="xref py py-meth docutils literal notranslate"><span class="pre">request()</span></code></a> with <strong>NO</strong>
 arguments.</p>
 <p>The method will first try to <em>GET</em> the content of <a class="reference internal" href="#pcapkit.vendor.default.Vendor.LINK" title="pcapkit.vendor.default.Vendor.LINK"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LINK</span></code></a>.
-Should any exception raised, it will first try with proxy settings from
+Should any exception be raised, it will first try with proxy settings from
 <a class="reference internal" href="#pcapkit.vendor.default.get_proxies" title="pcapkit.vendor.default.get_proxies"><code class="xref py py-func docutils literal notranslate"><span class="pre">get_proxies()</span></code></a>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
 <p>Since some <a class="reference internal" href="#pcapkit.vendor.default.Vendor.LINK" title="pcapkit.vendor.default.Vendor.LINK"><code class="xref py py-attr docutils literal notranslate"><span class="pre">LINK</span></code></a> links are from Wikipedia, etc., they
 might not be available in certain areas, e.g. the amazing PRC :)</p>
 </div>
-<p>Would proxies failed again, it will prompt for user intervention, i.e.
+<p>Should the proxies fail again, it will prompt for user intervention, i.e.
 it will use <a class="reference external" href="https://docs.python.org/3/library/webbrowser.html#webbrowser.open" title="(in Python v3.15)"><code class="xref py py-func docutils literal notranslate"><span class="pre">webbrowser.open()</span></code></a> to open the page in browser for you, and
 you can manually load that page and save the HTML source at the location
 it provides.</p>
@@ -758,7 +758,7 @@ out to <code class="docutils literal notranslate"><span class="pre">m</span></co
 <code class="docutils literal notranslate"><span class="pre">sys.exit(SomeCrawler())</span></code>, so running one from a second checkout, or
 from a module that never sits under <code class="docutils literal notranslate"><span class="pre">vendor/</span></code> at all, resolves
 <a class="reference internal" href="index.html#module-pcapkit.vendor" title="pcapkit.vendor"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pcapkit.vendor</span></code></a> from wherever it is installed while
-<code class="docutils literal notranslate"><span class="pre">inspect.getfile(cls)</span></code> names a file elsewhere entirely –  and
+<code class="docutils literal notranslate"><span class="pre">inspect.getfile(cls)</span></code> names a file elsewhere entirely – and
 <a class="reference internal" href="#pcapkit.vendor.default.Vendor.__init__" title="pcapkit.vendor.default.Vendor.__init__"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Vendor.__init__</span></code></a> then opens that path with <code class="docutils literal notranslate"><span class="pre">'w'</span></code>, silently
 truncating whatever <code class="xref py py-attr docutils literal notranslate"><span class="pre">__module__</span></code> actually names instead of
 raising. So the escape is rejected outright, rather than trusted to

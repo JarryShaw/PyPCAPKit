@@ -783,7 +783,7 @@ manual run, where no completed Unit Tests run exists yet to read a verdict from.
 arrows), each reads the verdict Unit Tests already reached instead of re-running
 the gate a second time, and acts on it only once the head’s <code class="docutils literal notranslate"><span class="pre">verdict</span></code> job,
 described under the edge list below, says it is a verdict on the commit it
-builds (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1967">#1967</a>). Create
+builds (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1967">#1967</a>). Create
 Release has no <code class="docutils literal notranslate"><span class="pre">schedule</span></code>, and its gate job’s <code class="docutils literal notranslate"><span class="pre">if:</span></code> reads <code class="docutils literal notranslate"><span class="pre">version_check</span></code>’s evidence
 rather than the event, so its gate can run whichever way the run was raised, once
 <code class="docutils literal notranslate"><span class="pre">version_check</span></code> itself has passed: on a <code class="docutils literal notranslate"><span class="pre">v*</span></code> tag push, and on a
@@ -821,7 +821,7 @@ the filtering happens in the <code class="docutils literal notranslate"><span cl
 checks out <code class="docutils literal notranslate"><span class="pre">github.sha</span></code>, <code class="docutils literal notranslate"><span class="pre">main</span></code>’s tip when the event is raised, not
 <code class="docutils literal notranslate"><span class="pre">github.event.workflow_run.head_sha</span></code>, the commit the completed run tested, and
 in a merge wave the two differ: Conda Update 38325136710 bumped 2e941bbb7 under
-the verdict for 9083163f5 (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1643">#1643</a>).
+the verdict for 9083163f5 (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1643">#1643</a>).
 So Vendor Update, Conda Update and GitHub Pages each run Cron Head’s <code class="docutils literal notranslate"><span class="pre">verdict</span></code>
 job first, in their <code class="docutils literal notranslate"><span class="pre">head</span></code> job, and act only when its <code class="docutils literal notranslate"><span class="pre">verified</span></code> output says
 the tip is the verified commit, or that commit plus bot commits
@@ -829,23 +829,23 @@ to <code class="docutils literal notranslate"><span class="pre">conda/build</spa
 the tip’s own Unit Tests run raises them again. Vendor Update’s run still
 concludes <code class="docutils literal notranslate"><span class="pre">success</span></code> then, since <code class="docutils literal notranslate"><span class="pre">verdict</span></code> ran, so Create Release reads its
 <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code> job to tell it from a real one
-(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1748">#1748</a>). The rule and its evidence are in
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1748">#1748</a>). The rule and its evidence are in
 <code class="docutils literal notranslate"><span class="pre">util/verdict_covers_checkout.py</span></code>. Conda Update also writes after the
 checkout, so it applies the same rule a second time: its push rebases onto
 <code class="docutils literal notranslate"><span class="pre">main</span></code>’s tip only when the commits that brings in pass it, and otherwise
 pushes nothing, and Conda Tag tags the commit that push landed rather than the
-tip (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1632">#1632</a>).</p>
+tip (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1632">#1632</a>).</p>
 <p>Vendor Update’s own commit raises it again: the push gets a Unit Tests run, whose
 completion starts another crawl. The commit bumps the version only when the crawl
 changed code. If every change is to comments or docstrings, the commit is “Updated
 vendor documentation without a version bump”, and the Create Release run that
 follows sees the same version, so it has nothing new to publish
-(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1674">#1674</a>). A crawl raised by
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1674">#1674</a>). A crawl raised by
 such a commit’s own Unit Tests run does not commit comment changes on top of it,
 so documentation commits cannot chain. The rule is in
 <code class="docutils literal notranslate"><span class="pre">util/vendor_code_changed.py</span></code>. A bump commit carries every module the crawl
 wrote, a new one included, so the crawl it raises does not find one untracked
-and bump again (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1685">#1685</a>).</p>
+and bump again (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1685">#1685</a>).</p>
 </section>
 <section id="reusable-workflow-calls-uses">
 <h2>Reusable-Workflow Calls (<code class="docutils literal notranslate"><span class="pre">uses:</span></code>)<a class="headerlink" href="#reusable-workflow-calls-uses" title="Link to this heading">¶</a></h2>
@@ -864,7 +864,7 @@ starting an independent run after the caller finishes. The calls target
 output is its <code class="docutils literal notranslate"><span class="pre">verdict</span></code> job’s, and the acting job reads it beside
 <code class="docutils literal notranslate"><span class="pre">needs.head.result</span></code>.</p></li>
 </ul>
-<p>Cron Head (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1967">#1967</a>) is
+<p>Cron Head (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1967">#1967</a>) is
 one copy of the test gate and the <code class="docutils literal notranslate"><span class="pre">verdict</span></code> job, which Conda Update, Vendor
 Update and GitHub Pages used to carry each. It holds <code class="docutils literal notranslate"><span class="pre">contents:</span> <span class="pre">read</span></code> and no
 more, which is what each caller grants its <code class="docutils literal notranslate"><span class="pre">head</span></code> job and what
@@ -876,7 +876,7 @@ a manual run, <code class="docutils literal notranslate"><span class="pre">verdi
 treats a <code class="docutils literal notranslate"><span class="pre">head</span></code> result other than <code class="docutils literal notranslate"><span class="pre">failure</span></code> as passing.</p>
 <p>Their schedules are eight hours apart on Saturdays: GitHub Pages at 02:00,
 Vendor Update at 10:00 and Conda Update at 18:00 UTC
-(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1967">#1967</a>). The owner’s
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1967">#1967</a>). The owner’s
 ruling kept a schedule on each and allowed them aligned or spread, and nothing
 orders them:</p>
 <ul class="simple">
@@ -886,7 +886,7 @@ GitHub Pages anyway, as a Unit Tests run whose completion raises both on the
 triggered it, through its <code class="docutils literal notranslate"><span class="pre">vendor_update</span></code> job, so the time of the others
 does not matter to it.</p></li>
 <li><p>At one time they cost more. Vendor Update and Conda Update both ran at 10:00
-until this change, and each scheduled pair read back from 2026-09-26 on
+until <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1967">#1967</a> spread them, and each scheduled pair read back from 2026-09-26 on
 checked out the same commit – on 2026-10-17, Conda Update 39023770904 and
 Vendor Update 39023891165 both gated 44ed96fc3, their <code class="docutils literal notranslate"><span class="pre">Gate</span> <span class="pre">(full</span> <span class="pre">suite,</span>
 <span class="pre">…)</span></code> jobs taking twelve and ten minutes. Their writing jobs share the <code class="docutils literal notranslate"><span class="pre">repository-maintenance</span></code> group, so <code class="docutils literal notranslate"><span class="pre">conda-update</span></code>
@@ -896,7 +896,7 @@ group cancels the one pending there.</p></li>
 <p>Spread, each <code class="docutils literal notranslate"><span class="pre">head</span></code> gates alone, and Conda Update runs once Vendor Update’s
 Create Release has had the day to publish, so its <code class="docutils literal notranslate"><span class="pre">Check</span> <span class="pre">the</span> <span class="pre">GitHub</span> <span class="pre">release</span>
 <span class="pre">exists</span></code> step finds the release rather than skipping the GitHub upload
-(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1634">#1634</a>).</p>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1634">#1634</a>).</p>
 <p>To debug Vendor Update, Conda Update or GitHub Pages without waiting for
 Saturday, start a manual run on a branch, as in <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">workflow</span> <span class="pre">run</span> <span class="pre">cron-conda.yml</span>
 <span class="pre">--ref</span> <span class="pre">&lt;branch&gt;</span></code>. A manual run is build-only by default: Cron Head’s test gate
@@ -957,7 +957,7 @@ existed then – <code class="docutils literal notranslate"><span class="pre">Py
 <span class="pre">…</span></code> – all reporting <code class="docutils literal notranslate"><span class="pre">skipped</span></code>.</p>
 </section>
 <section id="the-skip-cascade-888">
-<h2>The Skip Cascade (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/888">#888</a>)<a class="headerlink" href="#the-skip-cascade-888" title="Link to this heading">¶</a></h2>
+<h2>The Skip Cascade (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/888">#888</a>)<a class="headerlink" href="#the-skip-cascade-888" title="Link to this heading">¶</a></h2>
 <p>The relationships above compose into a failure mode worth seeing on its
 own graph. Create Release’s <code class="docutils literal notranslate"><span class="pre">version_check</span></code> – ahead of the <code class="docutils literal notranslate"><span class="pre">uses:</span></code> call
 above – carries:</p>
@@ -977,7 +977,7 @@ anything other than <code class="docutils literal notranslate"><span class="pre"
 <code class="docutils literal notranslate"><span class="pre">skipped</span></code>, which is exactly what Vendor Update’s <em>own</em> jobs report when
 <em>their</em> <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code>-path guards decline (see <code class="docutils literal notranslate"><span class="pre">cron-vendor.yml</span></code>’s
 <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code> job). Since
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1748">#1748</a> it is also false
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1748">#1748</a> it is also false
 for a Vendor Update that concluded <code class="docutils literal notranslate"><span class="pre">success</span></code> with <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code> skipped –
 its <code class="docutils literal notranslate"><span class="pre">verdict</span></code> job found the Unit Tests verdict was for another commit – which
 the <code class="docutils literal notranslate"><span class="pre">vendor_update</span></code> job reads from that run’s jobs first (observed on run
@@ -1032,12 +1032,12 @@ one can skip the very first attempt, before any tag is ever created, purely
 because the upstream Vendor Update run did not itself conclude <code class="docutils literal notranslate"><span class="pre">success</span></code>.</p>
 <p>Such a run is also kept out of the release’s concurrency group
 (its <code class="docutils literal notranslate"><span class="pre">concurrency</span></code> block,
-<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1705">#1705</a>). It is keyed on
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1705">#1705</a>). It is keyed on
 its own <code class="docutils literal notranslate"><span class="pre">github.run_id</span></code> rather than on the ref, so it cannot cancel a run
 waiting there with release work. Keyed on the ref, run 38499295798 joined at
 02:06:32Z on 2026-10-14, and the pending 38499150441, whose Vendor Update had
 succeeded, was cancelled a second later. A run whose Vendor Update concluded
-<code class="docutils literal notranslate"><span class="pre">success</span></code> with <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code> skipped (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1748">#1748</a>) is still keyed on the ref:
+<code class="docutils literal notranslate"><span class="pre">success</span></code> with <code class="docutils literal notranslate"><span class="pre">vendor-update</span></code> skipped (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1748">#1748</a>) is still keyed on the ref:
 the group reads only the event, which does not say which jobs ran. It can still
 displace a run pending there, and releases nothing in its place, so that
 release waits for the next Vendor Update on <code class="docutils literal notranslate"><span class="pre">main</span></code>.</p>
@@ -1049,7 +1049,7 @@ that runs with a secret on an event a fork can cause: it writes the project boar
 <em>Status</em> field with <code class="docutils literal notranslate"><span class="pre">PROJECT_TOKEN</span></code>, which a fork’s <code class="docutils literal notranslate"><span class="pre">pull_request</span></code> run would not
 receive. It therefore never checks out the repository and has no <code class="docutils literal notranslate"><span class="pre">uses:</span></code> step. It
 fetches <code class="file docutils literal notranslate"><span class="pre">util/project_status.py</span></code>, and <code class="file docutils literal notranslate"><span class="pre">util/_actions.py</span></code>, which it imports
-(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2047">#2047</a>), through the API at
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2047">#2047</a>), through the API at
 <code class="docutils literal notranslate"><span class="pre">github.sha</span></code> – the base branch’s tip under that event – and takes only the item
 number from the payload.
 <code class="docutils literal notranslate"><span class="pre">tests/project/test_project_status.py</span></code> asserts this over the file. Without the
@@ -1057,7 +1057,7 @@ secret it skips with a <code class="docutils literal notranslate"><span class="p
 <a class="reference internal" href="conventions/process.html"><span class="doc">Running the Repository</span></a>.</p>
 </section>
 <section id="coverage-1063">
-<h2>Coverage (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1063">#1063</a>)<a class="headerlink" href="#coverage-1063" title="Link to this heading">¶</a></h2>
+<h2>Coverage (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1063">#1063</a>)<a class="headerlink" href="#coverage-1063" title="Link to this heading">¶</a></h2>
 <p>Coverage is measured inside an existing leg rather than by a workflow of its
 own: the <code class="docutils literal notranslate"><span class="pre">Python</span> <span class="pre">3.15</span></code> leg of <code class="docutils literal notranslate"><span class="pre">test</span></code> (matrix key <code class="docutils literal notranslate"><span class="pre">coverage:</span> <span class="pre">true</span></code>) runs
 its unchanged pytest selection under <code class="docutils literal notranslate"><span class="pre">coverage</span> <span class="pre">run</span>
@@ -1071,10 +1071,10 @@ and re-importing pcapkit, one module’s peak RSS was 4.17 GiB under the default
 killed the runner. <code class="docutils literal notranslate"><span class="pre">sigterm</span> <span class="pre">=</span> <span class="pre">true</span></code> and a <code class="docutils literal notranslate"><span class="pre">pytest_sessionfinish</span></code> hook in
 <code class="file docutils literal notranslate"><span class="pre">tests/conftest.py</span></code> that saves each xdist worker’s data early keep a
 worker that dies during shutdown from losing its file
-(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1423">#1423</a>). The leg’s
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1423">#1423</a>). The leg’s
 <code class="docutils literal notranslate"><span class="pre">Report</span> <span class="pre">coverage</span></code> step then runs <code class="file docutils literal notranslate"><span class="pre">util/coverage_report.py</span></code>, which fails,
 posting no total, unless the controller and every xdist worker saved a data file
-(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1387">#1387</a>), and otherwise
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1387">#1387</a>), and otherwise
 writes the total and a per-package table to the job summary. The leg uploads the HTML
 report as the <code class="docutils literal notranslate"><span class="pre">coverage-html</span></code> artifact (30 days), with the bare numbers as the
 <code class="docutils literal notranslate"><span class="pre">coverage-summary</span></code> artifact and the per-process debug log as
@@ -1093,17 +1093,17 @@ failed. Neither workflow’s coverage step is a required check. A push run has n
 pull request, so its report goes to Discussions instead (see <a class="reference internal" href="#ci-reports">CI Reports</a>).</p>
 </section>
 <section id="ci-timing-review-1538">
-<h2>CI Timing Review (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1538">#1538</a>)<a class="headerlink" href="#ci-timing-review-1538" title="Link to this heading">¶</a></h2>
+<h2>CI Timing Review (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1538">#1538</a>)<a class="headerlink" href="#ci-timing-review-1538" title="Link to this heading">¶</a></h2>
 <p><strong>CI Timing</strong> (<code class="file docutils literal notranslate"><span class="pre">ci-timing.yml</span></code>) runs <code class="file docutils literal notranslate"><span class="pre">util/ci_timing.py</span></code> every Monday,
 or on dispatch with a <code class="docutils literal notranslate"><span class="pre">days</span></code> window and an optional <code class="docutils literal notranslate"><span class="pre">concurrency_hours</span></code> runner-pool
 measurement. Through the API it lists every completed run in the window of Unit Tests,
-Python Compatibility, Lint, CodeQL, GitHub Pages and Experimental Tests (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1732">#1732</a>, so
+Python Compatibility, Lint, CodeQL, GitHub Pages and Experimental Tests (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1732">#1732</a>, so
 its two-hour legs stay measured), a day per query because a filtered listing stops
 at 1,000 runs (Pages completed 1,154 in the week to 2026-10-09). It then reads the
 jobs of an evenly spaced sample – 150 push and 150 pull-request runs of Unit Tests,
 60 runs of each other workflow – and the summary says how many runs each sample
 holds and which span they cover. For the week to 2026-10-19 that was 677 calls
-(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1930">#1930</a>: 49 listing pages,
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1930">#1930</a>: 49 listing pages,
 one per workflow per day and one more per further 100 runs; 601 job reads; 15 for
 the JUnit artifacts; 12 workflow-file reads) of <code class="docutils literal notranslate"><span class="pre">GITHUB_TOKEN</span></code>’s 1,000 an hour, on
 a read-only token (<code class="docutils literal notranslate"><span class="pre">actions:</span> <span class="pre">read</span></code>, <code class="docutils literal notranslate"><span class="pre">contents:</span> <span class="pre">read</span></code>). It took 16.6 minutes,
@@ -1220,22 +1220,23 @@ fire while the pool stays saturated, and the JUnit timings are what show whether
 <code class="docutils literal notranslate"><span class="pre">W7</span></code>’s 10-second test line needs raising. What to do when one fires is on
 <a class="reference internal" href="conventions/process.html"><span class="doc">Running the Repository</span></a>.</p>
 <p><code class="docutils literal notranslate"><span class="pre">H1</span></code>, <code class="docutils literal notranslate"><span class="pre">H2</span></code> and <code class="docutils literal notranslate"><span class="pre">H4</span></code> on a non-blocking job are warnings, not HARD, so they do
-not fail the run (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1732">#1732</a>): on every job of <code class="file docutils literal notranslate"><span class="pre">experimental.yml</span></code>, which no
+not fail the run (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1732">#1732</a>): on every job of <code class="file docutils literal notranslate"><span class="pre">experimental.yml</span></code>, which no
 required context names, on every <a class="reference internal" href="#ktlo-tier"><span class="std std-ref">KTLO</span></a> leg, a job whose name ends in <code class="docutils literal notranslate"><span class="pre">(KTLO)</span></code>
-(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1633">#1633</a>), and on a job whose name ends in <code class="docutils literal notranslate"><span class="pre">(experimental)</span></code> in any workflow. That
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1633">#1633</a>), and on a job whose name ends in <code class="docutils literal notranslate"><span class="pre">(experimental)</span></code> in any workflow. That
 last covers the experimental legs that ran in <code class="file docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> under
 <code class="docutils literal notranslate"><span class="pre">test</span></code>’s 45-minute cap before the split. The finding keeps its <code class="docutils literal notranslate"><span class="pre">H</span></code> id and says it is non-blocking. A
 KTLO leg past its job’s <code class="docutils literal notranslate"><span class="pre">timeout-minutes</span></code> is still cancelled, and its check run
-reads red, though since <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1738">#1738</a> nothing gating waits on it, so that warning is worth
+reads red, though since <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1738">#1738</a> nothing gating waits on it, so that warning is worth
 acting on before the cap.</p>
 </section>
 <section id="work-kept-off-the-pull-request-queue-1538">
-<h2>Work Kept Off the Pull-Request Queue (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1538">#1538</a>)<a class="headerlink" href="#work-kept-off-the-pull-request-queue-1538" title="Link to this heading">¶</a></h2>
+<h2>Work Kept Off the Pull-Request Queue (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1538">#1538</a>)<a class="headerlink" href="#work-kept-off-the-pull-request-queue-1538" title="Link to this heading">¶</a></h2>
 <p>Cuts in <code class="file docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> keep work that cannot gate a merge from competing
 with pull-request jobs for the 20-runner pool. None touches a required check or adds a
 permission to the reusable workflow.</p>
 <ul class="simple">
-<li><p><code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code> runs on <code class="docutils literal notranslate"><span class="pre">main</span></code> pushes only, per <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1052">#1052</a> item H, and has
+<li><p><code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code> runs on <code class="docutils literal notranslate"><span class="pre">main</span></code> pushes only, per <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1052">#1052</a>
+item H, and has
 <code class="docutils literal notranslate"><span class="pre">needs:</span> <span class="pre">[test]</span></code>, so its cells join the queue once <code class="docutils literal notranslate"><span class="pre">test</span></code> finishes rather
 than when the push run is created, ahead of that run’s own <code class="docutils literal notranslate"><span class="pre">Python</span></code> legs and of
 pull-request jobs created later in a merge wave. Its <code class="docutils literal notranslate"><span class="pre">if:</span></code> opens with
@@ -1248,7 +1249,7 @@ about one slowest cell later, about 6 min before any queue wait (estimate).</p><
 on every leg. Dropped with it: that file in a venv holding only <code class="docutils literal notranslate"><span class="pre">test</span></code> and <code class="docutils literal notranslate"><span class="pre">DPKT</span></code>.</p></li>
 </ul>
 <p>Another cut, running the then-prerelease 3.15 engine cell on <code class="docutils literal notranslate"><span class="pre">main</span></code> pushes only,
-ended with <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1633">#1633</a>: 3.15 is
+ended with <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1633">#1633</a>: 3.15 is
 in the supported tier, so its cells block on every run.</p>
 </section>
 <section id="required-status-checks">
@@ -1267,7 +1268,7 @@ grepping every workflow file for its name:</p>
 </thead>
 <tbody>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Lint</span></code></p></td>
-<td><p>job <code class="docutils literal notranslate"><span class="pre">lint</span></code>, required since <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1967">#1967</a></p></td>
+<td><p>job <code class="docutils literal notranslate"><span class="pre">lint</span></code>, required since <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1967">#1967</a></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">lint.yml</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code></p></td>
@@ -1276,36 +1277,36 @@ grepping every workflow file for its name:</p>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.11</span></code></p></td>
 <td><p>job <code class="docutils literal notranslate"><span class="pre">compatibility</span></code>, matrix leg <code class="docutils literal notranslate"><span class="pre">3.11</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">.github/python-versions.toml:19</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>, key <code class="docutils literal notranslate"><span class="pre">&quot;3.11&quot;</span></code> of <code class="docutils literal notranslate"><span class="pre">.github/python-versions.toml</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.12</span></code></p></td>
 <td><p>job <code class="docutils literal notranslate"><span class="pre">compatibility</span></code>, matrix leg <code class="docutils literal notranslate"><span class="pre">3.12</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">.github/python-versions.toml:20</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>, key <code class="docutils literal notranslate"><span class="pre">&quot;3.12&quot;</span></code> of <code class="docutils literal notranslate"><span class="pre">.github/python-versions.toml</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.13</span></code></p></td>
 <td><p>job <code class="docutils literal notranslate"><span class="pre">compatibility</span></code>, matrix leg <code class="docutils literal notranslate"><span class="pre">3.13</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">.github/python-versions.toml:21</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>, key <code class="docutils literal notranslate"><span class="pre">&quot;3.13&quot;</span></code> of <code class="docutils literal notranslate"><span class="pre">.github/python-versions.toml</span></code></p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.14</span></code></p></td>
 <td><p>job <code class="docutils literal notranslate"><span class="pre">compatibility</span></code>, matrix leg <code class="docutils literal notranslate"><span class="pre">3.14</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">.github/python-versions.toml:22</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>, key <code class="docutils literal notranslate"><span class="pre">&quot;3.14&quot;</span></code> of <code class="docutils literal notranslate"><span class="pre">.github/python-versions.toml</span></code></p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.15</span></code></p></td>
 <td><p>job <code class="docutils literal notranslate"><span class="pre">compatibility</span></code>, matrix leg <code class="docutils literal notranslate"><span class="pre">3.15</span></code></p></td>
-<td><p><code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>, <code class="docutils literal notranslate"><span class="pre">.github/python-versions.toml:23</span></code></p></td>
+<td><p><code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>, key <code class="docutils literal notranslate"><span class="pre">&quot;3.15&quot;</span></code> of <code class="docutils literal notranslate"><span class="pre">.github/python-versions.toml</span></code></p></td>
 </tr>
 </tbody>
 </table>
 </div>
-<p>That is the list after <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1633">#1633</a>,
+<p>That is the list after <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1633">#1633</a>,
 which added <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.15</span></code> and removed <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span> <span class="pre">3.10</span></code>. Moving a version
 between the tiers below means editing the ruleset in the same change.</p>
 <p><code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code> is defined by exactly one, the <code class="docutils literal notranslate"><span class="pre">name:</span></code> of the
 <code class="docutils literal notranslate"><span class="pre">required-checks</span></code> job in <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>. <code class="docutils literal notranslate"><span class="pre">Compat</span> <span class="pre">Python</span></code> is defined by
 one, the <code class="docutils literal notranslate"><span class="pre">name:</span></code> of the <code class="docutils literal notranslate"><span class="pre">compatibility</span></code> job in <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>, whose
 <code class="docutils literal notranslate"><span class="pre">matrix</span></code> comes from <code class="file docutils literal notranslate"><span class="pre">.github/python-versions.toml</span></code>: the required legs
-are its supported tier (<code class="docutils literal notranslate"><span class="pre">python-versions.toml:19-23</span></code>), and its KTLO legs
-(<code class="docutils literal notranslate"><span class="pre">python-versions.toml:16-18</span></code>) have names ending in <code class="docutils literal notranslate"><span class="pre">(KTLO)</span></code>, so no required
+are its supported tier (keys <code class="docutils literal notranslate"><span class="pre">&quot;3.11&quot;</span></code> to <code class="docutils literal notranslate"><span class="pre">&quot;3.15&quot;</span></code>), and its KTLO legs
+(keys <code class="docutils literal notranslate"><span class="pre">&quot;3.8&quot;</span></code> to <code class="docutils literal notranslate"><span class="pre">&quot;3.10&quot;</span></code>) have names ending in <code class="docutils literal notranslate"><span class="pre">(KTLO)</span></code>, so no required
 context matches one. The comment above <code class="docutils literal notranslate"><span class="pre">required-checks</span></code> mentions the string
 without defining it.</p>
 <p><code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code> is an aggregate, not a single check run. The ruleset
@@ -1326,14 +1327,14 @@ triggers; the <code class="docutils literal notranslate"><span class="pre">gate-
 its <code class="docutils literal notranslate"><span class="pre">if:</span> <span class="pre">${{</span> <span class="pre">always()</span> <span class="pre">&amp;&amp;</span> <span class="pre">inputs.gate-only</span> <span class="pre">!=</span> <span class="pre">true</span> <span class="pre">}}</span></code>, so it is never
 produced – and never expected – on those paths.</p>
 <p id="ktlo-tier">Python versions are tiered – supported and KTLO
-(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1633">#1633</a>), and experimental
-(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1660">#1660</a>, below) – in
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1633">#1633</a>), and experimental
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1660">#1660</a>, below) – in
 <code class="file docutils literal notranslate"><span class="pre">.github/python-versions.toml</span></code> (see <a class="reference internal" href="#python-versions">Python Versions</a>).
 The <strong>supported</strong> tier, 3.11-3.15, blocks: a failed leg fails <code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code> or its own
 required <code class="docutils literal notranslate"><span class="pre">Compat</span></code> context. The <strong>KTLO</strong> (<em>keep the lights on</em>) tier – end-of-life 3.8-3.10, still built and
 tested – never blocks, is never a required context, and never shows a commit or a
-pull request red (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1672">#1672</a>). In <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> the KTLO legs are jobs of their own
-since <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1738">#1738</a>: <code class="docutils literal notranslate"><span class="pre">test-ktlo</span></code>,
+pull request red (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1672">#1672</a>). In <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> the KTLO legs are jobs of their own
+since <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1738">#1738</a>: <code class="docutils literal notranslate"><span class="pre">test-ktlo</span></code>,
 <code class="docutils literal notranslate"><span class="pre">integration-ktlo</span></code> and <code class="docutils literal notranslate"><span class="pre">pypcap-parity-ktlo</span></code>, which neither <code class="docutils literal notranslate"><span class="pre">required-checks</span></code>
 nor <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code> <code class="docutils literal notranslate"><span class="pre">needs:</span></code>, so not even a failure no step can contain, such
 as a lost runner or the job cap, reaches a gate. Each runs its gating twin’s steps,
@@ -1366,11 +1367,12 @@ so the Unit Tests run its <code class="docutils literal notranslate"><span class
 </ul>
 <p>Errors remain on a failed KTLO step, though none changes a conclusion: the
 runner’s <code class="docutils literal notranslate"><span class="pre">Process</span> <span class="pre">completed</span> <span class="pre">with</span> <span class="pre">exit</span> <span class="pre">code</span> <span class="pre">N.</span></code> for a <code class="docutils literal notranslate"><span class="pre">run:</span></code> step, and an
-action’s own. And <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1634">#1634</a>’s tag check still blocks the <code class="docutils literal notranslate"><span class="pre">pypi</span></code> KTLO legs: it fails
+action’s own. And <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1634">#1634</a>’s tag check still blocks the <code class="docutils literal notranslate"><span class="pre">pypi</span></code> KTLO legs: it fails
 every leg alike, and masked, the leg would go on to publish.</p>
 <p>PyPy is tiered the same way. <code class="docutils literal notranslate"><span class="pre">test</span></code> and <code class="docutils literal notranslate"><span class="pre">integration</span></code> run its supported
 versions after CPython’s, and <code class="docutils literal notranslate"><span class="pre">test-ktlo</span></code> and <code class="docutils literal notranslate"><span class="pre">integration-ktlo</span></code> its KTLO ones,
-each leg running the <code class="docutils literal notranslate"><span class="pre">ALL</span></code> test tier (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1958">#1958</a>, see <a class="reference internal" href="#test-tiers">Test Tiers</a>). A
+each leg running the <code class="docutils literal notranslate"><span class="pre">ALL</span></code> test tier (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1958">#1958</a>,
+see <a class="reference internal" href="#test-tiers">Test Tiers</a>). A
 supported PyPy leg blocks through <code class="docutils literal notranslate"><span class="pre">Required</span> <span class="pre">checks</span> <span class="pre">passed</span></code>, which needs its job,
 so it adds no context to the ruleset. No <code class="docutils literal notranslate"><span class="pre">Compat</span></code>, <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code> or
 <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> leg runs PyPy. On PyPy 8.0, which setup-python’s <code class="docutils literal notranslate"><span class="pre">pypy3.11</span></code>
@@ -1378,12 +1380,12 @@ is, PyPI has no Linux wheel of <a class="reference external" href="https://crypt
 with the image’s Rust and <code class="docutils literal notranslate"><span class="pre">libssl-dev</span></code>, and none of <code class="docutils literal notranslate"><span class="pre">lxml</span></code>, so the <code class="docutils literal notranslate"><span class="pre">test</span></code>
 extra carries <code class="docutils literal notranslate"><span class="pre">lxml</span></code> on CPython only. On <code class="docutils literal notranslate"><span class="pre">pypy3.10</span></code> the <code class="docutils literal notranslate"><span class="pre">crypto</span></code> and <code class="docutils literal notranslate"><span class="pre">all</span></code>
 extras cap <a class="reference external" href="https://cryptography.io"><code class="docutils literal notranslate"><span class="pre">cryptography</span></code></a> below 46, as 45.0.7 is the newest release with a Linux
-<code class="docutils literal notranslate"><span class="pre">pp310</span></code> wheel and the newest release’s sdist does not build there (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2040">#2040</a>).</p>
+<code class="docutils literal notranslate"><span class="pre">pp310</span></code> wheel and the newest release’s sdist does not build there (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2040">#2040</a>).</p>
 <p>On PyPy an xdist worker’s RSS grows with every test it runs, rather than in a few
 heavy modules, so a PyPy leg’s <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">unit</span> <span class="pre">tests</span></code> hands its pytest command to
 <code class="file docutils literal notranslate"><span class="pre">util/pytest_shards.py</span></code>, as GraalPy’s leg does (see below), which runs it once per
 directory its <code class="docutils literal notranslate"><span class="pre">SHARDS</span></code> names, <code class="docutils literal notranslate"><span class="pre">tests/protocols</span></code> and then <code class="docutils literal notranslate"><span class="pre">tests/corekit</span></code>, and once
-more over the rest, ignoring each (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2005">#2005</a>).
+more over the rest, ignoring each (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2005">#2005</a>).
 Each run starts its workers afresh. Measured on PyPy 8.0.1 at <code class="docutils literal notranslate"><span class="pre">-n</span> <span class="pre">4</span></code>, one run
 over the whole <code class="docutils literal notranslate"><span class="pre">ALL</span></code> tier took each worker to 5.4-5.9 GB and the workers together
 past 20 GB, beyond the runner’s 16 GB; split, the largest run peaked at 2.6 GB a
@@ -1392,7 +1394,8 @@ worker and 8.5 GB in all, and the tier took 383 s rather than 493 s. A smaller
 the kills into <code class="docutils literal notranslate"><span class="pre">MemoryError</span></code>s. Each run but the last writes a JUnit file of its
 own beside <code class="docutils literal notranslate"><span class="pre">junit.xml</span></code>, which <code class="docutils literal notranslate"><span class="pre">Upload</span> <span class="pre">test</span> <span class="pre">timings</span></code> takes too, and the step
 fails if any run did.</p>
-<p>Nothing below <code class="docutils literal notranslate"><span class="pre">requires-python</span></code>’s 3.8 is in any matrix (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2051">#2051</a>): pip refuses such an
+<p>Nothing below <code class="docutils literal notranslate"><span class="pre">requires-python</span></code>’s 3.8 is in any matrix (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2051">#2051</a>):
+pip refuses such an
 interpreter at install, so a leg there could only prove the refusal. Nor are
 3.8 and 3.9 in <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code>, which installs every interpreter on
 <code class="docutils literal notranslate"><span class="pre">ubuntu-latest</span></code>, where setup-python has no Ubuntu 26.04 build of any of them. Nor
@@ -1403,7 +1406,8 @@ setup-python reads them (<code class="docutils literal notranslate"><span class=
 <code class="docutils literal notranslate"><span class="pre">experimental</span></code>, the matrix job of <code class="file docutils literal notranslate"><span class="pre">.github/workflows/experimental.yml</span></code>
 (“Experimental Tests”), named <code class="docutils literal notranslate"><span class="pre">Python</span> <span class="pre">&lt;version&gt;</span> <span class="pre">(experimental)</span></code>, and nothing
 else: no <code class="docutils literal notranslate"><span class="pre">integration</span></code>, <code class="docutils literal notranslate"><span class="pre">Compat</span></code>, wheel or conda leg, so never a required
-context. They were legs of <code class="docutils literal notranslate"><span class="pre">test</span></code> until <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1732">#1732</a>, which moved them to a
+context. They were legs of <code class="docutils literal notranslate"><span class="pre">test</span></code> until <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1732">#1732</a>,
+which moved them to a
 workflow of their own, by the owner’s ruling that nothing waits on them. <strong>That
 workflow reports separately and holds up nothing</strong>: a job cannot <code class="docutils literal notranslate"><span class="pre">needs:</span></code> one in
 another workflow, nothing calls it, and no <code class="docutils literal notranslate"><span class="pre">workflow_run</span></code> names it but CI
@@ -1414,7 +1418,7 @@ Tests run completes without it, and with it <code class="docutils literal notran
 <code class="docutils literal notranslate"><span class="pre">cron-conda.yml</span></code>). It runs on Unit Tests’ <code class="docutils literal notranslate"><span class="pre">push</span></code> and <code class="docutils literal notranslate"><span class="pre">pull_request</span></code> events,
 skips a docs-only pull request by the same <code class="docutils literal notranslate"><span class="pre">changes</span></code> script, and lets a newer
 commit supersede a run, a pull request’s or, unlike Unit Tests, a push to <code class="docutils literal notranslate"><span class="pre">main</span></code>’s
-(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1903">#1903</a>): since nothing
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1903">#1903</a>): since nothing
 waits on the legs, <code class="docutils literal notranslate"><span class="pre">main</span></code>’s newest commit is the one worth testing, whereas Unit
 Tests keeps a run per push for <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>, which runs only there.</p>
 <p>A superseded run is skipped or stopped, never cancelled (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1938">#1938</a>): GitHub counts a
@@ -1464,11 +1468,11 @@ run from failing when a job fails” (<a class="reference external" href="https:
 though the leg’s check run still reads <code class="docutils literal notranslate"><span class="pre">failure</span></code>. A job past its
 <code class="docutils literal notranslate"><span class="pre">timeout-minutes</span></code> is cancelled, and that page does not say whether the job-level
 guard covers a cancellation. So setup-python, the install, the watcher’s setup-python
-and <code class="docutils literal notranslate"><span class="pre">requests</span></code> (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1938">#1938</a>,
+and <code class="docutils literal notranslate"><span class="pre">requests</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1938">#1938</a>,
 below) and the tests have caps of their own, of 5, 10, 1, 1 and 120 minutes, under
 the job’s 140, which leaves 3 for the rest: a step at its cap
-fails rather than cancels, and the guard holds (actions/runner
-<code class="docutils literal notranslate"><span class="pre">src/Runner.Worker/StepsRunner.cs:322-353</span></code>). The runner’s <code class="docutils literal notranslate"><span class="pre">has</span> <span class="pre">timed</span> <span class="pre">out</span></code> error
+fails rather than cancels, and the guard holds (actions/runner’s
+<code class="docutils literal notranslate"><span class="pre">StepsRunner.RunStepAsync</span></code>). The runner’s <code class="docutils literal notranslate"><span class="pre">has</span> <span class="pre">timed</span> <span class="pre">out</span></code> error
 stays, changing no conclusion, as <code class="docutils literal notranslate"><span class="pre">Process</span> <span class="pre">completed</span> <span class="pre">with</span> <span class="pre">exit</span> <span class="pre">code</span> <span class="pre">N.</span></code> does.
 Everything but the install and the tests took under 20 seconds on every uncovered
 leg of runs 38569321543-38569522442. <code class="docutils literal notranslate"><span class="pre">test</span></code>’s caps are main’s: 45 minutes for the
@@ -1482,12 +1486,12 @@ them: its leg reached 26% of the unit tier in 25 minutes (job 115915976024), whe
 <code class="docutils literal notranslate"><span class="pre">List</span> <span class="pre">the</span> <span class="pre">LATEST</span> <span class="pre">tier</span></code> asks <code class="docutils literal notranslate"><span class="pre">latest_tier_paths()</span></code> on the runner’s own <code class="docutils literal notranslate"><span class="pre">python3</span></code>,
 before setup-python, so GraalPy does not parse the tree, and <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">unit</span> <span class="pre">tests</span></code>
 passes each module it printed as an <code class="docutils literal notranslate"><span class="pre">--ignore</span></code>. The
-round-trip sweeps of <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1732">#1732</a>
+round-trip sweeps of <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1732">#1732</a>
 took 8% of the unit tier’s time in a serial 3.14 run (86 of 1,031 s), and 10-11% on
 the 3.14, 3.15 and 3.14t legs of run 38581834697, so the rest should take GraalPy
 88-113 minutes (estimate).</p>
 <p>GraalPy’s leg still loses its runner 18-30 minutes into its tests, with <code class="docutils literal notranslate"><span class="pre">The</span> <span class="pre">runner</span>
-<span class="pre">has</span> <span class="pre">received</span> <span class="pre">a</span> <span class="pre">shutdown</span> <span class="pre">signal</span></code> (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1740">#1740</a>),
+<span class="pre">has</span> <span class="pre">received</span> <span class="pre">a</span> <span class="pre">shutdown</span> <span class="pre">signal</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1740">#1740</a>),
 so each experimental leg samples its runner while the tests run. <code class="docutils literal notranslate"><span class="pre">Start</span> <span class="pre">the</span> <span class="pre">resource</span>
 <span class="pre">monitor</span></code> writes <code class="docutils literal notranslate"><span class="pre">free</span> <span class="pre">-m</span></code>, <code class="docutils literal notranslate"><span class="pre">df</span> <span class="pre">-h</span></code> of <code class="docutils literal notranslate"><span class="pre">/</span></code> and the workspace’s volume,
 <code class="docutils literal notranslate"><span class="pre">/proc/loadavg</span></code> and the five processes with the most RSS every 30 seconds, each
@@ -1497,8 +1501,8 @@ line led by <code class="docutils literal notranslate"><span class="pre">[monito
 <code class="docutils literal notranslate"><span class="pre">resource-monitor-&lt;version&gt;</span></code> (14 days, <code class="docutils literal notranslate"><span class="pre">if:</span> <span class="pre">always()</span></code>, <code class="docutils literal notranslate"><span class="pre">continue-on-error</span></code>)
 only where the runner survives the tests. <a class="reference external" href="https://docs.github.com/en/actions/reference/workflows-and-actions/expressions#always">always()</a>
 runs a step “even when canceled”, and docs.github.com says nothing of a runner’s
-shutdown, after which the runner evaluates no later step’s condition (actions/runner
-<code class="docutils literal notranslate"><span class="pre">src/Runner.Worker/StepsRunner.cs:205-208</span></code>, at <code class="docutils literal notranslate"><span class="pre">796cc18ff</span></code>). Job 116057255255
+shutdown, after which the runner evaluates no later step’s condition (actions/runner’s
+<code class="docutils literal notranslate"><span class="pre">StepsRunner.RunAsync</span></code>, at <code class="docutils literal notranslate"><span class="pre">796cc18ff</span></code>). Job 116057255255
 skipped every step after its tests, <code class="docutils literal notranslate"><span class="pre">Post</span> <span class="pre">Run</span> <span class="pre">actions/checkout&#64;v7</span></code> too, whose
 <a class="reference external" href="https://docs.github.com/en/actions/reference/workflows-and-actions/metadata-syntax#runspost-if">post-if</a>
 “defaults to <code class="docutils literal notranslate"><span class="pre">always()</span></code>”. On a lost runner, then, the <code class="docutils literal notranslate"><span class="pre">[monitor]</span></code> lines in the
@@ -1519,7 +1523,8 @@ failure report ended the session, exit 3, with 7.9 GB free. So a worker whose he
 is spent exits, xdist fails the test it ran as crashed and starts another, and
 <code class="docutils literal notranslate"><span class="pre">--max-worker-restart=30</span></code> allows 30 restarts in all, where three 16-minute heaps need
 about 21 in 110 minutes; xdist’s default is 4 a worker, 12 at <code class="docutils literal notranslate"><span class="pre">-n</span> <span class="pre">3</span></code>.</p></li>
-<li><p>GraalPy’s tier runs in shards (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1963">#1963</a>), so no worker outlives its
+<li><p>GraalPy’s tier runs in shards (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1963">#1963</a>),
+so no worker outlives its
 heap. In job 118912680486, the first full run of the curated <code class="docutils literal notranslate"><span class="pre">ALL</span></code> tier, nine
 workers went down at 2.5-3.0 GB RSS, 9-17 minutes into their lives, each failing a
 test that passes alone. So on GraalPy’s leg <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">unit</span> <span class="pre">tests</span></code> hands its pytest
@@ -1539,7 +1544,7 @@ own beside <code class="docutils literal notranslate"><span class="pre">junit.xm
 <li><p><code class="docutils literal notranslate"><span class="pre">timeout</span> <span class="pre">--signal=INT</span> <span class="pre">--kill-after=3m</span> <span class="pre">110m</span></code> ends pytest under the step’s 120-minute
 cap, so it still writes the junit XML, and exits 124; <code class="docutils literal notranslate"><span class="pre">prlimit</span> <span class="pre">--fsize=2147483648</span></code>
 caps any file at 2 GiB. The <code class="docutils literal notranslate"><span class="pre">timeout</span></code> is GNU’s, <code class="docutils literal notranslate"><span class="pre">gnutimeout</span></code> where it exists
-(#2020): on Ubuntu 26.04 <code class="docutils literal notranslate"><span class="pre">timeout</span></code> is uutils’, whose <code class="docutils literal notranslate"><span class="pre">--kill-after</span></code> sends SIGKILL
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2020">#2020</a>): on Ubuntu 26.04 <code class="docutils literal notranslate"><span class="pre">timeout</span></code> is uutils’, whose <code class="docutils literal notranslate"><span class="pre">--kill-after</span></code> sends SIGKILL
 with the SIGINT, and to its child alone.</p></li>
 <li><p>Where the scope starts <code class="docutils literal notranslate"><span class="pre">true</span></code> under a throwaway unit, <code class="docutils literal notranslate"><span class="pre">pcapkit-probe-&lt;pid&gt;.scope</span></code>,
 with every flag the tests get (<code class="docutils literal notranslate"><span class="pre">sudo</span> <span class="pre">-n</span> <span class="pre">--preserve-env</span></code>, <code class="docutils literal notranslate"><span class="pre">MemoryMax=12G</span></code>,
@@ -1571,7 +1576,8 @@ from the 88-113 above, not measured), so its leg may end on the 110-minute timeo
 warning: that is expected, blocks nothing, and leaves the caps as they are.</p>
 <p><strong>The Windows leg.</strong> <code class="file docutils literal notranslate"><span class="pre">experimental.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">windows</span></code> job runs the <code class="docutils literal notranslate"><span class="pre">ALL</span></code> tier
 on <code class="docutils literal notranslate"><span class="pre">windows-latest</span></code> under <code class="docutils literal notranslate"><span class="pre">latest</span></code>, the newest CPython the conda builds target, as
-<code class="docutils literal notranslate"><span class="pre">Python</span> <span class="pre">&lt;latest&gt;</span> <span class="pre">on</span> <span class="pre">Windows</span> <span class="pre">(experimental)</span></code> (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>), so the first published
+<code class="docutils literal notranslate"><span class="pre">Python</span> <span class="pre">&lt;latest&gt;</span> <span class="pre">on</span> <span class="pre">Windows</span> <span class="pre">(experimental)</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>),
+so the first published
 <code class="docutils literal notranslate"><span class="pre">win-64</span></code> conda package has had a test run. It needs <code class="docutils literal notranslate"><span class="pre">current</span></code>, <code class="docutils literal notranslate"><span class="pre">changes</span></code> and
 <code class="docutils literal notranslate"><span class="pre">python-versions</span></code> and runs on <code class="docutils literal notranslate"><span class="pre">experimental</span></code>’s condition, and it is non-blocking by
 the same mechanics: every step continues on error, setup-python, the install and <code class="docutils literal notranslate"><span class="pre">Run</span>
@@ -1594,12 +1600,13 @@ never holds <code class="docutils literal notranslate"><span class="pre">latest<
 </section>
 <section id="test-tiers">
 <h2>Test Tiers<a class="headerlink" href="#test-tiers" title="Link to this heading">¶</a></h2>
-<p>Every test module runs in one of two <em>test tiers</em> (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1958">#1958</a>): <code class="docutils literal notranslate"><span class="pre">ALL</span></code>, which runs on every
+<p>Every test module runs in one of two <em>test tiers</em> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1958">#1958</a>):
+<code class="docutils literal notranslate"><span class="pre">ALL</span></code>, which runs on every
 leg, and <code class="docutils literal notranslate"><span class="pre">LATEST</span></code>, which runs on <code class="docutils literal notranslate"><span class="pre">latest</span></code> alone. They are orthogonal to the unit
 and fixture-dependent tiers, which decide what a module may read and so which job
 collects it; a test tier decides on which of that job’s legs it runs.</p>
 <p><code class="docutils literal notranslate"><span class="pre">module_tier()</span></code> in <code class="file docutils literal notranslate"><span class="pre">tests/_tiers.py</span></code> decides, in one place, for every
-<code class="docutils literal notranslate"><span class="pre">tests/**/test_*.py</span></code>. <code class="docutils literal notranslate"><span class="pre">ALL</span></code> is a curated, opt-in list (#1958, #1963): short enough
+<code class="docutils literal notranslate"><span class="pre">tests/**/test_*.py</span></code>. <code class="docutils literal notranslate"><span class="pre">ALL</span></code> is a curated, opt-in list (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1958">#1958</a>, <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1963">#1963</a>): short enough
 to save time on every leg, the same on every leg so QA stays consistent, and enough
 on its own to validate a change on each interpreter, while <code class="docutils literal notranslate"><span class="pre">latest</span></code> runs the whole
 suite as the gate.</p>
@@ -1636,8 +1643,8 @@ exception hooks;</p></li>
 <code class="docutils literal notranslate"><span class="pre">pypcap</span></code> and <code class="docutils literal notranslate"><span class="pre">pypcapfile</span></code>, which install below 3.12 only, and Scapy, which the
 <code class="docutils literal notranslate"><span class="pre">integration</span></code> and <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> legs install on every interpreter and a
 <code class="docutils literal notranslate"><span class="pre">test</span></code> leg off <code class="docutils literal notranslate"><span class="pre">latest</span></code> skips;</p></li>
-<li><p>the hand-picked round trips, whatever their names, and the #1202 edge-case
-tables, whose cases are each written out by hand, as the owner ruled on #1958;
+<li><p>the hand-picked round trips, whatever their names, and the <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1202">#1202</a> edge-case
+tables, whose cases are each written out by hand, as the owner ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1958">#1958</a>;
 and</p></li>
 <li><p>the smoke slice: a representative module per protocol family and per package,
 so each leg still drives the main parse and build paths.</p></li>
@@ -1645,7 +1652,7 @@ so each leg still drives the main parse and build paths.</p></li>
 <p>Everything else is <code class="docutils literal notranslate"><span class="pre">LATEST</span></code>: the per-protocol field-by-field tests, whose
 behaviour is interpreter-independent pure Python, each real sweep – a round trip
 over every class or registry entry a table enumerates, every offset of a packet or
-every capture, as the owner ruled on #1732 and #1958 – and the docs, project and
+every capture, as the owner ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1732">#1732</a> and <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1958">#1958</a> – and the docs, project and
 structure tests. The vendor extra is installed on <code class="docutils literal notranslate"><span class="pre">latest</span></code> alone and the crawlers
 are pure Python, so the vendor modules are <code class="docutils literal notranslate"><span class="pre">LATEST</span></code>, each saying so, but for the
 file-restore and environment-variable tests, which stay on every leg. The tier guard itself is <code class="docutils literal notranslate"><span class="pre">ALL</span></code>, since <code class="file docutils literal notranslate"><span class="pre">tests/conftest.py</span></code>
@@ -1696,7 +1703,7 @@ does the same for every leg the tier file gives.</p>
 rather than lengthening it under coverage, and it is also the job that runs the docs
 readers on a docs-only diff.</p>
 <p>Latest CPython runs the whole suite, as the sanity check and the gate (the owner’s
-ruling on #1958), so it also installs what the whole suite gates on. In <code class="docutils literal notranslate"><span class="pre">test</span></code> and
+ruling on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1958">#1958</a>), so it also installs what the whole suite gates on. In <code class="docutils literal notranslate"><span class="pre">test</span></code> and
 <code class="docutils literal notranslate"><span class="pre">integration</span></code> the step <code class="docutils literal notranslate"><span class="pre">Install</span> <span class="pre">the</span> <span class="pre">whole</span> <span class="pre">suite's</span> <span class="pre">dependencies</span> <span class="pre">on</span> <span class="pre">latest</span></code> runs on
 the <code class="docutils literal notranslate"><span class="pre">latest</span></code> leg alone, after the install every leg runs, and adds the engines pip
 can install there (<code class="docutils literal notranslate"><span class="pre">Scapy</span></code>, <code class="docutils literal notranslate"><span class="pre">PyShark</span></code>), html5lib through <code class="docutils literal notranslate"><span class="pre">vendor</span></code>, Sphinx and
@@ -1743,8 +1750,9 @@ those pins drive read the tier file on the runner’s own <code class="docutils 
 interpreter that cannot import <code class="docutils literal notranslate"><span class="pre">tomllib</span></code>.</p>
 </section>
 <section id="file-size-caps-1969">
-<h2>File Size Caps (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1969">#1969</a>)<a class="headerlink" href="#file-size-caps-1969" title="Link to this heading">¶</a></h2>
-<p>A test that writes without bound fills the runner’s disk rather than failing: <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1372">#1372</a>’s <code class="docutils literal notranslate"><span class="pre">out.json</span></code> grew to
+<h2>File Size Caps (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1969">#1969</a>)<a class="headerlink" href="#file-size-caps-1969" title="Link to this heading">¶</a></h2>
+<p>A test that writes without bound fills the runner’s disk rather than failing: <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1372">#1372</a>’s
+<code class="docutils literal notranslate"><span class="pre">out.json</span></code> grew to
 several gigabytes on every run. So every pytest and unittest command in
 <code class="file docutils literal notranslate"><span class="pre">.github/workflows/unit-tests.yml</span></code> runs as <code class="docutils literal notranslate"><span class="pre">python</span> <span class="pre">util/cap_file_size.py</span>
 <span class="pre">python</span> <span class="pre">-m</span> <span class="pre">...</span></code>: <code class="docutils literal notranslate"><span class="pre">test</span></code>’s <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">unit</span> <span class="pre">tests</span></code>; <code class="docutils literal notranslate"><span class="pre">integration</span></code>’s,
@@ -1766,7 +1774,7 @@ killed by the signal, whose default action the script restores before it execs.
 without the script, and runs the script against a small limit.</p>
 </section>
 <section id="workflow-scripts-1967">
-<h2>Workflow Scripts (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1967">#1967</a>)<a class="headerlink" href="#workflow-scripts-1967" title="Link to this heading">¶</a></h2>
+<h2>Workflow Scripts (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1967">#1967</a>)<a class="headerlink" href="#workflow-scripts-1967" title="Link to this heading">¶</a></h2>
 <p>Shell that several steps repeat, or that has real logic – branches, or a bug
 history a test should pin – lives in a <code class="file docutils literal notranslate"><span class="pre">util/</span></code> script, which the steps run,
 rather than in a composite action: a composite action’s inner steps cannot take
@@ -1788,8 +1796,8 @@ to a script. Each script’s docstring says what it does; each has tests under
 <td><p><code class="docutils literal notranslate"><span class="pre">KTLO</span> <span class="pre">summary</span></code> in <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">test</span></code>, <code class="docutils literal notranslate"><span class="pre">integration</span></code> and
 <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> (and so their KTLO twins), <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>’s
 <code class="docutils literal notranslate"><span class="pre">compatibility</span></code> and <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">pypi</span></code>, as <code class="docutils literal notranslate"><span class="pre">leg_summary.py</span>
-<span class="pre">ktlo</span></code>; <code class="docutils literal notranslate"><span class="pre">Experimental</span> <span class="pre">summary</span></code> in <code class="docutils literal notranslate"><span class="pre">experimental.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">experimental</span></code>,
-as <code class="docutils literal notranslate"><span class="pre">leg_summary.py</span> <span class="pre">experimental</span></code>.</p></td>
+<span class="pre">ktlo</span></code>; <code class="docutils literal notranslate"><span class="pre">Experimental</span> <span class="pre">summary</span></code> in <code class="docutils literal notranslate"><span class="pre">experimental.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">experimental</span></code>
+and <code class="docutils literal notranslate"><span class="pre">windows</span></code>, as <code class="docutils literal notranslate"><span class="pre">leg_summary.py</span> <span class="pre">experimental</span></code>.</p></td>
 <td><p>No.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/classify_changes.py</span></code></p></td>
@@ -1816,7 +1824,8 @@ and <code class="docutils literal notranslate"><span class="pre">gate</span></co
 <tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/pip_install.py</span></code></p></td>
 <td><p>The install step of <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">test</span></code>, <code class="docutils literal notranslate"><span class="pre">integration</span></code> and
 <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code> (and so their KTLO twins), <code class="docutils literal notranslate"><span class="pre">experimental.yml</span></code>’s
-<code class="docutils literal notranslate"><span class="pre">experimental</span></code> and <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">compatibility</span></code>, at the
+<code class="docutils literal notranslate"><span class="pre">experimental</span></code> and <code class="docutils literal notranslate"><span class="pre">windows</span></code> and <code class="docutils literal notranslate"><span class="pre">python-compatibility.yml</span></code>’s
+<code class="docutils literal notranslate"><span class="pre">compatibility</span></code>, at the
 job’s <code class="docutils literal notranslate"><span class="pre">ANNOTATION_LEVEL</span></code>, and of <code class="docutils literal notranslate"><span class="pre">unittest-ordering</span></code>, <code class="docutils literal notranslate"><span class="pre">project-tests</span></code> and
 <code class="docutils literal notranslate"><span class="pre">gate</span></code>, at <code class="docutils literal notranslate"><span class="pre">error</span></code>.</p></td>
 <td><p>No: install with <code class="docutils literal notranslate"><span class="pre">pip</span> <span class="pre">install</span> <span class="pre">-e</span> <span class="pre">'.[test,DPKT,crypto,NGAP]'</span></code>.</p></td>
@@ -1842,7 +1851,8 @@ Experimental Tests and Python Compatibility (see <a class="reference internal" h
 <code class="docutils literal notranslate"><span class="pre">benchmark.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">benchmark</span></code>, as <code class="docutils literal notranslate"><span class="pre">install</span></code> alone. The
 <code class="docutils literal notranslate"><span class="pre">actions/cache</span></code> steps, the seed steps (<code class="docutils literal notranslate"><span class="pre">Seed</span> <span class="pre">apt's</span> <span class="pre">archive</span> <span class="pre">with</span> <span class="pre">this</span>
 <span class="pre">engine's</span> <span class="pre">cached</span> <span class="pre">.deb</span> <span class="pre">files</span></code> and <code class="docutils literal notranslate"><span class="pre">Seed</span> <span class="pre">apt's</span> <span class="pre">archive</span> <span class="pre">with</span> <span class="pre">the</span> <span class="pre">cached</span> <span class="pre">.deb</span>
-<span class="pre">files</span></code>) and the AppArmor step (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2019">#2019</a>) stay inline.</p></td>
+<span class="pre">files</span></code>) and the AppArmor step (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2019">#2019</a>)
+stay inline.</p></td>
 <td><p>No.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/_actions.py</span></code></p></td>
@@ -1861,43 +1871,46 @@ Reports</a>).</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">Check</span> <span class="pre">the</span> <span class="pre">release</span> <span class="pre">tags</span> <span class="pre">name</span> <span class="pre">this</span> <span class="pre">run's</span> <span class="pre">commit</span></code> in <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s
 <code class="docutils literal notranslate"><span class="pre">github</span></code>, <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code>, as <code class="docutils literal notranslate"><span class="pre">release_tags.py</span> <span class="pre">check</span></code>, and <code class="docutils literal notranslate"><span class="pre">Check</span>
 <span class="pre">which</span> <span class="pre">commit</span> <span class="pre">the</span> <span class="pre">version's</span> <span class="pre">tag</span> <span class="pre">names</span></code> in its <code class="docutils literal notranslate"><span class="pre">version_check</span></code>, as
-<code class="docutils literal notranslate"><span class="pre">release_tags.py</span> <span class="pre">owner</span></code> (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1634">#1634</a>, <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1748">#1748</a>).</p></td>
+<code class="docutils literal notranslate"><span class="pre">release_tags.py</span> <span class="pre">owner</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1634">#1634</a>,
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1748">#1748</a>).</p></td>
 <td><p>No.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">util/release_upload.py</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">Upload</span> <span class="pre">package</span> <span class="pre">to</span> <span class="pre">GitHub</span> <span class="pre">Release</span></code> in <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">pypi</span></code> and
-<code class="docutils literal notranslate"><span class="pre">conda</span></code> (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1640">#1640</a>).</p></td>
+<code class="docutils literal notranslate"><span class="pre">conda</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1640">#1640</a>).</p></td>
 <td><p>No.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/release_status.py</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">Report</span> <span class="pre">why</span> <span class="pre">this</span> <span class="pre">run</span> <span class="pre">did</span> <span class="pre">or</span> <span class="pre">did</span> <span class="pre">not</span> <span class="pre">release</span> <span class="pre">anything</span></code> in
 <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">release_status</span></code>, on the image’s <code class="docutils literal notranslate"><span class="pre">python3</span></code>
-after a checkout of <code class="file docutils literal notranslate"><span class="pre">util/</span></code> alone (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/888">#888</a>).</p></td>
+after a checkout of <code class="file docutils literal notranslate"><span class="pre">util/</span></code> alone (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/888">#888</a>).</p></td>
 <td><p>No.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">util/release_tiers.py</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">Read</span> <span class="pre">the</span> <span class="pre">released</span> <span class="pre">Python</span> <span class="pre">versions</span></code> in <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s
-<code class="docutils literal notranslate"><span class="pre">version_check</span></code>, on setup-python’s <code class="docutils literal notranslate"><span class="pre">python3</span></code> (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1660">#1660</a>).</p></td>
+<code class="docutils literal notranslate"><span class="pre">version_check</span></code>, on setup-python’s <code class="docutils literal notranslate"><span class="pre">python3</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1660">#1660</a>).</p></td>
 <td><p>No.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/release_published.py</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">Check</span> <span class="pre">PyPI</span> <span class="pre">publish</span> <span class="pre">completeness</span></code> and <code class="docutils literal notranslate"><span class="pre">Check</span> <span class="pre">Anaconda</span> <span class="pre">publish</span>
 <span class="pre">completeness</span></code> in <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">version_check</span></code>, as
 <code class="docutils literal notranslate"><span class="pre">release_published.py</span> <span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">anaconda</span></code>, on setup-python’s
-<code class="docutils literal notranslate"><span class="pre">python3</span></code> (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/888">#888</a>).</p></td>
+<code class="docutils literal notranslate"><span class="pre">python3</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/888">#888</a>).</p></td>
 <td><p>No.</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="file docutils literal notranslate"><span class="pre">util/release_conda.py</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">Check</span> <span class="pre">whether</span> <span class="pre">this</span> <span class="pre">leg</span> <span class="pre">is</span> <span class="pre">already</span> <span class="pre">on</span> <span class="pre">Anaconda</span></code> in <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s
 <code class="docutils literal notranslate"><span class="pre">conda</span></code>, as <code class="docutils literal notranslate"><span class="pre">release_conda.py</span> <span class="pre">leg</span></code>; <code class="docutils literal notranslate"><span class="pre">Build</span> <span class="pre">conda</span> <span class="pre">packages</span></code> and <code class="docutils literal notranslate"><span class="pre">Upload</span>
 <span class="pre">conda</span> <span class="pre">packages</span> <span class="pre">to</span> <span class="pre">Anaconda</span> <span class="pre">(Intel)</span></code> in that job and in <code class="docutils literal notranslate"><span class="pre">cron-conda.yml</span></code>’s
-<code class="docutils literal notranslate"><span class="pre">conda-dist</span></code>, as <code class="docutils literal notranslate"><span class="pre">release_conda.py</span> <span class="pre">build</span></code> and <code class="docutils literal notranslate"><span class="pre">upload</span></code> (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1822">#1822</a>, <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2044">#2044</a>), and <code class="docutils literal notranslate"><span class="pre">Upload</span> <span class="pre">conda</span>
+<code class="docutils literal notranslate"><span class="pre">conda-dist</span></code>, as <code class="docutils literal notranslate"><span class="pre">release_conda.py</span> <span class="pre">build</span></code> and <code class="docutils literal notranslate"><span class="pre">upload</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1822">#1822</a>,
+<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2044">#2044</a>),
+and <code class="docutils literal notranslate"><span class="pre">Upload</span> <span class="pre">conda</span>
 <span class="pre">packages</span> <span class="pre">to</span> <span class="pre">Anaconda</span> <span class="pre">(Windows)</span></code> in both as <code class="docutils literal notranslate"><span class="pre">upload</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>).</p></td>
 <td><p>No.</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="file docutils literal notranslate"><span class="pre">util/release_reset_build.py</span></code></p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">Reset</span> <span class="pre">Build</span> <span class="pre">Number</span></code> in <code class="docutils literal notranslate"><span class="pre">create-release.yml</span></code>’s <code class="docutils literal notranslate"><span class="pre">tag</span></code>, on the image’s
-<code class="docutils literal notranslate"><span class="pre">python3</span></code> (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1634">#1634</a>).
+<code class="docutils literal notranslate"><span class="pre">python3</span></code> (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1634">#1634</a>).
 <code class="docutils literal notranslate"><span class="pre">Create</span> <span class="pre">Tag</span></code> before it stays inline.</p></td>
 <td><p>No.</p></td>
 </tr>
@@ -1907,7 +1920,8 @@ after a checkout of <code class="file docutils literal notranslate"><span class=
 <p>The summaries run on the image’s <code class="docutils literal notranslate"><span class="pre">/usr/bin/python3</span></code> rather than the leg’s
 interpreter, which may have failed to set up or be too broken to run anything, so
 they need only the standard library, as <code class="docutils literal notranslate"><span class="pre">classify_changes.py</span></code> does on the
-runner’s <code class="docutils literal notranslate"><span class="pre">python3</span></code>. <code class="file docutils literal notranslate"><span class="pre">util/pytest_shards.py</span></code> runs on <code class="docutils literal notranslate"><span class="pre">/usr/bin/python3</span></code>
+runner’s <code class="docutils literal notranslate"><span class="pre">python3</span></code>. The Windows leg, which has no <code class="docutils literal notranslate"><span class="pre">/usr/bin/python3</span></code>, runs its
+summary on <code class="docutils literal notranslate"><span class="pre">python</span></code>, setup-python’s or the image’s. <code class="file docutils literal notranslate"><span class="pre">util/pytest_shards.py</span></code> runs on <code class="docutils literal notranslate"><span class="pre">/usr/bin/python3</span></code>
 too, standard library only, so on GraalPy’s leg the leg’s interpreter runs pytest
 alone; on PyPy’s legs the leg’s interpreter runs the script as well, under the
 file-size cap every test command of <code class="docutils literal notranslate"><span class="pre">unit-tests.yml</span></code> takes.
@@ -1919,7 +1933,8 @@ every version the matrices hold, the experimental tier included. <code class="fi
 under <code class="docutils literal notranslate"><span class="pre">sudo</span></code> the commands that shell ran. Its <code class="docutils literal notranslate"><span class="pre">plan</span></code> and <code class="docutils literal notranslate"><span class="pre">install</span></code> both read
 the job’s <code class="docutils literal notranslate"><span class="pre">APT_PACKAGES</span></code>, so the cache key always describes the set installed.
 Its bounds are still <code class="docutils literal notranslate"><span class="pre">timeout</span></code> run as root inside <code class="docutils literal notranslate"><span class="pre">sudo</span></code>, given no option, so
-uutils’ <code class="docutils literal notranslate"><span class="pre">timeout</span></code> behaves as GNU’s (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2020">#2020</a>), and the bound reaches
+uutils’ <code class="docutils literal notranslate"><span class="pre">timeout</span></code> behaves as GNU’s (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2020">#2020</a>),
+and the bound reaches
 apt’s own children, which a timeout in the script, running as the runner’s user,
 could not signal. Both <code class="docutils literal notranslate"><span class="pre">changes</span></code> jobs check out on every event, since the script is in the
 tree. The release scripts run as <code class="docutils literal notranslate"><span class="pre">python3</span></code>, from a checkout of the whole tree, and are
@@ -1932,10 +1947,11 @@ setup-python, <code class="docutils literal notranslate"><span class="pre">build
 <code class="file docutils literal notranslate"><span class="pre">conda/pypcapkit</span></code>, and <code class="docutils literal notranslate"><span class="pre">upload</span></code> on setup-python’s. A project
 pin runs each on the cases the shell it replaced handled and requires the same
 status, output and calls.
-<code class="file docutils literal notranslate"><span class="pre">util/_actions.py</span></code> is standard library only, and keeps to 3.7’s syntax,
+<code class="file docutils literal notranslate"><span class="pre">util/_actions.py</span></code> is standard library only, and keeps to 3.8’s syntax,
 since the scripts on <code class="docutils literal notranslate"><span class="pre">/usr/bin/python3</span></code> and on every leg’s interpreter import it.</p>
 <p>The scripts a person runs as well, or alone, sit beside the CI-only ones in
-<code class="file docutils literal notranslate"><span class="pre">util/</span></code> rather than in a directory of their own (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2050">#2050</a>). Every <code class="file docutils literal notranslate"><span class="pre">util/</span></code>
+<code class="file docutils literal notranslate"><span class="pre">util/</span></code> rather than in a directory of their own (<a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2050">#2050</a>).
+Every <code class="file docutils literal notranslate"><span class="pre">util/</span></code>
 script not listed here is CI-only.</p>
 <div class="table-wrapper docutils container">
 <table class="docutils align-default">
@@ -1990,7 +2006,7 @@ drifted.</p></td>
 </div>
 </section>
 <section id="ci-reports-2030">
-<span id="ci-reports"></span><h2>CI Reports (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2030">#2030</a>)<a class="headerlink" href="#ci-reports-2030" title="Link to this heading">¶</a></h2>
+<span id="ci-reports"></span><h2>CI Reports (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2030">#2030</a>)<a class="headerlink" href="#ci-reports-2030" title="Link to this heading">¶</a></h2>
 <p>A report with no pull request to comment on goes to GitHub Discussions. One
 category, <code class="docutils literal notranslate"><span class="pre">CI</span> <span class="pre">reports</span></code>, holds every report, and each job has one thread in it,
 titled <code class="docutils literal notranslate"><span class="pre">&lt;workflow</span> <span class="pre">file</span> <span class="pre">stem&gt;:</span> <span class="pre">&lt;job</span> <span class="pre">or</span> <span class="pre">report</span> <span class="pre">name&gt;</span></code>. A run adds a comment to its
@@ -2089,7 +2105,8 @@ where a job failed without failing it, or where an annotation counts:</p>
 <ul class="simple">
 <li><p>On a push run, by the owner’s ruling, an annotation counts only on a
 non-blocking leg, whose steps are forced to succeed: a job named <code class="docutils literal notranslate"><span class="pre">(KTLO)</span></code> or
-<code class="docutils literal notranslate"><span class="pre">(experimental)</span></code>, as a KTLO leg whose tests fail warns (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1672">#1672</a>), or an annotation
+<code class="docutils literal notranslate"><span class="pre">(experimental)</span></code>, as a KTLO leg whose tests fail warns (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1672">#1672</a>),
+or an annotation
 titled <code class="docutils literal notranslate"><span class="pre">(KTLO,</span> <span class="pre">non-blocking)</span></code>, as <code class="docutils literal notranslate"><span class="pre">engine-tests</span></code>’ KTLO cells write. A passing
 blocking job’s annotations neither count nor appear, unless the run failed.</p></li>
 <li><p>On any other run, which posts every time, every annotation on a passing job
@@ -2098,7 +2115,7 @@ counts.</p></li>
 neither do the annotations a workflow’s <code class="docutils literal notranslate"><span class="pre">expected</span></code> list in the script holds as
 written on every run by design. Each entry is a job, a level and a title
 prefix, an empty prefix matching only an empty title, so a reworded message
-still matches. Every list is empty today, and
+still matches. Every list is empty, and
 <code class="file docutils literal notranslate"><span class="pre">tests/project/test_unit_tests_push_reports_2030.py</span></code> pins them.</p></li>
 </ul>
 <p>A run whose legs all skipped tested nothing, as when <code class="docutils literal notranslate"><span class="pre">current</span></code> found its commit
@@ -2119,7 +2136,8 @@ days) for the report to download; both run on <code class="docutils literal notr
 and one cut to fit links the run. <code class="docutils literal notranslate"><span class="pre">Run</span> <span class="pre">unit</span> <span class="pre">tests</span></code> in <code class="docutils literal notranslate"><span class="pre">experimental.yml</span></code> sets
 no <code class="docutils literal notranslate"><span class="pre">JOB_SUMMARY_COPY</span></code> either: the line <code class="file docutils literal notranslate"><span class="pre">util/superseded.py</span></code> writes there
 for a stopped run reaches the copy through the watcher’s <code class="docutils literal notranslate"><span class="pre">--summary-copy</span></code>
-option, which the tests it runs never see (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2078">#2078</a>). The post step runs only
+option, which the tests it runs never see (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2078">#2078</a>).
+The post step runs only
 where the report step’s <code class="docutils literal notranslate"><span class="pre">post</span></code> output is <code class="docutils literal notranslate"><span class="pre">true</span></code>, and sets <code class="docutils literal notranslate"><span class="pre">GITHUB_WORKFLOW</span></code>
 to the relayed run’s workflow, which <code class="file docutils literal notranslate"><span class="pre">util/discussion_report.py</span></code> labels the
 run with.</p>
@@ -2139,7 +2157,7 @@ warning, the report marks them unavailable, and <code class="docutils literal no
 unchanged.</p>
 </section>
 <section id="codeql-configuration-2130">
-<span id="codeql-configuration"></span><h2>CodeQL Configuration (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2130">#2130</a>)<a class="headerlink" href="#codeql-configuration-2130" title="Link to this heading">¶</a></h2>
+<span id="codeql-configuration"></span><h2>CodeQL Configuration (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2130">#2130</a>)<a class="headerlink" href="#codeql-configuration-2130" title="Link to this heading">¶</a></h2>
 <p><code class="docutils literal notranslate"><span class="pre">Initialize</span> <span class="pre">CodeQL</span></code> in <code class="docutils literal notranslate"><span class="pre">codeql-analysis.yml</span></code> reads
 <code class="file docutils literal notranslate"><span class="pre">.github/codeql/codeql-config.yml</span></code> through its <code class="docutils literal notranslate"><span class="pre">config-file</span></code> input. The
 config’s <code class="docutils literal notranslate"><span class="pre">paths-ignore</span></code> leaves out <code class="file docutils literal notranslate"><span class="pre">tests</span></code> and changes nothing else, so the
@@ -2161,7 +2179,7 @@ dismissed by hand. <code class="file docutils literal notranslate"><span class="
 config and the input.</p>
 </section>
 <section id="action-pins-1968">
-<span id="action-pins"></span><h2>Action Pins (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1968">#1968</a>)<a class="headerlink" href="#action-pins-1968" title="Link to this heading">¶</a></h2>
+<span id="action-pins"></span><h2>Action Pins (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1968">#1968</a>)<a class="headerlink" href="#action-pins-1968" title="Link to this heading">¶</a></h2>
 <p>A tag or a branch is a reference its owner can move, so every <code class="docutils literal notranslate"><span class="pre">uses:</span></code> of an
 action outside this repository names a full commit, with the release that commit
 is as a trailing comment:</p>
@@ -2181,18 +2199,18 @@ and when <code class="file docutils literal notranslate"><span class="pre">.gith
 that names a particular action.</p>
 </section>
 <section id="workflow-lint-1967">
-<h2>Workflow Lint (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1967">#1967</a>)<a class="headerlink" href="#workflow-lint-1967" title="Link to this heading">¶</a></h2>
+<h2>Workflow Lint (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1967">#1967</a>)<a class="headerlink" href="#workflow-lint-1967" title="Link to this heading">¶</a></h2>
 <p>Lint’s <code class="docutils literal notranslate"><span class="pre">lint</span></code> job runs actionlint over every workflow in its <code class="docutils literal notranslate"><span class="pre">actionlint</span></code> step.
 The step downloads the release that <code class="docutils literal notranslate"><span class="pre">ACTIONLINT_VERSION</span></code> names and checks it
 against <code class="docutils literal notranslate"><span class="pre">ACTIONLINT_SHA256</span></code>, from that release’s checksums file, before unpacking
 it. Dependabot does not read this pin, so a bump changes both. The workflows use YAML anchors, which actionlint reads from
 1.7.10 on, and the pin is 1.7.12 or newer.</p>
 <p>actionlint runs the image’s shellcheck over each <code class="docutils literal notranslate"><span class="pre">run:</span></code> block. Unlike Lint’s
-other steps, this one blocks: a finding fails the job, as the owner ruled on #1967
-once #2023, #2037 and #2038 had fixed every finding it reported. It runs last and
+other steps, this one blocks: a finding fails the job, as the owner ruled on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1967">#1967</a>
+once <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2023">#2023</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2037">#2037</a> and <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2038">#2038</a> had fixed every finding it reported. It runs last and
 on <code class="docutils literal notranslate"><span class="pre">!cancelled()</span></code>, so a finding skips none of the advisory steps and a failed
 Python setup does not skip it. <code class="docutils literal notranslate"><span class="pre">Lint</span></code> is a required check of ruleset 23497679
-(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1967">#1967</a>), so a red Lint
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1967">#1967</a>), so a red Lint
 holds a merge. The image’s shellcheck is not pinned, so a runner
 image that adds a check can turn Lint red on unchanged code; the fix is to the
 script it flags. The step’s run summary counts the findings by actionlint rule and
@@ -2209,9 +2227,9 @@ an advisory step or a failed setup would skip it. It fails too when no workflow
 sets <code class="docutils literal notranslate"><span class="pre">concurrency.queue</span></code> any more.</p>
 </section>
 <section id="dependency-updates-1968">
-<h2>Dependency Updates (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1968">#1968</a>)<a class="headerlink" href="#dependency-updates-1968" title="Link to this heading">¶</a></h2>
+<h2>Dependency Updates (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1968">#1968</a>)<a class="headerlink" href="#dependency-updates-1968" title="Link to this heading">¶</a></h2>
 <p>Dependabot opens every dependency bump, weekly, from <code class="file docutils literal notranslate"><span class="pre">.github/dependabot.yml</span></code>
-(the owner’s ruling on #1968):</p>
+(the owner’s ruling on <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1968">#1968</a>):</p>
 <ul class="simple">
 <li><p><code class="docutils literal notranslate"><span class="pre">pip</span></code> over <code class="docutils literal notranslate"><span class="pre">/</span></code>, <code class="docutils literal notranslate"><span class="pre">/docs</span></code> and <code class="docutils literal notranslate"><span class="pre">/examples/benchmark</span></code>. The docs build pins
 Sphinx and sphinx-autodoc-typehints exactly in <code class="file docutils literal notranslate"><span class="pre">docs/requirements.txt</span></code>, and
@@ -2234,7 +2252,7 @@ PyUp runs on its defaults. The PyUp App’s installation, and the
 </section>
 <section id="python-versions">
 <h2>Python Versions<a class="headerlink" href="#python-versions" title="Link to this heading">¶</a></h2>
-<p>Since <a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1660">#1660</a>,
+<p>Since <a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1660">#1660</a>,
 <code class="file docutils literal notranslate"><span class="pre">.github/python-versions.toml</span></code> declares every Python version CI runs: one
 line per version, with its tier – <code class="docutils literal notranslate"><span class="pre">supported</span></code>, <code class="docutils literal notranslate"><span class="pre">ktlo</span></code>, <code class="docutils literal notranslate"><span class="pre">experimental</span></code>, or
 <code class="docutils literal notranslate"><span class="pre">pre-release</span></code>, which no version carries – and, where <code class="docutils literal notranslate"><span class="pre">ubuntu-latest</span></code> cannot
@@ -2276,7 +2294,8 @@ commits it did not make: when the branch holds some and proposes other tiers,
 <code class="docutils literal notranslate"><span class="pre">detect</span></code> fails before asking for the approval. Once that pull request is
 merged or closed, the next run with something to propose recreates the branch
 from <code class="docutils literal notranslate"><span class="pre">main</span></code>, a closed proposal’s tiers included. It reports a pre-release
-instead of writing it. Nor does it retire a job (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1747">#1747</a>): when the tiers leave
+instead of writing it. Nor does it retire a job (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1747">#1747</a>):
+when the tiers leave
 a matrix job with no leg, as 3.11 reaching end of life leaves
 <code class="docutils literal notranslate"><span class="pre">pypcap-parity</span></code>, it writes them as computed, warns, and puts the job first in
 the body as a manual step: retire or remove it, and the <code class="docutils literal notranslate"><span class="pre">needs:</span></code> that list it,
@@ -2303,7 +2322,7 @@ approval, in <code class="docutils literal notranslate"><span class="pre">create
 <code class="docutils literal notranslate"><span class="pre">PYPCAPKIT</span></code> token and <code class="docutils literal notranslate"><span class="pre">PYPCAPKIT_ACTIONS_DEPLOY_KEY</span></code> are secrets of
 <code class="docutils literal notranslate"><span class="pre">conda-tag</span></code>. GitHub gives an environment’s secrets only to a job that names
 it, so the scheduled jobs reading them name it too
-(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1968">#1968</a>):</p>
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1968">#1968</a>):</p>
 <ul class="simple">
 <li><p>Conda Update’s <code class="docutils literal notranslate"><span class="pre">conda-update</span></code> and <code class="docutils literal notranslate"><span class="pre">conda-tag</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">conda-tag</span></code></p></li>
 <li><p>Conda Update’s <code class="docutils literal notranslate"><span class="pre">conda-dist</span></code> – <code class="docutils literal notranslate"><span class="pre">environment:</span> <span class="pre">anaconda</span></code></p></li>
@@ -2333,7 +2352,7 @@ for <code class="docutils literal notranslate"><span class="pre">publish-pages</
 a pull request. Its <code class="docutils literal notranslate"><span class="pre">Check</span> <span class="pre">gh-pages</span> <span class="pre">holds</span> <span class="pre">no</span> <span class="pre">newer</span> <span class="pre">build</span></code> step skips the
 deploy when <code class="docutils literal notranslate"><span class="pre">gh-pages</span></code> already holds the build of a commit this run’s commit
 is behind, so a build that finishes late cannot replace newer documentation
-(<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1968">#1968</a>). Of these environments, only
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1968">#1968</a>). Of these environments, only
 <code class="docutils literal notranslate"><span class="pre">github-release</span></code> carries a required reviewer; <a class="reference internal" href="releasing.html"><span class="doc">Release Process</span></a>
 covers why one approval on that single environment is enough to gate the
 whole release graph, and is the page to read for the reasoning rather than
