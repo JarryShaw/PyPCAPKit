@@ -15,7 +15,7 @@
   runs that ``run:`` on its own case table, which reaches each of its branches.
 * :class:`TestTheStepsRunTheScripts` pins ``release_status``'s step to its
   script, after a checkout of :file:`util/` alone, and the script to the
-  standard library and Python 3.7's syntax.
+  standard library and Python 3.8's syntax.
 
 The shell ran as a step with no ``shell:`` runs on the runner, ``bash -e``, and
 ``bash`` prefixes each of its own errors with the script's path and line, which
@@ -43,6 +43,7 @@ from typing import TYPE_CHECKING
 
 from tests._workflows import load, steps
 from tests.project.test_release_gates import job_blocks
+from tests.project.test_requires_python_floor_2051 import FLOOR
 
 if TYPE_CHECKING:
     from typing import Callable, Optional
@@ -615,12 +616,12 @@ class TestTheStepsRunTheScripts(unittest.TestCase):
                     with self.subTest(job=job, step=step.get('name'), line=line):
                         self.assertNotIn(line, step.get('run', ''))
 
-    def test_the_scripts_need_only_util_and_python_3_7(self) -> None:
+    def test_the_scripts_need_only_util_and_python_3_8(self) -> None:
         """The sparse checkout holds :file:`util/`, and the image's ``python3`` nothing installed."""
         allowed = {'__future__', 'argparse', 'os', 'subprocess', 'sys', 'typing', '_actions', 'util'}
         for name in ('release_status.py',):
             with self.subTest(script=name):
-                tree = ast.parse((UTIL / name).read_text(encoding='utf-8'), feature_version=(3, 7))
+                tree = ast.parse((UTIL / name).read_text(encoding='utf-8'), feature_version=FLOOR)
                 imported = {alias.name.split('.')[0] for node in ast.walk(tree) if isinstance(node, ast.Import)
                             for alias in node.names}
                 imported |= {str(node.module).split('.')[0] for node in ast.walk(tree)

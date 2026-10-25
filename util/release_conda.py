@@ -46,7 +46,7 @@ space alone, so a quote or backslash is taken as it is rather than failing the
 step: every label is ``main`` or ``dev``. On ``windows-latest`` the paths are
 Windows' own rather than Git Bash's ``/tmp/...``.
 
-The script is standard library only, and keeps to Python 3.7's syntax.
+The script is standard library only, and keeps to Python 3.8's syntax.
 
 """
 

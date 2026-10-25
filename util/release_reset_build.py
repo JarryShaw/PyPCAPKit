@@ -30,7 +30,7 @@ never leaves it, ends it with ``<name>: unbound variable`` and status 1 where
 ``set -u`` did.
 
 ``tag`` has no setup-python, so this runs on the image's ``python3``: standard
-library only, and Python 3.7's syntax. Its ``git switch`` replaces the checkout,
+library only, and Python 3.8's syntax. Its ``git switch`` replaces the checkout,
 :file:`util/` included, so everything it imports is imported first.
 
 """

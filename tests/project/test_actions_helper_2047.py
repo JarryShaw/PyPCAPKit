@@ -2,8 +2,9 @@
 """#2047: :file:`util/_actions.py`, the GitHub Actions plumbing the ``util/`` scripts share.
 
 * :class:`TestStandardLibraryOnly` holds the helper to the standard library and
-  to 3.7's syntax, since :file:`util/pip_install.py` imports it on every
-  interpreter the matrices hold, before anything is installed.
+  to the syntax of ``requires-python``'s floor, 3.8, since
+  :file:`util/pip_install.py` imports it on every interpreter the matrices hold,
+  before anything is installed.
 * :class:`TestCommands`, :class:`TestFiles` and :class:`TestRun` pin each
   function's exact output, GitHub's escaping included.
 * :class:`TestScriptsImportIt` loads each script that imports the helper in the
@@ -26,16 +27,16 @@ import re
 import subprocess  # nosec: B404
 import sys
 import tempfile
-import tokenize
 import unittest
 from typing import TYPE_CHECKING
 from unittest import mock
 
 from tests._workflows import WORKFLOWS, load
+from tests.project.test_requires_python_floor_2051 import FLOOR
 from util import _actions
 
 if TYPE_CHECKING:
-    from typing import Any, Iterator, Optional
+    from typing import Any, Iterator
 
 #: Test tier (#1958): reads and runs the tree's own scripts, a question about the tree.
 __tier__ = 'LATEST'
@@ -48,10 +49,10 @@ SCRIPTS = ('apt_packages', 'check_suite_report', 'ci_timing', 'classify_changes'
            'python_versions', 'regenerate_samples', 'release_conda', 'release_published', 'release_reset_build',
            'release_status', 'release_tags', 'release_tiers', 'release_upload', 'superseded',
            'update_python_versions', 'vendor_code_changed', 'vendor_test_gate', 'verdict_covers_checkout')
-#: The top-level modules the helper may import, each in Python 3.7's standard
+#: The top-level modules the helper may import, each in Python 3.8's standard
 #: library: the running interpreter's :data:`sys.stdlib_module_names` would
-#: pass ``tomllib``, which 3.7 lacks.
-STDLIB_37 = frozenset({'__future__', 'contextlib', 'os', 'subprocess', 'sys', 'typing', 'uuid'})
+#: pass ``tomllib``, which 3.8 lacks.
+STDLIB_38 = frozenset({'__future__', 'contextlib', 'os', 'subprocess', 'sys', 'typing', 'uuid'})
 #: A trivial run of each script, ``(arguments, environment)``, that gets past its imports.
 RUNS = {
     'apt_packages': (['--help'], {}),
@@ -106,65 +107,25 @@ def imported(source: 'str') -> 'set[str]':
     return names
 
 
-def self_documenting(source: 'str') -> 'list[str]':
-    """Each f-string replacement field in ``source`` that ends in 3.8's ``=``, as ``line:col``.
-
-    ``ast.parse(..., feature_version=(3, 7))`` accepts ``f'{x=}'``. Since 3.12 an
-    f-string tokenizes into its fields (PEP 701), and there the form is an ``=``
-    token followed at once by the ``}``, ``!`` or ``:`` that ends the expression;
-    ``==``, ``:=`` and a keyword argument's ``=`` are other tokens or are followed
-    by an operand.
-
-    """
-    found = []
-    depth = 0
-    previous = None  # type: Optional[tokenize.TokenInfo]
-    for token in tokenize.generate_tokens(io.StringIO(source).readline):
-        if token.type == tokenize.FSTRING_START:  # pylint: disable=no-member
-            depth += 1
-        elif token.type == tokenize.FSTRING_END:  # pylint: disable=no-member
-            depth -= 1
-        elif depth and token.type == tokenize.OP and token.string in ('}', '!', ':') \
-                and previous is not None and previous.type == tokenize.OP and previous.string == '=':
-            found.append('%d:%d' % previous.start)
-        if token.type not in (tokenize.NL, tokenize.NEWLINE, tokenize.COMMENT):
-            previous = token
-    return found
-
-
 class TestStandardLibraryOnly(unittest.TestCase):
-    """The helper imports nothing but 3.7's standard library, and is written in 3.7's syntax."""
+    """The helper imports nothing but 3.8's standard library, and is written in 3.8's syntax."""
 
     def setUp(self) -> None:
         self.source = HELPER.read_text(encoding='utf-8')
 
-    def test_it_parses_as_python_3_7(self) -> None:
-        ast.parse(self.source, filename=str(HELPER), feature_version=(3, 7))
+    def test_it_parses_as_python_3_8(self) -> None:
+        ast.parse(self.source, filename=str(HELPER), feature_version=FLOOR)
 
-    def test_it_imports_only_what_3_7_has(self) -> None:
-        extra = sorted(imported(self.source) - STDLIB_37)
+    def test_it_imports_only_what_3_8_has(self) -> None:
+        extra = sorted(imported(self.source) - STDLIB_38)
         self.assertEqual(extra, [], f'util/_actions.py imports {extra}: check that each is in the standard '
-                                    'library of Python 3.7 and every interpreter the matrices hold, then add '
-                                    'it to STDLIB_37 in this test')
+                                    'library of Python 3.8 and every interpreter the matrices hold, then add '
+                                    'it to STDLIB_38 in this test')
         self.assertIn('uuid', imported(self.source), 'the import inside a function is seen')
 
     def test_the_import_check_sees_a_newer_module(self) -> None:
-        self.assertEqual(sorted(imported('import tomllib\nfrom os import path\n') - STDLIB_37), ['tomllib'])
-        self.assertEqual(sorted(imported('def f():\n    from . import x\n') - STDLIB_37), ['.'])
-
-    @unittest.skipUnless(hasattr(tokenize, 'FSTRING_START'), 'f-strings tokenize into fields from 3.12 (PEP 701)')
-    def test_it_has_no_self_documenting_f_string(self) -> None:
-        self.assertEqual(self_documenting(self.source), [])
-
-    @unittest.skipUnless(hasattr(tokenize, 'FSTRING_START'), 'f-strings tokenize into fields from 3.12 (PEP 701)')
-    def test_the_f_string_check_tells_the_forms_apart(self) -> None:
-        for source in ('f"{x=}"', 'f"{x = }"', 'f"{x=!r}"', 'f"{x=:>4}"', 'f"a {f(y)=} b"', 'f"{f\'{x=}\'}"'):
-            with self.subTest(source=source):
-                self.assertEqual(len(self_documenting(source + '\n')), 1, source)
-        for source in ('f"{a==b}"', 'f"x={x!r}"', 'f"{x:=^5}"', 'f"{(y:=1)}"', 'f"{g(a=1)}"', 'f"{x!r:=>4}"',
-                       'x = {"a": 1}', 'def f(a=1): return {a: a}', "f'{d[\"k=\"]}'"):
-            with self.subTest(source=source):
-                self.assertEqual(self_documenting(source + '\n'), [], source)
+        self.assertEqual(sorted(imported('import tomllib\nfrom os import path\n') - STDLIB_38), ['tomllib'])
+        self.assertEqual(sorted(imported('def f():\n    from . import x\n') - STDLIB_38), ['.'])
 
 
 class TestCommands(unittest.TestCase):

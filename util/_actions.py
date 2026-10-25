@@ -12,7 +12,7 @@ repository root, it imports ``util._actions``.
 The scripts run on the image's ``/usr/bin/python3``, or on a leg's own
 interpreter, which may be an end-of-life KTLO one, GraalPy or a free-threaded
 build, and :file:`util/pip_install.py` is the step that installs anything at
-all. So this module is standard library only and keeps to 3.7's syntax; a
+all. So this module is standard library only and keeps to 3.8's syntax; a
 project test, :file:`tests/project/test_actions_helper_2047.py`, holds it to
 both.
 

@@ -13,7 +13,7 @@
 * :class:`TestAPlantedDivergenceIsCaught` changes each script in a copy, one
   plant at a time, and requires the cases to tell it from the shell.
 * :class:`TestTheStepsRunTheScripts` pins each step to its script, and the
-  scripts to the standard library and Python 3.7's syntax.
+  scripts to the standard library and Python 3.8's syntax.
 
 The steps run with no ``shell:``, so on the runner's ``bash -e``, and ``bash``
 prefixes each of its own errors with the script's path and line, which
@@ -39,6 +39,7 @@ import unittest
 from typing import TYPE_CHECKING
 
 from tests._workflows import load, steps
+from tests.project.test_requires_python_floor_2051 import FLOOR
 
 if TYPE_CHECKING:
     from typing import Optional, Union
@@ -818,11 +819,11 @@ class TestTheStepsRunTheScripts(unittest.TestCase):
                     with self.subTest(job=job, step=step.get('name'), line=line):
                         self.assertNotIn(line, step.get('run', ''))
 
-    def test_the_scripts_need_only_util_and_python_3_7(self) -> None:
+    def test_the_scripts_need_only_util_and_python_3_8(self) -> None:
         allowed = {'__future__', 'argparse', 'os', 're', 'subprocess', 'sys', 'typing', '_actions', 'util'}
         for name in ('release_tiers.py', 'release_published.py'):
             with self.subTest(script=name):
-                tree = ast.parse((UTIL / name).read_text(encoding='utf-8'), feature_version=(3, 7))
+                tree = ast.parse((UTIL / name).read_text(encoding='utf-8'), feature_version=FLOOR)
                 imported = {alias.name.split('.')[0] for node in ast.walk(tree) if isinstance(node, ast.Import)
                             for alias in node.names}
                 imported |= {str(node.module).split('.')[0] for node in ast.walk(tree)

@@ -10,7 +10,7 @@
   scripts against the same stand-ins and requires the same status, standard
   output and error, ``$GITHUB_OUTPUT`` and calls.
 * :class:`TestTheStepsRunTheScripts` pins each step to its script, after a whole
-  checkout of the repository, and the scripts to Python 3.7's syntax.
+  checkout of the repository, and the scripts to Python 3.8's syntax.
 
 Their runs against a real repository, and the steps' ``env:``, are
 :mod:`tests.project.test_release_tags_the_run_sha_1634`'s.
@@ -32,6 +32,7 @@ import unittest
 from typing import TYPE_CHECKING
 
 from tests._workflows import load, steps
+from tests.project.test_requires_python_floor_2051 import FLOOR
 
 if TYPE_CHECKING:
     from typing import Callable
@@ -517,11 +518,11 @@ class TestTheStepsRunTheScripts(unittest.TestCase):
                 self.assertFalse([step for step in found if (step.get('name'), job) in {(n, j) for j, n in STEPS}
                                   and 'working-directory' in step])
 
-    def test_the_scripts_parse_as_python_3_7(self) -> None:
+    def test_the_scripts_parse_as_python_3_8(self) -> None:
         """The steps run them on the image's ``python3``, or on a KTLO leg's."""
         for name in ('release_tags.py', 'release_upload.py'):
             with self.subTest(script=name):
-                ast.parse((UTIL / name).read_text(encoding='utf-8'), feature_version=(3, 7))
+                ast.parse((UTIL / name).read_text(encoding='utf-8'), feature_version=FLOOR)
 
 
 if __name__ == '__main__':

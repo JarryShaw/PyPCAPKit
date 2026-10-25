@@ -11,7 +11,7 @@
   shell ends.
 * :class:`TestTheStepRunsTheScript` pins the step to its script and its
   ``env:``, after a whole checkout of the repository, its ``git`` calls to ones
-  that never pull, merge, rebase, reset or force, and the script to Python 3.7's
+  that never pull, merge, rebase, reset or force, and the script to Python 3.8's
   syntax.
 
 The shell ran as a step with no ``shell:`` runs on the runner, ``bash -e``, and
@@ -37,6 +37,7 @@ import unittest
 from typing import TYPE_CHECKING
 
 from tests._workflows import steps
+from tests.project.test_requires_python_floor_2051 import FLOOR
 
 if TYPE_CHECKING:
     from typing import Callable, Optional
@@ -462,9 +463,9 @@ class TestTheStepRunsTheScript(unittest.TestCase):
         self.assertEqual(commands, {'rev-parse', 'show', 'fetch', 'merge-base', 'ls-remote', 'switch', 'commit',
                                     'push'})
 
-    def test_it_parses_as_python_3_7(self) -> None:
+    def test_it_parses_as_python_3_8(self) -> None:
         """``tag`` has no setup-python, so it runs on the image's ``python3``."""
-        ast.parse(SCRIPT.read_text(encoding='utf-8'), feature_version=(3, 7))
+        ast.parse(SCRIPT.read_text(encoding='utf-8'), feature_version=FLOOR)
 
 
 if __name__ == '__main__':

@@ -30,7 +30,7 @@ also subject to pathname expansion, which this skips: every tag is ``v`` or
 
 The ``conda`` legs run it before setup-python, so ``python3`` is the image's,
 and ``github`` has no setup-python at all. So the script is standard library
-only, and keeps to Python 3.7's syntax.
+only, and keeps to Python 3.8's syntax.
 
 """
 
