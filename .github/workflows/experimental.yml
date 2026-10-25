@@ -148,7 +148,8 @@ jobs:
   # job-level guard covers that. So every step that can run long
   # carries a cap of its own under the job's: a step past its cap fails rather
   # than cancels, and `continue-on-error` then applies as to any failure
-  # (actions/runner src/Runner.Worker/StepsRunner.cs:322-353, at 5f0b3ddcc).
+  # (actions/runner `StepsRunner.RunStepAsync` in
+  # src/Runner.Worker/StepsRunner.cs, at 5f0b3ddcc).
   # tests/project/test_ktlo_legs_stay_green_1672.py pins the caps and the
   # minutes they leave the rest.
   #
@@ -254,12 +255,14 @@ jobs:
       # #1740: GraalPy's leg can lose its runner mid-tests ("The runner has
       # received a shutdown signal"), and then the runner evaluates no later
       # step's condition, `always()` included (actions/runner
-      # src/Runner.Worker/StepsRunner.cs:205-208, at 796cc18ff). So this samples
-      # the runner every 30 s into resource-monitor.log, and `Run unit tests`
-      # follows the file into its own log, the one record a lost runner leaves.
-      # The sampler holds none of this step's output: the runner kills a step's
-      # process tree 5 s after its shell exits while a child still holds it
-      # (src/Runner.Sdk/ProcessInvoker.cs:485-505, same commit). `set +eo
+      # `StepsRunner.RunAsync` in src/Runner.Worker/StepsRunner.cs, at
+      # 796cc18ff). So this samples the runner every 30 s into
+      # resource-monitor.log, and `Run unit tests` follows the file into its own
+      # log, the one record a lost runner leaves. The sampler holds none of this
+      # step's output: the runner kills a step's process tree 5 s after its
+      # shell exits while a child still holds it
+      # (`ProcessInvoker.ProcessExitedHandler` in
+      # src/Runner.Sdk/ProcessInvoker.cs, same commit). `set +eo
       # pipefail`: `shell: bash` sets both, and `ps | head` can end `ps` with
       # SIGPIPE. Started here, the sampler is outside the tests' memory scope,
       # so an OOM kill there leaves it running.
@@ -317,7 +320,7 @@ jobs:
       #   Java heap alone, not thread stacks or JIT code (graalvm.org, Native
       #   Image, Memory Management), and a heap the GC cannot free raises
       #   OutOfMemoryError, which GraalPy turns into MemoryError (graalpython
-      #   runtime/exception/ExceptionUtils.java:313-316, at graal-25.4.4).
+      #   `ExceptionUtils.wrapJavaExceptionIfApplicable`, at graal-25.4.4).
       # - #1753: a worker's live heap grows with its tests until no heap lasts
       #   the tier, and a MemoryError in pytest's own failure report ends the
       #   session. `-XX:+ExitOnOutOfMemoryError` ends that worker instead, and
@@ -341,13 +344,14 @@ jobs:
       # - `prlimit --fsize`: no file over 2 GiB.
       # - A transient scope, 12G and no swap, at a fifth of the runner's CPU
       #   weight, where `sudo -n` can start one; otherwise uncapped. A scope's
-      #   command inherits the caller's environment (systemd-run(1), systemd
-      #   v255 man/systemd-run.xml:70-71), but sudo resets PATH and drops
-      #   `LD_*` even under --preserve-env (sudo plugins/sudoers/env.c:133-141,
-      #   at 43defa130), where setup-python puts its lib/
-      #   (src/find-python.ts:163-170, at ff73b2463), so `env` sets those
-      #   again, and the heap too. systemd-run drops to the runner's uid and
-      #   gid itself (src/run/run.c:1645-1683, v255). The probe is `scoped`
+      #   command inherits the caller's environment (systemd-run(1),
+      #   Description, systemd v255), but sudo resets PATH and drops `LD_*`
+      #   even under --preserve-env (sudo `initial_badenv_table` in
+      #   plugins/sudoers/env.c, at 43defa130), where setup-python puts its
+      #   lib/ (`useCpythonVersion` in src/find-python.ts, at ff73b2463), so
+      #   `env` sets those again, and the heap too. systemd-run drops to the
+      #   runner's uid and gid itself (`start_transient_scope` in
+      #   src/run/run.c, v255). The probe is `scoped`
       #   itself, every flag included, under a throwaway unit and running
       #   `true`, and either way the tests run the one argv, in the scope or not.
       # `tests-status` holds, for `Containment summary`, the exit status, the
@@ -358,7 +362,7 @@ jobs:
       # an exception group's `|`: a mention is not one (#1962), and nor is
       # Java's `OutOfMemoryError`. A worker down is xdist's `[gwN] node down:`
       # line, since under `-q` it prints no `replacing crashed worker`
-      # (xdist/dsession.py:78-80, at v3.8.0).
+      # (`DSession.report_line` in xdist/dsession.py, at v3.8.0).
       #
       # #1938: util/superseded.py's `watch` runs the whole command in a session
       # of its own, outside the scope, and asks `current`'s question every

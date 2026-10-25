@@ -730,13 +730,16 @@ jobs:
 
       # #1634: the upload below never makes the release. ncipollo/release-action
       # v1.21.0 creates a missing one, and its tag, at ``commit``
-      # (src/Action.ts:72-92), so a bump made while Create Release waits on
-      # approval would tag the pending version at main's tip and fail Create
-      # Release's tag check. It also retargets a draft at ``commit``
-      # (:85-92,107-120), though Create Release's ``workflow_run`` run resets a
-      # draft's target to its sha (softprops/action-gh-release v3.0.2,
-      # src/github.ts:636-646,832-866); skipping a draft is a precaution. Only
-      # the GitHub upload is skipped; the build is on anaconda.org regardless.
+      # (``Action.checkForMissingReleaseError`` and
+      # ``Action.updateDraftOrCreateRelease`` in src/Action.ts), so a bump made
+      # while Create Release waits on approval would tag the pending version at
+      # main's tip and fail Create Release's tag check. It also retargets a
+      # draft at ``commit`` (``updateDraftOrCreateRelease`` and
+      # ``updateRelease``), though Create Release's ``workflow_run`` run resets
+      # a draft's target to its sha (softprops/action-gh-release v3.0.2,
+      # ``release`` and ``findTagFromReleases`` in src/github.ts); skipping a
+      # draft is a precaution. Only the GitHub upload is skipped; the build is
+      # on anaconda.org regardless.
       - name: Check the GitHub release exists
         id: release
         if: ${{ needs.mode.outputs.publishes == 'true' && matrix.os == 'ubuntu-latest' }}
@@ -765,17 +768,22 @@ jobs:
           echo "published=false" >> "$GITHUB_OUTPUT"
 
       # ``commit`` is sent to Update a release as ``target_commitish``
-      # (src/Action.ts:107-120, src/Releases.ts:150-174), and
+      # (``Action.updateRelease`` in src/Action.ts, ``GithubReleases.update`` in
+      # src/Releases.ts), and
       # ``github.ref_name`` is the default branch on every run that publishes, so
       # GitHub's workflow-file rule checks main, not the commit Create Release
       # made the release at. The tag stays: the target is "Unused if the Git
       # tag already exists" (REST docs, Update a release).
       #
       # #1657: that update also sends ``name``, ``body``, ``prerelease`` and
-      # ``draft``, which unset inputs make the tag, "" and false
-      # (src/Inputs.ts:70-92,128-135,210-240), so each bump wiped the release's
-      # name and notes. Each ``omit*DuringUpdate`` leaves its field undefined
-      # (:210-252), and Octokit drops it (dist/index.js:38369-38388).
+      # ``draft``, which unset inputs make the tag, "" and false (the
+      # ``CoreInputs`` getters ``name``, ``body``, ``createdPrerelease`` and
+      # ``createdDraft`` in src/Inputs.ts, read through its ``updated*``
+      # getters), so each bump wiped the release's name and notes. Each
+      # ``omit*DuringUpdate`` leaves its field undefined (the same ``updated*``
+      # getters), and Octokit drops it (@octokit/endpoint's
+      # ``removeUndefinedProperties``, called from its ``merge``, bundled in
+      # dist/index.js).
       - name: Upload package to GitHub Release
         if: ${{ needs.mode.outputs.publishes == 'true' && matrix.os == 'ubuntu-latest' && steps.release.outputs.published == 'true' }}
         uses: ncipollo/release-action@339a81892b84b4eeb0f6e744e4574d79d0d9b8dd # v1.21.0
