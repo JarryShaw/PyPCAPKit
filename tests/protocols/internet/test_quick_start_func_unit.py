@@ -75,6 +75,26 @@ class QuickStartRoundTripTests(unittest.TestCase):
                         self.assertEqual(option.ttl, datetime.timedelta(seconds=5))
 
 
+    def test_rate_parses_as_an_int(self) -> None:
+        """Every family reads ``rate`` as an :class:`int`, as annotated, not a float. See #2167.
+
+        TCP's Quick-Start Response is checked in
+        ``tests/protocols/transport/test_tcp_quick_start_response_unit.py``.
+        """
+        from pcapkit.const.ipv6.qs_function import QSFunction as Enum_QSFunction
+
+        for name, cls, base, code in _families():
+            for func in (Enum_QSFunction.Quick_Start_Request,
+                         Enum_QSFunction.Report_of_Approved_Rate):
+                for rate in (0, 80, 640):
+                    with self.subTest(family=name, func=func.name, rate=rate):
+                        built = cls(options=[(code, dict(func=func, rate=rate, ttl=5,
+                                                         nonce=NONCE))], **base)
+                        option = list(cls(built.data).info.options.values())[0]
+                        self.assertIs(type(option.rate), int)
+                        self.assertEqual(option.rate, rate)
+
+
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class QuickStartWireTests(unittest.TestCase):
     def setUp(self) -> None:

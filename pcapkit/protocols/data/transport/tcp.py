@@ -388,9 +388,16 @@ class Authentication(Option):
 
 @info_final
 class FastOpenCookie(Option):
-    """Data model for TCP fast open cookie option."""
+    """Data model for TCP fast open cookie option.
 
-    #: Cookie.
+    .. versionchanged:: 1.5.0
+
+       ``cookie`` is ``b''`` rather than :obj:`None` for a cookie request
+       (:issue:`2167`).
+
+    """
+
+    #: Cookie, ``b''`` for a cookie request.
     cookie: 'bytes'
 
     if TYPE_CHECKING:
