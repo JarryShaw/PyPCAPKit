@@ -3564,7 +3564,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [epb_flags] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
         if schema.length != 4:
-            raise ProtocolError(f'PCAP-NG: [epb_flags] invalid length (expected 8, got {schema.length})')
+            raise ProtocolError(f'PCAP-NG: [epb_flags] invalid length (expected 4, got {schema.length})')
 
         option = Data_EPB_FlagsOption(
             type=schema.type,
@@ -4026,7 +4026,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             raise ProtocolError(f'PCAP-NG: [pack_flags] option must be only one, '
                                 f'but {self._opt[schema.type] + 1} found.')
         if schema.length != 4:
-            raise ProtocolError(f'PCAP-NG: [pack_flags] invalid length (expected 8, got {schema.length})')
+            raise ProtocolError(f'PCAP-NG: [pack_flags] invalid length (expected 4, got {schema.length})')
 
         option = Data_PACK_FlagsOption(
             type=schema.type,
@@ -6021,7 +6021,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         )
 
     def _make_option_ns_dnsipv6(self, type: 'Enum_OptionType', option: 'Optional[Data_NS_DNSIP6AddrOption]' = None, *,
-                                ip: 'str | bytes | IPv6Address | int' = '8.8.8.8',
+                                ip: 'str | bytes | IPv6Address | int' = '2001:4860:4860::8888',
                                 **kwargs: 'Any') -> 'Schema_NS_DNSIP6AddrOption':
         """Make PCAP-NG ``ns_dnsIP6addr`` option.
 
@@ -6581,7 +6581,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         )
 
     def _make_record_ipv6(self, type: 'Enum_RecordType', record: 'Optional[Data_IPv6Record]' = None, *,
-                          ip: 'IPv6Address | str | bytes | int' = '127.0.0.1',
+                          ip: 'IPv6Address | str | bytes | int' = '::1',
                           names: 'Optional[list[str]]' = None,
                           **kwargs: 'Any') -> 'Schema_IPv6Record':
         """Make PCAP-NG ``nrb_record_ipv6`` name resolution record.
