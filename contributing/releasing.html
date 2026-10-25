@@ -653,7 +653,8 @@ names”, and off a <code class="docutils literal notranslate"><span class="pre"
 <code class="docutils literal notranslate"><span class="pre">::warning</span></code> naming both commits and what is missing, and the run stays
 green. A <code class="docutils literal notranslate"><span class="pre">v*</span></code> push of such a version still fails with the
 check’s <code class="docutils literal notranslate"><span class="pre">::error</span></code>. A partial release is finished by re-running the run that
-tagged it.</p></li>
+tagged it, or, for Anaconda files that run’s own <code class="docutils literal notranslate"><span class="pre">conda</span></code> legs cannot
+build, by Conda Update’s <code class="docutils literal notranslate"><span class="pre">publish</span></code> dispatch (see <a class="reference internal" href="#recovery">Recovery</a>).</p></li>
 <li><p><code class="docutils literal notranslate"><span class="pre">pypi</span></code> and <code class="docutils literal notranslate"><span class="pre">conda</span></code> attach their files with <code class="docutils literal notranslate"><span class="pre">gh</span> <span class="pre">release</span> <span class="pre">upload</span></code>, in
 their “Upload package to GitHub Release” steps, not <code class="docutils literal notranslate"><span class="pre">action-gh-release</span></code>,
 which calls Update a release before every upload (3.0.2’s <code class="docutils literal notranslate"><span class="pre">src/github.ts:631-683</span></code>). A file
@@ -1009,6 +1010,13 @@ existence. <code class="docutils literal notranslate"><span class="pre">pypi</sp
 platform/Python distribution before uploading and skips only that leg’s
 upload if it is already there. Neither replaces a file the GitHub Release
 already has (<a class="reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/1640">#1640</a>).</p>
+<p>A re-run repeats the tagged commit’s own workflow, so it cannot upload
+Anaconda files that commit’s <code class="docutils literal notranslate"><span class="pre">conda</span></code> legs cannot build: 1.5.0b14’s
+<code class="docutils literal notranslate"><span class="pre">osx-64</span></code> legs were broken at its tag (<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2140">#2140</a>). While <code class="docutils literal notranslate"><span class="pre">main</span></code>’s version
+is still the tagged one, dispatching Conda Update with <code class="docutils literal notranslate"><span class="pre">publish</span></code> on <code class="docutils literal notranslate"><span class="pre">main</span></code>
+builds <code class="docutils literal notranslate"><span class="pre">main</span></code> and uploads every platform under a bumped build
+(<a class="extlink-issue reference external" href="https://github.com/JarryShaw/PyPCAPKit/issues/2060">#2060</a>, <a class="extlink-pr reference external" href="https://github.com/JarryShaw/PyPCAPKit/pull/2150">#2150</a>), and the warning a later commit’s run posts for an
+unfinished release names that remedy wherever Anaconda files are missing.</p>
 <p><strong>A re-run does not need to be verified by hand against the PyPI and Anaconda
 listings, because</strong> <code class="docutils literal notranslate"><span class="pre">release_status</span></code> <strong>does it.</strong> That job runs on every
 <code class="docutils literal notranslate"><span class="pre">Create</span> <span class="pre">Release</span></code> attempt regardless of what else skipped, and reconciles
