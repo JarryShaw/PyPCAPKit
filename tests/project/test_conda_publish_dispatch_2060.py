@@ -340,7 +340,7 @@ class TestTheBumpIsForced(unittest.TestCase):
                 self.assertEqual(step('conda-update', label)['env']['FORCED'], '${{ steps.bump.outputs.forced }}')
 
 
-#: Push Changes' three "not pushed" notices, and the warning each becomes on a forced bump.
+#: Push Changes' "not pushed" notices, and the warning each becomes on a forced bump.
 MOVED_PAST = ('::notice title=Not pushed as main moved past this checkout::',
               '::warning title=Nothing published as main moved past this checkout::')
 MOVED_DURING = ('::notice title=Not pushed as main moved during the push::',

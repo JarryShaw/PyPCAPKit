@@ -345,9 +345,9 @@ def write_tiers(directory: 'pathlib.Path', data: 'dict[str, Any]') -> 'pathlib.P
 TOMLLIB_FLOOR = (3, 11)
 #: The ``python3`` each runner label a job runs the script on puts on ``PATH``, every
 #: image it may mean: actions/runner-images at 2c421200c (2026-10-12), "Language and
-#: Runtime" in images/ubuntu/Ubuntu2404-Readme.md:28 (what ``ubuntu-latest`` named then),
-#: Ubuntu2604-Readme.md:27 (from 2026-10-19) and images/macos/macos-26-arm64-Readme.md:28
-#: (``macos-latest``). Ubuntu2204-Readme.md:30's is 3.10.12, which has no tomllib.
+#: Runtime" in images/ubuntu/Ubuntu2404-Readme.md (what ``ubuntu-latest`` named then),
+#: Ubuntu2604-Readme.md (from 2026-10-19) and images/macos/macos-26-arm64-Readme.md
+#: (``macos-latest``). Ubuntu2204-Readme.md's is 3.10.12, which has no tomllib.
 RUNNER_PYTHON3 = {'ubuntu-latest': ((3, 12), (3, 14)), 'macos-latest': ((3, 14),)}
 
 
@@ -1031,11 +1031,11 @@ class TestTheProseFollowsTheFile(unittest.TestCase):
 
 
 #: The two builds as setup-python spells them, at actions/setup-python 3892123fb: a
-#: free-threaded CPython as ``3.14t`` (src/find-python.ts:240,
+#: free-threaded CPython as ``3.14t`` (src/find-python.ts's ``desugarFreeThreadedVersion``,
 #: ``/^(\d+\.\d+(\.\d+)?)(t)$/``), and GraalPy as ``graalpy-<version>``
-#: (src/find-graalpy.ts:115-125; README.md:55, ``graalpy-24.0``), the version being
-#: a GraalPy release line, matched as a semver range against oracle/graalpython's
-#: release tags (src/install-graalpy.ts:213-248).
+#: (src/find-graalpy.ts's ``parseGraalPyVersion``; README.md's "Basic usage",
+#: ``graalpy-24.0``), the version being a GraalPy release line, matched as a semver
+#: range against oracle/graalpython's release tags (src/install-graalpy.ts's ``findRelease``).
 SETUP_PYTHON = {'cpython': re.compile(r'3\.\d+t'), 'graalpy': re.compile(r'graalpy-\d+\.\d+')}
 #: :data:`TIERS_AT_MAIN` with one experimental build of each, listed last as the file lists them.
 EXPERIMENTAL_LEGS = [{'python-version': '3.14t', 'experimental': True},

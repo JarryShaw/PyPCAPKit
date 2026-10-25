@@ -22,7 +22,7 @@ are not actions fetched by tag, so they are left alone.
   either; and the root job's ``exclude-paths`` skips
   :file:`conda/requirements.txt`, which it would otherwise read.
 * :class:`TestDependabotCanBuildTheEditable` checks :file:`pyproject.toml`
-  declares its readme statically, as Dependabot now fetches that file in place
+  declares its readme statically, as Dependabot fetches that file in place
   of :file:`setup.py` and passes it through unstubbed.
 * :class:`TestPyUpOpensNoUpdates` checks :file:`.pyup.yml` turns PyUp's update
   pull requests off, as Dependabot opens them.

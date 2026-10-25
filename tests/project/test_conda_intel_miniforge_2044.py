@@ -6,7 +6,7 @@ The step "Conda environment creation and activation" of ``conda-dist`` in
 :file:`.github/workflows/create-release.yml` named no installer, so on the Intel
 runner setup-miniconda downloaded ``Miniconda3-latest-MacOSX-x86_64.sh``. That
 installer is frozen at conda 25.7.0, which conflicts with conda-forge's
-conda-content-trust plugin and has no py314 build. The Intel legs now pass
+conda-content-trust plugin and has no py314 build. The Intel legs pass
 ``miniforge-version: latest``; every other leg passes an empty string, which
 names no installer, so it keeps the bundled or downloaded Miniconda.
 
@@ -19,7 +19,7 @@ the runner casts a ``with:`` value, and trimmed as ``core.getInput`` trims it.
 
 #2123: with Miniforge, the Intel legs broke twice more. Installing the matrix
 Python into base rebuilt conda-forge's libmambapy at 2.10.0, which
-conda-libmamba-solver 26.10.0 cannot drive, so the Intel legs now leave base's
+conda-libmamba-solver 26.10.0 cannot drive, so the Intel legs leave base's
 Python alone, as 3.15 does everywhere; :class:`TestTheIntelLegsKeepBasesPython`
 pins that. And conda-build 26.9's rpath relocation failed on the vendored chardet
 extensions, so :file:`conda/pypcapkit/meta.yaml` turns it off on osx-64 alone;

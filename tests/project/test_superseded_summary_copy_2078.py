@@ -5,7 +5,7 @@ Experimental Tests run 39898485708 uploaded no ``job-summary-*`` artifact: its
 legs were stopped as superseded, and the one line their job summaries held was
 util/superseded.py's, which went to ``$GITHUB_STEP_SUMMARY`` alone, so
 ``job-summary.md`` was never written and ``Upload the job summary`` found nothing.
-The watcher now takes the copy's path as ``--summary-copy``, which ``Run unit
+The watcher takes the copy's path as ``--summary-copy``, which ``Run unit
 tests`` passes it, and the tests it runs never see.
 
 * :class:`TestTheSteps` runs ``Run unit tests`` and ``Name the job summary`` as

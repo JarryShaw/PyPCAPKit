@@ -226,7 +226,7 @@ class IPv4UnitTests(unittest.TestCase):
             # defect. Asserting the negative matters because the branch was not
             # uncovered before the fix -- it was covered by the only class in the
             # tree that satisfied it, ``DummyProtocol`` in
-            # tests/protocols/schema/test_schema_unit.py:168, which subclasses
+            # tests/protocols/schema/test_schema_unit.py, which subclasses
             # ``Protocol`` and so packed happily while every protocol in the
             # library raised. Without this line the same hole could be reopened
             # by making a protocol subclass ``Protocol`` rather than by fixing

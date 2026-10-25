@@ -319,7 +319,7 @@ class TestEveryReleaseTagIsCreatedAtTheRunSha(WorkflowMixin, unittest.TestCase):
         """``pypi`` and ``conda`` used it to upload, which re-checked the target.
 
         ``action-gh-release`` 3.0.2 calls Update a release on an existing
-        release before uploading anything (``src/github.ts:631-683``), passing
+        release before uploading anything (``release`` in ``src/github.ts``), passing
         the release's own ``target_commitish`` when the input is unset, and
         GitHub's REST docs apply the workflow-file rule there to "the new value
         of target_commitish if you are changing it, otherwise the existing
@@ -356,8 +356,8 @@ class TestEveryReleaseTagIsCreatedAtTheRunSha(WorkflowMixin, unittest.TestCase):
             with self.subTest(status=status):
                 self.assertIn(status, step['run'])
         # A final release is created as a draft and published by Update a release
-        # in the same step (``src/github.ts:1025``); a re-run would find a draft
-        # left behind and keep its target (``:636-647``).
+        # in the same step (``createRelease`` in ``src/github.ts``); a re-run would
+        # find a draft left behind and keep its target (``release``).
         self.assertIn('delete any draft release', step['run'])
         self.assertGreater(self.index('github', EXPLAIN_STEP),
                            self.steps['github'].index(next(
@@ -374,12 +374,15 @@ class TestTheReleaseAppToken(WorkflowMixin, unittest.TestCase):
     authorized for this". ``actions/create-github-app-token`` v3.3.0, which
     ``v3`` names: ``client-id`` "GitHub App Client ID", ``private-key``
     required, one ``permission-<name>`` input each, ``permission-workflows``
-    "Can be set to 'write'" (``action.yml:8-17,51-52,147-148``), and output
+    "Can be set to 'write'" (the ``client-id``, ``private-key``,
+    ``permission-contents`` and ``permission-workflows`` inputs of
+    ``action.yml``), and output
     ``token``. With no ``owner`` or ``repositories``, "access will be scoped to
     only the current repository", and the token "is revoked in the ``post``
     step of the action, which means it cannot be passed to another job"
-    (``README.md:389,436``). Without a ``permission-*`` input "the token
-    inherits all of the installation's permissions" (``:402``), so both are
+    (README.md's ``repositories`` and "How it works" sections). Without a
+    ``permission-*`` input "the token inherits all of the installation's
+    permissions" (its ``permission-<permission name>`` section), so both are
     named and nothing else is.
     """
 
@@ -400,7 +403,7 @@ class TestTheReleaseAppToken(WorkflowMixin, unittest.TestCase):
     def test_only_create_release_spends_it(self) -> None:
         """The ``token:`` input, with no ``env:`` beside it: 3.0.2's ``parseToken``
         prefers a non-empty ``INPUT_TOKEN`` and falls back to ``GITHUB_TOKEN``
-        (``src/util.ts:107-113``), so an ``env:`` token would only ever be a
+        (``src/util.ts``), so an ``env:`` token would only ever be a
         second credential handed to the action."""
         step = self.create_release()
         self.assertEqual(step.get('with', {}).get('token'), RELEASE_TOKEN)
@@ -609,9 +612,10 @@ class TestUploadsStayOffUpdateARelease(WorkflowMixin, unittest.TestCase):
     GitHub's REST docs state the workflow-file rule for Create a release and
     Update a release, and none for Upload a release asset. ``gh release upload``
     reads the release, then POSTs each file to its ``upload_url``
-    (cli/cli 2.102.0, ``pkg/cmd/release/upload/upload.go:89-116``). Without
-    ``--clobber`` it refuses a name the release already has (``:94-108``); with
-    it, it deletes that asset first (``pkg/cmd/release/shared/upload.go:141-146``),
+    (cli/cli 2.102.0, ``uploadRun`` in ``pkg/cmd/release/upload/upload.go``).
+    Without ``--clobber`` it refuses a name the release already has; with it, it
+    deletes that asset first (``uploadWithDelete`` in
+    ``pkg/cmd/release/shared/upload.go``),
     which Delete a release asset's docs state no workflow-file rule for either.
     """
 
@@ -1345,7 +1349,7 @@ class TestTheCountsAreOfTheReleasedPlatforms(ScratchRepository):
     """``version_check`` counts the conda platforms a tagged version was released for (#2060).
 
     ``pre`` is tagged before util/release_published.py existed, as every tag up to
-    v1.5.0b14 is; ``added`` adds it with the three platforms #1967 transcribed
+    v1.5.0b14 is; ``added`` adds it with the platforms #1967 transcribed
     from the step's shell; ``windows`` adds win-64, as #2060 did; the run is on
     ``windows``. Counting this run's platforms for a version tagged earlier read
     v1.5.0b14 as lacking win-64, and Release status warned that it was unfinished
@@ -1638,7 +1642,7 @@ class TestTheUploadScript(WorkflowMixin, unittest.TestCase):
 
     def test_a_pattern_matching_nothing_fails(self) -> None:
         """A change from the action, which only warned: ``fail_on_unmatched_files``
-        is unset here, so 3.0.2's ``src/run.ts:15-20`` logs "🤔 Pattern '…' does
+        is unset here, so 3.0.2's ``run`` in ``src/run.ts`` logs "🤔 Pattern '…' does
         not match any files." and carries on."""
         self.published()
         result = self.upload('pypi')
@@ -1648,8 +1652,8 @@ class TestTheUploadScript(WorkflowMixin, unittest.TestCase):
 
     def test_a_missing_release_fails_before_any_upload(self) -> None:
         """A change from the action, which made one: with no release for the tag,
-        3.0.2 calls ``createRelease`` (``src/github.ts:617-628``) with no notes
-        and ``target_commitish`` unset (``:1026``, ``src/util.ts:133``), which
+        3.0.2 calls ``createRelease`` (from ``release`` in ``src/github.ts``) with
+        no notes and ``target_commitish`` unset (``parseConfig`` in ``src/util.ts``), which
         Create a release defaults to "the repository's default branch". Making
         the release is ``github``'s job, at the run's commit."""
         self.build(self.WHEEL)
@@ -1688,22 +1692,25 @@ class TestCondaUpdateNeverMakesTheRelease(CondaDistMixin, unittest.TestCase):
 
     ``conda-dist`` attaches its packages with ``ncipollo/release-action@v1.21.0``
     and ``allowUpdates: true``, kept so #1632's ``test_cron_conda_really_does_publish``
-    still finds it. That action's ``createOrUpdateRelease`` (``src/Action.ts:53-70``)
+    still finds it. That action's ``createOrUpdateRelease`` (``src/Action.ts``)
     reads the release by tag, which GitHub's REST docs give as "a published
     release"; on a 404 it updates a draft of that tag or else calls
-    ``createRelease`` (``:72-92``), both with ``target_commitish: commit``
-    (``:107-120``, ``src/Releases.ts:76-99,150-174``). With no release, a bump
+    ``createRelease`` (``checkForMissingReleaseError`` and
+    ``updateDraftOrCreateRelease``), both with ``target_commitish: commit``
+    (``updateRelease``, and ``GithubReleases.create`` and ``GithubReleases.update`` in
+    ``src/Releases.ts``). With no release, a bump
     made while Create Release waits on its approval -- 1.5.0b9 waited three
     days, and cron-conda bumped three times meanwhile -- would put
     ``v<version>`` on ``main``'s tip, and Create Release's tag check would then
-    fail. A draft stays a draft (``omitDraftDuringUpdate``,
-    ``src/Inputs.ts:210-213``) but is retargeted at ``commit``; Create Release's
+    fail. A draft stays a draft (``omitDraftDuringUpdate``, through
+    ``CoreInputs.updatedDraft`` in ``src/Inputs.ts``) but is retargeted at ``commit``; Create Release's
     ``workflow_run`` run finds the draft and resets its target to the run's sha
-    (``action-gh-release`` 3.0.2's ``src/github.ts:636-646,832-866``), so
+    (``action-gh-release`` 3.0.2's ``release`` and ``findTagFromReleases`` in
+    ``src/github.ts``), so
     skipping a draft is a precaution against retargeting a release Create
     Release owns. On an existing release it calls Update a release with
-    ``target_commitish: commit`` (``src/Action.ts:107-120``,
-    ``src/Releases.ts:150-174``), and GitHub's REST docs check "the new value of
+    ``target_commitish: commit`` (``Action.updateRelease`` in ``src/Action.ts``,
+    ``GithubReleases.update`` in ``src/Releases.ts``), and GitHub's REST docs check "the new value of
     target_commitish if you are changing it, otherwise the existing target"
     against the workflow-file rule, which since #1634 is the run's commit.
     """

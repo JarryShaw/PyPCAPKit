@@ -296,7 +296,7 @@ FORMER_ANACONDA = textwrap.dedent(r'''
     echo "PCAPKIT_CONDA_COMPLETE=$complete" >> "$GITHUB_OUTPUT"
 ''').lstrip()
 
-#: Each step, its id, the ``run:`` it now holds, and the former shell, the
+#: Each step, its id, the ``run:`` it holds, and the former shell, the
 #: ``/tmp`` file it wrote standing for where the cases write it.
 STEPS = {
     'Read the released Python versions': ('released', 'python3 util/release_tiers.py', FORMER_TIERS),

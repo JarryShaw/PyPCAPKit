@@ -55,7 +55,7 @@ _REAL_DATETIME = datetime.datetime
 #: Java ``LocalDateTime``, which has no year-1 floor, and its constructor then
 #: raises ``ValueError: year 0 is out of range`` (#2134, measured on GraalPy
 #: 25.4.4; graalpython ``TimeZoneBuiltins.java`` and ``DatetimeModuleBuiltins
-#: .addOffsetToDateTime`` at graal-25.4.4, no upstream issue filed yet). Its
+#: .addOffsetToDateTime`` at graal-25.4.4, no upstream issue filed). Its
 #: ``datetime + timedelta`` still raises :exc:`OverflowError`.
 ZONE_OVERFLOW = ValueError if sys.implementation.name == 'graalpy' else OverflowError
 

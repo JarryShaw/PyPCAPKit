@@ -5,7 +5,7 @@ Phase 1 gave ``conda-dist`` in :file:`.github/workflows/cron-conda.yml` a
 non-blocking ``windows-latest`` leg that published nothing. Once its Conda
 Update runs were green, phase 2 gave ``conda`` in
 :file:`.github/workflows/create-release.yml` the leg too, made both blocking, and
-uploads from both with the anaconda-client CLI, as the Intel legs do (#2044).
+uploaded from both with the anaconda-client CLI, as the Intel legs do (#2044).
 
 * :class:`TestTheWindowsLegPublishes`: on ``windows-latest`` each job runs one
   upload, "Upload conda packages to Anaconda (Windows)", evaluated with

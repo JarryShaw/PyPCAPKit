@@ -12,7 +12,7 @@ leg carries ``continue-on-error: ${{ matrix.ktlo == true }}`` and an ``id``; a
 step that needs an earlier one waits on that step's ``outcome``; the last step,
 ``KTLO summary``, reports each failed ``outcome`` as a warning and a job-summary
 line; and a step's own annotations take the job's ``ANNOTATION_LEVEL``. #2030:
-only the two steps that name and upload the job's copy of its summary,
+only the steps that name and upload the job's copy of its summary,
 :data:`JOB_SUMMARY_STEPS`, follow a summary, masked on every leg.
 
 :func:`run_leg` steps through a job the way the runner does -- the implicit
@@ -790,7 +790,8 @@ class TestASlowExperimentalLegTimesOutAStepNotTheJob(unittest.TestCase):
     A job past its ``timeout-minutes`` is cancelled, which no step-level
     ``continue-on-error`` contains, and docs.github.com does not say whether the
     job-level one does. A step past its own is failed instead, and ``continue-on-error`` then applies to it as to any failure
-    (actions/runner src/Runner.Worker/StepsRunner.cs:322-353, at 5f0b3ddcc) --
+    (``StepsRunner.RunStepAsync`` in actions/runner src/Runner.Worker/StepsRunner.cs,
+    at 5f0b3ddcc) --
     the path :class:`TestAnExperimentalLegIsNonBlockingTheSameWay` runs.
 
     """

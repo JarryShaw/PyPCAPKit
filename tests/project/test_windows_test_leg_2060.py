@@ -165,7 +165,7 @@ class TestItNeverBlocks(unittest.TestCase):
                 self.assertEqual(conclusion, 'success')
 
     def test_the_summary_sees_every_failure(self) -> None:
-        """Last but the job summary's two steps, after any failure, and every step it reports has an ``id``."""
+        """Last but the job summary's steps, after any failure, and every step it reports has an ``id``."""
         self.assertEqual([label(entry) for entry in self.spec['steps'][self.position + 1:]], list(JOB_SUMMARY_STEPS))
         self.assertEqual(self.summary['if'], '${{ !cancelled() }}')
         self.assertEqual(self.summary['shell'], 'bash')

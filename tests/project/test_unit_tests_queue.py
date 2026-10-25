@@ -496,7 +496,7 @@ class TestEngineCellLoops(_Scratch):
         self.assertEqual(status, 0)
 
 
-#: The two apt steps, as (job, step name, extra env), each with its job's ``APT_PACKAGES``.
+#: The apt steps, as (job, step name, extra env), each with its job's ``APT_PACKAGES``.
 APT_STEPS: 'tuple[tuple[str, str, dict[str, str]], ...]' = (
     ('engine-tests', "Install this engine's system packages", {'ENGINE': 'PyShark', 'APT_PACKAGES': 'tshark'}),
     ('pypcap-parity', 'Install libpcap headers, a C toolchain, and tshark',

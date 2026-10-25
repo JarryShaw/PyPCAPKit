@@ -2,7 +2,8 @@
 """#1967: every ``run:`` block of experimental.yml passes shellcheck.
 
 Lint's ``actionlint`` step runs shellcheck over every workflow's ``run:`` blocks,
-but is advisory, so this test keeps experimental.yml clean. It checks each
+and a finding fails Lint. This test keeps experimental.yml clean without waiting
+for a Lint run: it checks each
 ``run:`` block of a ``bash`` or ``sh`` step as actionlint does: each
 ``${{ ... }}`` expression replaced by underscores of the same length, the
 shell's ``set -e`` line above it, and the checks actionlint disables left out.

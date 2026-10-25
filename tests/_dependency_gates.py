@@ -1392,7 +1392,7 @@ def pytest_jobs(workflow: 'Optional[pathlib.Path]' = None) -> 'tuple[Job, ...]':
 def job_reaches(job: 'Job', gate: 'Gate') -> 'bool':
     """Whether ``job``'s selection would collect the tests ``gate`` guards.
 
-    The five selection shapes are answered five ways, and none of them
+    Each selection shape is answered its own way, and none of them
     reimplements the workflow's own list:
 
     * ``'whole-suite'`` reaches everything under :file:`tests/`.

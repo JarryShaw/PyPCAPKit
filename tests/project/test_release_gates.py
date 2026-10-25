@@ -4006,7 +4006,7 @@ class TestCondaBumpIsTaggedAndUploaded(CondaWorkflowMixin, unittest.TestCase):
 
         """
         pre_fix = self._pre_fix_jobs()
-        # #1967: the gate is a job of `head` now, and a row reports a call one
+        # #1967: the gate is a job of `head`, and a row reports a call one
         # of whose jobs ran as `success` (see `head_result`). `skipped` is the
         # shape #1632 found, a skipped job ahead of the chain.
         context = conda_context(head='skipped')

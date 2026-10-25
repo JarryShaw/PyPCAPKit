@@ -36,7 +36,7 @@ would not have caught:
   :file:`tests/protocols/test_option_generator_tcp_base_unit.py`,
   :file:`tests/protocols/test_option_coverage_runtime.py`, and
   :file:`tests/protocols/test_option_roundtrip_unit.py`.
-  :file:`examples/generators/dispatch.py:20` and
+  :file:`examples/generators/dispatch.py`'s module docstring and
   :file:`docs/source/changelog/1.5.0.rst` both name it
   directly, too.
 

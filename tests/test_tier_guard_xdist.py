@@ -48,7 +48,7 @@ only under the lock, and :class:`ProbeLeftoverCheckTests` pins that ordering.
 
 A fifth (#1977): GraalPy holds the GIL inside a blocking :func:`fcntl.flock`, so
 :class:`ProbeWriteLockTests` deadlocked its own process and every worker queued
-behind it. The lock now polls with ``LOCK_NB``, and :class:`ProbeLockNonBlockingTests`
+behind it. There the lock polls with ``LOCK_NB``, and :class:`ProbeLockNonBlockingTests`
 pins that it never makes a blocking call.
 
 Kept separate from :mod:`tests.test_tier_guard`, which another change is already
@@ -754,7 +754,7 @@ class ProbeLockNestedRunTests(unittest.TestCase):
             return False
 
     def test_a_nested_run_does_not_queue_behind_a_waiting_writer(self) -> None:
-        """Fails on the code before this change: the child times out at the gate."""
+        """Fails on the code before #2082: the child times out at the gate."""
         order = []  # type: list[str]
 
         def writer() -> None:

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """#2020: every workflow ``timeout`` that needs GNU's semantics runs GNU's.
 
-Ubuntu 26.04, which ``ubuntu-latest`` now serves, ships uutils coreutils 0.10.0
+Ubuntu 26.04, which ``ubuntu-latest`` serves, ships uutils coreutils 0.10.0
 as ``timeout`` and GNU coreutils 9.7 as ``gnutimeout``. uutils' ``--kill-after``
 sends SIGKILL with the first signal, and to its child alone: in ``ubuntu:26.04``,
 ``timeout --signal=INT --kill-after=3s 1 sleep 30`` exits 137 after 1 s where

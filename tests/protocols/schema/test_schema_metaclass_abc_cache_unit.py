@@ -254,8 +254,7 @@ class SchemaMetaAbcCacheTests(unittest.TestCase):
 
         :meth:`NameResolutionBlock.post_process
         <pcapkit.protocols.schema.misc.pcapng.NameResolutionBlock.post_process>`
-        asks ``isinstance(record, (IPv4Record, IPv6Record))`` at
-        :file:`pcapkit/protocols/schema/misc/pcapng.py:1876` and then reads
+        asks ``isinstance(record, (IPv4Record, IPv6Record))`` and then reads
         ``record.names``. Before #439 was fixed, every schema class shared one
         ``_abc_impl``, so that question answered ``True`` for the block's
         *terminating* ``EndRecord`` -- which has no ``names`` -- provided

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""#2051: 1.5.0 requires Python 3.8, and nothing converts the sources any more.
+"""#2051: 1.5.0 requires Python 3.8, and nothing converts the sources.
 
 The owner's ruling on #2040 raised ``requires-python`` to ``>=3.8`` and dropped the
 ``bpc-*`` backport tools, which are no longer maintained. Pinned here:

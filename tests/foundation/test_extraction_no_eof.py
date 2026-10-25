@@ -94,7 +94,7 @@ serve a different checkout than the one under test.
 
 The timeout bounds the extraction, not the interpreter's warm-up (#2085). On
 GraalPy 25.4.4 a child spends 4-8s importing :mod:`pcapkit` and 7-13s on its
-first extraction, which imports five more modules and is otherwise cold code:
+first extraction, which imports more modules and is otherwise cold code:
 about 21 CPU-seconds before the case under test begins, after which every case
 here takes 0.02-0.06s. CPython takes 0.9s in all. A single 30s timeout over the
 whole child therefore failed four of eleven GraalPy runs on ``main``, the other

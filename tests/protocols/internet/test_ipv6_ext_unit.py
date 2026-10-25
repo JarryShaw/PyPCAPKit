@@ -576,7 +576,7 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
     def test_every_subclass_alias_survives_the_packet_dict_key_computation(self) -> None:
         """:meth:`IPv6._decode_next_layer
         <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>` keys its
-        packet dict by ``alias.lstrip('IPv6-').lower()`` (``ipv6.py:455``, in ``_exthdr_key``).
+        packet dict by ``alias.lstrip('IPv6-').lower()`` (in ``_exthdr_key``).
         :meth:`str.lstrip` strips a character *set*, so the hyphen in
         ``IPv6-Route``/``IPv6-Frag``/``IPv6-Opts`` is what lets ``IPv6`` fall
         away cleanly, where the underscore of a class-name default like

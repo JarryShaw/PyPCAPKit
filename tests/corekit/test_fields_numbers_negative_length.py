@@ -88,7 +88,7 @@ class NegativeResolvedLengthTests(unittest.TestCase):
         """``lambda pkt: pkt['len'] - 4`` against a truncated ``len``, verbatim.
 
         This is the exact shape at ``pcapkit/protocols/schema/internet/
-        hip.py``'s ``PuzzleParameter.random`` field (line 734 as of
+        hip.py``'s ``PuzzleParameter.random`` field (as of
         ``21e9588af``): a wire ``len`` of ``3`` -- one octet short of the
         4-octet header this parameter always carries -- resolves the
         remaining ``random`` payload to ``-1`` octets, negative because the
@@ -181,7 +181,7 @@ class NegativeBitLengthTests(unittest.TestCase):
     whenever one is supplied, and shifts by it immediately:
     ``(1 << bit_length) - 1``. #829 guarded the *resolved-length* shift in
     :meth:`~pcapkit.corekit.fields.numbers.NumberField.__call__` but left this
-    one, at ``pcapkit/corekit/fields/numbers.py:88`` on ``5576708d4``, open --
+    one, in ``NumberField.__init__`` on ``5576708d4``, open --
     a negative ``bit_length`` still raised a bare, uncatchable
     :exc:`ValueError` (``negative shift count``) rather than a
     :class:`~pcapkit.utilities.exceptions.ProtocolError`.
@@ -261,7 +261,7 @@ class NegativeBitLengthTests(unittest.TestCase):
         """The control: the ordinary, well-formed case is not touched.
 
         The exact shape at ``pcapkit/protocols/schema/link/vlan.py``'s
-        ``TCI.pcp``/``dei``/``vid`` fields (lines 47, 49, 51 on
+        ``TCI.pcp``/``dei``/``vid`` fields (on
         ``5576708d4``): a positive literal ``bit_length`` alongside a fixed
         byte ``length``.
 

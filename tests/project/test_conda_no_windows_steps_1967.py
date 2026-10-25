@@ -2,8 +2,8 @@
 """#1967: the conda jobs keep no step or ``case`` arm for a runner they have no leg on.
 
 ``conda`` in :file:`.github/workflows/create-release.yml` and ``conda-dist`` in
-:file:`.github/workflows/cron-conda.yml` have had no ``windows-latest`` leg since
-2023, yet carried ``Install and Setup (Windows)``, ``Setup Conda Distribution
+:file:`.github/workflows/cron-conda.yml` had no ``windows-latest`` leg from 2023
+until #2060, yet carried ``Install and Setup (Windows)``, ``Setup Conda Distribution
 (Windows)``, the ``matrix.os != 'windows-latest'`` guards on their twins, and a
 ``windows-latest`` arm in each ``case "${{ matrix.os }}"``: code no run reached.
 

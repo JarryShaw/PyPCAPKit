@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""GraalPy behaviours :mod:`pcapkit.corekit` no longer depends on (#1963).
+"""GraalPy behaviours :mod:`pcapkit.corekit` does not depend on (#1963).
 
 Each was measured on GraalPy 25.4 and does not happen on CPython, so each class
 here stands in for GraalPy's behaviour and checks the module does not lean on

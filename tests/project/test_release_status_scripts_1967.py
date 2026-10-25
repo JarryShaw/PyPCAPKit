@@ -235,7 +235,7 @@ VENDOR_SHELL = textwrap.dedent(r'''
     esac
 ''').lstrip()
 
-#: Each job, the step its script runs as, the ``run:`` it now holds, and its
+#: Each job, the step its script runs as, the ``run:`` it holds, and its
 #: permissions.
 JOBS = {
     'release_status': ('Report why this run did or did not release anything', 'python3 util/release_status.py',

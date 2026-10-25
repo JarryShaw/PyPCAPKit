@@ -4,7 +4,7 @@
 A pragma that misspells its message, as ``import-outside-top-level`` did for
 ``import-outside-toplevel``, suppresses nothing. pylint reports ``W0012
 unknown-option-value`` on it and still reports the message it was meant to
-silence, but the lint job is advisory, so nothing noticed.
+silence, but Lint's pylint step is advisory, so nothing noticed.
 
 :data:`KNOWN_MESSAGES` pins the names the package's pragmas use, and every
 pragma name has to be on it, so that check runs on every leg with nothing

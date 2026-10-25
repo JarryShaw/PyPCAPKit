@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """#1967: Lint runs actionlint, pinned to a checksum-verified release.
 
-Nothing ran actionlint over the workflows before #1967. Lint's ``lint`` job now
+Nothing ran actionlint over the workflows before #1967. Lint's ``lint`` job
 has an ``actionlint`` step that downloads one release, named by
 ``ACTIONLINT_VERSION``, checks it against ``ACTIONLINT_SHA256`` before unpacking
 it, and runs it over every workflow. The version is 1.7.12 or newer: the

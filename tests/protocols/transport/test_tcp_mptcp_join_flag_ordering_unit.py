@@ -13,9 +13,9 @@ the flags afterwards:
 
 .. code-block:: python
 
-    options_value, total_length = self._make_tcp_options(options)   # tcp.py:547
+    options_value, total_length = self._make_tcp_options(options)
     ...
-    self._flags = _flag                                             # tcp.py:567
+    self._flags = _flag
 
 but :meth:`TCP._make_mptcp_join
 <pcapkit.protocols.transport.tcp.TCP._make_mptcp_join>`, reached from
@@ -26,8 +26,8 @@ died outright::
     AttributeError: 'TCP' object has no attribute '_flags'
 
 The parse path has the identical pair of branches in ``_read_mptcp_join`` and is fine,
-because :meth:`~pcapkit.protocols.transport.tcp.TCP.read` assigns ``self._flags`` at
-``tcp.py:535``, before it parses the options at ``tcp.py:555``. Only the make path was
+because :meth:`~pcapkit.protocols.transport.tcp.TCP.read` assigns ``self._flags``
+before it parses the options. Only the make path was
 inverted.
 
 The fix is the hoist: the ``flags`` dict and the ``_flag`` accumulation move above the
@@ -104,7 +104,7 @@ in-library exception contract.
 
 The read path was checked for the same shape of problem and does **not** have it:
 :func:`~pcapkit.protocols.schema.transport.tcp.mptcp_data_selector` guards the flagless
-case at ``schema/transport/tcp.py:242-250`` and raises
+case and raises
 :exc:`~pcapkit.utilities.exceptions.FieldError` before ``_read_mptcp_join`` is reached at
 all, so its own closing ``ProtocolError`` stays unreachable and its
 ``cast('Enum_Flags', 0)`` is left alone. Changing it would alter the ``connection`` value

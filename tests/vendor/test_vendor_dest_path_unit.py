@@ -94,8 +94,8 @@ module scope, only as the string parser name in the crawlers'
 ``bs4.BeautifulSoup(text, 'html5lib')`` calls at actual crawl time, which
 nothing here reaches -- no test in this file calls :meth:`Vendor.__init__` or
 :meth:`~Vendor.context`. ``requests`` and ``beautifulsoup4`` both ship in the
-``test`` extra precisely so vendor tests can run (:file:`pyproject.toml`,
-around line 321), so both classes below run on ``test`` and ``gate`` -- the
+``test`` extra precisely so vendor tests can run (the comment on them in
+:file:`pyproject.toml`), so both classes below run on ``test`` and ``gate`` -- the
 only pytest jobs of :file:`.github/workflows/unit-tests.yml` that collect
 anything under :file:`tests/vendor/` at all, since ``integration`` and
 ``pypcap-parity`` never reach it and ``engine-tests`` runs only each engine's

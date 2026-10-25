@@ -25,9 +25,9 @@ silently link to a dead anchor exactly as ``secion-3`` did.
 
 The sweep this test is built on also turned up a **second** instance of the
 same defect: ``:rfc:`5797#secion-2.2``` in the ``feat`` attribute docstring of
-the ``Command`` class (not ``FEATCode``), at
-:file:`pcapkit/vendor/ftp/command.py:296` and its generated copy
-:file:`pcapkit/const/ftp/command.py:284`. Same missing ``t``, same two files,
+the ``Command`` class (not ``FEATCode``), in
+:file:`pcapkit/vendor/ftp/command.py` and its generated copy
+:file:`pcapkit/const/ftp/command.py`. Same missing ``t``, same two files,
 same one-character fix -- fixed alongside #942's rather than carried as a
 documented exception.
 
@@ -40,13 +40,13 @@ do not exist either -- RFC 8684's real HTML uses ``id="section-3.1"``, never
 ``id="3.1"`` -- so accepting that shape blessed exactly the defect class this
 test exists to catch, the same mistake as the allowlist above one layer down.
 The generators that produce them,
-:file:`pcapkit/vendor/tcp/mp_tcp_option.py:59` and
-:file:`pcapkit/vendor/reg/apptype/apptype.py:1200` (both parsing IANA's
+``MPTCPOption.process`` in :file:`pcapkit/vendor/tcp/mp_tcp_option.py` and
+``AppType.records`` in :file:`pcapkit/vendor/reg/apptype/apptype.py` (both parsing IANA's
 ``RFC8684, Section 3.1`` with the same ``re.fullmatch(r'RFC(?P<rfc>\\d+)(, Section
 (?P<sec>.*?))?', ...)``, which discards the literal word ``Section`` and
 keeps only the number), are fixed to emit ``#section-{sec}``, and the ten
 already-generated lines are fixed to match -- exactly what a regeneration
-would now produce, verified by reading the generators rather than by running
+would produce, verified by reading the generators rather than by running
 them. The third shape is dropped from :data:`ACCEPTED_FRAGMENT` entirely.
 
 :data:`ACCEPTED_FRAGMENT`'s set is not a survey of shapes this tree happens to

@@ -7,7 +7,7 @@ warned ``No files were found with the provided path:
 /home/runner/work/_temp/junit*.xml``: pytest, stopped, writes no JUnit file,
 and ``Upload test timings`` ran on as for any finished run. The watcher's
 ``Superseded`` notice already says why the file is missing, so the watcher
-now writes ``stopped=true`` to the step's outputs and the upload reads it.
+writes ``stopped=true`` to the step's outputs and the upload reads it.
 
 """
 

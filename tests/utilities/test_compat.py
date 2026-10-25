@@ -22,7 +22,7 @@ Python 3.11 and later nothing this file imports has pulled :mod:`aenum` in alrea
 -- the branch the *real* interpreter takes is ``from enum import StrEnum`` -- so the
 faked load performs the first ``import aenum`` of the process. Every
 :mod:`aenum` enumeration built afterwards -- including
-``pcapkit/const/reg/apptype.py:26``'s ``TransportProtocol`` -- then took the
+``TransportProtocol``, at the time in ``pcapkit/const/reg/apptype.py`` -- took the
 ``pyver < PY3_6`` path in ``aenum/_enum.py`` and died with ``AttributeError:
 'TransportProtocol' object has no attribute '__set_name__'``, so a later
 ``import pcapkit`` failed outright.
@@ -122,7 +122,7 @@ __tier__ = 'ALL'
 #: running the test until it stopped complaining, and that distinction is the
 #: point of having it. Every module imported at ``(3, 8)``: :mod:`builtins`,
 #: :mod:`collections.abc`, :mod:`functools`, :mod:`pathlib` and :mod:`typing`,
-#: which no version gate guards any more (#2051), and, behind the gates that
+#: which no version gate guards (#2051), and, behind the gates that
 #: remain, :mod:`urllib.parse`, :mod:`aenum`, :mod:`typing_extensions`,
 #: :mod:`contextlib`, :mod:`decimal`, :mod:`enum` and :mod:`_thread`.
 #: :mod:`threading` stays on the list because :meth:`CompatTests.load_compat_as`
@@ -199,7 +199,7 @@ def aenum_pyver_readings() -> 'dict[str, tuple[int, ...]]':
     module of the package takes a **copy** through ``from ._common import *``.
     The copies can disagree with the original -- reloading ``aenum._common``
     repairs it and leaves all of them -- and it is ``aenum._enum``'s copy that
-    ``aenum/_enum.py:1640`` branches on when it decides whether to call
+    ``EnumType.__new__`` in ``aenum/_enum.py`` branches on when it decides whether to call
     :meth:`~object.__set_name__` by hand. Sweeping covers ``_py3``, ``_tuple``
     and ``_constant`` too, without this file having to keep a list of which of
     :mod:`aenum`'s private modules hold one.
@@ -462,7 +462,7 @@ class CompatTests(unittest.TestCase):
 
         The closing lines are the symptom rather than a proxy for it. Building
         an :class:`aenum.IntFlag` subclass is exactly what
-        ``pcapkit/const/reg/apptype.py:26`` did for ``TransportProtocol`` when
+        ``pcapkit/const/reg/apptype.py`` did for ``TransportProtocol`` when
         #687 was found, and it is the statement that raised
         ``AttributeError: 'TransportProtocol' object has no attribute
         '__set_name__'`` for tests of :mod:`tests.project.test_public_api`

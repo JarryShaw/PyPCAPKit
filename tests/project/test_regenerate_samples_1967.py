@@ -32,7 +32,7 @@ RUN = 'python util/regenerate_samples.py'
 #: The jobs whose step runs the script, and the level each takes from where.
 LEVELLED_JOBS = ('integration', 'pypcap-parity')
 GATE = 'gate'
-#: Text only the old inline step held, which no workflow may hold now.
+#: Text only the old inline step held, which no workflow may hold.
 INLINE = ('make_samples.py', 'make-samples.log', '(download unavailable)', 'Sample fixture generation failed')
 
 FAILED = ('title=Sample fixture generation failed::examples/generators/make_samples.py could not rebuild '

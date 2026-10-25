@@ -527,7 +527,7 @@ class TestTheExperimentalLegsAreAWorkflowOfTheirOwn(unittest.TestCase):
         spec = self.own['jobs']['experimental']
         self.assertIs(spec.get('continue-on-error'), True)
         self.assertEqual(spec['env'], {'ANNOTATION_LEVEL': 'warning'})
-        # #2030: the last step but the two that name and upload the job's summary.
+        # #2030: the last step but the steps that name and upload the job's summary.
         self.assertEqual([entry['name'] for entry in spec['steps'][-3:]],
                          ['Experimental summary', 'Name the job summary', 'Upload the job summary'])
         # #2060: the Windows leg's job, as tests/project/test_windows_test_leg_2060.py pins.

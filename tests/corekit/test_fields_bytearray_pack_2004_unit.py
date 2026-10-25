@@ -5,7 +5,7 @@ GitHub issue #2004. CPython's :func:`struct.pack` takes a :obj:`bytearray` for
 the ``s`` and ``p`` formats, but PyPy's takes :obj:`bytes` alone and raises
 ``TypeError: expected bytes, got bytearray object``, so a :obj:`bytearray` value
 packed by :meth:`Field.pack <pcapkit.corekit.fields.field.Field.pack>` failed on
-PyPy. The field now hands :func:`struct.pack` a :obj:`bytes` copy.
+PyPy. The field hands :func:`struct.pack` a :obj:`bytes` copy.
 
 The PyPy behaviour is reproduced on any interpreter with a :mod:`struct`
 stand-in that refuses a :obj:`bytearray`, as PyPy's does. The real
@@ -114,7 +114,7 @@ class TestBytearrayPack(unittest.TestCase):
 
     def test_refused_values_stay_refused(self) -> None:
         # CPython raises struct.error for these and PyPy TypeError; neither may
-        # start packing because a bytearray now does.
+        # start packing because a bytearray does.
         for label, field in self._fields().items():
             for value in (memoryview(OCTETS), True, OCTETS.decode('latin-1'), list(OCTETS)):
                 with self.subTest(field=label, value=type(value).__name__):

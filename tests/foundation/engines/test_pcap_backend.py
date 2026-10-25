@@ -191,7 +191,7 @@ class InstalledDistributionsTests(unittest.TestCase):
 
         # From Python 3.15 ``importlib.metadata.distribution`` parses every
         # candidate's METADATA, which ran on each pcap_ct extraction (#2110).
-        # Existence is all that is asked, so a METADATA read is now an error.
+        # Existence is all that is asked, so here a METADATA read is an error.
         def unread(self, filename):
             raise AssertionError(f'read {filename} of {self}')
 

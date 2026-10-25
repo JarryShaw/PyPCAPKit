@@ -412,7 +412,7 @@ class TestTheRuleOnRealRunShapes(unittest.TestCase):
 
 
 def head_result(unit_tests: 'str', verdict: 'str') -> 'str':
-    """What the caller's ``needs.head.result`` is taken to be, from the two jobs of
+    """What the caller's ``needs.head.result`` is taken to be, from the jobs of
     :data:`HEAD` (#1967).
 
     A failure in either is a failure, which is what the acting jobs' ``!=
@@ -436,7 +436,7 @@ def _context(event_name: 'str' = 'workflow_run', conclusion: 'str' = 'success',
              verified: 'object' = 'true', cancelled: bool = False) -> 'dict[str, object]':
     """One run's ``github``/``needs`` context; the defaults are a verdict that covers its checkout.
 
-    ``unit_tests`` and ``verdict`` are the results of :data:`HEAD`'s two jobs,
+    ``unit_tests`` and ``verdict`` are the results of :data:`HEAD`'s jobs,
     which make the caller's ``head`` result through :func:`head_result`.
     ``verified=NULL`` is a ``verdict`` job that wrote no output, which is what a
     skipped or failed one leaves, and the call passes it on as it is.
