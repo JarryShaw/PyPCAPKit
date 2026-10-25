@@ -1,10 +1,10 @@
 """#1479 -- a final SCTP parameter or error cause sent without its padding parses and rebuilds.
 
 :rfc:`9260#section-3.2` lets the last chunk of a packet omit its padding, and in
-a chunk carrying a parameter or cause list that is the last item's padding. The
-nested list's span counted that padding whether or not it was there, so the last
-item read past the data and parsing raised :exc:`ProtocolError`. The span is now
-clamped to the octets present.
+a chunk carrying a parameter or cause list that is the last item's padding. A
+nested list span that counted that padding whether or not it was there would make
+the last item read past the data and parsing raise :exc:`ProtocolError`. The span
+is clamped to the octets present.
 
 """
 from __future__ import annotations

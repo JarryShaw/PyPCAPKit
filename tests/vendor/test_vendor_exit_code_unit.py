@@ -1,25 +1,25 @@
 # -*- coding: utf-8 -*-
 """``python -m pcapkit.vendor`` must fail its exit code when a crawler raises.
 
-GitHub issue #872. Before the fix, :func:`pcapkit.vendor.__main__.run`
-swallowed every exception a crawler raised -- filed as a merely-filterable
-:class:`~pcapkit.utilities.warnings.VendorRuntimeWarning` -- and
-:func:`pcapkit.vendor.__main__.main` always ended on ``return 0``, with
-no accounting of whether any target had failed. Because
+GitHub issue #872. Guards against :func:`pcapkit.vendor.__main__.run`
+swallowing every exception a crawler raises -- reported only as a
+merely-filterable :class:`~pcapkit.utilities.warnings.VendorRuntimeWarning` --
+while :func:`pcapkit.vendor.__main__.main` always returns ``0``, with no
+accounting of whether any target failed. Because
 :meth:`pcapkit.vendor.default.Vendor.__init__` runs its network fetch and
 render *before* the ``open(const_file, 'w')`` on its last line, a failed
 crawler writes nothing at all: the previous constant file is left untouched,
 one warning is emitted (silently, since
 :data:`~pcapkit.utilities.logging.VERBOSE` defaults to :data:`False`), and the
-process reports success regardless. A no-op regeneration was therefore
+process would report success regardless. A no-op regeneration would then be
 indistinguishable from a real one at the only boundary a CI job or a script
 actually checks -- the exit code. This was hit for real during GitHub issue
 #870's work, where a docstring edit silently failed to propagate.
 
-The fix makes :func:`~pcapkit.vendor.__main__.run` return whether its target
-succeeded, and :func:`~pcapkit.vendor.__main__.main` return ``1`` if *any*
-target failed while still attempting every target regardless of an earlier
-failure -- a crawler that is down should not stop the rest from regenerating.
+:func:`~pcapkit.vendor.__main__.run` returns whether its target succeeded, and
+:func:`~pcapkit.vendor.__main__.main` returns ``1`` if *any* target failed while
+still attempting every target regardless of an earlier failure -- a crawler that
+is down should not stop the rest from regenerating.
 
 This suite exercises the real :func:`~pcapkit.vendor.__main__.main` entrypoint
 end to end, with the default (no ``--target``) argument path, rather than
@@ -36,12 +36,12 @@ target list itself is stubbed too, by patching the
 ``__all__`` from -- so this suite never imports, runs, or writes anything
 under the real crawlers, and touches no file under :file:`pcapkit/const/`.
 
-Run against the pre-fix code (``run()`` ending on a bare ``return None`` and
-``main()`` ending on a bare ``return 0``), every method below fails:
+With ``run()`` ending on a bare ``return None`` and ``main()`` ending on a bare
+``return 0``, every method below fails:
 :meth:`~ExitCodeTests.test_run_returns_false_for_a_raising_crawler` (``run()``
 returns :data:`None`, not the exact value :data:`False` --
 :meth:`~unittest.TestCase.assertIs` is what makes this one discriminate: a
-plain :meth:`~unittest.TestCase.assertFalse` would pass on both trees, since
+plain :meth:`~unittest.TestCase.assertFalse` would pass either way, since
 :data:`None` is already falsy),
 :meth:`~ExitCodeTests.test_run_returns_true_for_a_clean_crawler` (``run()``
 returns :data:`None`, not :data:`True`),
@@ -49,7 +49,7 @@ returns :data:`None`, not :data:`True`),
 :meth:`~ExitCodeTests.test_main_still_attempts_every_target_after_an_earlier_one_fails`
 (``main()`` returns ``0``, not ``1``), and
 :meth:`~ExitCodeTests.test_failing_target_and_error_reach_stderr_unconditionally`
-(with warnings filtered out, pre-fix ``run()`` writes nothing to stderr at
+(with warnings filtered out, such a ``run()`` writes nothing to stderr at
 all).
 
 """
@@ -138,10 +138,10 @@ class ExitCodeTests(unittest.TestCase):
 
     def test_run_returns_false_for_a_raising_crawler(self) -> None:
         failing = self._make_failing_crawler()
-        # assertIs, not assertFalse: pre-fix run() returns None, which is
-        # merely falsy and would pass an assertFalse on both trees, pinning
-        # nothing. The exact value False is what main() actually branches
-        # on (`if not run(vendor): success = False`), so this has to check
+        # assertIs, not assertFalse: a run() returning None is merely falsy
+        # and would pass an assertFalse, pinning nothing. The exact value
+        # False is what main() actually branches on
+        # (`if not run(vendor): success = False`), so this has to check
         # for that literal, not for anything that happens to be falsy.
         self.assertIs(self.vendor_main.run(failing), False,
                      'run() must return the exact value False, not merely something '
@@ -153,10 +153,9 @@ class ExitCodeTests(unittest.TestCase):
                         'run() must report success when the crawler does not raise')
 
     def test_main_returns_non_zero_when_a_target_raises(self) -> None:
-        # The regression this issue is about: pre-fix, main() ends on a bare
-        # `return 0` with no accounting at all, so this assertion fails
-        # (0 != 1) against origin/main; see the module docstring for the
-        # full pre-fix failure list.
+        # The regression this issue is about: a main() ending on a bare
+        # `return 0` with no accounting at all fails this assertion (0 != 1);
+        # see the module docstring for the full failure list.
         failing = self._make_failing_crawler()
         fake_vendor_module = types.SimpleNamespace(__all__=['FailingCrawler'],
                                                     FailingCrawler=failing)
@@ -193,12 +192,12 @@ class ExitCodeTests(unittest.TestCase):
 
     def test_failing_target_and_error_reach_stderr_unconditionally(self) -> None:
         # Point 2 of the issue: VendorRuntimeWarning is filterable and VERBOSE
-        # defaults False, so the plain print() run() now does is the only
+        # defaults False, so the plain print() run() does is the only
         # thing guaranteed to reach a CI log regardless of warning filters.
         #
         # Warnings are suppressed here *on purpose*, and that is load-bearing
-        # rather than incidental: under the default filter, the pre-existing
-        # warn() call already writes both the qualified name and the
+        # rather than incidental: under the default filter, the warn() call
+        # already writes both the qualified name and the
         # exception repr to stderr on its own (Python's default "once per
         # location" display of an unfiltered warning), so an unsuppressed run
         # would pass this assertion whether or not the print() line exists --

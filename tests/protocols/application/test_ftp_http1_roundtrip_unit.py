@@ -10,7 +10,7 @@
   one.
 - #1241: text decoded with a detected charset was encoded back as UTF-8, so
   non-UTF-8 octets in FTP arguments and HTTP/1.* start lines changed on rebuild.
-  The charset is now recorded on the data whenever UTF-8 would not reproduce the
+  The charset is recorded on the data whenever UTF-8 would not reproduce the
   octets.
 
 """

@@ -1,16 +1,16 @@
 # -*- coding: utf-8 -*-
-"""Regression tests for the retired :mod:`pcapkit.vendor.ipx.packet` scrape.
+"""Regression tests for the hand-maintained :mod:`pcapkit.vendor.ipx.packet` registry.
 
 GitHub issue #518, and the same failure on the same article that #507 found for
-the sibling socket crawler. The packet-type crawler used to scrape
+the sibling socket crawler. The packet-type crawler does not scrape
 ``find_all('table', class_='wikitable')[1]`` out of the Wikipedia *Internetwork
-Packet Exchange* article, and both halves of that stopped working. Wikipedia
-answers |requests|_' default User-Agent with HTTP 403, so
-:meth:`pcapkit.vendor.default.Vendor._request` could not fetch the page; and the
+Packet Exchange* article, because neither half of that works. Wikipedia answers
+|requests|_' default User-Agent with HTTP 403, so
+:meth:`pcapkit.vendor.default.Vendor._request` cannot fetch the page; and the
 table was deleted from the article on 2026-08-25 in revision 1371327031, leaving
 the live page with a single ``wikitable`` -- the IPX header format one -- so that
-index raises :exc:`IndexError` even with the fetch fixed. The scrape is retired
-in favour of the hand-maintained :data:`pcapkit.vendor.ipx.packet.DATA`.
+index raises :exc:`IndexError` even with the fetch fixed. The crawler reads the
+hand-maintained :data:`pcapkit.vendor.ipx.packet.DATA` instead.
 
 .. |requests| replace:: ``requests``
 .. _requests: https://requests.readthedocs.io
@@ -24,8 +24,8 @@ it leaked into the member. Keeping it is what makes byte identity achievable, an
 renaming it would break a public member, so the name is pinned rather than
 tidied.
 
-The suite is unit-tier (see :mod:`tests._tiers`): it reads no capture and, by the
-whole point of the change, makes no network call.
+The suite is unit-tier (see :mod:`tests._tiers`): it reads no capture and, by
+design, makes no network call.
 
 """
 from __future__ import annotations
@@ -58,8 +58,8 @@ VENDOR_DEPS = ('requests', 'bs4', 'html5lib')
 #: Whether the crawlers are importable at all. ``html5lib`` ships in the
 #: ``vendor`` extra (:file:`pyproject.toml`), not ``test`` -- so these tests skip
 #: on the ``test`` and ``gate`` jobs of :file:`.github/workflows/unit-tests.yml`,
-#: which never install ``vendor``. ``engine-tests`` ran them for real (#738)
-#: until #849 narrowed each of its cells to that engine's own test files.
+#: which never install ``vendor``. ``engine-tests`` does not run them either:
+#: each of its cells runs only that engine's own test files (#849).
 #: Guarded the same way
 #: :file:`tests/protocols/test_dispatch_registry_unit.py` guards its own optional
 #: runtime dependencies, rather than making the whole unit tier depend on the
@@ -112,7 +112,7 @@ def _normalize(context: 'str') -> 'str':
 
 @unittest.skipUnless(HAS_VENDOR_DEPS, f'vendor extra not installed ({", ".join(VENDOR_DEPS)})')
 class IPXPacketVendorTests(unittest.TestCase):
-    """The hand-maintained registry, and the crawler that no longer crawls."""
+    """The hand-maintained registry, and the crawler that does not crawl."""
 
     if TYPE_CHECKING:
         vendor_module: 'Any'
@@ -155,9 +155,9 @@ class IPXPacketVendorTests(unittest.TestCase):
         return vendor
 
     def test_link_is_none_so_nothing_is_fetched(self) -> None:
-        # The retirement, stated as an assertion: with no LINK,
-        # Vendor._request() short-circuits to Packet.request() and never reaches
-        # requests.get() -- which is what used to take the 403.
+        # No LINK, stated as an assertion: Vendor._request() short-circuits to
+        # Packet.request() and never reaches requests.get(), which is what takes
+        # the 403.
         self.assertIsNone(self.vendor_module.Packet.LINK)
 
     def test_request_makes_no_network_call(self) -> None:

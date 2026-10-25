@@ -11,7 +11,7 @@ segment has to reproduce it:
   ``R``) were written back as zero;
 * #1218 -- the octets after an End of Option List option were dropped, and the
   Data Offset was recomputed from what was left, shrinking the header; they
-  are kept now, but only while the options still end with that option, so an
+  are kept, but only while the options still end with that option, so an
   edited option list still builds;
 * #1219 -- the User Timeout option lost its ``G`` bit, the maker choosing the
   granularity by the size of the value instead; the parsed unit is kept while

@@ -1,45 +1,31 @@
 # -*- coding: utf-8 -*-
-"""MP_CAPABLE's length and its receiver's-key predicate agreed on neither RFC 8684 form.
+"""MP_CAPABLE's length and its receiver's-key predicate agree on every RFC 8684 form.
 
-GitHub issue #567, found while fixing #541 and widened during #565's cross-review.
+GitHub issue #567, with the remaining lengths from #1042.
 
-Two independent defects, and both had to move together
---------------------------------------------------------
+Three sites that must agree
+---------------------------
 
 :rfc:`8684` section 3.1 gives ``MP_CAPABLE`` as **12** octets without the receiver's key and
-**20** octets with it.
+**20** octets with it. Three sites encode that split -- the maker
+``TCP._make_mptcp_capable``, the predicate on ``MPTCPCapable.rkey``, and the reader
+``TCP._read_mptcp_capable`` -- and the tests here guard each against its own wrong constant:
 
-``TCP._make_mptcp_capable`` (``pcapkit/protocols/transport/tcp.py``) wrote
-``length=20 if rkey is None else 32`` -- both branches wrong, and the no-key branch writing
-the value RFC 8684 assigns to the *other* case.
+* a maker writing ``length=20 if rkey is None else 32`` -- both branches wrong, and the no-key
+  branch writing the value RFC 8684 assigns to the *other* case. Measured with all three sites
+  wrong, ``rkey=None`` packed a *20*-octet option carrying no key octets, and an explicit
+  ``rkey`` packed a *32*-octet option whose last 12 octets are entirely unaccounted for by the
+  RFC 8684 figure;
+* a predicate of ``pkt['length'] != 32``, which packs the receiver's key for every length
+  *except* 32, i.e. drops it for exactly the length such a maker uses to signal "key present",
+  while a *correct* 12-octet, key-absent option satisfies ``12 != 32`` too, so the key field
+  would pack, appending 8 phantom octets;
+* a reader accepting only ``schema.length in (20, 32)`` and reading ``rkey`` only at 32, which
+  rejects the correct forms as soon as construction reaches it (#566).
 
-Independently, ``MPTCPCapable.rkey`` (``pcapkit/protocols/schema/transport/tcp.py``) was
-
-.. code-block:: python
-
-    rkey: 'int' = ConditionalField(
-        UInt64Field(),
-        lambda pkt: pkt['length'] != 32,
-    )
-
--- the receiver's key field packed for every length *except* 32, i.e. dropped for exactly the
-length the (also wrong) maker used to signal "key present". Fixing only the maker would have
-made a 20-octet, key-present option fail this predicate (``20 != 32`` is true, so the field
-would misfire as present regardless -- but a *correct* 12-octet, key-absent option satisfies
-``12 != 32`` too, so the key field would still pack, appending 8 phantom octets). Fixing only
-the predicate without the maker would leave both of the maker's wrong lengths (20, 32) on the
-wire. Neither half alone closes the gap; both are fixed in the same change here, to
-``length=12 if rkey is None else 20`` and ``lambda pkt: pkt['length'] == 20`` respectively.
-
-A third site shared the same wrong constants and would otherwise have re-broken this the
-moment #566 let construction reach it: ``TCP._read_mptcp_capable`` rejected anything but
-``schema.length in (20, 32)``, and read ``rkey`` only ``if schema.length == 32``. Fixed
-alongside the other two, to ``(12, 20)`` and ``== 20``.
-
-Filed measurement, pre-fix (all three sites still at the old constants): a maker call with
-``rkey=None`` packed a *20*-octet option (the value RFC 8684 assigns to the with-key form)
-carrying no key octets, and a maker call with an explicit ``rkey`` packed a *32*-octet option
-whose last 12 octets are entirely unaccounted for by the RFC 8684 figure.
+Correcting the maker alone leaves the predicate packing phantom key octets, and correcting the
+predicate alone leaves both of the maker's wrong lengths (20, 32) on the wire, so the sites are
+pinned together.
 
 Coverage
 --------
@@ -51,8 +37,8 @@ module also splices hand-built, spec-correct octets into a full segment via
 ``Schema_TCP(options=..., ...)``, bypassing the makers entirely, so the *parse* direction is
 pinned independently of whatever the *pack* direction happens to produce.
 
-#1042 widened the 12/20 split to all five lengths figure 4 defines -- 4, 12, 20, 22 and 24
--- in :class:`TCPMPTCPCapableAllLengthsUnitTests`.
+:class:`TCPMPTCPCapableAllLengthsUnitTests` covers all five lengths figure 4 defines -- 4,
+12, 20, 22 and 24 (#1042).
 
 """
 from __future__ import annotations
@@ -137,9 +123,9 @@ class TCPMPTCPCapableMakerUnitTests(unittest.TestCase):
     def test_no_key_packs_twelve_octets(self) -> None:
         """``rkey=None`` packs 12 octets: RFC 8684 figure 4, the key-absent form.
 
-        Pre-fix this packed **20** octets (the with-key value) and carried no key octets at
-        all -- the maker's own ``length=20 if rkey is None else 32`` read backwards relative
-        to RFC 8684.
+        Guards against packing **20** octets (the with-key value) with no key octets at all,
+        as a maker writing ``length=20 if rkey is None else 32`` -- backwards relative to RFC
+        8684 -- does.
 
         """
         packed = make_capable(skey=0x0102030405060708, rkey=None)
@@ -151,10 +137,10 @@ class TCPMPTCPCapableMakerUnitTests(unittest.TestCase):
     def test_with_key_packs_twenty_octets(self) -> None:
         """An explicit ``rkey`` packs 20 octets: RFC 8684 figure 4, the key-present form.
 
-        Pre-fix this packed **32** octets, the last 12 of which are unaccounted for by RFC
-        8684 -- the maker wrote ``length=32``, and pre-#567's ``rkey`` predicate
-        (``pkt['length'] != 32``) then *dropped* the key for this exact length, so those 12
-        extra octets were not even the key it claimed to carry.
+        Guards against packing **32** octets, the last 12 of which are unaccounted for by RFC
+        8684: a maker writing ``length=32`` beside an ``rkey`` predicate of
+        ``pkt['length'] != 32`` *drops* the key for this exact length, so those 12 extra
+        octets would not even be the key it claims to carry (#567).
 
         """
         packed = make_capable(skey=0x0102030405060708, rkey=0x1112131415161718)
@@ -195,9 +181,9 @@ class TCPMPTCPCapableParseUnitTests(unittest.TestCase):
     def test_no_key_spec_octets_parse_correctly(self) -> None:
         """RFC 8684 figure 4's 12-octet form parses, with ``rkey`` absent.
 
-        Pre-#566/#567 this raised ``ProtocolError: TCP: [OptNo 30] invalid format`` from
-        ``_read_mptcp_capable``'s ``schema.length not in (20, 32)`` guard -- 12 satisfied
-        neither of the two (both wrong) accepted values.
+        Guards against ``ProtocolError: TCP: [OptNo 30] invalid format`` from a
+        ``schema.length not in (20, 32)`` guard in ``_read_mptcp_capable`` (#566, #567) --
+        12 satisfies neither of those two (both wrong) accepted values.
 
         """
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
@@ -218,9 +204,9 @@ class TCPMPTCPCapableParseUnitTests(unittest.TestCase):
     def test_with_key_spec_octets_parse_correctly(self) -> None:
         """RFC 8684 figure 4's 20-octet form parses, with ``rkey`` present.
 
-        Pre-#566/#567, ``schema.length not in (20, 32)`` did accept 20 -- but
-        ``rkey=schema.rkey if schema.length == 32 else None`` then discarded it anyway, since
-        20 is not 32, so the receiver's key silently vanished rather than being reported.
+        Guards against the receiver's key silently vanishing: a ``schema.length not in (20,
+        32)`` guard accepts 20, but ``rkey=schema.rkey if schema.length == 32 else None``
+        then discards the key anyway, since 20 is not 32 (#566, #567).
 
         """
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
@@ -327,10 +313,10 @@ ALL_LENGTHS = {
 class TCPMPTCPCapableAllLengthsUnitTests(unittest.TestCase):
     """All five MP_CAPABLE lengths of :rfc:`8684` section 3.1 parse and round-trip (#1042).
 
-    Before #1042, ``_read_mptcp_capable`` accepted only ``length in (12, 20)``, so the SYN
-    form (4) and both first-data-ACK forms (22, 24) raised ``ProtocolError: TCP: [OptNo 30]
-    invalid format``; the schema also read ``skey`` unconditionally and had no Data-Level
-    Length or Checksum field.
+    Guards against ``_read_mptcp_capable`` accepting only ``length in (12, 20)``, under which
+    the SYN form (4) and both first-data-ACK forms (22, 24) raise ``ProtocolError: TCP: [OptNo
+    30] invalid format``, and against a schema that reads ``skey`` unconditionally and has no
+    Data-Level Length or Checksum field.
 
     """
 

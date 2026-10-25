@@ -57,7 +57,7 @@ class OSPFCryptographicAuthenticationUnitTests(unittest.TestCase):
     def test_ospf_is_grouped_with_the_application_layer(self) -> None:
         # The groups in these __all__ literals are runs of names: OSPF has to sit
         # inside the application run, which FTP opens and HTTPv2 closes, and not
-        # between the link-layer names it used to share a run with.
+        # among the link-layer names.
         for package in self._packages():
             names = package.__all__
             application = names[names.index('FTP'):names.index('HTTPv2_ContinuationFrame') + 1]

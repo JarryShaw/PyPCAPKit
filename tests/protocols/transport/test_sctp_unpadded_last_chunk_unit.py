@@ -1,10 +1,10 @@
 """#1474 -- a last SCTP chunk captured without (all of) its padding rebuilds as captured.
 
 :rfc:`9260#section-3.2` pads every chunk to four octets, but the last chunk of a
-packet may arrive with fewer pad octets, or none. Parsing already read what was
-there; the rebuild zero-filled the rest, so 17 octets in gave 20 out. The chunk's
-``padding`` now records the octets as captured whenever they are short, and the
-rebuild writes exactly those.
+packet may arrive with fewer pad octets, or none. Parsing reads what is there;
+guards against the rebuild zero-filling the rest, under which 17 octets in give
+20 out. The chunk's ``padding`` records the octets as captured whenever they are
+short, and the rebuild writes exactly those.
 
 """
 from __future__ import annotations

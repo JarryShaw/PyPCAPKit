@@ -4,20 +4,19 @@ line may re-enter ``_missing_`` for the same value.
 
 GitHub issue #866. A vendor crawler renders the body of the generated
 registry's :meth:`~enum.Enum._missing_` as a list of source lines, held in the
-local ``miss``. Two crawlers --
-:mod:`pcapkit.vendor.pcapng.record_type` and
-:mod:`pcapkit.vendor.pcapng.secrets_type` -- emitted a **two**-line body whose
-first line called :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`
-without returning it and whose second line was ``return cls(value)``::
+local ``miss``. Guards against a crawler emitting a **two**-line body whose first
+line calls :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`
+without returning it and whose second line is ``return cls(value)``::
 
     cls._unregistered_member(value, 'Unassigned')
     return cls(value)
 
-That shape was harmless while the first line was ``extend_enum(...)``, which
-*registers* the member, so the following ``cls(value)`` found it and returned.
-#861 replaced the ``extend_enum`` call with ``_unregistered_member``, which
-deliberately does **not** register -- so ``cls(value)`` missed again, re-entered
-``_missing_``, and recursed until ``RecursionError``.
+That shape is harmless only while the first line is ``extend_enum(...)``, which
+*registers* the member, so the following ``cls(value)`` finds it and returns.
+``_unregistered_member`` deliberately does **not** register (#861) -- so
+``cls(value)`` misses again, re-enters ``_missing_``, and recurses until
+``RecursionError``. #866 found :mod:`pcapkit.vendor.pcapng.record_type` and
+:mod:`pcapkit.vendor.pcapng.secrets_type` emitting it.
 
 The invariant is deliberately not "every emitted line returns": the base
 crawler itself emits legitimate non-returning lines for a range-guarded body.
@@ -37,36 +36,22 @@ something valid, so the guard below checks only that a hard-coded body
 *ends* in a ``return`` and that no emitted line re-enters ``_missing_`` for
 the same value -- not that every line returns.
 
-#861 only *half*-corrected the two generated files, and never touched the two
-crawlers. It replaced the non-returning ``extend_enum(...)`` call with a
-returning ``_unregistered_member(...)`` call, but the ``return cls(value)``
-line that followed was left in place, now unreachable dead code::
-
-    -        extend_enum(cls, 'Unassigned_0x%08x' % value, value)
-    +        return cls._unregistered_member(value, 'Unassigned')
-             return cls(value)          # <- still there, now unreachable
-
-That is why #861's own CI was green: the first ``return`` short-circuits, so
-the dead second line never ran. (A statement following a ``return`` in
-generated output is itself worth noticing on its own -- it means the
-generator that will overwrite the file disagrees with what the file
-currently does.) Because the crawlers were never touched, a later
-regeneration -- ``e58618bdf`` ("Bumped version to 1.5.0b5") -- reproduced the
-original two-line body from the stale crawlers and reintroduced the
-recursion, turning **12** tests red across **three** files:
-:file:`tests/const/test_const_enum_lookup.py`,
-:file:`tests/const/test_const_enum_no_mint.py`
-(``RulingConversionDoesNotMintTests.test_converted_value_does_not_mint`` and
-``test_repeated_lookup_does_not_grow_members``, two registries each), and
-:file:`tests/protocols/misc/test_pcapng_unit.py` (7 of the 12) -- all twelve
+A statement following a ``return`` in generated output is worth noticing on
+its own: it means the generator that will overwrite the file disagrees with
+what the file currently does. A generated file whose first line returns hides a
+dead ``return cls(value)`` behind it, so its own tests stay green, while a
+regeneration from the crawler reproduces the recursing two-line body -- which
+is how #866 turned :file:`tests/const/test_const_enum_lookup.py`,
+:file:`tests/const/test_const_enum_no_mint.py` and
+:file:`tests/protocols/misc/test_pcapng_unit.py` red, all with
 ``RecursionError``.
 
 The guard here is deliberately at the **crawler** layer rather than the
-generated one. ``tests/const/test_const_enum_lookup.py`` already exercises every
-committed registry and is what caught the regression; what nothing covered was
-the source a crawler *emits*, so a fix to a generated file could silently
-disagree with the generator that will overwrite it. This module needs no network
-and no regeneration: it reads the crawlers' own ASTs.
+generated one. ``tests/const/test_const_enum_lookup.py`` exercises every
+committed registry and catches the regression once a file is regenerated; the
+source a crawler *emits* needs its own check, so a fix to a generated file
+cannot silently disagree with the generator that will overwrite it. This module
+needs no network and no regeneration: it reads the crawlers' own ASTs.
 
 """
 from __future__ import annotations
@@ -163,7 +148,7 @@ class VendorMissingBodyTests(unittest.TestCase):
 
         This test does **not** catch #866 on its own: #866's body ended on
         ``return cls(value)``, which does return, so it passes this check
-        both before and after the fix. It is
+        either way. It is
         :meth:`test_no_crawler_emits_a_self_recursive_lookup` that catches
         the cycle -- this test only guards against a body that does not
         return at all.
@@ -197,8 +182,8 @@ class VendorMissingBodyTests(unittest.TestCase):
     def test_the_two_regressed_crawlers_emit_a_single_returning_line(self) -> None:
         """The specific pair from #866, pinned by name.
 
-        Kept alongside the general sweeps because a regression here is the one
-        that reached ``main``, and a named test says which file to look at
+        Kept alongside the general sweeps because these are the crawlers #866
+        was filed against, and a named test says which file to look at
         without having to read a subTest label.
 
         """

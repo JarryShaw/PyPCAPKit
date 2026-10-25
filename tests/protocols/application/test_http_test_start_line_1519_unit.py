@@ -3,11 +3,10 @@
 
 The predicate :meth:`HTTP._guess_version
 <pcapkit.protocols.application.http.HTTP._guess_version>` uses to recognise an
-HTTP/1.* start line was ``httpv1._test_start_line``, imported lazily by the
-dispatcher in ``http.py``. It is now
-:func:`~pcapkit.protocols.application.http.test_start_line`, and the patterns it
+HTTP/1.* start line is :func:`~pcapkit.protocols.application.http.test_start_line`,
+not a private ``httpv1._test_start_line`` imported lazily, and the patterns it
 shares with the HTTP/1.* parser -- ``_RE_METHOD``, ``_RE_VERSION``,
-``_RE_STATUS`` and ``_HTTP2_PREFACE_HEADER`` -- moved with it, so ``httpv1.py``
+``_RE_STATUS`` and ``_HTTP2_PREFACE_HEADER`` -- live beside it, so ``httpv1.py``
 imports them from ``http.py`` rather than keeping a copy of its own.
 
 The predicate is imported inside each test, never at module level: pytest

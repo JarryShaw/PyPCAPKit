@@ -1,27 +1,23 @@
-"""#649 -- the four MPTCP error messages that carried a doubled separator.
+"""#649 -- the MPTCP error messages carry a single separator.
 
-Four :exc:`~pcapkit.utilities.exceptions.ProtocolError` messages in the MPTCP
-option handlers were spelled ``f'{self.alias}: : [OptNo …]'``, so they rendered
+Guards against :exc:`~pcapkit.utilities.exceptions.ProtocolError` messages in
+the MPTCP option handlers spelled ``f'{self.alias}: : [OptNo …]'``, which render
 with an empty field between the protocol alias and the option number::
 
     TCP: : [OptNo 30] 1: invalid flags combination
 
 The defect is presentational -- the exception type, the option number and the
-subtype were always right, and nothing downstream parses these strings -- but it
-is the string a user sees when an MP_JOIN or DSS option is rejected, and an empty
-field reads as a value that failed to interpolate.
+subtype are right either way, and nothing downstream parses these strings -- but
+it is the string a user sees when an MP_JOIN or DSS option is rejected, and an
+empty field reads as a value that failed to interpolate.
 
-The correct form is not a matter of taste. When #649 was fixed, the same file
-spelled the same prefix without the doubling in 28 other places, all
-``f'{self.alias}: [OptNo {schema.kind}] …'``, so the four were outliers against a
-house form in their own module; the fix moved them into it and the count became
-32. Two sibling test modules already quoted the single-separator form in their
-docstrings, which is further evidence of what was intended.
+The correct form is not a matter of taste: every other message in the same file
+spells the prefix ``f'{self.alias}: [OptNo {schema.kind}] …'``, so a doubled one
+is an outlier against a house form in its own module.
 
-Every message here is asserted **in full** rather than by substring. That is the
-point of the change: a substring assertion on ``'invalid flags combination'``
-passes both before and after it, so the two places that already exercise these
-messages could not have caught this, and needed no edit --
+Every message here is asserted **in full** rather than by substring. A substring
+assertion on ``'invalid flags combination'`` matches both forms, so the two
+places that also exercise these messages cannot catch the doubling --
 
 * ``TCPMPTCPJoinFlagOrderingUnitTests.test_neither_syn_nor_ack_raises_protocol_error``
   in ``test_tcp_mptcp_join_flag_ordering_unit.py``, which asserts
@@ -31,12 +27,6 @@ messages could not have caught this, and needed no edit --
   in ``test_tcp_udp_unit.py``, which asserts
   ``assertRaisesRegex(ProtocolError, 'invalid flags combination')`` against
   ``_read_mptcp_join``.
-
-Two, not one: both match a substring that straddles the defect, and both still
-pass unchanged. Neither module is touched by this change.
-
-All four lines arrived together in ``3bba8a1748`` (2023-04-10) and were untouched
-until #649.
 
 """
 from __future__ import annotations
@@ -79,8 +69,8 @@ JOIN_MESSAGE = 'TCP: [OptNo 30] 1: invalid flags combination'
 #: :attr:`MPTCPOption.DSS <pcapkit.const.tcp.mp_tcp_option.MPTCPOption.DSS>`.
 DSS_MESSAGE = 'TCP: [OptNo 30] 2: missing required fields'
 
-#: What the four messages read before the fix, kept as a literal so each test can
-#: assert it is gone rather than only that the new form is present.
+#: The doubled prefix the defect renders, kept as a literal so each test can
+#: assert its absence rather than only the presence of the correct form.
 DOUBLED_PREFIX = 'TCP: : '
 
 
@@ -180,7 +170,7 @@ class TCPMPTCPErrorMessageUnitTests(unittest.TestCase):
         """Both of ``_make_mptcp_dss``'s guards, which are two lines, not one.
 
         The two carry the identical message, so asserting the string once would
-        not show that both were fixed. They are reached separately instead:
+        not show that both are correct. They are reached separately instead:
 
         * ``dsn`` given and ``ssn``/``dl_len``/``checksum`` absent -- the
           data-level fields a DSN requires are missing.
@@ -206,12 +196,10 @@ class TCPMPTCPErrorMessageUnitTests(unittest.TestCase):
     def test_no_doubled_separator_survives_anywhere_in_the_module(self) -> None:
         """The source-level sweep, so a fifth site cannot be added unnoticed.
 
-        The four were found by grepping for the pattern rather than by reading the
-        one that was reported, and three of the four came from that grep. A test
-        that pins only the four strings would not notice a fifth appearing, so
-        the absence is asserted over the whole file -- and the single-separator
-        count is asserted too, since deleting the four lines outright would
-        satisfy an absence check on its own.
+        A test that pins only the known strings would not notice another
+        appearing, so the absence is asserted over the whole file -- and the
+        single-separator count is asserted too, since deleting the offending
+        lines outright would satisfy an absence check on its own.
 
         """
         import pcapkit.protocols.transport.tcp as tcp_module
@@ -221,21 +209,20 @@ class TCPMPTCPErrorMessageUnitTests(unittest.TestCase):
         self.assertNotIn("f'{self.alias}: : ", source)
         self.assertEqual(source.count("f'{self.alias}: : "), 0)
 
-        # 28 before the fix, 32 after: the four joined the house form rather than
-        # being removed. A guard against "fixed" by deletion.
+        # The exact count of the single-separator form: the #649 messages join
+        # the house form rather than being removed. A guard against "fixed" by
+        # deletion.
         #
         # NOTE TO A FUTURE EDITOR: this count is deliberately exact, and it is
-        # therefore a tripwire on the whole module rather than on the four lines
+        # therefore a tripwire on the whole module rather than on the lines
         # #649 was about. Adding or removing *any* `f'{self.alias}: [OptNo …]'`
-        # message anywhere in this ~3000-line file will fail this assertion for a
-        # reason that has nothing to do with the doubled separator. That is
-        # intended -- the alternative, asserting only the absence, passes if the
-        # four lines are deleted outright -- so when you legitimately change the
-        # number of such messages, update the number here rather than loosening
-        # the assertion. The one above it, on the doubled form, is the one that
-        # must stay at 0 forever. 33 since #1042 added the MP_CAPABLE maker's,
-        # 34 since #1215 added the DSS maker's 4-octet width check, 35 since
-        # #1217 added the ADD_ADDR maker's HMAC check.
+        # message anywhere in the file will fail this assertion for a reason
+        # that has nothing to do with the doubled separator. That is intended
+        # -- the alternative, asserting only the absence, passes if the
+        # offending lines are deleted outright -- so when you legitimately
+        # change the number of such messages, update the number here rather
+        # than loosening the assertion. The one above it, on the doubled form,
+        # is the one that must stay at 0 forever.
         self.assertEqual(source.count("f'{self.alias}: [OptNo"), 35)
 
 

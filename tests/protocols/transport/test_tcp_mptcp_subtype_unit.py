@@ -1,17 +1,13 @@
 # -*- coding: utf-8 -*-
 """``MPTCP.subtype`` is set for a schema built in memory, not only one parsed from bytes.
 
-GitHub issue #566, found while fixing #541 -- the same defect the ``EXPECTED_FAILURES``
-table in :mod:`tests.protocols.test_option_roundtrip_unit` recorded for
-``tcp-mptcp/MP_CAPABLE``, ``tcp-mptcp/ADD_ADDR``, ``tcp-mptcp/REMOVE_ADDR``,
-``tcp-mptcp/MP_PRIO``, ``tcp-mptcp/DSS`` and ``tcp-mptcp/MP_FAIL`` until this fix, each with
-a fragment of the form ``"'MPTCPCapable' object has no attribute 'subtype'"``.
+GitHub issue #566.
 
-Root cause
-----------
+The construction path
+---------------------
 
 :class:`~pcapkit.protocols.schema.transport.tcp.MPTCP`, the base class every Multipath TCP
-subtype schema inherits, declared ``subtype`` only under :data:`~typing.TYPE_CHECKING`:
+subtype schema inherits, declares ``subtype`` only under :data:`~typing.TYPE_CHECKING`:
 
 .. code-block:: python
 
@@ -19,50 +15,45 @@ subtype schema inherits, declared ``subtype`` only under :data:`~typing.TYPE_CHE
         #: MPTCP subtype.
         subtype: 'Enum_MPTCPOption'
 
-so it was an annotation for a type checker, never a real attribute any construction path
-set. The only code that ever assigned ``schema.subtype`` was
-:meth:`_MPTCP.post_process <pcapkit.protocols.schema.transport.tcp._MPTCP.post_process>`,
-which runs once per option while parsing real bytes off the wire. Building an option through
-:class:`~pcapkit.protocols.transport.tcp.TCP`'s convenience constructor --
+so it is an annotation for a type checker, not a field any schema packs.
+:meth:`_MPTCP.post_process <pcapkit.protocols.schema.transport.tcp._MPTCP.post_process>`
+assigns ``schema.subtype`` once per option while parsing real bytes off the wire. Building
+an option through :class:`~pcapkit.protocols.transport.tcp.TCP`'s convenience constructor --
 ``TCP(options=[(Enum_Option.Multipath_TCP, {'subtype': ..., **kwargs})], ...)`` -- never
 unpacks anything: the dispatcher (``TCP._make_mode_mp``) calls the matching ``_make_mptcp_*``
 maker to build the schema in memory and then hands that same schema straight to the matching
 ``_read_mptcp_*`` to build the :class:`~pcapkit.protocols.data.transport.tcp.MPTCP` data
-model -- and every one of those eleven ``_read_mptcp_*`` methods reads ``schema.subtype``.
-Filed measurement, pre-fix: ``TCP(options=[(Enum_Option.Multipath_TCP, {'subtype':
-Enum_MPTCPOption.MP_FAIL, 'dsn': 7})], ...)`` raised
-``AttributeError: 'MPTCPFallback' object has no attribute 'subtype'``.
+model -- and every ``_read_mptcp_*`` method reads ``schema.subtype``. So
+:meth:`TCP._make_mode_mp <pcapkit.protocols.transport.tcp.TCP._make_mode_mp>`, the single
+dispatcher every ``_make_mptcp_*`` maker returns through, sets ``schema.subtype =
+subtype_val`` right after building the schema -- the same assignment
+:meth:`_MPTCP.post_process` makes for a real unpack, made unconditionally. Without it,
+``TCP(options=[(Enum_Option.Multipath_TCP, {'subtype': Enum_MPTCPOption.MP_FAIL, 'dsn':
+7})], ...)`` raises ``AttributeError: 'MPTCPFallback' object has no attribute 'subtype'``.
 
-Why a real field was not the fix
----------------------------------
+Why a real field is not the answer
+-----------------------------------
 
-#541 fixed the identical shape of problem for ``kind``/``length`` by declaring them as real
-fields on ``MPTCP``, and the obvious next step is to do the same for ``subtype``. That would
-be wrong here, and the difference is worth recording since this is the third
-``TYPE_CHECKING``-only attribute this one class has had (``kind``, ``length`` in #541,
-``subtype`` here) and a reader deserves to know the pattern was considered as a whole rather
-than patched a third time by reflex.
+``kind`` and ``length`` are real fields on ``MPTCP`` (#541), and the obvious next step is to
+do the same for ``subtype``. That would be wrong here, and the difference is worth recording
+so that a reader knows the pattern was considered as a whole rather than patched by reflex.
 
 ``kind`` and ``length`` are each the *sole* source of their own octet -- nothing else in any
-subtype schema packs them, so a real field was the only way to get them onto the wire at all.
-``subtype`` is not like that: every concrete subclass already encodes it as 4 bits of its own
+subtype schema packs them, so a real field is the only way to get them onto the wire at all.
+``subtype`` is not like that: every concrete subclass encodes it as 4 bits of its own
 ``test`` :class:`~pcapkit.corekit.fields.strings.BitField` (e.g.
 ``MPTCPCapable.test['subtype']``), which is what the wire format actually carries. Declaring
 a second, independent ``Field`` for the same 4 bits would either double-pack them under two
 names, or need a "derive this from another field, do not pack it yourself" kind of field --
 which nothing in :mod:`pcapkit.corekit.fields` provides (every ``FieldBase`` subclass either
 contributes its own bytes or selects among nested schemas; none merely mirrors a sibling
-field's decoded value into a second attribute). So ``MPTCP.subtype`` stays an annotation, and
-the fix is on the *construction* path instead: :meth:`TCP._make_mode_mp
-<pcapkit.protocols.transport.tcp.TCP._make_mode_mp>`, the single dispatcher every
-``_make_mptcp_*`` maker returns through, now sets ``schema.subtype = subtype_val`` right after
-building the schema -- the same assignment :meth:`_MPTCP.post_process` already makes for a
-real unpack, just made unconditionally.
+field's decoded value into a second attribute). So ``MPTCP.subtype`` stays an annotation,
+populated on the *construction* path.
 
 That leaves no other ``TYPE_CHECKING``-only *data* attribute on ``MPTCP`` itself: the class
-body has exactly ``kind``, ``length`` (both real fields since #541) and ``subtype`` (fixed
-here by the construction path). The ``if TYPE_CHECKING: def __init__(...): ...`` blocks inside
-the concrete subclasses below it are ordinary typed-signature stubs for the ``__init__`` that
+body has ``kind`` and ``length`` (real fields) and ``subtype`` (set by the construction
+path). The ``if TYPE_CHECKING: def __init__(...): ...`` blocks inside the concrete subclasses
+below it are ordinary typed-signature stubs for the ``__init__`` that
 :class:`~pcapkit.protocols.schema.schema.Schema` synthesises at runtime, not latent fields, so
 they are not instances of this pattern.
 
@@ -71,25 +62,16 @@ Coverage
 
 Every case here goes through the *public* ``TCP`` convenience constructor, not
 ``_make_mptcp_*`` directly, because that in-memory, no-byte-round-trip path is exactly what
-exposed the defect.
+exposes the defect.
 
-``MP_JOIN`` used to be left out, because it failed independently with ``AttributeError:
-'TCP' object has no attribute '_flags'`` -- ``_make_mptcp_join`` reads ``self._flags`` to
-pick between the three layouts of :rfc:`8684` section 3.2, and ``TCP.make`` assigned that
-attribute only *after* it had built the options. That is a statement-ordering defect, not
-this one, and #587 has since fixed it by hoisting the flag resolution above the option
-build; the ``subtype`` assertion this module exists for is made for MP_JOIN below, once per
-layout, since which layout gets built is exactly what the flags decide. The ordering defect
-itself, the three layouts' octets, and the silent wrong-layout outcome that ruled out
-fixing it with a zero-valued default are covered in
+``MP_JOIN`` is asserted once per layout, since ``_make_mptcp_join`` reads ``self._flags`` to
+pick between the three layouts of :rfc:`8684` section 3.2, and which layout gets built is
+exactly what the flags decide. The flag ordering itself (#587), the three layouts' octets,
+and the silent wrong-layout outcome that rules out a zero-valued default are covered in
 :mod:`tests.protocols.transport.test_tcp_mptcp_join_flag_ordering_unit`.
 
-``MP_FASTCLOSE`` *is* covered, as of #576. When this module was written it was left out: fixing
-``subtype`` got its construction past the ``AttributeError`` and into a second, independent
-defect -- its declared length agreed with neither its own schema nor its own parser -- so the
-case here could only assert the *shape of the exception* that defect raised. #576 has since
-corrected all three sites, so the assertion is made directly. The length arithmetic itself is
-covered per option in
+``MP_FASTCLOSE`` is asserted directly as well. Its length arithmetic (#576), like every
+option's, is covered per option in
 :mod:`tests.protocols.transport.test_tcp_mptcp_length_arithmetic_unit`; what stays here is
 only the ``subtype`` question this module is about.
 
@@ -160,10 +142,10 @@ def build_mptcp_option(subtype: 'object', *, header: 'Optional[dict[str, object]
 class TCPMPTCPSubtypeUnitTests(unittest.TestCase):
     """Every constructible MPTCP subtype round-trips ``.subtype`` through ``TCP()``.
 
-    Pre-fix, every one of these raised ``AttributeError: '<schema class>' object has no
-    attribute 'subtype'`` -- construction never got as far as returning a
-    :class:`~pcapkit.protocols.transport.tcp.TCP` instance at all, so there is nothing to
-    assert on the resulting data model until the fix lands.
+    Without the construction path setting ``subtype``, every one of these raises
+    ``AttributeError: '<schema class>' object has no attribute 'subtype'`` -- construction
+    never gets as far as returning a :class:`~pcapkit.protocols.transport.tcp.TCP` instance
+    at all, leaving no data model to assert on.
 
     """
 
@@ -235,12 +217,10 @@ class TCPMPTCPSubtypeUnitTests(unittest.TestCase):
     def test_mp_join_subtype_round_trips_in_all_three_layouts(self) -> None:
         """``MP_JOIN`` built through ``TCP()`` reports its own subtype, whichever form.
 
-        This module used to exclude MP_JOIN altogether: ``_make_mptcp_join`` reads
-        ``self._flags`` to choose between the three layouts of :rfc:`8684` section 3.2,
-        and ``TCP.make`` assigned that attribute only after it had already built the
-        options, so every one of these raised ``AttributeError: 'TCP' object has no
-        attribute '_flags'`` before ``subtype`` could come into it. #587 hoists the flag
-        resolution above the option build.
+        ``_make_mptcp_join`` reads ``self._flags`` to choose between the three layouts of
+        :rfc:`8684` section 3.2, so ``TCP.make`` resolves the flags before it builds the
+        options (#587); otherwise every one of these would raise ``AttributeError: 'TCP'
+        object has no attribute '_flags'`` before ``subtype`` could come into it.
 
         All three forms are exercised rather than just the SYN one ``TCP_BASE`` selects,
         because the flags are what pick the layout: a regression that reached only one
@@ -273,17 +253,10 @@ class TCPMPTCPSubtypeUnitTests(unittest.TestCase):
     def test_mp_fastclose_builds_and_reports_its_subtype(self) -> None:
         """``MP_FASTCLOSE`` builds through ``TCP()`` and reports its ``subtype``.
 
-        This was ``test_mp_fastclose_still_fails_but_no_longer_on_subtype`` when #579
-        landed: it pinned that MP_FASTCLOSE no longer raised the ``subtype``
-        ``AttributeError`` that #566 was about, while still raising ``ProtocolError:
-        TCP: [OptNo 30] invalid format`` from the *other* defect it named -- the
-        length disagreement filed as #576.
-
-        #576 has since fixed that disagreement at all three sites (the parser's guard,
-        which required 16; the schema, which packed 11; and the maker, which already
-        declared the RFC's 12), so the construction now succeeds and the assertion this
-        module exists for -- that ``subtype`` survives construction -- can be made
-        directly instead of through the shape of an exception.
+        MP_FASTCLOSE's maker, schema and parser agree on the RFC's 12 octets (#576), so the
+        construction succeeds and the assertion this module exists for -- that
+        ``subtype`` survives construction -- is made directly rather than through the
+        shape of an exception.
 
         """
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption

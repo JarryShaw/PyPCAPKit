@@ -58,8 +58,8 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 #: :mod:`tests.vendor.test_user_agent_unit` for why ``requests`` alone is not
 #: enough. ``html5lib`` ships in the ``vendor`` extra (:file:`pyproject.toml`),
 #: not ``test`` -- so these skip on the ``test`` and ``gate`` jobs, which do not
-#: install it. ``engine-tests`` ran them for real (#738) until #849 narrowed
-#: each of its cells to that engine's own test files.
+#: install it. ``engine-tests`` does not run them either: each of its cells
+#: runs only that engine's own test files (#849).
 VENDOR_DEPS = ('requests', 'bs4', 'html5lib')
 
 #: Whether the crawlers are importable at all.
@@ -157,8 +157,8 @@ class FTPReturnCodeEmptyRowTests(unittest.TestCase):
         self.assertEqual(rows[-1].get('class'), ['mw-empty-elt'])
 
     def test_process_skips_the_cell_less_row_instead_of_raising(self) -> None:
-        # The regression itself. Before the guard this raised
-        # `IndexError: list index out of range` at `line[0]`.
+        # The regression itself: without the guard, `line[0]` on the cell-less
+        # row raises `IndexError: list index out of range`.
         vendor = self._vendor()
         enum = vendor.process(vendor.request(REGISTRY_HTML))
 
@@ -196,7 +196,7 @@ class FTPReturnCodeEmptyRowTests(unittest.TestCase):
 
         self.assertIn("CODE_110: 'ReturnCode' = 110", context)
         self.assertIn("CODE_200: 'ReturnCode' = 200", context)
-        # GitHub issue #860: ReturnCode now mixes in EnumRegistry.
+        # GitHub issue #860: ReturnCode mixes in EnumRegistry.
         self.assertIn('class ReturnCode(EnumRegistry, IntEnum):', context)
 
 

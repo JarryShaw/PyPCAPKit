@@ -1,60 +1,54 @@
 # -*- coding: utf-8 -*-
 """Regression tests for GitHub issue #925.
 
-:mod:`pcapkit.vendor.ipv6.extension_header` used to crawl the *Protocol
-Numbers* registry (``protocol-numbers/protocol-numbers-1.csv``), filtered on
-its ``IPv6 Extension Header`` column -- a derived signal, not the registry
-:rfc:`8200#section-4` names as authoritative for this enumeration. That
-registry disagrees with the authoritative one on header 147 (``BIT-EMU``):
-the Protocol Numbers registry flags it as an IPv6 extension header (citing
-:rfc:`9801`), while IANA's *IPv6 Extension Header Types* registry
-(``ipv6-parameters/extension-header.csv``) omits 147 entirely. The fix moves
-:attr:`~pcapkit.vendor.ipv6.extension_header.ExtensionHeader.LINK` to the
-authoritative registry and rewrites the parser for its 3-column shape
-(``Protocol Number,Description,Reference`` -- no ``IPv6 Extension Header``
-flag to filter on).
+:mod:`pcapkit.vendor.ipv6.extension_header` crawls IANA's *IPv6 Extension
+Header Types* registry (``ipv6-parameters/extension-header.csv``), the registry
+:rfc:`8200#section-4` names as authoritative for this enumeration. Guards
+against crawling the *Protocol Numbers* registry
+(``protocol-numbers/protocol-numbers-1.csv``) filtered on its ``IPv6 Extension
+Header`` column instead -- a derived signal that disagrees with the
+authoritative registry on header 147 (``BIT-EMU``): the Protocol Numbers
+registry flags it as an IPv6 extension header (citing :rfc:`9801`), while the
+authoritative registry omits 147 entirely.
+:attr:`~pcapkit.vendor.ipv6.extension_header.ExtensionHeader.LINK` names the
+authoritative registry, and the parser reads its 3-column shape (``Protocol
+Number,Description,Reference`` -- no ``IPv6 Extension Header`` flag to filter
+on).
 
 That registry's ``Description`` column is verbose (``Routing Header for
-IPv6``), unlike the old registry's short ``Keyword`` column (``IPv6-Route``)
-that :meth:`~pcapkit.vendor.ipv6.extension_header.ExtensionHeader.process`
-used to derive most of the current member names from. Naively deriving names
-from the new column would silently rename eight of the eleven surviving
-members -- a breaking change far worse than the defect being fixed -- so the
-crawler now carries an explicit
-:attr:`~pcapkit.vendor.ipv6.extension_header.ExtensionHeader.NAMES` override
-for exactly those eight, and :data:`EXPECTED_MEMBERS` below pins that no name
-moves.
+IPv6``), unlike the Protocol Numbers registry's short ``Keyword`` column
+(``IPv6-Route``) that most of the member names come from. Naively deriving names
+from the ``Description`` column would silently rename most of the members -- a
+breaking change far worse than the defect -- so the crawler carries an explicit
+:attr:`~pcapkit.vendor.ipv6.extension_header.ExtensionHeader.NAMES` override for
+exactly those, and :data:`EXPECTED_MEMBERS` below pins that no name moves.
 
 This suite feeds the fixture CSV text directly to the crawler's own
 :meth:`~pcapkit.vendor.default.Vendor.request`, :meth:`count`, :meth:`process`
 and :meth:`context` -- the same pipeline :meth:`~pcapkit.vendor.default.
-Vendor.__init__` would drive from a live fetch -- so the fix is exercised
+Vendor.__init__` would drive from a live fetch -- so the crawler is exercised
 without ever calling :mod:`requests`. Per the standing rule on this package,
 no test here (or anywhere) invokes the crawler against the network.
 
-**The const half of the fix is now applied too.** Removing ``BIT_EMU`` looked
-blocked at first: :meth:`pcapkit.protocols.internet.ipv6.IPv6
+**The const side drops ``BIT_EMU`` as well.** :meth:`pcapkit.protocols.internet.ipv6.IPv6
 ._decode_next_layer`'s walk resolves ``Enum_ExtensionHeader(proto)`` at the
-top of its loop and used to rely on that succeeding for 147. But that test's
-own docstring says 147 was only ever the *example* -- ``"253``/``254`` are
-the same code path (also unregistered, also resolve to ``Raw``)"`` -- and 253
-*is* in the authoritative registry where 147 never was, so
+top of its loop, and 147 was only ever the *example* of an unregistered,
+``Raw``-resolving code -- ``"253``/``254`` are the same code path (also
+unregistered, also resolve to ``Raw``)"`` -- so
 ``tests.protocols.internet.test_ipv6_ext_unit
 .IPv6ExtUnitTests.test_unimplemented_terminal_code_stops_the_walk_not_the_packet``
-now exercises the identical code path on 253 instead, which frees
-:mod:`pcapkit.const.ipv6.extension_header` to drop ``BIT_EMU`` for real.
+exercises that code path on 253, which *is* in the authoritative registry.
 :mod:`tests.const.test_const_ipv6_extension_header_925_unit` pins that side;
 :func:`test_context_matches_the_committed_const_file_byte_for_byte` below is
 the seam between the two -- it proves the *committed* const file is exactly
-what this fixture, run through the fixed crawler, produces.
+what this fixture, run through the crawler, produces.
 
-A real crawl against the live registry was still never run here -- the
-standing rule on this repository disallows it. What this suite proves is
-narrower and machine-checkable without one: feeding it the fixture text this
-issue's own investigation fetched reproduces the committed const file
-byte-for-byte. The owner should still run the crawler for real once, to
-confirm the *live* registry matches the fixture -- IANA could have edited
-the registry between the fetch and #926 landing.
+No real crawl against the live registry is run here -- the standing rule on
+this repository disallows it. What this suite proves is narrower and
+machine-checkable without one: feeding it the fixture text this issue's own
+investigation fetched reproduces the committed const file byte-for-byte.
+Whether the *live* registry still matches the fixture is a question only a real
+crawl answers -- IANA can edit the registry at any time.
 
 """
 from __future__ import annotations
@@ -106,10 +100,10 @@ FIXTURE_CSV = (
     '254,Use for experimentation and testing,[RFC3692][RFC4727]'
 )
 
-#: Every member the fixed crawler is expected to produce from
-#: :data:`FIXTURE_CSV`, as ``(name, value)`` in registry order -- exactly the
-#: 11 non-``BIT_EMU`` members the committed
-#: :class:`pcapkit.const.ipv6.extension_header.ExtensionHeader` now carries,
+#: Every member the crawler is expected to produce from :data:`FIXTURE_CSV`,
+#: as ``(name, value)`` in registry order -- exactly the non-``BIT_EMU``
+#: members the committed
+#: :class:`pcapkit.const.ipv6.extension_header.ExtensionHeader` carries,
 #: spelled out so a future change to :meth:`process` that renames one
 #: silently fails here instead of shipping.
 EXPECTED_MEMBERS = (
@@ -126,17 +120,17 @@ EXPECTED_MEMBERS = (
     ('Use_for_experimentation_and_testing_254', 254),
 )
 
-#: Comments :data:`EXPECTED_MEMBERS` carried in
-#: :mod:`pcapkit.const.ipv6.extension_header` *before* this fix (i.e. sourced
-#: from the Protocol Numbers registry), for the six members whose text this
-#: registry change does not disturb -- the other five (``IPv6_Route``,
-#: ``IPv6_Frag``, ``ESP``, and both ``Use_for_experimentation_and_testing``
-#: members) draw genuinely different reference text from the new registry
-#: (real RFC citations where the old one cited an author's name, or an extra
-#: RFC 4727 citation), which is a known, reported divergence rather than a
-#: parsing defect -- see the module docstring and this suite's
+#: Comments :data:`EXPECTED_MEMBERS` carry when sourced from the Protocol
+#: Numbers registry, for the members whose text the two registries agree on --
+#: the others (``IPv6_Route``, ``IPv6_Frag``, ``ESP``, and both
+#: ``Use_for_experimentation_and_testing`` members) draw genuinely different
+#: reference text from the authoritative registry (real RFC citations where the
+#: Protocol Numbers registry cites an author's name, or an extra RFC 4727
+#: citation), which is a known, reported divergence rather than a parsing
+#: defect -- see this suite's
 #: ``test_five_comments_genuinely_diverge_from_the_historical_registry``. The
-#: committed const file now carries the *new* text for all 11, which is what
+#: committed const file carries the authoritative registry's text for every
+#: member, which is what
 #: ``test_context_matches_the_committed_const_file_byte_for_byte`` pins.
 UNCHANGED_COMMENTS = {
     'HOPOPT': 'HOPOPT, IPv6 Hop-by-Hop Option [:rfc:`8200`]',
@@ -226,8 +220,8 @@ class ExtensionHeaderVendorTests(unittest.TestCase):
         return vendor, lines
 
     def test_link_points_at_the_authoritative_registry(self) -> None:
-        # The root-cause fix, stated as an assertion: no longer the Protocol
-        # Numbers registry filtered on a derived flag.
+        # The root cause, stated as an assertion: the authoritative registry,
+        # not the Protocol Numbers registry filtered on a derived flag.
         link = self.vendor_module.ExtensionHeader.LINK
         self.assertEqual(link, 'https://www.iana.org/assignments/ipv6-parameters/extension-header.csv')
         self.assertNotIn('protocol-numbers', link)
@@ -240,8 +234,8 @@ class ExtensionHeaderVendorTests(unittest.TestCase):
         self.assertEqual(len(lines), 12)
 
     def test_no_extension_header_type_is_lost_or_renamed(self) -> None:
-        # The count, and every surviving name, in one assertion: losing 147
-        # (BIT_EMU) is the fix; losing or renaming any of the other 11 is not.
+        # The count, and every name, in one assertion: 147 (BIT_EMU) is absent
+        # by design; losing or renaming any other member is a defect.
         vendor, lines = self._vendor()
         enum, miss = vendor.process(lines)
         self.assertEqual(len(enum), 11)
@@ -316,7 +310,7 @@ class ExtensionHeaderVendorTests(unittest.TestCase):
         self.assertNotIn('147', generated)
 
     def test_context_matches_the_committed_const_file_byte_for_byte(self) -> None:
-        # The seam this fix rests on: pcapkit/const/ipv6/extension_header.py
+        # The seam the const side rests on: pcapkit/const/ipv6/extension_header.py
         # was hand-applied rather than produced by a live crawl (disallowed
         # in this environment), so this is what stands in for "regenerating
         # is a no-op" -- see tests.vendor.test_ipx_packet_unit for the same

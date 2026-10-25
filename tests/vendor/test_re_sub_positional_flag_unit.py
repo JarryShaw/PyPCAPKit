@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #796: a regex flag passed as ``re.sub``/``re.split``'s positional ``count``.
 
-Thirteen call sites under :file:`pcapkit/vendor/` passed a regex flag --
+Guards against call sites under :file:`pcapkit/vendor/` passing a regex flag --
 :data:`re.MULTILINE`, whose integer value is ``8`` -- as the *positional*
 fourth argument to :func:`re.sub` (third, for :func:`re.split`), which is the
 ``count``/``maxsplit`` slot, not ``flags``:
@@ -9,7 +9,7 @@ fourth argument to :func:`re.sub` (third, for :func:`re.split`), which is the
 .. code-block:: python
 
    re.sub(r'\\r*\\n', ' ', text, re.MULTILINE)             # count=8, flags=0 (!)
-   re.sub(r'\\r*\\n', ' ', text, flags=re.MULTILINE)        # the fix
+   re.sub(r'\\r*\\n', ' ', text, flags=re.MULTILINE)        # correct
 
 Two independent defects follow from that one misplacement:
 
@@ -17,32 +17,28 @@ Two independent defects follow from that one misplacement:
    occurrences of the pattern keeps its ninth match onward unsubstituted,
    because ``count=8`` caps replacement rather than being ignored.
 2. **The flag never applies.** :data:`re.MULTILINE` changes the matching
-   behaviour of ``^``/``$`` only; every one of these thirteen patterns is
-   ``r'\\r*\\n'``, which carries no anchor, so the *intended* flag was already
-   inert -- moving it to ``flags=`` does not change what it matches, only
-   removes the accidental ``count`` cap and the interpreter warning.
+   behaviour of ``^``/``$`` only; every one of the affected patterns is
+   ``r'\\r*\\n'``, which carries no anchor, so the *intended* flag is inert
+   -- passing it as ``flags=`` does not change what it matches, only removes
+   the accidental ``count`` cap and the interpreter warning.
 
 It is also a live :exc:`DeprecationWarning` on Python 3.13+ (`'count' is
 passed as positional argument`), scheduled to become a :exc:`TypeError`.
 
-A single-line grep over this tree only finds five of the thirteen: eight of
-them put the flag argument on a *continuation* line --
+A single-line grep misses a flag argument put on a *continuation* line --
 
 .. code-block:: python
 
    re.sub(r'\\r*\\n', ' ', text,
           re.MULTILINE)
 
--- which no single-line pattern sees. :class:`PositionalFlagArgumentTests`
-below therefore walks :mod:`ast` rather than grepping, exactly as the issue's
-own enumeration did, and is self-tested against an inline known-positive
-(plain and continuation-line shaped) and known-negative fixture before it is
-ever pointed at the real tree -- see
+-- so :class:`PositionalFlagArgumentTests` below walks :mod:`ast` rather than
+grepping, exactly as the issue's own enumeration did, and is self-tested
+against an inline known-positive (plain and continuation-line shaped) and
+known-negative fixture before it is ever pointed at the real tree -- see
 :meth:`PositionalFlagArgumentTests.test_self_check_detects_known_positive_and_negative_fixtures`.
 
-Run against stock ``4530424df`` (this issue's unblocking commit, before the
-fix in this change), :meth:`PositionalFlagArgumentTests.test_no_positional_flag_argument_in_vendor_tree`
-fails, reporting all thirteen sites now living at:
+The sites #796 enumerated live in:
 
 * :file:`pcapkit/vendor/default.py`
 * :file:`pcapkit/vendor/hip/eddsa_curve.py`
@@ -58,16 +54,17 @@ fails, reporting all thirteen sites now living at:
 * :file:`pcapkit/vendor/tcp/mp_tcp_option.py`
 * :file:`pcapkit/vendor/tcp/option.py`
 
-After the fix (``flags=`` on all thirteen), it passes.
+and :meth:`PositionalFlagArgumentTests.test_no_positional_flag_argument_in_vendor_tree`
+fails on any positional form in the tree.
 :class:`RuntimeDeprecationWarningTests` additionally pins the runtime
 symptom directly by re-creating the exact ``r'\\r*\\n'`` call shape used at
-every one of these sites and asserting no :exc:`DeprecationWarning` fires
-under ``error`` filtering -- run against the pre-fix positional form, the
-same assertion raises :exc:`DeprecationWarning` (captured explicitly in
+those sites and asserting no :exc:`DeprecationWarning` fires under ``error``
+filtering -- in the positional form, the same assertion raises
+:exc:`DeprecationWarning` (captured explicitly in
 :meth:`RuntimeDeprecationWarningTests.test_positional_flag_shape_warns_only_from_the_version_that_added_it`,
-which pins the *old* shape's own defect -- gated on the CPython version that
-introduced it (3.13+; below that, the same shape must NOT warn) so a future
-refactor cannot silently drop the regression coverage for it, and no
+which pins the positional shape's own defect -- gated on the CPython version
+that introduced it (3.13+; below that, the same shape must NOT warn) so a
+future refactor cannot silently drop the regression coverage for it, and no
 matrix leg below 3.13 goes dark).
 
 The suite is unit-tier (see :mod:`tests._tiers`): it reads no fixture capture
@@ -237,11 +234,11 @@ class RuntimeDeprecationWarningTests(unittest.TestCase):
             with self.assertWarns(DeprecationWarning):
                 with warnings.catch_warnings():
                     warnings.simplefilter('always')
-                    re.sub(self.PATTERN, ' ', 'a\nb', re.MULTILINE)  # noqa: intentional pre-fix shape
+                    re.sub(self.PATTERN, ' ', 'a\nb', re.MULTILINE)  # noqa: intentional positional shape
         else:
             with warnings.catch_warnings(record=True) as caught:
                 warnings.simplefilter('always')
-                re.sub(self.PATTERN, ' ', 'a\nb', re.MULTILINE)  # noqa: intentional pre-fix shape
+                re.sub(self.PATTERN, ' ', 'a\nb', re.MULTILINE)  # noqa: intentional positional shape
             self.assertFalse(
                 any(issubclass(w.category, DeprecationWarning) for w in caught),
                 f'expected no DeprecationWarning on Python {tuple(sys.version_info[:2])} for the '
@@ -250,13 +247,12 @@ class RuntimeDeprecationWarningTests(unittest.TestCase):
             )
 
     def test_positional_flag_shape_warns_only_from_the_version_that_added_it(self) -> None:
-        # GitHub issue #819: the OLD version of this test asserted only the
-        # 3.13+ branch, with no version guard at all, so it went red on
-        # every leg below 3.13 (measured: Python 3.11, 3.12 -- "warns" and
-        # "asserted" are not the same interpreter). Asserting the ABSENCE
-        # below the boundary, instead of skipping it, keeps coverage on
-        # every leg and makes the boundary itself a tested fact rather than
-        # a comment only two of five legs ever exercised.
+        # GitHub issue #819: asserting only the 3.13+ branch, with no
+        # version guard at all, goes red on every leg below 3.13 (measured:
+        # Python 3.11, 3.12 -- "warns" and "asserted" are not the same
+        # interpreter). Asserting the ABSENCE below the boundary, instead of
+        # skipping it, keeps coverage on every leg and makes the boundary
+        # itself a tested fact rather than a comment only some legs exercise.
         self._assert_positional_flag_shape(self.POSITIONAL_COUNT_DEPRECATED_SINCE)
 
     def test_the_boundary_constant_is_load_bearing(self) -> None:
@@ -295,10 +291,8 @@ class RuntimeDeprecationWarningTests(unittest.TestCase):
         self._assert_positional_flag_shape(self.POSITIONAL_COUNT_DEPRECATED_SINCE)
 
     def test_flags_keyword_shape_does_not_warn(self) -> None:
-        # The fix, exercised the same way: no DeprecationWarning under
-        # 'error' filtering. This is the assertion that fails on stock
-        # 4530424df if any of the thirteen sites still use the positional
-        # form, and passes once every site uses flags=.
+        # The keyword form, exercised the same way: no DeprecationWarning
+        # under 'error' filtering.
         with warnings.catch_warnings():
             warnings.simplefilter('error', DeprecationWarning)
             result = re.sub(self.PATTERN, ' ', 'a\nb', flags=re.MULTILINE)
@@ -307,17 +301,17 @@ class RuntimeDeprecationWarningTests(unittest.TestCase):
     def test_pattern_has_no_multiline_anchor(self) -> None:
         # Defect #2 from the issue body, checked directly rather than
         # asserted in prose: re.MULTILINE only changes '^'/'$' matching, and
-        # this pattern contains neither (nor \A/\Z), so the flag was already
-        # inert for every one of the thirteen sites -- the fix only removes
-        # the accidental count=8 cap, it does not change any match.
+        # this pattern contains neither (nor \A/\Z), so the flag is inert for
+        # every affected site -- passing it by keyword only removes the
+        # accidental count=8 cap, it does not change any match.
         for anchor in ('^', '$', r'\A', r'\Z'):
             self.assertNotIn(anchor, self.PATTERN,
                              f'pattern {self.PATTERN!r} contains {anchor!r} -- re.MULTILINE would '
                              f'not be a no-op here, and the "byte-identical" argument does not hold')
 
     def test_uncapping_count_only_matters_beyond_eight_matches(self) -> None:
-        # Defect #1, empirically bounded: below the old count=8 cap, the
-        # positional (buggy) and keyword (fixed) forms already agree, and
+        # Defect #1, empirically bounded: up to the count=8 cap, the
+        # positional (buggy) and keyword (correct) forms agree, and
         # they diverge only once a string carries more than eight
         # occurrences of the pattern -- which is what "byte-identical for
         # today's data, latent for tomorrow's" means concretely.
@@ -340,11 +334,12 @@ class RuntimeDeprecationWarningTests(unittest.TestCase):
 
 
 class GeneratorRuntimeCoverageTests(unittest.TestCase):
-    """Exercise every fixed call site's owning method directly.
+    """Exercise every affected call site's owning method directly.
 
-    :class:`PositionalFlagArgumentTests` proves the defect is gone from the
+    :class:`PositionalFlagArgumentTests` proves the defect is absent from the
     *source text*; this class proves it by *running* the exact line coverage
-    tooling measures, so the fix is exercised rather than only inspected.
+    tooling measures, so the keyword form is exercised rather than only
+    inspected.
 
     Every instance is built with ``cls.__new__(cls)``, the same bypass
     :file:`tests/vendor/test_vendor_dest_path_unit.py` and
@@ -359,11 +354,9 @@ class GeneratorRuntimeCoverageTests(unittest.TestCase):
     run first.
 
     Each case feeds ``process()`` a synthetic CSV row -- never live IANA
-    data -- reaching exactly the line this change touches, under
-    ``DeprecationWarning`` raised as an error. Run against stock
-    ``4530424df`` (the positional ``re.MULTILINE`` form), every one of these
-    fails with that :exc:`DeprecationWarning`; after the fix (``flags=``),
-    all pass.
+    data -- reaching exactly the affected line, under ``DeprecationWarning``
+    raised as an error. In the positional ``re.MULTILINE`` form, every one of
+    these fails with that :exc:`DeprecationWarning`.
 
     """
 

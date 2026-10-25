@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 """``pcapkit-vendor`` without the ``vendor`` extra exits on one line, not with a traceback.
 
-GitHub issue #1850. :mod:`pcapkit.vendor` imported every crawler unconditionally,
-and :mod:`pcapkit.vendor.default` imports ``requests`` at module scope, so without
-the extra importing the package raised :exc:`ModuleNotFoundError`. The console
-script and ``python -m pcapkit.vendor`` import that package before any line of
-:mod:`pcapkit.vendor.__main__` runs, so the user got a traceback; the
+GitHub issue #1850. :mod:`pcapkit.vendor.default` imports ``requests`` at module
+scope, so without the extra a :mod:`pcapkit.vendor` that imports every crawler
+unconditionally raises :exc:`ModuleNotFoundError` on import. The console script
+and ``python -m pcapkit.vendor`` import that package before any line of
+:mod:`pcapkit.vendor.__main__` runs, so the user would get a traceback; the
 :class:`~pcapkit.utilities.warnings.VendorWarning` emitted first is a
 :exc:`ResourceWarning`, which Python hides by default. The owner ruled that the
 command should instead exit with one line naming the missing packages and the
 extra to install, for a pip install without ``[vendor]`` as much as for the conda
 package, which does not vendor the crawlers' dependencies (#1814).
 
-The package now records what is missing in ``_MISSING`` and imports no crawler
+The package records what is missing in ``_MISSING`` and imports no crawler
 while it is not empty. Its :pep:`562` ``__getattr__`` raises a
 :exc:`ModuleNotFoundError` carrying the message for a crawler's name, and
 :func:`~pcapkit.vendor.__main__.main` prints the message and returns ``1``.
@@ -26,10 +26,10 @@ checkout ahead of any installed copy, and
 :meth:`MissingExtraTests.test_import_succeeds_and_a_crawler_name_raises` checks
 that the child imported this checkout.
 
-Against the unfixed tree every test of :class:`MissingExtraTests` fails on the
+Without that handling every test of :class:`MissingExtraTests` fails on the
 traceback of that import, and :class:`MainTests` fails with :exc:`AttributeError`,
-as there is no ``_MISSING`` to patch. :class:`PresentExtraTests` passes before and
-after the fix, as it should: it pins that nothing changes with the extra installed.
+as there is no ``_MISSING`` to patch. :class:`PresentExtraTests` passes either
+way, as it should: it pins that nothing changes with the extra installed.
 
 """
 from __future__ import annotations

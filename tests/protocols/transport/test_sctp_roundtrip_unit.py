@@ -1,12 +1,13 @@
 """#1221 and #1222 -- SCTP chunks rebuild byte-exactly through ``from_data``.
 
-#1221: the chunk makers wrote the flags octet back as zero, the DATA and T-bit
-flag schemas mapped only the defined bits, and the Invalid Stream Identifier
-cause wrote its reserved field back as zero. The raw octets are now kept.
+#1221: guards against the chunk makers writing the flags octet back as zero, the
+DATA and T-bit flag schemas mapping only the defined bits, and the Invalid Stream
+Identifier cause writing its reserved field back as zero. The raw octets are
+kept.
 
 #1222: :rfc:`9260#section-3.2` excludes the last parameter's (or cause's)
-padding from the chunk length, but the makers counted it. The canonical length
-is now computed, and a parsed chunk that counted the final padding keeps it.
+padding from the chunk length, so the makers must not count it. The canonical
+length is computed, and a parsed chunk that counted the final padding keeps it.
 
 """
 from __future__ import annotations

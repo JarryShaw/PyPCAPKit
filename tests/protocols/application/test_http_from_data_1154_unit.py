@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
 """``HTTP.from_data`` rebuilds the message it was parsed from. C.f. #1154.
 
-:meth:`HTTP._make_data <pcapkit.protocols.application.http.HTTP._make_data>`
-chose the versioned class from a ``version`` key that neither HTTP/1.* nor
-HTTP/2 data carries, so every ``HTTP.from_data(http.info)`` raised
-``ProtocolError: invalid HTTP version: 0``. It now dispatches on the class of
-the data, and passes the ``version`` that :meth:`HTTP.make
-<pcapkit.protocols.application.http.HTTP.make>` dispatches on.
+Guards against :meth:`HTTP._make_data
+<pcapkit.protocols.application.http.HTTP._make_data>` choosing the versioned
+class from a ``version`` key that neither HTTP/1.* nor HTTP/2 data carries,
+which made every ``HTTP.from_data(http.info)`` raise ``ProtocolError: invalid
+HTTP version: 0``. It dispatches on the class of the data, and passes the
+``version`` that :meth:`HTTP.make <pcapkit.protocols.application.http.HTTP.make>`
+dispatches on.
 
 Behind that, :meth:`httpv2.HTTP._make_data
-<pcapkit.protocols.application.httpv2.HTTP._make_data>` returned the frame's
-``length``, which ``ProtocolBase.__init__`` takes as the number of octets to
-parse back -- the payload alone, nine short of the frame -- so every HTTP/2
-``from_data`` raised as well. ``make`` computes the Length itself, so the key
-is no longer returned.
+<pcapkit.protocols.application.httpv2.HTTP._make_data>` must not return the
+frame's ``length``, which ``ProtocolBase.__init__`` takes as the number of
+octets to parse back -- the payload alone, nine short of the frame -- so every
+HTTP/2 ``from_data`` would raise as well. ``make`` computes the Length itself,
+so the key is not returned.
 
 The frames are the Scapy-built ones of
 ``test_http_guess_http2_1141_unit.LEGAL_FRAMES``, embedded as bytes.
@@ -93,7 +94,7 @@ class HTTPFromDataTests(unittest.TestCase):
                 self._round_trip(HTTP, bytes.fromhex(octets))
 
     def test_httpv2_rebuilds_its_own_frames(self) -> None:
-        """``httpv2.HTTP.from_data`` no longer parses back only Length octets."""
+        """``httpv2.HTTP.from_data`` parses back the whole frame, not only Length octets."""
         from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
 
         for name, octets in HTTP2_FRAMES:

@@ -7,7 +7,7 @@ which ``to_dict()`` flattens into a plain :obj:`dict`. ``from_dict`` cannot
 restore it, since the field is declared ``bytes | CryptographicAuthentication``,
 so :meth:`OSPF._make_encrypt_auth
 <pcapkit.protocols.application.ospf.OSPF._make_encrypt_auth>` has to accept
-that :obj:`dict`; it used to raise ``invalid type for auth_data``.
+that :obj:`dict` rather than raise ``invalid type for auth_data``.
 
 Every case builds its own octets in memory and reads no capture.
 
@@ -74,7 +74,7 @@ class TestOSPFAuthDictRoundTrip(unittest.TestCase):
                 self.assertEqual(OSPF.from_data(parsed.info).data, raw)
 
     def test_to_dict_flattens_cryptographic_authentication(self) -> None:
-        # The premise of the fix: the dict form really does carry a plain
+        # The premise of the dict branch: the dict form really does carry a plain
         # mapping -- the OrderedMultiDict ``to_dict()`` writes (#1484).
         from pcapkit.corekit.multidict import OrderedMultiDict
         from pcapkit.protocols.application.ospf import OSPF

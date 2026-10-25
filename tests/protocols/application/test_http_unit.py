@@ -176,18 +176,18 @@ class HTTPUnitTests(unittest.TestCase):
     def test_http_make_dispatches_to_real_versioned_classes(self) -> None:
         """Regression test for GH-452.
 
-        ``HTTP.make`` used to dispatch with ``protocol.make(**kwargs)``, where
-        ``protocol`` is the imported *class* -- an unbound call, since neither
-        ``HTTPv1.make`` nor ``HTTPv2.make`` is declared ``staticmethod`` or
-        ``classmethod`` on the real class (both are plain ``def make(self,
-        ...)``, matching the abstract ``ProtocolBase.make``). Every real call
-        therefore raised ``TypeError: make() missing 1 required positional
-        argument: 'self'``.
+        Guards against ``HTTP.make`` dispatching with
+        ``protocol.make(**kwargs)``, where ``protocol`` is the imported *class*
+        -- an unbound call, since neither ``HTTPv1.make`` nor ``HTTPv2.make`` is
+        declared ``staticmethod`` or ``classmethod`` on the real class (both are
+        plain ``def make(self, ...)``, matching the abstract
+        ``ProtocolBase.make``). Every real call would then raise ``TypeError:
+        make() missing 1 required positional argument: 'self'``.
 
         This deliberately exercises the **real** ``HTTPv1``/``HTTPv2``
         classes rather than a fake with a ``staticmethod`` ``make`` --
         ``test_http_read_make_and_guess_version_delegation_paths`` above uses
-        exactly such a fake, which is what let the original defect through:
+        exactly such a fake, which is how that defect gets through:
         a ``staticmethod`` absorbs an unbound call the same as a bound one,
         so a fake-based assertion passes whether or not ``self`` is actually
         threaded through.
@@ -223,33 +223,17 @@ class HTTPUnitTests(unittest.TestCase):
         :meth:`ProtocolBase.pack` calls
         ``target.make(**kwargs)`` on :meth:`~ProtocolBase._packing_target`,
         which while constructing is the instance itself -- a *bound* call on the
-        outer ``HTTP`` instance, which is what actually reaches the inner,
-        previously-unbound ``protocol.make(**kwargs)``. So the reachable
-        reproduction is ``HTTP(version=1, ...)``, not ``HTTP.make(...)``:
+        outer ``HTTP`` instance, which is what actually reaches the inner
+        ``protocol.make(**kwargs)`` dispatch. So the reachable reproduction is
+        ``HTTP(version=1, ...)``, not ``HTTP.make(...)``. Without the fix it
+        raises ``TypeError: HTTP.make() missing 1 required positional argument:
+        'self'`` -- the *same* exception text as the wrong reproduction, but
+        reached legitimately.
 
-        - on the unfixed code, this raises ``TypeError: HTTP.make() missing
-          1 required positional argument: 'self'`` -- the *same* exception
-          text as the wrong reproduction, but reached legitimately this time.
-        - on the fixed code, the constructed packet is read back and rejected,
-          as ``ProtocolError: HTTP: invalid format`` -- proving the callee was
-          actually reached, which "no ``TypeError``" alone would not.
-
-        The asserted message was ``'HTTP/1: invalid format'`` until #787.
-        Nothing about *this* regression test changed: the exception type, and
-        the fact that reaching it at all proves the versioned ``make`` ran, are
-        as they were. What moved is which line raises. ``httpv1.HTTP`` now
-        reports a malformed message as ``ProtocolError`` itself, so
-        ``HTTP.read``'s ``except ProtocolError: raise`` re-raises it unchanged
-        instead of ``except ValueError`` re-labelling it with the version it had
-        dispatched on. The bare message is also what this path *already* gave
-        whenever ``_read_http_header`` rejected a start line it could not
-        recognise, so #787 makes one message of two rather than introducing a
-        new one.
-
-        Since #1041 the read-back succeeds, so the callee is proven reached by
-        its output instead: ``make`` builds ``b'GET / HTTP/1.1\\r\\n\\r\\n'``,
-        a field-less request, and ``_read_http_header`` now accepts zero field
-        lines (:rfc:`9112#section-2.1`) where it used to reject them.
+        The callee is proven reached by its output, which "no ``TypeError``"
+        alone would not prove: ``make`` builds ``b'GET / HTTP/1.1\\r\\n\\r\\n'``,
+        a field-less request, and ``_read_http_header`` accepts zero field lines
+        (:rfc:`9112#section-2.1`, #1041), so the read-back succeeds.
         """
         from pcapkit.protocols.application.http import HTTP
 
@@ -260,13 +244,13 @@ class HTTPUnitTests(unittest.TestCase):
     def test_http_read_explicit_version_uses_same_buffer_as_guess(self) -> None:
         """Regression test for GH-447.
 
-        The explicit ``version=`` path passed ``self._file`` -- already
-        drained by the outer read -- instead of ``self._data``, so it built
-        the sub-protocol from a short or empty buffer while
-        ``_guess_version``, built from the same bytes, worked fine. This pins
-        the fix by asserting *which* buffer object reaches the sub-protocol
-        constructor, for both ``version=1`` and ``version=2``, rather than
-        merely that a call succeeds.
+        Guards against the explicit ``version=`` path passing ``self._file``
+        -- already drained by the outer read -- instead of ``self._data``,
+        which builds the sub-protocol from a short or empty buffer while
+        ``_guess_version``, built from the same bytes, works fine. Pinned by
+        asserting *which* buffer object reaches the sub-protocol constructor,
+        for both ``version=1`` and ``version=2``, rather than merely that a
+        call succeeds.
         """
         from pcapkit.protocols.application.http import HTTP
 
@@ -326,20 +310,17 @@ class HTTPUnitTests(unittest.TestCase):
         self.assertIsInstance(ctx.exception.__cause__, ValueError)
 
     def test_http_read_explicit_version_still_wraps_a_bare_value_error(self) -> None:
-        """``HTTP.read``'s ``except ValueError`` net stays, and is pinned here.
+        """``HTTP.read``'s ``except ValueError`` net is kept, and is pinned here.
 
-        #787 stops ``httpv1.HTTP`` from raising a bare :class:`ValueError` at
-        all, and that wrapper is what used to catch it -- so after the fix no
-        real payload reaches it, and the test above that used to cover it
-        (``..._wraps_malformed_payload``) now gets its chained ``__cause__`` from
-        ``httpv1.HTTP`` instead. Left in place rather than deleted, because the
-        guarantee is the explicit path's and not one delegate's: a
-        :class:`ValueError` out of *either* versioned class, from any site #787
-        did not touch, must still reach the caller as a
-        :class:`~pcapkit.utilities.exceptions.ProtocolError`. Pinned with a
-        stand-in that raises one, since nothing in the library does any more --
-        an untested branch is how a net like this comes to look redundant and
-        gets removed.
+        ``httpv1.HTTP`` does not raise a bare :class:`ValueError` (#787), so no
+        real payload reaches that net, and ``..._wraps_malformed_payload`` above
+        gets its chained ``__cause__`` from ``httpv1.HTTP``. The net is kept
+        because the guarantee is the explicit path's and not one delegate's: a
+        :class:`ValueError` out of *either* versioned class must reach the
+        caller as a :class:`~pcapkit.utilities.exceptions.ProtocolError`. Pinned
+        with a stand-in that raises one, since nothing in the library does -- an
+        untested branch is how a net like this comes to look redundant and gets
+        removed.
 
         """
         from pcapkit.protocols.application.http import HTTP
@@ -360,8 +341,7 @@ class HTTPUnitTests(unittest.TestCase):
                 self.assertIsInstance(ctx.exception.__cause__, ValueError)
 
         # A ``ProtocolError`` from the delegate is re-raised as it is, not
-        # re-labelled -- which is why #787's normalisation changes the message
-        # the two tests named in its commit assert.
+        # re-labelled with the version it was dispatched on.
         with mock.patch('pcapkit.protocols.application.httpv1.HTTP',
                         mock.Mock(side_effect=ProtocolError('HTTP: invalid format'))):
             with self.assertRaises(ProtocolError) as ctx:
@@ -372,9 +352,10 @@ class HTTPUnitTests(unittest.TestCase):
     def test_http_make_data_delegates_to_httpv1(self) -> None:
         """The version comes from the class of the parsed data (#1154).
 
-        This used to drive ``_make_data`` with a stand-in carrying a ``version``
-        key, which no parsed HTTP/1.* data has, so it pinned the lookup that made
-        every real ``from_data`` raise ``invalid HTTP version: 0``.
+        Driven with real parsed data rather than a stand-in carrying a
+        ``version`` key, which no parsed HTTP/1.* data has: such a stand-in pins
+        the lookup that makes every real ``from_data`` raise ``invalid HTTP
+        version: 0``.
 
         """
         from pcapkit.const.http.method import Method
@@ -410,44 +391,27 @@ class HTTPUnitTests(unittest.TestCase):
         self.assertIs(values['frame'], data)
 
     def test_http_guess_version_falls_through_to_the_http2_arm(self) -> None:
-        """``_guess_version`` must reach its second arm, which it never did (#787).
+        """``_guess_version`` must reach its second arm (#787).
 
-        This test used to be ``..._propagates_malformed_payload_value_error``
-        and asserted the opposite -- that these bytes raise :class:`ValueError`
-        -- because that is what the unfixed code did: ``httpv1.HTTP`` failed
-        with a bare :class:`ValueError`, which ``contextlib.suppress(
-        ProtocolError)`` does not catch, so the exception left ``_guess_version``
-        from the *first* arm and the HTTP/2 arm below it was dead code.
-
-        The expectation is inverted rather than deleted because the old one
-        pinned the defect as though it were the contract. Note the assertion
-        would still have *passed* untouched --
+        Guards against ``httpv1.HTTP`` failing with a bare :class:`ValueError`,
+        which ``contextlib.suppress(ProtocolError)`` does not catch: the
+        exception would leave ``_guess_version`` from the *first* arm, and the
+        HTTP/2 arm below it would be dead code. ``assertRaises(ValueError)``
+        cannot tell the two apart --
         :class:`~pcapkit.utilities.exceptions.ProtocolError` is a
-        :class:`ValueError` subclass, so ``assertRaises(ValueError)`` cannot tell
-        a normalised protocol error from a stray stdlib one -- had these
-        particular bytes still raised at all.
+        :class:`ValueError` subclass -- so the arms entered are recorded.
 
         What is asserted is that the second arm was *entered*, not the answer it
-        gave -- and, as of #799, the answer for *these* bytes is itself
-        ``ProtocolError`` rather than ``version='2'``. An earlier revision of
-        this test pinned ``version == '2'`` here and #799's review caught that
-        as exactly the trap this docstring already warned against: "not"'s
-        three octets read as a 24-bit declared length of 7,237,492, wildly past
-        the fifteen actually available, and #799 now requires the declared
-        length to be consistent with the buffer -- so arm 2 is entered
-        (dead-code-ness stays fixed) but correctly declines this payload too,
-        and both arms failing is what drives ``_guess_version`` to its own
-        ``ProtocolError``. Real HTTP/2 wire bytes -- self-consistently declared
-        -- are pinned to ``version == '2'`` by
-        ``test_guess_version_reaches_http2_on_the_connection_preface``, which is
-        where that assertion belongs.
-
-        Since #1141 the HTTP/2 arm runs only on a frame header a sender could
-        write, and ``b'not http at all'`` (type ``0x20``) is turned away before
-        it. So the payload is now a ``DATA`` frame header on stream 1 that
-        declares 255 octets of payload, with six behind it. That header passes
-        the plausibility test, so arm 2 is entered, and the declared length then
-        makes the arm decline it, as "not"'s did.
+        gave: the answer for *these* bytes is itself ``ProtocolError`` rather
+        than ``version='2'``. The payload is a ``DATA`` frame header on stream 1
+        that declares 255 octets of payload, with six behind it. That header
+        passes the plausibility test the HTTP/2 arm applies first (#1141), so
+        arm 2 is entered, and the declared length, which must be consistent with
+        the buffer (#799), then makes the arm decline it. Both arms failing is
+        what drives ``_guess_version`` to its own ``ProtocolError``. Real HTTP/2
+        wire bytes -- self-consistently declared -- are pinned to ``version ==
+        '2'`` by ``test_guess_version_reaches_http2_on_the_connection_preface``,
+        which is where that assertion belongs.
 
         """
         from pcapkit.protocols.application.http import HTTP
@@ -474,8 +438,8 @@ class HTTPUnitTests(unittest.TestCase):
                 HTTP._guess_version(http, len(http._data))
 
         # Both arms ran, in order: the first was tried and failed, and the
-        # second was reached -- which is exactly what it never used to be --
-        # even though it goes on to decline these particular bytes too.
+        # second was reached, even though it goes on to decline these particular
+        # bytes too.
         self.assertEqual(entered, ['httpv1', 'httpv2'])
 
     def test_guess_version_reaches_http2_on_the_connection_preface(self) -> None:
@@ -483,35 +447,22 @@ class HTTPUnitTests(unittest.TestCase):
 
         ``b'PRI * HTTP/2.0\\r\\n\\r\\nSM\\r\\n\\r\\n'`` plus a SETTINGS frame is
         what an HTTP/2 connection opens with, and ``httpv2.HTTP`` parses the
-        *frame* (on its own) and reports ``version='2'``. Through the proxy it
-        raised ``ValueError: not enough values to unpack (expected 2, got 1)``
-        instead, from ``httpv1.HTTP`` -- so the guess could not reach the answer
-        its own second arm already had.
+        *frame* (on its own) and reports ``version='2'``. Guards against the
+        guess raising ``ValueError: not enough values to unpack (expected 2, got
+        1)`` from ``httpv1.HTTP`` instead, which keeps it from the answer its own
+        second arm has.
 
         Asserted against the explicit ``version=2`` path rather than on its own,
         because "``read()`` and ``read(version=2)`` agree" is the property #787
-        is about: the explicit path worked throughout, and only the guess did
-        not.
+        is about.
 
-        The preface itself is asserted separately, and *not* prepended to the
-        frame in one buffer as the original #787 reproduction did. That
-        construction only ever "worked" by exploiting the exact defect #799
-        fixes: ``httpv2.HTTP`` has no notion of the preface at all, so it read
-        the preface's own ASCII octets as a frame header -- ``b'PRI'`` as a
-        23-bit-plus declared length of 5,265,993 -- and pre-#799 the guard
-        never checked that against the real buffer, so it "succeeded" reporting
-        a length backed by nothing. #799's ``schema.length > length`` check
-        rejects that inconsistency on both the guess and the explicit path
-        alike, which is correct: recognising the preface and skipping past it
-        is a real gap (tracked as #800), but reading it as if it were binary
-        framing was never a fix for that gap, only an accident #799 closes.
-
-        #800 has since closed that gap, so the one-buffer construction is
-        asserted here on the *explicit* path only: ``read(version=2)`` still has
-        no notion of the preface and must still refuse to read it as framing,
-        while the guess path now identifies the preface by prefix compare and
-        parses the frame after it. That half moved to
-        ``test_guess_version_identifies_the_http2_connection_preface`` below.
+        The preface prepended to the frame in one buffer is asserted here on the
+        *explicit* path only: ``read(version=2)`` skips the preface (#1242)
+        rather than reading its ASCII octets as a frame header, which would make
+        ``b'PRI'`` a declared length of 5,265,993 that the ``schema.length >
+        length`` check (#799) refuses. The guess path's handling of the preface
+        is pinned by ``test_guess_version_identifies_the_http2_connection_preface``
+        below.
 
         """
         import io
@@ -553,17 +504,15 @@ class HTTPUnitTests(unittest.TestCase):
 
         ``b'PRI * HTTP/2.0\\r\\n\\r\\nSM\\r\\n\\r\\n'`` followed by a SETTINGS
         frame is what every HTTP/2 connection opens with
-        (:rfc:`9113#section-3.4`), and before this change the dispatcher had no
-        notion of it: the HTTP/1 arm declined it and the HTTP/2 arm read the
+        (:rfc:`9113#section-3.4`). Without the prefix compare the dispatcher has
+        no notion of it: the HTTP/1 arm declines it and the HTTP/2 arm reads the
         preface's own ASCII as a frame header, ``b'PRI'`` becoming a declared
-        length of 5,265,993. #799/#802 then made that inconsistency a refusal,
-        which was right in itself but left a real HTTP/2 connection opening
-        reported as not-HTTP at all -- measured on ``f046b38f8``/``4530424df``,
-        both the bare preface and preface-plus-SETTINGS raised ``unknown HTTP
-        version``.
+        length of 5,265,993, which the consistency check of #799/#802 refuses --
+        so a real HTTP/2 connection opening, bare preface or
+        preface-plus-SETTINGS, would raise ``unknown HTTP version``.
 
         Three things are asserted, because "it answers 2" alone would also be
-        true of the accident this replaces:
+        true of a parse that consumed the preface as framing:
 
         * the answer is ``version='2'``;
         * the parsed frame is *the SETTINGS frame*, byte-identical to reading
@@ -626,11 +575,11 @@ class HTTPUnitTests(unittest.TestCase):
         per packet and has no representation for a frameless segment, so there is
         nothing to return and the payload is refused.
 
-        What the fix buys here is the *diagnosis*, which is why the message is
-        asserted rather than merely the exception type: on ``4530424df`` this
-        answered ``unknown HTTP version``, indistinguishable from genuine
-        garbage, and it now says which of the two it was. Reporting a version
-        with no data would be the dishonest alternative.
+        What is pinned here is the *diagnosis*, which is why the message is
+        asserted rather than merely the exception type: ``unknown HTTP
+        version`` would be indistinguishable from genuine garbage, and the
+        message says which of the two it was. Reporting a version with no data
+        would be the dishonest alternative.
 
         """
         import io
@@ -655,20 +604,19 @@ class HTTPUnitTests(unittest.TestCase):
 
         # And a preface followed by a frame that trips the #805 residual -- a
         # sixteen-octet GOAWAY, whose fixed ``stream`` and ``error`` fields alone
-        # want eight octets after the header -- must come back catchable. #805
-        # is now fixed at its actual root by #811: ``FieldBase.length`` raises
-        # ``ProtocolError`` itself on a negative resolved length, instead of
-        # letting a bare :exc:`struct.error` escape from :func:`struct.calcsize`.
+        # want eight octets after the header -- must come back catchable.
+        # ``FieldBase.length`` raises ``ProtocolError`` itself on a negative
+        # resolved length (#811), instead of letting a bare :exc:`struct.error`
+        # escape from :func:`struct.calcsize`.
         # So the ``debug`` field -- whose length is ``pkt['__length__']`` minus
         # the fixed ``stream``/``error`` octets, negative once the declared frame
         # length outruns this 16-octet buffer -- raises that ``ProtocolError``
         # directly, and ``http.py``'s dispatcher (``except ProtocolError: raise``)
         # passes it through unchanged rather than wrapping it as
         # ``'HTTP/2: invalid format'``, exactly as it does for the
-        # '9-octet frame header' case above. What #814 needed preserved survives
-        # this: it is still a catchable ``BaseError``, still not a bare
-        # :exc:`struct.error`, and still chained to the original one via
-        # ``__cause__`` -- only the message is now the more specific one #811
+        # '9-octet frame header' case above. As #814 requires, it is a catchable
+        # ``BaseError``, not a bare :exc:`struct.error`, and chained to the
+        # original one via ``__cause__``, with the specific message #811
         # provides.
         import struct
 
@@ -688,19 +636,17 @@ class HTTPUnitTests(unittest.TestCase):
     def test_guess_version_does_not_classify_text_as_http2(self) -> None:
         """Garbage text must never come back HTTP/2.
 
-        ``b'foo bar baz\\r\\nX: y\\r\\n\\r\\n'`` answered ``version='2'`` on
-        ``main`` before #802 -- the headline wrong answer of #800 -- because the
-        HTTP/2 arm accepted any buffer of nine octets or more and ``b'foo'`` read
-        as a declared length of 6,712,175 that nothing checked.
+        Guards against ``b'foo bar baz\\r\\nX: y\\r\\n\\r\\n'`` answering
+        ``version='2'`` -- the headline wrong answer of #800 -- as it does when
+        the HTTP/2 arm accepts any buffer of nine octets or more and ``b'foo'``
+        reads as a declared length of 6,712,175 that nothing checks.
 
-        Honest about what closed it: #802's ``schema.length > length`` check
-        already refuses this, so this case passes on ``4530424df`` too and is a
-        *regression guard* rather than a fix demonstration. It is worth pinning
-        here all the same, because after #800 the answer no longer depends on
-        that guard at all: text does not match the preface and does not match an
-        HTTP/1 start line, so it is never positively identified as anything, and
-        the fall-through is the only route left to it. Both defences are asserted
-        so that loosening either one is noticed.
+        Two defences refuse it. #802's ``schema.length > length`` check refuses
+        the inconsistent length, and independently of that check (#800) text
+        does not match the preface and does not match an HTTP/1 start line, so
+        it is never positively identified as anything, and the fall-through is
+        the only route left to it. Both defences are asserted so that loosening
+        either one is noticed.
 
         """
         import io
@@ -728,19 +674,18 @@ class HTTPUnitTests(unittest.TestCase):
     def test_guess_version_commits_to_http1_once_the_start_line_says_so(self) -> None:
         """An identified HTTP/1 message is not re-tried as HTTP/2 (#800).
 
-        This is the direction that matters for #682, which is about to route 231
-        real HTTP/1 frames through this dispatcher. Before the fix, an HTTP/1
-        message the HTTP/1 parser refused was handed to the HTTP/2 arm, which
-        accepts any self-consistent buffer of nine octets or more -- so the
-        answer for a malformed HTTP/1 message depended on what its first three
-        ASCII octets happened to spell as a 24-bit length. Now the start line
-        decides the version and the HTTP/1 parser's own verdict is the answer.
+        This is the direction that matters for the real HTTP/1 frames #682
+        routes through this dispatcher. Guards against an HTTP/1 message the
+        HTTP/1 parser refuses being handed to the HTTP/2 arm, which accepts any
+        self-consistent buffer of nine octets or more -- so the answer for a
+        malformed HTTP/1 message would depend on what its first three ASCII
+        octets happen to spell as a 24-bit length. The start line decides the
+        version and the HTTP/1 parser's own verdict is the answer.
 
         Asserted on the message, because the exception *type* is
-        ``ProtocolError`` either way: on ``4530424df`` these payloads came back
-        ``unknown HTTP version`` (both arms having declined), and they now come
-        back ``HTTP: invalid format`` from the version that was actually
-        identified.
+        ``ProtocolError`` either way: a payload both arms declined comes back
+        ``unknown HTTP version``, while these come back ``HTTP: invalid format``
+        from the version that was actually identified.
 
         """
         import io
@@ -900,11 +845,11 @@ class HTTPUnitTests(unittest.TestCase):
         self.assertEqual(upgraded.info.header['Upgrade'], 'h2c')
 
     def test_guess_version_still_prefers_http1_for_http1_bytes(self) -> None:
-        """HTTP/1 is tried first and must still win, request and response alike.
+        """HTTP/1 is tried first and must win, request and response alike.
 
-        The arms are ordered, so making the second reachable is only safe if the
-        first still claims everything it used to -- which is what stops #787's
-        fix from relabelling ordinary HTTP/1 traffic as HTTP/2.
+        The arms are ordered, so a reachable second arm is only safe if the first
+        claims every HTTP/1 message -- which is what stops ordinary HTTP/1
+        traffic being relabelled as HTTP/2 (#787).
 
         """
         import io
@@ -927,7 +872,7 @@ class HTTPUnitTests(unittest.TestCase):
                 self.assertEqual(guessed.info, explicit.info)
 
     def test_guess_version_still_reports_an_unknown_http_version(self) -> None:
-        """Bytes neither arm accepts must still raise ``unknown HTTP version``.
+        """Bytes neither arm accepts must raise ``unknown HTTP version``.
 
         ``_guess_version``'s closing ``raise`` is only reachable when *both*
         arms fail with :class:`~pcapkit.utilities.exceptions.ProtocolError`, so
@@ -938,12 +883,12 @@ class HTTPUnitTests(unittest.TestCase):
 
         A frame is used as the probe rather than short garbage because it
         exercises the intended route: both arms declining with
-        ``ProtocolError``. Short garbage now arrives here too, by way of the
+        ``ProtocolError``. Short garbage arrives here too, by way of the
         :exc:`struct.error` that ``_guess_version`` suppresses alongside
         ``ProtocolError``, and
         ``test_guess_version_reports_unknown_version_for_a_short_payload``
-        covers that separately -- it used to escape uncaught, which is the second
-        leak of #787's shape.
+        covers that separately -- it guards against that error escaping
+        uncaught, the second leak of #787's shape.
 
         """
         import io
@@ -960,28 +905,28 @@ class HTTPUnitTests(unittest.TestCase):
     def test_guess_version_reports_unknown_version_for_a_short_payload(self) -> None:
         """A payload too short for an HTTP/2 frame header must not leak :exc:`struct.error`.
 
-        Making the HTTP/2 arm reachable routed a class of payload that used to
-        stop at the HTTP/1 arm into ``httpv2.HTTP`` for the first time, and under
-        nine octets that class fails *inside* the schema machinery rather than in
-        ``read``: ``FieldBase.length`` hands :func:`struct.calcsize` a template
-        built from a negative length, and the resulting :exc:`struct.error`
-        derives straight from :exc:`Exception`. It is therefore not a
-        ``ProtocolError``, not a :exc:`ValueError`, and not
+        With the HTTP/2 arm reachable (#787), a payload the HTTP/1 arm declines
+        goes on into ``httpv2.HTTP``. Guards against a payload under nine octets
+        failing *inside* the schema machinery rather than in ``read``:
+        :func:`struct.calcsize` handed a template built from a negative length
+        raises :exc:`struct.error`, which derives straight from
+        :exc:`Exception`. That is not a ``ProtocolError``, not a
+        :exc:`ValueError`, and not
         :exc:`~pcapkit.utilities.exceptions.StructError`, so none of
         ``_guess_version``'s suppression, ``read``'s ``except ValueError`` net,
-        nor a caller's ``except BaseError`` saw it -- it left the proxy bare.
+        nor a caller's ``except BaseError`` would see it -- it would leave the
+        proxy bare.
 
         Asserted on all three of those nets, because "it raises something" is not
-        the property that was missing; "a caller who catches protocol errors
-        catches this" is.
+        the property at stake; "a caller who catches protocol errors catches
+        this" is.
 
-        The underlying defect is ``httpv2.HTTP``'s, and predates #787: the same
-        :exc:`struct.error` comes out of ``HTTPv2`` constructed directly and out
-        of ``HTTP(..., version=2)``, on the base revision as much as on this one.
-        What #787 changed is that the *guess* path reaches it, so the fix belongs
-        at this dispatcher's boundary, where both routes into a versioned parser
-        already normalise their failures. Both routes are pinned here for that
-        reason.
+        ``httpv2.HTTP.unpack`` refuses a buffer under nine octets with
+        ``ProtocolError`` before the schema layer runs (#799), so that
+        :exc:`struct.error` is what the guard prevents rather than what such a
+        payload meets. Both routes into ``httpv2.HTTP`` -- the guess and
+        ``HTTP(..., version=2)`` -- reach the same short-buffer path, so both are
+        pinned here.
 
         """
         import io
@@ -999,7 +944,7 @@ class HTTPUnitTests(unittest.TestCase):
                 with self.assertRaises(ProtocolError) as ctx:
                     HTTP(io.BytesIO(raw), len(raw), **kwargs)
 
-                # The nets that used to miss it.
+                # The nets a bare struct.error would miss.
                 self.assertIsInstance(ctx.exception, ValueError)
                 self.assertIsInstance(ctx.exception, BaseError)
                 self.assertNotIsInstance(ctx.exception, struct.error)
@@ -1021,9 +966,8 @@ class HTTPUnitTests(unittest.TestCase):
         bare :class:`ValueError`, and the reproduction only reaches the second.
 
         Asserted on ``httpv1.HTTP`` directly rather than through the proxy
-        because that is the difference between the two candidate fixes: the
-        contract now holds for every caller of ``httpv1.HTTP``, not only for
-        ``_guess_version``'s first arm.
+        because the contract holds for every caller of ``httpv1.HTTP``, not only
+        for ``_guess_version``'s first arm.
 
         ``__cause__`` is asserted because the chain is what keeps the underlying
         unpacking error reportable, and what keeps
@@ -1039,7 +983,7 @@ class HTTPUnitTests(unittest.TestCase):
         cases = (
             # No header/body separator at all -- ``read``'s own unpacking.
             ('no separator', b'not http at all'),
-            # The HTTP/2 preface is no longer refused by an unpacking (#1041) --
+            # The HTTP/2 preface is refused by name, not by an unpacking (#1041) --
             # ``test_httpv1_still_refuses_the_http2_connection_preface`` covers it.
             # A start line of fewer than three whitespace-separated tokens.
             ('two-token start line', b'GET /\r\nHost: example.com\r\n\r\n'),
@@ -1059,9 +1003,10 @@ class HTTPUnitTests(unittest.TestCase):
 
         :rfc:`9112#section-2.1` gives ``*( field-line CRLF )``, so zero fields is
         legal. The header block is then the start line alone, with no CRLF in
-        it, which ``_read_http_header`` used to refuse as malformed. Asserted
-        through the dispatcher too: ``test_start_line`` mirrored that refusal,
-        so ``HTTP`` answered ``unknown HTTP version`` for the same bytes.
+        it, which ``_read_http_header`` must not refuse as malformed. Asserted
+        through the dispatcher too: were ``test_start_line`` to mirror such a
+        refusal, ``HTTP`` would answer ``unknown HTTP version`` for the same
+        bytes.
 
         """
         import io
@@ -1108,9 +1053,9 @@ class HTTPUnitTests(unittest.TestCase):
     def test_httpv1_make_read_round_trips_a_message_with_no_header_fields(self) -> None:
         """``make`` emits zero fields as ``start-line CRLF CRLF``; ``read`` takes it back (#1041).
 
-        ``make`` already produced those bytes when given no ``headers``, so
-        constructing ``HTTPv1(method='GET', uri='/', http_version='1.1')`` raised
-        from its own ``read``. The response is also round-tripped through
+        ``make`` produces those bytes when given no ``headers``, so constructing
+        ``HTTPv1(method='GET', uri='/', http_version='1.1')`` exercises its own
+        ``read`` on them. The response is also round-tripped through
         ``_make_data``, so an empty parsed header dict is shown to rebuild the
         same bytes. The empty-bodied request's ``from_data`` round trip is
         :meth:`test_httpv1_from_data_round_trips_a_message_with_an_empty_body`
@@ -1141,10 +1086,10 @@ class HTTPUnitTests(unittest.TestCase):
         """``from_data(info)`` rebuilds a message whose body is empty (#1050).
 
         ``read`` records an empty body as :obj:`None`, and that stays the public
-        ``info.body`` value; ``_make_data`` used to pass it straight to ``make``,
-        which concatenated it onto the header bytes and raised ``TypeError``.
-        The response with a body is a regression guard: it round-tripped before
-        the fix and must keep doing so.
+        ``info.body`` value. Guards against ``_make_data`` passing it straight to
+        ``make``, which would concatenate it onto the header bytes and raise
+        ``TypeError``. The response with a body pins the non-empty case
+        alongside.
 
         """
         import io
@@ -1171,11 +1116,10 @@ class HTTPUnitTests(unittest.TestCase):
 
         The preface's header block, once split at the first CRLFCRLF, is
         ``PRI * HTTP/2.0`` -- a start line with zero fields, which ``_RE_METHOD``
-        and ``_RE_VERSION`` both accept. Refusing every CRLF-less header used to
-        be what turned it away; it is now refused by name. A regression guard:
-        this held before the fix and must hold after it, to the same message, in
-        the parser and the predicate alike, and the dispatcher's answers for a
-        complete and a truncated preface are unchanged.
+        and ``_RE_VERSION`` both accept. It is refused by name, so accepting a
+        CRLF-less header does not let it through. Pinned to the same message in
+        the parser and the predicate alike, along with the dispatcher's answers
+        for a complete and a truncated preface.
 
         """
         import io
@@ -1205,13 +1149,13 @@ class HTTPUnitTests(unittest.TestCase):
         """A colon-less field line must raise ``ProtocolError``, not :exc:`IndexError`.
 
         ``re.split(rb'\\s*:\\s*', field, maxsplit=1)`` returns a *one*-element
-        list for a field line with no colon in it, so ``item[1]`` raised
-        :exc:`IndexError`. That is the same defect #787 is about, one loop
+        list for a field line with no colon in it, so ``item[1]`` would raise
+        :exc:`IndexError`. That would be the same defect #787 is about, one loop
         further on and wearing a different exception type: an :exc:`IndexError`
-        is neither a :exc:`ValueError` nor a ``ProtocolError``, so it escaped
-        ``HTTP._guess_version``'s suppression exactly as the bare
-        :exc:`ValueError` did and left the HTTP/2 arm dead for this whole class
-        of input as well.
+        is neither a :exc:`ValueError` nor a ``ProtocolError``, so it would
+        escape ``HTTP._guess_version``'s suppression exactly as a bare
+        :exc:`ValueError` does and leave the HTTP/2 arm dead for this whole
+        class of input as well.
 
         Refused rather than skipped: dropping the line would hand back a message
         whose header fields are quietly not the ones on the wire, which is worse
@@ -1243,15 +1187,15 @@ class HTTPUnitTests(unittest.TestCase):
         :rfc:`9112#section-5.2` allows a field value to continue on the next line
         when that line begins with SP or HTAB, and prescribes replacing each such
         ``obs-fold`` with a space before interpreting the value. Deprecated, but
-        present in real captures, and both of the ways it used to come out were
-        wrong:
+        present in real captures, and a parser that splits each line on its colon
+        gets it wrong both ways:
 
-        * a continuation carrying no colon reached ``item[1]`` and raised
-          :exc:`IndexError` -- so an ordinary, legal HTTP/1.1 request aborted the
-          guess and, once refused, would have been relabelled HTTP/2;
-        * a continuation that happened to contain a colon was *worse*: it parsed
+        * a continuation carrying no colon reaches ``item[1]`` and raises
+          :exc:`IndexError` -- so an ordinary, legal HTTP/1.1 request aborts the
+          guess and, once refused, would be relabelled HTTP/2;
+        * a continuation that happens to contain a colon is *worse*: it parses
           silently into a spurious extra field, so ``X-Long: a`` folded over
-          ``b: c`` yielded two fields rather than one value of ``a b: c``, with
+          ``b: c`` yields two fields rather than one value of ``a b: c``, with
           nothing raised to say so.
 
         The second is the reason this is unfolded rather than merely refused.
@@ -1281,7 +1225,7 @@ class HTTPUnitTests(unittest.TestCase):
                 proto = HTTPv1(io.BytesIO(raw), len(raw))
                 self.assertEqual(list(proto.info.header.items()), fields)
 
-        # The colon-bearing continuation, which used to mis-parse in silence.
+        # The colon-bearing continuation, which a per-line split mis-parses in silence.
         raw = b'GET / HTTP/1.1\r\nX-Long: a\r\n   b: c\r\nHost: e\r\n\r\n'
         proto = HTTPv1(io.BytesIO(raw), len(raw))
         self.assertEqual(list(proto.info.header.items()),
@@ -1293,17 +1237,16 @@ class HTTPUnitTests(unittest.TestCase):
         The production is ``obs-fold = OWS CRLF RWS`` (:rfc:`9112#section-5.2`)
         and a recipient replaces *the whole* obs-fold with one or more SP -- so
         the optional whitespace before the CRLF belongs to the fold, not to the
-        field value. Right-stripping only the continuation left that OWS behind:
-        ``X: a \\t`` folded over ``\\tb`` unfolded to ``'a \\t  b'`` where the
-        literal ``X: a b`` gives ``'a b'``, four of the five pairs below
-        disagreed, and a HTAB survived inside the value where the RFC prescribes
-        SP.
+        field value. Right-stripping only the continuation would leave that OWS
+        behind: ``X: a \\t`` folded over ``\\tb`` would unfold to ``'a \\t  b'``
+        where the literal ``X: a b`` gives ``'a b'``, and a HTAB would survive
+        inside the value where the RFC prescribes SP.
 
         Asserted as agreement between each folded message and the literal message
         it is *defined to mean*, rather than against a hand-written expected
         value, because that equivalence is the whole content of the RFC's remedy
-        -- and pinning it on one input, as this test first did, is what let the
-        trailing-OWS forms through.
+        -- and pinning it on one input is what lets the trailing-OWS forms
+        through.
 
         """
         import io
@@ -1356,27 +1299,19 @@ class HTTPUnitTests(unittest.TestCase):
     def test_httpv1_never_lets_a_bare_exception_escape(self) -> None:
         """The invariant behind #787: ``httpv1.HTTP`` fails only as ``ProtocolError``.
 
-        This is what makes the set of payloads whose proxy answer changed
-        *derivable* rather than something to enumerate by example. That set is
-        exactly
-
-            {payloads ``httpv1`` refused with a bare exception on base}
-            INTERSECT {payloads ``httpv2`` accepts}
-            INTERSECT {payloads ``httpv1`` still refuses}
-
-        and the bare-exception sites were precisely four: the missing
+        A bare exception out of ``httpv1`` escapes ``_guess_version``'s
+        suppression, so every site that raises one adds a class of payload the
+        dispatcher mislabels. The sites guarded here are the missing
         ``\\r\\n\\r\\n`` in ``read``, a header with no CRLF, a start line of fewer
         than three whitespace-separated tokens, and ``item[1]`` on a colon-less
-        field line. A fifth such site would add a fifth class nobody predicted,
-        which is how that count grew by one on each review round while it was
-        being found by search.
+        field line -- and finding such sites by search is how one gets missed.
 
         So rather than pin the classes, this pins the property that bounds them:
         over a battery spanning every branch of ``read`` and
-        ``_read_http_header`` -- including the four converted sites and the four
-        classes that already raised ``ProtocolError`` before the fix -- nothing
-        escapes that is not a ``ProtocolError``. A new bare-raising site fails
-        here, and no consequence table has to be re-derived by hand.
+        ``_read_http_header`` -- including those sites and the paths that raise
+        ``ProtocolError`` by design -- nothing escapes that is not a
+        ``ProtocolError``. A new bare-raising site fails here, and no
+        consequence table has to be re-derived by hand.
 
         """
         import io
@@ -1385,7 +1320,7 @@ class HTTPUnitTests(unittest.TestCase):
         from pcapkit.utilities.exceptions import ProtocolError
 
         payloads = (
-            # The four converted sites.
+            # Sites that would raise a bare exception without the #787 conversion.
             ('read: no CRLFCRLF', b'not http at all'),
             ('read: no CRLFCRLF, long', b'abcdefghijklmnopqrstuvwxyz0123456789'),
             ('header: no CRLF (preface)', b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'),
@@ -1393,7 +1328,7 @@ class HTTPUnitTests(unittest.TestCase):
             ('start line: one token', b'PRI\r\nHost: e\r\n\r\n'),
             ('field line: no colon', b'GET / HTTP/1.1\r\nNoColonHere\r\n\r\n'),
             ('field line: orphan continuation', b'GET / HTTP/1.1\r\n orphan\r\n\r\n'),
-            # Already ``ProtocolError`` before the fix -- these must stay so.
+            # Paths that raise ``ProtocolError`` by design.
             ('start line: unrecognised 3 tokens', b'FOO BAR BAZ\r\nHost: e\r\n\r\n'),
             ('start line: non-numeric status', b'HTTP/1.1 XXX OK\r\nHost: e\r\n\r\n'),
             ('start line: four-digit status', b'HTTP/1.1 2000 OK\r\nHost: e\r\n\r\n'),
@@ -1407,7 +1342,7 @@ class HTTPUnitTests(unittest.TestCase):
             ('valid request', b'GET / HTTP/1.1\r\nHost: e\r\n\r\n'),
             ('valid response', b'HTTP/1.1 200 OK\r\nServer: s\r\n\r\n'),
             ('valid folded request', b'GET / HTTP/1.1\r\nX: a\r\n b\r\nHost: e\r\n\r\n'),
-            # Field-less, refused as a CRLF-less header until #1041.
+            # Field-less: zero field lines are legal (#1041).
             ('valid field-less request', b'GET / HTTP/1.0\r\n\r\n'),
             ('valid field-less response', b'HTTP/1.1 200 OK\r\n\r\n'),
         )
@@ -1467,18 +1402,18 @@ class HTTPUnitTests(unittest.TestCase):
         stop rather than a tidier failure. ``unknown HTTP version`` is only the
         best case, needing arm 2 to decline as well.
 
-        #799 closed the *outer*-header slice of the class this suppression
-        exists for (``httpv2.HTTP.unpack`` now rejects a buffer under nine
-        octets before the schema layer runs), and #805 closed the *inner*
-        slice (a resolved field length going negative now raises
-        ``ProtocolError`` rather than a bare :exc:`struct.error`), but neither
-        retired the suppression: it stays as defence in depth for any
-        ``__length__``-keyed field #805 did not individually verify, across
-        the schema modules that share the pattern. See
+        The *outer*-header slice of the class this suppression exists for is
+        refused by ``httpv2.HTTP.unpack``, which rejects a buffer under nine
+        octets before the schema layer runs (#799), and the *inner* slice by
+        ``FieldBase.length``, where a resolved field length going negative
+        raises ``ProtocolError`` rather than a bare :exc:`struct.error` (#805).
+        The suppression stays regardless, as defence in depth for any
+        ``__length__``-keyed field #805 did not individually verify, across the
+        schema modules that share the pattern. See
         ``test_guess_version_reports_unknown_version_for_a_short_payload`` for
-        the outer-header case #799 closed, and
+        the outer-header case, and
         ``test_guess_version_no_longer_leaks_a_bare_struct_error_for_an_inner_field_shortfall``
-        below for the inner one #805 closed.
+        below for the inner one.
 
         It is also unnecessary: nothing reaches a :exc:`struct.error` through
         ``httpv1.HTTP``. Nine byte patterns over lengths 0-24, on both the direct
@@ -1519,25 +1454,24 @@ class HTTPUnitTests(unittest.TestCase):
                         HTTP(io.BytesIO(raw), len(raw))
 
     def test_guess_version_no_longer_leaks_a_bare_struct_error_for_an_inner_field_shortfall(self) -> None:
-        """A buffer that clears nine octets used to still crash one field further in.
+        """A buffer that clears nine octets must not crash one field further in.
 
         #799's ``httpv2.HTTP.unpack`` guard only protects the fixed nine-octet
         *outer* header. A ``GOAWAY`` frame's own fixed ``stream`` (4 octets) and
         ``error`` (4 octets) fields consume eight more octets before ``debug``
         is even reached, so a sixteen-octet buffer -- nine for the header, seven
         for the rest -- drives ``pkt['__length__']`` to ``-1`` at ``debug``.
-        Pre-#805, that raised a bare :exc:`struct.error` straight through
-        ``httpv2.HTTP``; #805 closed the actual root, generic
-        ``FieldBase.length`` (``struct.calcsize`` on a negative-count template),
-        shared by many schema modules, not something httpv2-specific --
-        so direct construction now raises :exc:`ProtocolError` too.
+        Guards against that raising a bare :exc:`struct.error` straight through
+        ``httpv2.HTTP``. The root is generic ``FieldBase.length``
+        (``struct.calcsize`` on a negative-count template), shared by many
+        schema modules, not something httpv2-specific, and it is handled there
+        (#805) -- so direct construction raises :exc:`ProtocolError` too.
 
-        ``_guess_version``'s last arm keeps suppressing :exc:`struct.error`
-        alongside ``ProtocolError`` regardless: narrowing it, as an earlier
-        revision of this fix did, regressed the direct ``HTTP()`` guess path
-        for a *different* input class (the sub-nine-octet outer-header one),
-        and #805 does not touch every ``__length__``-keyed field in every one
-        of those modules, so the suppression stays as defence in depth.
+        ``_guess_version``'s last arm suppresses :exc:`struct.error` alongside
+        ``ProtocolError`` regardless: #805 does not touch every
+        ``__length__``-keyed field in every one of those modules, so the
+        suppression stays as defence in depth. Narrowing it was tried and broke
+        the direct ``HTTP()`` guess path for the sub-nine-octet outer-header class.
         This test drives real wire bytes through the actual guess path -- no
         ``mock.patch`` -- specifically because a mocked fault cannot see a
         regression in the *un-mocked* route the fault is meant to stand in for.
@@ -1554,8 +1488,8 @@ class HTTPUnitTests(unittest.TestCase):
         raw = b'\x00\x00\x15\x07\x00\x00\x00\x00\x00' + b'\xff' * 7
         self.assertEqual(len(raw), 16)
 
-        # Direct construction now raises ProtocolError, not a bare
-        # struct.error -- #805's fix, pinned here so a regression is noticed.
+        # Direct construction raises ProtocolError, not a bare struct.error
+        # (#805).
         import struct
         with self.assertRaises(ProtocolError) as direct_ctx:
             HTTPv2(io.BytesIO(raw), len(raw))
@@ -1644,29 +1578,24 @@ class HTTPUnitTests(unittest.TestCase):
             proto._read_http_header(b'BAD nope nope\r\nHost: example')
 
     def test_method_get_is_now_case_sensitive(self) -> None:
-        """``Method.get`` used to test the upper-cased key, so a mixed-case
-        method resolved to the same registered member regardless of its own
-        casing -- #583, item 1, at the time framed the same way as #582's fix
-        in :mod:`pcapkit.const.ftp.command` (``Command.get`` stays that way, per
-        RFC 959 Section 5.3). GitHub issue #896 retired that
-        for ``Method`` specifically: RFC 9110 Section 9.1 makes the HTTP
-        method *token* case-sensitive -- "standardized methods are defined in
-        all-uppercase US-ASCII letters" by convention, not by requirement --
-        so a request whose method token is ``get`` is a distinct,
-        non-standardised method from ``GET``, and conflating the two through
-        ``.get()`` was the defect.
+        """``Method.get`` must not resolve a mixed-case method to the registered
+        member of another casing -- GitHub issue #896.
 
-        This replaces the class's own former pin of the opposite behaviour
-        (same method name, opposite body) rather than adding a second test
-        beside it, since the two claims cannot both be true.
+        RFC 9110 Section 9.1 makes the HTTP method *token* case-sensitive --
+        "standardized methods are defined in all-uppercase US-ASCII letters" by
+        convention, not by requirement -- so a request whose method token is
+        ``get`` is a distinct, non-standardised method from ``GET``, and
+        conflating the two through ``.get()`` is the defect. ``Command.get`` in
+        :mod:`pcapkit.const.ftp.command` differs on purpose: it folds case, per
+        RFC 959 Section 5.3 (#582, #583 item 1).
         """
         from pcapkit.const.http.method import Method
 
-        # The exact registered casing still resolves.
+        # The exact registered casing resolves.
         self.assertIs(Method.get('GET'), Method.GET)
         self.assertTrue(Method.get('GET').safe)
 
-        # A differently-cased token no longer resolves to the registered
+        # A differently-cased token does not resolve to the registered
         # member -- each becomes its own unregistered member instead,
         # carrying the caller's own casing on its value (same convention
         # :meth:`Method._unregistered_member` documents) and never
@@ -1684,27 +1613,26 @@ class HTTPUnitTests(unittest.TestCase):
                 self.assertEqual(len(Method.__members__), before)
 
         # The constructor path (``Method(...)`` -> ``_missing_``) is a
-        # separate mechanism from ``.get()`` and #896 does not touch it --
-        # it still folds case, exactly as before.
+        # separate mechanism from ``.get()``, outside #896's scope, and it
+        # folds case.
         self.assertIs(Method('Get'), Method.GET)
 
         self.assertEqual([name for name in Method._member_map_
                           if name.upper() == 'GET'], ['GET'])
 
-        # GitHub issue #860: a genuinely unknown method no longer registers
+        # GitHub issue #860: a genuinely unknown method does not register
         # at all -- the owner's ruling is that ``get``/``_missing_`` have no
         # way to supply ``safe``/``idempotent``, so minting one would
         # register a permanently hollowed-out member; only ``register()``
         # can do that properly. The *value* keeps the caller's own casing
-        # (unchanged from before #860, and the same convention
-        # :class:`~pcapkit.const.ftp.command.FEATCode` already used) --
-        # only the *name* is canonicalised -- so a repeated call with the
-        # same casing is *equal* but never *identical* (nothing is cached
-        # to be identical to any more), while a different-case call is a
-        # genuinely different value and is correctly *not* equal: on
-        # ``main`` minting's cache silently returned the first casing seen
-        # for every later call regardless of case, which is exactly the
-        # "registered enum out of an unrecognised value" #860 removes.
+        # (the same convention :class:`~pcapkit.const.ftp.command.FEATCode`
+        # uses) -- only the *name* is canonicalised -- so a repeated call
+        # with the same casing is *equal* but never *identical* (nothing is
+        # cached to be identical to), while a different-case call is a
+        # genuinely different value and is correctly *not* equal. A minting
+        # cache would return the first casing seen for every later call
+        # regardless of case, which is exactly the "registered enum out of
+        # an unrecognised value" #860 rules out.
         unknown = Method.get('frob')
         self.assertEqual(unknown._name_, 'FROB')
         self.assertEqual(unknown, 'frob')
@@ -1717,8 +1645,9 @@ class HTTPUnitTests(unittest.TestCase):
         self.assertNotIn('FROB', Method.__members__)
 
     def test_httpv1_method_regex_is_anchored(self) -> None:
-        """``_RE_METHOD`` was unanchored and :func:`re.match` anchors only at the
-        start, so it prefix-matched ``b'Get'`` down to ``b'G'`` -- #583, item 2.
+        """``_RE_METHOD`` must be anchored: :func:`re.match` anchors only at the
+        start, so an unanchored pattern prefix-matches ``b'Get'`` down to
+        ``b'G'`` -- #583, item 2.
 
         Method tokens are case-sensitive per :rfc:`9110#section-9.1`, so ``Get``
         is not ``GET`` and must not be accepted as one.
@@ -1738,8 +1667,8 @@ class HTTPUnitTests(unittest.TestCase):
                 self.assertEqual(match.group('method') if match else None, expected)
 
     def test_httpv1_read_header_uses_the_captured_method(self) -> None:
-        """``httpv1.py`` handed the whole ``para1`` to ``Method.get`` rather than
-        the captured group, so a prefix match let a bad token through -- #583.
+        """``httpv1.py`` must hand ``Method.get`` the captured group, not the whole
+        ``para1``, or a prefix match lets a bad token through -- #583.
 
         Both halves are asserted together because either alone still gives a
         wrong answer: normalising ``Method.get`` alone would parse ``b'Get'`` as
@@ -1756,8 +1685,8 @@ class HTTPUnitTests(unittest.TestCase):
         self.assertIs(header.method, Method.GET)
         self.assertEqual(header.uri, '/index.html')
 
-        # A mixed- or lower-case token is not a registered method and no longer
-        # masquerades as a prefix of one; it is a malformed request line.
+        # A mixed- or lower-case token is not a registered method and must not
+        # masquerade as a prefix of one; it is a malformed request line.
         for raw in (b'Get / HTTP/1.1\r\nHost: example.test',
                     b'get / HTTP/1.1\r\nHost: example.test'):
             with self.subTest(raw=raw):
@@ -1768,29 +1697,28 @@ class HTTPUnitTests(unittest.TestCase):
         self.assertEqual([name for name in Method._member_map_
                           if name.upper() == 'GET'], ['GET'])
 
-        # The response path is untouched.
+        # The response path parses as usual.
         response, _ = proto._read_http_header(b'HTTP/1.1 404 Not Found\r\nServer: example')
         self.assertEqual(response.status, 404)
 
     def test_httpv1_status_regex_is_anchored(self) -> None:
-        """``_RE_STATUS`` carried the same unanchored-prefix defect as
-        ``_RE_METHOD``, and it escaped as the wrong exception type.
+        """``_RE_STATUS`` must be anchored like ``_RE_METHOD``, or a malformed
+        status escapes as the wrong exception type -- #583.
 
-        Found while auditing ``_RE_METHOD``'s siblings for #583. The pattern is
-        only a guard -- the value comes from ``int(para2)`` on the *raw* token --
-        so a prefix match let a malformed status past the guard and then out of
-        ``int()`` as a bare ``ValueError``, where ``_read_http_header`` documents
-        ``ProtocolError``. :rfc:`9112#section-4` gives ``status-code = 3DIGIT``,
-        exactly three, so anchoring is what the grammar says.
+        The pattern is only a guard -- the value comes from ``int(para2)`` on
+        the *raw* token -- so a prefix match would let a malformed status past
+        the guard and then out of ``int()`` as a bare ``ValueError``, where
+        ``_read_http_header`` documents ``ProtocolError``. :rfc:`9112#section-4`
+        gives ``status-code = 3DIGIT``, exactly three, so anchoring is what the
+        grammar says.
 
         The citation is RFC 9112, not RFC 9110: the production belongs to
         HTTP/1.1's ``status-line = HTTP-version SP status-code SP
         [ reason-phrase ]``, and :rfc:`9110#section-15` covers what the codes
         *mean* plus the IANA registry. RFC 9112 section 4 says so itself --
-        "HTTP's core status codes are defined in Section 15 of [HTTP]". A
-        cross-review caught the first draft citing 9110 for the grammar.
+        "HTTP's core status codes are defined in Section 15 of [HTTP]".
 
-        Measured before the fix:
+        Measured with an unanchored pattern:
         ``b'HTTP/1.1 200x OK'`` -> ``ValueError: invalid literal for int() with
         base 10: b'200x'``, and ``b'HTTP/1.1 2000 OK'`` -> ``ValueError: 2000 is
         not a valid StatusCode``.
@@ -2086,12 +2014,12 @@ class HTTPUnitTests(unittest.TestCase):
     def test_httpv2_truncated_frame_is_rejected_uniformly_regardless_of_declared_length(self) -> None:
         """#799: a buffer of four real octets must refuse *every* declared length.
 
-        ``HTTP.read`` in ``httpv2.py`` used to read ``if schema.length < 9:`` -- the declared
-        24-bit length off the wire, never the buffer's -- so a frame whose real
-        buffer held only four octets still parsed whenever the declared value
-        happened to clear nine and (for ``SETTINGS``) land on a multiple of six
-        past it. Measured pre-fix, sweeping the declared length against exactly
-        this four-octet ``SETTINGS`` buffer::
+        Guards against a length guard of ``if schema.length < 9:`` -- the
+        declared 24-bit length off the wire, never the buffer's -- under which a
+        frame whose real buffer holds only four octets parses whenever the
+        declared value happens to clear nine and (for ``SETTINGS``) land on a
+        multiple of six past it. Measured with that guard, sweeping the declared
+        length against exactly this four-octet ``SETTINGS`` buffer::
 
             declared=0    -> ProtocolError   declared=9        -> PARSED length=9
             declared=5    -> ProtocolError   declared=15       -> PARSED length=15
@@ -2103,8 +2031,8 @@ class HTTPUnitTests(unittest.TestCase):
         The parses are exactly the declared lengths congruent to 3 (mod 6) --
         i.e. ``(declared - 9) % 6 == 0`` -- which is ``_read_http_settings``'s own
         *unrelated* structural check on the declared value, not evidence the
-        buffer held what was declared. Every one of the nine cases below must
-        now come back ``ProtocolError`` uniformly.
+        buffer held what was declared. Every case below must come back
+        ``ProtocolError`` uniformly.
 
         """
         import io
@@ -2160,13 +2088,13 @@ class HTTPUnitTests(unittest.TestCase):
     def test_httpv2_declared_length_exceeding_the_buffer_is_rejected(self) -> None:
         """#799 blocker 2: a declared length beyond the buffer must not parse.
 
-        Before this check, a frame whose declared length cleared nine on its
-        own -- regardless of how far past the real buffer it reached -- still
-        passed the guard and reported the declared, attacker-controlled value
-        as if the capture actually contained it. Measured pre-fix, identical on
-        base and the first revision of #802: a nine-octet buffer declaring
-        16777215 parsed and reported ``length=16777215``, overstated by
-        16,777,206 octets, at every one of these buffer sizes.
+        Guards against a frame whose declared length clears nine on its own --
+        regardless of how far past the real buffer it reaches -- passing the
+        guard and reporting the declared, attacker-controlled value as if the
+        capture actually contained it. Measured without this check: a
+        nine-octet buffer declaring 16777215 parsed and reported
+        ``length=16777215``, overstated by 16,777,206 octets, at every one of
+        these buffer sizes.
 
         """
         import io
@@ -2203,7 +2131,7 @@ class HTTPUnitTests(unittest.TestCase):
         Nine is the header's own size, so a ``DATA`` frame declaring zero (an
         empty payload) backed by exactly nine real octets is the smallest
         legitimate HTTP/2 frame there is. One octet short of that must still be
-        refused -- pinning that the fix's ``>= 9`` is not an off-by-one ``> 9``.
+        refused -- pinning that the guard's ``>= 9`` is not an off-by-one ``> 9``.
 
         """
         import io
@@ -2222,7 +2150,7 @@ class HTTPUnitTests(unittest.TestCase):
             HTTPv2(io.BytesIO(one_short), len(one_short))
 
     def test_httpv2_well_formed_frame_still_parses(self) -> None:
-        """The fix must not refuse a frame whose buffer backs its declared length.
+        """The guard must not refuse a frame whose buffer backs its declared length.
 
         A ``DATA`` frame declaring 12 (its payload, the nine header octets
         excluded) backed by all 21 real octets is exactly the well-formed case
@@ -2243,15 +2171,15 @@ class HTTPUnitTests(unittest.TestCase):
     def test_httpv2_unpack_rejects_a_short_buffer_before_the_schema_layer_crashes(self) -> None:
         """A buffer under nine octets must not reach :func:`struct.calcsize`.
 
-        Before this guard existed at ``unpack``, a buffer too short to hold the
-        fixed nine-octet header sent ``Schema.unpack`` into arithmetic that
-        builds a *negative*-length struct template for a frame's payload field
+        Without this guard at ``unpack``, a buffer too short to hold the fixed
+        nine-octet header sends ``Schema.unpack`` into arithmetic that builds a
+        *negative*-length struct template for a frame's payload field
         (``pkt['__length__']`` is decremented by each field's nominal width
-        regardless of how many octets the buffer actually had), and
-        :func:`struct.calcsize` raised a bare :exc:`struct.error` for it --
+        regardless of how many octets the buffer actually has), and
+        :func:`struct.calcsize` raises a bare :exc:`struct.error` for it --
         neither a ``ProtocolError`` nor caught by anything downstream. Pinned
         directly on ``HTTP.unpack`` rather than only on ``read``, since ``read``
-        never runs for these buffers: the crash happened one call earlier.
+        never runs for these buffers: the crash would happen one call earlier.
 
         """
         import io
@@ -2504,27 +2432,28 @@ class HTTPUnitTests(unittest.TestCase):
     def test_settings_frame_settings_field_wraps_item_schema(self) -> None:
         """Regression test for GH-459.
 
-        ``SettingsFrame.settings`` used to pass the bare ``SettingPair``
-        *class* as ``ListField``'s ``item_type``, where every sibling
+        Guards against ``SettingsFrame.settings`` passing the bare
+        ``SettingPair`` *class* as ``ListField``'s ``item_type``, where every
+        sibling
         (``tcp.py``'s ``SACK.sack``, ``hip.py``, ``mh.py``'s
         ``CGAParametersOption.parameters``, ``sctp.py``'s
         ``gap_blocks``/``dup_tsn``) wraps its schema item in a
         :class:`~pcapkit.corekit.fields.misc.SchemaField`. A bare
         ``SchemaMeta`` is not a field instance, so ``ListField.unpack``'s
-        schema branch -- ``field = self._item_type(packet)`` -- constructed a
-        ``SettingPair`` from the packet *dict* instead of configuring a
+        schema branch -- ``field = self._item_type(packet)`` -- would construct
+        a ``SettingPair`` from the packet *dict* instead of configuring a
         per-item field, and the ``isinstance(self._item_type, SchemaField)``
-        check that picks the schema branch was ``False`` for a bare class in
-        the first place, so it fell through to the plain-field branch and
-        failed there instead: ``field.length`` does not exist on a
+        check that picks the schema branch is ``False`` for a bare class in the
+        first place, so it would fall through to the plain-field branch and
+        fail there instead: ``field.length`` does not exist on a
         ``SettingPair`` instance.
 
         This is a unit-level check on the field wiring, not an end-to-end
-        ``HTTPv2`` round trip. The round trip itself now passes -- there is
+        ``HTTPv2`` round trip. The round trip itself passes -- there is
         no ``EXPECTED_FAILURES`` entry for ``httpv2-frame/SETTINGS``, and
         the generator's own round trip for it reports ``OK``. What a round
         trip never exercises is a bare ``SettingsFrame(...).pack()`` called
-        with no enclosing packet: that still raises ``KeyError: 'flags'``,
+        with no enclosing packet: that raises ``KeyError: 'flags'``,
         from ``FrameType.post_process``'s ``packet['flags'][name]`` lookup,
         which has no ``flags`` to read without a real header above it. That
         is an unsupported invocation, not a defect in the round trip.
@@ -2534,7 +2463,7 @@ class HTTPUnitTests(unittest.TestCase):
 
         field = SettingsFrame.__fields__['settings']
 
-        # The type-check the ``# type: ignore[arg-type]`` used to silence:
+        # The type-check a ``# type: ignore[arg-type]`` would silence:
         # ``item_type`` must be a field instance, not the schema class itself.
         self.assertIsInstance(field._item_type, SchemaField)
         self.assertIs(field._item_type.schema, SettingPair)

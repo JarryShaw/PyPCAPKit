@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 """HTTP/2 frame Length counts the payload only, per :rfc:`9113#section-4.1`.
 
-GitHub issue #1121. ``HTTP.make`` wrote Length as payload + 9 and the readers
-checked the same, so every RFC-conformant frame with a fixed-size payload was
-rejected, and ``_read_http_priority`` checked ``!= 9`` and so rejected even the
-14 that ``make`` wrote for it.
+GitHub issue #1121. Guards against ``HTTP.make`` writing Length as payload + 9
+and the readers checking the same, under which every RFC-conformant frame with a
+fixed-size payload is rejected.
 
 The fixtures below are real HTTP/2 octets, not a re-statement of pcapkit's own
 arithmetic: each one is byte-identical to what scapy's independent
@@ -95,7 +94,7 @@ class HTTPv2FrameLengthUnitTests(unittest.TestCase):
                 self.assertEqual(bytes(HTTPv2(type=info.type, sid=info.sid, frame=info)), raw)
 
     def test_the_old_header_inclusive_length_is_rejected(self) -> None:
-        """A fixed-size frame declaring payload + 9 is now a size error."""
+        """A fixed-size frame declaring payload + 9 is a size error."""
         from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
         from pcapkit.utilities.exceptions import ProtocolError
 

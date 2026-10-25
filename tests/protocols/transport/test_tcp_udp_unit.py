@@ -35,14 +35,14 @@ def mptcp_option(opt: 'Any' = None, *, syn: 'bool' = False, ack: 'bool' = False,
     <pcapkit.protocols.transport.tcp.TCP.make>` is what assigns that attribute -- as an
     :class:`aenum.IntFlag` member, resolved *before* ``_make_tcp_options`` runs.
 
-    Until #603 the MP_JOIN cases here wrote a plain :obj:`set` onto the attribute of a bare
-    ``object.__new__(TCP)`` instead. A :obj:`set` answers the ``in`` tests the dispatchers
-    use, so every branch ran and both TCP modules read 100% statement and branch coverage
-    -- while the attribute had neither the type nor the provenance production gives it. That
-    is how #587, an ordering defect that broke MP_JOIN construction for every caller, sat
-    behind that coverage number untouched, and how the ``cast('Enum_Flags', 0)`` no-op
-    behind it went unnoticed too. Going through ``TCP()`` means an ordering or type defect
-    fails a test here instead of passing one.
+    The cases go through ``TCP()`` rather than writing a plain :obj:`set` onto the attribute
+    of a bare ``object.__new__(TCP)`` (#603). A :obj:`set` answers the ``in`` tests the
+    dispatchers use, so every branch runs and both TCP modules read 100% statement and
+    branch coverage -- while the attribute has neither the type nor the provenance
+    production gives it. That is how an ordering defect such as #587, which breaks MP_JOIN
+    construction for every caller, or a ``cast('Enum_Flags', 0)`` no-op can sit behind that
+    coverage number untouched. Through ``TCP()``, an ordering or type defect fails a test
+    here instead of passing one.
 
     Each call constructs a **fresh** instance, because the point is that ``_flags`` is
     resolved from these very arguments rather than left over from an earlier call.
@@ -938,11 +938,12 @@ class TCPUDPUnitTests(unittest.TestCase):
         # NOTE: a segment with neither SYN nor ACK selects no MP_JOIN layout, and the
         # library's own ``ProtocolError`` is what a caller must get for it. Reaching that
         # through ``TCP()`` rather than through a hand-written ``proto._flags = set()``
-        # makes this one assertion catch both defects #603 is about: revert #587's hoist
-        # and ``_flags`` does not exist yet, so this raises ``AttributeError``; restore the
-        # ``cast('Enum_Flags', 0)`` no-op and ``_flags`` is a plain ``int``, so
-        # ``Enum_Flags.SYN in self._flags`` raises ``TypeError``. A ``set`` gave the right
-        # answer for the wrong reason and hid both.
+        # makes this one assertion catch both defects #603 is about: if ``TCP.make``
+        # built the options before resolving the flags (#587), ``_flags`` would not
+        # exist yet and this would raise ``AttributeError``; if the accumulator were
+        # seeded with the ``cast('Enum_Flags', 0)`` no-op, ``_flags`` would be a plain
+        # ``int`` and ``Enum_Flags.SYN in self._flags`` would raise ``TypeError``. A
+        # ``set`` gives the right answer for the wrong reason and hides both.
         with self.assertRaises(ProtocolError):
             mptcp_option(subtype=MPTCPOption.MP_JOIN)
         with self.assertRaises(ProtocolError):
@@ -986,12 +987,10 @@ class TCPUDPUnitTests(unittest.TestCase):
         self.assertEqual(proto._read_mode_mp(unknown, options=options).data, b'\x0a\x01')
 
         # NOTE: :rfc:`8684` section 3.1 gives MP_CAPABLE as 12 octets without the
-        # receiver's key and 20 octets with it (#567); these three cases used
-        # 20/32/12 respectively, the pre-#567 (wrong) split, and so were
-        # exercising -- and pinning -- the very defect #567 fixes rather than
-        # correct behaviour. Updated to 12/20, with the third case's length
-        # moved to 32, which is not an MP_CAPABLE length under either the old
-        # or the new split, so it stays a genuine rejection.
+        # receiver's key and 20 octets with it (#567), so the first two cases
+        # use 12 and 20. The rejection case uses 32, which is not an MP_CAPABLE
+        # length under the RFC or under the wrong 20/32 split #567 guards
+        # against, so it is a genuine rejection.
         capable_no_receiver = mark(
             MPTCPCapable(test={'subtype': MPTCPOption.MP_CAPABLE.value, 'version': 0},
                          flags={'req': 1, 'ext': 0, 'deny_join': 0, 'reserved': 0, 'hsa': 1}, skey=1, rkey=2),
@@ -1022,13 +1021,9 @@ class TCPUDPUnitTests(unittest.TestCase):
         # dispatchers read the same attribute with the same ``in`` tests, and ``make`` is
         # the public entry point that assigns it, so this installs the ``Enum_Flags``
         # member production assigns instead of a ``set`` that merely answers ``in``. C.f.
-        # #603. Until #616 it *had* to be ``make`` rather than a parsed segment for the
-        # flagless case further down: ``read`` seeded its accumulator with
-        # ``cast('Enum_Flags', 0)``, a runtime no-op, so a flagless *parsed* instance
-        # carried a plain ``int`` and ``_read_mptcp_join`` raised ``TypeError`` instead of
-        # its documented ``ProtocolError``. #616 made ``read`` seed ``Enum_Flags(0)`` too,
-        # so either entry point serves now; ``make`` stays because these rows are about the
-        # dispatchers rather than about parsing, and
+        # #603. ``read`` seeds ``Enum_Flags(0)`` as ``make`` does (#616), so either entry
+        # point serves for the flagless case further down; ``make`` is used because these
+        # rows are about the dispatchers rather than about parsing, and
         # :meth:`test_a_flagless_segment_seeds_its_connection_flags_as_an_enum` below
         # covers the parsed side. Either way ``mptcp_data_selector`` rejects a flagless
         # MP_JOIN in the schema layer first, and
@@ -1053,11 +1048,10 @@ class TCPUDPUnitTests(unittest.TestCase):
         # NOTE: :rfc:`8684` section 3.2 figure 6 gives MP_JOIN-SYN/ACK as 16
         # octets -- kind (1) + length (1) + subtype/flags (1) + addr_id (1) +
         # the truncated HMAC (8) + the nonce (4) -- which is also exactly what
-        # MPTCPJoinSYNACK packs. These two cases used 20 (accept) and 19
-        # (reject), the pre-#576 guard's own wrong constant, and so pinned the
-        # defect rather than the RFC. The rejection case is now 20: the value the
-        # guard used to *require*, which no MP_JOIN form produces, so it stays a
-        # genuine rejection rather than an off-by-one near the correct length.
+        # MPTCPJoinSYNACK packs, so the accepted case uses 16. The rejection case
+        # uses 20, the wrong constant filed under #576, which no MP_JOIN form
+        # produces, so it is a genuine rejection rather than an off-by-one near
+        # the correct length.
         proto.make(syn=True, ack=True)
         join_synack = mark(
             MPTCPJoinSYNACK(test={'subtype': MPTCPOption.MP_JOIN.value, 'reserved': 0, 'backup': 0},
@@ -1169,11 +1163,9 @@ class TCPUDPUnitTests(unittest.TestCase):
 
         # NOTE: :rfc:`8684` section 3.5 figure 14 gives MP_FASTCLOSE as 12 octets
         # -- kind (1) + length (1) + subtype-and-reserved (2) + the receiver's key
-        # (8) -- which is what MPTCPFastclose packs since #576 added its missing
-        # reserved octet. These two cases used 16 (accept) and 15 (reject), the
-        # pre-#576 guard's own wrong constant. The rejection case is now 16, the
-        # value the guard used to require and that the RFC never produces for this
-        # option.
+        # (8) -- which is what MPTCPFastclose packs, reserved octet included
+        # (#576). The rejection case uses 16, the wrong constant filed under
+        # #576, which the RFC never produces for this option.
         fastclose = mark(
             MPTCPFastclose(test={'subtype': MPTCPOption.MP_FASTCLOSE.value, 'reserved': 0}, key=123),
             12,
@@ -1440,10 +1432,10 @@ class TCPUDPUnitTests(unittest.TestCase):
         The segment below sets a data offset of 7 -- 8 octets of option area
         -- for a reserved option kind (``0x4f``, ``Option.Reserved_79``)
         declaring ``length=12`` or ``length=32``, with only 6 data octets
-        behind it. The missing octets used to be read as zeros, 4 or 24 of
-        them, and rebuilt as if captured. :meth:`OptionField.unpack
-        <pcapkit.corekit.fields.collections.OptionField.unpack>` now refuses
-        the option with :exc:`~pcapkit.utilities.exceptions.ProtocolError`
+        behind it. Guards against the missing octets being read as zeros, 4
+        or 24 of them, and rebuilt as if captured. :meth:`OptionField.unpack
+        <pcapkit.corekit.fields.collections.OptionField.unpack>` refuses the
+        option with :exc:`~pcapkit.utilities.exceptions.ProtocolError`
         instead (#1325). Inside an IPv4 datagram the segment is kept as the
         octets captured, a :class:`~pcapkit.protocols.misc.raw.Raw` payload
         carrying that error, and rebuilds byte for byte.
@@ -1576,20 +1568,21 @@ class TCPUDPUnitTests(unittest.TestCase):
     def test_a_flagless_segment_seeds_its_connection_flags_as_an_enum(self) -> None:
         """A segment whose flags octet is all zero still parses to an ``Enum_Flags``. C.f. #616.
 
-        :meth:`TCP.read <pcapkit.protocols.transport.tcp.TCP.read>` seeded its flag
-        accumulator with ``cast('Enum_Flags', 0)``. :func:`typing.cast` is a runtime
-        no-op -- it returns its second argument unchanged -- so the accumulator began
-        life as the plain :class:`int` ``0``. The ``|=`` in the loop below it is the
-        only thing that promotes it to an
+        Guards against :meth:`TCP.read <pcapkit.protocols.transport.tcp.TCP.read>`
+        seeding its flag accumulator with ``cast('Enum_Flags', 0)``.
+        :func:`typing.cast` is a runtime no-op -- it returns its second argument
+        unchanged -- so the accumulator would begin life as the plain :class:`int`
+        ``0``. The ``|=`` in the loop is the only thing that promotes it to an
         :class:`~pcapkit.const.tcp.flags.Flags` member, and that never runs when no
-        flag bit is set, so a flagless segment left ``self._flags`` an :obj:`int`.
-        ``Enum_Flags.SYN in self._flags`` then raised ``TypeError: argument of type
-        'int' is not a container or iterable`` rather than answering. Any flag at all
-        masked it, which is why it survived a file at 100% coverage.
+        flag bit is set, so a flagless segment would leave ``self._flags`` an
+        :obj:`int`. ``Enum_Flags.SYN in self._flags`` then raises ``TypeError:
+        argument of type 'int' is not a container or iterable`` rather than
+        answering. Any flag at all masks it, which is how it survives a file at 100%
+        coverage.
 
         The type assertions are the load-bearing ones. ``0 == Enum_Flags(0)`` is
-        :data:`True`, so ``assertEqual(proto.connection, 0)`` passes on both sides of
-        the fix and cannot discriminate -- and neither can a membership test alone, on
+        :data:`True`, so ``assertEqual(proto.connection, 0)`` passes with either seed
+        and cannot discriminate -- and neither can a membership test alone, on
         the flagful rows. Hence ``assertIs(type(...), Enum_Flags)``, which is what the
         :attr:`~pcapkit.protocols.transport.tcp.TCP.connection` property has always
         advertised it returns.
@@ -1597,29 +1590,27 @@ class TCPUDPUnitTests(unittest.TestCase):
         The last block pins the consequence rather than the type. ``_read_mptcp_join``
         chooses between :rfc:`8684` section 3.2's three MP_JOIN layouts by testing
         ``self._flags`` for SYN and ACK, and falls through to the library's own
-        ``ProtocolError`` when neither is set. On an :obj:`int` it died on a bare
+        ``ProtocolError`` when neither is set. On an :obj:`int` it would die on a bare
         :exc:`TypeError` two lines earlier instead. That branch is not reachable from
         a caller -- :func:`~pcapkit.protocols.schema.transport.tcp.mptcp_data_selector`
         rejects a flagless MP_JOIN with a ``FieldError`` before the dispatcher runs --
-        so this was latent, but latent only by virtue of a guard in a different file.
+        so the defect is latent, but latent only by virtue of a guard in a different
+        file.
         The instance is parsed through ``TCP(...)`` rather than having ``_flags``
         written onto a bare ``object.__new__(TCP)``, for the reason #603 and #612 give
         in :func:`mptcp_option` above: a hand-written attribute proves nothing about
         what production puts there.
 
-        The closing block pins the one difference a consumer can see, so that it is a
-        recorded decision rather than a silent change: a flagless segment's
-        ``connection`` now dumps as the string ``'Flags::0 [0]'`` where it dumped as
-        the number ``0``. That is not a regression so much as the removal of an
-        inconsistency -- the field was a number for a flagless segment and a string for
-        every other one.
+        The closing block pins the one rendering a consumer can see, so that it is a
+        recorded decision: a flagless segment's ``connection`` dumps as the string
+        ``'Flags::0 [0]'``, not the number ``0``, so the field is a string for every
+        segment rather than a number for a flagless one alone.
 
-        That string read ``'Flags::None [0]'`` when this test was written, because
-        :func:`~pcapkit.dumpkit.common.make_dumper`'s hook interpolated ``o.name``
-        without accounting for a nameless composite member. #648 has since guarded it,
-        so the name half is now the value's own decimal spelling -- the same spelling
-        the enumeration library already uses for an undeclared residue, as in
-        ``Flags(2049).name == 'ACK|1'``.
+        The name half of that string is the value's own decimal spelling -- the same
+        spelling the enumeration library uses for an undeclared residue, as in
+        ``Flags(2049).name == 'ACK|1'`` -- because
+        :func:`~pcapkit.dumpkit.common.make_dumper`'s hook guards a nameless composite
+        member rather than interpolating its ``o.name`` of ``None`` (#648).
 
         """
         import struct
@@ -1661,8 +1652,8 @@ class TCPUDPUnitTests(unittest.TestCase):
                 self.assertEqual(Enum_Flags.SYN in proto.connection, bool(octet & 0x02))
                 self.assertEqual(Enum_Flags.ACK in proto.connection, bool(octet & 0x10))
 
-                # The numeric value is unchanged by the fix, which is exactly why the
-                # type is what has to be asserted.
+                # The numeric value is the same with either seed, which is exactly why
+                # the type is what has to be asserted.
                 self.assertEqual(int(proto.connection), int(expected))
                 self.assertEqual(proto.connection, int(expected))
 
@@ -1675,17 +1666,16 @@ class TCPUDPUnitTests(unittest.TestCase):
         with self.assertRaisesRegex(ProtocolError, 'invalid flags combination'):
             proto._read_mptcp_join(schema, options=DummyData())  # type: ignore[arg-type]
 
-        # The one place the change is observable to a consumer, pinned here so it cannot
+        # The one place the seed is observable to a consumer, pinned here so it cannot
         # drift silently. ``make_dumper``'s hook renders any enum member as
         # ``Type::name [value]``, and an ``aenum.IntFlag`` pseudo-member carrying no bits
-        # has ``name is None`` -- so a flagless segment dumps as a *string* where it used
-        # to dump as the number ``0``. Note what that replaced: ``connection`` was a JSON
-        # *number* for a flagless segment and a *string* for every other one, so the field
-        # is consistently typed now rather than switching type with the flags.
+        # has ``name is None`` -- so a flagless segment dumps as a *string*, not as the
+        # number ``0``, and ``connection`` is consistently typed rather than switching
+        # type with the flags.
         #
-        # The name half of that string was the literal ``None`` until #648 guarded the
-        # interpolation; it is now the value's own decimal spelling, so the rendering is
-        # ``'Flags::0 [0]'``. Both halves are asserted here because this segment is the
+        # The name half of that string would be the literal ``None`` without #648's
+        # guard on the interpolation; it is the value's own decimal spelling, so the
+        # rendering is ``'Flags::0 [0]'``. Both halves are asserted here because this segment is the
         # only wire-reachable producer of a nameless member in the library, which makes
         # this the test that notices if the guard is ever removed.
         # ``self`` is reached only by the fallback ``super()`` call at the end of the hook,

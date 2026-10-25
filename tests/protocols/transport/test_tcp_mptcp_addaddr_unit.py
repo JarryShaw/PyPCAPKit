@@ -1,61 +1,48 @@
 # -*- coding: utf-8 -*-
 """``TCP._make_mptcp_addaddr`` builds an ``ADD_ADDR`` option that packs. GitHub issue #541.
 
-Filed measurement: ``t._make_mptcp_addaddr(MPTCPOption.ADD_ADDR, addr_id=1, addr='1.2.3.4')``
-warned ``UnknownFieldWarning`` twice -- once for ``kind``, once for ``length`` -- then
-constructed a schema whose ``.pack()`` raised ``KeyError: 'length'`` from the ``port``
-field's condition in :class:`~pcapkit.protocols.schema.transport.tcp.MPTCPAddAddress`:
-
-.. code-block:: python
-
-    port: 'int' = ConditionalField(
-        UInt16Field(),
-        lambda pkt: pkt['length'] in (10, 22),
-    )
-
-Root cause: :class:`~pcapkit.protocols.schema.transport.tcp.MPTCP`, the base class every
-Multipath TCP subtype schema inherits, declared ``kind`` and ``length`` only under
+Guards against :class:`~pcapkit.protocols.schema.transport.tcp.MPTCP`, the base class
+every Multipath TCP subtype schema inherits, declaring ``kind`` and ``length`` only under
 :data:`~typing.TYPE_CHECKING` -- annotations for a type checker, not real
-:class:`~pcapkit.corekit.fields.field.FieldBase` descriptors. So ``Schema.__update__``
-rejected both keyword arguments as unknown and dropped them, and by the time ``pack()``
-reached ``port``'s lambda, ``length`` was never in the packet mapping at all. The ``port``
-predicate reading ``pkt['length']`` is not an independent circularity: ``length`` is
-supplied by the caller (the arithmetic differs by IP version and by whether ``port`` is
-given, but it does not depend on ``port`` having already been packed), so once ``length``
-is a real field that lands before ``port`` in field order, the predicate reads a value
-that is already there. Fixed by declaring real ``kind``/``length`` fields on ``MPTCP``
-itself, mirroring how :class:`~pcapkit.protocols.schema.transport.tcp.Option` already
-does it for every non-Multipath TCP option -- see ``MPTCP`` in
-:mod:`pcapkit.protocols.schema.transport.tcp`.
+:class:`~pcapkit.corekit.fields.field.FieldBase` descriptors. ``Schema.__update__`` then
+rejects both keyword arguments as unknown and drops them: as filed,
+``t._make_mptcp_addaddr(MPTCPOption.ADD_ADDR, addr_id=1, addr='1.2.3.4')`` warned
+``UnknownFieldWarning`` twice -- once for ``kind``, once for ``length`` -- then constructed a
+schema whose ``.pack()`` raised ``KeyError: 'length'`` from the ``port`` field's
+``pkt['length']``-gated condition, because ``length`` was never in the packet mapping at all.
+That predicate is not an independent circularity: ``length`` is supplied by the caller (the
+arithmetic differs by IP version and by whether ``port`` is given, but it does not depend on
+``port`` having already been packed), so with ``length`` a real field that lands before
+``port`` in field order, the predicate reads a value that is already there. ``MPTCP``
+declares real ``kind``/``length`` fields itself, mirroring how
+:class:`~pcapkit.protocols.schema.transport.tcp.Option` does it for every non-Multipath TCP
+option -- see ``MPTCP`` in :mod:`pcapkit.protocols.schema.transport.tcp`.
 
-That one change also fixes construction for every other ``_make_mptcp_*`` helper in
-:mod:`pcapkit.protocols.transport.tcp` that passes ``kind=``/``length=`` to its schema
-the same way (``_make_mptcp_unknown``, ``_make_mptcp_capable``, ``_make_join_syn``,
-``_make_join_synack``, ``_make_join_ack``, ``_make_mptcp_dss``, ``_make_mptcp_remove``,
-``_make_mptcp_prio``, ``_make_mptcp_fail`` and ``_make_mptcp_fastclose``, alongside
-``_make_mptcp_addaddr`` itself -- eleven in total), but this module only covers
-``ADD_ADDR``, the case the issue was filed against. It asserts on packed bytes, not
-merely on successful construction, since construction already succeeded before this fix
-and only ``pack()`` failed.
+Every other ``_make_mptcp_*`` helper in :mod:`pcapkit.protocols.transport.tcp` passes
+``kind=``/``length=`` to its schema the same way (``_make_mptcp_unknown``,
+``_make_mptcp_capable``, ``_make_join_syn``, ``_make_join_synack``, ``_make_join_ack``,
+``_make_mptcp_dss``, ``_make_mptcp_remove``, ``_make_mptcp_prio``, ``_make_mptcp_fail`` and
+``_make_mptcp_fastclose``), but this module only covers ``ADD_ADDR``, the case the issue was
+filed against. It asserts on packed bytes, not merely on successful construction, since
+construction succeeds even with the fields missing and only ``pack()`` fails.
 
-The same missing fields broke *unpacking*, not only packing, and for the identical
-reason: with no real ``kind``/``length`` fields on the base class, ``MPTCPAddAddress``'s
-own leading field (``test``, the subtype/IP-version octet) started reading one octet too
-early -- the ``kind`` octet itself (``0x1e``) -- rather than the third octet of the
-option. That is an off-by-two in field alignment, not a wire-format change: the octets a
-correct sender already puts on the wire were always right, only this library's reading of
-them was shifted. Measured on the pre-fix code with the hand-built, spec-correct wire
-octets :data:`ADD_ADDR_SPEC_OCTETS` and :data:`MP_PRIO_SPEC_OCTETS` below (neither built
-through any ``_make_mptcp_*`` maker, so the pack and parse directions cannot cancel each
-other's bug out): ``0x1e`` decoded as subtype ``1``/version ``14``, an IP version nothing
-accepts, so :class:`TCPMPTCPUnpackUnitTests.test_add_addr_spec_octets_parse_correctly`
-raised ``FieldError: TCP: [OptNo 30] 3 invalid IP version`` before this fix; MP_PRIO has
-no such guard, so :class:`TCPMPTCPUnpackUnitTests.test_mp_prio_spec_octets_parse_correctly`
-instead ran the misaligned bytes as far as ``MPTCPPriority.addr_id``'s own
-``pkt['length']``-gated :class:`~pcapkit.corekit.fields.misc.ConditionalField` and raised
-``KeyError: 'length'`` -- the same exception #541 was filed against, reached from the
-opposite direction. Both parse correctly after this fix, every field exactly as the
-octets were built.
+The same missing fields break *unpacking*, not only packing, and for the identical reason:
+with no real ``kind``/``length`` fields on the base class, ``MPTCPAddAddress``'s own leading
+field (``test``, the subtype/IP-version octet) starts reading one octet too early -- the
+``kind`` octet itself (``0x1e``) -- rather than the third octet of the option. That is an
+off-by-two in field alignment, not a wire-format change: the octets a correct sender puts on
+the wire are right, only the reading of them is shifted. The hand-built, spec-correct wire
+octets :data:`ADD_ADDR_SPEC_OCTETS` and :data:`MP_PRIO_SPEC_OCTETS` below pin it (neither is
+built through any ``_make_mptcp_*`` maker, so the pack and parse directions cannot cancel
+each other's bug out). Misaligned, ``0x1e`` decodes as subtype ``1``/version ``14``, an IP
+version nothing accepts, so
+:class:`TCPMPTCPUnpackUnitTests.test_add_addr_spec_octets_parse_correctly` would raise
+``FieldError: TCP: [OptNo 30] 3 invalid IP version``; MP_PRIO has no such guard, so
+:class:`TCPMPTCPUnpackUnitTests.test_mp_prio_spec_octets_parse_correctly` would instead run
+the misaligned bytes as far as ``MPTCPPriority.addr_id``'s own ``pkt['length']``-gated
+:class:`~pcapkit.corekit.fields.misc.ConditionalField` and raise ``KeyError: 'length'`` --
+the same exception #541 was filed against, reached from the opposite direction. Both parse
+every field exactly as the octets were built.
 
 """
 from __future__ import annotations
@@ -187,7 +174,7 @@ class TCPMPTCPAddAddressUnitTests(unittest.TestCase):
         self.assertEqual(packed[-2:], bytes.fromhex('01bb'))
 
     def test_opt_argument_round_trips_through_the_maker(self) -> None:
-        """Passing a previously-parsed ``opt`` takes the same path as the keyword form.
+        """Passing an already-parsed ``opt`` takes the same path as the keyword form.
 
         ``_make_mptcp_addaddr`` reads ``addr_id``/``addr``/``port`` off ``opt`` instead of
         the keyword arguments when one is given, so this exercises that branch against the
@@ -241,12 +228,12 @@ class TCPMPTCPUnpackUnitTests(unittest.TestCase):
     def test_add_addr_spec_octets_parse_correctly(self) -> None:
         """RFC 8684 section 3.4.1's IPv4 ``ADD_ADDR``, addr_id=1, 192.0.2.1.
 
-        Pre-fix this raised ``FieldError: TCP: [OptNo 30] 3 invalid IP version`` --
-        ``MPTCPAddAddress.test`` read the ``kind`` octet ``0x1e`` (``0001 1110``) as its
-        own subtype/version octet, decoding ``version=14``, which
-        :func:`~pcapkit.protocols.schema.transport.tcp.mptcp_add_address_selector`
-        then rejected outright since it was neither 4 nor 6. The selector now
-        takes the address family from the option length instead (#1217).
+        Guards against ``FieldError: TCP: [OptNo 30] 3 invalid IP version``, raised when
+        ``MPTCPAddAddress.test`` reads the ``kind`` octet ``0x1e`` (``0001 1110``) as its
+        own subtype/version octet, decoding ``version=14``, which a selector keyed on the
+        version would reject outright since it is neither 4 nor 6.
+        :func:`~pcapkit.protocols.schema.transport.tcp.mptcp_add_address_selector` takes
+        the address family from the option length instead (#1217).
 
         """
         from pcapkit.const.tcp.option import Option as Enum_Option
@@ -266,8 +253,8 @@ class TCPMPTCPUnpackUnitTests(unittest.TestCase):
     def test_mp_prio_spec_octets_parse_correctly(self) -> None:
         """RFC 8684 section 3.3.8's ``MP_PRIO`` with the optional Address ID, backup set.
 
-        Pre-fix this raised ``KeyError: 'length'``: ``MP_PRIO`` carries no IP-version
-        guard the way ``ADD_ADDR`` does, so the same off-by-two misalignment ran on
+        Guards against ``KeyError: 'length'``: ``MP_PRIO`` carries no IP-version guard
+        the way ``ADD_ADDR`` does, so the same off-by-two misalignment would run on
         through to ``MPTCPPriority.addr_id``'s own
         ``ConditionalField(UInt8Field(), lambda pkt: pkt['length'] == 4)`` -- the same
         exception #541 was filed against, reached by parsing rather than by packing.

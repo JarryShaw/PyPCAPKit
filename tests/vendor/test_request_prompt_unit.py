@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 """Regression tests for the manual-intervention prompt in ``Vendor._request``.
 
-GitHub issue #522: the last resort of
+GitHub issue #522: guards against the last resort of
 :meth:`pcapkit.vendor.default.Vendor._request` -- ask an operator to save the
-page by hand -- was a ``while True`` whose only pause was an ``input()`` call
+page by hand -- being a ``while True`` whose only pause is an ``input()`` call
 wrapped in ``contextlib.suppress(Exception)``. With nobody at a keyboard that
 suppression is what does the damage rather than the loop: ``input()`` raises
 instead of blocking, the suppression discards the exception, the file the loop
 waits for never appears, and the iteration repeats immediately. Three lines of
 output per pass, measured in the issue at **26.7 million lines / 2.6 GB** before
-the process was killed. It was never a hang; it was a printer.
+the process was killed. It is not a hang; it is a printer.
 
 ``input()`` fails three different ways depending on how ``stdin`` went away, and
-the old code suppressed all three identically -- measured on CPython 3.14.7:
+a blanket suppression treats all three identically -- measured on CPython 3.14.7:
 
 * a ``stdin`` at end of file, i.e. redirected from :file:`/dev/null` or a closed
   pipe, raises :exc:`EOFError`;
@@ -23,21 +23,21 @@ So a test that only closes stdin pins one third of the defect. Worse, the
 loudest real-world shape raises **nothing at all**: under ``yes | make vendor``
 ``input()`` returns ``'y'`` forever, the file still never appears, and the loop
 still spins. No amount of exception handling inside the loop catches that one,
-which is why the fix has two halves and this module tests both:
+which is why the guard has two halves and this module tests both:
 
 1. **A precondition.** :func:`~pcapkit.vendor.default.stdin_is_interactive`
    decides whether there is a terminal at all, and a run without one is failed
    with the fetch error -- exactly as :envvar:`PCAPKIT_CI_MODE` fails it -- before
    a browser is opened, a temporary directory is made, or a word is printed.
    This is the half that covers the piped-stdin case above.
-2. **A loop that cannot spin.** Any failure of ``input()`` now ends the wait with
+2. **A loop that cannot spin.** Any failure of ``input()`` ends the wait with
    the original :exc:`requests.RequestException` instead of being discarded. The
    precondition does not make this redundant: a terminal can go away *during* the
    wait -- an SSH session dropping, a parent closing the descriptor -- and that
    lands in exactly the loop the precondition already let the process into.
 
-Two properties are pinned alongside the fix, because a fix for a runaway loop is
-easy to overshoot:
+Two properties are pinned alongside, because a fix for a runaway loop is easy to
+overshoot:
 
 * :meth:`ManualIntervenePromptTests.test_saving_the_page_still_completes_the_fetch`
   and :meth:`~ManualIntervenePromptTests.test_the_prompt_still_repeats_until_the_page_appears`
@@ -46,17 +46,17 @@ easy to overshoot:
 * :meth:`~ManualIntervenePromptTests.test_keyboard_interrupt_still_aborts_as_itself`
   pins that :exc:`KeyboardInterrupt` is *not* swallowed into a fetch error.
   Ctrl-C is how an operator declines, and it is a :exc:`BaseException`, so it
-  escaped the old ``suppress(Exception)`` and must keep escaping the new
-  ``except Exception``.
+  escapes ``except Exception`` as it would ``suppress(Exception)``, and must
+  keep doing so.
 
 **No case here can wedge the suite, and none of them relies on a timeout to say
 so.** :func:`_fake_input` answers a bounded number of prompts and then raises
 :class:`_Runaway`, which derives from :exc:`BaseException` precisely so that
-neither the old ``suppress(Exception)`` nor the new ``except Exception`` can
-catch it: against the unfixed code a case fails in milliseconds with a message
-naming the defect, rather than printing until something kills it.
-:func:`~tests._support.time_limit` is layered on top as a backstop for a fix that
-found some *other* way not to terminate. Standard output is captured throughout,
+neither ``suppress(Exception)`` nor ``except Exception`` can catch it: with the
+defect present a case fails in milliseconds with a message naming the defect,
+rather than printing until something kills it.
+:func:`~tests._support.time_limit` is layered on top as a backstop for a loop
+that finds some *other* way not to terminate. Standard output is captured throughout,
 so the bounded flood is counted rather than spilled into the test report.
 
 Nothing here makes a network call: ``requests.get`` is replaced for the whole of
@@ -110,15 +110,15 @@ VENDOR_DEPS = ('requests', 'bs4', 'html5lib')
 #: Whether the crawlers are importable at all. ``html5lib`` ships in the
 #: ``vendor`` extra (:file:`pyproject.toml`), not ``test`` -- so these cases skip
 #: on the ``test`` and ``gate`` jobs of :file:`.github/workflows/unit-tests.yml`.
-#: ``engine-tests`` ran them for real (#738) until #849 narrowed each of its
-#: cells to that engine's own test files.
+#: ``engine-tests`` does not run them either: each of its cells runs only that
+#: engine's own test files (#849).
 #: Guarded the way :file:`tests/protocols/test_dispatch_registry_unit.py` guards
 #: its own optional dependencies rather than making the whole unit tier depend on
 #: the crawlers'.
 HAS_VENDOR_DEPS = all(importlib.util.find_spec(name) is not None for name in VENDOR_DEPS)
 
 #: How many prompts :func:`_fake_input` will answer before it decides the loop is
-#: never going to end. Small enough that the unfixed code's output stays in the
+#: never going to end. Small enough that a runaway loop's output stays in the
 #: tens of lines, large enough that no legitimate case comes near it -- the most
 #: any test here needs is two.
 PROMPT_BUDGET = 16
@@ -138,10 +138,10 @@ class _Runaway(BaseException):
     """Raised by :func:`_fake_input` once the prompt budget is exhausted.
 
     Derives from :exc:`BaseException` rather than :exc:`Exception` on purpose.
-    The code under test used to wrap its ``input()`` call in
-    ``contextlib.suppress(Exception)`` and now wraps it in ``except Exception``;
-    a sentinel either of those could catch would be swallowed and the loop would
-    carry on spinning, which is the failure this class exists to report. Only a
+    The code under test wraps its ``input()`` call in ``except Exception``, and
+    the defect's shape is ``contextlib.suppress(Exception)``; a sentinel either
+    of those could catch would be swallowed and the loop would carry on
+    spinning, which is the failure this class exists to report. Only a
     :exc:`BaseException` escapes both and reaches the test.
 
     """
@@ -185,8 +185,8 @@ def _fake_input(*replies: 'Any', limit: 'int' = PROMPT_BUDGET) -> 'tuple[Any, li
     guessing how many times it will be asked.
 
     Past ``limit`` calls the stand-in raises :class:`_Runaway` instead. That is
-    what makes a case against the unfixed code fail in milliseconds with a
-    diagnosis rather than printing until it is killed, and it is why no case here
+    what makes a case fail in milliseconds with a diagnosis when the loop runs
+    away, rather than printing until it is killed, and it is why no case here
     depends on a timeout to detect the runaway loop.
 
     Args:
@@ -452,7 +452,7 @@ class ManualIntervenePromptTests(unittest.TestCase):
     def test_a_stdin_at_eof_ends_the_wait_instead_of_spinning(self) -> None:
         # The heart of #522. ``stdin_is_interactive`` is forced True so that the
         # precondition cannot be what saves this -- the loop itself has to end.
-        # Against the unfixed code the EOFError is suppressed, the file never
+        # With the defect present the EOFError is suppressed, the file never
         # appears, and the prompt is re-asked until _fake_input gives up.
         crawler = self._crawler()
         prompt, calls = _fake_input(EOFError('EOF when reading a line'))
@@ -474,7 +474,7 @@ class ManualIntervenePromptTests(unittest.TestCase):
 
     def test_every_way_input_can_fail_ends_the_wait(self) -> None:
         # ``input()`` reports an unusable stdin three different ways, measured on
-        # CPython 3.14.7, and the old ``suppress(Exception)`` discarded all three
+        # CPython 3.14.7, and a blanket ``suppress(Exception)`` discards all three
         # alike. Pinning only EOFError would leave two thirds of the defect live,
         # so each is driven separately -- a subTest rather than one loop body, so
         # the exit code names which shape regressed.
@@ -517,7 +517,7 @@ class ManualIntervenePromptTests(unittest.TestCase):
         self.assertIs(caught.exception.__cause__, failure)
 
     def test_a_non_interactive_run_never_reaches_the_prompt(self) -> None:
-        # The half of the fix no in-loop exception handling can cover: under
+        # The half of the guard no in-loop exception handling can cover: under
         # ``yes | make vendor`` the prompt returns 'y' forever and raises nothing,
         # so the loop has to be *not entered*. Everything the branch would have
         # done as a side effect is asserted absent, since each is wasted or
@@ -574,11 +574,11 @@ class ManualIntervenePromptTests(unittest.TestCase):
         # KeyboardInterrupt rather than being folded into a network error --
         # "connection failed" would be an outright lie about what happened.
         #
-        # This one passes on the unfixed code too, and is here deliberately:
-        # KeyboardInterrupt is a BaseException and so escaped the old
-        # ``suppress(Exception)`` exactly as it escapes the new
-        # ``except Exception``. It guards the fix against overshooting into
-        # ``except BaseException``, which is the natural over-correction.
+        # This one passes with the defect present too, and is here
+        # deliberately: KeyboardInterrupt is a BaseException and so escapes
+        # ``suppress(Exception)`` exactly as it escapes ``except Exception``.
+        # It guards against overshooting into ``except BaseException``, which
+        # is the natural over-correction.
         crawler = self._crawler()
         prompt, calls = _fake_input(KeyboardInterrupt())
 

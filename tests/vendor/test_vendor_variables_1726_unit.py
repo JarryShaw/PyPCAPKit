@@ -103,9 +103,9 @@ class DeclarationTests(_VendorCase):
 
     def test_max_retry_takes_one_and_refuses_anything_below(self) -> None:
         self.assertEqual(self.load('MAX_RETRY', '1'), (1, []))
-        # 0 was read as 1 before #1726, and -1 is no limit only where a limit
-        # has a risk to name; here both are refused, as is a non-integer, which
-        # crashed the import.
+        # 0 must not be read as 1 (#1726), and -1 is no limit only where a
+        # limit has a risk to name; here both are refused, as is a
+        # non-integer, which must not crash the import.
         for text in ('0', '-1', 'lots'):
             with self.subTest(text=text):
                 value, messages = self.load('MAX_RETRY', text)

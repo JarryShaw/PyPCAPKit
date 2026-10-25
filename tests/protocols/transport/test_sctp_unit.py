@@ -41,9 +41,9 @@ def bitfield_packs_zero_bits() -> bool:
     so a flag word constructed with any bit clear does not survive a round trip.
 
     That is a library-wide defect in :mod:`pcapkit.corekit`, not an SCTP one, and
-    it is being fixed separately. The tests that need clear bits on the
-    *construction* side are gated on this probe so that they start running of
-    their own accord once the fix lands. Parsing is unaffected --
+    it is tracked separately. The tests that need clear bits on the
+    *construction* side are gated on this probe so that they run of their own
+    accord wherever :mod:`pcapkit.corekit` packs clear bits correctly. Parsing is unaffected --
     ``BitField.post_process`` is correct -- so the wire-conformance and scapy
     cross-check tests below exercise mixed flags unconditionally.
 
@@ -80,9 +80,8 @@ class SCTPUnitTests(unittest.TestCase):
     def _proto_registry():
         """Restore ``SCTP.__proto__`` on the way out, defaults included.
 
-        ``SCTP.__proto__.clear()`` was a sound teardown while the registry
-        started empty. It is not one now: NGAP is registered on PPIDs 60 and 66
-        by default, and clearing the registry leaves every later test in the
+        ``SCTP.__proto__.clear()`` is not a sound teardown: NGAP is registered
+        on PPIDs 60 and 66 by default, and clearing the registry leaves every later test in the
         process running against a registry that no import repopulates -- an
         order-dependent failure that only appears in whichever test happens to
         run second.
@@ -939,7 +938,7 @@ class SCTPUnitTests(unittest.TestCase):
                          'SCTP:PayloadProtocolIdentifier_3GPP_NG_Application_Protocol')
 
         # A PPID registered over the default dispatches to the new class. The
-        # overwrite warning is expected here -- 60 is no longer a free slot --
+        # overwrite warning is expected here -- 60 is not a free slot --
         # and is asserted rather than allowed to litter the test output.
         with self._proto_registry():
             with mock.patch.object(sctp_module, 'warn') as warned:
@@ -1064,9 +1063,9 @@ class SCTPUnitTests(unittest.TestCase):
         # would already be the overwrite this test means to trigger on the
         # *second* call, and the assertion on the call count would pass for the
         # wrong reason. The second call also has to use a genuinely different
-        # class from the first: GitHub issue #718 added an identity guard here
-        # (see ``test_register_stays_quiet_on_same_object_reregistration``), so
-        # replaying the first call's exact object would no longer warn.
+        # class from the first: GitHub issue #718's identity guard (see
+        # ``test_register_stays_quiet_on_same_object_reregistration``) keeps a
+        # replay of the first call's exact object quiet.
         with self._proto_registry():
             SCTP.register(4243, Raw)
             with mock.patch.object(sctp_module, 'warn') as warned:
@@ -1077,12 +1076,12 @@ class SCTPUnitTests(unittest.TestCase):
     def test_register_stays_quiet_on_same_object_reregistration(self) -> None:
         """GitHub issue #718: replaying a call with the identical class is a no-op.
 
-        Before the fix the guard fired on presence alone, so the *second* of
-        two calls that register the exact same class under the exact same
-        code -- what this test performs -- warned about an overwrite that
-        never happened. Mirrors the identity guard :func:`register_protocol
-        <pcapkit.foundation.registry.protocols.register_protocol>` already
-        applies.
+        Guards against the overwrite warning firing on presence alone, under
+        which the *second* of two calls that register the exact same class
+        under the exact same code -- what this test performs -- warns about an
+        overwrite that never happens. Mirrors the identity guard
+        :func:`register_protocol
+        <pcapkit.foundation.registry.protocols.register_protocol>` applies.
 
         """
         from pcapkit.protocols.misc.raw import Raw

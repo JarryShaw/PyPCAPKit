@@ -1,9 +1,9 @@
 """#1482 -- an SCTP Host Name parameter without a NUL terminator rebuilds as captured.
 
 :rfc:`9260#section-3.3.2.1.4` requires the host name to be null-terminated.
-The reader accepts a name as captured, but the maker rejected an unterminated
-one, so ``from_data(info)`` raised on a packet that parsed. The terminator
-check now applies only to a ``name`` keyword, not to a parsed record.
+The reader accepts a name as captured, so a maker that rejected an unterminated
+one would make ``from_data(info)`` raise on a packet that parsed. The terminator
+check applies only to a ``name`` keyword, not to a parsed record.
 
 """
 from __future__ import annotations
