@@ -42,14 +42,14 @@ __all__ = [
     'Int16Field', 'UInt16Field',
     'Int64Field', 'UInt64Field',
     'Int8Field', 'UInt8Field',
-    'EnumField',
+    'EnumField', 'PortEnumField',
 
     'BytesField',
     'StringField',
     'BitField',
     'PaddingField',
 
-    'ConditionalField', 'PayloadField', 'SchemaField',
+    'ConditionalField', 'PayloadField', 'SchemaField', 'SwitchField',
     'ForwardMatchField', 'NoValueField',
 
     'ListField', 'OptionField',

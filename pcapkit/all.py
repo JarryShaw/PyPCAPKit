@@ -58,11 +58,11 @@ __all__ = [
     'VersionInfo',                                          # Version
     'NumberField', 'Int32Field', 'UInt32Field',             # numeric protocol fields
     'Int16Field', 'UInt16Field', 'Int64Field', 'UInt64Field',
-    'Int8Field', 'UInt8Field', 'EnumField',
+    'Int8Field', 'UInt8Field', 'EnumField', 'PortEnumField',
     'BytesField', 'StringField', 'BitField',                # text protocol fields
     'PaddingField',
     'ConditionalField', 'PayloadField', 'SchemaField',      # misc protocol fields
-    'ForwardMatchField', 'NoValueField',
+    'SwitchField', 'ForwardMatchField', 'NoValueField',
     'IPv4AddressField', 'IPv6AddressField',                 # IP address protocol fields
     'IPv4InterfaceField', 'IPv6InterfaceField',
     'ListField', 'OptionField',                             # container protocol fields

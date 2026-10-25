@@ -12,6 +12,7 @@ from pcapkit.utilities.exceptions import FieldValueError
 
 __all__ = [
     '_TextField',
+    'BytesField',
     'StringField',
     'DecodedString',
     'BitField',

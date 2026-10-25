@@ -11,9 +11,10 @@ from pcapkit.utilities.exceptions import FieldError, NoDefaultValue
 from pcapkit.utilities.warnings import RegistryWarning, warn
 
 __all__ = [
-    'ConditionalField', 'PayloadField',
+    'ConditionalField', 'PayloadField', 'SchemaField',
     'SwitchField', 'ForwardMatchField',
     'NoValueField',
+    'nested_packet_context',
 ]
 
 if TYPE_CHECKING:
