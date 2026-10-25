@@ -1068,8 +1068,7 @@ class PortEnumField(EnumField):
         """
         # NOTE: imported here rather than at module level, as
         # :mod:`pcapkit.const` itself imports :mod:`pcapkit.corekit`; and tested
-        # against AppType rather than ``self._namespace``, as the
-        # per-transport copies this class replaced did (#1516).
+        # against AppType rather than ``self._namespace`` (#1516).
         from pcapkit.const.reg.apptype import AppType  # pylint: disable=import-outside-toplevel
 
         if isinstance(value, AppType):

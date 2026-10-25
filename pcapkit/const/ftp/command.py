@@ -43,7 +43,7 @@ class FEATCode(EnumRegistry, StrEnum):
        turns up on the wire but names none of these -- the extendability the
        owner conditionally asked to keep on GitHub issue :issue:`860`: unsure what a
        FEAT value absent from the RFC's list means in the CSV table, the owner
-       said that if the expected handling is our current approach, as industry
+       said that if the expected handling is this registry's approach, as industry
        convention has it, the registry stays extendable as is, and then approved
        declaring the registry's keywords as real members with ``_missing_``
        still covering the rest. No custom ``__new__`` here, so the base's
@@ -120,7 +120,7 @@ class FEATCode(EnumRegistry, StrEnum):
         recommendation, while some of this registry's codes are registered in
         lower case -- measured on the IANA CSV: ``base``, ``feat``, ``hist``,
         ``nat6`` and ``secu``, against all-upper-case keywords for the rest,
-        with none mixed. Without this override ``get('BASE')`` raised
+        with none mixed. Without this override ``get('BASE')`` raises
         :exc:`KeyError`, which is the defect GitHub issue :issue:`903`'s audit found.
 
         The obvious objection, answered: :rfc:`5797` uses case *presentationally*
@@ -141,9 +141,9 @@ class FEATCode(EnumRegistry, StrEnum):
         own precedence -- name before value -- and its non-minting ``str``
         path both survive: nothing here calls ``cls(key)``, so a key matching
         no member, folded or not, still raises rather than growing the
-        registry. ``get('ZZ-NOT-REAL')`` therefore still raises
-        :exc:`KeyError` while ``FEATCode('ZZ-NOT-REAL')`` still yields an
-        unregistered member, exactly as before.
+        registry. ``get('ZZ-NOT-REAL')`` therefore raises
+        :exc:`KeyError` while ``FEATCode('ZZ-NOT-REAL')`` yields an
+        unregistered member.
 
         Args:
             key: Name or value to look up. A non-``str`` key is passed
@@ -214,12 +214,11 @@ class FEATCode(EnumRegistry, StrEnum):
 class CommandType(EnumLookup, IntFlag):
     """Type of "kind" of command, based on :rfc:`959#section-4`.
 
-    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
-    issue :issue:`930`, finishing :issue:`877`'s phase 2. Pure re-parenting as far as
-    ``get``/``get_all`` are concerned -- this class defines no ``get`` of its
-    own to reconcile with the base -- and its own :meth:`_missing_` range
-    guard below is untouched, since :class:`~pcapkit.corekit.enum.EnumLookup` does not touch that
-    hook.
+    Built on :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub issue
+    :issue:`930`, which finished :issue:`877`'s phase 2. This class defines no
+    ``get`` of its own, so ``get``/``get_all`` are the base's, and its own
+    :meth:`_missing_` range guard below stands as written, since
+    :class:`~pcapkit.corekit.enum.EnumLookup` does not touch that hook.
 
     """
 
@@ -248,10 +247,9 @@ class CommandType(EnumLookup, IntFlag):
 class ConformanceRequirement(EnumLookup, IntEnum):
     """Expectation for support in modern FTP implementations.
 
-    Re-parented onto :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub
-    issue :issue:`930`, finishing :issue:`877`'s phase 2 -- pure re-parenting, since this
-    class defines neither ``get`` nor ``_missing_`` of its own to reconcile
-    with the base.
+    Built on :class:`~pcapkit.corekit.enum.EnumLookup` per GitHub issue
+    :issue:`930`, which finished :issue:`877`'s phase 2. This class defines
+    neither ``get`` nor ``_missing_`` of its own.
 
     """
 
@@ -611,8 +609,7 @@ class Command(EnumRegistry, StrEnum):
         """
         if not isinstance(key, str):
             # NOTE: unreachable only by the ``str`` annotation, which a caller
-            # at run time need not honour -- this is the path GitHub issue
-            # #1824 fixed.
+            # at run time need not honour (GitHub issue #1824).
             return super().get(key)  # type: ignore[unreachable]
         name = key.upper()
         if name not in cls._member_map_:  # pylint: disable=no-member
@@ -620,14 +617,13 @@ class Command(EnumRegistry, StrEnum):
             # else ``key`` exactly as given -- never ``name`` -- so an
             # unregistered member's value is the caller's own casing, the
             # same convention :meth:`_unregistered_member` documents and
-            # :class:`~pcapkit.const.ftp.command.FEATCode` already followed
+            # :class:`~pcapkit.const.ftp.command.FEATCode` follows
             # unchanged. Two calls naming the same command in different
             # case, e.g. ``get('xyzw')`` and ``get('XYZW')``, therefore build
             # results that are *not* equal -- each is exactly what its own
-            # caller passed. Minting instead returned, through the
+            # caller passed. Minting instead would return, through the
             # ``_member_map_`` cache, the *first* casing seen for every later
-            # call regardless of case; that is the one observable behaviour
-            # change in GitHub issue #860's conversion.
+            # call regardless of case (GitHub issue #860).
             return cls._unregistered_member(default if default is not None else key, name)
         return cls._member_map_[name]  # pylint: disable=no-member
 

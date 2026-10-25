@@ -256,11 +256,11 @@ RANGES = [
 #: fix for :issue:`841`, is whether a label is the final concrete assigned name or only
 #: a notation for readers; the ruling on :issue:`775` kept ``Registered by Xerox`` out
 #: of this set on that test, because a proprietary protocol may expose no name
-#: of its own, so the company name serves as its name. :issue:`775`'s final round
-#: converts it too, so this set does not decide *whether* a range registers --
-#: only *how its name is spelled*: these keep the bare label with no hex
-#: suffix, since the label itself already says nothing was assigned, while
-#: ``Registered by Xerox`` keeps the hex-suffixed name it always rendered.
+#: of its own, so the company name serves as its name. :issue:`775` settled on
+#: an unregistered member for that range too, so this set does not decide
+#: *whether* a range registers -- only *how its name is spelled*: these keep the
+#: bare label with no hex suffix, since the label itself already says nothing
+#: was assigned, while ``Registered by Xerox`` keeps a hex-suffixed name.
 UNASSIGNED_RANGE_NAMES = frozenset({
     'Experimental',
     'Dynamically Assigned Socket Numbers',
@@ -318,7 +318,7 @@ class Socket(Vendor):
         # NOTE: the range names are emitted raw, spaces and all, rather than
         # through ``safe_name``, because that is what the scrape did and what
         # the shipped constant file contains; sanitising them here would rename
-        # every member ``_missing_`` extends the enumeration with; see #507.
+        # every member ``_missing_`` builds for a range; see #507.
         for start, stop, name in RANGES:
             miss.append(f'if 0x{start:04X} <= value <= 0x{stop:04X}:')
             miss.append(f'    #: {self.wrap_comment(name)}')

@@ -72,8 +72,8 @@ def _snapshot_and_restore(vendor: 'Type[Vendor]') -> 'Iterator[None]':
     If that resolution fails -- a crawler outside the real
     :mod:`pcapkit.vendor` tree, such as a test double, or one whose
     ``_dest_path`` genuinely cannot be resolved without instance state --
-    the snapshot is skipped and ``vendor()`` runs unprotected, exactly as it
-    always did; not being able to *name* the file is not itself a reason to
+    the snapshot is skipped and ``vendor()`` runs unprotected; not being able
+    to *name* the file is not itself a reason to
     fail the target. The two triggers diverge from there. A crawler outside
     the real tree fails loudly anyway: :meth:`Vendor.__init__` calls the
     exact same ``_dest_path`` on itself and hits the exact same resolution
@@ -111,7 +111,7 @@ def _snapshot_and_restore(vendor: 'Type[Vendor]') -> 'Iterator[None]':
     here restores the file the symlink pointed at), ``link.py`` is a
     regular file holding the backup's content, and
     ``os.path.islink(link.py)`` is :data:`False`. ``find pcapkit/const
-    -type l`` is still empty, so this remains latent.
+    -type l`` is empty, so this is latent.
 
     Nothing is copied at all when the destination does not exist yet: there
     is no previous file for a failure to discard, so there is nothing this
@@ -154,12 +154,12 @@ def _snapshot_and_restore(vendor: 'Type[Vendor]') -> 'Iterator[None]':
         # pick: collapsing it into an unindented statement after this whole
         # `try` makes "cleanup only runs on success" a fact that has to be
         # re-derived from "`raise` never falls through", rather than one the
-        # structure states directly -- and it silently stopped being true the moment
-        # someone deleted that `raise`.  A mutation test proved it: with the
+        # structure states directly -- and it would silently stop being true the
+        # moment someone deleted that `raise`.  A mutation test showed it: with the
         # `raise` gone, the unindented `os.remove(backup)` still ran, after
         # `os.replace` had already renamed the backup away, so it raised
-        # FileNotFoundError instead of the crawler's real error -- and every
-        # existing test still passed, because run() catches that too.
+        # FileNotFoundError instead of the crawler's real error -- and the rest
+        # of the suite passed regardless, because run() catches that too.
         os.replace(backup, const_file)
         raise
     else:

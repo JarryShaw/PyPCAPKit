@@ -59,9 +59,9 @@ __all__ = ['AppType', 'TransportProtocol', 'TCP', 'UDP', 'SCTP', 'DCCP']
 
 #: Registries imported on first use rather than with this package, as submodule
 #: name to class name -- GitHub issue :issue:`1538`. Generated from IANA's
-#: registry, the two hold about 49,700 lines of members and were about 30% of
-#: ``import pcapkit``, while SCTP's and DCCP's cost a few milliseconds and stay
-#: eager.
+#: registry, the two hold about 49,700 lines of members, about 30% of
+#: ``import pcapkit`` when imported eagerly, while SCTP's and DCCP's cost a few
+#: milliseconds and stay eager.
 _LAZY = {'tcp': 'TCP', 'udp': 'UDP'}
 
 
@@ -69,8 +69,9 @@ class _Registries(dict):
     """:attr:`AppType.__registries__ <pcapkit.const.reg.apptype.apptype.AppType.__registries__>`,
     importing a lazy registry the first time its value is read.
 
-    Every key is present from the start, in the order the eager imports used to
-    insert them, so :func:`len`, ``in`` and iteration import nothing. A lazy
+    Every key is present from the start, in the order
+    :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol` declares them,
+    so :func:`len`, ``in`` and iteration import nothing. A lazy
     registry's value is a :class:`~pcapkit.corekit.module.ModuleDescriptor`
     until the first read replaces it with the class. Every way of reading a
     value is overridden, :meth:`__iter__` included: overriding it is what makes

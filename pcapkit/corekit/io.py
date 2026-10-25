@@ -220,7 +220,7 @@ class SeekableReader(io.BufferedReader):
             One read may return fewer octets than asked for at any point -- a pipe hands
             over what has been written so far, a raw stream what one system call returned
             -- and only an empty one means the stream has ended. Taking the first answer
-            for all there is ended a capture at a chunk boundary (:issue:`1586`), so this
+            for all there is would end a capture at a chunk boundary (:issue:`1586`), so this
             reads until ``minimum`` octets are in hand. Past that it does not wait:
             ``read1``, where the stream has it, returns what is already there. A
             non-blocking stream's :obj:`None` stops the reading. No one read asks for
@@ -338,7 +338,7 @@ class SeekableReader(io.BufferedReader):
             :meth:`io.BytesIO.read`, ``read1`` or ``readline``. On GraalPy those can hand
             back :obj:`bytes` that share the memory of a :class:`io.BytesIO` whose buffer
             is exported, as this one's is, so the next :meth:`_write_buffer`, which writes
-            through the view, changed octets that had already been returned
+            through the view, would change octets that had already been returned
             (:issue:`1963`). A slice of the view, copied, is a copy on every interpreter.
 
         """

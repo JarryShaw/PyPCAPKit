@@ -300,8 +300,9 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
         :attr:`~object.__dict__` shallow-updated from this one.
 
         Note:
-            Every ``__call__`` override in this module calls ``self.__copy__()``
-            directly rather than :func:`copy.copy(self) <copy.copy>`.
+            Every ``__call__`` in :mod:`pcapkit.corekit.fields` copies through
+            ``self.__copy__()`` -- directly, or by way of ``super().__call__`` --
+            rather than :func:`copy.copy(self) <copy.copy>`.
             :func:`copy.copy` still has to *find* this method before it can call
             it -- ``getattr(cls, '__copy__', None)`` -- and that lookup alone
             was profiled at 55,846 calls (~1.7% of an
@@ -309,8 +310,8 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
             ``examples/captures/http.pcap``, one per field
             per packet, all from this exact path. Calling ``__copy__``
             directly is exactly what :func:`copy.copy` would have done once it
-            found it, so this changes nothing about *when* a field is copied or
-            what the copy contains -- only the redundant dispatch is removed.
+            found it, so a field is copied at the same points and to the same
+            contents either way -- only the redundant dispatch is skipped.
             See GitHub issue :issue:`730`.
 
         Returns:
@@ -436,7 +437,7 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
         # ``secrets_data: BytesField(length=lambda pkt: pkt['__length__'])``) --
         # and is thus attacker-controlled: a corrupt or hostile capture can
         # declare an arbitrarily large one. Past :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH`, a
-        # length short of what ``buffer`` holds is provably bogus: the padding
+        # length that ``buffer`` falls short of is provably bogus: the padding
         # cannot recover data that was never in the buffer, only zero-fill for
         # it, and no field this large is legitimate to begin with. Honouring it
         # would allocate and zero-fill up to ``length`` octets on nothing but
@@ -491,7 +492,7 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
 
         # A shortfall no larger than :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL` is padded
         # without consulting the budget, and is not charged to it either. That is
-        # the load-bearing half of this fix rather than a concession in it: it is
+        # load-bearing rather than a concession: it is
         # what keeps the answer a function of *this* read rather than of
         # everything read before it. No shortfall a 16-bit wire length can produce
         # -- which is every shortfall a snapshot-truncated capture, a truncated
@@ -502,8 +503,8 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
         # not tallied against it. A snapshot-truncated capture of offload-sized
         # frames pads some 935 octets for every octet it reads, all of it in this
         # band; charging that to the same ledger would exhaust it within a few
-        # frames and refuse the next large shortfall -- reintroducing exactly the
-        # history-dependence the band exists to remove.
+        # frames and refuse the next large shortfall -- making the answer depend on
+        # history, which is exactly what the band exists to prevent.
         shortfall, ratio = config.MAX_ZERO_PAD_SHORTFALL, config.ZERO_PAD_BUDGET_RATIO
         if shortfall != -1 and padding > shortfall:
             # NOTE: ``-1`` for either term of the allowance lifts the budget.
