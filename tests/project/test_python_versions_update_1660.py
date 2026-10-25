@@ -682,7 +682,7 @@ class TestTheRewrite(unittest.TestCase):
         workflows = module.load_workflows(ROOT)
         data = module.pv.load()
         values = module.pv.outputs(data)
-        facts = module.make_facts(data, values, workflows, (ROOT / module.TIER_FILE).read_text(encoding='utf-8'))
+        facts = module.make_facts(data, values, workflows)
         for path in module.TARGETS:
             if path == module.TIER_FILE:
                 continue
@@ -696,7 +696,7 @@ class TestTheRewrite(unittest.TestCase):
                 self.assertEqual(rewritten, text)
 
     def test_a_claim_rewrites_each_group_and_never_spans_a_break(self) -> None:
-        """#1811 retired the count claims and their spelt-out words; a claim states versions and lines."""
+        """#1811 retired the count claims and their spelt-out words, #2165 the line ones: a claim states versions."""
         module = updater()
         claim = module.Claim(r'(3\.\d+) to (3\.\d+)', lambda facts: ('3.12', '3.16'))
         self.assertEqual(module.apply_claims('Tests 3.11 to 3.15.', [claim], {}), ('Tests 3.12 to 3.16.', []))

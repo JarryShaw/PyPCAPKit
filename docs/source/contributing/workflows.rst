@@ -769,19 +769,19 @@ grepping every workflow file for its name:
      - ``unit-tests.yml``
    * - ``Compat Python 3.11``
      - job ``compatibility``, matrix leg ``3.11``
-     - ``python-compatibility.yml``, ``.github/python-versions.toml:19``
+     - ``python-compatibility.yml``, key ``"3.11"`` of ``.github/python-versions.toml``
    * - ``Compat Python 3.12``
      - job ``compatibility``, matrix leg ``3.12``
-     - ``python-compatibility.yml``, ``.github/python-versions.toml:20``
+     - ``python-compatibility.yml``, key ``"3.12"`` of ``.github/python-versions.toml``
    * - ``Compat Python 3.13``
      - job ``compatibility``, matrix leg ``3.13``
-     - ``python-compatibility.yml``, ``.github/python-versions.toml:21``
+     - ``python-compatibility.yml``, key ``"3.13"`` of ``.github/python-versions.toml``
    * - ``Compat Python 3.14``
      - job ``compatibility``, matrix leg ``3.14``
-     - ``python-compatibility.yml``, ``.github/python-versions.toml:22``
+     - ``python-compatibility.yml``, key ``"3.14"`` of ``.github/python-versions.toml``
    * - ``Compat Python 3.15``
      - job ``compatibility``, matrix leg ``3.15``
-     - ``python-compatibility.yml``, ``.github/python-versions.toml:23``
+     - ``python-compatibility.yml``, key ``"3.15"`` of ``.github/python-versions.toml``
 
 That is the list after `#1633 <https://github.com/JarryShaw/PyPCAPKit/issues/1633>`__,
 which added ``Compat Python 3.15`` and removed ``Compat Python 3.10``. Moving a version
@@ -791,8 +791,8 @@ between the tiers below means editing the ruleset in the same change.
 ``required-checks`` job in ``unit-tests.yml``. ``Compat Python`` is defined by
 one, the ``name:`` of the ``compatibility`` job in ``python-compatibility.yml``, whose
 ``matrix`` comes from :file:`.github/python-versions.toml`: the required legs
-are its supported tier (``python-versions.toml:19-23``), and its KTLO legs
-(``python-versions.toml:16-18``) have names ending in ``(KTLO)``, so no required
+are its supported tier (keys ``"3.11"`` to ``"3.15"``), and its KTLO legs
+(keys ``"3.8"`` to ``"3.10"``) have names ending in ``(KTLO)``, so no required
 context matches one. The comment above ``required-checks`` mentions the string
 without defining it.
 
@@ -1006,8 +1006,8 @@ monitor`` ends the sampler, ``if: always()``. The file is uploaded as
 only where the runner survives the tests. `always()
 <https://docs.github.com/en/actions/reference/workflows-and-actions/expressions#always>`__
 runs a step "even when canceled", and docs.github.com says nothing of a runner's
-shutdown, after which the runner evaluates no later step's condition (actions/runner
-``src/Runner.Worker/StepsRunner.cs:205-208``, at ``796cc18ff``). Job 116057255255
+shutdown, after which the runner evaluates no later step's condition (actions/runner's
+``StepsRunner.RunAsync``, at ``796cc18ff``). Job 116057255255
 skipped every step after its tests, ``Post Run actions/checkout@v7`` too, whose
 `post-if
 <https://docs.github.com/en/actions/reference/workflows-and-actions/metadata-syntax#runspost-if>`__

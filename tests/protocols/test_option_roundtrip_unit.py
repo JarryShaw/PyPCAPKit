@@ -125,8 +125,8 @@ class Gap(NamedTuple):
     #: messages whose stable parts are not contiguous, so that a fragment does
     #: not have to bake in a rendering that is itself defective.
     fragment: 'str | tuple[str, ...]'
-    #: The defect, named with the ``file:line`` that causes it. This is the
-    #: field that makes the entry worth keeping rather than just silencing.
+    #: The defect, naming the function, class or method that causes it. This is
+    #: the field that makes the entry worth keeping rather than just silencing.
     defect: 'str'
 
 
@@ -594,7 +594,8 @@ class OptionRoundTripTests(unittest.TestCase):
                         outcome.status, 'OK',
                         f'{case.label} no longer round-trips: {outcome.detail}. '
                         f'If this is a newly found defect, add it to '
-                        f'EXPECTED_FAILURES with the file:line that causes it -- '
+                        f'EXPECTED_FAILURES naming the function, class or method that '
+                        f'causes it -- '
                         f'do not change the case to avoid it.'
                     )
                     continue

@@ -267,9 +267,9 @@ class DispatchRegistryTests(unittest.TestCase):
                         outcome.reached, True,
                         f'{case.label} no longer dispatches to {case.target!r}: '
                         f'chain was {outcome.chain!r} ({outcome.detail}). If this '
-                        f'is a newly found defect, add it to KNOWN_DEGRADED with '
-                        f'the file:line that causes it -- do not change the case '
-                        f'to avoid it.'
+                        f'is a newly found defect, add it to KNOWN_DEGRADED naming '
+                        f'the function, class or method that causes it -- do not '
+                        f'change the case to avoid it.'
                     )
                     continue
 
