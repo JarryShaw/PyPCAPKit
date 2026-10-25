@@ -198,7 +198,7 @@ class SMFHashBasedDPDOption(SMFDPDOption):
 
 @info_final
 class PDMOption(Option):
-    """Data model for IPv6-Opts Performance Diagnostic Metrics (PDM) option."""
+    """Data model for IPv6-Opts Performance and Diagnostic Metrics (PDM) option."""
 
     #: Scale delta time last received.
     scaledtlr: 'int'
@@ -352,7 +352,7 @@ class MPLOption(Option):
 
     """
 
-    #: Seed length.
+    #: Seed-ID type, which gives the length of the Seed-ID.
     seed_type: 'SeedID'
     #: Flags.
     flags: 'MPLFlags'

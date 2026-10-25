@@ -397,7 +397,9 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
 
         Args:
             code: HOPOPT option code.
-            meth: Method name or callable to parse and/or construct the option.
+            meth: Name ``X`` of the ``_read_opt_X`` and ``_make_opt_X``
+                methods, or a ``(parser, constructor)`` pair of callables, see
+                :attr:`__option__`.
 
         Warns:
             RegistryWarning: If a different entry is already registered for
@@ -1381,8 +1383,8 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         Note:
             Options given as a :obj:`list` are fresh input: padding options in
             it are dropped, and padding is inserted after each option to align
-            the header. Options given as an
-            :class:`~pcapkit.corekit.multidict.OrderedMultiDict`, i.e. parsed
+            the header. Options given as a mapping, such as the
+            :class:`~pcapkit.corekit.infoclass.OrderedMultiInfo` of parsed
             data, are emitted in order with their own padding options kept, and
             padding is added only at the end if the header is not aligned.
 

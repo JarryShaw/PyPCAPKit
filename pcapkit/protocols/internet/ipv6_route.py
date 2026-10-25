@@ -386,7 +386,9 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
 
         Args:
             code: IPv6-Route data type code.
-            meth: Method name or callable to parse and/or construct the data.
+            meth: Name ``X`` of the ``_read_data_type_X`` and
+                ``_make_data_type_X`` methods, or a ``(parser, constructor)`` pair
+                of callables, see :attr:`__routing__`.
 
         Warns:
             RegistryWarning: If a different entry is already registered for

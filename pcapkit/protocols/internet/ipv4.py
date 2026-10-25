@@ -583,7 +583,9 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
 
         Args:
             code: IPv4 option code.
-            meth: Method name or callable to parse and/or construct the option.
+            meth: Name ``X`` of the ``_read_opt_X`` and ``_make_opt_X``
+                methods, or a ``(parser, constructor)`` pair of callables, see
+                :attr:`__option__`.
 
         Warns:
             RegistryWarning: If a different entry is already registered for

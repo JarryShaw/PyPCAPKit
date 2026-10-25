@@ -98,6 +98,7 @@ Auxiliary Functions
 
 .. autofunction:: pcapkit.protocols.schema.internet.ipv6_route.ipv6_route_data_selector
 .. autofunction:: pcapkit.protocols.schema.internet.ipv6_route.ipv6_route_data_length
+.. autofunction:: pcapkit.protocols.schema.internet.ipv6_route.ipv6_route_header_length
 
 Data Models
 -----------

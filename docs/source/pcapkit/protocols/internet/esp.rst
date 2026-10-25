@@ -43,7 +43,9 @@ negotiated out of band. Therefore:
    :show-inheritance:
 
    .. autoproperty:: name
+   .. autoproperty:: alias
    .. autoproperty:: length
+   .. autoproperty:: protocol
 
    .. automethod:: id
 
