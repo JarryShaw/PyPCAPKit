@@ -1346,7 +1346,8 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
 
         # NOTE: Construction only. A keyword that names no parameter of this
         # protocol is a mistake rather than a value. Every ``make`` in the tree
-        # ends its signature with ``**kwargs`` and never reads it, so an unknown
+        # ends its signature with ``**kwargs``, and none but the dispatching
+        # ``HTTP.make`` reads it, so an unknown
         # keyword would reach the schema as nothing at all and the field would
         # keep its default -- ``TCP_BASE`` asking for ``seq=1``, which
         # ``TCP.make`` spells ``seq_no``, would yield ``seq = 0`` with no warning

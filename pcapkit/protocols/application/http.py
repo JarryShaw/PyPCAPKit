@@ -511,12 +511,12 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
               :exc:`~pcapkit.utilities.exceptions.ProtocolError` becomes under
               :func:`~pcapkit.corekit.decorators.beholder`. The nine-octet frame header is therefore
               never used to *identify* HTTP/2 ahead of HTTP/1: as identification it misfires on
-              binary HTTP/1 bodies, which is precisely how garbage text was classified HTTP/2 to
-              begin with. A bare frame is parsed as HTTP/2 only by the fall-through below, and only
-              if its header is one a conforming sender could write (see ``_test_http2_frame()``): a
-              frame type :rfc:`9113` defines, no undefined flag, and a stream that type may be sent
-              on. Nine zero octets -- a ``DATA`` frame on stream 0, a protocol error under
-              :rfc:`9113#section-6.1` -- are not guessed as HTTP/2.
+              binary HTTP/1 bodies, and classifies garbage text as HTTP/2. A bare frame is parsed
+              as HTTP/2 only by the fall-through below, and only if its header is one a conforming
+              sender could write (see ``_test_http2_frame()``): a frame type :rfc:`9113` defines,
+              no undefined flag, and a stream that type may be sent on. Nine zero octets -- a
+              ``DATA`` frame on stream 0, a protocol error under :rfc:`9113#section-6.1` -- are not
+              guessed as HTTP/2.
 
         """
         # NOTE: Positive identification, before any parse attempt. The preface is
@@ -605,7 +605,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         # <pcapkit.corekit.fields.field.FieldBase.length>` re-raises a
         # negative-length template as
         # :exc:`~pcapkit.utilities.exceptions.ProtocolError` -- so the
-        # suppression only guards whatever path is not yet known to do likewise.
+        # suppression only guards whatever path is not known to do likewise.
         #
         # Suppressing it on the *first* arm is wrong: nine byte patterns over
         # lengths 0-24 raised only ``ProtocolError`` through ``httpv1.HTTP``, so

@@ -103,7 +103,7 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
     #: :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
     #: and :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     #: Each value is a :class:`~pcapkit.corekit.module.ModuleDescriptor` naming the
-    #: module and class, or a :class:`~pcapkit.protocols.protocol.Protocol` subclass.
+    #: module and class, or a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
     __proto__ = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
         {
@@ -149,11 +149,11 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
         Arguments:
             code: protocol code as in :class:`~pcapkit.const.reg.linktype.LinkType`
             protocol: module descriptor or a
-                :class:`~pcapkit.protocols.protocol.Protocol` subclass
+                :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass
 
         Raises:
             pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a
-                class, or not a :class:`~pcapkit.protocols.protocol.Protocol` subclass.
+                class, or not a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
 
         Warns:
             pcapkit.utilities.warnings.RegistryWarning: If this link type is
