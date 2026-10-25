@@ -8050,7 +8050,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         prefix_val = ipaddress.ip_network(prefix)
         if prefix_val.version != 6:
-            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid movile network prefix: {prefix!r}')
+            raise ProtocolError(f'{self.alias}: [OptNo {type}] invalid mobile network prefix: {prefix!r}')
         prefix_length = prefix_val.prefixlen
         prefix_addr = prefix_val.network_address
 

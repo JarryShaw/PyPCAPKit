@@ -454,7 +454,7 @@ class TSOption(Option, code=Enum_OptionNumber.TS):
                     ts_val = datetime.timedelta(milliseconds=ts)
                 timestamp.add(ip_val, ts_val)
         else:
-            warn(f'IPv4: [OptNo {self.type}] invalid format: unknown timestmap flag: {ts_flag}', ProtocolWarning)
+            warn(f'IPv4: [OptNo {self.type}] invalid format: unknown timestamp flag: {ts_flag}', ProtocolWarning)
             self.data = self.ts_data[:used]
             timestamp = tuple(self.data)
 
