@@ -271,11 +271,11 @@ class TestNonSeekableStream(unittest.TestCase):
     def test_a_live_pipe_hands_over_each_frame_as_it_arrives(self) -> None:
         """A frame does not wait for the stream to go on past it.
 
-        ``pcapkit -`` reads a live capture. Measuring a record by reading a buffer's
-        worth past it held each frame back until that much more had arrived; and
-        before the fix, the second measurement of each record waited for at least one
-        more octet. The writer here sends one record, then waits for the reader to
-        have it before sending the rest.
+        ``pcapkit -`` reads a live capture. Guards against two defects: measuring a
+        record by reading a buffer's worth past it holds each frame back until that
+        much more has arrived, and a second measurement of each record waits for at
+        least one more octet. The writer here sends one record, then waits for the
+        reader to have it before sending the rest.
 
         """
         for name, data, first in (

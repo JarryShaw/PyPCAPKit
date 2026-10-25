@@ -39,8 +39,9 @@ stopped exercising anything. They **count handles**, by two independent means:
   than the Python wrapper around it, which is the thing that actually runs out.
   It is Linux-only and skipped elsewhere.
 
-Both were measured against ``6c3d1b0d9`` before the fix: path-given leaked
-exactly 1, stream-given left the caller's handle closed and unreadable.
+Both guard against the defects of #610: a path-given extraction leaking
+exactly one handle, and a stream-given one leaving the caller's handle closed
+and unreadable.
 
 """
 
@@ -167,7 +168,7 @@ class ExtractorClosesWhatItOpens(unittest.TestCase):
         """Nothing is left open on the capture once ``extract`` has returned.
 
         Measured two ways, so a future change that defeats one still fails on the
-        other. Before #610 both reported exactly one handle left open.
+        other. Without the fix (#610), both report exactly one handle left open.
 
         """
         import pcapkit
@@ -248,8 +249,8 @@ class ExtractorClosesWhatItOpens(unittest.TestCase):
         """``_cleanup`` runs twice for one extraction, and closing twice is fine.
 
         Its own docstring records the two routes -- the EOF path and
-        :meth:`Extractor.run` -- so now that the path-given case actually closes
-        the handle, the second call has to tolerate an already-closed one.
+        :meth:`Extractor.run` -- and since the path-given case closes the
+        handle, the second call has to tolerate an already-closed one.
 
         """
         import pcapkit
@@ -271,8 +272,8 @@ class ExtractorLeavesTheCallersStreamAlone(unittest.TestCase):
 
         ``closed`` alone would be a thin assertion, so the read is done as well:
         the failure this guards against is a caller losing access to a file it
-        still holds, and that is what actually demonstrates it. Before #610 the
-        handle came back closed and the read raised
+        still holds, and that is what actually demonstrates it. Without the fix
+        (#610), the handle comes back closed and the read raises
         ``ValueError: seek of closed file``.
 
         """

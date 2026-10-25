@@ -2,7 +2,7 @@
 """dpkt hands IPv4 reassembly a whole header. C.f. #1616.
 
 dpkt cut the input at the Total Length, so one shorter than the IHL cut the
-header itself (#1616). It now cuts no shorter than the IHL. A header whose IHL
+header itself (#1616). It cuts no shorter than the IHL. A header whose IHL
 runs past the captured octets, which dpkt still decodes, is no input at all.
 
 Every capture is built here, so the module is in the unit tier.

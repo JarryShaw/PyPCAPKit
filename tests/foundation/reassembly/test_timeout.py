@@ -226,9 +226,9 @@ class IPReassemblyTimeoutTests(unittest.TestCase):
 class IPLooseModeTests(unittest.TestCase):
     """``strict=False``, where IP reports one contiguous payload, not the runs.
 
-    This branch had no test, and it is the one where the payload -- not merely the
-    ``completed`` flag -- changed: an unterminated datagram used to come back as
-    65534 octets of preallocated buffer, reported *complete*.
+    This branch guards the payload, not merely the ``completed`` flag: without the
+    fix, an unterminated datagram comes back as 65534 octets of preallocated
+    buffer, reported *complete*.
     """
 
     def setUp(self) -> None:

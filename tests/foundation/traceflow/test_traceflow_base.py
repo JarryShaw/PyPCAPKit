@@ -229,9 +229,9 @@ class TraceFlowBaseTests(unittest.TestCase):
     def test_traceflow_subclass_rejects_unrecognised_keyword(self) -> None:
         """A misspelled class keyword raises instead of being swallowed.
 
-        It used to land in ``**kwargs``, get dropped by the bare
-        ``super().__init_subclass__()``, and leave the class registered under its
-        own class name -- no exception, no warning.
+        Guards against it landing in ``**kwargs``, being dropped by a bare
+        ``super().__init_subclass__()``, and leaving the class registered under
+        its own class name -- no exception, no warning.
 
         The keyword used here is deliberately *not* ``name``; see the sibling
         test in ``tests/foundation/reassembly/test_reassembly_base.py`` for why

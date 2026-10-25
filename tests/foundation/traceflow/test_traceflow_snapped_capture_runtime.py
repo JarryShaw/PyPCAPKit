@@ -4,11 +4,11 @@
 Every frame of :file:`tcp.pcap` snapped by 4 octets, with its original length
 kept, cuts four of its seven TCP headers short: frame 1 inside its options and
 frames 2, 4 and 7 inside a Timestamps option. The TCP parser rejects those
-headers by design (#1404), and the default engine's adapters used to skip the
-frames, tracing ``(3, 5) (6,)``. :mod:`dpkt`, :mod:`scapy` and Wireshark's
-``tcp.stream`` all trace ``(1, 2, 6, 7) (3, 4, 5)``, the flows of the full
-capture, and so does the default engine now that its adapters read the fixed
-20-octet header of a rejected segment.
+headers by design (#1404), and adapters that skip those frames trace
+``(3, 5) (6,)``. :mod:`dpkt`, :mod:`scapy` and Wireshark's ``tcp.stream`` all
+trace ``(1, 2, 6, 7) (3, 4, 5)``, the flows of the full capture, and so does the
+default engine, whose adapters read the fixed 20-octet header of a rejected
+segment.
 
 The snapped capture is built in memory, as PCAP and as PCAP-NG. The module
 reads the generated :file:`tcp.pcap`, so it belongs to the fixture-dependent

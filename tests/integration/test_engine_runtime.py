@@ -74,13 +74,12 @@ class EngineRuntimeTests(unittest.TestCase):
     def test_pyshark_engine_is_refused_before_asyncio_can_break(self) -> None:
         """On 3.14 the engine is declined by the preflight, not by pyshark.
 
-        This test used to assert the raw :exc:`AttributeError` from inside
-        ``pyshark``, which was the honest description of the behaviour until
         :meth:`PyShark.unsupported_reason
-        <pcapkit.foundation.engines.pyshark.PyShark.unsupported_reason>` began
-        answering the question first. The preflight now names the interpreter as
-        the cause and falls back, so the exception never happens -- and the
-        extraction succeeds with ``pcapkit``'s own parser rather than failing.
+        <pcapkit.foundation.engines.pyshark.PyShark.unsupported_reason>` answers
+        the question first: it names the interpreter as the cause and falls back,
+        so the raw :exc:`AttributeError` from inside ``pyshark`` never happens --
+        and the extraction succeeds with ``pcapkit``'s own parser rather than
+        failing.
 
         """
         from pcapkit.interface import extract

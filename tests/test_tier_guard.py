@@ -1204,12 +1204,11 @@ class AuditTests(unittest.TestCase):
         alone preserves that -- a stable sort leaves a tie in walk order. Only
         ``col_offset`` puts the pair back.
 
-        A tuple of two calls, which is what this module used to hold here, pins
-        neither half: :class:`ast.Tuple` keeps its elements in one field list, so
-        the walk yields them left to right already and the test passed with
-        ``col_offset`` dropped. :class:`ast.Dict` is the other shape that gets a
-        single line wrong, since all of its ``keys`` are walked before any of its
-        ``values``.
+        A tuple of two calls would pin neither half: :class:`ast.Tuple` keeps
+        its elements in one field list, so the walk yields them left to right
+        already and the test passes with ``col_offset`` dropped.
+        :class:`ast.Dict` is the other shape that gets a single line wrong,
+        since all of its ``keys`` are walked before any of its ``values``.
 
         """
         module = write_module(self.tmp_path, 'test_order_unit.py', """
@@ -1538,11 +1537,11 @@ class DependencyRequirementTests(unittest.TestCase):
     def test_all_is_narrowed_to_core_addons_by_910(self) -> None:
         """#910: ``all`` means core addons only, not every engine an end user might want.
 
-        The owner's ruling narrowed ``all`` to the core addons -- ``cli``,
-        ``crypto`` and ``pycrate`` (``NGAP``) stay, and the third-party
-        capture engines that used to be bundled here (``dpkt``, ``scapy``,
-        ``pyshark``, ``pypcapfile``) move out to their own on-demand extras,
-        covered by :meth:`test_dev_carries_what_all_used_to_for_the_toolchain`.
+        The owner's ruling limits ``all`` to the core addons -- ``cli``,
+        ``crypto`` and ``pycrate`` (``NGAP``) -- and the third-party capture
+        engines (``dpkt``, ``scapy``, ``pyshark``, ``pypcapfile``) have their
+        own on-demand extras instead, covered by
+        :meth:`test_dev_carries_what_all_used_to_for_the_toolchain`.
 
         """
         declared = _dependency_gates.declared_requirements()
@@ -1596,7 +1595,7 @@ class DependencyRequirementTests(unittest.TestCase):
         self.assertNotIn('setuptools', names)
 
     def test_every_extra_any_pytest_job_installs_is_declared(self) -> None:
-        """An install line naming an extra that no longer exists resolves to nothing."""
+        """An install line naming an extra that does not exist resolves to nothing."""
         if not _dependency_gates.WORKFLOW.is_file():
             self.skipTest(f'{_dependency_gates.WORKFLOW} is not present')
 
@@ -2175,20 +2174,15 @@ class DependencyGateCoverageTests(unittest.TestCase):
         """#779: a lint-tier tool gated visibly, and declining the install line anyway.
 
         ``mypy`` is a :file:`Pipfile` ``[dev-packages]`` entry and is in no
-        :file:`pyproject.toml` extra, so before #779 it had no
-        :data:`~tests._dependency_gates.MODULE_PROVIDERS` entry at all and an
-        ``@unittest.skipUnless`` gate on it was not merely undesirable but
-        *impossible*: adding one to
+        :file:`pyproject.toml` extra, so without a
+        :data:`~tests._dependency_gates.MODULE_PROVIDERS` entry an
+        ``@unittest.skipUnless`` gate on it is not merely undesirable but
+        *impossible* (#779): adding one to
         :file:`tests/vendor/test_vendor_reg_apptype_generator_unit.py` and
-        nothing else made this class report 2 failures and 5 errors of its 10
-        tests, every one of those errors a bare ``KeyError: 'mypy'`` out of
+        nothing else makes this class fail and error, every error a bare
+        ``KeyError: 'mypy'`` out of
         :func:`~tests._dependency_gates.extras_providing`, upstream of any
         :data:`~tests._dependency_gates.DEPENDENCY_GATE_EXCLUSIONS` filtering.
-        (#779 reports 4 errors of 9 tests for the same mutation; it was written
-        before #774 added
-        :meth:`test_the_vendor_extra_closes_every_job_reaching_the_vendor_gates`,
-        which is the tenth and the fifth error. Re-measured here rather than
-        copied.)
         The entry is what makes the gate expressible; the exclusion is what
         records that *closing* the gap would be the wrong fix, since a type
         checker belongs to :file:`.github/workflows/lint.yml` rather than to a
@@ -2216,11 +2210,11 @@ class DependencyGateCoverageTests(unittest.TestCase):
                 self.assertIn(('HAS_MYPY', job), gaps)
         # integration and pypcap-parity select by fixture tier and never
         # collect tests/vendor/ at all -- the same reason they are absent from
-        # HAS_VENDOR_DEPS above. engine-tests (#849) no longer reaches it
-        # either: each matrix.engine cell now runs an explicit TEST_PATHS list
+        # HAS_VENDOR_DEPS above. engine-tests (#849) does not reach it
+        # either: each matrix.engine cell runs an explicit TEST_PATHS list
         # and none of those lists names tests/vendor/ -- see the HAS_MYPY
-        # exclusion's own reason for why that is a real, disclosed change
-        # rather than a mistake here.
+        # exclusion's own reason for why that is real and disclosed rather
+        # than a mistake here.
         for job in ('integration', 'pypcap-parity', 'engine-tests'):
             with self.subTest(does_not_reach=job):
                 self.assertNotIn(('HAS_MYPY', job), gaps)
@@ -2356,7 +2350,7 @@ class DependencyGateCoverageTests(unittest.TestCase):
         module the same deliberate contract a required one already has, instead
         of an accident of whichever caller reaches it first.
 
-        Both messages below still earn their place now that
+        Both messages below earn their place even though
         :func:`~tests._dependency_gates._top_level_providers` names the module
         and the fix on its own (#779): what that cannot say is *which gate*
         wanted the module, and the location is most of what makes the failure
@@ -2563,7 +2557,7 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
             gaps = {(gap.flag, gap.job): gap
                     for gap in _dependency_gates.dependency_gate_gaps()}
 
-            # engine-tests (#849) no longer reaches tests/project/ at all -- see
+            # engine-tests (#849) does not reach tests/project/ at all -- see
             # test_the_isort_gate_is_visible_and_closed_by_the_test_extra above.
             # #1954: the module is a project pin, which project-tests runs instead of test.
             self.assertEqual(
@@ -2587,23 +2581,17 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
     def test_removing_dpkt_is_caught_on_every_job_that_installs_it(self) -> None:
         """#729's defect, restaged. Every job installing ``DPKT`` via a comma list goes dark.
 
-        #751 added ``engine-tests`` and ``pypcap-parity`` to the jobs this test
-        used to name, each carrying its own ``DPKT`` for the same reason as the
-        original ones -- ``engine-tests`` for
-        :file:`tests/foundation/engines/test_runtime_engines.py`'s reused
-        ``HAS_RUNTIME``, ``pypcap-parity`` for
+        ``pypcap-parity`` (#751) is among them, carrying its own ``DPKT`` for
         :file:`examples/generators/make_samples.py`.
 
-        #849's rebuild moves engine-tests off the shared comma-joined extras
-        list this test doctors: DPKT is now chosen per matrix.engine cell by a
-        ``case "$ENGINE" in DPKT) EXTRA=DPKT; ... esac`` block, so the literal
-        ``'DPKT,'``/``',DPKT'`` substitution below no longer touches it at all
-        -- and, separately, engine-tests no longer reaches
-        test_runtime_engines.py regardless (see the HAS_RUNTIME exclusion),
-        so there is no longer a DPKT-via-engine-tests gap for this doctoring
-        to reopen, and it is not among the jobs checked here. (#1538 later
-        dropped that DPKT cell outright: it ran only test_dpkt_unit.py, which
-        ``test`` runs too.)
+        engine-tests is not: it chooses its extra per matrix.engine cell (#849)
+        rather than from the shared comma-joined extras list this test doctors,
+        so the literal ``'DPKT,'``/``',DPKT'`` substitution below does not touch
+        it -- and, separately, engine-tests does not reach
+        test_runtime_engines.py regardless (see the HAS_RUNTIME exclusion), so
+        there is no DPKT-via-engine-tests gap for this doctoring to reopen. Nor
+        has it a DPKT cell (#1538): that cell ran only test_dpkt_unit.py, which
+        ``test`` runs too.
 
         """
         text = _dependency_gates.WORKFLOW.read_text(encoding='utf-8')
@@ -2812,8 +2800,8 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
     def test_a_non_distribution_flag_is_not_reported_even_when_doctored_ambiguous(self) -> None:
         """:data:`~tests._dependency_gates.NON_DISTRIBUTION_FLAGS`, exercised for real.
 
-        ``HAS_PYSHARK`` (used to stand in for this mechanism elsewhere) never
-        reaches :func:`~tests._dependency_gates.ambiguous_satisfactions`'s
+        ``HAS_PYSHARK`` never reaches
+        :func:`~tests._dependency_gates.ambiguous_satisfactions`'s
         ``MUTUALLY_EXCLUSIVE_IMPORTS`` branch at all -- ``pyshark`` has one
         provider -- so naming it in ``NON_DISTRIBUTION_FLAGS`` would still
         report nothing whether or not this function's own skip line ran,
@@ -2841,18 +2829,19 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
         self.assertNotIn(('pypcap-parity', 'HAS_PYPCAP'), findings)
 
     def test_deleting_an_engine_from_the_matrix_list_is_caught(self) -> None:
-        """#849's second cross-review, verbatim: ``_engine_matrix_variants`` never read ``engine:``.
+        """#849's second cross-review: ``_engine_matrix_variants`` reads ``engine:``.
 
-        Before this test's fix, the function built its :class:`Job` set purely from the
-        ``case "$ENGINE" in ...`` arms and never checked them against the ``engine:``
-        matrix list at all, so deleting ``- PyShark`` -- the ordinary way anyone retires a
-        cell -- left the case arms (still naming ``PyShark``) as the only source of truth.
-        Measured against the unfixed function: ``pytest_jobs`` raised nothing, the
-        returned :class:`Job` set still credited a ``PyShark`` engine-tests cell with
-        ``test_pyshark_engine.py``'s 3 ``HAS_PYSHARK`` methods, and
+        Guards against the function building its :class:`Job` set purely from the
+        ``case "$ENGINE" in ...`` arms without checking them against the ``engine:``
+        matrix list, so that deleting ``- PyShark`` -- the ordinary way anyone
+        retires a cell -- leaves the case arms (still naming ``PyShark``) as the
+        only source of truth.
+        Measured without the fix: ``pytest_jobs`` raised nothing, the returned
+        :class:`Job` set still credited a ``PyShark`` engine-tests cell with
+        ``test_pyshark_engine.py``'s ``HAS_PYSHARK`` methods, and
         ``dependency_gate_gaps`` reported no ``('HAS_PYSHARK', 'engine-tests')`` gap --
-        green, while the retired cell no longer runs in CI at all. This is the hard
-        acceptance criterion: this exact doctoring must raise :class:`AssertionError` now.
+        green, while the retired cell did not run in CI at all. This is the hard
+        acceptance criterion: this exact doctoring must raise :class:`AssertionError`.
 
         """
         doctored = doctored_workflow(self, '          - PyShark\n', '')
@@ -2865,12 +2854,11 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
         self.assertIn('PyShark', message)
 
     def test_a_second_baseline_install_line_is_caught(self) -> None:
-        """The pre-existing ``base_installs`` branch, exercised for the first time.
+        """The ``base_installs`` branch of ``_engine_matrix_variants``, exercised.
 
-        Grepping this file for ``_engine_matrix_variants`` before this change returned
-        nothing at all -- none of this function's ``raise AssertionError`` branches had a
-        test, this guard's own docstring notwithstanding ("the only honest way to show a
-        guard works is to break the thing it guards and watch it fire"). Doctoring in a
+        Each of that function's ``raise AssertionError`` branches needs a test, as this
+        guard's own docstring says ("the only honest way to show a guard works is to
+        break the thing it guards and watch it fire"). Doctoring in a
         second literal ``pip install -e '.[...]'`` baseline line makes the count the
         function checks for (exactly one) come out to two.
 
@@ -2889,7 +2877,7 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
         self.assertIn('2', message)
 
     def test_deleting_every_test_paths_case_arm_is_caught(self) -> None:
-        """The pre-existing ``engine_paths`` empty branch, exercised for the first time.
+        """The empty ``engine_paths`` branch of ``_engine_matrix_variants``, exercised.
 
         Without a single ``ENGINE) TEST_PATHS="..."`` arm left, this guard has nothing to
         build a :class:`Job` from at all and must say so rather than returning an empty,
@@ -2916,10 +2904,10 @@ class DependencyGateFalsifiabilityTests(unittest.TestCase):
         self.assertIn('TEST_PATHS', message)
 
     def test_a_test_paths_arm_with_no_matching_extra_arm_is_caught(self) -> None:
-        """The pre-existing per-engine ``extra is None`` branch, exercised for the first time.
+        """``_engine_matrix_variants``'s per-engine ``extra is None`` branch, exercised.
 
         Commenting out one engine's ``EXTRA=`` arm -- rather than renaming it, which the
-        new matrix-list-vs-case-arms equality check above would catch first, for a
+        matrix-list-vs-case-arms equality check above would catch first, for a
         different reason -- leaves Scapy declared in the ``engine:`` list and still
         present in ``engine_paths`` (so the equality check sees the same engines on
         both sides and stays quiet), but with no ``EXTRA=`` arm of its own: exactly the
@@ -3105,13 +3093,13 @@ class DependencyGateDegradationTests(unittest.TestCase):
                              {gap.flag for gap in _dependency_gates.dependency_gate_gaps()})
 
     def test_an_unmapped_module_names_itself_and_the_table_to_add_it_to(self) -> None:
-        """#779's second defect: the table lookup used to die on a bare ``KeyError``.
+        """#779's second defect: the table lookup must not die on a bare ``KeyError``.
 
         Auditing gates is this module's whole purpose, so the worst available
-        answer to an unrecognised one was the one it gave: ``KeyError: 'mypy'``
-        raised from a dict subscript three call sites deep, naming neither the
-        fix nor even the table that wanted the entry. All three subscripts now
-        go through :func:`~tests._dependency_gates._top_level_providers`, so
+        answer to an unrecognised one is ``KeyError: 'mypy'`` raised from a dict
+        subscript three call sites deep, naming neither the fix nor even the
+        table that wanted the entry. Every such subscript goes through
+        :func:`~tests._dependency_gates._top_level_providers`, so
         every entry point fails the same way and says the same thing --
         :func:`~tests._dependency_gates.extras_providing` (which
         :func:`~tests._dependency_gates.dependency_gate_gaps` reaches),
@@ -3200,16 +3188,16 @@ class DependencyGateDegradationTests(unittest.TestCase):
     def test_an_unrelated_flags_unmapped_exclusion_never_reaches_disqualification(self) -> None:
         """The ordering fix: the contested-scope check has to run *first*.
 
-        :func:`~tests._dependency_gates.ambiguous_satisfactions` used to
-        compute disqualified providers for every gate a job reaches, before
-        checking whether the gate's own required module was even in
+        Guards against :func:`~tests._dependency_gates.ambiguous_satisfactions`
+        computing disqualified providers for every gate a job reaches before
+        checking whether the gate's own required module is even in
         :data:`~tests._dependency_gates.MUTUALLY_EXCLUSIVE_IMPORTS`. A flag
         with a negated probe on some module with no
         :data:`~tests._dependency_gates.MODULE_PROVIDERS` entry, and nothing
-        to do with a contested name, would crash the entire function via
+        to do with a contested name, then crashes the entire function via
         :func:`~tests._dependency_gates._disqualified_providers` rather than
         being scoped out of it. This pins a synthetic flag shaped exactly
-        that way and shows it no longer crashes.
+        that way and shows it does not crash.
 
         """
         with unittest.mock.patch.object(

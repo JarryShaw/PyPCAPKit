@@ -23,7 +23,7 @@ from tests._support import reimport_once_per_class
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None
                   for name in ('tbtrim', 'aenum', 'chardet', 'dictdumper'))
 
-#: The label both colliding flows used to share.
+#: The label both colliding flows share when labels are not made unique.
 LABEL = '192.0.2.1_12345-198.51.100.2_443-300.0'
 
 

@@ -749,8 +749,8 @@ class StandInsDoNotOutliveTheirTestTests(unittest.TestCase):
     way and the assertion would pass whether or not the test case had been
     fixed.
 
-    Before the fix this failed on any ordering, on the fake ``ProtocolBase`` and
-    the stub ``pcapkit`` that ``ProtoChainTests.setUp`` left behind.
+    Without the fix this fails on any ordering, on the fake ``ProtocolBase`` and
+    the stub ``pcapkit`` that ``ProtoChainTests.setUp`` leaves behind.
 
     """
 
@@ -833,7 +833,7 @@ class LoadedModulesDoNotOutliveTheirTestTests(unittest.TestCase):
     different helper. :func:`~tests._support.load_module` writes to
     :data:`sys.modules` twice over -- the module it was asked for, and a bare stub
     package for each parent of that module's dotted name, via
-    :func:`~tests._support.ensure_package` -- and before the fix neither write was
+    :func:`~tests._support.ensure_package` -- and without the fix neither write is
     taken back off again.
 
     What that cost: ``pcapkit``, ``pcapkit.corekit`` and ``pcapkit.utilities``
@@ -848,15 +848,15 @@ class LoadedModulesDoNotOutliveTheirTestTests(unittest.TestCase):
     reason the sibling class gives and with more force here:
     :func:`tests.conftest.restore_module_table` repairs the region after every
     test, so under :mod:`pytest` these assertions pass whether or not the helper
-    was ever fixed. That guard arrived with #662, it is why the two-file
-    :mod:`pytest` repro quoted in #674 no longer fails, and it is not a substitute
+    was ever fixed. That guard (#662) is why the two-file :mod:`pytest` repro
+    quoted in #674 passes under :mod:`pytest`, and it is not a substitute
     for the helper putting its own writes back -- the stdlib runner reads no
     ``conftest.py`` at all, and a suite-wide net that hides a helper's bug also
     hides the next one.
 
     The polluting cases are *borrowed* rather than written here, so what is pinned
     is the behaviour of call sites the suite actually has. Every one of them
-    leaked before the fix, and none of them looked wrong.
+    leaks without the fix, and none of them looks wrong.
 
     """
 

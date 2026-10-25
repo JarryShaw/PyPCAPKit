@@ -4,8 +4,8 @@
 A capture snapped inside the TCP header leaves a Data Offset running past the
 captured octets, and the TCP parser rejects such a header by design (#1404), so
 the segment arrives as ``Raw``. The flow tracing and reassembly adapters of
-:mod:`pcapkit.toolkit.pcap` and :mod:`pcapkit.toolkit.pcapng` used to skip it;
-they now take the ports, numbers and flags from the fixed 20-octet header, as
+:mod:`pcapkit.toolkit.pcap` and :mod:`pcapkit.toolkit.pcapng` take the ports,
+numbers and flags from the fixed 20-octet header rather than skipping it, as
 :mod:`dpkt`, :mod:`scapy` and Wireshark do.
 
 Every frame is built here, written as PCAP and as PCAP-NG, and read back through
@@ -188,7 +188,8 @@ class TCPSegmentAdapterTests(unittest.TestCase):
 
     def test_a_dissection_stopped_at_the_internet_layer_traces_nothing(self) -> None:
         # The payload is Raw because the caller asked for no more, not because TCP
-        # rejected it, so the adapters leave it alone, as they did before #1518.
+        # rejected it, so the adapters leave it alone: reading a rejected
+        # segment's fixed header (#1518) does not apply.
         for container, write in (('pcap', pcap), ('pcapng', pcapng)):
             for kwargs in ({'layer': 'Internet'}, {'protocol': 'IPv4'}):
                 with self.subTest(container=container, **kwargs):

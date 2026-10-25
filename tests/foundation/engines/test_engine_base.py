@@ -69,25 +69,22 @@ class EngineBaseTests(unittest.TestCase):
     def test_engine_subclass_registration_is_opt_in(self) -> None:
         """Registration happens if and only if ``engine`` is given.
 
-        This is the #514 opt-in contract. Before it, ``__init_subclass__`` fell
-        back to ``cls.name`` when the keyword was absent, so *every* subclass of
-        the public class was registered -- which is why no built-in could
-        subclass it and every one of them inherited :class:`EngineBase` under an
-        alias instead.
+        This is the #514 opt-in contract. It guards against ``__init_subclass__``
+        falling back to ``cls.name`` when the keyword is absent, which registers
+        *every* subclass of the public class.
 
         The ``Default`` case is the load-bearing half: it sets
-        ``__engine_name__``, so under the old fallback it registered under
-        ``'defaultengine'``. A class attribute is not a registry key, and it
+        ``__engine_name__``, so a fallback to ``cls.name`` would register it under
+        ``'defaultengine'``. A class attribute is not a registry key, so it
         registers nothing.
 
-        No version guard, and that is the point of the rename. The keyword was
-        ``name`` when opt-in registration landed, which made this half of the test
-        unrunnable below Python 3.11 -- ``mcls``/``name``/``bases``/``namespace``
-        collide with :meth:`abc.ABCMeta.__new__`'s own parameters, which are
-        positional-or-keyword before 3.11 and positional-only from 3.11, so the
-        class statement failed in the metaclass before ``__init_subclass__`` ran.
-        ``engine`` is outside that set, so this runs everywhere. Verified on
-        3.10.21 and 3.14.7.
+        No version guard, and that is why the keyword is ``engine`` rather than
+        ``name``: ``mcls``/``name``/``bases``/``namespace`` collide with
+        :meth:`abc.ABCMeta.__new__`'s own parameters, which are
+        positional-or-keyword before 3.11 and positional-only from 3.11, so below
+        Python 3.11 such a class statement fails in the metaclass before
+        ``__init_subclass__`` runs. ``engine`` is outside that set, so this runs
+        everywhere. Verified on 3.10.21 and 3.14.7.
 
         """
         from pcapkit.foundation.engines.engine import Engine
@@ -123,10 +120,9 @@ class EngineBaseTests(unittest.TestCase):
 
         ``Engine`` spells the registry key ``engine`` while ``Reassembly`` and
         ``TraceFlow`` spell the same idea ``protocol``, so guessing the wrong one
-        is the expected mistake. It used to land in ``**kwargs``, get dropped by
-        the bare ``super().__init_subclass__()``, and leave the class registered
-        under its own class name. With registration now opt-in the same typo
-        would instead skip registration silently, which is quieter still.
+        is the expected mistake. Without the guard it lands in ``**kwargs``, is
+        dropped by a bare ``super().__init_subclass__()``, and, registration being
+        opt-in, the class silently goes unregistered.
 
         Unguarded by version on purpose: ``protocol`` is not one of the four
         names that collide with :meth:`abc.ABCMeta.__new__` below Python 3.11, so
@@ -138,7 +134,7 @@ class EngineBaseTests(unittest.TestCase):
         version-dependent: below 3.11 the metaclass collision fires before the
         guard, so it is a :exc:`TypeError` rather than an
         :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`. Loud either way,
-        which is why the rename did not need to chase it.
+        which is why the guard needs no special case for it.
 
         """
         from pcapkit.foundation.engines.engine import Engine
@@ -179,8 +175,8 @@ class EngineBaseTests(unittest.TestCase):
         ``final`` marker -- so that subclassing them again cannot register the
         subclass under a name nobody chose. That worked, but it is a property of
         *which base you inherited*, so it cannot be varied per subclass, and
-        under the old fallback a subclass of a registered class re-registered
-        itself under its own class name.
+        under a ``cls.name`` fallback a subclass of a registered class
+        re-registers itself under its own class name.
 
         Keying registration on the keyword instead gives both properties at once:
         the parent stays registered, the subclass does not re-register, and a
@@ -188,8 +184,9 @@ class EngineBaseTests(unittest.TestCase):
         ``HTTP``, ``L2TP`` and ``IP`` can be open to inheritance without the
         anti-re-registration guarantee being weakened.
 
-        Runs on every supported version since the keyword became ``engine``;
-        it was skipped below 3.11 while the keyword was ``name``.
+        Runs on every supported version: ``engine`` does not collide with
+        :meth:`abc.ABCMeta.__new__`'s own parameters below 3.11, as ``name``
+        would.
 
         """
         from pcapkit.foundation.engines.engine import Engine

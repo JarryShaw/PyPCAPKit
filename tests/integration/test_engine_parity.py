@@ -115,11 +115,10 @@ class EngineParityTests(EndToEndTestCase):
                 # Ethernet header as captured: the engine accounts for every
                 # captured octet, whatever it calls the layers it splits it into.
                 #
-                # #406: this comment used to say scapy "does not know this capture's
-                # link type and hands back one opaque ``Raw`` layer". That was the
-                # missing-layer-registry bug, not a property of the capture --
-                # arp.pcap is link type 1 and scapy now dissects it as
-                # ``Ethernet / ARP / Padding``. The assertions below still pass
+                # #406: arp.pcap is link type 1 and scapy dissects it as
+                # ``Ethernet / ARP / Padding``. One opaque ``Raw`` layer would be
+                # the missing-layer-registry bug, not a property of the capture.
+                # The assertions below pass
                 # either way, because ``bytes()`` of a dissected frame is the same
                 # octet string as ``bytes()`` of an undissected one.
                 captured = bytes(frame)

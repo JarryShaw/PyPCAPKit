@@ -7,7 +7,7 @@ octets 0 to 65,527. A fragment whose data reached octet 65,528 -- the last
 fragment at the largest Fragment Offset, 8191, among them -- made
 :meth:`IP._detect_conflicts <pcapkit.foundation.reassembly.ip.IP._detect_conflicts>`
 index past the table, and the whole extraction raised :exc:`IndexError`. The
-table now has 8,192 entries, the partial last block included.
+table has 8,192 entries, the partial last block included.
 
 Every case builds its fragments in memory and reads no capture. Classes are
 imported inside each test, after :func:`~tests._support.reimport_once_per_class`.

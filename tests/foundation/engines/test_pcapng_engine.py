@@ -414,10 +414,10 @@ class PCAPNGSectionRuleTests(unittest.TestCase):
                     self.assertIn('interface description block', message)
 
     def test_out_of_range_interface_id_is_a_format_error(self) -> None:
-        # Regression for #367: a section with at least one IDB and a block naming
-        # an interface it does not describe used to escape as a bare
-        # ``IndexError`` out of ``PCAPNG._get_timezone``, because the engine's
-        # bounds guards ran only after the block had already been parsed.
+        # Regression for #367: guards against a section with at least one IDB and
+        # a block naming an interface it does not describe escaping as a bare
+        # ``IndexError`` out of ``PCAPNG._get_timezone``, which happens when the
+        # engine's bounds guards run only after the block has been parsed.
         from pcapkit.utilities.exceptions import FormatError
 
         blocks = {

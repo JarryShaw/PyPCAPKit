@@ -19,7 +19,7 @@ including this one.
 * **the** :program:`tshark` **binary** -- ``pyshark`` shells out to it and parses
   nothing itself.
 
-What the running host provides is no longer assumed either way, and that is worth
+What the running host provides is not assumed either way, and that is worth
 stating plainly rather than leaving to a silent skip: :program:`tshark` is absent
 on most of this file's legs, but #751's ``engine-tests`` job -- which collects this
 same module -- installs it via ``apt-get``, so neither "present" nor "absent" can

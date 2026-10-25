@@ -176,10 +176,9 @@ class PySharkToolkitTests(unittest.TestCase):
         Ethernet capture is ``eth``, not ``ETHERNET`` -- not a LinkType
         member name on its own. Per the ruling on #838,
         ``pcapkit.toolkit.pyshark.FILTER_NAME_TO_LINKTYPE`` translates that
-        filter name to :attr:`LinkType.ETHERNET`, so this no longer raises the
-        way it did prior to that table landing. The fake carries no
-        ``encap_type``, which is what selects the filter-name path at all
-        since #843.
+        filter name to :attr:`LinkType.ETHERNET`, so this resolves rather than
+        raising. The fake carries no ``encap_type``, which is what selects the
+        filter-name path at all (#843).
 
         """
         from pcapkit.const.reg.linktype import LinkType
@@ -462,9 +461,9 @@ class PySharkToolkitTests(unittest.TestCase):
     def test_tcp_traceflow_end_to_end_for_an_ethernet_capture(self) -> None:
         """With the link-layer name resolved, the rest of
         :func:`tcp_traceflow`'s ``TF_TCP_Packet`` construction is unaffected
-        by this change -- check every field it fills in from the fake, not
-        just ``protocol``, so a regression there is not masked by the two
-        tests above only checking the new mapping.
+        by it -- check every field it fills in from the fake, not just
+        ``protocol``, so a regression there is not masked by the two tests
+        above only checking the mapping.
 
         """
         from pcapkit.const.reg.linktype import LinkType

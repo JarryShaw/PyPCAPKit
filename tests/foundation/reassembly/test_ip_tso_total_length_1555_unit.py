@@ -2,10 +2,10 @@
 """IP reassembly reads a Total Length of 0 as the fragment's captured length.
 
 GitHub issue #1555. A capture taken on a host that offloads TCP segmentation
-records its IPv4 headers with Total Length 0, and since #1547 the adapters hand
-over the rest of the captured frame as the payload. The reassembler still took
-the fragment's data length from ``tl - ihl``, i.e. ``-20``, so every such
-datagram came out ``PARTIAL`` and empty. It now takes the payload's own length,
+records its IPv4 headers with Total Length 0, and the adapters hand over the
+rest of the captured frame as the payload (#1547). Taking the fragment's data
+length from ``tl - ihl``, i.e. ``-20``, made every such datagram come out
+``PARTIAL`` and empty. The reassembler takes the payload's own length instead,
 as Wireshark 4.6.9 does ("presumed TSO") before it reassembles anything. A
 non-final fragment's partial last block can then only be a snaplen cut, so it is
 left as a hole.

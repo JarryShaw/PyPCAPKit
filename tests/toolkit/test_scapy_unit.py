@@ -343,14 +343,14 @@ class ScapyToolkitTests(unittest.TestCase):
 
     def test_tcp_traceflow_raises_for_an_ip_rooted_packet(self) -> None:
         """An IP-rooted (Ether-less) packet's ``.name`` is ``'IP'``, which is
-        not a LinkType member name. Since #775 tier 1, ``Enum_LinkType.get()``
+        not a LinkType member name. Per #775 tier 1, ``Enum_LinkType.get()``
         with no default raises on an unresolvable name instead of minting
         one -- and per the ruling on #838, NULL and RAW are genuine DLTs with
         their own handler protocol classes, not stand-ins for "unknown link
-        type", so this call site no longer papers over the miss with a
-        ``LinkType.NULL`` default. This pins that the miss now raises
+        type", so this call site does not paper over the miss with a
+        ``LinkType.NULL`` default. This pins that the miss raises
         :exc:`~pcapkit.utilities.exceptions.MissingKeyError` naming the
-        offending value, and that the registry is still not grown by it.
+        offending value, and that the registry is not grown by it.
 
         Contrast an Ether-rooted packet, exercised in
         ``test_tcp_reassembly_and_traceflow`` above: ``(Ether()/IP()/TCP()).
@@ -459,7 +459,7 @@ class ScapyTrailerTests(unittest.TestCase):
         first, last = (toolkit.ipv6_reassembly(packet) for packet in packets[2:])
         assert first is not None and last is not None
         self.assertEqual(bytes(first.payload), DATAGRAM[:40])
-        # 44 octets and a ``tl`` of 84 before the fix
+        # 44 octets and a ``tl`` of 84 without the fix
         self.assertEqual(bytes(last.payload), DATAGRAM[40:])
         self.assertEqual((last.ihl, last.tl), (40, 80))
 
@@ -500,8 +500,8 @@ class ScapyTrailerTests(unittest.TestCase):
         extractor = self._extract(self._tcp_frames(), store=False, reassembly=True, tcp=True)
         scapy = {(str(datagram.id.src[0]), datagram.id.src[1]): datagram.payload
                  for datagram in extractor.reassembly.tcp}
-        # ``b'X\x00\x00\x00\x00\x00\xef'`` before the fix: the first segment's
-        # padding took the place of the second's data, and its trailer followed
+        # ``b'X\x00\x00\x00\x00\x00\xef'`` without the fix: the first segment's
+        # padding takes the place of the second's data, and its trailer follows
         self.assertEqual(scapy.get(('192.0.2.1', 1)), b'XYZ')
         self.assertEqual(scapy.get(('2001:db8::1', 1)), b'six')
 

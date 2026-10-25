@@ -5,9 +5,9 @@ A packet's first layer does not name its link type: a raw IPv4 packet's is
 ``IP``, which is no :class:`~pcapkit.const.reg.linktype.LinkType` name, so the
 name lookup raised :exc:`~pcapkit.utilities.exceptions.MissingKeyError`, and a
 raw-IP packet whose first layer is ``IPv6`` resolved to ``LINKTYPE_IPV6`` whatever
-its interface said. :class:`~pcapkit.foundation.engines.scapy.Scapy` now attaches
+its interface said. :class:`~pcapkit.foundation.engines.scapy.Scapy` attaches
 the interface's link type with :func:`~pcapkit.toolkit.scapy.attach_linktype`,
-and only a packet built by hand, which carries none, is still looked up by name.
+and only a packet built by hand, which carries none, is looked up by name.
 
 """
 from __future__ import annotations

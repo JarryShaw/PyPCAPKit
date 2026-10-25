@@ -178,8 +178,8 @@ MODULE_PROVIDERS = {
     # :file:`pyproject.toml` extra declares it at all -- so
     # :func:`extras_providing` resolves it to the empty set and every pytest
     # job reaching a ``HAS_MYPY`` gate is reported as a :class:`Gap`. That is
-    # the honest answer rather than the :exc:`KeyError` a missing entry used to
-    # raise: the gate really is dark in CI, and
+    # the honest answer rather than a :exc:`KeyError` for a missing entry: the
+    # gate really is dark in CI, and
     # :data:`DEPENDENCY_GATE_EXCLUSIONS`'s ``HAS_MYPY`` entry is where the reason
     # for declining to close it lives (#779). Spelled as a requirement string
     # anyway, so the day some extra does carry mypy the gap closes itself
@@ -190,8 +190,8 @@ MODULE_PROVIDERS = {
     # (#766), so :func:`extras_providing` resolves it to ``{'test'}``, every
     # pytest job installs it, and ``HAS_ISORT`` is a satisfied gate with no
     # :data:`DEPENDENCY_GATE_EXCLUSIONS` entry at all -- which is the whole point
-    # of listing it here: the guard now *counts* a gate it could not see before,
-    # and finds nothing to report.
+    # of listing it here: the guard *counts* a gate it could not see without
+    # the entry, and finds nothing to report.
     #
     # Why the opposite ruling from ``mypy``, whose gap is declined above: that
     # entry's reason turns on lint.yml already running mypy over the whole
@@ -539,7 +539,7 @@ class Job(NamedTuple):
     That is deliberate rather than an oddity to special-case away:
     :func:`dependency_gate_gaps` aggregates by ``(flag, job.name)``, and a gate
     reached by *any* of a job's per-engine variants is exactly what "this job
-    reaches this gate" has to mean once one job's cells no longer all install
+    reaches this gate" has to mean when one job's cells do not all install
     and select the same thing.
 
     """
