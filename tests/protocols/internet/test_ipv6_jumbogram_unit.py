@@ -6,15 +6,15 @@ and carries its real length in a Jumbo Payload option of the Hop-by-Hop
 Options header. :class:`~pcapkit.protocols.internet.ipv6.IPv6` read only the
 Payload Length, so its next layer was
 :class:`~pcapkit.protocols.misc.null.NoPayload` and the whole jumbo payload
-ended up in ``info.trailer``. The Jumbo Payload Length now gives the payload
-extent, and only the octets past it are ``trailer``. Every packet still
-rebuilds byte for byte.
+ended up in ``info.trailer``. The Jumbo Payload Length gives the payload
+extent, and only the octets past it are ``trailer``. Every packet rebuilds
+byte for byte.
 
 GitHub issue #1687: :rfc:`2675#section-3` lists four errors a receiver must
 detect -- a Payload Length of 0 with a Hop-by-Hop Options header and no Jumbo
 Payload option, a non-zero Payload Length with the option, a Jumbo Payload
-Length below 65,536, and the option with a Fragment header. The parser read
-each as a jumbogram, or warned and went on; it now rejects each, as
+Length below 65,536, and the option with a Fragment header. Guards against the
+parser reading each as a jumbogram, or warning and going on: it rejects each, as
 :meth:`IPv4.read <pcapkit.protocols.internet.ipv4.IPv4.read>` rejects a version
 other than 4, so behind Ethernet the frame stops at the IPv6 layer, kept raw.
 And ``IPv6.make`` with no ``payload_length`` writes a Payload Length of 0 for a

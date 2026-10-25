@@ -1297,12 +1297,12 @@ class HIPUnitTests(unittest.TestCase):
         ).hmac, b'relh')
 
     def test_hip_make_param_encrypted_preserves_iv_on_pack(self) -> None:
-        # #556: ``_make_param_encrypted`` used to pass ``cipher=`` to
+        # #556: guards against ``_make_param_encrypted`` passing ``cipher=`` to
         # ``Schema_EncryptedParameter``, a keyword the schema does not
         # accept (the packing-time cipher lookup keys off ``__cipher__``,
-        # a packet-context key -- not a constructible field), so the value
-        # was dropped with an ``UnknownFieldWarning`` and the schema's own
-        # ``pre_unpack`` fallback then always treated the parameter as
+        # a packet-context key -- not a constructible field), so that the value
+        # is dropped with an ``UnknownFieldWarning`` and the schema's own
+        # ``pre_unpack`` fallback then always treats the parameter as
         # cipher-less, silently packing an AES-cipher ``ENCRYPTED``
         # parameter without its IV. Building one through ``make`` and
         # packing it must retain the IV.
@@ -1875,8 +1875,8 @@ class HIPUnitTests(unittest.TestCase):
         :func:`struct.calcsize` for a negative length -- its own ``while
         length > 0`` loop just returns an empty list instead -- so this
         parsed to an empty ``reg_type`` with no exception and no diagnostic:
-        ``proto.info.parameters[930].reg_type == ()``, confirmed against the
-        pre-fix tree at ``da2422728``, rather than rejecting the malformed
+        ``proto.info.parameters[930].reg_type == ()``, confirmed without the
+        fix at ``da2422728``, rather than rejecting the malformed
         ``Length``.
 
         """
@@ -1937,25 +1937,22 @@ class HIPUnitTests(unittest.TestCase):
         """#463/#466: ``TRANSPORT_FORMAT_LIST`` has no two-octet prefix, so
         ``Length = 0`` is a legitimate empty list, not a malformed one.
 
-        A first pass at #463 applied the same ``pkt['len'] - 2`` guard used
-        by :class:`NATTraversalModeParameter`, :class:`ESPTransformParameter`
-        and :class:`HIPTransportModeParameter` to this parameter's ``formats``
-        field too, on the assumption that the expression was byte-identical
-        across all four sites for the same reason. It is not: :rfc:`7401`
-        Section 5.2.11 defines ``Length`` as literally "2x number of TF
-        types", with nothing between ``Length`` and the list to account for.
-        So ``Length = 0`` with an empty ``formats`` list -- which packs
-        correctly on ``main`` as ``08010000`` -- was turned into a raise by
-        that first pass, a regression rather than a declined fix. This
-        parses it back to confirm the corrected :func:`~pcapkit.protocols.
-        schema.internet.hip.transport_format_list_len` accepts it again.
+        The ``pkt['len'] - 2`` guard used by
+        :class:`NATTraversalModeParameter`, :class:`ESPTransformParameter` and
+        :class:`HIPTransportModeParameter` does not apply to this parameter's
+        ``formats`` field: :rfc:`7401` Section 5.2.11 defines ``Length`` as
+        literally "2x number of TF types", with nothing between ``Length`` and
+        the list to account for. Applying it anyway turns ``Length = 0`` with an
+        empty ``formats`` list -- which packs as ``08010000`` -- into a raise.
+        This parses it back to confirm :func:`~pcapkit.protocols.
+        schema.internet.hip.transport_format_list_len` accepts it.
 
-        Two copies, and since #651 not because one is unrepresentable -- one
-        now is -- but because two consecutive parameters are what prove the
-        reader's *stride*. A parser that pads by the wrong amount still reads
-        a lone parameter correctly and only lands in the wrong place at the
-        start of the next one, so a single-parameter fixture cannot tell a
-        correct padding rule from any other.
+        Two copies -- a lone one is representable (#651) -- because two
+        consecutive parameters are what prove the reader's *stride*. A parser
+        that pads by the wrong amount still reads a lone parameter correctly
+        and only lands in the wrong place at the start of the next one, so a
+        single-parameter fixture cannot tell a correct padding rule from any
+        other.
 
         """
         from pcapkit.const.hip.parameter import Parameter
@@ -1982,19 +1979,18 @@ class HIPUnitTests(unittest.TestCase):
         self.assertEqual(copies[1].tf_type, ())
 
     def test_hip_transport_format_list_parameter_parses_the_full_declared_length(self) -> None:
-        """#463/#466: a since-corrected revision's ``- 2`` under-read every
-        *non-empty* ``TRANSPORT_FORMAT_LIST``, silently dropping trailing
-        entries; this proves the fully declared list now survives.
+        """#463/#466: guards against a ``- 2`` under-read of every
+        *non-empty* ``TRANSPORT_FORMAT_LIST``, which silently drops trailing
+        entries; this proves the fully declared list survives.
 
-        Pre-#463, on ``main``, with the then-one-octet ``item_type`` still in
-        place: ``Length = 4`` and four one-octet transport format entries
-        underflowed to ``pkt['len'] - 2 == 2``, sizing the list at only two
-        entries and silently dropping the last two octets. That bug is
-        independent of the item-width defect fixed alongside it below --
-        confirmed directly against a ``main``-shaped schema object:
-        ``TransportFormatListParameter(type=..., len=4, formats=[10, 20, 30,
-        40])`` packs to twelve octets and reads back as ``formats ==
-        [Unassigned_10, Unassigned_20]``.
+        Without the #463 fix, and with one-octet ``item_type`` entries:
+        ``Length = 4`` and four one-octet transport format entries underflowed
+        to ``pkt['len'] - 2 == 2``, sizing the list at only two entries and
+        silently dropping the last two octets. That defect is independent of
+        the item-width one below -- confirmed directly against a schema object
+        of that shape: ``TransportFormatListParameter(type=..., len=4,
+        formats=[10, 20, 30, 40])`` packed to twelve octets and read back as
+        ``formats == [Unassigned_10, Unassigned_20]``.
 
         Each ``TF type`` entry is two octets, not one -- :rfc:`7401` Section
         5.2.11 fixes it at "2x number of TF types" and the diagram shows two
@@ -2002,10 +1998,10 @@ class HIPUnitTests(unittest.TestCase):
         :class:`HIPTransportModeParameter`'s ``mode`` field and the items at
         :func:`two_octet_prefix_list_len`'s other two call sites, all three
         two-octet. So this test's four entries are four *two*-octet values
-        (``Length = 8``), and with both defects fixed --
+        (``Length = 8``), and with
         :func:`~pcapkit.protocols.schema.internet.hip.
         transport_format_list_len` returning ``Length`` unchanged, and
-        ``item_type=EnumField(length=2, ...)`` -- all four survive the round
+        ``item_type=EnumField(length=2, ...)``, all four survive the round
         trip rather than being dropped or double-counted.
 
         """
@@ -2021,10 +2017,10 @@ class HIPUnitTests(unittest.TestCase):
         # Two copies of: type(2)=2049 len(2)=8, four two-octet format entries
         # (10, 20, 30, 40), then four octets of padding. Eight octets of
         # contents are 8-aligned on their own, which is exactly the residue at
-        # which the pre-#651 rule (align the contents, ignore the four-octet
-        # type-and-length header) appended nothing and left the record four
-        # octets short; RFC 7401 5.2.1 asks for 11 + 8 - (8 + 3) % 8 == 16 --
-        # so 16 octets each and 32 together.
+        # which a contents-aligning rule (align the contents, ignore the
+        # four-octet type-and-length header; #651) appends nothing and leaves
+        # the record four octets short; RFC 7401 5.2.1 asks for
+        # 11 + 8 - (8 + 3) % 8 == 16 -- so 16 octets each and 32 together.
         one = (2049).to_bytes(2, 'big') + (8).to_bytes(2, 'big') + b''.join(
             n.to_bytes(2, 'big') for n in (10, 20, 30, 40)) + bytes(4)
         self.assertEqual(len(one), 16)
@@ -2167,15 +2163,15 @@ class HIPUnitTests(unittest.TestCase):
         ``NATTraversalModeParameter(type=..., len=..., modes=...)`` picks a
         self-consistent ``len`` by hand and so cannot expose a maker/schema
         disagreement. Building through the maker instead pins the two to
-        agree: with the one-octet ``item_type`` this module carried before
-        this fix, one entry's maker-computed ``len=4`` reversed through
+        agree: with a one-octet ``item_type``, one entry's maker-computed
+        ``len=4`` reverses through
         :func:`~pcapkit.protocols.schema.internet.hip.
         two_octet_prefix_list_len` back to ``(len - 2) // 1 == 2`` items --
-        ``[1, 0]``, one spurious trailing entry -- while with the corrected
+        ``[1, 0]``, one spurious trailing entry -- while with the
         two-octet ``item_type`` it reverses to ``(len - 2) // 2 == 1``,
         matching what went in.
 
-        Measured directly against this defect before this fix, byte for
+        Measured directly against this defect without the fix, byte for
         byte: ``modes=[1]`` packed to ``0260000400000100000000`` (11 octets,
         declared ``len=4``) and read back as ``modes == [1, 0]``.
 
@@ -2209,15 +2205,15 @@ class HIPUnitTests(unittest.TestCase):
         ``mode``. A hand-built ``ESPTransformParameter(type=..., len=...,
         suites=...)`` picks a self-consistent ``len`` by hand and so cannot
         expose a maker/schema disagreement. Building through the maker
-        instead pins the two to agree: with the one-octet ``item_type`` this
-        module carried before this fix, one entry's maker-computed ``len=4``
-        reversed through :func:`~pcapkit.protocols.schema.internet.hip.
+        instead pins the two to agree: with a one-octet ``item_type``, one
+        entry's maker-computed ``len=4`` reverses through
+        :func:`~pcapkit.protocols.schema.internet.hip.
         two_octet_prefix_list_len` back to ``(len - 2) // 1 == 2`` items --
-        ``[1, 0]``, one spurious trailing entry -- while with the corrected
+        ``[1, 0]``, one spurious trailing entry -- while with the
         two-octet ``item_type`` it reverses to ``(len - 2) // 2 == 1``,
         matching what went in.
 
-        Measured directly against this defect before this fix, byte for
+        Measured directly against this defect without the fix, byte for
         byte: ``suites=[1]`` packed to ``0fff000400000100000000`` (11
         octets, declared ``len=4``) and read back as ``suites == [1, 0]``.
 
@@ -2245,24 +2241,23 @@ class HIPUnitTests(unittest.TestCase):
         is necessary but not sufficient, since the full parser is what a
         real caller actually uses.
 
-        Before this fix, feeding a maker-built ``modes=[1]`` parameter
-        through the full parser did not reproduce the *same* phantom-entry
+        Without the fix, feeding a maker-built ``modes=[1]`` parameter
+        through the full parser does not reproduce the *same* phantom-entry
         symptom the direct schema round trip shows -- the single 11-octet
-        parameter this module's ``len`` arithmetic produced was not a
-        multiple of eight, so :meth:`HIP.make` raised ``ProtocolError:
-        HIPv2: invalid format`` before a packet even existed to parse, and a
-        hand-built two-copy packet instead corrupted the second copy and
-        emitted ``SchemaWarning: packet length < 0``. Either way the full
-        parser did not silently return a wrong value; it failed outright,
-        which is what this test pins now that the fix makes it succeed
-        instead.
+        parameter the module's ``len`` arithmetic produces is not a
+        multiple of eight, so :meth:`HIP.make` raises ``ProtocolError:
+        HIPv2: invalid format`` before a packet even exists to parse, and a
+        hand-built two-copy packet instead corrupts the second copy and
+        emits ``SchemaWarning: packet length < 0``. Either way the full
+        parser fails outright rather than silently returning a wrong value;
+        this test pins that it succeeds.
 
-        Since #651 both parameters are 8-aligned on their own -- ``len = 4``
+        Both parameters are 8-aligned on their own (#651) -- ``len = 4``
         (two ``reserved`` octets and one two-octet entry) is exactly the
         residue at which :rfc:`7401` Section 5.2.1 wants no padding at all,
-        ``11 + 4 - (4 + 3) % 8 == 8``, and at which the old contents-aligning
-        rule appended four octets that must not have been there. The two
-        copies stay, because two consecutive parameters are what prove the
+        ``11 + 4 - (4 + 3) % 8 == 8``, and at which a contents-aligning rule
+        appends four octets that must not be there. Two copies are used,
+        because two consecutive parameters are what prove the
         reader's stride rather than merely its handling of one record.
 
         """
@@ -2310,40 +2305,38 @@ class HIPUnitTests(unittest.TestCase):
         """#690: HIPv1's ``R1_Counter`` (code 128) must not fall through to
         ``UnassignedParameter`` on the parse path.
 
-        ``R1CounterParameter`` used to register itself with ``code=
-        Enum_Parameter.R1_COUNTER`` alone -- 129, the HIPv2 spelling.
-        :attr:`~pcapkit.protocols.internet.hip.HIP.__parameter__` already
-        carries two hand-written entries -- not a name-normalisation rule --
-        mapping both 128 and 129 to ``_read_param_r1_counter``, and
-        ``_make_param_r1_counter`` already built a real ``R1CounterParameter``
-        for 128 -- so construction worked and only parsing was broken. The
+        This guards against ``R1CounterParameter`` registering itself with
+        ``code=Enum_Parameter.R1_COUNTER`` alone -- 129, the HIPv2 spelling.
+        :attr:`~pcapkit.protocols.internet.hip.HIP.__parameter__` carries two
+        hand-written entries -- not a name-normalisation rule -- mapping both
+        128 and 129 to ``_read_param_r1_counter``, and
+        ``_make_param_r1_counter`` builds a real ``R1CounterParameter`` for 128
+        -- so construction works either way and only parsing can break. The
         *schema* used to unpack a parameter off the wire is chosen by a
         different mapping, :attr:`~pcapkit.protocols.schema.schema.EnumSchema.
         registry`, wired into :class:`HIP`'s ``param`` field as
         ``OptionField(..., registry=Parameter.registry)``, and that one is
-        keyed solely by the ``code=`` a schema class declares. So code 128
-        fell to ``Parameter.__default__`` -- ``UnassignedParameter``, whose
-        schema has ``value: bytes`` and no ``counter`` -- and
-        ``_read_param_r1_counter`` failed reading ``schema.counter`` off it
-        with ``AttributeError: 'UnassignedParameter' object has no attribute
-        'counter'``. Measured verbatim on the tree before this fix, with the
-        exact bytes this test builds.
+        keyed solely by the ``code=`` a schema class declares. So without the
+        fix code 128 falls to ``Parameter.__default__`` --
+        ``UnassignedParameter``, whose schema has ``value: bytes`` and no
+        ``counter`` -- and ``_read_param_r1_counter`` fails reading
+        ``schema.counter`` off it with ``AttributeError: 'UnassignedParameter'
+        object has no attribute 'counter'``. Measured verbatim without the fix,
+        with the exact bytes this test builds.
 
         The expected wire bytes below are derived from
         ``R1CounterParameter.__fields__`` rather than a hex literal, on
-        purpose: a literal is exactly what made the first version of this
-        test fail the moment #696 widened ``counter`` from four octets to
-        eight (12-octet records became 16). Deriving from the field widths
-        keeps this test about the registry dispatch it names, rather than
-        about a wire width #696's own ``test_hip_r1_counter_width_unit.py``
-        already pins.
+        purpose: a literal would tie this test to the width of ``counter``,
+        which ``test_hip_r1_counter_width_unit.py`` pins (#696). Deriving from
+        the field widths keeps this test about the registry dispatch it
+        names.
 
         Two copies, matching
         ``test_hip_nat_traversal_mode_and_esp_transform_survive_the_full_parser``'s
         own reason: proving the reader's stride across repeated occurrences
-        of the same code, not working around any alignment defect. With #696
-        landed a lone ``R1_COUNTER`` record already packs to a self-aligned
-        16 octets and parses cleanly on its own -- measured directly, one
+        of the same code, not working around any alignment defect. A lone
+        ``R1_COUNTER`` record packs to a self-aligned 16 octets (#696) and
+        parses cleanly on its own -- measured directly, one
         copy raises nothing and reads back the same counter -- so two copies
         here are a stride check, not a workaround.
 
@@ -2353,7 +2346,7 @@ class HIPUnitTests(unittest.TestCase):
         from pcapkit.protocols.internet.hip import HIP
         from pcapkit.protocols.schema.internet import hip as hip_schema
 
-        # The schema registry itself: both codes now resolve to the same class.
+        # The schema registry itself: both codes resolve to the same class.
         self.assertIs(hip_schema.Parameter.registry[Parameter.R1_Counter],
                       hip_schema.R1CounterParameter)
         self.assertIs(hip_schema.Parameter.registry[Parameter.R1_COUNTER],
@@ -2508,12 +2501,13 @@ class HIPUnitTests(unittest.TestCase):
         #J`` of ``RHASH_len / 8`` octets *each*. The ``/ 4`` is shorthand for
         twice ``/ 8`` and holds only because ``RHASH_len`` -- the natural output
         length of a hash function, in bits -- is a whole number of octets.
-        :meth:`~pcapkit.protocols.internet.hip.HIP._make_param_solution` used to
-        apply that shorthand to an arbitrary :meth:`int.bit_length`, where the
-        identity fails, and so emitted an odd contents width that
+        This guards against
+        :meth:`~pcapkit.protocols.internet.hip.HIP._make_param_solution`
+        applying that shorthand to an arbitrary :meth:`int.bit_length`, where
+        the identity fails, and so emitting an odd contents width that
         :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_solution`'s
         ``(len - 4) % 2`` guard rejects -- the library refusing to parse what it
-        had just built.
+        has just built.
 
         Two independent symptoms, both asserted below. The odd ``len`` is
         rejected outright; and because
@@ -2644,10 +2638,7 @@ class HIPUnitTests(unittest.TestCase):
         ``EXPECTED_FAILURES`` entry is that the cycle *closes*: nothing raises, the
         integers survive, and the round trip silently yields a parameter describing
         a different puzzle -- a conformant peer reads ``RHASH_len = 8`` bits where
-        the sender said 64. It only became reachable end to end once #608 was fixed
-        (#629); before that the undersized rebuild tripped
-        :meth:`~pcapkit.protocols.internet.hip.HIP._read_param_solution`'s parity
-        guard first and failed loudly.
+        the sender said 64.
 
         The octets below are written by hand, not by this library's own builder,
         which is the only way to present it with a value narrower than its field.
@@ -2668,7 +2659,7 @@ class HIPUnitTests(unittest.TestCase):
         # then Random #I and Puzzle solution #J as 8 octets each carrying 1.
         #
         # Reserved is 0x20 rather than the conformant 0x00 *only* so that this case
-        # isolates #653 on the unfixed tree: a 0x00 there trips #654's
+        # isolates #653 without the #654 fix: a 0x00 there trips #654's
         # ``math.log2(0)`` first and the width loss is never reached. #654's own
         # test below uses the conformant 0x00.
         wire = bytes.fromhex('0141' '0014' '01' '20' '6f70'
@@ -2688,7 +2679,7 @@ class HIPUnitTests(unittest.TestCase):
 
         rebuilt = proto._make_param_solution(Parameter.SOLUTION, parsed, version=2)
         self.assertEqual(rebuilt.len, 20)
-        self.assertNotEqual(rebuilt.len, 6)  # what the unfixed builder produced
+        self.assertNotEqual(rebuilt.len, 6)  # the width-losing value (#653)
         # Compared without the trailing padding, and then against the re-packed
         # source schema rather than against the literal. Both are deliberate: the
         # padding rule is pinned separately (#651/#664), and this test is about the
@@ -2714,7 +2705,7 @@ class HIPUnitTests(unittest.TestCase):
 
         rebuilt = proto._make_param_puzzle(Parameter.PUZZLE, parsed, version=2)
         self.assertEqual(rebuilt.len, 12)
-        self.assertNotEqual(rebuilt.len, 5)  # what the unfixed builder produced
+        self.assertNotEqual(rebuilt.len, 5)  # the width-losing value (#653)
         self.assertEqual(bytes(rebuilt)[:4 + rebuilt.len], wire[:4 + unpacked.len])
         self.assertEqual(bytes(rebuilt), bytes(unpacked))
 
@@ -2726,15 +2717,16 @@ class HIPUnitTests(unittest.TestCase):
         when received" -- and :rfc:`5201#section-5.2.5` says the same, so there is
         no HIP version under which it is a duration. Only ``PUZZLE``
         (:rfc:`7401#section-5.2.4`) has a ``Lifetime`` at that offset, and only
-        §5.2.4 defines the ``2^(value - 32)`` seconds encoding that pcapkit was
-        applying to both. Measured on ``origin/main`` at ``0c7f2b7c9``, the octet
+        §5.2.4 defines the ``2^(value - 32)`` seconds encoding, which this
+        guards against applying to both. Measured at ``0c7f2b7c9``, where it was
+        applied to both, the octet
         came out as ``0x20``, ``0x21``, ``0x25`` or ``0x2b`` depending on the
         lifetime asked for, and the one value the RFC actually permits -- zero --
         could not be written at all.
 
         Three things are asserted, in the order they matter. The octet is zero for a
         from-scratch build, whatever else is passed. A parameter that arrives with
-        the conformant ``0x00`` survives the round trip, where it used to be
+        the conformant ``0x00`` survives the round trip rather than being
         unbuildable. And a parameter that arrives with a non-zero ``Reserved``
         re-emits that same octet rather than a re-derived one, because round-trip
         fidelity is what #653 is about and "ignored when received" is honoured by
@@ -2751,7 +2743,7 @@ class HIPUnitTests(unittest.TestCase):
         proto = object.__new__(HIP)
         options = OrderedMultiDict()
 
-        # The data model no longer claims SOLUTION has a lifetime.
+        # The data model does not claim SOLUTION has a lifetime.
         self.assertIn('reserved', hip_data.SolutionParameter.__annotations__)
         self.assertNotIn('lifetime', hip_data.SolutionParameter.__annotations__)
         self.assertIn('reserved', hip_schema.SolutionParameter.__annotations__)
@@ -2775,9 +2767,9 @@ class HIPUnitTests(unittest.TestCase):
                 for stale in (0x20, 0x21, 0x25, 0x2b):
                     self.assertNotEqual(bytes(schema)[5], stale)
 
-        # A conformant SOLUTION -- Reserved = 0x00 -- parsed and re-serialised. On
-        # the unfixed tree this raised a bare ValueError from ``math.log2(0.0)``,
-        # because 0x00 was read as ``2 ** (0 - 32)`` seconds, which is below
+        # A conformant SOLUTION -- Reserved = 0x00 -- parsed and re-serialised.
+        # Without the fix this raises a bare ValueError from ``math.log2(0.0)``,
+        # because 0x00 is read as ``2 ** (0 - 32)`` seconds, which is below
         # timedelta's microsecond resolution and rounds to timedelta(0).
         # Compared against the re-packed source schema rather than against the
         # literal, and with the trailing padding excluded, for the reason given in
@@ -2831,16 +2823,16 @@ class HIPUnitTests(unittest.TestCase):
         positive input``, names neither HIP nor the parameter nor the field.
 
         :class:`~pcapkit.utilities.exceptions.ProtocolError` is the right member of
-        that family rather than the nearest-named one. It is already what both
-        readers raise for a malformed ``PUZZLE`` or ``SOLUTION``, and it is declared
+        that family rather than the nearest-named one. It is what both readers
+        raise for a malformed ``PUZZLE`` or ``SOLUTION``, and it is declared
         ``ProtocolError(BaseError, ValueError)`` -- so it joins the family *and*
-        stays catchable by any caller already written around the
-        :exc:`ValueError` that escapes. Both halves are asserted below,
-        because the second is what makes this a non-breaking change.
+        stays catchable by any caller written around a bare :exc:`ValueError`.
+        Both halves are asserted below, because the second is what keeps such
+        a caller working.
         :class:`~pcapkit.utilities.exceptions.EnumError` would not do: it is
         ``EnumError(BaseError, TypeError)``, so it would silently stop being caught.
 
-        A parsed PUZZLE no longer reaches the guard: its ``Lifetime`` octet is
+        A parsed PUZZLE does not reach the guard: its ``Lifetime`` octet is
         kept as ``lifetime_exponent`` and written back as is (#1323), so an
         octet of ``0x00`` -- ``2^-32`` seconds, which :class:`~datetime.timedelta`
         rounds to zero -- re-serialises unchanged.
@@ -2894,7 +2886,7 @@ class HIPUnitTests(unittest.TestCase):
         self.assertEqual(parsed.lifetime, datetime.timedelta(0))
         self.assertEqual(proto._make_param_puzzle(Parameter.PUZZLE, parsed, version=2).lifetime, 0)
 
-        # A positive lifetime still encodes exactly as it did before.
+        # A positive lifetime encodes as the exponent ``log2(seconds) + 32``.
         self.assertEqual(proto._make_param_puzzle(
             Parameter.PUZZLE, version=2, index=1, lifetime=1,
             opaque=b'op', random=1 << 63,
@@ -2953,12 +2945,11 @@ class HIPUnitTests(unittest.TestCase):
                 self.assertEqual(value.bit_length(), bits)
 
                 # HIPv1: the RFC's constants, at every width, narrow values
-                # included. PUZZLE goes first deliberately -- its keyword arguments
-                # are the same before and after this change, so on the unfixed tree
+                # included. PUZZLE goes first deliberately -- without the #655 fix
                 # this assertion is reached and reports #655 directly (measured:
                 # ``AssertionError: 12 != 5`` at 1 bit). SOLUTION's cannot be, since
-                # there the unfixed builder crashes on its own ``lifetime`` default
-                # before any length is computed -- which is #654.
+                # without the #654 fix its builder crashes on its own ``lifetime``
+                # default before any length is computed.
                 schema = proto._make_param_puzzle(
                     Parameter.PUZZLE, version=1, index=1, lifetime=1,
                     opaque=b'op', random=value,
@@ -2991,8 +2982,8 @@ class HIPUnitTests(unittest.TestCase):
                 ).len, solution_v2)
 
                 # The two versions agree only where the derived width happens to be
-                # the RFC's constant, which is the whole of the defect: they used to
-                # agree everywhere.
+                # the RFC's constant. Agreeing everywhere is the whole of the
+                # defect (#655).
                 self.assertEqual(solution_v2 == 20, bits in (57, 64))
                 self.assertEqual(puzzle_v2 == 12, bits in (57, 64))
 
@@ -3064,8 +3055,8 @@ class HIPUnitTests(unittest.TestCase):
                         random=1, rhash_len=rhash_len,
                     )
 
-        # Nor is one too narrow for the value it has to hold: silently truncating
-        # is what an undersized `len` used to do.
+        # Nor is one too narrow for the value it has to hold: an undersized `len`
+        # would silently truncate it.
         with self.assertRaises(ProtocolError):
             proto._make_param_solution(
                 Parameter.SOLUTION, version=2, index=1, reserved=0, opaque=b'op',
@@ -3120,8 +3111,8 @@ class HIPUnitTests(unittest.TestCase):
 
         -- and that matters more here than usual, because **pcapkit round-trips
         its own output whatever this formula says**: the writer and the reader
-        shared one wrong expression, so their disagreement with a real peer was
-        invisible to every construct-parse-construct test in the suite. Only an
+        share one expression, so a wrong one disagrees with a real peer
+        invisibly to every construct-parse-construct test in the suite. Only an
         independent statement of the RFC's arithmetic can see it, which is what
         ``rfc_total`` below is. It is written out longhand from the RFC text and
         deliberately does *not* call
@@ -3134,23 +3125,25 @@ class HIPUnitTests(unittest.TestCase):
 
         * ``Length = 4``, a whole ``SEQ``, and ``Length = 20``, a whole
           ``SOLUTION``: contents plus the four-octet header are *already*
-          8-aligned, so the RFC wants **no padding at all**. The old rule
-          appended four octets that must not be there, and a rule that dropped
+          8-aligned, so the RFC wants **no padding at all**. A contents-aligning
+          rule appends four octets that must not be there, and a rule that dropped
           the outer ``% 8`` -- ``8 - (Length + 4) % 8`` rather than
           ``(8 - (Length + 4) % 8) % 8`` -- would append eight. Only the
           residue ``Length % 8 == 4`` separates the correct answer from both.
         * ``Length = 0``, ``8``, ``16``: contents are 8-aligned on their own, so
-          the old rule appended nothing and left the record four octets short.
+          a contents-aligning rule appends nothing and leaves the record four
+          octets short.
           This is the residue at which the defect *under*-pads, and it is the
           one a test of "is the result at least as long as the contents" cannot
           see.
         * ``Length`` not a multiple of four -- 1, 2, 3, 5, 6, 7 -- where the pad
           is 3, 2, 1, 7, 6, 5. A formula that only ever moved in steps of four,
-          which both the old and the fixed one look like at a glance, is caught
-          here and nowhere else.
+          which both a contents-aligning rule and the RFC's look like at a
+          glance, is caught here and nowhere else.
 
-        The old and the correct formula never agree, at any ``Length``: there is
-        no residue at which this test would have passed before the fix.
+        A contents-aligning and the correct formula never agree, at any
+        ``Length``: there is no residue at which this test passes with the
+        former.
 
         """
         from pcapkit.protocols.schema.internet import hip as hip_schema
@@ -3160,7 +3153,7 @@ class HIPUnitTests(unittest.TestCase):
             return 11 + length - (length + 3) % 8
 
         def pre_651_total(length: int) -> int:
-            """What every padding site computed before #651."""
+            """Contents-aligning padding, the rule #651 guards against."""
             return 4 + length + (8 - (length % 8)) % 8
 
         for length in range(64):
@@ -3175,16 +3168,17 @@ class HIPUnitTests(unittest.TestCase):
                 self.assertEqual(4 + length + padding, total)
                 self.assertGreaterEqual(padding, 0)
                 self.assertLessEqual(padding, 7)
-                # and the defect is gone at every single residue, not on average
+                # and differs from the defective rule at every single residue,
+                # not on average
                 self.assertNotEqual(total, pre_651_total(length))
 
         # Which parameters this governs, stated rather than implied: every padding
         # site in ``schema/internet/hip.py`` and every reported record length in
         # ``internet/hip.py`` routes through these two helpers -- 45 of the 46
         # parameter schemas and 48 of the 49 reported lengths. The forty-sixth is
-        # ``LOCATOR_SET``, which since #679 uses
+        # ``LOCATOR_SET``, which uses
         # :func:`~pcapkit.protocols.schema.internet.hip.locator_set_padding_len`
-        # instead: the same arithmetic, read off a snapshot of the parameter's
+        # instead (#679): the same arithmetic, read off a snapshot of the parameter's
         # own ``Length`` rather than off ``pkt['len']``, which its nested
         # locators shadow while they pack. The counts and the identity of that
         # one callback are asserted directly in
@@ -3228,17 +3222,18 @@ class HIPUnitTests(unittest.TestCase):
     def test_hip_padding_sites_are_the_two_known_callbacks_and_nothing_else(self) -> None:
         """#651/#664/#679: two padding callbacks cover all 46, and no third exists.
 
-        #651 routed every HIP padding site through
-        :func:`~pcapkit.protocols.schema.internet.hip.parameter_padding_len`, with
-        one deliberate exception. ``LOCATOR_SET`` carried two defects that
-        cancelled at the shape its tests sampled -- a ``Length`` in 4-octet units
-        where :rfc:`7401` Section 5.2.1 counts bytes, and a padding callback
-        reading the nested ``Locator.len`` instead of the parameter's -- so
-        correcting either alone made the wire output worse, and #664 documented
-        the exclusion rather than leaving it to look accidental.
+        Every HIP padding site goes through
+        :func:`~pcapkit.protocols.schema.internet.hip.parameter_padding_len`
+        (#651), with one deliberate exception. ``LOCATOR_SET`` carried two
+        defects that cancelled at the shape its tests sampled -- a ``Length``
+        in 4-octet units where :rfc:`7401` Section 5.2.1 counts bytes, and a
+        padding callback reading the nested ``Locator.len`` instead of the
+        parameter's -- so correcting either alone made the wire output worse,
+        and #664 documented the exclusion rather than leaving it to look
+        accidental.
 
-        **#679 fixed the pair, so the exclusion is no longer a hold-back.**
-        ``LocatorSetParameter.padding`` now uses
+        **With the pair fixed (#679), the exclusion is not a hold-back.**
+        ``LocatorSetParameter.padding`` uses
         :func:`~pcapkit.protocols.schema.internet.hip.locator_set_padding_len`,
         which defers to ``parameter_padding_len`` for the arithmetic and differs
         from it only in *where it reads the length from*: the
@@ -3246,15 +3241,15 @@ class HIPUnitTests(unittest.TestCase):
         that :func:`~pcapkit.protocols.schema.internet.hip.locator_set_len_callback`
         takes before the nested locators overwrite ``pkt['len']``.
 
-        So the shape this guards has changed, and the reason to keep guarding it
-        has not. Three failure modes, none of which anything else catches:
+        Three failure modes make the shape worth guarding, none of which
+        anything else catches:
 
         * **A third expression appearing.** A later change that gives some
           parameter an inline lambda -- to make a pinned literal pass, say --
           would be indistinguishable from the two legitimate callbacks by
           inspection. ``bespoke`` below must stay empty.
         * **The ``LOCATOR_SET`` callback regressing to a raw ``pkt['len']``
-          read.** That is the pre-#664 state, and it silently re-introduces
+          read.** That silently re-introduces
           defect 1: the value read would be the last locator's 4, so the padding
           would be four octets at every locator count again.
         * **``LOCATOR_SET`` being "tidied" onto ``parameter_padding_len``
@@ -3345,8 +3340,8 @@ class HIPUnitTests(unittest.TestCase):
 
         ``SEQ`` is the one to read first. It carries a single four-octet Update
         ID, so it is complete in eight octets and needs no padding whatsoever;
-        pre-#651 pcapkit emitted twelve, appending four octets a conformant
-        receiver would read as the start of the next parameter. :rfc:`7401`
+        without the #651 fix pcapkit emits twelve, appending four octets a
+        conformant receiver would read as the start of the next parameter. :rfc:`7401`
         Section 5.3.5 puts a ``SEQ`` or an ``ACK`` on every ``UPDATE``, so this
         is not a corner of the parameter space.
 
@@ -3358,9 +3353,9 @@ class HIPUnitTests(unittest.TestCase):
 
         Nothing here imports
         :func:`~pcapkit.protocols.schema.internet.hip.parameter_total_len`: the
-        RFC's formula is written out inline, so on a pre-#651 tree this fails
-        with a real octet-count mismatch rather than with an
-        :exc:`AttributeError` for a helper that does not exist there yet.
+        RFC's formula is written out inline, so without #651 this fails with a
+        real octet-count mismatch rather than with an :exc:`AttributeError` for
+        a helper that does not exist there.
 
         """
         from pcapkit.const.hip.parameter import Parameter
@@ -3368,17 +3363,15 @@ class HIPUnitTests(unittest.TestCase):
 
         proto = object.__new__(HIP)
 
-        # (maker, kwargs, declared Length, total octets, pre-#651 octets)
+        # (maker, kwargs, declared Length, total octets, octets without #651)
         cases = [
             ('_make_param_seq', {'update_id': 0x01020304}, 4, 8, 12),
             ('_make_param_esp_info', {}, 12, 16, 20),
             # #608 sizes SOLUTION's ``len`` from the operands' own widths, so
             # reaching the RFC's ``Length = 20`` needs eight octets of each:
-            # 4 + 2 * ceil(57 / 8) == 20. No ``lifetime=`` here: an earlier
-            # revision of this case passed one to dodge #654's ``math.log2(0)``,
-            # and #665 removed that keyword, after which it survived only by
-            # being swallowed by ``**kwargs``. Dead keywords in a table like this
-            # read as requirements, so it is gone.
+            # 4 + 2 * ceil(57 / 8) == 20. No ``lifetime=`` here: SOLUTION takes
+            # none (#665), and a dead keyword swallowed by ``**kwargs`` in a
+            # table like this reads as a requirement.
             ('_make_param_solution', {'index': 1, 'opaque': b'op',
                                       'random': 1 << 56, 'solution': 1 << 56},
              20, 24, 28),
@@ -3403,7 +3396,7 @@ class HIPUnitTests(unittest.TestCase):
                 self.assertEqual(len(packed), total)
                 self.assertEqual(len(packed) % 8, 0)
                 self.assertEqual(len(packed), 11 + declared - (declared + 3) % 8)
-                # the octet count that would have been emitted before the fix,
+                # the octet count without the #651 fix,
                 # so the case is stated as a difference rather than a value
                 self.assertNotEqual(len(packed), pre_651)
                 # any padding present is zeroed, as 5.2.1 requires of the sender
@@ -3426,7 +3419,7 @@ class HIPUnitTests(unittest.TestCase):
             # contents-aligned one -- this is the protocol module's sites
             self.assertEqual(copy.length, 8)
 
-        # and the header's own ``len`` is now exact rather than exact-in-pairs:
+        # and the header's own ``len`` is exact rather than exact-in-pairs:
         # 4 + 16 // 8 == 6, with nothing lost to the floor division.
         rebuilt = bytes(HIP(parameters=[(Parameter.SEQ, {'update_id': 0x01020304})] * 2,
                            extension=True, next=6, packet=1, version=2,
@@ -3436,7 +3429,7 @@ class HIPUnitTests(unittest.TestCase):
         self.assertEqual(rebuilt[40:], seq * 2)
 
     def test_hip_encrypted_data_length_excludes_reserved_and_iv(self) -> None:
-        """#651: ``ENCRYPTED``'s ``data`` field had to be fixed with the padding.
+        """#651: ``ENCRYPTED``'s ``data`` length excludes ``Reserved`` and the IV.
 
         :rfc:`7401` Section 5.2.18 puts ``Reserved``, ``IV`` and the encrypted
         data all inside ``Length``, and
@@ -3444,16 +3437,16 @@ class HIPUnitTests(unittest.TestCase):
         match -- but the ``data`` field's length callback subtracted only the
         ``iv``, so it claimed four octets more than the parameter holds.
 
-        The two defects cancelled at some residues of ``Length`` and not others.
-        Measured across all eight, the old total agreed with the RFC at
-        ``Length % 8`` in ``{0, 5, 6, 7}`` and was eight octets over at
-        ``{1, 2, 3, 4}`` -- so ``Length = 8`` is one of the four where the
+        The two defects cancel at some residues of ``Length`` and not others.
+        Measured across all eight, the total without the #651 fix agreed with
+        the RFC at ``Length % 8`` in ``{0, 5, 6, 7}`` and was eight octets over
+        at ``{1, 2, 3, 4}`` -- so ``Length = 8`` is one of the four where the
         module emitted RFC-conformant ``ENCRYPTED`` octets while getting both
         halves wrong. Fixing the padding alone would have taken ``ENCRYPTED``
         from right at four of the eight residues to four octets too long at all
-        eight, so the pair is asserted here together: ``Length = 8`` (where they
-        used to cancel) and ``Length = 4`` (where they did not, and the record
-        used to be eight octets over).
+        eight, so the pair is asserted here together: ``Length = 8`` (where the
+        defects cancel) and ``Length = 4`` (where they do not, and the record
+        is eight octets over).
 
         """
         from pcapkit.const.hip.cipher import Cipher
@@ -3465,8 +3458,8 @@ class HIPUnitTests(unittest.TestCase):
         proto = object.__new__(HIP)
 
         # Length = 8: four ``reserved`` octets and four of data. The record is
-        # 16 octets, which is also what the pre-#651 tree emitted -- by the two
-        # errors cancelling rather than by either being right.
+        # 16 octets, which is also what the code emits without the #651 fix --
+        # by the two errors cancelling rather than by either being right.
         schema = proto._make_param_encrypted(
             Parameter.ENCRYPTED, version=2, cipher=Cipher.NULL_ENCRYPT,
             data=b'DATA')
@@ -3475,20 +3468,20 @@ class HIPUnitTests(unittest.TestCase):
                          bytes.fromhex('028100080000000044415441') + bytes(4))
         self.assertEqual(len(bytes(schema)), 16)
 
-        # Length = 4: no data at all, and the record is 8 octets. Pre-#651 this
-        # packed 16 -- the ``data`` field zero-extending b'' out to four octets
-        # and the padding rule adding four more.
+        # Length = 4: no data at all, and the record is 8 octets. Without the
+        # #651 fix this packs 16 -- the ``data`` field zero-extending b'' out
+        # to four octets and the padding rule adding four more.
         empty = proto._make_param_encrypted(
             Parameter.ENCRYPTED, version=2, cipher=Cipher.NULL_ENCRYPT, data=b'')
         self.assertEqual(empty.len, 4)
         self.assertEqual(bytes(empty), bytes.fromhex('0281000400000000'))
 
         # The residue claim in the docstring, asserted rather than asserted in
-        # prose. The old record total was ``8 + Length + (-Length % 8)``: four
-        # octets of ``reserved``, a ``data`` field four octets too wide, and
-        # contents-aligned padding. It agreed with the RFC at exactly four of
-        # the eight residues -- which is why a suite that only ever built
-        # ``Length = 8`` could not see either defect.
+        # prose. Without the #651 fix the record total is
+        # ``8 + Length + (-Length % 8)``: four octets of ``reserved``, a
+        # ``data`` field four octets too wide, and contents-aligned padding. It agrees with the RFC
+        # at exactly four of the eight residues -- which is why a suite that
+        # only ever builds ``Length = 8`` cannot see either defect.
         def old_total(length: int) -> int:
             return 8 + length + (-length % 8)
 

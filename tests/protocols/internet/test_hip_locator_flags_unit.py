@@ -52,7 +52,7 @@ class TestHIPLocatorFlags(unittest.TestCase):
 
         with warnings.catch_warnings():
             # Nested ``Locator`` schemas warn about their placeholder length;
-            # that is pre-existing noise unrelated to the flags octet.
+            # that is noise unrelated to the flags octet.
             warnings.simplefilter('ignore')
             return HIP(frame, len(frame), extension=True)
 

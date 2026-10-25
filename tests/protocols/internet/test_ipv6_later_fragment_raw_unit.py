@@ -9,9 +9,9 @@ taken from payload octets.
 
 :rfc:`8200#section-4.5` puts the upper-layer header in the first fragment only.
 A later one carries a slice of the Fragmentable Part from its offset on, and
-that slice starts with no header, so it is now a
+that slice starts with no header, so it is a
 :class:`~pcapkit.protocols.misc.raw.Raw` leaf. A first fragment, and an atomic
-one (offset zero, M clear), are still dissected as before.
+one (offset zero, M clear), are dissected on the Fragment header's Next Header.
 
 Every case builds its own octets in memory and reads no capture. Classes are
 imported inside each test, after :func:`~tests._support.reimport_once_per_class`.

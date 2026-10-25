@@ -197,12 +197,10 @@ class L2TPVersionTests(unittest.TestCase):
         """Binding ``L2TPv2`` at 115 must not invent an L2TPv2 header.
 
         This is the acceptance test for issue #548's actual resolution. It
-        performs the registration the issue asked for -- and that
-        :func:`~pcapkit.foundation.registry.protocols.register_protocol_code`
-        once documented as its worked example -- then feeds it a genuine
+        performs the registration the issue asked for, then feeds it a genuine
         :rfc:`3931` §4.1.1 v3-over-IP data message.
 
-        Measured before the version guard landed, that combination reported
+        Measured without the version guard, that combination reported
         ``version=4``, ``tunnelid=0x5678`` and ``sessionid=0xff03``: a
         confident header assembled out of the top half of a Session ID and the
         first two octets of a PPP frame. Degrading to
@@ -264,11 +262,10 @@ class L2TPVersionTests(unittest.TestCase):
         self.assertEqual(udp_info['raw']['packet'], payload)
 
     def test_udp_port_1701_is_unaffected_by_the_guard(self) -> None:
-        """The encapsulation that *is* L2TPv2's still dissects end to end.
+        """The encapsulation that *is* L2TPv2's dissects end to end.
 
         :rfc:`2661` puts L2TPv2 on UDP port 1701, which is the binding
-        ``UDP.__proto__`` already carries and the one this change must leave
-        alone.
+        ``UDP.__proto__`` carries and the one the guard must leave alone.
 
         """
         def udp(src: 'int', dst: 'int', payload: bytes) -> bytes:

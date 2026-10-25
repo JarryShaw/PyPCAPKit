@@ -73,11 +73,10 @@ class InternetBaseUnitTests(unittest.TestCase):
         class Other(Raw):
             pass
 
-        # GitHub issue #718 added an identity guard, so re-registering the
-        # exact same class at the same code -- what this used to do -- is now
-        # a silent no-op; see
+        # The identity guard from GitHub issue #718 makes re-registering the
+        # exact same class at the same code a silent no-op; see
         # ``test_register_stays_quiet_on_same_object_reregistration`` for that
-        # case. A genuinely different class is needed to still warn here.
+        # case. A genuinely different class is needed to warn here.
         with mock.patch('pcapkit.protocols.internet.internet.warn') as warn:
             DummyInternet.register(TransType.get(250), Other)
         warn.assert_called_once()
@@ -85,12 +84,11 @@ class InternetBaseUnitTests(unittest.TestCase):
     def test_register_stays_quiet_on_same_object_reregistration(self) -> None:
         """GitHub issue #718: replaying a call with the identical class is a no-op.
 
-        Before the fix the guard fired on presence alone, so the *second* of
-        two calls registering the exact same class under the exact same code
-        warned about an overwrite that never happened. Matches the identity
-        guard :func:`register_protocol
-        <pcapkit.foundation.registry.protocols.register_protocol>` already
-        applies.
+        This guards against the guard firing on presence alone, so that the
+        *second* of two calls registering the exact same class under the exact
+        same code warns about an overwrite that never happens. Matches the
+        identity guard :func:`register_protocol
+        <pcapkit.foundation.registry.protocols.register_protocol>` applies.
 
         """
         from pcapkit.const.reg.transtype import TransType
@@ -226,7 +224,7 @@ class InternetBaseUnitTests(unittest.TestCase):
             ip = IPv4(packet)
 
             # The payload is still reachable as Raw, labelled with the protocol
-            # number it arrived with -- only the registry write is gone.
+            # number it arrived with -- only the registry write is skipped.
             self.assertIsInstance(ip.payload, Raw)
             self.assertEqual(bytes(ip.payload), b'abcd')
             self.assertEqual(ip.payload.info.protocol, TransType.ICMP)

@@ -4,10 +4,11 @@
 GitHub issue #1680: :meth:`IPv6.read <pcapkit.protocols.internet.ipv6.IPv6.read>`
 copied the Version nibble without checking it, so a header of any Version was
 read as IPv6, and :meth:`~pcapkit.protocols.internet.ipv6.IPv6.from_data`, which
-always writes 6, rebuilt it with another first octet. It now rejects any Version
-but 6, as :meth:`IPv4.read <pcapkit.protocols.internet.ipv4.IPv4.read>` rejects
-any but 4: each concrete class reads only its own protocol. Behind Ethernet or
-inside a tunnel the frame stops there, kept raw and rebuilt as captured.
+always writes 6, rebuilt it with another first octet. The reader rejects any
+Version but 6, as :meth:`IPv4.read <pcapkit.protocols.internet.ipv4.IPv4.read>`
+rejects any but 4: each concrete class reads only its own protocol. Behind
+Ethernet or inside a tunnel the frame stops there, kept raw and rebuilt as
+captured.
 
 Every case builds its own octets in memory and reads no capture. Classes are
 imported inside each test, after :func:`~tests._support.reimport_once_per_class`,

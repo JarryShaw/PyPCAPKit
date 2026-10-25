@@ -4,7 +4,7 @@
 GitHub issue #1403: those octets were a zero-packing padding field missing from
 the data model, so :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data`
 dropped them, shrank ``Opt Data Len`` and padded the header with a ``PadN``
-instead. They are now the ``pad`` data field, written back on rebuild.
+instead. They are the ``pad`` data field, written back on rebuild.
 
 Every case builds its own octets in memory and reads no capture. The classes
 are imported inside each test, after

@@ -71,7 +71,7 @@ class HIPHostIDDIWidthTests(unittest.TestCase):
             hi_pub_key=PUB_KEY, di=DI, di_type=DITypes.FQDN)
 
         self.assertEqual(schema.len, 14)
-        # 26 octets before #1118: two zero octets after the DI word.
+        # Without the #1118 fix, 26 octets: two zero octets after the DI word.
         self.assertEqual(schema.pack().hex(), rfc_host_id().hex())
 
     def test_rfc_host_id_parses_algorithm_and_di(self) -> None:
@@ -83,7 +83,7 @@ class HIPHostIDDIWidthTests(unittest.TestCase):
         raw = rfc_host_id()
         schema = HostIDParameter.unpack(raw, len(raw))  # type: ignore[arg-type]
 
-        # Read as 1 -- the curve -- before #1118.
+        # Without the #1118 fix, read as 1 -- the curve.
         self.assertEqual(schema.algorithm, HIAlgorithm.ECDSA)
         self.assertEqual(int(schema.algorithm), 7)
         self.assertEqual(schema.di_data['type'], DITypes.FQDN)

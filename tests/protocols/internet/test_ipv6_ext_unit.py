@@ -250,9 +250,9 @@ class IPv6ExtUnitTests(unittest.TestCase):
 
     def test_shim6_has_no_dedicated_parser_and_dispatches_directly(self) -> None:
         """``Shim6`` (140) is a real IANA extension header this package has
-        never implemented, so it used to default to plain ``Raw`` via
-        ``Internet.__proto__``'s defaultdict -- registered here directly
-        instead, so no exception is even involved.
+        no dedicated parser for. It is registered to ``IPv6_Ext`` directly
+        rather than left to default to plain ``Raw`` via
+        ``Internet.__proto__``'s defaultdict, so no exception is even involved.
         """
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
         from pcapkit.const.reg.transtype import TransType
@@ -318,7 +318,7 @@ class IPv6ExtUnitTests(unittest.TestCase):
         IPv4 packet whose protocol byte happens to be 140 walk an IPv6-style
         extension-header chain. The version gate on ``__post_init__`` sends
         construction back through the caller's own ``@beholder``, which
-        restores exactly the pre-existing ``Raw`` fallback -- verified
+        falls back to plain ``Raw`` -- verified
         against a real :class:`~pcapkit.protocols.internet.ipv4.IPv4` packet,
         not just the class in isolation.
         """
@@ -331,7 +331,7 @@ class IPv6ExtUnitTests(unittest.TestCase):
 
         self.assertIsInstance(ipv4.payload, Raw)
         # the enum member's own name, not a chain walked out of an IPv4
-        # payload -- this is the exact pre-#891-registration rendering.
+        # payload.
         self.assertEqual(str(ipv4.protochain), 'IPv4:Shim6')
 
     # -- item 1 (cross-review): an unimplemented terminal code must not ------
@@ -351,15 +351,14 @@ class IPv6ExtUnitTests(unittest.TestCase):
         parser, also resolves to ``Raw``); this file covers one to keep the
         test proportionate, per the review's own framing.
 
-        GitHub issue #925: this used to pick ``BIT-EMU`` (147) for the
-        example. Unlike 253/254, 147 turned out not to be in IANA's
-        authoritative *IPv6 Extension Header Types* registry at all -- it
-        leaked in from a stale cross-reference in the *Protocol Numbers*
-        registry -- and :class:`~pcapkit.const.ipv6.extension_header.
-        ExtensionHeader` no longer carries it. 253 exercises the identical
-        code path (an extension-header code this package has not
-        implemented a dedicated parser for) while remaining a code IANA
-        actually recognises as one, which 147 no longer is.
+        GitHub issue #925: the example is 253, not ``BIT-EMU`` (147). Unlike
+        253/254, 147 is not in IANA's authoritative *IPv6 Extension Header
+        Types* registry at all -- it appears only through a stale
+        cross-reference in the *Protocol Numbers* registry -- and
+        :class:`~pcapkit.const.ipv6.extension_header.ExtensionHeader` does not
+        carry it. 253 exercises the identical code path (an extension-header
+        code this package has not implemented a dedicated parser for) while
+        being a code IANA actually recognises as one.
         """
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
         from pcapkit.const.reg.transtype import TransType
@@ -371,7 +370,7 @@ class IPv6ExtUnitTests(unittest.TestCase):
         ipv6 = IPv6(io.BytesIO(raw), len(raw))
 
         # the header this class exists to protect -- lost entirely under the
-        # pre-#891 defect, since the whole IPv6 layer became a bare ``Raw``.
+        # #891 defect, where the whole IPv6 layer becomes a bare ``Raw``.
         self.assertEqual(str(ipv6.src), '::1')
         self.assertEqual(str(ipv6.dst), '::1')
 
@@ -667,18 +666,18 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
         self.assertIs(ESP.__index__(), TransType.ESP)
 
     def test_base_role_protocol_delegates_past_the_fallback_answer(self) -> None:
-        """The trap this change had to avoid, pinned directly.
+        """The trap the shared base has to avoid, pinned directly.
 
         Every subclass implements ``protocol`` as ``return super().protocol``,
-        and ``IPv6_Ext`` now sits between it and
+        and ``IPv6_Ext`` sits between it and
         :class:`~pcapkit.protocols.protocol.ProtocolBase` in the MRO. Without
         the ``__data__`` discriminator in
         :attr:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protocol`, that
         ``super()`` lands on the *fallback-role* body, which reads
         ``self._info.protocol`` -- a field none of the eight data models has.
-        Measured before the discriminator was added: ``AttributeError`` on all
-        eight. Both parenting shapes are exercised, since ``AH``/``ESP`` reach
-        the base through ``IPsec``.
+        Measured without the discriminator: ``AttributeError`` on every one.
+        Both parenting shapes are exercised, since ``AH``/``ESP`` reach the
+        base through ``IPsec``.
         """
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
         from pcapkit.const.reg.transtype import TransType
@@ -767,10 +766,10 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
         self.assertEqual(object.__new__(IPv6_Ext).__length_hint__(), 8)
 
     def test_next_is_now_shared_by_every_subclass(self) -> None:
-        """None of the eight declared a ``next`` property before #917, so
-        reading one raised :exc:`AttributeError`. They inherit the base's now,
-        which is sound because :rfc:`8200#section-4.1` puts a Next Header octet
-        first in every extension header and all eight record it under that name.
+        """Every subclass inherits the base's ``next`` property (#917) --
+        without it, reading one raises :exc:`AttributeError` -- which is sound
+        because :rfc:`8200#section-4.1` puts a Next Header octet first in every
+        extension header and every subclass records it under that name.
         """
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.internet.hopopt import HOPOPT

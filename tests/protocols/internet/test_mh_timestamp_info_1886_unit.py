@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 """``NTPTimestamp`` and ``PMIPv6Timestamp`` are ``Info`` data models (GitHub issue #1886).
 
-Both were named tuples in :mod:`pcapkit.protocols.internet.mh`. They are now
-:class:`~pcapkit.protocols.data.data.Data` models in
+Both are :class:`~pcapkit.protocols.data.data.Data` models in
 :mod:`pcapkit.protocols.data.internet.mh`, beside the options that hold them, so
 :meth:`~pcapkit.corekit.infoclass.Info.from_dict` can resolve the annotations of
-those options and rebuild them. These checks pin what that changes:
+those options and rebuild them. These checks pin that:
 
-* each is an :class:`~pcapkit.corekit.infoclass.Info`, read by attribute and no
-  longer a tuple;
+* each is an :class:`~pcapkit.corekit.infoclass.Info`, read by attribute and
+  not a tuple;
 * a Mobility Header carrying the option that holds it rebuilds byte for byte,
   from its info and from ``info.to_dict()``;
 * the dumpers write it keyed by field;

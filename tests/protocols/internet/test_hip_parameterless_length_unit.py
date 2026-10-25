@@ -6,7 +6,7 @@ wrote Header Length ``0`` for ``parameters=None``. RFC 7401 §5.1 counts the
 field in 8-octet units excluding the first 8, so the two 16-octet HITs alone
 make 4 the minimum. The header's own re-parse then computed a parameter length
 of ``-32`` and raised ``ProtocolError``. :meth:`HIP.read
-<pcapkit.protocols.internet.hip.HIP.read>` now rejects a wire Header Length
+<pcapkit.protocols.internet.hip.HIP.read>` rejects a wire Header Length
 below 4 up front.
 
 Every case builds its own octets in memory and reads no capture.

@@ -8,7 +8,7 @@ Length, but the octets after either were kept by no ``info``, so
 L2TPv2 header of Length 8 followed by two octets rebuilt as 8 octets of its 10,
 and an OSPF header of Packet Length 24 followed by two as 24 of its 26.
 
-Each layer now owns them as ``trailer``, as IPv4, IPv6 (#1209) and IPX (#1433)
+Each layer owns them as ``trailer``, as IPv4, IPv6 (#1209) and IPX (#1433)
 do, and :meth:`make` writes a ``trailer`` outside the length it declares.
 
 Every case builds its own octets in memory and reads no capture. Classes are

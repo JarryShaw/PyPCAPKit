@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 """Constructing a CALIPSO option validates its data length and its pad.
 
-GitHub issue #1408: ``Opt Data Len`` is one octet, but ``make()`` wrote it
-unchecked, so a bitmap plus pad over 255 octets produced a corrupt length
-octet. A pad that was not :obj:`bytes`, or a bitmap that was neither
-bytes-like nor an iterable of octets, surfaced as a raw :exc:`struct.error`, :exc:`TypeError` or
-:exc:`ValueError`. All of these now raise
-:exc:`~pcapkit.utilities.exceptions.ProtocolError`. ``make()`` also built an
-odd ``Cmpt Length``, which RFC 5570 permits, but the reader rejected it; the
-reader now accepts it.
+GitHub issue #1408: ``Opt Data Len`` is one octet, so ``make()`` raises
+:exc:`~pcapkit.utilities.exceptions.ProtocolError` for a bitmap plus pad over
+255 octets rather than write a corrupt length octet. It raises the same for a
+pad that is not :obj:`bytes`, or a bitmap that is neither bytes-like nor an
+iterable of octets, rather than a raw :exc:`struct.error`, :exc:`TypeError` or
+:exc:`ValueError`. The reader accepts the odd ``Cmpt Length`` that ``make()``
+builds and RFC 5570 permits.
 
 The classes are imported inside each test, after
 :func:`~tests._support.reimport_once_per_class`, so that they belong to the

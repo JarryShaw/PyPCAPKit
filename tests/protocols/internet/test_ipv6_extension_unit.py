@@ -384,9 +384,9 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         """A :obj:`bool` destination address must not be silently converted. See #540.
 
         ``IPv6_Route.make``'s ``dst`` is converted to an :class:`~ipaddress.IPv6Address`
-        ahead of dispatching to the per-type constructor, via a bare
-        ``ipaddress.ip_address`` before this fix -- so ``dst=True`` converted to
-        ``::1`` with no exception at all. This is the most reachable of the four
+        ahead of dispatching to the per-type constructor; a bare
+        ``ipaddress.ip_address`` there converts ``dst=True`` to ``::1`` with no
+        exception at all. This is the most reachable of the four
         #540 sites, being on the public ``make`` entry point rather than a private
         helper.
         """
@@ -412,9 +412,9 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         """A :obj:`bool` entry in ``ip`` must not corrupt the RPL compression metadata. See #540.
 
         Worse than a plain packed-address defect: because ``cmpr_i``/``cmpr_e`` are
-        *derived* from the (previously unguarded) converted addresses, a bool
-        corrupted the compression metadata alongside the address list. Measured
-        before the fix:
+        *derived* from the converted addresses, an unguarded bool corrupts the
+        compression metadata alongside the address list. Measured without the
+        fix:
 
         .. code-block:: text
 
@@ -468,7 +468,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         these methods bind a ``type`` parameter -- so every message read
         ``[TypeNo <class 'type'>]`` instead of the routing type number that
         ``header.type`` already carries. Asserting only ``ProtocolError`` was
-        raised (as the pre-existing coverage does) would not have caught
+        raised (as the other coverage does) would not have caught
         this, so this checks the rendered message text directly.
         """
         from pcapkit.const.ipv6.routing import Routing
@@ -550,7 +550,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         # Hdr Ext Len in 8-octet units (:rfc:`8200#section-4.4`): 4 octets of
         # raw data is exactly the 4-octet fixed part every routing type's
         # data starts with, so no additional 8-octet units are needed. See
-        # #487 -- this used to assert ``1``, the pre-fix octet-count value.
+        # #487 for the defect, which gave the octet-count value ``1`` here.
         self.assertEqual(made_bytes.length, 0)
         # Raw bytes are unpacked into the routing type's own schema, which
         # the per-type reader needs (#1236).
@@ -572,7 +572,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         )
         # 4 reserved + 16-octet address = 20 octets of type-specific data ->
         # Hdr Ext Len = (20 - 4) / 8 = 2 (:rfc:`8200#section-4.4`). See #487
-        # -- this used to assert ``3``, the pre-fix (wrong-sign) value.
+        # for the defect, which gave the wrong-sign value ``3`` here.
         self.assertEqual(made_schema.length, 2)
         with self.assertRaises(ProtocolError):
             proto.make(data=object())
@@ -682,8 +682,8 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         # NOTE: "No options" is not the same as "no options area". The header is at
         # least (0 + 1) * 8 = 8 octets and 2 of those are the fixed part, so the
         # remaining 6 have to be padding options -- an empty options list is not a
-        # thing that can go on the wire, and asserting for one here used to pass
-        # only because ``make`` emitted a 2-octet header while declaring 8.
+        # thing that can go on the wire; asserting for one here passes only if
+        # ``make`` emits a 2-octet header while declaring 8.
         made_empty = proto.make(next=TransType.TCP)
         self.assertEqual(made_empty.next, TransType.TCP)
         self.assertEqual(made_empty.len, 0)
@@ -1047,9 +1047,9 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         # NOTE: The lengths below are the length of the *options area*, and the two
         # octets of the fixed header precede it, so a well-formed options area is 6
         # octets short of a multiple of 8 -- never a multiple of 8 itself. Each
-        # assertion is followed by the octet count that justifies it, since these
-        # numbers used to be 6 too large (or to account padding that was emitted two
-        # octets longer than it was counted as).
+        # assertion is followed by the octet count that justifies it, since a
+        # number 6 too large (or one accounting padding emitted two octets longer
+        # than it is counted as) is the easy mistake here.
 
         options, total_length = make_options([
             b'\x00',
@@ -1070,8 +1070,8 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
 
         # NOTE: A shortfall of exactly 2 octets, i.e. ``2 + opt_len`` 6 past a
         # multiple of 8, is one ``PadN`` of ``Opt Data Len`` 0 rather than two
-        # ``Pad1`` (#1793). That is a 4-octet option, not the 6-octet one this
-        # case used to pass -- 2 + 6 is already aligned and needs no padding.
+        # ``Pad1`` (#1793). That is a 4-octet option, not a 6-octet one --
+        # 2 + 6 is already aligned and needs no padding.
         pad2_options, pad2_length = make_options([
             bytes([Option.CALIPSO]) + b'123',
         ])
@@ -1082,9 +1082,8 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         self.assertEqual(pad2_options[1].type, Option.PadN)
         self.assertEqual(pad2_options[1].pack(), b'\x01\x00')
 
-        # NOTE: Likewise, the option that needs no padding is the 6-octet one; the
-        # 8-octet option this case used to pass leaves 2 + 8 = 10 and now draws 6
-        # octets of padding.
+        # NOTE: Likewise, the option that needs no padding is the 6-octet one; an
+        # 8-octet option leaves 2 + 8 = 10 and draws 6 octets of padding.
         no_pad_options, no_pad_length = make_options([
             bytes([Option.CALIPSO]) + b'12345',
         ])
@@ -1324,8 +1323,8 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         bad_smf = schema.SMFHashBasedDPDOption(type=Option.SMF_DPD, len=3, hav=b'\x81\x02\x03')
         object.__setattr__(bad_smf, 'mode', 2)
         assert_bad(proto._read_opt_smf_dpd, bad_smf)
-        # #775 tier 1: an unresolvable TaggerID name now raises KeyError out
-        # of Enum_TaggerID.get() instead of minting a member -- this reader
+        # #775 tier 1: an unresolvable TaggerID name raises KeyError out
+        # of Enum_TaggerID.get() rather than minting a member -- this reader
         # must turn that into its own ProtocolError, not let the KeyError
         # escape. Mirrors the SeedID 'Bogus_Seed_For_Test' case below.
         bad_tagger_id = schema.SMFIdentificationBasedDPDOption(
@@ -1572,9 +1571,10 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         ``IPv6_Route._make_data_type_rpl``) still holds ``self.addresses``
         as the ``list[bytes]`` the caller passed in -- one already-
         compressed address per item -- rather than the concatenated
-        ``bytes`` a parse produces. ``post_process`` used to assume the
-        latter unconditionally, so packing sliced and re-joined the *list*
-        as though it were that concatenated buffer and raised. Merely
+        ``bytes`` a parse produces. This guards against ``post_process``
+        assuming the latter unconditionally, so that packing slices and
+        re-joins the *list* as though it were that concatenated buffer and
+        raises. Merely
         constructing the schema does not exercise this: the defect is only
         reachable through an actual pack.
         """
@@ -1616,7 +1616,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         **4** octets. The schema declared it as two ``UInt8Field`` plus a
         3-octet ``BitField``, which is **5**, and so built a header one octet
         narrower than the ``Hdr Ext Len`` computed from that inflated data
-        area declared. Measured before the fix, for the two addresses the
+        area declared. Measured without the fix, for the two addresses the
         round-trip table uses::
 
             len(bytes(made))  == 41      # 4 + (5 + 32)
@@ -1628,7 +1628,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
 
         The assertions below are deliberately split. The ``make`` ones go
         through the public entry point and are blind to how the schema spells
-        its fields, so they fail on the pre-fix tree with those exact numbers
+        its fields, so without the fix they fail with those exact numbers
         rather than with a constructor error; the schema-level one pins the
         nibble placement, which is the thing a reader of the RFC diagram would
         check.
@@ -1710,7 +1710,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         second = ip_address('2001:db8::2')
 
         # Uncompressed: Hdr Ext Len 4, CmprI/CmprE/Pad all 0, two full
-        # addresses. 8 + 8*4 == 40 octets. The old '% 16' bound rejected this.
+        # addresses. 8 + 8*4 == 40 octets. A '% 16' bound would reject this.
         uncompressed = (bytes([0x11, 0x04, 0x03, 0x02]) + b'\x00\x00\x00\x00'
                         + first.packed + second.packed)
         self.assertEqual(len(uncompressed), 40)
@@ -1734,11 +1734,11 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         info = IPv6_Route(io.BytesIO(compressed), len(compressed), extension=True).info
         self.assertEqual(info.length, 48)
         self.assertEqual((info.cmpr_i, info.cmpr_e, info.pad), (4, 4, 4))
-        # All THREE elements, not two. ``post_process`` used to subtract
-        # ``pad_len`` a second time from a buffer whose own length callback had
-        # already taken it off, losing one address per ``16 - CmprI`` octets of
-        # padding -- invisible for as long as the guard rejected every padded
-        # header before this point could be reached.
+        # All THREE elements, not two. This guards against ``post_process``
+        # subtracting ``pad_len`` a second time from a buffer whose own length
+        # callback has already taken it off, which loses one address per
+        # ``16 - CmprI`` octets of padding -- invisible while a guard rejects
+        # every padded header before this point can be reached.
         self.assertEqual(len(info.ip), 3)
         self.assertEqual(list(info.ip), [first.packed[4:], second.packed[4:],
                                          ip_address('2001:db8::3').packed[4:]])
@@ -1755,9 +1755,9 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
                          f'IPv6-Route: [TypeNo {Routing.RPL_Source_Route_Header}] invalid format')
 
         # CmprI is 4 bits, so the divisor ``16 - CmprI`` bottoms out at 1 and
-        # can never be zero. Before #564 ``cmpr_i`` was a whole octet, so a
-        # hostile packet could set it to 16 and make ``post_process`` divide by
-        # zero; the field width now rules that out structurally.
+        # can never be zero. With a whole-octet ``cmpr_i`` (#564) a hostile
+        # packet could set it to 16 and make ``post_process`` divide by zero;
+        # the field width rules that out structurally.
         max_cmpr = (bytes([0x11, 0x01, 0x03, 0x02]) + bytes([0xff, 0x00, 0x00, 0x00])
                     + bytes(8))
         self.assertEqual(len(max_cmpr), 16)
@@ -1792,9 +1792,9 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
             dst=ip_address('fe80::1'),
             ip=[ip_address('2001:db8::1'), ip_address('2001:db8::2')],
         )
-        # ``pad`` is spelled the same before and after #564, so this assertion
-        # is the measurement rather than a consequence of the reshaped schema:
-        # it reads 8 on the pre-fix tree.
+        # ``pad`` is spelled the same with and without the #564 fix, so this
+        # assertion is the measurement rather than a consequence of the
+        # schema's shape: without the fix it reads 8.
         self.assertEqual(schema.pad['pad_len'], 0)
         self.assertEqual(schema.cmpr['cmpr_i'], 0)
         self.assertEqual(schema.cmpr['cmpr_e'], 0)
@@ -1921,7 +1921,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         octet, and the area handed to the mode schema has to be two octets wider
         than it, since that schema parses the option header itself.
 
-        The first case is #431's reproducer verbatim. On the pristine tree it does
+        The first case is #431's reproducer verbatim. Without the fix it does
         not fail, it never returns -- 15 seconds of CPU with no exception and no
         diagnostic -- so every case runs under a deadline: a regression here has
         to fail the suite rather than wedge it.
@@ -1989,19 +1989,21 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         route: its length comes from ``Opt Data Len`` too, but the octets it
         covers are a TaggerID whose own width comes from the ``TidLen`` nibble
         [:rfc:`6621#section-8.1`], so a wrong ``Opt Data Len`` mis-sizes the
-        identifier rather than the whole option. Both cases below hang the
-        pristine tree exactly as the hash-based ones do.
+        identifier rather than the whole option. Without the fix, both cases
+        below hang exactly as the hash-based ones do.
 
         Only the option itself is asserted here, not the padding after it -- that
         parity is what :meth:`_assert_identification_based_dpd_null_tid_option_area_matches`
-        below pins instead. Until #441, HOPOPT and IPv6-Opts disagreed on how much
-        of the option area an ``SMFIdentificationBasedDPDOption`` left over,
-        because the IPv6-Opts schema carried an extra forward-matched ``test``
-        field its HOPOPT twin did not: the field consumed no bytes but still
-        occupied a :attr:`Schema.__buffer__ <pcapkit.protocols.schema.schema.Schema.__buffer__>`
-        slot, so ``len(schema)`` over-reported the option by one octet under
-        IPv6-Opts. That was its own ``len(data)``-is-not-consumed defect, distinct
-        from the one #431 is about.
+        below pins instead. It guards against the #441 defect, where HOPOPT and
+        IPv6-Opts disagree on how much of the option area an
+        ``SMFIdentificationBasedDPDOption`` leaves over, because the IPv6-Opts
+        schema carries an extra forward-matched ``test`` field its HOPOPT twin
+        does not: the field consumes no bytes but still occupies a
+        :attr:`Schema.__buffer__
+        <pcapkit.protocols.schema.schema.Schema.__buffer__>` slot, so
+        ``len(schema)`` over-reports the option by one octet under IPv6-Opts.
+        That is its own ``len(data)``-is-not-consumed defect, distinct from the
+        one #431 is about.
 
         """
         from pcapkit.const.ipv6.option import Option
@@ -2048,12 +2050,12 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         """#441: a null-TaggerID I-DPD option must consume exactly what HOPOPT does.
 
         This is the issue's own reproduction: a null-TaggerID I-DPD option with a
-        zero-octet identifier, followed by one octet of ``PadN``. ``ipv6_opts.py``'s
-        ``SMFIdentificationBasedDPDOption`` carried a stray ``test``
-        :class:`~pcapkit.corekit.fields.misc.ForwardMatchField` that its HOPOPT
-        twin did not -- see
+        zero-octet identifier, followed by one octet of ``PadN``. It guards
+        against ``ipv6_opts.py``'s ``SMFIdentificationBasedDPDOption`` carrying a
+        stray ``test`` :class:`~pcapkit.corekit.fields.misc.ForwardMatchField`
+        that its HOPOPT twin does not -- see
         :meth:`_assert_identification_based_dpd_options_parse_from_the_wire` above
-        for the mechanism. On the pristine tree this option parses under HOPOPT
+        for the mechanism. Without the fix this option parses under HOPOPT
         but raises ``ProtocolError: IPv6-Opts: invalid format`` under IPv6-Opts,
         for the identical octets.
 
@@ -2372,12 +2374,13 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         under-declared ``len`` does not merely mis-state a length -- it
         silently truncates the nonce on the wire, with no exception raised.
 
-        The builder used to size with ``math.ceil(nonce.bit_length() // 8)``.
-        ``//`` floors, and :func:`math.ceil` of an :class:`int` is a no-op, so
-        the ceiling was never actually taken: every nonce whose bit length was
-        not an exact multiple of eight got sized short, and any nonce below 256
-        was declared as *zero* octets and dropped from the wire altogether
-        (``nonce=9`` packed to ``b'\\x8b\\x00'`` and parsed back as ``0``).
+        This guards against the builder sizing with
+        ``math.ceil(nonce.bit_length() // 8)``. ``//`` floors, and
+        :func:`math.ceil` of an :class:`int` is a no-op, so the ceiling is never
+        actually taken: every nonce whose bit length is not an exact multiple of
+        eight gets sized short, and any nonce below 256 is declared as *zero*
+        octets and dropped from the wire altogether (``nonce=9`` packed to
+        ``b'\\x8b\\x00'`` and parsed back as ``0``).
 
         ``0xFFFFFF`` -- bit length 24, the value the option-round-trip
         generator happens to use -- is one of the few values floor division
@@ -2550,20 +2553,17 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         Boundaries: zero addresses, one, and two, so a fix that special-cases
         "empty" or stops one item short of the general case is still caught.
 
-        #487 update: this test previously round-tripped through
-        ``Schema_SourceRoute.unpack`` directly rather than a full
-        ``IPv6_Route`` read, because ``_read_data_type_src``'s own
-        ``(header.length - 8) % 16`` guard rejected every ``length``
-        ``IPv6_Route.make`` computed for this routing type, for any address
-        count -- and separately, the ``length`` ``make`` computed was itself
-        wrong (raw octets, not the 8-octet units :rfc:`8200#section-4.4`
-        specifies for ``Hdr Ext Len``). Both halves are fixed now (see #487),
-        so this goes through the full ``IPv6_Route`` construct-then-parse
-        path -- which is a strictly stronger check than unpacking the nested
-        schema alone -- and the expected on-wire ``Hdr Ext Len`` byte below
-        changed from the old (buggy) octet counts ``0x04``/``0x14``/``0x24``
-        to the RFC-correct 8-octet-unit values ``0x00``/``0x02``/``0x04``.
-        The tuple-versus-list assertion this test exists for is unchanged.
+        #487: this goes through the full ``IPv6_Route`` construct-then-parse
+        path -- a strictly stronger check than unpacking the nested schema
+        alone. Without the #487 fix, ``_read_data_type_src``'s own
+        ``(header.length - 8) % 16`` guard rejects every ``length``
+        ``IPv6_Route.make`` computes for this routing type, for any address
+        count, and that ``length`` is itself wrong (raw octets, not the
+        8-octet units :rfc:`8200#section-4.4` specifies for ``Hdr Ext Len``).
+        The expected on-wire ``Hdr Ext Len`` byte below is the RFC-correct
+        8-octet-unit value ``0x00``/``0x02``/``0x04``, not the octet count
+        ``0x04``/``0x14``/``0x24``. The tuple-versus-list assertion is what
+        this test exists for.
 
         """
         from ipaddress import ip_address
