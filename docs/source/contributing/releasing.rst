@@ -165,7 +165,8 @@ the default branch, and ``tag`` pulled ``main`` before tagging.
   ``::warning`` naming both commits and what is missing, and the run stays
   green. A ``v*`` push of such a version still fails with the
   check's ``::error``. A partial release is finished by re-running the run that
-  tagged it.
+  tagged it, or, for Anaconda files that run's own ``conda`` legs cannot
+  build, by Conda Update's ``publish`` dispatch (see `Recovery`_).
 * ``pypi`` and ``conda`` attach their files with ``gh release upload``, in
   their "Upload package to GitHub Release" steps, not ``action-gh-release``,
   which calls Update a release before every upload (3.0.2's ``src/github.ts:631-683``). A file
@@ -556,6 +557,14 @@ existence. ``pypi`` is safe to re-run (``skip-existing: true``), and so is
 platform/Python distribution before uploading and skips only that leg's
 upload if it is already there. Neither replaces a file the GitHub Release
 already has (`#1640 <https://github.com/JarryShaw/PyPCAPKit/issues/1640>`__).
+
+A re-run repeats the tagged commit's own workflow, so it cannot upload
+Anaconda files that commit's ``conda`` legs cannot build: 1.5.0b14's
+``osx-64`` legs were broken at its tag (:issue:`2140`). While ``main``'s version
+is still the tagged one, dispatching Conda Update with ``publish`` on ``main``
+builds ``main`` and uploads every platform under a bumped build
+(:issue:`2060`, :pr:`2150`), and the warning a later commit's run posts for an
+unfinished release names that remedy wherever Anaconda files are missing.
 
 **A re-run does not need to be verified by hand against the PyPI and Anaconda
 listings, because** ``release_status`` **does it.** That job runs on every

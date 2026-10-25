@@ -18,7 +18,8 @@ In order, the first that applies:
 2. ``version_check`` did not succeed: a warning.
 3. The release test gate failed or was cancelled: a warning.
 4. The version is tagged at another commit and every publisher skipped (#1748):
-   a notice if that release is complete, else a warning naming what it lacks.
+   a notice if that release is complete, else a warning naming what it lacks,
+   and, for Anaconda files, Conda Update's ``publish`` dispatch (#2140).
 5. Each publisher reconciled against its own evidence -- succeeded, or skipped
    with its evidence saying done: a notice if all reconciled, a warning if one
    failed or was cancelled, and otherwise the ``::error``.
@@ -141,11 +142,18 @@ def report_elsewhere() -> 'None':
             '(#1748).')
         return
     version = var('PCAPKIT_VERSION')
+    # #2140: the re-run repeats the tagged commit's own conda legs, so it cannot
+    # upload what they could not build -- 1.5.0b14's osx-64, broken at its tag.
+    # Conda Update's `publish` dispatch builds main instead (#2060).
+    anaconda = (f" Its Anaconda files are the exception: while main's version is still {version}, dispatch Conda "
+                'Update with publish on main, which uploads every platform under a bumped build (#2060); the '
+                "re-run finishes them only if that run's own conda legs can still succeed."
+                if var('PCAPKIT_CONDA_COMPLETE') != 'true' else '')
     say('warning', f'v{version} is unfinished (#1634)',
         f"v{var('PCAPKIT_VERSION')} names {var('PCAPKIT_RELEASED_AT')}, not this run's commit "
         f"{var('PCAPKIT_RUN_SHA')}, and still lacks {', '.join(missing)}. Only that commit's run may finish it "
         '(#1634), so this run released nothing: re-run the Create Release run created for '
-        f"{var('PCAPKIT_RELEASED_AT')}, or release the next version.")
+        f"{var('PCAPKIT_RELEASED_AT')}, or release the next version.{anaconda}")
 
 
 def jobs() -> 'str':
