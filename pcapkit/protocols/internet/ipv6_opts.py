@@ -368,7 +368,8 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
         # NOTE: No options is not the same as no options area. The header is at
         # least 8 octets, 2 of them the fixed part, so the remaining 6 must be
         # padding options. Passing the empty list through the same path produces
-        # them; returning ``[], 0`` would declare an 8-octet header and emit 2.
+        # them; returning ``[], 0`` would emit the 2 fixed octets alone, under a
+        # ``Hdr Ext Len`` that ``(0 - 6) // 8`` makes ``-1``.
         options_value, total_length = self._make_ipv6_opts(
             options if options is not None else [])
 
@@ -1338,8 +1339,8 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             length of the option that has just been emitted. Aligning each
             option to 8 octets on its own leaves the options area a multiple of
             8 octets long, whereas :meth:`read` sizes it as
-            ``hdr_ext_len * 8 + 6`` -- six short of a multiple of 8 -- so the
-            header would declare 6 octets more than it carried.
+            ``hdr_ext_len * 8 + 6`` -- two short of a multiple of 8 -- so the
+            header would declare 2 octets fewer than it carried.
 
             A ``PadN`` option spends two octets on its own type and
             ``Opt Data Len`` fields before any padding data, so occupying
@@ -1379,7 +1380,7 @@ class IPv6_Opts(IPv6_Ext[Data_IPv6_Opts, Schema_IPv6_Opts],
             The returned length is that of the options area alone, the value
             :meth:`make` derives the ``Hdr Ext Len`` field from. Since the two
             octets of the fixed header precede it, an options area is well
-            formed only when it is 6 octets short of a multiple of 8 --
+            formed only when it is 2 octets short of a multiple of 8 --
             including when it holds no real options at all, in which case it is
             6 octets of pure padding rather than empty.
 
