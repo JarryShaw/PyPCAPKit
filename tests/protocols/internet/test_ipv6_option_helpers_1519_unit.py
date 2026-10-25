@@ -2,10 +2,10 @@
 """The IPv6 option helpers HOPOPT and IPv6-Opts share.
 
 GitHub issue #1519. The field helpers of the HOPOPT and IPv6-Opts option
-schemas were two copies differing only in the error prefix and in which
-module's option schemas the selectors return. They now live once, in
-:mod:`pcapkit.protocols.schema.internet.ipv6_option`, and each header module
-binds its own prefix and schemas. This module pins the shared helpers under
+schemas live once, in :mod:`pcapkit.protocols.schema.internet.ipv6_option`,
+rather than as two copies differing only in the error prefix and in which
+module's option schemas the selectors return; each header module binds its own
+prefix and schemas. This module pins the shared helpers under
 both prefixes, that each header delegates to them with its own, and that every
 error message keeps its exact text.
 

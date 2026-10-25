@@ -4,9 +4,9 @@
 GitHub issue #1793: HOPOPT, IPv6-Opts and MH each filled a two-octet shortfall
 with two ``Pad1`` options. :rfc:`8200#section-4.2`, and :rfc:`6275#section-6.2.2`
 for mobility options, say a ``PadN`` should be used rather than multiple
-``Pad1``, so two octets are now one ``PadN`` of length ``0``: the octets
-``01 00``. One octet is still a ``Pad1``, and parsed padding is still rebuilt as
-it was read -- only freshly built padding changed.
+``Pad1``, so two octets are one ``PadN`` of length ``0``: the octets
+``01 00``. One octet is a ``Pad1``, and parsed padding is rebuilt as it was
+read -- the rule covers only freshly built padding.
 
 Every case builds its own octets in memory and reads no capture. Classes are
 imported inside each test, after :func:`~tests._support.reimport_once_per_class`.

@@ -302,9 +302,9 @@ class ESPRegistryTests(unittest.TestCase):
         """``destination`` calls :func:`ipaddress.ip_address` directly, with
         no version check at all -- unlike the ``Field`` classes in
         :mod:`pcapkit.corekit.fields.ipaddress`, ESP does not route through
-        that abstraction. Before this fix,
+        that abstraction. This guards against
         ``SecurityAssociation(spi=1, destination=True).destination`` silently
-        became ``IPv4Address('0.0.0.1')``, with no exception and no warning.
+        becoming ``IPv4Address('0.0.0.1')``, with no exception and no warning.
         See #491.
         """
         from pcapkit.protocols.internet.esp import SecurityAssociation
@@ -1059,10 +1059,9 @@ class ESPProtocolTests(unittest.TestCase):
         "being *in* that registry is what makes something an extension
         header" ruling.
         Rephrasing the placement sentence as "places it among the IPv6
-        extension headers" overstated the RFC and contradicted this same
+        extension headers" overstates the RFC and contradicts this same
         docstring's ``Note:`` (which says RFC 8200 declines ESP
-        extension-header status); that was caught in review on the
-        second version of this fix.
+        extension-header status).
 
         The section's separate IPv4-context sentence ("placed after the
         IP header ... before the next layer protocol") is legitimate
@@ -1077,14 +1076,13 @@ class ESPProtocolTests(unittest.TestCase):
         besides :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`;
         it does not *make* the header standalone, and the RFC has no
         say in which base is named (``IPsec`` versus ``Internet``) --
-        an earlier revision claimed the RFC "makes it a standalone
-        protocol" and "names ``IPsec`` as the second base", the latter
-        positionally false (``ESP.__bases__`` puts ``IPsec`` first, not
-        second) and unsupported by the cited section; both were caught
-        in review on the third version of this fix. So this test
-        targets the exact wrong phrasing from the earlier rounds rather
-        than banning "IPv4" outright, which would forbid the legitimate
-        use kept above.
+        so a claim that the RFC "makes it a standalone protocol" or
+        "names ``IPsec`` as the second base" is unsupported by the cited
+        section, and the latter is positionally false too
+        (``ESP.__bases__`` puts ``IPsec`` first, not second). So this
+        test targets the wrong phrasings themselves rather than banning
+        "IPv4" outright, which would forbid the legitimate use kept
+        above.
         """
         import re
 

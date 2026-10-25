@@ -15,7 +15,7 @@ Every case builds its own octets in memory and reads no capture.
 :func:`~tests._support.reimport_once_per_class`, not at module load: a class
 bound at load belongs to whatever :mod:`pcapkit` import was live then, and once
 an earlier module has purged it, the payload :class:`Raw` resolves to the new
-import, which the old :class:`ProtocolBase` rejects, so ``from_data`` drops it.
+import, which the stale :class:`ProtocolBase` rejects, so ``from_data`` drops it.
 
 """
 

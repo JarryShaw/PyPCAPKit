@@ -3,9 +3,10 @@
 
 GitHub issue #1133. :rfc:`7401` introduces ``DH_GROUP_LIST`` (511),
 ``HIP_CIPHER`` (579), ``HIT_SUITE_LIST`` (715) and ``TRANSPORT_FORMAT_LIST``
-(2049); :rfc:`5201` has none of them. All four built and parsed back at
-version 1. They now raise :class:`~pcapkit.utilities.exceptions.ProtocolError`
-on both sides, as ``R1_Counter`` does for the opposite mismatch.
+(2049); :rfc:`5201` has none of them. Guards against all four building and
+parsing back at version 1: they raise
+:class:`~pcapkit.utilities.exceptions.ProtocolError` on both sides, as
+``R1_Counter`` does for the opposite mismatch.
 """
 from __future__ import annotations
 

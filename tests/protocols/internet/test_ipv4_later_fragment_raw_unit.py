@@ -9,10 +9,10 @@ payload octets. It is the IPv4 counterpart of #1545.
 
 :rfc:`791#section-3.2` puts the upper-layer header in the first fragment only.
 A later one carries a slice of the datagram's data from its offset on, and that
-slice starts with no header, so it is now a
+slice starts with no header, so it is a
 :class:`~pcapkit.protocols.misc.raw.Raw` leaf, as Wireshark shows it (``data``,
 under ``-o ip.defragment:FALSE``). A first fragment (offset zero, MF set) and
-an unfragmented datagram are still dissected as before.
+an unfragmented datagram are dissected on their Protocol field.
 
 Every case builds its own octets in memory and reads no capture. Classes are
 imported inside each test, after :func:`~tests._support.reimport_once_per_class`.
@@ -113,7 +113,7 @@ class TestIPv4LaterFragmentRaw(unittest.TestCase):
 
     def test_issue_repro_later_fragment_in_a_frame(self) -> None:
         # the issue's reproduction, carried in an Ethernet frame as a capture
-        # would carry it: ``'UDP' in frame`` no longer holds
+        # would carry it: ``'UDP' in frame`` does not hold
         from pcapkit.protocols.internet.ipv4 import IPv4
         from pcapkit.protocols.link.ethernet import Ethernet
         from pcapkit.protocols.misc.raw import Raw
@@ -135,7 +135,7 @@ class TestIPv4LaterFragmentRaw(unittest.TestCase):
 
     def test_made_later_fragment_parses_as_raw(self) -> None:
         # make -> parse: a later fragment built with a UDP object as its payload
-        # writes the UDP octets, reads back as raw (as IPv6 does since #1545),
+        # writes the UDP octets, reads back as raw (as IPv6 does, #1545),
         # and rebuilds to the octets made
         from pcapkit.protocols.internet.ipv4 import IPv4
         from pcapkit.protocols.misc.raw import Raw

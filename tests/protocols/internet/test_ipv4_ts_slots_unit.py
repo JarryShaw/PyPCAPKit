@@ -5,7 +5,7 @@ GitHub issue #1349: the ``TS`` option's ``ts_data`` covered only the
 ``pointer - 5`` octets before the pointer, and the rest of the option was a
 :class:`~pcapkit.corekit.fields.strings.PaddingField` that packed zeros, so
 ``from_data`` over a parsed header zeroed every slot not yet filled in. Those
-slots are now the ``remaining`` data field and a ``make()`` keyword, the same
+slots are the ``remaining`` data field and a ``make()`` keyword, the same
 shape #1319 gave LSR, SSR and RR.
 
 Every case builds its own octets in memory and reads no capture. Classes are

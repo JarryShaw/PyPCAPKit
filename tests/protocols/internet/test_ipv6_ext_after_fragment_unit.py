@@ -11,9 +11,9 @@ with no :class:`IPv6_Ext` to stand in. Each became a plain
 dissected, though it was without the Fragment header.
 
 :rfc:`8200#section-4.5` puts every header through the upper-layer one in the
-first fragment, at offset zero, so the walk now goes on past its Fragment
-header. A later fragment starts with no header at all, and still ends the walk.
-The packet split at the Fragment header, which reassembly takes, is unchanged.
+first fragment, at offset zero, so the walk goes on past its Fragment header.
+A later fragment starts with no header at all, and ends the walk. The packet
+split that reassembly takes stays at the Fragment header.
 
 Every case builds its own octets in memory and reads no capture. Classes are
 imported inside each test, after :func:`~tests._support.reimport_once_per_class`.

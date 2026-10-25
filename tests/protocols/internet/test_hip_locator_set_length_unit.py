@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
-"""HIP ``LOCATOR_SET``, whose ``Length`` unit and padding source were both wrong.
+"""HIP ``LOCATOR_SET`` counts ``Length`` in bytes and pads from its own length.
 
-GitHub issue #679. Two pre-existing defects, neither fixable alone:
+GitHub issue #679. Two defects, neither fixable alone:
 
 1. ``LocatorSetParameter.padding`` read the **nested** ``Locator.len`` rather than
    the parameter's. A :class:`~pcapkit.corekit.fields.collections.ListField` packs
@@ -9,7 +9,7 @@ GitHub issue #679. Two pre-existing defects, neither fixable alone:
    :meth:`Schema.pack <pcapkit.protocols.schema.schema.Schema.pack>` opens with
    ``packet.update(self.__dict__)`` -- and :class:`Locator` declares a ``len`` of
    its own, so by the time ``padding`` was evaluated ``pkt['len']`` was the last
-   locator's. That is 4 for any IPv6 locator whatever the count, so the old
+   locator's. That is 4 for any IPv6 locator whatever the count, so that
    expression appended exactly four octets to every ``LOCATOR_SET``.
 2. The parameter's ``len`` was ``sum(Locator.len)``, in the 4-octet units
    :rfc:`8046#section-4` gives ``Locator Length``, where :rfc:`7401`
@@ -30,7 +30,7 @@ would have left ``24n + 4``, four octets short at every count.
 **The cancellation was never general, and that is the whole reason this module
 sweeps shapes rather than counts.** It needs every locator to be 24 octets and
 there to be at least one of them. Measured on ``f0999858e``, the shapes where it
-does not hold were non-conformant before this fix:
+does not hold were non-conformant without the fix:
 
 ===================  ==============  ======  =========================
 shape                declared ``len``  packed  RFC total for the contents
@@ -46,7 +46,7 @@ SPI then plain       9               **60**  56
 ===================  ==============  ======  =========================
 
 Four of the seven were not even multiples of eight. A sweep over n = 1..5 of
-plain locators passed by cancellation before the fix and would pass a half-fix
+plain locators passes by cancellation without the fix and would pass a half-fix
 too, so it discriminates nothing; the empty set, the SPI-bearing variant and a
 mixed set in both orders are the shapes that do.
 
@@ -97,13 +97,12 @@ PLAIN = {'ip': '2001:db8::1'}
 #: :func:`~pcapkit.protocols.schema.internet.hip.locator_value_selector` accepts
 #: only ``type == 0, len == 4`` or ``type == 1, len == 5`` -- so ``spi=`` without
 #: an explicit ``type=1`` raises ``FieldValueError: invalid locator type or
-#: length``. That is a separate rough edge in the maker, noted rather than fixed
-#: here, and it is why an earlier attempt to measure these shapes could not reach
-#: the SPI path at all.
+#: length``. That is a separate rough edge in the maker, and without ``type=1``
+#: these shapes could not reach the SPI path at all.
 SPI = {'ip': '2001:db8::2', 'spi': 0xdeadbeef, 'type': 1}
 
 #: Every shape, with the octets each locator record occupies. Ordered so that the
-#: three the old cancellation covered come first and the four it did not follow.
+#: shapes the cancellation covers come first and the ones it does not follow.
 SHAPES = (
     ('empty', [], 0),
     ('plain n=1', [PLAIN], 24),
@@ -293,8 +292,7 @@ class HIPLocatorSetLengthTests(unittest.TestCase):
         of them, one per field, because ``SchemaField`` seeds a nested schema's
         ``__length__`` at the ``-1`` placeholder
         :meth:`Schema.pack <pcapkit.protocols.schema.schema.Schema.pack>`
-        documents; that is pre-existing, unrelated to ``Length`` units, and
-        unchanged by this fix -- what changed is that it now fires once per
+        documents; that is unrelated to ``Length`` units, and it fires once per
         locator actually parsed rather than once per truncated first locator.
         """
         from pcapkit.const.hip.parameter import Parameter
@@ -349,8 +347,8 @@ class HIPLocatorSetLengthTests(unittest.TestCase):
 
                 with warnings.catch_warnings():
                     # The per-locator ``__length__`` warnings described above are
-                    # pre-existing noise on a now-correct parse; the assertions
-                    # below are what this case is about.
+                    # noise unrelated to ``Length`` units; the assertions below
+                    # are what this case is about.
                     warnings.simplefilter('ignore')
                     parsed = HIP(octets, len(octets), extension=True)
 

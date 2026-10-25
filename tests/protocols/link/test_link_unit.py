@@ -255,9 +255,9 @@ class LinkProtocolUnitTests(unittest.TestCase):
     def test_arp_proto_resolve_rejects_a_bool(self) -> None:
         """A :obj:`bool` protocol address must not be silently packed. See #540.
 
-        ``bool`` is an :class:`int` subclass, so before this fix
-        ``ipaddress.IPv4Address(True)``/``ipaddress.IPv6Address(True)`` converted
-        without complaint. Measured before the fix:
+        ``bool`` is an :class:`int` subclass, so unguarded,
+        ``ipaddress.IPv4Address(True)``/``ipaddress.IPv6Address(True)`` convert
+        without complaint. Measured without the fix:
 
         .. code-block:: text
 
@@ -451,10 +451,10 @@ class LinkProtocolUnitTests(unittest.TestCase):
 
             # ``register`` resolves a ``ModuleDescriptor`` before storing it,
             # so the entry above is already the plain ``Raw`` class, not the
-            # descriptor -- passing ``Raw`` again would now be the same-object
-            # no-op GitHub issue #718 added an identity guard for (see
-            # ``test_link_register_stays_quiet_on_same_object_reregistration``).
-            # A genuinely different class is needed to still warn here.
+            # descriptor -- passing ``Raw`` again would be the same-object
+            # no-op that the identity guard from GitHub issue #718 makes silent
+            # (see ``test_link_register_stays_quiet_on_same_object_reregistration``).
+            # A genuinely different class is needed to warn here.
             with mock.patch('pcapkit.protocols.link.link.warn') as warn:
                 Link.register(custom_code, Other)
             warn.assert_called_once()
@@ -469,12 +469,11 @@ class LinkProtocolUnitTests(unittest.TestCase):
     def test_link_register_stays_quiet_on_same_object_reregistration(self) -> None:
         """GitHub issue #718: replaying a call with the identical class is a no-op.
 
-        Before the fix the guard fired on presence alone, so the *second* of
-        two calls registering the exact same class under the exact same code
-        warned about an overwrite that never happened. Matches the identity
-        guard :func:`register_protocol
-        <pcapkit.foundation.registry.protocols.register_protocol>` already
-        applies.
+        This guards against the guard firing on presence alone, so that the
+        *second* of two calls registering the exact same class under the exact
+        same code warns about an overwrite that never happens. Matches the
+        identity guard :func:`register_protocol
+        <pcapkit.foundation.registry.protocols.register_protocol>` applies.
 
         """
         from pcapkit.const.reg.ethertype import EtherType
@@ -753,10 +752,11 @@ class LinkProtocolUnitTests(unittest.TestCase):
         self.assertEqual(explicit_schema.type, EtherType.Address_Resolution_Protocol)
 
     def test_vlan_dei_is_read_from_the_dei_bit_not_the_pcp(self) -> None:
-        """``read`` used to report ``bool(tci['pcp'])`` as the DEI flag.
+        """``read`` reports the DEI bit as the DEI flag, not ``bool(tci['pcp'])``.
 
-        That is wrong in both directions, and invisible whenever the two happen
-        to agree -- which is why the case below pins them in *dis*agreement.
+        Reading it from the PCP is wrong in both directions, and invisible
+        whenever the two happen to agree -- which is why the case below pins
+        them in *dis*agreement.
 
         """
         from pcapkit.const.reg.ethertype import EtherType
@@ -766,9 +766,9 @@ class LinkProtocolUnitTests(unittest.TestCase):
         from pcapkit.protocols.schema.link.vlan import VLAN as SchemaVLAN
 
         cases = (
-            # priority set, drop-eligible clear -- the old code said True here
+            # priority set, drop-eligible clear -- reading the PCP says True here
             (PriorityLevel.CA, False, False),
-            # priority clear, drop-eligible set -- the old code said False here
+            # priority clear, drop-eligible set -- reading the PCP says False here
             (PriorityLevel.BE, True, True),
             (PriorityLevel.BE, False, False),
             (PriorityLevel.CA, True, True),

@@ -128,9 +128,9 @@ class MHUnitTests(unittest.TestCase):
              lambda: parse('1101' 'c8' '00' '1234' '00000000000000000000')),
             # a Binding Refresh Request carrying one 8-octet option of type 0xC8.
             # The code has to be outside the registry itself, not merely one this
-            # module happens not to handle: every one of the 71 registered option
-            # types now has a dispatch entry, so a registered code would already be
-            # in the table and prove nothing about insertion on a miss.
+            # module happens not to handle: every registered option type has a
+            # dispatch entry, so a registered code would already be in the table
+            # and prove nothing about insertion on a miss.
             ('option', MH.register_option, Option(0xC8), MH.__dict__['__option__'],
              lambda: parse('1101' '00' '00' '1234' '0000' 'c806' '000000000000')),
             ('extension', MH.register_extension, CGAExtension(0xFF),
@@ -1061,9 +1061,9 @@ class MHUnitTests(unittest.TestCase):
         (c.f. #493).
 
         The BU/BA cases here are the control: they show the ``* 4`` / ``/ 4``
-        scaling this module uses elsewhere is deliberately preserved, so the
-        FBU/FBack assertions below are evidence of the fix rather than of a
-        module-wide convention change.
+        scaling this module uses elsewhere applies there, so the FBU/FBack
+        assertions below pin those two messages' own units rather than a
+        module-wide convention.
         """
         from pcapkit.const.mh.packet import Packet
         from pcapkit.const.mh.status_code import StatusCode
@@ -1367,11 +1367,11 @@ class MHUnitTests(unittest.TestCase):
         exp_type = Option.Experimental_Mobility_Option
 
         # NOTE: Every case below is 8-octet aligned and so draws no padding option,
-        # which keeps these cases about the FMIPv6 message and option types. It used
-        # to be a workaround as well: ``_make_opt_pad`` round-tripped a ``PadN`` data
-        # model two octets too long, because it copied the data model's whole-option
-        # ``length`` into the schema's ``Option Length`` field. That is fixed, and
-        # ``test_mh_padding_option_data_model_round_trips`` covers it.
+        # which keeps these cases about the FMIPv6 message and option types.
+        # ``_make_opt_pad`` round-tripping a ``PadN`` data model two octets too
+        # long, by copying the data model's whole-option ``length`` into the
+        # schema's ``Option Length`` field, is covered by
+        # ``test_mh_padding_option_data_model_round_trips``.
         cases = [
             ('FBU', Packet.Fast_Binding_Update, {
                 'seq': 0x1234, 'ack': True, 'home': True, 'lla_compat': False,
@@ -1436,14 +1436,13 @@ class MHUnitTests(unittest.TestCase):
                 self.assertEqual(rebuilt, raw)
 
         with self.subTest('FBack, unassigned status now raises on construction'):
-            # This used to be in ``cases`` above, round-tripping a bare int for
-            # a status value RFC 5568 leaves unassigned. Constructing from
-            # ``data=`` builds the wire bytes and then reads them straight
-            # back to populate ``.info`` -- that read-back is what used to
-            # mint ``Unassigned_77`` harmlessly. Per the owner's ruling on
-            # GitHub issue #877 (see
+            # A status value RFC 5568 leaves unassigned is not one of the
+            # ``cases`` above. Constructing from ``data=`` builds the wire bytes
+            # and then reads them straight back to populate ``.info`` -- that
+            # read-back is where a minting enum would produce ``Unassigned_77``.
+            # Per the owner's ruling on GitHub issue #877 (see
             # ``test_mh_rfc5568_local_enums_cover_unregistered_value_sets``),
-            # the closed :class:`FastBindingAcknowledgmentStatus` now raises
+            # the closed :class:`FastBindingAcknowledgmentStatus` raises
             # instead, and it does so on construction itself, before there is
             # any wire-format bytes object to round-trip at all.
             from pcapkit.utilities.exceptions import EnumValueError
@@ -1460,18 +1459,17 @@ class MHUnitTests(unittest.TestCase):
 
         Both are therefore enumerated in :mod:`pcapkit.protocols.internet.mh`
         itself rather than in :mod:`pcapkit.const.mh`. Per the owner's ruling
-        on GitHub issue #877, both stay **closed**: GitHub issue #880 found
-        that a value the RFC leaves unassigned used to be minted a
-        ``Unassigned_N`` placeholder member -- through a path that bypassed
+        on GitHub issue #877, both stay **closed**: a value the RFC leaves
+        unassigned raises rather than being minted an ``Unassigned_N``
+        placeholder member (GitHub issue #880) -- a minting path bypasses
         ``_missing_``'s own ``0 <= value <= 255`` guard and, for an unknown
-        *name*, aliased a second unknown key onto the first at a shared ``-1``
-        sentinel. Both enums now raise instead of minting, so an unassigned
-        code no longer grows the class. Over IPv4 ``@beholder`` replaces the
-        MH layer and everything above it with
-        :class:`~pcapkit.protocols.misc.raw.Raw`; over IPv6 only the MH
-        header is replaced, by ``IPv6_Ext``, and the layers above it still
-        parse -- see ``test_mh_local_enums_raise_and_do_not_alias`` for that
-        distinction and the other two RFC-inline enums.
+        *name*, aliases a second unknown key onto the first at a shared ``-1``
+        sentinel. So an unassigned code does not grow the class. Over IPv4
+        ``@beholder`` replaces the MH layer and everything above it with
+        :class:`~pcapkit.protocols.misc.raw.Raw`; over IPv6 only the MH header
+        is replaced, by ``IPv6_Ext``, and the layers above it still parse --
+        see ``test_mh_local_enums_raise_and_do_not_alias`` for that distinction
+        and the other two RFC-inline enums.
         """
         from pcapkit.const.mh.option import Option
         from pcapkit.const.mh.packet import Packet
@@ -1487,7 +1485,7 @@ class MHUnitTests(unittest.TestCase):
         mhlla_type = Option.Mobility_Header_Link_Layer_Address_option
 
         # The membership assertions come first, before any lookup that raises
-        # gets a chance to run: ``_missing_`` is closed now, but pinning the
+        # gets a chance to run: ``_missing_`` is closed, but pinning the
         # declared set up front keeps this test honest about exactly what is
         # -- and is not -- a member, independent of the raise behaviour below.
         with self.subTest('FBack status members, RFC 5568 section 6.2.3'):
@@ -1555,7 +1553,7 @@ class MHUnitTests(unittest.TestCase):
 
         with self.subTest('unassigned values raise instead of minting'):
             # 2..127 is the unassigned half of the "accepted" range, 132..255 of
-            # the "rejected" one; both must now raise rather than parse.
+            # the "rejected" one; both must raise rather than parse.
             for wire in (2, 77, 127, 132, 255):
                 with self.assertRaises(EnumValueError):
                     fback(wire)
@@ -1572,12 +1570,11 @@ class MHUnitTests(unittest.TestCase):
                         enum_cls(value)
 
         with self.subTest('get() backports string and integer lookups, and no longer mints'):
-            # An unknown *name* is ``EnumKeyError`` since GitHub issue #923 --
-            # both ``get`` overrides used to raise ``EnumValueError`` for it, so
-            # that a name miss and a value miss reported identically, and that
-            # is the conversion #923's ruling rejects: stdlib ``E['nosuch']``
-            # raises ``KeyError``, so the name half is ``KeyError``-derived and
-            # only ``_missing_``'s value half stays ``ValueError``-derived.
+            # An unknown *name* is ``EnumKeyError`` (GitHub issue #923), not
+            # ``EnumValueError``, so a name miss and a value miss do not report
+            # identically: stdlib ``E['nosuch']`` raises ``KeyError``, so the
+            # name half is ``KeyError``-derived and only ``_missing_``'s value
+            # half is ``ValueError``-derived.
             from pcapkit.utilities.exceptions import EnumKeyError
 
             self.assertIs(FastBindingAcknowledgmentStatus.get(130),
@@ -1635,27 +1632,21 @@ class MHUnitTests(unittest.TestCase):
                                           chksum=parsed.chksum, data=parsed)), hi_raw)
 
     def test_mh_get_default_works_uniformly_through_the_inherited_method(self) -> None:
-        """GitHub issue #935: the two kept ``get`` overrides are deleted, not widened.
+        """GitHub issue #935: ``get(key, default)`` is inherited, not overridden.
 
-        GitHub issue #930 re-parented :class:`FastBindingAcknowledgmentStatus`
-        and :class:`IPv6AddressPrefixCode` onto
-        :class:`~pcapkit.corekit.enum.EnumLookup`, which made both
-        **advertise** the base's two-argument ``get(key, default)`` through
-        inheritance while their own kept ``@staticmethod`` overrides still
-        only accepted one -- calling either with a ``default`` raised
-        ``TypeError: get() takes 1 positional argument but 2 were given``.
-        GitHub issue #935's first ruling, the owner's lean toward option 1 of
-        that thread, widened both signatures to accept ``default`` rather than
-        delete them. The owner then asked, on GitHub pull request #940, why the
-        two overrides were needed at all when they could fall back to the base
-        class's, and his final ruling there went further: he preferred the
-        second option, deleting both overrides outright. Both classes now
-        inherit ``get`` from the base exactly as :class:`LMAAddressCode` and
-        :class:`LocalizedRoutingStatus` -- the two pure re-parents already in
-        this module -- always have, so ``default`` now works the same way on
-        all four, uniformly, because there is only one implementation left to
-        call. This test fails with the ``TypeError`` above against the tree at
-        382375811, before either ruling landed.
+        :class:`FastBindingAcknowledgmentStatus` and
+        :class:`IPv6AddressPrefixCode` are parented onto
+        :class:`~pcapkit.corekit.enum.EnumLookup` (GitHub issue #930), which
+        makes both **advertise** the base's two-argument ``get(key, default)``.
+        This guards against either keeping a one-argument ``@staticmethod``
+        override, so that calling it with a ``default`` raises
+        ``TypeError: get() takes 1 positional argument but 2 were given``. Per
+        the owner's final ruling on GitHub pull request #940, the overrides are
+        deleted rather than widened: both classes inherit ``get`` from the base,
+        as :class:`LMAAddressCode` and :class:`LocalizedRoutingStatus` -- the
+        module's pure re-parents -- do, so ``default`` works the same way on
+        every class here, because there is only one implementation to call.
+        This test fails with the ``TypeError`` above at 382375811.
         """
         from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
                                                    IPv6AddressPrefixCode, LMAAddressCode,
@@ -1666,9 +1657,9 @@ class MHUnitTests(unittest.TestCase):
                    LMAAddressCode, LocalizedRoutingStatus)
 
         with self.subTest('a default argument no longer raises TypeError'):
-            # This is exactly the call GitHub issue #935 reports as failing
-            # on the tree before either ruling landed: a second positional
-            # argument to a ``@staticmethod`` that only declared one.
+            # This is exactly the call GitHub issue #935 reports as failing:
+            # a second positional argument to a ``@staticmethod`` that declares
+            # only one.
             for cls in classes:
                 member = next(iter(cls))
                 try:
@@ -1692,8 +1683,8 @@ class MHUnitTests(unittest.TestCase):
         with self.subTest('a default naming no registered member still raises, not TypeError'):
             # The issue's own repro: a default that does not itself resolve
             # does not silently swallow the miss -- it falls through to the
-            # same EnumKeyError ``key`` alone would have raised, uniformly
-            # on all four now.
+            # same EnumKeyError ``key`` alone raises, uniformly on every class
+            # here.
             for cls in classes:
                 with self.subTest(cls=cls.__name__):
                     with self.assertRaises(EnumKeyError) as caught:
@@ -1741,17 +1732,13 @@ class MHUnitTests(unittest.TestCase):
         from pcapkit.utilities.exceptions import EnumValueError
 
         with self.subTest('LocalizedRoutingStatus and LMAAddressCode raise and now have get()'):
-            # Both had zero callers repo-wide (tests included), so GitHub issue
-            # #880 deleted the hand-rolled ``get()`` outright rather than
-            # rebuilding it on the immutable contract -- true on the tree #880
-            # left behind, where neither class carried ``get`` at all. GitHub
-            # issue #930 re-parented both onto
-            # :class:`~pcapkit.corekit.enum.EnumLookup`, which is what gives
-            # every non-registry enumeration ``get``/``get_all`` for free, so
-            # ``hasattr`` now reads the other way -- the immutable contract
-            # itself is what this subtest still pins: the base's own ``get``
-            # still cannot mint, so an unassigned value raises there exactly
-            # as it does through the bare constructor.
+            # Neither carries a hand-rolled ``get()`` (GitHub issue #880); both
+            # inherit ``get``/``get_all`` from
+            # :class:`~pcapkit.corekit.enum.EnumLookup` (GitHub issue #930), as
+            # every non-registry enumeration does. This subtest pins the
+            # immutable contract: the base's own ``get`` cannot mint, so an
+            # unassigned value raises there exactly as it does through the bare
+            # constructor.
             from pcapkit.utilities.exceptions import EnumKeyError
 
             for enum_cls, unassigned in ((LocalizedRoutingStatus, 50), (LMAAddressCode, 50)):
@@ -1764,14 +1751,14 @@ class MHUnitTests(unittest.TestCase):
                     enum_cls.get('NOT_A_REAL_MEMBER')
 
         with self.subTest('the shared -1 aliasing defect is gone'):
-            # Before the fix, ``get('bogus_one')`` minted a member at the
-            # shared sentinel -1, and ``get('bogus_two')`` then resolved to
+            # This guards against ``get('bogus_one')`` minting a member at the
+            # shared sentinel -1, and ``get('bogus_two')`` then resolving to
             # that same member -- a name that lies about itself. Both calls
-            # must now raise independently, and neither may touch the
+            # must raise independently, and neither may touch the
             # class's own lookup tables while doing so.
             #
-            # ``EnumKeyError`` rather than ``EnumValueError`` since GitHub
-            # issue #923: these are *name* misses, and #923's ruling keeps a
+            # ``EnumKeyError`` rather than ``EnumValueError`` (GitHub issue
+            # #923): these are *name* misses, and #923's ruling keeps a
             # name miss ``KeyError``-shaped after stdlib ``E['nosuch']``.
             from pcapkit.utilities.exceptions import EnumKeyError
 
@@ -1786,10 +1773,10 @@ class MHUnitTests(unittest.TestCase):
                 self.assertEqual(enum_cls._value2member_map_, before_values)  # pylint: disable=no-member
 
         with self.subTest("_missing_'s range invariant holds for all four"):
-            # ``extend_enum`` used to install a member at an explicit value
-            # without consulting ``_missing_`` at all, which is how a value
-            # the class's own guard rejects (e.g. -1) ended up a member of it.
-            # With no minting path left, no lookup -- in range or out of it --
+            # ``extend_enum`` installs a member at an explicit value without
+            # consulting ``_missing_`` at all, which is how a value the class's
+            # own guard rejects (e.g. -1) can end up a member of it. With no
+            # minting path, no lookup -- in range or out of it --
             # may change the declared member set.
             for enum_cls in (FastBindingAcknowledgmentStatus, IPv6AddressPrefixCode,
                              LocalizedRoutingStatus, LMAAddressCode):
@@ -1865,7 +1852,7 @@ class MHUnitTests(unittest.TestCase):
             # generically -- next header ``UDP`` and a length that exactly
             # matches this ``fback_raw`` payload -- so ``IPv6.read`` returns
             # normally: IPv6's own header fields (source, destination, hop
-            # limit) survive, and the chain now ends honestly at the bad
+            # limit) survive, and the chain ends honestly at the bad
             # header's replacement rather than swallowing the packet.
             def wrap_in_ethernet_ipv6(mh_payload: bytes) -> Ethernet:
                 ipv6_header = struct.pack(
@@ -1890,10 +1877,10 @@ class MHUnitTests(unittest.TestCase):
     def test_mh_message_flags_pack_each_bit_independently(self) -> None:
         """Regression test: a cleared flag must not be emitted as a set bit.
 
-        :class:`~pcapkit.corekit.fields.strings.BitField` used to seed its per-bit
-        buffer with NUL bytes and then truth-test it, so the ASCII ``b'0'`` written
-        for a cleared bit read back as set and every named bit came out as ``1``
-        regardless of the value handed in.
+        This guards against :class:`~pcapkit.corekit.fields.strings.BitField`
+        seeding its per-bit buffer with NUL bytes and then truth-testing it, so
+        that the ASCII ``b'0'`` written for a cleared bit reads back as set and
+        every named bit comes out as ``1`` regardless of the value handed in.
         """
         from pcapkit.const.mh.packet import Packet
         from pcapkit.const.reg.transtype import TransType
@@ -2085,7 +2072,7 @@ class MHUnitTests(unittest.TestCase):
 
         proto = object.__new__(MH)
 
-        # each of these previously emitted 6 + n octets while declaring only 8
+        # without the fix, each of these emits 6 + n octets while declaring only 8
         for n in (4, 6, 8):
             with self.subTest(body=n):
                 with mock.patch('pcapkit.protocols.internet.mh.warn') as warned:
@@ -2093,7 +2080,7 @@ class MHUnitTests(unittest.TestCase):
                 self.assertEqual(warned.call_count, 1)
                 self.assertIs(warned.call_args.args[1], ProtocolWarning)
 
-                # the emitted header is now exactly what it declares
+                # the emitted header is exactly what it declares
                 total = 6 + len(padded)
                 self.assertEqual(total % 8, 0)
                 self.assertEqual(((len(padded) + 6) // 8) * 8, total)
@@ -2261,10 +2248,11 @@ class MHUnitTests(unittest.TestCase):
         at all, so an opaque payload is the whole of the correct parse rather than
         a placeholder for a better one. All three share a handler.
 
-        The ``data.length`` assertion below read ``len(payload) + 2`` until #512.
-        That contradicted the ``len(schema.pack())`` assertion four lines above it
-        -- the same test proved the wire was ``len(payload) + 4`` and then asserted
-        the parsed length was two octets less. The ``+ 4`` is the wire's own count:
+        The ``data.length`` assertion below is ``len(payload) + 4``, not
+        ``len(payload) + 2`` (#512): the latter contradicts the
+        ``len(schema.pack())`` assertion four lines above it -- the same test
+        would prove the wire is ``len(payload) + 4`` and then assert the parsed
+        length two octets less. The ``+ 4`` is the wire's own count:
         a CGA extension's Extension Type and Extension Data Length are two octets
         each [:rfc:`4581#section-2`], not one each as an :rfc:`6275#section-6.2`
         mobility option's are.
@@ -2457,11 +2445,10 @@ class MHUnitTests(unittest.TestCase):
 
         Note:
             :attr:`~pcapkit.const.mh.option.Option.CGA_Parameters` is absent,
-            deliberately: it now parses (see
-            :meth:`test_mh_cga_parameters_option_now_parses`), but nobody has
-            verified this test's stricter round-trip identity for it yet --
-            that is a separate, deliberate scope decision left for whoever
-            takes it on next, not implied by parsing alone.
+            deliberately: it parses (see
+            :meth:`test_mh_cga_parameters_option_now_parses`), but this test's
+            stricter round-trip identity is not verified for it -- a separate,
+            deliberate scope decision, not implied by parsing alone.
         """
         import ipaddress
 
@@ -2874,7 +2861,7 @@ class MHUnitTests(unittest.TestCase):
         ``True`` into ``0.0.0.1`` and ``False`` into ``0.0.0.0``, sized the option
         as IPv4, and packed it with no exception and no warning -- so #500's guard
         in :meth:`~pcapkit.corekit.fields.ipaddress._IPAddressField.pre_process`
-        never saw a :obj:`bool` at all. Measured before the fix:
+        never saw a :obj:`bool` at all. Measured without the fix:
 
         .. code-block:: text
 
@@ -2929,7 +2916,7 @@ class MHUnitTests(unittest.TestCase):
         self.assertEqual(schema.length, 6)
         self.assertEqual(schema.address, ipaddress.ip_address('0.0.0.1'))
 
-        # and a malformed address is now an in-library error rather than
+        # and a malformed address is an in-library error rather than
         # ipaddress's own bare ValueError, which ``except BaseError`` cannot catch
         with self.assertRaises(FieldValueError) as context:
             proto._make_opt_bid(Option.Binding_Identifier,  # type: ignore[arg-type]
@@ -2982,16 +2969,16 @@ class MHUnitTests(unittest.TestCase):
     def test_mh_dmnp_prefix_length_range_check_survives_the_bool_guard(self) -> None:
         """The prefix-length range check needs a test that does not depend on #508.
 
-        Before #508's fix, the only thing reaching this check with an IPv4 address
-        was ``prefix=True`` at the default ``prefix_length=64``: the bool was
-        laundered into ``0.0.0.1``, and ``64 > 32`` then raised -- which is exactly
-        why #508's own sweep read this site as already guarded. It was not; the
-        ``ProtocolError`` was about the *prefix length*, not the prefix.
+        Without #508's fix, the only thing reaching this check with an IPv4
+        address is ``prefix=True`` at the default ``prefix_length=64``: the bool
+        is laundered into ``0.0.0.1``, and ``64 > 32`` then raises -- which is
+        exactly why #508's own sweep read this site as already guarded. It was
+        not; the ``ProtocolError`` was about the *prefix length*, not the prefix.
 
-        Now that the bool is refused earlier, that accident no longer exercises the
-        range check at all, so this test reaches it with a real address instead.
-        Without it, the fix silently drops coverage of a branch that was only ever
-        covered by the defect it removes.
+        With the bool refused earlier, that accident does not exercise the range
+        check at all, so this test reaches it with a real address instead.
+        Without this test, the branch would be covered only by the defect #508
+        removes.
         """
         from pcapkit.const.mh.option import Option
         from pcapkit.protocols.internet.mh import MH
@@ -3141,15 +3128,16 @@ class MHUnitTests(unittest.TestCase):
     def test_mh_mn_id_option_length_matches_packed_octets(self) -> None:
         """The MN-ID option's declared length must count what actually gets packed.
 
-        ``_make_opt_mn_id`` used to size the identifier from the *Python type* of
-        the ``identifier`` argument rather than from ``subtype_val``, which is what
-        actually selects the wire format (see ``mn_id_selector``). For the
-        ``IPv6_Address`` subtype -- the method's own default -- the schema always
-        packs a fixed 16-octet address
+        This guards against ``_make_opt_mn_id`` sizing the identifier from the
+        *Python type* of the ``identifier`` argument rather than from
+        ``subtype_val``, which is what actually selects the wire format (see
+        ``mn_id_selector``). For the ``IPv6_Address`` subtype -- the method's own
+        default -- the schema always packs a fixed 16-octet address
         (:class:`~pcapkit.corekit.fields.ipaddress.IPv6AddressField` ignores any
-        declared length entirely), so a ``str`` or ``int`` identifier, including
-        the no-argument default, declared a ``length`` that disagreed with what was
-        actually packed: ``len(packed) != length + 2``. See #448.
+        declared length entirely), so sized by type, a ``str`` or ``int``
+        identifier, including the no-argument default, declares a ``length`` that
+        disagrees with what is actually packed: ``len(packed) != length + 2``.
+        See #448.
         """
         import ipaddress
 
@@ -3158,9 +3146,9 @@ class MHUnitTests(unittest.TestCase):
 
         proto = object.__new__(MH)
 
-        # every documented ``identifier`` type, against the subtype that used to
-        # mis-size three of the four -- including the method's own default, which
-        # is itself one of the broken types (``str``).
+        # every documented ``identifier`` type, against the subtype that sizing
+        # by type gets wrong for most of them -- including the method's own
+        # default, ``str``.
         cases = (
             ('default (no identifier)', {}),
             ("str '::'", {'identifier': '::'}),
@@ -3180,20 +3168,17 @@ class MHUnitTests(unittest.TestCase):
     def test_mh_mn_id_option_converts_int_identifier_per_subtype(self) -> None:
         """An ``int`` identifier converts to each subtype's own wire form.
 
-        ``_make_opt_mn_id`` used to size an ``int`` identifier from the
-        integer's own :meth:`int.bit_length` regardless of ``subtype``, but
-        never actually turned it into the octets that width described --
-        ``BytesField`` received the ``int`` itself, and ``struct.pack()``
-        cannot do anything with that (#467). An earlier revision of this fix
-        (9b26fa387) rejected ``int`` outright for every subtype but
-        ``IPv6_Address``, on the reasoning that there was no non-arbitrary
-        width to convert it to. That reasoning held for ``NAI`` (its field is
-        a ``StringField``, and NAI is text, not a number) but was wrong for
-        the other six: ``id_len = math.ceil(identifier.bit_length() / 8)``
-        *was* the right, non-arbitrary width all along, self-consistent with
-        the declared ``length`` by construction -- what was missing was
-        actually converting ``identifier`` to those octets via
-        :meth:`int.to_bytes` before handing it to the schema. See #467, #468.
+        For every ``BytesField`` subtype,
+        ``id_len = math.ceil(identifier.bit_length() / 8)`` is the right,
+        non-arbitrary width, self-consistent with the declared ``length`` by
+        construction, and ``_make_opt_mn_id`` converts ``identifier`` to those
+        octets via :meth:`int.to_bytes` before handing it to the schema.
+        ``NAI`` has no such width: its field is a ``StringField``, and NAI is
+        text, not a number. This guards against sizing an ``int`` identifier
+        from that width without converting it -- ``BytesField`` then receives
+        the ``int`` itself, and ``struct.pack()`` cannot do anything with that
+        (#467) -- and against rejecting ``int`` outright for every subtype but
+        ``IPv6_Address``, as 9b26fa387 did. See #467, #468.
         """
         import io
 
@@ -3252,13 +3237,12 @@ class MHUnitTests(unittest.TestCase):
         # ``OverflowError`` and ``ipaddress.IPv6Address`` an
         # ``AddressValueError`` -- itself a bare ``ValueError``. So the guard
         # sits before the subtype dispatch rather than inside the ``int``
-        # branch, and ``IPv6_Address`` is covered here too: an earlier revision
-        # of this fix guarded only inside that branch, which the
-        # ``IPv6_Address`` dispatch never reaches, leaving
+        # branch, and ``IPv6_Address`` is covered here too: a guard only inside
+        # that branch, which the ``IPv6_Address`` dispatch never reaches, leaves
         # ``identifier=-5, subtype=IPv6_Address`` leaking
         # ``AddressValueError: -5 (< 0) is not permitted as an IPv6 address``
         # out of the very handler that exists to stop bare stdlib exceptions
-        # escaping. Confirmed to fail against that revision.
+        # escaping. Confirmed to fail against such a guard.
         for subtype in ('NAI', 'IPv6_Address', 'IMSI', 'P_TMSI',
                         'EUI_48_address', 'EUI_64_address', 'GUTI', 'DUID'):
             with self.subTest(subtype=subtype, identifier=-5):
@@ -3268,10 +3252,9 @@ class MHUnitTests(unittest.TestCase):
                         identifier=-5)
                 self.assertIsInstance(ctx.exception, BaseError)
 
-        # the ``IPv6_Address`` subtype is unaffected -- an ``int`` identifier
-        # still converts to its fixed 16-octet wire form via
-        # :class:`ipaddress.IPv6Address`, which both converts and validates,
-        # as #448 fixed and neither revision of this fix has touched.
+        # for the ``IPv6_Address`` subtype, an ``int`` identifier converts to
+        # its fixed 16-octet wire form via :class:`ipaddress.IPv6Address`,
+        # which both converts and validates (#448).
         schema = proto._make_opt_mn_id(  # type: ignore[arg-type]
             Option.MN_ID_OPTION_TYPE, subtype=MNIDSubtype.IPv6_Address, identifier=0x1234)
         self.assertEqual(schema.length, 17)
@@ -3279,8 +3262,8 @@ class MHUnitTests(unittest.TestCase):
 
         # ``IPv6_Address`` is the one subtype with an *upper* bound as well, and it
         # is checked on both sides of the boundary rather than at some large value,
-        # which is how this gap survived the first pass: the earlier probe stopped
-        # at ``2**128 - 1``, exactly one below where the answer changes. Above the
+        # since a probe that stops at ``2**128 - 1`` sits exactly one below where
+        # the answer changes. Above the
         # bound ``ipaddress.IPv6Address`` raises ``AddressValueError`` -- a bare
         # ``ValueError`` -- so it must be rejected in-library instead. The bound is
         # subtype-dependent: the ``BytesField`` subtypes have no ceiling and simply
@@ -3336,8 +3319,9 @@ class MHUnitTests(unittest.TestCase):
         closed the ``int`` half of that union. But each subtype's field
         (c.f. ``mn_id_selector``) accepts exactly *one* of ``bytes``/``str``
         -- a ``StringField`` for ``NAI``, a ``BytesField`` for the other six
-        -- so handing the wrong one, or a value of neither type, used to
-        leak a bare stdlib exception instead of an in-library one:
+        -- so this guards against handing the wrong one, or a value of
+        neither type, leaking a bare stdlib exception instead of an in-library
+        one:
 
         * ``bytes``/list/dict for ``NAI`` -- ``AttributeError`` (``StringField``
           calls ``identifier.encode(...)`` to pack)
@@ -3402,9 +3386,9 @@ class MHUnitTests(unittest.TestCase):
                 self.assertIsInstance(ctx.exception, ProtocolError)
                 self.assertIn('IPv6_Address', str(ctx.exception))
 
-        # the matching type, including the empty-value boundary, still works
-        # for every subtype -- this fix must reject the wrong type, not
-        # tighten what already worked.
+        # the matching type, including the empty-value boundary, works for
+        # every subtype -- the guard must reject the wrong type, not tighten
+        # what is valid.
         schema = proto._make_opt_mn_id(  # type: ignore[arg-type]
             Option.MN_ID_OPTION_TYPE, subtype=MNIDSubtype.NAI, identifier='')
         self.assertEqual(schema.length, 1)
@@ -3442,13 +3426,13 @@ class MHUnitTests(unittest.TestCase):
     def test_mh_mn_id_option_rejects_a_bool_identifier_for_every_subtype(self) -> None:
         """A ``bool`` identifier is a caller mistake, not a one-octet integer.
 
-        ``bool`` is an :class:`int` subclass, so before #469's review flagged it
-        ``True``/``False`` fell through to the #468 int-conversion path and
-        silently produced a plausible-looking wire form -- ``IPv6Address(1)``,
-        that is ``::1``, for ``IPv6_Address``, and a one-octet identifier for the
-        six ``BytesField`` subtypes. Refused for every subtype now, before the
-        subtype dispatch, so neither numeric path can reach it. A caller who
-        genuinely wants the integer passes ``int(flag)``, which the message says.
+        ``bool`` is an :class:`int` subclass, so unguarded, ``True``/``False``
+        fall through to the #468 int-conversion path and silently produce a
+        plausible-looking wire form -- ``IPv6Address(1)``, that is ``::1``, for
+        ``IPv6_Address``, and a one-octet identifier for the ``BytesField``
+        subtypes (#469). Refused for every subtype, before the subtype
+        dispatch, so neither numeric path can reach it. A caller who genuinely
+        wants the integer passes ``int(flag)``, which the message says.
         """
         from pcapkit.const.mh.mn_id_subtype import MNIDSubtype
         from pcapkit.const.mh.option import Option
@@ -3514,8 +3498,8 @@ class MHUnitTests(unittest.TestCase):
         ``data=`` bound to the model parameter and ``kwargs.get('data')`` always saw
         nothing. The payload was dropped with no exception and the length written as
         though it were empty -- ``vendor`` and ``subtype`` arrived intact, which
-        made it look like a partial success. The parameter is now ``option``, which
-        no sub-option field is called.
+        made it look like a partial success. The parameter is ``option``, which no
+        sub-option field is called.
         """
         from pcapkit.const.mh.ani_suboption import ANISuboption
         from pcapkit.const.mh.flow_id_suboption import FlowIDSuboption
@@ -3568,22 +3552,18 @@ class MHUnitTests(unittest.TestCase):
         self.assertIn(payload, option.pack())
 
     def test_mh_cga_parameters_option_now_parses(self) -> None:
-        """The CGA Parameters option parses -- this used to be pinned as broken.
+        """The CGA Parameters option parses end to end.
 
-        This test used to be
-        ``test_mh_cga_parameters_option_is_unparsable_upstream``, pinning a
-        :exc:`KeyError` on the exact reproduction below: sizing
+        This guards against a :exc:`KeyError` on the exact reproduction below:
+        sizing
         :attr:`~pcapkit.protocols.schema.internet.mh.CGAParameter.extensions`
-        read ``pkt['length']``, a name only the enclosing
+        reads ``pkt['length']``, a name only the enclosing
         :class:`~pcapkit.protocols.schema.internet.mh.CGAParametersOption`
-        declared, and :class:`~pcapkit.corekit.fields.misc.SchemaField` handed
-        a nested schema a fresh packet dict rather than the enclosing
-        option's. Fixed by #445 (the nested lookup now falls through to the
-        enclosing schema). The second half of the fault this test's own
-        docstring named -- a :class:`~pcapkit.corekit.fields.misc.
-        ForwardMatchField` miscounted into the nested schema's length -- was
-        fixed separately, by #446/#456. Both landed, so the option this test
-        exists for now parses end to end; see also
+        declares, so :class:`~pcapkit.corekit.fields.misc.SchemaField` has to
+        let the nested lookup fall through to the enclosing schema rather than
+        hand it a fresh packet dict (#445). It also guards against a
+        :class:`~pcapkit.corekit.fields.misc.ForwardMatchField` miscounted into
+        the nested schema's length (#446/#456). See also
         :meth:`tests.corekit.test_fields_misc_packet_context.
         CGAParametersRegressionTests.test_cga_parameters_option_now_parses_end_to_end`
         for the same reproduction asserting the parsed fields.

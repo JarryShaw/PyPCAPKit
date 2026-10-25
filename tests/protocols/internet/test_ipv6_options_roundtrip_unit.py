@@ -16,8 +16,8 @@ not reproduce:
   zeroed.
 * #1237: an unassigned Quick-Start function could not be read.
 
-#1200 is the other direction: a zero-length ``SMF_DPD`` option parsed as H-DPD
-by reading the next option's type octet, and is now rejected.
+#1200 is the other direction: a zero-length ``SMF_DPD`` option is rejected,
+rather than parsed as H-DPD by reading the next option's type octet.
 
 Every case builds its own octets in memory and reads no capture. The classes
 are imported inside each test, after

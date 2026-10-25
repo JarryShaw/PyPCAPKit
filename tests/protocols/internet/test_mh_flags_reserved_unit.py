@@ -4,7 +4,7 @@
 GitHub issue #1418: 24 MH ``flags`` bit fields named only some of their bits,
 and :class:`~pcapkit.corekit.fields.strings.BitField` packs an unnamed bit as
 zero, so a message, option or sub-structure whose reserved bits were set came
-back with them cleared. Each site now names a ``reserved`` sub-field, read into
+back with them cleared. Each site names a ``reserved`` sub-field, read into
 the data model (``flags_reserved`` on a message, since :attr:`MH.reserved` is
 the fixed-header octet, and ``reserved`` elsewhere) and written back by
 ``make()``, where it defaults to ``0``.

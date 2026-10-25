@@ -7,7 +7,7 @@ parses only itself -- its info holds no payload -- but its ``data`` kept every
 octet after it, so ``type(ex).from_data(ex.info).data`` came back short: 8 of
 the 28 octets of an 8-octet header followed by a UDP datagram.
 
-``data`` now holds the header alone, which is also what the parent's
+``data`` holds the header alone, which is also what the parent's
 ``from_data`` concatenates, so the parent rebuild is pinned alongside.
 
 Every case builds its own octets in memory and reads no capture. Classes are

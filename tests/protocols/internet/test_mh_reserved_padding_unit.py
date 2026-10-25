@@ -5,10 +5,10 @@ GitHub issue #1437, part A: every reserved field of the Mobility Header that a
 :class:`~pcapkit.corekit.fields.strings.PaddingField` holds -- in a message
 body, an option, a Flow Identification sub-option, an ANI sub-option or a QoS
 attribute -- was dropped by its reader, so a rebuild wrote zeros: Home Test Init
-reserved ``aabb`` came back as ``0000``. #1436 made the field pack the octets it
-is given; the readers now keep them on the data model (``msg_reserved`` on a
+reserved ``aabb`` came back as ``0000``. The field packs the octets it is given
+(#1436), and the readers keep them on the data model (``msg_reserved`` on a
 message, ``reserved`` elsewhere) and the makers write them back. A fresh build
-still writes zeros.
+writes zeros.
 
 Each case is one Mobility Header carrying the site under test, with its
 reserved octets set to ``aa``, ``aabb`` or ``aabbcc``, next to the same header

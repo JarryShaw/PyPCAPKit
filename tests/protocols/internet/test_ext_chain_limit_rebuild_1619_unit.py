@@ -10,7 +10,7 @@ octets again, and each such parse counted its chain afresh, from ``0``: so every
 one that reached the limit warned of it, twice for IPv6 and up to 33 times for
 IPv4, and went up to 32 headers past where the parse had stopped.
 
-Now a rebuilt payload takes its place in its chain from the layer it is the
+A rebuilt payload takes its place in its chain from the layer it is the
 payload of, as #1610 has it take its place in the frame, and only the layer
 being rebuilt warns, once its own parse gets to the limit.
 
@@ -182,7 +182,8 @@ class ExtensionHeaderChainRebuildTests(unittest.TestCase):
 
     def test_where_the_frame_limit_falls_first_rebuilding_warns_once(self) -> None:
         # Guard: 40 tunnels put the 65th layer at the chain's 24th header, short
-        # of the chain limit; the rebuild warned once before #1619 too.
+        # of the chain limit; the rebuild warns once with or without the #1619
+        # fix.
         from pcapkit.protocols.link.ethernet import Ethernet
 
         for carrier in ETHERTYPE:

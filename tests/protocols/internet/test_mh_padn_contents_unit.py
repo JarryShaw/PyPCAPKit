@@ -4,8 +4,8 @@
 GitHub issue #1329, its ``PadN`` remainder: the contents of a ``PadN``
 mobility option, and of a Flow Identification ``PadN`` sub-option, were held by
 a :class:`~pcapkit.corekit.fields.strings.PaddingField` that packed zeros, so
-``0106aabbccddeeff`` came back as ``0106000000000000``. The contents are now
-kept on the data model (``data``) and written back; a fresh build still writes
+``0106aabbccddeeff`` came back as ``0106000000000000``. The contents are
+kept on the data model (``data``) and written back; a fresh build writes
 zeros. The root cause is #1223.
 
 Every case builds its own octets in memory and reads no capture. :class:`MH` is

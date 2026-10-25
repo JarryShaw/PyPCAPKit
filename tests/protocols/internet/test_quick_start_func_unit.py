@@ -5,7 +5,7 @@ GitHub issue #1091. ``_read_opt_qs`` read ``schema.func``, which the schema
 declares only under ``TYPE_CHECKING`` and which only ``_QSOption.post_process``
 sets on the parse path. A schema built by ``_make_opt_qs`` never passes through
 that hook, so constructing any Quick-Start option raised ``AttributeError:
-'QuickStartRequestOption' object has no attribute 'func'``. The readers now
+'QuickStartRequestOption' object has no attribute 'func'``. The readers
 take the function from ``flags['func']``, the bit-field they already read
 ``rate`` from.
 

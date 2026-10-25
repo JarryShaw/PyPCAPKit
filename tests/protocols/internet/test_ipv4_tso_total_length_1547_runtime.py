@@ -6,7 +6,7 @@ GitHub issue #1547. A capture taken on a host that offloads TCP segmentation
 NIC fills it in later. :meth:`IPv4.read <pcapkit.protocols.internet.ipv4.IPv4.read>`
 handed the next layer ``0 - hdr_len`` octets, so TCP fell back to
 :class:`~pcapkit.protocols.misc.raw.Raw` and the flow was never traced. A Total
-Length of 0 now means the rest of the captured frame, with no trailer, as dpkt
+Length of 0 means the rest of the captured frame, with no trailer, as dpkt
 (``ip.py``) and Wireshark ("presumed TSO") read it, and the rebuild writes the 0
 back. Following the owner's ruling to match Wireshark, any other Total Length
 shorter than the header is a "Bogus IP length": no payload layer, the octets

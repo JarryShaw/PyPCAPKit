@@ -5,7 +5,7 @@ GitHub issue #1167. :meth:`IPv4.read <pcapkit.protocols.internet.ipv4.IPv4.read>
 handed the next layer the length the header declared even when the capture held
 none of its octets, so its UDP layer was parsed from an empty stream into an
 all-zero header, and :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data`
-rebuilt those 8 octets as if they had been on the wire. Such a payload is now a
+rebuilt those 8 octets as if they had been on the wire. Such a payload is a
 :class:`~pcapkit.protocols.misc.null.NoPayload`. ``test.pcapng`` frame 3, cut
 inside the IPv4 header itself (18 of 20 octets), is kept as raw octets
 (:issue:`1170`).

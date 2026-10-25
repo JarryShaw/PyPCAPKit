@@ -7,7 +7,7 @@ internet-v4 round-trip audit (#1202):
 * #1316 -- ``make()`` padded with an EOOL after every unaligned option, so the
   reader stopped there and the later options were lost;
 * #1317 -- ``from_data`` dropped the parsed NOP/EOOL layout and the octets after
-  the EOOL, and re-padded per option. The octets after the EOOL are now the
+  the EOOL, and re-padded per option. The octets after the EOOL are the
   ``padding`` data field, written back verbatim; the header length follows
   from the options and those octets, so edited options recompute it;
 * #1318 -- an option with an unassigned code could be neither rebuilt nor built;
@@ -201,7 +201,7 @@ class TestIPv4RoundTrip(unittest.TestCase):
         self.assertEqual(data[0], 0x47)
         self.assertEqual(data[20:].hex(), '88040001' '94040000')
 
-        # one option removed shrinks it, rather than zero-filling the old length
+        # one option removed shrinks it, rather than zero-filling to the length it had
         edited = self.parse(header('88040001' '94040000')).info.to_dict()
         edited['options'].pop(OptionNumber.RTRALT)
         data = IPv4.from_data(edited).data

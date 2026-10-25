@@ -137,8 +137,7 @@ class AHUnitTests(unittest.TestCase):
         "being *in* that registry is what makes something an extension
         header" ruling.
         Rephrasing the placement sentence as "places it among the IPv6
-        extension headers" overstated the RFC; that was caught in review
-        on the second version of this fix.
+        extension headers" overstates the RFC.
 
         The section's separate IPv4-context sentence ("placed after the
         IP header ... before the next layer protocol") is legitimate
@@ -152,13 +151,10 @@ class AHUnitTests(unittest.TestCase):
         that fact *qualifies* an already-standalone header for a base
         besides :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`;
         it does not *make* the header standalone, and the RFC has no
-        say in which base is named. An earlier revision of this
-        docstring's ``ESP`` counterpart claimed the RFC "makes it a
-        standalone protocol" and "names ``IPsec`` as the second base",
-        the latter positionally false and unsupported by the cited
-        section; both were caught in review on the third version of
-        this fix. So this test targets the exact wrong phrasing from
-        the earlier rounds rather than banning "IPv4" outright, which
+        say in which base is named, so a claim that the RFC "makes it a
+        standalone protocol" or "names ``IPsec`` as the second base" is
+        unsupported by the cited section. So this test targets the wrong
+        phrasings themselves rather than banning "IPv4" outright, which
         would forbid the legitimate use kept above.
         """
         import re

@@ -9,7 +9,7 @@ declared no reserved subfields, so bits 2, 3, 5 and 8-11 were lost on a
 GitHub issue #1208: :meth:`~pcapkit.protocols.link.l2tpv2.L2TPv2.make` set ``S``
 only when both ``ns`` and ``nr`` were given, so ``L2TPv2(ns=7)`` silently wrote
 neither. :rfc:`2661` §3.1 has ``S`` mark the presence of both fields together,
-so a lone value is now refused with
+so a lone value is refused with
 :class:`~pcapkit.utilities.exceptions.ProtocolError`.
 
 Every case builds its own octets in memory and reads no capture.

@@ -9,7 +9,7 @@ interpreter and the stack -- after 79 headers on Python 3.11, and between 85
 and 90 on 3.14, from a script at the default limit -- and IPv6, which walks its
 chain in a loop, went on to any depth.
 
-Now both stop at :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`
+Both stop at :data:`~pcapkit.utilities.config.EXTENSION_HEADER_LIMIT`
 headers in a row: what follows is kept as
 :class:`~pcapkit.protocols.misc.raw.Raw`, with one
 :exc:`~pcapkit.utilities.warnings.ProtocolWarning`, however long the chain and

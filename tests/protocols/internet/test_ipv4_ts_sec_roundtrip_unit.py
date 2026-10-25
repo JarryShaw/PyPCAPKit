@@ -6,10 +6,10 @@
   inexact, so a stamp of 1001 ms rebuilt as 1000.
 - GitHub issue #1392: the 1-3 octets a ``TS`` length leaves after its last
   whole slot were a zero-packing padding field, so they rebuilt as zeros. They
-  are now the ``remainder`` data field, kept as read.
+  are the ``remainder`` data field, kept as read.
 - GitHub issue #1393: ``_make_opt_sec`` set every field termination indicator
   from the octet's position, so a non-conforming one was rewritten. The wire
-  bits are now the ``termination`` data field, written back on rebuild.
+  bits are the ``termination`` data field, written back on rebuild.
 
 Every case builds its own octets in memory and reads no capture. Classes are
 imported inside each test, after :func:`~tests._support.reimport_once_per_class`.

@@ -20,8 +20,8 @@ Four short, at ``4 (mod 8)``, in both directions: a conformant receiver reading
 this one's tail, and a real peer's 16-octet ``R1_COUNTER`` leaves its last four
 octets to be read as the following parameter's ``Type``.
 
-Why the existing suite could not see it
----------------------------------------
+Why the suite could not see it
+------------------------------
 
 Three things hid it at once, and the third is the reason this module asserts
 against the RFC's arithmetic rather than against a round trip.
@@ -30,10 +30,10 @@ against the RFC's arithmetic rather than against a round trip.
    each parameter in a frame, and two four-octet shortfalls sum to eight, so the
    record area stays 8-aligned and ``HIP.make``'s ``total_length // 8 + 4``
    comes out exact.
-2. Before #651 the padding aligned the parameter *contents* rather than the
-   record, which at ``Length = 12`` appended exactly the four surplus octets this
-   parameter was missing. Correcting the padding did not break ``R1_COUNTER``; it
-   stopped compensating for it.
+2. A padding rule that aligns the parameter *contents* rather than the record
+   (the #651 defect) appends, at ``Length = 12``, exactly the four surplus octets
+   this parameter was missing. So correcting the padding does not break
+   ``R1_COUNTER``; it stops compensating for it.
 3. The round trip cannot see it at all, because pcapkit's reader consumes exactly
    the twelve octets its writer wrote. Only a comparison against the RFC's own
    stride -- or a real peer -- can tell the difference, which is what
@@ -106,7 +106,7 @@ class HIPR1CounterWidthTests(unittest.TestCase):
         The exact octets are pinned, not just the length, because the length
         alone would pass for a record padded to 16 with a four-octet counter as
         readily as for one carrying the eight-octet counter the RFC specifies --
-        and the padding is what the pre-#651 rule appended. So the assertion
+        that padding is what a contents-aligning rule (#651) appends. So the assertion
         names where the eight octets sit: four of ``Reserved`` after the
         type-and-length header, then the counter, then no padding at all, since
         ``rfc_total(12) - 4 - 12`` is zero.
@@ -128,7 +128,7 @@ class HIPR1CounterWidthTests(unittest.TestCase):
                 self.assertEqual(len(raw), rfc_total(12))
                 self.assertEqual(len(raw), 16)
                 self.assertEqual(len(raw) % 8, 0)
-                # Twelve octets before #672, four of them the counter:
+                # Without the #672 fix, twelve octets, four of them the counter:
                 # ``00 8x 00 0c 00 00 00 00 00 00 00 01``.
                 self.assertEqual(
                     raw.hex(), prefix + '000c' + '00000000' + '0000000000000001')
@@ -175,12 +175,12 @@ class HIPR1CounterWidthTests(unittest.TestCase):
         both codes; the two-copy pairing in
         :mod:`examples.generators.options` is what concealed that.
 
-        Code 128 is deliberately not exercised here. #690 registered
-        ``R1CounterParameter`` for 128 as well as 129, so it now reaches this
-        same class rather than parsing as an ``UnassignedParameter`` --
-        that coverage lives with the fix, in
+        Code 128 is deliberately not exercised here. ``R1CounterParameter`` is
+        registered for 128 as well as 129 (#690), so 128 reaches this same
+        class rather than parsing as an ``UnassignedParameter`` -- that
+        coverage lives in
         :meth:`HIPUnitTests.test_hip_r1_counter_code_128_resolves_to_its_own_schema`,
-        not here; this module stays scoped to the width #672 fixed.
+        not here; this module stays scoped to the width (#672).
         """
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.protocols.internet.hip import HIP
@@ -213,7 +213,7 @@ class HIPR1CounterWidthTests(unittest.TestCase):
         walk from 1 violation to 2, the new one being ``frame 101: type 0 padding
         not zeroed: aabbccdd``.
 
-        The width is fixed now, so the walk finds nothing here either way. This
+        With the width right, the walk finds nothing here either way. This
         pins the override anyway, because a fixture that cannot discriminate a
         wrong width from a right one is what let this defect survive as long as
         it did -- the same trap #608 fell into with the ``SOLUTION`` field.
