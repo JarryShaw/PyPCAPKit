@@ -90,8 +90,8 @@ backslash so Sphinx does not read the leading underscore as emphasis, which is
 why :func:`_documented_names` normalises ``\\_`` before comparing: a plain
 string match drops that entry and then reports a defect that is not there.
 
-:data:`KNOWN_DEFECTS` carries the findings this change did not fix, each with
-the reason. :meth:`DocstringParameterTests.test_known_defects_are_still_defects`
+:data:`KNOWN_DEFECTS` carries any finding left unfixed, each with the
+reason. :meth:`DocstringParameterTests.test_known_defects_are_still_defects`
 asserts every one of them still reproduces, so the list cannot rot -- when the
 owning change lands, that test fails and the entry has to be removed rather
 than sitting there forever describing a bug that is gone.
@@ -216,37 +216,10 @@ class Known(NamedTuple):
     reason: 'str'
 
 
-#: Defects this change deliberately left alone, every one because the file
-#: belongs to another concurrent change and editing it would silently discard
-#: that work. The corrections are recorded in the issue thread; nothing here
-#: is a claim that the docstring is right.
-KNOWN_DEFECTS = (
-    # NOTE: the ``register_extractor_engine`` entry that used to head this tuple
-    # is gone because the defect is fixed -- it documented 'engine' where the
-    # parameter is 'name', which is #546's item 2. The remaining register_*
-    # functions in that file were checked at the same time and none of them
-    # carries the same defect, so there is nothing left to record here for it.
-    Known(Finding('pcapkit/vendor/mh/binding_ack_flag.py', 'context', 'soup'),
-          "documents 'soup: Parsed HTML source.' where the parameter is 'data' "
-          "and holds CSV rows. Nothing was renamed here despite the "
-          '``# pylint: disable=arguments-renamed`` pragma -- the parameter '
-          'matches the base ``Vendor.context(self, data)`` in '
-          'pcapkit/vendor/default.py:445, which documents it as '
-          "'data: CSV data.'. The line was copy-pasted from a sibling whose "
-          "process()/context() really does take 'soup', so both the name and "
-          'the description are wrong'),
-    Known(Finding('pcapkit/vendor/mh/binding_update_flag.py', 'context', 'soup'),
-          "documents 'soup' where the parameter is 'data'"),
-    Known(Finding('pcapkit/vendor/mh/handover_ack_flag.py', 'context', 'soup'),
-          "documents 'soup' where the parameter is 'data'"),
-    Known(Finding('pcapkit/vendor/mh/handover_initiate_flag.py', 'context', 'soup'),
-          "documents 'soup' where the parameter is 'data'"),
-    Known(Finding('pcapkit/vendor/pcapng/option_type.py', 'context', 'data'),
-          "documents 'data: CSV data.' where the parameter is 'soup' and holds "
-          'parsed HTML -- the name and the description are both wrong'),
-    Known(Finding('pcapkit/vendor/vlan/priority_level.py', 'process', 'data'),
-          "documents 'data' where the parameter is 'soup'"),
-)
+#: Defects excused from
+#: :meth:`DocstringParameterTests.test_documented_parameters_exist`, each a
+#: :class:`Known` carrying the reason it is left unfixed. None is excused.
+KNOWN_DEFECTS = ()
 
 #: Swallowed section headers excused from
 #: :meth:`DocstringParameterTests.test_section_headers_are_not_swallowed`, in

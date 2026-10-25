@@ -472,7 +472,7 @@ class OptionType(Vendor):
         """Generate constant context.
 
         Args:
-            data: CSV data.
+            soup: Registry data.
 
         Returns:
             Constant context.

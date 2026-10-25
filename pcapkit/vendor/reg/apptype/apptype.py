@@ -147,7 +147,7 @@ class TransportProtocol(EnumLookup, IntEnum):
     # instead of being split. With no decoding left to protect, the owner's own
     # further ruling on GitHub issue #860 retired the power-of-two spacing
     # itself too: that spacing existed mainly for code that composed values like
-    # ``tcp | udp``, which the new logic no longer accepts, so sequential
+    # ``tcp | udp``, which the whole-value lookup does not accept, so sequential
     # ``auto()`` values are the expected behaviour. :meth:`AppType._dispatch`
     # never decodes an ``int`` -- composed by hand with ``|`` or passed bare --
     # into anything narrower than the whole value it already is, on either
@@ -160,8 +160,8 @@ class TransportProtocol(EnumLookup, IntEnum):
     # ``sctp``'s value -- resolves as ``dccp``'s, silently, with no
     # exception, since a real member sits at ``4`` either way. A caller holding
     # an integer under the old spacing (composed or not) can therefore land on a
-    # different real transport's registry after this change, not merely be
-    # refused where it previously resolved.
+    # different real transport's registry under the sequential numbering, not
+    # merely be refused where it previously resolved.
 
     #: No transport protocol. ``TransportProtocol(0) is undefined`` and
     #: ``bool(undefined)`` is ``False``; it is the ``proto`` sentinel default
@@ -200,14 +200,12 @@ class TransportProtocol(EnumLookup, IntEnum):
         ``Enum`` would raise in the circumstances, :exc:`ValueError` or
         :exc:`KeyError` as the case may be, and is to come from
         :mod:`pcapkit.utilities.exceptions` rather than being a builtin. A
-        stdlib ``E['nosuch']`` raises :exc:`KeyError`, and :issue:`923`'s census of the
-        127 concrete :class:`~pcapkit.corekit.enum.EnumLookup` subclasses --
-        taken before the phase-2 re-parenting moved this class, so it is not
-        among them -- found 119 already answering a name miss that way against 5
-        answering with :exc:`ValueError`. Those 5 are :class:`AppType` and its
-        four transport registries, and they land there only because their own
-        ``get()`` takes an :class:`int` port and never accepts a name at all,
-        rather than from any name-miss policy. So there was no policy here to
+        stdlib ``E['nosuch']`` raises :exc:`KeyError`, and :issue:`923`'s census
+        found :class:`~pcapkit.corekit.enum.EnumLookup` subclasses answering a
+        name miss that way. The exceptions were :class:`AppType` and its
+        per-transport registries, and they answered with :exc:`ValueError` only
+        because their own ``get()`` takes an :class:`int` port and never accepts
+        a name at all, rather than from any name-miss policy. So there was no policy here to
         preserve, and a name miss reaches the caller as
         :exc:`~pcapkit.utilities.exceptions.EnumKeyError` from the base. The
         maintainer's ruling given in review of the work for :issue:`808`, that
@@ -219,25 +217,23 @@ class TransportProtocol(EnumLookup, IntEnum):
         (:meth:`~pcapkit.corekit.enum.EnumLookup.get`), so this override
         moves from :class:`staticmethod` to :class:`classmethod` to
         delegate at all -- the same move GitHub issue :issue:`908` made for
-        :meth:`~pcapkit.const.http.method.Method.get`. Grepped every call
-        site in this tree for GitHub issue :issue:`877`: all call this method by
-        name, none take it as a bare callable or introspect ``__func__``,
-        so the switch is not caller-visible.
+        :meth:`~pcapkit.const.http.method.Method.get`. A caller invoking it by
+        name sees no difference between the two; only code taking it as a bare
+        callable or introspecting ``__func__`` could tell them apart.
 
-        ``default`` did not exist on this override before this change --
-        the original had no such parameter at all, which is a genuine LSP
-        violation once this class' ``get`` is a :class:`classmethod`
-        override of one that has it: a caller holding a
-        :class:`~pcapkit.corekit.enum.EnumLookup`-typed reference could pass
-        ``default=`` and, before this, would have hit a
-        :exc:`TypeError` at this subclass. Forwarded verbatim to
+        ``default`` is accepted here because the original override had no
+        such parameter at all, which is a genuine LSP violation once this
+        class' ``get`` is a :class:`classmethod` override of one that has
+        it: a caller holding a :class:`~pcapkit.corekit.enum.EnumLookup`-typed
+        reference could pass ``default=`` and hit a :exc:`TypeError` at this
+        subclass. Forwarded verbatim to
         :meth:`~pcapkit.corekit.enum.EnumLookup.get` rather than
         reimplemented, so it behaves exactly as the base's own ``default``
         does: a fallback to an *already-registered* value, resolved through
         ``_value2member_map_`` and never through the constructor, so
-        passing one still cannot mint. Every call site in this tree omits
-        it, so this is purely an added, backward-compatible capability, not
-        a change to anything this tree exercises today.
+        passing one still cannot mint. A call that omits it resolves exactly
+        as one made without the parameter did, so it is purely an added,
+        backward-compatible capability.
 
         Args:
             key: Key to get enum item.
@@ -276,17 +272,17 @@ class TransportProtocol(EnumLookup, IntEnum):
         #
         # NOTE: the delegation below is exception-compatible for the keys this
         # signature admits -- an unrecognised :class:`int` still reaches the
-        # caller as a :exc:`ValueError`, now the base's own
+        # caller as a :exc:`ValueError`, the base's own
         # :exc:`~pcapkit.utilities.exceptions.EnumValueError` since GitHub issue
         # #923 rather than ``aenum``'s bare one. It is not compatible for
         # keys outside it: ``None``, a :class:`float` and an unhashable key
-        # used to raise :exc:`AttributeError` from the ``key.lower()`` this
-        # branch no longer reaches, and now raise :exc:`ValueError` (or, for a
+        # raised :exc:`AttributeError` from ``key.lower()`` before the
+        # delegation, and raise :exc:`ValueError` through it (or, for a
         # :class:`float`, resolve -- ``get(1.0)`` answers ``tcp``, since
         # ``cls(key)`` accepts whatever :class:`int` equality accepts). No
-        # caller in this tree can reach any of those: the only live call site
-        # passes ``proto.lower()``, always a :class:`str`. The new shape is
-        # what every other ``EnumLookup`` subclass already does.
+        # caller inside :mod:`pcapkit` can reach any of those: the only live call
+        # site passes ``proto.lower()``, always a :class:`str`. Delegating is
+        # what every other ``EnumLookup`` subclass does.
         return super().get(key, default)
 
     # NOTE: ``_missing_`` used to range-check ``value`` and then defer to
@@ -426,7 +422,7 @@ class {NAME}(EnumRegistry, StrEnum):
         # the plain form GitHub issue #806 already fixed: it is appended only
         # when :attr:`aliases` is non-empty, so every member that does not
         # share its port with another service -- the vast majority -- renders
-        # exactly as it did before this issue. Registering a new alias through
+        # in the plain form unchanged. Registering a new alias through
         # :meth:`register_alias` changes what *every* member already on that
         # port renders, immediately, since :attr:`aliases` is derived fresh on
         # each call rather than fixed at construction.
@@ -671,8 +667,9 @@ class {NAME}(EnumRegistry, StrEnum):
 
         :meth:`get` answers with one member because that is what a port lookup
         means everywhere else -- :func:`socket.getservbyport` returns a single
-        name -- but IANA really did register all three services on TCP/80, and
-        discarding two of them would be inventing a registry it does not have.
+        name -- but IANA really does register more than one service on some
+        ports, TCP/80 among them, and discarding all but one would be inventing
+        a registry it does not have.
         This is how the rest are reached.
 
         Args:
