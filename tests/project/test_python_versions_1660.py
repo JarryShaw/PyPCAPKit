@@ -990,22 +990,24 @@ class TestTheProseFollowsTheFile(unittest.TestCase):
         page = prose(ROOT / 'docs' / 'source' / 'contributing' / 'workflows.rst')
         self.assertEqual(re.findall(r'\* - ``Compat Python (3\.\d+)``', page), self.supported)
 
-    def test_the_workflows_page_cites_each_version_on_its_line(self) -> None:
-        """The required contexts' rows, and the two tiers' spans under them, cite the file by line."""
-        lines = TIER_FILE.read_text(encoding='utf-8').splitlines()
+    def test_the_workflows_page_cites_each_version_by_its_key(self) -> None:
+        """The required contexts' rows, and the two tiers' spans under them, cite the file's keys (#2165).
+
+        A key names its entry; a line number has to be looked up, so none is cited.
+
+        """
         page = prose(ROOT / 'docs' / 'source' / 'contributing' / 'workflows.rst')
-        rows = re.findall(r'``Compat Python (3\.\d+)`` .*? ``\.github/python-versions\.toml:(\d+)``', page)
+        self.assertNotRegex(page, r'python-versions\.toml:\d')
+        rows = re.findall(r'``Compat Python (3\.\d+)`` .*? key ``"(3\.\d+)"`` of ``\.github/python-versions\.toml``',
+                          page)
         self.assertEqual([version for version, _ in rows], self.supported)
-        for version, line in rows:
+        for version, key in rows:
             with self.subTest(version=version):
-                self.assertTrue(lines[int(line) - 1].startswith(f'"{version}" = '), lines[int(line) - 1])
+                self.assertEqual(key, version)
         for label, versions in (('supported tier', self.supported), ('KTLO legs', self.ktlo)):
-            spans = re.findall(rf'its {label} \(``python-versions\.toml:(\d+)-(\d+)``\)', page)
+            spans = re.findall(rf'its {label} \(keys ``"(3\.\d+)"`` to ``"(3\.\d+)"``\)', page)
             with self.subTest(tier=label):
-                self.assertEqual(len(spans), 1, spans)
-                first, last = map(int, spans[0])
-                self.assertEqual([line.split(' = ', 1)[0] for line in lines[first - 1:last]],
-                                 [f'"{version}"' for version in versions])
+                self.assertEqual(spans, [(versions[0], versions[-1])])
 
     def test_the_bug_report_template_offers_supported_versions(self) -> None:
         text = (ROOT / '.github' / 'ISSUE_TEMPLATE' / 'bug_report.md').read_text(encoding='utf-8')

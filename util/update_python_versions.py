@@ -966,12 +966,6 @@ def span(tier: 'list[str]') -> 'Optional[tuple[str, str]]':
     return (tier[0], tier[-1]) if consecutive([pv.key(version)[1] for version in tier]) else None
 
 
-def lines_of(facts: 'dict[str, Any]', tier: 'str') -> 'Optional[tuple[int, int]]':
-    """The tier file lines of a CPython tier, if they are one run of lines."""
-    numbers = [facts['tier_lines'][version] for version in facts[tier]]
-    return (numbers[0], numbers[-1]) if consecutive(numbers) else None
-
-
 #: The sentences restating the tiers, by file. Never a workflow (see the module docstring).
 CLAIMS = {
     'pyproject.toml': (
@@ -995,9 +989,9 @@ CLAIMS = {
     'docs/source/contributing/workflows.rst': (
         Claim(r'The \*\*supported\*\* tier, (3\.\d+)-(3\.\d+),', lambda f: span(f['supported'])),
         Claim(r'end-of-life (3\.\d+)-(3\.\d+), still built', lambda f: span(f['ktlo'])),
-        Claim(r'the required legs are its supported tier \(``python-versions\.toml:(\d+)-(\d+)``\)',
-              lambda f: lines_of(f, 'supported')),
-        Claim(r'its KTLO legs \(``python-versions\.toml:(\d+)-(\d+)``\)', lambda f: lines_of(f, 'ktlo')),
+        Claim(r'the required legs are its supported tier \(keys ``"(3\.\d+)"`` to ``"(3\.\d+)"``\)',
+              lambda f: span(f['supported'])),
+        Claim(r'its KTLO legs \(keys ``"(3\.\d+)"`` to ``"(3\.\d+)"``\)', lambda f: span(f['ktlo'])),
         Claim(r'and the ``Compat Python (3\.\d+)``-``(3\.\d+)`` legs', lambda f: span(f['supported'])),
         Claim(r'the ``Python (3\.\d+)`` leg of ``test`` \(matrix key ``coverage: true``\)',
               lambda f: (f['latest'],)),
@@ -1022,7 +1016,8 @@ CLASSIFIER = re.compile(r'^(?P<indent>[ \t]*)"Programming Language :: Python :: 
 #: One row of the workflows page's required-contexts table.
 COMPAT_ROW = re.compile(r'^(?P<indent>[ \t]*)\* - ``Compat Python (?P<version>3\.\d+)``\n'
                         r'(?P<inner>[ \t]*)- job ``compatibility``, matrix leg ``(?P=version)``\n'
-                        r'(?P=inner)- (?P<where>``[^`\n]+``), ``\.github/python-versions\.toml:\d+``\n', re.M)
+                        r'(?P=inner)- (?P<where>``[^`\n]+``), key ``"(?P=version)"`` '
+                        r'of ``\.github/python-versions\.toml``\n', re.M)
 BUG_VERSIONS = re.compile(r'(Python Version: \[e\.g\. )([^\]\n]+)(\])')
 
 
@@ -1047,8 +1042,7 @@ def rewrite_compat_rows(text: 'str', facts: 'dict[str, Any]') -> 'tuple[str, lis
     first = matches[0]
     block = ''.join(f'{first["indent"]}* - ``Compat Python {version}``\n'
                     f'{first["inner"]}- job ``compatibility``, matrix leg ``{version}``\n'
-                    f'{first["inner"]}- {first["where"]}, '
-                    f'``.github/python-versions.toml:{facts["tier_lines"][version]}``\n'
+                    f'{first["inner"]}- {first["where"]}, key ``"{version}"`` of ``.github/python-versions.toml``\n'
                     for version in facts['supported'])
     return text[:first.start()] + block + text[matches[-1].end():], []
 
@@ -1074,21 +1068,14 @@ REWRITERS = {
 TARGETS = tuple(sorted({TIER_FILE} | set(CLAIMS) | set(REWRITERS)))
 
 
-def make_facts(data: 'dict[str, Any]', values: 'dict[str, str]', workflows: 'dict[str, Any]',
-               tier_file: 'str') -> 'dict[str, Any]':
+def make_facts(data: 'dict[str, Any]', values: 'dict[str, str]', workflows: 'dict[str, Any]') -> 'dict[str, Any]':
     """What the prose states, computed from the new tiers and the workflows' matrices."""
-    tier_lines = {}
-    for number, line in enumerate(tier_file.splitlines(), 1):
-        match = ENTRY.match(line)
-        if match and pv.SPELLING['cpython'].fullmatch(match['version']):
-            tier_lines[match['version']] = number
     return {
         'latest': data['latest'],
         'supported': pv.tier(data, 'cpython', 'supported'),
         'ktlo': pv.tier(data, 'cpython', 'ktlo'),
         'experimental': [version for impl in data['versions'] for version in pv.tier(data, impl, 'experimental')],
         'required': required_contexts(workflows, values),
-        'tier_lines': tier_lines,
     }
 
 
@@ -1167,7 +1154,7 @@ def compute_plan(root: 'pathlib.Path', sources: 'dict[str, Any]') -> 'tuple[dict
     validate(new_tier_text)
     after_values = pv.outputs(after)
 
-    facts = make_facts(after, after_values, workflows, new_tier_text)
+    facts = make_facts(after, after_values, workflows)
     texts = {TIER_FILE: new_tier_text}
     for path in TARGETS:
         if path == TIER_FILE:

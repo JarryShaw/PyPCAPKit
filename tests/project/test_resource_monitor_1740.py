@@ -578,7 +578,9 @@ class TestTheDocsSayIt(unittest.TestCase):
     def test_the_workflows_page_describes_the_monitor(self) -> None:
         page = prose(ROOT / 'docs' / 'source' / 'contributing' / 'workflows.rst')
         for phrase in ('``Start the resource monitor``', '``[monitor]``', '``resource-monitor-<version>``',
-                       '``Stop the resource monitor``', 'src/Runner.Worker/StepsRunner.cs:205-208'):
+                       '``Stop the resource monitor``',
+                       # #2165: the runner's shutdown check, cited by its method rather than by line.
+                       "actions/runner's ``StepsRunner.RunAsync``, at ``796cc18ff``"):
             with self.subTest(phrase=phrase):
                 self.assertIn(phrase, page)
 

@@ -51,18 +51,19 @@ The rules those tables carry:
    A code that fails is never skipped.
 *  **A failing case is an entry, never a changed argument.** An ``EXPECTED_FAILURES``
    entry records the status, a failure-detail fragment narrow enough to match one
-   site, and the defect: the ``file:line`` that causes it and the issue that tracks it.
+   site, and the defect: the function, class or method that causes it, by name, and the
+   issue that tracks it.
    Routing a case around a defect hides it: the generator's ``HIP_COPIES`` once put two
    parameters in every HIP packet, so the unrepresentable length of a lone one
    (:issue:`651`) was never constructed.
    ``KNOWN_DEGRADED`` entries have a different shape -- a fragment and a reason -- and
    they record why the probe's placeholder payload cannot reach the target, not a
-   defect to fix, so the ``file:line``-and-issue rule does not apply to them.
+   defect to fix, so the name-and-issue rule does not apply to them.
 *  **A regression is fixed; a pre-existing defect is recorded.** A case that a change
    breaks -- including a code it registers that does not close -- is fixed in that
    change, not added to a table. A newly found defect that predates the change gets an
-   entry naming the ``file:line`` that causes it, as the failure message asks, and an
-   issue.
+   entry naming the function, class or method that causes it, as the failure message
+   asks, and an issue.
 *  **The tables are checked in both directions.** In the option suite, an entry whose
    case starts passing turns ``test_round_trip_is_identity_or_a_recorded_gap`` red, and
    one naming a case that no longer exists fails

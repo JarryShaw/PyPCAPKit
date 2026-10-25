@@ -98,7 +98,7 @@ class Gap(NamedTuple):
 
     #: GitHub issue tracking the defect, or :data:`None` if not filed yet.
     issue: 'Optional[int]'
-    #: The defect, with the ``file:line`` that causes it.
+    #: The defect, naming the function, class or method that causes it.
     defect: 'str'
     #: Expected status of every case below, or the statuses one root cause
     #: shows as, of which each case must report one.
