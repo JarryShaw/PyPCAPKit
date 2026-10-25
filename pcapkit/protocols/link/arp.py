@@ -52,7 +52,7 @@ from pcapkit.protocols.data.link.arp import Type as Data_Type
 from pcapkit.protocols.link.link import Link
 from pcapkit.protocols.schema.link.arp import ARP as Schema_ARP
 from pcapkit.utilities.compat import cached_property
-from pcapkit.utilities.exceptions import ProtocolError
+from pcapkit.utilities.exceptions import FieldValueError, ProtocolError
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
@@ -403,15 +403,31 @@ class ARP(Link[Data_ARP, Schema_ARP],
             is validated and packed, one octet per group (an empty string packs
             as no octets); otherwise, a :class:`str` is
             taken as the *hex* encoded address that :meth:`_read_addr_resolve`
-            returns, and :obj:`bytes` are returned as given.
+            returns, and :class:`bytes`/:class:`bytearray` are returned as
+            :class:`bytes`.
 
         Raises:
+            FieldValueError: If ``addr`` is a :obj:`bool`, whatever ``htype``
+                is.
             ProtocolError: If ``htype`` is ``1`` and ``addr`` is not a
-                well-formed MAC address, or if ``htype`` is not ``1`` and
-                ``addr`` is a :class:`str` that is not *hex* encoded.
+                well-formed MAC address given as :class:`str`,
+                :class:`bytes` or :class:`bytearray`, or if ``htype`` is not
+                ``1`` and ``addr`` is either a :class:`str` that is not *hex*
+                encoded or none of :class:`str`, :class:`bytes` and
+                :class:`bytearray`.
 
         """
+        # NOTE: checked before the ``htype`` dispatch, for the same reason as
+        # in ``_make_proto_resolve``: without it a ``bool`` reaches the MAC
+        # pattern or falls through unchanged, and fails later as a
+        # ``TypeError`` (#2166).
+        if isinstance(addr, bool):
+            raise FieldValueError(
+                f'{self.__class__.__name__}: invalid hardware address: must not be a bool, '
+                f'not {addr!r} -- pass int({addr!r}) if the numeric value is what is wanted')
         if htype == Enum_Hardware.Ethernet:
+            if not isinstance(addr, (str, bytes, bytearray)):
+                raise ProtocolError(f'Invalid MAC address: {addr!r}')
             _addr = addr.encode() if isinstance(addr, str) else addr
             if PAT_MAC_ADDR.fullmatch(_addr) is not None:
                 return bytes.fromhex(_addr.replace(b':', b'').replace(b'-', b'').decode())
@@ -421,7 +437,9 @@ class ARP(Link[Data_ARP, Schema_ARP],
                 return bytes.fromhex(addr.replace(':', '').replace('-', ''))
             except ValueError:
                 raise ProtocolError(f'Invalid hardware address: {addr!r}') from None
-        return addr
+        if isinstance(addr, (bytes, bytearray)):
+            return bytes(addr)
+        raise ProtocolError(f'Invalid hardware address: {addr!r}')
 
     def _make_proto_resolve(self, addr: 'IPv4Address | IPv6Address | str | bytes', ptype: 'int',
                             plen: 'Optional[int]' = None) -> 'bytes':
@@ -439,15 +457,18 @@ class ARP(Link[Data_ARP, Schema_ARP],
             octets; otherwise, a :class:`str` is taken as the *hex* encoded
             address that :meth:`_read_proto_resolve` returns, an
             :class:`~ipaddress.IPv4Address`/:class:`~ipaddress.IPv6Address` is
-            packed, and anything else is returned as given.
+            packed, and :class:`bytes`/:class:`bytearray` are returned as
+            :class:`bytes`.
 
         Raises:
-            FieldValueError: If ``addr`` is packed as an IPv4 or IPv6 address
-                and is a :obj:`bool`, not a valid address, or not of that
-                version (see
+            FieldValueError: If ``addr`` is a :obj:`bool`, whatever ``ptype``
+                is, or is packed as an IPv4 or IPv6 address and is not a
+                valid address or not of that version (see
                 :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`).
-            ProtocolError: If ``ptype`` is neither IPv4 nor IPv6 and ``addr``
-                is a :class:`str` that is not *hex* encoded.
+            ProtocolError: If the address is not packed as IPv4 or IPv6, and
+                ``addr`` is either a :class:`str` that is not *hex* encoded or
+                none of :class:`str`, an IP address, :class:`bytes` and
+                :class:`bytearray`.
 
         Notes:
             Through :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address` rather than
@@ -468,6 +489,15 @@ class ARP(Link[Data_ARP, Schema_ARP],
             :exc:`AttributeError`, bool or not.
 
         """
+        # NOTE: checked before the ``ptype`` dispatch, for the placement reason
+        # ``_reject_bool`` in ``pcapkit.corekit.fields.ipaddress`` gives: the
+        # non-IP branches below never reach ``parse_ip_address``, so without it
+        # a ``bool`` falls through them unchanged and fails later as a
+        # ``TypeError`` from ``len()`` (#2166).
+        if isinstance(addr, bool):
+            raise FieldValueError(
+                f'{self.__class__.__name__}: invalid protocol address: must not be a bool, '
+                f'not {addr!r} -- pass int({addr!r}) if the numeric value is what is wanted')
         if ptype == Enum_EtherType.Internet_Protocol_version_4 and plen in (None, 4):
             return cast('IPv4Address', parse_ip_address(
                 addr, f'{self.__class__.__name__}: invalid protocol address', version=4)).packed
@@ -483,7 +513,9 @@ class ARP(Link[Data_ARP, Schema_ARP],
                                     f'{addr!r}') from None
         if isinstance(addr, (ipaddress.IPv4Address, ipaddress.IPv6Address)):
             return addr.packed
-        return addr
+        if isinstance(addr, (bytes, bytearray)):
+            return bytes(addr)
+        raise ProtocolError(f'{self.__class__.__name__}: invalid protocol address: {addr!r}')
 
 
 class InARP(ARP, schema=Schema_ARP, data=Data_ARP):
