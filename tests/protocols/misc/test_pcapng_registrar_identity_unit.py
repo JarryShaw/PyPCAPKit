@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #1401: the PCAP-NG parser registrars warn only on a real displacement.
 
-``register_block``, ``register_option``, ``register_record`` and
-``register_secrets`` tested only whether ``code`` was present, so handing back
-the entry already stored warned that it was being overwritten. They now apply
-the #1400 guard: an equal entry is a silent no-op, and the entry a code shipped
+Without the fix, ``register_block``, ``register_option``, ``register_record``
+and ``register_secrets`` test only whether ``code`` is present, so handing back
+the entry already stored warns that it is being overwritten. They apply the
+#1400 guard: an equal entry is a silent no-op, and the entry a code shipped
 with is accepted back after an override, which undoes it.
 
 Every registry is process-wide, so each case runs under

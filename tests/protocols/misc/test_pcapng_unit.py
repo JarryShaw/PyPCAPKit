@@ -130,8 +130,8 @@ class PCAPNGUnitTests(unittest.TestCase):
             secrets_map[SecretsType.TLS_Key_Log] = originals[3]
 
     def test_pcapng_record_registry_warning_names_the_name_resolution_record(self) -> None:
-        # #1038: the warning used to call an ``nrb_record_*`` entry a
-        # "systemd(1) journal export record", with a literal reST role.
+        # #1038: guards against the warning calling an ``nrb_record_*`` entry
+        # a "systemd(1) journal export record", with a literal reST role.
         from pcapkit.const.pcapng.record_type import RecordType
         from pcapkit.protocols.misc.pcapng import PCAPNG
 
@@ -150,9 +150,9 @@ class PCAPNGUnitTests(unittest.TestCase):
 
     def test_pcapng_name_resolution_option_guards_name_the_name_resolution_block(self) -> None:
         # #1038: the ``ns_dns*`` scope guards check ``Name_Resolution_Block``
-        # but used to tell the caller the option belongs in the systemd(1)
-        # Journal Export Block, and two make-side sites spelled the option
-        # ``ns_dnsip4addr``/``ns_dnsip6addr``.
+        # and name that block to the caller, not the systemd(1) Journal Export
+        # Block, and the make side spells the option
+        # ``ns_dnsIP4addr``/``ns_dnsIP6addr``, not ``ns_dnsip4addr``/``ns_dnsip6addr``.
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType
         from pcapkit.corekit.multidict import OrderedMultiDict
@@ -193,7 +193,7 @@ class PCAPNGUnitTests(unittest.TestCase):
                 self.assertNotIn('Journal Export', message)
                 self.assertNotIn(':manpage:', message)
 
-        # The make-side duplicate guards share the corrected spelling.
+        # The make-side duplicate guards share the ``ns_dnsIP*addr`` spelling.
         pcapng._type = BlockType.Name_Resolution_Block
         for option, type_, ip in (('ns_dnsIP4addr', OptionType.ns_dnsIP4addr, '8.8.8.8'),
                                   ('ns_dnsIP6addr', OptionType.ns_dnsIP6addr, '2001:4860::8888')):
@@ -437,12 +437,12 @@ class PCAPNGUnitTests(unittest.TestCase):
         self.assertEqual(pcapng._make_timestamp(decimal.Decimal(12)), (0, 2000))
 
         # #361: the epoch is 2000 units at if_tsresol=1000, i.e. 2s, plus the
-        # 10s if_tsoffset -- 12s, and nothing else. It used to come back as 3612,
-        # the same instant with this interface's if_tzone (+01:00) *added* to it,
-        # which is 3600s of pure error: a PCAP-NG timestamp is an offset from the
-        # UNIX epoch and so carries no timezone. The datetime is the one place
-        # ``tz`` still shows, as the zone the instant is rendered in, and it
-        # names the very same instant -- which the two returns did not before.
+        # 10s if_tsoffset -- 12s, and nothing else. Without the fix it comes back
+        # as 3612, the same instant with this interface's if_tzone (+01:00)
+        # *added* to it, which is 3600s of pure error: a PCAP-NG timestamp is an
+        # offset from the UNIX epoch and so carries no timezone. The datetime is
+        # the one place ``tz`` shows, as the zone the instant is rendered in, and
+        # it names the very same instant as the epoch.
         ts_datetime, ts_decimal = pcapng._read_timestamp(0, 2000)
         self.assertEqual(ts_datetime, datetime.datetime.fromtimestamp(12, tz))
         self.assertEqual(ts_decimal, decimal.Decimal(12))
@@ -560,15 +560,15 @@ class PCAPNGUnitTests(unittest.TestCase):
         pcapng._type = BlockType.Enhanced_Packet_Block
         # Faked through pcapng.py's own binding of
         # :func:`pcapkit.utilities.datetime.fromtimestamp`, which it calls
-        # instead of :meth:`datetime.datetime.fromtimestamp` since #2099.
+        # instead of :meth:`datetime.datetime.fromtimestamp` (#2099).
         with mock.patch('pcapkit.protocols.misc.pcapng.fromtimestamp', side_effect=ValueError), \
                 mock.patch('pcapkit.protocols.misc.pcapng.warn') as warn:
             timestamp, epoch = pcapng._read_timestamp(0, 1, interface_id=0)
         self.assertEqual(timestamp, datetime.datetime.fromtimestamp(0, datetime.timezone.utc))
-        # #361: 1 unit at if_tsresol=1e9 plus the 2s if_tsoffset. The leading
-        # ``Decimal(7200)`` this used to carry was this interface's if_tzone
-        # (+02:00) leaking into the epoch; the fallback datetime above is aware
-        # UTC either way, so the two used to name different instants.
+        # #361: 1 unit at if_tsresol=1e9 plus the 2s if_tsoffset. A leading
+        # ``Decimal(7200)`` would be this interface's if_tzone (+02:00) leaking
+        # into the epoch; the fallback datetime above is aware UTC either way,
+        # so the two would name different instants.
         self.assertEqual(epoch, decimal.Decimal(2) + decimal.Decimal('0.000000001'))
         warn.assert_called_once()
 
@@ -623,8 +623,8 @@ class PCAPNGUnitTests(unittest.TestCase):
 
             # ``register`` resolves a ``ModuleDescriptor`` before storing it,
             # so the entry above is already the plain ``Raw`` class, not the
-            # descriptor -- passing ``Raw`` again would now be the same-object
-            # no-op GitHub issue #718 added an identity guard for (see
+            # descriptor -- passing ``Raw`` again would be the same-object
+            # no-op covered by the identity guard for GitHub issue #718 (see
             # ``test_pcapng_register_stays_quiet_on_same_object_reregistration``).
             # A genuinely different class is needed to still warn here.
             with mock.patch('pcapkit.protocols.misc.pcapng.warn') as warn:
@@ -756,9 +756,9 @@ class PCAPNGUnitTests(unittest.TestCase):
     def test_pcapng_register_stays_quiet_on_same_object_reregistration(self) -> None:
         """GitHub issue #718: replaying a call with the identical class is a no-op.
 
-        Before the fix the guard fired on presence alone, so the *second* of
+        Without the fix the guard fires on presence alone, so the *second* of
         two calls registering the exact same class under the exact same code
-        warned about an overwrite that never happened. Matches the identity
+        warns about an overwrite that never happens. Matches the identity
         guard :func:`register_protocol
         <pcapkit.foundation.registry.protocols.register_protocol>` already
         applies.
@@ -888,11 +888,11 @@ class PCAPNGUnitTests(unittest.TestCase):
         # Per the mint/unmint ruling for #775
         # (``docs/source/contributing/conventions/mint-criterion.rst``),
         # ``Unassigned`` names a procedure rather than a party, so ``FilterType``'s
-        # ``_missing_`` no longer mints a registered ``Unassigned_0`` member for
+        # ``_missing_`` does not mint a registered ``Unassigned_0`` member for
         # code 0 -- it returns an unregistered member bearing the bare label
         # ``Unassigned``. ``FilterType(0)`` is used below wherever the fixtures
         # need *some* valid ``FilterType`` value for code 0; this pins that the
-        # value obtained that way is the one the ruling now produces.
+        # value obtained that way is the one the ruling produces.
         self.assertEqual(FilterType(0).name, 'Unassigned')
 
         pcapng = object.__new__(PCAPNG)
@@ -920,7 +920,7 @@ class PCAPNGUnitTests(unittest.TestCase):
             'checksum_not_ready': 0,
             'checksum_valid': 0,
             'tcp_segmentation_offloaded': 0,
-            'reserved': 0,  # bits 12-23, kept since #1273
+            'reserved': 0,  # bits 12-23, kept (#1273)
             'crc_error': 1,
             'too_long': 0,
             'too_short': 1,
@@ -2099,11 +2099,11 @@ class PCAPNGUnitTests(unittest.TestCase):
         # Per the mint/unmint ruling for #775
         # (``docs/source/contributing/conventions/mint-criterion.rst``),
         # ``Unassigned`` names a procedure rather than a party, so ``FilterType``'s
-        # ``_missing_`` no longer mints a registered ``Unassigned_0`` member for
+        # ``_missing_`` does not mint a registered ``Unassigned_0`` member for
         # code 0 -- it returns an unregistered member bearing the bare label
         # ``Unassigned``. ``FilterType(0)`` is used below wherever the fixtures
         # need *some* valid ``FilterType`` value for code 0; this pins that the
-        # value obtained that way is the one the ruling now produces.
+        # value obtained that way is the one the ruling produces.
         self.assertEqual(FilterType(0).name, 'Unassigned')
 
         pcapng = object.__new__(PCAPNG)
@@ -2311,7 +2311,7 @@ class PCAPNGUnitTests(unittest.TestCase):
             checksum_not_ready=False,
             checksum_valid=False,
             tcp_segmentation_offloaded=False,
-            reserved=0,  # bits 12-23, kept since #1273
+            reserved=0,  # bits 12-23, kept (#1273)
             crc_error=True,
             too_long=True,
             too_short=False,
@@ -2402,7 +2402,7 @@ class PCAPNGUnitTests(unittest.TestCase):
             checksum_not_ready=False,
             checksum_valid=False,
             tcp_segmentation_offloaded=False,
-            reserved=0,  # bits 12-23, kept since #1273
+            reserved=0,  # bits 12-23, kept (#1273)
             crc_error=True,
             too_long=False,
             too_short=True,
@@ -3445,8 +3445,8 @@ class PCAPNGUnitTests(unittest.TestCase):
 
         ``dhcp.pcapng`` is committed, and its interface carries ``if_tsresol=6``
         with neither ``if_tsoffset`` nor ``if_tzone`` -- the shape #361 is
-        about, where the epoch used to be shifted by whatever zone the reading
-        machine sat in.
+        about, which guards against the epoch being shifted by whatever zone
+        the reading machine sits in.
 
         """
         from pcapkit.interface import extract
@@ -3515,15 +3515,15 @@ class PCAPNGOptionAreaBoundTests(unittest.TestCase):
     """An option may not synthesise more payload than its area declares.
 
     An option's length is a 16-bit wire field, so one four-octet option header
-    can declare 65,535 octets of payload. Nothing bounded that against the area
-    the option sits in, and every shortfall inside a 16-bit length is padded
-    unconditionally at the field layer. Repeating such an option across blocks
-    therefore amplified without limit. C.f. #594, and #593 for the 32-bit band
+    can declare 65,535 octets of payload. Every shortfall inside a 16-bit length
+    is padded unconditionally at the field layer, so without a bound against the
+    area the option sits in, repeating such an option across blocks amplifies
+    without limit. C.f. #594, and #593 for the 32-bit band
     the field layer's own budget already covers.
 
     An option running past its area is refused, and the block keeps the whole
     option area as the octets captured, as one :obj:`bytes` item that packs
-    back verbatim (#1325). It used to be clamped to what the area had left.
+    back verbatim (#1325), rather than clamped to what the area had left.
 
     """
 
@@ -3815,8 +3815,8 @@ class PCAPNGOptionAreaBoundTests(unittest.TestCase):
         The first option takes eight octets, leaving two, so the loop runs again
         with two octets of area. The next option's type field takes both and its
         length field reads short, so it runs past the data and the area is kept
-        as captured. It used to parse as a second option of length zero, which
-        rebuilt two octets of length that were never there.
+        as captured. Parsing it as a second option of length zero would rebuild
+        two octets of length that were never there.
 
         """
         options = (tlv(UNKNOWN_OPT, b'\xaa\xbb')
@@ -3915,14 +3915,15 @@ class Unseekable(io.RawIOBase):
 class PCAPNGTruncatedFileTests(unittest.TestCase):
     """A capture cut short must still report the frames before the cut.
 
-    Block Total Length is cross-checked against its own trailing copy and never
-    against the file, so a last block running past the real end left the reader
-    seeked *past* that end -- which is legal and silent. Every block read after
-    it then measured a negative remainder, and the negative reached
-    :meth:`io.RawIOBase.read` through ``pcapng_block_selector`` as a bare
-    ``ValueError`` that no handler in the frame loop catches. The whole
-    extraction was lost, not the one truncated block, which inverts the #431
-    accommodation exactly. Measured on ``dhcp.pcapng`` before the fix: of its
+    Without the fix, Block Total Length is cross-checked against its own
+    trailing copy and never against the file, so a last block running past the
+    real end leaves the reader seeked *past* that end -- which is legal and
+    silent. Every block read after it then measures a negative remainder, and
+    the negative reaches :meth:`io.RawIOBase.read` through
+    ``pcapng_block_selector`` as a bare ``ValueError`` that no handler in the
+    frame loop catches. The whole extraction is lost, not the one truncated
+    block, which inverts the #431 accommodation exactly. Measured on
+    ``dhcp.pcapng`` without the fix: of its
     1,509 octet boundaries, **6** parsed and 1,489 raised something from outside
     :mod:`pcapkit.utilities.exceptions` -- 1,479 ``ValueError`` and 10
     ``struct.error``. C.f. #678, #431, #571, and #676 for the option-area bound
@@ -4017,7 +4018,7 @@ class PCAPNGTruncatedFileTests(unittest.TestCase):
 
         Absence of a foreign exception would be satisfied by turning all 1,509
         levels into a tidy in-library refusal, which is the failure this guards
-        against. Before the fix six levels parsed; the rest is what the fix is
+        against. Without the fix six levels parse; the rest is what the fix is
         for.
 
         """
@@ -4084,7 +4085,7 @@ class PCAPNGTruncatedFileTests(unittest.TestCase):
         self.assertEqual(len(boundary.frame), 3)
 
     def test_a_block_overrunning_the_file_is_reported_and_leaves_the_reader_at_the_end(self) -> None:
-        """The root cause, on its own: the seek that used to go past the end.
+        """The root cause, on its own: the seek must not go past the end.
 
         ``_read_fileng`` stops at the end of the file, so the octets it returned
         are the authority on where a truncated block really finishes -- and
@@ -4151,8 +4152,8 @@ class PCAPNGTruncatedFileTests(unittest.TestCase):
         called :meth:`~io.IOBase.tell` on the stream to record ``_seek_set``
         before ``unpack`` runs, so an unseekable stream never reaches the floor.
         Pinned rather than assumed, because a ``seekable()`` guard on the floor
-        would have been unreachable code -- and because the behaviour it would
-        have been protecting is unchanged by this fix.
+        would be unreachable code -- and because what such a guard would protect
+        behaves the same with or without the floor.
 
         """
         from pcapkit.protocols.misc.pcapng import PCAPNG
@@ -4241,10 +4242,9 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
 
         Walks every schema in
         :mod:`pcapkit.protocols.schema.misc.pcapng` and drives every ``length``
-        callback with the hostile packet above. Measured on the parent commit: 28
-        of the 74 callbacks returned a negative, from ``-1`` on an ``epb_hash``
-        declaring no payload to ``-16777248`` on an Enhanced Packet Block's
-        option area.
+        callback with the hostile packet above. Measured without the floor, the
+        callbacks return negatives from ``-1`` on an ``epb_hash`` declaring no
+        payload to ``-16777248`` on an Enhanced Packet Block's option area.
 
         """
         from pcapkit.protocols.schema.misc import pcapng as module
@@ -4409,14 +4409,14 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
         return journals[0].data, caught
 
     def test_an_ordinary_journal_entry_is_not_broken_by_its_own_padding(self) -> None:
-        """A 32-bit-unaligned journal entry used to raise a bare ``struct.error``.
+        """A 32-bit-unaligned journal entry does not raise a bare ``struct.error``.
 
         The block body is padded to a 32-bit boundary with NULs, and
-        ``bytes.strip()`` takes only ASCII whitespace -- so the padding survived
-        it and was read as the *name* of a binary field, whose 64-bit length
-        prefix then had nothing behind it. ``MESSAGE=hello\\n`` is 14 octets, so
-        two NULs follow it, and that is as ordinary as this block gets: the
-        failure was not confined to malformed input.
+        ``bytes.strip()`` takes only ASCII whitespace -- so without the fix the
+        padding survives it and is read as the *name* of a binary field, whose
+        64-bit length prefix then has nothing behind it. ``MESSAGE=hello\\n`` is
+        14 octets, so two NULs follow it, and that is as ordinary as this block
+        gets: the failure is not confined to malformed input.
 
         """
         entries, caught = self._extract_journal(b'MESSAGE=hello\n')
@@ -4504,9 +4504,9 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
     def test_a_bad_terminator_keeps_the_entry_as_captured(self) -> None:
         """A binary field's value followed by anything but its newline (#1413).
 
-        The walk used to end only that entry's field collection and carry on,
-        which dropped the bad octet from the rebuild. The whole entry is kept as
-        captured instead, with or without a separator behind the bad octet.
+        Ending only that entry's field collection and carrying on would drop
+        the bad octet from the rebuild. The whole entry is kept as captured
+        instead, with or without a separator behind the bad octet.
 
         """
         for tail in (b'GOOD=1\n', b'\n\nGOOD=1\n'):
@@ -4519,13 +4519,13 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
         self._assert_journal_kept(b'BIN\n' + struct.pack('<Q', 4) + b'abc\n', 'is not followed by')
 
     def test_journal_fields_following_a_binary_field_are_not_discarded(self) -> None:
-        """#704: skipping a binary field's terminator used to skip everything.
+        """#704: skipping a binary field's terminator does not skip everything.
 
-        ``entry_data.read()`` with no argument reads to *end of file*, not past
-        the one newline octet the format puts there, so the next ``readline()``
-        found nothing and ended the entry. A single binary field cannot show
-        this -- there is nothing behind it to lose -- so the entry needs a
-        *second* binary field, and a text field after that, to tell a
+        ``entry_data.read()`` with no argument reads to *end of file*, not past the
+        one newline octet the format puts there, so a skip written that way leaves
+        the next ``readline()`` nothing and ends the entry. A single binary field
+        cannot show this -- there is nothing behind it to lose -- so the entry needs
+        a *second* binary field, and a text field after that, to tell a
         length-bounded skip from an unbounded one.
 
         """
@@ -4547,11 +4547,11 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
         """A blank-line separator is found by reading, not by pre-slicing.
 
         ``draft-richardson-opsawg-pcapng-extras-01`` lets an entry carry a
-        trailing separator. The old parser sliced the buffer into segments
-        with ``self.entry.split(b'\\n\\n')`` before reading a single field, so
-        the separator's own bytes were gone by the time a binary last field's
-        terminator was checked, and the check that landed in #722 warned over
-        a newline that was in the capture all along. Walking the buffer whole
+        trailing separator. A parser that slices the buffer into segments
+        with ``self.entry.split(b'\\n\\n')`` before reading a single field has
+        lost the separator's own bytes by the time a binary last field's
+        terminator is checked, so the terminator check (#722) warns over a
+        newline that was in the capture all along. Walking the buffer whole
         never removes those bytes -- the blank line ends the current entry by
         being *read*, and whatever the buffer still holds after it starts the
         next one -- so there is nothing here for that check to trip over.
@@ -4584,19 +4584,18 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
                           if item.category.__name__ == 'SchemaWarning'], [])
 
     def test_a_trailing_separator_with_no_padding_still_starts_an_entry(self) -> None:
-        """A trailing separator landing exactly on the last octet was dropped.
+        """A trailing separator landing exactly on the last octet is not dropped.
 
         The two tests above see their trailing separator followed by the
         block's own NUL padding, which the walk also treats as ending an
-        entry -- so the extra empty entry that padding produces stood in for
-        the one the separator itself should have produced, and the gap went
-        unnoticed. Seven octets of field plus one of separator is eight, a
-        multiple of four, so :meth:`_journal_block` adds none: the blank line
-        is the last octet in the buffer, ``entry_data.tell()`` reaches
-        ``total`` in the same read that found it, and the walk used to stop
-        right there without recording that a separator had been seen at all.
-        Rebuilding from the result then wrote a :attr:`length` one octet
-        short of what was actually read.
+        entry -- so the extra empty entry that padding produces stands in for
+        the one the separator itself should produce, and can hide a gap.
+        Seven octets of field plus one of separator is eight, a multiple of
+        four, so :meth:`_journal_block` adds none: the blank line is the last
+        octet in the buffer, and ``entry_data.tell()`` reaches ``total`` in the
+        same read that found it. A walk that stops right there without
+        recording that a separator had been seen at all rebuilds a
+        :attr:`length` one octet short of what was actually read.
 
         """
         entries, caught = self._extract_journal(b'ABC=12\n' + b'\n')
@@ -4610,8 +4609,8 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
     def test_a_journal_binary_value_containing_a_blank_line_is_not_shredded(self) -> None:
         """#723 defect A: a length-prefixed value needs no escaping for ``\\n\\n``.
 
-        ``self.entry.split(b'\\n\\n')`` used to cut a binary field's own value
-        in the middle whenever that value happened to contain the entry
+        Splitting with ``self.entry.split(b'\\n\\n')`` cuts a binary field's own
+        value in the middle whenever that value happens to contain the entry
         separator, turning the tail of the value into a bogus field in a
         fabricated second entry. The value here carries two such separators;
         a parser that only counts bytes out by the declared length, and never
@@ -4658,7 +4657,7 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
                           if item.category.__name__ == 'SchemaWarning'], [])
 
     def test_a_journal_field_that_is_not_utf8_is_reported_and_kept_as_captured(self) -> None:
-        """One bad octet in one field used to cost the whole extraction.
+        """One bad octet in one field does not cost the whole extraction.
 
         :exc:`UnicodeDecodeError` is a :exc:`ValueError`, so it is neither in
         :mod:`pcapkit.utilities.exceptions` nor an :exc:`EOFError`. The octet is

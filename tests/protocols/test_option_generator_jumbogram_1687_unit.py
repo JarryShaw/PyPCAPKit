@@ -2,12 +2,12 @@
 """The generator's Jumbo Payload frame is a jumbogram RFC 2675 accepts. C.f. #1687.
 
 :file:`examples/generators/options.py` puts HOPOPT's Jumbo Payload case in an
-IPv6 envelope in :file:`examples/captures/options-ipv6.pcap`. It used to carry
-the option's default Jumbo Payload Length of 0 behind a non-zero Payload Length,
-two of the errors :rfc:`2675#section-3` lists, and since #1687 the default
-engine rejects such a packet: the frame stopped at IPv6 and its option was never
-walked. The case now carries a legal length, and ``_frame`` builds a genuine
-jumbogram around it, filled out by ``_jumbogram_datagram``.
+IPv6 envelope in :file:`examples/captures/options-ipv6.pcap`. The option's
+default Jumbo Payload Length of 0 behind a non-zero Payload Length is two of the
+errors :rfc:`2675#section-3` lists, and the default engine rejects such a packet
+(#1687): the frame stops at IPv6 and its option is never walked. So the case
+carries a legal length, and ``_frame`` builds a genuine jumbogram around it,
+filled out by ``_jumbogram_datagram``.
 
 :data:`JUMBO_LEN` and the datagram's fields are spelled out here rather than
 read from the generator, so a wrong generator constant fails as ``0 != 65536``.

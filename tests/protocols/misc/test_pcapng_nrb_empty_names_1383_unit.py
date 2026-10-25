@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #1383: NRB record names round-trip byte-exactly.
 
-The parse stripped every trailing NUL before splitting the name resolution
-data, so ``a\\0\\0`` came back as one name and rebuilt as ``a\\0``. Names are now
-split one per terminator, so an empty name is kept as ``''``. Data that is
-empty or not zero-terminated cannot be expressed as a list of names; it is
-malformed, and the record area is kept as the octets captured (#1325).
+Without the fix, the parse strips every trailing NUL before splitting the name
+resolution data, so ``a\\0\\0`` comes back as one name and rebuilds as ``a\\0``.
+Names are split one per terminator, so an empty name is kept as ``''``. Data
+that is empty or not zero-terminated cannot be expressed as a list of names; it
+is malformed, and the record area is kept as the octets captured (#1325).
 
 :mod:`pcapkit` is imported inside each test, after
 :func:`~tests._support.reimport_once_per_class`.

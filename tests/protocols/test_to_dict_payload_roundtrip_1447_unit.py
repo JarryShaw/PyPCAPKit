@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """``from_data(info.to_dict())`` rebuilds the payload, byte for byte.
 
-GitHub issue #1447: :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>`
-leaves out ``__next_type__`` and ``__next_name__``, which
-:meth:`~pcapkit.protocols.protocol.ProtocolBase._make_payload` dispatched on, so
+This guards against GitHub issue #1447, where
+:meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` left out
+``__next_type__`` and ``__next_name__``, which
+:meth:`~pcapkit.protocols.protocol.ProtocolBase._make_payload` dispatches on, so
 a layer rebuilt from its dict lost its payload: an Ethernet frame came back as
 its 14-octet header. IPv6 lost its extension headers the same way, with
 ``__exthdr__``, and HTTP raised ``ProtocolError('invalid HTTP data: Raw')``.

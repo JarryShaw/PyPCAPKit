@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 """A PCAP file ending in a partial record header stops cleanly at EOF.
 
-GitHub issue #1265: with fewer than sixteen octets left after the last record,
+This guards against GitHub issue #1265, where, with fewer than sixteen octets
+left after the last record,
 :meth:`Frame.unpack <pcapkit.protocols.misc.pcap.frame.Frame.unpack>` parsed a
 record header out of zero padding, and the payload read got a negative length
-(``ValueError: read length must be non-negative or -1``). A tail that short now
+(``ValueError: read length must be non-negative or -1``). A tail that short
 raises :exc:`~pcapkit.utilities.exceptions.StreamEOFError`, which the extractor
 treats as the end of the file, as it does for a truncated PCAP-NG block (#678).
 

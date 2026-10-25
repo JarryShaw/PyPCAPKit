@@ -3,11 +3,11 @@
 
 GitHub issue #1380: a nested schema may read less than its
 :class:`~pcapkit.corekit.fields.misc.SchemaField`'s declared span. Parsing then
-packing kept the octets it left unread (#1292), but a schema rebuilt through
+packing keeps the octets it left unread (#1292), but a schema rebuilt through
 :meth:`~pcapkit.protocols.schema.schema.Schema.from_dict`, or a protocol rebuilt
-through :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data`, had never
-been unpacked and zero-filled them. They now travel with the nested value as its
-``__remainder__``.
+through :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data`, has never
+been unpacked, and without the fix zero-fills them. They travel with the nested
+value as its ``__remainder__``.
 
 No shipped schema declares a :class:`~pcapkit.corekit.fields.misc.SchemaField`
 directly, so the schemas and the protocol here are built in the test. Everything

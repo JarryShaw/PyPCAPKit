@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #1437 (part B): PCAP-NG padding rebuilds as captured.
 
-#1436 made :class:`~pcapkit.corekit.fields.strings.PaddingField` pack the octets
-it is given, but the PCAP-NG reader never handed them on, so non-zero padding
-parsed silently and came back zeroed: the packet data padding of an SPB, EPB and
-Packet Block, the secrets padding of a DSB, the IDB reserved octets, and the
-padding of every option and NRB record. Octets after ``opt_endofopt`` were
-dropped outright, shrinking the block. Each is now kept on the data model --
-padding only when it is not all zeros, the octets after ``opt_endofopt``
-whenever there are any -- and written back by ``make``.
+:class:`~pcapkit.corekit.fields.strings.PaddingField` packs the octets it is
+given (#1436). Without the fix, the PCAP-NG reader never hands them on, so
+non-zero padding parses silently and comes back zeroed: the packet data padding
+of an SPB, EPB and Packet Block, the secrets padding of a DSB, the IDB reserved
+octets, and the padding of every option and NRB record. Octets after
+``opt_endofopt`` are dropped outright, shrinking the block. Each is kept on the
+data model -- padding only when it is not all zeros, the octets after
+``opt_endofopt`` whenever there are any -- and written back by ``make``.
 
 Every case builds its own octets in memory and reads no capture.
 

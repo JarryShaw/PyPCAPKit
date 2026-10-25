@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #1770: :mod:`pcapkit.protocols.protocol` exports ``Protocol``.
 
-The module's :attr:`__all__` was ``['ProtocolBase']``, so ``from
-pcapkit.protocols.protocol import *`` did not bind
+This guards against the module's :attr:`__all__` being ``['ProtocolBase']``,
+where ``from pcapkit.protocols.protocol import *`` does not bind
 :class:`~pcapkit.protocols.protocol.Protocol`, the class its docstring and
-:file:`protocol.rst` present as the module's user-facing one. It is listed now.
+:file:`protocol.rst` present as the module's user-facing one.
 
 """
 

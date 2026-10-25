@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 """Padding and reserved octets held by a ``PaddingField`` rebuild as captured.
 
-GitHub issue #1223. :class:`~pcapkit.corekit.fields.strings.PaddingField` packed
-zeros whatever it had read, so non-zero padding or reserved octets parsed
-silently and came back zeroed. The field now packs the octets it was given,
-and zeros when it has none, which is still what a freshly built packet writes.
+This guards against GitHub issue #1223, where
+:class:`~pcapkit.corekit.fields.strings.PaddingField` packed zeros whatever it
+had read, so non-zero padding or reserved octets parsed silently and came back
+zeroed. The field packs the octets it was given, and zeros when it has none,
+which is what a freshly built packet writes.
 Each protocol below carries the octets through its reader, data model and
 ``make()``; the HIP and SCTP trailing alignment padding is kept on the data
 model only when it is not all zeros.

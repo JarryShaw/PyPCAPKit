@@ -62,8 +62,8 @@ class Gap(NamedTuple):
 
 
 #: Every (capture, frame, layer path) whose object-form rebuild does not close.
-#: Frame numbers are one-based, as in the dumps. Empty since #1449 fixed the
-#: IPv6 extension-header rebuild (#1446).
+#: Frame numbers are one-based, as in the dumps. Empty: the IPv6
+#: extension-header rebuild closes (#1446, #1449).
 LAYER_GAPS: 'dict[str, Gap]' = {}
 
 class DictGap(NamedTuple):

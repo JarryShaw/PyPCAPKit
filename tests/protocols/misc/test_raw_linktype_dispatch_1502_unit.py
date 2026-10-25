@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #1502: ``LINKTYPE_RAW`` (101) is dissected as IPv4 or IPv6.
 
-Neither :attr:`Frame.__proto__ <pcapkit.protocols.misc.pcap.frame.Frame.__proto__>`
-nor :attr:`PCAPNG.__proto__ <pcapkit.protocols.misc.pcapng.PCAPNG.__proto__>`
-had an entry for ``LinkType.RAW``, so a raw-IP frame was kept as
-:class:`~pcapkit.protocols.misc.raw.Raw` and never reached reassembly. It
+This guards against
+:attr:`Frame.__proto__ <pcapkit.protocols.misc.pcap.frame.Frame.__proto__>` and
+:attr:`PCAPNG.__proto__ <pcapkit.protocols.misc.pcapng.PCAPNG.__proto__>` lacking
+an entry for ``LinkType.RAW``, which keeps a raw-IP frame as
+:class:`~pcapkit.protocols.misc.raw.Raw` so it never reaches reassembly. It
 carries a bare IPv4 or IPv6 datagram that only the version nibble tells apart,
-so both now dispatch it as ``IPV4`` or ``IPV6`` by that nibble, unless ``RAW``
+so both dispatch it as ``IPV4`` or ``IPV6`` by that nibble, unless ``RAW``
 itself is registered.
 
 Every layer is rebuilt byte-exactly, from ``info`` and from ``info.to_dict()``.

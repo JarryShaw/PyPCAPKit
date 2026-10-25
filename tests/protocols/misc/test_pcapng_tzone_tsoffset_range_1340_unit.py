@@ -3,15 +3,15 @@
 
 ``if_tzone`` is a signed 32-bit count of seconds, but a
 :class:`~datetime.timezone` holds strictly less than 24 hours, so an offset of
-a day or more raised a bare :exc:`ValueError` out of the IDB reader. It is now
-kept as captured, as a :class:`~datetime.timedelta`, with a
+a day or more raises a bare :exc:`ValueError` out of the IDB reader without the
+fix. It is kept as captured, as a :class:`~datetime.timedelta`, with a
 :class:`~pcapkit.utilities.warnings.ProtocolWarning`, and the block's
 timestamps render in UTC.
 
 ``if_tsoffset`` is a signed 64-bit count of seconds; an epoch past what
-``datetime`` or the platform ``time_t`` holds raised :exc:`OverflowError` or
-:exc:`OSError` from :meth:`datetime.datetime.fromtimestamp`, where only
-:exc:`ValueError` fell back to the epoch with a warning. All three do now.
+``datetime`` or the platform ``time_t`` holds raises :exc:`OverflowError` or
+:exc:`OSError` from :meth:`datetime.datetime.fromtimestamp`, not only
+:exc:`ValueError`. All three fall back to the epoch with a warning.
 
 Every block rebuilds byte-exactly from its data model.
 

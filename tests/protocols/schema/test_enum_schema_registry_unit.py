@@ -2,10 +2,10 @@
 
 :class:`~pcapkit.protocols.schema.schema.EnumSchema`'s :attr:`registry` is a
 :class:`collections.defaultdict`-backed mapping of enumeration codes to schema
-classes. Reading it with a bare ``registry[code]`` for a code nobody registered
-used to *insert* that code -- with whatever the default factory produced -- the
-same defect fixed at the protocol layer's ``__proto__`` family by GitHub issue
-#421 and its option, chunk and block registries by #425. These tests cover
+classes. These tests guard against a bare ``registry[code]`` read for a code
+nobody registered *inserting* that code -- with whatever the default factory
+produced -- the same defect fixed at the protocol layer's ``__proto__`` family
+by GitHub issue #421 and its option, chunk and block registries by #425. They cover
 both the auto-created
 :attr:`EnumSchema.__enum__` (the shape used by
 e.g. :class:`pcapkit.protocols.schema.transport.tcp.Option`) and a manually
@@ -257,11 +257,11 @@ class EnumSchemaRegistryOverwriteTests(unittest.TestCase):
         return Code, BaseSchema
 
     def test_register_warns_when_a_code_is_already_taken(self) -> None:
-        """The schema half now reports what it displaced.
+        """The schema half reports what it displaced.
 
-        Before this change the body was a bare ``cls.__enum__[code] = schema``:
-        the replacement happened, the read-side fell back to the new class, and
-        nothing connected that to the registration which caused it.
+        Guards against a bare ``cls.__enum__[code] = schema`` body, where the
+        replacement happens, the read-side falls back to the new class, and
+        nothing connects that to the registration which caused it.
 
         """
         from pcapkit.utilities.warnings import RegistryWarning
@@ -326,10 +326,10 @@ class EnumSchemaRegistryOverwriteTests(unittest.TestCase):
     def test_register_stays_quiet_on_same_object_reregistration(self) -> None:
         """GitHub issue #718: replaying a call with the identical schema is a no-op.
 
-        Before the fix the guard fired on presence alone, so a caller
+        Without the fix the guard fires on presence alone, so a caller
         idempotently re-asserting a binding it already made -- registering
         the exact same schema object under the exact same code a second time
-        -- warned about an overwrite that never happened, exactly as
+        -- warns about an overwrite that never happens, exactly as
         unhelpfully as a genuine collision. Matches the identity guard
         :func:`register_protocol
         <pcapkit.foundation.registry.protocols.register_protocol>` already

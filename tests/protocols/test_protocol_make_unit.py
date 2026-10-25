@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
 """Construction through ``make()`` in :class:`~pcapkit.protocols.protocol.Protocol`.
 
-GitHub issue #1312: :meth:`~pcapkit.protocols.protocol.ProtocolBase.unpack`
-reused the schema :meth:`~pcapkit.protocols.protocol.ProtocolBase.pack` had
-made instead of parsing the packed octets, so ``read`` met the raw
-:obj:`bytes` (or :class:`~pcapkit.protocols.schema.schema.Schema`) items
-the option makers accept, and construction crashed with
-:exc:`AttributeError`. A bare ``MH()`` crashed the same way on its default
-``data=b'\\x00\\x00'``. A made schema holding raw octets where parsing its
-packed form yields a schema is now replaced by the parsed one.
+This guards against GitHub issue #1312, where
+:meth:`~pcapkit.protocols.protocol.ProtocolBase.unpack` reused the schema
+:meth:`~pcapkit.protocols.protocol.ProtocolBase.pack` had made instead of
+parsing the packed octets, so ``read`` met the raw :obj:`bytes` (or
+:class:`~pcapkit.protocols.schema.schema.Schema`) items the option makers
+accept, and construction crashed with :exc:`AttributeError`. A bare ``MH()``
+crashed the same way on its default ``data=b'\\x00\\x00'``. A made schema
+holding raw octets where parsing its packed form yields a schema is replaced by
+the parsed one.
 
-GitHub issue #1308: a :obj:`str` member name given to two enum arguments
-of one ``make()`` raised ``ambiguous member name`` when only one of the
-enumerations had it. Each ``_make_index`` call now resolves against the
-argument it was passed.
+It also guards against GitHub issue #1308, where a :obj:`str` member name given
+to two enum arguments of one ``make()`` raised ``ambiguous member name`` when
+only one of the enumerations had it. Each ``_make_index`` call resolves against
+the argument it was passed.
 
 Every case builds its own packet in memory and reads no capture. Classes are
 imported inside each test, after

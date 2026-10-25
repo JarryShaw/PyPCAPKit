@@ -219,8 +219,8 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
 
             # ``register`` resolves a ``ModuleDescriptor`` before storing it,
             # so the entry above is already the plain ``Raw`` class, not the
-            # descriptor -- passing ``Raw`` again would now be the same-object
-            # no-op GitHub issue #718 added an identity guard for (see
+            # descriptor -- passing ``Raw`` again would be the same-object
+            # no-op covered by the identity guard for GitHub issue #718 (see
             # ``test_frame_register_stays_quiet_on_same_object_reregistration``).
             # A genuinely different class is needed to still warn here.
             with mock.patch('pcapkit.protocols.misc.pcap.frame.warn') as warn:
@@ -297,7 +297,7 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
         bad_time._file = io.BytesIO(b'')
         # Faked through frame.py's own binding of
         # :func:`pcapkit.utilities.datetime.fromtimestamp`, which it calls
-        # instead of :meth:`datetime.datetime.fromtimestamp` since #2099.
+        # instead of :meth:`datetime.datetime.fromtimestamp` (#2099).
         with mock.patch('pcapkit.protocols.misc.pcap.frame.fromtimestamp', side_effect=ValueError), \
                 mock.patch.object(Frame, '_decode_next_layer',
                                   lambda self, info, proto=None, length=None, packet=None: info), \
@@ -326,9 +326,9 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
     def test_frame_register_stays_quiet_on_same_object_reregistration(self) -> None:
         """GitHub issue #718: replaying a call with the identical class is a no-op.
 
-        Before the fix the guard fired on presence alone, so the *second* of
+        Without the fix the guard fires on presence alone, so the *second* of
         two calls registering the exact same class under the exact same code
-        warned about an overwrite that never happened. Matches the identity
+        warns about an overwrite that never happens. Matches the identity
         guard :func:`register_protocol
         <pcapkit.foundation.registry.protocols.register_protocol>` already
         applies.
@@ -441,13 +441,11 @@ class PCAPHeaderFrameUnitTests(unittest.TestCase):
 
         :meth:`Frame.unpack <pcapkit.protocols.misc.pcap.frame.Frame.unpack>`
         seeded the file's byte order under the key ``bytesorder``, where
-        ``byteorder_callback`` -- then in
-        :file:`pcapkit/protocols/schema/misc/pcap/frame.py`, now in
-        :file:`pcapkit/corekit/fields/byteorder.py` -- reads ``byteorder``,
-        so the lookup always missed and always fell back to
+        ``byteorder_callback`` (:file:`pcapkit/corekit/fields/byteorder.py`)
+        reads ``byteorder``, so the lookup always missed and always fell back to
         :data:`sys.byteorder`. On a little-endian host reading a little-endian
-        capture that is the right answer by coincidence, which is why every
-        fixture here passed; on a big-endian capture all four record-header
+        capture that is the right answer by coincidence, so little-endian
+        fixtures cannot catch it; on a big-endian capture all four record-header
         fields came back byte-swapped.
 
         The capture is built here rather than read from

@@ -110,9 +110,9 @@ class SchemaUnitTests(unittest.TestCase):
         See #476: several data models declare a ``ListField``-backed attribute as
         ``tuple[...]`` (HIP's ``group_id``, MH's ``prefixes``/``fid``/``bid``, and
         others), and ``_read_*`` hands one straight back to ``_make_*`` on a
-        parse-then-reconstruct cycle. Before the fix, :meth:`Schema.pack
-        <pcapkit.protocols.schema.schema.Schema.pack>` accepted a :obj:`list` but
-        raised :exc:`ProtocolUnbound` on the tuple -- a case no unit test that
+        parse-then-reconstruct cycle. Without the fix, :meth:`Schema.pack
+        <pcapkit.protocols.schema.schema.Schema.pack>` accepts a :obj:`list` but
+        raises :exc:`ProtocolUnbound` on the tuple -- a case no unit test that
         builds the schema directly with a list could ever see.
 
         """
@@ -130,11 +130,10 @@ class SchemaUnitTests(unittest.TestCase):
         self.assertEqual(bytes(as_tuple), bytes(as_list))
         self.assertEqual(bytes(as_tuple), b'\x09\xab\x10\x11\x44\x00\x00body')
 
-        # The branch still rejects what it always rejected: a tuple is accepted
-        # because it is a sequence ``ListField.pack`` can iterate, not because
-        # the check grew permissive. A :obj:`str` is also a sequence but is not
-        # what any data model here declares, so it stays out, same as
-        # ``object()`` did before this fix.
+        # The branch stays strict: a tuple is accepted because it is a sequence
+        # ``ListField.pack`` can iterate, not because the check is permissive. A
+        # :obj:`str` is also a sequence but is not what any data model here
+        # declares, so it stays out, as ``object()`` does.
         with self.assertRaises(ProtocolUnbound):
             bytes(FeatureSchema(
                 kind=1, repeated='xy',  # type: ignore[arg-type]
@@ -266,7 +265,7 @@ class SchemaUnitTests(unittest.TestCase):
         self.assertIs(BaseEnumSchema.registry[Code.three], ManySchema)
 
         # ``Code.two`` is held by ``ManySchema``, so this is a genuine overwrite
-        # and now reports one. Captured and asserted rather than left to escape:
+        # and reports one. Captured and asserted rather than left to escape:
         # an unasserted warning is noise in every later run of the suite, and the
         # capture is what stops this line from quietly becoming a second, silent
         # copy of the behaviour ``EnumSchemaRegistryOverwriteTests`` pins.
@@ -288,14 +287,10 @@ class SchemaUnitTests(unittest.TestCase):
     def test_schema_final_generated_init(self) -> None:
         """``schema_final`` generates a typed ``__init__`` from the field table.
 
-        This used to also cover a ``sys.version_info``-mocked "legacy version"
-        branch in ``SchemaMeta.__new__``, which no longer exists: that branch
-        was GitHub issue #439's workaround for a class-keyword collision with
-        ``abc.ABCMeta.__new__`` on Python < 3.11, and the fix removed it (and
-        the ``sys`` import along with it) in favour of renaming the one
-        keyword that actually collided. ``SchemaMeta.__new__`` no longer
-        branches on the interpreter version at all, so there is nothing left
-        for a mocked ``sys.version_info`` to exercise here.
+        ``SchemaMeta.__new__`` does not branch on the interpreter version: the
+        class-keyword collision with ``abc.ABCMeta.__new__`` on Python < 3.11 is
+        avoided by renaming the one keyword that collided (GitHub issue #439),
+        so there is nothing for a mocked ``sys.version_info`` to exercise here.
 
         """
         from pcapkit.corekit.fields.numbers import UInt8Field
@@ -339,11 +334,11 @@ class SchemaUnitTests(unittest.TestCase):
         # ``NO_VALUE`` the generated ``__init__`` seeded them with
         self.assertEqual(schema.to_dict(), {'kind': 9, 'size': 0x0102})
 
-        # so the schema packs, where before the fix the fields left out reached
+        # so the schema packs, where without the fix the fields left out reach
         # the packing as the field objects themselves
         self.assertEqual(bytes(schema), b'\x09\x01\x02\x00')
 
-        # and the two construction paths now agree
+        # and the two construction paths agree
         self.assertEqual(bytes(HeaderSchema.from_dict({'kind': 9})), bytes(schema))
 
         # a packet context is what makes packing at construction possible, so it
@@ -605,13 +600,13 @@ class SchemaUnitTests(unittest.TestCase):
     def test_forward_match_field_does_not_count_toward_length(self) -> None:
         """A ``ForwardMatchField`` reads octets but must not be billed for them.
 
-        Before the fix, :meth:`Schema.unpack
-        <pcapkit.protocols.schema.schema.Schema.unpack>` kept the octets a
+        Without the fix, :meth:`Schema.unpack
+        <pcapkit.protocols.schema.schema.Schema.unpack>` keeps the octets a
         :class:`~pcapkit.corekit.fields.misc.ForwardMatchField` read in
         ``__buffer__`` even though it rewinds the stream past them, so
-        ``len(schema)`` double-counted them: the same octet is read once by
+        ``len(schema)`` double-counts them: the same octet is read once by
         ``length_peek`` (kept in the buffer) and again for real by ``length``
-        (also kept), so a 3-octet input reported length 4. See #446.
+        (also kept), so a 3-octet input reports length 4. See #446.
 
         """
         PreviewedItem = self._make_previewed_item_schema()
@@ -631,7 +626,7 @@ class SchemaUnitTests(unittest.TestCase):
 
         Two ``PreviewedItem``s take two octets each off the wire -- four in
         total -- and :class:`~pcapkit.corekit.fields.collections.ListField`
-        is given exactly that as its declared ``length``. Before the fix, each
+        is given exactly that as its declared ``length``. Without the fix, each
         item's over-reported ``len(data)`` (3, not 2) drains the budget one
         octet too fast: ``4 - 3 = 1`` after the first item, then ``1 - 3 = -2``
         on the second, and :meth:`ListField.unpack

@@ -4,20 +4,18 @@
 Classic PCAP declares its byte order in the magic number of the global header,
 and the four fields of every record header -- ``ts_sec``, ``ts_usec``,
 ``incl_len`` and ``orig_len`` -- are written in that order rather than in the
-reading host's. Nothing in this suite read a big-endian ``.pcap`` before, because
-no such capture existed here: every fixture was little-endian, so on a
-little-endian runner a reader that ignored the file's declared order and used
-:data:`sys.byteorder` produced exactly the right answer.
+reading host's. Little-endian fixtures alone cannot show whether that order is
+honoured: on a little-endian runner, a reader that ignores the file's declared
+order and uses :data:`sys.byteorder` produces exactly the right answer.
 
-That is what GitHub issue #605 was.
+This guards against GitHub issue #605, where
 :meth:`Frame.unpack <pcapkit.protocols.misc.pcap.frame.Frame.unpack>` seeded the
-order under the key ``bytesorder``, while ``byteorder_callback`` -- then in
-:file:`pcapkit/protocols/schema/misc/pcap/frame.py`, now in
-:file:`pcapkit/corekit/fields/byteorder.py` -- reads ``byteorder``, so the
+order under the key ``bytesorder``, while ``byteorder_callback``
+(:file:`pcapkit/corekit/fields/byteorder.py`) reads ``byteorder``, so the
 ``.get()`` never found the key and always fell back to the host's order -- the
 sibling :meth:`Frame.pack <pcapkit.protocols.misc.pcap.frame.Frame.pack>`
-eleven lines earlier spelled it correctly, which is what marks it as a slip
-rather than a second key. Measured on the unfixed tree against
+spelled it correctly, which is what marks it as a slip rather than a second
+key. Measured without the fix against
 ``big_endian.pcap``, whose first record really holds ``ts_sec=1500000000``,
 ``ts_usec=123456`` and ``incl_len=74``: frame 1 came back with
 ``ts_sec=3106905``, ``ts_usec=1088553216`` and ``incl_len=1241513984``, i.e.
@@ -179,7 +177,7 @@ class PcapFrameByteOrderRuntimeTests(unittest.TestCase):
     def test_big_endian_record_headers_are_read_in_the_files_byte_order(self) -> None:
         """#605: ``a1 b2 c3 d4``, microsecond timestamps.
 
-        On the unfixed tree this raises ``ValueError: read length must be
+        Without the fix this raises ``ValueError: read length must be
         non-negative or -1`` before reaching any assertion: frame 1's swapped
         ``incl_len`` of 1241513984 consumes the whole file, and the read that
         follows is handed a negative payload length.
@@ -203,7 +201,7 @@ class PcapFrameByteOrderRuntimeTests(unittest.TestCase):
     def test_little_endian_twin_is_unaffected(self) -> None:
         """The control: the same three records in the little-endian container.
 
-        This passes on the unfixed tree too, and that is what it is for. It
+        This passes without the fix too, and that is what it is for. It
         pins the expectations of the big-endian tests to a file whose byte
         order was never in question, so a failure there cannot be blamed on the
         records themselves being wrong.

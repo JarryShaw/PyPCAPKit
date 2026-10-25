@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #1504: restoring a shipped dispatch entry puts back its descriptor.
 
+Without the fix,
 :meth:`ProtocolBase.register <pcapkit.protocols.protocol.ProtocolBase.register>`
 and its ``Link``, ``Internet``, ``Transport`` (``TCP``, ``UDP``), ``SCTP``,
-``Frame`` and ``PCAPNG`` overrides resolved a
+``Frame`` and ``PCAPNG`` overrides resolve a
 :class:`~pcapkit.corekit.module.ModuleDescriptor` argument to its class before
 storing it. The #1364 guard returns early only when the argument equals the
-*incumbent*, so after an override, handing back the shipped descriptor stored
-the class it names: the round trip did not close, and the restore imported the
+*incumbent*, so after an override, handing back the shipped descriptor stores
+the class it names: the round trip does not close, and the restore imports the
 module the entry was meant to defer. A descriptor equal to the one a code
-shipped with is now matched before it is resolved, and the shipped object itself
+shipped with is matched before it is resolved, and the shipped object itself
 is stored.
 
 Every registry is process-wide, so each case runs under

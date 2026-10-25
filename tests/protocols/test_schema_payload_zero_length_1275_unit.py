@@ -71,7 +71,7 @@ class TestPayloadFieldZeroLength(unittest.TestCase):
         The declared length is the authority even when the stream holds more:
         the octets past it belong to whatever encloses this schema, so reading
         them is an over-read that also leaves ``__length__`` mis-decremented --
-        it used to come back *larger* than before the payload was read.
+        without the fix it comes back *larger* than before the payload was read.
 
         """
         R = self._unset_schema()

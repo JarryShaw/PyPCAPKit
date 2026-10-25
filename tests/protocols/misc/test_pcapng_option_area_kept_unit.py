@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """A PCAP-NG option area holding a malformed option is kept as captured.
 
-GitHub issue #1325: an option or record whose declared length runs past its
-area used to be clamped to the octets the area had left, so the block parsed
-but rebuilt a different length or padding than it was read with. Now the whole
-area is kept as the octets captured: the block's ``options`` (or ``records``)
-are empty, ``options_raw`` (or ``records_raw``) holds the area, the block
-rebuilds byte for byte, and a capture holding such a block still extracts.
+This guards against GitHub issue #1325, where an option or record whose declared
+length runs past its area was clamped to the octets the area had left, so the
+block parsed but rebuilt a different length or padding than it was read with.
+The whole area is kept as the octets captured: the block's ``options`` (or
+``records``) are empty, ``options_raw`` (or ``records_raw``) holds the area, the
+block rebuilds byte for byte, and a capture holding such a block still extracts.
 
 Every case builds its own octets in memory. :mod:`pcapkit` is imported inside
 each test, after :func:`~tests._support.reimport_once_per_class`.

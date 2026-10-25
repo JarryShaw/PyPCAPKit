@@ -7,7 +7,8 @@ per-case difference is the one option it carries. So that mapping is the
 description of every one of those fixture frames, and a key it spells wrongly is a
 description that does not match the octets.
 
-Nothing warned when one did. :meth:`TCP.make
+Without a check upstream, nothing warns when the mapping spells a key wrongly.
+:meth:`TCP.make
 <pcapkit.protocols.transport.tcp.TCP.make>` ends its signature with
 ``**kwargs: 'Any'`` and never reads anything out of it, so a keyword it does not
 declare is accepted, discarded, and the parameter it was meant to set keeps its
@@ -21,7 +22,7 @@ default. GitHub issue #602 is three such keys:
   which is the acknowledgement *flag*, not the acknowledgement number
   ``ack_no``. The pair was the wrong way round, and neither half said so.
 
-That silence is gone: issue #617 has :meth:`ProtocolBase.__init__
+Issue #617 has :meth:`ProtocolBase.__init__
 <pcapkit.protocols.protocol.ProtocolBase.__init__>` check a construction keyword
 against the protocol's signatures and raise
 :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` for one that no signature
@@ -29,7 +30,7 @@ declares. ``TCP.make`` still ends in ``**kwargs`` and still reads nothing out of
 it -- the check is upstream of it -- so the account above remains the account of
 how the defect was possible, and
 :meth:`TCPBaseKeywordTests.test_an_undeclared_keyword_is_now_refused_rather_than_absorbed`
-is where the new behaviour is pinned.
+is where the refusal is pinned.
 
 Why the expected header is written out here
 -------------------------------------------
@@ -246,16 +247,13 @@ class TCPBaseKeywordTests(unittest.TestCase):
     def test_an_undeclared_keyword_is_now_refused_rather_than_absorbed(self) -> None:
         """Constructing with an undeclared keyword raises.
 
-        This test used to assert the opposite, and the change is the point.
-        ``make`` still ends its signature with ``**kwargs`` and still reads
-        nothing out of it, so on its own it would still absorb a misspelling; what
-        changed in #617 is that :meth:`ProtocolBase.__init__
-        <pcapkit.protocols.protocol.ProtocolBase.__init__>` now checks the
-        keywords against the signatures before ``make`` is reached, and refuses a
-        name none of them declares. That closes the asymmetry with
-        :class:`~pcapkit.protocols.schema.schema.Schema` construction, which has
-        always warned :exc:`~pcapkit.utilities.warnings.UnknownFieldWarning` for
-        an unknown field.
+        ``make`` ends its signature with ``**kwargs`` and reads nothing out of it,
+        so on its own it would absorb a misspelling; :meth:`ProtocolBase.__init__
+        <pcapkit.protocols.protocol.ProtocolBase.__init__>` checks the keywords
+        against the signatures before ``make`` is reached, and refuses a name none
+        of them declares (#617). That closes the asymmetry with
+        :class:`~pcapkit.protocols.schema.schema.Schema` construction, which warns
+        :exc:`~pcapkit.utilities.warnings.UnknownFieldWarning` for an unknown field.
 
         The ``**kwargs`` assertion is kept because it says why the check has to
         live outside ``make``: were the signature closed, Python would raise on
@@ -281,7 +279,7 @@ class TCPBaseKeywordTests(unittest.TestCase):
 
         self.assertIn('no_such_tcp_field', str(context.exception))
         # A warning would be the weaker fix the issue weighed and rejected; the
-        # silence here is now the silence of an exception having been raised.
+        # silence here is the silence of an exception having been raised.
         self.assertEqual([str(warning.message) for warning in caught], [])
 
     def test_the_three_keys_of_the_defect_are_each_refused(self) -> None:
@@ -289,9 +287,9 @@ class TCPBaseKeywordTests(unittest.TestCase):
 
         ``TCP_BASE`` is correct, so the mapping itself cannot
         demonstrate the defect. Putting the three keys back one at a time is what
-        keeps the original report reproducible: before the fix every one of them
-        built a segment whose field kept its default -- ``seq=1`` produced
-        ``info.seq == 0`` -- with an empty ``warnings`` list.
+        keeps the original report reproducible: without the fix every one of
+        them builds a segment whose field keeps its default -- ``seq=1``
+        produces ``info.seq == 0`` -- with an empty ``warnings`` list.
 
         """
         from pcapkit.protocols.transport.tcp import TCP

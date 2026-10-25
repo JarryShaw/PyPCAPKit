@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 """A frame is dissected to 64 layers, and no further.
 
-GitHub issue #1610: each layer dissects the next one from inside its own parse,
-so deep nesting of any protocol ran into Python's recursion limit, and
-:func:`~pcapkit.corekit.decorators.beholder` caught the ``RecursionError`` and
-left the rest raw, silently. From a script on Python 3.14, TCP was lost behind
-108 IPv4 headers in IPv4, or behind 200 stacked 802.1Q tags. #1604 bounded one
-chain of extension headers, but its count restarts at every tunnel.
+This guards against GitHub issue #1610: each layer dissects the next one from
+inside its own parse, so without a limit deep nesting of any protocol runs into
+Python's recursion limit, and :func:`~pcapkit.corekit.decorators.beholder`
+catches the ``RecursionError`` and leaves the rest raw, silently. From a script
+on Python 3.14, TCP was lost behind 108 IPv4 headers in IPv4, or behind 200
+stacked 802.1Q tags. #1604 bounds one chain of extension headers, but its count
+restarts at every tunnel.
 
-Now every frame stops at
+Every frame stops at
 :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT` layers, counted along its
 protocol chain from the first layer its record carries, through tunnels, tags
 and extension headers alike: what follows is kept as
@@ -223,7 +224,8 @@ class FrameLayerLimitTests(unittest.TestCase):
         self.assertEqual(config.FRAME_LAYER_LIMIT, 64)
 
     def test_a_frame_of_64_layers_is_dissected_to_the_tcp(self) -> None:
-        # Guard: below the old recursion cut-off, so this held before #1610 too.
+        # Guard: below the recursion cut-off #1610 is about, so this holds
+        # without the fix too.
         for shape, build in SHAPES.items():
             with self.subTest(shape=shape):
                 parsed, messages = self.frame(ethernet(build(64)))
@@ -283,7 +285,8 @@ class FrameLayerLimitTests(unittest.TestCase):
 
     def test_where_both_limits_fall_on_one_layer_it_warns_once(self) -> None:
         # Guard: the 33rd header in a row is also the 65th layer, and the
-        # extension header limit, which held before #1610 too, is the one named.
+        # extension header limit, which holds without the #1610 limit too, is the
+        # one named.
         for carrier in ('ipv4', 'ipv6'):
             with self.subTest(carrier=carrier):
                 layers = ['ipv4'] * 30 + [carrier] + ['opts'] * 40 + ['tcp']

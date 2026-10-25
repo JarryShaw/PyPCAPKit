@@ -8,8 +8,8 @@ class-level :class:`collections.defaultdict` and recording a miss in it is the
 defect GitHub issue #421 reported and pull request #426 fixed at this layer,
 pull request #428 extended to the option, chunk and block registries, and pull
 request #560 fixed at the schema layer. The cost of not writing it back is that
-every unrecognised frame resolves the same descriptor again. Since GitHub issue
-#1559 a registered descriptor is not written back either, so an extraction of
+every unrecognised frame resolves the same descriptor again. A registered
+descriptor is not written back either (GitHub issue #1559), so an extraction of
 :file:`many_interfaces.pcapng` performs 296 resolutions, 48 of them fallbacks.
 
 Proposed by @Ts-Boom in GitHub pull request #563, which paid that cost with a
@@ -24,8 +24,8 @@ Three properties, and the split is deliberate -- the first says the cost is
 gone, the other two say what it was not allowed to cost:
 
 :meth:`DefaultDescriptorResolutionTests.test_repeated_miss_does_not_re_enter_the_import_machinery`
-    The saving itself, as a call count rather than as a timing. Fails on the
-    unfixed tree with one :func:`~importlib.import_module` call per lookup.
+    The saving itself, as a call count rather than as a timing. Fails without
+    the fix with one :func:`~importlib.import_module` call per lookup.
 
 :meth:`DefaultDescriptorResolutionTests.test_a_missed_code_can_still_be_registered_without_a_warning`
     The half that any write-back-on-miss implementation breaks: a code that has

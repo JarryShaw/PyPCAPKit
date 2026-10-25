@@ -3,14 +3,14 @@
 
 :file:`examples/captures/options-transport.pcap` carries one TCP segment to port
 80 per HTTP/2 frame type, built by ``_httpv2_build`` in
-:file:`examples/generators/options.py`. That function put every frame on stream
-0. :rfc:`9113#section-6` makes ``DATA``, ``HEADERS``, ``PRIORITY``,
-``RST_STREAM``, ``PUSH_PROMISE`` and ``CONTINUATION`` on stream 0 a connection
-error, and since #1153 :meth:`HTTP._guess_version
+:file:`examples/generators/options.py`. :rfc:`9113#section-6` makes ``DATA``,
+``HEADERS``, ``PRIORITY``, ``RST_STREAM``, ``PUSH_PROMISE`` and ``CONTINUATION``
+on stream 0 a connection error, and :meth:`HTTP._guess_version
 <pcapkit.protocols.application.http.HTTP._guess_version>` declines a frame no
-conforming sender writes, so six of the ten segments decoded as ``TCP:Raw``.
+conforming sender writes (#1153), so a function putting every frame on stream 0
+decodes six of the ten segments as ``TCP:Raw``.
 :mod:`tests.protocols.test_option_coverage_runtime` checks only the
-``Ethernet:IPv4`` prefix, so nothing noticed.
+``Ethernet:IPv4`` prefix, so it cannot notice.
 
 :data:`EXPECTED_STREAM` spells each type's stream out rather than reading it from
 the generator, so a wrong generator constant fails here as ``0 != 1``.

@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 """Building a PCAP frame under a zero snaplen keeps the whole packet.
 
-GitHub issue #1385: :meth:`Frame.make <pcapkit.protocols.misc.pcap.frame.Frame.make>`
-defaulted ``incl_len`` to ``min(len(packet), snaplen)``, so a global header with
-snaplen 0 produced a 16-octet record holding no packet data. The PCAP draft says
-snaplen "MUST NOT be zero" (draft-ietf-opsawg-pcap, section 4), and libpcap reads
-a zero value as the maximum for the link type (``pcapint_adjust_snapshot``), so
-a zero snaplen is now no limit, as it already is for PCAP-NG.
+This guards against GitHub issue #1385, where
+:meth:`Frame.make <pcapkit.protocols.misc.pcap.frame.Frame.make>` defaulted
+``incl_len`` to ``min(len(packet), snaplen)``, so a global header with snaplen 0
+produced a 16-octet record holding no packet data. The PCAP draft says snaplen
+"MUST NOT be zero" (draft-ietf-opsawg-pcap, section 4), and libpcap reads a zero
+value as the maximum for the link type (``pcapint_adjust_snapshot``), so a zero
+snaplen is no limit, as it is for PCAP-NG.
 
 Every case builds its own octets and reads no capture. Classes are imported
 inside each test, after :func:`~tests._support.reimport_once_per_class`.
