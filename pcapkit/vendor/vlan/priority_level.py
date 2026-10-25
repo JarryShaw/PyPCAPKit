@@ -54,7 +54,7 @@ class PriorityLevel(Vendor):
         """Process HTML data.
 
         Args:
-            data: Parsed HTML source.
+            soup: Parsed HTML source.
 
         Returns:
             Enumeration fields and missing fields.

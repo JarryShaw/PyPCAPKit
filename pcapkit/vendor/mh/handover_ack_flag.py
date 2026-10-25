@@ -97,7 +97,7 @@ class HandoverACKFlag(Vendor):
     #: Link to registry.
     LINK = 'https://www.iana.org/assignments/mobility-parameters/handover-acknowledge-flags.csv'
 
-    def process(self, data: 'list[str]') -> 'list[str]':  # type: ignore[override] # pylint: disable=arguments-differ,arguments-renamed
+    def process(self, data: 'list[str]') -> 'list[str]':  # type: ignore[override]
         """Process CSV data.
 
         Args:
@@ -140,11 +140,11 @@ class HandoverACKFlag(Vendor):
             enum.append(f'{sufs}\n    {pres}')
         return enum
 
-    def context(self, data: 'list[str]') -> 'str':  # pylint: disable=arguments-differ,arguments-renamed
+    def context(self, data: 'list[str]') -> 'str':
         """Generate constant context.
 
         Args:
-            soup: Parsed HTML source.
+            data: CSV data.
 
         Returns:
             Constant context.
