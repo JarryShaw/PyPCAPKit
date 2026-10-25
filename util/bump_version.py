@@ -31,33 +31,23 @@ the file: no workflow writes it, and there is no release step that could. Left
 out of this script it would state the *previous* release forever, which is worse
 than having no citation file at all, because a stale one is still consumed.
 
-Both fields move together, and the reason is that they have the same standing. The
-file's own header says ``version`` and ``date-released`` both "describe the newest
-*published* release", so at the moment of a bump both are equally anticipatory --
-there is no principled line that lets one move and pins the other. Moving only
-``version`` would leave the pair asserting something plainly false and leave it
-there indefinitely: "1.5.0b5, released on the day 1.5.0b4 was".
+``date-released`` is the date of the commit that bumps the version, not the date
+the release is distributed (#2163). The release goes out only once the
+``github-release`` environment is approved (#887), so the two can differ: a
+release approved days after its bump keeps the bump's date, as ``1.5.0b9``'s
+was (#1634), and a bump that never reaches PyPI (``1.5.0b1``'s did not) keeps
+its date too. That is the intended meaning rather than a gap to close, which is
+why this script writes the field and no release step does. Both fields move in
+the same commit so that they describe the same bump; moving only ``version``
+would leave the pair asserting something plainly false: "1.5.0b5, released on
+the day 1.5.0b4 was".
 
-Measured over the thirty most recent releases, the bump commit's UTC calendar date
-equals the PyPI upload's UTC calendar date **thirty times out of thirty**, median
-gap three minutes. The weekly cron fires at 10:05 UTC, twelve hours clear of a
-date boundary. Hence UTC via :func:`datetime.datetime.now` with an
-explicit timezone, not :meth:`datetime.date.today`: seven of those thirty bumps
-were made late evening in US-Eastern, where a naive local date would have been a
-day behind the publish it was describing.
+The date is taken in UTC via :func:`datetime.datetime.now` with an explicit
+timezone, not :meth:`datetime.date.today`, so a bump run by hand late in the
+evening in US-Eastern records the commit's UTC calendar date rather than a local
+one a day behind it.
 
-The residual risk is stated rather than hidden. Roughly one bump in twelve
-historically never reached PyPI at all -- eight consecutive weekly bumps between
-2024-04-13 and 2024-06-15, and ``1.5.0b1`` -- and for those this script writes an
-optimistic date for a release that never happened. That is not an argument for
-leaving the field stale, since a stale date is wrong in *every* one of the other
-eleven cases; it is an argument for eventually anchoring both fields to
-:file:`.github/workflows/create-release.yml`, which runs only when a publish is
-actually going out. That would also give the right date to a release approved on
-a later day than its bump, which this script dates by the bump: ``1.5.0b9``'s
-Create Release run was approved three days after it was created (#1634). Until
-then this is the better of the two available answers, and the ``version`` half
-is guarded by a test that fails when the file drifts from
+The ``version`` half is guarded by a test that fails when the file drifts from
 ``pcapkit.__version__`` -- which also covers the version changes made by hand,
 which never run this script at all. Those are about a quarter of the commits
 that have moved ``__version__`` on ``main`` over the project's life, and a larger
@@ -156,8 +146,9 @@ CITATION = ROOT / 'CITATION.cff'
 #: format version, which must *not* move -- does not begin with this prefix.
 VERSION_KEY = 'version:'
 
-#: Top-level ``CITATION.cff`` key naming the release date. Optional in the
-#: format, so its absence is reported rather than filled in.
+#: Top-level ``CITATION.cff`` key naming the release date, which is the date of
+#: the version bump rather than of the publish. Optional in the format, so its
+#: absence is reported rather than filled in.
 RELEASED_KEY = 'date-released:'
 
 
@@ -314,7 +305,8 @@ def plan_citation(text: str, version: str, released: Optional[str] = None) -> st
     Args:
         text: Current contents of the citation file.
         version: Version string to record.
-        released: Release date as ``YYYY-MM-DD``, defaulting to today in UTC.
+        released: Release date as ``YYYY-MM-DD``, defaulting to today in UTC,
+            which is the date of the bump this call is part of.
             Only written if the file already carries a ``date-released`` field;
             the field is optional in the format and is not invented.
 

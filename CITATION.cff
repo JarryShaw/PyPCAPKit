@@ -7,9 +7,10 @@
 # into a paper or a bill of materials instead of depending on a reader noticing
 # ``LICENSE``. It grants nothing and restricts nothing; the licence is unchanged.
 #
-# ``version`` and ``date-released`` describe the newest *published* release, so they
-# move with ``pcapkit.__version__`` in ``pcapkit/__init__.py`` and the matching entry
-# under ``docs/source/changelog/`` when a release goes out.
+# ``version`` and ``date-released`` move with ``pcapkit.__version__`` in
+# ``pcapkit/__init__.py`` and the matching entry under ``docs/source/changelog/``,
+# in the commit that bumps the version. ``date-released`` is that commit's date,
+# not the date the release is later published (#2163).
 #
 # No ``doi`` and no ``orcid``: neither exists for this project or its author,
 # and both fields are checked formats rather than free text, so an invented value
