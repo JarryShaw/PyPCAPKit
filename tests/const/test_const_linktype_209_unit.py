@@ -16,7 +16,7 @@ the word "legacy" anywhere in it (measured directly against a live fetch while
 fixing this).
 
 The fix is in the generator, :mod:`pcapkit.vendor.reg.linktype`, not in the
-generated file: :meth:`~pcapkit.vendor.reg.linktype.LinkType.process` now
+generated file: :meth:`~pcapkit.vendor.reg.linktype.LinkType.process`
 sinks any row whose notes column mentions "legacy" into a bucket appended
 *after* every other row, so the current name is always the first one defined
 for a shared value regardless of the source table's own row order.
@@ -27,7 +27,7 @@ with no check that the row's value was actually claimed by another row --
 meaning a future *current* row whose notes happened to mention "legacy" about
 some unrelated code would be wrongly sunk, and a single ``USER0``-style range
 row would sink all sixteen expanded members at once instead of none.
-:meth:`~pcapkit.vendor.reg.linktype.LinkType.process` now only sinks a
+:meth:`~pcapkit.vendor.reg.linktype.LinkType.process` only sinks a
 single-value row when its value is a genuine duplicate elsewhere in the same
 table, and never routes a range row through the sink at all.
 
@@ -35,8 +35,8 @@ The cross-review of #852 itself then caught a second-order regression: the
 first cut of the duplicate-value pre-scan counted only single-value rows, so a
 value duplicated *across a range boundary* -- a single-value row sharing a
 value with one member of a ``USER0``-style range -- was invisible to it, and
-that row's legacy alias was no longer sunk even when correctly worded. The
-pre-scan now expands ``a–b`` ranges the same way the main loop does
+that row's legacy alias was not sunk even when correctly worded. The
+pre-scan expands ``a–b`` ranges the same way the main loop does
 before counting, so no duplicate is missed regardless of which branch the
 value comes from.
 
@@ -311,10 +311,10 @@ class LinkTypeGeneratorValueAwareTests(unittest.TestCase):
     def test_non_duplicated_legacy_wording_does_not_reorder(self) -> None:
         """A row cannot be sunk unless another row actually shares its value.
 
-        Fails against the value-blind, word-only predicate on ``main``: that
-        predicate sinks ``FOO_LEGACY_WORDED`` purely because its notes
-        contain "legacy", swapping it after ``BAR_PLAIN`` in the returned
-        list even though value 500 has no duplicate anywhere in this table.
+        Fails against a value-blind, word-only predicate, which sinks
+        ``FOO_LEGACY_WORDED`` purely because its notes contain "legacy",
+        swapping it after ``BAR_PLAIN`` in the returned list even though
+        value 500 has no duplicate anywhere in this table.
         The value-aware predicate leaves both rows in table order, because
         neither of their values is duplicated.
         """
@@ -343,7 +343,7 @@ class LinkTypeGeneratorValueAwareTests(unittest.TestCase):
         is earned here rather than borrowed from a sibling class. A predicate
         that regressed to counting only a positional prefix (e.g. "has this
         value already been appended to ``enum``") would still pass a
-        single-order test like the old one, because that predicate is only
+        single-order test, because that predicate is only
         wrong for the *first* occurrence of a value it has not seen yet --
         exactly what running the reversed order below would catch.
         """
@@ -397,11 +397,11 @@ An ordinary, unrelated link type.
 class LinkTypeGeneratorRangeSinkIsolationTests(unittest.TestCase):
     """Item 2 of GitHub issue #852: a range row must never sink its whole expansion.
 
-    The ``ValueError`` branch that expands a ``USER0``-style range used to
-    reuse the same per-row ``sink`` the single-value branch computed, so one
-    range row whose notes mentioned "legacy" would have sunk every expanded
+    Guards against the ``ValueError`` branch that expands a ``USER0``-style
+    range reusing the per-row ``sink`` the single-value branch computes, which
+    makes one range row whose notes mention "legacy" sink every expanded
     member at once. :meth:`~pcapkit.vendor.reg.linktype.LinkType.process`
-    now always appends range-expanded members straight into ``enum``,
+    always appends range-expanded members straight into ``enum``,
     unconditionally, and this pins that deliberately.
     """
 
@@ -474,7 +474,7 @@ class LinkTypeGeneratorCrossRangeDuplicateTests(unittest.TestCase):
     ``enum`` instead of ``legacy``, ahead of the range it duplicates, making
     the deprecated ``OLDUSER`` canonical for value 900 instead of ``USER0``.
     That is exactly the failure mode #844 and #852 both exist to close,
-    reopened by narrowing the predicate. :meth:`process`'s pre-scan now
+    reopened by narrowing the predicate. :meth:`process`'s pre-scan
     expands ``a–b`` ranges the same way the main loop does before counting,
     so this duplicate is caught regardless of which branch either occurrence
     comes from.
@@ -505,20 +505,18 @@ class LinkTypeGeneratorCrossRangeDuplicateTests(unittest.TestCase):
         )
 
     def test_malformed_en_dash_range_still_raises_loudly(self) -> None:
-        """A malformed registry row must still fail loudly -- via the pre-existing main loop.
+        """A malformed registry row must still fail loudly -- via the main loop.
 
         A number column with more than one en dash (``900–903–905``) cannot
         ``start, stop = map(int, ...)`` -- too many values to unpack. The
         pre-scan's local ``_expand`` swallows exactly that ``ValueError`` and
         contributes no counted values for the row, quietly -- but that is
         *not* what makes this test pass. This is a regression guard on the
-        main loop's own, pre-existing ``start, stop = map(int,
-        temp.split('–'))``, which hits the identical unpack error a few
-        lines later and still raises, uncaught, out of :meth:`process`.
-        That statement predates #852 entirely, so this assertion passes
-        identically on ``main``, on #854's first commit (before
-        ``_expand`` existed), and here: nothing about the pre-scan is what
-        is being pinned.
+        main loop's own ``start, stop = map(int, temp.split('–'))``, which
+        hits the identical unpack error a few lines later and still raises,
+        uncaught, out of :meth:`process`. That statement is independent of
+        #852's pre-scan, so this assertion holds with or without ``_expand``:
+        nothing about the pre-scan is what is being pinned.
         """
         import bs4
 
@@ -589,7 +587,7 @@ class LinkTypeGeneratorSignedOrUnderscoredValueTests(unittest.TestCase):
     Not reachable against tcpdump's table as vendored here: every committed
     member matches a plain unsigned decimal, so this is a latent
     hole rather than a live defect, exactly as #844 and #852's original
-    word-only rule was. :meth:`process`'s ``_expand`` now tries ``int(temp)``
+    word-only rule was. :meth:`process`'s ``_expand`` tries ``int(temp)``
     directly, before the en-dash range check, so it recognises the same
     values the main loop does.
     """

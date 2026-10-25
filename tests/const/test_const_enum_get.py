@@ -80,67 +80,59 @@ __tier__ = 'ALL'
 #: An integer no wire field in the library is wide enough to carry, so every
 #: registry that bounds its own domain rejects it. Deliberately far outside the
 #: ``0..0xFF`` range the Mobility Header flag registries check, because a value
-#: *inside* an unbounded-but-undefined span reaches a separate, pre-existing
-#: recursion in their ``_missing_`` (``return cls(value)``) that is not what
-#: this module is about.
+#: *inside* that range is resolved by their ``_missing_`` (through
+#: ``super()._missing_``) rather than rejected, so it would exercise flag
+#: composition rather than the ``default`` fallback this module is about.
 UNRESOLVABLE = 1 << 70
 
 #: Enums whose integer path resolves *anything* rather than raising, so there is
 #: no fallback for ``default`` to supply.
 #:
-#: :class:`~pcapkit.const.tcp.flags.Flags` was a third entry until GitHub issue
-#: #647. It resolved anything for a different reason -- it defined no
-#: ``_missing_`` at all, so ``aenum`` composed a pseudo-member for any integer,
-#: and ``Flags(-1)`` read back as every TCP header flag set at once. It now
-#: bounds its own domain like the rest of the tree and so belongs in the sweep
-#: below rather than in this set.
+#: :class:`~pcapkit.const.tcp.flags.Flags` is not in this set: it bounds its
+#: own domain like the rest of the tree (GitHub issue #647), and so belongs in
+#: the sweep below. Without that guard it resolves anything for a different
+#: reason -- it defines no ``_missing_`` at all, so ``aenum`` composes a
+#: pseudo-member for any integer, and ``Flags(-1)`` reads back as every TCP
+#: header flag set at once.
 #:
-#: Both used to auto-*extend* their unassigned span across the full integer
-#: range, via :func:`~aenum.extend_enum`. The #775/#847 mint-criterion
-#: ruling converted :class:`~pcapkit.const.ipv4.
-#: protection_authority.ProtectionAuthority`'s bare ``Unassigned`` label, so it
-#: now resolves via :meth:`~pcapkit.corekit.enum.EnumRegistry.
-#: _unregistered_member` instead -- it still resolves anything (the property
-#: that excuses it from the sweep below), it just no longer extends.
-#: :class:`~pcapkit.const.mh.cga_type.CGAType` is untouched: its ``Tag_<hex>``
-#: mint is not an IANA-style range at all, so the ruling never applied.
+#: Both resolve their unassigned span across the full integer range.
+#: :class:`~pcapkit.const.ipv4.protection_authority.ProtectionAuthority`'s
+#: bare ``Unassigned`` label resolves via
+#: :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`, per the
+#: #775/#847 mint-criterion ruling -- it resolves anything (the property that
+#: excuses it from the sweep below), it just does not extend.
+#: :class:`~pcapkit.const.mh.cga_type.CGAType` auto-*extends* via
+#: :func:`~aenum.extend_enum`: its ``Tag_<hex>`` mint is not an IANA-style
+#: range at all, so the ruling does not apply.
 EXPECTED_TO_RESOLVE_ANYTHING = frozenset({
     'pcapkit.const.ipv4.protection_authority.ProtectionAuthority',
     'pcapkit.const.mh.cga_type.CGAType',
 })
 
 #: Enums carrying no ``get(key, default)``, so there is no ``default`` to drop.
-#: Empty since GitHub issue #930: its two occupants,
+#: Empty: every enumeration the sweep walks takes the base ``get(key,
+#: default)`` through :class:`~pcapkit.corekit.enum.EnumLookup`, including
 #: :class:`~pcapkit.const.ftp.command.CommandType` and
-#: :class:`~pcapkit.const.ftp.command.ConformanceRequirement`, were the last
-#: of #877's non-registry enumerations still outside
-#: :class:`~pcapkit.corekit.enum.EnumLookup` -- held here rather than moved by
-#: GitHub issue #877's own PR because :mod:`pcapkit.const.ftp.command` was
-#: still held by #913 at the time. Re-parenting them gave each the base
-#: ``get(key, default)`` for the first time, so both moved into the main
-#: sweep below instead, the same way #877's own re-parenting already moved
-#: :class:`~pcapkit.const.reg.apptype.TransportProtocol` out of this set.
-#:
-#: :class:`~pcapkit.const.ftp.return_code.GroupingInformation` and
-#: :class:`~pcapkit.const.ftp.return_code.ResponseKind` were here too until
-#: GitHub issue #860 step 2 brought them onto
-#: :class:`~pcapkit.corekit.enum.EnumRegistry` -- they inherit the base
-#: ``get(key, default)`` now, so they moved into the main sweep below instead.
+#: :class:`~pcapkit.const.ftp.command.ConformanceRequirement` (GitHub issue
+#: #930), :class:`~pcapkit.const.reg.apptype.TransportProtocol` (GitHub issue
+#: #877), and :class:`~pcapkit.const.ftp.return_code.GroupingInformation` and
+#: :class:`~pcapkit.const.ftp.return_code.ResponseKind`, which are on
+#: :class:`~pcapkit.corekit.enum.EnumRegistry` (GitHub issue #860 step 2).
 EXPECTED_WITHOUT_AN_INTEGER_DEFAULT = frozenset()  # type: frozenset[str]
 
 #: :class:`~pcapkit.const.pcapng.filter_type.FilterType` declares *no* static
-#: members at all -- every one of its 256 codes reaches ``_missing_``. Before
-#: the #775/#847 ruling that was masked by an accident: importing
-#: :mod:`pcapkit.protocols.misc.pcapng` evaluates ``Enum_FilterType(0)`` as a
-#: default argument at class-definition time, which used to permanently mint
-#: ``'Unassigned_0'`` as a side effect of merely importing the library --
-#: leaving exactly one member for this sweep's ``next(iter(obj))`` fallback to
-#: find. The ruling correctly converted FilterType's bare ``Unassigned`` label,
-#: so that same import no longer mints anything, and the registry is now
-#: genuinely empty: :func:`next` on it raises :exc:`StopIteration`, with no
-#: value at all that ``obj(fallback)`` would resolve to a *cached* identity
-#: for. Excused from the main sweep for that reason and covered by its own
-#: test instead, :meth:`ConstEnumGetDefaultTests.
+#: members at all -- every one of its 256 codes reaches ``_missing_``.
+#: Importing :mod:`pcapkit.protocols.misc.pcapng` evaluates
+#: ``Enum_FilterType(0)`` as a default argument at class-definition time, but
+#: FilterType's bare ``Unassigned`` label resolves to an unregistered member
+#: (the #775/#847 ruling), so that import mints nothing -- a minting label
+#: would permanently mint ``'Unassigned_0'`` as a side effect of merely
+#: importing the library, leaving exactly one member for this sweep's
+#: ``next(iter(obj))`` fallback to find. The registry is genuinely empty:
+#: :func:`next` on it raises :exc:`StopIteration`, with no value at all that
+#: ``obj(fallback)`` would resolve to a *cached* identity for. Excused from the
+#: main sweep for that reason and covered by its own test instead,
+#: :meth:`ConstEnumGetDefaultTests.
 #: test_filter_type_default_never_resolves_but_key_path_still_uses_an_uncached_member`.
 EXPECTED_WITHOUT_A_CACHEABLE_FALLBACK = frozenset({
     'pcapkit.const.pcapng.filter_type.FilterType',
@@ -196,8 +188,8 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
         # permanently registers a junk member on a module-global class. Restore
         # the region to what it held before this class purged it, so those
         # polluted class objects are unreachable rather than merely dropped from
-        # :data:`sys.modules` -- purging again here (as this used to do, GitHub
-        # issue #720) does not achieve that: it only forces whoever imports
+        # :data:`sys.modules` -- purging again here (GitHub issue #720) does
+        # not achieve that: it only forces whoever imports
         # ``pcapkit`` next to rebuild it from source, and until they do, the
         # region sits empty for them exactly as it does for this class's own
         # first test, which is the leak #720 reports. Restoring is exact and
@@ -211,24 +203,24 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
         """#584's own repro, on the enum it was reported against."""
         from pcapkit.const.arp.hardware import Hardware
 
-        # Before the fix this raised ValueError('99999 is not a valid Hardware'),
-        # dropping the caller's default entirely. Both ``0`` (``Reserved_0``)
-        # and ``1`` (``Ethernet``) are genuinely registered members, so #864
-        # leaves this half of the repro untouched: a registered default still
+        # Without the fix this raises ValueError('99999 is not a valid
+        # Hardware'), dropping the caller's default entirely. Both ``0``
+        # (``Reserved_0``) and ``1`` (``Ethernet``) are genuinely registered
+        # members, so under #864's restriction too a registered default
         # resolves, exactly as #584 asked for.
         self.assertIs(Hardware.get(99999, 0), Hardware(0))
         self.assertIs(Hardware.get(99999, 1), Hardware.Ethernet)
 
-        # GitHub issue #864 changes what an *unresolvable* default does, though:
-        # #584 passed a ``str`` where the signature says ``int``, and ``'X'`` is
-        # not a registered value either way -- before #864 that failed with
-        # ``cls('X')``'s own error, naming ``'X'``; #864's ruling (only
-        # ``register`` can mint, and ``get`` may mint only where the lookup falls
-        # through to the ranges ``_missing_`` mints) replaces ``cls(default)``
-        # with a plain ``_value2member_map_`` lookup for exactly this reason, so
-        # an unresolvable default no longer gets an attempt of its own to fail
-        # from -- it now falls through to the *original* key lookup's own error
-        # instead, same as if no default had been supplied at all.
+        # An *unresolvable* default is a different matter: #584 passed a
+        # ``str`` where the signature says ``int``, and ``'X'`` is not a
+        # registered value either way. GitHub issue #864's ruling (only
+        # ``register`` can mint, and ``get`` may mint only where the lookup
+        # falls through to the ranges ``_missing_`` mints) consults ``default``
+        # through a plain ``_value2member_map_`` lookup rather than
+        # ``cls(default)``, so an unresolvable default gets no attempt of its
+        # own to fail from (which would name ``'X'``) -- it falls through to
+        # the *original* key lookup's own error instead, same as if no default
+        # had been supplied at all.
         with self.assertRaises(ValueError) as caught:
             Hardware.get(99999, 'X')
         self.assertIn('99999', str(caught.exception))
@@ -236,18 +228,18 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
 
         # A resolvable key is untouched.
         self.assertIs(Hardware.get(1), Hardware.Ethernet)
-        # 40 falls in Hardware's unassigned 39-255 range: since #775 tier 1,
-        # that no longer mints a permanent member, so each lookup returns its
-        # own unregistered pseudo-member -- equal, but no longer the same
-        # object, which is why this is assertEqual rather than assertIs.
+        # 40 falls in Hardware's unassigned 39-255 range, which mints no
+        # permanent member (#775 tier 1), so each lookup returns its own
+        # unregistered pseudo-member -- equal, but not the same object, which
+        # is why this is assertEqual rather than assertIs.
         self.assertEqual(Hardware.get(40), Hardware(40))
         self.assertIs(Hardware.get('Ethernet'), Hardware.Ethernet)
 
     def test_omitting_the_default_still_raises_for_the_original_key(self) -> None:
-        """GitHub issue #857: ``-1`` used to be compared with ``==`` against
-        :data:`~pcapkit.corekit.sentinels.NO_DEFAULT`, so a caller-supplied ``-1``
-        was silently read as *no default was supplied*.
-        :data:`~pcapkit.corekit.sentinels.NO_DEFAULT` is now an exported instance
+        """GitHub issue #857: guards against ``-1`` being compared with ``==``
+        against :data:`~pcapkit.corekit.sentinels.NO_DEFAULT`, which silently
+        reads a caller-supplied ``-1`` as *no default was supplied*.
+        :data:`~pcapkit.corekit.sentinels.NO_DEFAULT` is an exported instance
         of the dedicated :class:`~pcapkit.corekit.sentinels.NoDefaultType`,
         compared with ``is`` rather than ``==`` -- so a caller-supplied
         ``-1`` is never confused with the sentinel. That fact is pinned
@@ -255,26 +247,18 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
         :class:`~tests.const.test_const_registry_protocol.NoDefaultSentinelTests
         .test_no_default_is_not_equal_to_any_plausible_caller_value`.
 
-        Before GitHub issue #864, that distinction was *also* observable
-        through ``get()`` itself: a supplied-but-unresolvable ``-1`` failed
-        with its own name (``cls(-1)`` raising directly), differently from the
-        omitted case's original-key error. #864's ruling (only ``register`` can
-        mint, and ``get`` may mint only where the lookup falls through to the
-        ranges ``_missing_`` mints) removes that particular observation for an
-        *unregistered* default specifically: ``default`` no longer reaches
+        Through ``get()`` itself the distinction is not observable for an
+        *unregistered* default: GitHub issue #864's ruling (only ``register``
+        can mint, and ``get`` may mint only where the lookup falls through to
+        the ranges ``_missing_`` mints) keeps ``default`` from reaching
         ``cls(default)`` at all, and ``-1`` is not a registered value on either
-        registry here (both domains start at ``0``), so supplying it now
-        converges on exactly the *same* original-key error as omitting it
-        outright, rather than a distinguishable one of its own. The test's own
-        title is, if anything, more true after #864 than before: *omitting* the
-        default raises for the original key, and now so does supplying an
-        unregistered one -- pinned below for both.
+        registry here (both domains start at ``0``), so supplying it converges
+        on exactly the *same* original-key error as omitting it outright --
+        pinned below for both.
 
-        The genuinely-consulted half of #857's claim is repinned with a
+        The genuinely-consulted half of #857's claim is pinned with a
         *registered* default instead (``0``, ``Reserved_0`` on both
-        registries), which still resolves rather than raising -- the
-        observable proof #864 leaves available once ``-1`` no longer
-        provides it.
+        registries), which resolves rather than raising.
         """
         from pcapkit.const.arp.hardware import Hardware
         from pcapkit.const.arp.operation import Operation
@@ -285,17 +269,16 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
                     enum.get(99999)
                 self.assertIn('99999', str(omitted.exception))
 
-                # Since #864: an unregistered default (neither registry here
-                # has a member at ``-1``) converges on the *same*
-                # original-key error as omission, rather than a distinct one
-                # naming ``-1``.
+                # An unregistered default (neither registry here has a member
+                # at ``-1``) converges on the *same* original-key error as
+                # omission (#864), rather than a distinct one naming ``-1``.
                 with self.assertRaises(ValueError) as supplied:
                     enum.get(99999, -1)
                 self.assertIn('99999', str(supplied.exception))
                 self.assertNotIn('-1', str(supplied.exception))
 
-                # A *registered* default, by contrast, is still genuinely
-                # consulted rather than raising at all.
+                # A *registered* default, by contrast, is genuinely consulted
+                # rather than raising at all.
                 self.assertIs(enum.get(99999, 0), enum(0))
 
     def test_the_two_unverified_enums_from_the_issue(self) -> None:
@@ -309,10 +292,10 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
     def test_the_sweep_size_is_pinned(self) -> None:
         # If this drifts, a const enum was added, removed or renamed, and the
         # exception sets below need a fresh look rather than a silent pass.
-        # 118 became 120 with GitHub issue #880's ngap.ProcedureCode and
-        # ngap.ProtocolIE, moved onto EnumRegistry from hand-rolled IntEnum
-        # classes in pcapkit.protocols.application.ngap; neither needs an
-        # exception-set entry, since both take the base's own get(key, default).
+        # GitHub issue #880's ngap.ProcedureCode and ngap.ProtocolIE are on
+        # EnumRegistry rather than hand-rolled IntEnum classes in
+        # pcapkit.protocols.application.ngap; neither needs an exception-set
+        # entry, since both take the base's own get(key, default).
         names = {_qualname(obj) for obj in self.enums}
         self.assertEqual(len(self.enums), 120)
         for expected in (EXPECTED_TO_RESOLVE_ANYTHING, EXPECTED_WITHOUT_AN_INTEGER_DEFAULT,
@@ -350,28 +333,10 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
                 fallback = next(iter(obj)).value
                 self.assertIs(obj.get(UNRESOLVABLE, fallback), obj(fallback))
                 covered += 1
-        # 111 from GitHub issue #647, which gave
-        # :class:`~pcapkit.const.tcp.flags.Flags` a range guard and moved it
-        # out of ``EXPECTED_TO_RESOLVE_ANYTHING`` and into this sweep; minus 1
-        # for ``FilterType``, which #775/#847's ruling moved the other way --
-        # it used to be counted here only because an import-time side effect
-        # (see ``EXPECTED_WITHOUT_A_CACHEABLE_FALLBACK``) happened to leave it
-        # one real member to use as ``fallback``, and the ruling removed that
-        # side effect along with the mint it came from; plus 2 for GitHub
-        # issue #860 step 2, which gave ``GroupingInformation`` and
-        # ``ResponseKind`` the base ``get(key, default)`` they never had
-        # before, moving them out of ``EXPECTED_WITHOUT_AN_INTEGER_DEFAULT``
-        # and into this sweep; plus 2 for GitHub issue #880's
-        # ngap.ProcedureCode and ngap.ProtocolIE, which take the base
-        # ``get(key, default)`` from the moment they exist under
-        # pcapkit.const at all; plus 1 for GitHub issue #877's re-parenting of
-        # ``TransportProtocol`` onto ``EnumLookup``, which gave its own ``get``
-        # override a forwarding ``default`` parameter and moved it out of
-        # ``EXPECTED_WITHOUT_AN_INTEGER_DEFAULT`` the same way; plus 2 for
-        # GitHub issue #930's re-parenting of ``CommandType`` and
-        # ``ConformanceRequirement`` onto ``EnumLookup``, which gave each the
-        # base ``get(key, default)`` for the first time and emptied
-        # ``EXPECTED_WITHOUT_AN_INTEGER_DEFAULT`` entirely.
+        # The sweep size ``test_the_sweep_size_is_pinned`` pins, less every
+        # registry excused above: ``EXPECTED_TO_RESOLVE_ANYTHING`` and
+        # ``EXPECTED_WITHOUT_A_CACHEABLE_FALLBACK``, with
+        # ``EXPECTED_WITHOUT_AN_INTEGER_DEFAULT`` empty.
         self.assertEqual(covered, 117)
 
     def test_the_always_resolving_registries_have_nothing_to_fall_back_to(self) -> None:
@@ -382,18 +347,18 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
         than merely listed, so ``EXPECTED_TO_RESOLVE_ANYTHING`` cannot quietly
         grow to hide a registry that does raise.
 
-        Probing :class:`~pcapkit.const.mh.cga_type.CGAType` still *mutates*
-        the registry: the call permanently registers a member on a
-        module-global class, because its mint is untouched by the
-        #775/#847 ruling. That is done deliberately here, and
-        ``setUpClass`` registers a class cleanup that purges :mod:`pcapkit`
-        afterwards so the pollution cannot reach another module.
+        Probing :class:`~pcapkit.const.mh.cga_type.CGAType` *mutates* the
+        registry: the call permanently registers a member on a module-global
+        class, because the #775/#847 ruling does not cover its mint. That is
+        done deliberately here, and ``setUpClass`` registers a class cleanup
+        that purges :mod:`pcapkit` afterwards so the pollution cannot reach
+        another module.
         :class:`~pcapkit.const.ipv4.protection_authority.ProtectionAuthority`
-        no longer mutates anything -- its bare ``Unassigned`` converted, so it
-        resolves through a throwaway pseudo-member instead -- which is why the
-        identity check below only applies to ``CGAType``.
+        mutates nothing -- its bare ``Unassigned`` resolves through a throwaway
+        pseudo-member -- which is why the identity check below only applies to
+        ``CGAType``.
 
-        Measured: ``CGAType`` still grows 7 members to 8; ``ProtectionAuthority``
+        Measured: ``CGAType`` grows 7 members to 8; ``ProtectionAuthority``
         stays at 8.
         """
         for qualname in sorted(EXPECTED_TO_RESOLVE_ANYTHING):
@@ -405,11 +370,11 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
                 resolved = obj.get(UNRESOLVABLE)
                 self.assertIsNotNone(resolved)
                 self.assertEqual(int(resolved), UNRESOLVABLE)
-                # It resolves with or without a default, so the sentinel branch
-                # this change added is never reached for either of them.
+                # It resolves with or without a default, so the ``NO_DEFAULT``
+                # sentinel branch is never reached for either of them.
                 self.assertEqual(resolved, obj.get(UNRESOLVABLE, 0))
                 if qualname == 'pcapkit.const.mh.cga_type.CGAType':
-                    # Still mints permanently -- identity holds.
+                    # Mints permanently -- identity holds.
                     self.assertIs(resolved, obj.get(UNRESOLVABLE, 0))
                 else:
                     # Converted: a fresh, equal-but-not-identical pseudo-member
@@ -423,33 +388,27 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
 
         FilterType declares *no* static members at all, so its own
         ``_value2member_map_`` is permanently empty -- not ``0``, not
-        anything. Before GitHub issue #864, ``default=0`` still resolved
-        because ``get`` called ``cls(0)`` directly, reaching ``_missing_``
-        and its converted, uncached pseudo-member path. #864's ruling
-        closes exactly that path for ``default``: it is restricted to a
-        plain ``_value2member_map_`` lookup, and FilterType's is
-        permanently empty, so *no* default can ever resolve for this
-        registry any more -- the strongest instance of the ruling's own
-        accepted cost, since it is not one range that stops resolving but
-        the registry's entire domain.
+        anything. GitHub issue #864 restricts ``default`` to a plain
+        ``_value2member_map_`` lookup rather than ``cls(default)``, which
+        would reach ``_missing_`` and its converted, uncached pseudo-member
+        path, so *no* default can ever resolve for this registry -- the
+        strongest instance of the ruling's own accepted cost, since it is not
+        one range that does not resolve but the registry's entire domain.
 
-        ``key`` resolution is untouched by #864, though, and it is where
-        the uncached pseudo-member path this test was written to cover
-        still lives: ``FilterType.get(0)`` -- ``0`` as the *key*, no
-        default at all -- still reaches ``cls(0)`` -> ``_missing_``
-        directly, resolving to a fresh, equal-but-not-identical
-        pseudo-member every call, exactly as before. Restored here through
-        the path #864 does not touch, now that ``default`` can no longer
-        demonstrate it.
+        ``key`` resolution is outside #864's restriction, and it is where the
+        uncached pseudo-member path this test covers lives:
+        ``FilterType.get(0)`` -- ``0`` as the *key*, no default at all --
+        reaches ``cls(0)`` -> ``_missing_`` directly, resolving to a fresh,
+        equal-but-not-identical pseudo-member every call.
         """
         from pcapkit.const.pcapng.filter_type import FilterType
 
         with self.assertRaises(ValueError):
             FilterType.get(UNRESOLVABLE)
 
-        # No default can resolve on FilterType any more -- it has no
-        # registered members at all -- so even a value that is in-bounds
-        # (0x00-0xFF) for the *key* path, like ``0``, now falls through to
+        # No default can resolve on FilterType -- it has no registered
+        # members at all -- so even a value that is in-bounds (0x00-0xFF)
+        # for the *key* path, like ``0``, falls through to
         # the *original* ``UNRESOLVABLE`` error rather than resolving.
         before = len(FilterType.__members__)
         with self.assertRaises(ValueError) as caught:
@@ -457,12 +416,11 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
         self.assertIn(str(UNRESOLVABLE), str(caught.exception))
         self.assertEqual(len(FilterType.__members__), before)
 
-        # The uncached pseudo-member path itself is unaffected: as a *key*
-        # (no default supplied), ``0`` still resolves via ``cls(0)`` ->
-        # ``_missing_``, returning a fresh, equal-but-not-identical member
-        # every time rather than a cached identity -- the strength this
-        # test was written to add over the generic sweep, now demonstrated
-        # through ``key`` instead of ``default``.
+        # The uncached pseudo-member path itself: as a *key* (no default
+        # supplied), ``0`` resolves via ``cls(0)`` -> ``_missing_``,
+        # returning a fresh, equal-but-not-identical member every time rather
+        # than a cached identity -- the strength this test adds over the
+        # generic sweep.
         resolved = FilterType.get(0)
         self.assertEqual(int(resolved), 0)
         self.assertEqual(resolved, FilterType(0))
@@ -474,22 +432,18 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
     def test_the_vendor_template_still_emits_the_fix(self) -> None:
         """A regeneration must not undo the fix.
 
-        GitHub issue #775's tier 3 moved #584's fix off the per-file generated
-        ``get()`` entirely: it now lives permanently in
-        :meth:`~pcapkit.corekit.enum.EnumRegistry.get`, which every
-        default-template registry *inherits* rather than copies, so
-        there is no longer a ``get()`` block here for a regeneration to drop
-        the fix from -- the block this test used to extract and compare no
-        longer exists in either the template's output or the generated
-        module, in either case for the same reason.
+        #584's fix lives in :meth:`~pcapkit.corekit.enum.EnumRegistry.get`
+        (GitHub issue #775's tier 3), which every default-template registry
+        *inherits* rather than copies, so neither the template's output nor
+        the generated module has a per-file ``get()`` block for a
+        regeneration to drop the fix from.
 
-        What a regeneration could still undo is the inheritance itself, or
-        bring back a local copy of ``get``, ``register`` or
-        ``_unregistered_member`` that would shadow the base and silently
-        resurrect the pre-#775 two-contract bug -- this pins their absence,
-        and the presence of the mix-in, on both the freshly rendered template
-        (with synthetic content, as the pre-#775 version of this test did for
-        ``get()``) and the real, committed module.
+        What a regeneration could undo is the inheritance itself, or bring
+        back a local copy of ``get``, ``register`` or ``_unregistered_member``
+        that would shadow the base and silently resurrect #775's two-contract
+        bug -- this pins their absence, and the presence of the mix-in, on
+        both the freshly rendered template (with synthetic content) and the
+        real, committed module.
         """
         import pathlib
 

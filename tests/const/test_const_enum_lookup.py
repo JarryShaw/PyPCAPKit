@@ -32,7 +32,7 @@ was ``0`` -- no flags set -- and every composite of two defined bits. Overriding
 :class:`~pcapkit.const.tcp.flags.Flags`, which at the time defined no
 ``_missing_``, never had the defect -- and, as GitHub issue #647 then found, had
 no range guard either, so it resolved *any* integer and ``Flags(-1)`` read back
-as every TCP header flag set at once. It now carries the same guard ending in
+as every TCP header flag set at once. It carries the same guard ending in
 ``return super()._missing_(value)``, which is what keeps issue #623 fixed while
 issue #647 is too; :mod:`tests.const.test_const_enum_builtin_parity` is where
 that lands. :class:`~pcapkit.const.mh.binding_ack_flag.BindingACKFlag` and its
@@ -48,13 +48,12 @@ module is the first thing in the whole suite to import *every* submodule
 under :mod:`pcapkit.const`, including ones nothing else touches (e.g.
 :mod:`pcapkit.const.reg.apptype`). ``tests/cli/test_main.py`` stubs pieces of
 :mod:`pcapkit.utilities.compat` and :mod:`pcapkit.utilities.exceptions`
-straight into :data:`sys.modules` for its own isolation and, depending on
-suite order, those stubs used to still be sitting there when this module ran --
-purging first forces a clean re-import instead of tripping over them. That file
-has since been put under :func:`tests._support.isolate_modules` and puts them
-back itself (issue #688), so it is no longer the specific hazard; the purge stays
-because the convention is worth keeping and because the *next* stand-in written
-without the helpers would be.
+straight into :data:`sys.modules` for its own isolation; it runs under
+:func:`tests._support.isolate_modules` and puts them back itself (issue #688).
+The purge stays because the convention is worth keeping: a stand-in written
+without the helpers would leave its stubs sitting there when this module runs,
+depending on suite order, and purging first forces a clean re-import instead of
+tripping over them.
 
 """
 from __future__ import annotations
@@ -276,8 +275,8 @@ class ConstMissingClassmethodTests(unittest.TestCase):
         self.assertIsInstance(ResponseKind.__dict__['_missing_'], classmethod)
         self.assertIsInstance(GroupingInformation.__dict__['_missing_'], classmethod)
 
-        # And the actual symptom: every unknown value used to raise TypeError
-        # rather than extending the enum, not merely value 0.
+        # And the actual symptom: without the fix, every unknown value raises
+        # TypeError rather than extending the enum, not merely value 0.
         self.assertEqual(int(ResponseKind(7)), 7)
         self.assertEqual(int(ResponseKind(0)), 0)
         self.assertEqual(int(GroupingInformation(9)), 9)
@@ -290,8 +289,8 @@ class ConstFlagMissingRecursionTests(unittest.TestCase):
     enumerations ended in ``return cls(value)`` -- the constructor that had just
     failed to find the value -- so every in-range non-member re-entered
     ``_missing_`` unbounded and raised :exc:`RecursionError`. The tests below
-    assert the *resolved* value rather than catching the recursion, so an
-    unfixed tree fails on the error rather than on an assertion, and the four
+    assert the *resolved* value rather than catching the recursion, so without
+    the fix they fail on the error rather than on an assertion, and the four
     named registries are covered alongside the sweep.
 
     """
@@ -408,10 +407,11 @@ class ConstFlagMissingRecursionTests(unittest.TestCase):
         import pathlib
 
         # NOTE: the class statement names EnumRegistry and the first method after
-        # the enumeration block is a classmethod, because #775's tier 2 moved
-        # get/get_all/register/register_alias off these templates and onto
-        # pcapkit.corekit.enum.EnumRegistry -- the generated `@staticmethod get`
-        # that used to close the block is gone, leaving `_missing_` next.
+        # the enumeration block is a classmethod, because
+        # get/get_all/register/register_alias live on
+        # pcapkit.corekit.enum.EnumRegistry (#775's tier 2), not on these
+        # templates -- no generated `@staticmethod get` closes the block,
+        # leaving `_missing_` next.
         block = re.compile(
             r'class \w+\(EnumRegistry, IntFlag\):\n    """.*?"""\n\n    (.*?)\n\n    @classmethod',
             re.S)

@@ -5,7 +5,7 @@ GitHub issue #1538. :mod:`pcapkit.const.reg.apptype.tcp` and
 :mod:`~pcapkit.const.reg.apptype.udp` are generated from IANA's registry and
 hold about 49,700 lines of members between them; ``python -X importtime -c
 'import pcapkit'`` put them at 104 ms and 102 ms of a 700 ms import. Nothing on
-any import path needs them, so :mod:`pcapkit.const.reg.apptype` now imports them
+any import path needs them, so :mod:`pcapkit.const.reg.apptype` imports them
 from a :pep:`562` ``__getattr__`` and from
 :attr:`AppType.__registries__ <pcapkit.const.reg.apptype.apptype.AppType.__registries__>`
 the first time either is read.

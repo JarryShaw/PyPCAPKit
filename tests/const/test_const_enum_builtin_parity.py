@@ -25,15 +25,15 @@ something other than raise:
   :exc:`AttributeError` (``'int' object has no attribute 'upper'``) rather than
   :exc:`ValueError`.
 
-All six now carry a guard raising a bare :exc:`ValueError`, emitted by their
+All six carry a guard raising a bare :exc:`ValueError`, emitted by their
 templates under :mod:`pcapkit.vendor` rather than hand-written -- the tree is
 generated, so a fix that is not in the template is reverted by the next crawl.
 
 The one divergence from the built-in the owner named was the *mutable*
 registries': look a value up, miss, and then **register** it with
-:func:`~aenum.extend_enum` instead of raising. GitHub issues #775 and #860
-retired it, so a miss resolves to an equal, unregistered member instead, and
-only :class:`~pcapkit.const.mh.cga_type.CGAType` still extends on a miss.
+:func:`~aenum.extend_enum` instead of raising. Per GitHub issues #775 and #860,
+a miss resolves to an equal, unregistered member instead, and only
+:class:`~pcapkit.const.mh.cga_type.CGAType` extends on a miss.
 :class:`ConstEnumRegisterFallbackTests` pins that, and that no guard turns the
 lookup into an outright crash -- the failure mode GitHub issues #584 and #623
 are both about.
@@ -75,7 +75,7 @@ __tier__ = 'ALL'
 UNRESOLVABLE = 1 << 70
 
 #: The six registries GitHub issue #647 converged, as ``(module, class name,
-#: what the pre-fix lookup did with an invalid value)``. Named individually as
+#: what the lookup did with an invalid value without the fix)``. Named individually as
 #: well as swept, so a regression reports *which* registry came apart rather
 #: than only that the sweep shrank.
 ISSUE_647_OUTLIERS = (
@@ -99,13 +99,13 @@ ISSUE_647_OUTLIERS = (
 #: "Unassigned" spans that a capture can legitimately contain. They still
 #: reject a *negative* value, which no span covers.
 #:
-#: Only :class:`~pcapkit.const.mh.cga_type.CGAType` still ends in
+#: Only :class:`~pcapkit.const.mh.cga_type.CGAType` ends in
 #: :func:`~aenum.extend_enum` (its mint is not an IANA-style range at all, so
-#: the #775/#847 ruling never touched it).
+#: the #775/#847 ruling does not cover it).
 #: :class:`~pcapkit.const.ipv4.protection_authority.ProtectionAuthority`
-#: resolves the same way but no longer *registers* -- its bare ``Unassigned``
-#: converted, so it now goes through ``_unregistered_member`` and the
-#: resolution is not permanent; see
+#: resolves the same way but does not *register* -- its bare ``Unassigned``
+#: goes through ``_unregistered_member``, so the resolution is not
+#: permanent; see
 #: :meth:`ConstEnumRegisterFallbackTests.test_protection_authority_now_
 #: resolves_without_extending`. The name is kept for both because this set's
 #: own test only checks "does it raise", not "does it grow".
@@ -349,7 +349,7 @@ class ConstEnumBuiltinParityTests(unittest.TestCase):
         # The out-of-range probe below registers a junk member on the two
         # auto-extending registries, which are module-global classes. Restore
         # the region to what it held before this class purged it, rather than
-        # purging again (as this used to do, GitHub issue #720): a second purge
+        # purging again (GitHub issue #720): a second purge
         # cannot achieve "pollution cannot reach another module" -- it just
         # leaves the region empty for whoever runs next, exactly the gap #720
         # reports, whereas restoring rebinds it straight back to the pristine,
@@ -474,7 +474,7 @@ class ConstEnumBuiltinParityTests(unittest.TestCase):
                                                       f'{raised.__name__ if raised else None}')
 
     def test_the_registries_named_in_issue_647(self) -> None:
-        """The six outliers, by name, with what each used to do."""
+        """The six outliers, by name, with what each did without the fix."""
         for module_name, class_name, before in ISSUE_647_OUTLIERS:
             with self.subTest(enum=f'{module_name}.{class_name}', before=before):
                 obj = getattr(importlib.import_module(module_name), class_name)
@@ -513,12 +513,12 @@ class ConstEnumBuiltinParityTests(unittest.TestCase):
         # The six of issue #647 specifically, since the sweep above would still
         # pass if they had no ``_missing_`` at all -- which was the defect.
         #
-        # ``TransportProtocol`` is the one deliberate exception: GitHub issue
-        # #808 dropped its ``IntFlag`` base once nothing built a composite, and
-        # with it the custom ``_missing_`` this guard checks for -- a plain
-        # ``IntEnum``'s own default ``_missing_`` already rejects everything
-        # undeclared, so declaring one here would only reproduce the base
-        # class. Its ``-1`` rejection is still checked, just not through this
+        # ``TransportProtocol`` is the one deliberate exception: it has no
+        # ``IntFlag`` base (GitHub issue #808), and so no custom ``_missing_``
+        # for this guard to check -- a plain ``IntEnum``'s own default
+        # ``_missing_`` already rejects everything undeclared, so declaring one
+        # here would only reproduce the base class. Its ``-1`` rejection is
+        # checked, just not through this
         # guard shape; see ``test_the_registries_named_in_issue_647`` above,
         # which does not skip it.
         for module_name, class_name, _ in ISSUE_647_OUTLIERS:
@@ -573,7 +573,7 @@ class ConstFlagCompositeTests(unittest.TestCase):
                 self.assertEqual(Flags(composite), Flags[first] | Flags[second])
 
         # Every declared bit at once is the widest legitimate value, and it is
-        # what Flags(-1) used to return.
+        # what Flags(-1) returns without the #647 guard.
         every = 0
         for member in Flags:
             every |= int(member)
@@ -591,15 +591,13 @@ class ConstFlagCompositeTests(unittest.TestCase):
         self.assertEqual(int(Flags(1)), 1)
 
     def test_the_other_flag_registry_composes(self) -> None:
-        """GitHub issue #808 dropped ``TransportProtocol`` out of this group.
+        """``CommandType`` composes; ``TransportProtocol`` is not in this group.
 
-        This used to test ``TransportProtocol`` here too, as the third
-        registry in the codebase sharing Flag semantics alongside ``Flags``
-        (:class:`ConstFlagCompositeTests` above) and ``CommandType``. #808
-        dropped ``TransportProtocol``'s ``IntFlag`` base once nothing built a
-        composite, so it no longer belongs to this group; its own -- now
-        negative -- assertions live in
-        :meth:`test_transport_protocol_no_longer_composes` below instead.
+        ``TransportProtocol`` has no ``IntFlag`` base (GitHub issue #808), so it
+        does not share Flag semantics with ``Flags``
+        (:class:`ConstFlagCompositeTests` above) and ``CommandType``; its own,
+        negative, assertions live in
+        :meth:`test_transport_protocol_no_longer_composes` below.
         """
         from pcapkit.const.ftp.command import CommandType
 
@@ -609,16 +607,16 @@ class ConstFlagCompositeTests(unittest.TestCase):
             CommandType(0x08)
 
     def test_transport_protocol_no_longer_composes(self) -> None:
-        """GitHub issue #808: dropping the ``IntFlag`` base removed composing.
+        """GitHub issue #808: without an ``IntFlag`` base, nothing composes.
 
-        ``TransportProtocol(0x0F)`` used to equal the union of all four
-        declared bits, and ``TransportProtocol(0x10)`` -- one past the widest
-        legitimate combination -- was rejected by the range check
-        ``_missing_`` used to carry. Both mechanisms are gone now rather than
-        dormant: a plain :class:`~aenum.IntEnum` recognises only the five
-        declared values, so any other integer -- in range for the old bound
-        or not -- is rejected by the base class's own default ``_missing_``,
-        with no custom one declared here to widen it.
+        Guards against the ``IntFlag`` shape, under which, with power-of-two
+        values, ``TransportProtocol(0x0F)`` equals the union of the declared
+        bits and ``TransportProtocol(0x10)`` -- one past the widest legitimate
+        combination -- is rejected by a custom ``_missing_`` range check. A
+        plain :class:`~aenum.IntEnum` has neither mechanism: it recognises
+        only the declared values, so any other integer -- inside that range
+        check's bound or not -- is rejected by the base class's own default
+        ``_missing_``, with no custom one declared here to widen it.
         """
         from pcapkit.const.reg.apptype import TransportProtocol
 
@@ -653,19 +651,18 @@ class ConstFlagCompositeTests(unittest.TestCase):
 
 
 class ConstEnumRegisterFallbackTests(unittest.TestCase):
-    """A once-sanctioned divergence, now retired for these three specific
-    registries.
+    """A once-sanctioned divergence, retired for these specific registries.
 
     The owner's design intent, recorded on GitHub issue #647, was for the const
     enums to mirror the built-in enum's behaviour with one exception: a missing
     value falls back to registering it (the mutable enums). :class:`~pcapkit.const.http.method.Method`,
     :class:`~pcapkit.const.ftp.command.Command`,
     :class:`~pcapkit.const.ftp.command.FEATCode` and
-    :class:`~pcapkit.const.reg.apptype.apptype.AppType` (with its four
-    transport subclasses) were, until GitHub issue #860 step 2, the last
-    registries still living that divergence for an *unrecognised* value
-    (every numeric registry had already lost it under #775/#847's ruling).
-    GitHub issue #860 is where the owner retired it for all of them:
+    :class:`~pcapkit.const.reg.apptype.apptype.AppType` (with its
+    transport subclasses) are the registries GitHub issue #860 step 2
+    covers for an *unrecognised* value (every numeric registry is covered
+    by #775/#847's ruling). GitHub issue #860 is where the owner retired
+    the divergence for all of them:
     ``get()`` must not mint, because only ``register()`` may create a new
     registry entry, and for these registries only IANA-registered values
     are legitimate -- ``get()`` does not have enough information to build
@@ -679,11 +676,11 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
     :attr:`~pcapkit.const.ftp.command.Command.conf` and
     :class:`Method` needs :attr:`~pcapkit.const.http.method.Method.safe`/
     :attr:`~pcapkit.const.http.method.Method.idempotent`, neither of which a
-    bare unrecognised string carries, so the old fallback used to register a
+    bare unrecognised string carries, so a registering fallback builds a
     permanently hollowed-out member; :meth:`register` is the path that can
-    supply them properly now. What GitHub issues #584 and #623 guarded
+    supply them properly. What GitHub issues #584 and #623 guarded
     against -- a guard turning a registration into an outright crash rather
-    than a clean rejection -- is still checked below, just as "resolves to
+    than a clean rejection -- is checked below, as "resolves to
     an equal, unregistered pseudo-member" rather than "registers".
     """
 
@@ -732,22 +729,16 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
         for the four modules GitHub issue #647 touched, so a guard that had
         broken either would fail rather than merely go unmeasured.
 
-        This used to also probe the fallback with ``Flags.get(UNRESOLVABLE,
-        0)``, expecting it to resolve -- ``0`` is in-bounds for ``Flags``'s
-        own ``_missing_`` (``0 <= value <= 0xFFFF``), so before GitHub issue
-        #864 it reached ``cls(0)`` and resolved via the converted pseudo-member
-        path, uncaught. It is not a *registered* ``Flags`` member, though
-        (``Flags``'s smallest declared value is ``1 << 4``), so under #864's
-        restriction of ``default`` to a plain ``_value2member_map_`` lookup it
-        no longer resolves at all -- the same accepted cost as an unassigned
-        integer range, here on an :class:`~aenum.IntFlag` registry instead.
-        That is why the prior version of this assertion errored rather than
-        failed: the ``ValueError`` from the *key* (``UNRESOLVABLE``) now
-        propagates uncaught through a bare ``assertEqual`` that expected
-        success. Replaced with the same two-part check used elsewhere in this
-        batch: a *registered* default (``1 << 14``, ``SYN``) is still
-        genuinely consulted and resolves, while the unregistered ``0`` now
-        raises the same original-key error as no default at all.
+        The fallback is probed with a two-part check: a *registered* default
+        (``1 << 14``, ``SYN``) is genuinely consulted and resolves, while
+        ``Flags.get(UNRESOLVABLE, 0)`` raises the same original-key error as
+        no default at all. ``0`` is in-bounds for ``Flags``'s own
+        ``_missing_`` (``0 <= value <= 0xFFFF``), but it is not a *registered*
+        ``Flags`` member (``Flags``'s smallest declared value is ``1 << 4``),
+        and GitHub issue #864 restricts ``default`` to a plain
+        ``_value2member_map_`` lookup -- the same accepted cost as an
+        unassigned integer range, here on an :class:`~aenum.IntFlag` registry
+        instead.
         """
         from pcapkit.const.ftp.command import Command
         from pcapkit.const.http.method import Method
@@ -755,14 +746,14 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
         from pcapkit.const.tcp.flags import Flags
 
         # String paths, which bypass ``_missing_``. ``Method.get`` is probed
-        # with the exact registered casing rather than ``'get'`` -- GitHub
-        # issue #896 made its matching case-sensitive, so a lower-cased probe
-        # would no longer resolve to ``Method.GET`` at all; that behaviour
-        # change is pinned on its own in
+        # with the exact registered casing rather than ``'get'`` -- its
+        # matching is case-sensitive (GitHub issue #896), so a lower-cased
+        # probe would not resolve to ``Method.GET`` at all; that behaviour
+        # is pinned on its own in
         # :mod:`tests.const.test_const_enum_no_mint`
         # (``BespokeGetUnchangedTests.test_method_get_is_now_case_sensitive``)
         # rather than here, where the point is only that the string path
-        # still bypasses the guard this test is about.
+        # bypasses the guard this test is about.
         self.assertIs(Flags.get('SYN'), Flags.SYN)
         self.assertIs(Command.get('abor'), Command.ABOR)
         self.assertIs(Method.get('GET'), Method.GET)
@@ -774,11 +765,11 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
 
         # And the fallback the guard's ValueError is what triggers: GitHub issue
         # #584's ``get(key, default)``, which an EnumError would have walked past.
-        # A registered default is still genuinely consulted and resolves.
+        # A registered default is genuinely consulted and resolves.
         self.assertIs(Flags.get(UNRESOLVABLE, 1 << 14), Flags.SYN)
-        # Since #864: ``0`` is not a registered ``Flags`` member, so it no
-        # longer resolves either -- the original key's error propagates, the
-        # same as omitting the default outright.
+        # ``0`` is not a registered ``Flags`` member (GitHub issue #864), so
+        # it does not resolve either -- the original key's error propagates,
+        # the same as omitting the default outright.
         with self.assertRaises(ValueError) as caught:
             Flags.get(UNRESOLVABLE, 0)
         self.assertIn(str(UNRESOLVABLE), str(caught.exception))
@@ -786,17 +777,15 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
             Flags.get(UNRESOLVABLE)
 
     def test_the_auto_extending_integer_registries_still_extend(self) -> None:
-        """:class:`~pcapkit.const.mh.cga_type.CGAType` is the one true survivor
-        here: its ``Tag_<hex>`` mint is not an IANA-style range at all (a CGA
-        extension type tag is a collision-avoidance random 128-bit value), so
-        the #775/#847 mint-criterion ruling never touched it.
+        """:class:`~pcapkit.const.mh.cga_type.CGAType` is the one registry here
+        that extends: its ``Tag_<hex>`` mint is not an IANA-style range at all
+        (a CGA extension type tag is a collision-avoidance random 128-bit
+        value), so the #775/#847 mint-criterion ruling does not cover it.
 
-        :class:`~pcapkit.const.ipv4.protection_authority.ProtectionAuthority`
-        used to stand here beside it -- its own unbounded ``_missing_`` also
-        auto-extended for any non-negative integer -- but its label is a bare
-        ``Unassigned``, which the ruling converts; see
-        :meth:`test_protection_authority_now_resolves_without_extending` for
-        its replacement.
+        :class:`~pcapkit.const.ipv4.protection_authority.ProtectionAuthority`'s
+        own unbounded ``_missing_`` resolves any non-negative integer too, but
+        its label is a bare ``Unassigned``, which the ruling converts; see
+        :meth:`test_protection_authority_now_resolves_without_extending`.
         """
         from pcapkit.const.mh.cga_type import CGAType
 
@@ -812,12 +801,11 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
                     obj(-1)
 
     def test_protection_authority_now_resolves_without_extending(self) -> None:
-        """The other half of the split :meth:`test_the_auto_extending_integer_
-        registries_still_extend` used to cover as one case. Still resolves any
-        non-negative integer -- its ``_missing_`` bound is unchanged -- but
-        since #775/#847 that no longer mints a permanent member: a bare
-        ``Unassigned`` is a notation for the reader, not a name IANA assigned,
-        so two lookups of the same value are equal but no longer identical."""
+        """The counterpart of :meth:`test_the_auto_extending_integer_
+        registries_still_extend`. Resolves any non-negative integer, but does
+        not mint a permanent member (#775/#847): a bare ``Unassigned`` is a
+        notation for the reader, not a name IANA assigned, so two lookups of
+        the same value are equal but not identical."""
         from pcapkit.const.ipv4.protection_authority import ProtectionAuthority
 
         before = len(ProtectionAuthority.__members__)
@@ -835,14 +823,13 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
             ProtectionAuthority(-1)
 
     def test_apptype_no_longer_registers_an_unassigned_port(self) -> None:
-        """GitHub issue #584's machinery, which used to run through
-        ``_missing_``'s fallthrough and :meth:`AppType.get`'s own second
-        mint site -- both retired by GitHub issue #860 step 2 PR 2, on the
-        same ruling this class's docstring quotes. Renamed from
-        ``test_apptype_still_registers_an_unassigned_port``: 65000 is not in
-        any declared range, so this used to mint a permanent
-        ``PORT_65000_tcp`` member every process keeps forever; it now
-        resolves to an equal-but-not-identical unregistered one instead,
+        """GitHub issue #584's machinery, with no mint at ``_missing_``'s
+        fallthrough or at :meth:`AppType.get`'s own second mint site (GitHub
+        issue #860 step 2 PR 2, on the same ruling this class's docstring
+        quotes). 65000 is not in any declared range, so a minting lookup
+        would leave a permanent ``PORT_65000_tcp`` member every process keeps
+        forever; it resolves to an equal-but-not-identical unregistered one
+        instead,
         the same shape as :meth:`test_a_string_registry_no_longer_
         registers_an_unknown_name` above."""
         from pcapkit.const.reg.apptype import AppType, TransportProtocol
@@ -860,29 +847,22 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
     def test_transport_protocol_can_no_longer_be_extended_at_runtime(self) -> None:
         """Maintainer ruling on PR #836: extension refused, not renumbered.
 
-        This used to pin the *shape* of ``TransportProtocol.get``'s
-        registration. GitHub issue #808 dropped the ``IntFlag`` base -- see
-        :meth:`ConstFlagCompositeTests.test_transport_protocol_no_longer_composes`
-        for why composing stopped mattering -- but left the doubling itself
-        alone: stock ``ad4805f5f`` still mints at ``max_val * 2``, so
-        ``.get('quic')`` there returns ``16``, right after ``dccp``'s ``8``.
-        #836's own intermediate revision, not #808, is what switched an
-        unrecognised name to ``max_val + 1`` instead, minting ``9``. The
-        review ruling on PR #836 removes the registration from
-        ``TransportProtocol.get`` entirely, regardless of which scheme numbered
-        it: ``TransportProtocol`` is not to be extended at all. Unlike
+        The review ruling on PR #836 removes the registration from
+        ``TransportProtocol.get`` entirely, whichever scheme would number it --
+        a ``max_val * 2`` doubling (``.get('quic')`` minting ``16``, right
+        after a power-of-two ``dccp``'s ``8``) or a ``max_val + 1`` (minting
+        ``9``): ``TransportProtocol`` is not to be extended at all. Unlike
         :class:`~pcapkit.const.ipv4.protection_authority.ProtectionAuthority`
-        and :class:`~pcapkit.const.mh.cga_type.CGAType` below,
-        ``TransportProtocol`` was never one of :data:`EXPECTED_TO_REGISTER`
+        and :class:`~pcapkit.const.mh.cga_type.CGAType`,
+        ``TransportProtocol`` is not one of :data:`EXPECTED_TO_REGISTER`
         -- it reached the "look up, miss, then register" shape through its
         own hand-written ``get`` rather than through a generated
-        ``_missing_`` -- so pulling it back out of that shape is this
-        module's ruling changing which registries are mutable, not a
-        regression the sweep above would otherwise have to catch.
+        ``_missing_`` -- so refusing that registration is this module's
+        ruling changing which registries are mutable, not a regression the
+        sweep above would otherwise have to catch.
 
-        Regression check: this fails against #836's own prior head,
-        ``3567359e2``, which still registers ``'quic'`` at value 9 rather
-        than raising.
+        Without the ruling's refusal, ``TransportProtocol.get('quic')``
+        registers ``'quic'`` rather than raising.
         """
         from pcapkit.const.reg.apptype import TransportProtocol
 
@@ -891,9 +871,9 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
             TransportProtocol(9)
 
         before = len(TransportProtocol.__members__)
-        # KeyError, not ValueError, since GitHub issue #923 retired this
-        # override's ``KeyError`` -> ``ValueError`` conversion. What this test
-        # is about -- refused rather than registered -- is unchanged.
+        # KeyError, not ValueError: this override does no ``KeyError`` ->
+        # ``ValueError`` conversion (GitHub issue #923). What this test is
+        # about is refused rather than registered.
         with self.assertRaises(KeyError):
             TransportProtocol.get('quic')
         self.assertNotIn('quic', TransportProtocol.__members__)
@@ -906,8 +886,8 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
             TransportProtocol.get('quic2')
         self.assertEqual(len(TransportProtocol.__members__), before)
 
-        # An int naming no declared member is still rejected exactly as
-        # before -- this half of the guard is untouched by the ruling.
+        # An int naming no declared member is rejected -- the ruling concerns
+        # names, not this half of the guard.
         with self.assertRaises(ValueError):
             TransportProtocol(0x20)
 
@@ -919,10 +899,9 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
     committed tree passing the tests above is not evidence that the templates
     agree with it -- the next crawl would simply revert them. The four templates
     below each carry their own copy of the guard rather than inheriting the one
-    in :mod:`pcapkit.vendor.default`, which is why all four had to be edited and
-    why all four are checked -- each against its own guard text in
-    :data:`BESPOKE_TEMPLATES`, now that GitHub issue #798 finished moving all
-    four off ``%`` formatting (GitHub issue #792 did the first).
+    in :mod:`pcapkit.vendor.default`, which is why all four are checked --
+    each against its own guard text in :data:`BESPOKE_TEMPLATES`, none of
+    which uses ``%`` formatting (GitHub issues #792 and #798).
     """
 
     def setUp(self) -> None:
@@ -945,9 +924,9 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
         ``skipUnless`` can silently skip -- exactly how #792's regression
         reached seven CI legs -- so this checks the same guards through the
         committed :mod:`pcapkit.const` modules instead, which need no network
-        dependency to import. Asserts the *old* ``%``-style literal is gone
+        dependency to import. Asserts the ``%``-style literal is absent
         rather than merely that a guard exists, so a half-converted template
-        (old and new form both present) would still fail this.
+        (``%`` and f-string form both present) fails this.
         """
         old_guard = "raise ValueError('%r is not a valid %s' % (value, cls.__name__))"
         const_modules = (
@@ -966,21 +945,18 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
     def test_the_disable_drops_only_where_nothing_else_needs_percent_formatting(self) -> None:
         """GitHub issue #798's third part, finished by #804: the disable is earned.
 
-        All four bespoke const modules now carry no ``%``-formatted code, so
-        all four drop their module-level ``consider-using-f-string``.
+        All four bespoke const modules carry no ``%``-formatted code, so none
+        carries a module-level ``consider-using-f-string`` disable.
         ``pcapkit.const.tcp.flags`` and ``pcapkit.const.reg.apptype.apptype``
-        got there under PR #803, once their guards -- and, for the
-        latter, its three dunders and its span-handling tail -- were
-        converted. ``pcapkit.const.ftp.command`` and
-        ``pcapkit.const.http.method`` were *not* an oversight of #798, whose
-        stated scope named only the ``AppType`` template's dunders; they were
-        tracked as GitHub issue #804 and finished there, two ``__repr__``
-        methods in the former and one in the latter being the last ``%`` in
-        either file.
+        are covered by PR #803, which converted their guards -- and, for the
+        latter, its dunders and its span-handling tail.
+        ``pcapkit.const.ftp.command`` and ``pcapkit.const.http.method`` are
+        *not* an oversight of #798, whose stated scope named only the
+        ``AppType`` template's dunders; they are GitHub issue #804, whose
+        ``__repr__`` methods carried the last ``%`` in either file.
 
-        This previously asserted the opposite for that pair -- that their
-        disable was retained, and why -- so it fails against any tree where
-        #804's conversion is missing or half-applied, which is the point.
+        The test fails against any tree where #804's conversion is missing or
+        half-applied.
         Asserts the absence of ``%`` anywhere in the source rather than only
         of the disable, since a file that dropped the disable while keeping a
         ``%`` would otherwise be caught by ``make pylint`` in CI instead of
@@ -1025,10 +1001,10 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
 
         Covers the vendor modules as well as the const ones because the tree
         is generated: a conversion that is not in the template is reverted by
-        the next crawl. Fails against stock ``55e1b756e`` reporting four
-        sites -- two in :file:`pcapkit/const/ftp/command.py`, one in
-        :file:`pcapkit/const/http/method.py`, and one apiece in the two
-        generators' ``process`` methods.
+        the next crawl. Without #804's conversion it reports the ``%`` sites
+        in :file:`pcapkit/const/ftp/command.py`,
+        :file:`pcapkit/const/http/method.py` and the two generators'
+        ``process`` methods.
         """
         for vendor_name, _, const_name in ISSUE_804_PAIR:
             for module_name in (const_name, vendor_name):
@@ -1047,7 +1023,7 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
         :class:`str` and :data:`None`, and ``Command.desc`` is the one
         ``Optional[str]`` among them -- but GitHub issue #796's text claimed
         an equivalence in generated output that did not hold, so this derives
-        the old form's output for every member rather than assuming the two
+        the ``%`` form's output for every member rather than assuming the two
         forms agree.
         """
         from pcapkit.const.ftp.command import Command, FEATCode
@@ -1083,7 +1059,7 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
         """The two ``wrap_comment`` arguments, run rather than inspected.
 
         :meth:`test_no_percent_formatting_survives_in_the_issue_804_pair`
-        proves these two lines no longer use ``%`` in the *source*; this
+        proves these two lines use no ``%`` in the *source*; this
         proves the replacement produces the same text, which the
         render-and-diff below cannot reach because it supplies the
         enumeration block ready-made instead of crawling for it.
@@ -1097,7 +1073,7 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
         vendor_ftp = importlib.import_module('pcapkit.vendor.ftp.command')
         command = vendor_ftp.Command.__new__(vendor_ftp.Command)
         command.record = collections.Counter()
-        # GitHub issue #860: process() now returns (enum rows, distinct
+        # GitHub issue #860: process() returns (enum rows, distinct
         # per-command FEAT codes) rather than just the enum rows, since
         # FEATCode must declare the latter as real members instead of
         # minting them as a side effect of evaluating Command's own rows.
@@ -1105,8 +1081,8 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
             'h0,h1,h2,h3,h4,h5',
             'ABOR,base,Abort a transfer,s,m,[RFC959]',
         ])
-        # The old form, derived here rather than hardcoded, so this compares
-        # the two expressions rather than the new one against a guess.
+        # The ``%`` form, derived here rather than hardcoded, so this compares
+        # the two expressions rather than the f-string one against a guess.
         expected_ftp = command.wrap_comment('%s %s' % (  # pylint: disable=consider-using-f-string
             'Abort a transfer', '[:rfc:`959`]'))
         self.assertEqual(expected_ftp, "Abort a transfer [:rfc:`959`]")
@@ -1138,7 +1114,7 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
         # And the falsy-``rfcs`` branch, whose f-string form has to keep the
         # conditional inside the replacement field. ``wrap_comment`` drops the
         # trailing space ``'%s %s'`` leaves behind, so the expectation is
-        # derived from the old form rather than written as ``'GET '``.
+        # derived from the ``%`` form rather than written as ``'GET '``.
         emitted_norfc = method.process(['h0,h1,h2,h3', 'GET,yes,yes,'])
         expected_norfc = method.wrap_comment(re.sub(
             r'\r*\n', ' ', '%s %s' % ('GET', ''), flags=re.MULTILINE))  # pylint: disable=consider-using-f-string
@@ -1174,13 +1150,12 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
                     const_module.__file__  # type: ignore[arg-type]
                 ).read_text(encoding='utf-8')
 
-                # GitHub issue #860: both classes now mix in EnumRegistry,
-                # and both now close their enumeration block with a
+                # GitHub issue #860: both classes mix in EnumRegistry, and
+                # both close their enumeration block with a
                 # ``_unregistered_member`` classmethod (the override each
-                # needed for its own extra per-member attributes) rather
+                # needs for its own extra per-member attributes) rather
                 # than falling straight through to the ``get()`` override
-                # each still keeps -- a classmethod on both since #908 and
-                # #1824.
+                # each keeps -- a classmethod on both (#908, #1824).
                 block = re.compile(
                     rf'class {cls_name}\(EnumRegistry, StrEnum\):\n    """.*?\n\n    (#:.*?)'
                     r'\n\n    @classmethod', re.S)
@@ -1188,9 +1163,9 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
                 self.assertIsNotNone(enum_block, f'no enumeration block in {const_name}')
 
                 if cls_name == 'Command':
-                    # GitHub issue #860: Command's LINE gained a fifth
+                    # GitHub issue #860: Command's LINE carries a fifth
                     # positional argument, FEAT -- the per-command FEATCode
-                    # members FEATCode must now declare as real members
+                    # members FEATCode must declare as real members
                     # rather than mint as an import-time side effect (see
                     # BespokeOpenVocabularyUnmintConvertedTests). Read back
                     # out of the committed module the same way as ENUM.
@@ -1226,13 +1201,13 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
         enumeration block, which is read back out of the committed module.
 
         NOTE: the class statement names ``EnumRegistry`` and the first method
-        after the enumeration block is a ``classmethod``, because GitHub issue
-        #775's tier 2 found ``tcp/flags``' own exclusion rationale did not hold
-        -- see ``tests.const.test_const_registry_protocol`` -- and converted it
-        onto :class:`~pcapkit.corekit.enum.EnumRegistry` alongside the four
-        ``mh/*_flag`` templates. The generated ``@staticmethod get`` that used
-        to close the block is gone, leaving ``_missing_`` next, the same
-        rewrite ``test_const_enum_lookup.py`` made for those four.
+        after the enumeration block is a ``classmethod``, because ``tcp/flags``
+        is on :class:`~pcapkit.corekit.enum.EnumRegistry` alongside the four
+        ``mh/*_flag`` templates (GitHub issue #775's tier 2 found its own
+        exclusion rationale did not hold -- see
+        ``tests.const.test_const_registry_protocol``). No generated
+        ``@staticmethod get`` closes the block, leaving ``_missing_`` next, the
+        same shape ``test_const_enum_lookup.py`` expects for those four.
         """
         import pathlib
 
@@ -1263,10 +1238,10 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
     @unittest.skipUnless(importlib.util.find_spec('requests') is not None,
                          'pcapkit.vendor needs requests')
     def test_the_tcp_flags_checker_covers_the_value_domain_not_the_bit_offsets(self) -> None:
-        """The checker the template used to drop, and why it could not be kept.
+        """The template's checker, and why a bit-offset one could not be kept.
 
-        ``Flags.FLAG`` read ``4 <= value <= 15`` -- the *offsets* the IANA
-        registry indexes -- while the members it generates are ``1 << offset``.
+        A ``Flags.FLAG`` of ``4 <= value <= 15`` covers the *offsets* the IANA
+        registry indexes, while the members it generates are ``1 << offset``.
         The template never interpolated it, so it was never wrong in practice;
         interpolating it unchanged would have rejected every composite, every
         single member above bit 3, and ``Flags(0)``.
@@ -1308,8 +1283,8 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
         modules keep formatting their ``__str__`` and ``_missing_`` guard with
         ``%`` -- that is unrelated to GitHub issue #818, which is about
         ``__repr__`` specifically, and a whole-module check would never turn
-        green. Fails against stock ``75c340413`` reporting one line apiece in
-        the three const modules.
+        green. Without #818's conversion it reports one line apiece in the
+        three const modules.
 
         The vendor half is checked separately, by
         :meth:`test_no_percent_formatting_survives_in_the_issue_818_triples_vendor_repr_template`,
@@ -1333,8 +1308,8 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
         module sees an ordinary f-string and nothing to flag. This checks the
         template's source text directly instead, the same distinction GitHub
         issue #804's own docstring draws between "template text" and
-        "expression". Fails against stock ``75c340413``, whose three
-        templates still hold ``return "<%s...>" % (...)`` verbatim.
+        "expression". Without #818's conversion the templates hold
+        ``return "<%s...>" % (...)`` verbatim.
         """
         for vendor_name, _, _ in ISSUE_818_TRIPLE:
             with self.subTest(vendor=vendor_name):

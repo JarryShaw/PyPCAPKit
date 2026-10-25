@@ -8,10 +8,10 @@ member's own declared value. ``_value_`` was set correctly (``Method.GET.value
 == 'GET'``), but the :class:`str` the member itself *is* was not:
 ``str(Method.GET) == ''``, ``len(str(Method.GET)) == 0`` and, most visibly,
 ``Method.GET == 'GET'`` was :data:`False` for every one of the 40 declared
-members. True on ``main`` at ``60b85e3a4`` (measured), and true since the class
-was first written -- GitHub pull request #869 fixed the same inconsistency for an
-*unregistered* member's own str payload
-(:meth:`~pcapkit.const.http.method.Method._unregistered_member` now calls the
+members, as measured, and true since the class was first written -- GitHub
+pull request #869 fixed the same inconsistency for an *unregistered* member's
+own str payload
+(:meth:`~pcapkit.const.http.method.Method._unregistered_member` calls the
 base's :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`, which
 does pass the value along), which is what exposed this half: after #869,
 ``str(Method('frob')) == 'frob'`` while ``str(Method.GET) == ''`` -- a
@@ -25,18 +25,18 @@ both :mod:`pcapkit.const.http.method` (the generated module) and
 :mod:`pcapkit.vendor.http.method` (the generator template that produces it),
 since a fix only in the former is silently reverted by the next crawl.
 
-This is a **behaviour change to all 40 public members**: every equality
+The defect is visible on every public member: without the fix, every equality
 comparison of a :class:`~pcapkit.const.http.method.Method` member against its
-own wire string now succeeds where it used to fail silently (no exception --
-just an unexpected :data:`False`). Nothing under :mod:`pcapkit.protocols`
-compared a member this way before the fix (the one caller of
+own wire string fails silently (no exception -- just an unexpected
+:data:`False`). Nothing under :mod:`pcapkit.protocols` compares a member this
+way (the one caller of
 :meth:`~pcapkit.const.http.method.Method.get`,
 :meth:`pcapkit.protocols.application.httpv1.HTTP._read_start_line`, reached
 through :meth:`~pcapkit.protocols.application.httpv1.HTTP._read_http_header`
 and :meth:`~pcapkit.protocols.application.httpv1.HTTP.make`, only builds a
 member from the wire string, and
 :meth:`~pcapkit.protocols.application.httpv1.HTTP._make_start_line` reads
-``.value``; neither calls ``str()`` or ``==`` on the member itself), so the change is
+``.value``; neither calls ``str()`` or ``==`` on the member itself), so the fix is
 observable only to external callers and to this module's own dunders
 (``__repr__``, which reads ``_value_`` and was already correct).
 
@@ -76,8 +76,8 @@ class MethodStrPayload870RegressionTests(unittest.TestCase):
     def test_the_reported_case(self) -> None:
         """``Method.GET``, byte for byte, as the issue measured it.
 
-        Fails against ``main`` at ``60b85e3a4``: ``str(Method.GET)`` there is
-        ``''`` (``len`` 0) and ``Method.GET == 'GET'`` is :data:`False`.
+        Without the fix, ``str(Method.GET)`` is ``''`` (``len`` 0) and
+        ``Method.GET == 'GET'`` is :data:`False`.
         """
         from pcapkit.const.http.method import Method
 
@@ -102,9 +102,10 @@ class MethodStrPayload870RegressionTests(unittest.TestCase):
                 self.assertEqual(len(str(member)), len(member.value))
 
     def test_registered_and_unregistered_members_are_now_consistent(self) -> None:
-        """The inconsistency #870 reported: #869 fixed the unregistered half
-        only, so ``str(Method('frob')) == 'frob'`` while ``str(Method.GET) ==
-        ''`` on ``main`` at ``60b85e3a4``. Both now carry real content."""
+        """The inconsistency #870 reported: with #869's fix to the
+        unregistered half alone, ``str(Method('frob')) == 'frob'`` while
+        ``str(Method.GET) == ''``. With #870's fix to the registered half,
+        both carry real content."""
         from pcapkit.const.http.method import Method
 
         registered = Method.GET
