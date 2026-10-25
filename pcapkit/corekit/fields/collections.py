@@ -122,7 +122,7 @@ class ListField(FieldBase[List[_TL]], Generic[_TL]):
 
         """
         new_self = self.__copy__()
-        new_self._callback(self, packet)
+        new_self._callback(new_self, packet)
         if new_self._length_callback is not None:
             new_self._length = new_self._length_callback(packet)
             new_self._template = f'{new_self._length}s'
