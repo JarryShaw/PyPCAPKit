@@ -48,7 +48,8 @@ POSTERS = (
     (VERSIONS, 'detect', 'cron-python-versions: Python version update report', 'python-versions-report',
      'python-versions-report.md'),
 )
-#: Every job's own ``permissions:``, and the top-level block, as before #2030.
+#: Every job's own ``permissions:`` but ``discussion``'s, and the top-level block,
+#: so that only ``discussion`` may write discussions (#2030).
 PERMISSIONS = {
     CONDA: {None: {'contents': 'read'}, 'mode': {}, 'head': {'contents': 'read'},
             'conda-update': {'contents': 'write'}, 'conda-tag': {'contents': 'write'},

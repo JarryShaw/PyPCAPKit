@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
 """Pins the API page for :mod:`pcapkit.corekit.sentinels` existing and reachable.
 
-GitHub issue #934: what is now
-:file:`docs/source/contributing/conventions/sentinel-convention.rst` (GitHub
-issue #918 split it out of the single-page :file:`conventions.rst` that carried
-it at the time) cross-references :mod:`pcapkit.corekit.sentinels` repeatedly
-(the ``:mod:`` role), and none of those references used to resolve, because
-no page under :file:`docs/source/` documented that module -- confirmed by an
-explicit nitpicky ``sphinx-build`` before this page existed, and again after,
-to confirm the fix.
+GitHub issue #934:
+:file:`docs/source/contributing/conventions/sentinel-convention.rst`
+cross-references :mod:`pcapkit.corekit.sentinels` repeatedly (the ``:mod:``
+role), and those references resolve only because this page documents the
+module -- without it no page under :file:`docs/source/` does and none of them
+resolves, as an explicit nitpicky ``sphinx-build`` with and without the page
+confirmed.
 
 This does **not** re-test Sphinx's cross-reference resolution itself -- as
 :file:`tests/project/test_documentation_claims.py` explains at length, whether a
@@ -30,7 +29,7 @@ import unittest
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
-#: The page GitHub issue #934 added.
+#: The module's API page (GitHub issue #934).
 PAGE = ROOT / 'docs' / 'source' / 'pcapkit' / 'corekit' / 'sentinels.rst'
 
 #: The ``corekit`` API index, whose toctree has to list the page above.

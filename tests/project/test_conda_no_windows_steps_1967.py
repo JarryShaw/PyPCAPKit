@@ -1,24 +1,23 @@
 # -*- coding: utf-8 -*-
 """#1967: the conda jobs keep no step or ``case`` arm for a runner they have no leg on.
 
-``conda`` in :file:`.github/workflows/create-release.yml` and ``conda-dist`` in
-:file:`.github/workflows/cron-conda.yml` had no ``windows-latest`` leg from 2023
-until #2060, yet carried ``Install and Setup (Windows)``, ``Setup Conda Distribution
-(Windows)``, the ``matrix.os != 'windows-latest'`` guards on their twins, and a
-``windows-latest`` arm in each ``case "${{ matrix.os }}"``: code no run reached.
+This guards ``conda`` in :file:`.github/workflows/create-release.yml` and
+``conda-dist`` in :file:`.github/workflows/cron-conda.yml` against code no run
+reaches: in a job with no ``windows-latest`` leg, a Windows-only step such as
+``Install and Setup (Windows)``, a ``matrix.os != 'windows-latest'`` guard on its
+twin, or a ``windows-latest`` arm in a ``case "${{ matrix.os }}"``.
 
 * :class:`TestNoDeadRunnerCode` pins that no step's ``if:`` or
   ``continue-on-error`` names a runner label the job's matrix lacks, no ``case``
   arm maps one, :file:`util/release_conda.py`, which both jobs' steps run since
   #1967, maps no label that neither job has a leg on, and, with no Windows leg,
-  no step is Windows-only. So adding a
-  Windows leg back means adding its steps back deliberately, rather than
-  reviving ones nobody has run. #2060 did so for both jobs, whose Windows
-  steps are therefore live.
-* :class:`TestTheCheckSeesDeadCode` feeds :func:`dead` the jobs as they stood
-  before, rebuilt from the current ones, so the pin cannot pass by reading
-  nothing, and ``conda-dist`` without its Windows leg, whose steps must then read
-  as dead.
+  no step is Windows-only. So a Windows leg comes with its steps added
+  deliberately, rather than reviving ones nobody has run, as #2060 added both
+  jobs' Windows legs and steps.
+* :class:`TestTheCheckSeesDeadCode` feeds :func:`dead` the jobs with such dead
+  Windows code rebuilt into them from the current ones, so the pin cannot pass by
+  reading nothing, and ``conda-dist`` without its Windows leg, whose steps must
+  then read as dead.
 
 """
 
@@ -112,12 +111,12 @@ def without_windows(step: 'dict[str, Any]') -> 'dict[str, Any]':
 
 
 class TestTheCheckSeesDeadCode(unittest.TestCase):
-    """:func:`dead` reports each kind of dead code the jobs held before #1967."""
+    """:func:`dead` reports each kind of dead runner code: a step, a guard and a ``case`` arm."""
 
     def test_it_reports_a_windows_step_guard_and_arm(self) -> None:
         for name, job_id in JOBS:
             spec = copy.deepcopy(_workflows.job(name, job_id))
-            # #2060: conda-dist as it stood before its Windows leg came back.
+            # #2060: the job without its Windows leg.
             spec['strategy']['matrix']['os'] = [os for os in spec['strategy']['matrix']['os']
                                                 if not WINDOWS.search(os)]
             spec['steps'] = [without_windows(step) for step in spec['steps']

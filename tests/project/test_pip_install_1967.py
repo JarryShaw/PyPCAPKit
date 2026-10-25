@@ -6,9 +6,9 @@
   and the arguments and levels it refuses.
 * :class:`TestTheFormerShellAgrees` runs the shell the steps held before the
   script against the same stand-in and requires the same output, log and status;
-  for the steps that had no annotation, the same except for the annotation the
-  script writes on a failed install; and for an indented ``ERROR:`` line, the same
-  except for the reason the shell missed (#2041).
+  for the steps whose shell wrote no annotation, the same except for the
+  annotation the script writes for a failed install; and for an indented
+  ``ERROR:`` line, the same except for the reason the shell missed (#2041).
 * :class:`TestTheStepsRunTheScript` pins each covered step to the script, with
   its guards and environment, and every other ``pip install`` in
   ``unit-tests.yml`` to a listed step that keeps its shell.
@@ -364,8 +364,9 @@ class TestTheFormerShellAgrees(_Scratch):
                     self.assertEqual(new, old)
 
     def test_the_bare_steps_gain_the_annotation(self) -> None:
-        """Formerly pip's status, its two streams apart and no annotation; now its streams merged
-        into standard output and the log, and on a failure status 1 and the annotation."""
+        """The bare shell gives pip's status, its two streams apart and no annotation; the script
+        merges its streams into standard output and the log, and on a failure gives status 1 and
+        the annotation."""
         for output, status in OUTCOMES:
             with self.subTest(output=output, status=status):
                 (old, old_stderr), (new, new_stderr) = self.both(FORMER_BARE, 'error', install_output=output,

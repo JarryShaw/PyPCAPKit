@@ -83,10 +83,10 @@ class TestNoEOFDocumentedOnce(unittest.TestCase):
         it.
 
         Note:
-            The condition was a bare ``if self._flag_n:`` until #620, which is why
-            this checks for the ``continue`` under a test *mentioning* the flag
-            rather than for that exact line -- the flag now shares the condition
-            with a termination check, since on its own it never stopped. That also
+            The flag shares its condition with a termination check, since on its
+            own it never stopped (#620), which is why this checks for the
+            ``continue`` under a test *mentioning* the flag rather than for an
+            exact ``if self._flag_n:`` line. That also
             means this test does not distinguish #620's defect from its fix: it
             pins the documented *sense* of the flag, not that the loop ends.
             :file:`tests/foundation/test_extraction_no_eof.py` pins the ending.

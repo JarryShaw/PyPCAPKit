@@ -127,7 +127,7 @@ REF_CONTEXT = {'py:module': 'pcapkit.foundation.extraction', 'py:class': 'Extrac
 REGISTRY_MEMBERS = ('pcapkit.const.reg.apptype.tcp.TCP.dict',
                     'pcapkit.const.reg.apptype.udp.UDP.dict')
 
-#: A registry member's docstring whose first line napoleon used to split.
+#: A registry member's docstring whose first line napoleon, unaided, splits.
 H_323 = 'pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier.H_323'
 H_323_DOC = ['H.323 [http://standard.pictel.com/ftp/avc-site/0206 Bru/AVD-2198.zip][H.323',
              'over SCTP October 2002.]']
@@ -254,11 +254,11 @@ class BuiltinReferenceTests(unittest.TestCase):
                                             node['reftarget'], node, nodes.literal('', 'x'))
 
     def test_annotation_builtin_is_left_to_intersphinx(self) -> 'None':
-        """``dict`` in an annotation used to link to ``TCP.dict``."""
+        """``dict`` in an annotation does not link to ``TCP.dict``."""
         self.assertIsNone(self.resolve(self.annotation('dict')))
 
     def test_field_type_builtin_is_left_to_intersphinx(self) -> 'None':
-        """``dict`` in a ``:rtype:`` field used to link to ``TCP.dict`` too."""
+        """``dict`` in a ``:rtype:`` field does not link to ``TCP.dict`` either."""
         self.assertIsNone(self.resolve(self.field_type('dict')))
 
     def test_dotted_role_keeps_its_fuzzy_search(self) -> 'None':
@@ -305,7 +305,7 @@ class EnumMemberDocstringTests(unittest.TestCase):
         return lines
 
     def test_registry_member_keeps_its_docstring(self) -> 'None':
-        """The URL's colon used to turn ``H.323 [http`` into the member's type.
+        """Left to napoleon, the URL's colon turns ``H.323 [http`` into the member's type.
 
         Autodoc hands over the plain value -- ``13``, not the member -- so that is
         what is passed here.

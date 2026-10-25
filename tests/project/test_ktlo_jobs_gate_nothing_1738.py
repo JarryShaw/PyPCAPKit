@@ -1,18 +1,19 @@
 # -*- coding: utf-8 -*-
 """#1738: unit-tests.yml's KTLO legs are jobs of their own, which nothing gating waits on.
 
-The owner's option A. Until it, the KTLO legs were legs of ``test``,
-``integration`` and ``pypcap-parity``, kept from failing their job by step-level
-``continue-on-error`` alone. A failure no step can contain -- a lost runner, the
-job cap -- still failed the job, and so ``Required checks passed``, which reads one
-``needs.<job>.result`` per job, and skipped ``unittest-ordering``, which needs
-``test``. So they are ``test-ktlo``, ``integration-ktlo`` and ``pypcap-parity-ktlo``
-now, and this module pins the three things that make that hold:
+The owner's option A. As legs of ``test``, ``integration`` and
+``pypcap-parity``, kept from failing their job by step-level
+``continue-on-error`` alone, a KTLO failure no step can contain -- a lost runner,
+the job cap -- would still fail the job, and so ``Required checks passed``, which
+reads one ``needs.<job>.result`` per job, and skip ``unittest-ordering``, which
+needs ``test``. So they are ``test-ktlo``, ``integration-ktlo`` and
+``pypcap-parity-ktlo``, and this module pins the three things that make that hold:
 
 * no job that can fail the run -- one without job-level ``continue-on-error`` --
   ``needs:`` a KTLO job, directly or through another job;
 * none of those jobs holds a KTLO leg;
-* every check name is what it was: rulesets match names literally.
+* each leg's check name is its job's prefix and version, with ``(KTLO)`` on a
+  KTLO leg: rulesets match names literally.
 
 It also pins that each KTLO job runs its gating twin's steps, keeps the KTLO
 mechanics of #1672, and that :file:`util/ci_timing.py` tells the twins apart.
@@ -125,7 +126,7 @@ class TestNothingGatingWaitsOnKTLO(unittest.TestCase):
 
 
 class TestTheCheckNamesAreUnchanged(unittest.TestCase):
-    """Each leg is named as it was when both tiers shared a job."""
+    """Each leg is named ``<prefix> <version>``, with ``(KTLO)`` after it on a KTLO job."""
 
     def test_each_leg_keeps_its_name(self) -> None:
         for job_id, twin in TWINS.items():
@@ -146,7 +147,7 @@ class TestTheCheckNamesAreUnchanged(unittest.TestCase):
 
 
 class TestTheKTLOJobsKeepTheirMechanics(unittest.TestCase):
-    """#1633 and #1672 hold on each KTLO job as they did on the shared one."""
+    """#1633 and #1672 hold on each KTLO job."""
 
     def test_each_runs_its_twins_steps_on_ktlo_legs_only(self) -> None:
         for job_id, twin in TWINS.items():

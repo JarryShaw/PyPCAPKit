@@ -387,7 +387,7 @@ class BumpTests(unittest.TestCase):
                                              "PyPI's JSON has no releases")])
 
     def test_a_pin_no_release_can_move_to_warns_with_the_missing_tags(self) -> None:
-        # #2025: no release has a cp38 wheel, so the pin used to stay without a word.
+        # #2025: no release has a cp38 wheel, so the pin stays, and must not stay without a word.
         result, notes = vendor().refresh(table(), lambda name: recorded(), lambda name: '50.0.2',
                                          ('3.8', *PYTHONS), TODAY)
         self.assertEqual(result, table())
@@ -406,7 +406,7 @@ class BumpTests(unittest.TestCase):
                                              'on osx-64 at once')])
 
     def test_a_pin_whose_release_lost_a_wheel_warns_with_the_tag_it_lacks(self) -> None:
-        # #2028: 47.0.0 still has every wheel, so the 48.0.1 pin used to stay without a word.
+        # #2028: 47.0.0 still has every wheel, so the 48.0.1 pin stays, and must not stay without a word.
         result, notes = self.refresh(lost_wheel())
         self.assertEqual(result, table())
         self.assertEqual(notes, [('warning', 'cryptography 48.0.1 on osx-64 stays as it is, and may no longer '

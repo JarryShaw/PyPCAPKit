@@ -1,135 +1,75 @@
 # -*- coding: utf-8 -*-
 """Pins ``make isort`` clean on every one of its lines (#757).
 
-#757 was filed from a reproduction that ran bare ``isort --check-only --diff
-pcapkit/protocols/schema/schema.py``, with none of the flags ``make isort``
-actually uses. Bare isort wraps at its own default of 79 columns, so it flagged
-the ``misc`` import (89 characters) and proposed wrapping it -- and from that
-diff the issue reasoned that isort's wrap width must disagree with the
-project's ``line-too-long`` threshold of 120, since 89 is under 120 but over
-79.
+Each line of the Makefile's ``isort:`` target -- see :data:`MAKEFILE_LINES`
+below, one entry per line -- is run as a real ``isort`` invocation with that
+line's exact flags, not a hand-rolled guess about what those flags imply, so an
+edit that introduces an unsorted or mis-wrapped import anywhere ``make isort``
+reaches fails here instead of surfacing as "clean locally, red in CI" the way
+#757 did.
 
-Re-running with the Makefile's own flags -- see :data:`MAKEFILE_LINES` below,
-one entry per line of the ``isort:`` target -- shows a different picture.
 Those flags set the width to 100, exactly as :file:`CONTRIBUTING.md` documents
 ("120 for ``pylint`` and 100 for ``isort``, not PEP 8's 79"): a deliberate,
-written-down split, not a misconfiguration. Under *that* width the ``misc``
-import is not flagged at all (89 < 100). What *was* flagged, on the commit
-this test landed with, were things the whole-tree line's flags alone
-would not have caught:
+written-down split, not a misconfiguration. #757 was filed from a bare
+``isort --check-only --diff pcapkit/protocols/schema/schema.py``, which wraps at
+isort's own default of 79 columns and so flagged an 89-character import the
+Makefile's width accepts. So this module does not re-litigate the width.
 
-* :file:`pcapkit/protocols/schema/schema.py` -- its ``pcapkit.utilities.warnings``
-  import was wrapped across two lines at some earlier width, and unwrapped it
-  is 96 characters, under 100, so isort's real verdict was to collapse it back
-  to one line rather than wrap another import.
-* :file:`examples/generators/dispatch.py` -- two function-local import blocks
-  isort wants a blank line after (the util/examples-generators line's
-  targets, unreachable from the whole-tree line's ``pcapkit`` argument).
-* :file:`examples/generators/options.py` -- an ``import ipaddress`` isort wants
-  moved above the ``from pcapkit...`` block, and a ``from scapy.all import
-  ...`` isort wants reordered by its constant/class split (``IP, TCP`` before
-  ``Ether, IPv6, Raw``). Also the util/examples-generators line only; only
-  import order changed, since this module is loaded and run at test time,
-  not just read at review time.
-  These test modules load it by path via
-  ``importlib.util.spec_from_file_location``:
-  :file:`tests/protocols/test_option_generator_tcp_base_unit.py`,
-  :file:`tests/protocols/test_option_coverage_runtime.py`, and
-  :file:`tests/protocols/test_option_roundtrip_unit.py`.
-  :file:`examples/generators/dispatch.py`'s module docstring and
-  :file:`docs/source/changelog/1.5.0.rst` both name it
-  directly, too.
+Every line is covered, not the whole-tree one alone. That line (:file:`pcapkit`,
+skipping ``__init__.py``) reaches neither :file:`examples/generators/` nor
+:file:`util/`, which the last line sorts, nor the ``__init__.py`` files that sit
+at least one directory below :file:`pcapkit/const/` or :file:`pcapkit/vendor/`.
+The const and vendor lines have no ``--skip-glob``, so between them they
+re-cover whichever of the files the whole-tree line skips happen to live there.
+Their shape closes these gaps (#765):
 
-So this module does not re-litigate the width. It just pins isort's own
-verdict on each of those lines -- via real ``isort`` invocations with the
-Makefile's exact flags, not a hand-rolled guess about what those flags imply --
-so a future edit that reintroduces an unsorted or mis-wrapped import anywhere
-``make isort`` reaches fails here instead of surfacing as "clean locally, red
-in CI" the way #757 did. Earlier revisions of this test covered the
-whole-tree line only (:file:`pcapkit`, skipping ``__init__.py``) and so
-missed exactly the :file:`examples/generators/` files above and the
-``__init__.py`` files that sit at least one directory below
-:file:`pcapkit/const/` or :file:`pcapkit/vendor/` -- the const and vendor
-lines have no ``--skip-glob``, so between them they re-cover whichever of
-the files the whole-tree line skips happen to live there, even though
-the whole-tree line skips them package-wide. The const and vendor lines
-used to be one, :file:`pcapkit/const/*/*.py` and :file:`pcapkit/vendor/*/*.py`
-combined into a single brace-expanded glob that stopped at a fixed two
-levels, which the #754 split outgrew the moment
-:file:`pcapkit/const/reg/apptype/__init__.py` landed a level deeper still and
-nothing sorted it any more (#765).
+* **Any depth.** A brace-expanded ``pcapkit/{const,vendor}/*/*.py`` stops at a
+  fixed two levels, so :file:`pcapkit/const/reg/apptype/__init__.py`, a level
+  deeper still, would go unsorted. A ``**`` glob under ``shopt -s globstar``
+  needs bash >= 4.0, but :file:`Makefile`'s ``SHELL := $(shell command -v bash
+  ...)`` only ever picks *some* ``bash`` off ``$PATH``, and macOS ships 3.2 as
+  ``/bin/bash`` with no guarantee a newer one sits ahead of it. There ``shopt``
+  writes one line to stderr and returns non-zero, and the *next* command in the
+  recipe still runs under the plain, non-recursive glob -- silently, since make
+  judges that recipe line by the isort invocation that follows ``shopt``, not by
+  ``shopt`` itself. ``find`` needs no particular bash version and no shell
+  option at all, and reaches any depth the same way.
+* **One invocation per directory.** Handed to a single ``isort``, the two
+  ``find`` calls are loud only when *both* come back empty -- ``isort`` then
+  gets zero paths, exits 1 rather than reading ``stdin``, and make reports the
+  recipe as failed (no ``set -e`` needed for this, and none is set). If only
+  *one* came back empty, the other's files would still reach ``isort``, which
+  would exit 0 having quietly sorted half the tree. Neither case is reachable --
+  no path under :file:`pcapkit/const/` or :file:`pcapkit/vendor/` contains
+  whitespace to break the expansion, and neither directory can be absent where
+  ``make isort`` runs -- but one call per directory leaves neither reachable
+  even in principle, and matches :file:`.github/workflows/cron-vendor.yml`'s
+  own two calls (below).
+* **``-mindepth 2``.** Without it ``find`` would also reach
+  :file:`pcapkit/const/__init__.py` and :file:`pcapkit/vendor/__init__.py`
+  themselves, whose hand-grouped import order isort would flatten -- see
+  :func:`_const_targets` and :func:`_vendor_targets`.
 
-The first fix tried here widened that one line to
-``pcapkit/{const,vendor}/*/**/*.py`` under ``shopt -s globstar``, reaching
-any depth below the first subdirectory. That was itself wrong, and in the
-same shape as the bug it fixed: ``globstar`` needs bash >= 4.0,
-:file:`Makefile`'s ``SHELL := $(shell command -v bash ...)`` only ever picks
-*some* ``bash`` off ``$PATH``, and macOS ships 3.2 as ``/bin/bash`` with no
-guarantee a newer one sits ahead of it. Without ``globstar`` the shell option
-itself fails, ``shopt`` writes one line to stderr and returns non-zero, and
-the *next* command in the recipe still runs under the plain, non-recursive
-glob -- silently, since make does not stop a recipe line for a failed
-``shopt``, only for the isort invocation that follows it. So on such a
-machine that one line would have gone from reaching 264 files to reaching
-12, sorting none of the 32 depth-two ``__init__.py`` files it used to cover
-(the other two, three levels down under :file:`.../reg/apptype/`, stayed
-reachable even by the degraded glob) -- the #765 hole reopened one level up,
-by #765's own fix.
-
-The second fix replaced that with ``$$(find pcapkit/const -mindepth 2 -name
-'*.py') $$(find pcapkit/vendor -mindepth 2 -name '*.py')``, both handed to
-one ``isort`` invocation: ``find`` needs no particular bash version and no
-shell option at all, and reaches any depth the same way. That closed the
-bash-version gap but opened a narrower one of its own: merged into a single
-invocation, only the case where *both* ``find`` calls come back empty is
-loud -- ``isort`` then gets zero paths, exits 1 rather than reading
-``stdin``, and make reports the recipe as failed because that command's own
-status was non-zero, the same as it would for any other line (no ``set -e``
-needed for this, and none is set). If only *one* of the two came back empty,
-though, the other's files would still reach ``isort`` in that same
-invocation, which would exit 0 having quietly sorted half the tree. Neither
-case is reachable -- no path under :file:`pcapkit/const/` or
-:file:`pcapkit/vendor/` contains whitespace to break the expansion, and
-neither directory can be absent where ``make isort`` runs -- but it is the
-same shape of latent gap #765 itself was, so the third fix, now in place, is
-to split the one invocation into two: one call covers
-:file:`pcapkit/const/`, the other covers :file:`pcapkit/vendor/`, matching
-:file:`.github/workflows/cron-vendor.yml`'s own two calls exactly (below) and
-leaving neither case above reachable even in principle. The leading
-``-mindepth 2`` on each stays for the same reason the original glob's
-leading ``*/`` did: dropping it would also reach
-:file:`pcapkit/const/__init__.py` and :file:`pcapkit/vendor/__init__.py`
-themselves, whose hand-grouped import order isort would flatten -- see
-:func:`_const_targets` and :func:`_vendor_targets`.
-
-The identical two-level glob also lived in
-:file:`.github/workflows/cron-vendor.yml`, on the path that actually *writes*
-the deep files: ``pcapkit-vendor`` regenerates :mod:`pcapkit.const` from the
-:mod:`pcapkit.vendor` crawlers, and that job's own ``isort`` calls -- already
-two, one per directory -- were as blind to :file:`pcapkit/const/reg/apptype/`
-as the Makefile's own line used to be. Fixed there too (#765), the same way
-and for the same reason: that job runs on a ``macos-latest`` runner, so
-relying on ``bash`` >= 4.0 would have been exactly the mistake the Makefile's
-line first made. This module does not cover that fix, though: it only
+:file:`.github/workflows/cron-vendor.yml` sorts the deep files the same way and
+for the same reason (#765): it is the path that actually *writes* them, as
+``pcapkit-vendor`` regenerates :mod:`pcapkit.const` from the :mod:`pcapkit.vendor`
+crawlers, and that job runs on a ``macos-latest`` runner, where ``bash`` >= 4.0
+cannot be relied on. This module does not cover that job, though: it only
 exercises ``make isort``, and :file:`cron-vendor.yml`'s ``vendor-update`` job
 never runs it -- the tests that job runs before it commits are
 :file:`tests/const` and :file:`tests/vendor` alone (#1853).
 
-Until #766 this module gated on isort with a ``try: import isort`` inside
-:meth:`~TestIsortIsCleanOnThePackage.setUpClass`, raising
-:exc:`~unittest.SkipTest` from the body -- and isort was in no
-:file:`pyproject.toml` extra, so every CI leg skipped it. Both halves of that
-are fixed here, and they had to move together.
-
-The gate is now a module-level :data:`HAS_ISORT` read by an
-``@unittest.skipUnless`` decorator, because
+The gate and the install line go together (#766). The gate is a module-level
+:data:`HAS_ISORT` read by an ``@unittest.skipUnless`` decorator, not a
+``try: import isort`` raising :exc:`~unittest.SkipTest` inside
+:meth:`~TestIsortIsCleanOnThePackage.setUpClass`, because
 :func:`tests._dependency_gates._gates_of` walks a definition's
 ``decorator_list`` and never a function body: an inline ``skipTest`` is
 invisible to that scan *by construction*, which is the dark-test hazard #745
-exists to stop and which #779 fixed the same way for the sibling ``mypy``
+exists to stop and which #779 avoids the same way for the sibling ``mypy``
 check.
 
-The install line is the other half. ``isort`` is now a ``test`` extra
+The install line is the other half. ``isort`` is a ``test`` extra
 requirement, so the pytest jobs whose selection collects this module --
 ``test`` and ``gate``, since #849 took ``engine-tests`` off it -- run it for
 real rather than reporting a skip. That is the opposite resolution from
@@ -141,14 +81,14 @@ copy, while that same workflow's header records that ``isort`` is deliberately
 not one of the linters it installs -- it appears only in
 :file:`cron-vendor.yml`, as a formatter that rewrites the generated constants
 on a schedule rather than as a check. So declining the install line here would
-have left ``make isort``'s verdict checked nowhere at all, which is what #766
+leave ``make isort``'s verdict checked nowhere at all, which is what #766
 objected to. It is cheap enough to be uncontroversial, too: the lines below
 take about 1.5s together, the "costs nothing per leg" category the test
 job's own install comment puts ``DPKT`` in rather than the ``Scapy`` one.
 
 ``isort`` is in ``Pipfile``'s ``[dev-packages]`` too, as of #810 -- that being
 what ``make isort``'s own ``pipenv run`` prefix resolves against, so the target
-no longer depends on a contributor happening to have isort on ``PATH``. The two
+does not depend on a contributor happening to have isort on ``PATH``. The two
 declarations are additive rather than duplicate: the ``pyproject.toml`` extra
 serves consumers installing the package, ``Pipfile`` serves this repository's
 own dev environment, and ``make isort`` reads only the latter.
@@ -174,10 +114,10 @@ PACKAGE = ROOT / 'pcapkit'
 MAKEFILE = ROOT / 'Makefile'
 
 #: Whether :mod:`isort` is importable, for the one test that runs it. A visible
-#: ``skipUnless`` flag rather than the inline ``skipTest`` this module used
-#: until #766, so :func:`~tests._dependency_gates.gated_scopes` counts the gate
-#: and :mod:`tests.test_tier_guard` can audit which CI jobs it darkens -- none
-#: of them, now that the ``test`` extra carries isort; see this module's own
+#: ``skipUnless`` flag rather than an inline ``skipTest`` (#766), so
+#: :func:`~tests._dependency_gates.gated_scopes` counts the gate and
+#: :mod:`tests.test_tier_guard` can audit which CI jobs it darkens -- none of
+#: them, as the ``test`` extra carries isort; see this module's own
 #: docstring for why that install line was the right answer here and the wrong
 #: one for ``mypy``.
 HAS_ISORT = importlib.util.find_spec('isort') is not None
@@ -209,7 +149,7 @@ HAS_ISORT = importlib.util.find_spec('isort') is not None
 #: * 9.0.1, 9.0.2 -- clean, on all four lines.
 #:
 #: So 9.0.1 is the first final release this test gets a verdict from. Anything
-#: older skips, the 9.0.0 pre-releases included; 9.0.1 and newer run as before,
+#: older skips, the 9.0.0 pre-releases included; 9.0.1 and newer run,
 #: so a later release whose verdict moves still turns the test red, as
 #: :file:`pyproject.toml` intends.
 ISORT_FLOOR = (9, 0, 1)
@@ -273,7 +213,7 @@ def _find_mindepth_2_targets(sub: str) -> 'list[str]':
     into one alphabetical block, scattering the comments across it --
     confirmed with ``isort --diff``, not assumed. That file stays reached by
     neither this call nor the whole-tree line (which skips every
-    ``__init__.py``), same as before #765.
+    ``__init__.py``).
 
     """
     return sorted(str(path) for path in (PACKAGE / sub).glob('*/**/*.py'))
@@ -371,8 +311,8 @@ def _isort_recipe_line_numbers() -> 'list[int]':
 #: removed without a matching entry here, nothing more. Flags and target
 #: expressions are plain literals in this list, never read back out of
 #: :file:`Makefile`, so a flag edited there (``-l100`` to ``-l120``, say)
-#: is not something this file would notice at all -- pre-existing, and out
-#: of scope for :func:`_isort_recipe_line_numbers` to fix. That asymmetry
+#: is not something this file would notice at all, and out of scope for
+#: :func:`_isort_recipe_line_numbers` to fix. That asymmetry
 #: is also what keeps a wrong line number cheap rather than dangerous: the
 #: number only labels which real Makefile line a subtest's failure message
 #: points at, and never decides which flags or targets the *test* actually

@@ -36,12 +36,12 @@ the offending symbol instead of failing on the first one.
 Two scoping decisions, both measured rather than assumed.
 
 **Nothing is excluded, :mod:`pcapkit.vendor` included.** The vendor crawlers
-``import requests`` and ``import bs4`` at module scope, and the subtree used to be
-skipped through :data:`EXCLUDED_ROOTS` on the grounds that those came only from
-the ``vendor`` extra: this module is unit-tier -- see :mod:`tests._tiers` -- so it
-has to pass on ``pip install -e '.[test]'``. Both were already in the ``test``
-extra, since #507 (:file:`pyproject.toml`), so the skip never bought anything.
-Dropping it (#1772) brought in the vendor modules and packages, and found
+``import requests`` and ``import bs4`` at module scope, which reads as a reason to
+skip the subtree through :data:`EXCLUDED_ROOTS` if those came only from the
+``vendor`` extra: this module is unit-tier -- see :mod:`tests._tiers` -- so it
+has to pass on ``pip install -e '.[test]'``. Both are in the ``test`` extra too,
+since #507 (:file:`pyproject.toml`), so such a skip buys nothing. Sweeping the
+vendor modules and packages (#1772) found
 packages holding public attributes their :attr:`__all__` omitted:
 :mod:`pcapkit.vendor.ipx` leaked ``path``, the temporary of its ``sys.path``
 save-and-restore, since renamed ``_path``; the attributes :mod:`pcapkit.vendor`

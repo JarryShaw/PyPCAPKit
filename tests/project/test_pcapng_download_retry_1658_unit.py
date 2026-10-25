@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """:file:`examples/generators/pcapng.py` retries a transient download failure.
 
-GitHub issue #1658. ``_download`` made one attempt, so an HTTP 429 from the
-Wireshark mirror sent a CI leg straight to the synthesised stand-in. An HTTP 429
-or 5xx, or a timeout, is now retried with backoff, honouring ``Retry-After``,
-within a small budget; any other failure still falls back at once.
+GitHub issue #1658. With one attempt, an HTTP 429 from the Wireshark mirror
+sends a CI leg straight to the synthesised stand-in. So ``_download`` retries an
+HTTP 429 or 5xx, or a timeout, with backoff, honouring ``Retry-After``, within a
+small budget; any other failure falls back at once.
 
 #1894 moved the download from :mod:`urllib.request` to :mod:`requests`.
 :class:`DownloadRetryTests` runs against a stubbed ``requests.get`` and a fake
@@ -49,7 +49,7 @@ URL = 'https://example.invalid/many_interfaces.pcapng.1'
 NOW = 1_800_000_000.0
 
 # The policy, pinned as literals so that the tests fail on behaviour, rather than
-# on a missing name, against the generator as it was before #1658.
+# on a missing name, against a generator without the retry (#1658).
 #: Attempts per download, the first included.
 ATTEMPTS = 3
 #: Wait before the first retry, doubled for each one after.
@@ -133,8 +133,8 @@ class _Clocked(unittest.TestCase):
     def setUp(self) -> None:
         self.sleeps = []  # type: list[float]
         clock = types.SimpleNamespace(time=lambda: NOW, sleep=self.sleeps.append)
-        # ``create``: the generator before #1658 had no ``time`` to bind over,
-        # and these tests should fail there on behaviour, not in setUp.
+        # ``create``: a generator without the retry (#1658) has no ``time`` to bind
+        # over, and these tests should fail there on behaviour, not in setUp.
         patcher = mock.patch.object(self.generator, 'time', clock, create=True)
         patcher.start()
         self.addCleanup(patcher.stop)

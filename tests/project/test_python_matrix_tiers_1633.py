@@ -134,9 +134,9 @@ KTLO_STEPS = (
     ('python-compatibility.yml', 'compatibility', 'Verify package'),
 )
 
-#: Claims the tier split made false, each worded as it was somewhere before #1633,
-#: or while 3.7 was in the KTLO tier, before #2051. A denylist: it catches these
-#: phrasings coming back and examines no others.
+#: Claims the tiers make false (#1633), or the 3.8 floor does (#2051), each worded
+#: as some file once had it. A denylist: it catches these phrasings coming back
+#: and examines no others.
 RETIRED_CLAIMS = re.compile('|'.join((
     r'3\.15 as an allowed-to-fail leg',
     r'3\.15 runs allowed-to-fail',
@@ -806,8 +806,8 @@ class TestTheProseFollowsTheTiers(unittest.TestCase):
     def test_the_workflows_page_names_each_matrix_job_gate_only_skips(self) -> None:
         """The ``gate-only`` paragraph's matrix jobs, against ``unit-tests.yml``'s.
 
-        The paragraph counted each job's legs until #1811 (#1103's ruling: a count
-        drifts, and the tiers moved these). What it still claims is which matrix jobs
+        The paragraph states no leg counts (#1811; #1103's ruling: a count drifts,
+        and the tiers move these). What it claims is which matrix jobs
         a ``gate-only`` caller skips, so a matrix job added, dropped or no longer
         gated out fails here.
         """

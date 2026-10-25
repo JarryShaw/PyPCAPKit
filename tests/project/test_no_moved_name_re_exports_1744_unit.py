@@ -44,7 +44,7 @@ __tier__ = 'LATEST'
 #: Repository root.
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
-#: Removed paths the old module no longer binds at all, as ``(old module, name)``.
+#: Removed paths the old module does not bind at all, as ``(old module, name)``.
 PURE = (
     ('pcapkit.protocols.misc.pcapng', 'TLSKeyLabel'),
     ('pcapkit.corekit.fields.field', 'NoValueType'),

@@ -1,19 +1,17 @@
 # -*- coding: utf-8 -*-
 """Pins :class:`~pcapkit.const.ftp.command.FEATCode` as a documented API target.
 
-GitHub issue #934, part B: what is now
-:file:`docs/source/contributing/conventions/registry-protocol.rst` (GitHub issue
-#918 split it out of the single-page :file:`conventions.rst` that carried it at
-the time) cross-references :class:`~pcapkit.const.ftp.command.FEATCode` three
-times (the ``:class:`` role, at what were lines 592, 733 and 740 on
-``83c7552b8``), and none of
-them used to resolve, because no page under :file:`docs/source/` documented that
-class -- confirmed by an explicit nitpicky ``sphinx-build`` before
-:file:`docs/source/pcapkit/const/ftp.rst` gained an ``autoclass`` directive for it,
-and again after, to confirm the fix. ``FEATCode`` is not in
+GitHub issue #934, part B:
+:file:`docs/source/contributing/conventions/registry-protocol.rst`
+cross-references :class:`~pcapkit.const.ftp.command.FEATCode` with the
+``:class:`` role, and those references resolve only because
+:file:`docs/source/pcapkit/const/ftp.rst` carries an ``autoclass`` directive for
+the class -- without it no page under :file:`docs/source/` documents it and none
+of them resolves, as an explicit nitpicky ``sphinx-build`` with and without the
+directive confirmed. ``FEATCode`` is not in
 :mod:`pcapkit.const.ftp.command`'s ``__all__`` (only ``Command`` is), which is why the
-page's existing ``autoclass:: pcapkit.const.ftp.command.Command`` directive never
-pulled it in as a side effect.
+page's ``autoclass:: pcapkit.const.ftp.command.Command`` directive does not
+pull it in as a side effect.
 
 This does **not** re-test Sphinx's cross-reference resolution itself -- as
 :file:`tests/project/test_sentinels_doc_page_934_unit.py` explains for the sibling
@@ -34,7 +32,7 @@ import unittest
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
-#: The page that gained the ``FEATCode`` entry for GitHub issue #934.
+#: The page that carries the ``FEATCode`` entry (GitHub issue #934).
 PAGE = ROOT / 'docs' / 'source' / 'pcapkit' / 'const' / 'ftp.rst'
 
 

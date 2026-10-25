@@ -154,7 +154,7 @@ def edited(edits: 'list[tuple[str, str]]') -> 'str':
 
 
 def _load_script() -> 'Optional[types.ModuleType]':
-    """:file:`util/vendor_code_changed.py` as a module, or :data:`None` before #1674."""
+    """:file:`util/vendor_code_changed.py` as a module, or :data:`None` on a tree without it (#1674)."""
     if not SCRIPT.exists():
         return None
     spec = importlib.util.spec_from_file_location('vendor_code_changed', SCRIPT)
@@ -319,7 +319,7 @@ class TestTheScriptOnARegeneratedTree(ScratchRepository):
         self.assertIn('::notice title=Comments and docstrings only::none of the 2 changed', result.stdout)
 
     def test_no_paths_is_an_error_and_writes_nothing(self) -> None:
-        """The step then fails, and the workflow bumps as it did before #1674."""
+        """The step then fails, and the workflow bumps, as it does without the classifier (#1674)."""
         for changed_files in (None, '', ' \n'):
             with self.subTest(changed_files=changed_files):
                 result, written = self.run_script(changed_files=changed_files)

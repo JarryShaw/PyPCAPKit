@@ -2,10 +2,11 @@
 """The sample generators build from their own tree's :mod:`pcapkit`.
 
 GitHub issue #1343. Run as a script, a generator's ``sys.path[0]`` is
-:file:`examples/generators/`, not the tree root, so ``import pcapkit`` fell
-through to whatever was installed. An editable install pins one checkout, so a
-worktree's generators silently built their fixtures from *that* checkout's
-library: fewer captured cases than the tree defines, with nothing failing.
+:file:`examples/generators/`, not the tree root, so on its own ``import pcapkit``
+falls through to whatever is installed. An editable install pins one checkout,
+so a worktree's generators would silently build their fixtures from *that*
+checkout's library: fewer captured cases than the tree defines, with nothing
+failing.
 
 Each generator that imports :mod:`pcapkit` puts its own tree root first on
 :data:`sys.path`. The probe below proves it from a scratch worktree, whose path
@@ -13,9 +14,9 @@ no install points at, and with ``PYTHONPATH`` and ``PYTHONSAFEPATH`` stripped.
 The probe script lives outside the tree, so -- exactly as when a generator is run
 as a script -- nothing but the generator itself can put the tree on the path.
 
-The second half of the issue is that the shortfall was silent:
-``options.generate()`` recorded each failing case and carried on. It now raises
-once the captures it could build are written, which
+The second half of the issue is a silent shortfall, ``options.generate()``
+recording each failing case and carrying on. It raises once the captures it
+could build are written, which
 :meth:`OptionsGenerateTests.test_left_out_case_raises` pins.
 
 This module is unit-tier and reads no capture.
