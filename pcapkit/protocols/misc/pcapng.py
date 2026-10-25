@@ -680,6 +680,14 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
          - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._read_secrets_zigbee_aps`
          - :meth:`~pcapkit.protocols.misc.pcapng.PCAPNG._make_secrets_zigbee_aps`
 
+    .. versionchanged:: 1.5.0
+
+       ``context`` returns the caller supplied
+       :class:`~pcapkit.corekit.context.ContextRegistry` inherited from
+       :class:`~pcapkit.protocols.protocol.ProtocolBase`, on every block. The
+       block's section ``Context``, which ``context`` returned through 1.4.x,
+       is :attr:`section_context` (:issue:`2172`).
+
     """
 
     if TYPE_CHECKING:
@@ -945,10 +953,23 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         )
 
     @property
-    def context(self) -> 'Context':
-        """Context of current PCAP-NG block."""
+    def section_context(self) -> 'Context':
+        """Section context of current PCAP-NG block.
+
+        Raises:
+            UnsupportedCall: On a Section Header Block, which has no section
+                context of its own.
+
+        .. versionadded:: 1.5.0
+
+           Renamed from ``context``, with no alias. ``context`` is the one
+           inherited from :class:`~pcapkit.protocols.protocol.ProtocolBase`,
+           the caller supplied parsing context of
+           :mod:`pcapkit.corekit.context` (:issue:`2172`).
+
+        """
         if self._ctx is None:
-            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'context'")
+            raise UnsupportedCall(f"'{self.__class__.__name__}' object has no attribute 'section_context'")
         return self._ctx
 
     @property

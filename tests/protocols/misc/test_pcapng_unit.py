@@ -493,7 +493,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         self.assertEqual(pcapng.block, BlockType.Section_Header_Block)
         self.assertEqual(pcapng.index('Raw'), 33)
         with self.assertRaises(UnsupportedCall):
-            _ = pcapng.context
+            _ = pcapng.section_context
         with mock.patch('pcapkit.protocols.misc.pcapng.warn') as warn:
             self.assertEqual(pcapng.ts_resolution, 1_000_000)
             self.assertEqual(pcapng.ts_offset, 0)
@@ -522,7 +522,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         pcapng._ctx = ctx
         pcapng._type = BlockType.Enhanced_Packet_Block
         pcapng._info = DummyData(type=BlockType.Enhanced_Packet_Block, length=32, interface_id=0)
-        self.assertIs(pcapng.context, ctx)
+        self.assertIs(pcapng.section_context, ctx)
         self.assertTrue(pcapng.nanosecond)
         self.assertEqual(pcapng.linktype, LinkType.NULL)
         self.assertEqual(pcapng._get_linktype(0), LinkType.NULL)
@@ -752,6 +752,33 @@ class PCAPNGUnitTests(unittest.TestCase):
         pcapng._import_next_layer = mock.Mock(return_value=fake_next_no_chain)
         self.assertIs(pcapng._decode_next_layer(decoded_no_chain, LinkType.NULL, 0), decoded_no_chain)
         self.assertEqual(decoded_no_chain['protocols'], '')
+
+    def test_pcapng_context_is_the_base_caller_context_not_the_section(self) -> None:
+        # #2172: ``context`` is ProtocolBase's caller supplied registry on every
+        # block, a Section Header Block included; the section is ``section_context``.
+        from pcapkit.const.pcapng.block_type import BlockType
+        from pcapkit.corekit.context import ContextRegistry
+        from pcapkit.protocols.internet.esp import ESPContext, SecurityAssociation
+        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.protocol import ProtocolBase
+
+        esp = ESPContext(SecurityAssociation(spi=7))
+        registry = ContextRegistry(esp)
+        section = types.SimpleNamespace(interfaces=[], section=types.SimpleNamespace(byteorder='little'))
+        for block, ctx in ((BlockType.Section_Header_Block, None), (BlockType.Enhanced_Packet_Block, section)):
+            with self.subTest(block=block):
+                pcapng = object.__new__(PCAPNG)
+                pcapng._type = block
+                pcapng._ctx = ctx
+                pcapng._exctx = registry
+
+                context = pcapng.context
+                self.assertIsInstance(context, ContextRegistry)
+                self.assertIsNot(context, registry)
+                self.assertEqual(dict(context), {'ESP': esp})
+                self.assertEqual(dict(context), dict(ProtocolBase.context.fget(pcapng)))  # type: ignore[attr-defined]
+                if ctx is not None:
+                    self.assertIs(pcapng.section_context, ctx)
 
     def test_pcapng_register_stays_quiet_on_same_object_reregistration(self) -> None:
         """GitHub issue #718: replaying a call with the identical class is a no-op.
