@@ -1073,7 +1073,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         Args:
             code: PCAP-NG block type code.
-            meth: Method name or callable to parse and/or construct the block.
+            meth: Name of the ``_read_block_${name}`` and ``_make_block_${name}``
+                methods, or a ``(parser, constructor)`` pair of callables; see
+                :attr:`__block__`.
 
         Warns:
             RegistryWarning: If a different entry is already registered for
@@ -1096,7 +1098,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         Args:
             code: PCAP-NG option type code.
-            meth: Method name or callable to parse and/or construct the option.
+            meth: Name of the ``_read_option_${name}`` and
+                ``_make_option_${name}`` methods, or a ``(parser, constructor)``
+                pair of callables; see :attr:`__option__`.
 
         Warns:
             RegistryWarning: If a different entry is already registered for
@@ -1120,7 +1124,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         Args:
             code: PCAP-NG name resolution record type code.
-            meth: Method name or callable to parse and/or construct the name resolution record.
+            meth: Name of the ``_read_record_${name}`` and
+                ``_make_record_${name}`` methods, or a ``(parser, constructor)``
+                pair of callables; see :attr:`__record__`.
 
         Warns:
             RegistryWarning: If a different entry is already registered for
@@ -1143,7 +1149,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         Args:
             code: PCAP-NG decryption secrets type code.
-            meth: Method name or callable to parse and/or construct the decryption secrets.
+            meth: Name of the ``_read_secrets_${name}`` and
+                ``_make_secrets_${name}`` methods, or a ``(parser, constructor)``
+                pair of callables; see :attr:`__secrets__`.
 
         Warns:
             RegistryWarning: If a different entry is already registered for
@@ -4851,7 +4859,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
         # NOTE: ``-n % 4`` is the octet count needed to reach the next 32-bit
         # boundary, and zero when already there. Integer arithmetic throughout,
-        # unlike the ``math.ceil(n / 4) * 4 - n`` idiom used elsewhere in this
+        # unlike the ``math.ceil(n / 4) * 4`` idiom used elsewhere in this
         # file, which routes a length through a float.
         cb_data = data.pack() if isinstance(data, Schema) else data
         cb_data += bytes(-len(cb_data) % 4)

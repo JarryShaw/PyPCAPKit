@@ -95,7 +95,7 @@ Known Limitations
 * **The specification version is that of the installed decoder, not this
   package's.** The IE and procedure enumerations were generated from
   ``NGAP_Constants`` of |pycrate|_ 0.8.1 (Release-18-era). A |pycrate|_ that
-  carries a newer NGAP will decode IEs that
+  carries a newer NGAP will decode values that
   :class:`~pcapkit.const.ngap.procedure_code.ProcedureCode` and
   :class:`~pcapkit.const.ngap.protocol_ie.ProtocolIE` do not name. Such a
   value resolves to a non-registering member called ``Unassigned`` rather than

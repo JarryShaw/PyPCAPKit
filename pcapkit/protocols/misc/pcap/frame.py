@@ -473,7 +473,7 @@ class Frame(ProtocolBase[Data_Frame, Schema_Frame],
         """
         #: int: frame index number
         self._fnum = num
-        #: pcapkit.protocols.misc.pcap.header.Header: Global header of the PCAP file.
+        #: pcapkit.protocols.data.misc.pcap.header.Header: Global header of the PCAP file.
         self._ghdr = header
 
         #: pcapkit.const.reg.linktype.LinkType: next layer protocol index
