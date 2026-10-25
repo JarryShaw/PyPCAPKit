@@ -7,8 +7,8 @@ runs it with the runner's own ``python3``, before any setup-python step, as
 ``python3 util/python_versions.py --github-output``, which appends one step
 output per name below to ``$GITHUB_OUTPUT``. So it is standard library only:
 :mod:`tomllib` needs 3.11, and each image it runs on has a newer ``python3`` --
-3.12.3 on ``ubuntu-latest`` (24.04), 3.14.4 on 26.04, which that label moves to
-from 2026-10-19, and 3.14.7 on ``macos-latest`` (macOS 26 arm64), per
+3.12.3 on Ubuntu 24.04, 3.14.4 on 26.04, which ``ubuntu-latest`` names from
+2026-10-19, and 3.14.7 on ``macos-latest`` (macOS 26 arm64), per
 actions/runner-images' READMEs at 2c421200c.
 
 ``latest``

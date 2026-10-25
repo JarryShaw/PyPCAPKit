@@ -283,8 +283,8 @@ jobs:
           path: ${{ runner.temp }}/junit*.xml
           retention-days: 14
 
-      # #1672: the last step of every KTLO matrix job but the job summary's
-      # two, util/leg_summary.py (#1967). Each step above that can fail on a
+      # #1672: the last step of every KTLO matrix job before the job-summary
+      # steps, util/leg_summary.py (#1967). Each step above that can fail on a
       # KTLO leg has an `id` and `continue-on-error: ${{ matrix.ktlo == true }}`,
       # so its failure leaves the job at success; this step makes it visible
       # again, one warning and one job-summary line per failed step, from each

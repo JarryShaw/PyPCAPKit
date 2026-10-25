@@ -551,7 +551,7 @@ jobs:
           - macos-26-intel
           - ubuntu-latest
           # #2060: win-64, uploaded with the anaconda-client CLI as the Intel
-          # leg is, now that its runs have built and smoke-tested it green.
+          # leg is, once its runs had built and smoke-tested it green.
           - windows-latest
         # #1633: the supported tier, from .github/python-versions.toml through
         # `conda-update` (#1660); create-release.yml's ``conda`` job says why

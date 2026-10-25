@@ -158,17 +158,17 @@ The job drives them through the `Makefile` rather than restating their flags (`v
 variables, so a check cannot come out clean locally and red in CI because the two drifted.
 
 **Those steps are advisory, not a gate.** Each carries `continue-on-error: true`, so a finding lands
-as a non-blocking annotation and a red linter will not fail your pull request; none of them is
-clean. The workflow's header records what each tool would need before
-its `continue-on-error` line could be deleted. Read the job's run summary, where each step writes
+as a non-blocking annotation and a red linter will not fail your pull request. The workflow's
+header records which of them are clean and what each of the others would need before its
+`continue-on-error` line could be deleted. Read the job's run summary, where each step writes
 its verdict, and try not to add to the numbers.
 
-`isort` is the exception and is local-only. It appears in `cron-vendor.yml` as a formatter that
-rewrites the regenerated constants, not as a check, so nothing verifies import ordering on a pull
-request.
+`isort` is the exception: no `Lint` step runs it. It appears in `cron-vendor.yml` as a formatter
+that rewrites the regenerated constants, and `tests/project/test_isort_clean.py`, which the `test`
+extra's `isort` lets run, fails on a file whose imports `make isort` would reorder.
 
 One trap: `make vermin` redirects its report into `temp/vermin.txt` rather than to your terminal,
-and vermin exits 1 because `vermin.ini` sets `targets = 3.8` against the 3.11 minimum it detects.
+so when vermin finds code that misses `vermin.ini`'s `targets = 3.8` and exits 1,
 Make gives up at the redirect with `make: *** [vermin] Error 1`, the report left in the file and the line
 that would have opened it never reached. `make vermin-ci` runs the same flags to stdout, which is why
 CI uses it and why it is easier to read at a desk. Running the lot before you push still saves a

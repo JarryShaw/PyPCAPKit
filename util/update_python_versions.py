@@ -40,7 +40,7 @@ dropped
     ``end-of-life`` with no build for any hosted Ubuntu image.
 pre-release
     ``feature`` or ``prerelease`` once setup-python has a build. No workflow runs
-    pre-release legs yet, and :func:`python_versions.load` refuses the tier, so
+    pre-release legs, and :func:`python_versions.load` refuses the tier, so
     such a version is reported (:data:`HELD`) rather than written.
 experimental
     Free-threaded CPython and GraalPy, which no source here rates (#1660), are

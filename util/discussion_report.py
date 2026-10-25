@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """Post a run's report to its job's thread in a Discussions category (#2030).
 
-The ``discussion`` job of :file:`.github/workflows/ci-timing.yml` and of
-:file:`.github/workflows/cron-vendor.yml` runs, from the checkout's root and on
-the runner's ``python3``::
+The ``Post the report to Discussions`` step of each workflow's ``discussion``
+job, :file:`.github/workflows/ci-timing.yml`'s and
+:file:`.github/workflows/cron-vendor.yml`'s among them, runs, from the
+checkout's root and on the runner's ``python3``::
 
     python3 util/discussion_report.py --category NAME --title TITLE --report FILE \\
         --mode scheduled|push --status STATUS

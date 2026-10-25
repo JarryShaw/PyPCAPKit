@@ -2,7 +2,7 @@
 """Which commit a release tag names, against the commit this run was created for (#1634, #1748).
 
 :file:`.github/workflows/create-release.yml` runs it from the checkout's root,
-on the runner's own ``python3``, in two forms:
+on the runner's own ``python3``, in these forms:
 
 ``python3 util/release_tags.py check``
     The step "Check the release tags name this run's commit" of the ``github``,

@@ -1288,8 +1288,8 @@ def _pcapng_context() -> 'tuple[Any, Any]':
                      type=Enum_BlockType.Section_Header_Block, block={})
     # ``Protocol.info`` is annotated as the generic data model for the protocol,
     # so a checker cannot see that a Section Header Block's is the one ``Context``
-    # wants. The engine does exactly this, at
-    # pcapkit/foundation/engines/pcapng.py:181.
+    # wants. The engine does exactly this, in ``PCAPNG.run`` of
+    # pcapkit/foundation/engines/pcapng.py.
     section_info = section.info  # type: Any
     context = Context(section_info)
     interface = PCAPNG(num=1, sct=1, ctx=context,

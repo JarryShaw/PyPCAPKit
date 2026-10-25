@@ -5,8 +5,9 @@ Each step that can fail on a KTLO or experimental leg carries an ``id`` and a
 ``continue-on-error`` that holds on that leg, so its failure leaves the job, and
 ``required-checks``, at success. This script makes the failure visible again. The
 ``KTLO summary`` steps of :file:`.github/workflows/unit-tests.yml`'s ``test``,
-``integration`` and ``pypcap-parity`` jobs and :file:`.github/workflows/python-compatibility.yml`'s
-``compatibility`` job, and the ``Experimental summary`` step of
+``integration`` and ``pypcap-parity`` jobs, :file:`.github/workflows/python-compatibility.yml`'s
+``compatibility`` job and :file:`.github/workflows/create-release.yml`'s ``pypi`` job, and the
+``Experimental summary`` step of
 :file:`.github/workflows/experimental.yml`'s ``experimental`` job, each run::
 
     /usr/bin/python3 util/leg_summary.py ktlo          # or: experimental

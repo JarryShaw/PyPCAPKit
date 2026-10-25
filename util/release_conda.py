@@ -2,7 +2,7 @@
 """The conda legs' steps, in both conda jobs (#888, #1822, #2044).
 
 ``conda`` in :file:`.github/workflows/create-release.yml` and ``conda-dist`` in
-:file:`.github/workflows/cron-conda.yml` run it in three forms, each with
+:file:`.github/workflows/cron-conda.yml` run it in the forms below, each with
 ``PCAPKIT_CONDA_OS``, the leg's ``matrix.os``, and ``PCAPKIT_PYTHON_VERSION``, its
 ``matrix.python-version``, where it reads them:
 

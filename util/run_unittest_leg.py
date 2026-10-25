@@ -50,9 +50,8 @@ subdirectory per invocation (its ``directory`` argument), which is what
 :file:`.github/workflows/unit-tests.yml`'s ``unittest-ordering`` job calls
 once per entry of its own matrix -- the leg list lives in that workflow, not
 as a module-level constant here. :mod:`tests.protocols` is the largest leg;
-its timings, on different bases (a local serial run, and CI before and
-after it was sharded), are tabulated in that workflow's own comment rather than
-restated here. At the other end sit
+its CI timings, before and after it was sharded, are in that workflow's own
+comment rather than restated here. At the other end sit
 :mod:`tests.dumpkit` and :mod:`tests.interface`, small legs within a few
 seconds of each other in wall time (~39s and ~38s). Neither small leg is
 :mod:`tests.const` (~268s), which is larger by test count as well.
@@ -60,8 +59,8 @@ seconds of each other in wall time (~39s and ~38s). Neither small leg is
 Peak RSS was measured for the three cheapest legs only, via
 :func:`resource.getrusage` on ``RUSAGE_CHILDREN`` in this venv:
 :mod:`tests.cli` 152 MiB, :mod:`tests.dumpkit` 237 MiB, :mod:`tests.interface`
-305 MiB. No figure was taken for the larger legs, and that workflow comment's
-table carries wall times only, no RSS -- but the largest of the three is still
+305 MiB. No figure was taken for the larger legs, and that workflow comment
+gives wall times only, no RSS -- but the largest of the three is still
 some 90x short of 29 GB, which is enough to place the OOM on running
 *everything* in one process rather than on any one directory.
 
@@ -102,8 +101,8 @@ because it is already run whole, under :program:`pytest`, by the
 A stalled leg: ``--stall-dump SECONDS`` (or ``PCAPKIT_UNITTEST_STALL_DUMP``)
 arms :func:`faulthandler.dump_traceback_later`, so a leg still running after
 that long writes every thread's stack to stderr once, then carries on. The
-default, 1080s, is just under the 20-minute step cap, so a leg about to be
-killed says where it was first; ``0`` disables it.
+default, 1080s, is just under the ``unittest-ordering`` step's 20-minute cap,
+so a leg about to be killed says where it was first; ``0`` disables it.
 
 Memory: every purge-then-import leaves the previous generation as cyclic
 garbage, and the interpreter's own collector intermittently falls behind --
@@ -162,8 +161,9 @@ from tests._tiers import is_unit_tier  # noqa: E402  pylint: disable=wrong-impor
 #: this script exists to catch.
 _EXCLUDED_ROOT_MODULES = frozenset({'tests.test_tier_guard_xdist'})
 
-#: Seconds before a still-running leg dumps every thread's stack: just
-#: under the 20-minute step cap, so the dump lands before the kill.
+#: Seconds before a still-running leg dumps every thread's stack: just under
+#: the ``unittest-ordering`` step's 20-minute cap, so the dump lands before the
+#: kill.
 DEFAULT_STALL_DUMP = 1080
 
 #: Environment override for :data:`DEFAULT_STALL_DUMP`; ``--stall-dump`` wins.

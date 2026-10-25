@@ -96,5 +96,5 @@ reference. Pages worth knowing by name:
 | [How to ...](https://jarryshaw.github.io/PyPCAPKit/demo.html) | Worked examples, library and CLI |
 | [Extensions](https://jarryshaw.github.io/PyPCAPKit/ext.html) | Registering your own protocols, engines and dumpers |
 
-Release history is in [CHANGELOG.md](CHANGELOG.md), and contribution guidelines
-are in [CONTRIBUTING.md](CONTRIBUTING.md).
+The newest changelog entry is in [CHANGELOG.md](CHANGELOG.md), which links to the
+full history, and contribution guidelines are in [CONTRIBUTING.md](CONTRIBUTING.md).

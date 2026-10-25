@@ -816,8 +816,8 @@ jobs:
           python -m pip download -r conda/requirements.txt -d conda/wheels
 
       # With `activate-environment: base`, `python-version` installs that Python
-      # into base, next to conda itself. conda-forge's conda has no py315 build
-      # yet, so on 3.15 that fails with "RemoveError: Conda cannot remove
+      # into base, next to conda itself. conda-forge's conda has no py315
+      # build, so on 3.15 that fails with "RemoveError: Conda cannot remove
       # itself" (#1633, measured with conda 26.7.2). So 3.15 leaves base on its
       # own Python: `conda build --python` below builds against 3.15 regardless,
       # measured to build and import pypcapkit-*-py315_0. Drop the exception

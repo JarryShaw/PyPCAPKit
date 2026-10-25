@@ -95,7 +95,7 @@ coverage: samples
 	pipenv run coverage run -m pytest -q
 	pipenv run coverage report
 
-# The engine speed table in docs/source/index.rst -- every Python version
+# The engine speed tables in docs/source/engines.rst -- every Python version
 # examples/benchmark/python-images.txt marks `default`, one image each,
 # measured in containers so the host does not affect the
 # result. Needs docker, and nothing else: deliberately not run through pipenv,
