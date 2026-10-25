@@ -10,7 +10,7 @@ row (#1606).
 A later IPv4 fragment carries no upper-layer header (:rfc:`791#section-3.2`), so
 the default engine reads no TCP in one, but `Scapy`_ binds IPv6 to IPv4 protocol
 41, and AH to protocol 51, whatever the fragment offset, and its engine handed on
-the TCP it then dissected (#1617). It now stops at such a fragment.
+the TCP it then dissected (#1617). It stops at such a fragment.
 
 `dpkt`_ decodes protocol 0 as IPv4, so a Hop-by-Hop header there can read as an
 IPv4 packet dpkt cannot decode, or whose payload is no packet; neither ends the

@@ -4,7 +4,7 @@
 GitHub issue #1585. The data buffer holds 65,535 octets of data, but IPv4's
 Total Length counts the header as well, so fragments whose data covered octets
 0-65,522 behind a 20-octet header made a 65,543-octet datagram, and it read
-``COMPLETE``. Linux's ``ip_frag_reasm`` rejects it. The bound now counts the
+``COMPLETE``. Linux's ``ip_frag_reasm`` rejects it. The bound counts the
 header as the family's length field does: IPv4's Total Length counts all of it,
 and IPv6's Payload Length counts the extension headers but not the fixed
 40-octet header. A Total Length of 0 declares no length (#1555), so a datagram

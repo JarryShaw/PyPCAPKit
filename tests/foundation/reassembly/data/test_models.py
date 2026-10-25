@@ -52,12 +52,12 @@ class ReassemblyDataModelTests(unittest.TestCase):
         self.assertEqual(storage.tcp, ())
 
     def test_completion_is_a_string_that_still_reads_as_the_old_bool(self) -> None:
-        """The contract ``Datagram.completed`` has to keep, now it is a StrEnum.
+        """The contract ``Datagram.completed`` has to keep as a StrEnum.
 
         Deriving from :class:`~pcapkit.utilities.compat.StrEnum` -- as
         :class:`~pcapkit.protocols.application.httpv1.Type` does -- buys
         serialisability and comparison against a plain string. What it must not
-        cost is the truthiness callers of the former :obj:`bool` field rely on,
+        cost is the truthiness callers rely on, as for a :obj:`bool` field,
         which needs ``__bool__`` overridden because every non-empty string is
         otherwise truthy.
 

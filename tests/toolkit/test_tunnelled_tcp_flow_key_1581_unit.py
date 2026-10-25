@@ -5,7 +5,7 @@ The TCP reassembly and flow tracing adapters keyed a segment by the frame's
 *first* IP layer, which in a tunnel is the tunnel's own: every connection through
 one tunnel that shares a port pair merged into one flow, under the tunnel's
 endpoints. The default engine, scapy and pyshark did so (scapy found the inner
-IPv4 layer of 4in6 only). Each now keys it by the IP layer nearest above the TCP
+IPv4 layer of 4in6 only). Each keys it by the IP layer nearest above the TCP
 segment, as Wireshark's TCP conversations do.
 
 Every capture is built here, so the module is in the unit tier. pyshark runs

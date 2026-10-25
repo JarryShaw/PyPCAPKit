@@ -124,9 +124,9 @@ class IPOverlapConflictTests(unittest.TestCase):
     :rfc:`791` resolves *which* bytes win itself: "this procedure will use the
     more recently arrived copy in the data buffer" -- the opposite of TCP's
     first-write-wins (:rfc:`9293#section-3.10`, fixed for TCP by #443/#478).
-    So every case below still expects the *arriving* fragment's bytes in the
-    reassembled payload; what changes is that ``datagram.conflict`` now
-    records where that overwrite disagreed with what was already there.
+    So every case below expects the *arriving* fragment's bytes in the
+    reassembled payload, and ``datagram.conflict`` records where that
+    overwrite disagreed with what was already there.
 
     """
 

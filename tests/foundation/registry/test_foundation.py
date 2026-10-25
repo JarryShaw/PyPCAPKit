@@ -169,15 +169,13 @@ class FoundationRegistryTests(unittest.TestCase):
         Deliberately does **not** mock, because the point is to exercise the gate.
 
         """
-        # NOTE: GitHub issue #1016 moved this assertion. #513 was fixed by widening the
-        # public ``register_*`` guards to the ``*Base`` classes; #1016 narrowed them back
-        # to ``Engine``/``Reassembly``/``TraceFlow`` (the registration surface third
-        # parties extend), so the public door now refuses the built-ins -- see
-        # ``test_public_registration_rejects_base_only_classes`` below. What #513 bought
-        # -- that pcapkit's *own* classes are registrable through a real, unmocked gate --
-        # is kept by pointing this test at the internal ``Extractor._register_internal_*``
-        # path instead of the public wrappers. The subject classes and the read-back
-        # are unchanged.
+        # NOTE: the public ``register_*`` guards accept ``Engine``/``Reassembly``/
+        # ``TraceFlow`` (the registration surface third parties extend), so the public
+        # door refuses the built-ins (#1016) -- see
+        # ``test_public_registration_rejects_base_only_classes`` below. What #513
+        # guards -- that pcapkit's *own* classes are registrable through a real,
+        # unmocked gate -- is checked through the internal
+        # ``Extractor._register_internal_*`` path rather than the public wrappers.
         #
         # NOTE: imported inside the test because ``setUp`` puts the class's own ``pcapkit``
         # import in ``sys.modules``, which is why every sibling test imports locally too.

@@ -5,7 +5,7 @@ An SPB's packet data is ``min(original_len, snaplen)`` octets, with interface
 0's snaplen, and a snaplen of 0 means no limit. The default engine handed
 interface 0's snaplen to the parser as ``__packet__['snaplen']`` as it stood, so
 a 0 read as a limit of no octets, and the block's padding was read as packet
-data: 57 data octets came out as 60. The engine now hands over no limit for a
+data: 57 data octets came out as 60. The engine hands over no limit for a
 zero snaplen, and :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` reads a zero
 snaplen handed in as no limit too.
 

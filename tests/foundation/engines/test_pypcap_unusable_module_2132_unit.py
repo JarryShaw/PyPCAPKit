@@ -31,7 +31,7 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 
 #: What the fake ``pcap`` package raises on import: the libpcap loader's message.
 LOADER_ERROR = 'Cannot find libpcap.so library'
-#: The verdict ``PCAP_CT`` already gave on that failure, which ``PyPCAP`` shares.
+#: The verdict ``PCAP_CT`` and ``PyPCAP`` both give on that failure.
 REASON = f'the `pcap` module is installed but unusable -- OSError: {LOADER_ERROR}'
 #: Hang guard for the child interpreter, in seconds.
 TIMEOUT = 120

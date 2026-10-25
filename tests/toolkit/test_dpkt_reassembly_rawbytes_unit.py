@@ -3,8 +3,8 @@
 GitHub issue #1297. :mod:`pcapkit.toolkit.dpkt` built the header and payload of
 every reassembly and flow-tracing record by calling ``.pack()`` on the DPKT
 layer. DPKT recomputes a zeroed checksum or length while packing *and writes it
-back into the packet*, so the records no longer matched the capture, and the
-first adapter to run changed what every later one saw. The adapters now slice the
+back into the packet*, so the records did not match the capture, and the
+first adapter to run changed what every later one saw. The adapters slice the
 record octets that :class:`~pcapkit.foundation.engines.dpkt.DPKT` attaches to the
 frame.
 
@@ -282,7 +282,7 @@ class DPKTReassemblyRawBytesTests(unittest.TestCase):
                 self.assertEqual(info['packet'], wire)
 
     def test_options_transport_inputs_are_the_captured_octets(self) -> None:
-        """Before the fix, 33 of this capture's IPv4 datagrams came back rewritten.
+        """Without the fix, 33 of this capture's IPv4 datagrams come back rewritten.
 
         Each record is read by hand, and each input is the IHL's octets, then
         the rest up to the Total Length. The number of datagrams is counted here

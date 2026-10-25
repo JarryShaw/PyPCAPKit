@@ -334,7 +334,7 @@ class OwnDictRuleTests(unittest.TestCase):
         still needs. A ``getattr``-keyed check would do exactly that.
 
         **This is the test that matters most, because its failure mode is
-        silent.** Now that re-finalising only warns, a ``getattr`` here would
+        silent.** Since re-finalising only warns, a ``getattr`` here would
         not raise -- it would warn and hand back a class with no generated
         ``__init__``, whose construction then falls through to
         :meth:`Info.__update__` and takes a mapping instead of the declared
@@ -443,7 +443,7 @@ class OwnDictRuleTests(unittest.TestCase):
         """``__finalised__`` is read from each class's own ``__dict__`` (#1490).
 
         A class marked ``@final`` under a :attr:`~FinalisedState.BASE` ancestor
-        no longer reads ``BASE`` off it, so it reaches the branch that reads its
+        does not read ``BASE`` off it, so it reaches the branch that reads its
         own marker and is refused like any other mismarked class.
 
         """
@@ -746,7 +746,8 @@ class DecoratorCombinationTests(unittest.TestCase):
         applied to the class *object*, after creation, so that hook has already
         run and returned by the time the marker lands. First construction is the
         next moment this library is given control, and it is where the damage
-        used to surface -- as ``TypeError: 'int' object is not iterable`` out of
+        surfaces without the guard -- as
+        ``TypeError: 'int' object is not iterable`` out of
         :meth:`Info.__update__`, which names neither the class nor the mistake.
 
         """
@@ -767,7 +768,7 @@ class DecoratorCombinationTests(unittest.TestCase):
         self.assertIn('info_final', message)
 
     def test_a_bare_final_schema_is_refused_at_first_construction(self) -> None:
-        """The schema-side half, which used to return corrupt data instead."""
+        """The schema-side half, which returns corrupt data without the guard."""
         from pcapkit.protocols.schema.schema import Schema
         from pcapkit.utilities.compat import final
         from pcapkit.utilities.exceptions import SchemaError
@@ -894,7 +895,7 @@ class DecoratorCombinationTests(unittest.TestCase):
     def test_repeated_bare_info_construction_does_not_grow_excluded_without_bound(self) -> None:
         """The cost of the ``cls is not Info`` fix, pinned rather than assumed.
 
-        ``Info`` never reaches :attr:`~FinalisedState.BASE` now, so a bare
+        ``Info`` never reaches :attr:`~FinalisedState.BASE`, so a bare
         ``Info()`` would re-enter :func:`info_final` on *every* call rather than
         once, and ``cls.__excluded__.extend(cls.__builtin__)`` would append the
         same ~60 names again each time -- correctness untouched (``__excluded__``

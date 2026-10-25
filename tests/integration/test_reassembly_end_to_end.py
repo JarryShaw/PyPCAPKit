@@ -277,8 +277,8 @@ class IPv6FragmentPayloadTests(EndToEndTestCase):
 
     Kept apart from :class:`IPv6FragmentReassemblyTests` because these are the
     assertions on the datagram's octets, which are what the two defects recorded
-    below used to get wrong while the frame collection and the ``completed`` flag
-    stayed right.
+    below get wrong while the frame collection and the ``completed`` flag stay
+    right.
 
     """
 

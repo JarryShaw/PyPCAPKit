@@ -21,7 +21,7 @@ library consumer never sees. ``follow_tcp_stream`` quietly reported no streams.
 public API resets them, and ``sys.modules`` surgery does not un-run a
 ``bind_layers`` call. So an in-process assertion here would pass whenever
 something earlier in the run had imported a `Scapy`_ layer -- which is exactly
-what happened before #406 was found. :mod:`tests.toolkit.test_scapy_unit` imports
+how #406 went unnoticed. :mod:`tests.toolkit.test_scapy_unit` imports
 :mod:`scapy.layers.l2`, :mod:`~scapy.layers.inet` and :mod:`~scapy.layers.inet6`
 to build its fixtures, so ``pytest tests/toolkit tests/interface/test_misc.py``
 saw correct dissection while ``pytest tests/interface/test_misc.py`` alone did

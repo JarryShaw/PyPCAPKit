@@ -4,14 +4,13 @@
 GitHub issue #1566. The data buffer holds 65,535 octets and ``RCVBT`` 8,192
 blocks. Both completion checks tested ``all(RCVBT[0:(TDL + 7) // 8])``, and the
 slice stops silently at the table's end, so a final fragment declaring more data
-than fits completed its datagram short. A datagram now completes only if its
+than fits completed its datagram short. A datagram completes only if its
 total data length fits the buffer.
 
 A fragment the buffer's end clips counts as cut there: its partial last block is
-a hole. An 8-octet non-final fragment at the largest offset therefore received
-no block, and strict mode then dropped its datagram, while a 7-octet one was
-reported. #1567 leaves the 7-octet one's block clear too, and strict mode now
-reports a datagram with no run received, as lax mode does.
+a hole. An 8-octet non-final fragment at the largest offset therefore receives
+no block, and so does a 7-octet one (#1567). Strict mode reports a datagram with
+no run received, as lax mode does.
 
 Every case builds its fragments in memory and reads no capture. Classes are
 imported inside each test, after :func:`~tests._support.reimport_once_per_class`.

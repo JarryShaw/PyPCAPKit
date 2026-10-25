@@ -14,19 +14,19 @@ with nothing else to stop them, so an exhausted input was retried forever. The
 flag suppressed the error that *ended* the loop without supplying any other
 ending.
 
-The flag is not pointless, which is why the fix is a termination condition rather
+The flag is not pointless, which is why it gets a termination condition rather
 than a deletion. ``pcapkit/__main__.py`` sets ``no_eof = args.fin == '-'``, so
 ``pcapkit -`` reads a live capture off standard input, and reaching the end of
-what has arrived so far genuinely is not the end of that capture. What was
-missing was a way to tell a capture that has paused from one that is over.
+what has arrived so far genuinely is not the end of that capture. What is
+needed is a way to tell a capture that has paused from one that is over.
 
-Measured on ``6c3d1b0d9`` before the fix, which is what these tests reproduce:
+Measured without the fix, which is what these tests reproduce:
 
 * ``extract(in.pcap, nofile=True)`` returns with 6 frames; adding
   ``no_eof=True`` never returns, and ``faulthandler`` killed it at 10s with the
   stack in ``pcapkit/protocols/protocol.py`` ``__init__``.
 * The input's position at end of stream is *constant*: eight consecutive ends of
-  stream all at 605, of a 605-byte file. That is the signal the fix uses.
+  stream all at 605, of a 605-byte file. That is the signal the stopping rule uses.
 * A pipe whose writer is open but idle **blocks** rather than reporting end of
   stream -- frame 2 arrived at t=1.50s across a 1.5s pause -- so retrying was
   never what kept a live capture on a pipe alive.
@@ -38,19 +38,18 @@ What this narrows, deliberately
 
 A **seekable** input does not block, so the two end-of-stream probes happen
 microseconds apart and a file still being appended to ends at whatever was
-present when the extraction got there. Measured both ways, with the append
-landing on a record boundary 0.6s in: ``6c3d1b0d9`` yields all six frames, and
-this yields five. That is a real behaviour change, and it is deliberate -- the
-previous behaviour was unbounded by construction, which is the defect #620
-reports, so some stopping rule had to be chosen. A timed grace period would only
+present when the extraction got there. Measured with the append landing on a
+record boundary 0.6s in: unbounded retrying yields all six frames, and the
+stopping rule yields five. That is deliberate -- unbounded retrying is the defect
+#620 reports, so some stopping rule had to be chosen. A timed grace period would only
 make the cut-off intermittent instead of absent, so following a growing file is
 left to a policy of its own. :class:`NoEOFOverAGrowingFileStopsAtWhatIsThere`
 pins the decision so that it stays a decision rather than becoming folklore.
 
 Worth knowing while reading that: an append landing *mid-record* fails with
-``ValueError: read length must be non-negative or -1`` on **both** trees, so
-``no_eof`` over a growing file only ever worked for a writer flushing whole
-records. That is pre-existing and not addressed here.
+``ValueError: read length must be non-negative or -1`` with or without the
+stopping rule, so ``no_eof`` over a growing file only works for a writer flushing
+whole records. That is a separate matter, not addressed here.
 
 Why the end-to-end cases run in a child process
 -----------------------------------------------
@@ -431,8 +430,8 @@ class NoEOFTerminatesOnAnExhaustedInput(ChildBoundedTestCase):
         matches the plain form, which
         :file:`tests/integration/test_frame_iteration.py` already pins.
 
-        This is the case that proved an in-process deadline cannot bound: on
-        ``6c3d1b0d9`` it absorbed the ``SIGALRM`` into the parse path's
+        This is the case that proved an in-process deadline cannot bound:
+        without the fix it absorbed the ``SIGALRM`` into the parse path's
         ``except Exception`` and then ran unbounded.
 
         """
@@ -500,17 +499,18 @@ class NoEOFTerminatesOnAnExhaustedInput(ChildBoundedTestCase):
 class NoEOFOverAGrowingFileStopsAtWhatIsThere(ChildBoundedTestCase):
     """The deliberate narrowing: a seekable file being appended to is not followed.
 
-    This is the one case where the fix is a behaviour *change* rather than a
-    repair, so it is pinned rather than left to be discovered. A pipe is safe
+    This is the one case where the stopping rule narrows behaviour rather than
+    repairing it, so it is pinned rather than left to be discovered. A pipe is safe
     because its read blocks across a pause; a regular file reports end of stream
     at once, so the two probes fall microseconds apart and the extraction ends at
     the data present when it arrived.
 
-    Measured with the append landing on a record boundary 0.6s in: ``6c3d1b0d9``
-    yields all six frames, this yields five. Following a writer needs a policy --
-    a grace period, a poll interval, an explicit follow mode -- and a timed grace
-    would make the cut-off intermittent rather than absent, which is harder to
-    reason about than a crisp rule. So the rule is crisp and written down here.
+    Measured with the append landing on a record boundary 0.6s in: unbounded
+    retrying yields all six frames, the stopping rule five. Following a writer
+    needs a policy -- a grace period, a poll interval, an explicit follow mode --
+    and a timed grace would make the cut-off intermittent rather than absent,
+    which is harder to reason about than a crisp rule. So the rule is crisp and
+    written down here.
 
     The case below sequences the append on the extractor's own end of stream, not
     on that 0.6s timer: a loaded runner took longer than 0.6s to get there, read
@@ -534,7 +534,7 @@ class NoEOFOverAGrowingFileStopsAtWhatIsThere(ChildBoundedTestCase):
         a capture that has merely paused, so a frame appended there is read, and
         should be -- :class:`NoEOFStillRetriesAnInputThatGrows`.
 
-        The child is bounded like the others: on ``6c3d1b0d9`` the retry never
+        The child is bounded like the others: without the fix the retry never
         stops, so it reads the appended frame and then does not terminate, and the
         case doubles as another reproduction.
 

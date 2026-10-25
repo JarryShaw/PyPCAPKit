@@ -248,9 +248,9 @@ class IPv6DatagramHeaderTests(EndToEndTestCase):
     :rfc:`8200#section-4.5` -- "The Fragment header is not present in the
     reassembled packet", and "the Next Header field of the last header of the
     Unfragmentable Part is obtained from the Next Header field of the first
-    fragment's Fragment header". Every engine used to leave the field alone, so
-    the reassembled datagram advertised a Fragment header on a datagram that is
-    by definition no longer a fragment.
+    fragment's Fragment header". Guards against an engine leaving the field
+    alone, so that the reassembled datagram advertises a Fragment header on a
+    datagram that is by definition no longer a fragment.
 
     """
 

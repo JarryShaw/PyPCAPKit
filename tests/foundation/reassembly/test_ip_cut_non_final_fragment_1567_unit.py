@@ -10,7 +10,7 @@ zero-filled octets.
 
 Every fragment but the last carries a multiple of 8 octets
 (:rfc:`8200#section-4.5`, :rfc:`791#section-3.2`), so only the final fragment's
-partial last block is now counted received. That covers an IPv4 fragment whose
+partial last block is counted received. That covers an IPv4 fragment whose
 Total Length declares a non-multiple of 8 on a non-final fragment as well.
 
 Every case builds its fragments in memory and reads no capture. Classes are

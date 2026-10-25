@@ -59,9 +59,9 @@ true. Deleting either would destroy real documentation, so the presence of
 construction rather than by being listed.
 
 :meth:`Raw.__post_init__ <pcapkit.protocols.misc.raw.Raw.__post_init__>` shows
-how sharp that trap is, and it caught a reviewing scanner during this change.
-It documents ``error`` and ``alias``, has neither in its signature, and its body
-assigns a *local* ``alias`` from ``self._info.protocol.name`` -- which reads
+how sharp that trap is. It documents ``error`` and ``alias``, has neither in
+its signature, and its body assigns a *local* ``alias`` from
+``self._info.protocol.name`` -- which reads
 exactly like a docstring naming a parameter that does not exist. It is not:
 ``__post_init__`` forwards ``**kwargs`` to :meth:`~pcapkit.protocols.misc.raw.Raw.unpack`,
 which dispatches to :meth:`Raw.read <pcapkit.protocols.misc.raw.Raw.read>`, and
@@ -96,23 +96,13 @@ asserts every one of them still reproduces, so the list cannot rot -- when the
 owning change lands, that test fails and the entry has to be removed rather
 than sitting there forever describing a bug that is gone.
 
-That is not a hypothetical. The list was written against ``980e52f0c`` and had
-an entry for ``pcapkit/vendor/ipx/socket.py``'s ``process``, which documented
-``data`` where the parameter was ``soup``. Rebasing this change onto
-``c8fd97bcd`` picked up #511, which retired the HTML scrape and renamed that
-parameter to ``data`` as a side effect -- so the defect was gone, and this test
-failed on exactly that subtest and nothing else. The entry was removed.
-
-It then happened a second time, to the sibling ``pcapkit/vendor/ipx/packet.py``,
-and that entry's removal is in this change's diff. ``a8912b46f`` (#524) renamed
-that ``process``'s parameter to ``data`` so its docstring became correct, and
-``48c6f07f8`` (#535) added this list four commits later without re-running
-against the newer base -- so ``main`` was red on that subtest from the moment
-the guard itself landed. The guard was right both times; what failed was
-re-running it after a rebase. Worth knowing that the failure is reported through
-:meth:`~unittest.TestCase.subTest`, and ``pytest-subtests`` is not a dependency
-here, so pytest prints the parent test as ``PASSED`` while exiting non-zero:
-read the exit code, not the summary line.
+That is not a hypothetical: #511 and #524 each fixed, as a side effect, a
+``pcapkit/vendor/ipx`` ``process`` docstring this list carried as a defect, and
+this test failed on exactly that subtest until the entry was removed. So re-run
+it after a rebase. Worth knowing that the failure is reported through
+:meth:`~unittest.TestCase.subTest`: pytest reports each failing subtest as
+``SUBFAILED`` and counts it as failed, while the parent test is counted as
+passed.
 
 Everything here reads :file:`pcapkit/` source and imports nothing but the
 standard library, so it reads no capture under :file:`examples/captures/` and

@@ -10,7 +10,7 @@ assumed more than that and raised :exc:`AttributeError` on an
 * :meth:`Extractor.make_name <pcapkit.foundation.extraction.Extractor.make_name>`
   read ``fin.name``, which a :class:`io.BytesIO` does not have. The name only
   labels the input -- the output name comes from ``fout`` alone -- so a stream
-  without one is now labelled after its type, ``<BytesIO>``.
+  without one is labelled after its type, ``<BytesIO>``.
 * The magic number, and the PCAP-NG engine's block type, are read with
   ``peek``, which :class:`io.BufferedReader` has and :class:`typing.IO` does not.
 

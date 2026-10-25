@@ -6,8 +6,8 @@ from its fixed 20 octets, unless the datagram is a later fragment (#1518). It
 took the IPv4 branch of that fragment check by the header's Version field, and
 IPv6 then read any Version, so an IPv6 layer with Version 4 took it too and read
 an ``offset`` IPv6 does not have: the ``AttributeError`` ended the extraction,
-PCAP and PCAP-NG alike (#1666). The branch now goes by the layer's class. And
-IPv6 now rejects a Version other than 6 (#1680), so such a header is kept raw:
+PCAP and PCAP-NG alike (#1666). The branch goes by the layer's class. And
+IPv6 rejects a Version other than 6 (#1680), so such a header is kept raw:
 its frame hands over no input, and every frame after it is still read.
 
 scapy still reads those headers as IPv6 and hands their segments over, which

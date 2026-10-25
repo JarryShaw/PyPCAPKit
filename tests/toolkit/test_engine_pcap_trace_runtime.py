@@ -4,12 +4,12 @@
 Both engines expose each frame's captured octets, its timestamp, its original
 length and its link type, so their flow tracing adapters carry a PCAP frame
 record beside the frame mapping they always reported, and
-:class:`~pcapkit.foundation.extraction.Extractor` no longer swaps the format for
+:class:`~pcapkit.foundation.extraction.Extractor` does not swap the format for
 JSON. Every traced PCAP file is checked against the capture it was traced from:
 it holds its flow's records as captured, octets, original length and timestamp
 alike, the timestamp in the trace's resolution. The records are read from the
 capture by hand, so no engine's reading is the reference. Every JSON trace is
-checked against the one main wrote before.
+checked against pinned digests.
 
 The inputs no sample has are synthesised from :file:`tcp.pcap`: nanosecond PCAP
 and PCAP-NG (``if_tsresol=9``) captures, each with a timestamp that has
@@ -354,8 +354,8 @@ class EnginePCAPTraceTests(unittest.TestCase):
 
     def test_dict_capable_trace_formats_are_unchanged(self) -> None:
         # Only the PCAP trace dumper reads the frame record, so the JSON trace of
-        # each flow is the very file main wrote before #1507: the adapters still
-        # report the engine's own mapping of the frame, value types included.
+        # each flow matches ``JSON_TRACE_SHA256`` (#1507): the adapters report
+        # the engine's own mapping of the frame, value types included.
         # Re-measure the digests if dictdumper's output ever changes.
         from pcapkit import extract
 

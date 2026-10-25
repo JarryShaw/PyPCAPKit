@@ -5,7 +5,7 @@
 NS bit (:rfc:`3540`). :func:`~pcapkit.toolkit.dpkt.tcp_reassembly` and
 :func:`~pcapkit.toolkit.dpkt.tcp_traceflow` read each flag by its position among
 that field's binary digits, padded to eight, so with NS set every flag was read
-one bit low: a SYN as a FIN, an RST as a SYN, a PSH as an RST. They now mask
+one bit low: a SYN as a FIN, an RST as a SYN, a PSH as an RST. They mask
 each flag out of the flags octet.
 
 Every capture is built here, so the module is in the unit tier.

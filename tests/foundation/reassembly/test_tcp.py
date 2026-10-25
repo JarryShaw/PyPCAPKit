@@ -38,7 +38,7 @@ class TCPReassemblyTests(unittest.TestCase):
 
         ``first`` defaults to ``dsn`` and ``last`` to ``dsn + len(payload) - 1``
         -- absolute sequence numbers, with ``last`` inclusive -- because that is
-        what every :mod:`pcapkit.toolkit` module now passes. Tests that exercise
+        what every :mod:`pcapkit.toolkit` module passes. Tests that exercise
         the :rfc:`815` interval arithmetic on its own still override both.
 
         """
@@ -367,10 +367,10 @@ class TCPReassemblyCoordinateTests(unittest.TestCase):
     def test_incomplete_datagram_survives_a_realistic_initial_sequence_number(self) -> None:
         """A permanently missing segment gives ``completed=False``, not silence.
 
-        Two of the five segments never arrive. Before the fix this produced no
-        datagram whatsoever: the hole bounds were around 3.2 billion while the
-        payload buffer was 50 octets long, so every slice came back empty and
-        ``submit`` dropped the datagram at its ``if data:`` guard without a
+        Two of the five segments never arrive. Without the fix this produces no
+        datagram whatsoever: the hole bounds are around 3.2 billion while the
+        payload buffer is 50 octets long, so every slice comes back empty and
+        ``submit`` drops the datagram at its ``if data:`` guard without a
         word.
 
         """
@@ -408,11 +408,11 @@ class TCPReassemblyCoordinateTests(unittest.TestCase):
     def test_a_capture_without_the_handshake_reports_every_fragment(self) -> None:
         """A stream picked up mid-flight still reports all of its fragments.
 
-        Before the fix this returned a *partial* answer rather than nothing --
-        one fragment out of three -- because the completeness test counted hole
-        descriptors (``len(HDL) > 2``) rather than asking whether a hole fell
+        Without the fix this returns a *partial* answer rather than nothing --
+        one fragment out of three -- because the completeness test counts hole
+        descriptors (``len(HDL) > 2``) rather than asking whether a hole falls
         inside the received data. Without a SYN the list is one entry shorter,
-        so a two-gap stream slipped under the threshold.
+        so a two-gap stream slips under the threshold.
 
         """
         packets = self._stream(syn=False,
@@ -633,8 +633,8 @@ class TCPReassemblyCoordinateTests(unittest.TestCase):
 class TCPReassemblyConflictTests(unittest.TestCase):
     """Regression tests for GitHub issue #443.
 
-    Two segments claiming the same sequence range but carrying *different*
-    bytes used to resolve last-write-wins, silently, with ``completed`` still
+    Guards against two segments claiming the same sequence range but carrying
+    *different* bytes resolving last-write-wins, silently, with ``completed``
     reporting the datagram whole. Per :rfc:`9293#section-3.10` ("we
     reconstruct the segment to contain just the new data") the resolution is
     first-write-wins instead: the already-buffered bytes are kept, the
@@ -696,9 +696,9 @@ class TCPReassemblyConflictTests(unittest.TestCase):
     def test_conflicting_full_overlap_keeps_the_first_segment(self) -> None:
         """The issue's own reproduction: first-write-wins, and the range is recorded.
 
-        Before the fix this returned ``completed=True`` and
+        Without the fix this returns ``completed=True`` and
         ``payload=b'BBBBBBBBCCCC'`` -- the later, conflicting segment silently
-        won. The RFC-conformant answer keeps the first segment's bytes.
+        wins. The RFC-conformant answer keeps the first segment's bytes.
 
         """
         base = self.BASE
@@ -914,9 +914,8 @@ class TCPReassemblyConflictTests(unittest.TestCase):
     def test_a_simultaneous_head_prepend_and_tail_extension_in_one_overlap_call(self) -> None:
         """Full engulfment plus extension: a new head *and* a new tail in the same call.
 
-        Corrects a wrong comment that used to sit on the reach-back branch,
-        claiming a head-prepend and a tail-append "cannot both happen at
-        once". They can: the old buffer (``isn=100``, ``len=10``) is fully
+        A head-prepend and a tail-append can both happen at once: the old
+        buffer (``isn=100``, ``len=10``) is fully
         inside the arriving segment's range (``dsn=90``, ``len=30``), so the
         arriving segment supplies genuinely new bytes *before* ``isn``
         (90..99) and genuinely new bytes *past* the old buffer's end

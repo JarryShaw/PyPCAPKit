@@ -137,23 +137,22 @@ def pytest_sessionstart(session: 'pytest.Session') -> 'None':
     happens here decides what every test is restored *to*. Left cold, the
     region is empty at the pin and restored to empty after every test, which
     makes each of the tests that does not purge for itself -- :mod:`tests.project`
-    is the bulk of them -- pay a fresh ``import pcapkit`` it used to get from the
-    warm table. Measured over ``tests/project/``: 1.59s with no
+    is the bulk of them -- pay a fresh ``import pcapkit`` it would otherwise get
+    from the warm table. Measured over ``tests/project/``: 1.59s with no
     guard at all, **9.34s** guarded from a cold table, **0.35s** guarded from a
     warm one. The last is the fastest of the three because the import it would
     otherwise do inside the first test has moved here instead.
 
-    This used **not** to help a class that purges in
-    :meth:`~unittest.TestCase.setUpClass`, for the reason
-    :func:`_pin_module_snapshot` explains: such a class purges *after* this hook
-    and *before* the first snapshot the old, entry-scoped fixture took, so that
-    snapshot was whatever the class left -- warming the table earlier changed
-    nothing about it. Restoring to a *pinned* snapshot before each test as well
-    as after, rather than to one taken at that test's own entry, is what makes
-    the warm-up matter to a purging class too now: the pin below still captures
-    this import, and every later test -- including a purging class's own first
-    one -- is restored to it going in as well as coming out, regardless of
-    whether that class reloads anything for itself.
+    It helps a class that purges in :meth:`~unittest.TestCase.setUpClass` too.
+    Such a class purges *after* this hook and *before* its first test, so a
+    snapshot taken at that test's own entry would be whatever the class left --
+    warming the table earlier would change nothing about it, as
+    :func:`_pin_module_snapshot` explains. Restoring to a *pinned* snapshot
+    before each test as well as after is what makes the warm-up matter to a
+    purging class: the pin below captures this import, and every later test --
+    including a purging class's own first one -- is restored to it going in as
+    well as coming out, regardless of whether that class reloads anything for
+    itself.
     So a class that purges and reimports for itself, as
     :class:`tests.integration._helpers.EndToEndTestCase` does, still runs its
     tests on the pin. Only a module object a class attribute holds a direct
@@ -269,13 +268,11 @@ def restore_module_table() -> 'Iterator[None]':
     that will be written, which is the difference between the failure being
     unlikely and being impossible.
 
-    The others were fixed at their call sites when this guard landed, but
-    :mod:`tests.cli.test_main` was not: it kept its own purge loop, which
-    purges and restores nothing, and this fixture went on quietly healing it for
-    every test. That is issue #688 -- it took an audit rather than a failing run
-    to find, because a guard that repairs a leak also hides it. It is now fixed
-    at its call site too, which is what makes the paragraph above true of all
-    three rather than of two.
+    A guard that repairs a leak also hides it. Issue #688 -- a purge loop in
+    :mod:`tests.cli.test_main` that purged and restored nothing, which this
+    fixture quietly healed for every test -- took an audit rather than a
+    failing run to find. That is why every leak is fixed at its call site as
+    well.
 
     Deliberately *not* fixed by moving ``test_protochain.py`` so it sorts
     elsewhere, or by leaning on a neighbouring test's purge to heal the state.
@@ -603,7 +600,7 @@ def _tier_guard_lock(exclusive: 'bool') -> 'Iterator[None]':
     writes a real violation to disk, under :data:`~tests._tiers.PROBE_MODULE_NAME`, to
     reproduce the tier guard's own collection-time diagnostic end to end.
     Serially the two never overlap; under the ``-n auto --dist load`` this
-    suite's CI jobs now use, pytest-xdist may hand the two tests to different
+    suite's CI jobs use, pytest-xdist may hand the two tests to different
     worker processes at the same moment, and the scan can then observe the
     probe mid-life and report a violation nobody committed -- a real defect in
     the test suite's own concurrency, not a false positive, since the guard is

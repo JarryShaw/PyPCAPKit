@@ -92,10 +92,11 @@ class ProtocolRegistryTests(unittest.TestCase):
         :class:`pcapkit.protocols.application.http.HTTP`,
         :class:`pcapkit.protocols.application.httpv1.HTTP` and
         :class:`pcapkit.protocols.application.httpv2.HTTP` all land on ``'HTTP'``
-        and registering one replaces whichever was there. Before #675 the
-        replacement was silent -- no exception, no warning -- so a later bare-name
-        lookup simply returned a different class than it had before, with nothing
-        connecting the symptom to the registration that caused it.
+        and registering one replaces whichever was there. Guards against the
+        replacement being silent (#675) -- no exception, no warning -- so that a
+        later bare-name lookup simply returns a different class than it did
+        before, with nothing connecting the symptom to the registration that
+        caused it.
 
         """
         from pcapkit.foundation.registry import protocols as registry
@@ -148,8 +149,8 @@ class ProtocolRegistryTests(unittest.TestCase):
         :class:`~pcapkit.protocols.protocol.Protocol` under a name a built-in
         already holds displaces the built-in's entry. That is the sharpest form
         of #675: there is no call to any registry function anywhere in the
-        user's code, so before the fix nothing at all marked the moment the
-        dispatch table changed meaning.
+        user's code, so without the fix nothing at all marks the moment the
+        dispatch table changes meaning.
 
         """
         from pcapkit.foundation.registry import protocols as registry
@@ -231,19 +232,15 @@ class ProtocolRegistryTests(unittest.TestCase):
         self.assertEqual(self._registry_warnings(caught, RegistryWarning), [])
 
     def test_sibling_registries_now_stay_quiet_on_an_identical_re_registration(self) -> None:
-        """GitHub issue #718: the siblings now share ``register_protocol``'s guard.
+        """GitHub issue #718: the siblings share ``register_protocol``'s guard.
 
-        This test used to pin the opposite: the code-keyed registries warned
-        on presence alone, even when the incumbent and the replacement were
-        the same object, and #695's commit message argued that was
-        deliberate -- the key is caller-supplied rather than derived from the
-        value, so "present and different" supposedly had nothing to fix there.
-        #718 found that reasoning did not hold (a caller replaying a
-        registration is not a mistake merely because the key happens to be
-        explicit), added the identity guard, and this test now pins *that*: a
-        repeat registration naming the exact same class stays silent, exactly
+        A repeat registration naming the exact same class stays silent, exactly
         as :func:`~pcapkit.foundation.registry.protocols.register_protocol`
-        already behaved.
+        does. Guards against the code-keyed registries warning on presence
+        alone, even when the incumbent and the replacement are the same object.
+        That the key is caller-supplied rather than derived from the value does
+        not justify the warning: a caller replaying a registration is not a
+        mistake merely because the key happens to be explicit.
 
         """
         from pcapkit.const.reg.ethertype import EtherType
@@ -277,11 +274,11 @@ class ProtocolRegistryTests(unittest.TestCase):
     def test_sibling_registries_name_what_they_displaced(self) -> None:
         """Every code-keyed registrar says *what* it overwrote, not just that it did.
 
-        Independent of the identity guard the test above now pins (#718): a
-        genuine overwrite -- two different classes -- still warns and still
-        names both. The message used to be ``'protocol {code} already
-        registered, overwriting'`` and stop there, so a caller learned that
-        something had been displaced and never which class it was. That is the
+        Independent of the identity guard the test above pins (#718): a
+        genuine overwrite -- two different classes -- warns and names both.
+        Guards against a message reading ``'protocol {code} already
+        registered, overwriting'`` and stopping there, so a caller learns that
+        something has been displaced and never which class it was. That is the
         same diagnostic gap #675 closed for
         :func:`~pcapkit.foundation.registry.protocols.register_protocol`, and
         it is the part of #681 that does generalise.
@@ -368,7 +365,7 @@ class ProtocolRegistryTests(unittest.TestCase):
         builds a closure-local ``DummyProtocol`` on every call and every call
         after the first warns.
 
-        Before the fix the message was the same string for both operands --
+        Without the fix the message is the same string for both operands --
         ``overwriting <class '...UnitProtocol'> with <class '...UnitProtocol'>``
         -- which is technically true and tells a reader nothing, because the
         registry *did* overwrite one object with a different one, but nothing
@@ -522,7 +519,7 @@ class ProtocolRegistryTests(unittest.TestCase):
         register_protocol.assert_called_once_with(UnitProtocol)
 
         # NOTE: naming both transport protocols is the explicit way to reach both,
-        # one argument each, and it is the only way now that no member's ``proto``
+        # one argument each, and it is the only way, since no member's ``proto``
         # carries a composite to fan out from.
         with mock.patch.object(registry.TCP, 'register') as tcp_register:
             with mock.patch.object(registry.UDP, 'register') as udp_register:
@@ -824,15 +821,15 @@ class ProtocolRegistryTests(unittest.TestCase):
         self.assertIn("'(null)'", str(caught.exception))
 
     def test_register_apptype_null_sentinel_still_means_absent_with_a_class_module(self) -> None:
-        """GitHub issue #833's own repro, re-run against the new sentinel.
+        """GitHub issue #833's own repro, run against the :data:`NULL` sentinel.
 
         With a non-``str`` ``module``, the third positional is never
         ``class_`` -- it is the first ``*transport`` element instead, per the
         maintainer ruling in #815. :data:`NULL` passed there must still mean
         "nothing was named" (falling through to "no transport protocol
         given"), while the *string* ``'(null)'`` must be treated as an
-        ordinary, unrecognised transport name -- proving the two no longer
-        collide now that :data:`NULL` is not a :class:`str`.
+        ordinary, unrecognised transport name -- proving the two do not
+        collide, since :data:`NULL` is not a :class:`str`.
 
         """
         from pcapkit.foundation.registry import protocols as registry

@@ -183,8 +183,8 @@ class ExtractorTests(unittest.TestCase):
 
         Both built-in engines subclass :class:`~pcapkit.foundation.engines.engine.EngineBase`
         directly (so that they are not auto-registered), hence neither is an
-        :class:`~pcapkit.foundation.engines.engine.Engine`. The three declarations
-        used to say ``Engine`` and two ``cast`` calls hid the gap (#1022).
+        :class:`~pcapkit.foundation.engines.engine.Engine`. Guards against the
+        three declarations saying ``Engine``, a gap ``cast`` calls can hide (#1022).
         """
         import pcapkit.foundation.extraction as module
         from pcapkit.foundation.engines.pcap import PCAP
@@ -471,7 +471,7 @@ class ExtractorTests(unittest.TestCase):
         warned about an overwrite that never happened. This mirrors the
         identity guard GitHub issue #718 gave the code-keyed protocol
         registrars (see ``test_register_stays_quiet_on_same_object_reregistration``
-        in ``tests/protocols/test_protocol_base_unit.py``): the guard now
+        in ``tests/protocols/test_protocol_base_unit.py``): the guard
         fires only when the incumbent differs from the replacement, and the
         registry write happens either way.
 
@@ -704,7 +704,7 @@ class ExtractorTests(unittest.TestCase):
             )
 
             # An extension already on ``fout`` is recognised and not appended
-            # twice -- the comparison is against ``f'.{ext}'`` now that ``ext``
+            # twice -- the comparison is against ``f'.{ext}'`` since ``ext``
             # is bare, and getting that wrong would give ``out.json.json``.
             self.assertEqual(
                 Extractor.make_name(str(capture), str(temp / 'kept.json'), 'json')[1],
@@ -1271,8 +1271,8 @@ class DictFrameTraceEndToEndTests(unittest.TestCase):
 
     The constructor-level cases above prove the format is kept; this proves the
     adapter's frame record is *sufficient* -- the tracer runs, the dumper is handed
-    the record and writes it. Before #1507 the adapter built a :obj:`dict`, the
-    format was swapped for JSON, and before that guard this raised
+    the record and writes it. Guards against the adapter building a :obj:`dict`
+    (#1507): unless the format is swapped for JSON, that raises
     ``AttributeError: 'dict' object has no attribute 'packet'`` from
     :meth:`pcapkit.dumpkit.pcap.PCAPIO._append_value`.
 

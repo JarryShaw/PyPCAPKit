@@ -3,7 +3,7 @@
 
 :func:`tests.conftest.pytest_collection_modifyitems` raises :exc:`pytest.UsageError`
 with a detailed diagnostic when a unit-tier module reads a generated capture. Under
-``-n auto --dist load`` that message used to be lost entirely: each xdist worker
+``-n auto --dist load`` that message can be lost entirely: each xdist worker
 runs this hook inside its own nested :program:`pytest` session
 (:mod:`xdist.remote`), and that session's ``pytest_collection_finish`` fires from a
 ``finally:`` regardless of the ``UsageError``, so the controller sees what looks
@@ -13,13 +13,13 @@ unwinding. The controller then reports that test as crashed --
 ``INTERNALERROR`` instead of the diagnostic and describes the violation as a
 worker crash rather than as the tier-guard failure it is.
 
-The fix is to set ``session.shouldfail`` before raising, but only inside a worker
+So the hook sets ``session.shouldfail`` before raising, but only inside a worker
 (``hasattr(config, 'workerinput')``): that is the signal the controller already
 knows how to shut a worker down on cleanly, with no crash-item assertion, and it is
 a no-op outside a worker so the serial path is untouched.
 
 :class:`CollectionModifyItemsXdistTests` pins the hook's own logic directly and
-runs unconditionally. :class:`XdistSubprocessTests` reproduces the original bug
+runs unconditionally. :class:`XdistSubprocessTests` reproduces the bug
 end-to-end with a real violation and a real ``pytest -n auto --dist load``
 invocation, and skips when :mod:`xdist` is not importable -- the repository venv
 this suite normally runs under deliberately has no xdist installed.
@@ -34,7 +34,7 @@ measured on a real CI run, ``Integration Python 3.13``, one leg in five, 466s in
 :class:`XdistSubprocessTests` below takes the exclusive hold in ``setUp`` for as
 long as the probe sits on disk, and :func:`tests.conftest._tier_guard_reader_lock`
 takes the shared hold on behalf of every other unit-tier test, including
-``SuiteIsCleanTests``, without that module's own source changing at all.
+``SuiteIsCleanTests``, from :mod:`tests.conftest` alone.
 :class:`ProbeWriteLockTests` pins the mutex itself, independently of xdist.
 
 A third (#1756): a worker that dies mid-probe never runs its cleanup, and the
@@ -47,12 +47,12 @@ granted mistakes another worker's live probe for one. Both probe writers check
 only under the lock, and :class:`ProbeLeftoverCheckTests` pins that ordering.
 
 A fifth (#1977): GraalPy holds the GIL inside a blocking :func:`fcntl.flock`, so
-:class:`ProbeWriteLockTests` deadlocked its own process and every worker queued
-behind it. There the lock polls with ``LOCK_NB``, and :class:`ProbeLockNonBlockingTests`
-pins that it never makes a blocking call.
+a blocking lock deadlocks :class:`ProbeWriteLockTests`'s own process and queues
+every worker behind it. On GraalPy the lock polls with ``LOCK_NB``, and
+:class:`ProbeLockNonBlockingTests` pins that it never makes a blocking call.
 
-Kept separate from :mod:`tests.test_tier_guard`, which another change is already
-modifying: this module touches none of its code, only :mod:`tests.conftest`.
+Kept separate from :mod:`tests.test_tier_guard`: this module exercises
+:mod:`tests.conftest`, and none of :mod:`tests.test_tier_guard`'s code.
 
 """
 from __future__ import annotations
@@ -143,8 +143,8 @@ class CollectionModifyItemsXdistTests(unittest.TestCase):
     def test_worker_context_sets_shouldfail_before_raising(self) -> None:
         """Inside a worker, the diagnostic is also stashed on ``session.shouldfail``.
 
-        Fails on the code before this change: ``session.shouldfail`` stays at its
-        initial :data:`False` because nothing ever assigns to it.
+        Without the fix, ``session.shouldfail`` stays at its initial
+        :data:`False` because nothing ever assigns to it.
 
         """
         session = _FakeSession()
@@ -155,7 +155,7 @@ class CollectionModifyItemsXdistTests(unittest.TestCase):
         self.assertIn('a synthetic finding', message)
 
     def test_serial_context_leaves_shouldfail_untouched(self) -> None:
-        """Outside a worker, behaviour is exactly what it was before this change."""
+        """Outside a worker, ``session.shouldfail`` is left untouched."""
         session = _FakeSession()
         message = self._findings(session, _FakeConfig(is_worker=False))
 
@@ -190,7 +190,7 @@ class XdistSubprocessTests(unittest.TestCase):
     Skipped whenever the interpreter running this suite has no ``xdist`` to
     import -- true of the repository's own venv by design, so this class
     contributes nothing there and everything under a venv that has xdist
-    installed, such as the one used to verify this fix.
+    installed.
 
     """
 
@@ -259,9 +259,9 @@ class XdistSubprocessTests(unittest.TestCase):
         self.assertNotIn('INTERNALERROR', output)
 
     def test_xdist_run_reports_the_diagnostic_and_fails(self) -> None:
-        """The reproduction this change exists for.
+        """The end-to-end reproduction of the lost diagnostic.
 
-        Fails on the code before this change: the run exits non-zero from an
+        Without the fix, the run exits non-zero from an
         ``INTERNALERROR`` (``assert not crashitem`` in ``xdist/dsession.py``,
         naming the probe's test id) and ``_DIAGNOSTIC_MARKER`` never appears.
 
@@ -391,8 +391,8 @@ class ProbeWriteLockTests(unittest.TestCase):
     def test_a_concurrent_reader_waits_out_the_writer(self) -> None:
         """A shared hold cannot be granted while the exclusive one is live.
 
-        Fails on the code before this change: :func:`tests.conftest._tier_guard_lock`
-        does not exist yet, so there is nothing to import and nothing to wait on.
+        Without the fix, :func:`tests.conftest._tier_guard_lock` does not
+        exist, so there is nothing to import and nothing to wait on.
 
         """
         reader_acquired = threading.Event()
@@ -640,7 +640,7 @@ class ProbeLeftoverCheckTests(unittest.TestCase):
             fcntl.flock(handle.fileno(), fcntl.LOCK_UN)
 
     def test_a_live_probe_is_waited_for_not_reported_as_a_leftover(self) -> None:
-        """Fails on the code before this change: ``setUp`` raises "already exists"
+        """Without the fix, ``setUp`` raises "already exists"
         at once, without ever asking for the lock the live probe's writer holds.
 
         """
@@ -754,7 +754,7 @@ class ProbeLockNestedRunTests(unittest.TestCase):
             return False
 
     def test_a_nested_run_does_not_queue_behind_a_waiting_writer(self) -> None:
-        """Fails on the code before #2082: the child times out at the gate."""
+        """Without the fix (#2082), the child times out at the gate."""
         order = []  # type: list[str]
 
         def writer() -> None:

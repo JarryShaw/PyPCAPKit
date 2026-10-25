@@ -4,7 +4,7 @@
 :class:`~pcapkit.foundation.extraction.Extractor` keeps a callable ``verbose``
 as its ``_vfunc``, but each third-party engine installed its own printer
 whenever verbose output was on, so the caller's callback was replaced and never
-called. An engine now installs its printer only for ``verbose=True``.
+called. An engine installs its printer only for ``verbose=True``.
 
 Each case runs a real extraction of :file:`in.pcap`, which git tracks, so the
 module is unit tier. It proves first that the requested engine ran: the

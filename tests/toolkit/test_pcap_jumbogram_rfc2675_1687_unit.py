@@ -4,10 +4,10 @@
 :rfc:`2675#section-3` lists four errors a receiver must detect: a Payload Length
 of 0 with a Hop-by-Hop Options header and no Jumbo Payload option, a non-zero
 Payload Length with the option, a Jumbo Payload Length below 65,536, and the
-option with a Fragment header. The default engine's IPv6 parser now rejects
+option with a Fragment header. The default engine's IPv6 parser rejects
 each, so it dissects nothing past the IPv6 header: no TCP reassembly or flow
 tracing input, and no IP reassembly input from the packet or what it carries. A
-jumbogram RFC 2675 accepts is read as before, a capture cut short of its Jumbo
+jumbogram RFC 2675 accepts is dissected, a capture cut short of its Jumbo
 Payload Length included.
 
 Every capture is built here, so the module is in the unit tier.

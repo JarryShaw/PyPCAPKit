@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """Regression tests for #1256: PCAP-NG block names are unique across sections.
 
-The PCAP-NG engine used to number a non-packet block by the length of its
-section's context list, which restarts with every Section Header Block. The
-first Interface Description Block of the second section was therefore named
-``Interface Description 1`` again, so a mapping dumper (JSON, plist) kept only
-one of the two blocks and ``files=True`` overwrote the first block's file.
+Guards against the PCAP-NG engine numbering a non-packet block by the length
+of its section's context list, which restarts with every Section Header Block.
+That names the first Interface Description Block of the second section
+``Interface Description 1`` again, so a mapping dumper (JSON, plist) keeps only
+one of the two blocks and ``files=True`` overwrites the first block's file.
 
 """
 from __future__ import annotations
@@ -83,7 +83,7 @@ def dumped(path: str) -> tuple[list[str], list[str]]:
 
 
 class SingleSectionSampleTests(unittest.TestCase):
-    """A single-section file is named exactly as before the fix."""
+    """A single-section file's block names are unaffected by cross-section numbering."""
 
     def test_single_section_names_are_unchanged(self) -> None:
         keys, files = dumped(sample_path('dhcp.pcapng'))
