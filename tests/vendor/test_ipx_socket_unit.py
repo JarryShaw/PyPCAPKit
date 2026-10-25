@@ -209,9 +209,8 @@ class IPXSocketVendorTests(unittest.TestCase):
 
         ``Vendor.__init__`` regenerates and *writes* the constant file as a side
         effect of construction, which a test has no business doing to the
-        working tree, so the three attributes it sets -- ``NAME``, ``DOCS`` and
-        ``record``, at :file:`pcapkit/vendor/default.py` lines 338, 340 and 343
-        -- are set here instead.
+        working tree, so the attributes it sets -- ``NAME``, ``DOCS`` and
+        ``record`` -- are set here instead.
 
         """
         vendor = self.vendor_module.Socket.__new__(self.vendor_module.Socket)

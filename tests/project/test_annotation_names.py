@@ -64,7 +64,7 @@ def annotation_strings(tree: 'ast.AST') -> 'Iterator[tuple[str, int]]':
     in this package: a variable annotation, a parameter annotation, a return
     annotation, and the first argument of :func:`typing.cast`. The ``cast`` case
     is the one that is easiest to miss and is exactly where
-    ``ipv6_route.py:271``'s ``Optional`` hid -- :func:`typing.cast` never
+    the ``Optional`` in ``RPL.post_process`` of ``ipv6_route.py`` hid -- :func:`typing.cast` never
     evaluates that argument, so an unresolvable name there is invisible to every
     test that runs the line.
 

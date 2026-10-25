@@ -2,12 +2,12 @@
 """The AppType generator and its committed base module agree on #2048's rule.
 
 GitHub issue #2048. Every in-range port answers with the asking registry's own
-transport. That lives in two places: ``get``'s ``unknown`` fallback for a port
-``_missing_`` holds no span for, and the span branches the generator renders
+transport. That lives in ``get``'s ``unknown`` fallback for a port
+``_missing_`` holds no span for, and in the span branches the generator renders
 into ``_missing_``. Regenerating :mod:`pcapkit.const.reg.apptype.apptype` needs
 IANA's live CSV, so an edit to the template in
 :mod:`pcapkit.vendor.reg.apptype.apptype` is made to the committed module by
-hand. These render the template offline and check the two agree.
+hand. These render the template offline and check it against the committed module.
 
 """
 from __future__ import annotations
@@ -24,7 +24,7 @@ __tier__ = 'LATEST'
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 #: Every distribution importing :mod:`pcapkit.vendor` needs -- see
-#: :mod:`tests.vendor.test_ipx_packet_unit` for why all three are checked.
+#: :mod:`tests.vendor.test_ipx_packet_unit` for why each is checked.
 VENDOR_DEPS = ('requests', 'bs4', 'html5lib')
 
 #: Whether the crawlers are importable at all.

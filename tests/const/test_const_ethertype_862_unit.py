@@ -195,7 +195,7 @@ class EtherTypeGeneratorRangeOrderingTests(unittest.TestCase):
 class EtherTypeGeneratorGeneralOrderingTests(unittest.TestCase):
     """Pins :meth:`~pcapkit.vendor.reg.ethertype.EtherType._insert_range` itself.
 
-    #862's own pair is the only containment among the 56 ranges in today's
+    #862's own pair is the only containment among the ranges in the
     committed file, so this exercises the general rule -- narrower range
     before any wider range that contains it -- against synthetic nested
     ranges the live registry does not (yet) happen to contain.

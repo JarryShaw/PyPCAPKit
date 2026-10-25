@@ -5,7 +5,7 @@ The ZigBee NWK and APS key schemas have a fixed width, but a block's
 ``secrets_length`` may declare fewer octets or more. A key shorter than the
 width parsed, but its data model rebuilt it at full width: the key zero-padded,
 ``secrets_length`` rewritten and the block grown. Octets past the width were
-dropped, by the parse itself. The data model now keeps the Secrets Data octets
+dropped, by the parse itself. The data model keeps the Secrets Data octets
 as the block holds them, the schema keeps those past the fixed fields, and both
 rebuild byte for byte.
 

@@ -253,8 +253,8 @@ def restore_module_table() -> 'Iterator[None]':
     Issue #660 is what that costs. A stand-in ``ProtocolBase`` that is not
     :class:`~typing.Generic` stayed bound after the test that installed it, and
     the next test to import :mod:`pcapkit` died on ``TypeError: type
-    'ProtocolBase' is not subscriptable`` at
-    ``pcapkit/protocols/misc/pcap/frame.py:69`` -- a run of tests in
+    'ProtocolBase' is not subscriptable`` at the :class:`Frame` class statement
+    in :mod:`pcapkit.protocols.misc.pcap.frame` -- a run of tests in
     :mod:`tests.project`, and only when the polluting file happened to be
     collected first. Several files turned out to leak this way, one of
     which -- :mod:`tests.cli.test_main` -- did not import :mod:`tests._support`
@@ -523,7 +523,7 @@ collect_ignore = [f'protocols/{PROBE_MODULE_NAME}']
 #: shared hold (spanning the whole test, including the blocking
 #: ``subprocess.run``) would wait on an inner exclusive request that cannot be
 #: granted until the outer test finishes: the same deadlock shape as above, one
-#: level removed. Today it never selects either; a future change to that
+#: level removed. It selects neither; a future change to that
 #: selection should keep it that way, or add the module in question here too.
 #: The nested run's own *shared* holds are a different matter, and
 #: :data:`TIER_GUARD_HELD_ENV` covers them.

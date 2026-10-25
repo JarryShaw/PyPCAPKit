@@ -157,7 +157,7 @@ FORMER_UPLOAD = textwrap.dedent(r'''
     done <<< "$PCAPKIT_ASSETS"
 ''').lstrip()
 
-#: Each step, as ``(job, step name)``, and the ``run:`` it now holds.
+#: Each step, as ``(job, step name)``, and the ``run:`` it holds.
 STEPS = {
     ('version_check', "Check which commit the version's tag names"): 'python3 util/release_tags.py owner',
     ('github', "Check the release tags name this run's commit"): 'python3 util/release_tags.py check',

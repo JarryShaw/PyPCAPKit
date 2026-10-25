@@ -179,10 +179,10 @@ class NestedPacketContextSemanticsTests(unittest.TestCase):
     def test_pcapng_byteorder_consumer_still_works_with_both_shapes(self) -> None:
         """The one existing, hand-rolled ``__packet__`` fallback is unaffected.
 
-        ``packet_byteorder`` (``pcapkit/corekit/fields/byteorder.py:33``)
+        ``packet_byteorder`` (:mod:`pcapkit.corekit.fields.byteorder`)
         is called both with a plain dict built by hand -- as several tests and
         :func:`~pcapkit.foundation.engines.pcapng` construct -- and with what
-        ``SchemaField`` now actually builds. Both must keep working, and
+        ``SchemaField`` actually builds. Both must keep working, and
         neither is expected to change: the site already implements the
         fallback itself and does not route through
         :func:`~pcapkit.corekit.fields.misc.nested_packet_context`.

@@ -219,7 +219,7 @@ class TestTheLintReport(_ReportStep):
     """``lint``'s report: each tool's outcome, then the summary blocks."""
 
     workflow, job, file = LINT, 'lint', 'lint-report.md'
-    #: A run where every advisory tool found something, as each does today.
+    #: A run where every advisory tool found something.
     FOUND = {'BANDIT': 'failure', 'MYPY': 'failure', 'VERMIN': 'failure', 'PYLINT': 'failure',
              'ACTIONLINT': 'success'}
 

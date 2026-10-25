@@ -674,7 +674,7 @@ class AppTypeSplitTests(unittest.TestCase):
         ``cls.__transport__`` claims nothing, since IANA's unassigned and reserved
         markers belong to whichever registry was asked. Such a branch answered
         ``undefined`` until GitHub issue #2048, which made it answer with the
-        asking registry's own transport, so none answers ``undefined`` now.
+        asking registry's own transport, so none answers ``undefined``.
 
         "Every branch" is checked against the same source parsed with :mod:`ast`:
         the pattern has to find one branch per ``_unregistered_member`` call in

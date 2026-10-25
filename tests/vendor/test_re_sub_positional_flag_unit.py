@@ -221,8 +221,8 @@ class RuntimeDeprecationWarningTests(unittest.TestCase):
     PATTERN = r'\r*\n'
 
     #: The CPython version that began emitting a ``DeprecationWarning`` when
-    #: ``count``/``maxsplit`` is passed positionally. The module docstring at
-    #: line 25 already states "a live DeprecationWarning on Python 3.13+";
+    #: ``count``/``maxsplit`` is passed positionally. The module docstring
+    #: already states "a live DeprecationWarning on Python 3.13+";
     #: this constant is what turns that prose into a fact both branches of
     #: :meth:`test_positional_flag_shape_warns_only_from_the_version_that_added_it`
     #: are checked against (GitHub issue #819).
@@ -382,7 +382,7 @@ class GeneratorRuntimeCoverageTests(unittest.TestCase):
             instance.process(rows)  # type: ignore[attr-defined]
 
     def test_default_process_no_deprecation(self) -> None:
-        # pcapkit/vendor/default.py:376 -- the shared base implementation,
+        # pcapkit.vendor.default.Vendor.process -- the shared base implementation,
         # inherited by every crawler that does not override process(), e.g.
         # pcapkit.vendor.arp.hardware.Hardware.
         self._assert_no_deprecation(
@@ -411,8 +411,8 @@ class GeneratorRuntimeCoverageTests(unittest.TestCase):
 
     def test_ipv4_router_alert_process_no_deprecation(self) -> None:
         # No header row here -- ipv4-router-alert-option-values ships with
-        # none of its own (see the comment at
-        # pcapkit/vendor/ipv4/router_alert.py:39-42, GitHub issue #492).
+        # none of its own (see the comment in
+        # pcapkit.vendor.ipv4.router_alert.RouterAlert.process, GitHub issue #492).
         self._assert_no_deprecation(
             'pcapkit.vendor.ipv4.router_alert', 'RouterAlert',
             ['0,TestName,desc [RFC1234]'])

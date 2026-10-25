@@ -787,7 +787,8 @@ class StandInsDoNotOutliveTheirTestTests(unittest.TestCase):
     def test_the_real_protocol_base_still_subscripts_afterwards(self) -> None:
         """The failure mode itself, rather than the table it came from.
 
-        ``pcapkit/protocols/misc/pcap/frame.py:69`` is the line that raised
+        The :class:`Frame` class statement in
+        :mod:`pcapkit.protocols.misc.pcap.frame` is what raised
         ``TypeError: type 'ProtocolBase' is not subscriptable``, so importing it
         after the polluting test case has run is the most direct statement of
         what #660 was.

@@ -4,7 +4,7 @@
 Filed measurement: ``t._make_mptcp_addaddr(MPTCPOption.ADD_ADDR, addr_id=1, addr='1.2.3.4')``
 warned ``UnknownFieldWarning`` twice -- once for ``kind``, once for ``length`` -- then
 constructed a schema whose ``.pack()`` raised ``KeyError: 'length'`` from the ``port``
-field's condition at (what was then) ``pcapkit/protocols/schema/transport/tcp.py:792``:
+field's condition in :class:`~pcapkit.protocols.schema.transport.tcp.MPTCPAddAddress`:
 
 .. code-block:: python
 

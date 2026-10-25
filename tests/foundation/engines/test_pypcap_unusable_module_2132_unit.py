@@ -6,7 +6,7 @@ system libpcap, for one. :meth:`Extractor.import_test
 <pcapkit.foundation.extraction.Extractor.import_test>` lets that through, so the
 engine's ``unsupported_reason()`` has to report it. ``PCAP_CT`` did and ``PyPCAP``
 did not, so ``extract(engine='pypcap')`` raised the loader's error where
-``engine='pcap_ct'`` warned and fell back. Both now ask
+``engine='pcap_ct'`` warned and fell back. Both ask
 :func:`pcapkit.foundation.engines._pcap_backend.engine_reason`.
 
 """
@@ -31,7 +31,7 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 
 #: What the fake ``pcap`` package raises on import: the libpcap loader's message.
 LOADER_ERROR = 'Cannot find libpcap.so library'
-#: The verdict ``PCAP_CT`` already gave on that failure, which ``PyPCAP`` now shares.
+#: The verdict ``PCAP_CT`` already gave on that failure, which ``PyPCAP`` shares.
 REASON = f'the `pcap` module is installed but unusable -- OSError: {LOADER_ERROR}'
 #: Hang guard for the child interpreter, in seconds.
 TIMEOUT = 120

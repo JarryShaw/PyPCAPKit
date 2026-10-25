@@ -7,9 +7,9 @@ does not discover crawlers -- it reads :attr:`__all__`:
 
 .. code-block:: python
 
-   # pcapkit/vendor/__main__.py:228, the `--target <name>` path
+   # pcapkit.vendor.__main__.main, the `--target <name>` path
    target_list.extend(getattr(module, name) for name in module.__all__)
-   # pcapkit/vendor/__main__.py:236, the default path, i.e. a bare `pcapkit-vendor`
+   # pcapkit.vendor.__main__.main, the default path, i.e. a bare `pcapkit-vendor`
    target_list.extend(getattr(vendor_module, name) for name in vendor_module.__all__)
 
 :attr:`pcapkit.vendor.__all__` listed ``'MH_HandoverACKStatus'`` *twice* and had
@@ -173,7 +173,7 @@ class CrawlerReachabilityTests(unittest.TestCase):
     def _reachable_from(self, module: 'Any') -> 'dict[str, Any]':
         """The crawlers ``pcapkit-vendor`` would collect from ``module``.
 
-        The expression at :file:`pcapkit/vendor/__main__.py` lines 79 and 87,
+        The expression :func:`pcapkit.vendor.__main__.main` uses on both paths,
         reproduced -- ``getattr(module, name) for name in module.__all__`` --
         keyed by defining module and class name so the result is comparable with
         :meth:`_defined_crawlers` regardless of the alias each is exported under.

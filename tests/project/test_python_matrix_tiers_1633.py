@@ -539,9 +539,10 @@ def runner_parse(line: 'str') -> 'Optional[tuple[str, dict[str, str], str]]':
 
     A port of ``ActionCommand.TryParseV2`` and its un-escaping, from
     ``src/Runner.Common/ActionCommand.cs`` in actions/runner at 5f0b3ddcc. The
-    properties end at the first ``::`` after the leading one (``:69``), and are
-    split on every ``,`` (``:100``, ``propertiesStr.Split(new[] { ',' }, ...)``)
-    *before* ``%2C`` becomes a comma (``:30``, ``:106``). A piece holding no
+    properties end at the first ``::`` after the leading one
+    (``message.IndexOf(_commandKey, _commandKey.Length)``), and are split on every
+    ``,`` (``propertiesStr.Split(new[] { ',' }, ...)``) *before* ``%2C`` becomes a
+    comma (``_escapePropertyMappings``, which ``UnescapeProperty`` applies). A piece holding no
     ``=`` is dropped without a word, so ``title=on 3.8 (KTLO, non-blocking)``
     renders as "on 3.8 (KTLO".
 

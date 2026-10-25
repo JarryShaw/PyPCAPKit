@@ -3,14 +3,16 @@
 
 ``conda-dist`` in :file:`.github/workflows/cron-conda.yml` attaches each build
 bump's packages with ``ncipollo/release-action@v1.21.0`` and ``allowUpdates:
-true``, which calls Update a release before uploading (``src/Action.ts:107-120``).
-That request sends ``name``, ``body``, ``prerelease`` and ``draft`` whether or not
-the step sets them, and unset they are the tag, ``""`` and ``false``
-(``src/Inputs.ts:70-92,128-135,210-240``). ``v1.3.5.post42``, ``v1.4.1``,
+true``, which calls Update a release before uploading (``Action.updateRelease``
+in ``src/Action.ts``). That request sends ``name``, ``body``, ``prerelease`` and
+``draft`` whether or not the step sets them, and unset they are the tag, ``""``
+and ``false`` (``CoreInputs``'s ``body`` and ``name`` getters and its
+``updated*`` ones, in ``src/Inputs.ts``). ``v1.3.5.post42``, ``v1.4.1``,
 ``v1.4.1.post2`` and ``v1.5.0a1`` read name-is-tag and a 0-character body that
-way. Each ``omit*DuringUpdate`` input makes its field ``undefined``
-(``:210-252``), which Octokit drops from the request body
-(``dist/index.js:38369-38388``), so the release keeps what Create Release wrote.
+way. Each ``omit*DuringUpdate`` input makes its field ``undefined`` (the
+``updated*`` getters), which Octokit drops from the request body
+(``removeUndefinedProperties``, which the bundled ``merge`` calls in
+``dist/index.js``), so the release keeps what Create Release wrote.
 
 The step is read with the scanner of ``test_release_tags_the_run_sha_1634.py``,
 which runs without PyYAML; :meth:`TestTheUploadKeepsTheRelease.test_yaml_reads_the_same`
@@ -41,7 +43,8 @@ OMITTED = {
 
 #: Every input the step sets. Another one changes what the update sends -- a
 #: ``makeLatest``, say, whose ``legacy`` default is already sent as
-#: ``make_latest`` (``action.yml:58-61``, ``src/Releases.ts:168``) -- so adding
+#: ``make_latest`` (the ``makeLatest`` input in ``action.yml``, and
+#: ``GithubReleases.update`` in ``src/Releases.ts``) -- so adding
 #: one means reading the action again before adding it here.
 INPUTS = {'allowUpdates', 'artifacts', 'commit', 'tag', 'token', *OMITTED}
 

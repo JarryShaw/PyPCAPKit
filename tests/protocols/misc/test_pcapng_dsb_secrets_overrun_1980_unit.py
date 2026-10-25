@@ -5,7 +5,7 @@ A Decryption Secrets Block whose ``secrets_length`` ran far past the block read
 that many octets as secrets: the trailing Block Total Length and the blocks after
 it went with them, and past the zero-pad ceiling the read raised
 :exc:`~pcapkit.utilities.exceptions.FieldValueError` from inside the block's
-schema, which ended the whole extraction. The secrets are now bounded by the
+schema, which ended the whole extraction. The secrets are bounded by the
 block, as an Enhanced Packet Block's packet data is (#1405): the declared
 ``secrets_length`` is kept, a :class:`~pcapkit.utilities.warnings.ProtocolWarning`
 reports the overrun, and extraction carries on to the next block.

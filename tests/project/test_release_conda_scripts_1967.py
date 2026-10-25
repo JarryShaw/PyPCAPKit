@@ -399,7 +399,7 @@ class _Stand(unittest.TestCase):
         return self.env(extra, PCAPKIT_CONDA_LABELS=labels, PCAPKIT_CONDA_PACKAGES=packages)  # type: ignore[arg-type]
 
 
-#: Each step, as ``(workflow, job, step name)``, and the ``run:`` it now holds.
+#: Each step, as ``(workflow, job, step name)``, and the ``run:`` it holds.
 STEPS = {
     ('create-release.yml', 'conda', 'Check whether this leg is already on Anaconda'):
         'python3 util/release_conda.py leg /tmp/anaconda_release.json',

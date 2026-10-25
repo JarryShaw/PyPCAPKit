@@ -6,7 +6,7 @@ The fallback branch of the ``object_hook`` that
 ``super(type(self), self).object_hook(o)``. In a subclass of the class it
 returns, ``type(self)`` is the subclass, so the call resolved back to that same
 ``object_hook`` and recursed until :exc:`RecursionError`. A value no branch
-recognises now falls through to the output class's own ``object_hook``.
+recognises falls through to the output class's own ``object_hook``.
 
 :mod:`pcapkit` is imported inside each test, after
 :func:`~tests._support.reimport_once_per_class`.

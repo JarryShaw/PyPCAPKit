@@ -188,8 +188,8 @@ class ReassemblyBaseTests(unittest.TestCase):
         The keyword used here is deliberately *not* ``name``. Four class keyword
         names -- ``mcls``, ``name``, ``bases`` and ``namespace`` -- collide with
         :meth:`abc.ABCMeta.__new__`'s own parameters, which are
-        positional-or-keyword on Python 3.10 and positional-only from 3.11. On
-        3.10 the collision therefore raises :exc:`TypeError` from the metaclass
+        positional-or-keyword before Python 3.11 and positional-only from 3.11.
+        Below 3.11 the collision therefore raises :exc:`TypeError` from the metaclass
         *before* ``__init_subclass__`` is reached, so testing the guard with
         ``name=`` would only exercise it on 3.11+. Measured on 3.10.21, 3.11.15
         and 3.14.7. The colliding case is pinned separately below.
@@ -227,7 +227,7 @@ class ReassemblyBaseTests(unittest.TestCase):
         # ``name=`` is the mistake a user actually makes, by analogy with
         # ``Engine``, and it is one of the four colliding names -- so which
         # exception surfaces is version-dependent. Pinned rather than skipped, so
-        # the 3.10 behaviour is recorded rather than merely untested.
+        # the behaviour below 3.11 is recorded rather than merely untested.
         expected = UnsupportedCall if sys.version_info >= (3, 11) else TypeError
         with mock.patch('pcapkit.foundation.extraction.Extractor.register_reassembly') as register:
             with self.assertRaises(expected):

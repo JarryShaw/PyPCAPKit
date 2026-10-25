@@ -72,7 +72,7 @@ RECORDS = {
     'custom block (4.6.9)': ('DATA', ('section_number', 'interface_id', 'time', 'number', 'len')),
     'sysdig event (4.6.9)': ('sysdig', RECORD_FRAME),
     # 4.2.2 roots a Sysdig event at ``syscall`` and a Netflix custom block at
-    # ``bblog`` instead of ``frame`` (epan/dissectors/packet-frame.c:858-869, :884-890).
+    # ``bblog`` instead of ``frame`` (``dissect_frame`` in epan/dissectors/packet-frame.c).
     'sysdig event (4.2.2)': ('syscall', None),
     'black box log (4.2.2)': ('bblog', None),
 }

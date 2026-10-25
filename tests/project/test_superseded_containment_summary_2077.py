@@ -5,7 +5,7 @@ In Experimental Tests run 39898029852, job 120233865230, util/superseded.py's
 ``watch`` stopped pytest 61 s in, ``main`` having moved on, and exited 0 as it
 does for every stop. ``Containment summary`` read that status and closed on
 ``tests exited 0 after 61 s``, which reads as a pass. #2076 has the watcher
-write ``stopped=true`` to ``Run unit tests``'s outputs, so the summary now
+write ``stopped=true`` to ``Run unit tests``'s outputs, so the summary
 reads it and says the tests were stopped as superseded. It adds no warning for
 the stop, as the watcher's ``Superseded`` notice already says why, and keeps
 every warning it gives for a real cause.

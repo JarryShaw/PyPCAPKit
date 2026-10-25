@@ -548,7 +548,7 @@ class TestItGatesNothing(unittest.TestCase):
             with self.subTest(workflow=path.name):
                 self.assertNotIn('resource-monitor', path.read_text(encoding='utf-8'))
         self.assertIs(job(*EXPERIMENTAL).get('continue-on-error'), True)
-        # #2030: last but the two that name and upload the job's summary.
+        # #2030: last but the steps that name and upload the job's summary.
         self.assertEqual([entry['name'] for entry in steps()[-3:]],
                          ['Experimental summary', 'Name the job summary', 'Upload the job summary'])
 

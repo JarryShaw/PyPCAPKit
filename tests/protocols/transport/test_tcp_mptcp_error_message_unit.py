@@ -23,10 +23,12 @@ point of the change: a substring assertion on ``'invalid flags combination'``
 passes both before and after it, so the two places that already exercise these
 messages could not have caught this, and needed no edit --
 
-* ``test_tcp_mptcp_join_flag_ordering_unit.py:423``, which asserts
+* ``TCPMPTCPJoinFlagOrderingUnitTests.test_neither_syn_nor_ack_raises_protocol_error``
+  in ``test_tcp_mptcp_join_flag_ordering_unit.py``, which asserts
   ``assertIn('invalid flags combination', str(caught.exception))`` against
   ``_make_mptcp_join``, and
-* ``test_tcp_udp_unit.py:1632``, which asserts
+* ``TCPUDPUnitTests.test_a_flagless_segment_seeds_its_connection_flags_as_an_enum``
+  in ``test_tcp_udp_unit.py``, which asserts
   ``assertRaisesRegex(ProtocolError, 'invalid flags combination')`` against
   ``_read_mptcp_join``.
 

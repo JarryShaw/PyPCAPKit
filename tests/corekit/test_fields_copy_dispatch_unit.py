@@ -89,7 +89,7 @@ class FieldCallUsesCopyDunderDirectlyTests(unittest.TestCase):
         self.assertIsInstance(new_field, type(field))
 
     def test_field_base_call_field_py_294(self) -> None:
-        """:meth:`FieldBase.__call__` (``field.py:274``), reached via :class:`NoValueField`.
+        """:meth:`FieldBase.__call__`, reached via :class:`NoValueField`.
 
         :class:`~pcapkit.corekit.fields.misc.NoValueField` is the one concrete
         class in this package that never overrides ``__call__``, so it is the
@@ -102,19 +102,19 @@ class FieldCallUsesCopyDunderDirectlyTests(unittest.TestCase):
         self.assertCallReachesCopyDunderOnly(NoValueField())
 
     def test_field_call_field_py_579(self) -> None:
-        """:meth:`Field.__call__` (``field.py:580``)."""
+        """:meth:`Field.__call__`."""
         from pcapkit.corekit.fields.field import Field
 
         self.assertCallReachesCopyDunderOnly(Field(length=4))
 
     def test_list_field_call_collections_py_84(self) -> None:
-        """:meth:`ListField.__call__` (``collections.py:124``)."""
+        """:meth:`ListField.__call__`."""
         from pcapkit.corekit.fields.collections import ListField
 
         self.assertCallReachesCopyDunderOnly(ListField(length=4))
 
     def test_conditional_field_call_misc_py_148(self) -> None:
-        """:meth:`ConditionalField.__call__` (``misc.py:150``)."""
+        """:meth:`ConditionalField.__call__`."""
         from pcapkit.corekit.fields.field import Field
         from pcapkit.corekit.fields.misc import ConditionalField
 
@@ -122,13 +122,13 @@ class FieldCallUsesCopyDunderDirectlyTests(unittest.TestCase):
         self.assertCallReachesCopyDunderOnly(field)
 
     def test_payload_field_call_misc_py_299(self) -> None:
-        """:meth:`PayloadField.__call__` (``misc.py:351``)."""
+        """:meth:`PayloadField.__call__`."""
         from pcapkit.corekit.fields.misc import PayloadField
 
         self.assertCallReachesCopyDunderOnly(PayloadField(length=4))
 
     def test_switch_field_call_misc_py_427(self) -> None:
-        """:meth:`SwitchField.__call__` (``misc.py:479``)."""
+        """:meth:`SwitchField.__call__`."""
         from pcapkit.corekit.fields.field import Field
         from pcapkit.corekit.fields.misc import SwitchField
 
@@ -136,7 +136,7 @@ class FieldCallUsesCopyDunderDirectlyTests(unittest.TestCase):
         self.assertCallReachesCopyDunderOnly(field)
 
     def test_schema_field_call_misc_py_650(self) -> None:
-        """:meth:`SchemaField.__call__` (``misc.py:694``)."""
+        """:meth:`SchemaField.__call__`."""
         from pcapkit.corekit.fields.misc import SchemaField
         from pcapkit.corekit.fields.numbers import UInt8Field
         from pcapkit.protocols.schema.schema import Schema, schema_final
@@ -148,7 +148,7 @@ class FieldCallUsesCopyDunderDirectlyTests(unittest.TestCase):
         self.assertCallReachesCopyDunderOnly(SchemaField(schema=OneField))
 
     def test_forward_match_field_call_misc_py_782(self) -> None:
-        """:meth:`ForwardMatchField.__call__` (``misc.py:849``)."""
+        """:meth:`ForwardMatchField.__call__`."""
         from pcapkit.corekit.fields.field import Field
         from pcapkit.corekit.fields.misc import ForwardMatchField
 

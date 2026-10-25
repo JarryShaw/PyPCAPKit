@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """``python -m pcapkit.vendor`` must fail its exit code when a crawler raises.
 
-GitHub issue #872. Before this change, :func:`pcapkit.vendor.__main__.run`
+GitHub issue #872. Before the fix, :func:`pcapkit.vendor.__main__.run`
 swallowed every exception a crawler raised -- filed as a merely-filterable
 :class:`~pcapkit.utilities.warnings.VendorRuntimeWarning` -- and
-:func:`pcapkit.vendor.__main__.main` always ``return 0`` (line 93 pre-fix), with
+:func:`pcapkit.vendor.__main__.main` always ended on ``return 0``, with
 no accounting of whether any target had failed. Because
 :meth:`pcapkit.vendor.default.Vendor.__init__` runs its network fetch and
 render *before* the ``open(const_file, 'w')`` on its last line, a failed

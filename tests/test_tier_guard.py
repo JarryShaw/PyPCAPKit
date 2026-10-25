@@ -513,7 +513,7 @@ class TestTierTests(unittest.TestCase):
                 return _tiers.module_tier(path)
 
     def test_every_module_resolves_to_exactly_one_tier(self) -> None:
-        """The two tiers partition the test modules, and the ``LATEST`` list is the one tier."""
+        """The tiers partition the test modules, and the ``LATEST`` list is the one tier."""
         modules = _tiers.suite_modules()
         self.assertEqual(list(modules), sorted(set(modules)))
         tiers = {}  # type: dict[str, list[str]]
@@ -831,7 +831,7 @@ class FixtureTierSelectionTests(unittest.TestCase):
     def test_every_handled_call_names_a_literal_capture(self) -> None:
         """A computed name inside a handler would be invisible to the scan above.
 
-        Pins today's fact that no unit-tier module needs the computed case, so
+        Pins the fact that no unit-tier module needs the computed case, so
         that the day one does, this fails loudly instead of that module's
         fixture-backed coverage silently dropping out of
         :func:`~tests._tiers.fixture_tier_paths` -- see
@@ -1503,7 +1503,7 @@ class DependencyRequirementTests(unittest.TestCase):
         """Spot checks on the extras the rest of this suite reasons about."""
         declared = _dependency_gates.declared_requirements()
 
-        # Two lines since #2040: the second caps PyPy below 3.11.
+        # Since #2040 a second line caps PyPy below 3.11.
         self.assertEqual(
             [requirement.text for requirement in declared['crypto']],
             ["cryptography>=3.4; platform_python_implementation != 'PyPy' or python_version >= '3.11'",
@@ -1879,15 +1879,15 @@ class DependencyGateSelectionTests(unittest.TestCase):
                 self.assertEqual(section, job_section(text, name))
 
     def test_each_job_selection_is_one_of_the_three_recognised_shapes(self) -> None:
-        """A sixth shape has to fail here rather than be guessed at.
+        """A new shape has to fail here rather than be guessed at.
 
-        Five are recognised: subtract ``--ignore`` flags from the whole suite
+        These are recognised: subtract ``--ignore`` flags from the whole suite
         (``test``), ask :func:`~tests._tiers.fixture_tier_paths`
         (``integration``), pass no selection at all (``gate``), name
         literal test-file paths (``engine-tests``, one :class:`Job` per
         ``matrix.engine`` cell, #849), or run what
         :func:`~tests._tiers.project_pin_paths` prints (``project-tests``,
-        #1954). A new job selecting some sixth way would otherwise be
+        #1954). A new job selecting some other way would otherwise be
         classified ``'whole-suite'`` by the fallback and credited with
         reaching gates it does not run.
 

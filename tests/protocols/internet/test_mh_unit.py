@@ -1840,8 +1840,8 @@ class MHUnitTests(unittest.TestCase):
 
         with self.subTest('over IPv6, the raise now costs only the MH slot (GitHub issue #891)'):
             # Mobility Header is *also* one of IPv6's own chained extension
-            # headers (``Enum_ExtensionHeader.Mobility_Header``, value 135 --
-            # ``pcapkit/const/ipv6/extension_header.py:55``), so IPv6 never
+            # headers (``Enum_ExtensionHeader.Mobility_Header``, value 135, in
+            # ``pcapkit/const/ipv6/extension_header.py``), so IPv6 never
             # reaches the fallback through the base ``_import_next_layer`` at
             # all -- it walks its own ``@beholder``-decorated override
             # (``pcapkit/protocols/internet/ipv6.py:_import_next_layer``).
@@ -2942,8 +2942,8 @@ class MHUnitTests(unittest.TestCase):
         """#508 must not spread to fields where a :obj:`bool` legitimately means 0/1.
 
         ``NonceIndicesOption.home`` is a
-        :class:`~pcapkit.corekit.fields.numbers.UInt16Field` at
-        ``pcapkit/protocols/schema/internet/mh.py:708`` -- a nonce *index* rather
+        :class:`~pcapkit.corekit.fields.numbers.UInt16Field` in
+        :mod:`pcapkit.protocols.schema.internet.mh` -- a nonce *index* rather
         than an address -- so ``home=True`` packing as ``1`` is correct, not a
         defect. ``BindingRevocationMessage.code`` makes the same point through a
         :class:`~pcapkit.corekit.fields.misc.SwitchField`, which is why the guard

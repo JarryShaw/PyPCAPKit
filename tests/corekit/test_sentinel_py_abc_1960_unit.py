@@ -6,7 +6,7 @@ Where the C ``_abc`` module is missing, as on GraalPy, :mod:`abc` falls back to
 ``_abc_negative_cache_version`` on the class once any ABC has registered a
 virtual subclass since the class was built. :class:`~pcapkit.corekit.sentinels.SentinelMeta`
 refused every write to a built sentinel type, so ``isinstance(1, NullType)``
-raised :exc:`TypeError` there. It now lets those two names through, and no
+raised :exc:`TypeError` there. It lets those two names through, and no
 other.
 
 :class:`PyABCFallbackTests` runs the checks in a child interpreter that really

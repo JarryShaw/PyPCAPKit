@@ -6,8 +6,8 @@
   and the arguments and levels it refuses.
 * :class:`TestTheFormerShellAgrees` runs the shell the steps held before the
   script against the same stand-in and requires the same output, log and status;
-  for the steps that had no annotation, the same except for the annotation a
-  failed install now writes; and for an indented ``ERROR:`` line, the same
+  for the steps that had no annotation, the same except for the annotation the
+  script writes on a failed install; and for an indented ``ERROR:`` line, the same
   except for the reason the shell missed (#2041).
 * :class:`TestTheStepsRunTheScript` pins each covered step to the script, with
   its guards and environment, and every other ``pip install`` in

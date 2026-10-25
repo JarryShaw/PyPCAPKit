@@ -5,7 +5,7 @@
 ``anaconda.sh/releases/stable/v0.2.1/ana-darwin-x86_64``, which returns 404, so
 the step "Upload conda packages to Anaconda" failed on every Intel leg of
 ``conda-dist`` in :file:`.github/workflows/cron-conda.yml` and would on ``conda``
-in :file:`.github/workflows/create-release.yml`. That step now skips the Intel
+in :file:`.github/workflows/create-release.yml`. That step skips the Intel
 leg, and "Upload conda packages to Anaconda (Intel)" runs there alone, making
 the action's own ``anaconda --token … upload --user …`` call from conda-forge's
 anaconda-client, with ``--skip-existing``.

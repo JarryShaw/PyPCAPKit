@@ -37,7 +37,7 @@ from util import pytest_shards
 SHARDS = ('tests/const tests/corekit/test_fields_n* tests/corekit/test_[a-h]* tests/corekit/test_i* tests/corekit '
           'tests/foundation tests/protocols/internet tests/protocols/[a-m]* tests/protocols tests/toolkit')
 SCRIPT = ROOT / 'util' / 'pytest_shards.py'
-#: The three lines that build the command the step's caps run, in order.
+#: The lines that build the command the step's caps run, in order.
 PYTEST = 'set -- python -m pytest "$@"\n'
 SHARDED = 'set -- /usr/bin/python3 util/pytest_shards.py "$SHARDS" -- "$@"\n'
 CAPPED = 'set -- prlimit --fsize=2147483648 "$gnu_timeout" --signal=INT --kill-after=3m 110m "$@"\n'

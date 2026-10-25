@@ -5,7 +5,7 @@ The comparison -- engines, Python ceilings, prerequisites and the benchmark
 tables -- moved off the root document, which keeps a summary and a link.
 
 * :class:`PlacementTests` -- the page is in a toctree, the root document links it
-  and no longer carries the tables, and the prerequisites label is on the page.
+  and does not carry the tables, and the prerequisites label is on the page.
 * :class:`FootnoteTests` -- the benchmark tables mark their rows with
   reStructuredText footnotes rather than literal symbols and a hand legend.
 * :class:`ProvenanceTests` -- the page says where its figures come from.

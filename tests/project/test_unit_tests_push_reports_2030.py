@@ -11,7 +11,7 @@ theirs through :file:`ci-reports.yml`'s. Both relays run the same steps.
   its ``if:`` and its scopes; each ``discussion`` takes the events it posts and is
   the one job holding ``discussions: write``; a relayed run's concurrency group
   is its own; the checkout is the default branch's scripts, never the run's head;
-  and the two relays' steps are one.
+  and both relays' steps are one.
 * :class:`TestTheScriptsWorkflows` holds the script's :data:`WORKFLOWS` to the
   workflow files: their names, file stems, by-design lists and gated legs.
 * :class:`TestTheJobSummaries` pins how each job keeps a copy of its summary and
@@ -85,7 +85,7 @@ WRITE = 'python3 util/check_suite_report.py --report report/run-report.md'
 NEEDS = {'python-versions': {'outputs': {'latest': '3.15'}}}
 #: The step outputs ``Write the run report`` hands on.
 OUTPUTS = ('post', 'title', 'mode', 'status')
-#: The job summary's copy, and the two steps that end each job that writes one.
+#: The job summary's copy, and the steps that end each job that writes one.
 COPY = '${{ runner.temp }}/job-summary.md'
 SAVE, UPLOAD = 'Name the job summary', 'Upload the job summary'
 #: Each job that writes its summary, as ``(workflow, job)``: the KTLO summaries,

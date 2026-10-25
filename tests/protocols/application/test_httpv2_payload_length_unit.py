@@ -233,7 +233,7 @@ class FramePayloadMixin:
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class HTTPv2DataFramePayloadLengthUnitTests(FramePayloadMixin, unittest.TestCase):
-    """``DATA`` -- ``pcapkit/protocols/schema/application/httpv2.py:235``."""
+    """``DATA`` -- ``DataFrame`` in ``pcapkit/protocols/schema/application/httpv2.py``."""
 
     #: ``DATA``, :rfc:`9113#section-6.1`.
     TYPE = 0x00
@@ -297,7 +297,7 @@ class HTTPv2DataFramePayloadLengthUnitTests(FramePayloadMixin, unittest.TestCase
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class HTTPv2HeadersFramePayloadLengthUnitTests(FramePayloadMixin, unittest.TestCase):
-    """``HEADERS`` -- ``pcapkit/protocols/schema/application/httpv2.py:284``."""
+    """``HEADERS`` -- ``HeadersFrame`` in ``pcapkit/protocols/schema/application/httpv2.py``."""
 
     #: ``HEADERS``, :rfc:`9113#section-6.2`.
     TYPE = 0x01
@@ -409,7 +409,7 @@ class HTTPv2HeadersFramePayloadLengthUnitTests(FramePayloadMixin, unittest.TestC
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class HTTPv2PushPromiseFramePayloadLengthUnitTests(FramePayloadMixin, unittest.TestCase):
-    """``PUSH_PROMISE`` -- ``pcapkit/protocols/schema/application/httpv2.py:382``."""
+    """``PUSH_PROMISE`` -- ``PushPromiseFrame`` in ``pcapkit/protocols/schema/application/httpv2.py``."""
 
     #: ``PUSH_PROMISE``, :rfc:`9113#section-6.6`.
     TYPE = 0x05
@@ -488,14 +488,14 @@ class HTTPv2PlainLengthFormControlUnitTests(FramePayloadMixin, unittest.TestCase
     """
 
     def test_continuation_frame_carries_its_fragment(self) -> None:
-        """``CONTINUATION`` -- ``httpv2.py:453``, the plain form."""
+        """``CONTINUATION`` -- ``ContinuationFrame``, the plain form."""
         raw = http2_frame_bytes(0x09, 0x04, 1, FRAGMENT)
         info = self.parse(raw)
 
         self.assertEqual(info.fragment, FRAGMENT)
 
     def test_goaway_frame_carries_its_debug_data(self) -> None:
-        """``GOAWAY`` -- ``httpv2.py:423``, the plain form."""
+        """``GOAWAY`` -- ``GoawayFrame``, the plain form."""
         from pcapkit.const.http.error_code import ErrorCode
 
         payload = ((5).to_bytes(4, 'big')
@@ -509,7 +509,7 @@ class HTTPv2PlainLengthFormControlUnitTests(FramePayloadMixin, unittest.TestCase
         self.assertEqual(info.error, ErrorCode.ENHANCE_YOUR_CALM)
 
     def test_unassigned_frame_carries_its_data(self) -> None:
-        """An unregistered frame type -- ``httpv2.py:199``, the plain form.
+        """An unregistered frame type -- ``UnassignedFrame``, the plain form.
 
         ``0xF0`` is in the range :rfc:`9113#section-5.5` leaves for extensions,
         so this is expected traffic; the reader warns about it, which is why the

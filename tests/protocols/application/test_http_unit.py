@@ -217,10 +217,10 @@ class HTTPUnitTests(unittest.TestCase):
         ``protocol.make(**kwargs)`` dispatch this issue is actually about.
 
         The real, supported entry point is construction:
-        :meth:`ProtocolBase.__init__` (``protocol.py:1203``, the ``**kwargs``-
-        only overload at ``:1201``) calls ``self.pack(**kwargs)``, through
+        :meth:`ProtocolBase.__init__` (the implementation behind its
+        ``**kwargs``-only overload) calls ``self.pack(**kwargs)``, through
         :meth:`~ProtocolBase.__post_init__`, when built with no ``file``, and
-        :meth:`ProtocolBase.pack` (``protocol.py:761``) calls
+        :meth:`ProtocolBase.pack` calls
         ``target.make(**kwargs)`` on :meth:`~ProtocolBase._packing_target`,
         which while constructing is the instance itself -- a *bound* call on the
         outer ``HTTP`` instance, which is what actually reaches the inner,
@@ -2086,7 +2086,7 @@ class HTTPUnitTests(unittest.TestCase):
     def test_httpv2_truncated_frame_is_rejected_uniformly_regardless_of_declared_length(self) -> None:
         """#799: a buffer of four real octets must refuse *every* declared length.
 
-        ``httpv2.py:223`` used to read ``if schema.length < 9:`` -- the declared
+        ``HTTP.read`` in ``httpv2.py`` used to read ``if schema.length < 9:`` -- the declared
         24-bit length off the wire, never the buffer's -- so a frame whose real
         buffer held only four octets still parsed whenever the declared value
         happened to clear nine and (for ``SETTINGS``) land on a multiple of six
@@ -2711,7 +2711,7 @@ class HTTPUnitTests(unittest.TestCase):
         # made a memberless ``enum.Flag`` subclass refuse ``Flags(0)``
         # outright, where earlier interpreters handed back a pseudo-member --
         # ``Enum.__new__`` gained ``if not cls._member_map_: raise TypeError``
-        # (3.11's ``enum.py:1117``), which runs *before* the ``_missing_`` hook
+        # in 3.11, which runs *before* the ``_missing_`` hook
         # that used to manufacture one. Measured either side of the boundary
         # rather than taken from a changelog:
         #

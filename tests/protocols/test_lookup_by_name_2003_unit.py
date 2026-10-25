@@ -3,14 +3,14 @@
 
 GitHub issue #2003: on PyPy, an :class:`~pcapkit.corekit.infoclass.Info`
 lays its keys out as an earlier instance of the same class did, so its key
-order is not CPython's. Two lookups of a rebuild from ``to_dict()`` read
+order is not CPython's. Lookups of a rebuild from ``to_dict()`` read
 structure off that order: the payload was taken to be the *last* nested key,
 and the IPv6 extension header chain was walked in key order. A cut frame
 rebuilt short, and so did a Hop-by-Hop, Destination, Destination chain once
 ``hopopt`` had moved past the upper layer.
 
 The order of an :class:`~pcapkit.corekit.infoclass.Info` is not part of its
-contract, so nothing is read off it any more: ``to_dict()`` carries the
+contract, so nothing is read off it: ``to_dict()`` carries the
 ``__next_type__`` and ``__next_name__`` metadata the payload is dispatched on,
 and ``__exthdr__``, the extension header chain as a tuple of parser and info
 pairs in wire order. A dict without the metadata is not guessed at. These tests reorder an

@@ -8,7 +8,7 @@ a layer rebuilt from its dict lost its payload: an Ethernet frame came back as
 its 14-octet header. IPv6 lost its extension headers the same way, with
 ``__exthdr__``, and HTTP raised ``ProtocolError('invalid HTTP data: Raw')``.
 
-``to_dict`` now carries both keys, so the dict rebuild dispatches exactly as
+``to_dict`` carries both keys, so the dict rebuild dispatches exactly as
 the info's, and the dumps leave every dunder key out (#2003). A dict without
 them is not guessed at: no payload is rebuilt.
 

@@ -266,7 +266,7 @@ class DumpkitCommonTests(unittest.TestCase):
     def test_make_dumper_escapes_mapping_keys_for_plist_like_output(self) -> None:
         """GitHub issue #772, the half the hook above cannot reach.
 
-        ``dictdumper/plist.py:202`` writes a key as
+        ``PLIST._append_dict`` in :mod:`dictdumper.plist` writes a key as
         ``'<key>{item}</key>'.format(item=item)`` and calls ``_encode_value`` on
         the *value* two lines down, never on the key -- so
         :meth:`object_hook` is handed every value the writer interpolates and no

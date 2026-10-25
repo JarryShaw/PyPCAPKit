@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """The test suite's tier rule, and the machinery that enforces it.
 
-The suite runs in two tiers, and the split is a property of a module's *path*
-rather than of the command that happens to collect it:
+The suite is split into tiers by what a module may read, and the split is a
+property of a module's *path* rather than of the command that happens to collect
+it:
 
 =================================== ==========================================
 Tier                                Modules
@@ -50,8 +51,8 @@ So this module answers, cheaply and without needing the fixtures themselves:
   ``ALL``, on every leg, or ``LATEST``, on ``latest`` alone? ``ALL`` is opt-in:
   a module is in it only when it says so with ``__tier__ = 'ALL'``
   (:func:`declared_tier`), and :data:`DEFAULT_TIER`, ``LATEST``, otherwise.
-  :func:`all_tier_paths` and :func:`latest_tier_paths` list the two tiers; every
-  leg but ``latest`` leaves the second out. See "The curated ``ALL`` tier" below
+  :func:`all_tier_paths` and :func:`latest_tier_paths` list them; every
+  leg but ``latest`` leaves the ``LATEST`` one out. See "The curated ``ALL`` tier" below
   for which modules opt in.
 * :func:`is_project_pin` and :func:`project_pin_paths` -- which
   :file:`tests/project` modules give one answer on every interpreter, and so run
@@ -68,7 +69,7 @@ tarball still runs its tests.
 its own copy of the selection: the job calls this module at run time (``python
 -c "from tests._tiers import fixture_tier_paths; ..."``, see
 :data:`FIXTURE_TIER_SELECTOR`) instead of spelling out ``tests/integration``
-and the two globs itself. That closes the same gap :data:`UNIT_TIER_SELECTION`
+and the globs itself. That closes the same gap :data:`UNIT_TIER_SELECTION`
 leaves open in the other direction: a workflow that asks this module for the
 answer cannot drift from it, whereas one that repeats the answer as literal
 flags always can. See :func:`fixture_tier_paths`'s docstring for why the

@@ -292,7 +292,7 @@ class TestEveryWorkflowDeclaresPermissions(unittest.TestCase):
         self.assertEqual(deploy['with']['folder'], 'docs/build/html')
 
 
-#: A ``gh`` that answers the two ``gh api`` calls the check makes from the
+#: A ``gh`` that answers the ``gh api`` calls the check makes from the
 #: environment, and logs each call. ``$2`` is the endpoint.
 GH_STUB = '''#!/bin/sh
 printf '%s\\n' "$*" >> "$STUB_LOG"
