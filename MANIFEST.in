@@ -28,13 +28,15 @@ prune typings
 #
 # What actually ships them, on setuptools 84.0.0:
 #
-# * ``setuptools/command/sdist.py:59-60`` sets ``READMES`` from
-#   ``README_EXTENSIONS = ['', '.rst', '.txt', '.md']``, and
-#   ``setuptools/_distutils/command/sdist.py:277-296`` appends the first of those
+# * setuptools' ``sdist`` command (``setuptools/command/sdist.py``) sets
+#   ``sdist.READMES`` from ``README_EXTENSIONS = ['', '.rst', '.txt', '.md']``,
+#   and the distutils base's ``sdist._add_defaults_standards``
+#   (``setuptools/_distutils/command/sdist.py``) appends the first of those
 #   that exists to the file list unconditionally, before ``MANIFEST.in`` is read.
 #   The ``.md`` entry is setuptools' own addition over the distutils default, so
 #   the README becoming Markdown is exactly what this line stopped mattering for.
-# * ``setuptools/dist.py:460`` supplies the default ``license_files`` glob
+# * ``Distribution._finalize_license_files`` (``setuptools/dist.py``) supplies
+#   the default ``license_files`` glob
 #   ``['LICEN[CS]E*', 'COPYING*', 'NOTICE*', 'AUTHORS*']``, used because
 #   ``pyproject.toml`` declares no ``license-files`` of its own. That is what emits
 #   ``adding license file 'LICENSE'`` in the build log, twice, in a build with this

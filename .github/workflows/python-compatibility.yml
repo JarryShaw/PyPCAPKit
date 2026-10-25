@@ -91,8 +91,8 @@ jobs:
       # with sources that do not compile -- is legible from the run summary; a
       # warning on a KTLO leg (#1672). Each title escapes `,` as
       # `%2C`: the runner splits a command's properties on `,`, so the KTLO
-      # title would stop at "(KTLO" (actions/runner
-      # src/Runner.Common/ActionCommand.cs:100, at 5f0b3ddcc).
+      # title would stop at "(KTLO" (actions/runner `ActionCommand.TryParseV2`
+      # in src/Runner.Common/ActionCommand.cs, at 5f0b3ddcc).
       - name: Verify package
         id: verify
         if: ${{ steps.install.outcome == 'success' }}
