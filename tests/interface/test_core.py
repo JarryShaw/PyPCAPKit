@@ -308,9 +308,8 @@ class EngineConstantTests(unittest.TestCase):
     # tests above, but running it needs the :program:`tshark` *binary* as well as the
     # :mod:`pyshark` package, and the engine drives it as a subprocess -- so a
     # stand-in would be a stand-in for the whole extraction rather than for a module,
-    # and would stop testing the routing this class is about. Its constant predates
-    # this change and its value is asserted against the registry above, which is what
-    # a wrong constant would break.
+    # and would stop testing the routing this class is about. Its constant's value is
+    # asserted against the registry above, which is what a wrong constant would break.
 
     def _fake_pcap_module(self, *, is_pcap_ct: bool):
         """A stand-in :mod:`pcap` module, as one distribution or the other.

@@ -2,11 +2,11 @@
 """GitHub issue #1490: each non-final :class:`~pcapkit.corekit.infoclass.Info`
 subclass is finalised on its own state, whatever was built before it.
 
-:meth:`Info.__new__ <pcapkit.corekit.infoclass.Info.__new__>` used to read
-``__finalised__`` through inheritance, so once a non-final parent had been built
-its non-final children read the parent's ``BASE`` and were never finalised. They
-kept the ``__excluded__`` copied at declaration, and ``to_dict()``, ``len()`` and
-iteration then included ``__map__``, ``__map_reverse__`` and ``__multi__``.
+Without the fix, :meth:`Info.__new__ <pcapkit.corekit.infoclass.Info.__new__>`
+reads ``__finalised__`` through inheritance, so once a non-final parent has been
+built its non-final children read the parent's ``BASE`` and are never finalised.
+They keep the ``__excluded__`` copied at declaration, and ``to_dict()``, ``len()``
+and iteration then include ``__map__``, ``__map_reverse__`` and ``__multi__``.
 
 The defect depends on process-wide state -- which class was built first -- so
 every order runs in a fresh interpreter, started from the repository root so it

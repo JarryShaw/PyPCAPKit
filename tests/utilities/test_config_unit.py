@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """Every tunable limit has one home, :mod:`pcapkit.utilities.config`.
 
-GitHub issue #1726: the limits were defined across five packages, and the
-readers in ``ipv6.py`` and ``toolkit/pypcapfile.py`` copied two of them with
-``from ... import``, so patching the defining module left those readers on the
-old value. Now each is a ``PCAPKIT_*`` environment variable read once by
+GitHub issue #1726 guards against the limits being spread across packages, with
+the readers in ``ipv6.py`` and ``toolkit/pypcapfile.py`` copying two of them with
+``from ... import``, so that patching the defining module leaves those readers on
+the old value. Each is a ``PCAPKIT_*`` environment variable read once by
 :mod:`pcapkit.utilities.config`, every reader looks it up there at call time,
 and the old import paths are gone. A bad value warns and falls back to the
 default; ``-1`` lifts a limit, and that or any value above the default warns of

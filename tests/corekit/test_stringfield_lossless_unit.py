@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """StringField packs back exactly the octets it unpacked.
 
-GitHub issue #1293: :class:`~pcapkit.corekit.fields.strings.StringField` was
-lossy three ways. Without an ``encoding`` it decoded with the charset
-:func:`~pcapkit.utilities.chardet.detect` guessed and packed the text back as
-UTF-8; an octet the charset could not decode became U+FFFD and was packed as
-U+FFFD's own three octets; and a length of ``-1`` was taken from the *character*
-count, so multi-octet text lost its tail.
+GitHub issue #1293: without the fix, :class:`~pcapkit.corekit.fields.strings.StringField`
+is lossy three ways. Without an ``encoding`` it decodes with the charset
+:func:`~pcapkit.utilities.chardet.detect` guesses and packs the text back as
+UTF-8; an octet the charset cannot decode becomes U+FFFD and is packed as
+U+FFFD's own three octets; and a length of ``-1`` is taken from the *character*
+count, so multi-octet text loses its tail.
 
-The octets are now remembered by a :class:`DecodedString
+The octets are remembered by a :class:`DecodedString
 <pcapkit.corekit.fields.strings.DecodedString>` and packed verbatim, while the
 decoded text is left exactly as it was -- U+FFFD and all. That the text is
 unchanged is load-bearing rather than incidental, so

@@ -178,13 +178,13 @@ import_module` or :data:`sys.modules` succeeding -- the omission is caught
     def test_klass_treats_an_explicit_null_string_as_a_real_class_name(self) -> None:
         """``class_='(null)'`` is a class name, not the sentinel.
 
-        Before GitHub issue #833, :data:`NULL` was the plain :class:`str`
-        ``'(null)'``, so a descriptor built with that exact string was
-        indistinguishable from one built from the sentinel default -- an
-        equal-but-distinct string took whichever branch the identity check
-        happened to land on. The sentinel is no longer a :class:`str` at all,
-        so ``'(null)'`` now always resolves as an ordinary (missing) class
-        name, and the failure names it like any other bad class name would.
+        Without the GitHub issue #833 fix, :data:`NULL` is the plain
+        :class:`str` ``'(null)'``, so a descriptor built with that exact string
+        is indistinguishable from one built from the sentinel default -- an
+        equal-but-distinct string takes whichever branch the identity check
+        happens to land on. The sentinel is not a :class:`str` at all, so
+        ``'(null)'`` always resolves as an ordinary (missing) class name, and
+        the failure names it like any other bad class name would.
 
         """
         target_module = types.ModuleType('demo.explicit_null')
@@ -198,10 +198,10 @@ import_module` or :data:`sys.modules` succeeding -- the omission is caught
     def test_null_sentinel_is_not_a_string(self) -> None:
         """:data:`NULL` means "absent", and nothing else compares equal to it.
 
-        The pre-#833 sentinel was the plain string ``'(null)'``, compared by
-        identity -- so an equal-but-distinct ``'(null)'`` from a caller took a
-        different branch than the sentinel itself, purely as a function of
-        string interning. :data:`NULL` is now a dedicated
+        Without the #833 fix, the sentinel is the plain string ``'(null)'``,
+        compared by identity -- so an equal-but-distinct ``'(null)'`` from a
+        caller takes a different branch than the sentinel itself, purely as a
+        function of string interning. :data:`NULL` is a dedicated
         :class:`~pcapkit.corekit.sentinels.NullType` singleton, so no string a
         caller passes can compare equal to it by ``==`` or by ``is``.
 
@@ -223,16 +223,15 @@ import_module` or :data:`sys.modules` succeeding -- the omission is caught
     def test_null_sentinel_identity_survives_copy_and_pickle(self) -> None:
         """:data:`NULL` stays the same object through :mod:`copy` and :mod:`pickle`.
 
-        Before this fix, :class:`~pcapkit.corekit.sentinels.NullType` had no
+        Without the fix, :class:`~pcapkit.corekit.sentinels.NullType` has no
         :meth:`~pcapkit.corekit.sentinels.NullType.__copy__`,
         :meth:`~pcapkit.corekit.sentinels.NullType.__deepcopy__` or
         :meth:`~pcapkit.corekit.sentinels.NullType.__reduce__` of its own, so
         :func:`copy.copy`, :func:`copy.deepcopy` and every :mod:`pickle`
-        protocol fell back to the default behaviour for a plain object and
-        each produced a *second*, non-identical :class:`NullType` instance.
-        Measured on GitHub pull request #835's head, ``375b50c85``: this
-        test's ``copy.deepcopy`` and ``pickle`` assertions below all fail
-        with an :class:`AssertionError` there, since the round-tripped object
+        protocol fall back to the default behaviour for a plain object and
+        each produces a *second*, non-identical :class:`NullType` instance,
+        so this test's ``copy.deepcopy`` and ``pickle`` assertions below all
+        fail with an :class:`AssertionError`, since the round-tripped object
         ``is not`` :data:`NULL`.
 
         Every pickle protocol the running interpreter supports -- ``0``
@@ -279,20 +278,20 @@ import_module` or :data:`sys.modules` succeeding -- the omission is caught
         ``self.name is NULL`` to tell "the caller never named a class" apart
         from "the caller named a class that does not exist" -- see
         :meth:`test_klass_raises_protocolerror_when_class_name_was_never_given`.
-        Before this fix, :func:`copy.deepcopy` on the descriptor recursed into
-        that check's operand and minted a second, non-identical
+        Without the fix, :func:`copy.deepcopy` on the descriptor recurses into
+        that check's operand and mints a second, non-identical
         :class:`~pcapkit.corekit.sentinels.NullType`, so the identity check
-        failed silently and ``self.name`` -- still that stray sentinel, now
-        masquerading as an ordinary class name -- reached :func:`getattr`
-        directly. :func:`getattr` on a non-:class:`str` name raises a bare
+        fails silently and ``self.name`` -- that stray sentinel, masquerading
+        as an ordinary class name -- reaches :func:`getattr` directly.
+        :func:`getattr` on a non-:class:`str` name raises a bare
         :exc:`TypeError` that :meth:`klass` does not catch, downgrading what
         should be a clean :exc:`~pcapkit.utilities.exceptions.ProtocolError`
         into ``TypeError: attribute name must be string, not 'NullType'``.
-        Measured on GitHub pull request #835's head, ``375b50c85``: the
-        ``assertRaises(self.module.ProtocolError)`` below does not catch that
-        :exc:`TypeError` there, since :exc:`ProtocolError` derives from
-        :exc:`BaseError` and :exc:`ValueError`, never :exc:`TypeError`, so the
-        test fails with the :exc:`TypeError` propagating out uncaught.
+        The ``assertRaises(self.module.ProtocolError)`` below does not catch
+        that :exc:`TypeError`, since :exc:`ProtocolError` derives from
+        :exc:`BaseError` and :exc:`ValueError`, never :exc:`TypeError`, so
+        without the fix the test fails with the :exc:`TypeError` propagating
+        out uncaught.
 
         The target module is registered directly into :data:`sys.modules`,
         the same way :meth:`_register` does for every other test in this

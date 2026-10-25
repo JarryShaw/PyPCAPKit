@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
 """The byte-order callback the PCAP and PCAP-NG schemas share.
 
-GitHub issue #1519. The PCAP frame header and the PCAP-NG blocks each had a
-``byteorder_callback``, and the PCAP-NG one additionally fell back to an
-enclosing ``__packet__``. One helper now serves both, with the PCAP-NG body: a
-superset that gives the frame header the same answer on every packet the
+GitHub issue #1519. One helper serves both the PCAP frame header and the
+PCAP-NG blocks, with the PCAP-NG body and its fallback to an enclosing
+``__packet__``: a superset that gives the frame header the same answer on every
+packet the
 library hands it, since :meth:`Frame.pack
 <pcapkit.protocols.misc.pcap.frame.Frame.pack>` and :meth:`Frame.unpack
 <pcapkit.protocols.misc.pcap.frame.Frame.unpack>` always seed ``byteorder``.
 This pins the helper, its ``__packet__`` fallback, and that both schemas use it.
 
-GitHub issue #1711 then moved the helper from
-``pcapkit.protocols.schema.misc.byteorder`` to
-:mod:`pcapkit.corekit.fields.byteorder`, with no re-export left behind. This
-also pins that the old path no longer imports, and that the new module reaches
-no higher than :mod:`pcapkit.corekit`.
+Per GitHub issue #1711 the helper lives in
+:mod:`pcapkit.corekit.fields.byteorder`, with no re-export at the old
+``pcapkit.protocols.schema.misc.byteorder`` path. This also pins that the old
+path does not import, and that the module reaches no higher than
+:mod:`pcapkit.corekit`.
 
 """
 
@@ -33,7 +33,7 @@ __tier__ = 'ALL'
 
 SHARED = 'pcapkit.corekit.fields.byteorder'
 
-#: Where the helper lived before #1711; removed, not re-exported.
+#: The path the helper moved from (#1711); nothing is left there, not even a re-export.
 OLD_PATH = 'pcapkit.protocols.schema.misc.byteorder'
 
 #: Source of :data:`SHARED`, read with :mod:`ast` rather than imported.

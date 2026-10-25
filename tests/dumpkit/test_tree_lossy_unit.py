@@ -4,7 +4,7 @@
 GitHub issue #1266: :meth:`dictdumper.tree.Tree._append_number` hands every
 number to :func:`math.isnan`, which raises ``TypeError: must be real number, not
 complex`` for the :class:`complex` values :class:`~dictdumper.tree.Tree` routes
-there. :func:`~pcapkit.dumpkit.common.make_dumper` now writes those itself, in
+there. :func:`~pcapkit.dumpkit.common.make_dumper` writes those itself, in
 the writer's own ``-> <number>`` style. ``json`` and ``plist`` are untouched:
 they already write a :class:`complex` as the string ``(1+2j)``.
 

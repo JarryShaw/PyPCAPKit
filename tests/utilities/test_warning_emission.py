@@ -11,8 +11,8 @@ The emission model, which these tests pin:
   the log record carries, never how many records there are;
 * constructing a warning category is **not** an emission, and reports nothing.
 
-Before the fix the counts were: 1 outside development mode (the
-:mod:`warnings` emission was swallowed by the filter the constructor installed --
+Without the fix the counts are: 1 outside development mode (the
+:mod:`warnings` emission is swallowed by the filter the constructor installs --
 see #364) and 3 in development mode (two log records, from ``warn()`` and again
 from ``BaseWarning.__init__``, plus the :mod:`warnings` emission).
 
@@ -91,9 +91,9 @@ class WarningEmissionTests(unittest.TestCase):
     def test_a_non_pcapkit_category_is_reported_the_same_way(self) -> None:
         """The counts must not depend on the category being a ``BaseWarning``.
 
-        A ``BaseWarning`` used to be reported a different number of times from a
-        plain :exc:`UserWarning`, because only the former ran the constructor that
-        logged and filtered.
+        Guards against a ``BaseWarning`` being reported a different number of
+        times from a plain :exc:`UserWarning`, as happens when only the former runs
+        a constructor that logs and filters.
 
         """
         for devmode in (False, True):

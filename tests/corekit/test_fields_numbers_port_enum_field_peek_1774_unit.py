@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
-"""Why :meth:`~pcapkit.corekit.fields.numbers.PortEnumField.post_process` still peeks.
+"""Why :meth:`~pcapkit.corekit.fields.numbers.PortEnumField.post_process` peeks.
 
 GitHub issue #1774. The field looks a port up in the registry rows and in
 ``AppType._missing_``'s spans before calling ``AppType.get``, so that a genuine
 miss builds its member through ``EnumField._unregistered_member``. That peek was
-written to stop ``get`` minting a member per ephemeral port. Since #860 ``get``
-no longer mints, so the growth it guarded against is gone; but the member ``get``
-builds on a miss is still not the one a parse needs. These tests pin both
+written to stop ``get`` minting a member per ephemeral port. ``get`` does not
+mint (#860), so the growth it guarded against cannot happen; but the member
+``get`` builds on a miss is not the one a parse needs. These tests pin both
 halves, so that the peek's documented reason fails here the day it stops being
 true, and pin that a composite ``proto`` resolves a miss as ``get`` does.
 
@@ -53,7 +53,7 @@ class PortEnumFieldPeekTests(unittest.TestCase):
         return (dict(owner.__members__), by_value, rows)
 
     def test_neither_the_field_nor_get_grows_the_registry(self) -> None:
-        """The peek's original reason is gone: ``get`` itself no longer mints."""
+        """The peek's original reason does not apply: ``get`` itself does not mint."""
         from pcapkit.const.reg.apptype import AppType
 
         for proto in self._protos():
@@ -108,9 +108,9 @@ class PortEnumFieldPeekTests(unittest.TestCase):
         """``tcp | udp`` is a bare :class:`int` (``3``, which is SCTP's value).
 
         ``get`` dispatches it to SCTP for a hit and a miss alike. The field's
-        own miss branch used to read ``.name`` off it, raising
-        :exc:`AttributeError` for a port ``get`` resolves; it now takes the
-        transport from the registry, as ``get`` does.
+        own miss branch takes the transport from the registry, as ``get`` does;
+        reading ``.name`` off the bare :class:`int` instead raises
+        :exc:`AttributeError` for a port ``get`` resolves.
 
         """
         from pcapkit.const.reg.apptype import AppType, TransportProtocol

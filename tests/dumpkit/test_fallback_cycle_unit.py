@@ -2,12 +2,12 @@
 """GitHub issue #1372: the fallback writer expands an object without bound.
 
 ``_append_fallback`` dumps an object no other branch recognises through its
-attributes. A class among them was expanded too, through ``vars()``, which
-reaches the whole type graph, again along every path to each shared node. A
-frame's info object meeting the fallback -- as it does when its
+attributes. Without the fix, a class among them is expanded too, through
+``vars()``, which reaches the whole type graph, again along every path to each
+shared node. A frame's info object meeting the fallback -- as it does when its
 :class:`~pcapkit.corekit.infoclass.Info` class comes from another import of
 :mod:`pcapkit` -- carries its next layer's protocol class, and its JSON output
-grew until the disk filled. A class is now written as its name, a cycle as a
+grows until the disk fills. A class is written as its name, a cycle as a
 marker, and an expansion past ``FALLBACK_LIMIT`` objects raises.
 
 :mod:`pcapkit` is imported inside each test, after

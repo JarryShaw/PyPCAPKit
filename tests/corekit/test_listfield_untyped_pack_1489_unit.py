@@ -3,10 +3,10 @@
 
 GitHub issue #1489. Without an ``item_type``, :meth:`ListField.unpack
 <pcapkit.corekit.fields.collections.ListField.unpack>` returns the field's
-octets as one :obj:`bytes`, but :meth:`ListField.pack
-<pcapkit.corekit.fields.collections.ListField.pack>` iterated that value item
-by item and rejected each :obj:`int` with ``FieldValueError``. ``pack`` now
-writes such a value as-is; a typed ``ListField`` is unchanged.
+octets as one :obj:`bytes`, but without the fix :meth:`ListField.pack
+<pcapkit.corekit.fields.collections.ListField.pack>` iterates that value item
+by item and rejects each :obj:`int` with ``FieldValueError``. ``pack`` writes
+such a value as-is; a typed ``ListField`` is not affected.
 """
 
 import unittest

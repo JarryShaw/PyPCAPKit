@@ -7,10 +7,10 @@ base. So for ``NULL``, ``NO_VALUE``, ``NO_DEFAULT`` and ``ABSENT`` alike,
 calling the type again, :func:`copy.copy`, :func:`copy.deepcopy` and every
 :mod:`pickle` protocol hand back the one object.
 
-Before the change only ``NULL`` passed all of that. ``NO_DEFAULT`` failed
-pickle protocols 0 and 1, and ``NO_VALUE`` and ``ABSENT`` failed everything.
+Without the fix only ``NULL`` passes all of that. ``NO_DEFAULT`` fails
+pickle protocols 0 and 1, and ``NO_VALUE`` and ``ABSENT`` fail everything.
 
-In review of that change the owner asked for the base to be public, named
+In review of the fix the owner asked for the base to be public, named
 ``Sentinel`` after the library's other abstract bases, for every sentinel
 and sentinel type to be immutable, and for their repr and related behaviour
 to agree with Python's own singletons. :class:`BuiltinParityTests` runs the
@@ -18,9 +18,9 @@ same probes against :obj:`None`, :obj:`Ellipsis` and :obj:`NotImplemented`
 and against each sentinel, and the classes after it pin each behaviour on
 its own.
 
-:data:`OLD_PICKLES` are pickles written by the module as it stood at
-``75a9f237b``, the commit this change is based on, so they pin that a pickle
-made before the change still loads. They were produced by executing
+:data:`OLD_PICKLES` are pickles written by :mod:`pcapkit.corekit.sentinels` as
+it stood at ``75a9f237b``, without the #1842 fix, so they pin that a pickle
+written without the fix still loads. They were produced by executing
 ``git show 75a9f237b:pcapkit/corekit/sentinels.py`` as a module named
 ``pcapkit.corekit.sentinels``, registering it in :data:`sys.modules`, and
 calling :func:`pickle.dumps` on each sentinel at each protocol.

@@ -7,119 +7,51 @@ leaves its type (such as ``NullType``) out. The reason is the context a
 bare rule would not give: the types are not part of the public surface, so
 exposing only the final objects is what keeps the published API to the
 things a caller actually uses. GitHub issue #911 is the issue the
-implementing work for that ruling belongs to. That is one rule with two
-directions, and the tree on ``origin/main`` broke it in both:
+implementing work for that ruling belongs to.
 
-* ``pcapkit.corekit.module.__all__`` was ``['NULL', 'NullType', 'ModuleDescriptor']``
-  -- the type is exported;
-* ``pcapkit.corekit.enum.__all__`` was
-  ``['NO_DEFAULT', 'NoDefaultType', 'EnumLookup', 'EnumRegistry']`` -- likewise;
-* ``pcapkit.corekit.fields.field.__all__`` was ``['Field']`` -- the *object* is
-  missing, so this one needs a name added rather than removed.
+Every sentinel is *defined* in :data:`CANONICAL_MODULE`: the owner chose one
+shared module over one module per sentinel, on #911, so the ``<SENTINEL>Type``
+naming convention and the dunder methods the sentinels share or differ on sit
+together rather than scattered over a near-empty file per sentinel. Under the
+owner's ruling on #1715 that a moved name keeps no re-export at its old path
+(GitHub issue #1744), the export rule is asserted against
+:data:`CANONICAL_MODULE`, the only import path, and :mod:`pcapkit.corekit.module`,
+:mod:`pcapkit.corekit.fields.field` and :mod:`pcapkit.corekit.enum`, which use
+the sentinels, export neither the object nor the type. :class:`SentinelExportTests`
+asserts the shape in both directions and per module, rather than as one aggregate
+that a half-applied change would still satisfy.
 
-So two names come out and one goes in, which is why the fix is not "remove the
-types". :class:`SentinelExportTests` asserts the shape in both directions and per
-module, rather than as one aggregate that a half-applied change would still satisfy.
-
-What only ``import *`` narrows: the type stays importable by its dotted path, so
-``from pcapkit.corekit.module import NullType`` keeps working and an annotation
-naming it keeps resolving. That is the whole extent of the breaking change the issue
-is labelled for, and
-:meth:`SentinelExportTests.test_every_sentinel_type_is_still_importable_by_name`
+What only ``import *`` narrows: the type stays importable by its dotted path under
+:data:`CANONICAL_MODULE`, so an annotation naming it keeps resolving.
+:meth:`SentinelExportTests.test_every_sentinel_type_is_importable_from_the_canonical_module`
 pins it so a later reading of the ruling cannot escalate into deleting the types.
 
-The population is **four**, not the three
-:file:`docs/source/contributing/conventions/sentinel-convention.rst` documented --
-``ABSENT`` /
-``AbsentType`` in :mod:`pcapkit.protocols.protocol` is the fourth, missed because a
-sweep filtered on capitalised names did not see it when it was still spelled
-``_Absent``/``_AbsentType``, with a leading underscore. :class:`SentinelPopulationTests`
-pins the count and the doc together, so the next sentinel cannot be added to one
-without the other. ``ABSENT`` is private and stays out of :attr:`__all__` in both
-directions -- not under the export ruling, which argues the opposite for an
-object like this one, but under the privacy ruling stated below, which treats a
-sentinel documented as private as having no place in :attr:`__all__` at all.
+The population includes ``ABSENT`` / ``AbsentType``, private to
+:mod:`pcapkit.protocols.protocol` -- the kind of sentinel a sweep filtered on
+capitalised names misses while it is spelled with a leading underscore.
+:class:`SentinelPopulationTests` pins the population and the conventions doc
+together, so the next sentinel cannot be added to one without the other.
+``ABSENT`` stays out of :attr:`__all__` in both directions -- not under the export
+ruling, which argues the opposite for an object like this one, but under the
+privacy ruling stated below, which treats a sentinel documented as private as
+having no place in :attr:`__all__` at all.
 
-A follow-up to this same issue moved every sentinel's *definition* into
-:mod:`pcapkit.corekit.sentinels`: the owner chose one shared module over one module
-per sentinel, on #911. The shared module is where the ``<SENTINEL>Type`` naming
-convention and the dunder methods the sentinels share or differ on can sit
-together, which a near-empty file per sentinel would scatter.
-Every assertion above still holds unchanged, since it is about
-each original module's ``__all__``, which the re-export shims left untouched; what
-changed is only :attr:`type.__module__` for the four types, which
-:meth:`SentinelExportTests.test_every_sentinel_type_is_still_importable_by_name` now
-checks against :data:`CANONICAL_MODULE` rather than against a different module per
-sentinel.
-
-GitHub issue #937 later renamed two of the *objects* to SCREAMING_SNAKE --
-``NoValue`` to ``NO_VALUE`` and ``_Absent`` to ``ABSENT``, the latter also dropping
-its leading underscore -- so every instance name agrees on one casing. Privacy for
-what is now ``ABSENT`` stopped being signalled by the name at all and became
-documentation-only. GitHub issue #719 is where the owner ruled that the underscore
-can go, because documenting the object and its type as private, and not for public
-use, is enough on its own to carry the privacy.
-:meth:`SentinelExportTests.test_the_private_sentinel_is_exported_neither_way` is what
-now pins that privacy under the new name, since the mechanical underscore signal it
-used to double-check is gone.
+Every object name is SCREAMING_SNAKE (GitHub issue #937), so every instance name
+agrees on one casing, and the privacy of ``ABSENT`` is signalled by documentation
+rather than by the name: GitHub issue #719 is where the owner ruled that the
+underscore can go, because documenting the object and its type as private, and
+not for public use, is enough on its own to carry the privacy.
+:meth:`SentinelExportTests.test_the_private_sentinel_is_exported_neither_way` pins
+that privacy. :meth:`SentinelPopulationTests.test_every_sentinel_object_is_screaming_snake`
+pins the object's own casing directly, which
+``test_every_sentinel_follows_the_naming_convention`` cannot: it derives the type
+name from whatever the object is called, via :func:`_expected_type_name`.
 
 Ported code is deliberately **not** held to any of this. The case that settled it,
 ``_NOT_FOUND = object()`` in :file:`pcapkit/utilities/compat.py`'s ``cached_property``
 backport for interpreters below 3.8, went with that backport (#2051);
 :meth:`SentinelPopulationTests.test_the_vendored_bare_object_sentinel_went_with_its_backport`
 pins that, and the exemption stays in the conventions doc as a rule.
-
-On the tree before this change, four of these fail:
-
-* ``test_module_exports_the_object_and_not_the_type`` -- ``'NullType'`` is in
-  :attr:`__all__`;
-* ``test_enum_exports_the_object_and_not_the_type`` -- ``'NoDefaultType'`` is;
-* ``test_field_exports_the_object_and_not_the_type`` -- ``'NoValue'`` is not;
-* ``test_star_import_binds_the_objects_and_not_the_types`` -- all three of the above,
-  through the one operation that actually reads :attr:`__all__`.
-
-and two more fail on the documentation half:
-
-* ``test_conventions_doc_lists_every_sentinel_in_the_tree`` -- the table has three
-  rows and the prose says "three";
-* ``test_conventions_doc_carves_out_the_vendored_bare_object`` -- the carve-out is
-  not there at all.
-
-The rest pass either way and are regression guards: the sibling exports that must
-survive the edit (``ModuleDescriptor``, ``Field``, ``EnumLookup``,
-``EnumRegistry``), the types staying importable, and the naming convention itself.
-
-GitHub issue #937 also adds one genuinely new assertion rather than only renaming
-existing ones: :meth:`SentinelPopulationTests.test_every_sentinel_object_is_screaming_snake`
-pins the object's own casing directly, which nothing before it did --
-``test_every_sentinel_follows_the_naming_convention`` only ever pinned that
-``<SENTINEL>Type`` derives from whatever the object is called, by design, via
-:func:`_expected_type_name`, which is precisely why it passed on ``main`` at
-``382375811`` even though ``NoValue`` and ``_Absent`` were not SCREAMING_SNAKE
-there -- its two special cases (a ``bare.isupper()`` guard and a leading-underscore
-carry-through) existed *because* the objects disagreed, so the check that derives
-the type from the object could never by itself catch the object's casing being
-wrong. The new test fails twice on that commit, measured directly::
-
-    $ git show 382375811:pcapkit/corekit/sentinels.py | grep -n 'NoValue = \\|_Absent = '
-    227:NoValue = NoValueType()
-    469:_Absent = _AbsentType()
-    $ python3 -c "import re; p = re.compile(r'^[A-Z][A-Z0-9_]*$'); \\
-        print([n for n in ('NULL', 'NoValue', 'NO_DEFAULT', '_Absent') if not p.match(n)])"
-    ['NoValue', '_Absent']
-
-Now that every object is SCREAMING_SNAKE, :func:`_expected_type_name` collapses to
-the one mechanical rule those two special cases used to carve exceptions around;
-see its own docstring below for what dropped and why the assertion strength survives
-the drop.
-
-GitHub issue #1744 then dropped the per-module re-exports, under the owner's
-ruling on #1715 that a moved name keeps no re-export at its old path. So the
-export rule is now asserted against :data:`CANONICAL_MODULE`, the only import
-path, and the three per-module tests flip: :mod:`pcapkit.corekit.module`,
-:mod:`pcapkit.corekit.fields.field` and :mod:`pcapkit.corekit.enum` export
-neither the object nor the type. The type is importable by its dotted path
-under :data:`CANONICAL_MODULE` only.
 
 """
 from __future__ import annotations
@@ -146,26 +78,23 @@ __tier__ = 'ALL'
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
 #: Where every sentinel is *defined*: the single shared module GitHub
-#: issue #911 chose over one module per sentinel. Each entry in :data:`SENTINELS`
-#: below used to name a different module here (``pcapkit.corekit.module``,
-#: ``pcapkit.corekit.fields.field``, ``pcapkit.corekit.enum`` and
-#: ``pcapkit.protocols.protocol`` respectively); each reports this one.
+#: issue #911 chose over one module per sentinel. Every entry in :data:`SENTINELS`
+#: below reports this one.
 CANONICAL_MODULE = 'pcapkit.corekit.sentinels'
 
 #: Every sentinel in the tree that follows the house ``<SENTINEL>Type`` convention,
-#: as ``(instance name, instance, type)``. That is more sentinels than
-#: :file:`docs/source/contributing/conventions/sentinel-convention.rst` used to
-#: document -- see the module docstring.
-#: Every one shares :data:`CANONICAL_MODULE` as its defining module, which is
-#: why a per-entry module column is no longer part of this tuple -- see
-#: :data:`PUBLIC_SENTINELS` below for the (still distinct) *shim* locations.
+#: as ``(instance name, instance, type)``.
+#: Every one shares :data:`CANONICAL_MODULE` as its defining module, so the tuple
+#: carries no per-entry module column -- see :data:`PUBLIC_SENTINELS` below for
+#: the distinct *consumer* modules.
 #: Built by :func:`_sentinels` from the live import, not at module load.
 
 #: The public three of :data:`SENTINELS`, as ``(consumer module, object name, type
-#: name)``. The consumer is the module that used to re-export the sentinel before
-#: GitHub issue #1744. ``ABSENT`` is absent from it deliberately: it is private, so
-#: it is exported neither way and the export rule does not reach it -- GitHub issue
-#: #937 dropped its leading underscore, but not its privacy.
+#: name)``. The consumer is the module that uses the sentinel and, per GitHub issue
+#: #1744, does not re-export it. ``ABSENT`` is absent from it deliberately: it is
+#: private, so it is exported neither way and the export rule does not reach it --
+#: its name carries no leading underscore (GitHub issue #937), but it is private
+#: all the same.
 PUBLIC_SENTINELS = (
     ('pcapkit.corekit.module', 'NULL', 'NullType'),
     ('pcapkit.corekit.fields.field', 'NO_VALUE', 'NoValueType'),
@@ -194,15 +123,12 @@ class _ReimportCase(unittest.TestCase):
 def _expected_type_name(instance_name: 'str') -> 'str':
     """The type name the house convention derives from an instance name.
 
-    One mechanical rule since GitHub issue #937 made every instance name
-    SCREAMING_SNAKE: split on ``_``, title-case each word, and append ``Type``.
+    One mechanical rule, since every instance name is SCREAMING_SNAKE (GitHub
+    issue #937): split on ``_``, title-case each word, and append ``Type``.
     ``NULL`` gives ``NullType``, ``NO_VALUE`` gives ``NoValueType``, ``NO_DEFAULT``
-    gives ``NoDefaultType`` and ``ABSENT`` gives ``AbsentType``. Before #937 this
-    needed two special cases that are gone now: ``NoValue`` was already CamelCase,
-    so a ``bare.isupper()`` guard skipped re-title-casing it, and ``_Absent``
-    carried a leading underscore that had to be stripped and re-added around that
-    guard. Neither input shape exists any more, so neither does the code that
-    handled it.
+    gives ``NoDefaultType`` and ``ABSENT`` gives ``AbsentType``. No instance name
+    is CamelCase or carries a leading underscore, so no special case handles
+    either shape.
 
     """
     return ''.join(word.capitalize() for word in instance_name.split('_')) + 'Type'
@@ -221,18 +147,13 @@ def _star_import(module: 'str') -> 'dict[str, object]':
 
 
 def _sentinel_section() -> 'str':
-    """The "Naming a Sentinel" section, now its own page.
+    """The "Naming a Sentinel" section, which is its own page.
 
-    Read whole rather than sliced between two anchors: GitHub issue #918 split
-    the single-page :file:`docs/source/contributing/conventions.rst` into one
-    file per ``.. _label:`` anchor, and the "Naming a Sentinel" section *is*
-    :file:`docs/source/contributing/conventions/sentinel-convention.rst` now, so
-    there is no following anchor left in the same file to slice against. That
-    retires the ``text.index('.. _sentinel-convention:')`` /
-    ``text.index('.. _registry-protocol:', start)`` pairing this used before the
-    split -- the two anchors moved into separate files, which is exactly what
-    GitHub issue #930 flagged as the split's concrete blocker before #918
-    resolved it.
+    Read whole rather than sliced between two anchors: the conventions are one
+    file per ``.. _label:`` anchor (GitHub issue #918), and the "Naming a
+    Sentinel" section *is*
+    :file:`docs/source/contributing/conventions/sentinel-convention.rst`, so
+    there is no following anchor in the same file to slice against.
 
     """
     path = ROOT / 'docs/source/contributing/conventions/sentinel-convention.rst'
@@ -352,12 +273,10 @@ class SentinelExportTests(_ReimportCase):
         Pinned rather than assumed: the ruling says *export the objects*, and a
         literal reading of that would add ``ABSENT`` to
         :attr:`pcapkit.protocols.protocol.__all__`, which would publish a sentinel
-        whose own docstring says it never leaves the module. This kept pinning the
-        same fact under ``_Absent``/``_AbsentType`` before GitHub issue #937 dropped
-        the leading underscore that used to be the mechanical signal of "private" --
-        the rename makes this test the *only* thing enforcing that any more, which
-        is why it still checks both the object and the type, and both directions of
-        ``import *``.
+        whose own docstring says it never leaves the module. With no leading
+        underscore to signal "private" (GitHub issue #937), this test is the *only*
+        thing enforcing it, which is why it checks both the object and the type,
+        and both directions of ``import *``.
 
         """
         import pcapkit.protocols.protocol as protocol
@@ -388,22 +307,13 @@ class SentinelPopulationTests(_ReimportCase):
         object's own casing *is* -- a tree where every object were, say, CamelCase
         would satisfy it just as well, so long as the type followed suit. This test
         is what actually pins SCREAMING_SNAKE, independent of the type-derivation
-        rule, which is the rule this issue's ruling adds and the gap that let
-        ``NULL``, ``NoValue``, ``NO_DEFAULT`` and ``_Absent`` disagree on ``main``
-        before it landed.
+        rule -- the rule GitHub issue #937's ruling adds, and the gap that lets
+        object names disagree on casing.
 
-        Fails on the tree before this change, at ``382375811``: ``NoValue`` and
-        ``_Absent`` are the two objects that were not SCREAMING_SNAKE, measured
-        directly against that commit rather than assumed::
-
-            $ git show 382375811:pcapkit/corekit/sentinels.py | grep -n 'NoValue = \\|_Absent = '
-            227:NoValue = NoValueType()
-            469:_Absent = _AbsentType()
-
-        Neither ``NoValue`` (``N``, ``o``, ``V``, ... mixed case) nor ``_Absent``
-        (leading underscore, mixed case) matches ``^[A-Z][A-Z0-9_]*$``, so this test
-        fails twice over on that tree -- once for each -- and passes on this one for
-        every sentinel.
+        Without the fix the objects include ``NoValue`` and ``_Absent`` beside
+        ``NULL`` and ``NO_DEFAULT``. Neither ``NoValue`` (``N``, ``o``, ``V``, ...
+        mixed case) nor ``_Absent`` (leading underscore, mixed case) matches
+        ``^[A-Z][A-Z0-9_]*$``, so this test then fails once for each.
 
         """
         pattern = re.compile(r'^[A-Z][A-Z0-9_]*$')
@@ -443,25 +353,22 @@ class SentinelPopulationTests(_ReimportCase):
         self.assertNotIn('The three sentinels deliberately differ', section)
 
     def test_conventions_doc_records_that_only_the_object_is_exported(self) -> 'None':
-        """The ruling this change implements belongs in the doc that states the rule.
+        """The #911 ruling belongs in the doc that states the rule.
 
-        Pinned as the *claim* rather than as wording. The first version asserted the
-        literal ``'ONLY'`` -- the maintainer's own capitalisation, lifted from a block
-        quote of his #911 reply -- so paraphrasing that quote under GitHub issue #949
-        reddened this test without anything about the rule having changed. Asserting
-        someone's emphatic casing is exactly the defect #949 exists to remove, and a
-        test outside :mod:`tests.project` pinning a convention page's prose is how it
-        went unnoticed there.
+        Pinned as the *claim* rather than as wording. Asserting a literal such as
+        the maintainer's own emphatic capitalisation reddens the test whenever the
+        page paraphrases the quote (GitHub issue #949) without anything about the
+        rule having changed -- exactly the defect #949 exists to remove.
 
         So the substance is checked against the tree, which is where the ruling
         actually takes effect, and the page is only required to name the export
         boundary (``__all__``, an identifier rather than prose) and the issue that
         settled it.
 
-        The citation is accepted in either markup form. The page now writes it with the
+        The citation is accepted in either markup form. The page writes it with the
         ``:issue:`` role configured in ``docs/source/conf.py``, because a bare ``#NNN``
         resolves to nothing in the built documentation -- so pinning the bare spelling
-        would again redden this test over markup while the ruling it checks is
+        would redden this test over markup while the ruling it checks is
         untouched, which is the same defect the paragraph above records.
 
         """
@@ -551,10 +458,9 @@ class SentinelBehaviourTests(_ReimportCase):
     def test_the_private_sentinel_reprs_as_its_own_name(self) -> 'None':
         """``ABSENT``, not ``<object object at 0x...>``.
 
-        The reason the house rule prefers a class at all. ``AbsentType`` used to
-        keep a ``__repr__`` of its own, printing ``<absent>``; the shared one now
-        prints the object's own name, as ``repr(None)`` is ``'None'``, so it no
-        longer needs one.
+        The reason the house rule prefers a class at all. The shared ``__repr__``
+        prints the object's own name, as ``repr(None)`` is ``'None'``, so
+        ``AbsentType`` needs no ``__repr__`` of its own.
 
         """
         live = _sentinels()

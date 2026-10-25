@@ -9,47 +9,43 @@ rather than as a builtin exception.
 
 Measured on Python 3.14.7, that fixes the shape rather than leaving it open:
 ``E['nosuch']`` raises :exc:`KeyError` and ``E(999)`` raises :exc:`ValueError`.
-The base already matched it -- a census of the 127 concrete
-:class:`~pcapkit.corekit.enum.EnumLookup` subclasses found 119 answering a
-string name miss with :exc:`KeyError`, 5 with :exc:`ValueError` and 3 minting --
-so this issue changes **provenance only**: the bare builtin :exc:`KeyError` from
-``cls._member_map_[key]`` becomes
-:exc:`~pcapkit.utilities.exceptions.EnumKeyError`, and :mod:`aenum`'s own bare
-:exc:`ValueError` from ``cls(key)`` becomes
-:exc:`~pcapkit.utilities.exceptions.EnumValueError`.
+The base's shape matches it, so what #923 settles is **provenance**: a name miss
+on ``cls._member_map_[key]`` raises
+:exc:`~pcapkit.utilities.exceptions.EnumKeyError` rather than the bare builtin
+:exc:`KeyError`, and a value miss on ``cls(key)`` raises
+:exc:`~pcapkit.utilities.exceptions.EnumValueError` rather than :mod:`aenum`'s
+own bare :exc:`ValueError`.
 
 Deriving :exc:`~pcapkit.utilities.exceptions.EnumKeyError` from :exc:`KeyError`
-is what keeps the blast radius at nothing: six in-library sites catch the base's
-name miss -- :meth:`~pcapkit.const.http.method.Method.get`,
-:mod:`pcapkit.toolkit.scapy`, and two each in
-:mod:`pcapkit.protocols.internet.hopopt` and
+is what keeps the blast radius at nothing for the in-library sites that catch the
+base's name miss -- in :meth:`~pcapkit.const.http.method.Method.get`,
+:mod:`pcapkit.toolkit.scapy`, :mod:`pcapkit.protocols.internet.hopopt` and
 :mod:`pcapkit.protocols.internet.ipv6_opts` -- and ``Method.get`` catches it in
 order to **mint**, so for that one a name miss is part of a *successful* call.
 :class:`MethodStillMintsTests` pins that one directly.
 
-Three call sites also changed, all of them cases of the minority shape the
-ruling rejects:
+Call sites that would otherwise carry the shape the ruling rejects are pinned too:
 
 * ``TransportProtocol.get`` (and its codegen twin in
-  :mod:`pcapkit.vendor.reg.apptype.apptype`) dropped its ``KeyError`` ->
-  ``ValueError`` conversion, keeping only the ``key.lower()`` call --
+  :mod:`pcapkit.vendor.reg.apptype.apptype`) has no ``KeyError`` ->
+  ``ValueError`` conversion, only the ``key.lower()`` call --
   :class:`TransportProtocolCaseFoldingTests`.
-* ``Criticality.get`` was deleted outright, its body having become a pure
+* ``Criticality.get`` does not exist, since its body would be a pure
   pass-through -- :class:`CriticalityGetDeletionTests`.
 * :class:`~pcapkit.protocols.internet.mh.FastBindingAcknowledgmentStatus` and
-  :class:`~pcapkit.protocols.internet.mh.IPv6AddressPrefixCode` already raised
-  from :mod:`pcapkit.utilities.exceptions` on a *name* miss, but as
-  ``EnumValueError`` -- the right provenance in the wrong shape --
+  :class:`~pcapkit.protocols.internet.mh.IPv6AddressPrefixCode` raise from
+  :mod:`pcapkit.utilities.exceptions` on a *name* miss as ``EnumKeyError``, not
+  as ``EnumValueError`` -- the right provenance in the wrong shape --
   :class:`MobilityHeaderNameMissTests`.
 
-On the tree before this change every test below fails at import, since
-:exc:`~pcapkit.utilities.exceptions.EnumKeyError` does not exist there; with the
-exception added but the base left alone, each fails on its own assertion instead.
-Two are regression guards rather than defect repros and cannot fail on the
-pre-#923 tree -- :meth:`TransportProtocolCaseFoldingTests.
-test_upper_case_still_resolves` and the resolving half of
-:class:`CriticalityGetDeletionTests` -- and they are here because they are what
-the deletion and the reduction could plausibly have broken.
+Without the fix every test below fails at import, since
+:exc:`~pcapkit.utilities.exceptions.EnumKeyError` does not exist; with the
+exception but not the base's use of it, each fails on its own assertion instead.
+:meth:`TransportProtocolCaseFoldingTests.test_upper_case_still_resolves` and the
+resolving half of :class:`CriticalityGetDeletionTests` are regression guards
+rather than defect repros and cannot fail without the fix; they pin what
+reducing ``TransportProtocol.get`` and doing without ``Criticality.get`` could
+plausibly break.
 
 """
 from __future__ import annotations
@@ -251,8 +247,7 @@ class BaseGetQuietnessTests(unittest.TestCase):
 
     :meth:`~pcapkit.const.http.method.Method.get` catches it in order to build
     an unregistered member, so a loud error there would put one
-    :data:`logging.CRITICAL` record on the logger -- and, until #983, set
-    :data:`sys.tracebacklimit` to ``0`` process-wide -- for every *successful*
+    :data:`logging.CRITICAL` record on the logger for every *successful*
     ``Method.get`` call that misses. That is the GitHub issue
     #362 defect :class:`~pcapkit.utilities.exceptions.BaseError` documents
     ``quiet`` for, and :mod:`pcapkit.protocols.protocol` states the same rule
@@ -299,9 +294,8 @@ class BaseGetQuietnessTests(unittest.TestCase):
         self.assertEqual(minted.value, 'QUIET-923-PROBE')
 
     def test_the_value_miss_is_quiet_too(self) -> 'None':
-        """GitHub issue #1845: the owner ruled the value miss quiet as well, so
-        this was the loud control until then. It is still raised -- only not
-        reported."""
+        """GitHub issue #1845: the owner ruled the value miss quiet as well. It
+        is raised -- only not reported."""
         with capture(logger) as recorder:
             with self.assertRaises(EnumValueError):
                 _Closed.get(99)
@@ -311,7 +305,7 @@ class BaseGetQuietnessTests(unittest.TestCase):
         """The control. Without it ``recorder.messages == []`` above would also
         pass if :class:`~pcapkit.utilities.exceptions.BaseError` had simply
         stopped logging, rather than these raises being quiet. Constructed
-        directly, now that no ``get`` miss is loud."""
+        directly, since no ``get`` miss is loud."""
         saved_sys, saved_threading = sys.excepthook, threading.excepthook
 
         def _restore() -> 'None':
@@ -328,10 +322,10 @@ class BaseGetQuietnessTests(unittest.TestCase):
 class MethodStillMintsTests(unittest.TestCase):
     """The sharpest call site in the blast radius.
 
-    :meth:`~pcapkit.const.http.method.Method.get` is wired directly to the
-    old contract: it catches the base's name miss *in order to* hand back an
+    :meth:`~pcapkit.const.http.method.Method.get` relies on the base's name
+    miss being a :exc:`KeyError`: it catches it *in order to* hand back an
     unregistered member. If :exc:`~pcapkit.utilities.exceptions.EnumKeyError`
-    had not derived from :exc:`KeyError`, this would raise instead of minting.
+    did not derive from :exc:`KeyError`, this would raise instead of minting.
     """
 
     def test_an_unregistered_method_token_still_mints(self) -> 'None':
@@ -345,7 +339,7 @@ class MethodStillMintsTests(unittest.TestCase):
         self.assertEqual(minted.name, 'FROBNICATE-923')
         self.assertEqual(minted.value, 'FROBNICATE-923')
         # ``_unregistered_member`` hands back a throwaway, so neither lookup
-        # table grew -- the GitHub issue #860 contract, unchanged here.
+        # table grew -- the GitHub issue #860 contract.
         self.assertEqual(len(Method._member_map_), before_names)
         self.assertEqual(len(Method._value2member_map_), before_values)
 
@@ -357,18 +351,18 @@ class MethodStillMintsTests(unittest.TestCase):
 
 
 class TransportProtocolCaseFoldingTests(unittest.TestCase):
-    """``TransportProtocol.get`` survives, reduced to its ``key.lower()``.
+    """``TransportProtocol.get`` is reduced to its ``key.lower()``.
 
     Case-insensitivity is not on the base and ``get('TCP')`` resolving is live
     public behaviour -- :meth:`~pcapkit.const.reg.apptype.apptype.AppType.
     _dispatch` is the one live call site and it passes ``proto.lower()``, but the
-    public surface takes either casing. The exception conversion is what went.
+    public surface takes either casing. It carries no exception conversion.
     """
 
     def test_upper_case_still_resolves(self) -> 'None':
-        """A regression guard, not a defect repro: it passes on the pre-#923
-        tree too, and is here because reducing the override is exactly what
-        could have dropped the fold along with the conversion."""
+        """A regression guard, not a defect repro: it passes without the #923
+        fix too, and is here because reducing the override is exactly what
+        could drop the fold along with the conversion."""
         from pcapkit.const.reg.apptype.apptype import TransportProtocol
 
         self.assertIs(TransportProtocol.get('TCP'), TransportProtocol.tcp)
@@ -429,13 +423,13 @@ class TransportProtocolCaseFoldingTests(unittest.TestCase):
 
 
 class CriticalityGetDeletionTests(unittest.TestCase):
-    """``Criticality.get`` is gone, and the inherited base answers identically.
+    """``Criticality`` has no ``get`` of its own, and the inherited base answers identically.
 
-    Its body had become a pure pass-through once the ``KeyError`` ->
-    ``ValueError`` conversion went, so every assertion here is about the
-    *inherited* :meth:`~pcapkit.corekit.enum.EnumLookup.get`. ``default``
-    handling is the one thing that could have made the deletion unsafe, so it is
-    pinned in both directions.
+    Without the ``KeyError`` -> ``ValueError`` conversion its body would be a pure
+    pass-through, so every assertion here is about the *inherited*
+    :meth:`~pcapkit.corekit.enum.EnumLookup.get`. ``default`` handling is the one
+    thing that could make relying on the base unsafe, so it is pinned in both
+    directions.
     """
 
     def test_the_override_is_gone(self) -> 'None':
@@ -444,8 +438,8 @@ class CriticalityGetDeletionTests(unittest.TestCase):
         self.assertNotIn('get', Criticality.__dict__)
 
     def test_names_and_values_resolve_as_before(self) -> 'None':
-        """Invariants rather than repros -- they pass on the pre-#923 tree too,
-        and are the ones the deletion had to preserve."""
+        """Invariants rather than repros -- they pass without the #923 fix too,
+        and are what relying on the inherited ``get`` has to preserve."""
         from pcapkit.protocols.application.ngap import Criticality
 
         self.assertIs(Criticality.get('reject'), Criticality.reject)
@@ -497,12 +491,12 @@ class CriticalityGetDeletionTests(unittest.TestCase):
 class MobilityHeaderNameMissTests(unittest.TestCase):
     """The two :rfc:`5568` inline enumerations found by #923's own census.
 
-    Both already raised from :mod:`pcapkit.utilities.exceptions` on a name miss
-    -- the right provenance -- but chose ``EnumValueError`` deliberately, *"so
-    the two ways of getting this wrong do not report differently"*. That is the
-    conversion this ruling rejects, so the name half moves to
+    Both raise from :mod:`pcapkit.utilities.exceptions` on a name miss -- the
+    right provenance. Choosing ``EnumValueError`` for it, *"so the two ways of
+    getting this wrong do not report differently"*, is the conversion this
+    ruling rejects, so the name half is
     :exc:`~pcapkit.utilities.exceptions.EnumKeyError` and only ``_missing_``'s
-    value half stays :exc:`ValueError`-shaped.
+    value half is :exc:`ValueError`-shaped.
     """
 
     def test_a_name_miss_is_key_shaped(self) -> 'None':
@@ -560,7 +554,7 @@ class MobilityHeaderNameMissTests(unittest.TestCase):
 @unittest.skipUnless(importlib.util.find_spec('requests') is not None,
                      'pcapkit.vendor needs requests')
 class VendorTemplateParityTests(unittest.TestCase):
-    """A regeneration must not undo the change.
+    """A regeneration must not undo the fix.
 
     ``pcapkit/const/`` is generated from ``pcapkit/vendor/``, so the committed
     module passing everything above is not evidence that the template agrees
@@ -595,7 +589,7 @@ class VendorTemplateParityTests(unittest.TestCase):
 
         # Not vacuous: both halves have to carry the reduced body, so a template
         # that still converts cannot match a committed module that does not, and
-        # a pair that agree on the *old* body fails here too.
+        # a pair that agree on a *converting* body fails here too.
         self.assertIn('super().get(key.lower(), default)',
                       rendered_region.group(0))  # type: ignore[union-attr]
         self.assertNotIn("raise ValueError(f'{key!r} is not a valid",

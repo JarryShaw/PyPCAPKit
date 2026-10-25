@@ -2,10 +2,10 @@
 """Byte-identity proof for GitHub issue #730, across the classic-PCAP sample captures.
 
 :mod:`tests.corekit.test_fields_copy_dispatch_unit` proves the *mechanism* the
-issue asked about: every field ``__call__`` now reaches
+issue asked about: every field ``__call__`` reaches
 :meth:`~pcapkit.corekit.fields.field.FieldBase.__copy__` directly instead of
 going through :func:`copy.copy`. This module proves the thing that actually
-matters -- that swapping the dispatch did not move a single byte of what
+matters -- that the direct dispatch does not move a single byte of what
 :func:`~pcapkit.interface.core.extract` produces.
 
 Every field of every protocol is copied through one of the call sites
@@ -24,12 +24,11 @@ capture itself, read directly with :func:`open`, independently of whatever
 PCAP-NG is deliberately out of scope here: its block framing is not a fixed
 16-octet record header, so the same offset walk does not apply, and its own
 round-trip fidelity is already covered by
-:mod:`tests.protocols.test_pcapng_regression`. The field ``__call__`` change
+:mod:`tests.protocols.test_pcapng_regression`. The field ``__call__`` dispatch
 this module guards is format-agnostic -- every field, in every schema, of
-every protocol, in every container format, goes through one of the same eight
+every protocol, in every container format, goes through one of the same
 call sites -- so classic PCAP alone already exercises the mechanism; a
-passing run of the existing PCAP-NG suite (unaffected by this change) is the
-rest of the proof.
+passing run of the PCAP-NG suite is the rest of the proof.
 
 """
 from __future__ import annotations

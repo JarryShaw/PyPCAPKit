@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
-"""GitHub issue #2144: ``make_dumper``'s ``object_hook`` recursed in a subclass.
+"""GitHub issue #2144: ``make_dumper``'s ``object_hook`` must not recurse in a subclass.
 
-The fallback branch of the ``object_hook`` that
-:func:`~pcapkit.dumpkit.common.make_dumper` builds called
+Without the fix, the fallback branch of the ``object_hook`` that
+:func:`~pcapkit.dumpkit.common.make_dumper` builds calls
 ``super(type(self), self).object_hook(o)``. In a subclass of the class it
-returns, ``type(self)`` is the subclass, so the call resolved back to that same
-``object_hook`` and recursed until :exc:`RecursionError`. A value no branch
+returns, ``type(self)`` is the subclass, so the call resolves back to that same
+``object_hook`` and recurses until :exc:`RecursionError`. A value no branch
 recognises falls through to the output class's own ``object_hook``.
 
 :mod:`pcapkit` is imported inside each test, after

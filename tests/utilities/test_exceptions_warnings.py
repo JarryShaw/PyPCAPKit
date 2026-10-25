@@ -32,11 +32,11 @@ class ExceptionsWarningsTests(unittest.TestCase):
     def test_base_error_installs_an_excepthook_in_non_dev_mode(self) -> None:
         # Only a *loud* error does this: the mechanism is process-global, and a
         # quiet error is internal control flow that must not disturb it. See
-        # tests/utilities/test_quiet_exceptions.py. It used to be
+        # tests/utilities/test_quiet_exceptions.py. The mechanism is an
+        # exception hook, which only shortens the printing of a BaseError, not
         # `sys.tracebacklimit = 0`, which is the #719 defect -- a loud error's
-        # own terseness truncated every *other* exception in the process too.
-        # It now installs an exception hook instead, which only shortens the
-        # printing of a BaseError; see
+        # own terseness truncating every *other* exception in the process too;
+        # see
         # tests/utilities/test_exceptions_excepthook.py for that hook's actual
         # printing behaviour, end to end.
         original_limit = getattr(sys, 'tracebacklimit', None)
@@ -67,9 +67,9 @@ class ExceptionsWarningsTests(unittest.TestCase):
         self.assertTrue(critical.call_args.kwargs['stack_info'])
 
     def test_warn_delivers_base_warning_categories_to_the_caller(self) -> None:
-        # pcapkit no longer installs an `ignore` filter of its own, so a caller
-        # who asks to see the warning sees it. Whether it is displayed, raised or
-        # dropped is now entirely the application's decision -- see
+        # pcapkit installs no `ignore` filter of its own, so a caller who asks
+        # to see the warning sees it. Whether it is displayed, raised or dropped
+        # is entirely the application's decision -- see
         # tests/utilities/test_warning_filters.py for that contract in full.
         with mock.patch.object(self.warnings.logger, 'warning'):
             with pywarnings.catch_warnings(record=True) as records:

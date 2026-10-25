@@ -2,10 +2,10 @@
 """Copying or pickling a :class:`~pcapkit.corekit.io.PeekableStream` follows its stream (#1524).
 
 :mod:`copy` and :mod:`pickle` build the proxy without calling ``__init__``, then
-ask it for ``__setstate__``. ``__getattr__`` forwarded that to ``self._stream``,
-which was not set yet, so the lookup of ``_stream`` came back through
-``__getattr__`` until :exc:`RecursionError`. It now refuses ``_stream`` and every
-dunder, and the default protocols do what they do for any wrapper: a shallow
+ask it for ``__setstate__``. Without the fix, ``__getattr__`` forwards that to
+``self._stream``, which is not set yet, so the lookup of ``_stream`` comes back
+through ``__getattr__`` until :exc:`RecursionError`. ``__getattr__`` refuses
+``_stream`` and every dunder, and the default protocols do what they do for any wrapper: a shallow
 copy shares the stream, while a deep copy or a pickle copies it, and so works
 exactly when the stream's own does.
 

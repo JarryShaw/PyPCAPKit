@@ -132,7 +132,7 @@ class TestDumperRoundTrip(unittest.TestCase):
         self.assertEqual(got, {'error': none, 'items': [1, none, 2]})
 
     def test_unhandled_value_types_get_an_explicit_rendering(self) -> None:
-        """#1258: networks, sentinels and timezones no longer dump as ``{}``."""
+        """#1258: networks, sentinels and timezones do not dump as ``{}``."""
         from pcapkit.corekit.sentinels import NO_VALUE, NULL
 
         value = {
@@ -148,7 +148,7 @@ class TestDumperRoundTrip(unittest.TestCase):
                                'nl': '<NULL>', 'tz': 28800.0})
 
     def test_fallback_reads_the_slots_of_every_base_class(self) -> None:
-        """#1258: a leaf ``__slots__ = ()`` no longer hides its bases' slots."""
+        """#1258: a leaf ``__slots__ = ()`` does not hide its bases' slots."""
 
         class Base:
             __slots__ = ('first', 'unset')
@@ -174,7 +174,7 @@ class TestDumperRoundTrip(unittest.TestCase):
         self.assertEqual(json.loads(data)['x'], value)
 
     def test_plist_writes_strings_xml_cannot_spell_as_data(self) -> None:
-        """#1262: a control character no longer makes the document unparseable."""
+        """#1262: a control character does not make the document unparseable."""
         value = {'c': 'a\x01b\x1bc', 'ok': 'tab\there & <there>'}
         got = plistlib.loads(self.dump('PLIST', value))['x']
         self.assertEqual(got, {'c': 'a\x01b\x1bc'.encode(), 'ok': 'tab\there & <there>'})

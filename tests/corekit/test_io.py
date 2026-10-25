@@ -164,18 +164,18 @@ class SeekableReaderTests(unittest.TestCase):
                 os.unlink(path)
 
     def test_writable_is_the_method_the_io_protocol_consults(self) -> None:
-        """Issue #645: the override was spelled ``writeable``, so it overrode nothing.
+        """Issue #645: an override spelled ``writeable`` overrides nothing.
 
         The :mod:`io` API spells it ``writable``. With the misspelling in place,
-        ``'writable' in SeekableReader.__dict__`` was :data:`False` and
-        ``SeekableReader.writable is io.IOBase.writable`` was :data:`True` -- so :mod:`io`,
-        :mod:`shutil` and any third-party caller read the inherited value and never saw the one
-        defined in this file. Both returned :data:`False`, which is the coincidence that hid it:
-        there was no symptom to notice, and editing the misspelled method would silently have
-        had no effect.
+        ``'writable' in SeekableReader.__dict__`` is :data:`False` and
+        ``SeekableReader.writable is io.IOBase.writable`` is :data:`True` -- so :mod:`io`,
+        :mod:`shutil` and any third-party caller read the inherited value and never see the one
+        defined in this file. Both return :data:`False`, which is the coincidence that hides it:
+        there is no symptom to notice, and editing the misspelled method would silently have
+        no effect.
 
         The identity assertion is the load-bearing one. ``writable()`` returning :data:`False`
-        passed before the fix too, by inheritance, so a value-only test cannot tell the two
+        passes without the fix too, by inheritance, so a value-only test cannot tell the two
         trees apart.
 
         """
@@ -262,8 +262,8 @@ class SeekableReaderTests(unittest.TestCase):
         reader.read(2)
         self.assertEqual(reader.seek(-1, io.SEEK_CUR), 1)
         # NOTE: the end is a buffer's worth past the position, 1 + 4, so one before it is
-        # 4. It was the buffer's far edge, 0 + 4, until #1586 -- which a full buffer's
-        # edge reaches no further than the stream has been read.
+        # 4. Without the #1586 fix it is the buffer's far edge, 0 + 4 -- which a full
+        # buffer's edge reaches no further than the stream has been read.
         self.assertEqual(reader.seek(-1, io.SEEK_END), 4)
         with mock.patch.object(self.io_module, 'warn') as warn:
             self.assertEqual(reader.seek(20), 6)
@@ -389,7 +389,7 @@ class SeekableReaderTests(unittest.TestCase):
         self.assertEqual(reader.seek(0), 0)
 
         # NOTE: the stream holds five octets, so five is the whole of what an eight octet
-        # request can be answered with; it returned b'\x00\x00\x00e' before the fix -- four
+        # request can be answered with; without the fix it returns b'\x00\x00\x00e' -- four
         # octets, the content displaced by the padding, and one octet of it lost outright.
         self.assertEqual(reader.read(8), b'abcde')
         self._close_reader(reader)
@@ -497,8 +497,8 @@ class SeekableReaderTests(unittest.TestCase):
     def test_truncate_buffer_below_the_content_leaves_the_reader_usable(self) -> None:
         """A truncation has to bring ``_buffer_cur`` down with the buffer it indexes.
 
-        Left above the new size it addressed octets the buffer no longer has, and the next
-        read raised ``ValueError: memoryview assignment: lvalue and rvalue have different
+        Left above the new size it addresses octets the buffer no longer has, and the next
+        read raises ``ValueError: memoryview assignment: lvalue and rvalue have different
         structures`` from :meth:`_write_buffer` rather than returning anything.
 
         """
@@ -541,19 +541,19 @@ class SeekableReaderTests(unittest.TestCase):
         The existing round trip at :meth:`test_buffered_readline_read_read1_and_peek_paths`
         cannot see this: it seeks to 1, where ``_buffer_cur - 1`` happens to equal the
         octets actually available, so the two candidate caps agree. Seeking to 0 separates
-        them -- four octets are available and the old cap allowed three, making up the
-        fourth from the stream *past* the octet it had skipped.
+        them -- four octets are available and, without the fix, the cap allows three,
+        making up the fourth from the stream *past* the octet it skipped.
 
         """
         reader = self.SeekableReader(io.BytesIO(b'abcde'), buffer_size=8)
         self.assertEqual(reader.read(4), b'abcd')
         self.assertEqual(reader.seek(0), 0)
-        self.assertEqual(reader.read(5), b'abcde')  # was b'abce': four octets, d dropped
+        self.assertEqual(reader.read(5), b'abcde')  # without the fix: b'abce', d dropped
         self.assertEqual(reader.tell(), 5)
         self._close_reader(reader)
 
         # NOTE: an unbounded read must not hand back the padding behind the content
-        # either; this returned b'abcd\x00\x00\x00\x00e' before the fix.
+        # either; without the fix this returns b'abcd\x00\x00\x00\x00e'.
         reader = self.SeekableReader(io.BytesIO(b'abcde'), buffer_size=8)
         self.assertEqual(reader.read(4), b'abcd')
         self.assertEqual(reader.seek(0), 0)
@@ -679,15 +679,15 @@ class SeekableReaderTests(unittest.TestCase):
                 self._close_reader(reader)
 
     def test_seek_refuses_a_negative_position_with_a_saved_buffer_too(self) -> None:
-        """With ``buffer_save=True`` the refusal was skipped and the seek reported success.
+        """With ``buffer_save=True`` the refusal must not be skipped, nor the seek report success.
 
         The window refusal is conditional on there being no buffer file, since a saved
         buffer really can supply octets from before the window. A negative absolute position
-        is not that case, and with a file the old code fell straight through and *returned*
-        ``-5`` as though the seek had worked. The failure then surfaced on an unrelated call
-        as a bare ``OSError: [Errno 22] Invalid argument`` out of the middle of
-        :meth:`read`, from a line only reachable because :meth:`seek` had accepted something
-        it should not have.
+        is not that case, and with a file, without the fix, the code falls straight
+        through and *returns* ``-5`` as though the seek had worked. The failure then surfaces on an
+        unrelated call as a bare ``OSError: [Errno 22] Invalid argument`` out of the middle
+        of :meth:`read`, from a line only reachable because :meth:`seek` has accepted
+        something it should not have.
 
         """
         with tempfile.NamedTemporaryFile(delete=False) as temp:
@@ -771,7 +771,7 @@ class SeekableReaderTests(unittest.TestCase):
         ``_buffer_cur`` counts from the window's base, not from the position being read
         from, so it offers octets that lie *behind* the position; and the ``- 1`` is short of
         even that. What is genuinely available is
-        ``_buffer_set + _buffer_cur - _tell``, which is what each path now asks for.
+        ``_buffer_set + _buffer_cur - _tell``, which is what each path asks for.
 
         The two halves fail differently, so each gets its own case:
 
@@ -784,8 +784,8 @@ class SeekableReaderTests(unittest.TestCase):
           ``size_rem`` zero and skips the top-up entirely -- so the real octets are never
           fetched at all.
 
-        ``read`` already carried the corrected count before this change; ``readline``,
-        ``read1`` and ``peek`` are the three sites that did not. All four are asserted, the
+        ``read`` carries the corrected count even without the fix; ``readline``,
+        ``read1`` and ``peek`` are the sites that do not. All four are asserted, the
         first as a regression guard.
 
         """
@@ -824,12 +824,12 @@ class SeekableReaderTests(unittest.TestCase):
     def test_an_unbounded_buffered_readline_still_finishes_the_line(self) -> None:
         """Capping ``readline`` at the buffer must not truncate a line that runs past it.
 
-        With no size the old cap was ``min(-1, _buffer_cur - 1) == -1``, i.e. uncapped, and
-        :meth:`io.BytesIO.readline` then ran off the content into the NUL padding behind it.
-        Capping at the content is right, but on its own it would leave an unbounded
-        ``readline`` stopping at the window's edge rather than at the newline, so the
-        continuation from the stream now runs for a negative size as well -- the same shape
-        :meth:`read` already had.
+        With no size, without the fix, the cap is ``min(-1, _buffer_cur - 1) == -1``, i.e.
+        uncapped, and :meth:`io.BytesIO.readline` then runs off the content into the NUL
+        padding behind it. Capping at the content is right, but on its own it would leave an
+        unbounded ``readline`` stopping at the window's edge rather than at the newline, so
+        the continuation from the stream runs for a negative size as well -- the same shape
+        :meth:`read` has.
 
         """
         reader = self.SeekableReader(io.BytesIO(b'abcdefghij\nklm'), buffer_size=8)

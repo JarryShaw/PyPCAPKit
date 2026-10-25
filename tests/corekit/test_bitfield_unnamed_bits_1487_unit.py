@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """A BitField packs back the bits its namespace does not name.
 
-GitHub issue #1487: :class:`~pcapkit.corekit.fields.strings.BitField` read only
-its named subfields and packed from all zeros, so octets with a bit outside
-every subfield set came back with it cleared. The unpacked value now carries
-those bits under ``__unnamed__`` when any is set, and a value without the key
-packs them as zeros, as before.
+GitHub issue #1487 guards against :class:`~pcapkit.corekit.fields.strings.BitField`
+reading only its named subfields and packing from all zeros, so that octets with a
+bit outside every subfield set come back with it cleared. The unpacked value
+carries those bits under ``__unnamed__`` when any is set, and a value without the
+key packs them as zeros.
 
 :mod:`pcapkit` is imported inside each test, after
 :func:`~tests._support.reimport_once_per_class`, not at module load.

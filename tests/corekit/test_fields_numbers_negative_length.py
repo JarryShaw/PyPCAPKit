@@ -66,10 +66,10 @@ class NegativeResolvedLengthTests(unittest.TestCase):
     def test_protocolerror_is_a_baseerror_unlike_the_stock_valueerror(self) -> None:
         """The defect in one assertion: catchable as a pcapkit error.
 
-        On stock ``21e9588af`` this raises a bare :class:`builtins.ValueError`
+        Without the fix this raises a bare :class:`builtins.ValueError`
         (``negative shift count``), which is *not* an instance of
         :class:`~pcapkit.utilities.exceptions.BaseError` and so cannot be
-        caught as one -- measured directly below, since that is the whole
+        caught as one -- asserted directly below, since that is the whole
         point of the regression.
 
         """
@@ -179,23 +179,22 @@ class NegativeBitLengthTests(unittest.TestCase):
 
     ``NumberField.__init__`` caches ``self._bit_mask`` from ``bit_length``
     whenever one is supplied, and shifts by it immediately:
-    ``(1 << bit_length) - 1``. #829 guarded the *resolved-length* shift in
-    :meth:`~pcapkit.corekit.fields.numbers.NumberField.__call__` but left this
-    one, in ``NumberField.__init__`` on ``5576708d4``, open --
-    a negative ``bit_length`` still raised a bare, uncatchable
-    :exc:`ValueError` (``negative shift count``) rather than a
+    ``(1 << bit_length) - 1``. #829 guards the *resolved-length* shift in
+    :meth:`~pcapkit.corekit.fields.numbers.NumberField.__call__`; without the
+    #831 fix this one is open -- a negative ``bit_length`` raises a bare,
+    uncatchable :exc:`ValueError` (``negative shift count``) rather than a
     :class:`~pcapkit.utilities.exceptions.ProtocolError`.
 
-    The last two cases below are the second half of #831: with ``bit_length``
-    supplied, #829's guard in :meth:`__call__` sits entirely inside the
-    ``bit_length``-not-supplied branch and so never runs, and a field combining
-    a fixed ``bit_length`` with a callable ``length`` that resolves negative
-    used to fall through to ``template='...-1s'`` and a *different*
+    The last two cases below are the second half of #831: without the fix, with
+    ``bit_length`` supplied, #829's guard in :meth:`__call__` sits entirely
+    inside the ``bit_length``-not-supplied branch and so never runs, and a field
+    combining a fixed ``bit_length`` with a callable ``length`` that resolves
+    negative falls through to ``template='...-1s'`` and a *different*
     :exc:`ProtocolError` message from
     :attr:`~pcapkit.corekit.fields.field.FieldBase.length` -- the same wire
     condition, two different messages, depending on an unrelated constructor
     argument. The fix validates the resolved ``length`` unconditionally in
-    ``__call__``, so both shapes now raise the identical message.
+    ``__call__``, so both shapes raise the identical message.
     """
 
     def setUp(self) -> None:
@@ -222,9 +221,9 @@ class NegativeBitLengthTests(unittest.TestCase):
     def test_negative_bit_length_protocolerror_is_a_baseerror(self) -> None:
         """The defect in one assertion: catchable as a pcapkit error.
 
-        On stock ``5576708d4`` this raises a bare :class:`builtins.ValueError`
+        Without the fix this raises a bare :class:`builtins.ValueError`
         (``negative shift count``), which is *not* an instance of
-        :class:`~pcapkit.utilities.exceptions.BaseError` -- measured directly
+        :class:`~pcapkit.utilities.exceptions.BaseError` -- asserted directly
         below, mirroring
         :meth:`NegativeResolvedLengthTests.
         test_protocolerror_is_a_baseerror_unlike_the_stock_valueerror`
@@ -279,9 +278,9 @@ class NegativeBitLengthTests(unittest.TestCase):
     def test_bit_length_zero_still_works_exactly_as_it_does_on_main(self) -> None:
         """The boundary the fix must not break: ``bit_length=0`` is not negative.
 
-        Checked against stock behaviour rather than assumed: on ``5576708d4``,
-        prior to any change here, ``bit_length=0`` already constructs and
-        calls cleanly with a mask of ``0``, and that has to keep being true.
+        ``bit_length=0`` constructs and calls cleanly with a mask of ``0``,
+        with or without the fix, and the guard against a negative
+        ``bit_length`` must not catch it.
 
         """
         from pcapkit.corekit.fields.numbers import NumberField
@@ -300,7 +299,7 @@ class NegativeBitLengthTests(unittest.TestCase):
         No in-tree call site combines a fixed ``bit_length`` with a callable
         ``length`` -- ``vlan.py``'s three ``bit_length`` fields all take
         positive literal ``length`` -- so this is a constructed reproduction,
-        not a real wire shape. Before the fix, #829's guard in ``__call__``
+        not a real wire shape. Without the fix, #829's guard in ``__call__``
         sits inside ``if new_self._bit_length < 0:`` and this combination
         never enters that branch, so no ``ProtocolError`` fires there at all;
         the field instead degrades to ``template='>-1s'`` and the error is

@@ -4,21 +4,21 @@ level it returns must be *relative*.
 
 :func:`warnings.warn` and the :mod:`logging` module both count ``stacklevel``
 outwards from the frame that made the call: ``1`` is that frame, ``2`` its caller,
-and so on. ``stacklevel()`` used to return an absolute index into
-:func:`traceback.extract_stack`'s result instead, so the value grew with the depth
-of the caller's *own* stack and the attributed frame drifted one frame further out
-for every extra outer frame. Under :program:`pytest`, or any deep call chain, the
-function inverted its own purpose and blamed a frame with nothing to do with the
-complaint.
+and so on. Without the fix, ``stacklevel()`` returns an absolute index into
+:func:`traceback.extract_stack`'s result instead, so the value grows with the
+depth of the caller's *own* stack and the attributed frame drifts one frame
+further out for every extra outer frame. Under :program:`pytest`, or any deep
+call chain, the function inverts its own purpose and blames a frame with nothing
+to do with the complaint.
 
-It also returned ``-1``, and not only in theory: :func:`traceback.extract_stack`
-honours :data:`sys.tracebacklimit`, which :class:`BaseError
-<pcapkit.utilities.exceptions.BaseError>` *used to* set to ``0`` for every loud
-error outside development mode (GitHub issue #719 removed that -- it prints its
-terse line through an exception hook instead, and no longer touches the global
-at all). After the first such error the extracted stack was *empty*, the
-``for``/``else`` branch ran, and every subsequent warning in the process got
-``-1``.
+Without the fix, the function also returns ``-1``, and not only in theory:
+:func:`traceback.extract_stack` honours :data:`sys.tracebacklimit`, and setting
+it to ``0`` for every loud error outside development mode is the GitHub issue
+#719 defect in :class:`BaseError <pcapkit.utilities.exceptions.BaseError>`, which
+prints its terse line through an exception hook and does not touch the global
+at all. Under that defect, after the first such error the extracted stack is
+*empty*, the ``for``/``else`` branch runs, and every subsequent warning in the
+process gets ``-1``.
 
 Three groups of tests here, because they fail for different reasons:
 
@@ -27,7 +27,7 @@ Three groups of tests here, because they fail for different reasons:
   can produce;
 * :class:`StacklevelAttributionTests` -- the end-to-end attribution, driving real
   :mod:`pcapkit` APIs from a range of stack depths, which is what a user actually
-  sees and where the drift showed up;
+  sees and where the drift shows;
 * :class:`WarnWrapperLevelTests` -- :func:`pcapkit.utilities.warnings.warn`'s own
   ``stacklevel`` argument, which every call site in the package forwards a
   ``stacklevel()`` through.
@@ -72,8 +72,8 @@ EXTERNAL = os.path.join(os.path.sep, 'home', 'user', 'app.py')
 INTERNAL = os.path.join(os.path.sep, 'site-packages', 'pcapkit', 'internal.py')
 
 #: Outer stack depths the end-to-end tests run every probe at. The point of the
-#: list is its spread: the old absolute level was right by coincidence at exactly
-#: one depth, so a single-depth test passed against the defect.
+#: list is its spread: without the fix, the absolute level is right by coincidence at
+#: exactly one depth, so a single-depth test passes against the defect.
 DEPTHS = (0, 1, 2, 5, 12, 30)
 
 #: A checkout inside a directory literally named ``pcapkit`` would make this very
@@ -291,7 +291,7 @@ class StacklevelArithmeticTests(unittest.TestCase):
                 self.assertEqual(self.level_for(outer=0, inner=inner), inner - 1)
 
     def test_no_pcapkit_frame_at_all_yields_the_immediate_caller(self) -> None:
-        """The ``for``/``else`` branch, which used to return ``len(tb) - 1``."""
+        """The ``for``/``else`` branch, which without the fix returns ``len(tb) - 1``."""
         for outer in (1, 4, 25):
             with self.subTest(outer=outer):
                 self.assertEqual(self.level_for(outer=outer, inner=0), 1)
@@ -327,7 +327,7 @@ class StacklevelAttributionTests(unittest.TestCase):
         """Called from non-:mod:`pcapkit` code, the answer is ``1`` at any depth.
 
         The boundary is ``stacklevel()``'s own frame, so the only external frame
-        to name is its immediate caller. The old absolute index returned
+        to name is its immediate caller. Without the fix, the absolute index returns
         ``len(tb) - 2`` here, which under :program:`pytest` is a couple of dozen
         and climbing.
 
@@ -369,15 +369,15 @@ class StacklevelAttributionTests(unittest.TestCase):
     def test_a_truncated_traceback_limit_does_not_blind_the_walk(self) -> None:
         """``sys.tracebacklimit = 0`` must not change the answer.
 
-        :class:`~pcapkit.utilities.exceptions.BaseError` *used to* set it for
-        every loud error outside development mode (GitHub issue #719 removed
-        that), and :func:`traceback.extract_stack` honours it -- returning an
-        *empty* list, on which the old implementation fell through to its
-        ``for``/``else`` and returned ``-1``. So in ordinary use the first error
-        silently broke the attribution of every warning after it, for the life
-        of the process. It is also why this only ever reproduced in a
-        full-suite run: alone, this module never raised a loud error first.
-        Nothing in :mod:`pcapkit` sets the global any more, but the frame walk
+        Setting it for every loud error outside development mode is the GitHub
+        issue #719 defect in :class:`~pcapkit.utilities.exceptions.BaseError`,
+        and :func:`traceback.extract_stack` honours it -- returning an *empty*
+        list, on which the implementation without the fix falls through to its
+        ``for``/``else`` and returns ``-1``. So under that defect the first loud
+        error silently breaks the attribution of every warning after it, for the
+        life of the process, and it reproduces only in a full-suite run: alone,
+        this module never raises a loud error first. Nothing in :mod:`pcapkit`
+        sets the global, but the frame walk
         this guards is correct regardless of who does, which is exactly the
         point of setting it by hand below rather than provoking it indirectly.
 
@@ -405,12 +405,12 @@ class StacklevelAttributionTests(unittest.TestCase):
         The probes record with ``simplefilter('always')``, which un-ignores the
         categories Python hides by default, so a file handle an earlier test left
         for the collector arrives in the window as a :exc:`ResourceWarning`. Two
-        assumptions used to break on that: the count, which required the window to
-        hold exactly one record, and the *position*, since the probe returned the
-        last record rather than its own (:issue:`606`).
+        assumptions break on that (:issue:`606`): a count requiring the window to
+        hold exactly one record, and picking by *position*, which returns the last
+        record rather than the probe's own.
 
         Warnings are raised on both sides of the probe here deliberately -- one
-        before and one after -- because the trailing one is what made picking by
+        before and one after -- because the trailing one is what makes picking by
         position wrong rather than merely lucky. Emitting them directly keeps the
         test deterministic: the real thing depends on garbage-collection timing,
         which is why it moved between unrelated pull requests instead of failing
@@ -460,7 +460,7 @@ class StacklevelAttributionTests(unittest.TestCase):
         return recorder.records[-1]
 
     def test_error_log_blames_the_same_line_from_every_depth(self) -> None:
-        """``BaseError`` used to negate the level, which blamed :mod:`logging`."""
+        """Guards against ``BaseError`` negating the level, which blames :mod:`logging`."""
         seen = {}  # type: dict[int, tuple[str, int]]
         for depth in DEPTHS:
             record = through(depth, self.error_site)

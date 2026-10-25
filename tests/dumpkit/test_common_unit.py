@@ -108,12 +108,12 @@ class DumpkitCommonTests(unittest.TestCase):
     def test_dumper_subclass_registration_is_opt_in(self) -> None:
         """Registration happens if and only if ``fmt`` is given.
 
-        This is the #514 opt-in contract, extended to the fifth pair. Before it,
-        an absent ``fmt`` was *inferred* from the subclass'
+        This is the #514 opt-in contract, extended to the fifth pair. It guards
+        against *inferring* an absent ``fmt`` from the subclass'
         :attr:`~dictdumper.dumper.Dumper.kind` property -- which is an instance
-        property, so the old code constructed an instance against a
-        :func:`tempfile.NamedTemporaryFile` while the ``class`` statement was
-        still executing. A class definition no longer touches the filesystem.
+        property, so inferring it constructs an instance against a
+        :func:`tempfile.NamedTemporaryFile` while the ``class`` statement is
+        still executing. A class definition does not touch the filesystem.
 
         """
         from pcapkit.dumpkit.common import Dumper
@@ -146,7 +146,7 @@ class DumpkitCommonTests(unittest.TestCase):
 
         extractor.assert_not_called()
         traceflow.assert_not_called()
-        # the old inference path is gone, not merely unused
+        # no instance is constructed to infer ``fmt``
         named_temp.assert_not_called()
 
     def test_dumper_subclass_rejects_ext_without_fmt(self) -> None:
@@ -325,7 +325,7 @@ class DumpkitCommonTests(unittest.TestCase):
         one that keeps this branch free of any risk of double-escaping -- a
         plain :class:`dict` is not even rebuilt: the writer is handed the
         caller's own mapping, with the caller's own key objects in it, exactly
-        as it was before #772. A :class:`bytes` key stays :class:`bytes` there,
+        as given. A :class:`bytes` key stays :class:`bytes` there,
         which is what ``dictdumper``'s ``json`` writer then breaks on, for
         reasons of its own.
 
@@ -440,7 +440,7 @@ class DumpkitIOTests(unittest.TestCase):
 
     def test_pcap_dumper_writes_the_record_header_in_the_global_header_byte_order(self) -> None:
         # The dumper writes the 16-octet record header itself instead of building a
-        # Frame to pack it, so the byte order of those four uint32 fields is now this
+        # Frame to pack it, so the byte order of those four uint32 fields is this
         # module's responsibility rather than the schema's. It has to match the magic
         # number in front of them, and 'big' has to keep working on a little-endian
         # host -- which is exactly what a struct format hardcoded to one endianness
@@ -478,13 +478,13 @@ class DumpkitIOTests(unittest.TestCase):
                         )
 
     def test_pcap_dumper_truncates_an_out_of_range_record_field(self) -> None:
-        # UInt32Field, which used to pack these four fields, masks to the field width
-        # in NumberField.pre_process instead of rejecting an out-of-range value, so
-        # the dumper silently wrote a wrapped one. struct.pack raises on the same
-        # input, so writing the header directly would have turned a written -- if
-        # wrong -- record into a struct.error. Pinned so the mask is not mistaken for
-        # dead defensiveness and dropped: this is behaviour being preserved, not
-        # behaviour being chosen.
+        # UInt32Field, the field class that would otherwise pack these four fields,
+        # masks to the field width in NumberField.pre_process instead of rejecting an
+        # out-of-range value, so a wrapped one is silently written. struct.pack raises
+        # on the same input, so writing the header directly without the mask would
+        # turn a written -- if wrong -- record into a struct.error. Pinned so the
+        # mask is not mistaken for dead defensiveness and dropped: this is behaviour
+        # being preserved, not behaviour being chosen.
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.dumpkit.pcap import PCAPIO
         from pcapkit.protocols.data.misc.pcap.frame import Frame, FrameInfo
@@ -508,12 +508,12 @@ class DumpkitIOTests(unittest.TestCase):
 
     def test_pcap_dumper_appends_each_frame_without_reparsing_it(self) -> None:
         # Successive frames have to accumulate, and each record has to be the caller's
-        # own octets verbatim -- the dumper no longer round-trips them through a Frame
-        # construction, which packed the record and then dissected it again through
+        # own octets verbatim -- the dumper does not round-trip them through a Frame
+        # construction, which would pack the record and then dissect it again through
         # the whole protocol stack to reach bytes it had just been handed.
         #
-        # The payload here is deliberately not a valid Ethernet frame: under the old
-        # rebuild it was dissected anyway, so a dumper that reparses is not merely
+        # The payload here is deliberately not a valid Ethernet frame: such a rebuild
+        # dissects it anyway, so a dumper that reparses is not merely
         # slower but is doing work that can warn or raise on data it only had to copy.
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.dumpkit.pcap import PCAPIO

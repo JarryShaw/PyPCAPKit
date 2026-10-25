@@ -63,7 +63,7 @@ class LoggingEnvironmentTests(unittest.TestCase):
         self.assertTrue(logging_module.SPHINX_TYPE_CHECKING)
 
     def test_invalid_boolean_environment_values_fall_back_to_false_and_warn(self) -> None:
-        # GitHub issue #1726: the value used to be taken as off in silence.
+        # GitHub issue #1726 guards against the value being taken as off in silence.
         # logging loads before warnings, so it records the value and warnings
         # reports it once it has loaded, naming the variable and the value.
         os.environ['PCAPKIT_DEVMODE'] = 'maybe'
@@ -469,10 +469,10 @@ class ExtractorLoggingTests(unittest.TestCase):
     so a handle one of them leaks is reported -- as a :exc:`ResourceWarning`, at
     whatever unrelated point the collector reaches it -- inside a sibling module's
     test. :mod:`tests.utilities.test_stacklevel` records warnings to inspect their
-    attribution, and used to assert that its window held exactly one; a stray
-    handle from here was therefore enough to fail it (:issue:`606`).
+    attribution, and a window asserted to hold exactly one record is failed by a
+    stray handle from here (:issue:`606`).
 
-    The constructions are otherwise unchanged: with ``auto=True`` the extraction
+    Beyond that, the constructions are plain: with ``auto=True`` the extraction
     runs in ``__init__``, so the bodies are empty and everything asserted is read
     afterwards.
 

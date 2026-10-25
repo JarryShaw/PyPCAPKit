@@ -175,11 +175,11 @@ class TestShortReads(unittest.TestCase):
         self.assertEqual(reader.read(), DATA[:50])
 
     def test_close_after_the_stream_was_closed(self) -> None:
-        """A stream its owner closed first made :meth:`close` raise, from a finaliser too.
+        """A stream its owner closed first must not make :meth:`close` raise, finaliser or not.
 
-        Measured on a dpkt ``NeedData``: the extractor left with the reader, which was
-        collected after the caller closed its stream, and printed ``Exception ignored
-        ... ValueError: I/O operation on closed file``.
+        Without the fix, on a dpkt ``NeedData`` the extractor leaves with the reader,
+        which is collected after the caller closes its stream, and prints ``Exception
+        ignored ... ValueError: I/O operation on closed file``.
 
         """
         from pcapkit.corekit.io import SeekableReader  # pylint: disable=import-outside-toplevel

@@ -16,8 +16,8 @@ He then went with the recommendation to keep both on :class:`EnumRegistry`.
 What this module pins, and why each part is worth pinning:
 
 * the split is where it was ruled to be -- the lookup methods on the base, the
-  mutating ones still on :class:`~pcapkit.corekit.enum.EnumRegistry`, asserted as
-  an **exact** partition rather than as mere presence, so that a later change
+  mutating ones on :class:`~pcapkit.corekit.enum.EnumRegistry`, asserted as
+  an **exact** partition rather than as mere presence, so that a change
   cannot quietly migrate one across (:class:`TwoTierSplitTests`);
 * the base works as a base, for an :class:`int`-valued and a :class:`str`-valued
   enumeration alike, without either being a registry (:class:`BareLookupTests`);
@@ -29,24 +29,22 @@ What this module pins, and why each part is worth pinning:
   ``str``-key path -- that last one is a documented omission, so it is asserted
   rather than left to be rediscovered (:class:`ValidateValueTests`);
 * the declared-but-unassigned asymmetry :meth:`get`'s own docstring describes
-  survives on the new base (:class:`UnassignedAsymmetryTests`);
-* members still pickle, on every protocol, for all three shapes
-  (:class:`PickleTests`) -- flagged unverified while the change was being
-  designed, since inserting a class into the MRO is exactly the kind of thing
-  that can disturb :meth:`~object.__reduce_ex__`.
+  holds on the base (:class:`UnassignedAsymmetryTests`);
+* members pickle, on every protocol, for all three shapes
+  (:class:`PickleTests`) -- since inserting a class into the MRO is exactly the
+  kind of thing that can disturb :meth:`~object.__reduce_ex__`.
 
-On the tree before this change every test below fails at **import**::
+Without the base every test below fails at **import**::
 
     ImportError: cannot import name 'EnumLookup' from 'pcapkit.corekit.enum'
 
 That is not an artefact of how the module is written: the classes these tests
-exercise inherit from the base being introduced, so there is nothing to exercise
-until it exists. Two of the tests fail pre-change for a second, independent
-reason as well -- :meth:`TwoTierSplitTests.test_the_split_is_an_exact_partition`
-and :meth:`TwoTierSplitTests.test_enum_registry_subclasses_the_lookup_base`
-both contradict the single-tier shape even when rewritten against
-:class:`~pcapkit.corekit.enum.EnumRegistry` alone, because ``get`` and
-``get_all`` live in ``EnumRegistry.__dict__`` there.
+exercise inherit from the base, so there is nothing to exercise without it.
+:meth:`TwoTierSplitTests.test_the_split_is_an_exact_partition` and
+:meth:`TwoTierSplitTests.test_enum_registry_subclasses_the_lookup_base` also fail
+for a second, independent reason -- both contradict a single-tier shape even when
+rewritten against :class:`~pcapkit.corekit.enum.EnumRegistry` alone, because
+``get`` and ``get_all`` then live in ``EnumRegistry.__dict__``.
 
 """
 from __future__ import annotations
@@ -175,7 +173,7 @@ class TwoTierSplitTests(unittest.TestCase):
         Asserted against ``__dict__`` rather than with :func:`hasattr`, which
         cannot tell "defined here" from "inherited": the mutating five are
         reachable from :class:`EnumLookup`'s subclasses either way, so presence
-        alone would pass on the single-tier tree this change replaces.
+        alone would pass on a single-tier hierarchy.
 
         """
         for name in LOOKUP:
@@ -201,7 +199,7 @@ class TwoTierSplitTests(unittest.TestCase):
                 self.assertTrue(callable(getattr(_PickleInt, name)))
 
     def test_lookup_methods_resolve_to_the_base_on_a_registry(self) -> 'None':
-        """A registry's ``get`` is now the base's, not a copy of it."""
+        """A registry's ``get`` is the base's, not a copy of it."""
         for name in ('get', 'get_all'):
             with self.subTest(method=name):
                 self.assertIs(getattr(_PickleInt, name).__func__,
@@ -512,10 +510,9 @@ class PickleTests(unittest.TestCase):
     """Members survive the round trip on every protocol, for all three shapes.
 
     Inserting a class into the MRO is exactly the sort of change that can disturb
-    :meth:`~object.__reduce_ex__`, and this was flagged unverified while the
-    change was being designed. Each case also asserts that the class really does
-    reach the new base, so the test cannot pass vacuously on the single-tier tree
-    this change replaces.
+    :meth:`~object.__reduce_ex__`. Each case also asserts that the class really
+    does reach the base, so the test cannot pass vacuously on a single-tier
+    hierarchy.
 
     """
 
