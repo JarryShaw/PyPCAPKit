@@ -24,12 +24,14 @@ Octets      Bits        Name                    Description
 .. [*] https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange
 
 """
+import collections
 import textwrap
 from typing import TYPE_CHECKING
 
 from pcapkit.const.ipx.packet import Packet as Enum_Packet
 from pcapkit.const.ipx.socket import Socket as Enum_Socket
 from pcapkit.const.reg.transtype import TransType as Enum_TransType
+from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.protocols.data.internet.ipx import IPX as Data_IPX
 from pcapkit.protocols.data.internet.ipx import Address as Data_Address
 from pcapkit.protocols.internet.internet import Internet
@@ -37,7 +39,7 @@ from pcapkit.protocols.schema.internet.ipx import IPX as Schema_IPX
 
 if TYPE_CHECKING:
     from enum import IntEnum as StdlibEnum
-    from typing import Any, Optional, Type
+    from typing import Any, DefaultDict, Optional, Type
 
     from aenum import IntEnum as AenumEnum
     from typing_extensions import Literal
@@ -61,7 +63,30 @@ class IPX(Internet[Data_IPX, Schema_IPX],
        :attr:`~pcapkit.protocols.schema.internet.ipx.IPX.trailer`
        (:issue:`1433`).
 
+       The payload is dissected by IPX Packet Type from a registry of its own,
+       :attr:`__proto__`, rather than looked up as an IP protocol number
+       (:issue:`2169`).
+
     """
+
+    ##########################################################################
+    # Defaults.
+    ##########################################################################
+
+    #: Protocol index mapping for decoding next layer, see
+    #: :meth:`self._decode_next_layer
+    #: <pcapkit.protocols.internet.internet.Internet._decode_next_layer>` &
+    #: :meth:`self._import_next_layer
+    #: <pcapkit.protocols.internet.internet.Internet._import_next_layer>`. Keyed by
+    #: IPX Packet Type, as in :class:`~pcapkit.const.ipx.packet.Packet`, rather
+    #: than by IP protocol number, so this class keeps a registry of its own
+    #: instead of sharing :attr:`Internet.__proto__
+    #: <pcapkit.protocols.internet.internet.Internet.__proto__>` (:issue:`2169`).
+    #: No IPX-native protocol is shipped, so the payload is
+    #: :class:`~pcapkit.protocols.misc.raw.Raw` unless one is registered.
+    __proto__ = collections.defaultdict(
+        lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
+    )  # type: DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
 
     ##########################################################################
     # Properties.
@@ -78,8 +103,8 @@ class IPX(Internet[Data_IPX, Schema_IPX],
         return 30
 
     @property
-    def protocol(self) -> 'Enum_TransType':
-        """Name of next layer protocol."""
+    def protocol(self) -> 'Enum_Packet':
+        """IPX Packet Type of next layer protocol."""
         return self._info.type
 
     @property
@@ -233,6 +258,20 @@ class IPX(Internet[Data_IPX, Schema_IPX],
             # NOTE: And the octets captured past the Packet Length (#1433).
             'trailer': data.get('trailer', b''),
         }
+
+    def _next_exthdr_depth(self, proto: 'Optional[int]', extension: 'bool' = False) -> 'int':  # pylint: disable=unused-argument
+        """Place the next layer in its chain of IPv6 extension headers.
+
+        Arguments:
+            proto: next layer IPX Packet Type
+            extension: if the next layer is parsed as an extension header
+
+        Returns:
+            Always ``0``: an IPX Packet Type is not an IP protocol number, so it
+            never names an IPv6 extension header (:issue:`2169`).
+
+        """
+        return 0
 
     @staticmethod
     def _make_ipx_address(addr: 'Data_Address') -> 'bytes':
