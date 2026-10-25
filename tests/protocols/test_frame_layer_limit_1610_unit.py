@@ -20,6 +20,7 @@ imported inside each test, after :func:`~tests._support.reimport_once_per_class`
 
 """
 
+import gc
 import io
 import itertools
 import logging
@@ -34,7 +35,7 @@ from tests._support import close_extractor, reimport_once_per_class, scale_timeo
 from tests.foundation import _roundtrip as wire
 
 if TYPE_CHECKING:
-    from typing import Optional
+    from typing import Callable, Optional
 
 #: Test tier (#1958): exercises integer, bytes and struct edge cases, whose limits
 #: differ by interpreter.
@@ -98,6 +99,37 @@ def record(data: bytes, snapped: int = 0) -> bytes:
     """A PCAP record of ``data``, with its last ``snapped`` octets left uncaptured."""
     captured = data[:len(data) - snapped]
     return struct.pack('<IIII', 1_500_000_000, 0, len(captured), len(data)) + captured
+
+
+def best(parse: 'Callable[[bytes], object]', data: bytes,
+         clock: 'Callable[[], float]' = time.perf_counter) -> float:
+    """The quickest of three timed calls of ``parse(data)``, with the collector held off.
+
+    #2160: a deep frame is tens of times the octets of a short one, and on PyPy
+    each parse of it sets off steps of the major collection where a short one
+    sets off none. Their cost grows with the worker's whole heap rather than
+    with the frame, and lands on every deep parse alike, so the quickest of
+    three does not escape it. A collection first, then none while timing,
+    leaves the parse alone measured, as :mod:`timeit` does.
+    """
+    enabled = gc.isenabled()
+    gc.collect()
+    gc.disable()
+    try:
+        times = []
+        for _ in range(3):
+            start = clock()
+            parse(data)
+            times.append(clock() - start)
+    finally:
+        if enabled:
+            gc.enable()
+    return min(times)
+
+
+def bounded(short: float, deep: float) -> bool:
+    """Whether a deep frame took about as long as a short one, both cut at the limit."""
+    return deep < 4 * short + 0.05
 
 
 def chains(carrier: 'str', count: 'int', times: 'int') -> 'list[str]':
@@ -317,22 +349,14 @@ class FrameLayerLimitTests(unittest.TestCase):
     def test_no_recursion_error_at_any_depth_and_the_time_stays_bounded(self) -> None:
         from pcapkit.protocols.link.ethernet import Ethernet
 
-        def best(data: bytes) -> float:
-            times = []
-            for _ in range(3):
-                start = time.perf_counter()
-                Ethernet(data)
-                times.append(time.perf_counter() - start)
-            return min(times)
-
         cases = {'IPv4 in IPv4': 3000, '802.1Q tags': 10000, 'IPv6 in IPv6': 1500, 'mixed': 3000}
         with time_limit(scale_timeout(60)), warnings.catch_warnings(), _Logged() as logged:
             warnings.simplefilter('ignore')
             for shape, count in cases.items():
                 with self.subTest(shape=shape):
                     build = SHAPES[shape]
-                    short, deep = best(ethernet(build(66))), best(ethernet(build(count)))
-                    self.assertLess(deep, 4 * short + 0.05, (short, deep))
+                    short, deep = best(Ethernet, ethernet(build(66))), best(Ethernet, ethernet(build(count)))
+                    self.assertTrue(bounded(short, deep), (short, deep))
         self.assertEqual(logged.messages, [])
 
     def test_a_cut_frame_rebuilds_byte_exact(self) -> None:
@@ -395,6 +419,65 @@ class FrameLayerLimitTests(unittest.TestCase):
                 rebuilding = depth(lambda: Ethernet.from_data(info))  # pylint: disable=cell-var-from-loop
                 self.assertLess(rebuilding - parsing, 9, (parsing, rebuilding))
                 self.assertEqual(logged.messages, [])
+
+
+class TimingBoundTests(unittest.TestCase):
+    """C.f. #2160: :func:`best` and :func:`bounded`, timed by a made-up clock."""
+
+    #: On run 40161694146, pypy3.10 timed the short IPv6 frame at 0.0125 s, and
+    #: the deep one 0.125 s slower, which #2160 puts down to the collector.
+    SHORT, TAX = 0.0125, 0.125
+
+    def timed(self, cost: 'Callable[[bytes], float]') -> 'tuple[Callable[[bytes], None], Callable[[], float]]':
+        """A parse advancing a made-up clock by ``cost(data)``, and the clock."""
+        now = [0.0]
+
+        def parse(data: bytes) -> None:
+            now[0] += cost(data)
+
+        return parse, lambda: now[0]
+
+    def restore_collector(self) -> None:
+        """Leave the collector enabled or not, as the test found it."""
+        self.addCleanup(gc.enable if gc.isenabled() else gc.disable)
+
+    def test_the_collector_is_held_off_while_timing(self) -> None:
+        self.restore_collector()
+        gc.enable()
+        # the deep frame pays the collector's share only while it may run
+        parse, clock = self.timed(lambda data: self.SHORT + (self.TAX if data == b'deep' and gc.isenabled() else 0))
+        short, deep = best(parse, b'short', clock), best(parse, b'deep', clock)
+        self.assertAlmostEqual(short, self.SHORT)
+        self.assertAlmostEqual(deep, self.SHORT)
+        self.assertTrue(bounded(short, deep))
+        # and the bound itself still refuses what run 40161694146 measured
+        self.assertFalse(bounded(self.SHORT, self.SHORT + self.TAX))
+
+    def test_the_collector_is_left_as_it_was(self) -> None:
+        self.restore_collector()
+
+        def fail(data: bytes) -> None:
+            raise ValueError(data)
+
+        for enabled in (True, False):
+            with self.subTest(enabled=enabled):
+                (gc.enable if enabled else gc.disable)()
+                best(lambda data: None, b'')
+                self.assertEqual(gc.isenabled(), enabled)
+                with self.assertRaises(ValueError):
+                    best(fail, b'')
+                self.assertEqual(gc.isenabled(), enabled)
+
+    def test_a_parse_that_grows_with_the_layers_breaches_the_bound(self) -> None:
+        # The deep IPv6 frame of the test above: 1500 layers, against 66.
+        per_layer = self.SHORT / 66
+        for name, cost in (('linear', lambda layers: per_layer * layers),
+                           ('quadratic', lambda layers: per_layer * layers * layers / 66)):
+            with self.subTest(growth=name):
+                parse, clock = self.timed(lambda data: cost(len(data)))  # pylint: disable=cell-var-from-loop
+                short, deep = best(parse, bytes(66), clock), best(parse, bytes(1500), clock)
+                self.assertAlmostEqual(short, self.SHORT)
+                self.assertFalse(bounded(short, deep), (short, deep))
 
 
 if __name__ == '__main__':
