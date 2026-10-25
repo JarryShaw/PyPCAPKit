@@ -83,6 +83,11 @@ Algorithm
             [from octet fragment.first to octet fragment.last];
          HDL <- [one hole from PSN + fragment.len to infinity,
                  i.e. HOLE_OPEN_BOUND];
+         IF (SYN is false) {
+            /* the start of the stream is unknown: this hole is the one
+               before the capture */
+            insert one hole from -HOLE_OPEN_BOUND to PSN - 1 into HDL;
+         }
       } ELSE {
          put data from fragment into data buffer with BUFID
             [from octet fragment.first to octet fragment.last];
@@ -94,7 +99,13 @@ Algorithm
          }
       }
 
-      IF (FIN is true or RST is true) {
+      /* a FIN fixes the end of the stream; data sent before it may still
+         arrive after it */
+      IF (FIN is true) {
+         cut every hole in HDL back to end below the FIN;
+      }
+
+      IF (RST is true or HDL holds no hole but the one before the capture) {
          submit datagram to next step;
          free all reassembly resources for this BUFID;
          BREAK.
@@ -116,13 +127,14 @@ Algorithm
             new_hole.last <- fragment.first - 1;
          }
 
-         IF (fragment.last < hole.last AND FIN is false AND RST is false) {
+         IF (fragment.last < hole.last) {
             create new entry "new_hole" in HDL;
             new_hole.first <- fragment.last + 1;
             new_hole.last <- hole.last;
          }
 
-         BREAK.
+         /* one segment may span several holes */
+         CONTINUE.
       } give up until (no entry from HDL)
    }
 
@@ -141,16 +153,18 @@ here is the process:
    new hole descriptor ``new_hole`` with ``new_hole.first`` equal to
    ``hole.first``, and ``new_hole.last`` equal to ``fragment.first``
    minus one (``-1``).
-6. If ``fragment.last`` is less than ``hole.last`` and neither ``FIN``
-   nor ``RST`` is set -- TCP has no *more fragments* flag, so the
-   termination flags take its place -- then create a new hole
+6. If ``fragment.last`` is less than ``hole.last``, then create a new hole
    descriptor ``new_hole``, with ``new_hole.first`` equal to
    ``fragment.last`` plus one (``+1``) and ``new_hole.last`` equal to
    ``hole.last``.
 7. Go to step one.
-8. If the hole descriptor list is now empty, the datagram is now
-   complete. Pass it on to the higher level protocol processor
-   for further handling. Otherwise, return.
+8. If the hole descriptor list holds no hole but the one below a capture
+   that missed the handshake, the stream is complete. Pass it on to the
+   higher level protocol processor for further handling. Otherwise, return.
+
+TCP has no *more fragments* flag, so the hole above the last octet received
+stays open until a FIN cuts it back to end at the sequence number the FIN
+occupies. A RST submits the stream as it stands, holes and all.
 
 Terminology
 ===========

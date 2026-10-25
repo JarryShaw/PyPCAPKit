@@ -34,7 +34,7 @@ class IPv4(IP):
             :data:`None` selects :attr:`__timeout__`
 
     Example:
-        >>> from pcapkit.foundation.reassembly import IPv4
+        >>> from pcapkit.foundation.reassembly.ipv4 import IPv4
         # Initialise instance:
         >>> ipv4_reassembly = IPv4()
         # Call reassembly:

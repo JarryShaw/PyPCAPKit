@@ -242,7 +242,9 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
             ext: file extension
 
         Raises:
-            RegistryError: If ``dumper`` is not a class, or not a :class:`~pcapkit.dumpkit.common.Dumper` subclass.
+            RegistryError: If ``dumper`` is not a class, or not a
+                :class:`dictdumper.dumper.Dumper` subclass, such as
+                :class:`~pcapkit.dumpkit.common.Dumper`.
 
         Warns:
             RegistryWarning: If a different dumper is already registered for

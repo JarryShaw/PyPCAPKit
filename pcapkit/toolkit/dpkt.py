@@ -830,7 +830,8 @@ def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
             :func:`ipv4_reassembly`. The PCAP frame record is built from the
             exact timestamp attached by :func:`attach_timestamp`, if any; see
             :func:`packet2frame`.
-        data_link: Data link layer protocol (from global header).
+        data_link: Data link layer protocol: the global header's for PCAP, and
+            that of the interface the packet was captured on for PCAP-NG.
         count: Packet index. If not provided, defaults to ``-1``.
 
     Returns:
@@ -864,7 +865,7 @@ def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
         wire, _ = _layer2bytes(packet, tcp)
 
         data = TF_TCP_Packet(  # type: ignore[type-var]
-            protocol=data_link,                                         # data link type from global header
+            protocol=data_link,                                         # data link type
             index=count,                                                # frame number
             frame=packet2frame(packet, timestamp, data_link=data_link),  # extracted packet
             syn=syn,                                                    # TCP synchronise (SYN) flag

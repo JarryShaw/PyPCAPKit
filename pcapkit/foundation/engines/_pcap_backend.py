@@ -24,7 +24,8 @@ has to know which distribution it actually got rather than assume. This module i
 the one place that answers that, deliberately shared: the engines must agree on
 the answer, and a copy of the detection in each would be a chance to disagree.
 It is *only* detection -- nothing here is engine behaviour -- and it imports
-nothing from :mod:`pcapkit`, so it cannot introduce an import cycle.
+nothing from :mod:`pcapkit` but :mod:`pcapkit.corekit.infoclass`, which imports
+nothing from :mod:`pcapkit.foundation`, so it cannot introduce an import cycle.
 
 """
 import contextvars

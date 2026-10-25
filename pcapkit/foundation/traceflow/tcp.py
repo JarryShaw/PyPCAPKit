@@ -116,10 +116,11 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         and are concatenated after all. Measured: two requests sent back to back
         on one acknowledgement number come back as a single datagram carrying
         ``b'req1req2'``, which
-        :meth:`test_pipelined_sends_share_a_datagram_because_the_ack_never_moved`
-        pins. So this narrows the concatenation to within one exchange rather than
-        eliminating it, and an application parser handed a pipelined datagram
-        still sees only the first message.
+        ``test_pipelined_sends_share_a_datagram_because_the_ack_never_moved`` in
+        :file:`tests/foundation/traceflow/test_tcp.py` pins. So this narrows the
+        concatenation to within one exchange rather than eliminating it, and an
+        application parser handed a pipelined datagram still sees only the first
+        message.
 
         A direction that carried one acknowledgement number throughout -- a single
         request and its reply, which is what most of the unit tests exercise --

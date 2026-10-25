@@ -7,8 +7,10 @@
 
 :mod:`pcapkit.utilities` holds the cross-cutting services
 :mod:`pcapkit` is built with: user-refined exceptions and
-warnings, logging, a compatibility layer, and wrappers around
-third-party libraries. It imports nothing from :mod:`pcapkit`
+warnings, logging, the tunable limits of
+:mod:`~pcapkit.utilities.config`, a compatibility layer,
+timestamp conversion, and wrappers around third-party
+libraries. It imports nothing from :mod:`pcapkit`
 outside itself (:issue:`1712`).
 
 .. versionremoved:: 1.5.0

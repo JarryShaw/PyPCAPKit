@@ -511,11 +511,12 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
                 index=tuple(index),
                 header=header,
                 payload=payload,
-                # NOTE: ``analyze`` is a second full parse of the payload, and a
-                # datagram is submitted for every frame rather than only for the
-                # fragmented ones, so running it here charges every caller for a
-                # result most of them never read. ``Deferred`` postpones it to the
-                # first read of ``Datagram.packet``.
+                # NOTE: ``analyze`` is a second full parse of the payload, and an
+                # IPv4 datagram is submitted for every frame with **DF** clear
+                # rather than only for the fragmented ones, so running it here
+                # charges every caller for a result most of them never read.
+                # ``Deferred`` postpones it to the first read of
+                # ``Datagram.packet``.
                 packet=Deferred(self.protocol.analyze, bufid[3], payload),
                 conflict=conflict,
             )

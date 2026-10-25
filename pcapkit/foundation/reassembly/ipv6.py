@@ -79,7 +79,7 @@ class IPv6(IP):
             :data:`None` selects :attr:`__timeout__`
 
     Example:
-        >>> from pcapkit.foundation.reassembly import IPv6
+        >>> from pcapkit.foundation.reassembly.ipv6 import IPv6
         # Initialise instance:
         >>> ipv6_reassembly = IPv6()
         # Call reassembly:

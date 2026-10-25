@@ -71,8 +71,9 @@ class Completion(EnumLookup, StrEnum):
     COMPLETE = auto()
 
     #: Fragments were still outstanding when the buffer was flushed -- at the end
-    #: of the capture, or when the session was torn down (a TCP FIN/RST, or an
-    #: IPv4 datagram whose identifier was reused by an unfragmented packet).
+    #: of the capture, or when the session was torn down (a TCP RST, a TCP SYN on
+    #: a 4-tuple already buffered, or an IPv4 datagram whose identifier was
+    #: reused by an unfragmented packet).
     #: The missing octets may simply not have been captured.
     PARTIAL = auto()
 
@@ -111,9 +112,9 @@ class Deferred:
     :class:`~pcapkit.foundation.reassembly.data.data.ReassemblyData` rather than in
     either protocol's data module.
 
-    IP reassembly is the case that made it necessary. It submits a datagram for
-    *every* frame -- not only the fragmented ones, since a frame that is not
-    fragmented in any sense still reaches
+    IP reassembly is the case that made it necessary. IPv4 reassembly submits a
+    datagram for *every* frame whose **DF** flag is clear -- not only the
+    fragmented ones, since an unfragmented frame still reaches
     :meth:`IP.reassembly <pcapkit.foundation.reassembly.ip.IP.reassembly>` and is
     submitted there as a trivially complete datagram -- so an eager parse would
     re-parse captures holding no fragments at all: :file:`http.pcap` has 1117

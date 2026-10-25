@@ -344,7 +344,7 @@ class PCAPNG(EngineBase[P_PCAPNG]):
         with every Section Header Block, so numbering a block by their length gives the first IDB of
         every section the same name. The output dumpers key by name, so a repeated name overwrites
         the earlier block (#1256). The number is therefore counted across the whole file instead;
-        for a single-section file it is the same number as before.
+        for a single-section file the two counts agree.
 
         Args:
             kind: The kind of the block, e.g. ``'Interface Description'``.

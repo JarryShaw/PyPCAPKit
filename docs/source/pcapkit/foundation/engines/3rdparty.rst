@@ -115,7 +115,8 @@ support, as is used by :class:`pcapkit.foundation.extraction.Extractor`.
    3.10 and 3.11 return a loop silently, 3.12 returns one with a
    :exc:`DeprecationWarning`, and **3.14 raises**
    ``RuntimeError: There is no current event loop in thread 'MainThread'``. Python
-   3.13 works, being on the deprecated-but-functional side of that change.
+   3.13 was not measured; it is expected to work, being on the
+   deprecated-but-functional side of that change.
 
    **Wireshark's** :program:`tshark` **binary.** |pyshark|_ shells out to it and
    parses nothing itself. It need not be on :envvar:`PATH`: |pyshark|_ consults
@@ -464,8 +465,9 @@ and ``import pcap`` resolves to whichever the import system finds first.
 they actually got rather than assume, and this module is the one place that
 answers it -- deliberately shared, since the engines must agree and a copy of
 the detection in each would be a chance to disagree. It is *only* detection,
-and it imports nothing from :mod:`pcapkit`, so it cannot introduce an import
-cycle.
+and it imports nothing from :mod:`pcapkit` but :mod:`pcapkit.corekit.infoclass`,
+which imports nothing from :mod:`pcapkit.foundation`, so it cannot introduce an
+import cycle.
 
 .. autodata:: pcapkit.foundation.engines._pcap_backend.PYPCAP
 

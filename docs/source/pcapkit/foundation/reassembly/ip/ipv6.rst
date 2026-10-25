@@ -140,11 +140,9 @@ Terminology
        .. note::
 
           ``packet`` is analysed on the first read, not when the datagram is
-          submitted. A datagram is submitted for *every* frame -- an unfragmented
-          one included, since nothing upstream filters it out -- and the analysis
-          is a second full parse of the payload, so running it eagerly would
-          charge every caller for a result most never read. Reading the attribute, or any
-          mapping view of it (``datagram['packet']``, ``to_dict()``, ``items()``,
+          submitted. The analysis is a second full parse of the payload, so
+          running it eagerly would charge every caller for a result most never
+          read. Reading the attribute, or any mapping view of it (``datagram['packet']``, ``to_dict()``, ``items()``,
           ``repr()``), runs it and keeps the result; see
           :class:`~pcapkit.foundation.reassembly.data.data.Deferred`.
 

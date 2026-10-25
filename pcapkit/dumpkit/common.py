@@ -421,7 +421,7 @@ def make_dumper(output: 'Type[ABCDumper]') -> 'Type[ABCDumper]':
             The :attr:`~pcapkit.corekit.infoclass.Info.__excluded__` of a field
             model, or of the field model an export was made from -- metadata
             such as ``__next_type__``, which only a rebuild reads
-            (:issue:`2003`). None for an option list, whose keys are its
+            (:issue:`2003`). Empty for an option list, whose keys are its
             options.
 
         """

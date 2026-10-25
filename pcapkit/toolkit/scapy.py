@@ -11,7 +11,7 @@ cannot be used for it.
 
 .. warning::
 
-   This module requires installed `Scapy`_ engine.
+   This module requires `Scapy`_ to be installed.
 
 .. note::
 

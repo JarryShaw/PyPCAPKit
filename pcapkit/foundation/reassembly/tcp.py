@@ -39,7 +39,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
             expiry
 
     Example:
-        >>> from pcapkit.foundation.reassembly import TCP
+        >>> from pcapkit.foundation.reassembly.tcp import TCP
         # Initialise instance:
         >>> tcp_reassembly = TCP()
         # Call reassembly:
@@ -390,7 +390,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
         Covers both an ordinary (or zero-length) forward gap and a tail-side
         overlap. Mutates ``fragment`` in place: its ``gap`` list, its
         ``conflict`` list, and finally its ``raw``/``len`` via
-        :meth:`~pcapkit.foundation.reassembly.data.data.Info.__update__`.
+        :meth:`~pcapkit.corekit.infoclass.Info.__update__`.
 
         Arguments:
             info: :term:`info <reasm.tcp.packet>` dict of the arriving segment
@@ -445,7 +445,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
         which may also extend a new tail past the buffered end in the same
         call. Mutates ``fragment`` in place: its ``isn``, its ``gap`` list,
         its ``conflict`` list, and finally its ``raw``/``len`` via
-        :meth:`~pcapkit.foundation.reassembly.data.data.Info.__update__`.
+        :meth:`~pcapkit.corekit.infoclass.Info.__update__`.
 
         Arguments:
             info: :term:`info <reasm.tcp.packet>` dict of the arriving segment
