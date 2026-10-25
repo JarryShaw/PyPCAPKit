@@ -2,14 +2,14 @@
 """GitHub issue #1498: each non-final :class:`~pcapkit.protocols.schema.schema.Schema`
 subclass is finalised on its own state, whatever was built before it.
 
-:meth:`Schema.__new__ <pcapkit.protocols.schema.schema.Schema.__new__>` used to
-read ``__finalised__`` through inheritance, so once a non-final parent had been
-built its non-final children read the parent's ``BASE`` and were never
-finalised. They kept the ``__excluded__`` copied at declaration, and
-``to_dict()`` then included ``__map__``, ``__map_reverse__``, ``__buffer__`` and
-``__updated__``. The Quick-Start option schemas of HOPOPT, IPv6-Opts and IPv4
-are the shipped instances: each is a non-final subclass of a non-final
-``Option``.
+Without the fix,
+:meth:`Schema.__new__ <pcapkit.protocols.schema.schema.Schema.__new__>` reads
+``__finalised__`` through inheritance, so once a non-final parent has been built
+its non-final children read the parent's ``BASE`` and are never finalised. They
+keep the ``__excluded__`` copied at declaration, and ``to_dict()`` then includes
+``__map__``, ``__map_reverse__``, ``__buffer__`` and ``__updated__``. The
+Quick-Start option schemas of HOPOPT, IPv6-Opts and IPv4 are the shipped
+instances: each is a non-final subclass of a non-final ``Option``.
 
 The defect depends on process-wide state -- which class was built first -- so
 every order runs in a fresh interpreter, started from the repository root so it
@@ -117,7 +117,7 @@ class SchemaChildFinalisationTests(unittest.TestCase):
         self.assertIn('method', Child.__builtin__)
 
     def test_a_final_schema_under_a_base_state_ancestor_is_refused(self) -> None:
-        """A bare ``@final`` no longer escapes the guard by reading ``BASE`` off its parent."""
+        """A bare ``@final`` does not escape the guard by reading ``BASE`` off its parent."""
         from pcapkit.corekit.fields.numbers import UInt8Field
         from pcapkit.corekit.infoclass import FinalisedState
         from pcapkit.protocols.schema.schema import Schema

@@ -50,8 +50,9 @@ ISB = bytes.fromhex('05000000 28000000 00000000 00000000 00000000'
                     '0200 0800 00000000 00000000 0000 0000 28000000')
 
 #: A TLS key log whose labels interleave and which carries comments -- the
-#: order and the comments are what #1271's data model used to drop. Padded to a
-#: multiple of four octets, so that the Decryption Secrets Block needs no pad.
+#: order and the comments are what #1271 guards the data model against
+#: dropping. Padded to a multiple of four octets, so that the Decryption Secrets
+#: Block needs no pad.
 TLS_LOG = ('# a comment\n'
            'CLIENT_RANDOM 00 11\n'
            'SERVER_HANDSHAKE_TRAFFIC_SECRET 22 33\n'

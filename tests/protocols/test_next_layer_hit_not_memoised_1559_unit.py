@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #1559: a next-layer hit is resolved, not memoised.
 
-:meth:`ProtocolBase._lookup_next_layer
-<pcapkit.protocols.protocol.ProtocolBase._lookup_next_layer>` used to write the
-class a registered :class:`~pcapkit.corekit.module.ModuleDescriptor` resolved to
-back over that descriptor. Three consequences, one test each:
+This guards against :meth:`ProtocolBase._lookup_next_layer
+<pcapkit.protocols.protocol.ProtocolBase._lookup_next_layer>` writing the class a
+registered :class:`~pcapkit.corekit.module.ModuleDescriptor` resolved to back
+over that descriptor. That has three consequences, one test each:
 
-* after :func:`importlib.reload` of the protocol's module, dispatch kept reaching
-  the pre-reload class, so a parsed layer failed :func:`isinstance` against the
-  live one -- what the method's own docstring said a memo would do;
-* parsing mutated registries shared by the whole process, so what a registry
-  held depended on what had been parsed before;
-* so whether re-registering a shipped code warned depended on it too.
+* after :func:`importlib.reload` of the protocol's module, dispatch keeps
+  reaching the pre-reload class, so a parsed layer fails :func:`isinstance`
+  against the live one -- what the method's own docstring says a memo would do;
+* parsing mutates registries shared by the whole process, so what a registry
+  holds depends on what has been parsed before;
+* so whether re-registering a shipped code warns depends on it too.
 
-Every lookup now resolves through :attr:`ModuleDescriptor.klass
+Every lookup resolves through :attr:`ModuleDescriptor.klass
 <pcapkit.corekit.module.ModuleDescriptor.klass>`, which reads
 :data:`sys.modules`. Each test reloads or parses on a private import, under
 :func:`~tests._support.isolate_modules`, so neither a reloaded module nor a
@@ -122,12 +122,12 @@ class NextLayerHitNotMemoisedTests(unittest.TestCase):
                 self.assertEqual(dict(registry), before[name])
 
     def test_registering_a_dispatched_code_warns_alike_before_and_after_a_parse(self) -> None:
-        """Whether ``register`` warns no longer depends on what was parsed.
+        """Whether ``register`` warns does not depend on what was parsed.
 
         ``register`` warns when it displaces an incumbent other than the class
         it is handed, and a shipped descriptor counts as different from the
-        class it names. While a hit wrote the class back, re-registering UDP
-        warned before any parse and was silent after one had reached UDP.
+        class it names. If a hit wrote the class back, re-registering UDP
+        would warn before any parse and be silent after one had reached UDP.
 
         """
         from pcapkit.const.reg.transtype import TransType

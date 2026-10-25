@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 """A payload captured short of the next layer's header is kept as raw octets.
 
-GitHub issue #1170. Every ``_import_next_layer`` parsed the next layer from
+This guards against GitHub issue #1170, where every ``_import_next_layer``
+parsed the next layer from
 whatever octets were captured, however few, and only picked
 :class:`~pcapkit.protocols.misc.null.NoPayload` for a declared length of zero.
 :meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>` zero-fills
 the fields the stream ends inside, so
 :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data` rebuilt a header that
-was never captured. A payload with no captured octets is now a ``NoPayload``,
+was never captured. A payload with no captured octets is a ``NoPayload``,
 and one short of the next layer's header a
 :class:`~pcapkit.protocols.misc.raw.Raw`.
 

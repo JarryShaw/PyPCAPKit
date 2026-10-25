@@ -54,11 +54,11 @@ class ProtocolBaseUnitTests(unittest.TestCase):
 
             # NOTE: ``value`` and ``next_protocol`` are declared parameters rather
             # than names read out of ``**kwargs``, and ``make`` declares the
-            # un-prefixed parse limits, because since #617 a construction keyword
-            # no signature declares is refused rather than dropped. Both spellings
-            # are faithful to what the library does -- ``IPv4.make`` really does
-            # take a ``protocol`` -- and declaring them is the pattern #617 asks
-            # for, as against naming them in ``__keywords__``.
+            # un-prefixed parse limits, because a construction keyword no signature
+            # declares is refused rather than dropped (#617). Both spellings are
+            # faithful to what the library does -- ``IPv4.make`` really does take a
+            # ``protocol`` -- and declaring them is the pattern #617 asks for, as
+            # against naming them in ``__keywords__``.
             def read(self, length: int | None = None, *, value: int = 0,
                      next_protocol: object = None, **kwargs: object) -> DummyData:
                 data = DummyData(value=value)
@@ -250,10 +250,11 @@ class ProtocolBaseUnitTests(unittest.TestCase):
         class Other(Raw):
             pass
 
-        # GitHub issue #718 added an identity guard, so the second call needs
-        # a genuinely different class from the first to still warn -- see
+        # The identity guard for GitHub issue #718 keeps a same-object call
+        # silent, so the second call needs a genuinely different class from the
+        # first to warn -- see
         # ``test_register_stays_quiet_on_same_object_reregistration`` for the
-        # same-object case this used to (incorrectly) exercise.
+        # same-object case.
         with mock.patch('pcapkit.protocols.protocol.warn') as warn:
             DummyProtocol.register(1, Raw)
             DummyProtocol.register(1, Other)
@@ -359,11 +360,10 @@ class ProtocolBaseUnitTests(unittest.TestCase):
     def test_register_stays_quiet_on_same_object_reregistration(self) -> None:
         """GitHub issue #718: replaying a call with the identical class is a no-op.
 
-        Before the fix the guard fired on presence alone, so the *second* of
+        Without the fix the guard fires on presence alone, so the *second* of
         two calls registering the exact same class under the exact same code
-        warned about an overwrite that never happened -- this is the case
-        ``test_register_analyze_and_next_layer_paths`` used to (incorrectly)
-        exercise. Matches the identity guard :func:`register_protocol
+        warns about an overwrite that never happens. Matches the identity
+        guard :func:`register_protocol
         <pcapkit.foundation.registry.protocols.register_protocol>` already
         applies.
 

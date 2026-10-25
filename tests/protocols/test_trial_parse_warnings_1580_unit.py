@@ -3,15 +3,15 @@
 
 :meth:`~pcapkit.protocols.protocol.ProtocolBase._parse_next_layer` parses a next
 layer on trial and keeps it as :class:`~pcapkit.protocols.misc.raw.Raw` when
-fewer octets were captured than its header needs (#1170). The trial's warnings
-were reported anyway, for a layer the result does not have. A PCAP-NG Simple
-Packet Block cut to 10 octets by its interface's snaplen warned ``packet length
-< 0: -2`` and ``-4`` from the Ethernet header it then dropped, on parse, on both
-``from_data`` rebuilds and on ``make``. Nothing in it is PCAP-NG's: an Enhanced
-Packet Block, an obsolete Packet Block and a PCAP record cut the same way warned
-the same, in either byte order.
+fewer octets were captured than its header needs (#1170). Without the fix, the
+trial's warnings are reported anyway, for a layer the result does not have: a
+PCAP-NG Simple Packet Block cut to 10 octets by its interface's snaplen warns
+``packet length < 0: -2`` and ``-4`` from the Ethernet header it then drops, on
+parse, on both ``from_data`` rebuilds and on ``make``. Nothing in it is
+PCAP-NG's: an Enhanced Packet Block, an obsolete Packet Block and a PCAP record
+cut the same way warn the same, in either byte order.
 
-A next layer captured shorter than its length hint is now parsed under
+A next layer captured shorter than its length hint is parsed under
 :class:`~pcapkit.utilities.warnings.hold_warnings`, and its warnings are dropped
 with the layer. A layer that is kept reports them from the caller's line when its
 trial ends, inside the same guard -- so under an ``error`` filter every chain is
@@ -56,8 +56,8 @@ MACS = bytes(6) + bytes.fromhex('020000000001')
 #: An IPv4 header of total length 30, carrying TCP.
 IPV4_TCP = bytes.fromhex('4500001e00000000400600007f0000017f000001')
 
-#: Messages for a 10-octet TCP header kept in the chain, measured unchanged against
-#: the tree before the fix: the data offset is cut off, so its length reads as 0.
+#: Messages for a 10-octet TCP header kept in the chain, measured the same with
+#: and without the fix: the data offset is cut off, so its length reads as 0.
 TCP_CUT_MESSAGES = ['packet length < 0: -2', 'packet length < 0: -3', 'packet length < 0: -4',
                     'packet length < 0: -6', 'packet length < 0: -8', 'packet length < 0: -10']
 
@@ -78,7 +78,7 @@ FRAMES = (
 
 
 class _HoldNothing:
-    """A stand-in for :class:`hold_warnings` that holds nothing, as before #1580."""
+    """A stand-in for :class:`hold_warnings` that holds nothing, as without the #1580 fix."""
 
     discard = False
 

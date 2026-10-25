@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #1405: a captured length running past the block rebuilds byte-exactly.
 
-An Enhanced Packet Block whose ``captured_len`` runs past the block read that
-many octets as packet data: the trailing Block Total Length and whatever
-followed went with them, so a 36-octet block rebuilt as 40 or 41. The packet
-data is now bounded by the block, the padding and option area are sized from
+Without the fix, an Enhanced Packet Block whose ``captured_len`` runs past the
+block reads that many octets as packet data: the trailing Block Total Length and
+whatever follows go with them, so a 36-octet block rebuilds as 40 or 41. The
+packet data is bounded by the block, the padding and option area are sized from
 the octets read, and the declared ``captured_len`` is kept, so the block rebuilds
 as captured. The obsolete Packet Block has the same shape and the same fix.
 

@@ -1,15 +1,15 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #1364: re-registering a stored module descriptor keeps it.
 
-``ProtocolBase.register`` and the ``Internet``, ``Link``, ``Transport``,
-``SCTP`` (keyed by PPID), ``Frame`` and ``PCAPNG`` overrides resolved a
-:class:`~pcapkit.corekit.module.ModuleDescriptor` argument to its class before
-comparing it with the stored entry. Handing back the stored descriptor itself
-therefore warned of an overwrite and replaced the deferred entry with the
-class. The registrars now compare first: the stored entry, or a descriptor
+Without the fix, ``ProtocolBase.register`` and the ``Internet``, ``Link``,
+``Transport``, ``SCTP`` (keyed by PPID), ``Frame`` and ``PCAPNG`` overrides
+resolve a :class:`~pcapkit.corekit.module.ModuleDescriptor` argument to its
+class before comparing it with the stored entry, so handing back the stored
+descriptor itself warns of an overwrite and replaces the deferred entry with
+the class. The registrars compare first: the stored entry, or a descriptor
 equal to it, is a silent no-op that keeps the stored object, while a different
 entry still warns. ``Extractor.register_dumper`` is pinned alongside; #1376
-already keeps its shipped descriptors.
+keeps its shipped descriptors.
 
 Every registry is process-wide, so each case runs under
 :func:`unittest.mock.patch.dict`. Classes are imported inside each test, after

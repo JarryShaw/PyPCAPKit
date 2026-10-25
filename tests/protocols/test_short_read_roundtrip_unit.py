@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 """A header the data ends inside rebuilds as captured, in every family.
 
-GitHub issues #1458 and #1451: when the data ended inside a fixed-width field,
-the parse read the missing octets as zeros and recorded nothing, so
-``from_data(info)`` wrote the field -- and every field after it -- at full
-width. ``Ethernet(bytes(12) + b'\\x08')`` rebuilt as 14 octets.
+This guards against GitHub issues #1458 and #1451, where, when the data ended
+inside a fixed-width field, the parse read the missing octets as zeros and
+recorded nothing, so ``from_data(info)`` wrote the field -- and every field
+after it -- at full width. ``Ethernet(bytes(12) + b'\\x08')`` rebuilt as 14
+octets.
 
-:meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>` now
+:meth:`Schema.unpack <pcapkit.protocols.schema.schema.Schema.unpack>`
 records the field the data ends inside and how much of it was read, as
 ``__short_read__``; :meth:`Schema.pack <pcapkit.protocols.schema.schema.Schema.pack>`
 writes back only those octets, and the layer base classes carry the record

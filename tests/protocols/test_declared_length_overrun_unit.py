@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """An option declaring more octets than are present is rejected, not zero-filled.
 
-GitHub issue #1325: :meth:`OptionField.unpack
+This guards against GitHub issue #1325, where :meth:`OptionField.unpack
 <pcapkit.corekit.fields.collections.OptionField.unpack>` let an option schema
 read past the end of its data, and every field reading off the end padded the
 missing octets with zeros. A HIP ``ACK`` declaring 256 octets with 4 present
 parsed as 64 update IDs and rebuilt to 304 octets; an MH ``PadN`` declaring 3
 octets with none present rebuilt 24 octets from 16.
 
-Such an option now raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`.
+Such an option raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`.
 Inside a parent layer the octets are kept as captured -- raw extension data
 under IPv6, a :class:`~pcapkit.protocols.misc.raw.Raw` payload elsewhere -- and
 the parent rebuilds byte for byte.

@@ -26,15 +26,15 @@ NO_ABC_IMPL_REASON = "GraalPy's abc is _py_abc and PyPy's _abc keeps _py_abc's a
 class SchemaMetaAbcCacheTests(unittest.TestCase):
     """Regression tests for GitHub issue #439.
 
-    ``SchemaMeta.__new__`` (:mod:`pcapkit.protocols.schema.schema`) used to bypass
-    :meth:`abc.ABCMeta.__new__` on Python < 3.11, to dodge a ``namespace=`` class
-    keyword collision described in that module. Bypassing it also skipped
+    The issue: ``SchemaMeta.__new__`` (:mod:`pcapkit.protocols.schema.schema`)
+    bypassed :meth:`abc.ABCMeta.__new__` on Python < 3.11, to dodge a ``namespace=``
+    class keyword collision described in that module. Bypassing it also skipped
     :meth:`abc.ABCMeta.__new__`'s call to ``abc._abc_init(cls)``, so no
     :class:`~pcapkit.protocols.schema.schema.Schema` subclass ever got its own
     ``_abc_impl``. Attribute lookup then fell through the MRO to
     :class:`collections.abc.Mapping`'s ``_abc_impl`` -- the one ABC in the chain
-    still built through an untouched ``ABCMeta.__new__`` -- so *every* schema
-    class was reading and writing the same ``isinstance`` cache that
+    still built through an untouched ``ABCMeta.__new__`` -- so *every* schema class
+    was reading and writing the same ``isinstance`` cache that
     ``collections.abc.Mapping`` itself uses.
 
     :class:`dict` is a registered virtual subclass of ``Mapping``, so asking
@@ -166,7 +166,7 @@ class SchemaMetaAbcCacheTests(unittest.TestCase):
 
         Neither class is given its own ``_abc_impl``, so attribute lookup
         falls through the MRO to :class:`collections.abc.Mapping`'s -- exactly
-        the shape ``SchemaMeta.__new__`` used to produce on Python < 3.11,
+        the shape #439's bypass in ``SchemaMeta.__new__`` produced on Python < 3.11,
         confirmed below rather than assumed. Building this on plain
         ``abc.ABCMeta`` rather than ``SchemaMeta`` keeps the two tests below
         about ``abc.ABCMeta`` in general, not about this library's fix.
@@ -255,10 +255,10 @@ class SchemaMetaAbcCacheTests(unittest.TestCase):
         :meth:`NameResolutionBlock.post_process
         <pcapkit.protocols.schema.misc.pcapng.NameResolutionBlock.post_process>`
         asks ``isinstance(record, (IPv4Record, IPv6Record))`` and then reads
-        ``record.names``. Before #439 was fixed, every schema class shared one
-        ``_abc_impl``, so that question answered ``True`` for the block's
+        ``record.names``. Without the #439 fix, every schema class shares one
+        ``_abc_impl``, so that question answers ``True`` for the block's
         *terminating* ``EndRecord`` -- which has no ``names`` -- provided
-        *anything at all* had already asked whether that same ``EndRecord``
+        *anything at all* has already asked whether that same ``EndRecord``
         instance was a :class:`~pcapkit.protocols.schema.schema.Schema`.
 
         That is a lower bar than it sounds: ``isinstance(record, Schema)`` is
@@ -298,7 +298,7 @@ class SchemaMetaAbcCacheTests(unittest.TestCase):
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class SchemaMetaReservedClassKwargsTests(unittest.TestCase):
-    """Regression tests for the reserved-class-keyword guard added with #439.
+    """Regression tests for the reserved-class-keyword guard from #439.
 
     Renaming ``namespace=`` to ``ns=`` (see :mod:`pcapkit.protocols.schema.misc.
     pcapng`) fixed the one collision that was actually in use, but the

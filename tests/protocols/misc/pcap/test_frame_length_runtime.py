@@ -3,8 +3,8 @@
 
 Both readers that build a
 :class:`~pcapkit.protocols.data.misc.pcap.frame.Frame` have to agree about which
-of the two wire fields lands in which attribute, and until GitHub issue #618 they
-did not: the classic-PCAP reader in
+of the two wire fields lands in which attribute. GitHub issue #618 is the
+defect where they did not: the classic-PCAP reader in
 :mod:`pcapkit.protocols.misc.pcap.frame` wrote ``len=incl_len,
 cap_len=orig_len`` while :func:`pcapkit.toolkit.pcapng.block2frame` wrote
 ``len=original_len, cap_len=captured_len``. Exactly inverted, so ``frame.len``
@@ -31,12 +31,12 @@ snapshot length"; ``draft-ietf-opsawg-pcapng`` gives Captured Packet Length as
 been truncated", which "SHOULD NOT be less than the Captured Packet Length". So
 neither format is the odd one out -- only the reader was.
 
-Why it survived so long: **the two lengths are equal unless the snapshot length
+Why fixtures can miss it: **the two lengths are equal unless the snapshot length
 cut the frame short**, so a fixture without a truncated frame compares a value
-against itself and cannot tell the two assignments apart. There was no such
-fixture here until #614 added one. This module therefore leans on the two that
-exist, and asserts that they really are truncated before asserting anything
-about them -- a fixture regenerated into something untruncated fails
+against itself and cannot tell the two assignments apart. This module therefore
+leans on the two truncated fixtures (#614), and asserts that they really are
+truncated before asserting anything about them -- a fixture regenerated into
+something untruncated fails
 :meth:`PcapFrameLengthRuntimeTests.test_the_fixture_really_holds_a_truncated_frame`
 loudly rather than making everything below vacuous:
 
@@ -226,7 +226,7 @@ class PcapFrameLengthRuntimeTests(unittest.TestCase):
     def test_len_is_the_on_wire_length_and_cap_len_the_captured_one(self) -> None:
         """#618: the PCAP reader had these two the other way round.
 
-        On the unfixed tree the truncated frame comes back with ``len=96`` and
+        Without the fix the truncated frame comes back with ``len=96`` and
         ``cap_len=1200`` -- the captured length under the name that means
         on-wire, and vice versa -- so this fails on that frame in every fixture
         while passing on the two untruncated ones, which is exactly the shape of
@@ -283,9 +283,9 @@ class PcapFrameLengthRuntimeTests(unittest.TestCase):
 class PcapngFrameLengthRuntimeTests(unittest.TestCase):
     """#618, on the PCAP-NG reader -- the one that was already right.
 
-    This is the control. It passes on the unfixed tree too, and that is what it
-    is for: it pins the convention the PCAP reader was brought into line with, so
-    a later change that "fixes" the disagreement from the other end fails here.
+    This is the control. It passes without the fix too, and that is what it is
+    for: it pins the convention the PCAP reader follows, so a change that
+    "fixes" the disagreement from the other end fails here.
 
     """
 
@@ -383,7 +383,7 @@ class ReadersAgreeRuntimeTests(unittest.TestCase):
     def test_a_truncated_frame_reads_alike_whichever_container_it_came_from(self) -> None:
         """One caller, two capture formats, one meaning per attribute.
 
-        On the unfixed tree the PCAP side reports ``len < cap_len`` and the
+        Without the fix the PCAP side reports ``len < cap_len`` and the
         PCAP-NG side ``len > cap_len`` for the same kind of frame, and this fails
         on the first assertion of the pair.
 
@@ -411,7 +411,7 @@ class ReadersAgreeRuntimeTests(unittest.TestCase):
         for frame in truncated:
             with self.subTest(cap_len=frame.cap_len):
                 # the on-wire length is the larger of the two, in both formats.
-                # This is the assertion #618 breaks: before the fix the PCAP
+                # This is the assertion #618 breaks: without the fix the PCAP
                 # frame reports 96 against 1200 and fails here, while the
                 # PCAP-NG one reports 314 against 32 and passes
                 self.assertGreater(frame.len, frame.cap_len)

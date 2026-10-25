@@ -263,12 +263,11 @@ class RegisterProtocolCodeInferenceTests(unittest.TestCase):
         UDP port (explicit, since a bare port cannot say TCP or UDP,
         :rfc:`3931` §4.1.2) -- see #514's design thread.
 
-        Deliberately *not* ``L2TPv2``, which this docstring named until #548 was
-        settled: v2 answers on port 1701 only, and registering it at
-        ``TransType.L2TP`` points the :rfc:`2661` parser at a v3-over-IP header.
-        The mechanism under test is unchanged either way -- the class here is a
-        stand-in and nothing is really registered -- but the example should not
-        recommend a binding the library refuses.
+        Deliberately *not* ``L2TPv2`` (#548): v2 answers on port 1701 only, and
+        registering it at ``TransType.L2TP`` points the :rfc:`2661` parser at a
+        v3-over-IP header. The mechanism under test is unchanged either way -- the
+        class here is a stand-in and nothing is really registered -- but the example
+        should not recommend a binding the library refuses.
         """
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.foundation.registry.protocols import register_protocol_code

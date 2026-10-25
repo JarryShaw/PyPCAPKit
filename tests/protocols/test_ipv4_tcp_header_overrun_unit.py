@@ -1,17 +1,19 @@
 # -*- coding: utf-8 -*-
 """A header length declared past the data, and TS address keys given as strings.
 
-GitHub issue #1404: an IPv4 ``ihl`` or a TCP Data Offset declaring more header
+This guards against GitHub issue #1404, where an IPv4 ``ihl`` or a TCP Data
+Offset declaring more header
 than the data holds read the missing octets as zeros, and ``from_data`` rebuilt
 them -- 34 octets in and 38 out for an Ethernet frame whose IPv4 ``ihl`` is 6
-with only 20 header octets present. Such a header now raises
+with only 20 header octets present. Such a header raises
 :exc:`~pcapkit.utilities.exceptions.ProtocolError`, so its parent keeps the
 octets as a :class:`~pcapkit.protocols.misc.raw.Raw` payload and rebuilds them
 byte for byte.
 
-GitHub issue #1402: ``IPv4.make()`` called :func:`int` on each key of a TS
-option's ``timestamp`` mapping, so a dotted-quad string key raised a bare
-:exc:`ValueError`. The keys are now converted as addresses, and a :obj:`bool`
+It also guards against GitHub issue #1402, where ``IPv4.make()`` called
+:func:`int` on each key of a TS option's ``timestamp`` mapping, so a dotted-quad
+string key raised a bare :exc:`ValueError`. The keys are converted as
+addresses, and a :obj:`bool`
 key is rejected with :exc:`~pcapkit.utilities.exceptions.FieldValueError`.
 
 Every case builds its own octets in memory and reads no capture.

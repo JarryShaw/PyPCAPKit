@@ -1,8 +1,9 @@
 # -*- coding: utf-8 -*-
 """A PCAP record claiming more octets than its file holds warns, and is kept as captured.
 
-GitHub issue #1541. A record whose ``incl_len`` runs past the end of the file
-parsed silently. It is now reported the way the PCAP-NG reader reports a
+This guards against GitHub issue #1541, where a record whose ``incl_len`` runs
+past the end of the file parsed silently. It is reported the way the PCAP-NG
+reader reports a
 captured length running past its block (#1405), and is kept as captured in the
 same way: ``incl_len`` and ``cap_len`` stay as declared, the packet is the octets
 present, and the frame rebuilds as exactly the octets read, from ``info`` and

@@ -2,9 +2,10 @@
 """Calling ``pack()`` leaves the instance it is called on as it was. C.f. #1769.
 
 :meth:`ProtocolBase.pack <pcapkit.protocols.protocol.ProtocolBase.pack>` builds
-a fresh header from its keywords alone. It used to assign that header to the
-instance as well, so a bare ``UDP(srcport=1234, dstport=53).pack()`` left
-``schema.srcport`` at ``0`` while ``info.srcport`` was still ``1234``, and
+a fresh header from its keywords alone. This guards against it assigning that
+header to the instance as well, where a bare
+``UDP(srcport=1234, dstport=53).pack()`` left ``schema.srcport`` at ``0`` while
+``info.srcport`` was still ``1234``, and
 :meth:`TCP.make <pcapkit.protocols.transport.tcp.TCP.make>` overwrote
 :attr:`~pcapkit.protocols.transport.tcp.TCP.connection` on the way. The
 ``pack`` overrides of ``Frame`` and ``PCAPNG`` did the same, and HTTP/2's

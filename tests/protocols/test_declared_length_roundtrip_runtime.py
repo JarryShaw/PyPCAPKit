@@ -1,19 +1,21 @@
 # -*- coding: utf-8 -*-
 """``from_data`` keeps the length a truncated capture declared.
 
-GitHub issue #1155. :meth:`IPv4.make <pcapkit.protocols.internet.ipv4.IPv4.make>`,
+This guards against GitHub issue #1155, where
+:meth:`IPv4.make <pcapkit.protocols.internet.ipv4.IPv4.make>`,
 :meth:`UDP.make <pcapkit.protocols.transport.udp.UDP.make>` and :meth:`IPv6.make
 <pcapkit.protocols.internet.ipv6.IPv6.make>` computed their length field from the
 payload they were handed. On a capture cut short by the snaplen that is the
 *recorded* length rather than the declared one, so a
 :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data` rebuild of
 :file:`big_endian.pcap` frame 3 rewrote the IPv4 total length from 1186 to 82 and
-the UDP length from 0x048e to 0x003e. Each ``make`` now takes the length
+the UDP length from 0x048e to 0x003e. Each ``make`` takes the length
 explicitly, and ``_make_data`` hands it the parsed one; a construction that gives
 no length still computes it.
 
 The round-trip cases read generated captures, so this module belongs to the
-fixture-dependent tier. The in-memory cases pin that construction is unchanged.
+fixture-dependent tier. The in-memory cases pin construction with and without
+an explicit length.
 
 """
 from __future__ import annotations

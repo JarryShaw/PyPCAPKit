@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 """GitHub issues #1413 and #1414: malformed PCAP-NG blocks rebuild byte-exactly.
 
-* #1413 -- a Journal Export binary field filling its entry with no closing
-  newline gained one on rebuild (28 octets in, 32 out), and a bare ``KEY`` with
-  no ``=`` and no newline was dropped (16 in, 12 out). Under the #1406 ruling the
-  whole entry is now kept as captured, as ``entry_raw``.
-* #1414 -- a Simple Packet Block holding more data than its ``original_len``
-  lost the excess (24 in, 20 out), and an Enhanced Packet Block or Packet Block
-  below its 32-octet minimum rebuilt at 32. Both now keep the octets captured.
+* #1413 -- guards against a Journal Export binary field filling its entry with
+  no closing newline gaining one on rebuild (28 octets in, 32 out), and a bare
+  ``KEY`` with no ``=`` and no newline being dropped (16 in, 12 out). Under the
+  #1406 ruling the whole entry is kept as captured, as ``entry_raw``.
+* #1414 -- guards against a Simple Packet Block holding more data than its
+  ``original_len`` losing the excess (24 in, 20 out), and an Enhanced Packet
+  Block or Packet Block below its 32-octet minimum rebuilding at 32. Both keep
+  the octets captured.
 
 :mod:`pcapkit` is imported inside each test, after
 :func:`~tests._support.reimport_once_per_class`.

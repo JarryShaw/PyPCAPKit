@@ -2,10 +2,10 @@
 """``make()`` resolves an enum member name given as :obj:`str`.
 
 GitHub issue #1210: the ``make()`` signatures declare enum arguments as
-``Enum | StdlibEnum | AenumEnum | str | int``, but
-:meth:`~pcapkit.protocols.protocol.ProtocolBase._make_index` raised
+``Enum | StdlibEnum | AenumEnum | str | int``, but without the fix
+:meth:`~pcapkit.protocols.protocol.ProtocolBase._make_index` raises
 :exc:`~pcapkit.utilities.exceptions.ProtocolNotImplemented` for a :obj:`str`
-unless a ``*_namespace`` was passed. A member name now resolves against the
+unless a ``*_namespace`` is passed. A member name resolves against the
 enumeration class of the argument's default value, and builds the same bytes
 as the member itself and as its integer value.
 

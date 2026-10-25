@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 """A raw ``make()`` item rejected by ``read`` raises the wrapped error.
 
-GitHub issue #1394: :meth:`~pcapkit.protocols.protocol.ProtocolBase.unpack`
-wrapped only the schema re-parse of a made header holding raw items. A raw
-item the schema accepts but ``read`` rejects -- an option whose length runs
-past the option area, or one cut short of its own fields -- escaped as the
-reader's bare :exc:`~pcapkit.utilities.exceptions.ProtocolError`. The read is
-now covered too: the error says ``malformed raw item given to make()``,
+This guards against GitHub issue #1394, where
+:meth:`~pcapkit.protocols.protocol.ProtocolBase.unpack` wrapped only the schema
+re-parse of a made header holding raw items. A raw item the schema accepts but
+``read`` rejects -- an option whose length runs past the option area, or one cut
+short of its own fields -- escaped as the reader's bare
+:exc:`~pcapkit.utilities.exceptions.ProtocolError`. The read is covered too:
+the error says ``malformed raw item given to make()``,
 carries the reader's message, and chains it as ``__cause__``. An item whose
 fields run past the octets given is refused by the schema instead (#1325), and
 is wrapped the same way.

@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #1382: undefined ``epb_flags`` sub-field values round-trip.
 
-A direction of ``0b11`` or a reception type of ``0b101`` to ``0b111`` raised
-:exc:`~pcapkit.utilities.exceptions.ProtocolError`, so a capture carrying one
-could be neither parsed nor rebuilt. Both now resolve to an ``Unassigned``
+Without the fix, a direction of ``0b11`` or a reception type of ``0b101`` to
+``0b111`` raises :exc:`~pcapkit.utilities.exceptions.ProtocolError`, so a capture
+carrying one can be neither parsed nor rebuilt. Both resolve to an ``Unassigned``
 member that keeps the wire value. Bits 9 to 11, which pcapng-06 Table 5 defines
 (checksum not ready, checksum valid, TCP segmentation offloaded), are named
 instead of sitting in ``reserved``.
@@ -26,7 +26,7 @@ def _pb_with_flags(word: 'bytes') -> 'bytes':
 
 
 class TestPCAPNGFlagsUndefined(PCAPNGTestCase):
-    """Pin how undefined and newly named flags bits parse and rebuild."""
+    """Pin how undefined flags bits, and the named bits 9 to 11, parse and rebuild."""
 
     def _flags(self, word: 'str') -> 'tuple[bytes, object]':
         from pcapkit.const.pcapng.option_type import OptionType

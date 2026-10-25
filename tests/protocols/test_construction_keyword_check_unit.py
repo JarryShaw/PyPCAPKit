@@ -2,15 +2,15 @@
 """A construction keyword no signature declares is refused, not discarded.
 
 Every ``make`` in the tree ends its signature with ``**kwargs: 'Any'`` and reads
-nothing out of it, so until issue #617 a keyword it did not declare was accepted,
-dropped, and the field it named kept its default. That is the worst shape a defect
-can take in a packet library: the octets are wrong, nothing says so, and the
-mapping that produced them reads correctly.
+nothing out of it, so without the check from issue #617 a keyword it does not
+declare is accepted, dropped, and the field it names keeps its default. That is
+the worst shape a defect can take in a packet library: the octets are wrong,
+nothing says so, and the mapping that produced them reads correctly.
 
 The cost is not hypothetical. Issue #602 was
 :data:`examples.generators.options.TCP_BASE` asking for ``seq=1`` where
 :meth:`TCP.make <pcapkit.protocols.transport.tcp.TCP.make>` spells the parameter
-``seq_no``. Measured on the tree before this fix::
+``seq_no``. Measured without the fix::
 
     declared seq = 1   built info.seq = 0
     warnings captured: []
@@ -20,7 +20,7 @@ generator said ``1``, one octet per frame, and the only reason anybody found out
 was that somebody read the mapping against the signature. Issues #541 and #556
 were the same family of silence.
 
-The schema layer has never been so permissive: :meth:`Schema.__update__
+The schema layer is not so permissive: :meth:`Schema.__update__
 <pcapkit.protocols.schema.schema.Schema.__update__>` warns
 :exc:`~pcapkit.utilities.warnings.UnknownFieldWarning` for a field it does not
 know (:file:`pcapkit/protocols/schema/schema.py`). The asymmetry between the two
@@ -187,9 +187,9 @@ class RejectionTests(unittest.TestCase):
         """Each key of #602, put back one at a time, raises and is named.
 
         ``TCP_BASE`` is correct, so reproducing the report means
-        reintroducing the misspelling. Before the fix each of these built a
-        segment whose field kept its default -- ``seq=1`` giving ``info.seq == 0``
-        -- and captured no warning at all.
+        reintroducing the misspelling. Without the fix each of these builds a
+        segment whose field keeps its default -- ``seq=1`` giving ``info.seq == 0``
+        -- and captures no warning at all.
 
         """
         from pcapkit.protocols.transport.tcp import TCP
@@ -519,14 +519,14 @@ class ScopeTests(unittest.TestCase):
         declare it. :class:`~pcapkit.protocols.misc.null.NoPayload` is the case
         that matters, because :meth:`ProtocolBase._make_payload
         <pcapkit.protocols.protocol.ProtocolBase._make_payload>` reaches it for the
-        innermost layer of every packet: refusing ``packet`` broke ``from_data``
-        for all of them. Measured before ``packet`` was made out-of-band::
+        innermost layer of every packet: refusing ``packet`` breaks ``from_data``
+        for all of them. Measured with ``packet`` not out-of-band::
 
             UnsupportedCall: NoPayload: unexpected keyword(s): 'packet'
 
         What is asserted is that the rebuild happens at all. Whether it reproduces
         the original octets is a separate question about ``from_data``'s fidelity,
-        which this change neither improves nor worsens.
+        which this test does not pin.
 
         """
         from pcapkit.protocols.internet.ipv4 import IPv4
@@ -546,8 +546,8 @@ class ScopeTests(unittest.TestCase):
         only ``version`` and forwards every other keyword to
         :class:`HTTPv1 <pcapkit.protocols.application.httpv1.HTTP>` or
         :class:`HTTPv2 <pcapkit.protocols.application.httpv2.HTTP>` according to
-        that value, so no fixed set of names is correct for it. Measured before the
-        opt-out existed::
+        that value, so no fixed set of names is correct for it. Measured without
+        the opt-out::
 
             UnsupportedCall: HTTP: unexpected keyword(s): 'http_version', 'method', 'uri'
 
@@ -558,9 +558,8 @@ class ScopeTests(unittest.TestCase):
         ``make`` produces from these keywords -- is the proof that they reached
         the delegate rather than being refused on the way.
 
-        Until #1041 that packet failed to read back, as ``ProtocolError: HTTP:
-        invalid format``, because ``httpv1.HTTP`` refused a message with no header
-        fields; this test asserted that error as its proof of delegation.
+        The packet reads back as HTTP/1.1 (#1041), although it carries no
+        header fields.
         :meth:`HTTPUnitTests.test_http_construction_reaches_the_versioned_make_callee`
         pins the same outcome from the HTTP side.
 
@@ -576,9 +575,9 @@ class ScopeTests(unittest.TestCase):
 
         # The opt-out is not inherited. Both versioned classes declare their
         # keywords in full, and exempting them along with their base would forgo
-        # the check on the only two HTTP classes that can carry it -- which is what
-        # happened on the first attempt at this, measured before the ``klass is
-        # cls`` guard: every HTTP subclass came back unchecked.
+        # the check on the only two HTTP classes that can carry it -- measured
+        # without the ``klass is cls`` guard, every HTTP subclass comes back
+        # unchecked.
         for versioned, keyword in ((HTTPv1, 'http_version'), (HTTPv2, 'sid')):
             with self.subTest(protocol=versioned.__module__):
                 accepted = _declared_keywords(versioned)
@@ -635,7 +634,7 @@ class ReconstructionTests(unittest.TestCase):
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class AsymmetryTests(unittest.TestCase):
-    """The two layers, and what each now does with a name it does not know."""
+    """The two layers, and what each does with a name it does not know."""
 
     def test_the_schema_layer_still_warns_where_construction_now_raises(self) -> None:
         """One unknown name, two layers, both of them audible.

@@ -3,24 +3,24 @@
 
 :func:`roundtrip` in :file:`examples/generators/options.py` arms a
 :func:`signal.alarm` around each case and records ``'TIMEOUT'`` when it fires.
-The budget was a flat 5 seconds of wall-clock time, so a stalled CI runner failed
+A flat budget of 5 seconds of wall-clock time lets a stalled CI runner fail
 :mod:`tests.protocols.test_option_generator_httpv2_stream_unit` on a case that
-takes about 1.3 ms. The default is now 30 seconds, the budget
-:mod:`tests.protocols.test_option_roundtrip_unit` already gives the same cycle,
+takes about 1.3 ms. The default is 30 seconds, the budget
+:mod:`tests.protocols.test_option_roundtrip_unit` gives the same cycle,
 and ``PCAPKIT_TEST_TIMEOUT_SCALE`` stretches it exactly as it stretches
 :func:`tests._support.time_limit`.
 
 The spin that stands in for a hang is bounded (#1889). Unbounded, a deadline
-whose raise was lost -- one raised inside a finaliser is reported and dropped --
-spun until pytest-timeout's backstop ended the whole xdist worker. Now it gives up
-after :data:`SPIN_LIMIT` and the test fails by name, and the generator repeats
-the raise until :func:`roundtrip` has it.
+whose raise is lost -- one raised inside a finaliser is reported and dropped --
+spins until pytest-timeout's backstop ends the whole xdist worker. Bounded, it
+gives up after :data:`SPIN_LIMIT` and the test fails by name, and the generator
+repeats the raise until :func:`roundtrip` has it.
 
 The spin waits in a call made from inside the ``try`` that drops a raise, and
 arms the deadline there (#1897). Waiting inline, a raise handled at the jump
-closing the loop went past the ``except`` on CPython 3.13; armed as
-:func:`roundtrip` entered it, the deadline could come due in a stall before the
-``try``. Either way the first raise was not dropped.
+closing the loop goes past the ``except`` on CPython 3.13; armed as
+:func:`roundtrip` enters it, the deadline can come due in a stall before the
+``try``. Either way the first raise is not dropped.
 
 This module is unit tier: it loads the generator by path and builds nothing, so
 it imports no :mod:`pcapkit` and reads no capture.
@@ -276,7 +276,7 @@ class GeneratorDeadlineScaleTests(unittest.TestCase):
         self.assertEqual(signal.alarm(0), 0)
 
     def test_the_default_is_thirty_seconds_unscaled(self) -> None:
-        """Unset, the default applies as written -- and it is no longer 5."""
+        """Unset, the default applies as written -- 30, not a flat 5."""
         self.assertEqual(self.options.DEADLINE, 30)
         self.assertEqual(self.options.TIMEOUT_SCALE_ENV, SCALE_ENV)
         self.assertIn(self.armed(self.options.DEADLINE), (29, 30))

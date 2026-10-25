@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
-"""GitHub issue #1437 (part B): IPv4 and L2TP padding already rebuild as captured.
+"""GitHub issue #1437 (part B): IPv4 and L2TP padding rebuild as captured.
 
 The issue listed the IPv4 Quick-Start report "Not Used" octet, the IPv4 octets
 after the End of Option List, and the L2TPv2 offset pad as sites that might
-still zero-fill on rebuild. Measured on ``main`` at ``16c87f901``, all of them
-already round-trip byte for byte, so nothing changed; these cases guard that.
+still zero-fill on rebuild. All of them round-trip byte for byte (measured at
+``16c87f901``); these cases guard that.
 
 Every case builds its own octets in memory and reads no capture. Classes are
 imported inside each test, after :func:`~tests._support.reimport_once_per_class`.

@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #1384: a Simple Packet Block longer than the snaplen keeps its excess.
 
-An SPB holding 16 data octets under an interface snaplen of 8 parsed as 8
-octets: the other 8 were dropped, the trailing Block Total Length was read from
-the packet data, and the rebuild was 8 octets shorter. The parse now keeps every
-octet the block holds past the snaplen and its padding, warns that the data
-exceeds the snaplen, and rebuilds byte-exactly. A block sized for the snaplen
-still reads ``min(original_len, snaplen)`` octets.
+Without the fix, an SPB holding 16 data octets under an interface snaplen of 8
+parses as 8 octets: the other 8 are dropped, the trailing Block Total Length is
+read from the packet data, and the rebuild is 8 octets shorter. The parse keeps
+every octet the block holds past the snaplen and its padding, warns that the
+data exceeds the snaplen, and rebuilds byte-exactly. A block sized for the
+snaplen still reads ``min(original_len, snaplen)`` octets.
 
 :mod:`pcapkit` is imported inside each test, after
 :func:`~tests._support.reimport_once_per_class`.

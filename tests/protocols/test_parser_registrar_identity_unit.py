@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """GitHub issues #1362 and #1363: the parser registrars warn only on a real displacement.
 
-The registrars that store a parser -- a method name or a ``(parser,
-constructor)`` pair -- tested only whether ``code`` was present, so handing back
-the entry already stored warned that it was being overwritten. They now compare
-the incumbent with the replacement, as the class-storing registrars do since
-#718 and #739: an equal entry is a silent no-op. Under the #1363 ruling, the
+Without the fix, the registrars that store a parser -- a method name or a
+``(parser, constructor)`` pair -- test only whether ``code`` is present, so
+handing back the entry already stored warns that it is being overwritten. They
+compare the incumbent with the replacement, as the class-storing registrars do
+(#718 and #739): an equal entry is a silent no-op. Under the #1363 ruling, the
 entry a code shipped with is accepted back after an override, which undoes it.
 
 Every registry is process-wide, so each case runs under

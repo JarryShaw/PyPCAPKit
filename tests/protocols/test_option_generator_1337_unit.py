@@ -1,16 +1,14 @@
 # -*- coding: utf-8 -*-
-"""What #1337 changed in :file:`examples/generators/options.py`.
+"""Generator code in :file:`examples/generators/options.py` covered by #1337.
 
-Two comments there justified code by limitations that no longer hold.
-
-* ``_httpv2_rebuild`` withheld ``flags``, on the grounds that ``HTTP.make``
-  ignored it. Since #1341 ``make`` ORs ``flags`` into the bits the frame
-  constructor derives, and that constructor knows only the bits its frame type
-  defines. So a parsed frame with an undefined flag bit, or the reserved bit,
-  lost it on the generator's rebuild although ``HTTP.from_data`` keeps it.
-* ``SKIP`` left out TCP ``EOOL`` and ``NOP`` as "dropped by
-  ``_make_tcp_options``". Since #1163 that maker emits them as given, so each is
-  a distinct header that round-trips, and both now have a case.
+* ``_httpv2_rebuild`` passes ``flags`` and ``reserved`` on. ``HTTP.make`` ORs
+  ``flags`` into the bits the frame constructor derives (#1341), and that
+  constructor knows only the bits its frame type defines, so without them a
+  parsed frame with an undefined flag bit, or the reserved bit, loses it on the
+  generator's rebuild although ``HTTP.from_data`` keeps it.
+* ``SKIP`` does not leave out TCP ``EOOL`` and ``NOP``. ``_make_tcp_options``
+  emits them as given (#1163), so each is a distinct header that round-trips,
+  and both have a case.
 
 This module is unit tier: it builds everything in memory and reads no capture.
 
@@ -79,7 +77,7 @@ def _load_generator() -> 'types.ModuleType':
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class OptionGenerator1337Tests(unittest.TestCase):
-    """The generator code the stale #1337 comments used to justify."""
+    """The generator code #1337 covers."""
 
     options = None  # type: types.ModuleType
 

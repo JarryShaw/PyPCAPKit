@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #1026: the ``register`` classmethods reject a non-class themselves.
 
-Each ``register`` classmethod guarded with a bare ``issubclass(protocol,
-ProtocolBase)``. A non-class argument is refused by ``issubclass`` itself
-before the guard's own ``raise`` is reached, so the caller got ``TypeError:
-issubclass() arg 1 must be a class`` leaked out of ``abc`` rather than
-:class:`~pcapkit.utilities.exceptions.RegistryError`. Each now tests
+A bare ``issubclass(protocol, ProtocolBase)`` guard is not enough: a non-class
+argument is refused by ``issubclass`` itself before the guard's own ``raise`` is
+reached, so the caller gets ``TypeError: issubclass() arg 1 must be a class``
+leaked out of ``abc`` rather than
+:class:`~pcapkit.utilities.exceptions.RegistryError`. Each ``register`` tests
 ``isinstance(protocol, type)`` first, after the
 :class:`~pcapkit.corekit.module.ModuleDescriptor` is unwrapped, so a descriptor
 naming a non-class attribute is rejected too.
@@ -58,7 +58,7 @@ class RegisterClassGuardTests(unittest.TestCase):
                             klass.register(code, bad)  # type: ignore[arg-type]
                     self.assertIn('must be a class', str(caught.exception))
                     # ``RegistryError`` is a ``TypeError``, so callers catching
-                    # the old exception keep working.
+                    # ``TypeError`` keep working.
                     self.assertIsInstance(caught.exception, TypeError)
 
     def test_wrong_class_still_raises_registry_error(self) -> None:

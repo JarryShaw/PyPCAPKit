@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #1422: a PCAP-NG SHB or IDB shorter than its fixed fields.
 
-A Section Header Block below 28 octets, or an Interface Description Block
-below 20, read its fixed fields past the Block Total Length and rebuilt at the
-full fixed size (SHB 16 or 20 to 28, IDB 12 or 16 to 20). The block body is
-now kept as ``block_raw`` and written back at the declared length, as #1414
-does for EPB/PB. A 12-octet SHB has no Byte-Order Magic and takes the byte
-order in which its Block Total Length reads as 12.
+Without the fix, a Section Header Block below 28 octets, or an Interface
+Description Block below 20, reads its fixed fields past the Block Total Length
+and rebuilds at the full fixed size (SHB 16 or 20 to 28, IDB 12 or 16 to 20).
+The block body is kept as ``block_raw`` and written back at the declared length,
+as #1414 does for EPB/PB. A 12-octet SHB has no Byte-Order Magic and takes the
+byte order in which its Block Total Length reads as 12.
 
 :mod:`pcapkit` is imported inside each test, after
 :func:`~tests._support.reimport_once_per_class`.
@@ -25,7 +25,7 @@ if TYPE_CHECKING:
 
 #: Section and interface blocks below their fixed size, by issue length.
 SHORT = ('shb-12', 'shb-16', 'shb-20', 'shb-24', 'idb-12', 'idb-16')
-#: The same blocks at their full fixed size, already byte-exact before #1422.
+#: The same blocks at their full fixed size, byte-exact with or without the #1422 fix.
 FULL = ('shb-28', 'idb-20')
 
 

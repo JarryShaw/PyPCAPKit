@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
 """Two exports of the same packet compare ``==`` and not ``!=``.
 
-GitHub issue #1484. :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>`
-returns an :class:`~pcapkit.corekit.multidict.OrderedMultiDict`, and Werkzeug's
-class defines ``__eq__`` but no ``__ne__``: ``!=`` fell back to :obj:`dict`'s,
-which compares the internal buckets, so ``info.to_dict() != info.to_dict()``
-held for every frame. The export now negates its ``__eq__``.
+This guards against GitHub issue #1484.
+:meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` returns an
+:class:`~pcapkit.corekit.multidict.OrderedMultiDict`, and Werkzeug's class
+defines ``__eq__`` but no ``__ne__``: without an override ``!=`` falls back to
+:obj:`dict`'s, which compares the internal buckets, so
+``info.to_dict() != info.to_dict()`` holds for every frame. The export negates
+its ``__eq__``.
 
 For every frame of the option-heavy captures in :file:`examples/captures/`:
 

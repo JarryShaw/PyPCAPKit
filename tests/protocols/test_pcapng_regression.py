@@ -324,9 +324,9 @@ class PcapngPayloadOctetsTests(unittest.TestCase):
     def test_packet_header_and_payload_partition_the_block_octets(self) -> None:
         """``packet.header`` is the octets ahead of the payload, not the whole block.
 
-        The header used to be the entire block -- ``_read_packet(header=self.length)``
-        with ``length`` being the Block Total Length -- which is the same bug seen
-        from the other side.
+        Guards against the header being the entire block --
+        ``_read_packet(header=self.length)`` with ``length`` being the Block Total
+        Length -- which is the same bug seen from the other side.
 
         """
         with tempfile.TemporaryDirectory() as temp:
@@ -405,9 +405,9 @@ class PcapngPayloadOctetsTests(unittest.TestCase):
                 self.assertGreaterEqual(orig_len, incl_len)
 
         # 24 octets of global header, then 16 of record header and the payload per
-        # record, with nothing left over. Before #646 this file was 104 octets for
-        # these four blocks -- the global header and four record headers, and not one
-        # octet of payload -- which is both the wrong size and, worse, a size a
+        # record, with nothing left over. Without the #646 fix this file is 104 octets
+        # for these four blocks -- the global header and four record headers, and not
+        # one octet of payload -- which is both the wrong size and, worse, a size a
         # reader cannot tell is wrong until it has already lost frame sync.
         self.assertEqual(len(dumped), 24 + sum(16 + len(payload) for payload in expected))
         self.assertNotEqual(len(dumped), 104)

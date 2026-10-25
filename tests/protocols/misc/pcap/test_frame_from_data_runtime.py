@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 """``Frame.from_data`` rebuilds a captured frame.
 
-GitHub issue #1126: :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data`
-took nothing but the data, so the ``num`` and ``header`` that
+This guards against GitHub issue #1126, where
+:meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data` took nothing but the
+data, so the ``num`` and ``header`` that
 :class:`~pcapkit.protocols.misc.pcap.frame.Frame` requires could not reach it,
-and every call raised :exc:`TypeError`. ``from_data`` now forwards extra
-keywords to the construction, so the caller passes both alongside the data.
+and every call raised :exc:`TypeError`. ``from_data`` forwards extra keywords to
+the construction, so the caller passes both alongside the data.
 
 The frames are read from :file:`examples/captures/in.pcap`, so this belongs to
 the runtime tier.
