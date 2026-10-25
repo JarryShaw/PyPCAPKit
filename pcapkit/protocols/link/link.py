@@ -206,7 +206,7 @@ class Link(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=abstra
             size: buffer size
 
         Returns:
-            Internet layer protocol enumeration.
+            EtherType enumeration of the next layer protocol.
 
         """
         _byte = self._read_unpack(size)

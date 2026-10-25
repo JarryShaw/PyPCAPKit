@@ -471,10 +471,11 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
     )  # type: DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]
 
     #: Chunk type to method mapping, see :meth:`_read_sctp_chunks` and
-    #: :meth:`_make_sctp_chunks`. Method names are expected to be referred to
-    #: the class by ``_read_chunk_${name}`` and ``_make_chunk_${name}``, and if
-    #: such name not found, the value should then be a method that can parse the
-    #: chunk by itself.
+    #: :meth:`_make_sctp_chunks`. A :class:`str` value names the methods
+    #: ``_read_chunk_${name}`` and ``_make_chunk_${name}``, falling back to
+    #: :meth:`_read_chunk_donone` and :meth:`_make_chunk_donone` when the class
+    #: has no such method; any other value is a ``(parser, constructor)`` pair
+    #: of callables.
     __chunk__ = collections.defaultdict(
         lambda: 'donone',
         {
@@ -495,10 +496,11 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
     )  # type: DefaultDict[int, str | tuple[ChunkParser, ChunkConstructor]]
 
     #: Chunk parameter type to method mapping, see
-    #: :meth:`_read_sctp_parameters` and :meth:`_make_sctp_parameters`. Method
-    #: names are expected to be referred to the class by ``_read_param_${name}``
-    #: and ``_make_param_${name}``, and if such name not found, the value should
-    #: then be a method that can parse the parameter by itself.
+    #: :meth:`_read_sctp_parameters` and :meth:`_make_sctp_parameters`. A
+    #: :class:`str` value names the methods ``_read_param_${name}`` and
+    #: ``_make_param_${name}``, falling back to :meth:`_read_param_donone` and
+    #: :meth:`_make_param_donone` when the class has no such method; any other
+    #: value is a ``(parser, constructor)`` pair of callables.
     __parameter__ = collections.defaultdict(
         lambda: 'donone',
         {
@@ -514,10 +516,11 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
     )  # type: DefaultDict[int, str | tuple[ParameterParser, ParameterConstructor]]
 
     #: Error cause code to method mapping, see :meth:`_read_sctp_causes` and
-    #: :meth:`_make_sctp_causes`. Method names are expected to be referred to
-    #: the class by ``_read_cause_${name}`` and ``_make_cause_${name}``, and if
-    #: such name not found, the value should then be a method that can parse the
-    #: error cause by itself.
+    #: :meth:`_make_sctp_causes`. A :class:`str` value names the methods
+    #: ``_read_cause_${name}`` and ``_make_cause_${name}``, falling back to
+    #: :meth:`_read_cause_donone` and :meth:`_make_cause_donone` when the class
+    #: has no such method; any other value is a ``(parser, constructor)`` pair
+    #: of callables.
     __cause__ = collections.defaultdict(
         lambda: 'donone',
         {
@@ -756,7 +759,9 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         Args:
             code: SCTP chunk type.
-            meth: Method name or callable to parse and/or construct the chunk.
+            meth: Method name, or a ``(parser, constructor)`` pair of
+                callables, to parse and construct the chunk; see
+                :attr:`__chunk__`.
 
         Warns:
             RegistryWarning: If a different entry is already registered for
@@ -779,7 +784,9 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         Args:
             code: SCTP chunk parameter type.
-            meth: Method name or callable to parse and/or construct the parameter.
+            meth: Method name, or a ``(parser, constructor)`` pair of
+                callables, to parse and construct the parameter; see
+                :attr:`__parameter__`.
 
         Warns:
             RegistryWarning: If a different entry is already registered for
@@ -802,7 +809,9 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
 
         Args:
             code: SCTP error cause code.
-            meth: Method name or callable to parse and/or construct the cause.
+            meth: Method name, or a ``(parser, constructor)`` pair of
+                callables, to parse and construct the cause; see
+                :attr:`__cause__`.
 
         Warns:
             RegistryWarning: If a different entry is already registered for

@@ -9,7 +9,7 @@
 the link layer, with detailed implementation and methods.
 
 """
-# TODO: Implements DSL, EAPOL, FDDI, ISDN, NDP, PPP.
+# TODO: Implement DSL, EAPOL, FDDI, ISDN, NDP, PPP.
 
 # Base Class for Link Layer
 from pcapkit.protocols.link.link import Link
