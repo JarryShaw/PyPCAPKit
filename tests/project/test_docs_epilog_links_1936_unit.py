@@ -25,6 +25,7 @@ import ast
 import io
 import pathlib
 import re
+import tempfile
 import tokenize
 import unittest
 
@@ -123,6 +124,25 @@ def _rel(path: 'pathlib.Path') -> 'str':
 
 def _line(text: 'str', offset: 'int') -> 'int':
     return text.count('\n', 0, offset) + 1
+
+
+def _redefinitions(path: 'pathlib.Path', substs: 'set[str]', targets: 'set[str]', *,
+                   rel: 'str | None' = None) -> 'list[str]':
+    """Substitutions in *substs* and targets in *targets* that *path* defines again.
+
+    Read from :func:`_rendered`, so a definition in a ``#:`` comment counts.
+
+    """
+    rel = _rel(path) if rel is None else rel
+    text = _rendered(path)
+    found = []
+    for match in SUBST.finditer(text):
+        if match.group(1) in substs:
+            found.append(f'{rel}:{_line(text, match.start())}: |{match.group(1)}|')
+    for match in TARGET.finditer(text):
+        if _norm(match.group(1)) in targets:
+            found.append(f'{rel}:{_line(text, match.start())}: _{match.group(1)}')
+    return found
 
 
 class EpilogTests(unittest.TestCase):
@@ -224,14 +244,17 @@ class DefinitionTests(unittest.TestCase):
         targets = {_norm(name) for name, _ in TARGET.findall(epilog)}
         offenders = []
         for path in _sources(changelog=True):
-            text = path.read_text(encoding='utf-8')
-            for match in SUBST.finditer(text):
-                if match.group(1) in substs:
-                    offenders.append(f'{_rel(path)}:{_line(text, match.start())}: |{match.group(1)}|')
-            for match in TARGET.finditer(text):
-                if _norm(match.group(1)) in targets:
-                    offenders.append(f'{_rel(path)}:{_line(text, match.start())}: _{match.group(1)}')
+            offenders.extend(_redefinitions(path, substs, targets))
         self.assertEqual(offenders, [])
+
+    def test_a_doc_comment_redefinition_is_seen(self) -> 'None':
+        """A ``#:`` comment renders, so a definition in one counts (:issue:`2177`)."""
+        with tempfile.TemporaryDirectory() as tmp:
+            path = pathlib.Path(tmp) / 'mod.py'
+            path.write_text('#: A `DPKT`_ packet.\n#:\n#: .. _DPKT: https://dpkt.readthedocs.io\n'
+                            '#: .. |dpkt| replace:: ``dpkt``\nATTR = 1\n', encoding='utf-8')
+            found = _redefinitions(path, {'dpkt'}, {'dpkt'}, rel=path.name)
+        self.assertEqual(found, ['mod.py:4: |dpkt|', 'mod.py:3: _DPKT'])
 
 
 if __name__ == '__main__':
