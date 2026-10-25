@@ -5,7 +5,7 @@ The largest release since 1.0, and the first recorded here as it happened rather
 than reconstructed. New extraction engines, ESP with payload decryption,
 SCTP and NGAP over SCTP, a library logger that no longer hijacks the consumer's,
 and a defect programme run through the issue tracker, citing issues and pull
-requests from :pr:`340` to :pr:`2151`.
+requests from :pr:`340` to :pr:`2205`.
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` to ``1.5.0b3`` (all 2026-09-19)
 and ``1.5.0b4`` to ``1.5.0b14`` (2026-09-20 to 2026-10-22), dated in UTC and all
@@ -698,8 +698,8 @@ Fixed
   never mints" is qualified to ``default`` only. So
   ``Hardware.get('Definitely-Not-A-Member', 40)``,
   with ``40`` in :class:`~pcapkit.const.arp.hardware.Hardware`'s declared-but-unassigned
-  range, now raises ``KeyError`` naming the original key; its test waited on :pr:`865`
-  (above), then landed once :pr:`865` merged. Closes :issue:`864` (:pr:`868`).
+  range, now raises ``KeyError`` naming the original key. Closes :issue:`864`
+  (:pr:`868`).
 * :meth:`.ProtoChain.__add__` returned the left operand's cached ``protocols`` and
   ``aliases``: once ``a.protocols`` had been read, ``a + ProtoChain(IPv4)`` reported
   ``chain == 'Ethernet:IPv4'`` but ``protocols == (Ethernet,)``. ``copy.copy(self)``
@@ -782,6 +782,14 @@ Fixed
   Windows, ``SeekableReader(buffer_save=True)`` with no ``buffer_path`` could not reopen
   its temporary file; it creates one it can, and deletes it on ``close()`` or collection
   (:issue:`2098`, :pr:`2105`).
+* :class:`.PortEnumField` and :class:`.SwitchField` are exported from
+  :mod:`pcapkit.corekit`, :mod:`pcapkit.corekit.fields` and ``pcapkit.all``, and
+  :class:`.SchemaField`, ``nested_packet_context`` and :class:`.BytesField` from the
+  modules defining them, so ``import *`` binds them (:issue:`2174`, :pr:`2191`).
+* a :class:`.ListField` callback is handed the per-item copy it configures, not the
+  shared field, and a :class:`.SchemaField` with a callable length sizes its template
+  from the resolved length rather than ``1024s``. No parse in the library reached either
+  (:issue:`2173`, :pr:`2190`).
 
 pcapkit.dumpkit
 ---------------
@@ -1192,6 +1200,11 @@ Fixed
   completed. The bound is
   :data:`~pcapkit.foundation.reassembly.data.tcp.HOLE_OPEN_BOUND`, ``2**63 - 1``, the
   value 64-bit builds already used (:issue:`1959`, :pr:`1965`).
+* the method-name registrars, such as ``register_ipv4_option``, and
+  ``register_linktype``, ``register_pcap``, ``register_pcapng``, ``register_ethertype``
+  and ``register_transtype`` refuse a ``code`` that is not an enum member with
+  :exc:`.RegistryError` before touching a registry, where they registered it and then
+  raised ``AttributeError``, leaving the entry behind (:issue:`2186`, :pr:`2193`).
 
 pcapkit.interface
 -----------------
@@ -1467,6 +1480,14 @@ Changed
   hand-written dict needs those keys, ``__short_read__`` among them, to rebuild, and a
   custom :class:`.Info` lists its own dunder keys in ``__included__`` (:issue:`2003`,
   :pr:`2014`).
+* **a breaking change to** ``PCAPNG.context``: the block's section
+  :class:`~pcapkit.foundation.engines.pcapng.Context`, which it returned from 1.0.0
+  through 1.4.x, is :attr:`.PCAPNG.section_context`, with no alias, and ``context`` is
+  the caller supplied :class:`~pcapkit.corekit.context.ContextRegistry` every protocol
+  inherits from :class:`.ProtocolBase`, on a Section Header Block too.
+  :attr:`.PCAPNG.section_context` raises :exc:`.UnsupportedCall` on a Section Header
+  Block, as ``context`` did. Code reading ``block.context`` for the section reads
+  ``block.section_context`` (:issue:`2172`, :pr:`2205`).
 
 Fixed
 ~~~~~
@@ -1756,15 +1777,14 @@ Fixed
   gives: :class:`.ConditionalField`'s ``length`` forwards to the wrapped field without
   consulting the condition, whereas a :class:`.SwitchField` always resolves to a
   concrete field (:issue:`603`).
-* the assertion :issue:`604` left pinning the old padding side, which :pr:`621`
-  turned red on ``main``.
+* the assertion :issue:`604` left pinning the old padding side, which fails once
+  :pr:`621` pads with ``ljust()``.
   ``TCPUDPUnitTests.test_a_truncated_option_still_parses_its_declared_length``
   expected a truncated TCP option's ``data`` as the synthesised zero octets *followed
   by* the real ones, as ``rjust()`` produced: ``Reserved_79`` declaring ``length=12``
   over 6 real octets reports ``aabbccddeeff00000000`` where the test expected
-  ``00000000aabbccddeeff``. :pr:`621` made the padding ``ljust()`` everywhere but
-  could not retarget this file, since :pr:`612` owned it. The real octets now come
-  first, and the docstring is corrected. Test-only; the sibling case in
+  ``00000000aabbccddeeff``. The real octets now come first, and the docstring is
+  corrected. Test-only; the sibling case in
   ``tests/protocols/internet/test_ipv4_unit.py`` was retargeted in :pr:`621`
   (:issue:`604`).
 * the HIP ``SOLUTION`` builder sized the parameter with
@@ -1961,8 +1981,8 @@ Fixed
   ``tests/project/test_annotation_names.py`` pins the invariant without a type
   checker: it resolves every string annotation in the package against the names its
   own module binds, following nested forward references such as ``'list["Nested"]'``
-  and treating ``Literal`` members and ``Annotated`` metadata as values, and
-  reports exactly those findings on the unfixed tree. The same change corrects the
+  and treating ``Literal`` members and ``Annotated`` metadata as values; without the
+  fix, it reports exactly those findings. The same change corrects the
   ``MANIFEST.in`` comment asserting that ``include README.md`` was the only thing
   putting the README in a source distribution and that an sdist without it could not
   be installed; both halves are false, and the :pr:`619` entry above carried the same
@@ -2076,15 +2096,16 @@ Fixed
   in :meth:`.SystemdJournalExportBlock.post_process`, reachable from valid input, are
   fixed with it: the body's NUL alignment padding was read as a field *name*
   (``struct.error``; a NUL-only line now ends the entry); a binary field's declared
-  length was unbounded against its entry (``OverflowError``; now clamped and
-  reported); and a non-UTF-8 name, key or value raised ``UnicodeDecodeError`` (now
-  ``errors='replace'`` and reported). The silent loss of every field after a binary
-  one is filed as :issue:`704`. The unclamped non-packet option areas keep the
-  per-block framing assumption :pr:`676`'s note describes. Also here, the last
-  registrar with no overwrite guard: :meth:`.Option.register` now reports a displaced
-  option schema as a :exc:`.RegistryWarning` naming every namespace the ``ns='opt'``
-  fan-out displaced something in, tested by membership (subscripting the per-namespace
-  ``defaultdict`` would insert
+  length was unbounded against its entry (``OverflowError``; now a
+  :exc:`.ProtocolError` that keeps the block's journal data as captured, with a
+  :exc:`.ProtocolWarning`, :issue:`1406`); and a non-UTF-8 name, key or value raised
+  ``UnicodeDecodeError`` (now ``errors='replace'`` and reported). The silent loss of
+  every field after a binary one is filed as :issue:`704`. The unclamped non-packet
+  option areas keep the per-block framing assumption :pr:`676`'s note describes. Also
+  here, the last registrar with no overwrite guard: :meth:`.Option.register` now
+  reports a displaced option schema as a :exc:`.RegistryWarning` naming every namespace
+  the ``ns='opt'`` fan-out displaced something in, tested by membership (subscripting
+  the per-namespace ``defaultdict`` would insert
   :class:`~pcapkit.protocols.schema.misc.pcapng.UnknownOption` for a code nobody
   registered). The condition is identity-based like the parser registrars and
   :pr:`681`'s guard for ``register_protocol`` (:issue:`718`, :pr:`726`); a namespace the
@@ -2160,11 +2181,9 @@ Fixed
   field to have ended with a real newline; without one ``readline()`` runs through the
   value into the padding. Reachable on text fields only (a binary field's
   length-prefixed read is never in play, and a binary field *name* on such a line fails
-  its own length-prefix read regardless). The fix is tolerant: block padding is 0-3
-  octets, so at most the trailing three octets of a terminator-less line are stripped,
-  with a :exc:`.SchemaWarning`, and anything past that is left as data. The gate reads
-  the *raw* line, since a real trailing newline, or any other raw last octet including
-  ASCII whitespace, proves the padding is zero (:issue:`794`).
+  its own length-prefix read regardless). A field line with no terminating newline
+  raises :exc:`.ProtocolError`, so the block's journal data is kept as captured,
+  padding included, with a :exc:`.ProtocolWarning` (:issue:`794`, :issue:`1406`).
   ``examples/generators/pcapng.py``'s ``_journal_entry`` cited a bare line number for
   the defect its alignment workaround avoids and mis-attributed the fix; it now names
   :issue:`678`'s ``not line.strip(b'\x00')`` guard and the mechanism (:issue:`791`).
@@ -2187,19 +2206,19 @@ Fixed
 * :meth:`.SystemdJournalExportBlock.post_process` skipped a binary field's one trailing
   newline with a bare ``entry_data.read()``, which reads to **EOF**: the next
   ``readline()`` returned ``b''`` and ended the entry, discarding every field behind
-  the first binary one. The skip is bound to ``entry_data.read(1)``; a missing or
-  non-``b'\n'`` octet ends the entry with a :exc:`.SchemaWarning` instead of
-  resynchronising at the wrong offset.
-  ``test_journal_fields_following_a_binary_field_are_not_discarded`` fails against the
-  unfixed code with ``MissingKeyError: 'SECOND'`` (:issue:`704`).
+  the first binary one. The skip is bound to ``entry_data.read(1)``, and a value not
+  followed by its newline raises :exc:`.ProtocolError` rather than resynchronising at
+  the wrong offset, so the block's journal data is kept as captured, as one ``bytes``
+  item, with a :exc:`.ProtocolWarning` (:issue:`1406`). Without the fix,
+  ``test_journal_fields_following_a_binary_field_are_not_discarded`` fails with
+  ``MissingKeyError: 'SECOND'`` (:issue:`704`).
 * the same block's entries were split on a bare ``b'\n\n'``, which shreds a binary
-  field whose value contains that pair. Walking the entry instead of splitting it
-  introduced a regression on first review: a ``malformed`` flag broke the *outer*
-  per-block loop on a bad terminator, ending the whole block and dropping every
-  well-formed entry behind it. Fixed by dropping ``malformed``, leaving the per-entry
-  ``break`` as the only effect. Another gap closed in the same change: a trailing
-  separator on the block's last octet was indistinguishable from EOF and swallowed, so
-  a rebuild wrote ``length`` one octet short (:issue:`723`).
+  field whose value contains that pair. The entries are walked instead, each binary
+  value counted out by its length prefix; a bad terminator or length raises
+  :exc:`.ProtocolError`, so the block's journal data is kept as captured, with a
+  :exc:`.ProtocolWarning` (:issue:`1406`). Another gap closed in the same change: a
+  trailing separator on the block's last octet was indistinguishable from EOF and
+  swallowed, so a rebuild wrote ``length`` one octet short (:issue:`723`).
 * **a breaking change to** ``.get()``-backed enum fields: TCP/UDP/SCTP's
   :class:`.PortEnumField` and PCAP-NG's ``OptionEnumField`` each minted a member through
   ``aenum.extend_enum`` for every value no row or documented span covers (111 calls on
@@ -2267,12 +2286,12 @@ Fixed
   hand-written ``get()``, still on the retired ``default == -1`` convention, is replaced
   by the base's (no caller relied on the old form).
   :class:`~pcapkit.const.pcapng.option_type.OptionType` keeps its own ``get()`` for its
-  multi-namespace dispatch, but a later review found it still minted on both its
-  int/namespace and ``str`` paths, and the live pcapng parse path
+  multi-namespace dispatch, and both its int/namespace and ``str`` paths build an
+  unregistered member, where each minted one; the live pcapng parse path
   (:meth:`.PCAPNG._make_pcapng_options`) calls it with wire bytes, so parsing an
-  undeclared option code still registered a permanent member; both paths now build an
-  unregistered member. :class:`.FEATCode`, :class:`~pcapkit.const.ftp.command.Command`
-  and :class:`~pcapkit.const.http.method.Method` mint the literal wire value as its own
+  undeclared option code registered a permanent member. :class:`.FEATCode`,
+  :class:`~pcapkit.const.ftp.command.Command` and
+  :class:`~pcapkit.const.http.method.Method` mint the literal wire value as its own
   name rather than any placeholder; per the owner's ruling that ``get()`` lacks the
   information to create new members (:class:`~pcapkit.const.ftp.command.Command` needs
   ``feat``/``desc``/``type``/``conf`` and :class:`~pcapkit.const.http.method.Method`
@@ -2679,6 +2698,31 @@ Fixed
   Linux (:issue:`2099`, :pr:`2111`), and encode through
   :func:`pcapkit.utilities.datetime.totimestamp`, since GraalPy's ``timestamp()`` put a
   pre-1970 instant with a fraction one second late (:issue:`2134`, :pr:`2136`).
+* ARP's address makers refuse what they cannot pack: a ``bool`` hardware or protocol
+  address raises :exc:`.FieldValueError` whatever ``htype`` or ``ptype`` is; a hardware
+  address that is none of ``str``, ``bytes`` and ``bytearray``, or a protocol address
+  not packed as IPv4 or IPv6 that is none of those and not an ``ipaddress`` address,
+  raises :exc:`.ProtocolError`, where both failed later with a bare ``TypeError``. A
+  ``bytearray`` packs as ``bytes`` (:issue:`2166`, :pr:`2182`).
+* the Quick-Start rate parses as the ``int`` the IPv4, HOPOPT, IPv6-Opts and TCP data
+  models declare, where it was a ``float`` such as ``80.0``, and a TCP Fast Open cookie
+  request, the option of length 2, parses with ``cookie`` as ``b''`` rather than
+  ``None`` (:issue:`2167`, :pr:`2185`).
+* PCAP-NG's ``ns_dnsIP6addr`` option and IPv6 name resolution record build with their
+  defaults, ``2001:4860:4860::8888`` and ``::1``, where IPv4 defaults made them raise
+  :exc:`.FieldValueError` (:issue:`2168`, :pr:`2179`).
+* message text: the ``epb_flags`` and ``pack_flags`` length errors say ``expected 4``,
+  the length they check, rather than ``expected 8`` (:issue:`2168`, :pr:`2179`), and
+  the IPv4 TS option's unknown-flag warning and the Mobility Header's prefix error
+  spell ``timestamp`` and ``mobile`` (:issue:`2171`, :pr:`2189`).
+* IPX dissects its payload from a registry of its own, :attr:`.IPX.__proto__`, keyed by
+  IPX Packet Type, where it looked the Packet Type up as an IP protocol number, so a
+  type 17 (NCP) payload parsed as ``IPX:UDP`` and type 4 as ``IPX:IPv4``. No IPX-native
+  protocol ships, so the payload is :class:`~pcapkit.protocols.misc.raw.Raw` unless one
+  is registered (:issue:`2169`, :pr:`2187`).
+* HIP's ``ECHO_RESPONSE_UNSIGNED`` maker builds an ``EchoResponseUnsignedParameter``
+  schema, where it built the request's; the octets were already right (:issue:`2170`,
+  :pr:`2188`).
 
 pcapkit.toolkit
 ---------------
@@ -2759,7 +2803,7 @@ Fixed
   root filter name, pseudo-protocol roots aside, that resolved to a single
   :class:`~pcapkit.const.reg.linktype.LinkType` member across the encapsulations this
   host's Wireshark can write. ``pcapkit/toolkit/pyshark.py`` reaches full coverage under
-  new tests that fail against the unfixed tree; live pyshark parsing stays unexercised,
+  new tests, which fail without the fix; live pyshark parsing stays unexercised,
   since ``pyshark.FileCapture`` does not run on Python 3.14 (:pr:`850`).
 * ``pypcapfile``'s ``tcp_reassembly`` set ``last`` one past the segment.
   ``TCP_Packet.last`` is inclusive, and the other adapters set
@@ -2889,9 +2933,8 @@ Fixed
   member so ``cls(value)`` found it; :pr:`861` (above) replaced it with
   ``_unregistered_member``, which deliberately does not register, so ``cls(value)``
   missed and re-entered ``_missing_``. :pr:`861` fixed the *generated* modules but
-  not these *crawlers*, so :pr:`861`'s CI stayed green until a live regeneration
-  reintroduced the defect; :pr:`861`'s review had sampled only some regenerations,
-  and neither crawler's was among them. Both crawlers now collapse to the single
+  not these *crawlers*, so a live regeneration reintroduced the defect. Both crawlers
+  now collapse to the single
   returning line the other registries use, and their const files are regenerated. A
   new guard at the crawler-emission layer requires a hard-coded ``_missing_`` body to
   end in a return and no emitted line to re-enter ``_missing_`` for the same value --
@@ -3034,10 +3077,10 @@ Added
   file through ``extract()`` and derives expectations by walking its record
   chain with ``struct``; a unit-tier case in ``test_header_frame_unit.py`` builds a
   big-endian capture in memory, so the fixture-free selection CI runs on
-  every push catches it too. Each fails on the unfixed tree (the
-  fixture-backed ones by that ``ValueError``, the in-memory one by
-  ``AssertionError: 3106905 != 1500000000``) while the little-endian twin passes on
-  both, showing the records themselves are not the variable (:issue:`605`).
+  every push catches it too. Without the fix, each fails (the fixture-backed ones by
+  that ``ValueError``, the in-memory one by ``AssertionError: 3106905 != 1500000000``)
+  while the little-endian twin passes with and without it, showing the records
+  themselves are not the variable (:issue:`605`).
 * local type stubs under ``typings/`` for dpkt, pyshark, ``pcap`` and pypcapfile,
   declaring what pcapkit uses of each, so mypy checks the engines against them.
   ``mypy.ini`` reads them through ``mypy_path``, and neither the sdist nor the wheel
