@@ -102,7 +102,8 @@ A stalled leg: ``--stall-dump SECONDS`` (or ``PCAPKIT_UNITTEST_STALL_DUMP``)
 arms :func:`faulthandler.dump_traceback_later`, so a leg still running after
 that long writes every thread's stack to stderr once, then carries on. The
 default, 1080s, is just under the ``unittest-ordering`` step's 20-minute cap,
-so a leg about to be killed says where it was first; ``0`` disables it.
+so a leg about to be killed says where it was first; a step with a shorter cap
+passes its own (#2164). ``0`` disables it.
 
 Memory: every purge-then-import leaves the previous generation as cyclic
 garbage, and the interpreter's own collector intermittently falls behind --
