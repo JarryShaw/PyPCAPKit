@@ -1345,10 +1345,14 @@ jobs:
           python util/cap_file_size.py python -m pytest -q -n auto --dist load \
             --durations=30 --durations-min=1.0 --junitxml="$RUNNER_TEMP/junit.xml" "${pins[@]}"
 
+      # #2164: the script's default stall dump sits under `unittest-ordering`'s
+      # 20-minute step cap, so this step passes its own, a minute under its
+      # 15. tests/project/test_run_unittest_leg_stall_dump.py pins every step
+      # running the script to a dump inside its cap.
       - name: Run tests/project and the root-level modules under plain unittest
         if: ${{ needs.changes.outputs.code == 'false' }}
         timeout-minutes: 15
-        run: python util/cap_file_size.py python util/run_unittest_leg.py project --verbose
+        run: python util/cap_file_size.py python util/run_unittest_leg.py project --verbose --stall-dump 840
 
       - name: Run the other tests that read docs/ or Markdown
         if: ${{ needs.changes.outputs.code == 'false' }}

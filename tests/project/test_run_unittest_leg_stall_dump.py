@@ -6,6 +6,9 @@ it was, so the runner arms :func:`faulthandler.dump_traceback_later` before it
 builds the suite and cancels it on the way out. The in-process tests mock
 :mod:`faulthandler`, because this module itself runs inside the ``project`` leg,
 whose own dump is armed; the subprocess test lets a real one fire.
+:class:`TestEveryStepDumpsBeforeItsCap` reads every workflow step that runs the
+script, as :func:`tests._workflows.load` parses it: each one's dump has to fire
+before its own ``timeout-minutes`` kills it (#2164).
 
 The last class pins the decision #1052 recorded against restoring
 :data:`sys.modules` between tests: a sibling's write to the ``pcapkit`` region
@@ -17,11 +20,18 @@ from __future__ import annotations
 
 import os
 import pathlib
+import shlex
 import subprocess
 import sys
 import textwrap
 import unittest
+from typing import TYPE_CHECKING
 from unittest import mock
+
+from tests import _workflows
+
+if TYPE_CHECKING:
+    from typing import Any, Optional
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
 
@@ -104,6 +114,56 @@ class TestStallDumpFires(unittest.TestCase):
         self.assertIn('test_sleeps_past_the_dump', proc.stderr)
         self.assertEqual(proc.stderr.count('Timeout ('), 1, 'repeat=False dumps once')
         self.assertIn('1 test(s), 0 failure(s), 0 error(s)', proc.stdout)
+
+
+class TestEveryStepDumpsBeforeItsCap(unittest.TestCase):
+    """A workflow step running the leg dumps its stack before its cap kills it (#2164).
+
+    The dump is what :func:`run_unittest_leg.main` arms: the step's
+    ``--stall-dump``, else :data:`~run_unittest_leg.STALL_DUMP_ENV` from the
+    step's, job's or workflow's ``env``, else
+    :data:`~run_unittest_leg.DEFAULT_STALL_DUMP`. The cap is the step's
+    ``timeout-minutes``, else its job's.
+
+    """
+
+    @staticmethod
+    def _flag(run: 'str') -> 'Optional[float]':
+        words = shlex.split(run.replace('\\\n', ' '), comments=True)
+        for i, word in enumerate(words):
+            if word == '--stall-dump':
+                return float(words[i + 1])
+            if word.startswith('--stall-dump='):
+                return float(word.partition('=')[2])
+        return None
+
+    @staticmethod
+    def _steps() -> 'list[tuple[str, Any, Any, Any, Any]]':
+        found = []
+        for path in sorted(_workflows.WORKFLOWS.glob('*.yml')):
+            workflow = _workflows.load(path.name)
+            for job_id, job in (workflow.get('jobs') or {}).items():
+                for step in job.get('steps') or []:
+                    if 'run_unittest_leg.py' in str(step.get('run', '')):
+                        found.append((f'{path.name} {job_id} {step.get("name")!r}',
+                                      step, job, workflow, str(step['run'])))
+        return found
+
+    def test_every_step_dumps_before_its_cap(self):
+        found = self._steps()
+        self.assertTrue(found, 'no workflow step runs util/run_unittest_leg.py')
+        for where, step, job, workflow, run in found:
+            with self.subTest(step=where):
+                dump = self._flag(run)
+                if dump is None:
+                    env = {**(workflow.get('env') or {}), **(job.get('env') or {}),
+                           **(step.get('env') or {})}
+                    dump = float(env.get(leg.STALL_DUMP_ENV) or leg.DEFAULT_STALL_DUMP)
+                cap = step.get('timeout-minutes', job.get('timeout-minutes'))
+                self.assertIsNotNone(cap, 'the step has no cap to dump before')
+                self.assertGreater(dump, 0, 'the dump is disabled')
+                self.assertLess(dump, float(cap) * 60,
+                                f'the dump at {dump:g}s fires after the {cap}-minute cap')
 
 
 class TestPeriodicCollect(unittest.TestCase):
