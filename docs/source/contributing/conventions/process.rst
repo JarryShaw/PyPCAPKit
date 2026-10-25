@@ -44,8 +44,8 @@ once:
    ``PyShark``, ``PyPCAPFile``, ``PyPCAP`` and ``PCAP_CT`` are not core addons, so
    they are on demand -- one extra at a time, ``pip install pypcapkit[Scapy]`` and so
    on. This holds however easy they are to install, and it is what the ruling
-   changed: some of them used to be in ``all``.
-*  ``PyPCAP`` **and** ``PCAP_CT`` **were already excluded for installability**, which the
+   changed: the 1.4 ``all`` carried some of them.
+*  ``PyPCAP`` **and** ``PCAP_CT`` **are also excluded for installability**, a reason the
    ruling leaves untouched. ``pypcap`` is an sdist-only C extension needing a
    compiler and the libpcap development files; ``pcap-ct`` and ``libpcap`` are
    published only as pre-releases, and ``all`` should not be how somebody acquires a

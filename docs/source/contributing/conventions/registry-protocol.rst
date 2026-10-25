@@ -45,7 +45,7 @@ The owner ruled on :issue:`877` that a registry may subclass a bare base enum ou
 subclassing that base in turn for use by the mutable ones. So a **closed** set
 inherits :class:`~pcapkit.corekit.enum.EnumLookup`
 directly and is never handed a ``register`` it would have to refuse; an **open**
-registry inherits :class:`~pcapkit.corekit.enum.EnumRegistry` exactly as before.
+registry inherits :class:`~pcapkit.corekit.enum.EnumRegistry`.
 
 What settled the split is the owner's own second thought about carrying ``register``
 on the base: if the base carries ``register``, there is no principled reason for it
@@ -54,9 +54,9 @@ Following that through leaves :class:`~pcapkit.corekit.enum.EnumRegistry` holdin
 a few methods, too thin to justify a second class -- so the two tiers collapse into one,
 which is the opposite of what was ruled.
 
-**Both tiers are plain classes, and that is load-bearing.** Inserting a parent above
-:class:`~pcapkit.corekit.enum.EnumRegistry` leaves the member data type exactly where
-it was -- ``LinkType -> EnumRegistry -> EnumLookup -> IntEnum -> int`` -- so
+**Both tiers are plain classes, and that is load-bearing.** The parent above
+:class:`~pcapkit.corekit.enum.EnumRegistry` leaves the member data type with the enum
+base -- ``LinkType -> EnumRegistry -> EnumLookup -> IntEnum -> int`` -- so
 ``_member_type_`` still comes from the enum base. Had either tier subclassed
 ``aenum.Enum`` in order to "be an enum", it would have become the member type
 itself and broken ``int``, ``str`` and flag registries at once.
@@ -348,15 +348,15 @@ resolvable.
 
 And a folding override carries **only** the fold.
 :meth:`TransportProtocol.get <pcapkit.const.reg.apptype.apptype.TransportProtocol.get>` is
-the worked example: since :issue:`923` it lowers ``key``, forwards ``default`` verbatim
-and delegates to ``super().get()``, and that is all it does. It used to convert the base's
-name-miss :exc:`KeyError` into a :exc:`ValueError` as well, and :issue:`923`'s ruling
-retired that; the :issue:`808` refusal to extend the class at all is untouched by the
-retirement, since only the exception class moved. ``Criticality.get`` went further and was
+the worked example: it lowers ``key``, forwards ``default`` verbatim and delegates to
+``super().get()``, and that is all it does. :issue:`923`'s ruling retired the conversion
+of the base's name-miss :exc:`KeyError` into a :exc:`ValueError` that it also carried;
+the :issue:`808` refusal to extend the class at all is untouched by the retirement,
+since only the exception class moved. ``Criticality.get`` went further and was
 deleted: conversion was the *only* thing it added over the base, so once that went there
 was nothing left for an override to hold, and the class inherits
-:meth:`~pcapkit.corekit.enum.EnumLookup.get` unchanged. **An override that would now be
-empty is deleted, not kept as a pass-through** -- a ``get`` that only calls
+:meth:`~pcapkit.corekit.enum.EnumLookup.get` unchanged. **An override left with nothing
+to add is deleted, not kept as a pass-through** -- a ``get`` that only calls
 ``super().get()`` reads as though it were doing something, and the next reader has to diff
 it against the base to find out that it is not.
 
@@ -525,10 +525,9 @@ That leaves the classes with something to decide:
        :class:`~pcapkit.protocols.internet.mh.LocalizedRoutingStatus` never carried a
        ``get`` at all, so they had no string lookup to fold.
        :class:`~pcapkit.protocols.application.ngap.Criticality` had one when this audit
-       was taken and no longer does: :issue:`877` re-parented it onto
+       was taken and inherits ``get`` unchanged: :issue:`877` re-parented it onto
        :class:`~pcapkit.corekit.enum.EnumLookup` and :issue:`923` retired the exception
-       conversion that was the override's only remaining job, so it inherits ``get``
-       unchanged.
+       conversion that was the override's only remaining job.
      - **case-sensitive** -- conforms
    * - :class:`~pcapkit.protocols.misc.pcapng.WireGuardKeyLabel`
      - ``draft-tuexen-opsawg-pcapng``
@@ -609,7 +608,8 @@ rather than changing it.
    :class:`~pcapkit.const.ftp.command.Command`,
    :class:`~pcapkit.const.ftp.command.FEATCode`,
    :class:`~pcapkit.const.http.method.Method`,
-   :class:`~pcapkit.const.pcapng.option_type.OptionType` and
+   :class:`~pcapkit.const.pcapng.option_type.OptionType`,
+   :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol` and
    :class:`~pcapkit.const.reg.apptype.apptype.AppType` -- and probing one of those
    measures the override rather than the base. The unconditionally clean witness is
    ``tests/corekit/test_enum_lookup_base_unit.py``'s own ``_Str``, a purpose-built

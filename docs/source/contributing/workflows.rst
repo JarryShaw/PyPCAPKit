@@ -357,8 +357,8 @@ starting an independent run after the caller finishes. The calls target
   ``needs.head.result``.
 
 Cron Head (:issue:`1967`) is
-one copy of the test gate and the ``verdict`` job, which Conda Update, Vendor
-Update and GitHub Pages used to carry each. It holds ``contents: read`` and no
+the one copy of the test gate and the ``verdict`` job that Conda Update, Vendor
+Update and GitHub Pages share. It holds ``contents: read`` and no
 more, which is what each caller grants its ``head`` job and what
 ``unit-tests.yml`` is called with. Every expression in it reads the caller's ``github`` context, so its jobs decide on
 the event that started the caller and check out the caller's ``github.sha``. A
@@ -378,13 +378,13 @@ orders them:
   ``workflow_run`` path. Create Release reads only the Vendor Update run that
   triggered it, through its ``vendor_update`` job, so the time of the others
   does not matter to it.
-* At one time they cost more. Vendor Update and Conda Update both ran at 10:00
-  until :issue:`1967` spread them, and each scheduled pair read back from 2026-09-26 on
-  checked out the same commit -- on 2026-10-17, Conda Update 39023770904 and
-  Vendor Update 39023891165 both gated 44ed96fc3, their ``Gate (full suite,
-  …)`` jobs taking twelve and ten minutes. Their writing jobs share the ``repository-maintenance`` group, so ``conda-update``
-  then waited for ``vendor-update`` to finish, and a third job joining that
-  group cancels the one pending there.
+* Aligned, they cost more. With Vendor Update and Conda Update both at 10:00,
+  each scheduled pair read back from 2026-09-26 on checked out the same commit
+  (:issue:`1967`) -- on 2026-10-17, Conda Update 39023770904 and Vendor Update
+  39023891165 both gated 44ed96fc3, their ``Gate (full suite, …)`` jobs taking
+  twelve and ten minutes. Their writing jobs share the ``repository-maintenance``
+  group, so ``conda-update`` waited for ``vendor-update`` to finish, and a third
+  job joining that group cancels the one pending there.
 
 Spread, each ``head`` gates alone, and Conda Update runs once Vendor Update's
 Create Release has had the day to publish, so its ``Check the GitHub release
@@ -717,8 +717,9 @@ fire while the pool stays saturated, and the JUnit timings are what show whether
 not fail the run (:issue:`1732`): on every job of :file:`experimental.yml`, which no
 required context names, on every :ref:`KTLO <ktlo-tier>` leg, a job whose name ends in ``(KTLO)``
 (:issue:`1633`), and on a job whose name ends in ``(experimental)`` in any workflow. That
-last covers the experimental legs that ran in :file:`unit-tests.yml` under
-``test``'s 45-minute cap before the split. The finding keeps its ``H`` id and says it is non-blocking. A
+last also covers older runs of :file:`unit-tests.yml`, whose experimental legs ran under
+``test``'s 45-minute cap until :issue:`1732` moved them to :file:`experimental.yml`.
+The finding keeps its ``H`` id and says it is non-blocking. A
 KTLO leg past its job's ``timeout-minutes`` is still cancelled, and its check run
 reads red, though since :issue:`1738` nothing gating waits on it, so that warning is worth
 acting on before the cap.
@@ -739,13 +740,13 @@ permission to the reusable workflow.
   fails the push run that GitHub Pages, Conda Update and Vendor Update (and so Create
   Release) wait on. The cost is wall time: the push run, and those workflows, finish
   about one slowest cell later, about 6 min before any queue wait (estimate).
-* ``engine-tests`` has no ``DPKT`` cell. Its only path was
+* ``engine-tests`` has no ``DPKT`` cell. Its only path would be
   :file:`tests/toolkit/test_dpkt_unit.py`, which ``test`` runs with ``DPKT`` installed
-  on every leg. Dropped with it: that file in a venv holding only ``test`` and ``DPKT``.
+  on every leg. What that gives up is the file in a venv holding only ``test`` and
+  ``DPKT``.
 
-Another cut, running the then-prerelease 3.15 engine cell on ``main`` pushes only,
-ended with :issue:`1633`: 3.15 is
-in the supported tier, so its cells block on every run.
+The 3.15 engine cells are not among the cuts: 3.15 is in the supported tier
+(:issue:`1633`), so its cells block on every run.
 
 Required Status Checks
 ----------------------
@@ -783,9 +784,8 @@ grepping every workflow file for its name:
      - job ``compatibility``, matrix leg ``3.15``
      - ``python-compatibility.yml``, key ``"3.15"`` of ``.github/python-versions.toml``
 
-That is the list after :issue:`1633`,
-which added ``Compat Python 3.15`` and removed ``Compat Python 3.10``. Moving a version
-between the tiers below means editing the ruleset in the same change.
+Moving a version between the tiers below means editing the ruleset in the same
+change, as :issue:`1633` did for 3.15 and 3.10.
 
 ``Required checks passed`` is defined by exactly one, the ``name:`` of the
 ``required-checks`` job in ``unit-tests.yml``. ``Compat Python`` is defined by
@@ -797,8 +797,8 @@ context matches one. The comment above ``required-checks`` mentions the string
 without defining it.
 
 ``Required checks passed`` is an aggregate, not a single check run. The ruleset
-requires it and the ``Compat Python 3.11``-``3.15`` legs, nothing else, as
-that comment records. It ``needs:`` the gating jobs of ``unit-tests.yml`` --
+requires it and the ``Compat Python 3.11``-``3.15`` legs, with ``Lint``, and
+nothing else. It ``needs:`` the gating jobs of ``unit-tests.yml`` --
 ``test``, ``integration``, ``engine-tests`` and ``pypcap-parity``, plus
 ``project-tests``, the one run of the project pins, and ``changes`` for the
 docs-only path -- and checks each result explicitly, in its "Check every
@@ -902,9 +902,8 @@ setup-python reads them (``3.14t``, ``graalpy-25.4``). Each runs a leg of
 ``experimental``, the matrix job of :file:`.github/workflows/experimental.yml`
 ("Experimental Tests"), named ``Python <version> (experimental)``, and nothing
 else: no ``integration``, ``Compat``, wheel or conda leg, so never a required
-context. They were legs of ``test`` until :issue:`1732`,
-which moved them to a
-workflow of their own, by the owner's ruling that nothing waits on them. **That
+context. They run in a workflow of their own, rather than as legs of ``test``, by
+the owner's ruling on :issue:`1732` that nothing waits on them. **That
 workflow reports separately and holds up nothing**: a job cannot ``needs:`` one in
 another workflow, nothing calls it, and no ``workflow_run`` names it but CI
 Reports', which posts its finished runs (see `CI Reports`_), so the Unit
@@ -1012,8 +1011,8 @@ skipped every step after its tests, ``Post Run actions/checkout@v7`` too, whose
 <https://docs.github.com/en/actions/reference/workflows-and-actions/metadata-syntax#runspost-if>`__
 "defaults to ``always()``". On a lost runner, then, the ``[monitor]`` lines in the
 tests' log are the record. The monitor's steps -- start, stop and upload -- are each
-``continue-on-error`` with no cap of their own, so the caps above and the check names
-are as they were.
+``continue-on-error`` with no cap of their own, so they change neither the caps above
+nor the check names.
 
 A lost runner fails the job, and so its check, whatever ``continue-on-error`` says,
 so ``Run unit tests`` holds the tests to what leaves the runner alive, and a breach
@@ -1047,7 +1046,7 @@ warnings:
   caps hold over the whole tier; on ``timeout``'s SIGINT the run in progress writes
   its JUnit file and no later one starts. Each shard's run writes a JUnit file of its
   own beside ``junit.xml``, such as ``junit-tests-protocols.xml``, and ``Upload test
-  timings`` takes them all. 3.14t's leg runs pytest once, as before.
+  timings`` takes them all. 3.14t's leg runs pytest once.
 * ``timeout --signal=INT --kill-after=3m 110m`` ends pytest under the step's 120-minute
   cap, so it still writes the junit XML, and exits 124; ``prlimit --fsize=2147483648``
   caps any file at 2 GiB. The ``timeout`` is GNU's, ``gnutimeout`` where it exists
@@ -1272,7 +1271,7 @@ engine cells that ``engine-tests``' ``Write the per-cell script`` writes;
 
 ``util/cap_file_size.py`` sets ``RLIMIT_FSIZE``, soft and hard, to 2 GiB, or keeps
 a lower hard limit, and execs the command, so the step's exit status and
-``continue-on-error`` behave as before and every process the command starts
+``continue-on-error`` behave as without it and every process the command starts
 inherits the cap. A write past it raises ``OSError: [Errno 27] File too large`` in
 Python, since CPython ignores ``SIGXFSZ``, so the test errors; any other program is
 killed by the signal, whose default action the script restores before it execs.
@@ -1753,7 +1752,7 @@ Distribution`` steps rewrite the former, and Dependabot reads only a ``FROM`` li
 that names its image, while the benchmark's :file:`Dockerfile` takes its base image
 through ``ARG PYTHON_IMAGE`` from :file:`examples/benchmark/python-images.txt`.
 
-PyUp, which opened the same kind of bump before, opens none: :file:`.pyup.yml` sets
+PyUp opens no bump: :file:`.pyup.yml` sets
 ``update: False`` and lists no ``requirements:``. A file listed there takes its own
 ``update``, which defaults to ``all``, so the list would override the global
 setting. Deleting :file:`.pyup.yml` would not stop the bot either, as without it
@@ -1763,8 +1762,8 @@ PyUp runs on its defaults. The PyUp App's installation, and the
 Python Versions
 ---------------
 
-Since :issue:`1660`,
-:file:`.github/python-versions.toml` declares every Python version CI runs: one
+:file:`.github/python-versions.toml` (:issue:`1660`) declares every Python version
+CI runs: one
 line per version, with its tier -- ``supported``, ``ktlo``, ``experimental``, or
 ``pre-release``, which no version carries -- and, where ``ubuntu-latest`` cannot
 provide it, the ``runner`` it needs. ``latest`` names the newest supported CPython, which every
@@ -1785,7 +1784,7 @@ the coverage leg's version. Its tests, and the other tests that
 read the file, skip on the KTLO interpreters, which have no ``tomllib``. Some
 edits it names rather than makes: a new ``pypi`` KTLO leg needs its own
 ``ktlo_*`` output for ``release_status``, and a pre-release leg needs
-non-blocking mechanics no workflow has yet, so the script refuses one.
+non-blocking mechanics no workflow has, so the script refuses one.
 
 **Python Versions** (:file:`cron-python-versions.yml`) proposes those edits.
 Every Monday, or on dispatch, its ``detect`` job runs

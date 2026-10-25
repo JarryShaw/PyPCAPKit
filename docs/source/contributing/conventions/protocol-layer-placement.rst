@@ -153,12 +153,12 @@ Each is deliberate. Do not "fix" any of them.
 
 **A parsing base may live in another subpackage.**
 :mod:`pcapkit.protocols.application.rarp` imports
-:class:`~pcapkit.protocols.link.arp.ARP` from :mod:`pcapkit.protocols.link.arp`. This
-is the first ``application/ → link/`` dependency in the package, and it is the honest
-consequence of letting layer and parser disagree.
+:class:`~pcapkit.protocols.link.arp.ARP` from :mod:`pcapkit.protocols.link.arp`. That
+``application/ → link/`` dependency is the honest consequence of letting layer and
+parser disagree.
 
 **The dispatch tier is decoupled from the subpackage.** A protocol's subpackage says
-nothing about which registry reaches it, and the move did not touch any dispatch key:
+nothing about which registry reaches it, and no dispatch key depends on it:
 
 .. list-table::
    :header-rows: 1

@@ -144,10 +144,11 @@ One Commit per Release
 Every job that checks out, tags, builds or publishes pins ``github.sha``
 (:issue:`1634`), so a run
 releases the commit it was created for however long it waits on approval.
-Before that, run 38008819343 was created for ``b6b95bc8e``, approved three
-days later, and tagged ``main``'s tip ``2c0008c3c`` as both ``v1.5.0b9`` and
-``conda-1.5.0b9+0``: ``action-gh-release`` defaulted ``target_commitish`` to
-the default branch, and ``tag`` pulled ``main`` before tagging.
+Without the pins, a run releases whatever ``main``'s tip is once approved: run
+38008819343 was created for ``b6b95bc8e``, approved three days later, and
+tagged ``main``'s tip ``2c0008c3c`` as both ``v1.5.0b9`` and
+``conda-1.5.0b9+0``, since ``action-gh-release`` defaults ``target_commitish`` to
+the default branch, and ``tag`` pulls ``main`` before tagging.
 
 * On ``workflow_run``, where ``github`` creates the ``v*`` tag, it passes
   ``target_commitish`` ``github.sha``; on a ``v*`` push the tag
@@ -176,7 +177,7 @@ the default branch, and ``tag`` pulled ``main`` before tagging.
   ``src/github.ts``, on a release that exists). A file
   the release already has is left alone
   (:issue:`1640`): the action
-  deleted and re-uploaded it, and a rebuild against live PyPI is not
+  deletes and re-uploads it, and a rebuild against live PyPI is not
   byte-identical to the published copy. Only an asset in state ``uploaded``
   counts: `Upload a release asset
   <https://docs.github.com/en/rest/releases/assets#upload-a-release-asset>`__
@@ -185,15 +186,15 @@ the default branch, and ``tag`` pulled ``main`` before tagging.
   again (``--clobber``). ``conda``'s upload is not gated on ``check_leg``, so a
   leg whose Anaconda upload landed but whose GitHub upload failed still gets
   its asset on a re-run.
-* ``gh release upload`` also fails, deliberately, where the action did not.
+* ``gh release upload`` also fails, deliberately, where the action does not.
   With no release for the tag, the upload fails with ``gh``'s
-  "release not found", where the action made one, with no notes and
+  "release not found", where the action makes one, with no notes and
   ``target_commitish`` unset (``release()`` and ``createRelease()`` there), which Create a
   release defaults to "the repository's default branch"; the release is
   ``github``'s to make, at the run's commit. A file pattern matching nothing
   exits 1 with ``::error title=Nothing to upload``, where the action,
-  ``fail_on_unmatched_files`` unset, only warned (``run()`` in ``src/run.ts``) and
-  published the release without that file.
+  ``fail_on_unmatched_files`` unset, only warns (``run()`` in ``src/run.ts``) and
+  publishes the release without that file.
 
 Pinning the target may have a cost, and GitHub documents the rule two ways.
 Its REST docs for `Create a release
@@ -246,10 +247,10 @@ exists". It also uploads only to a published release, read first with ``gh
 release view``. With none, the action would create one, and its tag, at
 ``commit`` (``Action.checkForMissingReleaseError()`` and
 ``Action.updateDraftOrCreateRelease()``). Conda Update bumped 1.5.0b9's build
-three times while that run waited on approval; once ``conda-dist`` runs on
-every bump (:issue:`1632`),
-that would tag the pending version at ``main``'s tip and fail Create Release's
-tag check. The action would also retarget a draft at ``commit``
+three times while that run waited on approval, and ``conda-dist`` runs on
+every pushed bump (:issue:`1632`), so a release the action created there would
+tag the pending version at ``main``'s tip and fail Create Release's tag check.
+The action would also retarget a draft at ``commit``
 (``Action.updateDraftOrCreateRelease()`` and ``Action.updateRelease()``), which ``omitDraftDuringUpdate`` keeps a
 draft, but Create Release's ``workflow_run`` run finds the draft and resets
 its target to the run's sha (``action-gh-release`` 3.0.2's ``release()`` and
@@ -305,7 +306,7 @@ the release test gate, ask for a second approval and race the first run's
 uploads from another concurrency group, so ``version_check``'s ``if:`` skips a
 ``push`` whose ``github.actor_id`` is ``vars.RELEASE_APP_BOT_ID``, and
 ``release_status`` reports it with ``::notice title=Nothing to release``. A
-tag pushed by a person runs as before. Whether a tag made
+tag pushed by a person is not skipped. Whether a tag made
 through the Releases API fires ``push``, and with the bot as actor, is
 unmeasured; if not, the guard never matches and the cost is one approval to
 reject.
@@ -324,23 +325,26 @@ the job; that a re-run reads variables and secrets set since is unmeasured.
 Per-Job Evidence, Not a Shared Proxy
 ------------------------------------
 
-Until :issue:`888`, every job
-past ``version_check`` shared one guard:
+One guard shared by every job past ``version_check`` would read "the ``v*`` tag
+exists" as a proxy for "this version was already published":
 
 .. code-block:: yaml
 
    if: ${{ startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
 
-using "the ``v*`` tag exists" as a proxy for "this version was already
-published". Those diverge exactly when a release half-completes -- ``github``
-tags, a later job fails or is rejected, and the tag is left behind with the
-publish incomplete -- which is the whole subject of `Precautions`_ below.
-``github`` still uses that guard for its own artefact, since the tag it
-checks *is* the one it is about to create:
+Those diverge exactly when a release half-completes -- ``github`` tags, a later
+job fails or is rejected, and the tag is left behind with the publish
+incomplete -- which is the whole subject of `Precautions`_ below
+(:issue:`888`). Of the publishers, only ``github`` uses that clause, for its own
+artefact, since
+the tag it checks *is* the one it is about to create; the clause beside it skips
+a version whose tag names another commit (`One Commit per Release`_):
 
 .. code-block:: yaml
 
-   if: ${{ startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false' }}
+   if: >-
+     ${{ (startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_RELEASED_ELSEWHERE != 'true') &&
+     (startsWith(github.ref_name, 'v') || needs.version_check.outputs.PCAPKIT_TAG_EXISTS == 'false') }}
 
 ``tag``, ``pypi`` and ``conda`` each read their own evidence instead:
 
@@ -401,7 +405,7 @@ on ``tag``), and GitHub Actions skips a job whose ``needs:`` included a job
 that itself skipped -- *before* that job's own ``if:`` is even evaluated --
 unless the ``if:`` calls a status-check function itself. ``github``
 legitimately skips whenever its own tag already exists, which is exactly the
-retry case this fix is for. Left alone, that skip would cascade: ``pypi``'s
+retry case this guard is for. Left alone, that skip would cascade: ``pypi``'s
 own evidence might correctly say "not yet on PyPI, please run", but the
 default status check GitHub Actions prepends to an ``if:`` that does not
 itself call a status-check function -- effectively ``success()`` over
@@ -478,10 +482,9 @@ What still makes one approval mean *the whole release* is the ``needs:``
 graph: ``tag`` and ``pypi`` both depend on ``github``, and ``conda`` depends on
 ``tag`` and ``github`` -- so nothing downstream of ``github`` can
 start before it is approved, and rejecting it leaves nothing tagged and
-nothing published. Before that removal ``tag`` depended on ``version_check``
-alone, so removing its reviewer without moving this dependency would have let
-it push a commit to ``main`` and cut a ``conda-*`` tag *ahead of* the
-approval it was supposed to wait for.
+nothing published. Without its ``needs: github``, ``tag``, which has no
+reviewer of its own, could push a commit to ``main`` and cut a ``conda-*`` tag
+*ahead of* the approval it is supposed to wait for.
 
 Precautions
 -----------
@@ -521,7 +524,7 @@ Neither is worth the risk of a double upload to an index that cannot take one
 back, and neither is needed, since a plain re-run self-heals; see
 `Recovery`_ below.
 
-``environment: pypi`` **stays even though its reviewer is gone.** ``pypi``
+``environment: pypi`` **stays even though it has no reviewer.** ``pypi``
 publishes through PyPI's OIDC trusted publishing (the job's
 ``environment: pypi`` and ``id-token: write``), and PyPI's trusted-publisher
 configuration can be scoped to a GitHub Actions environment name. If this

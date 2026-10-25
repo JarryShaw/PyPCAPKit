@@ -62,12 +62,11 @@ leaves the type out of it. The type stays importable by its dotted path there, f
 annotation or an ``is`` guard; it is only ``import *`` that does not offer it. The
 ``__all__`` there does name :class:`~pcapkit.corekit.sentinels.Sentinel`, the abstract
 base every sentinel type shares, since that is no sentinel's own type. A private
-sentinel such as ``ABSENT`` is in neither, which is what private means here -- dropping
-its leading underscore did not add it to either list, and
+sentinel such as ``ABSENT`` is in neither, which is what private means here, and
 :class:`~pcapkit.corekit.sentinels.AbsentType` and
 :data:`~pcapkit.corekit.sentinels.ABSENT` are documented on
 :doc:`the sentinels API page </pcapkit/corekit/sentinels>` as private and not for
-public use rather than left off it, since the name alone no longer says so.
+public use rather than left off it, since nothing in the name says so.
 
 .. note::
 

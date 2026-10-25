@@ -148,8 +148,8 @@ was left behind, and that was deliberate. The owner ruled that the
 ``IPv6_GenericExt`` name goes for good: it was an intermediate state, and it was never
 released.
 
-What makes that safe rather than merely decided: the old name existed on ``main`` from
-``b3551cb63`` to ``93cf940b3``, under four hours on one day, and no release tag falls
+What makes that safe rather than merely decided: ``IPv6_GenericExt`` existed on
+``main`` from ``b3551cb63`` to ``93cf940b3``, under four hours on one day, and no release tag falls
 between the two commits -- ``git tag --contains`` names the same tags for both -- so it
 appears in **no** release and the break has no callers to inconvenience. Do not
 reintroduce it as an alias, and do not cite it as a former public name.

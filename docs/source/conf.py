@@ -1247,26 +1247,11 @@ def read_own_enum_new(obj: type, name: str, *defargs: 'Any') -> 'Any':
     return safe_getattr(obj, name, *defargs)
 
 
-# NB: handlers used to sit here -- ``remove_module_docstring``,
-# ``process_docstring``, ``process_fields`` and ``source_read`` -- each with its
-# ``app.connect`` call commented out in ``setup`` below, so none of them had run
-# for as long as they had been in the file. They are deleted rather than restored,
-# because restoring them would either duplicate work done properly elsewhere or make the
-# build unusable:
-#
-#   ``remove_module_docstring`` and ``process_docstring`` were both attempts at the
-#   same thing -- flipping :data:`typing.TYPE_CHECKING` and reloading each module
-#   so autodoc could see the ``if TYPE_CHECKING:`` names. ``bind_type_checking_names``
-#   above solves that, per module and without mutating a global mid-build.
-#
-#   ``process_fields`` only ever printed; the ``lines.append`` that was its point
-#   was itself commented out.
-#
-#   ``source_read`` printed every document's entire source text, which on this
-#   project is several thousand pages of build log.
-#
-# If the ``TYPE_CHECKING`` behaviour is ever wanted again, ``bind_type_checking_names``
-# is where it belongs, not a reload hook.
+# NB: the ``TYPE_CHECKING`` names belong to ``bind_type_checking_names`` above,
+# not to a hook that flips :data:`typing.TYPE_CHECKING` and reloads each module:
+# the binding does the same per module, without mutating a global mid-build. Nor
+# should a ``source-read`` handler print each document: on this project that is
+# several thousand pages of build log.
 
 
 def setup(app: 'Sphinx') -> None:
