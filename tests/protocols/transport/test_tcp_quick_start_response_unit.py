@@ -94,6 +94,15 @@ class QuickStartResponseTests(unittest.TestCase):
                     self.assertEqual(again, raw)
                     self.assertEqual(bytes(tcp.payload.data), payload)
 
+    def test_rate_parses_as_an_int(self) -> 'None':
+        """``req_rate`` is an :class:`int`, as annotated, not a float. See #2167."""
+        QS = qs()
+        for rate in (0, 80, 640, 1_310_720):
+            with self.subTest(rate=rate):
+                req_rate = parse(build(rate)).info.options[QS].req_rate
+                self.assertIs(type(req_rate), int)
+                self.assertEqual(req_rate, rate)
+
     def test_rate_rounds_down_to_a_representable_code(self) -> 'None':
         """A rate is floored to ``40 * 2 ** N``, and below 80 kbps to ``N = 0``."""
         QS = qs()

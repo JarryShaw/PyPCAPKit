@@ -809,10 +809,10 @@ class TCPUDPUnitTests(unittest.TestCase):
                            key_id=1, next_key_id=2, mac=b'mac'),
             options=options,
         ).mac, b'mac')
-        self.assertIsNone(proto._read_mode_fastopen(
+        self.assertEqual(proto._read_mode_fastopen(
             FastOpenCookie(kind=Option.TCP_Fast_Open_Cookie, length=2, cookie=None),
             options=options,
-        ).cookie)
+        ).cookie, b'')
         self.assertEqual(proto._read_mode_fastopen(
             FastOpenCookie(kind=Option.TCP_Fast_Open_Cookie, length=8, cookie=b'cookie'),
             options=options,
@@ -1302,6 +1302,45 @@ class TCPUDPUnitTests(unittest.TestCase):
         unnamed = TCP(srcport=53406, dstport=member)
         self.assertEqual(unnamed.info.srcport.port, 53406)
         self.assertIs(unnamed.info.dstport, member)
+
+    def test_a_fast_open_cookie_request_parses_as_empty_bytes(self) -> None:
+        """A Fast Open cookie request reads ``cookie=b''``, not :obj:`None`. See #2167.
+
+        :rfc:`7413` sends a cookie request as option ``22 02``: length 2 and no
+        cookie. The data model annotates ``cookie`` as :class:`bytes`, and a
+        segment built with ``cookie=b''`` reads back ``b''``, so a parsed one
+        reading :obj:`None` broke both the annotation and the parse/construct
+        agreement. Both round trips are checked byte for byte.
+
+        """
+        import struct
+
+        from pcapkit.const.tcp.option import Option
+        from pcapkit.protocols.transport.tcp import TCP
+
+        # data offset 6: a cookie request, then two no-operations
+        wire = struct.pack('!HHIIBBHHH', 1, 2, 0, 0, 6 << 4, 0x10, 0xFFFF, 0, 0) \
+            + bytes([Option.TCP_Fast_Open_Cookie, 2, 1, 1])
+        parsed = TCP(wire, len(wire))
+        cookie = parsed.info.options[Option.TCP_Fast_Open_Cookie]
+        self.assertIs(type(cookie.cookie), bytes)
+        self.assertEqual(cookie.cookie, b'')
+        self.assertEqual(cookie.to_dict()['cookie'], b'')
+
+        for value in (None, b''):
+            with self.subTest(cookie=value):
+                built = TCP(srcport=1, dstport=2, ack=True,
+                            options=[(Option.TCP_Fast_Open_Cookie, {'cookie': value}),
+                                     (Option.No_Operation, {}), (Option.No_Operation, {})])
+                self.assertEqual(built.data, wire)
+                self.assertEqual(built.info.options[Option.TCP_Fast_Open_Cookie], cookie)
+
+        again = TCP(srcport=1, dstport=2, ack=True, options=parsed.info.options)
+        self.assertEqual(again.data, wire)
+        from_dict = TCP(srcport=1, dstport=2, ack=True,
+                        options=[(Option.TCP_Fast_Open_Cookie, cookie.to_dict()),
+                                 (Option.No_Operation, {}), (Option.No_Operation, {})])
+        self.assertEqual(from_dict.data, wire)
 
     def test_a_sack_option_overrunning_the_option_area_raises(self) -> None:
         """An over-long ``SACK`` option must be an error, not a hang.

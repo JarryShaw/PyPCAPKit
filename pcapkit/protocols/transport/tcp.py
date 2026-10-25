@@ -1439,7 +1439,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         data = Data_QuickStartResponse(
             kind=schema.kind,
             length=schema.length,
-            req_rate=40000 * (2 ** rate) / 1000 if rate > 0 else 0,
+            req_rate=40000 * (2 ** rate) // 1000 if rate > 0 else 0,
             ttl_diff=schema.diff,
             nonce=schema.nonce['nonce'],
             reserved=schema.flags['reserved'],
@@ -2136,10 +2136,12 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         if not (schema.length == 2 or (6 <= schema.length <= 18 and schema.length % 2 == 0)):
             raise ProtocolError(f'{self.alias}: [OptNo {schema.kind}] invalid format')
 
+        # a length of 2 is a cookie request (RFC 7413 Section 4.1.1),
+        # which carries no cookie, so the schema field is absent (#2167)
         data = Data_FastOpenCookie(
             kind=schema.kind,
             length=schema.length,
-            cookie=schema.cookie,
+            cookie=schema.cookie if schema.cookie is not None else b'',
         )
         return data
 
@@ -2683,7 +2685,9 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             code: option code
             opt: option data
             rate: rate (in kbps)
-            diff: time to live (in seconds) difference
+            diff: TTL Diff, the IP TTL minus the QS TTL, modulo 256 (:rfc:`4782`
+                Section 4.2); a :class:`~datetime.timedelta` is taken as its whole
+                seconds
             nonce: nonce value
             reserved: reserved bits before the rate request (``Resv.``, 4 bits)
             nonce_reserved: reserved bits after the nonce (``R``, 2 bits)
@@ -3438,7 +3442,7 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Args:
             code: option code
             opt: option data
-            cookie: fast open cookie
+            cookie: fast open cookie; :obj:`None` or ``b''`` for a cookie request
             **kwargs: arbitrary keyword arguments
 
         Returns:
