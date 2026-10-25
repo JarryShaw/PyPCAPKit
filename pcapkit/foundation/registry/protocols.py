@@ -758,6 +758,10 @@ def register_ipv4_option(code: 'IPv4_OptionNumber', meth: 'str | tuple[IPv4_Opti
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.
             It should be a subclass of :class:`pcapkit.protocols.schema.internet.ipv4.Option`.
 
+    Raises:
+        RegistryError: If ``meth`` is a name with no matching
+            ``_read_opt_*`` method.
+
     """
     if isinstance(meth, str) and not hasattr(IPv4, f'_read_opt_{meth}'):
         raise RegistryError('method must be a valid IPv4 option parser function')
@@ -782,6 +786,10 @@ def register_hip_parameter(code: 'HIP_Parameter', meth: 'str | tuple[HIP_Paramet
         meth: Method name or callable to parse and/or construct the parameter.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the parameter.
             It should be a subclass of :class:`pcapkit.protocols.schema.internet.hip.Parameter`.
+
+    Raises:
+        RegistryError: If ``meth`` is a name with no matching
+            ``_read_param_*`` method.
 
     """
     if isinstance(meth, str) and not hasattr(HIP, f'_read_param_{meth}'):
@@ -808,6 +816,10 @@ def register_hopopt_option(code: 'IPv6_Option', meth: 'str | tuple[HOPOPT_Option
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.
             It should be a subclass of :class:`pcapkit.protocols.schema.internet.hopopt.Option`.
 
+    Raises:
+        RegistryError: If ``meth`` is a name with no matching
+            ``_read_opt_*`` method.
+
     """
     if isinstance(meth, str) and not hasattr(HOPOPT, f'_read_opt_{meth}'):
         raise RegistryError('method must be a valid HOPOPT option parser function')
@@ -832,6 +844,10 @@ def register_ipv6_opts_option(code: 'IPv6_Option', meth: 'str | tuple[IPv6_Opts_
         meth: Method name or callable to parse and/or construct the option.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.
             It should be a subclass of :class:`pcapkit.protocols.schema.internet.ipv6_opts.Option`.
+
+    Raises:
+        RegistryError: If ``meth`` is a name with no matching
+            ``_read_opt_*`` method.
 
     """
     if isinstance(meth, str) and not hasattr(IPv6_Opts, f'_read_opt_{meth}'):
@@ -858,6 +874,10 @@ def register_ipv6_route_routing(code: 'IPv6_Routing', meth: 'str | tuple[IPv6_Ro
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the routing data.
             It should be a subclass of :class:`pcapkit.protocols.schema.internet.ipv6_route.RoutingType`.
 
+    Raises:
+        RegistryError: If ``meth`` is a name with no matching
+            ``_read_data_type_*`` method.
+
     """
     if isinstance(meth, str) and not hasattr(IPv6_Route, f'_read_data_type_{meth}'):
         raise RegistryError('method must be a valid IPv6-Route routing data parser function')
@@ -882,6 +902,10 @@ def register_mh_message(code: 'MH_Packet', meth: 'str | tuple[MH_PacketParser, M
         meth: Method name or callable to parse and/or construct the data.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the message type.
             It should be a subclass of :class:`pcapkit.protocols.schema.internet.mh.Packet`.
+
+    Raises:
+        RegistryError: If ``meth`` is a name with no matching
+            ``_read_msg_*`` method.
 
     """
     if isinstance(meth, str) and not hasattr(MH, f'_read_msg_{meth}'):
@@ -908,6 +932,10 @@ def register_mh_option(code: 'MH_Option', meth: 'str | tuple[MH_OptionParser, MH
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.
             It should be a subclass of :class:`pcapkit.protocols.schema.internet.mh.Option`.
 
+    Raises:
+        RegistryError: If ``meth`` is a name with no matching
+            ``_read_opt_*`` method.
+
     """
     if isinstance(meth, str) and not hasattr(MH, f'_read_opt_{meth}'):
         raise RegistryError('method must be a valid MH option parser function')
@@ -932,6 +960,10 @@ def register_mh_extension(code: 'MH_CGAExtension', meth: 'str | tuple[MH_Extensi
         meth: Method name or callable to parse and/or construct the data.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the CGA extension.
             It should be a subclass of :class:`pcapkit.protocols.schema.internet.mh.CGAExtension`.
+
+    Raises:
+        RegistryError: If ``meth`` is a name with no matching
+            ``_read_ext_*`` method.
 
     .. versionchanged:: 1.5.0
 
@@ -1198,6 +1230,10 @@ def register_tcp_option(code: 'TCP_Option', meth: 'str | tuple[TCP_OptionParser,
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.
             It should be a subclass of :class:`pcapkit.protocols.schema.transport.tcp.Option`.
 
+    Raises:
+        RegistryError: If ``meth`` is a name with no matching
+            ``_read_mode_*`` method.
+
     """
     if isinstance(meth, str) and not hasattr(TCP, f'_read_mode_{meth}'):
         raise RegistryError('method must be a TCP option parser function')
@@ -1222,6 +1258,10 @@ def register_tcp_mp_option(code: 'TCP_MPTCPOption', meth: 'str | tuple[TCP_MPOpt
         meth: Method name or callable to parse and/or construct the option.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.
             It should be a subclass of :class:`pcapkit.protocols.schema.transport.tcp.MPTCP`.
+
+    Raises:
+        RegistryError: If ``meth`` is a name with no matching
+            ``_read_mptcp_*`` method.
 
     """
     if isinstance(meth, str) and not hasattr(TCP, f'_read_mptcp_{meth}'):
@@ -1336,6 +1376,10 @@ def register_http_frame(code: 'HTTP_Frame', meth: 'str | tuple[HTTP_FrameParser,
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the frame.
             It should be a subclass of :class:`pcapkit.protocols.schema.application.httpv2.FrameType`.
 
+    Raises:
+        RegistryError: If ``meth`` is a name with no matching
+            ``_read_http_*`` method.
+
     """
     if isinstance(meth, str) and not hasattr(HTTPv2, f'_read_http_{meth}'):
         raise RegistryError('method must be a frame parser function')
@@ -1366,6 +1410,10 @@ def register_pcapng_block(code: 'PCAPNG_BlockType', meth: 'str | tuple[PCAPNG_Bl
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the block.
             It should be a subclass of :class:`pcapkit.protocols.schema.misc.pcapng.BlockType`.
 
+    Raises:
+        RegistryError: If ``meth`` is a name with no matching
+            ``_read_block_*`` method.
+
     """
     if isinstance(meth, str) and not hasattr(PCAPNG, f'_read_block_{meth}'):
         raise RegistryError('method must be a block parser function')
@@ -1390,6 +1438,10 @@ def register_pcapng_option(code: 'PCAPNG_OptionType', meth: 'str | tuple[PCAPNG_
         meth: Method name or callable to parse and/or construct the option.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.
             It should be a subclass of :class:`pcapkit.protocols.schema.misc.pcapng.Option`.
+
+    Raises:
+        RegistryError: If ``meth`` is a name with no matching
+            ``_read_option_*`` method.
 
     """
     if isinstance(meth, str) and not hasattr(PCAPNG, f'_read_option_{meth}'):
@@ -1417,6 +1469,10 @@ def register_pcapng_record(code: 'PCAPNG_RecordType', meth: 'str | tuple[PCAPNG_
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the name resolution record.
             It should be a subclass of :class:`pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord`.
 
+    Raises:
+        RegistryError: If ``meth`` is a name with no matching
+            ``_read_record_*`` method.
+
     """
     if isinstance(meth, str) and not hasattr(PCAPNG, f'_read_record_{meth}'):
         raise RegistryError('method must be a name resolution record parser function')
@@ -1441,6 +1497,10 @@ def register_pcapng_secrets(code: 'PCAPNG_SecretsType', meth: 'str | tuple[PCAPN
         meth: Method name or callable to parse and/or construct the decryption secrets.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the decryption secrets.
             It should be a subclass of :class:`pcapkit.protocols.schema.misc.pcapng.DSBSecrets`.
+
+    Raises:
+        RegistryError: If ``meth`` is a name with no matching
+            ``_read_secrets_*`` method.
 
     """
     if isinstance(meth, str) and not hasattr(PCAPNG, f'_read_secrets_{meth}'):
