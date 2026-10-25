@@ -59,8 +59,7 @@ an earlier version of L2TP: :rfc:`2661` §3.1 requires ``Ver`` to be 2 and reser
 the value 1 "to permit detection of L2F packets should they arrive intermixed
 with L2TP packets". L2F is a separate protocol with its own header. It is
 therefore to be implemented as ``L2F``, the canonical name, carrying ``L2TPv1``
-only as an alias in its :meth:`~pcapkit.protocols.protocol.Protocol.id` --
-the same relationship HTTP/3 has to QUIC. See
+only as an alias in its :meth:`~pcapkit.protocols.protocol.Protocol.id`. See
 :meth:`HTTPv1.id <pcapkit.protocols.application.httpv1.HTTP.id>` for how a
 version-flavoured alias is spelled: canonical name first, alias second, since
 callers take element zero as canonical.

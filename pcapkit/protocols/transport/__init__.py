@@ -9,7 +9,7 @@
 the transport layer, with detailed implementation and methods.
 
 """
-# TODO: Implements DCCP, RSVP.
+# TODO: Implement DCCP, RSVP.
 
 # Base Class for Transport Layer
 from pcapkit.protocols.transport.transport import Transport

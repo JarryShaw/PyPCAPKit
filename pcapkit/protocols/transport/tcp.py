@@ -358,9 +358,10 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             # ``httpv1.HTTP``, because HTTP/1 and HTTP/2 share these ports on the
             # wire -- RFC 9113 calls the cleartext form ``http`` and keeps it on
             # 80 -- so the port cannot decide the version and the payload has to.
-            # That dispatch is a positive identification (the RFC 9113 §3.4
-            # connection preface, then an HTTP/1 start line) rather than a trial
-            # parse. UDP's table binds the proxy for the same ports.
+            # That dispatch identifies the payload positively (the RFC 9113 §3.4
+            # connection preface, then an HTTP/1 start line) and trial-parses
+            # only as a last resort. UDP's table binds the same class for the
+            # same ports.
             20: ModuleDescriptor('pcapkit.protocols.application.ftp', 'FTP_DATA'),
             21: ModuleDescriptor('pcapkit.protocols.application.ftp', 'FTP'),
             80: ModuleDescriptor('pcapkit.protocols.application.http', 'HTTP'),
@@ -369,10 +370,11 @@ class TCP(Transport[Data_TCP, Schema_TCP],
     )
 
     #: Option code to method mapping, see :meth:`_read_tcp_options` and
-    #: :meth:`_make_tcp_options`. Method names are expected to be referred to
-    #: the class by ``_read_mode_${name}`` and ``_make_mode_${name}``, and if
-    #: such name not found, the value should then be a method that can parse the
-    #: option by itself.
+    #: :meth:`_make_tcp_options`. A :class:`str` value names the methods
+    #: ``_read_mode_${name}`` and ``_make_mode_${name}``, falling back to
+    #: :meth:`_read_mode_donone` and :meth:`_make_mode_donone` when the class
+    #: has no such method; any other value is a ``(parser, constructor)`` pair
+    #: of callables.
     __option__ = collections.defaultdict(
         lambda: 'donone',
         {
@@ -402,10 +404,11 @@ class TCP(Transport[Data_TCP, Schema_TCP],
     )  # type: DefaultDict[int, str | tuple[OptionParser, OptionConstructor]]
 
     #: Option code to method mapping, see :meth:`_read_mode_mp` and
-    #: :meth:`_make_mode_mp`. Method names are expected to be referred to the
-    #: class by ``_read_mptcp_${name}`` and ``_make_mptcp_${name}``, and if such
-    #: name not found, the value should then be a method that can parse the
-    #: option by itself.
+    #: :meth:`_make_mode_mp`. A :class:`str` value names the methods
+    #: ``_read_mptcp_${name}`` and ``_make_mptcp_${name}``, falling back to
+    #: :meth:`_read_mptcp_unknown` and :meth:`_make_mptcp_unknown` when the
+    #: class has no such method; any other value is a ``(parser, constructor)``
+    #: pair of callables.
     __mp_option__ = collections.defaultdict(
         lambda: 'unknown',
         {
@@ -686,7 +689,9 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
         Args:
             code: TCP option code.
-            meth: Method name or callable to parse and/or construct the option.
+            meth: Method name, or a ``(parser, constructor)`` pair of
+                callables, to parse and construct the option; see
+                :attr:`__option__`.
 
         Warns:
             RegistryWarning: If a different entry is already registered for
@@ -709,7 +714,9 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
         Args:
             code: MPTCP option code.
-            meth: Method name or callable to parse and/or construct the option.
+            meth: Method name, or a ``(parser, constructor)`` pair of
+                callables, to parse and construct the option; see
+                :attr:`__mp_option__`.
 
         Warns:
             RegistryWarning: If a different entry is already registered for
