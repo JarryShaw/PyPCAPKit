@@ -208,7 +208,7 @@ class PyPCAP(EngineBase['RawFrame']):
                 than upstream `PyPCAP`_, or is installed but cannot load. These
                 are the conditions :meth:`unsupported_reason` reports, kept here as
                 well because that hook is only consulted by
-                :meth:`Extractor.run <pcapkit.foundation.extraction.Extractor.run>`;
+                :class:`~pcapkit.foundation.extraction.Extractor`'s engine selection;
                 constructing the engine directly bypasses it, and running
                 `pcap-ct`_ under the :class:`~pcapkit.foundation.engines.pypcap.PyPCAP` name would
                 misreport what did the work. Via :class:`~pcapkit.foundation.extraction.Extractor`

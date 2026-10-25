@@ -217,8 +217,8 @@ EXTENSION_HEADER_LIMIT = read_limit('EXTENSION_HEADER_LIMIT', 32, risk=_RECURSIO
 IPV6_TCP_WARNED_LIMIT = read_limit('IPV6_TCP_WARNED_LIMIT', 32, risk=(
     'each capture remembered pins one of its packets in memory'))
 
-#: int: Most objects
-#: :meth:`DictDumper._append_fallback <pcapkit.dumpkit.common.DictDumper._append_fallback>`
+#: int: Most objects the ``_append_fallback`` method of a dumper
+#: :func:`~pcapkit.dumpkit.common.make_dumper` builds
 #: expands for one top-level object, counting an object once per time it is met,
 #: :envvar:`PCAPKIT_FALLBACK_LIMIT`; ``-1`` expands without bound.
 #:

@@ -515,7 +515,9 @@ class Extractor(Generic[_P]):
             ext: file extension
 
         Raises:
-            RegistryError: If ``dumper`` is not a class, or not a :class:`~pcapkit.dumpkit.common.Dumper` subclass.
+            RegistryError: If ``dumper`` is not a class, or not a
+                :class:`dictdumper.dumper.Dumper` subclass, such as
+                :class:`~pcapkit.dumpkit.common.Dumper`.
 
         Warns:
             RegistryWarning: If a different dumper is already registered for
@@ -1670,10 +1672,11 @@ class Extractor(Generic[_P]):
             :attr:`~object.__dict__` rather than attribute access. That matters
             for more than tidiness: ``_flag_s`` is assigned early in
             :meth:`__init__` and ``_ifile`` only much later, so a constructor
-            that fails in between -- an unreadable path, an unknown format --
-            leaves an instance whose flag says "mine" and which has no stream at
-            all. The close itself is guarded too, that being what a close during
-            interpreter shutdown can fail at.
+            that fails in between -- an unreadable path, or a negative
+            ``reasm_timeout`` with ``reassembly=True`` and ``ip``, ``ipv4``,
+            ``ipv6`` or ``tcp`` set -- leaves an instance whose flag says "mine"
+            and which has no stream at all. The close itself is guarded too, that
+            being what a close during interpreter shutdown can fail at.
 
         """
         if not self._owns_input():

@@ -49,7 +49,8 @@ class Packet(Info, Generic[_AT]):
 
     """
 
-    #: Data link type from global header.
+    #: Data link type: the PCAP global header's, or that of the PCAP-NG
+    #: interface the packet was captured on.
     protocol: 'Enum_LinkType'
     #: Frame number.
     index: 'int'
@@ -109,7 +110,8 @@ class Buffer(Info, Generic[_AT]):
     #: authoritative ordering; :attr:`forward` and :attr:`reverse` are
     #: subsequences of it.
     index: 'list[int]'
-    #: Flow label generated from ``BUFID``.
+    #: Flow label, built from the packet that opened the flow, cf.
+    #: :meth:`TCP.trace <pcapkit.foundation.traceflow.tcp.TCP.trace>`.
     label: 'str'
     #: ``(address, port)`` of the endpoint whose packet opened this flow. It
     #: defines what "forward" means for the flow, and it is the endpoint the
@@ -169,7 +171,8 @@ class Index(DeferredPacket, Info):
     fpout: 'Optional[str]'
     #: Tuple of frame index, **both directions**, in capture order.
     index: 'tuple[int, ...]'
-    #: Flow label generated from ``BUFID``.
+    #: Flow label, built from the packet that opened the flow, cf.
+    #: :meth:`TCP.trace <pcapkit.foundation.traceflow.tcp.TCP.trace>`.
     label: 'str'
     #: Frame index of the packets travelling in the direction that opened the
     #: flow, in capture order. That endpoint is the one the :attr:`label` names

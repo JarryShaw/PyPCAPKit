@@ -251,10 +251,11 @@ class PCAP_CT(EngineBase['RawFrame']):
         Raises:
             UnsupportedCall: If the environment cannot support this engine, for
                 either of the reasons :meth:`unsupported_reason` describes. That
-                hook is only consulted by :meth:`Extractor.run
-                <pcapkit.foundation.extraction.Extractor.run>`, which degrades to
-                the default engine with a warning; constructing the engine
-                directly bypasses it, so this is the backstop for that path.
+                hook is only consulted by
+                :class:`~pcapkit.foundation.extraction.Extractor`'s engine
+                selection, which degrades to the default engine with a warning;
+                constructing the engine directly bypasses it, so this is the
+                backstop for that path.
 
         """
         # NOTE: the probe comes *before* ``import pcap``, and the order is
@@ -464,8 +465,8 @@ class PCAP_CT(EngineBase['RawFrame']):
             a second call, where upstream ``pypcap`` 1.3.0 segfaults on one. The
             :attr:`_closed <PCAP_CT._closed>` flag is kept regardless: it is not
             this engine's business to depend on a pre-release's undocumented
-            forgiveness, and the flag also covers the case of an engine that was
-            never opened.
+            forgiveness. An engine that was never opened has no
+            :attr:`_handle <PCAP_CT._handle>` to close, and is skipped too.
 
         """
         if self._closed or self._handle is None:

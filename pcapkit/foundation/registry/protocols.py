@@ -754,7 +754,10 @@ def register_ipv4_option(code: 'IPv4_OptionNumber', meth: 'str | tuple[IPv4_Opti
     Args:
         code: :class:`IPv4 <pcapkit.protocols.internet.ipv4.IPv4>` option code as
             in :class:`~pcapkit.const.ipv4.option_number.OptionNumber`.
-        meth: Method name or callable to parse and/or construct the option.
+        meth: Method name, or a ``(parser, constructor)`` pair of callables, to
+            parse and construct the option. A name names the
+            ``_read_opt_*`` and ``_make_opt_*`` methods, and has to name
+            an existing ``_read_opt_*`` one.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.
             It should be a subclass of :class:`pcapkit.protocols.schema.internet.ipv4.Option`.
 
@@ -779,7 +782,10 @@ def register_hip_parameter(code: 'HIP_Parameter', meth: 'str | tuple[HIP_Paramet
     Args:
         code: :class:`~pcapkit.protocols.internet.hip.HIP` parameter code as
             in :class:`~pcapkit.const.hip.parameter.Parameter`.
-        meth: Method name or callable to parse and/or construct the parameter.
+        meth: Method name, or a ``(parser, constructor)`` pair of callables, to
+            parse and construct the parameter. A name names the
+            ``_read_param_*`` and ``_make_param_*`` methods, and has to name
+            an existing ``_read_param_*`` one.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the parameter.
             It should be a subclass of :class:`pcapkit.protocols.schema.internet.hip.Parameter`.
 
@@ -804,7 +810,10 @@ def register_hopopt_option(code: 'IPv6_Option', meth: 'str | tuple[HOPOPT_Option
     Args:
         code: :class:`~pcapkit.protocols.internet.hopopt.HOPOPT` option code as
             in :class:`~pcapkit.const.ipv6.option.Option`.
-        meth: Method name or callable to parse and/or construct the option.
+        meth: Method name, or a ``(parser, constructor)`` pair of callables, to
+            parse and construct the option. A name names the
+            ``_read_opt_*`` and ``_make_opt_*`` methods, and has to name
+            an existing ``_read_opt_*`` one.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.
             It should be a subclass of :class:`pcapkit.protocols.schema.internet.hopopt.Option`.
 
@@ -829,7 +838,10 @@ def register_ipv6_opts_option(code: 'IPv6_Option', meth: 'str | tuple[IPv6_Opts_
     Args:
         code: :class:`IPv6-Opts <pcapkit.protocols.internet.ipv6_opts.IPv6_Opts>`
             option code as in :class:`~pcapkit.const.ipv6.option.Option`.
-        meth: Method name or callable to parse and/or construct the option.
+        meth: Method name, or a ``(parser, constructor)`` pair of callables, to
+            parse and construct the option. A name names the
+            ``_read_opt_*`` and ``_make_opt_*`` methods, and has to name
+            an existing ``_read_opt_*`` one.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.
             It should be a subclass of :class:`pcapkit.protocols.schema.internet.ipv6_opts.Option`.
 
@@ -854,7 +866,10 @@ def register_ipv6_route_routing(code: 'IPv6_Routing', meth: 'str | tuple[IPv6_Ro
     Args:
         code: :class:`IPv6-Route <pcapkit.protocols.internet.ipv6_route.IPv6_Route>`
             data type code as in :class:`~pcapkit.const.ipv6.routing.Routing`.
-        meth: Method name or callable to parse and/or construct the data.
+        meth: Method name, or a ``(parser, constructor)`` pair of callables, to
+            parse and construct the data. A name names the
+            ``_read_data_type_*`` and ``_make_data_type_*`` methods, and has to name
+            an existing ``_read_data_type_*`` one.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the routing data.
             It should be a subclass of :class:`pcapkit.protocols.schema.internet.ipv6_route.RoutingType`.
 
@@ -879,7 +894,10 @@ def register_mh_message(code: 'MH_Packet', meth: 'str | tuple[MH_PacketParser, M
     Args:
         code: :class:`~pcapkit.protocols.internet.mh.MH`
             message type code as in :class:`~pcapkit.const.mh.packet.Packet`.
-        meth: Method name or callable to parse and/or construct the data.
+        meth: Method name, or a ``(parser, constructor)`` pair of callables, to
+            parse and construct the data. A name names the
+            ``_read_msg_*`` and ``_make_msg_*`` methods, and has to name
+            an existing ``_read_msg_*`` one.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the message type.
             It should be a subclass of :class:`pcapkit.protocols.schema.internet.mh.Packet`.
 
@@ -904,7 +922,10 @@ def register_mh_option(code: 'MH_Option', meth: 'str | tuple[MH_OptionParser, MH
     Args:
         code: :class:`~pcapkit.protocols.internet.mh.MH`
             option code as in :class:`~pcapkit.const.mh.option.Option`.
-        meth: Method name or callable to parse and/or construct the data.
+        meth: Method name, or a ``(parser, constructor)`` pair of callables, to
+            parse and construct the data. A name names the
+            ``_read_opt_*`` and ``_make_opt_*`` methods, and has to name
+            an existing ``_read_opt_*`` one.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.
             It should be a subclass of :class:`pcapkit.protocols.schema.internet.mh.Option`.
 
@@ -929,7 +950,10 @@ def register_mh_extension(code: 'MH_CGAExtension', meth: 'str | tuple[MH_Extensi
     Args:
         code: :class:`~pcapkit.protocols.internet.mh.MH`
             CGA extension code as in :class:`~pcapkit.const.mh.cga_extension.CGAExtension`.
-        meth: Method name or callable to parse and/or construct the data.
+        meth: Method name, or a ``(parser, constructor)`` pair of callables, to
+            parse and construct the data. A name names the
+            ``_read_ext_*`` and ``_make_ext_*`` methods, and has to name
+            an existing ``_read_ext_*`` one.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the CGA extension.
             It should be a subclass of :class:`pcapkit.protocols.schema.internet.mh.CGAExtension`.
 
@@ -1194,7 +1218,10 @@ def register_tcp_option(code: 'TCP_Option', meth: 'str | tuple[TCP_OptionParser,
     Args:
         code: :class:`~pcapkit.protocols.transport.tcp.TCP` option code as in
             :class:`~pcapkit.const.tcp.option.Option`.
-        meth: Method name or callable to parse and/or construct the option.
+        meth: Method name, or a ``(parser, constructor)`` pair of callables, to
+            parse and construct the option. A name names the
+            ``_read_mode_*`` and ``_make_mode_*`` methods, and has to name
+            an existing ``_read_mode_*`` one.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.
             It should be a subclass of :class:`pcapkit.protocols.schema.transport.tcp.Option`.
 
@@ -1219,7 +1246,10 @@ def register_tcp_mp_option(code: 'TCP_MPTCPOption', meth: 'str | tuple[TCP_MPOpt
     Args:
         code: Multipath :class:`~pcapkit.protocols.transport.tcp.TCP` option code as in
             :class:`~pcapkit.const.tcp.mp_tcp_option.MPTCPOption`.
-        meth: Method name or callable to parse and/or construct the option.
+        meth: Method name, or a ``(parser, constructor)`` pair of callables, to
+            parse and construct the option. A name names the
+            ``_read_mptcp_*`` and ``_make_mptcp_*`` methods, and has to name
+            an existing ``_read_mptcp_*`` one.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.
             It should be a subclass of :class:`pcapkit.protocols.schema.transport.tcp.MPTCP`.
 
@@ -1332,7 +1362,10 @@ def register_http_frame(code: 'HTTP_Frame', meth: 'str | tuple[HTTP_FrameParser,
     Args:
         code: :class:`HTTP/2 <pcapkit.protocols.application.httpv2.HTTP>` frame type
             code as in :class:`~pcapkit.const.http.frame.Frame`.
-        meth: Method name or callable to parse and/or construct the frame.
+        meth: Method name, or a ``(parser, constructor)`` pair of callables, to
+            parse and construct the frame. A name names the
+            ``_read_http_*`` and ``_make_http_*`` methods, and has to name
+            an existing ``_read_http_*`` one.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the frame.
             It should be a subclass of :class:`pcapkit.protocols.schema.application.httpv2.FrameType`.
 
@@ -1362,7 +1395,10 @@ def register_pcapng_block(code: 'PCAPNG_BlockType', meth: 'str | tuple[PCAPNG_Bl
     Args:
         code: :class:`PCAPNG <pcapkit.protocols.misc.pcapng.PCAPNG>` block type
             code as in :class:`~pcapkit.const.pcapng.block_type.BlockType`.
-        meth: Method name or callable to parse and/or construct the block.
+        meth: Method name, or a ``(parser, constructor)`` pair of callables, to
+            parse and construct the block. A name names the
+            ``_read_block_*`` and ``_make_block_*`` methods, and has to name
+            an existing ``_read_block_*`` one.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the block.
             It should be a subclass of :class:`pcapkit.protocols.schema.misc.pcapng.BlockType`.
 
@@ -1387,7 +1423,10 @@ def register_pcapng_option(code: 'PCAPNG_OptionType', meth: 'str | tuple[PCAPNG_
     Args:
         code: :class:`PCAPNG <pcapkit.protocols.misc.pcapng.PCAPNG>` option type
             code as in :class:`~pcapkit.const.pcapng.option_type.OptionType`.
-        meth: Method name or callable to parse and/or construct the option.
+        meth: Method name, or a ``(parser, constructor)`` pair of callables, to
+            parse and construct the option. A name names the
+            ``_read_option_*`` and ``_make_option_*`` methods, and has to name
+            an existing ``_read_option_*`` one.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the option.
             It should be a subclass of :class:`pcapkit.protocols.schema.misc.pcapng.Option`.
 
@@ -1412,8 +1451,10 @@ def register_pcapng_record(code: 'PCAPNG_RecordType', meth: 'str | tuple[PCAPNG_
     Args:
         code: :class:`PCAPNG <pcapkit.protocols.misc.pcapng.PCAPNG>` name
             resolution record type code as in :class:`~pcapkit.const.pcapng.record_type.RecordType`.
-        meth: Method name or callable to parse and/or construct the name
-            resolution record.
+        meth: Method name, or a ``(parser, constructor)`` pair of callables, to
+            parse and construct the name resolution record. A name names the
+            ``_read_record_*`` and ``_make_record_*`` methods, and has to name
+            an existing ``_read_record_*`` one.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the name resolution record.
             It should be a subclass of :class:`pcapkit.protocols.schema.misc.pcapng.NameResolutionRecord`.
 
@@ -1438,7 +1479,10 @@ def register_pcapng_secrets(code: 'PCAPNG_SecretsType', meth: 'str | tuple[PCAPN
     Args:
         code: :class:`PCAPNG <pcapkit.protocols.misc.pcapng.PCAPNG>` decryption
             secrets type code as in :class:`~pcapkit.const.pcapng.secrets_type.SecretsType`.
-        meth: Method name or callable to parse and/or construct the decryption secrets.
+        meth: Method name, or a ``(parser, constructor)`` pair of callables, to
+            parse and construct the decryption secrets. A name names the
+            ``_read_secrets_*`` and ``_make_secrets_*`` methods, and has to name
+            an existing ``_read_secrets_*`` one.
         schema: :class:`~pcapkit.protocols.schema.schema.Schema` class for the decryption secrets.
             It should be a subclass of :class:`pcapkit.protocols.schema.misc.pcapng.DSBSecrets`.
 

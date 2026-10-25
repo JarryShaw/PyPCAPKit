@@ -64,10 +64,10 @@ def _is_packet(packet: 'PySharkPacket') -> 'bool':
     records only.
 
     The marker is ``frame.encap_type`` on the record's :func:`_frame_layer`.
-    Wireshark adds it for ``REC_TYPE_PACKET`` records only:
-    :file:`epan/dissectors/packet-frame.c` lines 1001-1002 in 4.2.2, and 828-890
-    in 4.6.9. The summary line is not used, because it differs between those
-    versions. A record with no ``frame`` layer is not a packet either.
+    Wireshark adds it for ``REC_TYPE_PACKET`` records only, in ``dissect_frame``
+    of :file:`epan/dissectors/packet-frame.c`, in 4.2.2 and 4.6.9 alike. The
+    summary line is not used, because it differs between those versions. A
+    record with no ``frame`` layer is not a packet either.
 
     """
     frame = _frame_layer(packet)
@@ -119,8 +119,8 @@ class PyShark(EngineBase['PySharkPacket']):
         error rather than degrading to the default engine with a warning.
 
         **The interpreter.** |pyshark|_ 0.6 does
-        ``asyncio.get_event_loop_policy().get_event_loop()`` at
-        :file:`pyshark/capture/capture.py:183`, in a fresh interpreter with no
+        ``asyncio.get_event_loop_policy().get_event_loop()`` in
+        ``Capture._setup_eventloop``, in a fresh interpreter with no
         running loop. Measured: 3.10 and 3.11 return a loop
         silently, 3.12 returns one with a :exc:`DeprecationWarning`, and 3.14
         raises ``RuntimeError: There is no current event loop in thread

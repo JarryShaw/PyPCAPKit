@@ -105,9 +105,9 @@ else:
 # leaving no runtime trace at all. That dunder is *read* --
 # :meth:`pcapkit.corekit.infoclass.Info.__init_subclass__` and
 # :meth:`pcapkit.protocols.schema.schema.Schema.__init_subclass__` refuse to
-# derive from a class carrying it in its own ``__dict__`` -- so on 3.10, which is
-# in the CI matrix, keying the guard on 3.8 would leave the runtime check reading
-# an attribute nothing had set: a silent no-op on one supported interpreter and
+# derive from a class carrying it in its own ``__dict__`` -- so on 3.8 to 3.10,
+# all in the CI matrix, keying the guard on 3.8 would leave the runtime check
+# reading an attribute nothing had set: a silent no-op on those interpreters and
 # an enforced rule on the rest. ``typing_extensions`` is a declared dependency
 # for exactly ``python_version < '3.11'`` and its ``final`` sets the attribute on
 # every version, so asking for it below 3.11 costs nothing and closes the gap.

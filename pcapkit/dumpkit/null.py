@@ -49,7 +49,7 @@ class NotImplementedIO(DumperBase):
             name: name of current content block
 
         Returns:
-            The dumper class itself (to support chain calling).
+            The dumper itself (to support chain calling).
 
         """
         return self

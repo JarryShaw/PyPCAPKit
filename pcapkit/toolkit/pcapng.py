@@ -211,7 +211,7 @@ def tcp_traceflow(frame: 'PCAPNG', *, nanosecond: 'bool' = False) -> 'TF_TCP_Pac
     if (segment := tcp_segment(frame)) is not None:
         frame_info = cast('Packet', frame.info)
         data = TF_TCP_Packet(  # type: ignore[type-var]
-            protocol=frame.linktype,                      # data link type from global header
+            protocol=frame.linktype,                      # data link type of the block's interface
             index=frame_info.number,                      # frame number
             frame=block2frame(frame_info, nanosecond=nanosecond),
                                                           # extracted frame info

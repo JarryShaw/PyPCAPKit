@@ -96,6 +96,10 @@ reported as a separate incomplete datagram; this is intended (:issue:`1507`).
 
 Departures from the procedure above:
 
+* The timer is not set from ``TLB`` and ``TTL``. A buffer is abandoned a fixed
+  timeout after its first-arriving fragment, on the capture's clock -- 60
+  seconds by default, per :rfc:`1122#section-3.3.2` for IPv4 and
+  :rfc:`8200#section-4.5` for IPv6.
 * Only the final fragment's partial last ``RCVBT`` block is set. A non-final
   fragment carries a multiple of 8 octets, so one ending mid-block was cut or
   is malformed, and setting its last block would complete the datagram with
