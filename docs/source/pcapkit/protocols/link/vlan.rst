@@ -5,7 +5,7 @@ VLAN - 802.1Q/802.1ad VLAN Tag Types
 
 :mod:`pcapkit.protocols.link.vlan` contains
 :class:`~pcapkit.protocols.link.vlan.VLAN` only, an abstract base class holding
-the tag layout shared by every VLAN tag [*]_. The two concrete tags live in
+the tag layout shared by every VLAN tag [*]_. The concrete tags live in
 modules of their own:
 
 .. list-table::
