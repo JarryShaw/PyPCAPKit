@@ -17,7 +17,7 @@ import unittest
 from pcapkit.const.arp.hardware import Hardware
 from pcapkit.const.reg.ethertype import EtherType
 from pcapkit.protocols.link.arp import ARP
-from pcapkit.utilities.exceptions import ProtocolError
+from pcapkit.utilities.exceptions import FieldValueError, ProtocolError
 
 #: A protocol type that is neither IPv4 nor IPv6.
 NON_IP = EtherType.get(0x88B5)
@@ -50,6 +50,84 @@ class TestARPProtocolAddress(unittest.TestCase):
             with self.subTest(ptype=name):
                 parsed = ARP(data)
                 self.assertEqual(ARP.from_data(parsed.info).data, data)
+
+
+class TestARPNonIPAddressType(unittest.TestCase):
+    """A non-IP ``ptype`` checks the address type too. See #2166.
+
+    Only the IPv4 and IPv6 branches went through ``parse_ip_address``, so any
+    other ``ptype`` returned a :obj:`bool` or :class:`int` unchanged, and
+    :meth:`~pcapkit.protocols.link.arp.ARP.make` then failed with ``TypeError:
+    object of type 'bool' has no len()``.
+    """
+
+    def test_bool_raises_field_value_error(self) -> None:
+        cases = {
+            'non-IP': dict(ptype=NON_IP),
+            'IPv4 with plen 6': dict(ptype=EtherType.Internet_Protocol_version_4, plen=6),
+        }
+        for name, kwargs in cases.items():
+            for value in (True, False):
+                with self.subTest(case=name, value=value):
+                    with self.assertRaises(FieldValueError) as context:
+                        ARP(spa=value, tpa=value, **kwargs)
+                    self.assertIn('must not be a bool', str(context.exception))
+
+    def test_non_bytes_raises_protocol_error(self) -> None:
+        for value in (5, 1.5, None, ['a1', 'b2', 'c3']):
+            with self.subTest(value=value):
+                with self.assertRaises(ProtocolError):
+                    ARP(ptype=NON_IP, spa=value, tpa=value)
+
+    def test_bytes_and_bytearray_pack_as_given(self) -> None:
+        proto = ARP(ptype=NON_IP, spa=b'\xa1\xb2\xc3', tpa=bytearray(b'\xd4\xe5\xf6'),
+                    sha='01:23:45:67:89:ab', tha='fe:dc:ba:98:76:54')
+        self.assertEqual(proto.data, ARP_NON_IP)
+
+
+class TestARPHardwareAddressType(unittest.TestCase):
+    """The hardware address resolver checks the address type too. See #2166.
+
+    A :obj:`bool` or :class:`int` ``sha``/``tha`` reached the MAC pattern
+    (``TypeError: expected string or bytes-like object``) for Ethernet, and fell
+    through unchanged (``TypeError: object of type 'bool' has no len()``) for
+    any other ``htype``.
+    """
+
+    HTYPES = {'Ethernet': Hardware.Ethernet, 'non-Ethernet': Hardware.Fibre_Channel}
+
+    def test_bool_raises_field_value_error(self) -> None:
+        for name, htype in self.HTYPES.items():
+            for value in (True, False):
+                with self.subTest(htype=name, value=value):
+                    with self.assertRaises(FieldValueError) as context:
+                        ARP(htype=htype, sha=value, tha=value)
+                    self.assertIn('must not be a bool', str(context.exception))
+
+    def test_unsupported_type_raises_protocol_error(self) -> None:
+        for name, htype in self.HTYPES.items():
+            for value in (5, None, [1, 2, 3, 4, 5, 6], memoryview(b'\x01' * 6)):
+                with self.subTest(htype=name, value=value):
+                    with self.assertRaises(ProtocolError):
+                        ARP(htype=htype, sha=value, tha=value)
+
+    def test_supported_forms_still_pack(self) -> None:
+        raw = bytes.fromhex('0123456789ab')
+        cases = (
+            (Hardware.Ethernet, '01:23:45:67:89:ab'),
+            (Hardware.Ethernet, '01-23-45-67-89-ab'),
+            (Hardware.Ethernet, b'01:23:45:67:89:ab'),
+            (Hardware.Ethernet, bytearray(b'01:23:45:67:89:ab')),
+            (Hardware.Fibre_Channel, '0123456789ab'),
+            (Hardware.Fibre_Channel, '01:23:45:67:89:ab'),
+            (Hardware.Fibre_Channel, raw),
+            (Hardware.Fibre_Channel, bytearray(raw)),
+        )
+        for htype, value in cases:
+            with self.subTest(htype=htype.name, value=value):
+                proto = ARP(htype=htype, sha=value, tha=value)
+                self.assertEqual(proto.data[8:14], raw)
+                self.assertEqual(proto.data[18:24], raw)
 
 
 class TestARPLengthFields(unittest.TestCase):
