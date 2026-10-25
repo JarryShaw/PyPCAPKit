@@ -726,7 +726,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         Args:
             code: HIP parameter code.
-            meth: Method name or callable to parse and/or construct the parameter.
+            meth: Name ``X`` of the ``_read_param_X`` and ``_make_param_X``
+                methods, or a ``(parser, constructor)`` pair of callables, see
+                :attr:`__parameter__`.
 
         Warns:
             RegistryWarning: If a different entry is already registered for

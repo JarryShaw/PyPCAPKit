@@ -620,6 +620,7 @@ class Locator(Schema):
             'preferred': (7, 1),
         },
     )
+    #: Locator lifetime, in seconds.
     lifetime: 'int' = UInt32Field()
     #: Locator value.
     value: 'IPv6Address | LocatorData' = SwitchField(

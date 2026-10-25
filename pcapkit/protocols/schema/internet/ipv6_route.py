@@ -82,9 +82,11 @@ def ipv6_route_header_length(hdr_ext_len: 'int') -> 'int':
     route data's own ``.length``, which
     :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route.read` then
     subtracts from the outer packet length to find the next layer's length.
-    It is the read-side counterpart of
-    :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_hdr_ext_len`,
-    which does the inverse arithmetic on the write side.
+    Its inverse is the ``(length - 8) // 8`` that
+    :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_data`
+    passes back as ``hdr_ext_len``;
+    :meth:`~pcapkit.protocols.internet.ipv6_route.IPv6_Route._make_hdr_ext_len`
+    inverts :func:`ipv6_route_data_length` instead.
 
     Args:
         hdr_ext_len: raw ``Hdr Ext Len`` field value, as read off the wire.

@@ -83,6 +83,8 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
          - :class:`pcapkit.protocols.internet.mh.MH`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.HIP`
          - :class:`pcapkit.protocols.internet.hip.HIP`
+       * - :attr:`~pcapkit.const.reg.transtype.TransType.Shim6`
+         - :class:`pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.SCTP`
          - :class:`pcapkit.protocols.transport.sctp.SCTP`
        * - :attr:`~pcapkit.const.reg.transtype.TransType.OSPFIGP`

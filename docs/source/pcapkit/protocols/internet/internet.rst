@@ -30,6 +30,9 @@ which is a base class for internet layer protocols, e.g. :class:`~pcapkit.protoc
       :no-value:
    .. autoattribute:: _exthdr_depth
 
+.. autodata:: pcapkit.protocols.internet.internet._exthdr_rebuilt
+   :no-value:
+
 Extension Header Chains
 -----------------------
 

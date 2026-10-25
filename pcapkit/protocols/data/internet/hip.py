@@ -169,9 +169,9 @@ class ESPInfoParameter(Parameter):
     reserved: 'int'
     #: KEYMAT index.
     index: 'int'
-    #: Old SDI.
+    #: Old SPI.
     old_spi: 'int'
-    #: New SDI.
+    #: New SPI.
     new_spi: 'int'
 
     if TYPE_CHECKING:
@@ -338,7 +338,7 @@ class SolutionParameter(Parameter):
 class SEQParameter(Parameter):
     """Data model for HIP ``SEQ`` parameter."""
 
-    #: Unique ID.
+    #: Update ID.
     id: 'int'
 
     if TYPE_CHECKING:
@@ -787,7 +787,7 @@ class RouteDstParameter(Parameter):
     reserved: 'bytes'
     #: Flags.
     flags: 'Flags'
-    #: Destination address.
+    #: Destination HITs.
     hit: 'tuple[IPv6Address, ...]'
 
     if TYPE_CHECKING:
@@ -967,7 +967,7 @@ class RouteViaParameter(Parameter):
 class FromParameter(Parameter):
     """Data model for HIP ``FROM`` parameter."""
 
-    #: HIT address.
+    #: Address.
     address: 'IPv6Address'
 
     if TYPE_CHECKING:

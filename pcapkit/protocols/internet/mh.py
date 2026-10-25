@@ -1440,11 +1440,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             next: Next header type.
             next_default: Default value for next header type field.
             next_namespace: Namespace of next header type field.
-            next_reversed: Whether the bits of next header type field is reversed.
+            next_reversed: Whether the namespace of next header type field is reversed.
             type: Mobility Header type.
             type_default: Default value for Mobility Header type field.
             type_namespace: Namespace of Mobility Header type field.
-            type_reversed: Whether the bits of Mobility Header type field is reversed.
+            type_reversed: Whether the namespace of Mobility Header type field is reversed.
             reserved: Reserved octet after the MH type.
             chksum: Checksum.
             data: Message data.
@@ -1508,7 +1508,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Args:
             code: MH message type code.
-            meth: Method name or callable to parse and/or construct the message.
+            meth: Name ``X`` of the ``_read_msg_X`` and ``_make_msg_X``
+                methods, or a ``(parser, constructor)`` pair of callables, see
+                :attr:`__message__`.
 
         Warns:
             RegistryWarning: If a different entry is already registered for
@@ -1531,7 +1533,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Args:
             code: MH option code.
-            meth: Method name or callable to parse and/or construct the option.
+            meth: Name ``X`` of the ``_read_opt_X`` and ``_make_opt_X``
+                methods, or a ``(parser, constructor)`` pair of callables, see
+                :attr:`__option__`.
 
         Warns:
             RegistryWarning: If a different entry is already registered for
@@ -1554,7 +1558,9 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Args:
             code: CGA extension code.
-            meth: Method name or callable to parse and/or construct the extension.
+            meth: Name ``X`` of the ``_read_ext_X`` and ``_make_ext_X``
+                methods, or a ``(parser, constructor)`` pair of callables, see
+                :attr:`__extension__`.
 
         Warns:
             RegistryWarning: If a different entry is already registered for
@@ -4544,7 +4550,7 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Note:
             The ``S`` bit is the **last** bit of the option, not the first -- the
             reserved field precedes it rather than following it, which is the
-            other way round from every other flag in this module.
+            other way round from most flags in this module.
 
         Args:
             schema: Parsed option schema.
@@ -5433,8 +5439,11 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
             :rfc:`3376#section-4.2` IGMP structures. They belong to those protocols
             rather than to the mobility header, and each is self-describing through
             its own auxiliary-data length and source count, so they are recorded
-            opaquely here rather than half-decoded. :attr:`protocol` says which of
-            the two they are: ``143`` for MLDv2, ``131`` for MLDv1.
+            opaquely here rather than half-decoded.
+            :attr:`~pcapkit.protocols.data.internet.mh.DynamicIPMulticastSelectorOption.protocol`
+            says which of the two they are: ``143`` for MLDv2 and ``131`` for MLDv1,
+            or ``0x12``, ``0x16`` and ``0x22`` for IGMPv1 to IGMPv3
+            [:rfc:`7028#section-8`].
 
         Args:
             schema: Parsed option schema.

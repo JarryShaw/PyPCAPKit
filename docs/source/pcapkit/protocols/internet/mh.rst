@@ -30,6 +30,7 @@ Octets      Bits        Name                    Description
    :show-inheritance:
 
    .. autoproperty:: name
+   .. autoproperty:: alias
    .. autoproperty:: length
    .. autoproperty:: payload
    .. autoproperty:: protocol
