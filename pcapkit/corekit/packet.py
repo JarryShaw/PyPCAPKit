@@ -44,6 +44,8 @@ from pcapkit.utilities.exceptions import InfoError
 if TYPE_CHECKING:
     from typing import Any, Callable, ClassVar, Type
 
+    from pcapkit.corekit.multidict import OrderedMultiDict
+
 __all__ = ['DeferredPacket']
 
 
@@ -168,7 +170,7 @@ class DeferredPacket:
         self.__analyse__()
         return super().__repr__()
 
-    def to_dict(self) -> 'dict[str, Any]':
+    def to_dict(self) -> 'OrderedMultiDict[str, Any]':
         """Convert the instance into :obj:`dict`.
 
         Returns:
