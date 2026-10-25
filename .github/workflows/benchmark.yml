@@ -1,11 +1,12 @@
 name: Engine Benchmark
 
 # #2125: times every extraction engine on every interpreter the engines are
-# tested on, so the docs' Engine Support speed table no longer goes stale
-# between hand runs (#2109). Natively, through examples/benchmark/native.sh
-# rather than run.sh: a hosted runner is already a fresh VM per job, so
-# containers would add a build per version and no isolation, and a native run
-# makes macOS and Windows runners candidates too. One job measures every
+# tested on, so the speed tables of docs/source/engines.rst have a weekly
+# measurement to be copied from rather than waiting on a hand run (#2109).
+# Natively, through examples/benchmark/native.sh rather than run.sh: a hosted
+# runner is already a fresh VM per job, so containers would add a build per
+# version and no isolation, and a native run makes macOS and Windows runners
+# candidates too. One job measures every
 # version, since the per-version table's absolute times compare only within
 # one machine: by default `ubuntu-26.04-arm`, the fastest runner that
 # measures every environment and engine. What a native run does not pin --

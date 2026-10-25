@@ -185,9 +185,9 @@ jobs:
       # YAML anchors need actionlint 1.7.10 or later.
       #
       # The `-ignore` hides a false positive on `concurrency.queue`, a documented
-      # key (project-status.yml uses it) no actionlint release knows yet
-      # (rhysd/actionlint#657, fixed by rhysd/actionlint#654). Drop it once a
-      # release with the fix is pinned.
+      # key (project-status.yml uses it) that the pinned actionlint does not
+      # know (rhysd/actionlint#657, fixed by rhysd/actionlint#654). Drop it once
+      # a release with the fix is pinned.
       - name: actionlint
         id: actionlint
         if: ${{ !cancelled() }}

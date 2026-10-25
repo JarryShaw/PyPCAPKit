@@ -266,8 +266,8 @@ numbers, and it should not need overriding:
   instead, which is closer to what a user gets.)
 - `dpkt`, `scapy`, `pyshark` and `pypcapfile` are pure Python. `lxml`,
   `pyshark`'s only compiled dependency, publishes manylinux wheels for aarch64 on
-  every interpreter in the matrix (cp310 through cp314), so no column needs a compiler
-  for it.
+  every interpreter this was checked on (cp310 through cp314), so none of those
+  columns needs a compiler for it.
 - `pypcap` is the only thing that compiles, and nothing in it is
   architecture-specific: its pre-generated `pcap.c` contains no arch guards or
   inline assembly, and its `setup.py` branches on `sys.maxsize > 2**32` rather

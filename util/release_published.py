@@ -2,7 +2,7 @@
 """Whether a version's files are all on PyPI, and all on Anaconda (#888, #1633, #1922).
 
 :file:`.github/workflows/create-release.yml`'s ``version_check`` job runs it,
-after setup-python, in two forms:
+after setup-python, in these forms:
 
 ``python3 util/release_published.py pypi /tmp/pypi_release.json``
     The step "Check PyPI publish completeness". It expects a wheel for each

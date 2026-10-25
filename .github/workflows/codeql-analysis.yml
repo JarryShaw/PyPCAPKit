@@ -54,7 +54,7 @@ jobs:
   # posts nothing: its findings belong to the pull request, and the alerts the
   # report lists are the default branch's. The only job holding
   # `security-events: read` or `discussions: write`, and it runs no project
-  # code but the two util/ scripts.
+  # code but util/codeql_report.py and util/discussion_report.py.
   discussion:
     name: Post the CodeQL report
     needs: [ analyze ]

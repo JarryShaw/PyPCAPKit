@@ -10,10 +10,11 @@ script. A script that the steps run as ``python util/<script>.py`` has
 repository root, it imports ``util._actions``.
 
 The scripts run on the image's ``/usr/bin/python3``, or on a leg's own
-interpreter, which may be 3.7, GraalPy or a free-threaded build, and
-:file:`util/pip_install.py` is the step that installs anything at all. So this
-module is standard library only and keeps to 3.7's syntax; a project test,
-:file:`tests/project/test_actions_helper_2047.py`, holds it to both.
+interpreter, which may be an end-of-life KTLO one, GraalPy or a free-threaded
+build, and :file:`util/pip_install.py` is the step that installs anything at
+all. So this module is standard library only and keeps to 3.7's syntax; a
+project test, :file:`tests/project/test_actions_helper_2047.py`, holds it to
+both.
 
 The escaping is GitHub's, from the "Workflow commands for GitHub Actions"
 reference (https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-commands)

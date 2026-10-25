@@ -15,10 +15,10 @@ commit``. Completion of that workflow is itself the ``workflow_run`` trigger of
 back out of the tree, tags ``v<version>``, and publishes to PyPI and Anaconda.
 
 So in this repository a bump is not a preparatory step that a release later
-follows -- the bump *is* what causes the release, minutes later and with no human
-in between. That fact decides what this script is responsible for updating, and
-it is the reason ``date-released`` below is in scope rather than left to a
-release step that does not exist.
+follows -- the bump *is* what causes the release, with nothing in between but the
+``github-release`` environment's one approval (#887). That fact decides what this
+script is responsible for updating, and it is the reason ``date-released`` below
+is in scope rather than left to a release step that does not exist.
 
 ``CITATION.cff``
 ----------------
@@ -40,9 +40,8 @@ there indefinitely: "1.5.0b5, released on the day 1.5.0b4 was".
 
 Measured over the thirty most recent releases, the bump commit's UTC calendar date
 equals the PyPI upload's UTC calendar date **thirty times out of thirty**, median
-gap three minutes, and no bump in the project's history has taken more than a day
-to publish. The weekly cron fires at 10:05 UTC and publishes at 10:07, twelve
-hours clear of a date boundary. Hence UTC via :func:`datetime.datetime.now` with an
+gap three minutes. The weekly cron fires at 10:05 UTC, twelve hours clear of a
+date boundary. Hence UTC via :func:`datetime.datetime.now` with an
 explicit timezone, not :meth:`datetime.date.today`: seven of those thirty bumps
 were made late evening in US-Eastern, where a naive local date would have been a
 day behind the publish it was describing.
@@ -54,8 +53,11 @@ optimistic date for a release that never happened. That is not an argument for
 leaving the field stale, since a stale date is wrong in *every* one of the other
 eleven cases; it is an argument for eventually anchoring both fields to
 :file:`.github/workflows/create-release.yml`, which runs only when a publish is
-actually going out. Until then this is the better of the two available answers, and
-the ``version`` half is guarded by a test that fails when the file drifts from
+actually going out. That would also give the right date to a release approved on
+a later day than its bump, which this script dates by the bump: ``1.5.0b9``'s
+Create Release run was approved three days after it was created (#1634). Until
+then this is the better of the two available answers, and the ``version`` half
+is guarded by a test that fails when the file drifts from
 ``pcapkit.__version__`` -- which also covers the version changes made by hand,
 which never run this script at all. Those are about a quarter of the commits
 that have moved ``__version__`` on ``main`` over the project's life, and a larger

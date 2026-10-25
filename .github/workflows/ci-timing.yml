@@ -47,7 +47,7 @@ jobs:
   report:
     name: CI timing report
     runs-on: ubuntu-latest
-    # Three nested limits, so a slow week ends in a smaller report rather than
+    # Nested limits, so a slow week ends in a smaller report rather than
     # none (#1930): the script stops reading jobs at --budget-minutes and writes
     # what it has; the step's cap sits far enough above it for an in-flight
     # request to finish its retries; this one leaves room for setup and uploads.

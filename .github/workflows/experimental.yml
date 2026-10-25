@@ -608,9 +608,9 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
-  # #2060: the unit tier on Windows before the win-64 conda package is
-  # published, so its first release has had a test run. One leg, on `latest`,
-  # the newest CPython the conda builds target. Non-blocking by `experimental`'s
+  # #2060: the unit tier on Windows, the platform of the win-64 conda package,
+  # added so that its first release had a test run. One leg, on `latest`, the
+  # newest CPython the conda builds target. Non-blocking by `experimental`'s
   # mechanics: every step that can fail is `continue-on-error`, the long ones
   # have caps under the job's, `Experimental summary` reports each failure as a
   # warning, and the job-level guard covers a lost runner. None of
