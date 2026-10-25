@@ -54,8 +54,6 @@ __all__ = [
 #: A `DPKT`_ packet carries a :attr:`~object.__dict__`, so this is an ordinary
 #: attribute rather than anything exotic; the name is spelled out here so that
 #: nothing has to know it by hand.
-#:
-#: .. _DPKT: https://dpkt.readthedocs.io
 TIMESTAMP_ATTR = '__pcapkit_timestamp__'
 
 #: Attribute a frame's record octets are stashed under.
@@ -67,8 +65,6 @@ TIMESTAMP_ATTR = '__pcapkit_timestamp__'
 #: the wire octets out of this buffer instead, which
 #: :class:`~pcapkit.foundation.engines.dpkt.DPKT` attaches alongside
 #: :data:`TIMESTAMP_ATTR`.
-#:
-#: .. _DPKT: https://dpkt.readthedocs.io
 BUFFER_ATTR = '__pcapkit_buffer__'
 
 
