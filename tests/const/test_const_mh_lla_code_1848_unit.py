@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 """``LLACode`` names codes ``0`` and ``2`` as :rfc:`5568#section-6.4.3` does.
 
-GitHub issue #1848. Code ``0`` was misspelt ``Wilcard``, and code ``2``, the
-*Link-Layer Address of the MN*, was named ``MH``. Both are renamed, to
-``Wildcard`` and ``MN``, and neither old name survives as an alias, as the
-renames of #1090 and #1715 left none.
+GitHub issue #1848. Code ``0`` is ``Wildcard``, which the module misspelt
+``Wilcard``, and code ``2``, the *Link-Layer Address of the MN*, is ``MN``,
+which it named ``MH``. Neither misspelling is an alias, as #1090 and #1715
+keep no alias for a renamed member either.
 
 """
 import unittest
 
 
 class LLACodeRenameTests(unittest.TestCase):
-    """The RFC's names resolve both ways, and the shipped names are gone."""
+    """The RFC's names resolve both ways, and the misspellings resolve neither."""
 
     def test_code_0_is_wildcard(self) -> 'None':
         from pcapkit.const.mh.lla_code import LLACode

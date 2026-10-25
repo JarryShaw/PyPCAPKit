@@ -422,8 +422,8 @@ class TCPMPTCPJoinRoundTripUnitTests(unittest.TestCase):
         """Construct, pack, parse, and get the same values back, for all three forms.
 
         This is the cycle
-        :mod:`tests.protocols.test_option_roundtrip_unit` exercises generically and had
-        to record as an ``EXPECTED_FAILURES`` gap for MP_JOIN. Asserted per layout here
+        :mod:`tests.protocols.test_option_roundtrip_unit` exercises generically. Asserted
+        per layout here
         because that suite drives one case per registry code and so reaches only whichever
         form its fixture's flags select.
 

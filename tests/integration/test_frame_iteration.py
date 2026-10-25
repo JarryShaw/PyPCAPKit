@@ -110,18 +110,18 @@ def stack(frame: 'Any') -> 'list[Any]':
 class ExtractionLimitTests(EndToEndTestCase):
     """``layer`` and ``protocol``, which stop parsing part way up the stack.
 
-    Both were inert until GH-356. ``ProtocolBase.__init__`` read the limits from
-    ``_layer``/``_protocol``, while every producer -- the two engines building
-    the outermost protocol, all four ``_import_next_layer`` implementations
+    Guards against both being inert (GH-356): ``ProtocolBase.__init__`` reading
+    the limits from ``_layer``/``_protocol``, while every producer -- the engines
+    building the outermost protocol, every ``_import_next_layer`` implementation
     recursing into the next one, and the public
     ``pcapkit.extract(layer=..., protocol=...)`` that the CLI's ``-L``/``-P``
-    feed -- passed them without the underscore. They landed in ``**kwargs``, were
-    dropped, ``_sigterm`` stayed :data:`False` the whole way up, and the parse
-    always ran to the top of the stack whatever the caller asked for.
+    feed -- passes them without the underscore. They land in ``**kwargs``, are
+    dropped, ``_sigterm`` stays :data:`False` the whole way up, and the parse
+    always runs to the top of the stack whatever the caller asked for.
 
     So these tests assert on *where the parse stopped*, not on the option being
-    stored: a test that only checked ``extractor._exlyr`` would have passed
-    throughout the bug's lifetime.
+    stored: a test that only checked ``extractor._exlyr`` passes with the limits
+    inert.
 
     """
 
@@ -274,9 +274,9 @@ class ExtractionLimitTests(EndToEndTestCase):
 
         It builds its outermost protocol in
         ``pcapkit.foundation.engines.pcapng.PCAPNG.read_frame`` rather than
-        through ``PCAP.read_frame``, so it has to be checked separately: the
-        protochains for :file:`test.pcapng` were byte-identical to the unlimited
-        run while the limits were inert.
+        through ``PCAP.read_frame``, so it has to be checked separately: with the
+        limits inert, the protochains for :file:`test.pcapng` are byte-identical
+        to the unlimited run.
 
         """
         chains = {}
@@ -290,7 +290,7 @@ class ExtractionLimitTests(EndToEndTestCase):
         unlimited = chains[()]
         self.assertNotEqual(chains[(('layer', 'link'),)], unlimited)
         self.assertNotEqual(chains[(('layer', 'internet'),)], unlimited)
-        # Anything the unlimited run took past the link layer must be shorter now.
+        # Anything the unlimited run took past the link layer must be shorter here.
         self.assertTrue(any(len(short.split(':')) < len(long.split(':'))
                             for short, long in zip(chains[(('layer', 'link'),)], unlimited)))
 

@@ -2,10 +2,11 @@
 """Every registry's ``register`` refuses what its ``get`` refuses.
 
 GitHub issue #1816. :meth:`~pcapkit.corekit.enum.EnumRegistry.register` routes a
-new value through :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value`, but
-only ``AppType`` (#1792) overrode that hook, so everywhere else ``register``
-minted a value ``get`` refuses: ``Hardware.register(70000, 'x')`` minted, and
-``Hardware.get(70000)`` then returned the new member. Every registry overrides
+new value through :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value`. It
+guards against only ``AppType`` (#1792) overriding that hook, under which
+``register`` everywhere else mints a value ``get`` refuses:
+``Hardware.register(70000, 'x')`` mints, and ``Hardware.get(70000)`` then
+returns the new member. Every registry overrides
 the hook. A generated one uses the check its ``_missing_`` makes; ``TLSKeyLabel``
 and ``ExtensionHeader`` have no ``_missing_``, so they check the member type and
 the 8-bit Next Header field respectively.

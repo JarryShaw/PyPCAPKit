@@ -405,7 +405,7 @@ class PcapngPayloadOctetsTests(unittest.TestCase):
                 self.assertGreaterEqual(orig_len, incl_len)
 
         # 24 octets of global header, then 16 of record header and the payload per
-        # record, with nothing left over. Without the #646 fix this file is 104 octets
+        # record, with nothing left over. Without the #646 fix this file is 88 octets
         # for these four blocks -- the global header and four record headers, and not
         # one octet of payload -- which is both the wrong size and, worse, a size a
         # reader cannot tell is wrong until it has already lost frame sync.

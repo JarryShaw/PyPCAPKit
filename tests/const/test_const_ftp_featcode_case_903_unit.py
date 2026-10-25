@@ -89,11 +89,11 @@ import unittest
 from pcapkit.const.ftp.command import Command, FEATCode
 from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel
 
-#: The 5 placeholder ("pseudo FEAT code") members, registered in lower case
+#: The placeholder ("pseudo FEAT code") members, registered in lower case
 #: per RFC 5797 Section 2, with the ``<...>`` value form the crawler emits.
 PSEUDO_CODES = ('base', 'hist', 'secu', 'feat', 'nat6')
 
-#: The 10 genuine FEAT keywords, registered in upper case per the same section.
+#: The genuine FEAT keywords, registered in upper case per the same section.
 REAL_CODES = ('AUTH', 'HOST', 'UTF8', 'MDTM', 'MLST', 'PBSZ', 'PROT', 'REST',
               'SIZE', 'TVFS')
 
@@ -114,7 +114,7 @@ class FEATCodeCaseInsensitiveLookupTests(unittest.TestCase):
                 self.assertIs(FEATCode.get(key), FEATCode.base)  # type: ignore[attr-defined]
 
     def test_every_placeholder_resolves_from_either_case(self) -> 'None':
-        """All 5 of them, not just the one the issue names."""
+        """All of them, not just the one the issue names."""
         for name in PSEUDO_CODES:
             member = FEATCode[name]
             for key in (name, name.upper(), name.capitalize()):
@@ -155,8 +155,8 @@ class FEATCodeCaseInsensitiveLookupTests(unittest.TestCase):
                          (FEATCode.AUTH,))  # type: ignore[attr-defined]
 
     def test_exact_hits_are_unchanged_for_every_member(self) -> 'None':
-        """The fold is a fallback: an exact name or value still resolves the
-        way it did before, through the base, for all 15 members."""
+        """The fold is a fallback: an exact name or value resolves through
+        the base, for every member."""
         self.assertEqual(len(FEATCode._member_names_), 15)
         for member in FEATCode:
             with self.subTest(member=member.name):

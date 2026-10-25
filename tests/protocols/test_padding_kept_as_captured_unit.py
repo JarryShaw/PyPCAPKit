@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """Padding and reserved octets held by a ``PaddingField`` rebuild as captured.
 
-This guards against GitHub issue #1223, where
-:class:`~pcapkit.corekit.fields.strings.PaddingField` packed zeros whatever it
-had read, so non-zero padding or reserved octets parsed silently and came back
+This guards against GitHub issue #1223: a
+:class:`~pcapkit.corekit.fields.strings.PaddingField` that packs zeros whatever
+it has read, so non-zero padding or reserved octets parse silently and come back
 zeroed. The field packs the octets it was given, and zeros when it has none,
 which is what a freshly built packet writes.
 Each protocol below carries the octets through its reader, data model and
@@ -59,7 +59,7 @@ FRAMES = {
                                  '138813891122334400000000' '06000009' '00ff0005aaeeeeee'),
 }
 
-#: HIP parameters whose reserved octets are ``ff`` (the 12 sites listed on
+#: HIP parameters whose reserved octets are ``ff`` (the sites listed on
 #: #1223), and one whose trailing padding is not zero.
 HIP_PARAMS = {
     'R1_COUNTER': '0081000cffffffff00000000aabbccdd',
@@ -110,13 +110,13 @@ class TestPaddingKeptAsCaptured(unittest.TestCase):
         self.assertEqual(PaddingField(length=2).pack(None, {}), bytes(2))
 
     def test_wrong_width_padding_is_zero_filled_or_truncated(self) -> None:
-        """A ``ConditionalField``-wrapped padding keeps ``main``'s ``struct`` semantics."""
+        """A ``ConditionalField``-wrapped padding zero-fills or truncates as ``struct`` does."""
         from pcapkit.const.http.frame import Frame
         from pcapkit.protocols.application.httpv2 import HTTP
         from pcapkit.protocols.link.l2tpv2 import L2TPv2
 
         # the L2TPv2 ``padding`` contract: zero-filled or truncated to ``offset``
-        # octets (bytes measured on ``main``)
+        # octets (bytes measured)
         for padding, wire in ((b'\xaa', '0202000000000003aa00007878'),
                               (b'\xaa\xbb\xcc\xdd\xee', '0202000000000003aabbcc7878'),
                               (None, '02020000000000030000007878')):
@@ -131,7 +131,7 @@ class TestPaddingKeptAsCaptured(unittest.TestCase):
                 self.assertEqual(HTTP(type=Frame.DATA, sid=1, frame=frame).data.hex(), wire)
 
     def test_makers_tolerate_a_data_model_without_the_new_fields(self) -> None:
-        """A stand-in lacking the new attributes rebuilds with zero padding."""
+        """A stand-in lacking the padding attributes rebuilds with zero padding."""
         from types import SimpleNamespace
 
         from pcapkit.const.ipv6.option import Option

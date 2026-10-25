@@ -275,11 +275,11 @@ class AppTypeSplitTests(unittest.TestCase):
         the sweep over every member that pins this for each of them, aliased or
         not, and
         ``test_the_new_dunders_are_byte_identical_to_the_percent_form`` for the
-        sample #1062 formats against the pre-#798 form.
+        sample #1062 formats against the ``%``-formatted form.
         """
         from pcapkit.const.reg.apptype import TCP
 
-        # No aliases: byte-identical to the pre-#807 form.
+        # No aliases: no suffix at all.
         self.assertEqual(repr(TCP.finger), '<TCP.finger: 79 [tcp]>')
         self.assertEqual(str(TCP.finger), 'finger [79 - tcp]')
 
@@ -335,7 +335,7 @@ class AppTypeSplitTests(unittest.TestCase):
         self.assertEqual(SCTP.get(80).aliases, ())
 
     def test_register_alias_is_reachable_by_its_sanitised_identifier(self) -> None:
-        """The finding this issue's second round fixed, pinned directly.
+        """An alias is reachable by subscription on its sanitised name.
 
         An alias whose own name does not resolve through subscription is not
         much of an alias -- ``TCP['http-alt-test']`` is a ``KeyError`` because
@@ -385,9 +385,9 @@ class AppTypeSplitTests(unittest.TestCase):
         """A name with nothing left after sanitising, or a Python cannot start with.
 
         Refused explicitly rather than falling back to a synthetic identifier
-        such as the port-and-counter scheme this method used before this
-        round -- a fallback here would just recreate the original defect of
-        an alias unreachable by anything resembling its own name.
+        such as a port-and-counter scheme -- a fallback here would just
+        recreate the defect of an alias unreachable by anything resembling its
+        own name.
         """
         from pcapkit.const.reg.apptype import TCP
 
@@ -525,7 +525,7 @@ class AppTypeSplitTests(unittest.TestCase):
             AppType.get(80)
 
     def test_a_service_name_is_not_a_port_lookup(self) -> None:
-        """GitHub issue #734's junk-minting path is gone rather than fixed.
+        """A service name is refused rather than resolved (GitHub issue #734).
 
         The string branch #734 reported tested ``key in __members_proto__``, which is keyed
         by transport protocol, so a name never matched and

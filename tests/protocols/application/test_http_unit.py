@@ -771,10 +771,10 @@ class HTTPUnitTests(unittest.TestCase):
         reserved bit clear" test, because that is what misfires on binary HTTP/1
         bodies. So a bare frame falls through to the trial parse, where the
         HTTP/2 parser's own length and type consistency rules decide: a
-        self-consistent frame is read as HTTP/2 (unchanged behaviour, pinned so
-        the new identification step is not mistaken for a replacement of the
-        fall-through), and one whose declared length its buffer does not back is
-        refused rather than answered.
+        self-consistent frame is read as HTTP/2 (pinned so the identification
+        step is not mistaken for a replacement of the fall-through), and one
+        whose declared length its buffer does not back is refused rather than
+        answered.
 
         """
         import io
@@ -2567,11 +2567,10 @@ class HTTPUnitTests(unittest.TestCase):
     def test_make_http_data_restores_end_stream_from_the_frame(self) -> None:
         """``_make_http_data`` must read ``END_STREAM`` back off ``frame.flags``.
 
-        It was the only one of the six ``_make_http_*`` methods that never
-        looked at ``frame.flags``, so a DATA frame parsed with ``END_STREAM``
-        set rebuilt with the bit clear and a parse -> reconstruct round trip
-        lost it silently (#652). ``PADDED`` survived only because it is
-        re-derived from ``pad_len``.
+        Guards against it ignoring ``frame.flags``: a DATA frame parsed with
+        ``END_STREAM`` set would rebuild with the bit clear, and a parse ->
+        reconstruct round trip would lose it silently (#652). ``PADDED`` survives either way,
+        because it is re-derived from ``pad_len``.
 
         """
         import io
@@ -2658,7 +2657,7 @@ class HTTPUnitTests(unittest.TestCase):
             with self.assertRaises(TypeError):
                 FrameType.Flags(0)
 
-        # The five frame schemas that inherit that memberless enum therefore
+        # The frame schemas that inherit that memberless enum therefore
         # keep the plain ``int`` -- and must not raise on the way.
         unassigned = UnassignedFrame(data=b'x')
         unassigned.post_process({

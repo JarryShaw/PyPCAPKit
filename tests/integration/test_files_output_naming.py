@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 """What ``files=True`` actually writes to disk.
 
-#358: every per-frame report landed with two dots before its extension --
-``Frame 1..json``, ``Global Header..txt``, ``Section Header 1..plist``. The name
-was composed as ``f'{name}.{ext._fext}'`` while ``_fext`` still carried its own
-leading dot, so the separator was supplied twice.
+#358: guards against every per-frame report landing with two dots before its
+extension -- ``Frame 1..json``, ``Global Header..txt``, ``Section Header
+1..plist`` -- as it does when the name is composed as ``f'{name}.{ext._fext}'``
+while ``_fext`` carries its own leading dot, supplying the separator twice.
 
 The unit-tier half of this lives in :file:`tests/foundation/test_extraction.py`
 and pins :meth:`Extractor.make_name
 <pcapkit.foundation.extraction.Extractor.make_name>` to returning a bare
 extension. This module checks the thing the user sees: the names on disk, for
 both engines and every format that reaches a file. A test of ``make_name`` alone
-would keep passing if an engine started supplying the dot twice again, so the
+would keep passing if an engine supplied the dot twice, so the
 two are complementary rather than redundant.
 
 """
@@ -86,11 +86,11 @@ class FilesOutputNamingTests(EndToEndTestCase):
                     self.assertNotIn('..', name)
 
     def test_single_file_output_still_carries_exactly_one_dot(self) -> None:
-        """The non-``files`` branch, which was already right and must stay right.
+        """The non-``files`` branch, which must keep exactly one dot.
 
-        ``make_name`` appends the extension itself here, so moving the dot out of
-        ``_fext`` had to move it into this branch's f-string; a mistake would
-        show up as ``report`` with no suffix, or ``report..json``.
+        ``make_name`` appends the extension itself here, with the dot in this
+        branch's f-string rather than in ``_fext``; a mistake would show up as
+        ``report`` with no suffix, or ``report..json``.
 
         """
         for fmt, suffix in FORMATS.items():

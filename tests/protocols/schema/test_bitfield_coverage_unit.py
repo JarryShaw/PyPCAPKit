@@ -43,8 +43,8 @@ __tier__ = 'LATEST'
 
 #: Bit fields allowed to leave bits unnamed, as ``schema.field`` (relative to
 #: :mod:`pcapkit.protocols.schema`) -> the ``(start, length)`` bit ranges left
-#: uncovered. Every known site has been fixed, so this is empty, and it must
-#: stay empty unless a new gap is filed as a GitHub issue. An entry must match
+#: uncovered. It is empty, and must stay empty unless a new gap is filed as a
+#: GitHub issue. An entry must match
 #: exactly: once its site is fixed the entry has to go, and a site that changes
 #: shape has to be looked at again.
 #:

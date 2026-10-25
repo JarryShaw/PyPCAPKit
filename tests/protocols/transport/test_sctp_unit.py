@@ -34,18 +34,19 @@ HAS_SCAPY = importlib.util.find_spec('scapy') is not None
 def bitfield_packs_zero_bits() -> bool:
     """Whether :class:`~pcapkit.corekit.fields.strings.BitField` packs a clear bit.
 
-    ``BitField.pre_process`` seeds its working buffer with NUL bytes and then
-    writes the ASCII characters ``b'0'`` and ``b'1'`` into it, before collapsing
-    the buffer by truth-testing each byte -- and ``b'0'`` is ``0x30``, which is
-    truthy. Every named bit therefore comes out **set** regardless of its value,
-    so a flag word constructed with any bit clear does not survive a round trip.
+    It guards against a ``BitField.pre_process`` that seeds its working buffer
+    with NUL bytes and then writes the ASCII characters ``b'0'`` and ``b'1'``
+    into it, before collapsing the buffer by truth-testing each byte -- ``b'0'``
+    is ``0x30``, which is truthy, so every named bit comes out **set** regardless
+    of its value, and a flag word constructed with any bit clear does not survive
+    a round trip.
 
-    That is a library-wide defect in :mod:`pcapkit.corekit`, not an SCTP one, and
-    it is tracked separately. The tests that need clear bits on the
-    *construction* side are gated on this probe so that they run of their own
-    accord wherever :mod:`pcapkit.corekit` packs clear bits correctly. Parsing is unaffected --
-    ``BitField.post_process`` is correct -- so the wire-conformance and scapy
-    cross-check tests below exercise mixed flags unconditionally.
+    That is a library-wide concern of :mod:`pcapkit.corekit`, not an SCTP one.
+    The tests that need clear bits on the *construction* side are gated on this
+    probe, so that they run wherever :mod:`pcapkit.corekit` packs clear bits
+    correctly. Parsing does not depend on it -- ``BitField.post_process`` reads
+    the bits separately -- so the wire-conformance and scapy cross-check tests
+    below exercise mixed flags unconditionally.
 
     """
     from pcapkit.corekit.fields.strings import BitField
@@ -163,9 +164,9 @@ class SCTPUnitTests(unittest.TestCase):
     def test_constructed_ports_carry_the_same_type_as_parsed_ones(self) -> None:
         """A bare :obj:`int` port is resolved on construction, not left as it is.
 
-        SCTP never tripped over this the way TCP and UDP did -- it keys its next
-        layer on the DATA chunk's PPID rather than on a port, so it never read
-        ``srcport.port`` off the schema -- but it did leave a constructed packet
+        SCTP keys its next layer on the DATA chunk's PPID rather than on a port,
+        so it never reads ``srcport.port`` off the schema the way TCP and UDP
+        do -- but an unresolved port would still leave a constructed packet
         holding an :obj:`int` where a parsed one holds an
         :class:`~pcapkit.const.reg.apptype.AppType`.
 
@@ -245,8 +246,8 @@ class SCTPUnitTests(unittest.TestCase):
         from pcapkit.const.sctp.chunk import Chunk
         from pcapkit.const.sctp.parameter import Parameter
 
-        # Every flag in the flag-carrying chunks is set, so that the tests are
-        # not blocked on the BitField construction defect described by
+        # Every flag in the flag-carrying chunks is set, so that these tests do
+        # not depend on the BitField construction probe
         # :func:`bitfield_packs_zero_bits`; mixed flags are covered on the
         # parsing side by the wire-conformance and scapy tests below, and on the
         # construction side by the gated test that follows this one.

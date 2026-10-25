@@ -61,7 +61,7 @@ from tests._support import reimport_once_per_class
 #: on 2026-09-27). Row order matches the live table: the wide IEEE802.3 range
 #: first, the narrower Old Xerox range it contains second, then the
 #: unrelated Xyplex range -- exactly the order that reproduces the defect
-#: against unfixed code.
+#: without the fix.
 ETHERTYPE_862_FIXTURE_CSV = [
     'Ethertype (decimal),Ethertype (hex),Exp. Ethernet (decimal),Exp. Ethernet (octal),Description,Reference',
     '0000-1500,0000-05DC,-,-,IEEE802.3 Length Field,[IEEE Std 802.3]',
@@ -167,10 +167,10 @@ class EtherTypeGeneratorRangeOrderingTests(unittest.TestCase):
         # Reordering must not lose either range or swap their bodies.
         #
         # NOTE: the second assertion checks for the ``_unregistered_member``
-        # form, not ``extend_enum``: #775's final round converts every range
-        # branch on this crawler -- see
+        # form, not ``extend_enum``: every range branch on this crawler
+        # resolves through ``_unregistered_member`` (#775) -- see
         # tests/const/test_const_enum_no_mint.py's own docstring. The
-        # hex-suffixed name is kept, because PR #878 scoped that conversion
+        # hex-suffixed name is kept, because PR #878 scopes that conversion
         # as not registering rather than renaming.
         _enum, miss = self._process_fixture()
         text = '\n'.join(miss)
@@ -203,11 +203,11 @@ class EtherTypeGeneratorGeneralOrderingTests(unittest.TestCase):
     def test_nested_ranges_are_ordered_narrowest_first(self) -> None:
         """Regression pin against two specific wrong implementations of
         "insert ahead of a containing range" -- not a general correctness
-        proof for arbitrary nesting depth or arrival order. That exhaustive
+        proof for arbitrary nesting depth or arrival order. An exhaustive
         proof (every arrival order at 3 and 4 levels, plus randomised
-        fuzzing) was done separately in the review of PR #865, #862's fix,
-        and does not live in this repository as a test; this method only
-        pins the two specific shortcuts that review considered and rejected.
+        fuzzing) does not live in this repository as a test (see PR #865,
+        #862's fix); this method only pins the two specific shortcuts PR #865
+        considers and rejects.
 
         Against these three nested ranges (OUTER contains MIDDLE contains
         INNER), the correct result is always ``[INNER, MIDDLE, OUTER]``, but

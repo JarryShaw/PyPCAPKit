@@ -141,7 +141,7 @@ class VendorMissingBodyTests(unittest.TestCase):
 
         Not every emitted line has to ``return`` -- the range-guarded shape
         in :meth:`pcapkit.vendor.default.Vendor.process` legitimately emits
-        an ``if`` header and a ``#:`` comment before its ``return``, and 53
+        an ``if`` header and a ``#:`` comment before its ``return``, and many
         crawlers do exactly that (see the module docstring). What has to be
         true is narrower: a hard-coded body must *end* on a ``return``, so
         control never falls off the end of ``miss`` into a fallthrough.

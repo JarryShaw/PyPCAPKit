@@ -68,7 +68,7 @@ class IPv4UnitTests(unittest.TestCase):
     def test_ipv4_make_data_scales_offset_and_defaults_missing_options(self) -> None:
         """Regression test for #494.
 
-        Two defects live in :meth:`IPv4._make_data
+        Guards against two defects in :meth:`IPv4._make_data
         <pcapkit.protocols.internet.ipv4.IPv4._make_data>`: the fragment
         ``offset`` was handed back in octets to a parameter that
         :meth:`IPv4.make <pcapkit.protocols.internet.ipv4.IPv4.make>` takes in
@@ -308,13 +308,12 @@ class IPv4UnitTests(unittest.TestCase):
     def test_schema_pack_packs_a_second_real_protocol_as_payload(self) -> None:
         """A real protocol nested in another one, not ``Raw`` and not ``NoPayload``.
 
-        This closes a hole in the three tests above rather than describing a
-        defect of its own. Every one of them hands the payload field a
+        This closes a hole in the tests above rather than describing a defect
+        of its own. Every one of them hands the payload field a
         :class:`~pcapkit.protocols.misc.raw.Raw` or a
         :class:`~pcapkit.protocols.misc.null.NoPayload`, because those are what
-        *parsing* yields, so between them they exercise exactly two of the more
-        than forty :class:`~pcapkit.protocols.protocol.ProtocolBase` descendants
-        the widened
+        *parsing* yields, so between them they exercise exactly two of the
+        :class:`~pcapkit.protocols.protocol.ProtocolBase` descendants the
         check in :meth:`Schema.pack
         <pcapkit.protocols.schema.schema.Schema.pack>` has to accept. That is
         enough coverage to be defeated by a fix that is not one: replacing the
@@ -324,10 +323,9 @@ class IPv4UnitTests(unittest.TestCase):
 
            elif isinstance(data, (Protocol, Raw, NoPayload)):
 
-        -- special-casing precisely the classes the tests use -- passes all four
-        of them, measured, while leaving the general defect in place for the
-        other protocols. #536's own reviewer found that by falsification, and
-        this test is what makes the shortcut fail.
+        -- special-casing precisely the classes the tests use -- passes all of
+        them, measured, while leaving the general defect in place for the
+        other protocols. This test is what makes the shortcut fail.
 
         So the payload here is a ``UDP``, and the assertions are chosen to be
         unsatisfiable by any finite list of special cases:
@@ -556,10 +554,9 @@ class IPv4UnitTests(unittest.TestCase):
         ``IndexError: list assignment index out of range`` -- not an in-library
         exception, and out of a ``_make_opt_*`` helper.
 
-        That is why :file:`examples/generators/options.py` passed *two*
-        authorities to this option; with the arithmetic fixed, one is a
-        legitimate argument again, which is the thing this test is really
-        asserting.
+        One authority is a legitimate argument, which is the thing this test is
+        really asserting; :file:`examples/generators/options.py` passes two as a
+        coverage choice.
 
         The same off-by-one under-sized by a whole octet at every exact multiple
         of eight, which is checked here too. No shipped enumeration member has
@@ -612,22 +609,22 @@ class IPv4UnitTests(unittest.TestCase):
 
         ``Enum_ProtectionAuthority`` member ``7`` is named
         ``Field_Termination_Indicator`` -- it is not an authority at all, yet it
-        was a member of the enumeration the writer accepted as one. Passing it
-        produced an option encoding zero authorities.
+        is a member of the enumeration, so a writer accepting every member as an
+        authority encodes an option with zero authorities for it.
 
-        The writer and the reader disagreed about whether index 7 is data, and
-        this test records which of the two won. ``_read_opt_sec`` loops over
+        The writer and the reader must agree about whether index 7 is data, and
+        this test records which of the two wins. ``_read_opt_sec`` loops over
         ``range(7)`` per octet and maps octet ``base`` bit ``bit`` to authority
         ``base * 8 + bit``, so the authority numbering it produces *skips* 7, 15
         and 23 -- those positions are termination bits and nothing else. The
-        reader is right and the writer was wrong, so the rejection is on the
-        write side and ``range(7)`` is left alone; widening it would make the
-        reader report a terminator as an authority.
+        reader is right, so the rejection is on the write side and
+        ``range(7)`` is left alone; widening it would make the reader report a
+        terminator as an authority.
 
         Rejecting the whole congruence class rather than only the named ``7``
         follows from that: 15 and 23 are termination bits for exactly the same
         reason and are just as undeliverable, they simply have no name in the
-        enumeration yet. Asserting 15 is what stops the fix being read as a
+        enumeration. Asserting 15 is what stops the fix being read as a
         special case of one value.
 
         """
@@ -727,8 +724,8 @@ class IPv4UnitTests(unittest.TestCase):
                          option)
 
         # Four octets is already 32-bit aligned, so the padding branch is not
-        # reached at all -- no NOP and no EOOL, where before there was one of
-        # each.
+        # reached at all -- no NOP and no EOOL, where a six-octet SID draws one
+        # of each.
         options, total_length = proto._make_ipv4_options(parsed.info.options)
         self.assertEqual([type(entry).__name__ for entry in options],
                          ['SIDOption'])
@@ -760,9 +757,8 @@ class IPv4UnitTests(unittest.TestCase):
         as the ``1`` it is, so #500's guard in
         :meth:`_IPAddressField.pre_process
         <pcapkit.corekit.fields.ipaddress._IPAddressField.pre_process>` is never
-        reached. This was the fifth site of that defect -- #481, #500, #539 and
-        #540 are the first four -- and the fix is the same one #539 used for its
-        seven: route the conversion through
+        reached. It is the same defect as #481, #500, #539 and #540, with the
+        same fix #539 used: route the conversion through
         :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`.
 
         Both halves are asserted, because a guard that rejects everything is not a
@@ -929,11 +925,8 @@ class IPv4UnitTests(unittest.TestCase):
         :class:`~pcapkit.utilities.warnings.UnknownFieldWarning` and carries on, so
         every timestamp was dropped in silence and ``ts_data`` stayed bound to its
         class-level ``ListField``, which ``post_process`` then tried to iterate:
-        ``TypeError: 'ListField' object is not iterable``. The IPv4 Timestamp
-        option was unbuildable through ``make`` for as long as that stood, which is
-        what the ``ipv4-option/TS`` entry of
-        :data:`tests.protocols.test_option_roundtrip_unit.EXPECTED_FAILURES`
-        recorded.
+        ``TypeError: 'ListField' object is not iterable``. Without the fix the
+        IPv4 Timestamp option cannot be built through ``make`` at all.
 
         The absence of the warning is asserted as well as the presence of the
         timestamps, because the warning is the whole reason the defect was silent:
@@ -1085,10 +1078,10 @@ class IPv4UnitTests(unittest.TestCase):
             options=[(OptionNumber.SID, {'sid': 5})],
             payload=b'data',
         )
-        # 20 of header, the 4-octet SID option, and 4 of payload. This read 32
-        # with ihl=7 while ``SIDOption.sid`` was 32 bits wide: the option packed
-        # to six octets, which is not 32-bit aligned, so the option area picked
-        # up a NOP and an EOOL and grew to eight. See #534.
+        # 20 of header, the 4-octet SID option, and 4 of payload. Without the
+        # #534 fix this reads 32 with ihl=7: a 32-bit ``SIDOption.sid`` packs the
+        # option to six octets, which is not 32-bit aligned, so the option area
+        # picks up a NOP and an EOOL and grows to eight.
         self.assertEqual(made.length, 28)
         self.assertEqual(made.vihl['ihl'], 6)
         self.assertEqual(made.ttl, 64)
@@ -1114,9 +1107,9 @@ class IPv4UnitTests(unittest.TestCase):
             registry[OptionNumber.EOOL] = original
 
         # An unregistered code carries no entry, so registering one is not an
-        # overwrite. The setattr form could not tell the two apart: it keyed the
-        # warning on ``hasattr(cls, f'_read_opt_{name}')``, which is true of every
-        # shipped handler as well as of anything a user had already installed.
+        # overwrite. A setattr form cannot tell the two apart: keyed on
+        # ``hasattr(cls, f'_read_opt_{name}')``, its warning fires for every
+        # shipped handler as well as for anything a user installed.
         custom = OptionNumber.get(31)
         self.assertNotIn(custom, registry)
         try:
@@ -1143,11 +1136,11 @@ class IPv4UnitTests(unittest.TestCase):
         :data:`OptionConstructor` declare -- ``(schema, *, options)`` and
         ``(code, option=None, **kwargs)`` -- i.e. as plain callables rather than
         as methods with an implicit ``self``. That is the calling convention
-        every other dispatch family uses, and the reason the registry form
-        replaced ``setattr``: installing the callable on the class made it a
-        descriptor, so dispatch passed ``self`` as the first positional argument
-        and a handler written to the declared signature could not be called at
-        all.
+        every other dispatch family uses, and the reason dispatch goes through
+        the registry rather than ``setattr``: a callable installed on the class
+        becomes a descriptor, so dispatch would pass ``self`` as the first
+        positional argument and a handler written to the declared signature
+        could not be called at all.
 
         """
         from pcapkit.const.ipv4.option_number import OptionNumber
@@ -1211,10 +1204,11 @@ class IPv4UnitTests(unittest.TestCase):
     def test_ipv4_option_registry_covers_every_shipped_handler(self) -> None:
         """Every ``_read_opt_*`` / ``_make_opt_*`` pair must be reachable.
 
-        The setattr form derived the handler name from ``code.name.lower()``, so
-        a handler was reachable by construction and "what is registered?" had no
-        direct answer. Under the registry the mapping is explicit data, which
-        means a handler added without its registry entry becomes dead code --
+        A setattr form, deriving the handler name from ``code.name.lower()``,
+        makes a handler reachable by construction and leaves "what is
+        registered?" with no direct answer. In the registry the mapping is
+        explicit data, which means a handler added without its registry entry
+        becomes dead code --
         this pins the two sides together.
 
         """
@@ -1248,9 +1242,8 @@ class IPv4UnitTests(unittest.TestCase):
         :attr:`IPv4.__option__ <pcapkit.protocols.internet.ipv4.IPv4.__option__>`
         is a :class:`collections.defaultdict` on a class attribute shared by
         every instance in the process, so ``registry[code]`` would insert each
-        code it missed -- the leak #428 swept out of the sixteen registries that
-        already existed. This one is new, so the guard has to be pinned here too:
-        the reads go through
+        code it missed -- the leak #428 guards the other registries against, so
+        it is pinned here too: the reads go through
         :meth:`~pcapkit.protocols.protocol.ProtocolBase._lookup_registry`.
 
         Option number 31 is unassigned in IANA's registry and 134 is ``CIPSO``,
@@ -1379,7 +1372,7 @@ class IPv4UnitTests(unittest.TestCase):
                          ['bytes', 'SIDOption'])
 
         # Which is why the alignment branch gets a case of its own rather than
-        # riding along on SID's old width. The padding terminator is an EOOL
+        # relying on SID to reach it. The padding terminator is an EOOL
         # *option*, not the bare wire code -- that is what #506 fixed. A SEC
         # option carrying a two-octet bitmap packs to five, so it is one: three
         # octets of padding, two NOPs and the EOOL.

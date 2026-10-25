@@ -1,26 +1,22 @@
 # -*- coding: utf-8 -*-
 """Every class that declares a dispatch code is reachable under it.
 
-GitHub issue #548 asked for this directly:
-
-    No test asserts that every ``TransType`` member with an implementing class
-    is reachable through dispatch, which is why this survived. Such a test
-    would be broadly useful -- it would catch the next missing registration
-    rather than just this one.
+GitHub issue #548 asks for this directly: a test asserting that every
+``TransType`` member with an implementing class is reachable through dispatch
+catches the next missing registration, not just one.
 
 :file:`test_dispatch_registry_unit.py` walks the problem from the other end: it
 takes each ``__proto__`` entry that *exists* and checks the class it
-names can parse a packet. That cannot see a class nobody registered at all,
-which is exactly how :class:`~pcapkit.protocols.application.ospf.OSPF` shipped
-reachable from no table (fixed in #436). This module walks it from the class
-side instead -- every
+names can parse a packet. That cannot see a class nobody registered at all
+-- #436's :class:`~pcapkit.protocols.application.ospf.OSPF` case, a class
+reachable from no table. This module walks it from the class side instead -- every
 :class:`~pcapkit.protocols.protocol.ProtocolBase` descendant whose
 :meth:`~pcapkit.protocols.protocol.Protocol.__index__` returns an enum member
 is *claiming* to be reachable under that code, so the claim is checked.
 
 Which registry a code belongs in is not restated here. It is read from
 :data:`~pcapkit.foundation.registry.protocols._CODE_DESTINATIONS`, the enum
-type -> destination table #570 shipped to back ``code=``, so the audit and the
+type -> destination table that backs ``code=`` (#570), so the audit and the
 registration mechanism cannot drift apart: an enum type added to that table
 gets audited here the same day.
 
@@ -160,9 +156,9 @@ class DispatchReachabilityTests(unittest.TestCase):
                                                f'{gap.found!r}' for gap in gaps))
 
         # A walk that found nothing to check would also report no gaps, so pin
-        # the floor. 23 claims verified when this landed -- the 21 distinct
-        # classes plus ``InARP`` and ``DRARP`` reaching their siblings' entries,
-        # and ``Ethernet`` counted once for ``Frame`` and once for ``PCAPNG``.
+        # a floor of 23 claims (measured: the 21 distinct classes plus ``InARP``
+        # and ``DRARP`` reaching their siblings' entries, and ``Ethernet``
+        # counted once for ``Frame`` and once for ``PCAPNG``).
         self.assertGreaterEqual(checked, 23)
 
     def test_the_audit_detects_a_code_that_nothing_dispatches(self) -> None:

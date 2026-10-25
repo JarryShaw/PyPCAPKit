@@ -174,7 +174,7 @@ class MethodGetCaseSensitivityTests(unittest.TestCase):
         """The issue's own repro: ``Method.get('get')`` must stop resolving
         to :attr:`Method.GET`.
 
-        Fails against the pre-fix override (``name = key.upper()`` folded
+        Fails against an override that folds case (``name = key.upper()`` folded
         into the ``_member_map_`` membership test): there,
         ``Method.get('get') is Method.GET`` is :data:`True`.
         """

@@ -185,7 +185,7 @@ APPTYPE_NEW = APPTYPE_HEADER + (
 )
 
 #: ``tls-parameters/tls-sslkeylogfile-labels.csv``. The crawler's own comment
-#: records ``[RFC9850]`` for every row as of 2026-09-28; ``[RFC 9850]`` is live.
+#: records ``[RFC9850]`` for every row; ``[RFC 9850]`` is the live form.
 TLS_LABEL_OLD = ('Value,Description,Reference,Comment\r\n'
                  'CLIENT_RANDOM,Master secret in TLS 1.2 and earlier,[RFC9850],\r\n')
 TLS_LABEL_NEW = TLS_LABEL_OLD.replace('[RFC', '[RFC ')

@@ -447,7 +447,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         self.assertEqual(ts_datetime, datetime.datetime.fromtimestamp(12, tz))
         self.assertEqual(ts_decimal, decimal.Decimal(12))
         self.assertEqual(ts_datetime.timestamp(), float(ts_decimal))
-        # and the round trip closes, which it could not while the two disagreed
+        # and the round trip closes, which needs the two to agree
         self.assertEqual(pcapng._make_timestamp(ts_decimal), (0, 2000))
 
         self.assertEqual(pcapng._read_mac_addr(b'\x00\x01\x02\x03\x04\x05'), '00:01:02:03:04:05')
@@ -1407,16 +1407,15 @@ class PCAPNGUnitTests(unittest.TestCase):
         self.assertEqual(PCAPNG.__dict__['__secrets__'][SecretsType.TLS_Key_Log], 'tls')
 
     def test_tls_key_label_tracks_rfc_9850_plus_documented_rsa_exception(self) -> None:
-        # GitHub issue #886: the canonical definition moved from a hand-written
-        # class in this module to a generated one under
-        # :mod:`pcapkit.const.pcapng.tls_key_label`. The re-export once left at
-        # ``pcapkit.protocols.misc.pcapng.TLSKeyLabel`` was dropped under #1744;
+        # GitHub issue #886: the canonical definition is the generated one under
+        # :mod:`pcapkit.const.pcapng.tls_key_label`, with no re-export at
+        # ``pcapkit.protocols.misc.pcapng.TLSKeyLabel`` (#1744);
         # tests/project/test_no_moved_name_re_exports_1744_unit.py pins that.
         from pcapkit.const.pcapng.tls_key_label import TLSKeyLabel
 
-        # RFC 9850 :rfc:`9850#section-4.2`'s "TLS SSLKEYLOGFILE Labels" registry
-        # (10 rows as of 2026-09-28), plus the NSS-historical ``RSA`` label this
-        # module documents and retains -- it has no row of its own.
+        # RFC 9850 :rfc:`9850#section-4.2`'s "TLS SSLKEYLOGFILE Labels" registry,
+        # plus the NSS-historical ``RSA`` label this module documents and
+        # retains -- it has no row of its own.
         expected = {
             'RSA',
             'CLIENT_RANDOM',
@@ -1448,8 +1447,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         self.assertIs(TLSKeyLabel('RSA'), TLSKeyLabel.RSA)
 
         # Matching stays by value, not name -- lower-case never resolves, and
-        # an unrecognised label still raises rather than minting, unchanged
-        # from before this class was generated.
+        # an unrecognised label raises rather than minting.
         with self.assertRaises(ValueError):
             TLSKeyLabel('client_random')
         with self.assertRaises(ValueError):
@@ -2847,8 +2845,8 @@ class PCAPNGUnitTests(unittest.TestCase):
     def _all_block_schemas():
         """Every PCAP-NG block schema, populated well enough to be packed.
 
-        Returns a list of ``(label, block type, schema)`` triples covering all
-        eleven block schemas of
+        Returns a list of ``(label, block type, schema)`` triples covering every
+        block schema of
         :mod:`pcapkit.protocols.schema.misc.pcapng`, each with the block total
         length its own fields imply.
 
@@ -3086,15 +3084,15 @@ class PCAPNGUnitTests(unittest.TestCase):
         self.assertEqual(statistics[0].interface_id, 0)
 
     ##########################################################################
-    # Signed numeric fields (#366, uncovered by the SHB repro).
+    # Signed numeric fields (#366).
     ##########################################################################
 
     def test_signed_number_fields_pack_negative_values(self) -> None:
-        # Uncovered while fixing #366: ``NumberField.pre_process`` masks the
-        # value against the *unsigned* bit mask, which turns any negative value
-        # into a pattern ``struct.pack`` rejects for a signed template. No
-        # signed field in the library could write a negative value, which is
-        # what a PCAP-NG section length of -1 (not specified) needs.
+        # #366: guards against ``NumberField.pre_process`` masking the value
+        # against the *unsigned* bit mask, which turns any negative value into a
+        # pattern ``struct.pack`` rejects for a signed template. Under it no
+        # signed field in the library can write a negative value, which is what
+        # a PCAP-NG section length of -1 (not specified) needs.
         from pcapkit.corekit.fields.numbers import (Int8Field, Int16Field, Int32Field, Int64Field,
                                                     UInt32Field)
 
@@ -3120,11 +3118,11 @@ class PCAPNGUnitTests(unittest.TestCase):
     ##########################################################################
 
     def test_pcapng_make_block_uses_its_own_option_namespace(self) -> None:
-        # Regression for #365: all eight ``_make_block_*`` methods passed
-        # ``namespace='shb'``, which is not a namespace anywhere -- neither on
-        # ``OptionType`` nor in the schema option registry -- so every raw-bytes
-        # option was misclassified as ``shb_unknown_*`` and ``OptionType`` was
-        # permanently extended with a member per unrecognised code.
+        # Regression for #365: guards against the ``_make_block_*`` methods
+        # passing ``namespace='shb'``, which is not a namespace anywhere --
+        # neither on ``OptionType`` nor in the schema option registry -- so every
+        # raw-bytes option is misclassified as ``shb_unknown_*`` and
+        # ``OptionType`` permanently extended with a member per unrecognised code.
         from pcapkit.const.pcapng.block_type import BlockType
         from pcapkit.const.pcapng.option_type import OptionType
         from pcapkit.const.pcapng.secrets_type import SecretsType
@@ -3364,12 +3362,11 @@ class PCAPNGUnitTests(unittest.TestCase):
         # further up the stack, where subclassing FileNotFoundError is what keeps
         # the outer handler working.
         #
-        # It also drops a dependency on pytest's working directory, which the
-        # relative os.path.join('examples', ...) this replaces quietly had. Run
-        # from anywhere but the repository root that path never resolved, so this
-        # test skipped with "run make_samples.py first" on a tree that in fact had
-        # every fixture -- a silent hole rather than a failure. Measured from /tmp:
-        # this version passes where the previous one skipped.
+        # It also avoids depending on pytest's working directory. A relative
+        # os.path.join('examples', ...) resolves only from the repository root,
+        # so run from anywhere else this test would skip with "run
+        # make_samples.py first" on a tree that in fact has every fixture -- a
+        # silent hole rather than a failure.
         from pcapkit.const.pcapng.option_type import OptionType
         from pcapkit.interface import extract
 
@@ -3599,8 +3596,8 @@ class PCAPNGOptionAreaBoundTests(unittest.TestCase):
         """#594's vector, one block: 65,535 declared against a four-octet area.
 
         The area is exactly the option header, so there is nothing left for the
-        payload. Before any bound this read ``b''`` off an exhausted stream and
-        zero-padded it to 65,535 octets -- from a 40-octet block.
+        payload. Without a bound this reads ``b''`` off an exhausted stream and
+        zero-pads it to 65,535 octets -- from a 40-octet block.
 
         """
         options = over_declared(UNKNOWN_OPT, b'', 0xFFFF)
@@ -3813,8 +3810,8 @@ class PCAPNGOptionAreaBoundTests(unittest.TestCase):
         """An option still packs when no length is known.
 
         :meth:`Schema.pack` leaves ``__length__`` at ``-1`` when no length is
-        known. This passes with or without the bound's negative-remainder guard,
-        and the cross-review of #676 is what established that: both
+        known. This passes with or without the bound's negative-remainder guard
+        (#676): both
         :class:`~pcapkit.corekit.fields.strings.BytesField` and
         :class:`~pcapkit.corekit.fields.strings.StringField` repair a negative
         width in ``pre_process``, resetting it to ``len(value)``, so the pack
@@ -3859,10 +3856,10 @@ class PCAPNGOptionAreaBoundTests(unittest.TestCase):
         Block Total Length is checked only against its own trailing copy, never
         against the file, so a block may declare 1,000,000 octets while holding
         36. Its option area is then sized at 999,964, and an option declaring
-        65,535 is comfortably under that: unbounded, this synthesised 65,535
+        65,535 is comfortably under that: unbounded, this synthesises 65,535
         octets of zeros from a 36-octet buffer -- 1,820x, with no warning at
-        all. Found by the cross-review of #676, which is why the area is bounded
-        by the octets the block holds.
+        all. That is why the area is bounded by the octets the block holds
+        (#676).
 
         The block still parses, and reports the length it declared; its option
         area is the four octets it holds, kept as captured, and the trailing
@@ -4138,8 +4135,8 @@ class PCAPNGTruncatedFileTests(unittest.TestCase):
         than clamped, because at the end of the file no block is being read: the
         clamp-and-warn of #676 keeps a truncated *block* parsing, where inventing
         a whole block out of zero padding would only fabricate a frame. It is the
-        same signal ``prepare`` already raises for a remainder of exactly zero --
-        one, two and three octets merely fell through it.
+        same signal ``prepare`` raises for a remainder of exactly zero, extended
+        to one, two and three octets.
 
         """
         from pcapkit.protocols.misc.pcapng import PCAPNG
@@ -4302,17 +4299,16 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
         self.assertGreaterEqual(len(exercised), 70)
 
     def test_a_field_sized_by_the_remaining_length_whole_is_left_alone(self) -> None:
-        """The three decryption-secrets payloads are exempt, and measurably so.
+        """The decryption-secrets payloads are exempt, and measurably so.
 
         ``UnknownSecrets.data``, ``TLSKeyLog.data`` and ``WireGuardKeyLog.data``
         read ``__length__`` whole rather than subtracting from it, and
         :meth:`Schema.pack <pcapkit.protocols.schema.schema.Schema.pack>` leaves
         it at ``-1`` when no length is known -- so flooring them at zero packs
-        *nothing*. Measured: it emptied both secrets payloads, and the two
-        ``EXPECTED_FAILURES`` entries for them in
-        ``tests/protocols/test_option_roundtrip_unit.py`` then came back ``OK``
-        rather than ``MISMATCH``, because an empty payload compares equal to an
-        empty payload. A regression that reads as a fix, which is why this is
+        *nothing*. Measured: it empties the secrets payloads, which the
+        round-trip sweep in ``tests/protocols/test_option_roundtrip_unit.py``
+        reads as ``OK``, because an empty payload compares equal to an empty
+        payload. A regression that reads as a fix, which is why this is
         pinned rather than left to the reader.
 
         """
@@ -4467,11 +4463,11 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
         return caught
 
     def test_a_journal_binary_field_cut_short_of_its_length_is_kept_as_captured(self) -> None:
-        """The reviewer's case: fewer than eight octets for a 64-bit length.
+        """Fewer than eight octets for a 64-bit length.
 
         ``struct.unpack('<Q', ...)`` refuses a short buffer with a bare
-        :exc:`struct.error`, which cost the whole extraction rather than this one
-        entry. The entry is kept as captured instead (#1413), and so is the one
+        :exc:`struct.error`, which would cost the whole extraction rather than
+        this one entry. The entry is kept as captured instead (#1413), and so is the one
         whose prefix the block's own padding made up to eight, since that
         zero-length field has no terminator behind it. Swept over every
         shortfall, since the boundary is the whole point.
@@ -4662,8 +4658,8 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
         ``struct.pack('<Q', 2570) == b'\\n\\n\\x00\\x00\\x00\\x00\\x00\\x00'`` --
         the prefix of a 2,570-octet binary field *is* the entry separator plus
         six NULs. Splitting on ``b'\\n\\n'`` before reading a field cuts this
-        entry apart before the length prefix is ever unpacked, so the old
-        parser read zero fields from it. This is the discriminating case a
+        entry apart before the length prefix is ever unpacked, so a parser that
+        splits first reads zero fields from it. This is the discriminating case a
         delimiter-based parser cannot survive: the fix has to be a parser that
         never looks for the separator inside a field it has not finished
         reading yet.
@@ -4723,7 +4719,7 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
 
         NUL is valid UTF-8, so a text field's value may end in one. Given its
         own trailing newline, this line is one ``readline()`` call away from
-        the block's own padding -- exactly as it always was -- so #794's fix,
+        the block's own padding, so #794's fix,
         which only triggers when that newline is missing, must leave it
         untouched.
 
@@ -4736,7 +4732,7 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
                           if item.category.__name__ == 'SchemaWarning'], [])
 
     def test_a_terminator_less_line_whose_raw_tail_is_whitespace_is_kept_as_captured(self) -> None:
-        """Cross-review on #795: a whitespace tail is not a newline.
+        """#795: a whitespace tail is not a newline.
 
         ``bytes.strip()`` would take the whitespace and expose NUL octets
         before it as if they were padding. The line has no terminating newline,
@@ -4879,10 +4875,11 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
 class PCAPNGOptionRegistryGuardTests(unittest.TestCase):
     """Registering an option schema over another must say so.
 
-    ``Option.register`` wrote into its namespace dictionaries with no check at
-    all, so a second registration for the same code replaced the first in
-    silence and every later lookup got the replacement. #681 added the same guard
-    to ``register_protocol``; this is the sibling on the schema side.
+    Guards against ``Option.register`` writing into its namespace dictionaries
+    with no check at all, under which a second registration for the same code
+    replaces the first in silence and every later lookup gets the replacement.
+    #681 guards ``register_protocol`` the same way; this is the sibling on the
+    schema side.
 
     """
 
@@ -4939,8 +4936,7 @@ class PCAPNGOptionRegistryGuardTests(unittest.TestCase):
         The guard is identity-based, matching every sibling registrar: presence
         alone is not the test, only whether the incumbent differs from the
         replacement. ``if_name`` already names ``IF_NameOption``, so replacing
-        it with ``UnknownOption`` is a real displacement, and it is reported
-        exactly as it was before the guard changed.
+        it with ``UnknownOption`` is a real displacement, and it is reported.
 
         """
         from pcapkit.const.pcapng.option_type import OptionType
@@ -4966,7 +4962,7 @@ class PCAPNGOptionRegistryGuardTests(unittest.TestCase):
 
         The ``opt`` namespace fans a single registration out across every
         namespace there is, and a warning per namespace would report one mistake
-        seven times. Naming them in one message says the same thing and stays
+        once per namespace. Naming them in one message says the same thing and stays
         greppable.
 
         """
@@ -5044,10 +5040,9 @@ class PCAPNGOptionRegistryGuardTests(unittest.TestCase):
 
         ``__init_subclass__`` loops over ``code`` with no deduplication, so a
         repeated entry reaches :meth:`Option.register` twice with the *same*
-        class -- the second call finds itself already the incumbent. Before
-        the identity guard this still hit the presence-only check and warned
-        about an overwrite that never happened, since the class was
-        overwriting itself.
+        class -- the second call finds itself already the incumbent. A
+        presence-only check would warn about an overwrite that never happens,
+        since the class is overwriting itself.
 
         """
         from pcapkit.const.pcapng.option_type import OptionType
@@ -5076,8 +5071,8 @@ class PCAPNGOptionRegistryGuardTests(unittest.TestCase):
         already names a different incumbent: two calls to :meth:`Option.register`
         with the same new class. The first call genuinely displaces
         ``IF_NameOption`` and must warn; the second finds itself already the
-        incumbent and must not warn again. The presence-only guard warned on
-        both, reporting the same displacement twice.
+        incumbent and must not warn again. A presence-only guard warns on both,
+        reporting the same displacement twice.
 
         """
         from pcapkit.const.pcapng.option_type import OptionType

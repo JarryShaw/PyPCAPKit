@@ -78,10 +78,10 @@ class TCPRuntimeTests(unittest.TestCase):
         ``Data_Raw.protocol`` is "the original enumeration of this protocol", and
         it is worth most precisely when the protocol is unknown -- it is then the
         only record of what the payload claimed to be. This frame is SSH, which
-        :mod:`pcapkit` does not decode, so port 22 is what it has to say. It used
-        to say :obj:`None`, which made the frame indistinguishable from "TCP
-        payload on a port we cannot name at all", while the equivalent SCTP and
-        IPv4 cases both named theirs.
+        :mod:`pcapkit` does not decode, so port 22 is what it has to say.
+        :obj:`None` would make the frame indistinguishable from "TCP payload on
+        a port we cannot name at all", while the equivalent SCTP and IPv4 cases
+        both name theirs.
 
         The chain still ends in ``Raw`` rather than in the port's name: the ports
         reach :meth:`Transport._decode_next_layer

@@ -4,24 +4,24 @@ A next layer code nobody registered resolves to the fallback
 :class:`~pcapkit.corekit.module.ModuleDescriptor` the registry's default factory
 produces -- normally :class:`~pcapkit.protocols.misc.raw.Raw`. That resolution is
 deliberately **not** written back into the registry, because the registry is a
-class-level :class:`collections.defaultdict` and recording a miss in it is the
-defect GitHub issue #421 reported and pull request #426 fixed at this layer,
-pull request #428 extended to the option, chunk and block registries, and pull
-request #560 fixed at the schema layer. The cost of not writing it back is that
+class-level :class:`collections.defaultdict` and recording a miss in it is
+GitHub issue #421's defect, guarded at this layer by pull request #426, at the
+option, chunk and block registries by pull request #428, and at the schema layer
+by pull request #560. The cost of not writing it back is that
 every unrecognised frame resolves the same descriptor again. A registered
 descriptor is not written back either (GitHub issue #1559), so an extraction of
 :file:`many_interfaces.pcapng` performs 296 resolutions, 48 of them fallbacks.
 
-Proposed by @Ts-Boom in GitHub pull request #563, which paid that cost with a
-class-level cache of resolved classes and no invalidation -- so a
-:func:`importlib.reload` left it serving the pre-reload class forever. These
+GitHub pull request #563 proposes paying that cost with a class-level cache of
+resolved classes and no invalidation, under which an :func:`importlib.reload`
+leaves it serving the pre-reload class forever. These
 tests pin the shape taken instead: the repeats are cheap because
 :attr:`ModuleDescriptor.klass <pcapkit.corekit.module.ModuleDescriptor.klass>`
 reads :data:`sys.modules` rather than re-entering
 :func:`importlib.import_module`, and nothing anywhere retains the class.
 
-Three properties, and the split is deliberate -- the first says the cost is
-gone, the other two say what it was not allowed to cost:
+The properties split deliberately -- the first pins the saving, the others say
+what it is not allowed to cost:
 
 :meth:`DefaultDescriptorResolutionTests.test_repeated_miss_does_not_re_enter_the_import_machinery`
     The saving itself, as a call count rather than as a timing. Fails without
@@ -80,7 +80,7 @@ class DefaultDescriptorResolutionTests(unittest.TestCase):
             ``__proto__`` is a fresh, empty :class:`collections.defaultdict`
             declaring the same :class:`~pcapkit.corekit.module.ModuleDescriptor`
             fallback the real registries do. Fresh, so that a miss recorded by
-            accident is visible as a key rather than hidden among the ~90
+            accident is visible as a key rather than hidden among the many
             registrations a real table carries.
 
         """

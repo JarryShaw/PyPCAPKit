@@ -15,10 +15,10 @@ The cost is not hypothetical. Issue #602 was
     declared seq = 1   built info.seq = 0
     warnings captured: []
 
-Twenty-five generated fixture frames carried sequence number ``0`` while the
-generator said ``1``, one octet per frame, and the only reason anybody found out
-was that somebody read the mapping against the signature. Issues #541 and #556
-were the same family of silence.
+Without the fix, twenty-five generated fixture frames carry sequence number
+``0`` while the generator says ``1``, one octet per frame, and nothing but
+reading the mapping against the signature reveals it. Issues #541 and #556 are
+the same family of silence.
 
 The schema layer is not so permissive: :meth:`Schema.__update__
 <pcapkit.protocols.schema.schema.Schema.__update__>` warns
@@ -298,13 +298,13 @@ class RejectionTests(unittest.TestCase):
         one question rather than adding a second.
 
         The honest caveat, recorded so it is a decision rather than an oversight:
-        all five of those reject a *class* keyword at ``__init_subclass__`` time,
+        all of those reject a *class* keyword at ``__init_subclass__`` time,
         which is a narrower kind of "unexpected keyword" than a field value passed
         to a constructor. And ``UnsupportedCall`` carries :exc:`AttributeError`,
         where a reader expecting the stdlib's ``unexpected keyword argument`` would
         reach for :exc:`TypeError` -- and where an ``except AttributeError`` written
-        for duck-typing could swallow this. Consistency with the five precedents was
-        preferred to a sixth spelling of the same idea, but the trade is real.
+        for duck-typing could swallow this. Consistency with those precedents is
+        preferred to another spelling of the same idea, but the trade is real.
 
         """
         from pcapkit.protocols.transport.tcp import TCP
@@ -492,7 +492,7 @@ class ScopeTests(unittest.TestCase):
         name. A regression here would refuse a caller that is setting a parse
         limit on something it is constructing.
 
-        ``packet`` is the fifth, and is there for a different reason -- see
+        ``packet`` is one more, and is there for a different reason -- see
         :meth:`test_from_data_survives_the_injected_packet_keyword`.
 
         """
@@ -575,7 +575,7 @@ class ScopeTests(unittest.TestCase):
 
         # The opt-out is not inherited. Both versioned classes declare their
         # keywords in full, and exempting them along with their base would forgo
-        # the check on the only two HTTP classes that can carry it -- measured
+        # the check on the HTTP classes that can carry it -- measured
         # without the ``klass is cls`` guard, every HTTP subclass comes back
         # unchecked.
         for versioned, keyword in ((HTTPv1, 'http_version'), (HTTPv2, 'sid')):
@@ -680,24 +680,25 @@ class SentinelTests(unittest.TestCase):
     That marker is :data:`~pcapkit.corekit.sentinels.ABSENT`, an instance of
     :class:`~pcapkit.corekit.sentinels.AbsentType` following
     :class:`~pcapkit.corekit.sentinels.NoValueType`, which is how this library
-    already spells a singleton marker. It was a bare ``object()`` when #640 was
-    first raised; a bare ``object()`` has no name in a traceback, no informative
-    :func:`repr`, and no type a checker can hold anyone to.
+    already spells a singleton marker. It is not a bare ``object()`` (#640): a
+    bare ``object()`` has no name in a traceback, no informative :func:`repr`,
+    and no type a checker can hold anyone to.
 
-    The four tests here split two and two, and the split is worth knowing before
+    The tests here split into two pairs, and the split is worth knowing before
     reading them:
 
     :meth:`test_the_absent_marker_is_an_instance_of_its_own_type` and
     :meth:`test_the_absent_marker_cannot_be_confused_with_another_singleton`
-        pin the marker's *shape*. Both name ``ABSENT``, so on the bare
-        ``object()`` they fail at the import -- which makes them a check that the
-        rename happened, with the substance behind the gate.
+        pin the marker's *shape*. Both name ``ABSENT``, so against a bare
+        ``object()`` marker they fail at the import -- which makes them a check
+        on the name, with the substance behind the gate.
 
     :meth:`test_the_absent_marker_never_reaches_the_accepted_names` and
     :meth:`test_the_three_answers_stay_distinct_across_the_swap`
-        pin the *behaviour*, and **both pass on the bare** ``object()`` **too**.
-        That is the point of them rather than a weakness: they are the evidence
-        that the swap changed nothing, which a shape assertion cannot give. What
+        pin the *behaviour*, and **both pass against a bare** ``object()``
+        **too**. That is the point of them rather than a weakness: they are the
+        evidence that the marker's type changes no behaviour, which a shape
+        assertion cannot give. What
         they catch is the mistake this kind of swap actually makes -- comparing
         against a second instance of the right class, which reads correctly and
         typechecks -- measured by mutating the ``.get`` default to a fresh
@@ -717,7 +718,7 @@ class SentinelTests(unittest.TestCase):
 
         self.assertIsInstance(ABSENT, AbsentType)
 
-        # The point of #640's review comment: ``type(object())`` is ``object``,
+        # The point of #640: ``type(object())`` is ``object``,
         # which says nothing about what the value is for.
         self.assertIsNot(type(ABSENT), object)
 

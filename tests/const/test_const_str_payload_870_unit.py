@@ -7,8 +7,8 @@ the underlying :class:`str` content was permanently empty regardless of the
 member's own declared value. ``_value_`` was set correctly (``Method.GET.value
 == 'GET'``), but the :class:`str` the member itself *is* was not:
 ``str(Method.GET) == ''``, ``len(str(Method.GET)) == 0`` and, most visibly,
-``Method.GET == 'GET'`` was :data:`False` for every one of the 40 declared
-members, as measured, and true since the class was first written -- GitHub
+``Method.GET == 'GET'`` was :data:`False` for every declared member, as
+measured, and true since the class was first written -- GitHub
 pull request #869 fixed the same inconsistency for an *unregistered* member's
 own str payload
 (:meth:`~pcapkit.const.http.method.Method._unregistered_member` calls the
@@ -68,7 +68,7 @@ from tests._support import reimport_once_per_class
 
 
 class MethodStrPayload870RegressionTests(unittest.TestCase):
-    """The exact repro from GitHub issue #870, and the full sweep of Method's own 40 members."""
+    """The exact repro from GitHub issue #870, and the full sweep of Method's own members."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)

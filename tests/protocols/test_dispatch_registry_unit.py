@@ -3,19 +3,16 @@
 
 GitHub issue #496: the ``__proto__`` dispatch registries decide which
 :class:`~pcapkit.protocols.protocol.Protocol` subclass parses the next layer.
-#496 named the original tables; #904 added
-``Internet.__proto__[TransType.Shim6]``, and #1574 added the loopback table.
-Nothing walked all of them.
+#496 names the tables, joined by #904's
+``Internet.__proto__[TransType.Shim6]`` and #1574's loopback table.
 :file:`test_registry_runtime.py` checks that a table entry *resolves* to the
 right class object, and
 :file:`test_dispatch_bindings_unit.py` checks that a hand-picked set of codes
 actually parse a packet into the class the table names -- the property that
-matters, since a resolvable entry whose target cannot parse a packet is
-exactly what shipped once: :class:`~pcapkit.protocols.application.ospf.OSPF` was
-reachable from no table at all, per that module's own docstring.
+matters, since an entry can resolve to a target that cannot parse a packet.
 
-This module closes the gap the same way
-:file:`test_option_roundtrip_unit.py` closed it for the option/parameter
+This module covers every table the same way
+:file:`test_option_roundtrip_unit.py` covers the option/parameter
 registries: :func:`examples.generators.dispatch.cases` walks every
 ``__proto__`` table directly, so a code registered tomorrow gets a case here
 tomorrow -- or fails :meth:`DispatchRegistryTests
@@ -194,10 +191,10 @@ class DispatchRegistryTests(unittest.TestCase):
         registry size unchanged, code still present, class wrong. Measured:
         pointing ``Internet.__proto__[TransType.AH]`` at
         :class:`~pcapkit.protocols.misc.raw.Raw` instead of
-        :class:`~pcapkit.protocols.internet.ah.AH` changed nothing
-        :meth:`test_cases_cover_every_table_named_in_the_issue` or the old,
-        registry-derived version of :meth:`test_dispatch_reaches_target_or_is_a_recorded_degrade`
-        looked at, and both kept passing. This does not: it compares
+        :class:`~pcapkit.protocols.internet.ah.AH` changes nothing
+        :meth:`test_cases_cover_every_table_named_in_the_issue` looks at, nor
+        anything a registry-derived dispatch check would, and both pass. This
+        test does not: it compares
         :attr:`Case.registered` -- what the table says right now -- against
         :attr:`Case.target` -- what it is pinned to say -- and is independent
         of whether the target dissector can actually parse anything, which is
@@ -224,12 +221,10 @@ class DispatchRegistryTests(unittest.TestCase):
 
         """
         cases = self.dispatch.cases()
-        # #904: 38 -> 39, and the internet count 16 -> 17 below with it -- one
-        # new entry, Internet.__proto__[TransType.Shim6], registered at
-        # IPv6_Ext where it previously had none at all (defaulted to
-        # Raw). Diffed against origin/main: no other table changed shape.
-        # #1574: 39 -> 47 -- LinkType.NULL and LinkType.LOOP in both link-type
-        # tables, and the four address families of the new Loopback.__proto__.
+        # The tables of #496, including #904's Internet.__proto__[TransType.Shim6]
+        # registered at IPv6_Ext rather than defaulting to Raw, plus #1574's
+        # LinkType.NULL and LinkType.LOOP in both link-type tables and the four
+        # address families of Loopback.__proto__.
         self.assertEqual(len(cases), 47,
                          'expected exactly 47 entries across the seven __proto__ '
                          'tables named in GitHub issue #496 and the loopback table '

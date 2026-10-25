@@ -1,16 +1,17 @@
 # -*- coding: utf-8 -*-
-"""The PCAP magic number is looked up in its one home as it was compared before. C.f. #1739.
+"""The PCAP magic number is looked up in its one home, as a comparison would read it. C.f. #1739.
 
-Moving the four magic numbers to
-:data:`pcapkit.protocols.schema.misc.pcap.header.MAGIC_NUMBER` turned three
-comparisons into lookups, which pins two behaviours the literals had:
+The magic numbers live in
+:data:`pcapkit.protocols.schema.misc.pcap.header.MAGIC_NUMBER`, and the code
+that reads them looks them up there, which pins two behaviours a comparison
+against literals has:
 
 * :meth:`Header._make_magic <pcapkit.protocols.misc.pcap.header.Header._make_magic>`
   raises :exc:`KeyError` for a nanosecond flag that is neither, not a
   :exc:`StopIteration` that a generator would turn into :exc:`RuntimeError`;
 * :func:`~pcapkit.protocols.schema.misc.pcap.header.magic_number_callback` and
   :meth:`Header.read <pcapkit.protocols.misc.pcap.header.Header.read>` match a
-  :obj:`bytearray` magic number, which compared equal to the literals, rather
+  :obj:`bytearray` magic number, which compares equal to the literals, rather
   than reject it as unhashable.
 
 Every value is built here, so the module is in the unit tier.

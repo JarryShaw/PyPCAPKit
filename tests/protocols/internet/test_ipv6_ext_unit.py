@@ -313,7 +313,7 @@ class IPv6ExtUnitTests(unittest.TestCase):
                      alias=int(ExtensionHeader.HOPOPT))
 
     def test_shim6_registration_does_not_leak_into_ipv4_parsing(self) -> None:
-        """GitHub issue #891 cross-review: registering ``IPv6_Ext``
+        """GitHub issue #891: registering ``IPv6_Ext``
         into the shared ``Internet.__proto__`` for Shim6 must not make an
         IPv4 packet whose protocol byte happens to be 140 walk an IPv6-style
         extension-header chain. The version gate on ``__post_init__`` sends
@@ -334,7 +334,7 @@ class IPv6ExtUnitTests(unittest.TestCase):
         # payload.
         self.assertEqual(str(ipv4.protochain), 'IPv4:Shim6')
 
-    # -- item 1 (cross-review): an unimplemented terminal code must not ------
+    # -- #891 item 1: an unimplemented terminal code must not --------------
     # -- collapse the whole packet -------------------------------------------
 
     def test_unimplemented_terminal_code_stops_the_walk_not_the_packet(self) -> None:
@@ -349,7 +349,7 @@ class IPv6ExtUnitTests(unittest.TestCase):
         hop limit) intact rather than losing it to a further-out
         ``@beholder``. ``254`` is the same code path (also has no dedicated
         parser, also resolves to ``Raw``); this file covers one to keep the
-        test proportionate, per the review's own framing.
+        test proportionate.
 
         GitHub issue #925: the example is 253, not ``BIT-EMU`` (147). Unlike
         253/254, 147 is not in IANA's authoritative *IPv6 Extension Header
@@ -390,11 +390,11 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
     the shared base of every IPv6 extension header, *and* the concrete
     fallback parser for one this package does not implement.
 
-    That merge removes a safety net. Before it, each implemented
-    header inherited :class:`~pcapkit.protocols.internet.internet.Internet`
-    directly, whose ``name``/``alias``/``protocol``/``length`` are generic or
-    abstract and whose ``__index__`` is :func:`abc.abstractmethod` -- so
-    forgetting one was loud. After it, the same omission silently inherits this
+    Serving both roles removes a safety net. A header inheriting
+    :class:`~pcapkit.protocols.internet.internet.Internet` directly gets a
+    ``name``/``alias``/``protocol``/``length`` that is generic or abstract and
+    an ``__index__`` that is :func:`abc.abstractmethod` -- so forgetting one is
+    loud. Under ``IPv6_Ext``, the same omission silently inherits this
     module's own *fallback-role* answers, which are wrong for a header that has
     an identity: it reports itself as ``IPv6 Extension Header`` / ``IPv6-Ext``,
     reads its length off a data model that is not its own, and ``__index__``
@@ -474,8 +474,8 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
             return None
 
     def test_the_family_is_exactly_the_eight_known_members(self) -> None:
-        """Importing :mod:`pcapkit.protocols.internet` must turn up all eight,
-        and only those eight. This is what keeps the per-subclass tests below
+        """Importing :mod:`pcapkit.protocols.internet` must turn up exactly
+        :attr:`KNOWN_MEMBERS`. This is what keeps the per-subclass tests below
         from passing vacuously on a walk that discovered nothing.
         """
         self.assertEqual({klass.__qualname__ for klass in self._family()},
@@ -487,7 +487,7 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
     #: The maintainer's convention, from GitHub pull request #924: a header
     #: usable *only* as an extension header inherits ``IPv6_Ext`` alone; one
     #: usable as a standalone protocol names ``Internet`` (or ``IPsec``) as
-    #: well. The three here each travel as an IPv4 payload on a primary
+    #: well. Those named here each travel as an IPv4 payload on a primary
     #: source -- ``AH`` :rfc:`4302#section-3.1.1`, ``ESP``
     #: :rfc:`4303#section-3.1.1`, ``HIP`` :rfc:`7401#appendix-C.2`, whose
     #: worked example is an IPv4 header carrying ``Next Header: 139``.
@@ -505,7 +505,7 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
         Asserted against ``__bases__`` rather than ``__mro__``, because every
         member reaches :class:`~pcapkit.protocols.internet.internet.Internet`
         transitively through ``IPv6_Ext`` -- so an ``__mro__`` check passes for
-        all eight and tests nothing. What the convention encodes is the
+        every member and tests nothing. What the convention encodes is the
         *declaration*: naming the base is how a deliberate standalone protocol
         is told apart from a header that merely inherits one.
 
@@ -541,8 +541,8 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
         """Checked against ``__dict__``, not :func:`getattr`.
 
         :func:`getattr` cannot tell an override from an inherited fallback-role
-        answer -- which is the entire failure mode -- so it would report all
-        five present on a subclass that defines none of them.
+        answer -- which is the entire failure mode -- so it would report every
+        required member present on a subclass that defines none of them.
         """
         for klass in self._family():
             for member in self.REQUIRED_OVERRIDES:
@@ -582,7 +582,7 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
         ``IPv6_Route`` leaves ``_route``.
 
         Asserted as "no underscore, and the key is usable" rather than as
-        "contains a hyphen", because four of the eight legitimately carry none:
+        "contains a hyphen", because some legitimately carry none:
         ``HOPOPT``, ``MH``, ``AH`` and ``ESP`` have no ``IPv6`` prefix for the
         strip to bite on, so demanding a hyphen of them would be demanding a
         rename rather than testing an invariant.
@@ -674,7 +674,7 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
         the ``__data__`` discriminator in
         :attr:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext.protocol`, that
         ``super()`` lands on the *fallback-role* body, which reads
-        ``self._info.protocol`` -- a field none of the eight data models has.
+        ``self._info.protocol`` -- a field none of the family's data models has.
         Measured without the discriminator: ``AttributeError`` on every one.
         Both parenting shapes are exercised, since ``AH``/``ESP`` reach the
         base through ``IPsec``.

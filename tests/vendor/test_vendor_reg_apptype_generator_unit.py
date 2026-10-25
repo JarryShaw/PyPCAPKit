@@ -11,8 +11,9 @@ members are plain, not *annotated*, assignments. An annotated member --
 ``sphinx/ext/autodoc/_dynamic/_loader.py`` -- the wrapper
 around :func:`typing.get_type_hints` that catches the ``NameError`` a
 ``TYPE_CHECKING``-only forward ref would otherwise raise), each call
-re-resolving the *whole* class, which made documenting this one registry cost
-378.8s on CI -- the single largest stall in the entire docs build. The
+re-resolving the *whole* class, which with annotated members makes documenting
+this one registry cost 378.8s on CI (measured) -- the single largest stall in the
+entire docs build. The
 annotation carries no information a lookup needs: member construction reads the
 positional tuple, not ``__annotations__``. Measured by #769, dropping it removes
 86,838 bytes (7/8 bytes per member, depending on whether its class name is 3 or
@@ -26,8 +27,8 @@ uses attribute access rather than
 ``__getitem__``) to reach a member plain attribute access returns in 24 ns,
 saving 7 bytes each (``TransportProtocol.get('tcp')`` is 28 characters,
 ``TransportProtocol.tcp`` is 21), for 167,587 bytes (163.7 KiB) of generated
-source as measured by #769. The generator only ever emits the five declared
-names (``TRANSPORTS + ('undefined',)``), so the attribute form cannot miss.
+source as measured by #769. The generator only ever emits the declared names
+(``TRANSPORTS + ('undefined',)``), so the attribute form cannot miss.
 
 GitHub issue #770: a bare ``undefined = 0`` in the ``BASE`` template is an int
 literal, so mypy -- which has no :mod:`aenum` plugin and so treats this class
@@ -113,7 +114,7 @@ HAS_MYPY = importlib.util.find_spec('mypy') is not None
 
 
 class AppTypeGeneratorShapeTests(unittest.TestCase):
-    """Pins to the three mechanical changes #744, #768 and #770 made."""
+    """Pins to the mechanical shapes of #744, #768 and #770."""
 
     def test_flag_emits_attribute_access_not_get_calls(self) -> None:
         """GitHub issue #768, against the generator method directly.
@@ -166,9 +167,9 @@ class AppTypeGeneratorShapeTests(unittest.TestCase):
 
         Every *generator-emitted* site -- one per member's ``proto``
         argument plus one per ``cls.__transport__ is ...`` range-row test and
-        its own ``extend_enum(...)`` call -- was rewritten, so the generated
-        registries have none. The base module keeps the one legitimate
-        survivor, ``_dispatch``'s ``TransportProtocol.get(proto.lower())``,
+        its own ``extend_enum(...)`` call -- uses attribute access, so the
+        generated registries have none. The base module keeps one legitimate
+        call, ``_dispatch``'s ``TransportProtocol.get(proto.lower())``,
         which resolves a *caller*-supplied string at run time and so cannot
         be a fixed attribute access -- exactly the "other callers" #768 says
         :meth:`~pcapkit.const.reg.apptype.apptype.TransportProtocol.get`

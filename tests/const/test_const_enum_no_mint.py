@@ -31,7 +31,7 @@ placeholder is notation, not a name worth registering. Applied registry by
 registry to every ``_missing_`` calling :func:`~aenum.extend_enum` -- measured
 by an AST walk over ``pcapkit/const/*.py`` rather than estimated -- the ruling
 converts them (:data:`RULING_CONVERTED_REGISTRIES` below).
-:class:`~pcapkit.const.mh.cga_type.CGAType` keeps minting, for a different
+:class:`~pcapkit.const.mh.cga_type.CGAType` mints, for a different
 reason: its ``Tag_<hex>`` mint is not an IANA-style range at all (see its own
 module for why), so the ruling does not cover it.
 
@@ -125,19 +125,17 @@ change -- and it is a real consequence, not a refusal: a hand-composed
 own value through :meth:`AppType._dispatch`. None of the tests below pin
 that, per the same ruling.
 
-GitHub issue #775's final round closes the two registries tier 2 left
-*mixed* (keeping some branches minting and converting others):
-every one of :class:`~pcapkit.const.reg.ethertype.EtherType`'s
-range branches, and :class:`~pcapkit.const.ipx.socket.Socket`'s
-``Registered by Xerox`` one, convert to
-:meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member` too -- PR #878
-scoped it this way: keeping the existing hex-suffixed name, since the
+GitHub issue #775 also converts the attributed branches: every one of
+:class:`~pcapkit.const.reg.ethertype.EtherType`'s range branches, and
+:class:`~pcapkit.const.ipx.socket.Socket`'s ``Registered by Xerox`` one,
+return :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member` too --
+PR #878 scoped it this way: keeping the existing hex-suffixed name, since the
 conversion is about not registering rather than renaming. So each keeps the
 hex-suffixed name (``Xyplex_0x0888``, not a bare ``Xyplex``) even though it
 does not register -- both are wholly converted like those in
 :data:`RULING_CONVERTED_REGISTRIES`, and
 :class:`EtherTypeMixedMintTests`/:class:`IPXSocketMixedMintTests` below
-prove that the probe each once kept minting does not mint. The one
+prove that their attributed-vendor probes do not mint. The one
 consequence worth naming: this reintroduces the exact "manufactured,
 value-suffixed name" shape :func:`is_manufactured` exists to flag, on calls
 that are safe because :meth:`_unregistered_member` never registers
@@ -345,10 +343,9 @@ def _first_unassigned_value(cls: 'type') -> 'int':
 #: mint is a bare status word (``Unassigned``, ``Reserved [...]``, ``Reserved
 #: for Private/Experimental Use``, ``Unspecified in the IANA registry``, and
 #: similar) rather than a name anyone assigned. Derived from an AST walk over
-#: the modules that mint without the fix, including the registries
-#: tier 2 left *mixed* until #775's final round (:class:`~pcapkit.
-#: const.reg.ethertype.EtherType` and :class:`~pcapkit.const.ipx.socket.
-#: Socket` -- see :data:`ETHERTYPE_UNASSIGNED_PROBES` and
+#: the modules that mint without the fix, including the attributed branches
+#: of :class:`~pcapkit.const.reg.ethertype.EtherType` and
+#: :class:`~pcapkit.const.ipx.socket.Socket` (see :data:`ETHERTYPE_UNASSIGNED_PROBES` and
 #: :data:`IPX_SOCKET_UNASSIGNED_PROBES`). Not listed: the bespoke classes
 #: GitHub issue #860 converts instead (:class:`~pcapkit.const.reg.apptype.
 #: apptype.AppType`, :class:`~pcapkit.const.http.status_code.StatusCode`,
@@ -445,7 +442,7 @@ RULING_CONVERTED_REGISTRIES = (
 #: generic "first branch that converts, by source order" probe can actually
 #: exercise -- i.e. the registry's own bounds contain at least one value that
 #: is not already a declared member, *and* nothing earlier in the same
-#: ``_missing_`` masks it. One reason holds registries out of this list: 13
+#: ``_missing_`` masks it. One reason holds registries out of this list: some
 #: have no reachable gap at all -- the same situation :data:`ALL_REGISTRIES`
 #: already documents for :class:`~pcapkit.const.hip.transport.Transport`:
 #: every value inside the guard's own bounds names a real member, so
@@ -545,9 +542,8 @@ RULING_CONVERTED_WITH_REACHABLE_GAP = (
 #: "Old Xerox Experimental values. Invalid as an Ethertype since 1983." both
 #: convert, because the label itself says nothing was assigned. Every *other*
 #: named block -- companies the historical list attributes a real code range
-#: to -- kept minting under that original ruling, and #775's final round
-#: converts every remaining branch; :data:`ETHERTYPE_FORMERLY_KEPT_PROBE` pins
-#: one (``Xyplex``) as a regression guard that it does not mint either.
+#: to -- converts too (#775); :data:`ETHERTYPE_FORMERLY_KEPT_PROBE` pins one
+#: (``Xyplex``) as a regression guard that it does not mint.
 #:
 #: "Old Xerox Experimental" (0x0101-0x01FF) is a strict subset of the wider
 #: "IEEE802.3 Length Field" branch (0x0000-0x05DC). :meth:`pcapkit.vendor.reg.
@@ -564,23 +560,23 @@ ETHERTYPE_UNASSIGNED_PROBES = {
     0x8039: 'DEC_Unassigned',
     0x0101: ETHERTYPE_OLD_XEROX_LABEL,
 }
-#: The one probe the original ruling kept minting -- Xyplex, 0x0888 -- because
-#: a proprietary protocol has no public name of its own, so the company name
-#: serves as one (#775, #847). #775's final round converts it too, preserving
-#: the hex-suffixed name exactly as the crawler renders it (PR #878 scoped it
-#: this way: keeping the existing hex-suffixed name, since the conversion is
-#: about not registering rather than renaming), so this pins the opposite of
-#: what its name suggests: that this probe does not mint either. Kept as its
+#: An attributed vendor block -- Xyplex, 0x0888 -- whose company name serves as
+#: the name of a proprietary protocol that has none of its own (#775, #847).
+#: It converts like the unassigned rows, keeping the hex-suffixed name exactly
+#: as the crawler renders it (PR #878 scoped it this way: keeping the existing
+#: hex-suffixed name, since the conversion is about not registering rather
+#: than renaming), so despite its name this pins that the probe does not
+#: mint. Kept as its
 #: own constant, distinct from :data:`ETHERTYPE_UNASSIGNED_PROBES`, because
 #: :class:`EtherTypeMixedMintTests` below wants it named individually in
 #: its own regression test.
 ETHERTYPE_FORMERLY_KEPT_PROBE = (0x0888, 'Xyplex_0x0888')
 
-#: :class:`~pcapkit.const.ipx.socket.Socket` probes for the owner's original
-#: #775/#847 ruling: ``Experimental`` and the three dynamically/statically
-#: assigned labels convert, as notation for the reader rather than a final
-#: concrete assigned name; ``Registered by Xerox``, the company one, kept
-#: minting under it, and is pinned by :data:`IPX_SOCKET_FORMERLY_KEPT_PROBE`.
+#: :class:`~pcapkit.const.ipx.socket.Socket` probes for the owner's #775/#847
+#: ruling: ``Experimental`` and the dynamically/statically assigned labels
+#: convert, as notation for the reader rather than a final concrete assigned
+#: name. ``Registered by Xerox``, the company one, is pinned by
+#: :data:`IPX_SOCKET_FORMERLY_KEPT_PROBE`.
 IPX_SOCKET_UNASSIGNED_PROBES = {
     0x0025: 'Experimental',
     0x4001: 'Dynamically Assigned Socket Numbers',
@@ -589,7 +585,7 @@ IPX_SOCKET_UNASSIGNED_PROBES = {
 }
 #: The mirror of :data:`ETHERTYPE_FORMERLY_KEPT_PROBE` for
 #: :class:`~pcapkit.const.ipx.socket.Socket`: ``Registered by Xerox`` also
-#: converts in #775's final round, keeping its hex-suffixed name.
+#: converts (#775), keeping its hex-suffixed name.
 IPX_SOCKET_FORMERLY_KEPT_PROBE = (0x0010, 'Registered by Xerox_0x0010')
 
 
@@ -599,7 +595,7 @@ def _first_unregistered_value(cls: 'type') -> 'Optional[int]':
     pseudo-member, read from the class's own compiled ``_missing_`` by AST
     rather than hardcoded.
 
-    Handles both shapes tier 2 produced: a per-range branch (``if lo <= value
+    Handles both shapes the generated ``_missing_`` takes: a per-range branch (``if lo <= value
     <= hi: ... return cls._unregistered_member(...)``), whose lower bound is
     the probe; and an unconditional mint straight after the guard (no range
     branch of its own), for which any in-bounds value not already a member
@@ -848,8 +844,8 @@ class RegisterStillMintsTests(unittest.TestCase):
         outside any registry's assigned codes, so this cannot collide with
         anything either the CSV seeded or a sibling test minted.
 
-        Since #1816, ``register`` refuses a value outside the range a
-        registry's ``_missing_`` checks, and most bound themselves to 16 bits
+        ``register`` refuses a value outside the range a registry's
+        ``_missing_`` checks (#1816), and most bound themselves to 16 bits
         or fewer. So the fixed value is used where the range reaches it, and
         elsewhere the highest value in range that no member carries. A
         registry whose whole range is assigned has nothing left to mint, and
@@ -886,10 +882,9 @@ class UnregisteredMemberHelperTests(unittest.TestCase):
     """:meth:`_unregistered_member` in isolation, on every one of tier 1's
     registries -- not only those whose own ``_missing_`` happens to call it.
     It is part of the shared template regardless, so every registry carries
-    it whether or not its own ``_missing_`` uses it yet (the other 83 keep
-    their own bespoke ``process()``-driven ``_missing_``, out of tier 1's
-    scope), and this pins that the helper itself behaves identically on all
-    of them.
+    it whether or not its own ``_missing_`` uses it (the rest keep their
+    own bespoke ``process()``-driven ``_missing_``, out of tier 1's scope),
+    and this pins that the helper itself behaves identically on all of them.
 
     """
 
@@ -1007,10 +1002,10 @@ def is_manufactured(name_arg: 'Optional[ast.expr]') -> 'bool':
     than being hardcoded exemptions -- so a combining shape hidden inside
     either would still be caught.
 
-    Round 5's review found that a call's *arguments* need a plainer rule
-    than its receiver does: a bare ``value``/``key`` passed as data to
-    ``str(...)``, ``operator.mod(...)``, ``.format_map(...)``, or nested
-    inside a set/generator/list-comprehension/``map(...)`` argument to
+    A call's *arguments* need a plainer rule than its receiver does: a bare
+    ``value``/``key`` passed as data to ``str(...)``, ``operator.mod(...)``,
+    ``.format_map(...)``, or nested inside a
+    set/generator/list-comprehension/``map(...)`` argument to
     ``.join(...)``, is not to be cleared the way a receiver is, since an
     argument being the value at all is already how each of those shapes
     glues it to something else. Every argument of any call is therefore walked bluntly for
@@ -1023,7 +1018,7 @@ def is_manufactured(name_arg: 'Optional[ast.expr]') -> 'bool':
     the enum machinery's own attribute rather than through the
     conventional ``value``/``key`` parameter name, which this function has
     no way to recognise without hardcoding attribute names as well as
-    parameter names -- a broader heuristic than round 5 asked for. Nothing
+    parameter names -- a broader heuristic than the sweep needs. Nothing
     under :mod:`pcapkit.const` writes a ``name`` argument this way.
 
     """
@@ -1059,7 +1054,7 @@ def is_manufactured(name_arg: 'Optional[ast.expr]') -> 'bool':
         # safe one (a false positive is loud and gets a fixture; a false
         # negative ships quietly), and no real call site under
         # ``pcapkit/const``/``pcapkit/vendor`` is affected either way
-        # (measured at round 5: the sweep stayed at 1012/0). It genuinely
+        # (measured: the sweep stayed at 1012/0). It genuinely
         # does over-flag: ``value.upper()`` alone is exempt (it is the
         # receiver case just above), but the exact same expression as an *argument* --
         # ``str(value.upper())``, ``helper(value.upper())`` -- flags, so
@@ -1101,27 +1096,26 @@ def is_manufactured(name_arg: 'Optional[ast.expr]') -> 'bool':
 #: expected)`` where ``source`` is a full ``return cls._unregistered_member(
 #: value, <name-expr>)`` statement parsed for its own ``name`` argument.
 IS_MANUFACTURED_FIXTURES = (
-    # The manufactured shapes the round-2 review named explicitly --
-    # each embeds ``value``, the thing being looked up, into the label.
+    # The manufactured shapes -- each embeds ``value``, the thing being looked up, into the label.
     ('percent-s-value', "cls._unregistered_member(value, 'x_%s' % value)", True),
     ('percent-x-value', "cls._unregistered_member(value, 'x_%x' % value)", True),
     ('concat-str-value', "cls._unregistered_member(value, 'x_' + str(value))", True),
     ('format-method-value', "cls._unregistered_member(value, 'x_{}'.format(value))", True),
     # An f-string embedding value is the same shape as the four above.
     ('fstring-value', "cls._unregistered_member(value, f'x_{value}')", True),
-    # Round-3 review's gap: a wrapping call around a combining shape --
-    # hoisting a .upper()/.zfill()/str()/.join() outside the %/+/f-string
-    # must not silently disable the guard.
+    # A wrapping call around a combining shape -- hoisting a
+    # .upper()/.zfill()/str()/.join() outside the %/+/f-string -- must not
+    # silently disable the guard.
     ('percent-value-then-upper', "cls._unregistered_member(value, ('x_%s' % value).upper())", True),
     ('percent-value-then-zfill', "cls._unregistered_member(value, ('x_%d' % value).zfill(8))", True),
     ('str-wrapping-percent', "cls._unregistered_member(value, str('x_%s' % value))", True),
     ('fstring-then-upper', "cls._unregistered_member(value, f'x_{value}'.upper())", True),
     ('join-list-with-value', "cls._unregistered_member(value, ''.join(['x_', str(value)]))", True),
-    # Round-5 review's gap: on the generic call-recursion path, a bare
-    # ``ast.Name`` argument (as opposed to the outermost expression) was
-    # treated as exempt the same way ``value`` alone is at the top level --
-    # which missed the value being glued in as *data* to a call rather than
-    # merely transformed. None of these nine exists under pcapkit/const/
+    # On the generic call-recursion path, a bare ``ast.Name`` argument (as
+    # opposed to the outermost expression) is not exempt the way ``value``
+    # alone is at the top level -- that would miss the value being glued in
+    # as *data* to a call rather than merely transformed. None of these
+    # exists under pcapkit/const/
     # (latent, not live), but the census that found them is exactly
     # what this fixture set exists to keep honest.
     ('join-set-with-value', "cls._unregistered_member(value, ''.join({'x_', str(value)}))", True),
@@ -1167,7 +1161,7 @@ class IsManufacturedSelfCheckTests(unittest.TestCase):
 
 
 #: The one call-chain every hex-suffixed manufactured name shares, on every
-#: branch #775's final round deliberately kept unrenamed rather than
+#: branch #775 deliberately keeps unrenamed rather than
 #: converting to the bare placeholder every other converted registry uses
 #: (``Xyplex_0x0888``, ``Registered by Xerox_0x0010``, ...; see that
 #: sweep's own docstring, and the module docstring's closing paragraph, for
@@ -1183,8 +1177,8 @@ _HEX_SUFFIX_SHAPE = ast.parse('hex(value)[2:].upper().zfill(4)', mode='eval').bo
 
 
 def _is_hex_suffixed_unregistered_name(name_arg: 'Optional[ast.expr]') -> bool:
-    """Whether ``name_arg`` is *exactly* the one shape #775's final round
-    preserved unrenamed on :class:`~pcapkit.const.reg.ethertype.EtherType`'s
+    """Whether ``name_arg`` is *exactly* the one shape #775 preserves
+    unrenamed on :class:`~pcapkit.const.reg.ethertype.EtherType`'s
     range branches and :class:`~pcapkit.const.ipx.socket.Socket`'s one --
     a ``%``-format :class:`~ast.BinOp` whose left operand is a string
     constant ending in the literal ``'_0x%s'``, and whose right operand is
@@ -1219,8 +1213,8 @@ def _is_hex_suffixed_unregistered_name(name_arg: 'Optional[ast.expr]') -> bool:
 class UnregisteredMemberNameIsBareTests(unittest.TestCase):
     """The naming rule settled under GitHub issue #775's tier 1: a non-minting
     pseudo-member carries the registry's own ``unassigned``/``reserved`` name
-    bare, with no numeric value appended. Minted members keep their number,
-    because there it is part of the real name (``Motorola_0x8705`` names one
+    bare, with no numeric value appended. An attributed vendor block keeps its
+    number, because there it is part of the real name (``Motorola_0x8705`` names one
     EtherType inside Motorola's block). Asked whether the non-minting path should
     honour the registry's own name directly or keep appending the numeric value,
     the owner chose the bare name -- safe precisely because a
@@ -1236,9 +1230,8 @@ class UnregisteredMemberNameIsBareTests(unittest.TestCase):
     *manufactured* numeric-suffixed label: a bare string constant containing
     ``%`` (the ``'Unassigned_%d' % value`` mint shape, spelled out as a
     literal), or an equivalent ``%``-formatted :class:`~ast.BinOp` or
-    f-string. It therefore covers every call site tier 1's follow-up
-    touched, every one tier 2's #775/#847 ruling added, and those #860
-    step 2's PR 1 added across :class:`~pcapkit.const.http.
+    f-string. It therefore covers every call site the #775/#847 ruling and
+    #860's step 2 convert: :class:`~pcapkit.const.http.
     status_code.StatusCode`, :class:`~pcapkit.const.ftp.return_code.
     ReturnCode`, :class:`~pcapkit.const.ftp.return_code.ResponseKind`,
     :class:`~pcapkit.const.ftp.return_code.GroupingInformation`,
@@ -1251,10 +1244,9 @@ class UnregisteredMemberNameIsBareTests(unittest.TestCase):
     those ``__new__``-carrying overrides makes internally -- not a
     fresh call site with a label of its own, just relaying whatever the true
     call site already passed, so it is walked and counted here too rather
-    than specially excluded -- plus the sites round 2 review found still
-    minting on :class:`OptionType`'s own ``get()`` (its int/namespace path
-    and its ``str`` path, both independent of ``_missing_``). PR 2 then added
-    the ``_missing_`` branches on
+    than specially excluded -- plus the sites on :class:`OptionType`'s own
+    ``get()`` (its int/namespace path and its ``str`` path, both independent
+    of ``_missing_``), and the ``_missing_`` branches on
     :class:`~pcapkit.const.reg.apptype.apptype.AppType` itself, the one more
     inside its own ``get()``, and the one ``super()._unregistered_member(...)``
     forward its own override makes; see
@@ -1287,13 +1279,13 @@ class UnregisteredMemberNameIsBareTests(unittest.TestCase):
     A call site still using ``extend_enum(...)`` instead of
     ``_unregistered_member(...)`` at all -- :class:`~pcapkit.const.mh.
     cga_type.CGAType`, plus ``register``/``register_alias`` on every registry
-    (including :class:`~pcapkit.const.reg.apptype.apptype.AppType`'s own,
-    added by PR 2) -- is out of scope and untouched by this sweep entirely,
+    (including :class:`~pcapkit.const.reg.apptype.apptype.AppType`'s own)
+    -- is out of scope and untouched by this sweep entirely,
     since it never calls ``_unregistered_member`` in the first place; minting
     there is the explicit, caller-named path the sweep is not about.
 
-    GitHub issue #775's final round converts the last minting branches --
-    every one of :class:`~pcapkit.const.reg.ethertype.EtherType`'s and
+    GitHub issue #775 converts the attributed branches too -- every one of
+    :class:`~pcapkit.const.reg.ethertype.EtherType`'s and
     :class:`~pcapkit.const.ipx.socket.Socket`'s one -- and deliberately keeps
     each one's hex-suffixed name unchanged (PR #878 scoped it this way:
     keeping the existing hex-suffixed name, since the conversion is about not
@@ -1344,12 +1336,10 @@ class UnregisteredMemberNameIsBareTests(unittest.TestCase):
                     offenders.append(f'{path.relative_to(repo_root)}:{node.lineno}: {segment}')
 
         # Sanity: the sweep itself must actually be exercising something.
-        # The floor is the call-site total when #775's final round landed --
-        # the sites tier 1's follow-up touched, those tier 2's #775/#847
-        # ruling added, those #860 step 2's PR 1 added (true call sites, each
-        # override's own ``super()`` forward, and OptionType.get()'s own
-        # paths), AppType's from PR 2, and that final round's on EtherType
-        # and Socket -- so a walk that silently stops finding sites fails.
+        # The floor is the call-site total of the #775/#847 and #860
+        # conversions -- true call sites, each override's own ``super()``
+        # forward, OptionType.get()'s own paths, AppType's, and EtherType's
+        # and Socket's -- so a walk that silently stops finding sites fails.
         self.assertGreaterEqual(call_count, 1065,
                                  f'expected at least 1065 _unregistered_member call sites, found {call_count}')
         # And that the exemption is actually earning its keep, rather than a
@@ -1418,17 +1408,16 @@ class RulingConversionDoesNotMintTests(unittest.TestCase):
                 self.assertIsNot(first, second)
 
 
-#: Registries whose ``_missing_`` legitimately keeps minting on some branches
-#: (real attributed names), so the blanket "no extend_enum left" sweep below
-#: does not apply to them. Empty: GitHub issue #775's final round converts
-#: every branch on :class:`~pcapkit.const.reg.ethertype.EtherType` and
-#: :class:`~pcapkit.const.ipx.socket.Socket`, the two tier 2 left *mixed*.
-#: Kept as an empty-by-construction frozenset so the two subtractions below
+#: Registries whose ``_missing_`` legitimately mints on some branches (real
+#: attributed names), so the blanket "no extend_enum left" sweep below does
+#: not apply to them. Empty: every branch on
+#: :class:`~pcapkit.const.reg.ethertype.EtherType` and
+#: :class:`~pcapkit.const.ipx.socket.Socket` converts, attributed ones
+#: included (#775). Kept as an empty-by-construction frozenset so the two subtractions below
 #: stay self-documenting about *why* nothing is excluded, and so a future
 #: registry that becomes genuinely mixed has a named place to be added.
 #: :class:`EtherTypeMixedMintTests` and :class:`IPXSocketMixedMintTests` prove
-#: the probe each once kept minting does not mint either, alongside the rows
-#: that never did.
+#: their attributed-vendor probes do not mint, alongside the unassigned rows.
 _MIXED_REGISTRIES = frozenset()  # type: frozenset[tuple[str, str]]
 
 
@@ -1438,8 +1427,8 @@ class RulingConversionSourceTests(unittest.TestCase):
     so no lookup can exercise the branch)
     -- and, as a completeness check, for the wholly-converted registries:
     none of their ``_missing_`` bodies may call :func:`~aenum.extend_enum`.
-    :data:`_MIXED_REGISTRIES` is empty, #775's final round having
-    converted both, so nothing is excluded here -- see its own docstring."""
+    :data:`_MIXED_REGISTRIES` is empty, so nothing is excluded here -- see
+    its own comment."""
 
     def test_no_reachable_gap_registries_no_longer_call_extend_enum(self) -> None:
         # EtherType belongs to RULING_CONVERTED_WITH_REACHABLE_GAP: its Old
@@ -1471,8 +1460,8 @@ class RulingConversionSourceTests(unittest.TestCase):
                 self.assertNotIn('extend_enum', source)
 
     def test_ethertype_and_socket_no_longer_call_extend_enum_either(self) -> None:
-        """The two registries tier 2 left mixed: GitHub issue #775's final
-        round leaves no ``extend_enum`` call on either, the same invariant
+        """EtherType and Socket carry no ``extend_enum`` call either (#775),
+        the same invariant
         :meth:`test_every_wholly_converted_registry_no_longer_calls_extend_enum`
         proves for the rest -- named separately because Socket is not a
         member of :data:`RULING_CONVERTED_REGISTRIES`, so the loop above alone
@@ -1488,13 +1477,12 @@ class RulingConversionSourceTests(unittest.TestCase):
 
 
 class EtherTypeMixedMintTests(unittest.TestCase):
-    """:class:`~pcapkit.const.reg.ethertype.EtherType` is tier 2's mixed
-    case: tier 2's ruling converts ``DEC Unassigned`` and the "Old Xerox
-    Experimental..." row and leaves every other attributed vendor block (a
-    real company's own name for its own code) minting. GitHub issue #775's
-    final round converts those too, so no branch mints -- ``EtherType(0x0888)``
-    resolves to an unregistered ``Xyplex_0x0888`` -- and the class keeps its
-    tier-2 name. :meth:`test_formerly_attributed_vendor_block_
+    """:class:`~pcapkit.const.reg.ethertype.EtherType`'s unassigned rows and
+    attributed vendor blocks. The #775/#847 ruling converts ``DEC
+    Unassigned`` and the "Old Xerox Experimental..." row, and #775 converts
+    every attributed vendor block (a real company's own name for its own
+    code) too, so no branch mints -- ``EtherType(0x0888)`` resolves to an
+    unregistered ``Xyplex_0x0888``. :meth:`test_formerly_attributed_vendor_block_
     no_longer_mints` below pins that one named probe (``Xyplex``)."""
 
     def setUp(self) -> None:
@@ -1516,13 +1504,12 @@ class EtherTypeMixedMintTests(unittest.TestCase):
                 self.assertNotIn(value, EtherType._value2member_map_)  # type: ignore[attr-defined]
 
     def test_formerly_attributed_vendor_block_no_longer_mints(self) -> None:
-        """``Xyplex`` (0x0888), the real attributed name tier 2's ruling
-        *kept* minting: GitHub issue #775's final round converts it,
-        preserving the hex-suffixed name exactly as the crawler renders it --
-        PR #878 scoped it this way: keeping the existing hex-suffixed name,
-        since the conversion is about not registering rather than renaming.
-        Same shape as :meth:`test_unassigned_rows_do_not_mint` above, for the
-        one probe tier 2 kept as the exception."""
+        """``Xyplex`` (0x0888), a real attributed name, does not mint (#775):
+        it resolves to an unregistered member with the hex-suffixed name
+        exactly as the crawler renders it -- PR #878 scoped it this way:
+        keeping the existing hex-suffixed name, since the conversion is about
+        not registering rather than renaming. Same shape as
+        :meth:`test_unassigned_rows_do_not_mint` above."""
         from pcapkit.const.reg.ethertype import EtherType
 
         value, name = ETHERTYPE_FORMERLY_KEPT_PROBE
@@ -1542,12 +1529,11 @@ class EtherTypeMixedMintTests(unittest.TestCase):
 
 
 class IPXSocketMixedMintTests(unittest.TestCase):
-    """:class:`~pcapkit.const.ipx.socket.Socket` is tier 2's other mixed
-    case: tier 2's ruling converts ``Experimental`` and the three
-    dynamically/statically assigned labels and leaves ``Registered by
-    Xerox``, the company one, minting. GitHub issue #775's final round
-    converts it too, so ``Socket(0x0010)`` resolves to an unregistered
-    ``Registered by Xerox_0x0010``; see
+    """:class:`~pcapkit.const.ipx.socket.Socket`'s unassigned rows and its
+    attributed one. The #775/#847 ruling converts ``Experimental`` and the
+    dynamically/statically assigned labels, and #775 converts ``Registered
+    by Xerox``, the company one, too, so ``Socket(0x0010)`` resolves to an
+    unregistered ``Registered by Xerox_0x0010``; see
     :meth:`test_registered_by_xerox_no_longer_mints` below."""
 
     def setUp(self) -> None:
@@ -1569,10 +1555,10 @@ class IPXSocketMixedMintTests(unittest.TestCase):
                 self.assertNotIn(value, Socket._value2member_map_)  # type: ignore[attr-defined]
 
     def test_registered_by_xerox_no_longer_mints(self) -> None:
-        """``Registered by Xerox`` (0x0010), the company name tier 2's ruling
-        *kept* minting: GitHub issue #775's final round converts it,
-        preserving the hex-suffixed name exactly as the crawler renders it --
-        same ruling, same reasoning as
+        """``Registered by Xerox`` (0x0010), the company name, does not mint
+        (#775): it resolves to an unregistered member with the hex-suffixed
+        name exactly as the crawler renders it -- same ruling, same reasoning
+        as
         :meth:`EtherTypeMixedMintTests.
         test_formerly_attributed_vendor_block_no_longer_mints`."""
         from pcapkit.const.ipx.socket import Socket
@@ -1630,7 +1616,7 @@ class BespokeUnmintConvertedRegistriesTests(unittest.TestCase):
         reimport_once_per_class(self, restore=True)
 
     def test_unassigned_value_resolves_without_minting(self) -> None:
-        """Swept across all 5: resolves, does not mint, repeated lookup is
+        """Swept across every one of them: resolves, does not mint, repeated lookup is
         equal but not identical -- the same shape as
         :class:`UnassignedRangeDoesNotMintTests` above, generalised to
         registries whose ``_unregistered_member`` is not the generic one."""
@@ -1673,10 +1659,10 @@ class BespokeUnmintConvertedRegistriesTests(unittest.TestCase):
         self.assertEqual(str(member), '[105] Unassigned')
 
     def test_statuscode_every_unassigned_range_resolves_without_minting(self) -> None:
-        """All 8 of :meth:`~pcapkit.const.http.status_code.StatusCode.
+        """Every one of :meth:`~pcapkit.const.http.status_code.StatusCode.
         _missing_`'s ``if`` branches, not just the first -- each is its own
         source line and its own converted call, so covering only one leaves
-        seven untested."""
+        the rest untested."""
         from pcapkit.const.http.status_code import StatusCode
 
         for value in (105, 209, 227, 309, 419, 432, 452, 512):
@@ -1770,7 +1756,7 @@ class BespokeUnmintConvertedRegistriesTests(unittest.TestCase):
     def test_optiontype_get_int_path_no_longer_mints(self) -> None:
         """Guards against :meth:`OptionType.get` minting directly on a miss
         (bypassing ``_missing_`` entirely) -- a second, independent mint
-        site, on the wire-facing path round 2 review measured live
+        site, on the wire-facing path
         (:meth:`pcapkit.protocols.misc.pcapng.PCAPNG._make_pcapng_options`
         calls ``get()`` with raw option-code bytes). The owner's ruling names
         ``get`` explicitly -- the same reason
@@ -1843,27 +1829,26 @@ class BespokeUnmintConvertedRegistriesTests(unittest.TestCase):
 
 
 class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
-    """The 3 open-vocabulary ``StrEnum`` classes -- unlike every other unmint
-    branch converted above or on tier 2, none of these three minted a
-    synthetic numeric placeholder under a procedural label
-    (``Unassigned_%d``, ``Unknown_%d``); each minted the literal, exact
-    string it was asked to resolve, as its own name. That initially read as
-    a case for keeping them minting (the label was never manufactured), but
-    GitHub issue #860 settled it the other way: ``get()`` does not mint,
+    """The open-vocabulary ``StrEnum`` classes -- unlike every other unmint
+    branch above or of tier 2, a miss here would not mint a synthetic
+    numeric placeholder under a procedural label (``Unassigned_%d``,
+    ``Unknown_%d``); it would mint the literal, exact string it was asked to
+    resolve, as its own name. That reads as a case for minting (the label is
+    not manufactured), but GitHub issue #860 settles it the other way: ``get()`` does not mint,
     because only ``register()`` creates a new registry entry, and for these
     registries only IANA-registered values are legitimate -- ``get()``
     simply does not have enough information to build a new one. Concretely:
     :class:`~pcapkit.const.ftp.command.Command` needs ``feat``/``desc``/``type``/``conf`` and
     :class:`~pcapkit.const.http.method.Method` needs
     ``safe``/``idempotent``, neither of which a bare wire string carries, so
-    minting registers a permanently hollowed-out member for each.
+    minting would register a permanently hollowed-out member for each.
     :class:`~pcapkit.const.ftp.command.FEATCode` has no custom ``__new__``
-    at all and needed no override.
+    at all and needs no override.
 
     Both ``_missing_`` and each class's own ``get()`` (a *second*,
     independent mint site bypassing ``_missing_`` entirely, the same shape
-    as :class:`~pcapkit.const.pcapng.option_type.OptionType`'s) are
-    converted, since the owner's reasoning names ``get`` explicitly and
+    as :class:`~pcapkit.const.pcapng.option_type.OptionType`'s) refuse to
+    mint, since the owner's reasoning names ``get`` explicitly and
     leaving it minting while ``_missing_`` does not would be a direct
     contradiction. ``Command``/``Method``'s ``_unregistered_member``
     override canonicalises the member's *name* to upper case and keeps the
@@ -2447,9 +2432,9 @@ class AppTypeUnmintConvertedTests(unittest.TestCase):
         ``_missing_``'s ranges either, so it reaches :meth:`AppType.
         get`'s own, second, independent mint site --
         distinct from the one inside ``_missing_``, and easy to miss when
-        converting only the latter (exactly what round 2 review of #860 step
-        2 PR 1 caught on :class:`~pcapkit.const.pcapng.option_type.
-        OptionType` for the same reason)."""
+        converting only the latter (the same second mint site
+        :class:`~pcapkit.const.pcapng.option_type.OptionType`'s own ``get()``
+        carries)."""
         from pcapkit.const.reg.apptype.tcp import TCP
 
         before = len(TCP.__members__)

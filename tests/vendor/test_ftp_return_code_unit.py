@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 """Regression tests for :mod:`pcapkit.vendor.ftp.return_code`'s empty-row guard.
 
-GitHub issue #518. Fixing the shared ``User-Agent`` got this crawler past the
-Wikipedia 403 it had been taking, and it then died one step further on:
-:meth:`~pcapkit.vendor.ftp.return_code.ReturnCode.process` read ``line[0]`` on
-every row of the registry table, and revision 1354125851 of the article ends that
-table with ``<tr class="mw-empty-elt"></tr>`` -- which is what MediaWiki renders a
-trailing ``|-`` row separator in the wikitext as. It carries no cells at all, so
-``line[0]`` raised ``IndexError: list index out of range`` and took the whole
-crawler down. The guard is ``if len(line) < 2: continue``.
+GitHub issue #518. Past the Wikipedia 403 that the shared ``User-Agent``
+addresses, this crawler meets a cell-less row: revision 1354125851 of the article
+ends the registry table with ``<tr class="mw-empty-elt"></tr>`` -- which is what
+MediaWiki renders a trailing ``|-`` row separator in the wikitext as. It carries
+no cells at all, so a :meth:`~pcapkit.vendor.ftp.return_code.ReturnCode.process`
+that reads ``line[0]`` on every row raises ``IndexError: list index out of
+range`` and takes the whole crawler down. The guard is
+``if len(line) < 2: continue``.
 
-That guard is the most fragile line in the #518 change and it had no test: the
-suite's other cases all run against the hand-maintained IPX table or a mocked
-fetch, so none of them ever sees a cell-less row. This module is that test.
+That guard needs a test of its own: the suite's other cases all run against the
+hand-maintained IPX table or a mocked fetch, so none of them sees a cell-less
+row.
 
 **The fixture is built inline and parsed with the same ``html5lib`` the crawler
 uses**, rather than fetched. Two reasons: the unit tier makes no network call, and

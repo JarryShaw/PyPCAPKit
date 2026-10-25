@@ -1,9 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Unit tests for :mod:`pcapkit.protocols.application.ospf`.
-
-Relocated from ``tests/protocols/link/test_link_unit.py`` with the module
-itself, under :issue:`719`.
-"""
+"""Unit tests for :mod:`pcapkit.protocols.application.ospf`."""
 from __future__ import annotations
 
 import importlib.util

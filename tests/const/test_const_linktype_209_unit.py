@@ -1,44 +1,41 @@
 # -*- coding: utf-8 -*-
 """``LinkType(209)`` must resolve to the current name, not the legacy one.
 
-GitHub issue #844: :mod:`pcapkit.const.reg.linktype` declared two members for
-value ``209`` -- ``IPMB_LINUX`` first, ``I2C_LINUX`` second -- so
+GitHub issue #844: guards against :mod:`pcapkit.const.reg.linktype` declaring
+``IPMB_LINUX`` ahead of ``I2C_LINUX`` for value ``209``, under which
 :class:`~aenum.IntEnum`'s "first member defined for a value is canonical" rule
-made ``LinkType(209).name`` resolve to ``'IPMB_LINUX'``, the name tcpdump's own
+makes ``LinkType(209).name`` resolve to ``'IPMB_LINUX'``, the name tcpdump's own
 registry (and the generated comment above it) labels "Legacy names (do not
-use)". Traced to commit ``cfdf2ab5c7`` (2024-05-04): a regeneration inserted
-the legacy row above the current one, because tcpdump's
+use)". Traced to commit ``cfdf2ab5c7`` (2024-05-04), a regeneration that
+inserted the legacy row above the current one, because tcpdump's
 ``http://www.tcpdump.org/linktypes.html`` table lists them in exactly that
 order -- ``LINKTYPE_IPMB_LINUX`` (209, marked legacy in its notes column)
 ahead of ``LINKTYPE_I2C_LINUX`` (209, the current name). 209 is the *only*
 value the table double-assigns, and that legacy note is the only occurrence of
-the word "legacy" anywhere in it (measured directly against a live fetch while
-fixing this).
+the word "legacy" anywhere in it (measured directly against a live fetch).
 
-The fix is in the generator, :mod:`pcapkit.vendor.reg.linktype`, not in the
-generated file: :meth:`~pcapkit.vendor.reg.linktype.LinkType.process`
-sinks any row whose notes column mentions "legacy" into a bucket appended
+The generator, :mod:`pcapkit.vendor.reg.linktype`, holds the ordering rather
+than the generated file: :meth:`~pcapkit.vendor.reg.linktype.LinkType.process`
+sinks a row whose notes column mentions "legacy" into a bucket appended
 *after* every other row, so the current name is always the first one defined
 for a shared value regardless of the source table's own row order.
 
-GitHub issue #852, a follow-up to the cross-review of #848, pointed out that
-the original predicate tested the notes column for the word "legacy" alone,
-with no check that the row's value was actually claimed by another row --
-meaning a future *current* row whose notes happened to mention "legacy" about
-some unrelated code would be wrongly sunk, and a single ``USER0``-style range
-row would sink all sixteen expanded members at once instead of none.
+GitHub issue #852 (from the cross-review of #848) adds that a predicate testing
+the notes column for the word "legacy" alone, with no check that the row's value
+is actually claimed by another row, would wrongly sink a future *current* row
+whose notes happen to mention "legacy" about some unrelated code, and would sink
+all sixteen expanded members of a single ``USER0``-style range row at once
+instead of none.
 :meth:`~pcapkit.vendor.reg.linktype.LinkType.process` only sinks a
 single-value row when its value is a genuine duplicate elsewhere in the same
 table, and never routes a range row through the sink at all.
 
-The cross-review of #852 itself then caught a second-order regression: the
-first cut of the duplicate-value pre-scan counted only single-value rows, so a
-value duplicated *across a range boundary* -- a single-value row sharing a
-value with one member of a ``USER0``-style range -- was invisible to it, and
-that row's legacy alias was not sunk even when correctly worded. The
-pre-scan expands ``a–b`` ranges the same way the main loop does
-before counting, so no duplicate is missed regardless of which branch the
-value comes from.
+A duplicate-value pre-scan counting only single-value rows would miss a value
+duplicated *across a range boundary* -- a single-value row sharing a value with
+one member of a ``USER0``-style range -- and leave that row's legacy alias
+unsunk even when correctly worded. The pre-scan expands ``a–b`` ranges the
+same way the main loop does before counting, so no duplicate is missed
+regardless of which branch the value comes from.
 
 This module pins both the symptom and the root cause:
 
@@ -48,7 +45,7 @@ This module pins both the symptom and the root cause:
 - :class:`LinkTypeGeneratorLegacyOrderingTests` -- against
   :meth:`~pcapkit.vendor.reg.linktype.LinkType.process` directly, fed a
   two-row fixture reproducing tcpdump's own HTML for value 209 byte-for-byte
-  (captured from a live fetch while diagnosing this issue). Needs no network:
+  (captured from a live fetch). Needs no network:
   the fixture *is* the table row, not a fetch of it, so this stays reliable in
   CI while still exercising the exact code path a real crawl runs. A
   regeneration that drops the fix reintroduces the wrong order here before it
@@ -59,8 +56,8 @@ This module pins both the symptom and the root cause:
   one regardless of which table position it occupies.
 - :class:`LinkTypeGeneratorRangeSinkIsolationTests` -- issue #852 item 2: a
   single range row's wording must never sink its whole expansion.
-- :class:`LinkTypeGeneratorCrossRangeDuplicateTests` -- the #852 cross-review
-  regression: a single-value row's legacy wording must still be honoured when
+- :class:`LinkTypeGeneratorCrossRangeDuplicateTests` -- #852's cross-range
+  case: a single-value row's legacy wording must still be honoured when
   the value it duplicates belongs to a range row, not another single-value
   one.
 
@@ -84,7 +81,7 @@ __tier__ = 'ALL'
 #: ``dark={'test': ('html5lib',), 'gate': ('html5lib',)}``.
 #:
 #: ``html5lib`` is the one that is actually missing on ``test``: ``requests`` and
-#: ``bs4`` have shipped in the ``test`` extra since #507, but only
+#: ``bs4`` are in the ``test`` extra (#507), but only
 #: ``beautifulsoup4[html5lib]`` -- the ``vendor`` and ``dev`` extras -- provides a
 #: parser (their entries in :file:`pyproject.toml`, and the ``test`` extra's comment
 #: on ``beautifulsoup4`` saying so deliberately).
@@ -432,7 +429,7 @@ class LinkTypeGeneratorRangeSinkIsolationTests(unittest.TestCase):
 
 #: A single-value legacy row for 900, followed by a range row that expands to
 #: include 900 among its members (``USER0``..``USER3`` == 900-903). This is
-#: the #852 cross-review's own repro: value 900 is a genuine duplicate, but
+#: #852's cross-range case: value 900 is a genuine duplicate, but
 #: only because one of its two occurrences comes from a *range* expansion --
 #: a duplicate-value pre-scan that counts only single-value rows never sees
 #: it, so ``OLDUSER``'s "legacy" wording is silently ignored and the
@@ -462,19 +459,18 @@ An ordinary user-defined range.
 
 @unittest.skipUnless(HAS_VENDOR_DEPS, 'requests, bs4 and/or html5lib not installed')
 class LinkTypeGeneratorCrossRangeDuplicateTests(unittest.TestCase):
-    """The #852 cross-review's regression: a value duplicated *across* a range boundary.
+    """#852's cross-range case: a value duplicated *across* a range boundary.
 
-    The first cut of the duplicate-value pre-scan built ``dup_values`` from
+    Guards against a duplicate-value pre-scan that builds ``dup_values`` from
     only the single-value rows (filtering the notes column's number on
-    ``str.isdigit()``), so a range row's expanded values never entered the
-    count. A single-value row sharing one of *those* values -- ``900``,
+    ``str.isdigit()``), under which a range row's expanded values never enter
+    the count. A single-value row sharing one of *those* values -- ``900``,
     shared here with the first member of a ``USER0``..``USER3`` range
-    covering 900-903 -- was therefore never recognised as a duplicate, and
-    its correctly-worded "legacy" notes were silently ignored: it landed in
+    covering 900-903 -- is then never recognised as a duplicate, and its
+    correctly-worded "legacy" notes are silently ignored: it lands in
     ``enum`` instead of ``legacy``, ahead of the range it duplicates, making
-    the deprecated ``OLDUSER`` canonical for value 900 instead of ``USER0``.
-    That is exactly the failure mode #844 and #852 both exist to close,
-    reopened by narrowing the predicate. :meth:`process`'s pre-scan
+    the deprecated ``OLDUSER`` canonical for value 900 instead of ``USER0``
+    -- exactly the failure mode #844 and #852 exist to close. :meth:`process`'s pre-scan
     expands ``a–b`` ranges the same way the main loop does before counting,
     so this duplicate is caught regardless of which branch either occurrence
     comes from.
@@ -573,23 +569,22 @@ The current name for this link type.
 
 @unittest.skipUnless(HAS_VENDOR_DEPS, 'requests, bs4 and/or html5lib not installed')
 class LinkTypeGeneratorSignedOrUnderscoredValueTests(unittest.TestCase):
-    """The second #852 cross-review's regression: ``_expand``'s recognition set was too narrow.
+    """#852's signed and underscored values: ``_expand`` must recognise what the main loop does.
 
-    The pre-scan's single-value branch tested ``str.isdigit()``, which is
-    narrower than the main loop's own acceptance test, ``int(temp)`` --
+    Guards against the pre-scan's single-value branch testing ``str.isdigit()``,
+    which is narrower than the main loop's own acceptance test, ``int(temp)`` --
     ``int()`` also accepts a leading sign (``+209``, ``-5``) and PEP 515
     underscore grouping (``2_09``). A value the main loop accepts but
     ``_expand`` does not is invisible to ``dup_values``, so a correctly
     "legacy"-worded row sharing that value silently stops being sunk -- the
-    same class of under-count the range-expansion fix above closes, just for
-    a different reason ``_expand`` can fail to recognise a value.
+    same class of under-count as the cross-range case above, just for a
+    different reason ``_expand`` can fail to recognise a value.
 
     Not reachable against tcpdump's table as vendored here: every committed
     member matches a plain unsigned decimal, so this is a latent
-    hole rather than a live defect, exactly as #844 and #852's original
-    word-only rule was. :meth:`process`'s ``_expand`` tries ``int(temp)``
-    directly, before the en-dash range check, so it recognises the same
-    values the main loop does.
+    hole rather than a live defect, as #852's word-only rule is.
+    :meth:`process`'s ``_expand`` tries ``int(temp)`` directly, before the
+    en-dash range check, so it recognises the same values the main loop does.
     """
 
     def setUp(self) -> None:

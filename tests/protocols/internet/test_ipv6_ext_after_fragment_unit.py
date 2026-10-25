@@ -1,14 +1,15 @@
 # -*- coding: utf-8 -*-
 """An IPv6 extension header behind a first fragment dissects as without it.
 
-GitHub issue #1539: :class:`~pcapkit.protocols.internet.ipv6.IPv6` ended its
-extension header walk at every Fragment header, and handed what followed to the
-upper-layer dispatch. That dispatch neither passes ``extension=True`` nor
-``version=6``, so Shim6 failed :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`'s
-version gate, and a zero-filled HIP header or a Routing header of type 3 raised
-with no :class:`IPv6_Ext` to stand in. Each became a plain
-:class:`~pcapkit.protocols.misc.raw.Raw` leaf, so the TCP behind it was never
-dissected, though it was without the Fragment header.
+GitHub issue #1539: guards against :class:`~pcapkit.protocols.internet.ipv6.IPv6`
+ending its extension header walk at every Fragment header and handing what
+follows to the upper-layer dispatch. That dispatch neither passes
+``extension=True`` nor ``version=6``, so Shim6 fails
+:class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext`'s version gate, and a
+zero-filled HIP header or a Routing header of type 3 raises with no
+:class:`IPv6_Ext` to stand in. Each becomes a plain
+:class:`~pcapkit.protocols.misc.raw.Raw` leaf, so the TCP behind it is never
+dissected, though it is without the Fragment header.
 
 :rfc:`8200#section-4.5` puts every header through the upper-layer one in the
 first fragment, at offset zero, so the walk goes on past its Fragment header.
@@ -122,8 +123,9 @@ class TestIPv6ExtAfterFragment(unittest.TestCase):
                     self.assert_rebuilds(ipv6)
 
     def test_first_fragment_walks_a_dedicated_header(self) -> None:
-        # Destination Options reached TCP behind a first fragment before, but as
-        # an upper layer holding it, not as an extension header beside it
+        # Without the #1539 fix, Destination Options reaches TCP behind a first
+        # fragment too, but as an upper layer holding it, not as an extension
+        # header beside it
         from pcapkit.protocols.internet.ipv6_frag import IPv6_Frag
         from pcapkit.protocols.internet.ipv6_opts import IPv6_Opts
 

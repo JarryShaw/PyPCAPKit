@@ -321,9 +321,9 @@ class SchemaUnitTests(unittest.TestCase):
             spare: int = UInt8Field()
             trailer: list[int] = ListField(length=2, item_type=UInt8Field())
 
-        # the guard read ``hasattr(cls, '__init__')``, which every class satisfies
-        # through :obj:`object`, so the generated method was never installed and
-        # ``__init__`` stayed bound to ``Schema.__update__``
+        # a guard reading ``hasattr(cls, '__init__')``, which every class
+        # satisfies through :obj:`object`, never installs the generated method,
+        # and ``__init__`` stays bound to ``Schema.__update__``
         self.assertIsNot(HeaderSchema.__init__, Schema.__update__)
         self.assertEqual(HeaderSchema.__init__.__qualname__, 'HeaderSchema.__init__')
 
@@ -505,7 +505,7 @@ class SchemaUnitTests(unittest.TestCase):
         :class:`~pcapkit.corekit.fields.misc.SchemaField` hands the live file
         straight down. Reporting the raw stream position then names an offset
         outside the field: the same three-octet area that fails at offset 3 below
-        reported offset 5 when the stream was two octets in.
+        would report offset 5, the stream being two octets in.
 
         """
         from pcapkit.utilities.exceptions import FieldValueError

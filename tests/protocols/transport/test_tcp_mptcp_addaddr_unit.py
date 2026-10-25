@@ -214,11 +214,11 @@ class TCPMPTCPAddAddressUnitTests(unittest.TestCase):
 class TCPMPTCPUnpackUnitTests(unittest.TestCase):
     """Spec-correct MPTCP option octets parse into a :class:`TCP`, field by field.
 
-    Every case above builds an option and packs it; none of them ever asks the library
-    to *parse* one, so the identical off-by-two that broke packing -- ``MPTCPAddAddress``
-    (and its siblings) reading the ``kind`` octet as their own first field, because
-    ``MPTCP`` supplied no real ``kind``/``length`` fields for anything ahead of it to
-    consume -- shipped unpinned on the read side. These two do not construct anything
+    Every case above builds an option and packs it; none of them asks the library to
+    *parse* one, so the off-by-two that breaks packing -- ``MPTCPAddAddress`` (and its
+    siblings) reading the ``kind`` octet as their own first field, when ``MPTCP``
+    supplies no real ``kind``/``length`` fields for anything ahead of it to consume --
+    needs pinning on the read side too. These two do not construct anything
     through a maker at all: :data:`ADD_ADDR_SPEC_OCTETS` and :data:`MP_PRIO_SPEC_OCTETS`
     are hand-built from the RFC 8684 figures, spliced into a real TCP segment by
     :func:`build_tcp_segment`, and parsed back through :class:`TCP` proper.

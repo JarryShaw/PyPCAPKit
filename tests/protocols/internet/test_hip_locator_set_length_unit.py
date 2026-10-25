@@ -45,7 +45,8 @@ plain then SPI       9               **59**  56
 SPI then plain       9               **60**  56
 ===================  ==============  ======  =========================
 
-Four of the seven were not even multiples of eight. A sweep over n = 1..5 of
+The SPI-bearing and mixed shapes were not even multiples of eight, nor was the
+empty one. A sweep over n = 1..5 of
 plain locators passes by cancellation without the fix and would pass a half-fix
 too, so it discriminates nothing; the empty set, the SPI-bearing variant and a
 mixed set in both orders are the shapes that do.
@@ -136,7 +137,7 @@ def rfc_total(length: 'int') -> 'int':
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class HIPLocatorSetLengthTests(unittest.TestCase):
-    """``LOCATOR_SET``'s ``Length`` unit and padding source, over seven shapes."""
+    """``LOCATOR_SET``'s ``Length`` unit and padding source, over every shape."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)
@@ -195,14 +196,14 @@ class HIPLocatorSetLengthTests(unittest.TestCase):
                 self.assertEqual(raw[2:4], contents.to_bytes(2, 'big'))
 
     def test_the_three_plain_shapes_keep_the_octet_counts_main_emitted(self) -> None:
-        """n = 1, 2, 5 still pack 32, 56 and 128 octets.
+        """n = 1, 2, 5 pack 32, 56 and 128 octets.
 
-        The one part of this parameter that was already right, and the reason
-        #651 and #664 left it alone. Those three are the shapes where the two
-        defects cancelled exactly, so they are also the three that a correct fix
-        must not move -- if they change, something has gone wrong even though
-        every other shape improved. Only the two ``Length`` octets differ from
-        ``f0999858e``: ``0004`` became ``0018`` at n = 1, and so on.
+        These are the shapes where the two defects cancel exactly, and the
+        reason #651 and #664 left this parameter alone, so they are also the
+        three a correct fix must not move -- if they change, something has gone
+        wrong whatever the other shapes do. Only the two ``Length`` octets
+        differ from ``f0999858e``: ``0018`` at n = 1 where it packed ``0004``,
+        and so on.
         """
         for locators, total, length in (([PLAIN], 32, 24),
                                         ([PLAIN, PLAIN], 56, 48),
@@ -288,8 +289,8 @@ class HIPLocatorSetLengthTests(unittest.TestCase):
         than what it read.
 
         The residual warnings are asserted to be absent *at the parameter level*
-        only for the empty shape. Every nested :class:`Locator` still raises six
-        of them, one per field, because ``SchemaField`` seeds a nested schema's
+        only for the empty shape. Every nested :class:`Locator` raises one of
+        them per field, because ``SchemaField`` seeds a nested schema's
         ``__length__`` at the ``-1`` placeholder
         :meth:`Schema.pack <pcapkit.protocols.schema.schema.Schema.pack>`
         documents; that is unrelated to ``Length`` units, and it fires once per

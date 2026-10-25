@@ -113,9 +113,9 @@ class ValueLookupTests(unittest.TestCase):
 
     def test_an_exact_name_match_still_wins_and_ignores_a_supplied_default(self) -> None:
         """The base's own precedence (name before value) survives the
-        delegation, and ``default`` is never consulted on a hit -- matching
-        the pre-#908 behaviour where a resolved ``key`` ignored ``default``
-        entirely."""
+        delegation, and ``default`` is never consulted on a hit -- a resolved
+        ``key`` ignores ``default`` entirely, with or without #908's
+        delegation."""
         from pcapkit.const.http.method import Method
 
         self.assertIs(Method.get('GET', default='IGNORED'), Method.GET)
@@ -154,8 +154,9 @@ class PreservedBehaviourTests(unittest.TestCase):
 
 
 class DefaultSignatureTests(unittest.TestCase):
-    """``default`` keeps its pre-#908 meaning rather than widening to the
-    base's ``NO_DEFAULT`` sentinel -- see the module docstring's reasoning."""
+    """``default`` keeps its own meaning, the unregistered member's value,
+    rather than widening to the base's ``NO_DEFAULT`` sentinel -- see the
+    module docstring's reasoning."""
 
     def test_default_still_names_the_unregistered_members_value(self) -> None:
         """Omitted or ``None``, ``default`` uses ``key`` itself; supplied,
@@ -289,7 +290,7 @@ class NonStrKeyTests(unittest.TestCase):
 
         # NOTE: ``inspect.getsource(Method.get)`` rather than
         # ``Method.get.__func__``, which a ``staticmethod`` does not carry --
-        # so against the pre-#908 module this would die with
+        # so against a ``staticmethod`` ``get`` (#908) this would die with
         # :exc:`AttributeError` before reaching a single assertion, and would
         # be pinning ``classmethod``-ness (already pinned by
         # :class:`DefaultSignatureTests`) rather than the docstring it is

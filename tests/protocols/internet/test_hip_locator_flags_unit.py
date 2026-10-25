@@ -2,10 +2,11 @@
 """HIP ``LOCATOR_SET`` keeps the seven reserved bits of each locator's flags octet.
 
 GitHub issue #1365. :rfc:`8046#section-4` lays the fourth octet of a locator out
-as ``Reserved`` (7 bits) followed by ``P`` (1 bit). ``Locator.flags`` declared only
-``preferred: (7, 1)``, so the seven high-order bits were dropped on rebuild: flags
-``0xfe`` parsed and rebuilt through ``from_data`` as ``0x00``. The fix names them
-``reserved: (0, 7)``, per the #654 per-site policy, and carries them through
+as ``Reserved`` (7 bits) followed by ``P`` (1 bit). Declaring only
+``preferred: (7, 1)`` in ``Locator.flags`` drops the seven high-order bits on
+rebuild: flags ``0xfe`` parse and rebuild through ``from_data`` as ``0x00``.
+``Locator.flags`` names them ``reserved: (0, 7)``, per the #654 per-site policy,
+and carries them through
 :class:`~pcapkit.protocols.data.internet.hip.Locator` and ``make()``.
 
 Every case builds its own octets in memory and reads no capture. Classes are

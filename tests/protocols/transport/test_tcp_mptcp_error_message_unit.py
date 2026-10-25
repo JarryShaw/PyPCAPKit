@@ -194,7 +194,7 @@ class TCPMPTCPErrorMessageUnitTests(unittest.TestCase):
                 self.assertNotIn(DOUBLED_PREFIX, str(caught.exception))
 
     def test_no_doubled_separator_survives_anywhere_in_the_module(self) -> None:
-        """The source-level sweep, so a fifth site cannot be added unnoticed.
+        """The source-level sweep, so another site cannot be added unnoticed.
 
         A test that pins only the known strings would not notice another
         appearing, so the absence is asserted over the whole file -- and the

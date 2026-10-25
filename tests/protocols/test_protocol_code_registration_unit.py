@@ -101,9 +101,9 @@ class ProtocolCodeOptInTests(unittest.TestCase):
     def test_unrecognised_class_keyword_raises_unsupportedcall(self) -> None:
         """A misspelled keyword raises rather than being silently swallowed.
 
-        Before this hook existed, extra keywords fell into ``**kwargs`` and
-        were dropped by the bare ``super().__init_subclass__()`` -- no
-        exception, no warning. ``codes=`` (plural) is the natural typo for
+        Without this hook, extra keywords fall into ``**kwargs`` and are
+        dropped by a bare ``super().__init_subclass__()`` -- no exception, no
+        warning. ``codes=`` (plural) is the natural typo for
         ``code=``, and does not collide with :meth:`abc.ABCMeta.__new__`.
         """
         from pcapkit.protocols.internet.internet import Internet

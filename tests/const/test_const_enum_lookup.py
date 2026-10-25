@@ -19,24 +19,23 @@ two defects -- and the fix -- stay pinned: a future regeneration of the
 fail this suite rather than silently reintroducing GitHub issue #492.
 
 That sweep deliberately skips :class:`~aenum.IntFlag`, on the grounds that it is
-"a different value-lookup contract" -- which is exactly why it did not catch
+"a different value-lookup contract" -- which is exactly why it cannot catch
 GitHub issue #623, a third lookup defect of the same family living in the class
-of enum it excluded. The four Mobility Header flag enumerations overrode
-``_missing_`` with a body ending in ``return cls(value)``, the same constructor
-that had just failed to find the value, so every in-range value that is not
-already a member re-entered ``_missing_`` unbounded and raised
+of enum it excludes. It guards against the Mobility Header flag enumerations
+overriding ``_missing_`` with a body ending in ``return cls(value)``, the same
+constructor that has just failed to find the value, under which every in-range
+value that is not already a member re-enters ``_missing_`` unbounded and raises
 :exc:`RecursionError`. Because their members are single bits, the reachable hole
-was ``0`` -- no flags set -- and every composite of two defined bits. Overriding
-``_missing_`` at all is what caused it: the override shadowed the ``aenum``
-:class:`~aenum.Flag` machinery that resolves precisely those values, which is why
-:class:`~pcapkit.const.tcp.flags.Flags`, which at the time defined no
-``_missing_``, never had the defect -- and, as GitHub issue #647 then found, had
-no range guard either, so it resolved *any* integer and ``Flags(-1)`` read back
-as every TCP header flag set at once. It carries the same guard ending in
-``return super()._missing_(value)``, which is what keeps issue #623 fixed while
-issue #647 is too; :mod:`tests.const.test_const_enum_builtin_parity` is where
-that lands. :class:`~pcapkit.const.mh.binding_ack_flag.BindingACKFlag` and its
-three siblings end in that same tail, the one
+is ``0`` -- no flags set -- and every composite of two defined bits. Such an
+override shadows the ``aenum`` :class:`~aenum.Flag` machinery that resolves
+precisely those values. Defining no ``_missing_`` at all avoids that, but -- as
+GitHub issue #647 finds for :class:`~pcapkit.const.tcp.flags.Flags` -- leaves no
+range guard either, so *any* integer resolves and ``Flags(-1)`` reads back as
+every TCP header flag set at once. ``Flags`` carries the same guard ending in
+``return super()._missing_(value)``, which keeps both issues fixed;
+:mod:`tests.const.test_const_enum_builtin_parity` is where that lands.
+:class:`~pcapkit.const.mh.binding_ack_flag.BindingACKFlag` and its siblings end
+in that same tail, the one
 :mod:`pcapkit.vendor.default` emits for every other generated enumeration. So
 this module carries a companion sweep over the :class:`~aenum.IntFlag` classes,
 covering the contract the :class:`~aenum.IntEnum` sweep declines to.
@@ -196,12 +195,10 @@ class ConstEnumZeroLookupTests(unittest.TestCase):
         # Pins the size of the sweep itself: if this drifts, a const enum was
         # added, removed, or renamed, and EXPECTED_TO_REJECT_ZERO (and the
         # analysis in GitHub issue #492) needs a fresh look rather than a
-        # silent pass. 112 rather than 111 since GitHub issue #808: dropping
-        # ``TransportProtocol``'s ``IntFlag`` base moved it from
-        # ``_iter_const_int_flags`` into this sweep. 114 rather than 112 since
-        # GitHub issue #880's ngap.ProcedureCode and ngap.ProtocolIE joined
-        # this sweep, moved onto EnumRegistry from hand-rolled IntEnum classes
-        # in pcapkit.protocols.application.ngap.
+        # silent pass. ``TransportProtocol`` has no ``IntFlag`` base (GitHub
+        # issue #808), so it is in this sweep rather than
+        # ``_iter_const_int_flags``'s, and so are GitHub issue #880's
+        # ngap.ProcedureCode and ngap.ProtocolIE, which are on EnumRegistry.
         names = {f'{obj.__module__}.{obj.__qualname__}' for obj in self.enums}
         self.assertEqual(len(self.enums), 114)
         self.assertTrue(EXPECTED_TO_REJECT_ZERO.issubset(names),
@@ -245,9 +242,9 @@ class ConstMissingClassmethodTests(unittest.TestCase):
     aenum invokes lookup failures as ``cls._missing_(value)``. Without
     ``@classmethod``, the sole positional argument binds to ``cls`` and
     ``value`` goes unfilled, so *every* call raises :class:`TypeError` instead
-    of running the intended fallback body -- see GitHub issue #492 (LOW
-    severity there because, at the time, nothing reachable at runtime ever
-    triggered the broken path).
+    of running the intended fallback body -- see GitHub issue #492, which
+    rates it LOW severity because nothing reachable at runtime triggers the
+    broken path.
 
     """
 
@@ -314,9 +311,8 @@ class ConstFlagMissingRecursionTests(unittest.TestCase):
     def test_the_sweep_size_is_pinned(self) -> None:
         """A flag enum added or removed needs a fresh look, not a silent pass.
 
-        6 rather than 7 since GitHub issue #808: dropping
-        ``TransportProtocol``'s ``IntFlag`` base moved it out of this sweep and
-        into ``_iter_const_int_enums`` instead.
+        ``TransportProtocol`` has no ``IntFlag`` base (GitHub issue #808), so
+        it is in ``_iter_const_int_enums``'s sweep rather than this one.
         """
         names = {f'{obj.__module__}.{obj.__qualname__}' for obj in self.flags}
         self.assertEqual(len(self.flags), 6)

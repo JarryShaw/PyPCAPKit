@@ -481,8 +481,8 @@ class EnumSchemaRegistryOverwriteTests(unittest.TestCase):
     def test_declaring_a_subclass_with_fresh_codes_stays_quiet(self) -> None:
         """Every ordinary schema declaration must stay silent.
 
-        This is the case that governs whether ``import pcapkit`` is noisy: 326
-        registry writes happen during import, and a guard that warned on a
+        This is the case that governs whether ``import pcapkit`` is noisy:
+        hundreds of registry writes happen during import, and a guard that warned on a
         first-time declaration would fire on the great majority of them. Covers
         the iterable form of ``code`` as well, which is the branch that shares
         the guard.
@@ -503,8 +503,8 @@ class EnumSchemaRegistryOverwriteTests(unittest.TestCase):
 
         self.assertEqual(self._registry_warnings(caught, RegistryWarning), [])
 
-        # The iterable branch was restructured into a single loop to carry the
-        # guard once; assert it still registers every code it was given.
+        # The iterable branch carries the guard in a single loop; assert it
+        # registers every code it is given.
         self.assertIs(BaseSchema.registry[Code.one], Single)
         self.assertIs(BaseSchema.registry[Code.two], Several)
         self.assertIs(BaseSchema.registry[Code.three], Several)

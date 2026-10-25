@@ -261,8 +261,8 @@ class HTTPv2DataFramePayloadLengthUnitTests(FramePayloadMixin, unittest.TestCase
     def test_padded_data_frame_keeps_its_payload_and_drops_its_padding(self) -> None:
         """A padded ``DATA`` frame's payload survives, padding excluded.
 
-        The arm that already worked, asserted so that a fix cannot repair the
-        unpadded case by breaking this one. :data:`PADDING` is non-zero, so a
+        The padded arm, asserted so that a fix cannot repair the unpadded case
+        by breaking this one. :data:`PADDING` is non-zero, so a
         callback that stopped subtracting it would hand back
         ``DATA_PAYLOAD + PADDING`` and be caught here rather than pass on an
         equal length.
@@ -370,14 +370,14 @@ class HTTPv2HeadersFramePayloadLengthUnitTests(FramePayloadMixin, unittest.TestC
         """``pad_len`` accounting for the whole area leaves ``fragment`` empty.
 
         The zero-length boundary, and it is load-bearing rather than decorative.
-        A cross-review on a second model found that without this case -- and its
-        ``PUSH_PROMISE`` and ``PRIORITY`` counterparts below -- the module was
-        satisfied by a wrong fix returning ``max(computed, 1)`` for these two
-        fields, since every other fixture here has a non-empty fragment and so
-        never asks the callback for ``0``. Measured under that mutation: this
+        Without this case -- and its ``PUSH_PROMISE`` and ``PRIORITY``
+        counterparts below -- the module is satisfied by a wrong fix
+        returning ``max(computed, 1)`` for these two fields, since every other
+        fixture here has a non-empty fragment and so never asks the callback
+        for ``0``. Measured under that mutation: this
         frame's ``fragment`` came back ``b'\\xde'`` -- one padding octet leaked in
-        -- alongside a swallowed ``SchemaWarning: packet length < 0: -1``, and all
-        15 of the other tests still passed. :meth:`FramePayloadMixin.parse`
+        -- alongside a swallowed ``SchemaWarning: packet length < 0: -1``, and every
+        other test in the module still passed. :meth:`FramePayloadMixin.parse`
         requiring silence is what turns that warning into a failure.
 
         """
@@ -457,7 +457,7 @@ class HTTPv2PushPromiseFramePayloadLengthUnitTests(FramePayloadMixin, unittest.T
         The zero-length boundary for this frame -- see
         :meth:`HTTPv2HeadersFramePayloadLengthUnitTests.\
 test_a_padded_headers_frame_of_only_padding_reads_an_empty_fragment`
-        for the wrong fix that passed the module before this case existed. The
+        for the wrong fix that passes the module without the zero-length cases. The
         promised stream identifier is asserted as well, since it is the field
         immediately ahead of the fragment and the one an offset error would
         borrow from.
@@ -631,8 +631,8 @@ class HTTPv2PayloadLengthCallbackUnitTests(unittest.TestCase):
     def test_the_padded_arm_subtracts_exactly_the_padding_length(self) -> None:
         """With ``PADDED`` set the callback returns ``__length__ - pad_len``.
 
-        The arm that always worked, pinned at the level of the number so that a
-        change to the unpadded arm cannot quietly move this one. ``pad_len``'s
+        The padded arm, pinned at the level of the number so that a change to
+        the unpadded arm cannot quietly move this one. ``pad_len``'s
         own octet is *not* subtracted here, because the field that read it has
         already decremented ``__length__`` by one.
 
@@ -653,8 +653,8 @@ class HTTPv2PayloadLengthCallbackUnitTests(unittest.TestCase):
         ``0`` is a legitimate answer -- a frame whose padding fills its whole
         payload area has a zero-length payload -- so the callback must be able to
         return it. Pinned as a number because a clamp is the shape of wrong fix
-        the wire tests above could not see until their zero-length cases were
-        added: ``max(computed, 1)`` satisfies every non-empty fixture and only
+        the wire tests above see only through their zero-length cases:
+        ``max(computed, 1)`` satisfies every non-empty fixture and only
         shows up here and at that boundary.
 
         """

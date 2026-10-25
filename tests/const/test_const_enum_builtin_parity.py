@@ -136,8 +136,8 @@ BESPOKE_TEMPLATES = {
 }
 
 #: The pair GitHub issue #804 finished, as ``(vendor module, class name, const
-#: module)``. Their templates are the two of :data:`BESPOKE_TEMPLATES`' four
-#: that #798 left on ``%``-formatted ``__repr__`` methods.
+#: module)``. Their templates are those of :data:`BESPOKE_TEMPLATES` that #798
+#: left on ``%``-formatted ``__repr__`` methods.
 ISSUE_804_PAIR = (
     ('pcapkit.vendor.ftp.command', 'Command', 'pcapkit.const.ftp.command'),
     ('pcapkit.vendor.http.method', 'Method', 'pcapkit.const.http.method'),
@@ -153,9 +153,8 @@ ISSUE_804_PAIR = (
 #: ``pcapkit.const.http.{error_code,frame,setting}``, whose ``%`` lives in
 #: their ``_missing_`` guard (inherited from the *shared*
 #: :mod:`pcapkit.vendor.default` template) and which the issue's own last
-#: comment split back out, plus ``pcapkit.const.reg.apptype.apptype`` (already
-#: an f-string since #792, and off the table anyway while PR #815
-#: owns that tree). What is left with an actual ``%``-formatted ``__repr__``
+#: comment split back out, plus ``pcapkit.const.reg.apptype.apptype`` (an
+#: f-string, #792). What is left with an actual ``%``-formatted ``__repr__``
 #: is exactly these three -- each its own bespoke vendor template, like
 #: :data:`ISSUE_804_PAIR`'s pair, so each gets a const half and a vendor half.
 ISSUE_818_TRIPLE = (
@@ -365,30 +364,23 @@ class ConstEnumBuiltinParityTests(unittest.TestCase):
                 if issubclass(obj, int) and not issubclass(obj, aenum.Flag)]
 
         # The decomposition is asserted, not just the total, so this sweep stays
-        # in step with the three narrower ones it overlaps: 112 non-flag IntEnum
-        # and 6 IntFlag in tests.const.test_const_enum_lookup, and 118 -- their
-        # sum, unchanged -- in tests.const.test_const_enum_get. GitHub issue #808
-        # moved ``TransportProtocol`` from the flag count to the int count by
-        # dropping its ``IntFlag`` base, one for one, so the sum each of those
-        # counts on stays the same even though the two addends moved.
+        # in step with the three narrower ones it overlaps: the non-flag IntEnum
+        # and the IntFlag sweeps of tests.const.test_const_enum_lookup, and their
+        # sum in tests.const.test_const_enum_get. ``TransportProtocol`` has no
+        # ``IntFlag`` base (GitHub issue #808), so it is in the int count.
         #
-        # Five of the ten string registries are the application layer one, which
-        # GitHub issue #732 split into a package: the memberless
-        # pcapkit.const.reg.apptype.apptype.AppType base plus one registry per
-        # transport protocol. It is discovered exactly like a member-bearing
+        # The application layer registry, which GitHub issue #732 split into a
+        # package -- the memberless pcapkit.const.reg.apptype.apptype.AppType base
+        # plus one registry per transport protocol -- accounts for several of the
+        # string registries. It is discovered exactly like a member-bearing
         # registry, since this sweep is structural and never looks at members.
-        # The tenth is GitHub issue #886's
-        # pcapkit.const.pcapng.tls_key_label.TLSKeyLabel, moved here from a
-        # hand-written class under pcapkit.protocols.misc.pcapng -- it defines
-        # no ``_missing_`` of its own, so it is not among the three ``value.
-        # upper()`` outliers #647 fixed above, and it never reached
+        # Another is GitHub issue #886's
+        # pcapkit.const.pcapng.tls_key_label.TLSKeyLabel -- it defines no
+        # ``_missing_`` of its own, so it is not among the ``value.upper()``
+        # outliers #647 fixed above, and it is outside
         # tests.const.test_const_enum_get's narrower (IntEnum, IntFlag)-only
-        # sweep, so that module's own pinned count does not move.
-        # 112 became 114 with GitHub issue #880's ngap.ProcedureCode and
-        # ngap.ProtocolIE, moved onto EnumRegistry from hand-rolled IntEnum
-        # classes in pcapkit.protocols.application.ngap -- two more IntEnum
-        # registries, two more modules, no change to the flag or str counts --
-        # and the sum in tests.const.test_const_enum_get became 120 with them.
+        # sweep. The int count includes GitHub issue #880's ngap.ProcedureCode
+        # and ngap.ProtocolIE, which are on EnumRegistry.
         self.assertEqual(len(ints), 114)
         self.assertEqual(len(flags), 6)
         self.assertEqual(len(strs), 10)
@@ -897,9 +889,9 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
 
     :mod:`pcapkit.const` is generated from :mod:`pcapkit.vendor`, so the
     committed tree passing the tests above is not evidence that the templates
-    agree with it -- the next crawl would simply revert them. The four templates
+    agree with it -- the next crawl would simply revert them. The templates
     below each carry their own copy of the guard rather than inheriting the one
-    in :mod:`pcapkit.vendor.default`, which is why all four are checked --
+    in :mod:`pcapkit.vendor.default`, which is why each is checked --
     each against its own guard text in :data:`BESPOKE_TEMPLATES`, none of
     which uses ``%`` formatting (GitHub issues #792 and #798).
     """
@@ -945,7 +937,7 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
     def test_the_disable_drops_only_where_nothing_else_needs_percent_formatting(self) -> None:
         """GitHub issue #798's third part, finished by #804: the disable is earned.
 
-        All four bespoke const modules carry no ``%``-formatted code, so none
+        No bespoke const module carries ``%``-formatted code, so none
         carries a module-level ``consider-using-f-string`` disable.
         ``pcapkit.const.tcp.flags`` and ``pcapkit.const.reg.apptype.apptype``
         are covered by PR #803, which converted their guards -- and, for the
@@ -1202,12 +1194,11 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
 
         NOTE: the class statement names ``EnumRegistry`` and the first method
         after the enumeration block is a ``classmethod``, because ``tcp/flags``
-        is on :class:`~pcapkit.corekit.enum.EnumRegistry` alongside the four
-        ``mh/*_flag`` templates (GitHub issue #775's tier 2 found its own
-        exclusion rationale did not hold -- see
+        is on :class:`~pcapkit.corekit.enum.EnumRegistry` alongside the
+        ``mh/*_flag`` templates (GitHub issue #775's tier 2 -- see
         ``tests.const.test_const_registry_protocol``). No generated
         ``@staticmethod get`` closes the block, leaving ``_missing_`` next, the
-        same shape ``test_const_enum_lookup.py`` expects for those four.
+        same shape ``test_const_enum_lookup.py`` expects for those templates.
         """
         import pathlib
 

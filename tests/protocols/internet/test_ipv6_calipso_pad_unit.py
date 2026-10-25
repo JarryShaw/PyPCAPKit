@@ -77,7 +77,7 @@ class TestCALIPSOPad(unittest.TestCase):
                 })])
                 self.assertEqual(made.data, bytes.fromhex(HEADERS['cmpt_len 2, zero pad'][0]))
             with self.subTest(protocol=cls.__name__, pad=None):
-                # without a pad the option is the fixed header alone, as before
+                # without a pad the option is the fixed header alone
                 made = cls(next=59, options=[(Option.CALIPSO, {'domain': 1, 'level': 5})])
                 self.assertEqual(made.data, bytes.fromhex(HEADERS['cmpt_len 0, no pad'][0]))
 

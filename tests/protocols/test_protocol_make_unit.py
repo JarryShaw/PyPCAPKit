@@ -194,7 +194,7 @@ class TestMakeIndexPerArgument(unittest.TestCase):
     def test_shared_name_resolves_per_argument(self) -> None:
         pair, _, _ = self._pair()
         self.assertEqual(pair.make_pair(pair, a='Shared', b='Shared'), (1, 2))
-        # a name only one argument holds resolves as it did before
+        # and a name only one argument holds resolves normally
         self.assertEqual(pair.make_pair(pair, a='Shared', b='Only'), (1, 3))
 
     def test_ipv4_shared_name_falls_back_per_argument(self) -> None:
@@ -217,7 +217,7 @@ class TestMakeIndexPerArgument(unittest.TestCase):
                 value = b
                 return self._make_index(value)
 
-        # ``value`` is a local, so ``b`` is found by its value as before
+        # ``value`` is a local, so ``b`` is found by its value
         self.assertEqual(Alias.make_alias(Alias, b='HIGH'), 7)
 
     def test_unlocated_call_matches_every_argument(self) -> None:

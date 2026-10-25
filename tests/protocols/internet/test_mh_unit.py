@@ -89,7 +89,7 @@ class MHUnitTests(unittest.TestCase):
     def test_unregistered_mh_codes_do_not_mutate_the_class_registries(self) -> None:
         """Parsing must not write to ``__message__``, ``__option__`` or ``__extension__``.
 
-        #425's defect on MH's three registries. Each is a
+        #425's defect on MH's registries. Each is a
         :class:`collections.defaultdict` on a class attribute shared by every
         :class:`~pcapkit.protocols.internet.mh.MH` instance in the process, so
         ``registry[code]`` inserted every unrecognised message type, option type
@@ -679,8 +679,8 @@ class MHUnitTests(unittest.TestCase):
             )
             self.assertEqual(proto.read(extension=True).data, b'read')
             # this constructor returns raw bytes, and 6 + 4 octets is 6 short of
-            # 16, so the body is padded to align the header; before that it emitted
-            # 10 octets while declaring 8
+            # 16, so the body is padded to align the header; without the fix it
+            # emits 10 octets while declaring 8
             self.assertEqual(proto.make(type=custom_packet, data={'value': b'dict'}).data,
                              b'dict' + b'\x00' * 6)
             unknown_message = data.UnknownMessage(
@@ -765,8 +765,8 @@ class MHUnitTests(unittest.TestCase):
             # NOTE: The data model's ``length`` is the whole option, the schema's is
             # its ``Option Length`` field. A 4-octet ``PadN`` spends 2 octets on its
             # type and length fields, so ``Option Length`` is 2 and the schema packs
-            # back to the 4 octets the data model described. Asserting 4 here was
-            # asserting the two-octet overshoot.
+            # back to the 4 octets the data model described. Asserting 4 here would
+            # assert the two-octet overshoot.
             remade = proto._make_opt_pad(
                 Option.Pad1,
                 data.PadOption(type=Option.PadN, length=4, data=b'\x00\x00'),
@@ -1704,7 +1704,7 @@ class MHUnitTests(unittest.TestCase):
                         cls.get('bogus')
 
     def test_mh_local_enums_raise_and_do_not_alias(self) -> None:
-        """GitHub issue #880: the four RFC-inline helper enums stay immutable.
+        """GitHub issue #880: the RFC-inline helper enums stay immutable.
 
         Companion to :meth:`test_mh_rfc5568_local_enums_cover_unregistered_value_sets`,
         which covers :class:`FastBindingAcknowledgmentStatus` and
@@ -1712,8 +1712,8 @@ class MHUnitTests(unittest.TestCase):
         never had wire-level coverage in that test --
         :class:`LocalizedRoutingStatus` (:rfc:`6705#section-10.2`) and
         :class:`LMAAddressCode` (:rfc:`5949#section-6.2.2`) -- plus three
-        properties the issue measured that are not specific to any one of the
-        four: the ``get()``-level aliasing defect, the ``_missing_`` range
+        properties the issue measured that are not specific to any one of
+        them: the ``get()``-level aliasing defect, the ``_missing_`` range
         invariant, and the consequence of the raise once it reaches a real
         capture -- which turns out to differ by wrapping protocol, see the
         last two subtests.
@@ -1833,17 +1833,17 @@ class MHUnitTests(unittest.TestCase):
             # all -- it walks its own ``@beholder``-decorated override
             # (``pcapkit/protocols/internet/ipv6.py:_import_next_layer``).
             #
-            # Before GitHub issue #891, that override let any exception from
-            # MH's own parser reach ``@beholder`` unchanged, which substituted
-            # plain ``Raw`` for the MH slot; ``Raw``'s info carries no
-            # ``.next``, so ``proto = info.next``
+            # Without GitHub issue #891's catch, that override lets any
+            # exception from MH's own parser reach ``@beholder`` unchanged,
+            # which substitutes plain ``Raw`` for the MH slot; ``Raw``'s info
+            # carries no ``.next``, so ``proto = info.next``
             # (``pcapkit/protocols/internet/ipv6.py:_decode_next_layer``)
-            # raised ``AttributeError`` on it regardless -- and it was *that*,
+            # raises ``AttributeError`` on it regardless -- and it is *that*,
             # unrelated, exception that a further-out ``@beholder``
-            # (Ethernet's) actually caught, degrading the whole IPv6 packet,
-            # header fields and MH message alike, to ``Raw``.
+            # (Ethernet's) catches, degrading the whole IPv6 packet, header
+            # fields and MH message alike, to ``Raw``.
             #
-            # #891 gives ``IPv6._import_next_layer`` its own catch, one layer
+            # ``IPv6._import_next_layer`` has its own catch (#891), one layer
             # in from ``@beholder``: for an extension header whose wire
             # format RFC 6564 guarantees (Mobility Header among them), the MH
             # slot becomes
@@ -2059,10 +2059,10 @@ class MHUnitTests(unittest.TestCase):
         """An opaque message body is padded to alignment, with a warning.
 
         A message whose body is raw bytes carries no mobility options, so the
-        padding goes into the body itself. Warning and returning it unchanged was
+        padding goes into the body itself. Warning and returning it unchanged is
         not enough: ``length`` is ``(len(data) + 6) // 8 - 1``, which floors, so the
-        header shipped declaring 8 octets while emitting 10, 12 or 14, and a parser
-        reads 8 and misinterprets the rest.
+        header would ship declaring 8 octets while emitting 10, 12 or 14, and a
+        parser reads 8 and misinterprets the rest.
 
         """
         from pcapkit.const.mh.packet import Packet
@@ -2250,7 +2250,7 @@ class MHUnitTests(unittest.TestCase):
 
         The ``data.length`` assertion below is ``len(payload) + 4``, not
         ``len(payload) + 2`` (#512): the latter contradicts the
-        ``len(schema.pack())`` assertion four lines above it -- the same test
+        ``len(schema.pack())`` assertion above it -- the same test
         would prove the wire is ``len(payload) + 4`` and then assert the parsed
         length two octets less. The ``+ 4`` is the wire's own count:
         a CGA extension's Extension Type and Extension Data Length are two octets
@@ -2283,8 +2283,8 @@ class MHUnitTests(unittest.TestCase):
 
         All three readers -- :meth:`~pcapkit.protocols.internet.mh.MH._read_ext_none`,
         :meth:`~pcapkit.protocols.internet.mh.MH._read_ext_multiprefix` and
-        :meth:`~pcapkit.protocols.internet.mh.MH._read_ext_exp` -- passed their
-        ``Extension Data Length`` through
+        :meth:`~pcapkit.protocols.internet.mh.MH._read_ext_exp` -- must not pass
+        their ``Extension Data Length`` through
         :meth:`~pcapkit.protocols.internet.mh.MH._mh_option_length`, which adds the
         ``2`` octets an :rfc:`6275#section-6.2` mobility option's Option Type and
         Option Length occupy. A CGA extension's header is twice that: per
@@ -2294,9 +2294,10 @@ class MHUnitTests(unittest.TestCase):
         :rfc:`5535#section-5` says the same from the other side: its ``Ext Len`` is
         the length *"not including the first 4 octets"*.
 
-        So every parsed extension reported a length two octets short of what it
-        consumed. ``len(schema.pack())`` is the arbiter here -- the write side has
-        always measured the real thing, which is why only the read side was wrong.
+        Through that helper every parsed extension would report a length two
+        octets short of what it consumed. ``len(schema.pack())`` is the arbiter
+        here -- the write side measures the real thing, which is why only the
+        read side is at stake.
         """
         from pcapkit.const.mh.cga_extension import CGAExtension
         from pcapkit.protocols.internet.mh import MH
@@ -2370,11 +2371,11 @@ class MHUnitTests(unittest.TestCase):
 
         :meth:`~pcapkit.protocols.internet.mh.MH._mh_option_length` is correct and
         stays correct -- an :rfc:`6275#section-6.2` mobility option's Option Type and
-        Option Length are one octet each. What was wrong was reusing it for CGA
-        extensions, whose two header fields are 16 bits each
+        Option Length are one octet each. What it must not do is serve CGA
+        extensions too, whose two header fields are 16 bits each
         [:rfc:`4581#section-2`]. This pins both contracts side by side so the next
         reader picks the right one, and pins the ``+2`` against being "fixed" to
-        ``+4`` to suit the three callers that were the actual defect.
+        ``+4`` to suit the CGA extension readers, where the defect of #512 lies.
         """
         from pcapkit.protocols.internet.mh import MH
 
@@ -2400,14 +2401,15 @@ class MHUnitTests(unittest.TestCase):
 
         #509 extracted
         :meth:`~pcapkit.protocols.internet.mh.MH._mh_option_length` so that "a future
-        fix to this arithmetic only has to happen once", and converted the equivalent
-        branch in both ``hopopt.py`` and ``ipv6_opts.py``. The ``mh.py`` branch was
-        left open-coding ``clen + 2``, so the arithmetic still existed twice in the
-        very file that introduced the helper.
+        fix to this arithmetic only has to happen once", and the equivalent branch of
+        ``hopopt.py`` and ``ipv6_opts.py`` routes through each module's own helper.
+        Guards against the
+        ``mh.py`` branch open-coding ``clen + 2``, which keeps the arithmetic twice in
+        the very file that holds the helper.
 
         A value assertion cannot catch that -- ``clen + 2`` and the helper return the
-        same number, which is why the conversion is behaviour-neutral and why
-        ``test_mh_padding_options_parse_from_the_wire`` passed throughout. What is
+        same number, so the conversion is behaviour-neutral and
+        ``test_mh_padding_options_parse_from_the_wire`` passes either way. What is
         testable is the *delegation*: patch the helper and a converted reader follows
         it, while an open-coded one ignores it.
         """
@@ -2623,7 +2625,7 @@ class MHUnitTests(unittest.TestCase):
                 self.assertEqual(rebuilt, raw)
 
     def test_mh_message_types_round_trip_byte_for_byte(self) -> None:
-        """Every one of the 24 registered message types must survive a round trip."""
+        """Every registered message type must survive a round trip."""
         from pcapkit.const.mh.option import Option
         from pcapkit.const.mh.packet import Packet
         from pcapkit.const.reg.transtype import TransType
@@ -3011,7 +3013,7 @@ class MHUnitTests(unittest.TestCase):
         """``BID-PRI`` is a 7-bit field, so ``0x80`` cannot be packed.
 
         In the same maker as #508's care-of-address conversion, and immediately
-        above it, so it is worth pinning that the new conversion did not move the
+        above it, so it is worth pinning that the conversion does not move the
         check out from under a valid input.
         """
         from pcapkit.const.mh.option import Option
@@ -3070,7 +3072,7 @@ class MHUnitTests(unittest.TestCase):
     def test_mh_target_careof_address_suboption_round_trips_both_families(self) -> None:
         """The sub-option length is derived from the family, so both widths need pinning.
 
-        ``_make_fid_suboption`` is one of #508's seven sites and the only one reached
+        ``_make_fid_suboption`` is one of #508's sites and the only one reached
         through the sub-option dispatcher rather than an option maker, so its
         legitimate output is worth asserting byte for byte alongside the bool
         rejection.
@@ -3178,7 +3180,7 @@ class MHUnitTests(unittest.TestCase):
         from that width without converting it -- ``BytesField`` then receives
         the ``int`` itself, and ``struct.pack()`` cannot do anything with that
         (#467) -- and against rejecting ``int`` outright for every subtype but
-        ``IPv6_Address``, as 9b26fa387 did. See #467, #468.
+        ``IPv6_Address``, the shape of 9b26fa387. See #467, #468.
         """
         import io
 
@@ -3492,13 +3494,13 @@ class MHUnitTests(unittest.TestCase):
         ``kwargs`` branch, and a field whose name collides with one of the maker's
         own parameters never arrives there.
 
-        That is what happened. The makers took the data model as a parameter named
-        ``data``, and the vendor-specific quality-of-service attribute of
+        Guards against the makers taking the data model as a parameter named
+        ``data``: the vendor-specific quality-of-service attribute of
         :rfc:`7222#section-4.2.11` has a *field* called ``data``, so a caller's
-        ``data=`` bound to the model parameter and ``kwargs.get('data')`` always saw
-        nothing. The payload was dropped with no exception and the length written as
-        though it were empty -- ``vendor`` and ``subtype`` arrived intact, which
-        made it look like a partial success. The parameter is ``option``, which no
+        ``data=`` binds to the model parameter and ``kwargs.get('data')`` always sees
+        nothing. The payload is dropped with no exception and the length written as
+        though it were empty -- ``vendor`` and ``subtype`` arrive intact, which
+        makes it look like a partial success. The parameter is ``option``, which no
         sub-option field is called.
         """
         from pcapkit.const.mh.ani_suboption import ANISuboption

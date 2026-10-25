@@ -49,15 +49,15 @@ class SchemaMetaAbcCacheTests(unittest.TestCase):
     ``False`` for ``dict`` -- but caches it in the shared object's *negative*
     cache, and since that object is ``Mapping``'s own, a plain ``dict`` then
     stops answering ``isinstance(x, Mapping)`` at all, anywhere in the process,
-    until the cache token advances. Measured directly against the pre-fix code
-    (not merely inferred): asking ``isinstance({}, Schema)`` and then
+    until the cache token advances. Measured directly on a shared cache (not
+    merely inferred): asking ``isinstance({}, Schema)`` and then
     ``isinstance({}, Mapping)`` returns ``False`` for the second question too.
     This is the more dangerous direction, since it breaks code with no
     connection to schemas at all -- ordinary library code such as
     :meth:`Info.from_dict <pcapkit.corekit.infoclass.Info.from_dict>` asking
     ``isinstance(dict_, (dict, collections.abc.Mapping))`` is enough to trigger
-    either direction, which is why the defect only ever showed up in the full
-    suite and not in a single test file run alone.
+    either direction, which is why the defect shows up in the full suite and
+    not in a single test file run alone.
 
     """
 
@@ -67,9 +67,9 @@ class SchemaMetaAbcCacheTests(unittest.TestCase):
         # first assertion below true for the wrong reason.
         # :func:`reimport_once_per_class` resets it on every call. The classes
         # are the class's own import, kept across its tests (GitHub issue
-        # #1538): on the #439 defect every schema class shares ``Mapping``'s
-        # cache, so that reset reaches it too, and reverting the fix fails the
-        # same tests either way. A couple of tests deliberately poison the
+        # #1538): with the #439 defect present every schema class shares
+        # ``Mapping``'s cache, so that reset reaches it too, and the same tests
+        # fail either way. A couple of tests deliberately poison the
         # shared caches, so ``restore=True`` resets them again on the way out
         # of the class, and nothing outside it reads what was left behind.
         reimport_once_per_class(self, restore=True)
@@ -101,11 +101,11 @@ class SchemaMetaAbcCacheTests(unittest.TestCase):
     def test_asking_schema_first_does_not_break_mapping_for_a_plain_dict(self) -> None:
         """The reverse direction: ``Schema`` first must not corrupt ``Mapping``.
 
-        Before this class had its own ``_abc_impl``, asking ``isinstance({},
-        Schema)`` computed a fresh (correct) ``False`` for ``dict`` and cached
-        it in the *negative* cache of the object it shared with
+        Without its own ``_abc_impl``, asking ``isinstance({}, Schema)``
+        computes a fresh (correct) ``False`` for ``dict`` and caches it in the
+        *negative* cache of the object it shares with
         :class:`collections.abc.Mapping` -- after which a plain :class:`dict`
-        stopped answering ``isinstance(x, Mapping)`` at all. This is the
+        stops answering ``isinstance(x, Mapping)`` at all. This is the
         direction most likely to be missed: it has nothing to do with
         ``Schema`` being asked about a dict that should not match it, and
         everything to do with an *unrelated* stdlib question breaking as a
@@ -347,8 +347,7 @@ class SchemaMetaReservedClassKwargsTests(unittest.TestCase):
         <pcapkit.protocols.schema.schema.EnumSchema.__init_subclass__>`), and
         it does not appear anywhere in
         :attr:`~pcapkit.protocols.schema.schema.SchemaMeta._RESERVED_CLASS_KWARGS`,
-        so it must keep working exactly as before -- as must the renamed
-        ``ns=`` keyword itself.
+        so it must keep working -- as must the ``ns=`` keyword itself.
 
         """
         from pcapkit.const.pcapng.option_type import OptionType as Enum_OptionType

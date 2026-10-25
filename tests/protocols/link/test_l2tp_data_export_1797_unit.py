@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 """The L2TP data model is exported with its link-layer siblings (#1797).
 
-:mod:`pcapkit.protocols.data.link` re-exported the data models of ARP, Ethernet,
-Loopback and VLAN but not :mod:`pcapkit.protocols.data.link.l2tp`, although
-:mod:`pcapkit.protocols.schema.link` exports the schema of the same name. The
-omission was not a decision: the data model arrived in ``cdb5fef3f`` without
-touching the package, and no commit has ever named ``L2TP`` in it.
+:mod:`pcapkit.protocols.data.link` re-exports the data models of its children,
+:mod:`pcapkit.protocols.data.link.l2tp` among them, just as
+:mod:`pcapkit.protocols.schema.link` exports the schema of the same name.
+Its absence (#1797) was not a decision: the data model's commit,
+``cdb5fef3f``, did not touch the package, and no commit up to #1797 named
+``L2TP`` in it.
 
-:mod:`tests.project.test_public_api` could not see the gap. Its converse
-assertion reads the attributes a package *holds*, and a name the package never
-imported is not one of them -- so these cases check the package against the
+:mod:`tests.project.test_public_api` cannot see a missing re-export. Its
+converse assertion reads the attributes a package *holds*, and a name the
+package never imports is not one of them -- so these cases check the package against the
 ``__all__`` of each of its children instead.
 
 Nothing here reads a capture, so this belongs to the unit tier.

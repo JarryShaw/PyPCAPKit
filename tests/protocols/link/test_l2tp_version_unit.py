@@ -16,15 +16,14 @@ nibble anywhere. So 115 is not a second door onto the :rfc:`2661` framing
 :class:`L2TPv2` implements; it is a different header that only an ``L2TPv3``
 class can read, and no such class exists in this tree.
 
-What *was* genuinely missing is the guard that makes that reasoning
-enforceable.
+What these tests pin is the guard that makes that reasoning enforceable.
 :attr:`L2TPv2.version <pcapkit.protocols.link.l2tpv2.L2TPv2.version>`
 is annotated ``Literal[2]``, returns a hard-coded ``2``, and its
-docstring already promises that *"a datagram carrying any other value is a
-different protocol reached through a different class"* -- but
-:meth:`~pcapkit.protocols.link.l2tpv2.L2TPv2.read` stored the wire nibble
-unchecked, so the class reported ``version == 2`` while its own parsed data
-reported ``3`` for the same octets. These tests hold the two to the same
+docstring promises that *"a datagram carrying any other value is a
+different protocol reached through a different class"* -- so a
+:meth:`~pcapkit.protocols.link.l2tpv2.L2TPv2.read` that stores the wire nibble
+unchecked has the class report ``version == 2`` while its own parsed data
+reports ``3`` for the same octets. These tests hold the two to the same
 answer.
 
 Every case builds its own octets in memory and reads no capture under
@@ -151,10 +150,10 @@ class L2TPVersionTests(unittest.TestCase):
     def test_no_accepted_datagram_disagrees_with_the_version_property(self) -> None:
         """``L2TPv2.version`` and ``info.version`` cannot report different numbers.
 
-        Before this guard the class answered ``version == 2`` from a hard-coded
-        ``Literal[2]`` property while ``info.version`` carried whatever the
-        wire said, so one datagram had two versions depending on which
-        attribute a consumer read.
+        Without this guard the class answers ``version == 2`` from a hard-coded
+        ``Literal[2]`` property while ``info.version`` carries whatever the
+        wire says, so one datagram has two versions depending on which
+        attribute a consumer reads.
 
         """
         from pcapkit.utilities.exceptions import ProtocolError
@@ -238,11 +237,11 @@ class L2TPVersionTests(unittest.TestCase):
     def test_l2tpv3_over_udp_1701_no_longer_parses_as_l2tpv2(self) -> None:
         """:rfc:`3931` §4.1.2 puts L2TPv3 on port 1701 too, and that is a live capture.
 
-        This is the part of the change that fixes a real dissection rather than
-        guarding a hypothetical registration: port 1701 is bound, so
-        before the version guard a v3 datagram arriving on it was dissected as
-        L2TPv2 and reported ``tunnelid=0x1234``/``sessionid=0x5678`` read out
-        of v3's Control Connection ID. :rfc:`3931` §3.2.1 requires ``Ver`` to
+        This is the case that guards a real dissection rather than a
+        hypothetical registration: port 1701 is bound, so without the version
+        guard a v3 datagram arriving on it is dissected as L2TPv2 and reports
+        ``tunnelid=0x1234``/``sessionid=0x5678`` read out of v3's Control
+        Connection ID. :rfc:`3931` §3.2.1 requires ``Ver`` to
         be 3, so the nibble is exactly the signal that this is not v2.
 
         """

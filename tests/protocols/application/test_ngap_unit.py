@@ -170,7 +170,7 @@ class NGAPUnitTests(unittest.TestCase):
             ProtocolIE(65536)
 
     def test_get_of_an_unresolvable_string_key_raises_rather_than_minting(self) -> None:
-        """GitHub issue #880's own repro, re-run against the fixed classes:
+        """GitHub issue #880's own repro:
         ``get()`` on an unrecognised name must raise rather than mint a
         member at a shared default -- the defect that let a second unknown
         name alias onto the first's member. Real callers in :meth:`NGAP.read`

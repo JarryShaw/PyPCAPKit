@@ -142,8 +142,8 @@ class CommandLineTests(EndToEndTestCase):
 
         Frame 4 of :file:`http6.cap` is the shortest unambiguous witness: it
         parses to all four layers unlimited, so each limit shortens the chain the
-        verbose output prints. Every one of these printed the full chain while the
-        limits were inert.
+        verbose output prints. With the limits inert, every one of these prints the
+        full chain.
 
         """
         capture = sample_path('http6.cap')
