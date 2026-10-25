@@ -1486,10 +1486,11 @@ def keep_short_read(protocol: 'ProtocolBase') -> 'None':
     Called by the layer base classes once a parse is done. When the data ended
     inside one of the header's fields, ``info`` gains the ``__short_read__``
     record :meth:`Schema.unpack` made, so that :func:`replay_short_read` can
-    cut the rebuild back to what was captured (:issue:`1458`). The key is an
-    ordinary one, so :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>`
-    carries it and ``from_data(info.to_dict())`` replays it too; it is absent
-    for a header that was captured whole.
+    cut the rebuild back to what was captured (:issue:`1458`). The key is listed
+    in :attr:`Data.__included__ <pcapkit.protocols.data.data.Data.__included__>`,
+    so :meth:`Info.to_dict <pcapkit.corekit.infoclass.Info.to_dict>` carries it
+    and ``from_data(info.to_dict())`` replays it too; it is absent for a header
+    that was captured whole.
 
     """
     header = cast('Optional[Schema]', getattr(protocol, '__header__', None))

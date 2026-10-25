@@ -1318,10 +1318,13 @@ class SectionHeaderBlock(BlockType, code=Enum_BlockType.Section_Header_Block):
             This method is expected to directly modify any data stored
             in the ``packet`` and thus no return is required.
 
-            The Byte-Order Magic is not carried by any field of the schema --
-            :attr:`magic` is the palindromic constant, identical in either byte
-            order -- so it is seeded here from the byte order the packet data
-            asks for, and from the host byte order when it asks for none.
+            :func:`shb_byteorder_callback` takes the byte order from the
+            Byte-Order Magic as :attr:`match` reads it, and a constructed block
+            has no :attr:`match` to read -- a forward match packs no octets --
+            nor can :attr:`magic` stand in, since it holds the same constant in
+            either byte order. So :attr:`match` is seeded here from the byte
+            order the packet data asks for, and from the host byte order when it
+            asks for none; a ``match`` already in ``packet`` is kept.
 
         """
         if 'match' in packet:
@@ -2050,7 +2053,7 @@ class NS_DNSIP6AddrOption(_NS_Option, code=Enum_OptionType.ns_dnsIP6addr):
 class NameResolutionBlock(BlockType, code=Enum_BlockType.Name_Resolution_Block):
     """Header schema for PCAP-NG Name Resolution Block (NRB)."""
 
-    #: Record total length.
+    #: Block total length.
     length: 'int' = UInt32Field(callback=byteorder_callback)
     #: Name resolution records.
     records: 'list[NameResolutionRecord]' = OptionAreaField(

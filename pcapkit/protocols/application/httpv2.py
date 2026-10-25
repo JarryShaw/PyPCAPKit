@@ -490,7 +490,9 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
 
         Args:
             code: HTTP frame type code.
-            meth: Method name or callable to parse and/or construct the frame.
+            meth: Name of the ``_read_http_${name}`` and ``_make_http_${name}``
+                methods, or a ``(parser, constructor)`` pair of callables; see
+                :attr:`__frame__`.
 
         Warns:
             RegistryWarning: If a different entry is already registered for
@@ -512,7 +514,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
     ##########################################################################
 
     def __length_hint__(self) -> 'Literal[9]':
-        """Total length of corresponding protocol."""
+        """Return an estimated length for the object."""
         return 9
 
     ##########################################################################
