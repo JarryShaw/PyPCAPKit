@@ -741,14 +741,17 @@ class EnumField(NumberField[Union[enum.IntEnum, aenum.IntEnum]]):
             bare, unlogged :exc:`ValueError` precisely because the ``except
             ValueError`` fallback of :meth:`~pcapkit.corekit.enum.EnumLookup.get`
             has to keep catching it (GitHub issues :issue:`584` and
-            :issue:`647`). The registries that
-            *do* bound themselves to a width and reject outside it are the
-            bit-flag ones -- :class:`pcapkit.const.tcp.flags.Flags` among them --
-            and none of those is named as the namespace of a plain
-            :class:`EnumField` anywhere in the package, so no in-library guard
-            loses its force through this method. The distinction is therefore for
-            a registry registered from outside :mod:`pcapkit.const`, which has no
-            such obligation to stay quiet.
+            :issue:`647`). That bare :exc:`ValueError` is also how a generated
+            guard bounds its registry to a width, rejecting a value outside
+            ``0 <= value <= N``. Bit-flag registries such as
+            :class:`pcapkit.const.tcp.flags.Flags` do so, and so do plain ones
+            such as :class:`pcapkit.const.ipv4.option_number.OptionNumber`, which
+            is the namespace of a plain :class:`EnumField`. That is harmless:
+            the out-of-width rejection is the bare :exc:`ValueError` this method
+            falls back on, so no in-library guard loses its force through this
+            method. The distinction is therefore for a registry registered from
+            outside :mod:`pcapkit.const`, which has no such obligation to stay
+            quiet.
 
             Octets carrying bits outside :attr:`~NumberField.bit_length` that
             :meth:`NumberField.post_process` recorded resolve to a member that
