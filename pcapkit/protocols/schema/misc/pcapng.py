@@ -389,7 +389,7 @@ def bounded_option(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict
     An option's length is a 16-bit wire field, so one four-octet option header
     can declare 65,535 octets of payload. Read as declared, every shortfall
     would be zero-padded at the field layer, and the zeros rebuilt as if they
-    had been captured (#594, #1325). So a payload that runs past the area is
+    had been captured (:issue:`594`, :issue:`1325`). So a payload that runs past the area is
     refused here instead. Inside a block, :class:`OptionAreaField` then keeps
     the whole option area as the octets captured, so the block still parses and
     rebuilds byte for byte.
@@ -426,7 +426,7 @@ class OptionAreaField(OptionField):
     or :func:`bounded_option`. A block has no catch point above its fields, so
     raising would abort the whole extraction. This field instead returns the
     area as a single :obj:`bytes` item, which packs back verbatim, and reports
-    no padding after it (#1325).
+    no padding after it (:issue:`1325`).
 
     """
 

@@ -78,7 +78,7 @@ if TYPE_CHECKING:
         def Loopback(self) -> 'Type[DPKTLoopback]': ...
 
     class _DPKTPackage(Protocol):
-        """|dpkt|_, as :class:`DPKT` reads it through :attr:`DPKT._expkg` (#1878).
+        """|dpkt|_, as :class:`DPKT` reads it through :attr:`DPKT._expkg` (:issue:`1878`).
 
         Each attribute is a submodule, described by what the engine reads of it.
         mypy matches a module with a protocol at the top level only, so the

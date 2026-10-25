@@ -52,7 +52,7 @@ if TYPE_CHECKING:
         def pcap_packet(self) -> 'Type[PCAPFilePacket]': ...
 
     class _PCAPFilePackage(Protocol):
-        """|pcapfile|_, as :class:`PyPCAPFile` reads it through :attr:`PyPCAPFile._expkg` (#1878).
+        """|pcapfile|_, as :class:`PyPCAPFile` reads it through :attr:`PyPCAPFile._expkg` (:issue:`1878`).
 
         Each attribute is a submodule, described by what the engine reads of it.
         mypy matches a module with a protocol at the top level only, so the

@@ -29,7 +29,7 @@ if TYPE_CHECKING:
     from pcapkit.foundation.extraction import Extractor
 
     class _PySharkPackage(Protocol):
-        """|pyshark|_, as :class:`PyShark` reads it through :attr:`PyShark._expkg` (#1878)."""
+        """|pyshark|_, as :class:`PyShark` reads it through :attr:`PyShark._expkg` (:issue:`1878`)."""
 
         @property
         def FileCapture(self) -> 'Type[PySharkFileCapture]': ...

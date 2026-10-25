@@ -65,7 +65,7 @@ back to the default engine rather than raising when a requested engine is absent
    toolchain. ``dev`` is defined by what the toolchain must be able to *see*, and the
    workflows that need full resolution install ``.[all,dev]``. Do not add
    ``pypcap``/``pcap-ct`` to it to silence a lint finding; :file:`.github/workflows/lint.yml`
-   carries a tracked ``import-error`` count that is deliberate rather than accidental.
+   expects pylint's ``import-error`` for them, deliberately rather than by accident.
 
 .. note::
 
@@ -88,9 +88,9 @@ detail of what actually changed in that version bump. Ruled on
 
 Two different things get confused here, so they are named apart:
 
-*  **A pull request's commits.** The shared changelog for the 1.5.0 cycle is a
+*  **A pull request's commits.** The shared changelog for the 1.5.0 cycle was a
    long-lived pull request of its own, carrying roughly one commit per code pull
-   request, deliberately unsquashed so that what is and is not accounted for stays
+   request, and merged unsquashed so that what is and is not accounted for stays
    readable in its log. That is a property of *the pull request*, and it is not what
    the ruling is about.
 *  **A changelog file's entries.** :file:`docs/source/changelog/1.5.0.rst` groups its
@@ -142,9 +142,9 @@ belongs to none. The map is one-to-one with the package list below -- every pack
    section wants that module's changes; the same prose appearing twice reads as two
    separate changes. Raised originally on :issue:`918`.
 
-   The restructure itself belongs to the shared changelog's own pull request, which
-   owns the file and merges last; doing it earlier would conflict with every open
-   change that touches an entry.
+   The restructure itself was done on the shared changelog's own pull request, which
+   owned the file and merged last; doing it earlier would have conflicted with every
+   open change that touched an entry.
 
 Issue and Pull Request Labels
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
