@@ -157,9 +157,9 @@ class OSPFUnitTests(unittest.TestCase):
         Latent rather than live: nothing in this module calls ``_make_id_numbers``
         -- ``OSPF.make`` builds ``router_id``/``area_id`` from its own
         arguments rather than through this helper -- so only a unit test (this one,
-        and the pre-existing one above) reaches it. It is fixed alongside the three
-        live sites anyway, so that it does not resurface the moment a future caller
-        reaches it. Measured before the fix:
+        and the one above) reaches it. It is guarded alongside the three live sites
+        anyway, so that it does not resurface the moment a future caller reaches it.
+        Measured without the guard:
 
         .. code-block:: text
 

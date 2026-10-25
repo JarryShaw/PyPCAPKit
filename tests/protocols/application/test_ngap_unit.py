@@ -122,13 +122,13 @@ class NGAPUnitTests(unittest.TestCase):
     def test_unknown_procedure_and_ie_resolve_without_raising_or_aliasing(self) -> None:
         """GitHub issue #880: an in-range value neither enumeration names must
         report rather than explode, but two *different* unrecognised values
-        must never alias onto the same member the way the old shared-``-1``
-        ``extend_enum`` mint used to. Since GitHub issue #880's fix,
+        must never alias onto the same member, as a shared-``-1``
+        ``extend_enum`` mint would make them.
         :class:`~pcapkit.const.ngap.procedure_code.ProcedureCode` and
         :class:`~pcapkit.const.ngap.protocol_ie.ProtocolIE` answer such a
         value with a throwaway, non-registering member (:meth:`pcapkit.
         corekit.enum.EnumRegistry._unregistered_member`) named ``Unassigned``
-        -- bare, not value-suffixed, matching every other converted registry
+        -- bare, not value-suffixed, matching every other non-minting registry
         under :mod:`pcapkit.const` (see :mod:`tests.const.
         test_const_enum_no_mint`) -- rather than a permanent,
         value-suffixed member sharing one mutable default with every other

@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 """HTTP/2 payload lengths, asserted against the octets that went onto the wire.
 
-GitHub issue #668. Three payload length callbacks in
-:mod:`pcapkit.protocols.schema.application.httpv2` put the conditional
-expression in the wrong place, so an **unpadded** ``DATA``, ``HEADERS`` or
-``PUSH_PROMISE`` frame parsed with its whole payload silently discarded.
+GitHub issue #668. Guards against three payload length callbacks in
+:mod:`pcapkit.protocols.schema.application.httpv2` putting the conditional
+expression in the wrong place, under which an **unpadded** ``DATA``,
+``HEADERS`` or ``PUSH_PROMISE`` frame parses with its whole payload silently
+discarded.
 
-What the grouping did
----------------------
+What the grouping does
+----------------------
 
 A conditional expression binds looser than ``-``, so::
 
@@ -16,15 +17,15 @@ A conditional expression binds looser than ``-``, so::
 groups as ``(pkt['__length__'] - pkt['pad_len']) if pkt['flags']['bit_3'] else 0``
 -- the whole subtraction is the ``if`` arm and the ``else`` arm is a bare ``0``.
 ``0`` reaches :class:`~pcapkit.corekit.fields.strings.BytesField` as "read no
-octets at all", so every frame *without* the ``PADDED`` flag read its payload as
-``b''``. The intent was to subtract nothing rather than to read nothing::
+octets at all", so every frame *without* the ``PADDED`` flag reads its payload as
+``b''``. The intent is to subtract nothing rather than to read nothing::
 
     length=lambda pkt: pkt['__length__'] - (pkt['pad_len'] if pkt['flags']['bit_3'] else 0)
 
 ``__length__`` is the *remaining* declared length at the field, so the unpadded
 arm wants ``__length__`` itself, which is what subtracting a zero padding length
-gives. Padding is rare in HTTP/2, so the broken arm was the common one: nothing
-raised, nothing warned, and ``info.data`` was simply empty.
+gives. Padding is rare in HTTP/2, so the broken arm is the common one: nothing
+raises, nothing warns, and ``info.data`` is simply empty.
 
 Why the arithmetic comes out
 ----------------------------
@@ -42,23 +43,23 @@ off-by-one -- which #668 asked to be checked separately rather than assumed.
 
 Note also that the two expressions are *equal whenever ``PADDED`` is set*
 (``(A - B) if T else 0`` and ``A - (B if T else 0)`` are both ``A - B`` for
-truthy ``T``), so only the unpadded arm could ever have changed. The padded
+truthy ``T``), so only the unpadded arm differs between them. The padded
 cases below are here to prove that from behaviour rather than from the shape of
 the conditional, and to catch a "fix" that repairs the unpadded arm by breaking
 the padded one.
 
-It broke construction as well as parsing
----------------------------------------
+It breaks construction as well as parsing
+-----------------------------------------
 
 :class:`~pcapkit.corekit.fields.strings.BytesField` consults its ``length``
-callback on the *pack* path too, so the ``else 0`` arm did not merely discard a
-payload on read -- it declined to write one. Measured pre-fix,
+callback on the *pack* path too, so the ``else 0`` arm does not merely discard a
+payload on read -- it declines to write one. Measured with that grouping,
 ``bytes(HTTP(type=Frame.DATA, sid=1, frame={'data': DATA_PAYLOAD}))`` packed
 ``000015000000000001``: nine octets of header whose length field declares
 **21**, with the body absent. A reader walking a stream by that length field is
 handed a frame twelve octets shorter than it claims, which desynchronises
 everything after it. #668 is filed as a parse-side defect and the construct side
-needed no code change, so
+needs no code change of its own, so
 :class:`HTTPv2ConstructedFrameDeclaresWhatItWritesUnitTests` asserts that half
 rather than leaving it implied.
 
@@ -80,12 +81,11 @@ Why the zero-length payload cases are here
 
 Each of the three frames has a "frame of only padding" case, where ``pad_len``
 accounts for the whole payload area and the payload is legitimately empty. Those
-are not padding of the test matrix: a cross-review on a second model found that
-with only the ``DATA`` one present -- every other fixture carrying a non-empty
-payload -- the module was satisfied by a wrong fix returning
-``max(computed, 1)`` for the two ``fragment`` fields, which passed all fifteen
-tests while leaking a padding octet into the fragment and swallowing a
-``SchemaWarning: packet length < 0: -1``. ``0`` is a legitimate answer from
+are not padding of the test matrix: with only the ``DATA`` one present -- every
+other fixture carrying a non-empty payload -- the module would be satisfied by a
+wrong fix returning ``max(computed, 1)`` for the two ``fragment`` fields, which
+leaks a padding octet into the fragment and swallows a ``SchemaWarning: packet
+length < 0: -1``. ``0`` is a legitimate answer from
 these callbacks and has to be asserted as one, at the wire and at the callback
 both; :meth:`HTTPv2PayloadLengthCallbackUnitTests.\
 test_the_padded_arm_reaches_zero_and_is_not_clamped` is the latter.
@@ -97,25 +97,25 @@ The clean controls
 :attr:`~pcapkit.protocols.schema.application.httpv2.UnassignedFrame.data` and
 :attr:`~pcapkit.protocols.schema.application.httpv2.GoawayFrame.debug` use the
 plain ``length=lambda pkt: pkt['__length__']`` with no conditional, and all
-three carried their payload correctly the whole time.
+three carry their payload correctly with or without the defect.
 :class:`HTTPv2PlainLengthFormControlUnitTests` asserts them, because they are
-what shows the field machinery was never at fault -- it was the conditional's
+what shows the field machinery is not at fault -- it is the conditional's
 grouping alone.
 
-Why the round-trip suite could not see it
-----------------------------------------
+Why the round-trip suite cannot see it
+--------------------------------------
 
 :mod:`tests.protocols.test_option_roundtrip_unit` drives every HTTP/2 frame
 type, but through ``make`` -> parse -> ``make``, and ``make`` writes the length
-field from ``HTTP._make_http_length``. Both sides therefore agreed on an empty
-payload and the octets matched. Its generator also passes no ``data`` or
+field from ``HTTP._make_http_length``. Both sides therefore agree on an empty
+payload and the octets match. Its generator also passes no ``data`` or
 ``fragment`` argument for these three frames (measured: ``kwargs={}`` for
 ``httpv2-frame/DATA``, ``/HEADERS`` and ``/PUSH_PROMISE``), so the payload it
-round-trips is ``b''`` and there was nothing for the callback to lose.
+round-trips is ``b''`` and there is nothing for the callback to lose.
 :meth:`tests.protocols.application.test_http_unit.HTTPUnitTests.test_httpv2_frame_readers_cover_successful_frames`
 drives the readers with hand-built schema stubs rather than wire bytes, so the
-length callback never ran there at all. This module reads wire octets, which is
-the gap -- and asserts the packed octets too, which no existing test did either.
+length callback never runs there at all. This module reads wire octets, which is
+the gap -- and asserts the packed octets too.
 
 This module is unit tier: it builds its own octets and reads no capture.
 
@@ -245,9 +245,9 @@ class HTTPv2DataFramePayloadLengthUnitTests(FramePayloadMixin, unittest.TestCase
     def test_unpadded_data_frame_keeps_its_whole_payload(self) -> None:
         """An unpadded ``DATA`` frame's payload survives the parse.
 
-        This is #668's headline case. Pre-fix the callback returned ``0`` here
-        and ``info.data`` came back ``b''`` -- measured on the octets this test
-        builds, which declare twelve payload octets and carried them.
+        This is #668's headline case. With the defect the callback returns ``0``
+        here and ``info.data`` comes back ``b''`` -- measured on the octets this
+        test builds, which declare twelve payload octets and carry them.
 
         """
         raw = http2_frame_bytes(self.TYPE, self.END_STREAM, 1, DATA_PAYLOAD)
@@ -282,7 +282,7 @@ class HTTPv2DataFramePayloadLengthUnitTests(FramePayloadMixin, unittest.TestCase
         """``pad_len`` accounting for the whole payload leaves ``data`` empty.
 
         The boundary of the padded arm: here ``__length__ - pad_len`` is exactly
-        ``0``, which is the one input for which the pre-fix and post-fix
+        ``0``, which is the one input for which the defective and correct
         expressions agree on an empty payload -- and the only shape under which
         ``b''`` is the right answer.
 
@@ -311,8 +311,8 @@ class HTTPv2HeadersFramePayloadLengthUnitTests(FramePayloadMixin, unittest.TestC
     def test_unpadded_headers_frame_keeps_its_header_block_fragment(self) -> None:
         """An unpadded ``HEADERS`` frame's fragment survives the parse.
 
-        Pre-fix ``info.fragment`` came back ``b''``, which is what an HPACK
-        decoder would have been handed in place of the header block.
+        Guards against ``info.fragment`` coming back ``b''``, which is what an
+        HPACK decoder would be handed in place of the header block.
 
         """
         raw = http2_frame_bytes(self.TYPE, self.END_HEADERS, 1, FRAGMENT)
@@ -425,7 +425,7 @@ class HTTPv2PushPromiseFramePayloadLengthUnitTests(FramePayloadMixin, unittest.T
 
         The promised stream identifier is asserted too: it sits between
         ``pad_len`` and the fragment, so reading it correctly and the fragment
-        as ``b''`` is exactly the pre-fix behaviour, and asserting only the
+        as ``b''`` is exactly the defect's behaviour, and asserting only the
         fragment would not show that the four octets before it were accounted
         for.
 
@@ -479,8 +479,8 @@ class HTTPv2PlainLengthFormControlUnitTests(FramePayloadMixin, unittest.TestCase
 
     ``ContinuationFrame.fragment``, ``UnassignedFrame.data`` and
     ``GoawayFrame.debug`` are written ``length=lambda pkt: pkt['__length__']``,
-    and all three carried their payload correctly before #668 was fixed as well
-    as after. That is what localises the defect to the conditional's grouping
+    and all three carry their payload correctly whether or not the #668 grouping
+    defect is present. That is what localises the defect to the conditional's grouping
     rather than to :class:`~pcapkit.corekit.fields.strings.BytesField`,
     ``__length__``'s bookkeeping, or the frame dispatch -- all of which these
     frames use identically.
@@ -592,8 +592,8 @@ class HTTPv2PayloadLengthCallbackUnitTests(unittest.TestCase):
     def test_the_unpadded_arm_returns_the_remaining_length(self) -> None:
         """With ``PADDED`` clear the callback returns ``__length__``, not ``0``.
 
-        This is #668 stated as a number: pre-fix all three returned ``0`` here,
-        which is why an unpadded frame's payload was dropped.
+        This is #668 stated as a number: with the defect all three return ``0``
+        here, which is why an unpadded frame's payload is dropped.
 
         """
         packet = self.packet(padded=False)
@@ -611,10 +611,10 @@ class HTTPv2PayloadLengthCallbackUnitTests(unittest.TestCase):
 
         ``pad_len`` is :data:`~pcapkit.corekit.sentinels.NO_VALUE` when
         ``PADDED`` is clear, so the conditional has to short-circuit around it.
-        It does so in the fixed form because the conditional *is* the right
-        operand of the subtraction. This does not discriminate the fix from the
-        defect -- the broken grouping short-circuited too, just around the wrong
-        thing -- but it does pin the shape against a rewrite that reaches for
+        It does so in the correct form because the conditional *is* the right
+        operand of the subtraction. This does not discriminate the correct
+        grouping from the defective one -- the broken grouping short-circuits
+        too, just around the wrong thing -- but it does pin the shape against a rewrite that reaches for
         ``pad_len`` unconditionally, e.g. ``__length__ - int(pkt['pad_len'] or 0)``,
         which raises on the value the field machinery actually supplies.
 
@@ -684,15 +684,15 @@ class HTTPv2ConstructedFrameDeclaresWhatItWritesUnitTests(unittest.TestCase):
 
     :class:`~pcapkit.corekit.fields.strings.BytesField` consults its ``length``
     callback on the construct path as well as the parse path, so the ``else 0``
-    arm did not merely discard a payload on read -- it declined to *write* one.
-    Measured pre-fix: ``bytes(HTTP(type=Frame.DATA, sid=1, frame={'data': body}))``
+    arm does not merely discard a payload on read -- it declines to *write* one.
+    Measured with that grouping: ``bytes(HTTP(type=Frame.DATA, sid=1, frame={'data': body}))``
     packed ``000015000000000001``, nine octets of header whose length field
     declares **21**, with the twelve octets of body absent. Any reader walking a
     stream by that length field is handed a frame that is twelve octets shorter
     than it claims, which desynchronises everything after it.
 
-    The issue frames #668 as a parse-side defect and the construct side needed no
-    code change, so this is asserted here rather than left implied by the parse
+    The issue frames #668 as a parse-side defect and the construct side needs no
+    code change of its own, so this is asserted here rather than left implied by the parse
     tests -- it is the half of the defect that reaches other people's tooling.
 
     """
@@ -733,20 +733,20 @@ class HTTPv2ConstructedFrameDeclaresWhatItWritesUnitTests(unittest.TestCase):
         self.assertIn(payload, raw, 'the payload octets must reach the wire')
 
     def test_an_unpadded_data_frame_writes_the_body_it_declares(self) -> None:
-        """``DATA`` -- packed nine octets against a declared 21 pre-fix."""
+        """``DATA`` -- the defect packs nine octets against a declared 21."""
         raw = self.build(type=0x00, sid=1, frame={'data': DATA_PAYLOAD})
         self.assertDeclaresWhatItWrites(raw, DATA_PAYLOAD)
 
     def test_an_unpadded_headers_frame_writes_the_fragment_it_declares(self) -> None:
-        """``HEADERS`` -- packed nine octets against a declared 29 pre-fix."""
+        """``HEADERS`` -- the defect packs nine octets against a declared 29."""
         raw = self.build(type=0x01, sid=1, frame={'fragment': FRAGMENT})
         self.assertDeclaresWhatItWrites(raw, FRAGMENT)
 
     def test_an_unpadded_push_promise_frame_writes_the_fragment_it_declares(self) -> None:
-        """``PUSH_PROMISE`` -- packed thirteen octets against a declared 33 pre-fix.
+        """``PUSH_PROMISE`` -- the defect packs thirteen octets against a declared 33.
 
         Thirteen rather than nine because the promised stream identifier sits
-        ahead of the fragment and was written; it is asserted here so that a
+        ahead of the fragment and is written; it is asserted here so that a
         regression cannot lose the fragment while keeping the frame's length
         field self-consistent.
 
@@ -757,12 +757,12 @@ class HTTPv2ConstructedFrameDeclaresWhatItWritesUnitTests(unittest.TestCase):
         self.assertIn((7).to_bytes(4, 'big'), raw)
 
     def test_an_unpadded_continuation_frame_is_the_control(self) -> None:
-        """``CONTINUATION`` packed its fragment correctly pre-fix as well.
+        """``CONTINUATION`` packs its fragment correctly with or without the defect.
 
         The plain-form control for the construct path, matching
         :class:`HTTPv2PlainLengthFormControlUnitTests` on the parse path: its
-        length field matched what it wrote throughout, which is what shows the
-        construct machinery was never the problem either.
+        length field matches what it writes either way, which is what shows the
+        construct machinery is not the problem either.
 
         """
         raw = self.build(type=0x09, sid=1, frame={'fragment': FRAGMENT})

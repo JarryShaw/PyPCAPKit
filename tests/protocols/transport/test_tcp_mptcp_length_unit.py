@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
-"""Where the Multipath TCP option header keeps its length, which was off by seven bits.
+"""Where the Multipath TCP option header keeps its length: bits 8-15, not seven bits early.
 
 GitHub issue #553. :class:`_MPTCP
 <pcapkit.protocols.schema.transport.tcp._MPTCP>` reads the option header through
 a :class:`~pcapkit.corekit.fields.misc.ForwardMatchField` over a 3-octet
 :class:`~pcapkit.corekit.fields.strings.BitField`, and that field's namespace
-declared ``'length': (1, 8)`` -- eight bits starting one bit in. The entry has
-to be ``(8, 8)``, and three independent pieces of evidence say so:
+declares ``'length': (8, 8)``. Guards against ``(1, 8)`` -- eight bits starting
+one bit in -- and three independent pieces of evidence say ``(8, 8)`` is right:
 
 * :rfc:`8684` section 3 lays every Multipath TCP option out as ``Kind`` (8
   bits), ``Length`` (8 bits), ``Subtype`` (4 bits), then subtype-specific
   content. Numbering from the option's first octet, ``Length`` therefore
   occupies bits 8-15 and the subtype bits 16-19.
 * The sibling entry in the very same namespace, ``'subtype': (16, 4)``, is
-  already written against that numbering, and it decodes correctly. Two entries
-  in one namespace cannot be anchored differently -- :meth:`BitField.post_process
+  written against that numbering, and it decodes correctly. Two entries in one
+  namespace cannot be anchored differently -- :meth:`BitField.post_process
   <pcapkit.corekit.fields.strings.BitField.post_process>` slices both out of one
   big-endian bit string over the whole 3-octet window -- so ``subtype`` reading
   from bit 16 fixes the window's origin at ``kind`` and leaves bit 8 as the only
@@ -26,13 +26,13 @@ to be ``(8, 8)``, and three independent pieces of evidence say so:
   <pcapkit.protocols.schema.transport.tcp.Option>` -- so it is handed the
   option's first octet and nothing has consumed ``kind``/``length`` before it.
 
-At ``(1, 8)`` the field straddled the low seven bits of ``kind`` and the high bit
-of ``length``. For the 12-octet MP_CAPABLE of :rfc:`8684` figure 4, whose first
-three octets are ``1e 0c 01``, that reads ``00111100`` where the length is
-``00001100``: 60 instead of 12.
+At ``(1, 8)`` the field would straddle the low seven bits of ``kind`` and the
+high bit of ``length``. For the 12-octet MP_CAPABLE of :rfc:`8684` figure 4,
+whose first three octets are ``1e 0c 01``, that reads ``00111100`` where the
+length is ``00001100``: 60 instead of 12.
 
-Why no existing test saw it
----------------------------
+Why a round trip cannot see it
+------------------------------
 
 The decoded length is used for one thing, ``SchemaField(length=pkt['test']['length'])``
 in :func:`mptcp_data_selector
@@ -40,26 +40,13 @@ in :func:`mptcp_data_selector
 nested subtype schema. Over-declaring that size does not fail loudly: the
 enclosing :class:`~pcapkit.corekit.fields.collections.OptionField` stops at the
 end-of-option-list marker or at the declared options length whichever comes
-first, so the over-read is absorbed rather than reported. And the construction
-path never evaluated the field at all -- when #553 was fixed, every
-``tcp-mptcp/*`` case in
-:data:`tests.protocols.test_option_roundtrip_unit.EXPECTED_FAILURES` failed before
-reaching it, for reasons of its own that #553 did not touch.
+first, so the over-read is absorbed rather than reported.
 
 So the assertion here is deliberately on the *decoded namespace* rather than on a
-round trip. A full parse of an MP_CAPABLE option did not complete then either:
-:class:`MPTCPCapable
-<pcapkit.protocols.schema.transport.tcp.MPTCPCapable>` gated ``rkey`` on
-``pkt['length'] != 32`` while the nested subtype schemas declared no ``length``
-field, so parsing raised ``KeyError: 'length'`` from
-:file:`pcapkit/protocols/schema/transport/tcp.py` regardless of which bit offset
-the header used. That was the structural defect behind #541 and the eight
-``tcp-mptcp/*`` expected failures -- the subtype schemas inherit :class:`MPTCP
-<pcapkit.protocols.schema.transport.tcp.MPTCP>`, which declared ``kind`` and
-``length`` only under :data:`~typing.TYPE_CHECKING` -- and it is not what #553
-is about. Tying this assertion to an end-to-end parse would have meant it could
-not be written until that much larger change landed, and the bit offset would
-have stayed wrong in the meantime.
+round trip: a full parse can fail, or pass, for reasons that have nothing to do
+with the bit offset -- the subtype schemas' own ``kind``/``length`` declarations
+on :class:`MPTCP <pcapkit.protocols.schema.transport.tcp.MPTCP>` (#541), for one
+-- and the offset is pinned independently of them.
 
 The field is read off the schema class, ``_MPTCP.__fields__['test']``, rather
 than rebuilt here, so the declaration under test is the one the library ships.
@@ -123,8 +110,8 @@ class MPTCPHeaderOffsetTests(unittest.TestCase):
         """``subtype`` reads MP_CAPABLE, from the same window as ``length``.
 
         This is the entry that pins the window's origin, so it is asserted
-        rather than assumed: ``subtype`` was already correct at ``(16, 4)``
-        before #553 and has to stay correct after it, which is what rules out
+        rather than assumed: ``subtype`` decodes correctly at ``(16, 4)``
+        independently of #553's ``length`` entry, which is what rules out
         "fixing" the length by moving the window instead of the entry.
 
         """
@@ -169,7 +156,7 @@ class MPTCPHeaderOffsetTests(unittest.TestCase):
         The exhaustive form of the assertion above, and the one that leaves no
         room for an offset that happens to be right for the two lengths a
         hand-written case would pick. ``kind`` is held at ``1e``, whose low
-        seven bits are what the old offset mixed into the answer, so any
+        seven bits are what a ``(1, 8)`` offset mixes into the answer, so any
         residual dependence on it shows up as a mismatch.
 
         """

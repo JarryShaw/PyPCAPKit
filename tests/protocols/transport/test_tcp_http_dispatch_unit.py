@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """TCP's HTTP ports dispatch through the version-identifying proxy. C.f. #682.
 
-:attr:`TCP.__proto__ <pcapkit.protocols.transport.tcp.TCP.__proto__>` bound
-:class:`pcapkit.protocols.application.httpv1.HTTP` directly for ports 80 and
-8080, so a segment on either port was HTTP/1 by assertion of the port number:
-an HTTP/2 payload there was refused by the HTTP/1 parser and reported as
-:class:`~pcapkit.protocols.misc.raw.Raw`. Both versions share those ports on the
+Guards against :attr:`TCP.__proto__ <pcapkit.protocols.transport.tcp.TCP.__proto__>`
+binding :class:`pcapkit.protocols.application.httpv1.HTTP` directly for ports 80
+and 8080, which makes a segment on either port HTTP/1 by assertion of the port
+number: an HTTP/2 payload there would be refused by the HTTP/1 parser and
+reported as :class:`~pcapkit.protocols.misc.raw.Raw`. Both versions share those ports on the
 wire -- :rfc:`9113#section-3.1` keeps the cleartext form on ``http`` -- so the
 port cannot decide the version and the payload has to, which is what
 :class:`pcapkit.protocols.application.http.HTTP` does.
@@ -86,15 +86,15 @@ class TCPHTTPDispatchTests(unittest.TestCase):
     def test_http2_on_the_http_ports_decodes_as_http2_and_http1_still_as_http1(self) -> None:
         """Both versions reach their own parser from a port-80/8080 segment.
 
-        The HTTP/2 half is what the repoint buys: before it, these nine octets
-        decoded as ``TCP:Raw``, because ``httpv1.HTTP`` refused them and
-        :func:`~pcapkit.corekit.decorators.beholder` turned the refusal into
-        ``Raw``. The HTTP/1.1 half is the guard on the 231 HTTP/1.1 frames in the
-        fixture corpus that this change routes through
+        The HTTP/2 half pins the binding to the proxy: bound to ``httpv1.HTTP``,
+        these nine octets decode as ``TCP:Raw``, because ``httpv1.HTTP`` refuses
+        them and :func:`~pcapkit.corekit.decorators.beholder` turns the refusal
+        into ``Raw``. The HTTP/1.1 half guards the HTTP/1.1 frames in the
+        fixture corpus, which these ports route through
         :meth:`HTTP._guess_version
-        <pcapkit.protocols.application.http.HTTP._guess_version>` for the first
-        time: they have to come back HTTP/1.1, and both halves are asserted here
-        so neither can be satisfied at the other's expense.
+        <pcapkit.protocols.application.http.HTTP._guess_version>`: they have to
+        come back HTTP/1.1, and both halves are asserted here so neither can be
+        satisfied at the other's expense.
 
         """
         from pcapkit.protocols.transport.tcp import TCP

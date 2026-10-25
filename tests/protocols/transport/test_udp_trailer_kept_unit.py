@@ -2,12 +2,12 @@
 """Octets captured past a UDP datagram's own Length field survive a rebuild.
 
 GitHub issue #1461: :class:`~pcapkit.protocols.transport.udp.UDP` reads its
-Length field, but the payload ran to the end of the capture and nothing kept
-what lay past an empty one, so
-:meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data` dropped it: a header
-of Length 8 followed by two octets rebuilt as 8 octets of its 10.
+Length field. Guards against the payload running to the end of the capture with
+nothing keeping what lies past an empty one, under which
+:meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data` drops it: a header of
+Length 8 followed by two octets would rebuild as 8 octets of its 10.
 
-The payload now stops at Length and the rest is ``info.trailer``, as IPv4, IPv6
+The payload stops at Length and the rest is ``info.trailer``, as IPv4, IPv6
 (#1209) and IPX (#1433) do, and :meth:`make` writes a ``trailer`` outside the
 length it declares.
 

@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """FTP and HTTP/1.* keep what they normalise. C.f. #1302, #1303, #1333.
 
-- #1302: HTTP/1.* field values decoded with a guessed charset were encoded back
-  as UTF-8. The field lines are now kept as received (``raw_header``).
-- #1303: a multi-line FTP reply arriving whole in one segment did not parse. The
-  lines after the first are now kept as received (``lines``).
+- #1302: HTTP/1.* field values decoded with a guessed charset must not be
+  encoded back as UTF-8. The field lines are kept as received (``raw_header``).
+- #1303: a multi-line FTP reply arriving whole in one segment parses. The lines
+  after the first are kept as received (``lines``).
 - #1333: the FTP command case and the HTTP/1.* whitespace -- around start-line
   tokens, around the field colon, and in ``obs-fold`` -- were normalised on
   rebuild. The parsed values stay normalised for lookup, and the original

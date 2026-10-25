@@ -153,8 +153,9 @@ FTP_COMMAND_NEW = (
     'ADAT,secu,Authentication/Security Data,a,o,[RFC 2228]; [RFC 2773]; [RFC 4217]\r\n'
 )
 
-#: ``ALGS`` live on 2026-10-13. It read ``[RFC6384] Section 11`` before, so it
-#: is the one row whose rendering moves: the section is now in the citation.
+#: ``ALGS`` live on 2026-10-13, with the section inside the citation. The older
+#: registry format reads ``[RFC6384] Section 11``, so this is the one row whose
+#: rendering differs between the two formats.
 FTP_ALGS_NEW = (
     'cmd,FEAT code,description,type,conf,References and Notes\r\n'
     'ALGS,,FTP64 ALG status,,o,"[RFC 6384, Section 11]"\r\n'

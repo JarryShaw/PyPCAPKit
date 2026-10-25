@@ -59,7 +59,7 @@ DSS is the one entry that is not a defect where #576 puts it
 
 #576 files the DSS defect against ``_make_mptcp_dss``'s length expression and suggests the
 fix "will also change what its maker needs to compute". Re-derived from figure 9, that
-expression is **already correct**, and it is left untouched. Read as a base plus widening
+expression is **correct**. Read as a base plus widening
 increments rather than one term per field:
 
 .. code-block:: python
@@ -71,33 +71,28 @@ the 4 is the head; ``A`` contributes the 4-octet Data ACK and ``a`` a further 4 
 2-octet Checksum) and ``m`` a further 4 to widen the DSN to 8. Every combination matches the
 figure, and all flags set gives 4 + 4 + 4 + 12 + 4 = 28.
 
-What was wrong was the *schema* that expression describes. ``MPTCPDSS.ack`` and ``MPTCPDSS.dsn``
-sized themselves with ``NumberField(length=lambda pkt: 8 if pkt['flags']['a'] else 0)`` -- **0**
-octets in the unextended case, where the figure says 4 -- so the option went onto the wire 4
-(or, with both fields unextended, 8) octets shorter than its own ``Length`` octet declared, and
-the ``ack``/``dsn`` values the caller supplied were simply not present. Measured pre-fix with
-the generator's own override arguments: 12 octets packed against a declared 20.
+What can go wrong is the *schema* that expression describes. Guards against
+``MPTCPDSS.ack`` and ``MPTCPDSS.dsn`` sizing themselves with ``NumberField(length=lambda pkt:
+8 if pkt['flags']['a'] else 0)`` -- **0** octets in the unextended case, where the figure says
+4 -- under which the option goes onto the wire 4 (or, with both fields unextended, 8) octets
+shorter than its own ``Length`` octet declares, and the ``ack``/``dsn`` values the caller
+supplied are simply not present. Measured that way with the generator's own override
+arguments: 12 octets packed against a declared 20.
 
-A second defect sat behind the first: correcting the lambda to ``8 if ... else 4`` would still
-not have packed *at the time*, because :class:`~pcapkit.corekit.fields.numbers.NumberField`
-could not pack a callable length at all -- it called ``build_template`` once at ``__init__``
-with the placeholder length ``-1``, latching ``_need_process = True``, and nothing cleared that
-when ``__call__`` later resolved the real length and rebuilt the template as ``>I``/``>Q``.
-Measured on the 8-octet form, which the old lambda did reach: ``_make_mptcp_dss(DSS, ack=1 <<
-40)`` raised ``struct.error: required argument is not an integer``. #576 left that to
-:mod:`pcapkit.corekit.fields.numbers`, and **#598 has since fixed it** by recomputing
-``_need_process`` from the width in force rather than once from the placeholder, so a callable
-length packs and unpacks both widths. The schema keeps selecting between
-:class:`~pcapkit.corekit.fields.numbers.UInt32Field` and
-:class:`~pcapkit.corekit.fields.numbers.UInt64Field`, which each fix ``__template__`` at class
-level, through a :class:`~pcapkit.corekit.fields.misc.SwitchField` -- the pattern
-:func:`~pcapkit.protocols.schema.transport.tcp.mptcp_add_address_selector` already uses in that
+A callable length also has to pack at all. :class:`~pcapkit.corekit.fields.numbers.NumberField`
+builds its template once at ``__init__`` with the placeholder length ``-1``, and recomputes
+``_need_process`` from the width in force rather than latching it from that placeholder
+(#598), so a callable length packs and unpacks both widths; latched, the 8-octet form
+``_make_mptcp_dss(DSS, ack=1 << 40)`` raised ``struct.error: required argument is not an
+integer``. The schema selects between :class:`~pcapkit.corekit.fields.numbers.UInt32Field`
+and :class:`~pcapkit.corekit.fields.numbers.UInt64Field`, which each fix ``__template__`` at
+class level, through a :class:`~pcapkit.corekit.fields.misc.SwitchField` -- the pattern
+:func:`~pcapkit.protocols.schema.transport.tcp.mptcp_add_address_selector` uses in that
 module -- for the narrower reason recorded in
 :func:`~pcapkit.protocols.schema.transport.tcp.mptcp_dss_ack_selector`'s own note, which is
 about :class:`~pcapkit.corekit.fields.misc.ConditionalField`'s condition-blind ``length`` and
-not about wire absence. Swapping the two would be a behaviour change and is not made here.
-:class:`TCPMPTCPDSSExtendedFieldsUnitTests` covers the 8-octet forms that could not be packed
-before at all.
+not about wire absence. Swapping the two would be a behaviour change.
+:class:`TCPMPTCPDSSExtendedFieldsUnitTests` covers the 8-octet forms.
 
 MP_JOIN-SYN is not a defect either
 -----------------------------------
@@ -125,21 +120,11 @@ parse-side bug cannot cancel out behind a closed round trip -- the pattern
 the blind spot :mod:`tests.protocols.test_option_roundtrip_unit`'s own docstring names ("a
 defect can leave the cycle closed").
 
-When this module was written MP_JOIN could not be built through the public ``TCP()``
-constructor at all -- ``_make_mptcp_join`` dispatches on ``self._flags``, which ``TCP.make``
-assigned *after* it had already built the options, so construction raised ``AttributeError:
-'TCP' object has no attribute '_flags'``. That was a separate, already-recorded gap
-(``tcp-mptcp/MP_JOIN`` in :data:`tests.protocols.test_option_roundtrip_unit.EXPECTED_FAILURES`,
-with exactly that diagnosis) and was left alone here, which is why the MP_JOIN classes drive
-the makers directly and reach the readers by parsing bytes, where ``_flags`` *is* set.
-
-**#587 has since hoisted that assignment above the option build**, so the constructor route is
-open now and its ``EXPECTED_FAILURES`` entry is gone;
+The MP_JOIN classes drive the makers directly and reach the readers by parsing bytes, where
+``_flags`` *is* set, rather than going through the public ``TCP()`` constructor: that keeps
+them a check on the *length arithmetic* of each form rather than on the dispatch.
 :mod:`tests.protocols.transport.test_tcp_mptcp_join_flag_ordering_unit` covers all three
-layouts through ``TCP()`` proper. The classes here are still written against the makers, which
-is what keeps them a check on the *length arithmetic* of each form rather than on the dispatch,
-so they are left as they are -- but the reason is now choice rather than impossibility. C.f.
-#587, #603.
+layouts through ``TCP()`` proper. C.f. #587, #603.
 
 """
 from __future__ import annotations
@@ -266,8 +251,8 @@ class TCPMPTCPFastcloseLengthUnitTests(LengthInvariantMixin, unittest.TestCase):
     def test_maker_packs_twelve_octets(self) -> None:
         """``_make_mptcp_fastclose`` packs 12 octets, reserved octet included.
 
-        Pre-fix this packed **11** -- ``1e0c700000000000000009``, a declared 12 against an
-        11-octet option -- because ``MPTCPFastclose`` had no reserved field and ``test`` was
+        Guards against packing **11** -- ``1e0c700000000000000009``, a declared 12 against
+        an 11-octet option -- as a schema with no reserved field would, ``test`` being then
         the only octet between ``length`` and ``key``, where figure 14 draws 4 subtype bits
         followed by 12 reserved ones.
 
@@ -280,10 +265,10 @@ class TCPMPTCPFastcloseLengthUnitTests(LengthInvariantMixin, unittest.TestCase):
     def test_spec_octets_parse_back(self) -> None:
         """Hand-built figure 14 octets parse, with the key intact.
 
-        Pre-fix ``_read_mptcp_fastclose`` required ``schema.length == 16``, so a
-        spec-correct 12-octet option off the wire raised ``ProtocolError: TCP: [OptNo 30]
-        invalid format`` -- and so did every option the maker produced, since it declared
-        the correct 12.
+        Guards against ``_read_mptcp_fastclose`` requiring ``schema.length == 16``, under
+        which a spec-correct 12-octet option off the wire raises ``ProtocolError: TCP:
+        [OptNo 30] invalid format`` -- and so does every option the maker produces, since
+        it declares the correct 12.
 
         """
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
@@ -332,9 +317,9 @@ class TCPMPTCPJoinSYNACKLengthUnitTests(LengthInvariantMixin, unittest.TestCase)
     def test_maker_packs_sixteen_octets(self) -> None:
         """``_make_join_synack`` packs 16 octets and declares 16.
 
-        Pre-fix it declared **12** -- ``_make_join_syn``'s length for figure 5's SYN form --
-        while packing the 16 octets figure 6 requires, since the HMAC here is 8 octets where
-        the SYN's token is 4.
+        Guards against declaring **12** -- ``_make_join_syn``'s length for figure 5's SYN
+        form -- while packing the 16 octets figure 6 requires, since the HMAC here is 8
+        octets where the SYN's token is 4.
 
         """
         packed = make('_make_join_synack', 'MP_JOIN', addr_id=5, hmac=b'\xDD' * 8, nonce=9)
@@ -348,10 +333,10 @@ class TCPMPTCPJoinSYNACKLengthUnitTests(LengthInvariantMixin, unittest.TestCase)
     def test_spec_octets_parse_back(self) -> None:
         """Hand-built figure 6 octets parse in a SYN/ACK segment.
 
-        Pre-fix ``_read_join_synack`` required ``schema.length == 20`` -- a value neither
-        figure 6 nor ``MPTCPJoinSYNACK`` produces, and one that contradicted this method's
-        own docstring figure -- so a spec-correct 16-octet option was rejected as an invalid
-        format.
+        Guards against ``_read_join_synack`` requiring ``schema.length == 20`` -- a value
+        neither figure 6 nor ``MPTCPJoinSYNACK`` produces, and one that contradicts the
+        reader's own docstring figure -- under which a spec-correct 16-octet option is
+        rejected as an invalid format.
 
         """
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
@@ -368,12 +353,12 @@ class TCPMPTCPJoinSYNACKLengthUnitTests(LengthInvariantMixin, unittest.TestCase)
         self.assertEqual(data.nonce, 9)
 
     def test_reconstruction_keeps_the_parsed_hmac(self) -> None:
-        """Rebuilding from parsed data preserves ``hmac``, which used to be dropped.
+        """Rebuilding from parsed data preserves ``hmac``.
 
-        ``_make_join_synack``'s ``if opt is not None:`` branch set ``backup``, ``addr_id``
-        and ``nonce`` -- the last of those twice, on two consecutive lines -- but never
-        ``hmac``, so reconstructing a parsed MP_JOIN-SYN/ACK silently substituted the
-        ``bytes(8)`` default for the truncated HMAC that was actually on the wire. The HMAC
+        Guards against ``_make_join_synack``'s ``if opt is not None:`` branch setting
+        ``backup``, ``addr_id`` and ``nonce`` but never ``hmac``, under which
+        reconstructing a parsed MP_JOIN-SYN/ACK silently substitutes the ``bytes(8)``
+        default for the truncated HMAC that was actually on the wire. The HMAC
         is the entire authentication payload of this form of the option, so an all-zero
         substitute is not a cosmetic loss.
 
@@ -399,9 +384,9 @@ class TCPMPTCPJoinACKLengthUnitTests(LengthInvariantMixin, unittest.TestCase):
     def test_maker_packs_twenty_four_octets(self) -> None:
         """``_make_join_ack`` packs 24 octets and declares 24.
 
-        Pre-fix it declared **8**, a third of the truth, while packing the 24 octets figure 7
-        requires: the 160-bit HMAC alone is 20. ``_read_join_ack`` already required 24, so
-        nothing this maker produced could be parsed back.
+        Guards against declaring **8**, a third of the truth, while packing the 24 octets
+        figure 7 requires: the 160-bit HMAC alone is 20. ``_read_join_ack`` requires 24, so
+        nothing such a maker produces could be parsed back.
 
         """
         packed = make('_make_join_ack', 'MP_JOIN', hmac=b'\xBB' * 20)
@@ -412,8 +397,8 @@ class TCPMPTCPJoinACKLengthUnitTests(LengthInvariantMixin, unittest.TestCase):
     def test_maker_output_satisfies_its_own_reader(self) -> None:
         """What the maker declares is what the reader accepts.
 
-        The two disagreed absolutely before the fix -- 8 against a guard of 24 -- so this is
-        the pairing that could not hold at all, rather than an off-by-one.
+        A maker declaring 8 disagrees absolutely with a guard of 24, so this is the pairing
+        that cannot hold at all under that defect, rather than an off-by-one.
 
         """
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
@@ -437,9 +422,9 @@ class TCPMPTCPRemoveAddressLengthUnitTests(LengthInvariantMixin, unittest.TestCa
         """``addr_id=[1, 2]`` packs 5 octets and declares 5.
 
         Stated as its own test, not only as a case of the ``subTest`` sweep below, because
-        pytest 9.1.1 here has no ``pytest-subtests``: a failing ``subTest`` is reported but
-        its *parent* test still prints ``PASSED``, so a per-site regression is easier to read
-        from a test that fails outright. Pre-fix this packed ``1e04400102`` -- 5 octets
+        pytest counts a failing ``subTest`` as a failed subtest (``SUBFAILED``) while
+        counting its *parent* test as passed, so a per-site regression is easier to read
+        from a test that fails outright. Guards against packing ``1e04400102`` -- 5 octets
         declaring 4.
 
         """
@@ -451,10 +436,10 @@ class TCPMPTCPRemoveAddressLengthUnitTests(LengthInvariantMixin, unittest.TestCa
     def test_length_tracks_the_number_of_address_ids(self) -> None:
         """``3 + n`` for every ``n``, not a constant 4.
 
-        Pre-fix, measured: ``addr_id=[1, 2]`` packed 5 octets declaring 4, ``addr_id=[]``
-        packed 3 declaring 4, and ``addr_id=[1, 2, 3, 4]`` packed 7 declaring 4. Only
-        ``addr_id=[1]`` -- which is what ``examples.generators.options``' fixture passes --
-        happened to agree, which is why the round-trip suite never saw this.
+        Measured with a constant 4: ``addr_id=[1, 2]`` packed 5 octets declaring 4,
+        ``addr_id=[]`` packed 3 declaring 4, and ``addr_id=[1, 2, 3, 4]`` packed 7 declaring
+        4. Only ``addr_id=[1]`` -- which is what ``examples.generators.options``' fixture
+        passes -- happens to agree, which is why the round-trip suite cannot see this.
 
         """
         for addr_ids in ([], [1], [1, 2], [1, 2, 3, 4], list(range(1, 21))):
@@ -470,7 +455,7 @@ class TCPMPTCPRemoveAddressLengthUnitTests(LengthInvariantMixin, unittest.TestCa
 
         The declared length is what
         :attr:`~pcapkit.protocols.schema.transport.tcp.MPTCPRemoveAddress.addr_id` sizes its
-        list from, as ``pkt['length'] - 3``, so the old constant 4 truncated the parse to a
+        list from, as ``pkt['length'] - 3``, so a constant 4 would truncate the parse to a
         single ID as well as mis-declaring the pack.
 
         """
@@ -497,9 +482,9 @@ class TCPMPTCPPriorityLengthUnitTests(LengthInvariantMixin, unittest.TestCase):
     def test_no_address_id_packs_three_octets(self) -> None:
         """``addr_id=None`` packs 3 octets with no Address ID at all.
 
-        Pre-fix this packed ``1e045000`` -- 4 octets, the last a phantom all-zero Address ID
-        no caller asked for. The constant ``length=4`` satisfied ``MPTCPPriority.addr_id``'s
-        own ``pkt['length'] == 4`` predicate, so declaring the legacy length *created* the
+        Guards against packing ``1e045000`` -- 4 octets, the last a phantom all-zero Address
+        ID no caller asked for. A constant ``length=4`` satisfies ``MPTCPPriority.addr_id``'s
+        own ``pkt['length'] == 4`` predicate, so declaring the legacy length *creates* the
         legacy field.
 
         """
@@ -529,12 +514,13 @@ class TCPMPTCPPriorityLengthUnitTests(LengthInvariantMixin, unittest.TestCase):
         self.assertEqual(packed, bytes([0x1E, 0x04, 0x50, 0x07]))
 
     def test_reconstruction_keeps_the_parsed_backup_flag(self) -> None:
-        """Rebuilding from parsed data preserves ``backup``, which used to be dropped.
+        """Rebuilding from parsed data preserves ``backup``.
 
-        ``_make_mptcp_prio``'s ``if opt is not None:`` branch set only ``addr_id``, so a
-        parsed MP_PRIO with ``B=1`` was rebuilt with ``B=0`` -- and ``B`` is the entire
-        payload of this option, so the rebuilt option said the opposite of the original.
-        The same shape as ``_make_join_synack``'s dropped ``hmac``.
+        Guards against ``_make_mptcp_prio``'s ``if opt is not None:`` branch setting only
+        ``addr_id``, under which a parsed MP_PRIO with ``B=1`` is rebuilt with ``B=0`` --
+        and ``B`` is the entire payload of this option, so the rebuilt option would say the
+        opposite of the original. The same shape as a dropped ``hmac`` in
+        ``_make_join_synack``.
 
         """
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
@@ -557,9 +543,9 @@ class TCPMPTCPDSSLengthUnitTests(LengthInvariantMixin, unittest.TestCase):
     def test_data_ack_only_packs_eight_octets(self) -> None:
         """``A`` set, ``a`` clear: head 4 + a 4-octet Data ACK = 8.
 
-        Pre-fix this packed ``1e082001`` -- 4 octets declaring 8 -- because ``MPTCPDSS.ack``
-        sized itself ``8 if pkt['flags']['a'] else 0`` and so contributed nothing at all.
-        The ``ack`` value the caller passed was not on the wire.
+        Guards against packing ``1e082001`` -- 4 octets declaring 8 -- as an
+        ``MPTCPDSS.ack`` sized ``8 if pkt['flags']['a'] else 0`` does, contributing nothing
+        at all. The ``ack`` value the caller passed would not be on the wire.
 
         """
         packed = make('_make_mptcp_dss', 'DSS', ack=1)
@@ -570,8 +556,9 @@ class TCPMPTCPDSSLengthUnitTests(LengthInvariantMixin, unittest.TestCase):
     def test_mapping_only_packs_sixteen_octets(self) -> None:
         """``M`` set, ``m`` clear: head 4 + DSN 4 + SSN 4 + Data-Level Length 2 + Checksum 2.
 
-        Pre-fix ``MPTCPDSS.dsn`` contributed 0 octets here for the same reason as ``ack``, so
-        this packed 12 against a declared 16 and the ``dsn`` value was lost.
+        Guards against ``MPTCPDSS.dsn`` contributing 0 octets here for the same reason as
+        ``ack``, under which this packs 12 against a declared 16 and the ``dsn`` value is
+        lost.
 
         """
         packed = make('_make_mptcp_dss', 'DSS', dsn=2, ssn=3, dl_len=4, checksum=b'\x00\x00')
@@ -588,9 +575,9 @@ class TCPMPTCPDSSLengthUnitTests(LengthInvariantMixin, unittest.TestCase):
 
         This is #576's filed measurement: ``ack=1, dsn=2, ssn=3, dl_len=4,
         checksum=b'\\x00\\x00'`` packed **12** octets against a declared 20, with neither
-        ``ack`` nor ``dsn`` on the wire. ``tcp-mptcp/DSS`` still read ``'OK'`` in the
-        round-trip suite, because construct -> parse -> reconstruct produced the same wrong
-        12 octets every time and the suite only checks the cycle is self-consistent.
+        ``ack`` nor ``dsn`` on the wire. The round-trip suite cannot see that, because
+        construct -> parse -> reconstruct produces the same wrong 12 octets every time and
+        the suite only checks the cycle is self-consistent.
 
         """
         packed = make('_make_mptcp_dss', 'DSS', ack=1, dsn=2, ssn=3, dl_len=4,
@@ -610,8 +597,8 @@ class TCPMPTCPDSSLengthUnitTests(LengthInvariantMixin, unittest.TestCase):
         would prove nothing: ``TCP._make_mode_mp`` hands the schema it just built straight to
         the matching ``_read_mptcp_*``, so ``data.ack`` reads back the attribute the caller
         set regardless of how many octets the field packed. Measured -- that assertion passes
-        against the unfixed tree. Going out to bytes and back in is what exposes a field that
-        declared 4 octets and packed 0.
+        even with the defect present. Going out to bytes and back in is what exposes a field
+        that declares 4 octets and packs 0.
 
         """
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption

@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 """FTP reply codes and HTTP status codes parse and rebuild for every three digits.
 
-GitHub issue #1443: :class:`~pcapkit.const.ftp.return_code.ReturnCode` resolved
-only 100 to 659 and :class:`~pcapkit.const.http.status_code.StatusCode` only
-100 to 599, so a reply such as ``999 hi`` or a status line such as
-``HTTP/1.1 999 X`` raised :exc:`~pcapkit.utilities.exceptions.EnumValueError`
-and could not be parsed at all. Both wire fields are three digits, so every
-value from 000 to 999 now resolves, to ``Unassigned`` inside the registry's
-range and ``Unknown`` outside it, and the packet rebuilds byte for byte.
+GitHub issue #1443: guards against
+:class:`~pcapkit.const.ftp.return_code.ReturnCode` resolving only 100 to 659 and
+:class:`~pcapkit.const.http.status_code.StatusCode` only 100 to 599, which made a
+reply such as ``999 hi`` or a status line such as ``HTTP/1.1 999 X`` raise
+:exc:`~pcapkit.utilities.exceptions.EnumValueError` and fail to parse at all.
+Both wire fields are three digits, so every value from 000 to 999 resolves, to
+``Unassigned`` inside the registry's range and ``Unknown`` outside it, and the
+packet rebuilds byte for byte.
 ``make()`` also writes the code as three digits, so ``099`` keeps its zero.
 
 Every case builds its own octets in memory and reads no capture. Classes are

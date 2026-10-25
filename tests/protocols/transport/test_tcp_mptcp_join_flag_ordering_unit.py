@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 """``TCP.make`` resolves the connection flags before it builds the options.
 
-GitHub issue #587, found while reviewing #585's CI. Distinct from #576/#585, which are
-about MPTCP option *length* arithmetic; this one is a statement-ordering defect in
-:meth:`TCP.make <pcapkit.protocols.transport.tcp.TCP.make>` and needs its own fix.
+GitHub issue #587. Distinct from #576/#585, which are about MPTCP option *length*
+arithmetic; this one is a statement-ordering defect in
+:meth:`TCP.make <pcapkit.protocols.transport.tcp.TCP.make>`.
 
-Root cause
-----------
+The ordering
+------------
 
-:meth:`~pcapkit.protocols.transport.tcp.TCP.make` built the options first and assigned
-the flags afterwards:
+:meth:`TCP._make_mptcp_join <pcapkit.protocols.transport.tcp.TCP._make_mptcp_join>`,
+reached from ``_make_tcp_options``, *branches on* ``self._flags`` to pick which of the
+three MP_JOIN layouts to emit, so :meth:`~pcapkit.protocols.transport.tcp.TCP.make` has
+to assign the flags before it builds the options. Built the other way round:
 
 .. code-block:: python
 
@@ -17,22 +19,15 @@ the flags afterwards:
     ...
     self._flags = _flag
 
-but :meth:`TCP._make_mptcp_join
-<pcapkit.protocols.transport.tcp.TCP._make_mptcp_join>`, reached from
-``_make_tcp_options``, *branches on that attribute* to pick which of the three MP_JOIN
-layouts to emit. So on a fresh instance the attribute did not exist yet and construction
-died outright::
+a fresh instance has no such attribute yet, and construction dies outright::
 
     AttributeError: 'TCP' object has no attribute '_flags'
 
-The parse path has the identical pair of branches in ``_read_mptcp_join`` and is fine,
-because :meth:`~pcapkit.protocols.transport.tcp.TCP.read` assigns ``self._flags``
-before it parses the options. Only the make path was
-inverted.
-
-The fix is the hoist: the ``flags`` dict and the ``_flag`` accumulation move above the
-``_make_tcp_options`` call. The ``offset`` computation stays where it is, being the one
-statement in that block that genuinely depends on the options' ``total_length``.
+The parse path has the identical pair of branches in ``_read_mptcp_join``, and
+:meth:`~pcapkit.protocols.transport.tcp.TCP.read` assigns ``self._flags`` before it
+parses the options. In ``make`` the ``flags`` dict and the ``_flag`` accumulation sit
+above the ``_make_tcp_options`` call; the ``offset`` computation stays below it, being the
+one statement in that block that genuinely depends on the options' ``total_length``.
 
 Why the branch is not the thing to remove
 ------------------------------------------
@@ -50,12 +45,12 @@ SYN/ACK        figure 6      16   subtype/rsv/``B`` 1, ``Address ID`` 1, truncat
 ACK            figure 7      24   subtype and 12 reserved bits 2, full HMAC 20
 ============== ========= ======== ==================================================
 
-Those octet counts are the ones #585 corrected at the makers, and they are re-asserted
-here from the same figures, because a layout chosen correctly and then sized wrongly is
-no better than the crash.
+Those octet counts are the makers' own (#585), and they are re-asserted here from the
+same figures, because a layout chosen correctly and then sized wrongly is no better than
+the crash.
 
-Why a zero initialisation is not the fix
------------------------------------------
+Why a zero initialisation is not enough
+----------------------------------------
 
 The obvious alternative -- give ``_flags`` a class-level default of zero so the attribute
 always exists -- is worse than the crash, and
@@ -64,9 +59,9 @@ always exists -- is worse than the crash, and
 :meth:`Protocol.pack <pcapkit.protocols.protocol.ProtocolBase.pack>` is public and calls
 ``make``, so an instance that has already *parsed* a segment can be asked to build a
 different one. That instance's ``_flags`` is already set -- to the parsed segment's flags
--- so a zero default never comes into play for it, and pre-fix it silently built the
-option for the wrong segment. Measured pre-fix on a parsed MP_JOIN-SYN instance asked to
-pack an MP_JOIN-ACK segment::
+-- so a zero default never comes into play for it, and with the options built first it
+silently builds the option for the wrong segment. Measured that way on a parsed
+MP_JOIN-SYN instance asked to pack an MP_JOIN-ACK segment::
 
     c3500050 00000001 00000000 8010 2000 0000 0000  1e0c 10 00 00000000 00000000
 
@@ -76,40 +71,36 @@ authentication payload of figure 7's form, and the only reason to send it -- is 
 replaced by an all-zero phantom token and nonce. Nothing raises. A receiver gets a
 self-inconsistent segment.
 
-Post-fix the same call emits ``1e18 10 00`` followed by the 20 HMAC octets: figure 7,
-length 24.
+Built in the right order, the same call emits ``1e18 10 00`` followed by the 20 HMAC
+octets: figure 7, length 24.
 
-So the crash was the *benign* symptom and the ordering is the defect. Hoisting fixes both
-outcomes at once; a zero default fixes only the fresh-instance crash, and converts the
-flagless case from a crash into a spurious error while leaving the silent corruption
-exactly as it was.
+So the crash is the *benign* symptom and the ordering is the defect. Resolving the flags
+first prevents both outcomes; a zero default prevents only the fresh-instance crash, and
+converts the flagless case from a crash into a spurious error while leaving the silent
+corruption exactly as it is.
 
-The second, smaller fix in the same block
-------------------------------------------
+The flagless seed
+------------------
 
-Hoisting made one branch reachable for the first time: an MP_JOIN asked for on a segment
-with neither SYN nor ACK set. ``_make_mptcp_join`` ends in a
-:exc:`~pcapkit.utilities.exceptions.ProtocolError` for exactly that case, but it could
-not be reached, because the accumulator was seeded with ``cast('Enum_Flags', 0)`` --
-and :func:`typing.cast` is a runtime no-op, so with no flag set ``self._flags`` stayed
-the plain :class:`int` ``0`` and the first membership test raised instead::
+An MP_JOIN asked for on a segment with neither SYN nor ACK set ends in
+``_make_mptcp_join``'s :exc:`~pcapkit.utilities.exceptions.ProtocolError`. Reaching it
+needs a real flagless seed for the accumulator: seeded with ``cast('Enum_Flags', 0)`` --
+and :func:`typing.cast` is a runtime no-op -- ``self._flags`` would stay the plain
+:class:`int` ``0`` with no flag set, and the first membership test would raise instead::
 
     TypeError: argument of type 'int' is not a container or iterable
 
 Seeding with ``Enum_Flags(0)`` -- a real, flagless :class:`aenum.IntFlag` member, which
-still compares equal to ``0`` and still ORs as before -- lets the library's own
-documented error surface. :class:`TCPMPTCPJoinFlagOrderingUnitTests` pins that it is a
-``ProtocolError``, since a bare :exc:`TypeError` escaping the library would break the
-in-library exception contract.
+compares equal to ``0`` and ORs the same way -- lets the library's own documented error
+surface. :class:`TCPMPTCPJoinFlagOrderingUnitTests` pins that it is a ``ProtocolError``,
+since a bare :exc:`TypeError` escaping the library would break the in-library exception
+contract.
 
-The read path was checked for the same shape of problem and does **not** have it:
+On the read path,
 :func:`~pcapkit.protocols.schema.transport.tcp.mptcp_data_selector` guards the flagless
-case and raises
-:exc:`~pcapkit.utilities.exceptions.FieldError` before ``_read_mptcp_join`` is reached at
-all, so its own closing ``ProtocolError`` stays unreachable and its
-``cast('Enum_Flags', 0)`` is left alone. Changing it would alter the ``connection`` value
-the data model reports for every flagless parsed segment, which is not what #587 is
-about.
+case and raises :exc:`~pcapkit.utilities.exceptions.FieldError` before
+``_read_mptcp_join`` is reached at all, and ``read`` seeds ``Enum_Flags(0)`` as well
+(#616).
 
 Relationship to the rest of the suite
 --------------------------------------
@@ -119,19 +110,8 @@ Everything here goes through the **public** constructor, ``TCP(options=[(code, k
 in :mod:`tests.protocols.transport.test_tcp_mptcp_length_arithmetic_unit` call
 ``_make_join_syn``/``_make_join_synack``/``_make_join_ack`` directly on a
 ``TCP.__new__(TCP)``, which is precisely how they sidestep ``_make_mptcp_join`` and its
-``self._flags`` read -- so they passed throughout, and none of them would have caught
-this. The public path is the one #587 breaks, and the one nothing covered.
-
-:mod:`tests.protocols.transport.test_tcp_mptcp_subtype_unit` records the same gap from
-the other side: its module docstring excludes MP_JOIN from #566's coverage because it
-"fails independently with ``AttributeError: 'TCP' object has no attribute '_flags'``".
-That exclusion is lifted by this fix, and the ``subtype`` assertion it could not make for
-MP_JOIN is made below alongside the layout ones.
-
-:data:`tests.protocols.test_option_roundtrip_unit.EXPECTED_FAILURES` carried a
-``'tcp-mptcp/MP_JOIN'`` entry recording this defect. It is deleted with this fix, which
-is what that suite's own contract requires -- an entry whose defect is fixed turns it red
-until the entry goes.
+``self._flags`` read -- so none of them can catch an inverted order. The public path is
+the one #587 is about.
 
 """
 from __future__ import annotations
@@ -145,18 +125,11 @@ import unittest
 #: Deliberately *not* a copy of :data:`examples.generators.options.TCP_BASE`, which the
 #: sibling modules in this directory reuse -- and, unlike them, this dict omits
 #: ``syn``/``ack`` altogether, since every case here passes those two explicitly to
-#: select a layout, where a shared constant could not. Until #617, those sibling
-#: modules' own copies of that mapping additionally passed ``'seq': 1`` and
-#: ``'ack_flag': False``, neither of which was a parameter of ``make`` -- both were
-#: silently swallowed by its ``**kwargs`` -- while their ``'ack': 0`` bound to ``ack``,
-#: the *acknowledgement flag*, not to ``ack_no``. Measured pre-#617:
-#: ``TCP(**TCP_BASE).info.seq`` read back ``0``, not the ``1`` the mapping appeared to
-#: set. That was harmless where those modules used it, since none of them asserted
-#: anything about the sequence number -- but #617 turns any keyword ``make`` does not
-#: declare into ``UnsupportedCall`` instead of a silent no-op, so those mappings have
-#: since been corrected to ``seq_no``/``ack_no``/``ack`` rather than merely tolerated.
-#: This module dispatches on the ACK flag and always has, so it could never have
-#: afforded to leave which-``ack``-is-which to inference, #617 or not.
+#: select a layout, where a shared constant could not. The names matter: ``ack`` is the
+#: *acknowledgement flag*, not ``ack_no``, and ``make`` raises ``UnsupportedCall`` for any
+#: keyword it does not declare (#617), so a ``seq`` or an ``ack_flag`` would be refused
+#: rather than silently swallowed by its ``**kwargs``. This module dispatches on the ACK
+#: flag, so it cannot leave which-``ack``-is-which to inference.
 TCP_HEADER = {
     'srcport': 50000, 'dstport': 80, 'seq_no': 1, 'ack_no': 0,
     'ns': False, 'cwr': False, 'ece': False, 'urg': False,
@@ -259,8 +232,8 @@ class JoinLayoutMixin:
         wrong: the option octets are what the figure draws, the option's own ``Length``
         octet agrees with how many octets it actually occupies, and the header's
         ``offset`` accounts for them -- the last being what proves the ``offset``
-        computation still sees the options it is supposed to count, after the hoist moved
-        statements around it.
+        computation sees the options it is supposed to count, with the flag resolution
+        placed ahead of the option build.
 
         Args:
             tcp: The constructed :class:`~pcapkit.protocols.transport.tcp.TCP` instance.
@@ -280,29 +253,24 @@ class JoinLayoutMixin:
 class TCPMPTCPJoinFlagOrderingUnitTests(JoinLayoutMixin, unittest.TestCase):
     """Each of the three MP_JOIN layouts builds through the public constructor.
 
-    Pre-fix every one of these raised ``AttributeError: 'TCP' object has no attribute
-    '_flags'`` before returning anything, so there was no instance to assert on at all.
+    With the options built before the flags, every one of these raises ``AttributeError:
+    'TCP' object has no attribute '_flags'`` before returning anything, leaving no instance
+    to assert on at all.
 
     """
 
     def test_the_issue_reproduction_constructs(self) -> None:
         """#587's reproduction returns an instance instead of raising.
 
-        This used to keep ``seq=0, ack=0`` exactly as the issue filed it, since neither
-        is ``make``'s parameter name for the sequence and acknowledgement numbers and a
-        reader pasting the issue's own text would hit precisely this call. #617 removes
-        that option: ``seq`` is not declared by ``make``'s (or ``read``'s, ``pack``'s,
-        ``unpack``'s, ``__post_init__``'s, or ``__init__``'s) signature at all -- the
-        parameter is ``seq_no`` -- so where it used to be silently absorbed by ``make``'s
-        trailing ``**kwargs`` and leave the sequence number at its default, it now raises
-        :exc:`~pcapkit.utilities.exceptions.UnsupportedCall`, for a reason that has
-        nothing to do with what this test is pinning. ``ack=0`` needed no change: ``ack``
+        The issue's own call, with ``seq`` spelled ``seq_no``: ``make`` (like ``read``,
+        ``pack``, ``unpack``, ``__post_init__`` and ``__init__``) declares no ``seq``
+        parameter, and an undeclared keyword raises
+        :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` (#617), for a reason that has
+        nothing to do with what this test is pinning. ``ack=0`` is kept as filed: ``ack``
         *is* a real parameter -- the connection flag, not the acknowledgement number --
-        and ``0`` is an accepted falsy value for it, which is exactly why the issue's
-        original text could leave it alone too. So only ``seq`` is renamed to ``seq_no``
-        here; everything else, including the value ``0``, is unchanged, and the case
-        still returns an instance rather than raising ``AttributeError: 'TCP' object has
-        no attribute '_flags'``, which is what #587 is about.
+        and ``0`` is an accepted falsy value for it. The case returns an instance rather
+        than raising ``AttributeError: 'TCP' object has no attribute '_flags'``, which is
+        what #587 is about.
 
         """
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
@@ -407,12 +375,12 @@ class TCPMPTCPJoinFlagOrderingUnitTests(JoinLayoutMixin, unittest.TestCase):
     def test_neither_syn_nor_ack_raises_protocol_error(self) -> None:
         """A flagless segment gets the library's own error, not a bare ``TypeError``.
 
-        ``_make_mptcp_join`` has always ended in this ``ProtocolError``, but the branch
-        was doubly unreachable: construction died on the missing attribute first, and
-        even past that the ``cast('Enum_Flags', 0)`` accumulator left ``self._flags`` as
-        a plain ``int``, on which ``Enum_Flags.SYN in self._flags`` raises ``TypeError:
-        argument of type 'int' is not a container or iterable``. Seeding with
-        ``Enum_Flags(0)`` is what lets the intended error through.
+        ``_make_mptcp_join`` ends in this ``ProtocolError``, and two things can keep a
+        caller from it: construction dying on a missing attribute first, and a
+        ``cast('Enum_Flags', 0)`` accumulator leaving ``self._flags`` as a plain ``int``,
+        on which ``Enum_Flags.SYN in self._flags`` raises ``TypeError: argument of type
+        'int' is not a container or iterable``. Seeding with ``Enum_Flags(0)`` is what
+        lets the intended error through.
 
         """
         from pcapkit.utilities.exceptions import ProtocolError
@@ -428,8 +396,8 @@ class TCPMPTCPJoinFlagOrderingUnitTests(JoinLayoutMixin, unittest.TestCase):
         The control on the previous case: seeding the accumulator with ``Enum_Flags(0)``
         must not have made a flagless segment invalid in itself, and the flag octet it
         writes must still be zero. ``Enum_Flags(0)`` compares equal to ``0`` and ORs
-        exactly as the old ``cast('Enum_Flags', 0)`` did, so it is a drop-in for every
-        combination -- which is what makes the change safe for the six other flags this
+        exactly as a ``cast('Enum_Flags', 0)`` seed does, so it is a drop-in for every
+        combination -- which is what makes the seed safe for the six other flags this
         accumulator handles (``cwr``, ``ece``, ``urg``, ``psh``, ``rst``, ``fin``) as
         well as for SYN and ACK.
 
@@ -492,8 +460,9 @@ class TCPMPTCPJoinStaleFlagsUnitTests(unittest.TestCase):
     """The case that rules out initialising ``_flags`` to zero.
 
     An instance that has parsed a segment already *has* ``_flags``, so no default value
-    would have changed its behaviour. Pre-fix it built the option for the segment it had
-    read rather than the one it was being asked to write, and did so silently.
+    would change its behaviour. With the options built before the flags, it builds the
+    option for the segment it read rather than the one it is asked to write, and does so
+    silently.
 
     """
 
@@ -501,7 +470,7 @@ class TCPMPTCPJoinStaleFlagsUnitTests(unittest.TestCase):
         """A ``TCP`` instance that has parsed a real MP_JOIN-SYN segment.
 
         Returns:
-            The instance, whose ``_flags`` is now ``SYN`` from the wire.
+            The instance, whose ``_flags`` is ``SYN`` from the wire.
 
         """
         from pcapkit.protocols.transport.tcp import TCP
@@ -515,11 +484,12 @@ class TCPMPTCPJoinStaleFlagsUnitTests(unittest.TestCase):
     def test_parsed_instance_packs_the_requested_layout(self) -> None:
         """``pack`` on a parsed MP_JOIN-SYN instance emits the ACK form when asked to.
 
-        Pre-fix this produced ``…8010…1e0c 10 00 00000000 00000000``: an ACK header
-        carrying figure 5's 12-octet SYN option, with the caller's 20-octet HMAC
-        discarded and an all-zero token and nonce invented in its place. No exception --
-        which is why this outcome is worse than the ``AttributeError`` the same defect
-        produces on a fresh instance, and why a zero default is not the fix.
+        With the options built first, this produces ``…8010…1e0c 10 00 00000000
+        00000000``: an ACK header carrying figure 5's 12-octet SYN option, with the
+        caller's 20-octet HMAC discarded and an all-zero token and nonce invented in its
+        place. No exception -- which is why this outcome is worse than the
+        ``AttributeError`` the same defect produces on a fresh instance, and why a zero
+        default is not enough.
 
         """
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption
@@ -543,19 +513,19 @@ class TCPMPTCPJoinStaleFlagsUnitTests(unittest.TestCase):
     def test_make_re_derives_the_flags_on_every_call(self) -> None:
         """``make`` recomputes ``_flags`` per call rather than inheriting the parse's.
 
-        **This case is not a regression guard for #587, and it passed on the unfixed
-        tree too.** It is kept, and named for what it actually establishes, because the
-        fix leans on this property: hoisting the flag resolution is only worth anything
+        **This case is not a regression guard for #587: it passes with either statement
+        order.** It is kept, and named for what it actually establishes, because the
+        ordering leans on this property: resolving the flags first is only worth anything
         if what it resolves describes the segment being *built*. If ``make`` instead
-        reused a previously stored value, the hoist would move the same wrong flags to an
-        earlier point and the defect above would survive it.
+        reused a previously stored value, resolving it earlier would only move the same
+        wrong flags to an earlier point and the defect above would survive.
 
         Adding an ``options`` argument would not turn this into a discriminator, which is
-        worth recording since it is the obvious thing to try. Pre-fix, ``make`` assigned
-        ``self._flags`` *after* building the options -- so by the time ``make`` returned,
-        the attribute held the new call's flags either way, and only the option octets
-        built in between were wrong. The assertion that separates the two trees is
-        therefore on those octets, and
+        worth recording since it is the obvious thing to try. With the options built
+        first, ``make`` assigns ``self._flags`` *after* building them -- so by the time
+        ``make`` returns, the attribute holds the new call's flags either way, and only
+        the option octets built in between are wrong. The assertion that separates the
+        two orders is therefore on those octets, and
         :meth:`test_parsed_instance_packs_the_requested_layout` is the case that makes
         it.
 
@@ -580,7 +550,7 @@ class TCPMPTCPJoinStaleFlagsUnitTests(unittest.TestCase):
 
 
 class TCPMakeStatementOrderUnitTests(unittest.TestCase):
-    """The ordering itself, pinned so a future refactor cannot silently re-invert it.
+    """The ordering itself, pinned so a future refactor cannot silently invert it.
 
     The behavioural cases above are the ones that matter, but they only fail for MP_JOIN.
     Any option maker that comes to read ``self._flags`` would be broken by the same
@@ -607,8 +577,8 @@ class TCPMakeStatementOrderUnitTests(unittest.TestCase):
     def test_the_offset_still_follows_the_option_build(self) -> None:
         """``offset`` is computed after the options, since it counts their octets.
 
-        The half of the hoist that had to *stay* put. Moving it up with the flags would
-        have made the header's data offset describe an empty option area.
+        The statement that has to *stay* below the option build. Moving it up with the
+        flags would make the header's data offset describe an empty option area.
 
         """
         from pcapkit.protocols.transport.tcp import TCP
@@ -626,7 +596,7 @@ class TCPMakeStatementOrderUnitTests(unittest.TestCase):
         Pinned on the behaviour rather than on the source text, because what the option
         makers need is that ``Enum_Flags.SYN in self._flags`` does not raise for *any*
         flag combination -- including none at all, which is the case
-        ``cast('Enum_Flags', 0)`` left as a plain ``int``.
+        ``cast('Enum_Flags', 0)`` would leave as a plain ``int``.
 
         ``make`` is called on a bare ``TCP.__new__(TCP)`` rather than through the
         constructor, and that is load-bearing rather than a shortcut. ``Protocol``'s
@@ -636,13 +606,10 @@ class TCPMakeStatementOrderUnitTests(unittest.TestCase):
             self._info = self.unpack(...)   # -> read(), which sets _flags again
 
         so a fully constructed instance's ``_flags`` is whatever the **read** path left,
-        not what ``make`` computed. When this test was written the read path also seeded
-        with ``cast('Enum_Flags', 0)``, so a flagless ``TCP(...)`` reported ``_flags`` as
-        the plain ``int`` ``0``; #616 changed that seed to ``Enum_Flags(0)``, so both paths
-        now leave an ``Enum_Flags`` member. The re-parse still overwrites what ``make``
-        assigned either way, and it cannot affect option construction, which has already
-        finished by then. Observing ``make`` alone is the only way to assert on the value
-        the option makers actually see.
+        not what ``make`` computed. Both paths seed ``Enum_Flags(0)`` (#597, #616), but
+        the re-parse overwrites what ``make`` assigned either way, and it cannot affect
+        option construction, which has already finished by then. Observing ``make``
+        alone is the only way to assert on the value the option makers actually see.
 
         """
         from pcapkit.const.tcp.flags import Flags as Enum_Flags
@@ -661,12 +628,11 @@ class TCPMakeStatementOrderUnitTests(unittest.TestCase):
 
 
 class TCPMPTCPJoinReadPathUnitTests(unittest.TestCase):
-    """The control: the parse path dispatches as it always did.
+    """The control: the parse path dispatches each layout to its own reader.
 
-    #587 is a defect on the make path only, and the fix moves statements inside ``make``.
-    Nothing here should have changed, so these are regression guards rather than new
-    coverage -- they fail only if the hoist disturbed something it was not supposed to
-    touch.
+    #587 is a defect on the make path only, and its ordering lives inside ``make``. These
+    are regression guards rather than new coverage -- they fail only if reordering
+    ``make`` disturbs something it is not supposed to touch.
 
     """
 
@@ -692,17 +658,14 @@ class TCPMPTCPJoinReadPathUnitTests(unittest.TestCase):
                 self.assertEqual(data.connection, connection)
 
     def test_a_flagless_segment_is_rejected_by_the_schema_selector(self) -> None:
-        """The read path's own flagless guard is untouched, and fires before the reader.
+        """The read path's own flagless guard fires before the reader.
 
         ``mptcp_data_selector`` cannot choose an MP_JOIN schema with neither flag set, so
         it raises :exc:`~pcapkit.utilities.exceptions.FieldError` there. That is why
-        ``_read_mptcp_join``'s closing ``ProtocolError`` is unreachable from a caller, and
-        it is still unreachable: this guard is what #616 measured as identical either side
-        of changing the read path's seed. That unreachability was the original reason for
-        leaving the seed as ``cast('Enum_Flags', 0)``, and #616's reason for changing it
-        anyway -- a ``TypeError`` averted only by a guard in a different file is averted
-        fragilely. ``read`` seeds ``Enum_Flags(0)`` now, as ``make`` has since #597, so
-        calling the dispatcher directly on a flagless parsed segment reaches its
+        ``_read_mptcp_join``'s closing ``ProtocolError`` is unreachable from a caller.
+        ``read`` seeds ``Enum_Flags(0)`` all the same (#616), as ``make`` does (#597) --
+        a ``TypeError`` averted only by a guard in a different file is averted fragilely
+        -- so calling the dispatcher directly on a flagless parsed segment reaches its
         ``ProtocolError`` rather than a bare ``TypeError``; see
         :meth:`tests.protocols.transport.test_tcp_udp_unit.TCPUDPUnitTests.test_a_flagless_segment_seeds_its_connection_flags_as_an_enum`.
 
@@ -721,9 +684,9 @@ class TCPMPTCPJoinReadPathUnitTests(unittest.TestCase):
 class TCPMakeOtherOptionsUnitTests(unittest.TestCase):
     """The other control: options that do not read ``self._flags`` are unaffected.
 
-    The hoist moves two statements past a call that reaches every option maker in the
-    registry, so the claim that it is behaviour-preserving for everything except MP_JOIN
-    needs at least one witness that is not MP_JOIN.
+    The flag resolution sits before a call that reaches every option maker in the
+    registry, so the claim that its position matters only to MP_JOIN needs at least one
+    witness that is not MP_JOIN.
 
     """
 
@@ -757,8 +720,8 @@ class TCPMakeOtherOptionsUnitTests(unittest.TestCase):
     def test_a_plain_option_still_sets_the_header_offset(self) -> None:
         """A segment with a non-MPTCP option still counts it in ``offset``.
 
-        The ``offset`` computation is the statement the hoist stepped over, so this pins
-        that it still reads the ``total_length`` the option build produced rather than a
+        The ``offset`` computation is the statement that stays below the option build, so
+        this pins that it reads the ``total_length`` the option build produced rather than a
         stale or zero one.
 
         """

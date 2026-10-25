@@ -1,25 +1,25 @@
 # -*- coding: utf-8 -*-
-"""Regression tests for the retired :mod:`pcapkit.vendor.ipx.socket` scrape.
+"""Regression tests for the hand-maintained :mod:`pcapkit.vendor.ipx.socket` registry.
 
-GitHub issue #507: the crawler used to scrape the well-known-socket table out of
-the Wikipedia *Internetwork Packet Exchange* article, and both halves of that
-stopped working. Wikipedia answers ``requests``' default User-Agent with HTTP
-403, so :meth:`pcapkit.vendor.default.Vendor._request` could not fetch the page;
-and the table was deleted from the article on 2026-08-25, so there was nothing
-left at ``find_all('table', class_='wikitable')[3]`` to parse even with the fetch
-fixed. The scrape is retired in favour of the hand-maintained
-:data:`pcapkit.vendor.ipx.socket.DATA`.
+GitHub issue #507: the crawler does not scrape the well-known-socket table out of
+the Wikipedia *Internetwork Packet Exchange* article, because neither half of
+that works. Wikipedia answers ``requests``' default User-Agent with HTTP 403, so
+:meth:`pcapkit.vendor.default.Vendor._request` cannot fetch the page; and the
+table was deleted from the article on 2026-08-25, so there is nothing at
+``find_all('table', class_='wikitable')[3]`` to parse even with the fetch fixed.
+The crawler reads the hand-maintained :data:`pcapkit.vendor.ipx.socket.DATA`
+instead.
 
 What that leaves worth pinning is the failure mode the issue is actually about:
 a regeneration that quietly drops sockets. :data:`EXPECTED_MEMBERS` spells out
 the enumeration in full, so losing one fails here rather than shipping. The
 value ``0x0000`` in it is the member GitHub issue #492 called for -- IPX's own
-default for the ``dst``/``src`` socket field -- which the old crawler had to
-prepend unconditionally *because* the scrape yielded nothing, and which a
-hand-maintained table has no excuse to lose.
+default for the ``dst``/``src`` socket field -- which a scrape yielding nothing
+would have to prepend unconditionally, and which a hand-maintained table has no
+excuse to lose.
 
 The suite is unit-tier (see :mod:`tests._tiers`): it reads no capture and, by
-the whole point of the change, makes no network call.
+design, makes no network call.
 
 """
 from __future__ import annotations
@@ -86,12 +86,12 @@ EXPECTED_MEMBERS = (
 #: placed before a narrower one it fully contains masks that narrower one, so
 #: reordering the list changes behaviour without changing any member.
 #:
-#: GitHub issue #841: three ranges used to be listed after a wider range that
-#: fully contained them -- ``(0x0020, 0x003F)`` after ``(0x0001, 0x0BB8)``, and
-#: both ``(0x4000, 0x4FFF)`` and ``(0x8000, 0xFFFF)`` after ``(0x0BB9, 0xFFFF)``
-#: -- which made those three branches of the generated ``_missing_``
-#: unreachable. Each subset range is now listed ahead of the wider range that
-#: contains it, so every branch fires for at least the values only it covers.
+#: GitHub issue #841: each subset range is listed ahead of the wider range that
+#: contains it -- ``(0x0020, 0x003F)`` before ``(0x0001, 0x0BB8)``, and both
+#: ``(0x4000, 0x4FFF)`` and ``(0x8000, 0xFFFF)`` before ``(0x0BB9, 0xFFFF)`` --
+#: so every branch of the generated ``_missing_`` fires for at least the values
+#: only it covers. Listed after the wider range, a subset range's branch would
+#: be unreachable.
 EXPECTED_RANGES = (
     (0x0020, 0x003F, 'Experimental'),
     (0x0001, 0x0BB8, 'Registered by Xerox'),
@@ -105,31 +105,25 @@ EXPECTED_RANGES = (
 #: the value because the value alone cannot tell a live range branch from a
 #: masked one: every branch of the generated ``_missing_`` returns ``value``,
 #: so only the name says which branch ran -- for ``Registered by Xerox``,
-#: that name still carries the value as a numeric suffix even though it no
-#: longer mints (see below); asserting the value alone would pass just as
-#: happily with the range branches deleted or reordered.
+#: that name carries the value as a numeric suffix even though it does not
+#: mint (see below); asserting the value alone would pass just as happily
+#: with the range branches deleted or reordered.
 #:
-#: Before GitHub issue #841 was fixed, three of these were unreachable --
-#: ``(0x0001, 0x0BB8)`` masked ``(0x0020, 0x003F)``, and ``(0x0BB9, 0xFFFF)``
-#: masked both ``(0x4000, 0x4FFF)`` and ``(0x8000, 0xFFFF)`` -- so ``0x0020``,
-#: ``0x003F``, ``0x4000``, ``0x4FFF``, ``0x8000``, ``0x8061``, ``0x9094`` and
-#: ``0xFFFF`` all resolved under the wrong wide range's name. See
-#: :data:`pcapkit.vendor.ipx.socket.RANGES` for the reordering that fixed it.
+#: Guards against the masking of GitHub issue #841: with the wide ranges
+#: first, ``(0x0001, 0x0BB8)`` masks ``(0x0020, 0x003F)``, and ``(0x0BB9,
+#: 0xFFFF)`` masks both ``(0x4000, 0x4FFF)`` and ``(0x8000, 0xFFFF)``, so
+#: ``0x0020``, ``0x003F``, ``0x4000``, ``0x4FFF``, ``0x8000``, ``0x8061``,
+#: ``0x9094`` and ``0xFFFF`` would all resolve under the wrong wide range's
+#: name. See :data:`pcapkit.vendor.ipx.socket.RANGES` for the order.
 #:
-#: GitHub issue #775's original mint-criterion ruling then converted four
-#: of the five ranges -- ``Experimental``, ``Dynamically Assigned Socket
-#: Numbers``, ``Statically Assigned Socket Numbers`` and ``Dynamically
-#: Assigned`` each name an allocation *policy* for the pool rather than a
-#: specific assignment, so they no longer mint and their bare name carries no
-#: numeric suffix. ``Registered by Xerox`` was the one that stayed at the
-#: time: the ruling on #775 kept it minting on that criterion, because a
-#: proprietary protocol may expose no name of its own, so the company name
-#: serves as its name. #775's *final* round converts it too, keeping its
-#: hex-suffixed name unchanged -- PR #878 scoped the change this way:
-#: preserve the existing name argument exactly, since this is about not
-#: registering rather than about renaming -- so all five ranges resolve
-#: through :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`
-#: now and none of them mint.
+#: No range mints (GitHub issue #775). ``Experimental``, ``Dynamically
+#: Assigned Socket Numbers``, ``Statically Assigned Socket Numbers`` and
+#: ``Dynamically Assigned`` each name an allocation *policy* for the pool
+#: rather than a specific assignment, so their bare name carries no numeric
+#: suffix. ``Registered by Xerox`` keeps its hex-suffixed name: a proprietary
+#: protocol may expose no name of its own, so the company name serves as its
+#: name, and not registering is not renaming (PR #878). Every range resolves
+#: through :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`.
 EXPECTED_MISSING_NAMES = {
     0x0000: 'Unspecified',                    # a defined member
     0x0001: 'Routing_Information_Packet',     # a defined member
@@ -177,7 +171,7 @@ def _normalize(context: 'str') -> 'str':
 
 @unittest.skipUnless(HAS_CRAWLER_DEPS, 'requests and/or beautifulsoup4 not installed')
 class IPXSocketVendorTests(unittest.TestCase):
-    """The hand-maintained registry, and the crawler that no longer crawls."""
+    """The hand-maintained registry, and the crawler that does not crawl."""
 
     if TYPE_CHECKING:
         vendor_module: 'Any'
@@ -221,9 +215,9 @@ class IPXSocketVendorTests(unittest.TestCase):
         return vendor
 
     def test_link_is_none_so_nothing_is_fetched(self) -> None:
-        # The retirement, stated as an assertion: with no LINK,
-        # Vendor._request() short-circuits to Socket.request() and never
-        # reaches requests.get() -- which is what used to take the 403.
+        # No LINK, stated as an assertion: Vendor._request() short-circuits to
+        # Socket.request() and never reaches requests.get(), which is what
+        # takes the 403.
         self.assertIsNone(self.vendor_module.Socket.LINK)
 
     def test_request_makes_no_network_call(self) -> None:
@@ -281,14 +275,13 @@ class IPXSocketVendorTests(unittest.TestCase):
         self.assertEqual(tuple(self.vendor_module.RANGES), EXPECTED_RANGES)
 
     def test_previously_shadowed_ranges_are_reachable(self) -> None:
-        # GitHub issue #841: under the old ``RANGES`` order each of these three
-        # values resolved as the wider range that masked its own -- 0x0030 as
+        # GitHub issue #841: with each wider range listed first, these values
+        # would resolve as the range that masks their own -- 0x0030 as
         # 'Registered by Xerox_0x0030', 0x4080 and 0x8100 both as
-        # 'Dynamically Assigned_0x...'. Pinned separately from
+        # 'Dynamically Assigned'. Pinned separately from
         # test_unlisted_sockets_still_resolve so the regression this issue
-        # describes has a test that names it. Bare names, not the numeric-
-        # suffixed ones #841 pinned: all three of these ranges were
-        # converted under GitHub issue #775's ruling after #841 landed.
+        # describes has a test that names it. The names are bare because
+        # these ranges do not mint (GitHub issue #775).
         for value, name in (
             (0x0030, 'Experimental'),
             (0x4080, 'Dynamically Assigned Socket Numbers'),

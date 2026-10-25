@@ -1,44 +1,35 @@
 # -*- coding: utf-8 -*-
 """``run()`` must restore a target's const file when the target's run fails.
 
-GitHub issue #872. Rounds 4-8 made
-:meth:`~pcapkit.vendor.default.Vendor.__init__`'s own write atomic -- a
-temp-file-then-:func:`os.replace` at the point of the write, with permission
-matching for the replacement. The owner's ruling on GitHub pull request #873,
-answering two inline questions: he preferred :mod:`contextlib` to managing the
-temp file's deletion by hand on the strength of best intent alone (a
-try-finally), and for atomic writing he saw an easier path in simply keeping a
-copy of the file before running the sub-vendor and reverting if anything
-failed.
-
-That supersedes the atomic write entirely rather than adjusting it.
-``Vendor._write_atomic`` no longer exists;
-:meth:`Vendor.__init__`'s last line is once again a plain::
+GitHub issue #872. The protection lives in
+:func:`pcapkit.vendor.__main__._snapshot_and_restore`, a
+:func:`contextlib.contextmanager` that :func:`~pcapkit.vendor.__main__.run`
+wraps every ``vendor()`` call in, rather than in an atomic write inside
+:meth:`~pcapkit.vendor.default.Vendor.__init__`. That follows the owner's
+ruling on GitHub pull request #873: keeping a copy of the file before running
+the sub-vendor and reverting if anything fails is the easier path, with
+:mod:`contextlib` managing the cleanup rather than a hand-written try-finally.
+:meth:`Vendor.__init__`'s last line is a plain::
 
     with open(const_file, 'w') as file:
         print(context, file=file)
 
-The protection moved up a level, to
-:func:`pcapkit.vendor.__main__._snapshot_and_restore`, a
-:func:`contextlib.contextmanager` that :func:`~pcapkit.vendor.__main__.run`
-wraps every ``vendor()`` call in. It copies the target's existing const file
-aside *before* the crawler is instantiated at all -- resolving the
-destination via :meth:`~pcapkit.vendor.default.Vendor._dest_path`, a
-classmethod for exactly this reason, called on the crawler *class* rather
-than an instance -- and restores that copy if the crawler raises for any
-reason. This is a **wider** guarantee than an atomic write at one call site:
-it covers any way a crawler's own code could end up touching its const
-file, not only the single ``open``/``print`` pair the base class happens to
-use, and it puts the discarding exactly at the per-target boundary the
-owner's earlier ruling (b) asked for.
+``_snapshot_and_restore`` copies the target's existing const file aside
+*before* the crawler is instantiated at all -- resolving the destination via
+:meth:`~pcapkit.vendor.default.Vendor._dest_path`, a classmethod for exactly
+this reason, called on the crawler *class* rather than an instance -- and
+restores that copy if the crawler raises for any reason. This is a **wider**
+guarantee than an atomic write at one call site: it covers any way a crawler's
+own code could end up touching its const file, not only the single
+``open``/``print`` pair the base class happens to use, and it puts the
+discarding exactly at the per-target boundary.
 
-Because the protection now lives in ``run()`` rather than inside
-:meth:`Vendor.__init__`, this suite calls
-:func:`pcapkit.vendor.__main__.run` -- not the crawler class directly, the
-way rounds 4-8's version of this file did -- exactly as
-:file:`tests/vendor/test_vendor_exit_code_unit.py` already does. Calling the
-crawler class directly would exercise :meth:`Vendor.__init__` in isolation,
-which is no longer where the guarantee lives.
+Because the protection lives in ``run()`` rather than inside
+:meth:`Vendor.__init__`, this suite calls :func:`pcapkit.vendor.__main__.run`
+-- not the crawler class directly -- exactly as
+:file:`tests/vendor/test_vendor_exit_code_unit.py` does. Calling the crawler
+class directly would exercise :meth:`Vendor.__init__` in isolation, which is
+not where the guarantee lives.
 
 This suite makes no network call: :class:`~pcapkit.vendor.default.Vendor`'s
 ``_request``, ``count``, ``context`` and ``_dest_path`` are all overridden by
@@ -52,37 +43,23 @@ instantiating it -- overriding it as a plain instance method would raise
 "skip the snapshot", silently exercising the unprotected fallback instead of
 what these tests are actually about.
 
-The three permission-matching methods rounds 6-8 added
-(``test_existing_permissions_survive_a_successful_write``,
-``test_a_read_only_destination_is_regenerated_and_stays_read_only``,
-``test_a_new_destination_gets_umask_masked_permissions``) are gone with the
-code they pinned: ``_write_atomic``'s mode-matching had three genuinely
-different branches (existing mode preserved via :func:`os.stat`, the
-``0o444``-succeeds-anyway case, and a fresh-file umask fallback), each
-worth its own test. Snapshot-and-restore has no equivalent branching to
-pin -- a restored file is simply the exact bytes and mode
-:func:`shutil.copy2` copied out, once, for every case alike -- so keeping
-three separate permutations would pin nothing that one does not already
-cover, and I chose to delete them rather than repoint them at a property
-that no longer varies by case.
+Snapshot-and-restore has no per-mode branching to pin -- a restored file is
+simply the exact bytes and mode :func:`shutil.copy2` copied out, once, for every
+case alike -- so one mode assertion covers what separate permutations would.
 
 :meth:`SnapshotRestoreTests.test_successful_run_replaces_the_previous_file_content`
-is the happy-path round trip. Run against ``origin/main`` (pre-#872, no
-exit-code accounting at all), it fails too --
-``self.assertTrue(self.vendor_main.run(...))`` sees :data:`None`, since
-pre-fix ``run()`` never returns anything -- so this is a second method the
-fix changes, not only the one below.
+is the happy-path round trip. It also pins that ``run()`` returns :data:`True`
+on success, which a ``run()`` with no exit-code accounting fails.
 
-What survives, in the new shape, is the invariant the original pin actually
-encoded: a failure during or around a target's regeneration leaves the
-previous const file byte-for-byte intact. That is
+The invariant pinned is that a failure during or around a target's
+regeneration leaves the previous const file byte-for-byte intact. That is
 :meth:`SnapshotRestoreTests.test_a_failure_leaves_the_previous_file_byte_for_byte_intact`
-below, still simulated by making :func:`print` raise once the destination is
-open for writing -- :meth:`Vendor.__init__` still opens ``const_file``
-directly (there is no temp file to redirect the write onto any more), so
-this again truncates the previous content before the injected failure
-fires; :func:`~pcapkit.vendor.__main__._snapshot_and_restore` is what
-restores it afterwards. It asserts on the *reported* error
+below, simulated by making :func:`print` raise once the destination is open
+for writing -- :meth:`Vendor.__init__` opens ``const_file`` directly (there is
+no temp file to redirect the write onto), so this truncates the previous
+content before the injected failure fires;
+:func:`~pcapkit.vendor.__main__._snapshot_and_restore` is what restores it
+afterwards. It asserts on the *reported* error
 (:meth:`~unittest.TestCase.assertWarnsRegex` against the crawler's own
 ``RuntimeError`` text) rather than merely on ``run()`` returning falsy,
 deliberately: a mutant that deletes the ``raise`` from
@@ -96,16 +73,12 @@ stderr line, and ``run()`` returns :data:`True`. A bare
 ``assertFalse(run(...))`` cannot catch a return value that flips to *true*;
 only asserting that the crawler's own error was actually reported can. It
 also asserts the destination's mode (``0o640`` in, ``0o640`` out) alongside
-its content, which is the measurement that actually justifies collapsing
-rounds 6-8's three separate mode-permutation tests into one: restore
-preserves mode as a side effect of :func:`shutil.copy2` plus a rename, for
-every case alike, rather than needing a case-by-case check. Run against
-both of :mod:`pcapkit.vendor.__main__` and :mod:`pcapkit.vendor.default`
-taken from ``origin/main`` (swapping only one of the two leaves the other's
-fix in place and proves nothing -- see GitHub issue #872's own round 8),
-this fails on the content assertion with ``'' != 'GOOD CONTENT\\n'``: the
-previous content is destroyed before ``run()`` (pre-#872) ever gets a
-chance to report anything.
+its content, which is the measurement that justifies a single mode
+assertion: restore preserves mode as a side effect of :func:`shutil.copy2`
+plus a rename, for every case alike, rather than needing a case-by-case
+check. Without the protection this fails on the content assertion with
+``'' != 'GOOD CONTENT\\n'``: the previous content is destroyed before
+``run()`` ever gets a chance to report anything.
 
 :meth:`SnapshotRestoreTests.test_a_keyboard_interrupt_still_restores_and_propagates`
 pins ``except BaseException:`` itself, rather than the narrower
@@ -125,38 +98,31 @@ content, and the directory listing -- the first alone is silent about
 exactly the defect this pins.
 
 :meth:`SnapshotRestoreTests.test_a_read_only_destination_is_left_exactly_as_it_was`
-re-measures the ``0o444`` case under the new design rather than assuming it
-still behaves as rounds 6-8 documented. It does not: ``os.replace()``
-(round 4-8's last step) needed write permission on the *directory*, not the
-target file, so a ``0o444`` destination was still successfully regenerated.
-A plain ``open(const_file, 'w')`` (this round's design) needs write
-permission on the file itself, so a ``0o444`` destination now fails to
-regenerate exactly as it did on `main`, before #872 -- a capability the
-atomic-write approach had and this one has deliberately traded away for
-simplicity, per the owner's ruling. What the new design still guarantees is
-that the failure leaves the file exactly as it was, mode included, which is
-what this method actually pins.
-
-Run against ``origin/main``, this method passes -- it is a measurement, not
-a regression pin. `main`'s plain ``open(const_file, 'w')`` already raised
-:exc:`PermissionError` on a ``0o444`` destination *before* truncating
-anything (the permission check happens before the write, not after), so the
-file was already left untouched on the pre-#872 tree for this one specific
-scenario; there is nothing here for the fix to have changed.
+measures the ``0o444`` case. A plain ``open(const_file, 'w')`` needs write
+permission on the file itself, so a ``0o444`` destination fails to
+regenerate -- a capability an :func:`os.replace`-based atomic write, which
+needs write permission on the *directory* instead, would have, and which
+this design deliberately trades away for simplicity, per the owner's
+ruling. What the design guarantees is that the failure leaves the file
+exactly as it was, mode included, which is what this method pins. It is a
+measurement, not a regression pin: ``open()`` raises :exc:`PermissionError`
+on a ``0o444`` destination *before* truncating anything (the permission
+check happens before the write, not after), so the file is left untouched
+with or without the snapshot.
 
 The ``0o444`` file is one traded capability; there is a second, in the
 opposite direction, not covered by any method here. A writable file inside
-a *non-writable directory* also regenerated on `main` -- opening an
-*existing* file for writing needs write permission on the file, not on its
-parent directory -- but fails under this design, because
-:func:`~pcapkit.vendor.__main__._snapshot_and_restore`'s
+a *non-writable directory* regenerates under a plain ``open`` with no
+snapshot -- opening an *existing* file for writing needs write permission on
+the file, not on its parent directory -- but fails under this design,
+because :func:`~pcapkit.vendor.__main__._snapshot_and_restore`'s
 :func:`tempfile.mkstemp` call needs write permission on the directory to
 create the backup, and :meth:`Vendor.__init__`'s own ``open(const_file,
-'w')`` never needed that. Measured: ``run()`` returns :data:`False` with a
+'w')`` does not. Measured: ``run()`` returns :data:`False` with a
 :exc:`PermissionError`, and the previous content survives untouched because
-``vendor()`` is never even called. This is not new relative to rounds 4-8
-(``os.replace()`` needed directory write too), only relative to `main`, so
-#873 discloses two traded capabilities rather than one. See
+``vendor()`` is never even called. An :func:`os.replace`-based write needs
+directory write too, so #873 discloses two traded capabilities rather than
+one. See
 :func:`~pcapkit.vendor.__main__._snapshot_and_restore`'s own docstring for
 the asymmetry between this and the ``0o444`` case: a ``_dest_path``
 resolution failure *skips* the snapshot and lets the target proceed
@@ -335,10 +301,10 @@ class SnapshotRestoreTests(unittest.TestCase):
                              'a failure during a target\'s run must leave the previous const '
                              'file byte-for-byte untouched, not truncated or partially '
                              'overwritten')
-        # The mode check, not just content: this is what actually justifies
-        # collapsing rounds 6-8's three separate mode-permutation tests into
-        # one -- restore preserves mode as a side effect of shutil.copy2
-        # plus a rename, uniformly, rather than needing a case-by-case check.
+        # The mode check, not just content: this is what justifies a single
+        # mode assertion rather than separate mode-permutation tests --
+        # restore preserves mode as a side effect of shutil.copy2 plus a
+        # rename, uniformly, rather than needing a case-by-case check.
         # Windows chmod sets only the read-only bit, so 0o640 reads back as 0o666 (#2102).
         if os.name != 'nt':
             mode = stat.S_IMODE(os.stat(const_file).st_mode)
@@ -392,13 +358,13 @@ class SnapshotRestoreTests(unittest.TestCase):
 
         stub_crawler = self._make_crawler(const_file, 'NEW CONTENT')
 
-        # Measured, not assumed (see the module docstring): unlike round
-        # 4-8's os.replace()-based design, a plain open(const_file, 'w')
-        # needs write permission on the file itself, so this still fails --
-        # run() must still report that failure.
+        # Measured, not assumed (see the module docstring): unlike an
+        # os.replace()-based design, a plain open(const_file, 'w') needs
+        # write permission on the file itself, so this fails -- run() must
+        # report that failure.
         self.assertFalse(self.vendor_main.run(stub_crawler))
 
-        # What the new design does guarantee: the failure leaves the file
+        # What the design does guarantee: the failure leaves the file
         # exactly as it was, content and mode both, even though nothing was
         # ever actually rewritten (open() raised before truncating anything).
         with open(const_file, encoding='utf-8') as file:

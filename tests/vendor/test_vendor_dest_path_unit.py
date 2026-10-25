@@ -1,16 +1,15 @@
 # -*- coding: utf-8 -*-
 """Regression tests for :meth:`pcapkit.vendor.default.Vendor._dest_path`.
 
-Prerequisite for GitHub issue #732, which turns
-:file:`pcapkit/const/reg/apptype.py` into a package with per-transport modules
-(``tcp.py``, ``udp.py``, ``dccp.py``, ``sctp.py``) mirrored under
-:file:`pcapkit/vendor/reg/apptype/`. Before that split can be generated, the
-path derivation :meth:`~pcapkit.vendor.default.Vendor.__init__` uses to decide
-where to write a crawler's constant file has to handle a module nested *two*
-levels under :mod:`pcapkit.vendor`, not just one.
+GitHub issue #732 turns :file:`pcapkit/const/reg/apptype.py` into a package with
+per-transport modules (``tcp.py``, ``udp.py``, ``dccp.py``, ``sctp.py``) mirrored
+under :file:`pcapkit/vendor/reg/apptype/`, so the path derivation
+:meth:`~pcapkit.vendor.default.Vendor.__init__` uses to decide where to write a
+crawler's constant file has to handle a module nested *two* levels under
+:mod:`pcapkit.vendor`, not just one.
 
-The pre-fix code derived that path by splitting the module's absolute
-filesystem path into exactly two levels:
+Guards against deriving that path by splitting the module's absolute filesystem
+path into exactly two levels:
 
 .. code-block:: python
 
@@ -19,30 +18,29 @@ filesystem path into exactly two levels:
    os.makedirs(os.path.join(ROOT, '..', 'const', STEM), exist_ok=True)
    with open(os.path.join(ROOT, '..', 'const', STEM, FILE), 'w') as file:
 
-That was correct only because every crawler then sat exactly one level under
-``vendor/``, e.g. :mod:`pcapkit.vendor.reg.apptype` wrote
-:file:`pcapkit/const/reg/apptype.py`. Traced by hand for a module one level
-deeper -- :file:`pcapkit/vendor/reg/apptype/tcp.py`, the shape #732 needs --
-``temp`` is :file:`.../vendor/reg/apptype`, so ``ROOT`` becomes
-:file:`.../vendor/reg` and ``STEM`` becomes ``apptype``. The write then lands at
+That is correct only for a crawler exactly one level under ``vendor/``, e.g.
+:mod:`pcapkit.vendor.reg.apptype` writing :file:`pcapkit/const/reg/apptype.py`.
+Traced by hand for a module one level deeper --
+:file:`pcapkit/vendor/reg/apptype/tcp.py`, the shape #732 needs -- ``temp`` is
+:file:`.../vendor/reg/apptype`, so ``ROOT`` becomes :file:`.../vendor/reg` and
+``STEM`` becomes ``apptype``. The write then lands at
 :file:`.../vendor/reg/../const/apptype/tcp.py`, i.e.
 :file:`pcapkit/vendor/const/apptype/tcp.py` -- *inside* ``vendor/`` itself,
 never reaching :mod:`pcapkit.const` at all.
 
-The fix, :meth:`~pcapkit.vendor.default.Vendor._dest_path`, anchors on the
-``vendor`` package's own ``__file__`` instead of counting a fixed number of
-path components, and mirrors whatever path a module sits at *relative to*
+:meth:`~pcapkit.vendor.default.Vendor._dest_path` anchors on the ``vendor``
+package's own ``__file__`` instead of counting a fixed number of path
+components, and mirrors whatever path a module sits at *relative to*
 ``vendor/`` under ``const/``.
 
-That relative-path mirroring has its own failure mode, caught in review
-rather than by any test written for the first version of this change:
-``const/`` and ``vendor/`` are siblings at equal depth, so for a module that
-is *not* under the resolved ``vendor_root`` -- a second checkout, or any
-module whose file simply is not under ``vendor/`` -- the leading ``..``
-segments of ``os.path.relpath(module, vendor_root)`` cancel out exactly
-against ``const_root``, reproducing the module's own path. Unguarded,
+That relative-path mirroring has its own failure mode: ``const/`` and
+``vendor/`` are siblings at equal depth, so for a module that is *not* under
+the resolved ``vendor_root`` -- a second checkout, or any module whose file
+simply is not under ``vendor/`` -- the leading ``..`` segments of
+``os.path.relpath(module, vendor_root)`` cancel out exactly against
+``const_root``, reproducing the module's own path. Unguarded,
 :meth:`Vendor.__init__` then opens that with ``'w'``, silently truncating the
-crawler's own source. The fix rejects that case outright, raising
+crawler's own source. ``_dest_path`` rejects that case outright, raising
 :exc:`~pcapkit.utilities.exceptions.VendorPathNotFound` instead of returning
 a path that happens to equal its input.
 
@@ -50,22 +48,18 @@ Three things are pinned:
 
 * :class:`ExistingCrawlerDestPathTests` -- the regression guard. Every crawler
   discovered under :mod:`pcapkit.vendor` must resolve to exactly the
-  :file:`const/` file it writes -- the depth-one ones by the pre-fix formula,
-  the five #732 nests under :file:`vendor/reg/apptype/` by the mirrored path;
-  this is the "did not move" half of the contract, checked by enumerating the
-  real crawlers on disk rather than sampling a couple by name.
+  :file:`const/` file it writes -- the depth-one ones by the two-level
+  formula, the ones #732 nests under :file:`vendor/reg/apptype/` by the
+  mirrored path; this is the "did not move" half of the contract, checked by
+  enumerating the real crawlers on disk rather than sampling a couple by name.
 * :class:`NestedCrawlerDestPathTests`\\ 's
   :meth:`~NestedCrawlerDestPathTests.test_nested_module_resolves_under_const`
-  -- the case that motivated the fix. A stub crawler is built two levels
+  -- the case that motivates ``_dest_path``. A stub crawler is built two levels
   under a *synthetic* ``vendor/`` tree in a temporary directory (never inside
   the checkout, since :meth:`Vendor.__init__` -- not exercised here -- would
   otherwise write into it), and :meth:`_dest_path` is asserted to mirror it
-  under a sibling ``const/`` at the same relative depth. Run against the
-  pre-fix code (with the ``_dest_path`` hunk reverted by hand), this raises
-  ``AttributeError: 'TCP' object has no attribute '_dest_path'`` -- the method
-  the fix introduces does not exist yet, which is itself evidence the old
-  inline code could not have passed this case either: :func:`_old_algorithm`
-  below reproduces the reverted logic directly against the same synthetic
+  under a sibling ``const/`` at the same relative depth. :func:`_old_algorithm`
+  below reproduces the two-level split directly against the same synthetic
   paths and lands it at ``vendor/const/apptype/tcp.py``, confirming the trace
   above without needing the checkout's real crawlers.
 * :class:`NestedCrawlerDestPathTests`\\ 's
@@ -150,21 +144,21 @@ HAS_VENDOR_DEPS = all(importlib.util.find_spec(name) is not None for name in VEN
 
 
 def _old_algorithm(module_file: 'str') -> 'str':
-    """Reproduce the reverted, pre-fix path derivation directly.
+    """Reproduce the two-level split path derivation directly.
 
-    Verbatim translation of the hunk this change replaces -- two
-    :func:`os.path.split` calls and a pair of ``os.path.join(ROOT, '..', ...)``
-    -- kept here rather than imported, since the whole point is a copy that
-    survives the fix being applied. Used only by
+    A verbatim translation of the two-level split -- two :func:`os.path.split`
+    calls and a pair of ``os.path.join(ROOT, '..', ...)`` -- kept here rather
+    than imported, since the whole point is a copy independent of
+    :class:`~pcapkit.vendor.default.Vendor`. Used only by
     :meth:`NestedCrawlerDestPathTests.test_old_algorithm_would_have_written_inside_vendor`
-    to show *what* the old code got wrong, independent of whether
-    ``Vendor._dest_path`` currently exists to be reverted and re-run by hand.
+    to show *what* the two-level split gets wrong, independent of
+    ``Vendor._dest_path``.
 
     Args:
         module_file: Absolute path of the crawler's own module file.
 
     Returns:
-        The path the pre-fix code would have opened for writing.
+        The path the two-level split would open for writing.
 
     """
     temp, file_name = os.path.split(os.path.abspath(module_file))
@@ -181,11 +175,11 @@ class ExistingCrawlerDestPathTests(unittest.TestCase):
     sampled by name so that adding a crawler without adding it here cannot
     silently go unchecked.
 
-    A depth-one crawler is held to the pre-fix formula, which is what "must not
-    move" means for the 116 that predate the fix. The five nested ones GitHub
-    issue #732 added -- :mod:`pcapkit.vendor.reg.apptype` and its four
-    per-transport modules -- are held to the mirrored path instead, since the
-    pre-fix formula is precisely what cannot express them: it would put
+    A depth-one crawler is held to the two-level formula, which is what "must
+    not move" means for it. The nested ones of GitHub issue #732 --
+    :mod:`pcapkit.vendor.reg.apptype` and its per-transport modules -- are held
+    to the mirrored path instead, since the two-level formula is precisely what
+    cannot express them: it would put
     ``vendor/reg/apptype/tcp.py`` at ``vendor/const/apptype/tcp.py``, inside
     ``vendor/`` itself. Both arms end at the same assertion, that the file is
     really there, which is the half of this test the formula cannot fake.
@@ -255,11 +249,11 @@ class ExistingCrawlerDestPathTests(unittest.TestCase):
                 rel_path = os.path.relpath(module_file, vendor_root)
 
                 if len(rel_path.split(os.sep)) == 2:
-                    # The pre-fix formula. Every crawler that predates #732 sits
-                    # at this depth and must still land exactly where it did.
+                    # The two-level formula. Every crawler at this depth must land
+                    # exactly where that formula puts it.
                     expected = os.path.normpath(_old_algorithm(module_file))
                 else:
-                    # #732's nested crawlers, which the pre-fix formula cannot
+                    # #732's nested crawlers, which the two-level formula cannot
                     # express -- mirrored under const/ at whatever depth they sit.
                     expected = os.path.normpath(os.path.join(
                         os.path.dirname(vendor_root), 'const', rel_path))
@@ -384,10 +378,9 @@ class NestedCrawlerDestPathTests(unittest.TestCase):
         self.assertIn(module_file, str(ctx.exception))
 
     def test_old_algorithm_would_have_written_inside_vendor(self) -> None:
-        # Independent evidence that the reverted hunk is genuinely wrong here,
-        # not only that Vendor._dest_path does not exist yet on the pre-fix
-        # code (see the AttributeError captured in the PR description). This
-        # runs the pre-fix formula itself, copied verbatim into
+        # Independent evidence that the two-level split is genuinely wrong
+        # here, not only that Vendor._dest_path exists. This runs the
+        # two-level formula itself, copied verbatim into
         # _old_algorithm, against the very same synthetic paths this class
         # uses -- and it lands inside vendor/, exactly as the hand trace in
         # the issue predicts.

@@ -5,9 +5,9 @@ GitHub issue #880's owner ruling for the ``ngap.py`` half of the defect: unlike
 the four closed :mod:`pcapkit.protocols.internet.mh` helper enums #877 ruled
 on, :class:`~pcapkit.const.ngap.procedure_code.ProcedureCode` and
 :class:`~pcapkit.const.ngap.protocol_ie.ProtocolIE` are genuinely open per
-3GPP TS 38.413, and the fix is to source their real assignment from |pycrate|_
-through a vendor crawler rather than hand-maintaining the list or minting a
-value at lookup time. This module tests the crawler half of that: that
+3GPP TS 38.413, so their real assignment is sourced from |pycrate|_ through a
+vendor crawler rather than by hand-maintaining the list or minting a value at
+lookup time. This module tests the crawler half of that: that
 :meth:`~pcapkit.vendor.ngap.procedure_code.ProcedureCode._request` reads
 |pycrate|_'s own compiled specification correctly, that its output matches the
 generated :mod:`pcapkit.const.ngap` modules exactly, that two independent

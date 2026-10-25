@@ -9,8 +9,7 @@ what encapsulates it, with the IETF as the single source of truth.
 Link Layer chapter at §2.3.2. The rule and its citations are written down at
 :doc:`/contributing/conventions/protocol-layer-placement`.
 
-Three separate things are pinned here, because each broke independently while the
-move was being made:
+Three separate things are pinned here, because each can break independently:
 
 #. the ``__layer__`` values and the base classes, including the **order** of RARP's
    two bases -- ``ARP``'s chain reaches ``Link``, which owns ``__layer__``, so
@@ -94,7 +93,7 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
         self.assertEqual(RARP(rarp_request()).layer, 'Application')
 
     def test_arp_and_inarp_stay_on_the_link_layer(self) -> None:
-        """:rfc:`1122#section-2.3.2` keeps ARP where it is; only RARP moved."""
+        """:rfc:`1122#section-2.3.2` keeps ARP on the link layer; RARP is not."""
         from pcapkit.protocols.link.arp import ARP, InARP
 
         self.assertEqual(ARP.__layer__, 'Link')
@@ -153,7 +152,7 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
                 self.assertIn(name, pcapkit.protocols.__all__)
 
     def test_the_names_left_the_link_subpackage(self) -> None:
-        """A pure move: no deprecated re-export at the old path, by ruling."""
+        """No deprecated re-export under ``link``, by ruling."""
         import pcapkit.protocols.application
         import pcapkit.protocols.link
 
@@ -197,12 +196,12 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
                 self.assertIs(getattr(importlib.import_module(entry.module), entry.name), cls)
 
     def test_ospf_leaves_links_registry_behind_and_rarp_keeps_it(self) -> None:
-        """``Link`` sets names of its own; OSPF loses its EtherType machinery.
+        """``Link`` sets names of its own; OSPF has none of its EtherType machinery.
 
         ``__proto__``, its shipped copy ``_shipped_proto``, ``register`` and
         ``_read_protos`` are ``Link``'s EtherType machinery, and OSPF takes each
         of them from ``ProtocolBase`` instead. The first assertion pins a subset
-        of ``Link``'s own names. The loss is inert because a ``-1`` lookup misses in either
+        of ``Link``'s own names. The absence is inert because a ``-1`` lookup misses in either
         registry and falls back to :class:`~pcapkit.protocols.misc.raw.Raw`.
         """
         from pcapkit.protocols.application.ospf import OSPF
@@ -287,13 +286,14 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
         return extraction.frame[0]
 
     def test_layer_link_extraction_of_a_headerless_ipv4_capture(self) -> None:
-        """Inert for the protochain, though the termination flag moves. Measured.
+        """Inert for the protochain, though the termination flag differs. Measured.
 
-        ``_sigterm`` on the OSPF instance was ``True`` under ``layer='link'`` while
-        OSPF reported ``'Link'``, and is ``False`` now. The extracted result does
-        not change, because OSPF dispatches its body on the ``-1`` sentinel and
-        both the ``_sigterm`` branch of ``_import_next_layer`` and
-        ``ProtocolBase.__proto__``'s default resolve to
+        ``_sigterm`` on the OSPF instance is ``False`` under ``layer='link'``, as
+        OSPF reports ``'Application'``; were OSPF on the link layer it would be
+        ``True``. The extracted result is the same either way, because OSPF
+        dispatches its body on the ``-1`` sentinel and both the ``_sigterm``
+        branch of ``_import_next_layer`` and ``ProtocolBase.__proto__``'s default
+        resolve to
         :class:`~pcapkit.protocols.misc.raw.Raw`. A ``link`` extraction of a
         capture with no Ethernet header never reaches a link protocol at all.
         """
@@ -308,7 +308,7 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
         self.assertFalse(ospf._sigterm, "'link' must no longer terminate at OSPF")
 
     def test_layer_application_extraction_now_terminates_at_ospf(self) -> None:
-        """The flip side: ``layer='application'`` now matches where it did not."""
+        """The flip side: ``layer='application'`` matches at OSPF."""
         frame = self.extract_ipv4_ospf(layer='application')
         self.assertEqual(str(frame.protochain), 'IPv4:OSPFv2:Raw')
 

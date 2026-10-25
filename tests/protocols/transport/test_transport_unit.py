@@ -52,8 +52,8 @@ class TransportUnitTests(unittest.TestCase):
 
         with self.assertRaises(UnsupportedCall):
             Transport.register(1, Raw)
-        # RegistryError is (BaseError, TypeError), so the bare TypeError this
-        # used to raise is still caught by anyone who was catching it.
+        # RegistryError is (BaseError, TypeError), so anyone catching a bare
+        # TypeError here still catches it.
         with self.assertRaises(RegistryError):
             DummyTransport.register(81, object)  # type: ignore[arg-type]
         with self.assertRaises(TypeError):
@@ -65,11 +65,10 @@ class TransportUnitTests(unittest.TestCase):
         class Other(Raw):
             pass
 
-        # GitHub issue #718 added an identity guard, so registering the same
-        # ``Raw`` object port 80 already holds -- what this used to do --
-        # would now be a silent no-op; see
+        # GitHub issue #718's identity guard makes registering the same ``Raw``
+        # object port 80 already holds a silent no-op; see
         # ``test_register_stays_quiet_on_same_object_reregistration`` for
-        # that case. A genuinely different class is needed to still warn.
+        # that case. A genuinely different class is needed to warn.
         with mock.patch('pcapkit.protocols.transport.transport.warn') as warn:
             DummyTransport.register(80, Other)
         warn.assert_called_once()
@@ -77,13 +76,11 @@ class TransportUnitTests(unittest.TestCase):
     def test_register_stays_quiet_on_same_object_reregistration(self) -> None:
         """GitHub issue #718: replaying a call with the identical class is a no-op.
 
-        Before the fix the guard fired on presence alone, so registering port
-        80's ``Raw`` incumbent with the exact same ``Raw`` object -- what
-        ``test_register_validates_protocols_and_abstract_base`` used to do --
-        warned about an overwrite that never happened. Matches the identity
-        guard :func:`register_protocol
-        <pcapkit.foundation.registry.protocols.register_protocol>` already
-        applies.
+        Guards against the overwrite warning firing on presence alone, under
+        which registering port 80's ``Raw`` incumbent with the exact same
+        ``Raw`` object warns about an overwrite that never happens. Matches
+        the identity guard :func:`register_protocol
+        <pcapkit.foundation.registry.protocols.register_protocol>` applies.
 
         """
         from pcapkit.protocols.misc.raw import Raw
@@ -380,9 +377,9 @@ class TransportUnitTests(unittest.TestCase):
         :meth:`ProtocolBase._import_next_layer
         <pcapkit.protocols.protocol.ProtocolBase._import_next_layer>` as
         ``alias``, which is what :class:`~pcapkit.protocols.misc.raw.Raw` records
-        as ``Data_Raw.protocol``. This used to pass :obj:`None`, so TCP and UDP
-        anonymised every payload they could not dispatch -- unlike SCTP and IPv4,
-        which both keep the identifier the packet arrived with. The lower port is
+        as ``Data_Raw.protocol``. Guards against passing :obj:`None`, under which
+        TCP and UDP anonymise every payload they cannot dispatch -- unlike SCTP
+        and IPv4, which both keep the identifier the packet arrived with. The lower port is
         the one carried, matching the lookup's own primary key.
 
         """

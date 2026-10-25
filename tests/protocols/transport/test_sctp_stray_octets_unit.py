@@ -3,12 +3,12 @@
 
 GitHub issue #1468: SCTP has no packet length field, so octets left after the
 last whole chunk -- fewer than a chunk header, or a chunk whose declared length
-runs past the data -- cannot be told apart from a chunk cut short. They made
-:class:`~pcapkit.protocols.transport.sctp.SCTP` raise ``ProtocolError: Field
-chunks has an option that runs past the end of the data``, so the packet had no
-round trip at all.
+runs past the data -- cannot be told apart from a chunk cut short. Guards
+against them making :class:`~pcapkit.protocols.transport.sctp.SCTP` raise
+``ProtocolError: Field chunks has an option that runs past the end of the
+data``, which leaves the packet no round trip at all.
 
-Per the #1458 ruling they are now recorded rather than rejected: the chunk list
+Per the #1458 ruling they are recorded rather than rejected: the chunk list
 stops at the last whole chunk and the rest is kept as ``trailer``, as IPv4,
 IPv6 (#1209), L2TPv2 and OSPF (#1455) do. :meth:`make` writes a ``trailer``
 after the chunks.
@@ -48,7 +48,7 @@ STRAY = {
     'chunk length below its header': (COMMON + COOKIE_ACK + struct.pack('!BBH', 11, 0, 2), 1,
                                       struct.pack('!BBH', 11, 0, 2)),
     'under a chunk header': (COMMON + b'ab', 0, b'ab'),
-    # formerly rejected by tests/protocols/test_declared_length_overrun_unit.py
+    # recorded as stray octets, not rejected as a declared-length overrun
     'INIT past the data': (COMMON + INIT_CUT, 0, INIT_CUT),
 }
 

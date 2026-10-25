@@ -1,120 +1,95 @@
 # -*- coding: utf-8 -*-
 """The mechanical shapes :mod:`pcapkit.vendor.reg.apptype.apptype` must keep.
 
-GitHub issue #744: every one of :class:`~pcapkit.const.reg.apptype.apptype.AppType`'s
-members used to be an *annotated* assignment --
+GitHub issue #744: :class:`~pcapkit.const.reg.apptype.apptype.AppType`'s
+members are plain, not *annotated*, assignments. An annotated member --
 ``tcpmux: 'TCP' = 1, 'tcpmux', TransportProtocol.get('tcp') | TransportProtocol.get('udp')``
--- which put one forward-ref string per member into the class's
+-- puts one forward-ref string per member into the class's
 ``__annotations__``. Sphinx's default autodoc calls
 ``sphinx.util.typing.get_type_hints(parent, ...)`` once per member
 (from ``_make_props_from_imported_object`` in
 ``sphinx/ext/autodoc/_dynamic/_loader.py`` -- the wrapper
 around :func:`typing.get_type_hints` that catches the ``NameError`` a
 ``TYPE_CHECKING``-only forward ref would otherwise raise), each call
-re-resolving the *whole* class, which is what made documenting this one
-registry cost 378.8s on CI -- the single largest stall in the entire docs
-build. The annotation carried no information a lookup needs: member
-construction reads the positional tuple, not ``__annotations__``. Measured
-when #769 fixed it: dropping it removed 86,838 bytes (7/8 bytes per member,
-depending on whether its class name is 3 or 4 letters long).
+re-resolving the *whole* class, which made documenting this one registry cost
+378.8s on CI -- the single largest stall in the entire docs build. The
+annotation carries no information a lookup needs: member construction reads the
+positional tuple, not ``__annotations__``. Measured by #769, dropping it removes
+86,838 bytes (7/8 bytes per member, depending on whether its class name is 3 or
+4 letters long).
 
 GitHub issue #768: the ``proto`` argument on every one of those members, and
 every ``cls.__transport__ is ...`` test in a range-row ``_missing_`` branch,
-called :meth:`~pcapkit.const.reg.apptype.apptype.TransportProtocol.get`
-(524 ns, an ``isinstance`` check, two ``.lower()`` calls, a membership test
-and a ``__getitem__``) to reach a member plain attribute access returns in
-24 ns -- every such call site rewritten to the attribute form, saving 7 bytes
-each (``TransportProtocol.get('tcp')`` is 28 characters,
+uses attribute access rather than
+:meth:`~pcapkit.const.reg.apptype.apptype.TransportProtocol.get` (524 ns, an
+``isinstance`` check, two ``.lower()`` calls, a membership test and a
+``__getitem__``) to reach a member plain attribute access returns in 24 ns,
+saving 7 bytes each (``TransportProtocol.get('tcp')`` is 28 characters,
 ``TransportProtocol.tcp`` is 21), for 167,587 bytes (163.7 KiB) of generated
-source as measured when #769 fixed it. The generator only ever emits the five
-declared names (``TRANSPORTS + ('undefined',)``), so the attribute form cannot
-miss.
+source as measured by #769. The generator only ever emits the five declared
+names (``TRANSPORTS + ('undefined',)``), so the attribute form cannot miss.
 
-GitHub issue #770: ``undefined = 0`` in the ``BASE`` template is a bare int
+GitHub issue #770: a bare ``undefined = 0`` in the ``BASE`` template is an int
 literal, so mypy -- which has no :mod:`aenum` plugin and so treats this class
 as a plain one -- infers the class attribute's type as ``int`` while the
 ``auto()``-valued siblings (``tcp``, ``udp``, ``sctp``, ``dccp``) infer as
-``Any``. That is what made ``TransportProtocol.undefined`` disagree with its
-own ``'TransportProtocol'`` annotation at the sites that default to it --
-the class attribute ``__transport__``, and the ``proto`` parameter on
-``__new__``, ``get`` and ``get_all``. The fix wraps the literal in
-:func:`~typing.cast` so mypy infers ``TransportProtocol`` there too, without
-changing what runs: :func:`~typing.cast` is the identity function at run time,
-so ``TransportProtocol.undefined`` stays the same ``0`` -- ``TransportProtocol(0)
-is undefined`` and ``bool(undefined)`` is ``False`` -- and the same genuine
-``TransportProtocol`` member it always was: the ``proto`` sentinel default at
-each of those sites, and what the base registry's ``_missing_`` extends
-unassigned/reserved rows from. Two rejected alternatives, measured rather than
-argued: an explicit member annotation (``undefined: 'TransportProtocol' = 0``)
-does not fix this at all, it only *relocates* the error -- mypy still reports
-one ``[assignment]`` at the member's own declaration line, for 113 errors in
-39 files rather than 116, so ``cast`` is preferred 0/38 against 1/39, not on
-parity. ``auto() & 0`` is run-time identical to the bare literal -- value
-``0``, no burned counter slot, ``tcp``/``udp``/``sctp``/``dccp`` unaffected --
-and is rejected only because it leans on :mod:`aenum`'s undocumented internal
-order of operations for resolving a composed ``auto()``, not because it
-misbehaves.
+``Any``. That makes ``TransportProtocol.undefined`` disagree with its own
+``'TransportProtocol'`` annotation at the sites that default to it -- the class
+attribute ``__transport__``, and the ``proto`` parameter on ``__new__``,
+``get`` and ``get_all``. The template wraps the literal in :func:`~typing.cast`
+so mypy infers ``TransportProtocol`` there too, without changing what runs:
+:func:`~typing.cast` is the identity function at run time, so
+``TransportProtocol.undefined`` is the same ``0`` -- ``TransportProtocol(0) is
+undefined`` and ``bool(undefined)`` is ``False`` -- and a genuine
+``TransportProtocol`` member: the ``proto`` sentinel default at each of those
+sites, and what the base registry's ``_missing_`` extends unassigned/reserved
+rows from. Two rejected alternatives, measured rather than argued: an explicit
+member annotation (``undefined: 'TransportProtocol' = 0``) does not fix this at
+all, it only *relocates* the error -- mypy still reports one ``[assignment]`` at
+the member's own declaration line, for 113 errors in 39 files rather than 116,
+so ``cast`` is preferred 0/38 against 1/39, not on parity. ``auto() & 0`` is
+run-time identical to the bare literal -- value ``0``, no burned counter slot,
+``tcp``/``udp``/``sctp``/``dccp`` unaffected -- and is rejected only because it
+leans on :mod:`aenum`'s undocumented internal order of operations for resolving
+a composed ``auto()``, not because it misbehaves.
 
-(That description is #770's own, and it describes the tree as it ships --
-but not without a detour along the way. An intermediate revision of GitHub
-issue #860 step 2 PR 2 briefly moved every one of the five members,
-``undefined`` included, onto ``auto()`` with an explicit ``_start_ = 0``,
-which made #770's own literal-vs-``auto()`` asymmetry disappear entirely:
-with no bare literal left anywhere, no member's wrapper was load-bearing
-against a mypy error any more, since an ``auto()``-valued member infers as
-``Any``, which is assignable to ``TransportProtocol`` with no cast at all.
-The owner's final ruling, given on GitHub pull request #874, reinstated the
-original shape instead: ``undefined`` takes ``0`` directly, and the other real
-transports use ``auto()``, so that no ``_start_`` has to be defined and the
-declaration of ``undefined`` is explicit. So ``undefined`` is a direct,
-explicit ``0`` again, and ``tcp``/``udp``/``sctp``/``dccp`` continue from it
-via plain ``auto()`` with no ``_start_`` needed at all -- ``auto()`` picks up
-the next value after whatever came immediately before it, explicit literal or
-not. #770's own account above is therefore accurate again as shipped, and
-``undefined`` is once more the one member among the five whose wrapper is
-load-bearing against a mypy error, exactly as it always was -- see
+``undefined`` takes ``0`` directly and the other real transports use
+``auto()``, so that no ``_start_`` has to be defined and the declaration of
+``undefined`` is explicit (the owner's ruling on GitHub pull request #874);
+``auto()`` picks up the next value after whatever came immediately before it,
+explicit literal or not. That makes ``undefined`` the one member among the five
+whose wrapper is load-bearing against a mypy error -- see
 :meth:`AppTypeGeneratorShapeTests.
 test_undefined_member_is_cast_rather_than_a_bare_literal`'s own docstring
-for the measurements.)
+for the measurements.
 
 #744 and #768 are pinned two ways: directly against the generator's own
 :meth:`~pcapkit.vendor.reg.apptype.apptype.AppType.flag`, which needs no
 network access since it is a ``@staticmethod``, and against the files it
 actually produced, committed under :mod:`pcapkit.const.reg.apptype`. #770 is
 pinned against that same base module -- a plain source-text assertion that the
-member stays wrapped in ``cast`` rather than reverting to a bare literal, plus
-a direct run through mypy's own API when :mod:`mypy` is importable, since the
+member stays wrapped in ``cast`` rather than being a bare literal, plus a
+direct run through mypy's own API when :mod:`mypy` is importable, since the
 source-text shape alone cannot tell a correct fix from a differently-worded
 one that stops mypy agreeing.
 
 That second pin is gated the way :mod:`tests._dependency_gates` can actually
 see: a module-level ``HAS_MYPY`` flag and an ``@unittest.skipUnless``
-decorator. It was written as an inline
-``try``/``except ImportError: self.skipTest(...)`` instead when #770 landed,
-for an obstacle that was real at the time -- ``mypy`` had no
-:data:`~tests._dependency_gates.MODULE_PROVIDERS` entry, so adding the
-decorator without one made
-:class:`~tests.test_tier_guard.DependencyGateCoverageTests` report 2 failures
-and 5 errors of its 10 tests, every one of those errors a bare
-``KeyError: 'mypy'`` out of
-:func:`~tests._dependency_gates.extras_providing` -- re-measured on this
-change's own base; #779 reports 4 errors of 9 tests because it was written
-before #774 added the tenth. #779 closed that end:
-``mypy`` is mapped now and its gap is recorded as a deliberate exclusion, so
-the gate can take the visible shape. The inline form worked, but was invisible
-to the guard *by construction* --
-:func:`~tests._dependency_gates._gates_of` walks a definition's decorator list
-and never its body -- which is the "dark test" hazard #745 exists to stop, and
-which #766 carries for the sibling isort check.
+decorator, with ``mypy`` mapped in
+:data:`~tests._dependency_gates.MODULE_PROVIDERS` and its gap recorded as a
+deliberate exclusion (#779). An inline ``try``/``except ImportError:
+self.skipTest(...)`` would work, but is invisible to the guard *by
+construction* -- :func:`~tests._dependency_gates._gates_of` walks a
+definition's decorator list and never its body -- which is the "dark test"
+hazard #745 exists to stop, and which #766 carries for the sibling isort check.
 
-What the gate is worth has not changed. mypy is a :file:`Pipfile`
-``[dev-packages]`` entry and is in no :file:`pyproject.toml` extra,
-so no ``pytest`` job in :file:`.github/workflows/unit-tests.yml` -- every one
-installs ``.[test,...]`` -- ever has it importable, and this test skips on all
-of them; it runs where mypy is installed, which is a developer checkout and
-``make mypy``'s own environment. The difference is that the skip is now
-counted: it is a :class:`~tests._dependency_gates.Gap` on each job that
-reaches it, and
+What the gate is worth: mypy is a :file:`Pipfile` ``[dev-packages]`` entry and
+is in no :file:`pyproject.toml` extra, so no ``pytest`` job in
+:file:`.github/workflows/unit-tests.yml` -- every one installs
+``.[test,...]`` -- ever has it importable, and this test skips on all of them;
+it runs where mypy is installed, which is a developer checkout and ``make
+mypy``'s own environment. The skip is counted: it is a
+:class:`~tests._dependency_gates.Gap` on each job that reaches it, and
 :data:`~tests._dependency_gates.DEPENDENCY_GATE_EXCLUSIONS`\\ ``['HAS_MYPY']``
 carries the reason for declining to close it -- a type checker belongs to the
 lint tier, not to a pytest install line.
@@ -133,7 +108,7 @@ __all__ = ['AppTypeGeneratorShapeTests']
 #: ``skipUnless`` flag rather than an inline ``skipTest``, so
 #: :func:`~tests._dependency_gates.gated_scopes` counts the gate and
 #: :mod:`tests.test_tier_guard` can audit which CI jobs it darkens (#779); see
-#: this module's own docstring for what that replaced and why.
+#: this module's own docstring for why.
 HAS_MYPY = importlib.util.find_spec('mypy') is not None
 
 
@@ -168,7 +143,7 @@ class AppTypeGeneratorShapeTests(unittest.TestCase):
     def test_generated_registries_carry_no_per_member_annotation(self) -> None:
         """GitHub issue #744, against what the committed files produced.
 
-        Before the fix, ``TCP.__annotations__`` alone held an entry for every
+        Guards against ``TCP.__annotations__`` holding an entry for every
         member on top of its class-level attributes. Only the
         class-level attributes each registry declares exactly once should
         remain: ``__transport__``, ``__registry__``, ``__canonical__``, and
@@ -217,38 +192,19 @@ class AppTypeGeneratorShapeTests(unittest.TestCase):
 
         ``undefined`` is the one bare int literal among five members whose
         remaining four (``tcp``, ``udp``, ``sctp``, ``dccp``) are
-        ``auto()``-valued, which is exactly the asymmetry #770 fixed --
+        ``auto()``-valued, which is exactly the asymmetry #770 is about --
         mypy infers the literal as ``int`` and the ``auto()`` siblings as
         ``Any``, so wrapping the literal in :func:`~typing.cast` is what
         makes all five agree on ``TransportProtocol``.
-
-        That shape briefly changed and changed back during GitHub issue
-        #860 step 2 PR 2's own development: an intermediate revision moved
-        ``undefined`` onto ``auto()`` too, with an explicit ``_start_ = 0``
-        to keep every member's run-time value the same, which made #770's
-        literal-vs-``auto()`` asymmetry disappear entirely -- with no bare
-        literal left anywhere, no member's wrapper was load-bearing against
-        a mypy error any more (measured at the time: unwrapping ``undefined``
-        alone stayed mypy-clean, identically to unwrapping ``tcp`` instead).
-        The owner's final ruling, given on GitHub pull request #874,
-        reinstated the original shape: ``undefined`` takes ``0`` directly, and
-        the other real transports use ``auto()``, so that no ``_start_`` has to
-        be defined and the declaration of ``undefined`` is explicit. So
-        ``undefined`` is a direct, explicit ``cast('TransportProtocol', 0)``
-        again, exactly as #770 first shaped it, and this test's own check (and
-        #770's asymmetry) are both back to describing the tree as it actually
-        ships.
 
         Measured directly, to prove the load-bearing claim rather than
         assert it: with ``undefined`` unwrapped to a bare ``0`` (everything
         else unchanged), the mypy run
         :meth:`test_undefined_member_infers_as_transport_protocol_under_mypy`
-        below performs now reports real errors again -- see that method's
-        own docstring for the exact count -- where it did not while
-        ``undefined`` was still ``auto()``-valued. Unwrapping ``tcp``
-        instead, leaving ``undefined`` wrapped, still leaves that run
-        clean, since ``tcp`` stays ``auto()``-valued and so still infers as
-        ``Any`` either way.
+        below performs reports real errors -- see that method's own
+        docstring for the exact count. Unwrapping ``tcp`` instead, leaving
+        ``undefined`` wrapped, leaves that run clean, since ``tcp`` stays
+        ``auto()``-valued and so infers as ``Any`` either way.
         """
         import inspect
         import re
@@ -277,11 +233,10 @@ class AppTypeGeneratorShapeTests(unittest.TestCase):
         # unwrapped ``undefined = 0`` sits somewhere else in the source --
         # a leftover from a bad edit, e.g. -- which a plain substring test
         # has no way to notice since the string it looks for is still
-        # there. ``undefined = auto()`` bare is checked too, against the
-        # one intermediate shape this issue's own development already
-        # tried and the owner's ruling retired -- a regression back to it
-        # would otherwise pass unnoticed, since it changes no run-time
-        # value at all.
+        # there. ``undefined = auto()`` bare is checked too: the owner's
+        # ruling on GitHub pull request #874 rules that shape out, and a
+        # regression to it would otherwise pass unnoticed, since it changes
+        # no run-time value at all.
         for pattern in (r'\n[ \t]*undefined = 0[ \t]*\n',
                         r'\n[ \t]*undefined = auto\(\)[ \t]*\n'):
             match = re.search(pattern, source)
@@ -301,36 +256,23 @@ class AppTypeGeneratorShapeTests(unittest.TestCase):
         directory, exactly as ``make mypy`` does, so the effective config is
         stricter than these four flags alone would suggest.
 
-        Measured directly on this tree, rather than read off #770's own
-        issue text (this module's own account above states 4 errors as
-        #770's original repro; neither of us has independently confirmed
-        that against the issue itself, so it is stated here as this
-        module's claim, not a re-verified one): stripping just ``undefined``'s
-        ``cast`` wrapper -- ``undefined = 0``, every other member and the
-        rest of the source unchanged -- gives 3 ``[assignment]`` errors on
-        *this* tree -- ``__transport__``, ``__new__``'s ``proto`` default,
-        and :meth:`~pcapkit.const.reg.apptype.apptype.
-        AppType._unregistered_member`'s own ``proto`` default, new since
-        this issue (#860) and still plainly ``TransportProtocol``-typed --
-        plus 762 ``[arg-type]`` errors, one per ``_missing_`` branch that
-        passes ``TransportProtocol.undefined`` where it is now typed as a
-        bare ``int``, for 765 total. Stripping ``tcp``'s wrapper instead,
-        leaving ``undefined`` wrapped, stays clean -- ``tcp`` is still
-        ``auto()``-valued, which infers as ``Any`` regardless of the
-        wrapper (see :meth:`test_undefined_member_is_cast_rather_than_a_
-        bare_literal`'s own docstring for that measurement). If the module
-        docstring's 4 is right about #770's own time, the count of 3 moved
-        there in two separate steps since: GitHub PR #836 (the same one
-        that dropped the ``IntFlag`` base) had already annotated ``get``'s
-        and ``get_all``'s own ``proto`` parameters ``'TransportProtocol |
-        str | int'`` -- a union a bare ``int`` default satisfies without
-        error -- which would have taken two sites out of play before this
-        issue touched anything; this issue (#860) then added a third, new
-        site with the plain ``TransportProtocol`` annotation the two
-        retired ones used to carry, ``_unregistered_member``'s own
-        default, landing the count measured here at 3. None of that is
-        exercised by this test, which only ever runs mypy against the
-        *fixed* source and requires zero errors of any code.
+        Measured directly: stripping just ``undefined``'s ``cast`` wrapper --
+        ``undefined = 0``, every other member and the rest of the source
+        unchanged -- gives three ``[assignment]`` errors -- ``__transport__``,
+        ``__new__``'s ``proto`` default, and
+        :meth:`~pcapkit.const.reg.apptype.apptype.AppType._unregistered_member`'s
+        own ``proto`` default (#860), plainly ``TransportProtocol``-typed --
+        plus one ``[arg-type]`` error per ``_missing_`` branch that passes
+        ``TransportProtocol.undefined`` where it is then typed as a bare
+        ``int``. ``get``'s and ``get_all``'s own ``proto`` parameters are
+        annotated ``'TransportProtocol | str | int'`` (GitHub PR #836) -- a
+        union a bare ``int`` default satisfies without error -- so they are
+        not among the three. Stripping ``tcp``'s wrapper instead, leaving
+        ``undefined`` wrapped, stays clean -- ``tcp`` is ``auto()``-valued,
+        which infers as ``Any`` regardless of the wrapper (see
+        :meth:`test_undefined_member_is_cast_rather_than_a_bare_literal`'s
+        own docstring for that measurement). This test itself only ever runs
+        mypy against the shipped source and requires zero errors of any code.
 
         This is not in :file:`.github/workflows/unit-tests.yml`'s reach --
         mypy is a :file:`Pipfile` ``[dev-packages]`` entry, not a
@@ -370,16 +312,14 @@ class AppTypeGeneratorShapeTests(unittest.TestCase):
         is undefined`` and ``bool(undefined)`` is ``False`` -- rather than
         merely being *typed* as one.
 
-        Before GitHub issue #808 dropped the ``IntFlag`` base, this also
-        asserted ``TransportProtocol.tcp | TransportProtocol.undefined is
-        TransportProtocol.tcp`` -- ``|``'s neutral element composing back to the
-        same singleton. That assertion is gone rather than adapted: ``|`` on a
-        plain :class:`~aenum.IntEnum` falls through to ``int.__or__`` and
-        returns a bare :class:`int`, never a ``TransportProtocol`` -- not even
-        one identical to an existing member -- so there is no longer a
-        singleton for ``is`` to find on *either* side of ``|``, and pinning
-        ``int(tcp | undefined) == int(tcp)`` would only be pinning integer
-        arithmetic.
+        ``TransportProtocol.tcp | TransportProtocol.undefined is
+        TransportProtocol.tcp`` is not asserted: with no ``IntFlag`` base
+        (GitHub issue #808), ``|`` on a plain :class:`~aenum.IntEnum` falls
+        through to ``int.__or__`` and returns a bare :class:`int`, never a
+        ``TransportProtocol`` -- not even one identical to an existing member
+        -- so there is no singleton for ``is`` to find on *either* side of
+        ``|``, and pinning ``int(tcp | undefined) == int(tcp)`` would only be
+        pinning integer arithmetic.
         """
         from pcapkit.const.reg.apptype.apptype import TransportProtocol
 

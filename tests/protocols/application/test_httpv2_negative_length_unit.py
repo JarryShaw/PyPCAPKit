@@ -3,17 +3,17 @@
 
 GitHub issue #805. :meth:`~pcapkit.protocols.schema.schema.Schema.unpack`
 decrements ``packet['__length__']`` by each field's *nominal* width
-regardless of how many octets the buffer actually had, and a field whose own
+regardless of how many octets the buffer actually has, and a field whose own
 ``length=lambda pkt: pkt['__length__']``-style callback resolves to that
 negative remainder builds a struct template such as ``'-5s'``.
-:func:`struct.calcsize` cannot size that and raised a bare
+:func:`struct.calcsize` cannot size that and raises a bare
 :exc:`struct.error` for it -- not a :exc:`ProtocolError`, not even a
 :exc:`ValueError`, uncatchable by ordinary caller code.
 
-Scope, per the issue's own correction of its body: the fix belongs at the
+Scope, per the issue's own correction of its body: the guard belongs at the
 *resolved field length* -- :attr:`~pcapkit.corekit.fields.field.FieldBase.length`
--- not at the running-counter warning (``pcapkit/protocols/schema/schema.py``
-around ``packet['__length__'] < 0``), which this module does not touch. See
+-- not at the running-counter warning (``packet['__length__'] < 0`` in
+:meth:`~pcapkit.protocols.schema.schema.Schema.unpack`). See
 :mod:`tests.corekit.test_fields_field`'s ``FieldBaseLengthNegativeResolvedLengthTests``
 for the property-level unit tests and the unaffected non-negative control.
 
@@ -73,7 +73,7 @@ class NegativeResolvedLengthUnitTests(unittest.TestCase):
         ``stream``+``error`` alone are eight fixed octets, so a 16-octet
         buffer (7 octets of frame-specific payload after the 9-octet header)
         drives ``debug``'s ``length=lambda pkt: pkt['__length__']`` to -1.
-        Pre-fix: ``struct.error: bad char in struct format``.
+        Unguarded: ``struct.error: bad char in struct format``.
         """
         from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
         from pcapkit.utilities.exceptions import ProtocolError
@@ -135,10 +135,10 @@ class NegativeResolvedLengthUnitTests(unittest.TestCase):
     def test_a_well_formed_goaway_frame_still_parses_cleanly(self) -> None:
         """Control: a ``GOAWAY`` frame whose buffer matches its declared length.
 
-        The fix is a ``try``/``except struct.error`` around the same
-        :func:`struct.calcsize` call as before, so a resolved length that
-        never goes negative must parse identically to pre-fix -- no
-        exception, no warning.
+        The guard is a ``try``/``except struct.error`` around the
+        :func:`struct.calcsize` call, so a resolved length that never goes
+        negative must parse as it would unguarded -- no exception, no
+        warning.
         """
         from pcapkit.protocols.application.httpv2 import HTTP as HTTPv2
 

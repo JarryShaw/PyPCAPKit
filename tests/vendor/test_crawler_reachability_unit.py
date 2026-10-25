@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """Every vendor crawler is reachable from the target list that runs them.
 
-Until #531, :mod:`pcapkit.vendor` defined 117 crawlers and
-:file:`pcapkit/vendor/__main__.py` could only ever run 116 of them, because it
-does not discover crawlers -- it reads :attr:`__all__`:
+:file:`pcapkit/vendor/__main__.py` does not discover crawlers -- it reads
+:attr:`__all__`, both on the ``--target <name>`` path and on the default path,
+i.e. a bare ``pcapkit-vendor``:
 
 .. code-block:: python
 
@@ -12,23 +12,14 @@ does not discover crawlers -- it reads :attr:`__all__`:
    # pcapkit.vendor.__main__.main, the default path, i.e. a bare `pcapkit-vendor`
    target_list.extend(getattr(vendor_module, name) for name in vendor_module.__all__)
 
-:attr:`pcapkit.vendor.__all__` listed ``'MH_HandoverACKStatus'`` *twice* and had
-no entry for ``'MH_HandoverInitiateStatus'`` at all, in
-:file:`pcapkit/vendor/__init__.py` and independently in
-:file:`pcapkit/vendor/mh/__init__.py`. So both the default target list and
-``--target mh`` were missing ``handover_initiate_status``, and that crawler had
-never run: :file:`.github/workflows/cron-vendor.yml` invokes bare
-``pcapkit-vendor``, which is exactly the default path.
-
-The corroborating evidence was in the generated file the crawler owns.
-:meth:`pcapkit.vendor.default.Vendor.context` emitted a ``:meta private:``
-directive into every enumeration it wrote until #858 replaced the template.
-When #531 landed, 116 of the 117 files under :file:`pcapkit/const/*/` carried
-it. The one that did not was
-:file:`pcapkit/const/mh/handover_initiate_status.py` -- the output of the one
-crawler that could not be reached. The duplicate dates to commit ``24edd30d2``
-(2023-04-17, "added MH enumerations & vendor cralwers"), so the file has been
-stale for the whole life of the crawler.
+So a crawler missing from :attr:`__all__` never runs, and
+:file:`.github/workflows/cron-vendor.yml` invokes bare ``pcapkit-vendor``, which
+is exactly the default path. Guards against :attr:`pcapkit.vendor.__all__`
+listing ``'MH_HandoverACKStatus'`` *twice* and ``'MH_HandoverInitiateStatus'``
+not at all, in :file:`pcapkit/vendor/__init__.py` and independently in
+:file:`pcapkit/vendor/mh/__init__.py` (#531), which leaves
+``handover_initiate_status`` out of both the default target list and
+``--target mh``, and the constant file it owns stale.
 
 Why the contract is stated over *all* crawlers rather than as a pin on this one.
 The defect is a displaced duplicate, and that shape is invisible to the obvious
@@ -42,15 +33,11 @@ one most likely to be made again, since adding a crawler means editing two
 
 Relationship to :file:`tests/project/test_public_api.py` (GitHub pull request
 #527). That module sweeps :attr:`__all__` across the tree for a related family of
-defects. This module is a separate file for two reasons: #527 had not merged
-when #531 added this one, so there was no file to extend; and the assertion here
-is not the one it makes. The property checked here -- defined versus reachable --
-is about the crawler *registry* rather than about :attr:`__all__` hygiene. #527
-also skipped :mod:`pcapkit.vendor` through ``EXCLUDED_ROOTS``, saying the unit
-tier lacked the ``vendor`` extra, though ``requests`` and ``bs4`` were already in
-the ``test`` extra (#507). #1772 dropped that exclusion, so its
-``test_no_duplicate_all_entries`` now gives the duplicate a second, cheaper
-detector.
+defects, and its ``test_no_duplicate_all_entries`` covers :mod:`pcapkit.vendor`
+too (#1772), giving the duplicate a second, cheaper detector. This module stays
+separate because its assertion is not the one that module makes: the property
+checked here -- defined versus reachable -- is about the crawler *registry*
+rather than about :attr:`__all__` hygiene.
 
 The suite is unit-tier (see :mod:`tests._tiers`): it reads no capture, and it
 instantiates nothing. That last part is load-bearing rather than incidental.
@@ -98,10 +85,10 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 HAS_CRAWLER_DEPS = all(importlib.util.find_spec(name) is not None
                        for name in ('requests', 'bs4'))
 
-#: The crawler this change makes reachable, as ``(module, class, exported
-#: name)``. Named explicitly as well as covered by the general contract below,
-#: so the failure says which crawler went missing instead of only how many did.
-#: A count alone would be satisfied by any 117 crawlers, including the wrong 117.
+#: The crawler #531 makes reachable, as ``(module, class, exported name)``.
+#: Named explicitly as well as covered by the general contract below, so the
+#: failure says which crawler went missing instead of only how many did. A count
+#: alone would be satisfied by the right number of the wrong crawlers.
 REGRESSION_CRAWLER = (
     'pcapkit.vendor.mh.handover_initiate_status',
     'HandoverInitiateStatus',
@@ -210,13 +197,13 @@ class CrawlerReachabilityTests(unittest.TestCase):
                          f'absent from pcapkit.vendor.__all__, so `pcapkit-vendor` with no '
                          f'arguments never runs them and the constant files they own go stale')
 
-        # And nothing is exported that no longer exists on disk, which is the
+        # And nothing is exported that does not exist on disk, which is the
         # same list drifting in the other direction.
         self.assertEqual(sorted(set(reachable) - set(defined)), [])
 
     def test_every_crawler_is_reachable_from_its_own_protocol_target(self) -> None:
         # The `--target <name>` path, which reads the subpackage's __all__ rather
-        # than the root's. It is a separate list and was separately wrong, so a
+        # than the root's. It is a separate list and can be separately wrong, so a
         # crawler can be reachable one way and not the other.
         defined = self._defined_crawlers()
 

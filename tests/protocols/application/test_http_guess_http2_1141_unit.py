@@ -1,18 +1,18 @@
 # -*- coding: utf-8 -*-
 """HTTP's version guess takes a bare frame for HTTP/2 only if a sender could write it. C.f. #1141.
 
-Since #1138 an HTTP/2 frame's Length counts the payload alone
-(:rfc:`9113#section-4.1`), so any nine octets whose Length fits the buffer are
-self-consistent. :meth:`HTTP._guess_version
+An HTTP/2 frame's Length counts the payload alone (:rfc:`9113#section-4.1`,
+#1138), so any nine octets whose Length fits the buffer are self-consistent.
+:meth:`HTTP._guess_version
 <pcapkit.protocols.application.http.HTTP._guess_version>` falls through to an
-HTTP/2 trial parse when neither the preface nor an HTTP/1 start line matches, and
-that trial accepted most zero-heavy binary: nine zero octets came back as
-``HTTP/2 type=0``, a ``DATA`` frame on stream 0, which :rfc:`9113#section-6.1`
-makes a protocol error.
+HTTP/2 trial parse when neither the preface nor an HTTP/1 start line matches. A
+trial that accepts any self-consistent header would take most zero-heavy binary:
+nine zero octets would come back as ``HTTP/2 type=0``, a ``DATA`` frame on stream
+0, which :rfc:`9113#section-6.1` makes a protocol error.
 
-The guess now requires a frame type :rfc:`9113` defines, no flag that type
+The guess requires a frame type :rfc:`9113` defines, no flag that type
 leaves undefined, a clear reserved bit, and a stream that type may be sent on.
-Explicit ``version=2`` parsing is not affected, and is asserted unchanged here.
+Explicit ``version=2`` parsing is not subject to the guess, as asserted here too.
 
 The legal frames in :data:`LEGAL_FRAMES` were built with Scapy 2.7.0's
 :mod:`scapy.contrib.http2` (``H2Frame`` over each frame class) and are embedded
@@ -70,8 +70,9 @@ REJECTED_FRAMES = (
     ('ORIGIN, not an RFC 9113 type', '0000000c0000000000'),
 )
 
-#: The seeded fuzz. Pre-fix, this corpus produced 566 HTTP/2 labels, of which
-#: 249 were ``DATA`` (most on stream 0) and 317 frames of unknown type.
+#: The seeded fuzz. Measured without the guess's checks, this corpus produced
+#: 566 HTTP/2 labels, of which 249 were ``DATA`` (most on stream 0) and 317
+#: frames of unknown type.
 FUZZ_SEED = 1141
 FUZZ_COUNT = 5000
 PRE_FIX_HTTP2_LABELS = 566
@@ -111,7 +112,7 @@ class HTTPGuessHTTP2Tests(unittest.TestCase):
             self._guess(bytes(9))
 
     def test_explicit_version_still_parses_nine_zero_octets(self) -> None:
-        """Explicit HTTP/2 parsing stays RFC-exact: only the guess is tightened."""
+        """Explicit HTTP/2 parsing is RFC-exact: the checks apply to the guess only."""
         from pcapkit.protocols.application.http import HTTP
 
         http = HTTP(bytes(9), 9, version=2)

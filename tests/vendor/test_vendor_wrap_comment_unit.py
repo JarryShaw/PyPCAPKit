@@ -5,17 +5,17 @@ Sphinx renders each ``#:`` comment in :mod:`pcapkit.const` as a reST paragraph,
 with its continuation lines joined by a space, and an AppType ``list-table`` cell
 the same way.
 
-* GitHub issue #1846: ``[http://ele2.io][Damir Franusic]`` autolinked
-  ``http://ele2.io][Damir``, since docutils reads ``]`` and ``[`` as URL
-  characters, and ``(S) flag`` rendered as an enumerated list.
-  :meth:`~pcapkit.vendor.default.Vendor.wrap_comment` now spaces a URL reference
+* GitHub issue #1846: guards against ``[http://ele2.io][Damir Franusic]``
+  autolinking ``http://ele2.io][Damir``, since docutils reads ``]`` and ``[`` as
+  URL characters, and against ``(S) flag`` rendering as an enumerated list.
+  :meth:`~pcapkit.vendor.default.Vendor.wrap_comment` spaces a URL reference
   off the bracket after it and backslash-escapes a leading enumerator.
-* GitHub issue #1847: :mod:`textwrap` broke lines at hyphens, so the docs read
-  ``run- time``, and a URL split that way in a cell lost the rest of its
-  autolink. Neither wrapper breaks at a hyphen now.
+* GitHub issue #1847: guards against :mod:`textwrap` breaking lines at
+  hyphens, under which the docs read ``run- time`` and a URL split that way in
+  a cell loses the rest of its autolink. Neither wrapper breaks at a hyphen.
 
-The committed :mod:`pcapkit.const` files were re-rendered offline with the
-patched wrappers, so the last cases check the tree as well as the generators.
+The committed :mod:`pcapkit.const` files are rendered by the same wrappers, so
+the last cases check the tree as well as the generators.
 Nothing here makes a network call.
 
 """
@@ -115,7 +115,7 @@ class WrapCommentTests(unittest.TestCase):
     def test_no_line_is_broken_at_a_hyphen(self) -> None:
         from pcapkit.vendor.default import Vendor
 
-        # The width is unchanged, and the old wrap did split this one there.
+        # At the same width, a plain textwrap.wrap splits this one there.
         self.assertIn('[draft-ietf-httpbis-resumable-', textwrap.wrap(RESUMABLE, 76)[1])
 
         lines = _lines(Vendor.wrap_comment(RESUMABLE))

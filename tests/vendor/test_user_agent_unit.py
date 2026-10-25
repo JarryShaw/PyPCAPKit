@@ -1,14 +1,14 @@
 # -*- coding: utf-8 -*-
 """Regression tests for the ``User-Agent`` the vendor crawlers send.
 
-GitHub issue #518: :meth:`pcapkit.vendor.default.Vendor._request` used to call
-``requests.get(self.LINK)`` with no headers at all, in both its direct and its
-proxy branch. Wikimedia rejects |requests|_' default ``python-requests/<version>``
-agent outright -- measured 2026-09-19 as HTTP 403 and 126 bytes of robot-policy
-text, against 200 for a descriptive agent, reproduced on four separate articles
-with nothing but the header changing -- so four crawlers could not fetch their
-registry at all, and burned ``MAX_RETRY`` attempts against a refusal that no
-amount of retrying lifts.
+GitHub issue #518: guards against :meth:`pcapkit.vendor.default.Vendor._request`
+calling ``requests.get(self.LINK)`` with no headers at all, in either its direct
+or its proxy branch. Wikimedia rejects |requests|_' default
+``python-requests/<version>`` agent outright -- measured 2026-09-19 as HTTP 403
+and 126 bytes of robot-policy text, against 200 for a descriptive agent,
+reproduced on four separate articles with nothing but the header changing -- so
+a crawler sending it cannot fetch its registry at all, and burns ``MAX_RETRY``
+attempts against a refusal that no amount of retrying lifts.
 
 .. |requests| replace:: ``requests``
 .. _requests: https://requests.readthedocs.io
@@ -18,8 +18,8 @@ parts to it:
 
 * **Both** call sites send it. The proxy branch is the one that gets forgotten,
   because it only runs when the direct fetch has already raised, so a test that
-  exercises only the happy path would have passed on the unfixed code's sibling
-  bug. :meth:`test_the_proxy_branch_sends_it_too` drives that branch deliberately.
+  exercises only the happy path would pass with that branch still sending no
+  header. :meth:`test_the_proxy_branch_sends_it_too` drives that branch deliberately.
 * The agent is **descriptive, not a browser spoof**. Wikimedia's policy asks for
   an agent that identifies the tool and offers a contact address; sending
   ``Mozilla/5.0 …`` would satisfy the 403 and misrepresent the client, so
@@ -73,17 +73,17 @@ VENDOR_DEPS = ('requests', 'bs4', 'html5lib')
 #: Whether the crawlers are importable at all. ``html5lib`` ships in the
 #: ``vendor`` extra (:file:`pyproject.toml`), not ``test`` -- so these tests skip
 #: on the ``test`` and ``gate`` jobs of :file:`.github/workflows/unit-tests.yml`,
-#: which never install ``vendor``. ``engine-tests`` ran them for real (#738)
-#: until #849 narrowed each of its cells to that engine's own test files.
+#: which never install ``vendor``. ``engine-tests`` does not run them either:
+#: each of its cells runs only that engine's own test files (#849).
 #: Guarded the same way
 #: :file:`tests/protocols/test_dispatch_registry_unit.py` guards its own optional
 #: runtime dependencies, rather than making the whole unit tier depend on the
 #: crawlers' requirements. See #518.
 HAS_VENDOR_DEPS = all(importlib.util.find_spec(name) is not None for name in VENDOR_DEPS)
 
-#: Tokens that only appear in a browser's ``User-Agent``. The point of the fix is
-#: an agent that says what the client actually is, so any of these appearing in
-#: it means the fix has been replaced by a spoof. ``Gecko`` covers both the real
+#: Tokens that only appear in a browser's ``User-Agent``. The point is an agent
+#: that says what the client actually is, so any of these appearing in it means
+#: the descriptive agent has been replaced by a spoof. ``Gecko`` covers both the real
 #: token and the ``like Gecko`` every Chromium agent carries.
 BROWSER_TOKENS = ('Mozilla', 'AppleWebKit', 'Chrome', 'Chromium', 'Safari',
                   'Gecko', 'Edg/', 'OPR/', 'Opera', 'Trident', 'Firefox')

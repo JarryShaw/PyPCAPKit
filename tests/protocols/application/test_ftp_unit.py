@@ -116,20 +116,20 @@ class FTPUnitTests(unittest.TestCase):
         # form raised too.
         self.assertIs(Command('retr'), Command.RETR)
 
-        # GitHub issue #860: a genuinely unknown command no longer registers
+        # GitHub issue #860: a genuinely unknown command does not register
         # at all -- the owner's ruling is that ``get``/``_missing_`` have no
         # way to supply ``feat``/``desc``/``type``/``conf``, so minting one
         # would register a permanently hollowed-out member; only
         # ``register()`` can do that properly. The *value* keeps the
-        # caller's own casing (unchanged from before #860, and the same
-        # convention :class:`~pcapkit.const.ftp.command.FEATCode` already
-        # used) -- only the *name* is canonicalised -- so a repeated call
-        # with the same casing is *equal* but never *identical* (nothing is
-        # cached to be identical to any more), while a different-case call
-        # is a genuinely different value and is correctly *not* equal: on
-        # ``main`` minting's cache silently returned the first casing seen
-        # for every later call regardless of case, which is exactly the
-        # "registered enum out of an unrecognised value" #860 removes.
+        # caller's own casing (the same convention
+        # :class:`~pcapkit.const.ftp.command.FEATCode` uses) -- only the
+        # *name* is canonicalised -- so a repeated call with the same casing
+        # is *equal* but never *identical* (nothing is cached to be
+        # identical to), while a different-case call is a genuinely
+        # different value and is correctly *not* equal. A minting cache
+        # would return the first casing seen for every later call
+        # regardless of case, which is exactly the "registered enum out of
+        # an unrecognised value" #860 rules out.
         unknown = Command.get('xyzw')
         self.assertEqual(unknown._name_, 'XYZW')
         self.assertEqual(unknown, 'xyzw')
@@ -146,7 +146,8 @@ class FTPUnitTests(unittest.TestCase):
     def test_ftp_read_parses_a_lowercase_request(self) -> None:
         """The case-insensitivity is reachable from wire data: ``ftp.py``
         compiles ``FTP_REQUEST`` with :data:`re.I` and passes the match
-        verbatim, so a lowercase request used to crash the parse -- #582.
+        verbatim, so the lookup must accept a lowercase request rather than
+        crash the parse -- #582.
         """
         from pcapkit.const.ftp.command import Command
         from pcapkit.protocols.application.ftp import FTP, Type
