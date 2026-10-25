@@ -27,15 +27,18 @@ at all. It reads :file:`pcapkit/__init__.py` as text rather than importing
 :mod:`pcapkit`, because the question is what the file in the repository says, and
 an installed copy elsewhere on ``sys.path`` would answer a different one.
 
-What is deliberately not tested
--------------------------------
+Calling ``main``
+----------------
 
-:func:`~bump_version.main` is never called. It ends by writing ``conda/build``
-relative to the working directory and by resolving
-:file:`pcapkit/__init__.py` through ``pcapkit.__path__``, so calling it in-process
-would rewrite the checkout running the tests. The pieces it wires together are
-each tested directly instead, and the ordering property that matters -- that the
-one fatal outcome is reached before any file is written -- is structural:
+:func:`~bump_version.main` is called once, with the version reader and
+:func:`~bump_version.init_path` patched and the working directory moved into the
+scratch tree, because it ends by writing ``conda/build`` relative to the working
+directory and by resolving :file:`pcapkit/__init__.py` through
+``pcapkit.__path__``; unpatched, it would rewrite the checkout running the tests.
+That one call pins what a bump writes into ``date-released`` (#2163). Otherwise
+the pieces it wires together are each tested directly, and the ordering
+property that matters -- that the one fatal outcome is reached before any file is
+written -- is structural:
 :func:`~bump_version.plan_citation` takes text and returns text, so it has nothing
 to write with.
 
@@ -190,9 +193,8 @@ class CitationDateTests(CitationTreeMixin, unittest.TestCase):
         self.assertNotIn("date-released: '2026-09-20'", rewritten)
 
     def test_the_release_date_defaults_to_today_in_utc(self) -> None:
-        # Not ``date.today()``. Seven of the thirty most recent bumps were made
-        # late evening in US-Eastern, where the local date is a day behind the
-        # publish the field is describing.
+        # Not ``date.today()``. A bump made late evening in US-Eastern has a local
+        # date a day behind the UTC date of the commit the field is describing.
         opened = datetime.datetime.now(datetime.timezone.utc).date()
         rewritten = bump_version.plan_citation(FIXTURE, '1.5.0b5')
         closed = datetime.datetime.now(datetime.timezone.utc).date()
@@ -211,6 +213,42 @@ class CitationDateTests(CitationTreeMixin, unittest.TestCase):
         if local not in (opened, closed):
             self.assertNotIn(f"date-released: '{local.isoformat()}'", rewritten,
                              'the local date was written where UTC was required')
+
+    def test_a_bump_dates_the_release_by_the_bump_itself(self) -> None:
+        # #2163: ``date-released`` is the date of the commit that bumps the
+        # version, not the date the release is distributed. So the bump writes the
+        # run's own UTC date into the field, in the same write that moves
+        # ``version``, rather than leaving it for a release step to fill in.
+        citation = self.write_citation()
+        package = self.tmp_path / 'pcapkit'
+        package.mkdir()
+        init = package / '__init__.py'
+        init.write_text("__version__ = '1.5.0b4'\n", encoding='utf-8')
+        (self.tmp_path / 'conda').mkdir()
+
+        # ``main`` writes ``conda/build`` relative to the working directory and
+        # finds ``__init__.py`` through ``pcapkit``, so both are pointed at the
+        # scratch tree to keep the checkout running the tests untouched.
+        cwd = os.getcwd()
+        self.addCleanup(os.chdir, cwd)
+        os.chdir(self.tmp_path)
+
+        with mock.patch.object(bump_version, 'current_version', return_value='1.5.0b4'), \
+                mock.patch.object(bump_version, 'init_path', return_value=str(init)):
+            opened = datetime.datetime.now(datetime.timezone.utc).date()
+            self.assertEqual(bump_version.main(['--citation', str(citation)]), 0)
+            closed = datetime.datetime.now(datetime.timezone.utc).date()
+
+        written = citation.read_text(encoding='utf-8')
+        self.assertIn('\nversion: 1.5.0b5\n', written)
+        # Both bounds, so a run straddling UTC midnight does not flake.
+        wanted = {f"\ndate-released: '{day.isoformat()}'\n" for day in (opened, closed)}
+        self.assertTrue(
+            any(candidate in written for candidate in wanted),
+            f'expected the bump to date the release {sorted(wanted)}, got '
+            f'{[ln for ln in written.splitlines() if ln.startswith("date-released:")]!r}',
+        )
+        self.assertIn("__version__ = '1.5.0b5'", init.read_text(encoding='utf-8'))
 
     def test_a_file_without_a_release_date_does_not_gain_one(self) -> None:
         # The field is optional in Citation File Format 1.2.0. Inventing one would

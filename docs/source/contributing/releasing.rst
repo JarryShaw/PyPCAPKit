@@ -25,7 +25,10 @@ counter, or a fresh ``.post1`` for a final release -- and then:
 
 * rewrites the ``__version__`` assignment in ``pcapkit/__init__.py``;
 * moves :file:`CITATION.cff`'s ``version`` and ``date-released`` fields to
-  match, line-oriented so the file's own quoting and comments survive;
+  match, line-oriented so the file's own quoting and comments survive.
+  ``date-released`` becomes the bump's own date in UTC, not the date the
+  release is later published, which is its intended meaning
+  (:issue:`2163`);
 * resets :file:`conda/build` to ``0``.
 
 Its one scheduled caller is the ``Bump Version`` step of
