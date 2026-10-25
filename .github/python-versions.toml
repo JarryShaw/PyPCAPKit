@@ -68,3 +68,12 @@ workflow = "cron-conda.yml"
 job = "conda-dist"
 where = "Conda environment creation and activation: with.python-version"
 value = "3.15"
+
+# The util/ scripts held to requires-python's 3.8 compile on the leg whose
+# parser is 3.8's (#2206): ast's feature_version is best-effort on a newer
+# interpreter. Raising the floor moves this with it.
+[[exemptions]]
+workflow = "python-compatibility.yml"
+job = "compatibility"
+where = "Compile the 3.8-floor util scripts: if"
+value = "3.8"

@@ -519,7 +519,13 @@ class TestTheStepsRunTheScripts(unittest.TestCase):
                                   and 'working-directory' in step])
 
     def test_the_scripts_parse_as_python_3_8(self) -> None:
-        """The steps run them on the image's ``python3``, or on a KTLO leg's."""
+        """The steps run them on the image's ``python3``, or on a KTLO leg's.
+
+        ``feature_version`` is best-effort on a newer interpreter, so the 3.8
+        compat leg's ``Compile the 3.8-floor util scripts`` is the authoritative
+        check (#2206).
+
+        """
         for name in ('release_tags.py', 'release_upload.py'):
             with self.subTest(script=name):
                 ast.parse((UTIL / name).read_text(encoding='utf-8'), feature_version=FLOOR)

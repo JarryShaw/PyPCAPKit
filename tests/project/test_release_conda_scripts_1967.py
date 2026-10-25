@@ -563,6 +563,12 @@ class TestTheStepsRunTheScripts(unittest.TestCase):
         self.assertEqual(set(release_conda.PLATFORMS), legs)
 
     def test_the_scripts_parse_as_python_3_8(self) -> None:
+        """Best-effort on a newer interpreter, as ``feature_version`` is (#2206).
+
+        The 3.8 compat leg's ``Compile the 3.8-floor util scripts`` is the
+        authoritative check.
+
+        """
         ast.parse((UTIL / 'release_conda.py').read_text(encoding='utf-8'), feature_version=FLOOR)
 
 

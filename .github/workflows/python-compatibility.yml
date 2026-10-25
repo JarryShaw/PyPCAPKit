@@ -114,6 +114,32 @@ jobs:
             exit 1
           fi
 
+      # #2206: the util/ scripts held to requires-python's 3.8, compiled by 3.8's
+      # own parser. Their tests' `ast.parse(..., feature_version=(3, 8))` is
+      # best-effort on a newer interpreter, so this leg is the check. The list is
+      # the scripts those tests parse at the floor, as
+      # tests/project/test_compat_util_floor_2206.py pins; the version, an
+      # exemption in .github/python-versions.toml.
+      - name: Compile the 3.8-floor util scripts
+        id: compile-util
+        if: ${{ steps.install.outcome == 'success' && matrix.python-version == '3.8' }}
+        continue-on-error: ${{ matrix.ktlo == true }}
+        shell: bash
+        env:
+          LEG: Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}
+        run: |
+          log="$RUNNER_TEMP/compileall-util.log"
+          if ! python -m compileall -q \
+              util/_actions.py util/release_conda.py util/release_published.py \
+              util/release_reset_build.py util/release_status.py util/release_tags.py \
+              util/release_tiers.py util/release_upload.py > "$log" 2>&1; then
+            cat "$log"
+            count=$(awk '/^\*\*\* Error compiling /{n++} END{print n+0}' "$log")
+            first=$(awk '/^  File "/{sub(/^  /, ""); print; exit}' "$log")
+            echo "::${ANNOTATION_LEVEL} title=util/ does not compile on ${LEG//,/%2C}::$count scripts fail to compile, the first at ${first:-an unreported place}; see this step's log."
+            exit 1
+          fi
+
       # #1672: the KTLO leg's report -- the same step ends every KTLO matrix
       # job; see unit-tests.yml's `test` job for how it works.
       - name: KTLO summary

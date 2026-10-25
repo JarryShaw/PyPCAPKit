@@ -464,7 +464,13 @@ class TestTheStepRunsTheScript(unittest.TestCase):
                                     'push'})
 
     def test_it_parses_as_python_3_8(self) -> None:
-        """``tag`` has no setup-python, so it runs on the image's ``python3``."""
+        """``tag`` has no setup-python, so it runs on the image's ``python3``.
+
+        ``feature_version`` is best-effort on a newer interpreter, so the 3.8
+        compat leg's ``Compile the 3.8-floor util scripts`` is the authoritative
+        check (#2206).
+
+        """
         ast.parse(SCRIPT.read_text(encoding='utf-8'), feature_version=FLOOR)
 
 

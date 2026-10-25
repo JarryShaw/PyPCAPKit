@@ -164,6 +164,9 @@ done <<< "$failed"
 '''
 #: A ``util/`` script a ``run:`` invokes, whose own annotations are the step's.
 UTIL_SCRIPT = re.compile(r'\butil/[\w-]+\.py\b')
+#: A ``compileall`` command line, continuation lines included: the scripts it names
+#: are compiled, not run, so their annotations are not the step's (#2206).
+COMPILEALL = re.compile(r'-m compileall\b(?:[^\n]*\\\n)*[^\n]*')
 #: ``experimental``'s steps with a ``timeout-minutes`` of their own (#1660), by ``id``:
 #: setup-python, the install, the watcher's setup-python and requests (#1938) and the
 #: tests. #1732: the tests' is GraalPy's unit tier less the round-trip sweeps, 88-113
@@ -367,11 +370,12 @@ def commands(script: 'str') -> 'set[str]':
 
     A script's ``::{level}``, where it reads ``ANNOTATION_LEVEL`` into ``level`` as
     :file:`util/regenerate_samples.py` does, is the shell's ``${ANNOTATION_LEVEL}``;
-    so is a ``level`` it passes to util/_actions.py's annotations (#2047).
+    so is a ``level`` it passes to util/_actions.py's annotations (#2047). A script
+    a :data:`COMPILEALL` command line names is compiled, not run (#2206).
 
     """
     found = set(COMMAND.findall(script)) | set(HELPER_CALL.findall(script))
-    for path in set(UTIL_SCRIPT.findall(script)):
+    for path in set(UTIL_SCRIPT.findall(COMPILEALL.sub('', script))):
         text = (ROOT / path).read_text(encoding='utf-8')
         levelled = "level = os.environ['ANNOTATION_LEVEL']" in text
         written = set(COMMAND.findall(text)) | helper_levels(text)
@@ -910,6 +914,17 @@ class TestTheScanReadsTheHelpersAnnotations(unittest.TestCase):
                                {'notice'})):
             with self.subTest(script=script):
                 self.assertEqual(commands(script), found)
+
+    def test_a_script_compileall_names_is_not_read_as_run(self) -> None:
+        """#2206: compiling a script that writes ``::error`` writes nothing; running it still does."""
+        self.assertIn('error', commands('python3 util/release_tags.py'))
+        for script in ('python -m compileall -q util/release_tags.py',
+                       'if ! python -m compileall -q \\\n'
+                       '    util/release_tags.py \\\n'
+                       '    util/release_upload.py; then'):
+            with self.subTest(script=script):
+                self.assertEqual(commands(script), set())
+        self.assertIn('error', commands('python -m compileall -q util\npython3 util/release_tags.py'))
 
     def test_a_literal_command_is_still_read(self) -> None:
         for script in ('echo "::error::m"', "printf '::error::%s\\n' m"):

@@ -820,6 +820,13 @@ class TestTheStepsRunTheScripts(unittest.TestCase):
                         self.assertNotIn(line, step.get('run', ''))
 
     def test_the_scripts_need_only_util_and_python_3_8(self) -> None:
+        """Each imports only :file:`util/` and the standard library, and parses at the floor.
+
+        ``feature_version`` is best-effort on a newer interpreter, so the 3.8
+        compat leg's ``Compile the 3.8-floor util scripts`` is the authoritative
+        check (#2206).
+
+        """
         allowed = {'__future__', 'argparse', 'os', 're', 'subprocess', 'sys', 'typing', '_actions', 'util'}
         for name in ('release_tiers.py', 'release_published.py'):
             with self.subTest(script=name):
