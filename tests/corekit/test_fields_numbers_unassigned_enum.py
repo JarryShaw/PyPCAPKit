@@ -239,10 +239,13 @@ class UnassignedEnumFieldTests(unittest.TestCase):
         :exc:`ValueError` on purpose -- ``tests/const/test_const_enum_builtin_parity.py``
         pins exactly that, because each generated ``get()``'s ``except
         ValueError`` fallback depends on it -- so no registry under
-        :mod:`pcapkit.const` exercises this branch, and none needs to: the
-        bit-flag registries that do bound themselves to a width, including
-        :class:`pcapkit.const.tcp.flags.Flags`, are reached through neither a
-        plain :class:`~pcapkit.corekit.fields.numbers.EnumField` nor this method.
+        :mod:`pcapkit.const` exercises this branch, and none needs to: a
+        generated guard that bounds its registry to a width rejects with that
+        same bare :exc:`ValueError`, whether the registry is a bit-flag one such
+        as :class:`pcapkit.const.tcp.flags.Flags` or a plain one such as
+        :class:`pcapkit.const.ipv4.option_number.OptionNumber` behind a plain
+        :class:`~pcapkit.corekit.fields.numbers.EnumField`, so the field falls
+        back on it like any other miss.
 
         Asserted for both enumeration libraries, because the registries under
         :mod:`pcapkit.const` are a mixture of the two and ``_missing_`` is
