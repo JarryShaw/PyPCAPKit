@@ -128,7 +128,7 @@ def _reader_type() -> 'Type[PcapReader]':
     PCAP-NG specification defines a section: an interface ID counts the Interface
     Description Blocks of its own section only. `Scapy`_'s reader keeps appending
     to one table across Section Header Blocks, so a later section's interface 0
-    resolved to the first section's, with its link type and resolution (:issue:`1522`).
+    resolves to the first section's, with its link type and resolution (:issue:`1522`).
 
     And it dates packets that `Scapy`_ misdates. A Simple Packet
     Block has no timestamp, and `Scapy`_ leaves its packet with the time it was
@@ -182,7 +182,7 @@ def _reader_type() -> 'Type[PcapReader]':
 
     class _Uncapped(PcapReader):
         # ``sniff`` calls ``recv()``, and Scapy's default ``size`` of ``MTU``
-        # cut every record to 65,535 octets (#1717); an explicit one is kept
+        # cuts every record to 65,535 octets (#1717); an explicit one is kept
         def recv(self, size: 'int' = _CAPLEN_MAX, **kwargs: 'Any') -> 'ScapyPacket':  # type: ignore[override]
             return super().recv(size, **kwargs)
 

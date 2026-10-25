@@ -1114,7 +1114,7 @@ class Extractor(Generic[_P]):
 
         The built-in engines call this at their global-header step. The PCAP
         engine passes the header's fields as ``protocol``, ``byteorder``,
-        ``nanosecond``, ``thiszone``, ``sigfigs`` and ``snaplen``:
+        ``nanosecond``, ``version``, ``thiszone``, ``sigfigs`` and ``snaplen``:
         :class:`~pcapkit.dumpkit.pcap.PCAPIO` writes its own global header from
         them, and the other writers ignore them. The PCAP-NG engine passes none.
         :meth:`run` calls it again, without arguments, after the engine has
@@ -1621,7 +1621,7 @@ class Extractor(Generic[_P]):
         class owns it* -- the rule of :issue:`610`, as :meth:`_owns_input` writes
         it down and :meth:`_cleanup` and the backstops already follow. A stream
         the caller supplied stays open for the caller to close, so leaving the
-        block no longer closes it behind the caller's back (:issue:`1999`).
+        block does not close it behind the caller's back (:issue:`1999`).
 
         For a caller's non-seekable stream, the stream this class owns is the
         :class:`~pcapkit.corekit.io.SeekableReader` wrapped around it, and that
@@ -1776,10 +1776,10 @@ class Extractor(Generic[_P]):
         being appended to ends at the data present when it got there, rather than
         following the writer. That is a deliberate narrowing, and it is measured:
         a file gaining its last record 0.6s in yields five of its six frames here,
-        where the unbounded retry of ``6c3d1b0d9`` yielded all six. Unbounded
-        retrying is the defect :issue:`620` reports, so *some* stopping rule had
-        to be chosen, and a timed grace period would only make the cut-off
-        intermittent rather than absent.
+        where an unbounded retry yields all six. Unbounded retrying is the defect
+        :issue:`620` reports, so *some* stopping rule had to be chosen, and a
+        timed grace period would only make the cut-off intermittent rather than
+        absent.
         Following a growing file wants a deliberate policy of its own; see the
         note in :file:`docs/source/changelog/1.5.0.rst`.
 

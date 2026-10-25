@@ -56,7 +56,7 @@ _TIME_T = 2**63
 # December 31, 1969, UTC, gives ``0.5``, not ``-0.5`` (#2134, measured on
 # GraalPy 25.4.4). ``TimestampNode`` takes ``ChronoUnit.SECONDS.between`` of the
 # epoch and the instant, which truncates (graalpython, DateTimeBuiltins.java, at
-# graal-25.4.4; no upstream issue is filed yet). CPython and PyPy compute
+# graal-25.4.4, with no upstream issue filed). CPython and PyPy compute
 # ``(dt - epoch).total_seconds()`` for an aware datetime, which is right, so
 # there :func:`totimestamp` is the stdlib call itself.
 _TIMESTAMP_TRUNCATES = sys.implementation.name == 'graalpy'

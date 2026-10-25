@@ -206,9 +206,9 @@ class PCAPNGReader:
 
         Returns:
             Timestamp in seconds since the UNIX epoch, and the packet data. The
-            timestamp is a :class:`~pcapkit.toolkit.dpkt.Timestamp`: the
-            :obj:`float` this reader always yielded, which also carries the exact
-            value, the interface's resolution and the packet's original length,
+            timestamp is a :class:`~pcapkit.toolkit.dpkt.Timestamp`: a
+            :obj:`float` that also carries the exact value, the interface's
+            resolution and the packet's original length,
             for the PCAP frame record of the packet (:issue:`1507`).
 
         Raises:

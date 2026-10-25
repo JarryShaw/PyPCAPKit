@@ -33,7 +33,8 @@ __all__ = [
 # ``_common`` binds a ``NoneType`` of its own only on a ``NameError``, so there it
 # binds none, and the ``from ._common import *`` in aenum's ``__init__`` fails on
 # the name ``__all__`` lists: ``AttributeError: module 'aenum._common' has no
-# attribute 'NoneType'``. That left pcapkit unimportable on PyPy 8.0 (#1958).
+# attribute 'NoneType'``. Unhandled, that leaves pcapkit unimportable on PyPy 8.0
+# (#1958).
 # ``aenum._common`` itself ran to its end and stays in :data:`sys.modules`, so
 # binding the name there and importing aenum again completes it, leaving
 # :mod:`builtins` as PyPy has it. This module runs before any of pcapkit's that

@@ -70,8 +70,8 @@ class IPv4(IP):
     #: up to the 4.25-minute TTL ceiling, not a 15-second deadline. It is ruled
     #: out here: the recommendation is superseded, and TTL is not in
     #: :class:`~pcapkit.foundation.reassembly.data.ip.Packet` at all, so the
-    #: fragment model would have to grow a field to express a scheme the current
-    #: requirement asks implementations not to use.
+    #: fragment model would have to grow a field to express a scheme RFC 1122
+    #: asks implementations not to use.
     #:
     #: 60 seconds is the low end of RFC 1122's range, and it makes IPv4 agree
     #: with the 60 seconds :rfc:`8200#section-4.5` mandates for IPv6 -- so one
