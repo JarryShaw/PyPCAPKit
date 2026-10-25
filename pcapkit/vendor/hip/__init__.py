@@ -3,7 +3,7 @@
 """:class:`~pcapkit.protocols.internet.hip.HIP` Vendor crawlers
 ========================================================================
 
-.. module:: pcapkit.const.hip
+.. module:: pcapkit.vendor.hip
 
 This module contains all vendor crawlers of
 :class:`~pcapkit.protocols.internet.hip.HIP` implementations. Available

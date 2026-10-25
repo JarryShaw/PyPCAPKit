@@ -568,7 +568,7 @@ class Vendor(metaclass=VendorMeta):
         ``sys.exit(SomeCrawler())``, so running one from a second checkout, or
         from a module that never sits under ``vendor/`` at all, resolves
         :mod:`pcapkit.vendor` from wherever it is installed while
-        ``inspect.getfile(cls)`` names a file elsewhere entirely --  and
+        ``inspect.getfile(cls)`` names a file elsewhere entirely -- and
         :meth:`Vendor.__init__ <pcapkit.vendor.default.Vendor.__init__>` then opens that path with ``'w'``, silently
         truncating whatever :attr:`~Vendor.__module__` actually names instead of
         raising. So the escape is rejected outright, rather than trusted to
@@ -618,7 +618,7 @@ class Vendor(metaclass=VendorMeta):
         arguments.
 
         The method will first try to *GET* the content of :attr:`~Vendor.LINK`.
-        Should any exception raised, it will first try with proxy settings from
+        Should any exception be raised, it will first try with proxy settings from
         :func:`~pcapkit.vendor.default.get_proxies`.
 
         .. note::
@@ -626,7 +626,7 @@ class Vendor(metaclass=VendorMeta):
            Since some :attr:`~Vendor.LINK` links are from Wikipedia, etc., they
            might not be available in certain areas, e.g. the amazing PRC :)
 
-        Would proxies failed again, it will prompt for user intervention, i.e.
+        Should the proxies fail again, it will prompt for user intervention, i.e.
         it will use :func:`webbrowser.open` to open the page in browser for you, and
         you can manually load that page and save the HTML source at the location
         it provides.

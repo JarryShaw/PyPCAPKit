@@ -36,7 +36,7 @@ __all__ = ['ProtocolIE']
 #: accessor.
 _TYPEREF = ('NGAP-CommonDataTypes', 'ProtocolIE-ID')
 
-#: Default constant template of enumerate registry, sourced from pycrate
+#: Default constant template of enumeration registry, sourced from pycrate
 #: rather than an IANA CSV -- see :mod:`pcapkit.vendor.ngap.procedure_code`.
 LINE = lambda NAME, DOCS, FLAG, ENUM, MODL: f'''\
 # -*- coding: utf-8 -*-

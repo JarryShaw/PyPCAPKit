@@ -2,7 +2,7 @@
 """Cipher IDs
 ================
 
-.. module:: pcapkit.const.hip.cipher
+.. module:: pcapkit.vendor.hip.cipher
 
 This module contains the vendor crawler for **Cipher IDs**,
 which is automatically generating :class:`pcapkit.const.hip.cipher.Cipher`.

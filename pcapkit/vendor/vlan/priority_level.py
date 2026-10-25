@@ -38,7 +38,7 @@ class PriorityLevel(Vendor):
         """Fetch registry table.
 
         Args:
-            text: Context from :attr:`~LinkType.LINK`.
+            text: Context from :attr:`~PriorityLevel.LINK`.
 
         Returns:
             Parsed HTML source.

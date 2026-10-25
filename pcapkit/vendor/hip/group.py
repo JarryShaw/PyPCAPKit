@@ -2,7 +2,7 @@
 """Group IDs
 ===============
 
-.. module:: pcapkit.const.hip.group
+.. module:: pcapkit.vendor.hip.group
 
 This module contains the vendor crawler for **Group IDs**,
 which is automatically generating :class:`pcapkit.const.hip.group.Group`.

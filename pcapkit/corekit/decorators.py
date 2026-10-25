@@ -61,12 +61,12 @@ def seekset(func: 'Callable[Concatenate[ProtocolBase, P], R_seekset]') -> 'Calla
         This decorator function is designed for decorating *instance methods*.
 
     The decorator will keep the current offset of :attr:`self._file <pcapkit.protocols.protocol.Protocol._file>`,
-    then call the decorated function. Afterwards, it will rewind the  offset of
-    :attr:`self._file <pcapkit.protocols.protocol.Protocol._file>` to the original and returns the return value from
+    then call the decorated function. Afterwards, it will rewind the offset of
+    :attr:`self._file <pcapkit.protocols.protocol.Protocol._file>` to the original and return the return value from
     the decorated function.
 
     Note:
-        The decorated function should have following signature::
+        The decorated function should have the following signature::
 
             func(self: 'pcapkit.protocols.protocol.ProtocolBase',
                  *args: 'typing.Any', **kwargs: 'typing.Any') -> 'typing.Any'
@@ -110,7 +110,7 @@ def beholder(
     end-of-file :exc:`~pcapkit.utilities.exceptions.StructError`.
 
     Note:
-        The decorated function should have following signature::
+        The decorated function should have the following signature::
 
             func(self: 'pcapkit.protocols.protocol.ProtocolBase',
                  proto: 'int', length: 'typing.Optional[int]',
@@ -218,7 +218,7 @@ def prepare(func: 'Callable[Concatenate[Type[R_prepare], bytes | IO[bytes], Opti
     the revised version of parameter list to the original method.
 
     Note:
-        The decorated function should have following signature::
+        The decorated function should have the following signature::
 
             func(cls: 'typing.Type[pcapkit.protocols.schema.schema.Schema]',
                  data: 'bytes | typing.IO[bytes]',

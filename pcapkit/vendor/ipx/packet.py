@@ -11,7 +11,7 @@ which is automatically generating :class:`pcapkit.const.ipx.packet.Packet`.
 """
 
 ###############################################################################
-# NOTE: fix duplicated name of ``socket```
+# NOTE: fix duplicated name of ``socket``
 import sys
 
 path = sys.path.pop(0)

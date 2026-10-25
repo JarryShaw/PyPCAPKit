@@ -2,7 +2,7 @@
 """Registration Failure Types
 ================================
 
-.. module:: pcapkit.const.hip.registration_failure
+.. module:: pcapkit.vendor.hip.registration_failure
 
 This module contains the vendor crawler for **Registration Failure Types**,
 which is automatically generating :class:`pcapkit.const.hip.registration_failure.RegistrationFailure`.

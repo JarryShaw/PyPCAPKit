@@ -11,7 +11,7 @@ automatically generated from the :mod:`pcapkit.vendor` module.
 # IANA registration
 from pcapkit.const.reg import *
 
-# Miscellanous
+# Miscellaneous
 from pcapkit.const.pcapng import *
 
 # per protocol

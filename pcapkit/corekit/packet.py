@@ -172,9 +172,11 @@ class DeferredPacket:
         """Convert the instance into :obj:`dict`.
 
         Returns:
-            The fields, with ``packet`` resolved if it had not been read yet --
-            a :obj:`dict` holding the placeholder would leak an implementation
-            detail into what is meant to be plain data.
+            The fields, as :meth:`Info.to_dict
+            <pcapkit.corekit.infoclass.Info.to_dict>` exports them, with
+            ``packet`` resolved if it had not been read yet -- an export
+            holding the placeholder would leak an implementation detail into
+            what is meant to be plain data.
 
         """
         self.__analyse__()

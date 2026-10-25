@@ -11,7 +11,7 @@ which is automatically generating :class:`pcapkit.const.ipx.socket.Socket`.
 """
 
 ###############################################################################
-# NOTE: fix duplicated name of ``socket```
+# NOTE: fix duplicated name of ``socket``
 import sys
 
 path = sys.path.pop(0)
@@ -129,8 +129,8 @@ DATA = {
     # :rfc:`1362` line 253 with "information exchange" for "protocol exchange".
     # So they are known omissions with good sourcing, not rows nobody noticed.
     # Adding them would add members to the generated file and so give up the
-    # byte-identity proof this change rests on, which makes them a follow-up
-    # rather than part of #507.
+    # byte-identity proof #507 rests on, which makes them a follow-up rather
+    # than part of it.
     #
     # Some of the rows below also depart from Novell's own wording: Novell writes
     # "Novell NetBIOS" and "Diagnostics" where this table says "NetBIOS" and

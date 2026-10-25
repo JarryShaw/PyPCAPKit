@@ -2,7 +2,7 @@
 """HIP Certificate Types
 ===========================
 
-.. module:: pcapkit.const.hip.certificate
+.. module:: pcapkit.vendor.hip.certificate
 
 This module contains the vendor crawler for **HIP Certificate Types**,
 which is automatically generating :class:`pcapkit.const.hip.certificate.Certificate`.

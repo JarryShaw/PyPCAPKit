@@ -4,7 +4,7 @@
 
 .. module:: pcapkit.vendor.hip
 
-This module contains all constant enumerations of
+This module contains all vendor crawlers of
 :class:`~pcapkit.protocols.internet.hip.HIP` implementations. Available
 vendor crawlers include:
 

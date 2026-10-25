@@ -336,7 +336,7 @@ class OptionField(ListField, Generic[_TS]):
 
     @property
     def option_padding(self) -> 'int':
-        """Length option padding data."""
+        """Length of option padding data."""
         return self._option_padding
 
     def __init__(self, length: 'int | Callable[[dict[str, Any]], int]' = lambda _: -1,
@@ -402,9 +402,11 @@ class OptionField(ListField, Generic[_TS]):
 
         Important:
             If the option list ended before the specified size limit,
-            set :attr:`self.option_padding <OptionField.option_padding>`
-            as the remaining length to the ``packet`` argument such that
-            the next fields can be aware of such informations.
+            :attr:`self.option_padding <OptionField.option_padding>` is set
+            to the remaining length, which :meth:`Schema.unpack
+            <pcapkit.protocols.schema.schema.Schema.unpack>` records in
+            ``packet`` as ``__option_padding__`` so that the next fields can
+            be aware of it.
 
         Raises:
             FieldValueError: If an option consumes nothing from ``buffer``, since
