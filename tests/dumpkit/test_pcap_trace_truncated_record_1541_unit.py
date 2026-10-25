@@ -4,9 +4,9 @@
 A record whose ``incl_len`` runs past the end of its file, or a PCAP-NG block
 whose captured length runs past the block (#1405), is kept as captured by its
 reader: the declared length stays in ``frame_info`` and the packet is the octets
-present. :class:`~pcapkit.dumpkit.pcap.PCAPIO` copied the declared length into the
-trace record header, so the trace claimed octets it did not hold -- measured on a
-record claiming ``0x7fffffff`` over 585 octets.
+present. Without the fix, :class:`~pcapkit.dumpkit.pcap.PCAPIO` copies the declared
+length into the trace record header, so the trace claims octets it does not hold --
+measured on a record claiming ``0x7fffffff`` over 585 octets.
 
 Each case traces a TCP flow whose last record is cut that way, then reads the
 trace back with :mod:`struct` alone: every record must hold exactly ``incl_len``
@@ -145,7 +145,7 @@ class TestPCAPTraceTruncatedRecord(unittest.TestCase):
             self.assertEqual(_records(file.read()), [(3, 86, b'abc'), (3, 86, b'abc'), (0, 86, b'')])
 
     def test_a_whole_record_is_traced_unchanged(self) -> None:
-        """A record the file holds whole keeps its octets, as before #1541."""
+        """A record the file holds whole keeps its octets, with or without the #1541 fix."""
         data = pcap([(SECOND + number, 0, frame) for number, frame in enumerate(_frames())])
         self.assertEqual(self.trace(data)[24:].hex(), data[24:].hex())
 

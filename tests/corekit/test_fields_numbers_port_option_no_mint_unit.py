@@ -1,21 +1,21 @@
 # -*- coding: utf-8 -*-
-"""A registry-backed ``EnumField`` subclass minted a member per unassigned value.
+"""A registry-backed ``EnumField`` subclass must not mint a member per unassigned value.
 
-GitHub issue #575. :meth:`PortEnumField.post_process
+GitHub issue #575. Without the fix, :meth:`PortEnumField.post_process
 <pcapkit.corekit.fields.numbers.PortEnumField.post_process>` (TCP, UDP,
 SCTP) and :meth:`OptionEnumField.post_process
 <pcapkit.protocols.schema.misc.pcapng.OptionEnumField.post_process>` (PCAP-NG)
-each resolved a wire value by calling their registry's ``.get()`` directly::
+each resolve a wire value by calling their registry's ``.get()`` directly::
 
     return self._namespace.get(value, proto=...)
 
-which minted a fresh member -- via :func:`aenum.extend_enum` -- for any value
+which mints a fresh member -- via :func:`aenum.extend_enum` -- for any value
 neither an existing row nor one of the registry's own documented spans
 accounts for. On ``examples/captures/http.pcap`` that is 111 calls, all from
 ephemeral TCP ports with no IANA assignment, and measured at 13-17% of
 extraction self time.
 
-Each of them now falls through to
+Each of them falls through to
 :meth:`EnumField._unregistered_member <pcapkit.corekit.fields.numbers.EnumField._unregistered_member>`
 instead of minting: an actual instance of the registry the field names --
 ``isinstance`` holds, and it renders and dispatches exactly like a declared
@@ -109,11 +109,11 @@ class PortEnumFieldBoundedFallbackTests(unittest.TestCase):
 
         54321 carries no IANA assignment on any of the three transports and
         sits in none of ``AppType._missing_``'s documented spans, so this is
-        exactly the value that used to mint ``PORT_54321_<transport>``. The
+        exactly the value that, without the fix, mints ``PORT_54321_<transport>``. The
         resolved member still carries ``.port``, ``.svc`` and ``.proto`` --
         read unconditionally by e.g. ``Transport._decode_next_layer``'s
         ``srcport.port`` -- because losing them would trade one crash for
-        another. Per the owner's ruling, it is now a real member of the
+        another. Per the owner's ruling, it is a real member of the
         registry -- ``isinstance`` holds against both the per-transport
         registry and ``AppType`` itself -- rather than some foreign stand-in,
         and two such members for the same value are distinct objects, which
@@ -179,8 +179,8 @@ class PortEnumFieldBoundedFallbackTests(unittest.TestCase):
         A direct call to ``.get()`` is different on purpose and stays that
         way: the owner's ruling and the docstring above are both explicit
         that ``get()`` is the public API and answering a caller who asked for
-        this exact value directly is defensible -- since #874 with an
-        unregistered ``unknown`` member rather than a mint -- which is also
+        this exact value directly is defensible -- with an unregistered
+        ``unknown`` member rather than a mint (#874) -- which is also
         what ``tests/const/test_const_apptype_split_unit.py`` pins for ports
         59001 and 51. So this only asserts the
         value-lookup side, never the ``.get()`` side.
@@ -220,7 +220,7 @@ class PortEnumFieldBoundedFallbackTests(unittest.TestCase):
         ``_missing_`` answers regardless of transport, so it has always
         resolved to a real, named member -- the mechanism the issue
         explicitly leaves alone, as distinct from ``get()``'s unbounded
-        fall-through this fix removes.
+        fall-through the fix removes.
 
         """
         from pcapkit.const.reg.apptype import AppType

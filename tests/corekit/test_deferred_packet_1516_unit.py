@@ -2,11 +2,9 @@
 """GitHub issue #1516: one :class:`~pcapkit.corekit.packet.DeferredPacket` for
 reassembly and flow tracing.
 
-There used to be two copies of the mixin, in
-``pcapkit/foundation/reassembly/data/data.py`` and
-``pcapkit/foundation/traceflow/data/data.py``. Their method bodies were
-AST-identical, and the one thing that differed was which module-level
-``Deferred`` the ``isinstance`` test named. The merged class takes that
+The mixin serves the models of both ``pcapkit/foundation/reassembly/data/data.py``
+and ``pcapkit/foundation/traceflow/data/data.py``, which differ only in which
+module-level ``Deferred`` the ``isinstance`` test names. The class takes that
 difference as the ``__deferred__`` hook each subclass sets, so a model resolves
 its own placeholder class and nothing else.
 

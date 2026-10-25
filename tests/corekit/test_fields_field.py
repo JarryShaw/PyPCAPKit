@@ -18,10 +18,10 @@ class FieldBaseUnpackBoundsTests(unittest.TestCase):
     ``length`` there is frequently wire-derived -- resolved by a
     ``_length_callback`` against the very packet under parse, or built by a
     schema selector from a value it just read off the wire -- and is thus
-    attacker- or corruption-controlled. Before #554,
-    ``buffer[:length].rjust(length, b'\\x00')`` zero-padded up to ``length``
-    octets regardless of how little data ``buffer`` actually held, so a
-    short, otherwise unremarkable capture could declare a multi-gigabyte
+    attacker- or corruption-controlled. Without the #554 guard,
+    ``buffer[:length].rjust(length, b'\\x00')`` zero-pads up to ``length``
+    octets regardless of how little data ``buffer`` actually holds, so a
+    short, otherwise unremarkable capture can declare a multi-gigabyte
     field and force that allocation.
 
     The fix is deliberately *not* "reject any length the buffer falls short
@@ -78,12 +78,12 @@ class FieldBaseUnpackBoundsTests(unittest.TestCase):
         by its snapshot length would start failing to parse instead of
         reporting the tail as padding. This field is nowhere near
         :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH`, so the
-        shortfall must still be padded exactly as before #554.
+        shortfall must be padded exactly as it is without #554's guard.
 
         The zeros land on the *tail*, which is where the unread octets were:
         a short read has lost the end of the buffer, not the start of it.
-        Before #604 they were placed at the front instead, which corrupted
-        the value rather than merely padding it -- see
+        Without the #604 fix they are placed at the front instead, which
+        corrupts the value rather than merely padding it -- see
         :class:`FieldBaseShortReadPaddingSideTests` below.
         """
         field = self.BytesField(length=4)
@@ -113,7 +113,7 @@ class FieldBaseUnpackBoundsTests(unittest.TestCase):
 
         # ljust() left-justifies: the one real octet stays where it was read,
         # at the front, and the padding fills the tail that was never read.
-        # Before #604 this was the other way round.
+        # Without the #604 fix this is the other way round.
         self.assertEqual(len(result), self.ceiling)
         self.assertEqual(result[:1], b'A')
         self.assertEqual(result[1:], b'\x00' * (self.ceiling - 1))
@@ -168,8 +168,8 @@ class FieldBaseUnpackBoundsTests(unittest.TestCase):
         ``length`` whatever it likes.
 
         A ~40-octet PCAP-NG Decryption Secrets Block with a bogus inner
-        length was enough to force a multi-gigabyte ``rjust()`` under the
-        unfixed code. ``length`` here is set to 16 GiB -- large enough that,
+        length is enough to force a multi-gigabyte ``rjust()`` without the
+        fix. ``length`` here is set to 16 GiB -- large enough that,
         if the guard were absent, comparing against the wrong thing, or
         otherwise not actually reached, this test would try to allocate that
         much and either hang or fail with :exc:`MemoryError` rather than
@@ -200,13 +200,13 @@ class FieldBaseCumulativePaddingBudgetTests(unittest.TestCase):
     holds many fields, so a declared length sitting just *under*
     :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH` is honoured
     however many times it is declared, and the sum has no bound at all. Measured
-    on the tree that carried only the per-field ceiling, 200 minimal PCAP-NG
+    with only the per-field ceiling in place, 200 minimal PCAP-NG
     Decryption Secrets Blocks -- 4,800 wire octets, each declaring
     ``secrets_length`` of 262,142 against two supplied octets -- retained
     **50.0 MiB**, an amplification of 10,922x per block, with the ceiling never
     firing once because every single field was within it.
 
-    :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>` now
+    :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>`
     keeps a running ledger of octets supplied against octets synthesised, and
     refuses a shortfall *past*
     :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_SHORTFALL` once the total
@@ -258,7 +258,7 @@ class FieldBaseCumulativePaddingBudgetTests(unittest.TestCase):
         # NOTE: deliberately *not* read off the module. The behavioural tests
         # below have to fail on their assertions when the budget is absent, not
         # on an :exc:`AttributeError` raised here before any of them runs -- a
-        # setup that reaches for a name the unfixed code does not have turns every
+        # setup that reaches for a name absent without the fix turns every
         # case in the class into the same uninformative error and proves nothing
         # about behaviour. Only the two cases that exist to pin the constants
         # themselves name them.
@@ -295,9 +295,9 @@ class FieldBaseCumulativePaddingBudgetTests(unittest.TestCase):
         Each declares two octets short of
         :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH` against two
         supplied octets, so #554's per-field guard is *correct* to let each one
-        through -- and before #573 all 200 went through, retaining 50.0 MiB from
-        4,800 octets of input. At least one has to be refused now, or the sum is
-        still unbounded.
+        through -- and without the #573 fix all 200 go through, retaining 50.0 MiB
+        from 4,800 octets of input. At least one has to be refused, or the sum is
+        unbounded.
         """
         _, accepted, refused = self.pad_until_refused(self.ceiling - 2, b'\xaa\xbb')
 
@@ -387,8 +387,8 @@ class FieldBaseCumulativePaddingBudgetTests(unittest.TestCase):
         with self.assertRaises(self.FieldValueError):
             self.BytesField(length=4 * 1024 * 1024).unpack(b'A', {})
 
-        # but several near-ceiling fields in a row are now affordable, where from
-        # a cold start only the first was.
+        # but after that bulk several near-ceiling fields in a row are affordable,
+        # where from a cold start only the first is.
         padded, accepted, refused = self.pad_until_refused(self.ceiling - 2,
                                                            b'\xaa\xbb', limit=4)
         self.assertEqual((accepted, refused), (4, 0))
@@ -604,7 +604,7 @@ class FieldBaseShortReadPaddingSideTests(unittest.TestCase):
     exhausting memory, and it does so silently -- no exception, no warning, just
     a plausible integer that is wrong.
 
-    Before #604 the padding was applied with ``rjust()``, which places the zeros
+    Without the fix the padding is applied with ``rjust()``, which places the zeros
     at the *front* of the buffer. That asserts that the octets which were never
     read were the *leading* ones. A short read asserts the opposite: the buffer
     ran out, so what is missing is whatever came *after* what was read. The zeros
@@ -751,9 +751,9 @@ class FieldBaseShortReadPaddingSideTests(unittest.TestCase):
         """The regression guard: nothing about a complete field may move.
 
         The padding side is only ever consulted when the buffer falls short, so a
-        field that got all its octets must answer exactly as it did before #604 --
-        for a big-endian field especially, since that is the one whose short-read
-        behaviour this change alters and whose full-read behaviour must not.
+        field that got all its octets must answer exactly as it would without the
+        #604 fix -- for a big-endian field especially, since that is the one whose
+        short-read behaviour #604 alters and whose full-read behaviour it must not.
         """
         cases = [
             (2, self.UInt16Field, 0x0102),
@@ -857,7 +857,7 @@ class FieldBaseShortReadPaddingSideTests(unittest.TestCase):
                                      data[:kept] + b'\x00' * (width - kept))
 
     def test_an_entirely_empty_buffer_still_reads_as_zero(self) -> None:
-        """The #431 invariant, which this change must not disturb.
+        """The #431 invariant, which the #604 fix must not disturb.
 
         ``OptionField.unpack`` and ``ListField.unpack`` read a fixed-width,
         few-octet field past the end of a truncated option area and need it to
@@ -865,9 +865,9 @@ class FieldBaseShortReadPaddingSideTests(unittest.TestCase):
         short by its snapshot length reads as end-of-option-list or ``Pad1``
         rather than raising. With nothing at all in the buffer the whole field is
         padding, so both ``rjust()`` and ``ljust()`` produce all zeros and the
-        answer is the same before and after #604. Asserted explicitly, because it
-        is the property a fix to the padding side could most easily have broken
-        and the one that declined #571.
+        answer is the same with or without the #604 fix. Asserted explicitly,
+        because it is the property a fix to the padding side could most easily
+        break and the one that declined #571.
         """
         for byteorder in ('big', 'little'):
             for cls in (self.UInt16Field, self.UInt32Field, self.UInt64Field):

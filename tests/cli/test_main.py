@@ -10,25 +10,24 @@ real thing runs in :mod:`tests.integration.test_cli_subprocess`.
 :data:`sys.modules` is process-global, so binding a stand-in over a real module
 name is a write that outlives the test unless something undoes it -- and these
 stand-ins are *emptier* than what they replace, which is the quiet kind. Issue
-#688: this file bound module names there -- the stand-ins above, the bare
+#688 is this file binding module names there -- the stand-ins above, the bare
 ``pcapkit.foundation`` parent they hang from, and ``pcapkit.__main__`` itself
--- and put none of them back. Pairing it with :mod:`tests.project.test_public_api`
-gave a run of ``ImportError: cannot import name 'show_flag_values' from
+-- and putting none of them back. Paired with :mod:`tests.project.test_public_api`,
+that gives a run of ``ImportError: cannot import name 'show_flag_values' from
 'pcapkit.utilities.compat'`` errors and one for ``SeekError``, because the real
-library's next import found a ``pcapkit.utilities.compat`` carrying exactly one name.
+library's next import finds a ``pcapkit.utilities.compat`` carrying exactly one name.
 
 That is the same defect as issues #660 and #674, and it is fixed the same way:
 :func:`tests._support.isolate_modules` in ``setUp``, which purges the region on
-the way in and restores it exactly on the way out. What this file used to do
-instead was roll its own purge loop, which protects this file from whatever ran
-before it and promises nothing to whatever runs after -- see
+the way in and restores it exactly on the way out. A purge loop of this file's
+own would not do: it protects this file from whatever ran before it and promises
+nothing to whatever runs after -- see
 :func:`tests._support.purge_modules` for why restoration is owed by the code that
 binds.
 
-:func:`tests.conftest.restore_module_table` masked the symptom under
-:program:`pytest` throughout, which is why it took an audit to find: it surfaces
-only under ``--noconftest``, under the stdlib :mod:`unittest` runner, or on any
-route that does not load that conftest.
+:func:`tests.conftest.restore_module_table` masks the symptom under
+:program:`pytest`: it surfaces only under ``--noconftest``, under the stdlib
+:mod:`unittest` runner, or on any route that does not load that conftest.
 :meth:`CLIMainTests.assert_module_table_restored` is checked in a cleanup
 registered *before* the isolation, so it runs after the restore and is not
 masked by that fixture -- a regression here fails under a plain
@@ -408,10 +407,10 @@ class CLIMainTests(unittest.TestCase):
         """An omitted ``-L``/``-P`` forwards :data:`None`, not a sentinel string.
 
         ``Extractor.__init__`` substitutes its own ``'none'``/``'null'`` for an
-        omitted value, so the CLI has nothing to substitute. It used to pass the
-        strings ``'None'`` and ``'null'``, which only worked because
-        ``Extractor`` happened to lowercase the former into the sentinel it
-        wanted.
+        omitted value, so the CLI has nothing to substitute. Forwarding the
+        strings ``'None'`` and ``'null'`` instead works only because
+        ``Extractor`` happens to lowercase the former into the sentinel it
+        wants.
 
         """
         emoji = types.SimpleNamespace(emojize=lambda text: text)

@@ -10,10 +10,10 @@ RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 
 #: Prefix lengths whose octet happens to be an ASCII digit, i.e. ``0x30``--``0x39``.
-#: :meth:`IPv6InterfaceField.post_process` used to read the octet as an ASCII
-#: decimal string, so these were the only prefix lengths that parsed at all --
-#: and every one of them decoded to ``prefixlen - 48``. Every other prefix length,
-#: including all the common ones, raised :exc:`ValueError`.
+#: Without the fix, :meth:`IPv6InterfaceField.post_process` reads the octet as an
+#: ASCII decimal string, so these are the only prefix lengths that parse at all --
+#: and every one of them decodes to ``prefixlen - 48``. Every other prefix length,
+#: including all the common ones, raises :exc:`ValueError`.
 ASCII_DIGIT_PREFIX_LENGTHS = tuple(range(48, 58))
 
 #: Section 4.2 of the PCAP-NG specification: ``if_IPv6addr`` is 17 octets, of
@@ -84,14 +84,14 @@ class IPAddressFieldTests(unittest.TestCase):
                 interface = ipaddress.ip_interface(f'2001:db8::1/{prefixlen}')
                 raw = field.pack(interface, {})
 
-                # the octet really is an ASCII digit, which is why these ten used
-                # to parse while every other prefix length raised
+                # the octet really is an ASCII digit, which is why, without the
+                # fix, these parse while every other prefix length raises
                 self.assertIn(raw[16:], [str(digit).encode() for digit in range(10)])
 
                 parsed = field.unpack(raw, {})
                 self.assertEqual(parsed, interface)
                 self.assertEqual(parsed.network.prefixlen, prefixlen)
-                # the old ASCII reading decoded /48../57 as /0../9
+                # without the fix, the ASCII reading decodes /48../57 as /0../9
                 self.assertNotEqual(parsed.network.prefixlen, prefixlen - 48)
 
     def test_ipv6_interface_rejects_out_of_range_prefix_length(self) -> None:
@@ -152,13 +152,13 @@ class IPAddressFieldTests(unittest.TestCase):
             IPv4InterfaceField().pre_process('2001:db8::1/64', {})
 
     def test_pre_process_malformed_value_raises_in_library_error(self) -> None:
-        """A malformed address/interface string used to let a bare
-        :exc:`ValueError` from :mod:`ipaddress` escape -- unlike the very next
-        statement in the same method, which already raised the library's own
+        """A malformed address/interface string must not let a bare
+        :exc:`ValueError` from :mod:`ipaddress` escape -- the very next
+        statement in the same method raises the library's own
         :exc:`FieldValueError` for a value that is merely the wrong IP
-        version. So ``except BaseError`` could not reliably catch a bad field
-        value: whether the exception was in-library depended on *how* the
-        value was wrong. Every public field class must raise
+        version. Otherwise ``except BaseError`` cannot reliably catch a bad
+        field value: whether the exception is in-library would depend on
+        *how* the value is wrong. Every public field class must raise
         :exc:`FieldValueError` here too, with the original :mod:`ipaddress`
         message preserved.
         """
@@ -186,7 +186,7 @@ class IPAddressFieldTests(unittest.TestCase):
 
     def test_wrong_version_message_is_not_relabelled_as_a_malformed_value(self) -> None:
         """Wrapping the conversion must not broaden into swallowing the
-        pre-existing wrong-version ``FieldValueError`` -- its message stays
+        wrong-version ``FieldValueError`` the method raises of its own -- its message stays
         the version-mismatch message, not the "invalid IP ..." message used
         for a genuinely malformed value.
         """
@@ -208,12 +208,12 @@ class IPAddressFieldTests(unittest.TestCase):
 
         :obj:`bool` is an :class:`int` subclass, and :func:`ipaddress.ip_address`/
         :func:`ipaddress.ip_interface` both treat any :class:`int` below
-        ``2**32`` as IPv4 -- so before this fix, ``True``/``False`` were
+        ``2**32`` as IPv4 -- so without the fix, ``True``/``False`` are
         silently converted to ``0.0.0.1``/``0.0.0.0`` (or the equivalent
         interface) on an IPv4-typed field, with no exception and no warning.
-        On an IPv6-typed field the same conversion happened to raise instead,
+        On an IPv6-typed field the same conversion happens to raise instead,
         because the resulting :class:`~ipaddress.IPv4Address`'s version
-        mismatched -- and that asymmetry is exactly what let this survive
+        mismatches -- and that asymmetry is exactly what let this survive
         #481, which fixed the identical mechanism at only one call site
         (``MH._make_opt_mn_id``). See #491.
 
@@ -254,9 +254,9 @@ class IPAddressFieldTests(unittest.TestCase):
     def test_ipv4_make_rejects_a_bool_address_through_the_public_api(self) -> None:
         """The corruption reported in #491, reproduced through the public API.
 
-        Before this fix, ``IPv4.make(src=True, dst=False)`` packed and
-        decoded without any exception or warning, silently corrupting the
-        addresses to ``0.0.0.1``/``0.0.0.0``. It must now raise instead.
+        Without the fix, ``IPv4.make(src=True, dst=False)`` packs and
+        decodes without any exception or warning, silently corrupting the
+        addresses to ``0.0.0.1``/``0.0.0.0``. It must raise instead.
         """
         from pcapkit.protocols.internet.ipv4 import IPv4
         from pcapkit.utilities.exceptions import BaseError
@@ -330,8 +330,8 @@ class IPAddressFieldTests(unittest.TestCase):
     def test_parse_ip_address_malformed_value_raises_in_library_error(self) -> None:
         """A malformed value must not leak :mod:`ipaddress`'s bare :exc:`ValueError`.
 
-        The construction-path callers used to let it out verbatim -- e.g.
-        ``MH._make_opt_bid(address='nonsense')`` raised a plain
+        Without the fix, the construction-path callers let it out verbatim --
+        e.g. ``MH._make_opt_bid(address='nonsense')`` raises a plain
         :exc:`ValueError`, which ``except BaseError`` cannot catch.
         """
         from pcapkit.corekit.fields.ipaddress import parse_ip_address
@@ -457,11 +457,11 @@ class IPAddressFieldTests(unittest.TestCase):
         so neither documented handler can tell them apart. This pins that, since it
         is the whole basis for leaving the two alone.
 
-        It also pins the compatibility half of #508's two deliberate behaviour
-        changes: ``_make_opt_bid(address='nonsense')`` and the HIP locator's
-        wrong-family case used to raise a **bare** :exc:`ValueError`, so they were
-        catchable by ``except ValueError`` and not by ``except BaseError``. They are
-        now catchable by both -- a widening, not a break.
+        It also pins the compatibility half of #508 for
+        ``_make_opt_bid(address='nonsense')`` and the HIP locator's wrong-family
+        case: without the fix they raise a **bare** :exc:`ValueError`, catchable
+        by ``except ValueError`` and not by ``except BaseError``. They are
+        catchable by both -- a widening, not a break.
         """
         from pcapkit.const.hip.parameter import Parameter
         from pcapkit.const.mh.mn_id_subtype import MNIDSubtype
@@ -517,8 +517,8 @@ class IPAddressFieldTests(unittest.TestCase):
         ``HIP``'s locator and ``TCP``'s Multipath ``ADD_ADDR`` address are both
         backed by a :class:`~pcapkit.corekit.fields.misc.SwitchField`, and both
         makers derive the wire form from the address family before the schema
-        exists. Measured before the fix: ``ip=True`` packed a locator of ``::1``
-        with no error at all, and ``addr=True`` gave an IPv4 ``MPTCPAddAddress``
+        exists. Without the fix, ``ip=True`` packs a locator of ``::1``
+        with no error at all, and ``addr=True`` gives an IPv4 ``MPTCPAddAddress``
         with ``address=IPv4Address('0.0.0.1')``.
 
         The ``mh`` sites are covered next to the rest of that module, in
@@ -548,46 +548,36 @@ class IPAddressFieldTests(unittest.TestCase):
                 self.assertIsInstance(context.exception, BaseError)
                 self.assertIn('must not be a bool', str(context.exception))
 
-        # the same two sites still take every legitimate value they took before.
+        # the same two sites take every legitimate value.
         #
-        # Both literals moved with #679, and in a way worth stating precisely
-        # because it is not the direction a reader of #651 would guess: the
-        # records are still **32 octets**, and only the two ``Length`` octets
-        # changed, from ``0004`` to ``0018``. Measured with ``.pack()`` on both
-        # trees rather than reasoned about -- ``f0999858e`` emits
-        # ``00c10004...00000000`` and the fix emits ``00c10018...00000000``, 32
-        # octets each. Note the argument order: the first argument is the
-        # produced octets and the second is the literal.
+        # The LOCATOR_SET record is **32 octets** with ``Length`` octets ``0018``
+        # (#679): :rfc:`7401` Section 5.2.1's ``Length`` is "length of the
+        # Contents, in bytes", so one IPv6 locator's 24-octet contents declare 24,
+        # and the padding is ``rfc_total(24) - 4 - 24`` = 4. Note the argument
+        # order: the first argument is the produced octets and the second is the
+        # literal.
         #
-        # ``LOCATOR_SET`` was the one parameter #651 and #664 left on the old
-        # padding expression, because two defects in it cancelled. Its ``len``
-        # was ``sum(Locator.len)`` -- 4-octet units, where :rfc:`7401`
-        # Section 5.2.1's ``Length`` is "length of the Contents, in bytes" -- so
-        # it declared ``4n`` for a ``24n``-octet contents; and its padding
-        # callback read the nested ``Locator.len`` instead of the parameter's,
-        # because ``ListField`` packs each ``Locator`` into the shared packet
-        # context and ``padding`` is evaluated after the list. That shadowed
-        # value is 4 for any IPv6 locator, so the old expression appended exactly
-        # four octets at every count: ``4 + 24n + 4 = 24n + 8``, which is also
-        # the RFC total for a byte-count ``Length`` of ``24n``. Hence 32 octets
-        # here before and after, by two wrongs then and by the arithmetic now.
-        #
-        # #679 fixed the pair together. ``Length`` is now the byte count 24, the
-        # padding is ``rfc_total(24) - 4 - 24`` = 4, and the total is the same 32
-        # -- while the shapes the cancellation never covered stopped being
-        # wrong: an empty set went from 4 octets to the 8 the RFC requires, one
-        # SPI-bearing locator from 35 to 32, two from 63 to 64, and a mixed pair
-        # from 59 or 60 to 56. Those live in
+        # Without the fix, two defects cancel at this shape. ``len`` is
+        # ``sum(Locator.len)`` -- 4-octet units, declaring ``4n`` for a
+        # ``24n``-octet contents -- and the padding callback reads the nested
+        # ``Locator.len`` instead of the parameter's, because ``ListField`` packs
+        # each ``Locator`` into the shared packet context and ``padding`` is
+        # evaluated after the list. That shadowed value is 4 for any IPv6 locator,
+        # so without the fix the expression appends exactly four octets at every count:
+        # ``4 + 24n + 4 = 24n + 8``, which is also the RFC total for a byte-count
+        # ``Length`` of ``24n``. So this record is 32 octets either way, and only
+        # the ``Length`` octets (``0004`` without the fix) tell the two apart. The shapes
+        # the cancellation does not cover -- an empty set, SPI-bearing locators, a
+        # mixed pair -- live in
         # :mod:`tests.protocols.internet.test_hip_locator_set_length_unit`, which
         # sweeps shapes rather than counts for exactly that reason.
         #
         # They pin exact octets rather than a length or a prefix, deliberately.
         # Exact octets are the whole subject of #651, and pcapkit round-trips its
-        # own output whatever the padding rule says -- writer and reader shared the
-        # error -- so a comparison that tolerated trailing bytes would have gone on
-        # passing through the defect and through the fix alike. For the same reason
-        # these stay 32 octets: a shorter pin here would silently bless a
-        # four-octet shortfall.
+        # own output whatever the padding rule says -- writer and reader share the
+        # error -- so a comparison that tolerated trailing bytes would pass through
+        # the defect and through the fix alike. For the same reason these stay 32
+        # octets: a shorter pin here would silently bless a four-octet shortfall.
         self.assertEqual(
             hip._make_param_locator_set(  # type: ignore[arg-type]
                 Parameter.LOCATOR_SET, version=2,

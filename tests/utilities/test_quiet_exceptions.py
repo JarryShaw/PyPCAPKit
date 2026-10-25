@@ -1,18 +1,18 @@
 """Regression tests for #362 -- ``quiet=True`` must mean *emit nothing*.
 
-``BaseError.__init__`` used to treat ``quiet`` as "log at ``ERROR`` instead of
-``CRITICAL``", so every absent-key lookup through
+Without the fix, ``BaseError.__init__`` treats ``quiet`` as "log at ``ERROR``
+instead of ``CRITICAL``", so every absent-key lookup through
 :meth:`MultiDict.get <pcapkit.corekit.multidict.MultiDict.get>` -- which raises
 :exc:`~pcapkit.utilities.exceptions.MissingKeyError` with ``quiet=True`` and
-catches it immediately -- put an ``ERROR`` record on :data:`sys.stderr`. Parsing a
-capture with unfragmented IPv6 and reassembly enabled produced one such record
+catches it immediately -- puts an ``ERROR`` record on :data:`sys.stderr`. Parsing
+a capture with unfragmented IPv6 and reassembly enabled produces one such record
 per frame, for what the calling code itself documents as the ordinary case.
 
-The same constructor also set :data:`sys.tracebacklimit` to ``0`` on both
-branches, so an absent-key ``.get()`` truncated the tracebacks of entirely
-unrelated exceptions for the rest of the process. ``quiet=True`` now means no log
-record on any channel and no process-global side effect; a loud error is
-unchanged.
+Without the fix, the constructor also sets :data:`sys.tracebacklimit` to ``0`` on both
+branches, so an absent-key ``.get()`` truncates the tracebacks of entirely
+unrelated exceptions for the rest of the process. ``quiet=True`` means no log
+record on any channel and no process-global side effect; a loud error logs at
+``CRITICAL``.
 
 """
 from __future__ import annotations
@@ -71,7 +71,7 @@ class QuietExceptionTests(unittest.TestCase):
                 del sys.tracebacklimit
         else:
             sys.tracebacklimit = self._saved_tracebacklimit
-        # A loud error constructed by any test below now installs an exception
+        # A loud error constructed by any test below installs an exception
         # hook (see tests/utilities/test_exceptions_excepthook.py) rather than
         # setting sys.tracebacklimit -- so this has to be restored too.
         sys.excepthook = self._saved_excepthook
@@ -208,12 +208,12 @@ class QuietExceptionTests(unittest.TestCase):
         self.assertEqual(recorder.messages, [('CRITICAL', 'StreamEOFError: boom')])
 
     def test_loud_error_leaves_tracebacklimit_unset_and_installs_a_hook(self) -> None:
-        """The feature a loud error provides is unchanged; the mechanism is not.
+        """A loud error shortens its own printing without touching the global.
 
-        A loud error used to shorten its own printing by setting
-        ``sys.tracebacklimit = 0`` -- process-wide, for every exception, for the
-        rest of the process, which is the #719 defect. It now installs an
-        exception hook instead, which only shortens the printing of a
+        Shortening it by setting ``sys.tracebacklimit = 0`` -- process-wide, for
+        every exception, for the rest of the process -- is the #719 defect. A
+        loud error installs an exception hook instead, which only shortens the
+        printing of a
         :class:`~pcapkit.utilities.exceptions.BaseError` itself; see
         ``tests/utilities/test_exceptions_excepthook.py`` for what that hook
         actually prints, end to end.

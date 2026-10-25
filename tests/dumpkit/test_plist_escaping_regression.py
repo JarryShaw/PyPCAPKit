@@ -4,16 +4,16 @@
 :file:`tests/dumpkit/test_common_unit.py` pins what
 :meth:`~pcapkit.dumpkit.common.make_dumper.DictDumper.object_hook` returns. This
 module pins the only thing that actually matters about it -- that the file on
-disk parses -- against the fixture that used to prove it did not.
+disk parses -- against a fixture that, without the fix, proves it does not.
 
 :file:`examples/captures/test.pcapng` carries a decryption secrets block whose
 TLS key log entries are keyed by a raw :class:`bytes` client random
 (:meth:`~pcapkit.protocols.schema.misc.pcapng.TLSKeyLog.post_process`), so the
 report's key is a ``bytes`` repr holding ``&``, ``<`` and ``>``. GitHub issue
 #772 and JarryShaw/DictDumper#125 are the two halves of that: ``dictdumper``
-interpolates a mapping key into its markup without escaping it, and until the
-in-repo half landed the ``plist`` and ``xml`` reports of this fixture stopped
-parsing at line 1517 of 1958 with ``not well-formed (invalid token)``.
+interpolates a mapping key into its markup without escaping it, and without the
+in-repo half the ``plist`` and ``xml`` reports of this fixture stop parsing at
+line 1517 of 1958 with ``not well-formed (invalid token)``.
 
 This module is fixture-tier by its ``_regression.py`` name -- ``test.pcapng`` is
 generated rather than committed, so a unit-tier module may not read it (see
@@ -136,8 +136,8 @@ class PlistKeyEscapingTests(unittest.TestCase):
 
         This fixture carries three undeclared PCAP-NG option types, each of which
         reaches the writer as a mapping key rendered
-        ``OptionType::<unassigned> [opt_unknown [N]]`` -- #771's case, and now the
-        same escaping as every other key rather than a special case beside it.
+        ``OptionType::<unassigned> [opt_unknown [N]]`` -- #771's case, escaped the
+        same way as every other key rather than as a special case beside it.
         ``&amp;lt;`` anywhere in the report is what a second pass over an
         already-escaped key would leave behind, so it is what this looks for.
 

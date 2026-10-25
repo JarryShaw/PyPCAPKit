@@ -14,44 +14,40 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 class NestedPacketContextSemanticsTests(unittest.TestCase):
     """The packet context a nested schema's field callbacks see -- issue #445.
 
-    ``SchemaField.pack``/``unpack`` used to hand a nested schema a nested
-    context whose *only* content was ``{'__packet__': packet}``: a name the
-    nested schema declares itself resolves normally, but a name it does not
+    Without the fix, ``SchemaField.pack``/``unpack`` hand a nested schema a
+    nested context whose *only* content is ``{'__packet__': packet}``: a name
+    the nested schema declares itself resolves normally, but a name it does not
     declare -- which every top-level schema writes as ``pkt['length']`` and
-    which a nested one inherited unmodified -- raised :exc:`KeyError` instead
+    which a nested one inherits unmodified -- raises :exc:`KeyError` instead
     of reaching the enclosing schema. ``pcapkit.corekit.fields.misc.
-    nested_packet_context`` replaces that literal with a plain :class:`dict`
-    holding a shallow copy of the enclosing schema's own names, so a name the
-    nested schema does not declare resolves to the enclosing schema's value,
+    nested_packet_context`` builds a plain :class:`dict` holding a shallow
+    copy of the enclosing schema's own names, so a name the nested schema
+    does not declare resolves to the enclosing schema's value,
     while ``__packet__`` keeps naming the enclosing mapping explicitly.
 
     :meth:`test_nested_schema_reads_enclosing_field_by_name_and_does_not_leak_writes`
-    is the load-bearing case: it fails with the recorded ``KeyError`` before
-    the fix and passes after, and in the same pass checks that the mapping
+    is the load-bearing case: it fails with the recorded ``KeyError`` without
+    the fix and passes with it, and in the same pass checks that the mapping
     does not confuse a name the nested schema shadows with the enclosing
     schema's own, and that nothing the nested schema writes through the
     mapping is ever written back to the enclosing schema's own data.
 
-    Intermediate versions of this fix returned a :class:`collections.ChainMap`
-    and then a hand-written :class:`dict` subclass, the latter adopted when the
-    ``ChainMap`` was suspected of corrupting a shared :class:`~abc.ABCMeta`
-    cache on CPython <= 3.10 (issue #439) -- a suspicion that is probably wrong
-    but is no longer decidable, since #439's direct fix removed the mechanism;
-    see :func:`pcapkit.corekit.fields.misc.nested_packet_context` for why it is
-    recorded there as two measurements that do not fully reconcile rather than
-    as a settled reversal.
-
-    Both are retired. What the plain :class:`dict` settles that neither
-    predecessor did: the subclass's own ``.setdefault()`` bypassed the fallback
+    A :class:`collections.ChainMap` or a hand-written :class:`dict` subclass
+    would not do. The subclass's own ``.setdefault()`` bypasses the fallback
     exactly as :class:`dict`'s built-in one does, silently inserting a name
-    locally instead of honouring what the enclosing schema already had for it,
-    and its ``__eq__`` compared only its own storage; the ``ChainMap`` got both
-    right by delegation but needed a :func:`~typing.cast` at the call site,
+    locally instead of honouring what the enclosing schema already has for it,
+    and its ``__eq__`` compares only its own storage; the ``ChainMap`` gets both
+    right by delegation but needs a :func:`~typing.cast` at the call site,
     since it does not satisfy ``Schema.pack``'s ``dict[str, Any]`` annotation.
-    A copy needs neither a cast nor an override -- every operation is
-    :class:`dict`'s own.
+    (A ``ChainMap`` was also suspected of corrupting a shared
+    :class:`~abc.ABCMeta` cache on CPython <= 3.10, issue #439 -- a suspicion
+    that is probably wrong but not decidable, since #439's direct fix removed
+    the mechanism; see :func:`pcapkit.corekit.fields.misc.nested_packet_context`
+    for why it is recorded there as two measurements that do not fully
+    reconcile rather than as a settled reversal.) A copy needs neither a cast
+    nor an override -- every operation is :class:`dict`'s own.
     :meth:`test_nested_schema_reads_enclosing_field_by_name_and_does_not_leak_writes`
-    pins the behaviour that was the gap (``setdefault`` on a name absent
+    pins the behaviour that is the gap (``setdefault`` on a name absent
     locally but present in the parent returns the parent's value rather than
     inserting a new one), which is issue #474.
 
@@ -179,11 +175,10 @@ class NestedPacketContextSemanticsTests(unittest.TestCase):
     def test_pcapng_byteorder_consumer_still_works_with_both_shapes(self) -> None:
         """The one existing, hand-rolled ``__packet__`` fallback is unaffected.
 
-        ``packet_byteorder`` (:mod:`pcapkit.corekit.fields.byteorder`)
-        is called both with a plain dict built by hand -- as several tests and
+        :func:`~pcapkit.corekit.fields.byteorder.packet_byteorder` is called
+        both with a plain dict built by hand -- as several tests and
         :func:`~pcapkit.foundation.engines.pcapng` construct -- and with what
-        ``SchemaField`` actually builds. Both must keep working, and
-        neither is expected to change: the site already implements the
+        ``SchemaField`` actually builds. Both must work: the site implements the
         fallback itself and does not route through
         :func:`~pcapkit.corekit.fields.misc.nested_packet_context`.
 
@@ -195,7 +190,7 @@ class NestedPacketContextSemanticsTests(unittest.TestCase):
 
         # Hand-built, the shape every existing caller uses.
         self.assertEqual(packet_byteorder({'__packet__': outer}), 'little')
-        # What SchemaField hands a real nested schema now.
+        # What SchemaField hands a real nested schema.
         self.assertEqual(packet_byteorder(nested_packet_context(outer)), 'little')
         # No enclosing packet at all -- the top-level case.
         self.assertEqual(packet_byteorder({}), sys.byteorder)

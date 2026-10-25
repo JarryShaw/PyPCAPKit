@@ -2,8 +2,8 @@
 """Every value of a repeated field reaches the ``json``, ``plist`` and ``tree`` dumps.
 
 GitHub issue #1484. An IPv6 packet carrying two Destination Options headers
-holds both under the one ``opts`` key, and every dump held only the first.
-Each dump now writes the field as the list of both headers, in wire order,
+holds both under the one ``opts`` key, and without the fix every dump holds only
+the first. Each dump writes the field as the list of both headers, in wire order,
 while a field held once is written as its value.
 
 Every case builds its input in a temporary directory, and reads no capture.

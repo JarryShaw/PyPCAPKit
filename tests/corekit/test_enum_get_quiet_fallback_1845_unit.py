@@ -241,7 +241,7 @@ class QuietRaiseTests(_HookGuard):
 
 
 class LoudPathTests(_HookGuard):
-    """What stays loud. These pass before the fix too: they guard against a fix
+    """What stays loud. These pass without the fix too: they guard against a fix
     that quiets more than ``get``'s own lookup miss."""
 
     def test_register_is_loud(self) -> 'None':

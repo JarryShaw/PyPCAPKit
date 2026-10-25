@@ -1,22 +1,22 @@
 """Regression tests for #364 -- constructing a pcapkit warning must not touch
 the process-global :data:`warnings.filters`.
 
-``BaseWarning.__init__`` used to call ``warnings.simplefilter('ignore',
-type(self))`` outside development mode. That inserted an entry at index 0 of the
+Without the fix, ``BaseWarning.__init__`` calls ``warnings.simplefilter('ignore',
+type(self))`` outside development mode. That inserts an entry at index 0 of the
 filter list -- *ahead* of everything the interpreter, :option:`-W` and the host
-application had put there -- and never removed it. Two consequences reached code
+application have put there -- and never removes it. Two consequences reach code
 that has nothing to do with :mod:`pcapkit`:
 
-1. the application's own configuration for the category was overridden, so
-   ``-W error`` and a programmatic :func:`warnings.simplefilter` were both
+1. the application's own configuration for the category is overridden, so
+   ``-W error`` and a programmatic :func:`warnings.simplefilter` are both
    defeated;
 2. :func:`warnings.simplefilter` calls ``warnings._filters_mutated()``, which
    invalidates every module's ``__warningregistry__``, so an unrelated
-   once-per-location warning was reported a second time.
+   once-per-location warning is reported a second time.
 
-Every test here forces ``PCAPKIT_DEVMODE=0``, because the defect only reproduced
-outside development mode -- in development mode the constructor logged instead of
-filtering, and these assertions would pass against the unfixed code.
+Every test here forces ``PCAPKIT_DEVMODE=0``, because the defect only reproduces
+outside development mode -- in development mode the constructor without the fix
+logs instead of filtering, and these assertions would pass without the fix.
 
 """
 from __future__ import annotations
@@ -80,8 +80,8 @@ class WarningFilterTests(unittest.TestCase):
                 category('just constructing the object')
 
             self.assertEqual(pywarnings.filters, snapshot)
-            # Called out separately: index 0 is the slot `simplefilter` used to
-            # take over, and the one that decides which action wins.
+            # Called out separately: index 0 is the slot the #364 defect's
+            # `simplefilter` takes over, and the one that decides which action wins.
             self.assertEqual(pywarnings.filters[0], snapshot[0])
             self.assertEqual(len(pywarnings.filters), len(snapshot))
 
@@ -101,7 +101,7 @@ class WarningFilterTests(unittest.TestCase):
         """``simplefilter('error')`` must turn a pcapkit warning into an error.
 
         This is the programmatic equivalent of ``python -W error``, which the
-        index-0 override used to defeat.
+        #364 defect's index-0 override defeats.
 
         """
         with capture(self.logger):
@@ -113,7 +113,7 @@ class WarningFilterTests(unittest.TestCase):
                     self.warnings.warn('a complaint', self.warnings.SchemaWarning, stacklevel=1)
 
     def test_application_can_still_silence_pcapkit_warnings(self) -> None:
-        """The suppression pcapkit used to impose must remain available to the caller."""
+        """Suppressing pcapkit warnings is available to the application itself."""
         with capture(self.logger):
             with pywarnings.catch_warnings(record=True) as records:
                 pywarnings.resetwarnings()

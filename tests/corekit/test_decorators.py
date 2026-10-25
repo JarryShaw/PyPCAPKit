@@ -31,11 +31,9 @@ class DecoratorTests(unittest.TestCase):
         ``StructError('unexpected eof', eof=True)`` does not pass ``quiet=True``,
         for one -- and a loud error outside development mode installs
         :mod:`pcapkit.utilities.exceptions`'s own exception hook on first use
-        (GitHub issue #719). This file had no ``tearDown`` before that issue and
-        never needed one: the equivalent side effect at the time,
-        ``sys.tracebacklimit = 0``, was already left unrestored, corrupting
-        every test that ran afterwards in the same process -- the #981 shape,
-        just not previously visible as a failure here. Addressed the way
+        (GitHub issue #719). Left unrestored, that process-global corrupts every
+        test that runs afterwards in the same process -- the #981 shape, whether
+        or not it shows as a failure here. It is restored the way
         ``isolate_modules`` addresses its own restore: via ``addCleanup``, so it
         still runs if the rest of ``setUp`` raises partway through.
 
@@ -131,9 +129,9 @@ class DecoratorTests(unittest.TestCase):
 
         Shared by the five call-shape tests below, one per row of `#444
         <https://github.com/JarryShaw/PyPCAPKit/issues/444>`__'s reproduction
-        table: ``prepare`` used to subscript ``args[2]``/``args[3]``
-        unconditionally, so only the three-positional shape worked and every
-        shorter or keyword call raised ``IndexError`` instead of falling back
+        table: without the fix, ``prepare`` subscripts ``args[2]``/``args[3]``
+        unconditionally, so only the three-positional shape works and every
+        shorter or keyword call raises ``IndexError`` instead of falling back
         to the documented ``length=None, packet=None`` defaults.
 
         """
@@ -187,20 +185,20 @@ class DecoratorTests(unittest.TestCase):
         self._assert_call_shape_result(DemoSchema.unpack(b'payload', length=7, packet={}))
 
     def test_prepare_raises_typeerror_for_extra_positional_and_keyword_arguments(self) -> None:
-        """Extras used to vanish silently instead of being forwarded; see #454.
+        """Extras raise :exc:`TypeError` rather than vanishing silently; see #454.
 
-        ``prepare``'s own docstring promised the decorated function receives
-        ``*args, **kwargs``, but the wrapper never populated either --
-        reproduced from the issue::
+        Without the fix, ``prepare``'s own docstring promises the decorated
+        function receives ``*args, **kwargs``, but the wrapper populates neither
+        -- reproduced from the issue::
 
             Probe.unpack(b'\\x07\\x08', 2, {}, 'EXTRA_POSITIONAL', extra_kw='EXTRA_KW')
             -> a=7 b=8      # both extras silently gone, no error
 
-        The chosen fix removes the promise (nothing in the tree ever passed
-        extras, and ``@prepare`` decorates exactly one function, whose real
-        signature never had room for them) and rejects extras instead of
-        forwarding them, so a misspelled or unsupported argument is a
-        ``TypeError`` rather than a parse that silently ignored it.
+        ``prepare`` makes no such promise (nothing in the tree passes extras, and
+        the real signature of the function ``@prepare`` decorates has no room for
+        them) and rejects extras instead of forwarding them, so a misspelled or
+        unsupported argument is a ``TypeError`` rather than a parse that silently
+        ignores it.
 
         """
         DemoSchema = self._demo_schema_for_call_shapes()
@@ -211,11 +209,11 @@ class DecoratorTests(unittest.TestCase):
     def test_prepare_raises_typeerror_for_length_given_both_positionally_and_by_keyword(self) -> None:
         """The narrower case #454 calls out.
 
-        Passing ``length`` both positionally and by keyword used to silently
-        keep the positional value and drop the keyword one -- the keyword
-        never reached ``kwargs.pop``, since that branch only runs when the
-        positional slot was *not* supplied. It is now a caller error like any
-        other unconsumed argument.
+        Passing ``length`` both positionally and by keyword is a caller error
+        like any other unconsumed argument. Without the fix, the positional
+        value is silently kept and the keyword one dropped -- the keyword never
+        reaches ``kwargs.pop``, since that branch only runs when the positional
+        slot is *not* supplied.
 
         """
         DemoSchema = self._demo_schema_for_call_shapes()
@@ -241,13 +239,13 @@ class DecoratorTests(unittest.TestCase):
             DemoSchema.unpack(b'', None, None)
 
     def test_prepare_raises_stream_eof_error_not_a_bare_eof_error(self) -> None:
-        """The genuinely-exhausted case now raises an in-library exception.
+        """The genuinely-exhausted case raises an in-library exception.
 
-        A caller could not previously tell a truncated capture apart from any
-        other ``EOFError``. ``StreamEOFError`` still *is* an ``EOFError`` --
-        so ``pcapkit.foundation.extraction.Extractor``'s existing ``except
-        (EOFError, StopIteration)`` keeps working unchanged -- but it can now
-        be caught specifically via
+        That lets a caller tell a truncated capture apart from any other
+        ``EOFError``. ``StreamEOFError`` *is* an ``EOFError`` -- so
+        ``pcapkit.foundation.extraction.Extractor``'s ``except
+        (EOFError, StopIteration)`` catches it -- but it can also be caught
+        specifically via
         :class:`pcapkit.utilities.exceptions.StreamEOFError`.
 
         """
@@ -299,7 +297,7 @@ class DecoratorTests(unittest.TestCase):
             class Empty(Schema):
                 pass
             Empty.unpack(b'', 0, {})
-            -> EOFError: EOFError()     # before the fix
+            -> EOFError: EOFError()     # without the fix
 
         Distinguishing this from the truncated-stream case above is what
         ``length is not None`` (a *declared* length, even zero) checks for.
@@ -333,12 +331,12 @@ class DecoratorTests(unittest.TestCase):
 
         ``Schema.unpack`` clears ``__updated__`` before returning, but
         ``post_process`` runs after it and every field it assigns sets the flag
-        again. The schema was therefore left dirty, and the next
-        ``bytes(schema)`` re-packed it -- which calls ``post_process`` a second
+        again. Without the fix the schema is therefore left dirty, and the next
+        ``bytes(schema)`` re-packs it -- which calls ``post_process`` a second
         time with a packet context rebuilt from the schema's own fields, so any
-        value ``post_process`` had derived from the *enclosing* layer's context
-        was overwritten with the fallback. ``Schema.pack`` clears the flag after
-        ``post_process``, and this asserts the unpacking path now matches it.
+        value ``post_process`` derived from the *enclosing* layer's context is
+        overwritten with the fallback. ``Schema.pack`` clears the flag after
+        ``post_process``, and this asserts the unpacking path matches it.
 
         """
         class DemoSchema:
@@ -496,8 +494,8 @@ class DecoratorTests(unittest.TestCase):
         so neither header schema has a ``payload`` field: reaching for the schema
         raises ``ProtocolUnbound('unknown field: payload')`` *from the recovery
         path*, turning a next-layer failure that should have degraded to
-        :class:`Raw` into a crash. It was unreachable until something was
-        registered on an SCTP payload protocol identifier, which NGAP now is.
+        :class:`Raw` into a crash. It is reachable once something is registered
+        on an SCTP payload protocol identifier, as NGAP is.
 
         """
         exceptions = self.exceptions

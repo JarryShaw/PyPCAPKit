@@ -19,8 +19,8 @@ copied or what the copy contains -- only the redundant lookup is removed. This
 module proves that: every one of those call sites reaches
 :meth:`FieldBase.__copy__` without ever calling :func:`copy.copy`.
 
-On the tree before this fix, every test below fails: each ``__call__``
-listed in the issue called :func:`copy.copy` exactly once (twice for
+Without the fix, every test below fails: each ``__call__``
+listed in the issue calls :func:`copy.copy` exactly once (twice for
 :class:`~pcapkit.corekit.fields.misc.ConditionalField`,
 :class:`~pcapkit.corekit.fields.misc.SwitchField` and
 :class:`~pcapkit.corekit.fields.misc.ForwardMatchField`, whose ``__call__``
@@ -71,8 +71,8 @@ class FieldCallUsesCopyDunderDirectlyTests(unittest.TestCase):
             field: A field instance built with whatever a real call site would
                 give it -- a real callback default, a real selector, etc. --
                 rather than a bare :class:`~unittest.mock.Mock`, so this
-                exercises the exact ``__call__`` bodies :func:`copy.copy(self)
-                <copy.copy>` used to run through.
+                exercises the exact ``__call__`` bodies that would otherwise
+                run through :func:`copy.copy(self) <copy.copy>`.
 
         """
         with mock.patch('copy.copy', side_effect=copy.copy) as copy_copy, \

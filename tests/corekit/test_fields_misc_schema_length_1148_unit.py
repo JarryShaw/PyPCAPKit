@@ -2,14 +2,14 @@
 """A length-less ``SchemaField`` sizes its nested schema by what is left to read.
 
 GitHub issue #1148. ``SchemaField``'s default length is ``-1``, meaning "not
-declared", and :meth:`SchemaField.unpack
-<pcapkit.corekit.fields.misc.SchemaField.unpack>` passed that ``-1`` straight on
+declared", and without the fix :meth:`SchemaField.unpack
+<pcapkit.corekit.fields.misc.SchemaField.unpack>` passes that ``-1`` straight on
 as the nested schema's length. The nested schema's ``__length__`` therefore
-started negative, and every sub-field it read warned ``packet length < 0`` --
+starts negative, and every sub-field it reads warns ``packet length < 0`` --
 six warnings per HIP ``Locator`` and per MH ``CGAParameter``, on input that
 parses correctly.
 
-The nested schema is now told the true remainder of the buffer. A remainder of
+The nested schema is told the true remainder of the buffer. A remainder of
 zero is passed as a declared length, so a truncated item is still reported as
 malformed data rather than as the quiet end-of-stream signal that
 :func:`~pcapkit.corekit.decorators.prepare` raises for a derived zero.

@@ -1,12 +1,12 @@
 """A :class:`~pcapkit.corekit.fields.numbers.NumberField` whose ``length`` is a callable.
 
-GitHub issue #591. ``_need_process`` used to be a *latch*: ``build_template``
-raised it :data:`True` in its fall-through branch and nothing ever put it back.
-A callable ``length`` is a placeholder of ``-1`` until
+GitHub issue #591. Without the fix ``_need_process`` is a *latch*:
+``build_template`` raises it :data:`True` in its fall-through branch and nothing
+ever puts it back. A callable ``length`` is a placeholder of ``-1`` until
 :meth:`~pcapkit.corekit.fields.numbers.NumberField.__call__` resolves it, ``-1``
-takes that fall-through branch, and the flag then outlived the very rebuild that
-installed the real width. ``pre_process`` consequently handed :obj:`bytes` to a
-template that had become ``>Q``, and :func:`struct.pack` refused it with
+takes that fall-through branch, and the flag then outlives the very rebuild that
+installs the real width. ``pre_process`` consequently hands :obj:`bytes` to a
+template that has become ``>Q``, and :func:`struct.pack` refuses it with
 ``required argument is not an integer``.
 
 Every test here is written as a **comparison against the same width supplied
@@ -80,8 +80,8 @@ class CallableLengthTests(unittest.TestCase):
 
         Identical resolved length, identical template; the *only* difference is
         whether ``length`` arrived as an :obj:`int` or as a callable returning
-        that same :obj:`int`. Before the fix the static column packed and the
-        callable column raised, for all four native widths.
+        that same :obj:`int`. Without the fix the static column packs and the
+        callable column raises, for every native width.
 
         """
         from pcapkit.corekit.fields.numbers import NumberField
@@ -128,7 +128,7 @@ class CallableLengthTests(unittest.TestCase):
         ``build_template`` takes the same fall-through branch for any width
         outside ``{1, 2, 4, 8}`` as it does for the ``-1`` placeholder. So
         clearing the flag whenever a callable is resolved -- rather than
-        recomputing it from the width now in force -- would have broken every
+        recomputing it from the width now in force -- would break every
         one of these, which genuinely do need :meth:`int.to_bytes`.
 
         """
@@ -172,8 +172,8 @@ class CallableLengthTests(unittest.TestCase):
 
         While ``length`` is still the ``-1`` placeholder there is no width to
         pack to, so :data:`True` is the correct answer for it -- and it is the
-        answer the unresolved field keeps. What changed is that the answer is
-        no longer *sticky*.
+        answer the unresolved field keeps. What matters is that the answer is
+        not *sticky*.
 
         """
         from pcapkit.corekit.fields.numbers import NumberField

@@ -6,12 +6,13 @@ here stands in for GraalPy's behaviour and checks the module does not lean on
 CPython's:
 
 * :class:`io.BytesIO` ``read``, ``read1`` and ``readline`` from the start of an
-  exported buffer can hand back :obj:`bytes` sharing its memory, so
-  :class:`~pcapkit.corekit.io.SeekableReader` returned octets that its next write
-  to the buffer then changed.
+  exported buffer can hand back :obj:`bytes` sharing its memory, so without the
+  fix :class:`~pcapkit.corekit.io.SeekableReader` returns octets that its next
+  write to the buffer then changes.
 * ``dict.__init__`` and ``dict.update`` given ``(key, value)`` pairs store them
-  through a subclass's ``__setitem__``, so ``MultiDict(MultiDict)``, and a
-  ``MultiDict`` restored from pairs of its state, wrapped every value list in another.
+  through a subclass's ``__setitem__``, so without the fix ``MultiDict(MultiDict)``,
+  and a ``MultiDict`` restored from pairs of its state, wrap every value list in
+  another.
 
 On GraalPy itself, ``test_end_of_stream_reads_ahead_only_as_far_as_asked`` in
 ``test_io_seekable_reader_short_reads_1586_unit.py`` and the ``MultiDict`` copies

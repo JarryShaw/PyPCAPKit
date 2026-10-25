@@ -221,10 +221,9 @@ class SwitchFieldBoolDispatchTests(unittest.TestCase):
         Every such branch, across the protocol modules -- not just
         :mod:`~pcapkit.protocols.schema.internet.mh`'s -- because the claim
         being pinned is about ``SwitchField`` in general, so a fix scoped to one
-        module would not settle it. Measured on ``main`` at ``27bb315d5``, i.e.
-        *before* #508's fix: every probe (each branch, with ``True`` and with
-        ``False``) raised, and none was laundered. That is what makes a
-        guard in ``SwitchField`` dead code.
+        module would not settle it. Without #508's fix, every probe (each
+        branch, with ``True`` and with ``False``) raises, and none is
+        laundered. That is what makes a guard in ``SwitchField`` dead code.
         """
         from pcapkit.corekit.fields.misc import SwitchField
         from pcapkit.utilities.exceptions import BaseError, FieldValueError

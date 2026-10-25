@@ -1,13 +1,13 @@
-"""``pre_process``'s width repair sized values with floor division.
+"""``pre_process``'s width repair must not size values with floor division.
 
 GitHub issue #599. When a :class:`~pcapkit.corekit.fields.numbers.NumberField`
 is packed while ``length`` is still the ``-1`` placeholder, ``pre_process``
-derives a width from the value itself. It derived it with::
+derives a width from the value itself. Without the fix it derives it with::
 
     self._length = math.ceil(value.bit_length() // 8)
 
 :func:`math.ceil` on an :obj:`int` is a no-op -- ``//`` has already floored it --
-so the expression was plain floor division and the width came out one octet short
+so the expression is plain floor division and the width comes out one octet short
 for every value whose bit length is *not* an exact multiple of eight. The
 intended expression is ``math.ceil(value.bit_length() / 8)``.
 
@@ -16,20 +16,20 @@ Two things about this suite are deliberate.
 **The boundaries are tested one method each, not one parametrised sweep.** The
 defect is a pattern rather than an instance -- it fails at *every* octet boundary
 -- so a single case would pass against a fix that special-cased the reported
-width. Standalone methods also keep each failure individually visible: the
-pytest in use has no ``pytest-subtests``, so a failing :meth:`~unittest.TestCase
-.subTest` still leaves its parent reported as passed.
+width. Standalone methods also keep each failure attached to its own test:
+pytest reports and counts a failing :meth:`~unittest.TestCase.subTest` as a
+``SUBFAILED`` entry, but counts the parent method itself as passed.
 
-**Each boundary is asserted as a pair.** The value *below* the boundary already
-packed correctly before the fix and must go on doing so; only the value *above*
-it was broken. Asserting the pair is what distinguishes a fix from a width that
+**Each boundary is asserted as a pair.** The value *below* the boundary packs
+correctly with or without the fix and must go on doing so; only the value *above*
+it breaks. Asserting the pair is what distinguishes a fix from a width that
 has merely been shifted by one in the other direction.
 
-The failure was not a single exception type, and this suite deliberately does not
-assert one. Since #591's fix, ``_need_process`` is recomputed from the width in
-force, so a mis-sized width that lands on 1, 2 or 4 octets now comes back from
+The failure is not a single exception type, and this suite deliberately does not
+assert one. ``_need_process`` is recomputed from the width in force (#591), so
+without the fix a mis-sized width that lands on 1, 2 or 4 octets comes back from
 :func:`struct.pack` as ``struct.error: 'B' format requires 0 <= number <= 255``
-while a mis-sized 3 octets still comes back from :meth:`int.to_bytes` as
+while a mis-sized 3 octets comes back from :meth:`int.to_bytes` as
 ``OverflowError: int too big to convert``. What these tests pin instead is the
 width and the octets -- the thing that is actually wrong.
 """
@@ -50,8 +50,8 @@ RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 
 #: The reported table, as ``(value, octets the value needs)``. The first of each
-#: pair sits on an octet boundary and packed correctly before the fix; the second
-#: is one past it and did not.
+#: pair sits on an octet boundary and packs correctly with or without the fix; the
+#: second is one past it and packs correctly only with it.
 BOUNDARY_PAIRS = (
     (255, 1, 256, 2),
     (65535, 2, 65536, 3),
@@ -161,11 +161,11 @@ class WidthRepairBoundaryTests(unittest.TestCase):
         """The issue understates the reach, and this is where it shows.
 
         #599 frames the defect as hitting values "just past an octet boundary",
-        which reads as though small values were safe. They were not: floor
+        which reads as though small values were safe. They are not: floor
         division is wrong for *every* bit length that is not a multiple of eight,
-        so ``1`` -- bit length 1, floored to **zero** octets -- was mis-sized
-        too, and every value from 1 to 127 with it. Measured on the unfixed tree,
-        ``pack(1, {})`` raised ``OverflowError: int too big to convert`` against a
+        so ``1`` -- bit length 1, floored to **zero** octets -- is mis-sized
+        too, and every value from 1 to 127 with it. Without the fix,
+        ``pack(1, {})`` raises ``OverflowError: int too big to convert`` against a
         zero-octet width.
 
         """
@@ -234,7 +234,7 @@ class WidthRepairBoundaryTests(unittest.TestCase):
     def test_math_ceil_of_a_floor_division_is_the_floor_division(self) -> None:
         """The root cause, pinned directly rather than only described.
 
-        The old expression *looked* like a ceiling and was not one. Stating that
+        Without the fix, the expression *looks* like a ceiling and is not one. Stating that
         as an assertion keeps the next reader of ``pre_process`` from
         reintroducing it: the two expressions differ for seven of every eight bit
         lengths, and coincide only on the eighth.
@@ -252,7 +252,7 @@ class WidthRepairBoundaryTests(unittest.TestCase):
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class WidthRepairReachabilityTests(unittest.TestCase):
-    """How a caller gets to the repair at all, which bounds what this fix touches."""
+    """How a caller gets to the repair at all, which bounds what the #599 fix touches."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self)

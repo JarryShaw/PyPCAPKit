@@ -1,11 +1,11 @@
 """Regression tests for the ``sys.tracebacklimit`` leak in a loud ``BaseError``.
 
-GitHub issue #719: :class:`~pcapkit.utilities.exceptions.BaseError` set
-:data:`sys.tracebacklimit` to ``0`` for every loud error outside development
-mode, and nothing ever restored it. The attribute is process-global, so after
-one pcapkit error every subsequent traceback in the *process* was truncated --
+GitHub issue #719: without the fix, :class:`~pcapkit.utilities.exceptions.BaseError`
+sets :data:`sys.tracebacklimit` to ``0`` for every loud error outside development
+mode, and nothing ever restores it. The attribute is process-global, so after
+one pcapkit error every subsequent traceback in the *process* is truncated --
 including exceptions that have nothing to do with :mod:`pcapkit`. Measured
-against the tree before this fix::
+without the fix::
 
     DEVMODE: False
     before                    hasattr(sys, 'tracebacklimit') = False
@@ -13,14 +13,14 @@ against the tree before this fix::
     then, unrelated:  [][5] -> IndexError
        traceback.extract_tb(...) -> 0 frames
 
-The fix removes the assignment outright and produces the same terse, one-line
+``BaseError`` makes no such assignment, and produces the same terse, one-line
 output for a loud error through an exception hook instead --
 :func:`pcapkit.utilities.exceptions._excepthook`, installed lazily by
 :func:`pcapkit.utilities.exceptions._install_excepthook` the first time a loud
 error actually needs it. A hook only shortens the printing of the exception it
 recognises as its own; it does not reach into how :mod:`traceback`, or any other
-code, formats a *different* exception, which is what let the old mechanism leak
-in the first place.
+code, formats a *different* exception, which is what lets a
+:data:`sys.tracebacklimit` assignment leak.
 
 A hook is awkward to probe from inside the very process that installs it --
 :data:`sys.excepthook` only fires for an exception that reaches the real
@@ -456,16 +456,16 @@ class DoubleInstallTests(unittest.TestCase):
 class CrossInstanceReinstallTests(unittest.TestCase):
     """A fresh module instance must install *over* a stale instance's hook.
 
-    GitHub pull request #983: CI caught this one. ``_install_excepthook``'s guard used
-    to skip installing whenever :data:`sys.excepthook` already carried the
+    GitHub pull request #983. Without the fix, ``_install_excepthook``'s guard
+    skips installing whenever :data:`sys.excepthook` already carries the
     ``installed_by_pcapkit`` marker -- a plain ``True``, identical on *every*
     reloaded copy of :func:`~pcapkit.utilities.exceptions._excepthook`, so it
-    could not tell "my own instance already installed" from "some *other*,
-    possibly long-gone instance did". A worker that had already run some other
-    test touching a loud :class:`~pcapkit.utilities.exceptions.BaseError` left
+    cannot tell "my own instance already installed" from "some *other*,
+    possibly long-gone instance did". A worker that has already run some other
+    test touching a loud :class:`~pcapkit.utilities.exceptions.BaseError` leaves
     exactly that: a marked hook with no live module behind it any more. The
     next instance's own :func:`~pcapkit.utilities.exceptions._install_excepthook`
-    then saw the marker, concluded there was nothing to do, and left
+    then sees the marker, concludes there is nothing to do, and leaves
     ``_previous_excepthook`` at :data:`None` -- never actually installing
     *its own* hook at all.
 
@@ -538,10 +538,10 @@ class ThreadingExcepthookTests(unittest.TestCase):
     :data:`threading.excepthook` needed its own hook for a reason distinct from
     "symmetry with :data:`sys.excepthook`": the interpreter's *default*
     :data:`threading.excepthook` itself consults :data:`sys.tracebacklimit`
-    when printing, so removing the global without replacing it on this side too
-    would have *regressed* a loud :class:`~pcapkit.utilities.exceptions.BaseError`
-    on a worker thread from one line to a full default traceback -- the
-    opposite of this change's purpose. Measured: 2 lines with
+    when printing, so without the global and without a hook on this side too, a
+    loud :class:`~pcapkit.utilities.exceptions.BaseError` on a worker thread
+    prints a full default traceback rather than one line -- the opposite of
+    what the hook is for. Measured: 2 lines with
     ``sys.tracebacklimit = 0`` in place, 12 without it and without this hook.
 
     """

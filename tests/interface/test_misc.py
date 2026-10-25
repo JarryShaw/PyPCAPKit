@@ -26,18 +26,18 @@ HAS_SCAPY = importlib.util.find_spec('scapy') is not None
 #: is expected to agree on it, either by dissecting the capture itself or by being
 #: redirected to the default engine.
 #:
-#: **Two, not three.** Flow tracing was keyed on (source, destination), so the two
-#: halves of one connection came back as two flows; it is now keyed on the pair of
-#: endpoints, so a conversation is one flow. ``in.pcap``'s three TCP frames are
-#: frame 3 (``123.129.210.135:80`` -> ``192.168.1.100:55232``), frame 4 (the same
-#: connection the other way) and frame 5 (``192.168.1.100:55216`` ->
-#: ``123.129.210.135:80``, a second connection). Frames 3 and 4 share an address
-#: pair and a port pair and differ only in direction, so they are one TCP
-#: connection and now one flow -- leaving two conversations, not three.
+#: **Two, not three.** Flow tracing is keyed on the pair of endpoints rather than on
+#: (source, destination), so both halves of one connection are one flow.
+#: ``in.pcap``'s three TCP frames are frame 3 (``123.129.210.135:80`` ->
+#: ``192.168.1.100:55232``), frame 4 (the same connection the other way) and
+#: frame 5 (``192.168.1.100:55216`` -> ``123.129.210.135:80``, a second
+#: connection). Frames 3 and 4 share an address pair and a port pair and differ
+#: only in direction, so they are one TCP connection and one flow -- leaving two
+#: conversations, not three.
 IN_PCAP_TCP_STREAMS = 2
 
-#: The same capture with ``trace_bidirectional=False``, i.e. the per-direction
-#: behaviour flow tracing had before conversations became one flow.
+#: The same capture with ``trace_bidirectional=False``, i.e. per-direction flow
+#: tracing, in which each direction of a conversation is a flow of its own.
 IN_PCAP_TCP_FLOWS_PER_DIRECTION = 3
 
 
@@ -47,11 +47,11 @@ class FollowTCPStreamTests(unittest.TestCase):
 
     ``examples/captures/in.pcap`` (committed, so unit-tier safe) holds three TCP
     frames making up **two** conversations -- see
-    :data:`IN_PCAP_TCP_STREAMS` for which frames pair up and why. #399: the
-    reassembly adapter was chosen by comparing the engine *instance* to a string --
-    a comparison that is never true -- so every engine silently used the pcapkit
-    adapter regardless of which engine ran. That crashed on DPKT frames
-    (``AttributeError: 'dict' object has no attribute 'packet'``) and returned an
+    :data:`IN_PCAP_TCP_STREAMS` for which frames pair up and why. #399 guards
+    against choosing the reassembly adapter by comparing the engine *instance* to a
+    string -- a comparison that is never true -- so that every engine silently uses
+    the pcapkit adapter regardless of which engine ran. That crashes on DPKT frames
+    (``AttributeError: 'dict' object has no attribute 'packet'``) and returns an
     empty, misleading result on Scapy frames.
 
     Both third-party engines that dissect this capture must therefore find every
@@ -59,13 +59,12 @@ class FollowTCPStreamTests(unittest.TestCase):
     no dissection at all (PyPCAP) or have no reassembly adapter (PyShark) are
     redirected to the default engine instead, and are asserted separately below.
 
-    #406: this class previously expected Scapy to find *zero* streams, on the
-    stated rationale that it could not read the capture's link layer -- "a
-    documented capability gap". That rationale was wrong. ``in.pcap`` is plain
-    Ethernet (link type 1), which Scapy dissects perfectly well; the zero came
-    from :class:`~pcapkit.foundation.engines.scapy.Scapy` importing only
+    #406: Scapy finding *zero* streams here is not a capability gap in reading
+    the capture's link layer. ``in.pcap`` is plain Ethernet (link type 1), which
+    Scapy dissects perfectly well; a zero is the symptom of
+    :class:`~pcapkit.foundation.engines.scapy.Scapy` importing only
     :mod:`scapy.sendrecv`, which populates none of Scapy's layer registries, so
-    every frame came back as an undissected ``Raw``. Zero was the polluted
+    every frame comes back as an undissected ``Raw``. Zero is the polluted
     answer and the count here is the truthful one.
     """
 
@@ -117,8 +116,8 @@ class FollowTCPStreamTests(unittest.TestCase):
     def test_dpkt_engine_follows_every_stream(self) -> None:
         # DPKT dissects in.pcap's Ethernet/IP/TCP in full, so it finds both streams,
         # of two frames and one, with no payload to reassemble. This is the
-        # regression guard for #399: before the fix the DPKT frame reached the
-        # pcapkit adapter and raised AttributeError, and the counted-vs-uncounted
+        # regression guard for #399: without the fix the DPKT frame reaches the
+        # pcapkit adapter and raises AttributeError, and the counted-vs-uncounted
         # call convention is what makes the reassembled numbering line up.
         with warnings.catch_warnings():
             warnings.simplefilter('ignore')
@@ -203,9 +202,9 @@ class FollowTCPStreamTests(unittest.TestCase):
                 self.assertEqual(len(streams), IN_PCAP_TCP_STREAMS)
 
     def test_dpkt_and_scapy_keep_the_pcap_trace_format(self) -> None:
-        # Both engines' flow tracing adapters now hand the tracer a PCAP frame
+        # Both engines' flow tracing adapters hand the tracer a PCAP frame
         # record built from the captured octets (#1507), so neither an explicit
-        # 'pcap' nor an unset format is replaced any more: every stream is written
+        # 'pcap' nor an unset format is replaced: every stream is written
         # as PCAP, and nothing warns about a substitution.
         from pcapkit.utilities.warnings import FormatWarning
 

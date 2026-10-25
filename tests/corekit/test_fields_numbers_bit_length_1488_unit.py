@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """A number field keeps the bits outside its ``bit_length`` as captured.
 
-GitHub issue #1488: :meth:`NumberField.post_process
-<pcapkit.corekit.fields.numbers.NumberField.post_process>` masked the decoded
+GitHub issue #1488 guards against :meth:`NumberField.post_process
+<pcapkit.corekit.fields.numbers.NumberField.post_process>` masking the decoded
 value to ``bit_length`` bits and :meth:`~pcapkit.corekit.fields.numbers.NumberField.pre_process`
-masked it again, so ``UInt16Field(bit_length=12)`` read ``ffff`` and packed
-``0fff``. The parsed value now records the bits it does not interpret, and a
-value a caller supplies is still truncated to ``bit_length`` bits.
+masking it again, so that ``UInt16Field(bit_length=12)`` reads ``ffff`` and packs
+``0fff``. The parsed value records the bits it does not interpret, and a value a
+caller supplies is truncated to ``bit_length`` bits.
 
 Every case builds its own octets in memory and reads no capture. Classes are
 imported inside each test, after :func:`~tests._support.reimport_once_per_class`.

@@ -127,11 +127,11 @@ class UnassignedEnumFieldTests(unittest.TestCase):
     def test_an_unassigned_registry_value_resolves_instead_of_raising(self) -> None:
         """The reported lookup, as a field unpack.
 
-        Measured on the unfixed tree, this raised ``ValueError: 28 is not a valid
-        BlockType`` straight out of :mod:`aenum`. It now resolves, and the value
+        Without the fix, this raises ``ValueError: 28 is not a valid
+        BlockType`` straight out of :mod:`aenum`. It resolves, and the value
         it resolves to carries the octets it came from -- which is the whole
         point, since a pseudo-member that lost the code would be no more useful
-        to the dispatch than the exception was.
+        to the dispatch than the exception.
 
         """
         from pcapkit.const.pcapng.block_type import BlockType
@@ -186,14 +186,14 @@ class UnassignedEnumFieldTests(unittest.TestCase):
         <pcapkit.const.pcapng.block_type.BlockType._missing_>` covers. Per the
         mint/unmint ruling recorded for #775
         (``docs/source/contributing/conventions/mint-criterion.rst``),
-        ``Reserved`` names a procedure rather than a party, so this range no
-        longer *mints* a registered ``Reserved_0bad0bad`` member -- it now
+        ``Reserved`` names a procedure rather than a party, so this range does
+        not *mint* a registered member such as ``Reserved_0bad0bad`` -- it
         returns an unregistered member via ``_unregistered_member``, bearing the
-        bare label ``Reserved`` and the original value. The fallback must still
-        not shadow ``_missing_``: if it did, a reserved code would come back
+        bare label ``Reserved`` and the original value. The fallback must not
+        shadow ``_missing_``: if it did, a reserved code would come back
         nameless and lose the only thing the registry knows about it. Because
-        the name alone (``Reserved``) no longer pins the value the way
-        ``Reserved_0bad0bad`` used to, the value is asserted explicitly too.
+        the name alone (``Reserved``) does not pin the value, the value is
+        asserted explicitly too.
 
         """
         from pcapkit.const.pcapng.block_type import BlockType
@@ -284,7 +284,7 @@ class UnassignedEnumFieldTests(unittest.TestCase):
         A namespace-less :class:`~pcapkit.corekit.fields.numbers.EnumField` has
         always produced this nameless member; the fix reuses the same mechanism
         rather than inventing a second shape, so an unassigned code and a
-        registry-less field now answer alike.
+        registry-less field answer alike.
 
         """
         from pcapkit.corekit.fields.numbers import EnumField
@@ -331,7 +331,7 @@ class UnassignedEnumFieldTests(unittest.TestCase):
         a one- and two-octet field can carry, across four registries of different
         shapes, and asserts that nothing leaves the field layer except a member.
 
-        Measured on the unfixed tree this raised for the overwhelming majority of
+        Without the fix this raises for the overwhelming majority of
         values in each registry -- the registries declare a few hundred codes
         between them and the two-octet ones have 65,536 to answer for.
 
@@ -398,9 +398,9 @@ class UnassignedBlockTypeExtractionTests(unittest.TestCase):
     def test_an_unassigned_block_type_no_longer_costs_the_extraction(self) -> None:
         """The issue's repro, with a packet block behind the unknown one.
 
-        Measured on the unfixed tree, ``Extractor`` raised ``ValueError: 28 is
-        not a valid BlockType`` and produced nothing at all -- so the Enhanced
-        Packet Block behind the unknown block was lost along with it, which is
+        Without the fix, ``Extractor`` raises ``ValueError: 28 is
+        not a valid BlockType`` and produces nothing at all -- so the Enhanced
+        Packet Block behind the unknown block is lost along with it, which is
         what "one unknown block costs the whole extraction" means.
 
         The control is the same capture without the unknown block, and the

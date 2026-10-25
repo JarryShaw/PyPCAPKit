@@ -12,16 +12,16 @@ sentinel -- :class:`~pcapkit.corekit.sentinels.NullType`,
 :class:`~pcapkit.corekit.sentinels.NoValueType`,
 :class:`~pcapkit.corekit.sentinels.NoDefaultType` and
 :class:`~pcapkit.corekit.sentinels.AbsentType`, and their instances. The
-original modules (:mod:`pcapkit.corekit.module`,
+modules that use them (:mod:`pcapkit.corekit.module`,
 :mod:`pcapkit.corekit.fields.field`, :mod:`pcapkit.corekit.enum` and
-:mod:`pcapkit.protocols.protocol`) kept a re-export of each until GitHub issue
-#1744 dropped them, under the ruling on #1715 that a moved name keeps no
-re-export at its old path; ``tests/project/test_no_moved_name_re_exports_1744_unit.py``
-pins that. Each still imports the *object* it uses from here.
+:mod:`pcapkit.protocols.protocol`) import the *object* they use from here and
+keep no re-export of it (GitHub issue #1744), under the ruling on #1715 that a
+moved name keeps no re-export at its old path;
+``tests/project/test_no_moved_name_re_exports_1744_unit.py`` pins that.
 
-None of this module exists before that move, which is exactly what makes it a
-regression test rather than a description: at ``d31c0aaf6``, a ``main``
-commit from before #922, ``import pcapkit.corekit.sentinels`` itself
+Without #922 the sentinels module does not exist, which is exactly what makes
+this a regression test rather than a description: at ``d31c0aaf6``, a ``main``
+commit without #922, ``import pcapkit.corekit.sentinels`` itself
 fails --
 
 .. code-block:: text
@@ -48,7 +48,7 @@ would quietly break every ``is NULL`` (etc.) check in that module.
 asserts that with ``is``, never ``==``.
 
 :class:`NoImportCycleTests` pins the other thing the issue asked to be checked
-"on purpose" rather than left to the pre-existing ``cyclic-import`` findings
+"on purpose" rather than left to the ``cyclic-import`` findings
 :command:`pylint` reports for this package, which run to hundreds and would
 swallow one more without comment: that :mod:`pcapkit.corekit.sentinels` itself
 imports nothing from any of the modules that depend on it, so the
@@ -132,10 +132,10 @@ class NoImportCycleTests(unittest.TestCase):
         :mod:`pcapkit.corekit.module`, :mod:`pcapkit.corekit.fields.field`,
         :mod:`pcapkit.corekit.enum` or :mod:`pcapkit.protocols.protocol` -- each
         of which imports *it*. Walked with :mod:`ast` rather than grepped for the
-        dotted name as plain text, because the module's own docstring above
-        names those modules *in prose*, explaining where each sentinel used to live --
-        a text search would flag that explanation as if it were the cycle it is
-        warning readers there is no longer any risk of.
+        dotted name as plain text, because the sentinels module's own docstring
+        names those modules *in prose*, explaining that they import from it --
+        a text search would flag that explanation as if it were the cycle this
+        test rules out.
 
         """
         import ast
