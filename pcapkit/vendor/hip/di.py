@@ -2,7 +2,7 @@
 """DI-Types
 ==============
 
-.. module:: pcapkit.const.hip.di
+.. module:: pcapkit.vendor.hip.di
 
 This module contains the vendor crawler for **DI-Types**,
 which is automatically generating :class:`pcapkit.const.hip.di.DITypes`.

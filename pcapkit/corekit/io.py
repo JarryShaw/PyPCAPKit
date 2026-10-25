@@ -10,7 +10,8 @@ implementation to :class:`io.BufferedReader`, and the stream proxies
 :class:`~pcapkit.corekit.io.PeekableStream`, which adds ``peek`` to a
 seekable stream, and :class:`~pcapkit.corekit.io.NamedStream`, which gives
 a stream a ``name``, as well as :func:`~pcapkit.corekit.io.advance`, which moves
-a stream past more octets than one read or seek can take.
+a stream past more octets than one read or seek can take, and
+:func:`~pcapkit.corekit.io.can_seek`, which tells whether a stream really seeks.
 
 """
 import io

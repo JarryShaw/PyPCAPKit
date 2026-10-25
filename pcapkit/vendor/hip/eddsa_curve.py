@@ -2,7 +2,7 @@
 """EdDSA Curve Label
 ===========================
 
-.. module:: pcapkit.const.hip.eddsa_curve
+.. module:: pcapkit.vendor.hip.eddsa_curve
 
 This module contains the vendor crawler for **EdDSA Curve Label**,
 which is automatically generating :class:`pcapkit.const.hip.eddsa_curve.EdDSACurve`.

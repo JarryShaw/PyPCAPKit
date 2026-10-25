@@ -267,9 +267,9 @@ class InfoMeta(abc.ABCMeta):
       .. note::
 
          This is implemented thru the :meth:`__new__` method, which will
-         inherit the additional and excluded field names from the base
-         classes, as well as populating the additional and excluded field
-         from the subclass attributes.
+         inherit the additional, excluded and included field names from the
+         base classes, as well as populating the additional, excluded and
+         included fields from the subclass attributes.
 
          .. code-block:: python
 
@@ -747,9 +747,9 @@ class Info(Mapping[str, VT], Generic[VT], metaclass=InfoMeta):
         Important:
             We only convert nested :class:`Info` objects into :obj:`dict` if
             they are the direct value of the :class:`Info` object's attribute.
-            Should such :class:`Info` objects be nested within other data,
+            Should such :class:`Info` objects be nested within other data
             types, such as :obj:`list`, :obj:`tuple`, :obj:`set`, etc., we
-            shall not convert them into :obj:`dict` and remain them intact.
+            leave them intact rather than converting them into :obj:`dict`.
 
         Note:
             :meth:`from_dict` reverses the flattening only for keys whose type

@@ -152,10 +152,9 @@ def _snapshot_and_restore(vendor: 'Type[Vendor]') -> 'Iterator[None]':
         #
         # The `else:` below is deliberate, not a style default pylint would
         # pick: collapsing it into an unindented statement after this whole
-        # `try` (as an earlier round of this same PR did) makes "cleanup
-        # only runs on success" a fact that has to be re-derived from
-        # "`raise` never falls through", rather than one the structure
-        # states directly -- and it silently stopped being true the moment
+        # `try` makes "cleanup only runs on success" a fact that has to be
+        # re-derived from "`raise` never falls through", rather than one the
+        # structure states directly -- and it silently stopped being true the moment
         # someone deleted that `raise`.  A mutation test proved it: with the
         # `raise` gone, the unindented `os.remove(backup)` still ran, after
         # `os.replace` had already renamed the backup away, so it raised
@@ -196,7 +195,7 @@ def run(vendor: 'Type[Vendor]') -> 'bool':
         # Unconditional, unlike the warning below: VendorRuntimeWarning is
         # filterable and VERBOSE defaults false, so without a plain print a CI
         # log that ignores warnings would show nothing at all about which
-        # target broke or why -- exactly the failure mode this fix exists for.
+        # target broke or why -- exactly the failure mode this print exists for.
         print(f'{vendor.__module__}.{vendor.__name__} failed: {error!r}', file=sys.stderr)
         warn(f'{vendor.__module__}.{vendor.__name__} <{error!r}>', VendorRuntimeWarning, stacklevel=2)
         return False

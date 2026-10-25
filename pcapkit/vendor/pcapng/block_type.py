@@ -83,7 +83,7 @@ class BlockType(Vendor):
         """Fetch registry table.
 
         Args:
-            text: Context from :attr:`~LinkType.LINK`.
+            text: Context from :attr:`~BlockType.LINK`.
 
         Returns:
             Rows (``tr``) from registry table (``table``).

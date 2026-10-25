@@ -53,7 +53,7 @@ __all__ = ['ProcedureCode']
 #: directly rather than through a public accessor.
 _TYPEREF = ('NGAP-CommonDataTypes', 'ProcedureCode')
 
-#: Default constant template of enumerate registry, sourced from pycrate
+#: Default constant template of enumeration registry, sourced from pycrate
 #: rather than an IANA CSV -- see the module docstring.
 LINE = lambda NAME, DOCS, FLAG, ENUM, MODL: f'''\
 # -*- coding: utf-8 -*-

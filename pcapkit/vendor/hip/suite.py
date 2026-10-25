@@ -2,7 +2,7 @@
 """Suite IDs
 ===============
 
-.. module:: pcapkit.const.hip.suite
+.. module:: pcapkit.vendor.hip.suite
 
 This module contains the vendor crawler for **Suite IDs**,
 which is automatically generating :class:`pcapkit.const.hip.suite.Suite`.

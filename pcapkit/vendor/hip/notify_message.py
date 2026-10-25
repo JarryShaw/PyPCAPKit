@@ -2,7 +2,7 @@
 """Notify Message Types
 ==========================
 
-.. module:: pcapkit.const.hip.notify_message
+.. module:: pcapkit.vendor.hip.notify_message
 
 This module contains the vendor crawler for **Notify Message Types**,
 which is automatically generating :class:`pcapkit.const.hip.notify_message.NotifyMessage`.

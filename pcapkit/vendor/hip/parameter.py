@@ -2,7 +2,7 @@
 """HIP Parameter Types
 =========================
 
-.. module:: pcapkit.const.hip.parameter
+.. module:: pcapkit.vendor.hip.parameter
 
 This module contains the vendor crawler for **HIP Parameter Types**,
 which is automatically generating :class:`pcapkit.const.hip.parameter.Parameter`.
