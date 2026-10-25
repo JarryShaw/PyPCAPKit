@@ -3514,6 +3514,31 @@ class HIPUnitTests(unittest.TestCase):
         with self.assertRaisesRegex(FieldValueError, 'invalid parameter length'):
             hip_schema.encrypted_data_len({'len': 19, 'iv': b'\x11' * 16})
 
+    def test_hip_echo_response_unsigned_maker_builds_the_response_schema(self) -> None:
+        # #2170: the maker built the ECHO_REQUEST_UNSIGNED schema class, and its
+        # ``param`` and return annotations named the Request classes.
+        from pcapkit.const.hip.parameter import Parameter
+        from pcapkit.protocols.data.internet import hip as hip_data
+        from pcapkit.protocols.internet.hip import HIP
+        from pcapkit.protocols.schema.internet import hip as hip_schema
+
+        proto = object.__new__(HIP)
+        param = hip_data.EchoResponseUnsignedParameter(type=Parameter.ECHO_RESPONSE_UNSIGNED,
+                                                       critical=False, length=4, opaque=b'abcd')
+        for name, schema in (
+            ('keywords', proto._make_param_echo_response_unsigned(
+                Parameter.ECHO_RESPONSE_UNSIGNED, version=2, opaque=b'abcd')),
+            ('data', proto._make_param_echo_response_unsigned(
+                Parameter.ECHO_RESPONSE_UNSIGNED, param, version=2)),
+        ):
+            with self.subTest(source=name):
+                self.assertIs(type(schema), hip_schema.EchoResponseUnsignedParameter)
+                self.assertEqual(schema.opaque, b'abcd')
+
+        hints = HIP._make_param_echo_response_unsigned.__annotations__
+        self.assertEqual(hints['param'], 'Optional[Data_EchoResponseUnsignedParameter]')
+        self.assertEqual(hints['return'], 'Schema_EchoResponseUnsignedParameter')
+
 
 if __name__ == '__main__':
     unittest.main()
