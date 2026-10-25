@@ -5035,10 +5035,10 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             opaque=opaque,
         )
 
-    def _make_param_echo_response_unsigned(self, code: 'Enum_Parameter', param: 'Optional[Data_EchoRequestUnsignedParameter]' = None, *,  # pylint: disable=unused-argument
+    def _make_param_echo_response_unsigned(self, code: 'Enum_Parameter', param: 'Optional[Data_EchoResponseUnsignedParameter]' = None, *,  # pylint: disable=unused-argument
                                            version: 'int',
                                            opaque: 'bytes' = b'',
-                                           **kwargs: 'Any') -> 'Schema_EchoRequestUnsignedParameter':
+                                           **kwargs: 'Any') -> 'Schema_EchoResponseUnsignedParameter':
         """Make HIP ``ECHO_RESPONSE_UNSIGNED`` parameter.
 
         Args:
@@ -5055,7 +5055,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         if param is not None:
             opaque = param.opaque
 
-        return Schema_EchoRequestUnsignedParameter(
+        return Schema_EchoResponseUnsignedParameter(
             type=code,
             len=len(opaque),
             opaque=opaque,
