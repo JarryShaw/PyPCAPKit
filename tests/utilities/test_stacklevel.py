@@ -178,7 +178,7 @@ def emissions(records: 'list[pywarnings.WarningMessage]',
     :exc:`ResourceWarning` among them. A file handle some earlier test left open
     is reported whenever the collector happens to reach it, so it surfaces inside
     an arbitrary window, and asserting that a window held exactly one record let
-    another test's litter fail *this* one (:issue:`606`).
+    another test's litter fail *this* one (#606).
 
     That is not a theoretical ordering concern. The same failure was watched
     migrating between two pull requests with neither branch touched and neither
@@ -192,8 +192,8 @@ def emissions(records: 'list[pywarnings.WarningMessage]',
 
     The callers count over :class:`~pcapkit.utilities.warnings.BaseWarning`, the
     root of the package's own categories, rather than over the one category they
-    expect. Narrowing the count that far would have dropped something the old
-    assertion did buy: a *second* complaint from :mod:`pcapkit` under some other
+    expect. Narrowing the count that far would drop something an exactly-one
+    count does buy: a *second* complaint from :mod:`pcapkit` under some other
     category is a real defect, and counting only the expected category would let
     it pass unnoticed. Counting pcapkit's warnings as a group keeps that, and
     gives up only the part that was never this module's business -- warnings the
@@ -238,9 +238,9 @@ class StacklevelArithmeticTests(unittest.TestCase):
     def test_level_does_not_grow_with_the_outer_stack(self) -> None:
         """The defect, stated directly: the outer depth must not matter.
 
-        The old ``index - 1`` returned the number of outer frames less one, so
-        these six shapes -- identical on the :mod:`pcapkit` side -- gave six
-        different answers.
+        An ``index - 1`` returns the number of outer frames less one, so these
+        shapes -- identical on the :mod:`pcapkit` side -- would give a
+        different answer each.
 
         """
         levels = {outer: self.level_for(outer=outer, inner=4)
@@ -405,8 +405,8 @@ class StacklevelAttributionTests(unittest.TestCase):
         The probes record with ``simplefilter('always')``, which un-ignores the
         categories Python hides by default, so a file handle an earlier test left
         for the collector arrives in the window as a :exc:`ResourceWarning`. Two
-        assumptions break on that (:issue:`606`): a count requiring the window to
-        hold exactly one record, and picking by *position*, which returns the last
+        assumptions break on that (#606): a count requiring the window to hold
+        exactly one record, and picking by *position*, which returns the last
         record rather than the probe's own.
 
         Warnings are raised on both sides of the probe here deliberately -- one

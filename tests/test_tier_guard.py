@@ -802,12 +802,11 @@ class FixtureTierSelectionTests(unittest.TestCase):
 
         Two files are excluded on purpose, not overlooked: :file:`tests/_tiers.py`
         itself and :file:`tests/test_tier_guard.py`, this module. Both mention
-        ``sample_path(`` and ``except FileNotFoundError`` freely -- in
-        docstrings, in error messages, and in source strings ``write_module()``
-        writes out for other tests to audit -- without containing a single real
-        call to either. A first version of this check included them and failed
-        immediately for exactly that reason, which is the point: a check that
-        cannot fail is not a check.
+        ``sample_path(`` and ``except FileNotFoundError`` freely -- in docstrings,
+        in error messages, and in source strings ``write_module()`` writes out for
+        other tests to audit -- without containing a single real call to either.
+        Including them fails at once for exactly that reason (measured), which is
+        the point: a check that cannot fail is not a check.
 
         Restricted to ``test_*.py`` for the same reason :mod:`pytest` itself
         is (see ``python_files`` in :file:`pyproject.toml`): a module outside
@@ -966,8 +965,8 @@ class CommittedCaptureTests(unittest.TestCase):
         :func:`~tests._tiers.committed_captures` -- a second call to that same
         function would only prove it agrees with itself, not that it agrees
         with git. A hardcoded, stale, or otherwise wrong literal set would fail
-        the comparison below; it could only have passed the old body, which
-        asserted nothing but non-emptiness and the absence of a ``/``.
+        the comparison below; it would pass a body asserting nothing but
+        non-emptiness and the absence of a ``/``.
 
         """
         tracked = _tiers.committed_captures()
@@ -1502,7 +1501,7 @@ class DependencyRequirementTests(unittest.TestCase):
         """Spot checks on the extras the rest of this suite reasons about."""
         declared = _dependency_gates.declared_requirements()
 
-        # Since #2040 a second line caps PyPy below 3.11.
+        # A second line caps PyPy below 3.11 (#2040).
         self.assertEqual(
             [requirement.text for requirement in declared['crypto']],
             ["cryptography>=3.4; platform_python_implementation != 'PyPy' or python_version >= '3.11'",
@@ -2137,10 +2136,10 @@ class DependencyGateCoverageTests(unittest.TestCase):
 
         #745's own text lists ``HAS_CRAWLER_DEPS`` alongside ``HAS_VENDOR_DEPS``
         as ruled onto a non-blocking leg. It is not: it asks only for
-        ``requests`` and ``bs4``, both of which the ``test`` extra has carried
-        since #507, so every job installs it. Only ``HAS_VENDOR_DEPS`` -- which
-        additionally wants :mod:`html5lib`, and so
-        ``beautifulsoup4[html5lib]`` -- is genuinely dark.
+        ``requests`` and ``bs4``, both of which the ``test`` extra carries
+        (#507), so every job installs it. Only ``HAS_VENDOR_DEPS`` -- which
+        additionally wants :mod:`html5lib`, and so ``beautifulsoup4[html5lib]``
+        -- is genuinely dark.
 
         """
         gaps = {gap.flag for gap in _dependency_gates.dependency_gate_gaps()}
@@ -2153,11 +2152,11 @@ class DependencyGateCoverageTests(unittest.TestCase):
     def test_the_vendor_extra_closes_every_job_reaching_the_vendor_gates(self) -> None:
         """#1958: the ``latest`` legs install ``vendor``, so html5lib is no gap anywhere.
 
-        #738 ruled these gates onto a non-blocking leg, and ``engine-tests`` was
-        that leg until #849 narrowed it to explicit engine paths, after which
-        they ran nowhere. The owner's ruling E on #1958 runs the whole suite on
-        latest CPython, so ``test``'s ``latest`` leg and ``gate`` install
-        ``vendor``, and the exclusion that recorded the gap is gone.
+        #738 ruled these gates onto a non-blocking leg, and ``engine-tests``,
+        narrowed to explicit engine paths (#849), runs them nowhere. The owner's
+        ruling E on #1958 runs the whole suite on latest CPython, so ``test``'s
+        ``latest`` leg and ``gate`` install ``vendor``, and the exclusion that
+        recorded the gap is gone.
 
         """
         reaching = {job.name for job in _dependency_gates.pytest_jobs()

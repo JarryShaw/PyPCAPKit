@@ -446,9 +446,9 @@ class IPAddressFieldTests(unittest.TestCase):
     def test_both_bool_guards_stay_catchable_as_value_error_and_as_base_error(self) -> None:
         """The two exception classes used for this mistake are interchangeable to callers.
 
-        #508's seven sites answer with :exc:`FieldValueError`, because the rejection
-        happens in a field-level conversion; the two older hand-rolled guards for
-        the same mistake -- ``MH._make_opt_mn_id`` from #481 and ESP's
+        #508's sites answer with :exc:`FieldValueError`, because the rejection
+        happens in a field-level conversion; the hand-rolled guards for the same
+        mistake -- ``MH._make_opt_mn_id`` from #481 and ESP's
         ``SecurityAssociation`` from #491 -- answer with
         :exc:`~pcapkit.utilities.exceptions.ProtocolError`, because they answer for
         the option rather than for a field. That inconsistency is deliberate and
@@ -512,7 +512,7 @@ class IPAddressFieldTests(unittest.TestCase):
                 self.assertTrue(issubclass(cls, ValueError))
 
     def test_switch_backed_address_makers_reject_a_bool(self) -> None:
-        """#508's remaining sites, for the two protocols outside :mod:`~pcapkit.protocols.internet.mh`.
+        """#508's remaining sites, for the protocols outside :mod:`~pcapkit.protocols.internet.mh`.
 
         ``HIP``'s locator and ``TCP``'s Multipath ``ADD_ADDR`` address are both
         backed by a :class:`~pcapkit.corekit.fields.misc.SwitchField`, and both
@@ -603,7 +603,7 @@ class IPAddressFieldTests(unittest.TestCase):
         malformed or corrupted IPv4 interface option can carry
         ``0.255.0.255``, which :func:`ipaddress.ip_interface` rejects. The
         field keeps such a mask as given, so the value packs back to the same
-        octets (c.f. :issue:`1294`).
+        octets (c.f. #1294).
         """
         from pcapkit.corekit.fields.ipaddress import IPv4InterfaceField
 

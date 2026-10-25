@@ -59,10 +59,10 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 #: Wider than :data:`tests._support.ISOLATED_PREFIXES` by ``'emoji'``, which is
 #: the one stand-in here that is not part of :mod:`pcapkit`.
 #: :func:`tests.conftest.restore_module_table` covers only the default prefixes,
-#: so the faked ``emoji`` was not merely unrestored but *unmasked* as well: it
-#: survived even a normal :program:`pytest` run, leaving whatever imported
-#: :mod:`emoji` next with a :class:`~types.SimpleNamespace` carrying nothing but
-#: ``emojize`` -- or, from the last test here, a class whose ``emojize`` raises
+#: so a faked ``emoji`` left unrestored is *unmasked* as well: it survives even
+#: a normal :program:`pytest` run, leaving whatever imports :mod:`emoji` next
+#: with a :class:`~types.SimpleNamespace` carrying nothing but ``emojize`` --
+#: or, from the last test here, a class whose ``emojize`` raises
 #: :exc:`UnicodeEncodeError`.
 ISOLATED = ISOLATED_PREFIXES + ('emoji',)
 

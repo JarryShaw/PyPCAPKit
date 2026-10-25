@@ -127,7 +127,7 @@ class DecoratorTests(unittest.TestCase):
     def _demo_schema_for_call_shapes(self):
         """A ``DemoSchema`` whose ``unpack`` records what ``prepare`` bound.
 
-        Shared by the five call-shape tests below, one per row of `#444
+        Shared by the call-shape tests below, one per row of `#444
         <https://github.com/JarryShaw/PyPCAPKit/issues/444>`__'s reproduction
         table: without the fix, ``prepare`` subscripts ``args[2]``/``args[3]``
         unconditionally, so only the three-positional shape works and every
@@ -170,7 +170,7 @@ class DecoratorTests(unittest.TestCase):
         self._assert_call_shape_result(DemoSchema.unpack(b'payload', 7))
 
     def test_prepare_accepts_data_length_and_packet_positionally(self) -> None:
-        """``unpack(data, length, packet)`` -- the one shape that already worked."""
+        """``unpack(data, length, packet)`` -- the shape that never needed the fix."""
         DemoSchema = self._demo_schema_for_call_shapes()
         self._assert_call_shape_result(DemoSchema.unpack(b'payload', 7, {}))
 
@@ -267,9 +267,8 @@ class DecoratorTests(unittest.TestCase):
 
     def test_prepare_still_raises_eof_for_a_truncated_stream(self) -> None:
         """A file-like stream already exhausted, with no declared length, is
-        the frame reader's genuine end-of-capture case and must still raise --
-        confirming the #458 fix only changes the *declared*-zero case below,
-        not this one.
+        the frame reader's genuine end-of-capture case and must still raise:
+        only the *declared*-zero case below unpacks (#458).
 
         """
         class DemoSchema:
@@ -397,7 +396,7 @@ class DecoratorTests(unittest.TestCase):
     # ``self.__header__.get_payload()``, because that is what
     # ``ProtocolBase._get_payload`` is -- a wrapper over the schema's accessor.
     # ``beholder`` goes through the wrapper rather than the schema directly, so
-    # that the two protocols which override it (SCTP, PCAP-NG) recover from a
+    # that the protocols which override it, SCTP and PCAP-NG, recover from a
     # next-layer failure at all; see
     # ``test_beholder_uses_the_protocol_payload_accessor_not_the_schema``.
     ##########################################################################
@@ -472,8 +471,8 @@ class DecoratorTests(unittest.TestCase):
         The success path in ``_import_next_layer`` passes ``alias=proto``, so a
         payload that reached :class:`Raw` because nothing was registered on its
         number is still labelled with that number. Omitting it from the failure
-        path made *registering* a protocol produce less informative output than
-        leaving the number unregistered.
+        path would make *registering* a protocol produce less informative
+        output than leaving the number unregistered.
 
         """
         Raw, _ = self._payload_stand_ins()

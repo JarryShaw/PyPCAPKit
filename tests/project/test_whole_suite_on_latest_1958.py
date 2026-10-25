@@ -32,7 +32,7 @@ WHOLE_SUITE = frozenset({'test', 'Scapy', 'DPKT', 'crypto', 'cli', 'NGAP', 'vend
 LATEST_STEP = "Install the whole suite's dependencies on latest"
 LATEST_IF = ("${{ steps.install.outcome == 'success' && "
              'matrix.python-version == needs.python-versions.outputs.latest }}')
-#: The install line every leg of each matrix job runs, unchanged by #1958.
+#: The install line every leg of each matrix job runs.
 BASE = {
     'test': frozenset({'test', 'DPKT', 'crypto', 'NGAP'}),
     'integration': frozenset({'test', 'Scapy', 'DPKT', 'cli'}),

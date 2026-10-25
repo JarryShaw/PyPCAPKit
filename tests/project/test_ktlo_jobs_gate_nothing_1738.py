@@ -41,7 +41,7 @@ WORKFLOW = ROOT / '.github' / 'workflows' / 'unit-tests.yml'
 NAME = 'unit-tests.yml'
 #: Each gating job and the job holding its KTLO legs.
 TWINS = {'test': 'test-ktlo', 'integration': 'integration-ktlo', 'pypcap-parity': 'pypcap-parity-ktlo'}
-#: Each gating job's check-name prefix, as main named its legs before the split.
+#: Each gating job's check-name prefix, which its KTLO twin's legs share.
 PREFIX = {'test': 'Python', 'integration': 'Integration Python', 'pypcap-parity': 'PyPCAP/PyPCAPFile parity Python'}
 #: The KTLO versions each twin runs; ``pypcap-parity`` runs on ``ubuntu-latest`` and below 3.12 only, and
 #: on CPython alone, where ``test`` and ``integration`` run PyPy's too (#1958).
@@ -224,7 +224,7 @@ class TestCITimingTellsTheTwinsApart(unittest.TestCase):
     def test_the_critical_path_leaves_the_ktlo_jobs_out(self) -> None:
         required = next(spec for spec in self.specs if spec['name'] == self.module.REQUIRED_JOB)
         self.assertFalse(set(TWINS.values()) & set(required['needs']))
-        # The KTLO leg finishes last, so on main, where it was `test`'s, it led.
+        # The KTLO leg finishes last, so counted as `test`'s it would lead.
         run = {'event': 'pull_request', 'conclusion': 'success', 'jobs': [
             {'name': name, 'runner_name': 'GitHub Actions 1', 'conclusion': 'success',
              'started_at': '2026-10-14T00:00:00Z', 'completed_at': end}

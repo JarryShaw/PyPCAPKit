@@ -32,7 +32,7 @@ PYPROJECT = ROOT / 'pyproject.toml'
 #: The newest release with a manylinux ``pp310`` wheel, and the first without one.
 LAST_PP310 = Version('45.0.7')
 FIRST_WITHOUT = Version('46.0.0')
-#: The release ``pypy3.10`` resolved to before the cap, whose sdist fails there.
+#: The release ``pypy3.10`` resolves to without the cap, whose sdist fails there.
 NEWEST = Version('50.0.2')
 
 

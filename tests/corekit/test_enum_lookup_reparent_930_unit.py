@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #930, the blocked half of #877's phase 2: re-parenting the last
-seven non-registry enumerations onto :class:`~pcapkit.corekit.enum.EnumLookup`.
+non-registry enumerations onto :class:`~pcapkit.corekit.enum.EnumLookup`.
 
 GitHub pull request #921 re-parented every other non-registry enumeration and left these
-seven alone, because the files holding them were open under other pull requests:
+alone, because the files holding them were open under other pull requests:
 :mod:`pcapkit.const.ftp.command` (``CommandType``, ``ConformanceRequirement``) under #913,
 and :mod:`pcapkit.protocols.internet.esp` (``ESPStatus``) plus
 :mod:`pcapkit.protocols.internet.mh` (``FastBindingAcknowledgmentStatus``,
@@ -11,7 +11,7 @@ and :mod:`pcapkit.protocols.internet.esp` (``ESPStatus``) plus
 module pins that they derive from the base, so that every non-registry enumeration is
 inside the hierarchy and none is outside it.
 
-None of the seven declares a ``get`` of its own: ``get`` and ``get_all`` come from the base
+None of these declares a ``get`` of its own: ``get`` and ``get_all`` come from the base
 alone. For :class:`FastBindingAcknowledgmentStatus` and :class:`IPv6AddressPrefixCode` that
 is GitHub issue #935's ruling, given on GitHub pull request #940: a hand-rolled override
 there resolves by :class:`int` or by name exactly as
@@ -29,7 +29,7 @@ override branching on ``isinstance(key, int)`` routes every other type -- ``None
 :exc:`~pcapkit.utilities.exceptions.EnumKeyError`, while the base, branching on
 ``isinstance(key, str)`` instead, answers with an
 :exc:`~pcapkit.utilities.exceptions.EnumValueError`.
-:class:`NonCanonicalKeyConvergenceTests` pins that all seven answer such a key alike.
+:class:`NonCanonicalKeyConvergenceTests` pins that they all answer such a key alike.
 
 :meth:`~pcapkit.corekit.enum.EnumLookup.get_all`, inherited from the base, calls ``get``
 internally, so a name miss reached through it is as quiet as one reached through ``get``.
@@ -92,12 +92,12 @@ __all__ = [
 
 
 class ReparentedBasesTests(unittest.TestCase):
-    """Every one of the seven gained :class:`EnumLookup` as a base, mixed in
-    *ahead of* its enum base so ``_member_type_`` still resolves to
-    :class:`int`, and none grew a member in the process -- this issue's own
-    brief is explicit that a re-parent minting one silently is exactly the
-    defect this programme exists to prevent, so each test below pins both in
-    one place rather than trusting that a passing base-tuple assertion says
+    """Each of these has :class:`EnumLookup` as a base, mixed in *ahead of*
+    its enum base so ``_member_type_`` still resolves to :class:`int`, and
+    none has a member the re-parent minted -- this issue's own brief is
+    explicit that a re-parent minting one silently is exactly the defect
+    this programme exists to prevent, so each test below pins both in one
+    place rather than trusting that a passing base-tuple assertion says
     anything about the member table. ``__members__`` (which counts aliases)
     and ``list(cls)`` (which does not) are pinned separately, since the two
     diverge on :class:`CommandType`: its ``undefined = 0`` member is a real,
@@ -141,7 +141,7 @@ class ReparentedBasesTests(unittest.TestCase):
     def test_fast_binding_acknowledgment_status(self) -> None:
         """No ``get`` override to pin here (GitHub pull request #940) --
         :class:`AllSevenInheritTheBareClassmethodTests` covers this class
-        alongside the other six."""
+        alongside the others."""
         from aenum import IntEnum
 
         from pcapkit.corekit.enum import EnumLookup
@@ -188,17 +188,17 @@ class ReparentedBasesTests(unittest.TestCase):
 
 
 class NoMintingTests(unittest.TestCase):
-    """None of the seven mints on a miss, exercised through ``get`` itself
+    """None of these mints on a miss, exercised through ``get`` itself
     rather than only through the static counts above."""
 
     def test_a_battery_of_lookups_does_not_grow_any_of_the_seven(self) -> None:
-        """None of the seven mints on a miss -- each is a closed set on the
+        """None of these mints on a miss -- each is a closed set on the
         bare lookup tier, not the mutating
         :class:`~pcapkit.corekit.enum.EnumRegistry` one. Exercises every
         ``get`` (name hit, value hit, name miss, value miss) and then
         re-checks every size against the values pinned above, in the same
         process and without subprocess isolation: unlike a registry whose
-        ``_missing_`` mints a placeholder, every one of these seven either
+        ``_missing_`` mints a placeholder, every one of these either
         resolves an existing member or raises, so there is nothing for an
         earlier assertion in this method to leave behind for a later one to
         mistake for growth.
@@ -232,7 +232,7 @@ class NoMintingTests(unittest.TestCase):
 
 
 class GetByNameAndValueTests(unittest.TestCase):
-    """``get`` resolves by name and by value on each of the seven, uniformly
+    """``get`` resolves by name and by value on each of these, uniformly
     through the base's own inherited implementation -- none of them carries
     an override (GitHub issue #935)."""
 
@@ -286,10 +286,10 @@ class GetByNameAndValueTests(unittest.TestCase):
 
 
 class FailedLookupTests(unittest.TestCase):
-    """What a miss raises on each of the seven -- a name miss is
+    """What a miss raises on each of these -- a name miss is
     :exc:`KeyError`-derived and a value miss :exc:`ValueError`-derived,
     matching stdlib :class:`~enum.Enum`'s own shape (GitHub issue #923) on
-    every one of the seven, uniformly through the base's own ``get`` (GitHub
+    every one of them, uniformly through the base's own ``get`` (GitHub
     issue #935).
     """
 
@@ -487,16 +487,16 @@ class InheritedQuietnessTests(unittest.TestCase):
 
 
 class AllSevenInheritTheBareClassmethodTests(unittest.TestCase):
-    """All seven inherit the base's ``classmethod`` outright, none
+    """Each inherits the base's ``classmethod`` outright, none
     declaring a ``get`` of its own.
 
     For :class:`FastBindingAcknowledgmentStatus` and
     :class:`IPv6AddressPrefixCode` that is the owner's ruling on GitHub pull
     request #940 -- no override rather than one widened to accept
-    ``default`` -- so the seven are one uniform case. A test that only
-    checked the decorator would pass identically whether an override were
-    kept or converted, so this also asserts that ``get`` is absent from each
-    class's own ``__dict__``.
+    ``default`` -- so they are one uniform case. A test that only checked
+    the decorator would pass identically whether an override were kept or
+    converted, so this also asserts that ``get`` is absent from each class's
+    own ``__dict__``.
     """
 
     def test_all_seven_inherit_the_bare_classmethod(self) -> None:
@@ -512,13 +512,13 @@ class AllSevenInheritTheBareClassmethodTests(unittest.TestCase):
             with self.subTest(cls=cls.__name__):
                 self.assertIsInstance(inspect.getattr_static(cls, 'get'), classmethod)
                 # Inherited, not redeclared: the class's own ``__dict__`` carries
-                # no ``get`` of its own -- which holds for all seven alike.
+                # no ``get`` of its own -- which holds for each of them alike.
                 self.assertNotIn('get', vars(cls))
 
 
 class NonCanonicalKeyConvergenceTests(unittest.TestCase):
     """The point of GitHub issue #935's final ruling, made literally true:
-    ``get(None)`` and ``get(1.5)`` answer alike on all seven.
+    ``get(None)`` and ``get(1.5)`` answer alike on every one of them.
 
     An override branching on ``isinstance(key, int)`` routes every other
     type through its own *name* path -- so a key that is neither an
@@ -530,9 +530,9 @@ class NonCanonicalKeyConvergenceTests(unittest.TestCase):
     :meth:`~pcapkit.corekit.enum.EnumLookup._validate_value` and the
     constructor, reaching :meth:`_missing_` and answering with an
     :exc:`~pcapkit.utilities.exceptions.EnumValueError`. With no override,
-    all seven answer both keys the same way -- measured here rather than
-    assumed, since "all seven behave alike" is exactly the claim GitHub
-    issue #935 set out to make true.
+    they all answer both keys the same way -- measured here rather than
+    assumed, since "they all behave alike" is exactly the claim GitHub issue
+    #935 set out to make true.
 
     Scope, stated as narrowly as the evidence supports: what this settles is
     the exception a key of some third type raises. Whether any caller passes

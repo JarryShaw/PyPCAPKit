@@ -400,8 +400,8 @@ def load_module(module_name: str, relative_path: str,
 
     Both halves of that write to :data:`sys.modules` -- the stub parents, and
     ``module_name`` itself -- so both are taken back off again when ``test``
-    finishes, via :func:`restore_modules_after`. Before issue #674 they were not,
-    and test modules left a bare ``pcapkit`` bound for whatever ran next.
+    finishes, via :func:`restore_modules_after`. Without that, a test module
+    leaves a bare ``pcapkit`` bound for whatever runs next (issue #674).
 
     Args:
         module_name: Dotted name to execute the file under, e.g.
@@ -587,8 +587,8 @@ def _reset_abc_caches() -> None:
 
     :func:`abc._reset_caches` is a CPython internal (present on both the C
     ``_abc`` and pure-python ``_py_abc`` backends); if a future runtime drops
-    it this degrades to the previous, occasionally-flaky behaviour rather than
-    erroring.
+    it this degrades to skipping the reset, which is occasionally flaky,
+    rather than erroring.
     """
     reset = getattr(abc, '_reset_caches', None)
     if reset is None:  # pragma: no cover
@@ -748,9 +748,9 @@ def _running_test_case() -> 'Optional[unittest.TestCase]':
     same frame, so one handed some other, finished :class:`~unittest.TestCase`
     would otherwise win the walk -- and a cleanup registered on a test that has
     already finished is never run, which is the original leak with an extra step
-    and no error to show for it. Measured before the check was added: a ten-name
-    leak, silently. Skipping the idle candidate lets the walk continue to the
-    method frame above, which is the running test.
+    and no error to show for it. Measured without the check: a ten-name leak,
+    silently. Skipping the idle candidate lets the walk continue to the method
+    frame above, which is the running test.
 
     Returns:
         The running test, or :data:`None` when the caller is not inside a running

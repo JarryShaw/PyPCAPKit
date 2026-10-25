@@ -84,7 +84,7 @@ class TestExperimentalHasNoGroup(unittest.TestCase):
 
 
 class TestUnitTestsKeepsARunPerCommit(unittest.TestCase):
-    """unit-tests.yml is unchanged: only a pull request's run is superseded."""
+    """unit-tests.yml keeps a run per commit: only a pull request's run is superseded."""
 
     def setUp(self) -> None:
         self.unit = Concurrency('unit-tests.yml')

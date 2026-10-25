@@ -129,8 +129,8 @@ class NestedPacketContextSemanticsTests(unittest.TestCase):
         raw = b'\xaa\x03\x22\xbb\xcc'
         outer = Outer.unpack(raw, len(raw), None)
 
-        # The bug, fixed: 'length' is not Inner's own field, and resolves to
-        # Outer's by falling through rather than raising KeyError.
+        # 'length' is not Inner's own field, and resolves to Outer's by
+        # falling through rather than raising KeyError (#445).
         self.assertEqual(outer.inner.body, b'\xbb\xcc')
         self.assertEqual(captured['fallback_length'], 3)
 
@@ -173,7 +173,7 @@ class NestedPacketContextSemanticsTests(unittest.TestCase):
         self.assertNotIn('body', parent)
 
     def test_pcapng_byteorder_consumer_still_works_with_both_shapes(self) -> None:
-        """The one existing, hand-rolled ``__packet__`` fallback is unaffected.
+        """A hand-rolled ``__packet__`` fallback works with both shapes.
 
         :func:`~pcapkit.corekit.fields.byteorder.packet_byteorder` is called
         both with a plain dict built by hand -- as several tests and
@@ -188,7 +188,7 @@ class NestedPacketContextSemanticsTests(unittest.TestCase):
 
         outer = {'byteorder': 'little'}
 
-        # Hand-built, the shape every existing caller uses.
+        # Hand-built, as those callers build it.
         self.assertEqual(packet_byteorder({'__packet__': outer}), 'little')
         # What SchemaField hands a real nested schema.
         self.assertEqual(packet_byteorder(nested_packet_context(outer)), 'little')
@@ -236,8 +236,8 @@ class CGAParametersRegressionTests(unittest.TestCase):
     A CGA Parameters option could not be parsed at all: sizing
     ``CGAParameter.extensions`` (``pcapkit/protocols/schema/internet/mh.py``,
     ``CGAParameter.extensions``) reads ``pkt['length']``, a name only the
-    enclosing ``CGAParametersOption`` declares. No change to ``mh.py`` itself
-    was needed -- the fallback in ``nested_packet_context`` resolves it.
+    enclosing ``CGAParametersOption`` declares. ``mh.py`` needs nothing of
+    its own: the fallback in ``nested_packet_context`` resolves it.
 
     """
 
@@ -258,11 +258,10 @@ class CGAParametersRegressionTests(unittest.TestCase):
         )
         self.assertEqual(len(raw), 40)
 
-        # #446 (ForwardMatchField counted into Schema.__len__, fixed on
-        # #456/main) was a second, separate defect blocking this exact
-        # option: with #445 alone, this reached FieldValueError: Field
-        # parameters has invalid length rather than parsing. With both
-        # fixes applied, CGA Parameters parses end to end.
+        # Parsing end to end also needs #446's fix (ForwardMatchField
+        # counted into Schema.__len__, #456): with #445's alone, this
+        # raises FieldValueError: Field parameters has invalid length
+        # rather than parsing.
         m = MH(raw, len(raw), extension=True)
         option = m.info.options[Enum_Option.CGA_Parameters]
         parameter = option.parameters[0]

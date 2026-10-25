@@ -13,8 +13,8 @@ config ignores is not extracted and cannot be a flow source.
 * :class:`TestTheInitStep` checks ``Initialize CodeQL`` in
   :file:`codeql-analysis.yml` reads :file:`.github/codeql/codeql-config.yml`
   and nothing else.
-* :class:`TestTheConfig` checks the config ignores :file:`tests` and changes
-  nothing else: every query still runs, over every other path.
+* :class:`TestTheConfig` checks the config ignores :file:`tests` and sets
+  nothing else: every query runs, over every other path.
 
 """
 
@@ -59,7 +59,7 @@ class TestTheInitStep(unittest.TestCase):
 
 
 class TestTheConfig(unittest.TestCase):
-    """:file:`tests` left out, and the scan otherwise as it was."""
+    """:file:`tests` left out, and no other filter on the scan."""
 
     def test_only_the_tests_are_ignored(self) -> None:
         self.assertEqual(config()['paths-ignore'], ['tests'])

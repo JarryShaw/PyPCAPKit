@@ -20,18 +20,15 @@ parts that can, so that the specific defects it found cannot come back silently:
 
 #546's item 2 -- ``register_extractor_engine`` documenting a parameter named
 ``engine`` where the signature reads ``name`` -- is **not** tested here, because
-:file:`tests/test_docstring_contract.py` already checks that property across the
-whole of :mod:`pcapkit` and carried the defect as a :data:`KNOWN_DEFECTS` entry
-reading "owned by the registry docstring change". Fixing it is therefore a
-*deletion* from that tuple rather than a new test, and a second checker here would
-only be a narrower copy of a better one.
+:file:`tests/test_docstring_contract.py` checks that property across the whole of
+:mod:`pcapkit`, and a second checker here would only be a narrower copy of a
+better one.
 
 Deliberately **not** tested here either: whether a Sphinx cross-reference
 resolves. That is a property of the built inventory, not of the source, and the
 honest check for it is a nitpicky ``sphinx-build`` -- some 20 minutes, and it needs
 the docs toolchain installed. A unit test that re-implemented Sphinx's resolution
 rules would pass while the real build failed, which is worse than not testing it.
-The measured counts are recorded in the pull request instead.
 
 """
 

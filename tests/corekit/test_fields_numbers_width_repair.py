@@ -11,7 +11,7 @@ so the expression is plain floor division and the width comes out one octet shor
 for every value whose bit length is *not* an exact multiple of eight. The
 intended expression is ``math.ceil(value.bit_length() / 8)``.
 
-Two things about this suite are deliberate.
+These things about this suite are deliberate.
 
 **The boundaries are tested one method each, not one parametrised sweep.** The
 defect is a pattern rather than an instance -- it fails at *every* octet boundary
@@ -313,7 +313,7 @@ class WidthRepairSurroundingContractTests(unittest.TestCase):
     """The rest of the field's contract that the repair leans on.
 
     Each case here pins a statement or branch of ``numbers.py`` that the repair
-    depends on and that nothing reached before, which is why they live with the
+    depends on and that nothing else reaches, which is why they live with the
     #599 suite rather than apart from it.
     """
 

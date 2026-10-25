@@ -3,10 +3,10 @@
 
 The *House Conventions* pages, under :file:`docs/source/contributing/conventions/`,
 record the settled design rulings, and most of what they record is reasoning --
-which no test can check. Some of it is not: a count of classes, a per-class
-classification, a retired name, an exception type. Those are the parts that rot
-silently, because Sphinx builds without ``-W`` and without ``nitpicky``, so a page
-whose every factual claim has gone stale still renders and CI still passes.
+which no test can check. Some of it is not: a per-class classification, a retired
+name, an exception type. Those are the parts that rot silently, because Sphinx
+builds without ``-W`` and without ``nitpicky``, so a page whose every factual claim
+has gone stale still renders and CI still passes.
 
 GitHub issue #918 part 1 harvested the settled rulings onto a single page; part 2
 split it into :file:`docs/source/contributing/conventions/`, one file per
@@ -66,7 +66,7 @@ structure:
 Deliberately **not** checked here: whether the page's cross-references resolve. That is
 a property of the built inventory rather than of the source, for the reason
 :file:`tests/project/test_documentation_claims.py` gives at length, and the honest check
-is the rendered HTML. The measured result is recorded in the pull request instead.
+is the rendered HTML.
 
 """
 
@@ -99,21 +99,18 @@ CONVENTIONS_DIR = ROOT / 'docs' / 'source' / 'contributing' / 'conventions'
 INDEX = CONVENTIONS_DIR / 'index.rst'
 
 #: Every ``.. _label:`` anchor, in the order the index's toctree lists the files in.
-#: ``mint-criterion``, ``sentinel-convention`` and ``registry-protocol`` predate
-#: #918; ``extension-header-subclassing`` arrived with it, and ``process`` came
-#: next, on the owner's ruling that the settled *process*
-#: rulings -- the ``all`` extra, what a changelog entry is, and what the labels
-#: mean -- get a page of their own rather than being wedged onto a code-convention
-#: page. ``documentation`` came after it, carrying the rulings GitHub issue #719
-#: settled about the prose itself -- heading case, when a Mermaid graph beats a
-#: paragraph, and what a sentence on these pages may claim -- which had until then
-#: lived only in that thread. ``protocol-layer-placement`` carries the other ruling
-#: that thread settled -- which subpackage a dissector belongs in, decided by designed
-#: function rather than by encapsulation -- and sits beside the other class-hierarchy
-#: page. ``test-coverage`` came next, carrying GitHub issue #1203's rules for what the
-#: test suite has to prove, and ``utilities-or-corekit`` came last, carrying GitHub
-#: issue #1712's rule for which of those two packages a module belongs in. Every
-#: anchor is the bare file stem, which is what :data:`PAGES` below depends on.
+#: ``process`` holds, on the owner's ruling, the settled *process* rulings -- the
+#: ``all`` extra, what a changelog entry is, and what the labels mean -- on a page of
+#: their own rather than wedged onto a code-convention page. ``documentation`` carries
+#: the rulings GitHub issue #719 settled about the prose itself -- heading case, when
+#: a Mermaid graph beats a paragraph, and what a sentence on these pages may claim.
+#: ``protocol-layer-placement`` carries the other ruling that thread settled -- which
+#: subpackage a dissector belongs in, decided by designed function rather than by
+#: encapsulation -- and sits beside the other class-hierarchy page. ``test-coverage``
+#: carries GitHub issue #1203's rules for what the test suite has to prove, and
+#: ``utilities-or-corekit`` GitHub issue #1712's rule for which of those two packages
+#: a module belongs in. Every anchor is the bare file stem, which is what
+#: :data:`PAGES` below depends on.
 ANCHORS = (
     'mint-criterion',
     'sentinel-convention',
@@ -364,8 +361,8 @@ class ConventionAnchorTests(unittest.TestCase):
         :data:`INDEX`, which carries no ruling of its own; its children do. The
         second is worse than stale, because it is the standing instruction #918
         part 3 exists to keep alive, and on the index it tells a contributor to
-        write onto the wrong file. #918 part 2's first round moved the preamble
-        across unedited, and a cross-review caught it.
+        write onto the wrong file. A preamble moved across from a page unedited
+        fails this.
 
         Checked as a ban on the self-referential singular ``"this page"`` rather
         than against those exact sentences, so a rewrite that makes the same
@@ -415,10 +412,10 @@ class PhaseTwoRemainderTests(unittest.TestCase):
         """*"No enumeration remains outside the hierarchy"* -- against a runtime walk.
 
         GitHub issue #930 finished phase 2, so the page says it landed for every
-        non-registry enumeration. That replaces the figure checks on how many
-        remained outside and how many of the total had landed (#1811), which said
-        no more than the walk finding none outside -- and that is what fails here
-        once an enumeration is added outside :class:`~pcapkit.corekit.enum.EnumLookup`.
+        non-registry enumeration. No figure is checked for how many remain outside or
+        how many of the total landed (#1811): it would say no more than the walk
+        finding none outside -- and that is what fails here once an enumeration is
+        added outside :class:`~pcapkit.corekit.enum.EnumLookup`.
         """
         for claim in ('the phase landed for every non-registry enumeration',
                       '**No enumeration remains outside the hierarchy**'):
@@ -451,11 +448,10 @@ class PhaseTwoRemainderTests(unittest.TestCase):
     def test_the_audit_population_claims_hold_for_the_whole_population(self) -> 'None':
         """*The Audit, per Class*'s own population, against the same runtime walk.
 
-        The section opened with figures for the registries, their files, the
-        :class:`int`-valued, flag and ``aenum.StrEnum`` splits and the grand total,
-        which GitHub issue #949 wired to the walk and #1811 removed with the figures
-        themselves (#1103's ruling: a count drifts). What the section still claims of
-        the whole population is checked here: every registry is :class:`int`- or
+        The section gives no figures for the registries, their files, the
+        :class:`int`-valued, flag and ``aenum.StrEnum`` splits or the grand total
+        (#1811; #1103's ruling: a count drifts). What it claims of the whole
+        population is checked here: every registry is :class:`int`- or
         ``str``-valued, and every one of them is under :mod:`pcapkit.const`.
 
         """
@@ -579,7 +575,7 @@ class ExtensionHeaderClassificationTests(unittest.TestCase):
                          'assertions below assume may no longer hold')
 
     def test_the_table_covers_the_whole_family_and_nothing_else(self) -> 'None':
-        """A ninth extension header has to reach the page, not only the code."""
+        """A new extension header has to reach the page, not only the code."""
         listed = {name for row in self.rows[1:] for name in self._named(row[0])}
         self.assertEqual(listed, set(self.family),
                          'the page and IPv6_Ext.__subclasses__() disagree about which '
@@ -649,7 +645,7 @@ class RetiredNameTests(unittest.TestCase):
                          '#924 is that it was an intermediate state and never released')
 
     def test_the_shared_base_still_carries_the_name_the_ruling_left(self) -> 'None':
-        """The other half: the rename landed, rather than the name simply going."""
+        """The other half: the name was renamed, not simply removed."""
         from pcapkit.protocols.internet.ipv6_ext import IPv6_Ext
 
         self.assertEqual(IPv6_Ext.__name__, 'IPv6_Ext')
@@ -773,15 +769,14 @@ class GetOverrideContractTests(unittest.TestCase):
     on ``quiet=True``, #935 on an advertised signature that is refused, #940 on
     deleting an override that only reimplements the base. The remaining one, the
     ``@classmethod`` requirement for delegation, is **not** a ruling and is not
-    presented as one: it is
-    forced by the language, since zero-argument :func:`super` inside a
-    ``@staticmethod`` has nothing to bind, and #913 set the shape that #908 then
-    followed. Each states something the tree can be asked about. The page's
-    half is what rots: the same claims are already pinned in ``tests/corekit``
-    and ``tests/protocols`` against the *code*, so a later change that moves the code
+    presented as one: it is forced by the language, since zero-argument :func:`super`
+    inside a ``@staticmethod`` has nothing to bind, and #913 set the shape that #908
+    then followed. Each states something the tree can be asked about. The page's half
+    is what rots: the same claims are already pinned in ``tests/corekit`` and
+    ``tests/protocols`` against the *code*, so a later change that moves the code
     fails there, while a page still describing the old shape fails nothing. This
-    class is the other direction: it is what catches a stale audit row such as
-    *"Two of them define a ``get`` of their own"*, false since #940.
+    class is the other direction: it is what catches a stale audit row such as *"Two
+    of them define a ``get`` of their own"*, which #940 made false.
 
     """
 
@@ -852,11 +847,10 @@ class GetOverrideContractTests(unittest.TestCase):
                          'OptionType.get now delegates, so the page is wrong to list it '
                          'as the surviving staticmethod')
 
-        # Execute the outcomes rather than assert the page names them. The
-        # first draft of this test only grepped for the error string, and the
-        # string it grepped for was the wrong one -- the page claimed
+        # Execute the outcomes rather than assert the page names them. A grep
+        # for the error string cannot tell a wrong one -- the page once claimed
         # `RuntimeError: super(): no arguments` for a shape that actually raises
-        # `TypeError`, and a prose-only assertion could not tell.
+        # `TypeError`, and a prose-only assertion passed it.
         class _Base:
             @classmethod
             def get(cls, key, default=None):  # noqa: D102
@@ -874,12 +868,12 @@ class GetOverrideContractTests(unittest.TestCase):
 
         with self.assertRaises(TypeError) as caught:
             _WithParam.get('BASELINE-CONTROL')
-        # Substring chosen to survive CPython's own rewording: 3.10-3.12 say
-        # "obj must be an instance or subtype of type" while 3.13+ say "obj
-        # (instance of str) is not an instance or subtype of type (Cls)". Only
-        # `instance or subtype of type` is common to both, and pinning either
-        # full sentence would fail the required Compat legs that word it the other way --
-        # invisible locally, since this venv is 3.14.
+        # Substring chosen to survive CPython's own rewording: 3.10-3.12 say "obj must be
+        # an instance or subtype of type" while 3.13+ say "obj (instance of str) is not
+        # an instance or subtype of type (Cls)". Only `instance or subtype of type` is
+        # common to both, and pinning either full sentence would fail the required Compat
+        # legs that word it the other way -- invisible on a local run under one
+        # interpreter.
         self.assertIn('instance or subtype of type', str(caught.exception),
                       'zero-argument super() in a staticmethod binds the first '
                       'positional parameter -- the lookup key -- as its instance')
@@ -931,8 +925,8 @@ class GetOverrideContractTests(unittest.TestCase):
 
         Measured rather than read off the source, because the cost the ruling turns
         on is the side effect: a loud :class:`BaseError` logs at
-        :data:`logging.CRITICAL` and, until #983, also set
-        :data:`sys.tracebacklimit` to ``0`` for the whole process (#362), and a
+        :data:`logging.CRITICAL` -- without #983's fix it also sets
+        :data:`sys.tracebacklimit` to ``0`` for the whole process (#362) -- and a
         quiet one does neither.
 
         """
@@ -952,12 +946,11 @@ class GetOverrideContractTests(unittest.TestCase):
 
         self.addCleanup(_restore)
 
-        # Run the behavioural check unconditionally. An earlier version guarded it
-        # with `if not had:`, which meant a test that had already set
-        # sys.tracebacklimit turned this into a prose-only check that still
-        # reported pass -- silent degradation under test-order pollution rather
-        # than a failure. Clearing it first is safe because _restore puts whatever
-        # was there back.
+        # Run the behavioural check unconditionally. Guarded with `if not had:`, a
+        # test that had already set sys.tracebacklimit would turn this into a
+        # prose-only check that still reports pass -- silent degradation under
+        # test-order pollution rather than a failure. Clearing it first is safe
+        # because _restore puts whatever was there back.
         if had:
             del sys.tracebacklimit
         with self.assertRaises(EnumKeyError):
@@ -968,19 +961,19 @@ class GetOverrideContractTests(unittest.TestCase):
                          'ruled overrides follow the base here, not the reverse')
 
         flat = self._flat()
-        # The *claim*, not his wording. This asserted `'not be loud'` until GitHub issue
-        # #949, which is a fragment of the sentence he typed on the issue rather than
-        # anything the ruling turns on; the substance is that the first answer on #933 is
-        # not the ruling and the second one is. Occurs once on the page, checked.
+        # The *claim*, not his wording (GitHub issue #949): a fragment of the sentence he
+        # typed on the issue is not anything the ruling turns on; the substance is that
+        # the first answer on #933 is not the ruling and the second one is. Occurs once
+        # on the page, checked.
         self.assertIn('first declined, then reversed', flat,
                       "the page no longer records that #933's ruling is the owner's "
                       'reversal rather than his first answer, which is the whole reason '
                       'both answers are on the issue')
         # Anchored to the headline sentence, not the bare token. `quiet=True` occurs
-        # more than once on the page, so `assertIn('``quiet=True``')` was satisfied by a
-        # later mention -- inverting the ruling itself to `quiet=False` failed nothing.
-        # The same shape as the `labels: bug` assertion and the bare figure, which
-        # passed the same way, so the rule is explicit -- never assert a token
+        # more than once on the page, so `assertIn('``quiet=True``')` is satisfied by a
+        # later mention -- inverting the ruling itself to `quiet=False` would fail
+        # nothing. The same shape as the `labels: bug` assertion and the bare figure,
+        # which passed the same way, so the rule is explicit -- never assert a token
         # that appears more than once on the page it is meant to pin.
         self.assertIn('Raise the way the base raises, which means** ``quiet=True``', flat,
                       'the page no longer states the ruling as its headline, so a '
@@ -1044,8 +1037,8 @@ class GetOverrideContractTests(unittest.TestCase):
 
         # Derived, not listed: the population is every EnumLookup subclass those two
         # modules *define* -- re-exports from pcapkit.const.ngap.* are not helpers of
-        # theirs. An earlier version hard-coded a tally that disagreed with both its
-        # own name and the page, so the set is measured here and asserted by name.
+        # theirs. A hard-coded tally can disagree with both its own name and the
+        # page, so the set is measured here and asserted by name.
         import inspect
 
         from pcapkit.corekit.enum import EnumLookup
@@ -1096,9 +1089,9 @@ def _optional_dependencies() -> 'dict[str, list[str]]':
     (``grep -n tomli pyproject.toml`` finds nothing), so there is nothing to fall back to
     and adding one for a docs-claims test is not worth it.
 
-    **Verified against** :mod:`tomllib` **rather than asserted.** A second version
-    matched arrays with a non-greedy bracket pattern, which stopped at the first
-    literal ``]`` -- which mis-parsed several extras, silently:
+    **Verified against** :mod:`tomllib` **rather than asserted.** Matching arrays
+    with a non-greedy bracket pattern, which stops at the first literal ``]``, was
+    measured to mis-parse several extras, silently:
 
     * ``vendor`` came back **empty**, because the ``]`` inside ``"requests[socks]"``
       closed the match early.
@@ -1127,9 +1120,9 @@ def _optional_dependencies() -> 'dict[str, list[str]]':
             'pyproject.toml has no [project.optional-dependencies] section, so the '
             "page's extras claims have nothing to be checked against")
 
-    # Comments first: a comment may contain ``]`` or a quoted string, and both fooled
-    # the previous version. A ``#`` inside a requirement string is not a comment, so
-    # quoted spans are skipped rather than blindly cut at the first ``#``.
+    # Comments first: a comment may contain ``]`` or a quoted string, and both fool a
+    # bracket match. A ``#`` inside a requirement string is not a comment, so quoted
+    # spans are skipped rather than blindly cut at the first ``#``.
     stripped = []
     for line in block.group(1).splitlines():
         out, quote = [], None
@@ -1175,10 +1168,9 @@ class ProcessConventionTests(unittest.TestCase):
     deliberately pins neither against the owner's own phrasing. Quoting him is what
     the page is forbidden to do here -- his instruction on GitHub issue #918 was to
     paraphrase -- and asserting a quoted sentence is separately a trap this module has
-    already been bitten by: tests elsewhere in this file pinned two off-hand replies of
-    his as literal strings, which made a sentence typed into a GitHub thread a CI build
-    dependency. GitHub issue #949 removed the last of those. Attribution lives in the
-    issue number the page cites; the tests check substance.
+    already been bitten by: pinning an off-hand reply of his as a literal string makes
+    a sentence typed into a GitHub thread a CI build dependency (GitHub issue #949).
+    Attribution lives in the issue number the page cites; the tests check substance.
 
     """
 
@@ -1283,12 +1275,12 @@ class ProcessConventionTests(unittest.TestCase):
                 self.assertIn(extra, extras,
                               f'the {extra} extra is gone, so the page names an '
                               'extra a user cannot install')
-                # Compare *requirements*, not the extra's name against them. The
-                # previous form asked whether 'DPKT' was an element of
-                # ['emoji', 'cryptography>=3.4', 'pycrate'] -- element equality against
-                # a requirement string, so it could never be true and the regression its
-                # own message names was unreachable. Measured: widening `all` back to
-                # the pre-#910 engine set left this green while the sibling assertEqual
+                # Compare *requirements*, not the extra's name against them. Asking
+                # whether 'DPKT' is an element of ['emoji', 'cryptography>=3.4',
+                # 'pycrate'] is element equality against a requirement string, which can
+                # never be true, so the regression its own message names would be
+                # unreachable. Measured: with that form, widening `all` to take the
+                # engine extras back left this green while the sibling assertEqual
                 # caught it.
                 self.assertFalse(
                     set(extras[extra]) & set(extras['all']),
@@ -1306,11 +1298,10 @@ class ProcessConventionTests(unittest.TestCase):
         """The ruling's substance, in the page's words rather than the owner's.
 
         The claim is narrow on purpose: entries are grouped by topic and are **not**
-        one per commit. The grouping scheme itself was open when this test was first
-        written and the page then carried a disclaimer saying so; it was ruled shortly
-        afterwards -- a section per top-level module, with the kind headings nested
-        inside -- so the page records the scheme and this checks for it. What is still
-        unruled is narrower: which module an entry spanning several belongs under.
+        one per commit. The grouping scheme is ruled too -- a section per top-level
+        module, with the kind headings nested inside -- so the page records the scheme
+        and this checks for it. What is still unruled is narrower: which module an
+        entry spanning several belongs under.
 
         """
         self.assertIn('not one line per commit', self.flat,
@@ -1467,13 +1458,12 @@ class ProcessConventionTests(unittest.TestCase):
                 if line.startswith('labels:'):
                     templated[template.name] = line.split(':', 1)[1].strip()
 
-        # The dependabot attribution, which had no pin at all -- which is how the page
-        # came to name ``github_actions`` as dependabot-applied while
-        # .github/dependabot.yml configured only ``pip``. Since #1968 it configures
-        # ``github-actions`` too, so the label is dependabot's on a workflow bump and
-        # hand-applied everywhere else. Getting either half wrong is this section's own
-        # point stated backwards, and the places the page mentioned it once disagreed
-        # with each other about ``python``.
+        # The dependabot attribution: unpinned, the page once named ``github_actions``
+        # as dependabot-applied while .github/dependabot.yml configured only ``pip``.
+        # It configures ``github-actions`` too (#1968), so the label is dependabot's on
+        # a workflow bump and hand-applied everywhere else. Getting either half wrong
+        # is this section's own point stated backwards, and the places the page
+        # mentioned it once disagreed with each other about ``python``.
         dependabot = (ROOT / '.github' / 'dependabot.yml').read_text(encoding='utf-8')
         ecosystems = re.findall(r'package-ecosystem:\s*"([^"]+)"', dependabot)
 
@@ -1488,14 +1478,13 @@ class ProcessConventionTests(unittest.TestCase):
         # issue #949 asked to be looked at. Every sentence pairing the tool with the
         # label is checked instead, so the phrasing does not matter.
         #
-        # Proximity is not the test, and a first attempt at #949 that used it was wrong:
-        # the section then stated more than once, deliberately, that ``github_actions``
-        # was *not* dependabot's, and each of those sentences named the tool and the
-        # label together.
-        # Distinguishing an attribution from a denial by looking for a negation nearby
-        # also failed -- the attributing bullet's own sentence ended "so it never opens a
-        # workflow bump here", so the negation was present in the sentence that made the
-        # claim as well as in the two that denied it.
+        # Proximity is not the test, and was measured wrong on #949: the section then
+        # stated more than once, deliberately, that ``github_actions`` was *not*
+        # dependabot's, and each of those sentences named the tool and the label
+        # together. Distinguishing an attribution from a denial by looking for a
+        # negation nearby also failed -- the attributing bullet's own sentence ended
+        # "so it never opens a workflow bump here", so the negation was present in the
+        # sentence that made the claim as well as in the two that denied it.
         #
         # So the page's attribution is *parsed* instead: the one clause that says what
         # dependabot puts on its pull requests is located, the labels named inside it are
@@ -1600,7 +1589,7 @@ class ProcessConventionTests(unittest.TestCase):
             f'can see and no build can warn about: {mismatched}')
 
     def test_the_page_describes_the_changelog_grouping_as_it_is(self) -> 'None':
-        """The current shape of ``1.5.0.rst``, counted rather than eyeballed.
+        """The shape of ``1.5.0.rst``, counted rather than eyeballed.
 
         What is checked is the file's shape: one ``-`` underlined section per
         top-level module plus one for what belongs to none, each carrying ``~``
@@ -1634,8 +1623,8 @@ class ProcessConventionTests(unittest.TestCase):
             [], [k for k in kinds if k not in ('Added', 'Changed', 'Fixed')],
             'a kind subsection is named something other than Added/Changed/Fixed')
 
-        # The inline form is gone. This is the half that makes the claim falsifiable in
-        # the direction that matters: a partial revert would restore it.
+        # No inline form. This is the half that makes the claim falsifiable in the
+        # direction that matters: an entry written the inline way would fail it.
         self.assertEqual(
             [], re.findall(r'(?m)^\* \*\*(?:Added|Changed|Fixed)\*\*', changelog),
             'an entry carries an inline kind label again, so the file is back to the '

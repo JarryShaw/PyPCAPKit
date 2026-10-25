@@ -69,12 +69,12 @@ def discover_address_typed_switches() -> 'set[tuple[str, str, str]]':
     """Find every address-typed :class:`SwitchField` declaration in the schema tree.
 
     Walks :attr:`Schema.__fields__` for every :class:`Schema` subclass rather than
-    grepping annotations, because three of the switches --
+    grepping annotations, because some of the switches --
     ``mh.BindingIdentifierOption.address`` and both
     ``SMFIdentificationBasedDPDOption.tid`` -- are wrapped in a
     :class:`~pcapkit.corekit.fields.misc.ConditionalField` and so are invisible to
-    a grep for a ``SwitchField`` annotation. #508's own table listed seven for
-    exactly that reason; there are ten.
+    a grep for a ``SwitchField`` annotation. #508's own table missed them for
+    exactly that reason.
 
     Returns:
         ``(module, class, attribute)`` for each distinct declaration. Declarations
@@ -248,9 +248,9 @@ class SwitchFieldBoolDispatchTests(unittest.TestCase):
 
         The table above is hand-written, so on its own it proves nothing about
         switches nobody listed -- which is the failure mode #491 and #508 share.
-        Rediscovering them from ``Schema.__fields__`` and comparing closes that:
-        ten declarations, three of which a ``SwitchField`` annotation grep cannot
-        see because they are ``ConditionalField``-wrapped.
+        Rediscovering them from ``Schema.__fields__`` and comparing closes that,
+        including the declarations a ``SwitchField`` annotation grep cannot see
+        because they are ``ConditionalField``-wrapped.
         """
         discovered = discover_address_typed_switches()
         tabled = {(module, name, attr)
@@ -263,7 +263,7 @@ class SwitchFieldBoolDispatchTests(unittest.TestCase):
                 f'only tabled: {sorted(tabled - discovered)}')
         self.assertEqual(len(discovered), 10)
 
-        # and the three that an annotation grep misses really are wrapped
+        # and the ones an annotation grep misses really are wrapped
         from pcapkit.corekit.fields.misc import ConditionalField
 
         wrapped = {(module, name, attr)
@@ -447,11 +447,11 @@ class PayloadFieldProtocolNameTests(unittest.TestCase):
     def test_an_unregistered_name_warns_and_still_falls_back_to_raw(self) -> None:
         """A name the registry does not hold is a caller's mistake, so it warns.
 
-        The fallback itself is kept: refusing the assignment would reject a
-        lenient spelling the field has always accepted, and :obj:`None` -- hence
+        The fallback itself stays: refusing the assignment would reject a
+        lenient spelling the field accepts, and :obj:`None` -- hence
         :class:`~pcapkit.protocols.misc.raw.Raw` -- remains a legitimate state
-        for a payload whose protocol is genuinely not known. What was wrong was
-        only that nothing said so.
+        for a payload whose protocol is genuinely not known. The warning is what
+        tells the caller.
 
         """
         from pcapkit.corekit.fields.misc import PayloadField

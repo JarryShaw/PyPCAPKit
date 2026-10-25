@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """#1660: the Python version tiers are declared once, in :file:`.github/python-versions.toml`.
 
-Before #1660 every matrix spelt its versions out, so a tier change -- 3.11
-reaching end-of-life, a new pre-release -- meant editing many files by hand.
+With every matrix spelling its versions out, a tier change -- 3.11 reaching
+end-of-life, a new pre-release -- means editing many files by hand.
 :file:`util/python_versions.py` reads the file instead, and each workflow takes
 its matrices, and each single-interpreter job its ``latest``, from that script's
 step outputs. These things are pinned here:
@@ -11,7 +11,7 @@ step outputs. These things are pinned here:
   file, ``latest`` is the newest supported CPython (the owner's ruling on
   #1661), each exemption's reason is the comment above it, and the script runs
   on the ``python3`` of every runner that runs it.
-* **Nothing moved.** The tiers as this change introduced them expand to exactly
+* **Nothing moved.** The tiers as #1660 introduced them expand to exactly
   the legs, in the same order, that ``main`` spelt out at :data:`MAIN`, apart
   from the one deliberate move: the coverage leg and the ``gate`` from 3.14 to
   ``latest``, 3.15. Job-name templates are compared too, since rulesets match
@@ -231,8 +231,8 @@ KTLO_AT_MAIN = [{'python-version': '3.7', 'ktlo': True, 'os': 'ubuntu-22.04'},
                 {'python-version': '3.9', 'ktlo': True, 'os': 'ubuntu-24.04'},
                 {'python-version': '3.10', 'ktlo': True}]
 CONDA_AT_MAIN = {'os': ['macos-latest', 'ubuntu-latest'], 'python-version': SUPPORTED_AT_MAIN}
-#: The conda jobs' ``os`` axis since #1822, which added the Intel macOS runner,
-#: and #2060, which added the Windows one.
+#: The conda jobs' ``os`` axis, with the Intel macOS runner (#1822) and the
+#: Windows one (#2060).
 CONDA_JOBS = (('create-release.yml', 'conda'), ('cron-conda.yml', 'conda-dist'))
 CONDA_OS = ['macos-latest', 'macos-26-intel', 'ubuntu-latest', 'windows-latest']
 MAIN_MATRICES = {
@@ -268,12 +268,12 @@ TEMPLATES_AT_MAIN = {
         'Conda deployment (update) on ${{ matrix.os }} with Python ${{ matrix.python-version }}',
 }
 #: Each unit-tests.yml job MAIN ran KTLO legs in, and the job those legs run in
-#: since #1738, which nothing gating waits on.
+#: (#1738), which nothing gating waits on.
 KTLO_TWINS = {('unit-tests.yml', 'test'): 'test-ktlo', ('unit-tests.yml', 'integration'): 'integration-ktlo',
               ('unit-tests.yml', 'pypcap-parity'): 'pypcap-parity-ktlo'}
 #: Ruleset 23497679's required contexts at MAIN.
 REQUIRED_AT_MAIN = {'Required checks passed'} | {f'Compat Python {v}' for v in SUPPORTED_AT_MAIN}
-#: The tiers MAIN's matrices encode, as this change first wrote them into the file.
+#: The tiers MAIN's matrices encode, as #1660 first wrote them into the file.
 TIERS_AT_MAIN = {
     'latest': '3.15',
     'versions': {
@@ -478,7 +478,7 @@ class TestTheFileAndTheScript(unittest.TestCase):
         self.assertEqual(self.parse_github_output(output.read_text(encoding='utf-8')), live_outputs())
 
     def test_the_workflow_commands_byte_for_byte(self) -> None:
-        """#2047: the whole of each run's output, so moving it onto util/_actions.py can be shown to change nothing.
+        """#2047: the whole of each run's output, so any change to what is written fails here.
 
         Each multi-line output's delimiter is fresh, so it is read as ``EOF`` once
         each is shown to open and close one value, and to differ from the others.
@@ -508,10 +508,10 @@ class TestTheFileAndTheScript(unittest.TestCase):
         self.assertEqual(output.read_bytes().decode('utf-8'), written)
 
     def test_the_file_named_in_an_error_is_escaped(self) -> None:
-        """#2047: ``--file``'s ``%`` and line breaks are escaped, as the error text's always were.
+        """#2047: ``--file``'s ``%`` and line breaks are escaped, as the error text's are.
 
-        Before util/_actions.py the path went out as written, so a ``%`` in it read
-        as the start of an escape, and a line break split the command in two.
+        Written out unescaped, a ``%`` in the path would read as the start of an
+        escape, and a line break would split the command in two.
 
         """
         missing = self.tmp / '50%\nmissing.toml'
@@ -666,10 +666,10 @@ class TestNothingMovedButLatest(unittest.TestCase):
     def test_no_job_name_changes_but_the_gates(self) -> None:
         """Rulesets match check names literally, so each template and leg name stays.
 
-        ``test``'s template is :data:`MAIN`'s again since its experimental legs
-        left it for a job of their own (#1732). Since #1738 each job of
-        :data:`KTLO_TWINS` names its legs with a template of its own, the KTLO
-        job's ending `` (KTLO)``, so what stays is each leg's rendered name.
+        ``test``'s template is :data:`MAIN`'s, its experimental legs being a
+        job of their own (#1732). Each job of :data:`KTLO_TWINS` names its legs
+        (#1738) with a template of its own, the KTLO job's ending `` (KTLO)``,
+        so what stays is each leg's rendered name.
 
         """
         for (name, job_id), template in TEMPLATES_AT_MAIN.items():

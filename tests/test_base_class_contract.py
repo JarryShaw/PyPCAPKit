@@ -32,23 +32,20 @@ years) and issue #513 (the ``extraction.py`` gates rejecting the library's own
 built-ins for three years). These tests replace the convention with
 something that fails.
 
-The sweep and the migration are both complete: every site is renamed, the
-last batch of them (all ``ProtocolBase``, across ``pcapkit/protocols/`` and some
-``pcapkit/foundation/`` modules) having landed in #514 part (c) once #726 and
-#742 merged. :data:`PENDING_ALIAS_PATHS` is therefore empty -- its intended end
-state -- and :func:`is_pending` is trivially ``False`` for every path; the dict
-stays as a mechanism rather than being deleted, in case a future ``*Base``
-family needs the same transitional carve-out.
+Every site is renamed (#514 part (c), #726, #742). :data:`PENDING_ALIAS_PATHS`
+is therefore empty -- its intended end state -- and :func:`is_pending` is
+trivially ``False`` for every path; the dict stays as a mechanism rather than
+being deleted, in case a future ``*Base`` family needs the same transitional
+carve-out.
 
-:class:`RegistrationGateTests` is a regression pin, not a new behaviour. Every
-assertion in it already held before part (c), because parts (a) and (b)
-(pull requests #547 and #570) made registration opt-in on a keyword. It is written down
-because the ruling promotes it from an accident of where the hook happens to live
-into the specification, and an unasserted specification is one refactor away from
-being untrue. The property worth noticing is the last one: a library-style
-subclass cannot opt in *even if it tries*, because the ``*Base`` hook does not
-accept the keyword at all. That is the ``final``-substitute the split was built
-to provide, and it is stronger than a convention.
+:class:`RegistrationGateTests` is a regression pin: registration is opt-in on a keyword
+(#514 parts (a) and (b), pull requests #547 and #570). It is written down because the
+ruling promotes it from an accident of where the hook happens to live into the
+specification, and an unasserted specification is one refactor away from being untrue.
+The property worth noticing is the last one: a library-style subclass cannot opt in
+*even if it tries*, because the ``*Base`` hook does not accept the keyword at all. That
+is the ``final``-substitute the split was built to provide, and it is stronger than a
+convention.
 
 .. note::
 
@@ -140,13 +137,12 @@ NOT_IN_SCOPE = frozenset({'FieldBase'})
 #: owns the whole ``pcapkit/protocols/`` subtree and enumerating its sites
 #: would turn this into a changelog.
 #:
-#: Each entry is a promise, not an exemption: when the named pull request lands,
-#: the alias comes out and the entry goes with it. **An empty dict is the end
-#: state**, and :meth:`BaseClassAliasTests.test_no_library_module_imports_a_base_under_its_public_name`
-#: fails on an entry that has stopped matching anything, so a stale promise
-#: cannot sit here unnoticed once its pull request merges. #514 part (c) landed
-#: the last sites, so this is empty and every alias check below runs
-#: unconditionally.
+#: Each entry is a promise, not an exemption: when the named pull request lands, the alias
+#: comes out and the entry goes with it. **An empty dict is the end state**, and
+#: :meth:`BaseClassAliasTests.test_no_library_module_imports_a_base_under_its_public_name`
+#: fails on an entry that has stopped matching anything, so a stale promise cannot sit
+#: here unnoticed once its pull request merges. It is empty, so every alias check below
+#: runs unconditionally.
 PENDING_ALIAS_PATHS = {}  # type: dict[str, int]
 
 

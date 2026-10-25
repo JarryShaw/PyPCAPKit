@@ -42,9 +42,8 @@ and says so:
 :meth:`DocstringCitationTests.test_quoted_rfc_sentences_cite_their_own_section`
     A docstring that quotes a sentence from :rfc:`8200` verbatim and attributes
     it to a section that does not contain it. Issues #517 and #530 were both
-    exactly this, in sibling files, and neither was catchable by anything here
-    before -- see :data:`RFC8200_QUOTED_SENTENCES` for what this can and cannot
-    prove.
+    exactly this, in sibling files -- see :data:`RFC8200_QUOTED_SENTENCES` for
+    what this can and cannot prove.
 
 Why a documented name may legitimately be absent from the signature, which is
 the trap this module has to avoid: this project documents keyword arguments
@@ -126,10 +125,9 @@ if TYPE_CHECKING:
 PACKAGE = ROOT / 'pcapkit'
 
 #: Napoleon headers that open a parameter block. ``Args`` is the house
-#: spelling, but ``Arguments`` is used 200-odd times and ``Parameters`` and
-#: ``Keyword Args`` a handful more, and a checker that matched only ``Args``
-#: would silently skip every one of them -- which is how a census of this
-#: class undercounts by a tenth.
+#: spelling, but ``Arguments``, ``Parameters`` and ``Keyword Args`` are used
+#: too, and a checker that matched only ``Args`` would silently skip every
+#: one of them -- which is how a census of this class undercounts.
 PARAM_SECTIONS = frozenset({
     'Args', 'Arguments', 'Parameters', 'Keyword Args', 'Keyword Arguments',
 })
@@ -170,9 +168,9 @@ OTHER_SECTIONS = frozenset({
 #:
 #: Values are *sets* of acceptable sections rather than one section, because a
 #: sentence can honestly belong to more than one: the TLV deferral below is
-#: worded identically in Section 4.3 and Section 4.6 (rfc8200.txt lines 722 and
-#: 1268), so a docstring citing either is right and a checker demanding one
-#: would fail a correct citation in the sibling header.
+#: worded identically in Section 4.3 and Section 4.6, so a docstring citing
+#: either is right and a checker demanding one would fail a correct citation
+#: in the sibling header.
 RFC8200_QUOTED_SENTENCES = {
     'the length of the option data field of this option, in octets':
         frozenset({'4.2'}),
@@ -236,11 +234,11 @@ def _documented_names(doc: 'str') -> 'tuple[list[tuple[str, bool]], list[str]]':
     A checker keyed on the absolute column matches one and silently skips the
     other.
 
-    It is *not* for the reason an earlier draft of this docstring gave, which
-    said ``__doc__`` is dedented at compile time so the source and runtime
-    columns differ. That is true of ``__doc__`` and irrelevant here, because
-    :func:`functions` reads ``ast.get_docstring(node, clean=False)``, which
-    preserves the raw source indentation. Measured on 3.14.7 for a method whose
+    It is *not* because ``__doc__`` is dedented at compile time so the source
+    and runtime columns differ. That is true of ``__doc__`` and irrelevant
+    here, because :func:`functions` reads
+    ``ast.get_docstring(node, clean=False)``, which preserves the raw source
+    indentation. Measured on 3.14.7 for a method whose
     ``Args:`` sits at eight spaces::
 
         get_docstring(clean=False)  ->  indents [0, 8, 12, 12]
@@ -249,8 +247,7 @@ def _documented_names(doc: 'str') -> 'tuple[list[tuple[str, bool]], list[str]]':
 
     So this module never sees the dedented form at all. The relative
     measurement is right, but for the nesting reason above rather than that
-    one -- recorded because a wrong rationale in a checker for wrong
-    rationales is worth correcting explicitly.
+    one.
 
     """
     lines = doc.splitlines()
@@ -341,11 +338,11 @@ def _raised_names(node: 'ast.AST') -> 'set[str]':
     * Only :class:`ast.Name` and :class:`ast.Attribute` raise targets are
       resolved, so a computed ``raise REGISTRY[code]`` would register neither as
       a matching raise nor, in :func:`_calls_anything_callable`, as a call.
-      Inert: across ``pcapkit/`` the 1,060 raise targets break down as
-      1,058 ``Name`` and 2 ``Attribute``, and **no** ``Subscript``.
+      Inert: across ``pcapkit/`` every raise target is a ``Name`` or an
+      ``Attribute``, and **none** a ``Subscript``.
     * :func:`ast.walk` descends into nested ``def``\\ s, so a ``raise`` inside a
-      local helper is attributed to the function enclosing it. 19 documented
-      functions contain a nested ``def`` and 6 of those raise inside it.
+      local helper is attributed to the function enclosing it, and some
+      documented functions raise inside a nested ``def``.
 
     That second one reads like a bug and is the right answer for a nested
     ``def`` that is a local helper the enclosing body actually calls, so the

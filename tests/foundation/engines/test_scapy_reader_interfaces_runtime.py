@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """The scapy engine takes a packet's link type and clock from its interface.
 
-Three things :class:`scapy.utils.PcapNgReader` reads differently from the
-default engine, all fixed in the reader subclass of
+What :class:`scapy.utils.PcapNgReader` reads differently from the default
+engine, all fixed in the reader subclass of
 :mod:`pcapkit.foundation.engines.scapy`:
 
 * #1503 -- a Simple Packet Block carries no timestamp. Scapy leaves the packet

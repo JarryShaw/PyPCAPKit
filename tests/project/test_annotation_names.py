@@ -94,14 +94,13 @@ def _as_string(node: 'Optional[ast.expr]') -> 'Iterator[tuple[str, int]]':
 
 #: :class:`ast.TypeAlias` where the running interpreter has it, else ``()``.
 #:
-#: ``ast.TypeAlias`` and ``ast.TypeVar`` are :pep:`695` nodes, new in Python 3.12,
-#: and the oldest CI leg to run the suite is 3.8 (KTLO, #1633), the oldest supported
-#: one 3.11 -- so naming either one directly raises :exc:`AttributeError` on 3.8-3.11,
-#: and does so in *every* test in this module rather than one, because
-#: :func:`bound_names` walks every node of every file. Resolving
-#: them through :func:`getattr` to an empty tuple instead leaves both branches
-#: fully live on 3.12+ and merely unreachable below it, since :func:`isinstance`
-#: against ``()`` is always :data:`False`.
+#: ``ast.TypeAlias`` and ``ast.TypeVar`` are :pep:`695` nodes, new in Python 3.12, and
+#: the oldest CI leg to run the suite is 3.8 (KTLO, #1633) -- so naming either one
+#: directly raises :exc:`AttributeError` on 3.8-3.11, and does so in *every* test in
+#: this module rather than one, because :func:`bound_names` walks every node of every
+#: file. Resolving them through :func:`getattr` to an empty tuple instead leaves both
+#: branches fully live on 3.12+ and merely unreachable below it, since
+#: :func:`isinstance` against ``()`` is always :data:`False`.
 #:
 #: A :data:`sys.version_info` comparison would work too, and is not chosen: it
 #: writes the version down a second time, next to the attribute it guards, and the
@@ -189,7 +188,7 @@ def referenced_names(source: str) -> 'Optional[set[str]]':
     Which is why the descent below is explicit rather than :func:`ast.walk`: the
     two places a string inside an annotation is a *value* and not a type have to be
     skipped, or they become false positives. ``Literal["big", "little"]`` names no
-    type ``big``, and this package writes 20-odd of those; and everything after the
+    type ``big``, and this package writes many of those; and everything after the
     first argument of ``Annotated[T, ...]`` is metadata. Both are recognised by the
     subscripted name, which is how a type checker recognises them too.
 
@@ -373,10 +372,10 @@ class AnnotationNamesAreInScopeTests(unittest.TestCase):
 
         The other half of following nested strings, and the reason the descent has
         to know what it is descending into: inside ``Literal`` a string is a
-        *value*, and this package writes twenty-odd of them. Following those
-        indiscriminately reports every literal member as an unresolvable name --
-        a false positive on real code, which is worse than the missed defect it
-        was meant to fix. ``Annotated``'s trailing metadata is the same case.
+        *value*, and this package writes many of them. Following those
+        indiscriminately reports every literal member as an unresolvable name -- a
+        false positive on real code, which is worse than the missed defect it was
+        meant to fix. ``Annotated``'s trailing metadata is the same case.
 
         """
         self.assertEqual(

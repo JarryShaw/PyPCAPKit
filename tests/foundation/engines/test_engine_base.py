@@ -202,7 +202,7 @@ class EngineBaseTests(unittest.TestCase):
         register.assert_called_once_with('parentengine', Parent)
 
         # the substitute for ``final``: inheriting a registered class registers
-        # nothing, where the old fallback registered it as 'derived'
+        # nothing, where a ``cls.name`` fallback would register it as 'derived'
         with mock.patch('pcapkit.foundation.extraction.Extractor.register_engine') as register:
             class Derived(Parent):
                 pass

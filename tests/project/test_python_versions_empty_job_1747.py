@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """#1747: the version updater names a job its update would leave with no leg.
 
-Since #1746, ``pypcap-parity`` holds the supported versions below 3.12 only, so
-3.11 reaching end of life leaves its matrix empty while ``required-checks``
-still needs it. The owner's ruling on #1747: the updater retires nothing; its
+``pypcap-parity`` holds the supported versions below 3.12 only (#1746), so 3.11
+reaching end of life leaves its matrix empty while ``required-checks`` still
+needs it. The owner's ruling on #1747: the updater retires nothing; its
 proposal flags the job as a manual step, for him to retire or remove it, rather
 than quietly writing a zero-leg matrix. The tier file is still written as
 computed, and the fingerprint is still the tiers alone.

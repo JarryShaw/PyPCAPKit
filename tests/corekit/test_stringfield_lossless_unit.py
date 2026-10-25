@@ -104,7 +104,7 @@ class TestStringFieldLossless(unittest.TestCase):
     def test_undecodable_octet_round_trips_as_replacement_text(self) -> None:
         value, packed = self.roundtrip(b'caf\xe9', encoding='utf-8')
         self.assertEqual(packed, b'caf\xe9')
-        self.assertEqual(value, 'caf�')  # the text main decoded, unchanged
+        self.assertEqual(value, 'caf�')  # the text a plain decode gives
 
     def test_lossy_errors_scheme_still_round_trips(self) -> None:
         for errors in ('replace', 'ignore'):
@@ -211,8 +211,8 @@ class TestStringFieldUnquote(unittest.TestCase):
     """``unquote=True`` decodes alike on every Python (#1693).
 
     :func:`urllib.parse.unquote` accepts :obj:`bytes` only from Python 3.9, and
-    every value a field unpacks is :obj:`bytes`, so on 3.8 each of these raised
-    ``TypeError: Expected str, got bytes``.
+    every value a field unpacks is :obj:`bytes`, so on 3.8 each of these raises
+    ``TypeError: Expected str, got bytes`` without the fix.
     """
 
     def setUp(self) -> None:
@@ -245,7 +245,7 @@ class TestStringFieldUnquote(unittest.TestCase):
         self.assertIs(strings.unquote, compat.unquote)
 
     def test_a_value_that_is_not_bytes_still_goes_to_urllib(self) -> None:
-        """Only :obj:`bytes` take the 3.9 path; the fix leaves anything else as it was.
+        """Only :obj:`bytes` take the 3.9 path; anything else goes to :mod:`urllib`.
 
         A field never unpacks one, but :meth:`post_process` is public: text is
         unquoted, while a :obj:`bytearray` or :obj:`memoryview` raises exactly what

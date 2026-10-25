@@ -69,13 +69,12 @@ invisible to that scan *by construction*, which is the dark-test hazard #745
 exists to stop and which #779 avoids the same way for the sibling ``mypy``
 check.
 
-The install line is the other half. ``isort`` is a ``test`` extra
-requirement, so the pytest jobs whose selection collects this module --
-``test`` and ``gate``, since #849 took ``engine-tests`` off it -- run it for
-real rather than reporting a skip. That is the opposite resolution from
-``mypy``'s, whose :data:`~tests._dependency_gates.DEPENDENCY_GATE_EXCLUSIONS`
-entry declines the install line, and the difference is not taste:
-:file:`lint.yml` already runs
+The install line is the other half. ``isort`` is a ``test`` extra requirement,
+so the pytest jobs whose selection collects this module -- ``test`` and
+``gate``, not ``engine-tests`` (#849) -- run it for real rather than reporting
+a skip. That is the opposite resolution from ``mypy``'s, whose
+:data:`~tests._dependency_gates.DEPENDENCY_GATE_EXCLUSIONS` entry declines the
+install line, and the difference is not taste: :file:`lint.yml` already runs
 ``make mypy`` over the whole package, so a pytest copy would be a *second*
 copy, while that same workflow's header records that ``isort`` is deliberately
 not one of the linters it installs -- it appears only in
@@ -83,12 +82,12 @@ not one of the linters it installs -- it appears only in
 on a schedule rather than as a check. So declining the install line here would
 leave ``make isort``'s verdict checked nowhere at all, which is what #766
 objected to. It is cheap enough to be uncontroversial, too: the lines below
-take about 1.5s together, the "costs nothing per leg" category the test
-job's own install comment puts ``DPKT`` in rather than the ``Scapy`` one.
+take about 1.5s together, the "costs nothing per leg" category the test job's
+own install comment puts ``DPKT`` in rather than the ``Scapy`` one.
 
-``isort`` is in ``Pipfile``'s ``[dev-packages]`` too, as of #810 -- that being
-what ``make isort``'s own ``pipenv run`` prefix resolves against, so the target
-does not depend on a contributor happening to have isort on ``PATH``. The two
+``isort`` is in ``Pipfile``'s ``[dev-packages]`` too (#810) -- that being what
+``make isort``'s own ``pipenv run`` prefix resolves against, so the target does
+not depend on a contributor happening to have isort on ``PATH``. The two
 declarations are additive rather than duplicate: the ``pyproject.toml`` extra
 serves consumers installing the package, ``Pipfile`` serves this repository's
 own dev environment, and ``make isort`` reads only the latter.
@@ -201,19 +200,18 @@ def _pcapkit_tree_targets() -> 'list[str]':
 
 def _find_mindepth_2_targets(sub: str) -> 'list[str]':
     """``$(find pcapkit/<sub> -mindepth 2 -name '*.py')`` (#765) --
-    ``Path.glob('*/**/*.py')`` matches the same set ``find -mindepth 2`` does:
-    at least one subdirectory below ``<sub>``, then any depth. Pathlib's own
-    glob has no shell and no bash version to depend on in the first place, so
-    this mirror was never exposed to the bug the Makefile itself just had.
-    The leading ``*/`` (equivalently, the ``-mindepth 2``) is deliberate, not
-    slack -- a bare ``**/*.py`` would also reach :file:`pcapkit/<sub>/__init__.py`
-    itself, whose hand-grouped, commented import order (``# base crawler``,
-    only under ``vendor``; ``# IANA registration``, ``# Miscellanous`` and
-    ``# per protocol`` under both) isort's ``-l100 -ppcapkit`` would flatten
-    into one alphabetical block, scattering the comments across it --
-    confirmed with ``isort --diff``, not assumed. That file stays reached by
-    neither this call nor the whole-tree line (which skips every
-    ``__init__.py``).
+    ``Path.glob('*/**/*.py')`` matches the same set ``find -mindepth 2`` does: at
+    least one subdirectory below ``<sub>``, then any depth. Pathlib's own glob has
+    no shell and no bash version to depend on in the first place, so this mirror
+    is not exposed to the bash-version bug the module docstring describes. The
+    leading ``*/`` (equivalently, the ``-mindepth 2``) is deliberate, not slack --
+    a bare ``**/*.py`` would also reach :file:`pcapkit/<sub>/__init__.py` itself,
+    whose hand-grouped, commented import order (``# base crawler``, only under
+    ``vendor``; ``# IANA registration``, ``# Miscellanous`` and ``# per protocol``
+    under both) isort's ``-l100 -ppcapkit`` would flatten into one alphabetical
+    block, scattering the comments across it -- confirmed with ``isort --diff``,
+    not assumed. That file stays reached by neither this call nor the whole-tree
+    line (which skips every ``__init__.py``).
 
     """
     return sorted(str(path) for path in (PACKAGE / sub).glob('*/**/*.py'))
@@ -221,9 +219,9 @@ def _find_mindepth_2_targets(sub: str) -> 'list[str]':
 
 def _const_targets() -> 'list[str]':
     """``pcapkit/const/`` half of the pair described in
-    :func:`_find_mindepth_2_targets` -- its own line since #765's second fix
-    (see the module docstring), matching :file:`cron-vendor.yml`'s own
-    separate calls for ``const`` and ``vendor``.
+    :func:`_find_mindepth_2_targets` -- on its own line (#765; see the
+    module docstring), matching :file:`cron-vendor.yml`'s own separate
+    calls for ``const`` and ``vendor``.
 
     """
     return _find_mindepth_2_targets('const')
@@ -248,13 +246,11 @@ def _isort_recipe_line_numbers() -> 'list[int]':
     """The physical, 1-indexed line numbers of the Makefile's ``isort:``
     target's own recipe lines, computed fresh from :file:`Makefile` every
     run rather than hardcoded -- a hardcoded number is exactly the kind of
-    silent rot this module exists to catch, and an earlier revision of this
-    file was guilty of it in its own name: functions called
-    ``_line_125_targets`` and so on stopped matching reality the moment a
-    :file:`Makefile` comment two lines above the target grew by a few
-    lines, and nothing here noticed until a reviewer measured it by hand.
-    None of the functions below are named after a line number any more for
-    that reason; :data:`MAKEFILE_LINES` carries the number as data instead,
+    silent rot this module exists to catch: a function called
+    ``_line_125_targets`` stops matching reality the moment a
+    :file:`Makefile` comment above the target grows by a few lines, with
+    nothing here to notice. So none of the functions below is named after a
+    line number; :data:`MAKEFILE_LINES` carries the number as data instead,
     paired with the callable it belongs to positionally rather than by a
     key that could drift out of sync with what it claims to label.
 
@@ -262,12 +258,12 @@ def _isort_recipe_line_numbers() -> 'list[int]':
     ``isort:`` or another such line, a blank line, or a comment line at
     column 0 -- make itself treats a blank or a column-0 ``#`` line inside a
     recipe as transparent rather than as ending the rule (measured with
-    ``make -n isort`` as the oracle: it still reports the same commands
-    with either dropped in between two recipe lines, which an earlier
-    revision of this function got wrong by breaking on the first line that
-    was not tab-indented, comment or not). The first following line that is
-    genuine content and not tab-indented ends the target -- a new target
-    declaration, most likely, since nothing above passes that test.
+    ``make -n isort`` as the oracle: it still reports the same commands with
+    either dropped in between two recipe lines, so breaking on the first
+    line that is not tab-indented, comment or not, would be wrong). The
+    first following line that is genuine content and not tab-indented ends
+    the target -- a new target declaration, most likely, since nothing above
+    passes that test.
 
     Matching ``isort:`` requires the *whole* line, not a prefix: an
     ``isort-check:`` target, or a ``.PHONY: isort`` line naming ``isort`` as

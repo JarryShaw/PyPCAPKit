@@ -315,10 +315,10 @@ class ExtractorLeavesTheCallersStreamAlone(unittest.TestCase):
 
         # A ``BufferedReader`` over a non-seekable raw stream, which is the shape
         # ``sys.stdin.buffer`` has -- and stdin is the input that actually reaches
-        # this path, since ``pcapkit/__main__.py`` hands it over for ``fin='-'``.
-        # A bare non-seekable :class:`io.BytesIO` is *not* usable here: lacking
+        # this path, since ``pcapkit/__main__.py`` hands it over for ``fin='-'``. A
+        # bare non-seekable :class:`io.BytesIO` is *not* usable here: lacking
         # ``peek`` it takes a different branch of ``SeekableReader`` that mis-reads
-        # the first record, which is why the existing suite only ever drives one
+        # the first record, which is why the rest of the suite only ever drives one
         # with ``Extractor.run`` patched out.
         stream = io.BufferedReader(_NonSeekableRaw(payload))
         extractor = pcapkit.extract(fin=stream, nofile=True, store=False)
@@ -420,10 +420,11 @@ class FinaliserBackstopWithoutDel(unittest.TestCase):
     """#1997: the backstop is a :class:`weakref.finalize`, not ``__del__`` alone.
 
     GraalPy never calls ``__del__``, so on that interpreter the #606 backstop
-    only ever ran if something else did the closing. CPython does call it, which
-    is why a regression here would go unnoticed on every CPython leg unless the
-    finaliser is checked on its own: these tests do that, either by inspecting it
-    or by taking ``__del__`` out of the way, so that they fail on CPython too.
+    only ever runs if something else does the closing. CPython does call it,
+    which is why a regression here would go unnoticed on every CPython leg unless
+    the finaliser is checked on its own: these tests do that, either by
+    inspecting it or by taking ``__del__`` out of the way, so that they fail on
+    CPython too.
 
     """
 
@@ -482,7 +483,7 @@ class FinaliserBackstopWithoutDel(unittest.TestCase):
                              'without __del__ the handle outlived the extractor')
 
     def test_collect_until_waits_out_a_finaliser_that_runs_late(self) -> None:
-        """A finaliser run after :func:`gc.collect` returns, as GraalPy's can be (:issue:`1963`).
+        """A finaliser run after :func:`gc.collect` returns, as GraalPy's can be (#1963).
 
         The stand-in finaliser runs on the third collection. With no grace the
         helper reports it as never run, the shape of the GraalPy leg's failure; with a
@@ -491,7 +492,7 @@ class FinaliserBackstopWithoutDel(unittest.TestCase):
 
         The collector and the clock are both fakes, with each collection costing a
         fake second, so the outcome does not depend on how fast the engine's own
-        :func:`gc.collect` is (:issue:`2016`).
+        :func:`gc.collect` is (#2016).
 
         """
         clock = [0.0]

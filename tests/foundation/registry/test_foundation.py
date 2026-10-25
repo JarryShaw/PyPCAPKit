@@ -151,18 +151,16 @@ class FoundationRegistryTests(unittest.TestCase):
     def test_registration_accepts_pcapkit_own_builtin_classes(self) -> None:
         """The built-ins pass the internal ``issubclass`` gate, and non-subclasses still fail.
 
-        This is the regression for GitHub issue #513. Every sibling test in this
-        module mocks ``Extractor.register_*`` away, so none of them reaches the
-        validation at :file:`pcapkit/foundation/extraction.py` -- which is why the
-        defect survived: all three entry points rejected pcapkit's *own* engines,
+        This is the regression for GitHub issue #513. A test that mocks
+        ``Extractor.register_*`` away never reaches the validation in
+        :file:`pcapkit/foundation/extraction.py` -- which is how the defect
+        survived: all three entry points rejected pcapkit's *own* engines,
         reassembly and flow-tracing classes with
         :exc:`~pcapkit.utilities.exceptions.RegistryError`.
 
         The cause was that each check named the auto-registering public class
         (``Engine``, ``Reassembly``, ``TraceFlow``) while every built-in subclasses
-        the ``*Base`` variant -- imported under an alias, e.g.
-        ``from ...engine import EngineBase as Engine`` at
-        :file:`pcapkit/foundation/engines/pcap.py`, specifically so that it is not
+        the ``*Base`` variant directly, specifically so that it is not
         auto-registered. So ``issubclass(PCAP, Engine)`` was :data:`False` while
         ``issubclass(PCAP, EngineBase)`` was :data:`True`.
 

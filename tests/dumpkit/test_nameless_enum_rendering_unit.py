@@ -85,7 +85,7 @@ class NamelessEnumRenderingTests(unittest.TestCase):
     the name half.
 
     The replacement is the value's own decimal spelling -- ``'Flags::0 [0]'``,
-    ``'Flags::8 [8]'`` -- chosen for three reasons these tests pin:
+    ``'Flags::8 [8]'`` -- chosen for reasons these tests pin:
 
     * It is what the enumeration libraries themselves already use for an
       undeclared residue. ``Flags(2057).name`` is ``'ACK|9'``, naming the
@@ -121,8 +121,8 @@ class NamelessEnumRenderingTests(unittest.TestCase):
 
         Covers the nameless zero *and* every non-zero nameless value the
         registry admits, because a fix that special-cased zero would pass on
-        ``Flags(0)`` alone and still emit ``'Flags::8 [8]'``'s predecessor
-        ``'Flags::None [8]'``.
+        ``Flags(0)`` alone and still emit ``'Flags::None [8]'`` in place of
+        ``'Flags::8 [8]'``.
 
         Both libraries are swept from the same derivation, so this is still the
         demonstration that the rendering is not an :mod:`aenum` quirk -- stdlib
@@ -154,12 +154,13 @@ class NamelessEnumRenderingTests(unittest.TestCase):
                     self.assertNotIn('None', rendered)
 
     def test_named_members_are_untouched(self) -> None:
-        """The control. Only the name half of a *nameless* member changes.
+        """The control. Only the name half of a *nameless* member gets the fallback.
 
-        ``Flags(2049)`` matters most here: its name is ``'ACK|1'``, so it was
-        never broken, and it is the precedent the fallback follows. If the guard
+        ``Flags(2049)`` matters most here: its name is ``'ACK|1'``, so it needs
+        no fallback, and it is the precedent the fallback follows. If the guard
         were written as "compose the name from the value" rather than "use the
-        value when there is no name", this is the assertion that would catch it.
+        value when there is no name", this is the assertion that would catch
+        it.
 
         """
         from pcapkit.const.tcp.flags import Flags
@@ -174,7 +175,7 @@ class NamelessEnumRenderingTests(unittest.TestCase):
 
         # An explicitly declared zero keeps its declared name, which is the
         # clearest demonstration that the guard keys on the *name* and not on the
-        # value: this member's value is 0 and its rendering is unchanged.
+        # value: this member's value is 0 and it renders under its declared name.
         from pcapkit.const.reg.apptype import TransportProtocol
 
         self.assertEqual(TransportProtocol(0).name, 'undefined')
@@ -220,10 +221,10 @@ class NamelessEnumRenderingTests(unittest.TestCase):
         Reached when the member carries public instance attributes, which for a
         pseudo-member takes a :meth:`~enum.Enum._missing_` override. No registry
         under :mod:`pcapkit.const` is both a flag enumeration and an annotated
-        one, so this branch is not reachable from a capture on ``main`` --
-        but the interpolation was character-for-character the same as the other
-        two, so it is guarded with them rather than left as the one place the
-        literal ``None`` survives.
+        one, so this branch is not reachable from a capture -- but the
+        interpolation is character-for-character the same as the other two, so
+        it is guarded with them rather than left as the one place the literal
+        ``None`` survives.
 
         """
         from pcapkit.dumpkit.common import make_dumper
@@ -366,8 +367,8 @@ def _const_path() -> 'list[str]':
 def _flag_registries() -> 'dict[str, FlagRegistry]':
     """Every flag enumeration declared under :mod:`pcapkit.const`.
 
-    Discovered rather than listed, so an eighth registry is swept the day it
-    lands instead of the day somebody remembers to add it here. Keyed by
+    Discovered rather than listed, so a new registry is swept the day it lands
+    instead of the day somebody remembers to add it here. Keyed by
     ``<module>.<class>`` so a failing subtest names the registry it came from.
 
     Both libraries are matched because the two are unrelated types --

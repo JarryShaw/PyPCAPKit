@@ -120,8 +120,8 @@ class TestEngineFallbackKeepsPCAPOutput(unittest.TestCase):
                     self.assertTrue(flow.fpout.endswith('.pcap'), flow.fpout)
 
     def test_available_third_party_engine_still_falls_back_to_json(self) -> None:
-        # The other half of the contract: an engine that really runs keeps the
-        # existing replacement, and its warning names that engine.
+        # The other half of the contract: an engine that really runs still
+        # falls back to JSON, and its warning names that engine.
         from pcapkit.utilities.warnings import FormatWarning
 
         if importlib.util.find_spec('dpkt') is None:

@@ -89,12 +89,12 @@ CANONICAL_MODULE = 'pcapkit.corekit.sentinels'
 #: the distinct *consumer* modules.
 #: Built by :func:`_sentinels` from the live import, not at module load.
 
-#: The public three of :data:`SENTINELS`, as ``(consumer module, object name, type
-#: name)``. The consumer is the module that uses the sentinel and, per GitHub issue
-#: #1744, does not re-export it. ``ABSENT`` is absent from it deliberately: it is
-#: private, so it is exported neither way and the export rule does not reach it --
-#: its name carries no leading underscore (GitHub issue #937), but it is private
-#: all the same.
+#: The public members of :data:`SENTINELS`, as
+#: ``(consumer module, object name, type name)``. The consumer is the module that
+#: uses the sentinel and, per GitHub issue #1744, does not re-export it.
+#: ``ABSENT`` is absent from it deliberately: it is private, so it is exported
+#: neither way and the export rule does not reach it -- its name carries no
+#: leading underscore (GitHub issue #937), but it is private all the same.
 PUBLIC_SENTINELS = (
     ('pcapkit.corekit.module', 'NULL', 'NullType'),
     ('pcapkit.corekit.fields.field', 'NO_VALUE', 'NoValueType'),
@@ -199,11 +199,11 @@ class SentinelExportTests(_ReimportCase):
     """``__all__`` names the object and not the type, in the canonical module only."""
 
     def test_module_exports_neither_the_object_nor_the_type(self) -> 'None':
-        """``['NULL', 'ModuleDescriptor']`` lost ``NULL`` under GitHub issue #1744.
+        """``__all__`` is ``['ModuleDescriptor']``, without ``NULL`` (GitHub issue #1744).
 
-        ``ModuleDescriptor`` is not a sentinel and has to survive the edit, which
-        is asserted here rather than in a separate test because removing it is the
-        plausible way to get this line wrong.
+        ``ModuleDescriptor`` is not a sentinel and has to stay, which is asserted
+        here rather than in a separate test because removing it is the plausible
+        way to get this line wrong.
 
         """
         import pcapkit.corekit.module as module
@@ -230,7 +230,7 @@ class SentinelExportTests(_ReimportCase):
         self.assertIn('EnumRegistry', enum.__all__)
 
     def test_field_exports_neither_the_object_nor_the_type(self) -> 'None':
-        """``NO_VALUE`` was added here by #911 and removed again by #1744."""
+        """``NO_VALUE`` is not exported here (#1744)."""
         import pcapkit.corekit.fields.field as field
 
         self.assertNotIn('NO_VALUE', field.__all__)
@@ -241,7 +241,7 @@ class SentinelExportTests(_ReimportCase):
         """Through ``import *`` itself, which is the surface the ruling is about.
 
         The canonical module binds every public object and no sentinel's own
-        type; each former re-export site binds neither.
+        type; each consumer module binds neither.
 
         """
         canonical = importlib.import_module(CANONICAL_MODULE)
@@ -287,7 +287,7 @@ class SentinelExportTests(_ReimportCase):
 
 
 class SentinelPopulationTests(_ReimportCase):
-    """There are four, they follow the naming rule, and the docs say so."""
+    """They follow the naming rule, and the docs say so."""
 
     def test_every_sentinel_follows_the_naming_convention(self) -> 'None':
         """A sentinel object's type class is named ``<SENTINEL>Type``.
@@ -418,7 +418,7 @@ class SentinelPopulationTests(_ReimportCase):
         self.assertRegex(source, r'(?m)^from functools import cached_property$')
 
     def test_the_sentinel_table_has_a_row_per_sentinel_and_no_more(self) -> 'None':
-        """Counted from the table itself, so a fifth sentinel cannot be half-added."""
+        """Counted from the table itself, so a new sentinel cannot be half-added."""
         section = _sentinel_section()
         table = section[section.index('.. list-table::'):]
         table = table[:table.index('\n\n', table.index('- Defined in'))]
@@ -432,9 +432,9 @@ class SentinelBehaviourTests(_ReimportCase):
     :file:`docs/source/contributing/conventions/sentinel-convention.rst`
     documents.
 
-    Not part of the export change, and asserted here because the doc edit that goes
-    with it makes claims about every sentinel -- an undocumented ``__bool__`` or a missing
-    ``__repr__`` would make the corrected prose wrong in a way no other test sees.
+    Asserted here because the convention page makes claims about every sentinel -- an
+    undocumented ``__bool__`` or a missing ``__repr__`` would make its prose wrong in a
+    way no other test sees.
 
     """
 
@@ -507,14 +507,13 @@ class SentinelBehaviourTests(_ReimportCase):
 class NoValueIsTheDocumentedFieldDefaultTests(_ReimportCase):
     """Why the ruling reaches ``NO_VALUE`` at all.
 
-    ``NO_VALUE``'s own comment in :mod:`pcapkit.corekit.fields.field` reads *"Default
-    value for* :attr:`FieldBase.default <pcapkit.corekit.fields.field.FieldBase.default>`*"*,
-    so it is the value a caller is told to compare a field's default against -- which
-    is what makes withholding it from ``import *`` the defect rather than a
-    preference. That contract had no test: the ``default`` setter and deleter were
-    both uncovered, and the deleter is the only code path that puts the sentinel
-    *back*. Named ``NoValue`` at the time #911 landed; GitHub issue #937 renamed the
-    object to ``NO_VALUE`` without touching this contract.
+    ``NO_VALUE``'s own comment in :mod:`pcapkit.corekit.fields.field` reads *"Default value
+    for* :attr:`FieldBase.default <pcapkit.corekit.fields.field.FieldBase.default>`*"*, so it
+    is the value a caller is told to compare a field's default against -- which is what makes
+    withholding it from ``import *`` the defect rather than a preference. The ``default``
+    setter and deleter are covered here, and the deleter is the only code path that puts the
+    sentinel *back*. GitHub issue #937 renamed the object from ``NoValue`` to ``NO_VALUE``
+    without touching this contract.
 
     :class:`~pcapkit.corekit.fields.strings.BytesField` is the concrete field under
     test, following :file:`tests/corekit/test_fields_field.py`: a real user-facing

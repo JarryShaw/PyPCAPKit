@@ -237,14 +237,15 @@ class TestTheSamplesReachTheTestsLog(unittest.TestCase):
         self.assertEqual(stop.stdout, 'The resource monitor did not start on this leg.\n')
 
 
-#: Round 2's containment, as the issue's research sized it (estimates, until a run shows them);
-#: #1753 adds the exit on a spent heap, which tests/project/test_graalpy_worker_heap_1753.py pins.
+#: The containment, as the issue's research sized it (estimates); #1753
+#: adds the exit on a spent heap, which
+#: tests/project/test_graalpy_worker_heap_1753.py pins.
 HEAP, GRAAL_WORKERS, SCOPE_MEMORY = '--vm.Xmx2g --vm.XX:+ExitOnOutOfMemoryError', '3', '12G'
 #: A ``LATEST``-tier module, as ``List the LATEST tier`` would hand the tests step (#1958):
 #: a stand-in naming no real module, so this pin runs no test module by path.
 SWEEP = 'tests/protocols/test_a_latest_sweep_unit.py'
 FSIZE = 2 * 1024 ** 3
-#: Round 3: the probe is the scope itself, every flag included, under a throwaway unit.
+#: The probe is the scope itself, every flag included, under a throwaway unit.
 PROBE = 'if probe=$(scoped "pcapkit-probe-$$.scope" true 2>&1); then'
 SCOPE_FLAGS = ('sudo -n --preserve-env systemd-run --scope --quiet --unit="$unit"',
                f'-p MemoryMax={SCOPE_MEMORY}', '-p MemorySwapMax=0', '-p CPUWeight=20',
@@ -269,7 +270,7 @@ def by_impl(expression: 'str', version: 'str') -> 'str':
 
 
 class TestTheTestsAreContained(unittest.TestCase):
-    """Round 2: the tests are held to what leaves the runner alive, so a breach fails the step."""
+    """The tests are held to what leaves the runner alive, so a breach fails the step."""
 
     def legs(self) -> 'list[str]':
         found = [leg['python-version'] for leg in legs(*EXPERIMENTAL)]
@@ -434,7 +435,7 @@ class TestTheContainmentRuns(unittest.TestCase):
             'without the 12G scope. Experimental legs never block (#1660), so this job still succeeds.'])
 
     def test_the_uncapped_tests_run_the_capped_argv(self) -> None:
-        """Round 3: the fallback drops the scope and nothing else, so the two paths run one pytest."""
+        """The fallback drops the scope and nothing else, so the two paths run one pytest."""
         argvs = {}
         for path, sudo in (('capped', None), ('uncapped', 'echo "sudo: a password is required" >&2\nexit 1\n')):
             if sudo is None:
@@ -496,7 +497,7 @@ class TestTheContainmentRuns(unittest.TestCase):
         self.assertIn('scope 12G', oom)
 
     def test_a_hung_teardown_killed_after_the_timeout_is_a_timeout(self) -> None:
-        """Round 3: ``--kill-after`` ends a teardown SIGINT did not with SIGKILL, exit 137, as an OOM kill does."""
+        """``--kill-after`` ends a teardown SIGINT did not with SIGKILL, exit 137, as an OOM kill does."""
         base = 'scope=12G\nmemory_errors=0\n'
         timeout = ['tests timed out at 110 minutes']
         self.assertEqual(self.titles(base + 'exit=137\noom_kills=0\nelapsed=6781\n'), timeout)
@@ -527,7 +528,7 @@ class TestTheContainmentRuns(unittest.TestCase):
         self.assertIn('the tests step wrote no tests-status', result.stdout)
 
     def test_experimental_summary_is_mains_and_runs_last(self) -> None:
-        """Round 3: the causes are a step of their own, so ``Experimental summary`` stays the KTLO summary's."""
+        """The causes are a step of their own, so ``Experimental summary`` stays the KTLO summary's."""
         self.assertEqual(position(SUMMARY) + 1, position('Experimental summary'))
         self.assertEqual(step(SUMMARY).get('if'), '${{ !cancelled() }}')
         self.assertIs(step(SUMMARY).get('continue-on-error'), True)

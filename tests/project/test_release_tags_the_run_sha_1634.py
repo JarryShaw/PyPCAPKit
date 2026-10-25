@@ -1316,7 +1316,7 @@ class TestTheCountsAreOfTheReleasedTiers(ScratchRepository):
         self.assertNotIn('Error', result.stdout + result.stderr)
 
     def test_a_reader_from_before_the_helper_runs_alone(self) -> None:
-        """A commit without util/_actions.py, whose reader imports nothing from it, is read as before."""
+        """A commit without util/_actions.py, whose reader imports nothing from it, is still read."""
         (self.seed / 'util' / '_actions.py').unlink()
         (self.seed / 'util' / 'python_versions.py').write_text(
             "import sys\nprint({'pypi-wheels': 'cp37 cp38', 'conda-builds': 'py37 py38'}[sys.argv[-1]])\n",
@@ -1328,7 +1328,7 @@ class TestTheCountsAreOfTheReleasedTiers(ScratchRepository):
         self.assertEqual(written, {'pypi-wheels': 'cp37 cp38', 'conda-builds': 'py37 py38'})
 
     def test_a_finished_release_reads_complete_after_the_tiers_grow(self) -> None:
-        """The two checks, fed the step's answer and, as before it, this run's tiers."""
+        """The two checks, fed the step's answer and this run's tiers."""
         self.push(self.added, f'refs/tags/v{self.VERSION}')
         self.checkout(self.grown)
         _, written = self.released(exists=True)
@@ -1690,29 +1690,30 @@ class CondaDistMixin(WorkflowMixin):
 class TestCondaUpdateNeverMakesTheRelease(CondaDistMixin, unittest.TestCase):
     """:file:`cron-conda.yml`'s GitHub upload only ever updates a published release.
 
-    ``conda-dist`` attaches its packages with ``ncipollo/release-action@v1.21.0``
-    and ``allowUpdates: true``, kept so #1632's ``test_cron_conda_really_does_publish``
-    still finds it. That action's ``createOrUpdateRelease`` (``src/Action.ts``)
-    reads the release by tag, which GitHub's REST docs give as "a published
-    release"; on a 404 it updates a draft of that tag or else calls
-    ``createRelease`` (``checkForMissingReleaseError`` and
-    ``updateDraftOrCreateRelease``), both with ``target_commitish: commit``
-    (``updateRelease``, and ``GithubReleases.create`` and ``GithubReleases.update`` in
-    ``src/Releases.ts``). With no release, a bump
-    made while Create Release waits on its approval -- 1.5.0b9 waited three
-    days, and cron-conda bumped three times meanwhile -- would put
-    ``v<version>`` on ``main``'s tip, and Create Release's tag check would then
-    fail. A draft stays a draft (``omitDraftDuringUpdate``, through
-    ``CoreInputs.updatedDraft`` in ``src/Inputs.ts``) but is retargeted at ``commit``; Create Release's
+    ``conda-dist`` attaches its packages with
+    ``ncipollo/release-action@v1.21.0`` and ``allowUpdates: true``, kept so
+    #1632's ``test_cron_conda_really_does_publish`` still finds it. That
+    action's ``createOrUpdateRelease`` (``src/Action.ts``) reads the release by
+    tag, which GitHub's REST docs give as "a published release"; on a 404 it
+    updates a draft of that tag or else calls ``createRelease``
+    (``checkForMissingReleaseError`` and ``updateDraftOrCreateRelease``), both
+    with ``target_commitish: commit`` (``updateRelease``, and
+    ``GithubReleases.create`` and ``GithubReleases.update`` in
+    ``src/Releases.ts``). With no release, a bump made while Create Release
+    waits on its approval -- 1.5.0b9 waited three days, and cron-conda bumped
+    three times meanwhile -- would put ``v<version>`` on ``main``'s tip, and
+    Create Release's tag check would then fail. A draft stays a draft
+    (``omitDraftDuringUpdate``, through ``CoreInputs.updatedDraft`` in
+    ``src/Inputs.ts``) but is retargeted at ``commit``; Create Release's
     ``workflow_run`` run finds the draft and resets its target to the run's sha
     (``action-gh-release`` 3.0.2's ``release`` and ``findTagFromReleases`` in
-    ``src/github.ts``), so
-    skipping a draft is a precaution against retargeting a release Create
-    Release owns. On an existing release it calls Update a release with
-    ``target_commitish: commit`` (``Action.updateRelease`` in ``src/Action.ts``,
-    ``GithubReleases.update`` in ``src/Releases.ts``), and GitHub's REST docs check "the new value of
-    target_commitish if you are changing it, otherwise the existing target"
-    against the workflow-file rule, which since #1634 is the run's commit.
+    ``src/github.ts``), so skipping a draft is a precaution against retargeting
+    a release Create Release owns. On an existing release it calls Update a
+    release with ``target_commitish: commit`` (``Action.updateRelease`` in
+    ``src/Action.ts``, ``GithubReleases.update`` in ``src/Releases.ts``), and
+    GitHub's REST docs check "the new value of target_commitish if you are
+    changing it, otherwise the existing target" against the workflow-file rule,
+    which is the run's commit (#1634).
     """
 
     def test_the_action_is_still_the_upload(self) -> None:

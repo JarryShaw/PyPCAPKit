@@ -80,7 +80,7 @@ REPORTS = "${{ !cancelled() && github.event_name != 'pull_request' }}"
 
 
 class TestTheWorkflowsPost(unittest.TestCase):
-    """The ``discussion`` job of each workflow, and every other job left as it was."""
+    """The ``discussion`` job of each workflow, and every other job's permissions per :data:`PERMISSIONS`."""
 
     def test_only_the_posting_job_may_write_discussions(self) -> None:
         for name, permissions in PERMISSIONS.items():

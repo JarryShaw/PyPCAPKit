@@ -286,21 +286,21 @@ def restore_module_table() -> 'Iterator[None]':
     :meth:`~unittest.TestCase.setUpClass` runs *before* this fixture's first
     entry for the class and a class-level cleanup runs *after* its last exit, so
     either can plant exactly the kind of leak the paragraphs above describe
-    without this fixture's old, entry-scoped restore ever seeing it -- an
-    entry-scoped snapshot faithfully preserves whatever a ``setUpClass`` purge
-    already did, rather than undoing it, and a class-level cleanup that purges
-    again has no later exit here to be caught by at all. See
-    :func:`_pin_module_snapshot` for why the fix is to restore to a fixed target
-    instead, both before the test and after it, rather than to change what is
-    snapshotted and when: doing it on both sides means neither a ``setUpClass``
-    purge nor a class-exit purge survives past the next test's own entry,
-    regardless of which one planted it or whether the class in between reimports
-    anything. This is the same "leaning on a neighbour" trap the paragraph above
-    already rejects, generalised: healing a class-level leak by restoring before
-    the *next* test runs is the guard doing its own job on a fixed schedule, not
-    an accident of collection order -- unlike relying on some *other* class's own
-    purge to happen to reimport first, which is exactly the accident #720's
-    reproduction shows failing half the time.
+    without an entry-scoped restore ever seeing it -- an entry-scoped snapshot
+    faithfully preserves whatever a ``setUpClass`` purge already did, rather than
+    undoing it, and a class-level cleanup that purges again has no later exit
+    here to be caught by at all. See :func:`_pin_module_snapshot` for why the fix
+    is to restore to a fixed target instead, both before the test and after it,
+    rather than to change what is snapshotted and when: doing it on both sides
+    means neither a ``setUpClass`` purge nor a class-exit purge survives past the
+    next test's own entry, regardless of which one planted it or whether the
+    class in between reimports anything. This is the same "leaning on a
+    neighbour" trap the paragraph above already rejects, generalised: healing a
+    class-level leak by restoring before the *next* test runs is the guard doing
+    its own job on a fixed schedule, not an accident of collection order --
+    unlike relying on some *other* class's own purge to happen to reimport first,
+    which is exactly the accident #720's reproduction shows failing half the
+    time.
 
     Yields:
         Nothing; the region is already restored by the time control passes to
@@ -476,9 +476,10 @@ def pytest_collection_modifyitems(session: 'pytest.Session', config: 'pytest.Con
         # pytest-xdist 3.8.0/pytest 9.1.1: setting `shouldfail` first is what the
         # controller already knows how to shut a worker down on cleanly, no
         # crash-item assertion, and the message still comes through -- as
-        # ``xdist.dsession.Interrupted: <message>`` rather than ``ERROR:
-        # <message>``, which is the one visible difference from the serial path.
-        # A no-op outside a worker, so serial behaviour is unchanged.
+        # ``xdist.dsession.Interrupted: <message>`` rather than
+        # ``ERROR: <message>``, which is the one visible difference from the
+        # serial path. A no-op outside a worker, where the ``UsageError`` alone
+        # ends the run.
         if hasattr(config, 'workerinput'):
             session.shouldfail = message
         raise pytest.UsageError(message)
@@ -629,11 +630,11 @@ def _tier_guard_lock(exclusive: 'bool') -> 'Iterator[None]':
     has to poll (see :data:`TIER_GUARD_LOCK_POLLS`), they do (#1977). A second
     lock file, the gate, gives the writer priority: a writer holds the gate
     exclusively while it waits for the lock, and a reader passes through the
-    gate, shared and released at once, before asking for the lock. Readers
-    hold the gate only for that instant, so the writer gets it almost at once,
-    and the readers already past it then drain. The kernel drops both locks
-    with a dying process, so no crash can leave the gate shut. Every wait is
-    unbounded, as before: proceeding without the lock would reopen the race.
+    gate, shared and released at once, before asking for the lock. Readers hold
+    the gate only for that instant, so the writer gets it almost at once, and
+    the readers already past it then drain. The kernel drops both locks with a
+    dying process, so no crash can leave the gate shut. Every wait is
+    unbounded: proceeding without the lock would reopen the race.
 
     Args:
         exclusive: :data:`True` for the writer's hold, :data:`False` for a

@@ -4,7 +4,7 @@
 Each concrete :class:`~pcapkit.protocols.schema.schema.Schema` subclass under
 :mod:`pcapkit.protocols.schema` is enumerated, so a schema added tomorrow gets a
 case tomorrow. For each one a **minimal valid instance** ``s`` is built and
-packed to ``b``, and four things must hold:
+packed to ``b``, and these must hold:
 
 * ``Schema.unpack(b)`` succeeds and accounts for exactly ``b`` (``SELF``);
 * the parsed schema, packed again, is ``b`` (``REPACK``);
@@ -461,7 +461,7 @@ def build(cls: 'type', depth: 'int' = 0, extra: 'Optional[dict[str, Any]]' = Non
 
 
 def check(cls: 'type', schema: 'Any', raw: 'bytes', ctx: 'dict[str, Any]') -> 'Outcome':
-    """The four assertions of the module docstring, for one built instance."""
+    """The assertions of the module docstring, for one built instance."""
     with warnings.catch_warnings():
         warnings.simplefilter('ignore')
         try:

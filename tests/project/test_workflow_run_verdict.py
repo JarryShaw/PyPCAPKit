@@ -16,9 +16,9 @@ Two layers, as in :mod:`tests.project.test_release_gates`:
   and paths are git's answers rather than a model's;
 * :class:`TestEachWorkflowGatesOnTheVerdict` evaluates each workflow's job
   conditions and concurrency group over the scenarios, with the evaluator
-  :mod:`tests.project.test_release_gates` pins. Since #1967 the test gate and
-  the ``verdict`` job are one copy, in :data:`HEAD`, which each workflow calls
-  as its ``head`` job.
+  :mod:`tests.project.test_release_gates` pins. The test gate and the
+  ``verdict`` job are one copy, in :data:`HEAD` (#1967), which each workflow
+  calls as its ``head`` job.
 
 """
 
@@ -342,7 +342,7 @@ class TestTheRuleOnRealRunShapes(unittest.TestCase):
         return result.returncode, result.stdout.decode('utf-8'), path.read_bytes() if path.exists() else None
 
     def test_the_workflow_commands_byte_for_byte(self) -> None:
-        """#2047: each answer's whole output, so moving it onto util/_actions.py can be shown to change nothing."""
+        """#2047: each answer's whole output, so any change to what is written fails here."""
         verdict, head = self.sha['9083163f5'], self.sha['2e941bbb7']
         refused = (f"::notice title=Skipped as the verdict is for another commit::{self.sha['bbcabf1dd']} after the "
                    f'verified {verdict} was authored by {HUMAN[1]} and committed by {GITHUB[1]}, not by the bot. '
@@ -365,9 +365,9 @@ class TestTheRuleOnRealRunShapes(unittest.TestCase):
     def test_the_workflow_commands_escape_what_they_interpolate(self) -> None:
         """#2047: ``%`` and LF in a path, and ``%`` in a sha or a ref, are escaped: one command, one line.
 
-        Before util/_actions.py these went out as written: a bot commit to a path
-        holding a line break split its notice in two, the second line read as a
-        log line, or as a workflow command of its own where it began ``::``.
+        Written out unescaped, a bot commit to a path holding a line break would
+        split its notice in two, the second line read as a log line, or as a
+        workflow command of its own where it began ``::``.
 
         """
         base = self.sha['f4f94bcad']

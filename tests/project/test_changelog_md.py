@@ -519,7 +519,7 @@ class PythonRoleTests(ChangelogTreeMixin, unittest.TestCase):
 
 
 class ResidualMarkupTests(ChangelogTreeMixin, unittest.TestCase):
-    """The guard against six regexes quietly copying through what they cannot convert."""
+    """The guard against the regexes quietly copying through what they cannot convert."""
 
     def test_an_unconvertible_directive_is_fatal(self) -> None:
         index = self.make_tree(entry=ENTRY + '\n.. note::\n\n   Not in the subset.\n')
@@ -549,7 +549,7 @@ class ResidualMarkupTests(ChangelogTreeMixin, unittest.TestCase):
         return message
 
     def test_an_inline_hyperlink_reference_is_fatal(self) -> None:
-        # The worst of the five: GFM renders ```text <url>`_`` as broken inline
+        # The worst of these: GFM renders ```text <url>`_`` as broken inline
         # code followed by a stray underscore, so the link target vanishes
         # silently rather than merely looking wrong.
         self._reject('\nSee `the RFC index <https://www.rfc-editor.org/>`_ for more.\n',
@@ -659,7 +659,7 @@ class ResidualMarkupTests(ChangelogTreeMixin, unittest.TestCase):
     def test_an_rfc_role_with_an_anchor_is_not_a_leftover(self) -> None:
         # The gate-level half of #592: rule 2 covers the ``:rfc:`` role, so an entry
         # citing a section of an RFC must pass rather than be refused as markup the
-        # rules do not cover. #590's entry was rewritten to work around this.
+        # rules do not cover.
         markdown = self.convert(ENTRY.replace(':rfc:`4303`', ':rfc:`4303#section-2.1`'))
 
         self.assertEqual(changelog_md.residual(markdown), [])

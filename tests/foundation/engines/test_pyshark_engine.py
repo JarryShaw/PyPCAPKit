@@ -3,8 +3,7 @@
 The rest of the engine is exercised end to end in
 :mod:`tests.foundation.engines.test_runtime_engines`, which needs `PyShark`_ and the
 generated captures. This module covers only the preflight check, which is the part
-that has to give the right answer on a machine where `PyShark`_ cannot run at all --
-including this one.
+that has to give the right answer on a machine where `PyShark`_ cannot run at all.
 
 `PyShark`_ is refused for two independent reasons, and both are measured:
 
@@ -21,9 +20,9 @@ including this one.
 
 What the running host provides is not assumed either way, and that is worth
 stating plainly rather than leaving to a silent skip: :program:`tshark` is absent
-on most of this file's legs, but #751's ``engine-tests`` job -- which collects this
-same module -- installs it via ``apt-get``, so neither "present" nor "absent" can
-be relied on. The "missing binary" path is exercised for real by
+on most of this file's legs, but #751's ``engine-tests`` job -- which collects
+this same module -- installs it via ``apt-get``, so neither "present" nor "absent"
+can be relied on. The "missing binary" path is exercised for real by
 :meth:`PySharkUnsupportedReasonTests.test_this_host_really_has_no_tshark_so_the_check_is_not_vacuous`,
 which self-skips wherever tshark turns out to be on this host's :envvar:`PATH`
 instead of assuming the answer; the "binary present" path is exercised mostly by
@@ -31,11 +30,11 @@ patching ``pyshark``'s own resolver, since a real tshark is not guaranteed on
 every leg that collects this module. The one test that needs *both* states on
 demand --
 :meth:`PySharkUnsupportedReasonTests.test_a_config_ini_naming_an_off_path_tshark_is_not_read_as_missing`
--- constructs them explicitly rather than depending on whatever the host
-happens to provide, which is what makes it pass on ``engine-tests`` (tshark on
-``PATH``) and everywhere else (no tshark on ``PATH``) alike. The interpreter is
-3.14, so every version below the ceiling is reached by patching
-:data:`sys.version_info`, which is the same technique
+-- constructs them explicitly rather than depending on whatever the host happens
+to provide, which is what makes it pass on ``engine-tests`` (tshark on ``PATH``)
+and everywhere else (no tshark on ``PATH``) alike. Every version either side of
+the ceiling is reached by patching :data:`sys.version_info`, whichever interpreter
+runs the tests, which is the same technique
 :mod:`tests.foundation.engines.test_pypcapfile_engine` uses.
 
 .. _PyShark: https://kiminewt.github.io/pyshark
@@ -57,8 +56,8 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 
 HAS_PYSHARK = importlib.util.find_spec('pyshark') is not None
 
-#: A version below the ceiling, used to reach the :program:`tshark` branch, which
-#: is otherwise unreachable on the 3.14 interpreter these tests run on.
+#: A version below the ceiling, used to reach the :program:`tshark` branch
+#: whichever interpreter runs the tests.
 SUPPORTED_VERSION = (3, 11, 0, 'final', 0)
 
 
@@ -262,18 +261,17 @@ class PySharkUnsupportedReasonTests(unittest.TestCase):
         :meth:`test_this_host_really_has_no_tshark_so_the_check_is_not_vacuous`;
         :func:`_tshark_missing` and ``PyShark.unsupported_reason`` must not.
 
-        Deliberately host-independent, and that is itself the regression: an
-        earlier version of this test asserted ``shutil.which('tshark') is
-        None``, i.e. that the *host* has no tshark anywhere on ``PATH`` at all
-        -- true on the machine it was written on, false on every
-        ``engine-tests`` CI leg once #755's own ``apt-get install …
-        tshark`` step runs, which is exactly the asymmetry that escaped
-        review. The claim this test actually needs is narrower: that
-        ``which`` cannot resolve *the stand-in specifically*, because its
-        directory was never put on ``PATH`` -- true regardless of whether
-        some unrelated ``tshark`` happens to sit on ``PATH`` elsewhere. Both
-        worlds are constructed and checked below rather than left to
-        whatever the running host happens to provide.
+        Deliberately host-independent, and that is itself the regression:
+        asserting ``shutil.which('tshark') is None``, i.e. that the *host* has
+        no tshark anywhere on ``PATH`` at all, is true on a machine without it
+        and false on every ``engine-tests`` CI leg once #755's own
+        ``apt-get install … tshark`` step runs, which is exactly the asymmetry
+        that escaped review. The claim this test actually needs is narrower:
+        that ``which`` cannot resolve *the stand-in specifically*, because its
+        directory was never put on ``PATH`` -- true regardless of whether some
+        unrelated ``tshark`` happens to sit on ``PATH`` elsewhere. Both worlds
+        are constructed and checked below rather than left to whatever the
+        running host happens to provide.
 
         """
         import os

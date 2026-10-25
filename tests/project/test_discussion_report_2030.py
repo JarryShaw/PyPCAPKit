@@ -11,10 +11,10 @@
   one ``::warning`` and exit 0, so reporting never fails a run.
 * :class:`TestTheWorkflowsPost` pins the ``discussion`` job of
   :file:`ci-timing.yml` and :file:`cron-vendor.yml`: the only job holding
-  ``discussions: write``, every other job's permissions as they were, first-party
-  actions only, the mode each event maps to, the script called on the
-  artifact the reporting job uploads, and cron-vendor's job running on a
-  failed gate but not on a deliberate skip.
+  ``discussions: write``, every other job's permissions as :data:`PERMISSIONS`
+  records them, first-party actions only, the mode each event maps to, the
+  script called on the artifact the reporting job uploads, and cron-vendor's
+  job running on a failed gate but not on a deliberate skip.
 * :class:`TestTheVendorPostStep` runs cron-vendor's post step with a stand-in
   ``python3``: the status it passes, and the report it writes for a failed gate.
 * :class:`TestTheVendorReport` runs ``vendor-update``'s ``Write the run report``
@@ -442,8 +442,8 @@ class TestTheWorkflowCommands(_FakeGitHub):
     """#2047: the whole of what the script prints and appends to the summary, byte for byte.
 
     The tests above read the warning with ``assertIn``; these pin each run's whole
-    standard output and summary file, with text each escape changes, so moving the
-    writes onto util/_actions.py can be shown to change nothing.
+    standard output and summary file, with text each escape changes, so any change
+    to what is written fails here.
 
     """
 
@@ -553,7 +553,7 @@ def post_step(name: 'str') -> 'dict[str, Any]':
 
 
 class TestTheWorkflowsPost(unittest.TestCase):
-    """The ``discussion`` job of each workflow, and every other job left as it was."""
+    """The ``discussion`` job of each workflow, and every other job's permissions per :data:`PERMISSIONS`."""
 
     def test_only_the_posting_job_may_write_discussions(self) -> None:
         for name, permissions in PERMISSIONS.items():

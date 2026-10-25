@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """#2030: CodeQL's ``discussion`` job, which posts the open code-scanning alerts to Discussions.
 
-* :class:`TestTheJob` pins :file:`codeql-analysis.yml`: ``analyze`` as it was,
-  ``discussion`` the one job holding ``security-events: read`` and
-  ``discussions: write``, run after ``analyze`` on a push or the schedule and
-  never on a pull request, the mode each event maps to, the thread's title, and
-  the status the report step hands on.
+* :class:`TestTheJob` pins :file:`codeql-analysis.yml`: ``analyze`` with the
+  permissions :data:`ANALYZE` records, ``discussion`` the one job holding
+  ``security-events: read`` and ``discussions: write``, run after ``analyze`` on a
+  push or the schedule and never on a pull request, the mode each event maps to,
+  the thread's title, and the status the report step hands on.
 * :class:`TestThePostStep` runs ``Post the report to Discussions`` with a
   stand-in ``python3``: the report step's status, or ``analyze``'s result where
   the step wrote none.
@@ -96,7 +96,7 @@ FAKE_GH = textwrap.dedent('''\
 
 
 class TestTheJob(unittest.TestCase):
-    """``discussion`` beside ``analyze``, and ``analyze`` left as it was."""
+    """``discussion`` beside ``analyze``, and ``analyze`` with its own permissions."""
 
     def test_only_the_posting_job_holds_its_scopes(self) -> None:
         spec = load(NAME)

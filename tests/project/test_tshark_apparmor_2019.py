@@ -69,7 +69,7 @@ class TestEveryTsharkInstallIsFollowed(unittest.TestCase):
     def test_every_job_installing_tshark_is_covered(self) -> None:
         """A new tshark install elsewhere in the workflows needs the step too.
 
-        Since #1967 an install runs :file:`util/apt_packages.py install`, which installs
+        An install runs :file:`util/apt_packages.py install` (#1967), which installs
         the job's ``APT_PACKAGES``, so a job counts when that names tshark.
 
         """

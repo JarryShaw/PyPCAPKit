@@ -16,9 +16,9 @@ class TCPReassemblyRuntimeTests(unittest.TestCase):
     This lives in a ``*_runtime.py`` module rather than beside the unit tests
     because it reads a generated capture: ``examples/captures/`` holds only a
     handful of committed fixtures, and the rest are rebuilt by
-    ``examples/generators/make_samples.py``. The unit-test workflow skips this
-    file for exactly that reason, and the integration workflow generates the
-    fixtures before running it.
+    ``examples/generators/make_samples.py``. The ``test`` job of
+    unit-tests.yml skips this file for exactly that reason, and the
+    ``integration`` job generates the fixtures before running it.
 
     """
 

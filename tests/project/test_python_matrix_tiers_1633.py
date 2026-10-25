@@ -5,11 +5,11 @@ Python 3.10 reached end-of-life on 2026-10-01 and 3.15.0 was released on
 2026-10-09, so the owner's ruling on #1633 split the matrices:
 
 * **Supported** -- 3.11 to 3.15, in every matrix (unit tests, compatibility,
-  conda, PyPI), blocking as before.
+  conda, PyPI), blocking.
 * **KTLO** -- end-of-life versions that still build and test (3.10 wherever it
   ran, plus 3.8 and 3.9 in the test matrices), never blocking: not CI, not
   a release, not a required context.
-* ``requires-python`` stayed ``>=3.6, <4``, until #2051 raised it to ``>=3.8``.
+* ``requires-python`` is ``>=3.8`` (#2051).
 
 A KTLO leg can block in more ways than one, so each is pinned on its own: a job
 that ``required-checks`` or ``release_status`` aggregates through one
@@ -19,22 +19,21 @@ job-level one); a compatibility leg must never carry a required context's name;
 and PyPI's completeness evidence must not count a KTLO wheel, or one failed KTLO
 leg would leave every later release run retrying it. The release-side checks
 execute the workflow's own shell, stubbing only ``curl``. The last class reads
-the prose that states the tiers back against the matrices. #1672 later made
-every KTLO leg conclude ``success``, Compat's included, and report a failed step
-as a warning; :mod:`tests.project.test_ktlo_legs_stay_green_1672` pins that.
+the prose that states the tiers back against the matrices. Every KTLO leg
+concludes ``success``, Compat's included, and reports a failed step as a warning
+(#1672); :mod:`tests.project.test_ktlo_legs_stay_green_1672` pins that.
 
-3.7 joined the tier afterwards, at the owner's request, and left it with #2051,
-whose ``>=3.8`` pip enforces at install, so no leg runs below that floor. A KTLO
-leg that cannot install or compile still fails fast and says why, at warning
-level, and :class:`TestAKTLOLegFailsFast` pins that -- the install and verify
-steps are executed with ``python`` stubbed, and each annotation is parsed as the
-runner parses it.
+No leg runs below 3.8, the ``requires-python`` floor pip enforces at install
+(#2051). A KTLO leg that cannot install or compile still fails fast and says
+why, at warning level, and :class:`TestAKTLOLegFailsFast` pins that -- the
+install and verify steps are executed with ``python`` stubbed, and each
+annotation is parsed as the runner parses it.
 
-Since #1660 the tiers are declared once, in :file:`.github/python-versions.toml`,
+The tiers are declared once, in :file:`.github/python-versions.toml` (#1660),
 and every matrix is read from it, so the expectations below are read from it
 too: what is pinned here is that each tier keeps its mechanics wherever the file
-puts a version. :mod:`tests.project.test_python_versions_1660` pins that the file
-reproduces the matrices ``main`` spelt out before.
+puts a version. :mod:`tests.project.test_python_versions_1660` pins how each
+matrix is read from the file.
 
 """
 
@@ -95,7 +94,7 @@ EXPERIMENTAL_LEVEL = 'warning'
 LEG_TEMPLATE = "Python ${{ matrix.python-version }}${{ matrix.ktlo && ' (KTLO, non-blocking)' || '' }}"
 EXPERIMENTAL_LEG_TEMPLATE = 'Python ${{ matrix.python-version }} (experimental, non-blocking)'
 #: The job holding experimental legs, the only one (#1660), in a workflow of its own
-#: since #1732, so that nothing in unit-tests.yml waits on it.
+#: (#1732), so that nothing in unit-tests.yml waits on it.
 EXPERIMENTAL_JOB = ('experimental.yml', 'experimental')
 #: What ``test`` and ``integration`` run, and their KTLO twins: CPython's tier
 #: then PyPy's, as each implementation runs the ``ALL`` test tier (#1958).
@@ -118,7 +117,7 @@ MATRICES = (
 AGGREGATED = (('unit-tests.yml', 'test'), ('unit-tests.yml', 'integration'),
               ('unit-tests.yml', 'pypcap-parity'), ('create-release.yml', 'pypi'))
 #: Where each KTLO leg must be, as (workflow, job, KTLO versions). unit-tests.yml's
-#: are jobs of their own since #1738, which nothing gating waits on.
+#: are jobs of their own (#1738), which nothing gating waits on.
 KTLO_LEGS = (
     ('unit-tests.yml', 'test-ktlo', TESTED_KTLO),
     ('unit-tests.yml', 'integration-ktlo', TESTED_KTLO),
@@ -307,7 +306,7 @@ class TestTheKTLOTierNeverBlocks(unittest.TestCase):
                 self.assertEqual(found, sorted(versions))
 
     def test_37_to_39_run_where_setup_python_still_builds_them(self) -> None:
-        """No Ubuntu 26.04 build of any, and ``ubuntu-latest`` moves to 26.04."""
+        """No Ubuntu 26.04 build of any, which ``ubuntu-latest`` serves."""
         for name, job_id, _ in KTLO_LEGS:
             spec = job(name, job_id)
             for leg in legs(name, job_id):
@@ -719,7 +718,7 @@ class TestAKTLOLegFailsFast(unittest.TestCase):
                     self.assertIn('SyntaxError: invalid syntax', result.stdout)
 
     def test_a_supported_leg_fails_the_same_steps_at_error_level(self) -> None:
-        """#1672 changed the KTLO level only: on 3.12 each of these still fails as an ``::error``."""
+        """#1672 is about the KTLO level only: on 3.12 each of these fails as an ``::error``."""
         cases = [(name, job_id, install, PIP_STUB, {'PIP_OUTPUT': PIP_37, 'PIP_STATUS': '1'},
                   '::error title=pcapkit did not install on Python 3.12::No matching distribution found '
                   'for pytest>=8; extra == "test". The rest of this leg is skipped.')
@@ -798,8 +797,9 @@ class TestTheProseFollowsTheTiers(unittest.TestCase):
     """What the docs and comments say about the matrices, read against the matrices.
 
     Nothing executes these, so a tier change leaves them stale without failing
-    anything else: round one of #1633 left the workflows page miscounting the
-    ``test`` legs, and comments naming 3.10 as CI's floor or 3.15 as allowed to fail.
+    anything else: a first pass at #1633 left the workflows page miscounting the
+    ``test`` legs, and comments naming 3.10 as CI's floor or 3.15 as allowed to
+    fail.
 
     """
 

@@ -80,8 +80,8 @@ class OptionFieldTests(unittest.TestCase):
         """Selecting an option schema must not parse the option first.
 
         Reading the option type by unpacking the whole base schema and throwing
-        the result away parsed every option twice -- two schema unpacks per
-        option, the first of which was used for nothing but its type field. The
+        the result away would parse every option twice -- two schema unpacks
+        per option, the first of them used for nothing but its type field. The
         base schema must therefore not appear here at all, and each option
         schema exactly once.
 
@@ -121,11 +121,10 @@ class OptionFieldForeignBaseSchemaTests(unittest.TestCase):
     and :mod:`pcapkit.foundation.registry` invites third-party protocols to
     register their own base schemas, which need not.
 
-    Such a base schema must be **unpacked in full**, as it was before the shortcut
-    existed. Getting this wrong does not raise: reading the wrong octets as the type
-    code selects the wrong option schema and the packet is silently misparsed, which
-    is why each case below asserts the parsed result and not merely that the slow
-    path ran.
+    Such a base schema must be **unpacked in full**. Getting this wrong does not
+    raise: reading the wrong octets as the type code selects the wrong option schema
+    and the packet is silently misparsed, which is why each case below asserts the
+    parsed result and not merely that the slow path ran.
 
     """
 
@@ -238,7 +237,7 @@ class OptionFieldForeignBaseSchemaTests(unittest.TestCase):
         # field second, the first four octets read ``size=0, kind=1``; a reader that
         # takes the *leading* two octets as the type code sees 0, which is the
         # end-of-option-list code, so it stops without parsing the option at all --
-        # measured, before the fallback existed: ['End'] and four octets of padding.
+        # measured without the fallback: ['End'] and four octets of padding.
         Options = self._type_second()
 
         schema = Options.unpack(b'\x00\x00\x00\x01' b'\x00\x00\x00\x00', 8, {})
@@ -278,11 +277,11 @@ class OptionFieldForeignBaseSchemaTests(unittest.TestCase):
 class OptionFieldPackageDeclarationTests(unittest.TestCase):
     """Every ``OptionField`` this package declares must still take the shortcut.
 
-    The fallback added for foreign base schemas is selected from the base schema's
+    The fallback for foreign base schemas is selected from the base schema's
     shape, so a base schema declared here in a shape the shortcut does not fit
     would silently drop back to parsing every one of its options twice -- correct,
-    but giving up the whole point of the change with nothing to show it. This is
-    the guard against that happening unnoticed.
+    but losing the shortcut with nothing to show it. This is the guard against
+    that happening unnoticed.
 
     """
 
@@ -325,8 +324,8 @@ class ListFieldSchemaItemTests(unittest.TestCase):
 
     ``field = self._item_type(packet)`` builds a per-item copy through
     :meth:`SchemaField.__call__ <pcapkit.corekit.fields.misc.SchemaField.__call__>`,
-    which applies both ``callback`` and ``length_callback`` to that copy -- the
-    schema branch then unpacked from ``self._item_type`` instead of from
+    which applies both ``callback`` and ``length_callback`` to that copy -- without
+    the fix the schema branch then unpacks from ``self._item_type`` instead of from
     ``field``, discarding whatever the copy carries. C.f. #433.
 
     No declaration in this package passes either argument, so nothing here
@@ -380,12 +379,12 @@ class ListFieldSchemaItemTests(unittest.TestCase):
         """The per-item field's ``callback`` mutation must reach ``unpack``.
 
         The callback is evaluated regardless: ``field = self._item_type(packet)``
-        runs it for its side effect even on the unpatched code. So what this
-        proves is not that the callback *fires*, but that the mutation it made
-        on its copy is what ``unpack`` actually used. It alternates
-        ``field._schema`` between two otherwise-identical schemas, one per
-        item; unpacking from ``self._item_type`` instead would use the schema
-        fixed at construction time for every item.
+        runs it for its side effect even without the fix. So what this proves is
+        not that the callback *fires*, but that the mutation it made on its copy
+        is what ``unpack`` actually used. It alternates ``field._schema`` between
+        two otherwise-identical schemas, one per item; unpacking from
+        ``self._item_type`` instead would use the schema fixed at construction
+        time for every item.
 
         """
         from pcapkit.corekit.fields.collections import ListField

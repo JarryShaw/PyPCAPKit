@@ -17,10 +17,10 @@ This does **not** re-test Sphinx's cross-reference resolution itself -- as
 :file:`tests/project/test_sentinels_doc_page_934_unit.py` explains for the sibling
 half of this same issue, whether a reference resolves is a property of the built
 inventory rather than of the source, and the honest check is the rendered HTML from
-an actual ``sphinx-build`` run, recorded in the pull request rather than
-reimplemented here. What this pins is the purely textual precondition a later edit
-could silently break even though a plain (non-nitpicky) build would keep passing
-either way: the page has to keep declaring an ``autoclass`` for the class.
+an actual ``sphinx-build`` run, not reimplemented here. What this pins is the
+purely textual precondition a later edit could silently break even though a plain
+(non-nitpicky) build would keep passing either way: the page has to keep declaring
+an ``autoclass`` for the class.
 
 """
 

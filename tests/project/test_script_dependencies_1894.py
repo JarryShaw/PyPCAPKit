@@ -8,8 +8,8 @@ Markdown table with ``markdown-it-py``. The ``test`` extra in
 :file:`Pipfile`'s ``[dev-packages]``, which ``make``'s ``pipenv run`` targets
 resolve against, carries them too, with the ``test`` extra's markers. Those keep
 each off the interpreters PyPI has no wheel of it for: ``psutil`` and ``lxml``
-are CPython only, ``lxml`` since #1958, as PyPI has none of it for GraalPy or
-PyPy 8.0. The ``dev`` extra is not asked: it holds what the toolchain linting
+are CPython only (``lxml`` by #1958), as PyPI has none of it for GraalPy or PyPy
+8.0. The ``dev`` extra is not asked: it holds what the toolchain linting
 :mod:`pcapkit` must resolve, not the scripts' dependencies.
 
 """

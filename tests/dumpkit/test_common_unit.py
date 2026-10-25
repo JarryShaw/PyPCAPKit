@@ -108,7 +108,7 @@ class DumpkitCommonTests(unittest.TestCase):
     def test_dumper_subclass_registration_is_opt_in(self) -> None:
         """Registration happens if and only if ``fmt`` is given.
 
-        This is the #514 opt-in contract, extended to the fifth pair. It guards
+        This is the #514 opt-in contract, applied to this pair too. It guards
         against *inferring* an absent ``fmt`` from the subclass'
         :attr:`~dictdumper.dumper.Dumper.kind` property -- which is an instance
         property, so inferring it constructs an instance against a
@@ -268,13 +268,13 @@ class DumpkitCommonTests(unittest.TestCase):
 
         ``PLIST._append_dict`` in :mod:`dictdumper.plist` writes a key as
         ``'<key>{item}</key>'.format(item=item)`` and calls ``_encode_value`` on
-        the *value* two lines down, never on the key -- so
-        :meth:`object_hook` is handed every value the writer interpolates and no
-        key at all, and the escaping proven above cannot reach one. Both
-        branches that build a mapping therefore escape their own keys:
-        :class:`~pcapkit.corekit.multidict.MultiDict`, where only an
-        enum-derived key was escaped before, and a plain :class:`dict`, where
-        nothing was.
+        the *value* two lines down, never on the key -- so :meth:`object_hook`
+        is handed every value the writer interpolates and no key at all, and the
+        escaping proven above cannot reach one. Both branches that build a
+        mapping therefore escape their own keys:
+        :class:`~pcapkit.corekit.multidict.MultiDict`, where without the fix
+        only an enum-derived key is escaped, and a plain :class:`dict`, where
+        nothing is.
 
         The :class:`bytes` key is :file:`examples/captures/test.pcapng`'s own,
         and it is the reason that fixture's ``plist`` report did not parse:

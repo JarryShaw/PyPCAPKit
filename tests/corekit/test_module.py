@@ -133,10 +133,10 @@ class ModuleDescriptorTests(unittest.TestCase):
 
         The fallback above swallows one :exc:`AttributeError` to retry through
         :func:`importlib.import_module`. A descriptor naming a class that does
-        not exist has to come back out of that retry naming the same missing
-        attribute it always did -- but as :exc:`~pcapkit.utilities.\
+        not exist has to come back out of that retry naming the missing
+        attribute -- but as :exc:`~pcapkit.utilities.\
 exceptions.ProtocolError` rather than the bare stdlib :exc:`AttributeError`,
-        so every one of the nine ``register_*`` call sites that build a
+        so every one of the ``register_*`` call sites that build a
         descriptor from a bad class name fails as a :mod:`pcapkit` error a
         caller can actually catch. GitHub issue #832.
 

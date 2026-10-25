@@ -12,11 +12,10 @@ This module is named ``*_runtime.py`` deliberately, which puts it in the
 fixture-dependent tier (see :mod:`tests._tiers`). It reads ``tcp.pcap``,
 ``ipv6.pcap`` and ``test.pcapng``, none of which git tracks --
 :file:`examples/generators/make_samples.py` writes them -- so it cannot be
-unit-tier, and it was one only because the guard added in GitHub pull request #393
-could not see it: the reads go through ``sample_path(capture)`` with a *variable*,
-which only the runtime half of the guard catches, and that half was never reached
-on a machine where the engine packages were absent and every test skipped.
-Installing an engine made its reads fail at once.
+unit-tier. The static half of the guard from GitHub pull request #393 cannot see
+that: the reads go through ``sample_path(capture)`` with a *variable*, which only
+the runtime half catches, and that half is never reached on a machine where the
+engine packages are absent and every test skips.
 
 """
 from __future__ import annotations

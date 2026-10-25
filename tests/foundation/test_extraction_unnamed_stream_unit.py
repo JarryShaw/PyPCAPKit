@@ -98,7 +98,7 @@ class TestPathEngines(unittest.TestCase):
     """Engines that open the input by path refuse an unnamed stream up front.
 
     Scapy and PyShark hand ``Extractor._ifnm`` to their library as a file name,
-    so before the refusal the ``<BytesIO>`` label was opened as a path --
+    so without the refusal the ``<BytesIO>`` label is opened as a path --
     ``FileNotFoundError`` from inside :mod:`scapy`. The refusal is raised by
     :class:`~pcapkit.foundation.extraction.Extractor` itself, before the engine
     is constructed, so it does not depend on the engine being able to run.

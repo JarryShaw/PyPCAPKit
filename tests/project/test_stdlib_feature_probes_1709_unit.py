@@ -23,8 +23,8 @@ This scans every module of the package for both shapes: a literal attribute
 probe of a module the file imports by name or of a builtin class, and a literal
 probe of any object for an attribute in :data:`VERSIONED`. A computed attribute
 name, as in ``getattr(hashlib, digest)``, is a lookup rather than a question
-about the interpreter, and is not matched. Run against the tree before issue
-#1709, it reports exactly those and the :data:`EXEMPT` entries.
+about the interpreter, and is not matched. Run against the tree without the
+fixes of issue #1709, it reports exactly those and the :data:`EXEMPT` entries.
 
 This module is unit-tier: it reads source text and never imports the package.
 

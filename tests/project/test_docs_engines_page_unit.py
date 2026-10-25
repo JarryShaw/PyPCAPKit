@@ -23,7 +23,7 @@ DOCS = ROOT / 'docs' / 'source'
 INDEX = DOCS / 'index.rst'
 PAGE = DOCS / 'engines.rst'
 
-#: The headings that moved, each written once on the page.
+#: The headings :file:`engines.rst` holds, each written once on the page.
 MOVED = ('Engine Support by Python Version', 'Engine Prerequisites', 'Test Environment',
          'Test Results', 'Test Results (Relative)')
 
@@ -51,7 +51,7 @@ def section(text: 'str', title: 'str') -> 'str':
 
 
 class PlacementTests(unittest.TestCase):
-    """The page exists, is reachable, and holds what moved."""
+    """The page exists, is reachable, and holds those headings."""
 
     def setUp(self) -> 'None':
         self.index = INDEX.read_text(encoding='utf-8')
@@ -74,7 +74,7 @@ class PlacementTests(unittest.TestCase):
                 self.assertEqual(found.count(title), 1)
 
     def test_index_keeps_a_summary_that_links_the_page(self) -> 'None':
-        """Its ``#engine-comparison`` anchor survives, and none of the moved sections do."""
+        """Its ``#engine-comparison`` anchor is there, and none of the page's sections are."""
         found = headings(self.index)
         self.assertIn('Engine Comparison', found)
         self.assertIn(':doc:`engines`', section(self.index, 'Engine Comparison'))

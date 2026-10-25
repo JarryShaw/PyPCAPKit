@@ -10,8 +10,9 @@ the ``s`` and ``p`` formats, but PyPy's takes :obj:`bytes` alone and raises
 
 The PyPy behaviour is reproduced on any interpreter with a :mod:`struct`
 stand-in that refuses a :obj:`bytearray`, as PyPy's does. The real
-:func:`struct.pack` then pins that the output is unchanged and that a value
-refused before -- a :obj:`memoryview`, a :obj:`bool`, a :obj:`str` -- still is.
+:func:`struct.pack` then pins the output, and that a :obj:`memoryview`, a
+:obj:`bool` and a :obj:`str` are refused as :func:`struct.pack` refuses
+them.
 
 GitHub issue #2015. GraalPy's ``c`` format takes a :obj:`bytearray`, where
 CPython's refuses it, so the field hands a :obj:`bytearray` for ``c`` over as

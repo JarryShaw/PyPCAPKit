@@ -670,9 +670,10 @@ class TestReaders(unittest.TestCase):
                 self.assertTrue(loads, f'{rel} never reads {module}.{name}')
 
     def test_pypcapfile_binds_none(self) -> 'None':
-        # The four names defined there until #1739: reading them through
-        # ``pcapkit.toolkit.pypcapfile`` would be a re-export, which ruling 1 on
-        # #1726 rules out, so the module reaches them as module attributes.
+        # The names #1739 moved out of there: reading them through
+        # ``pcapkit.toolkit.pypcapfile`` would be a re-export, which
+        # ruling 1 on #1726 rules out, so the module reaches them as
+        # module attributes.
         pypcapfile = importlib.import_module('pcapkit.toolkit.pypcapfile')
         for name in ('TCP_MIN_HEADER_LEN', 'IPV4_HEADER_LEN', 'IPV6_HEADER_LEN', 'AH_HEADER_LEN'):
             with self.subTest(name=name):

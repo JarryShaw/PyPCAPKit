@@ -57,8 +57,8 @@ MOVED = {
                                      '_ZERO_PAD_BUDGET_RATIO'],
 }
 
-#: What :mod:`pcapkit.utilities.config` held for the :mod:`pcapkit.vendor`
-#: crawlers before they kept their own variables again (:issue:`1726`).
+#: The :mod:`pcapkit.vendor` crawlers' own variables, which
+#: :mod:`pcapkit.utilities.config` does not hold (#1726).
 VENDOR_NAMES = ('VENDOR_RETRY', 'CI_MODE', 'http_proxy', 'https_proxy')
 
 #: The public readers of :mod:`pcapkit.utilities.config`, which are not variables.

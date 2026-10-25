@@ -1,23 +1,23 @@
 # -*- coding: utf-8 -*-
 """GitHub issue #1845: ``get`` is quiet for a value it cannot resolve; ``register`` is loud.
 
-#1823 gave every generated registry a ``_validate_value`` override raising a loud
-:exc:`~pcapkit.utilities.exceptions.EnumValueError`, and
+Every generated registry has a ``_validate_value`` override raising a loud
+:exc:`~pcapkit.utilities.exceptions.EnumValueError` (#1823), and
 :meth:`~pcapkit.corekit.enum.EnumLookup.get` calls that hook before ``cls(key)``.
-So ``get(out_of_range, default)`` returned ``default`` but logged a
-:data:`logging.CRITICAL` record and installed :mod:`pcapkit`'s exception hooks
-on the way. The owner ruled ``get`` quiet for such a value, with a usable
-``default`` or without one -- without, the miss is still raised, just not
-reported -- and kept ``register`` loud. The quiet path lives in
-:mod:`pcapkit.corekit`, so the generated overrides are untouched: ``get`` runs
-them inside a :class:`~pcapkit.utilities.exceptions.CaughtByCaller` block, which
-makes a :exc:`ValueError`-derived :class:`~pcapkit.utilities.exceptions.BaseError`
+So without the fix ``get(out_of_range, default)`` returns ``default`` but logs a
+:data:`logging.CRITICAL` record and installs :mod:`pcapkit`'s exception hooks on
+the way. The owner ruled ``get`` quiet for such a value, with a usable ``default``
+or without one -- without, the miss is still raised, just not reported -- and kept
+``register`` loud. The quiet path lives in :mod:`pcapkit.corekit`, so the
+generated overrides stay loud: ``get`` runs them inside a
+:class:`~pcapkit.utilities.exceptions.CaughtByCaller` block, which makes a
+:exc:`ValueError`-derived :class:`~pcapkit.utilities.exceptions.BaseError`
 constructed there quiet.
 
 The generated registry under test is
 :class:`~pcapkit.const.ipv4.tos_pre.ToSPrecedence`, whose override accepts
-``0``-``7`` only. ``LLACode``, the registry the issue measured on, is avoided
-because one of its members is being renamed in parallel (#1848).
+``0``-``7`` only. ``LLACode``, the registry the issue measured on, is not
+used here: #1848 renamed one of its members.
 
 """
 

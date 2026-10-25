@@ -211,9 +211,9 @@ class WiringTests(unittest.TestCase):
                 self.assertIs(cls.__deferred__, importlib.import_module(deferred_module).Deferred)
 
     def test_the_old_import_paths_are_gone(self) -> 'None':
-        """The name was public at all three before the move; GitHub issue #1744
-        dropped those re-exports (#1715: a moved name keeps no re-export at its
-        old path), so :mod:`pcapkit.corekit.packet` is the one home.
+        """None of the three paths the name was public at keeps a re-export
+        (GitHub issue #1744; #1715: a moved name keeps no re-export at its old
+        path), so :mod:`pcapkit.corekit.packet` is the one home.
 
         """
         from pcapkit.corekit.packet import DeferredPacket

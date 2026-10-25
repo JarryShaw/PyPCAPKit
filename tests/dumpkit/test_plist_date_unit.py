@@ -102,7 +102,7 @@ class TestPlistDate(unittest.TestCase):
         })
 
     def test_json_and_tree_keep_the_fractional_date(self) -> None:
-        """Only the ``plist`` writer is changed; the others keep full precision."""
+        """Only the ``plist`` writer drops the fraction; the others keep full precision."""
         stamp = datetime.datetime(2017, 11, 19, 15, 49, 5, 471719, tzinfo=UTC)
 
         self.assertIn(b'2017-11-19T15:49:05.471719', self.dump('JSON', {'time': stamp}))

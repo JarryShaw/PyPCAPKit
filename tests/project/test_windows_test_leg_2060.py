@@ -1,11 +1,10 @@
 # -*- coding: utf-8 -*-
 """#2060: a non-blocking Windows unit-test leg, ahead of the win-64 conda package's release.
 
-The plan for #2060 asks that a Windows unit-test leg run before phase 2 publishes,
-so the first win-64 package has had a test run. :file:`.github/workflows/experimental.yml`
-gained ``windows``, a job of its own beside ``experimental``, whose Linux
-containment (cgroup scope, ``prlimit``, resource monitor, superseded watcher)
-cannot run on Windows.
+The plan for #2060 asks that a Windows unit-test leg run before a win-64 package
+publishes. :file:`.github/workflows/experimental.yml` has ``windows``, a job of its own
+beside ``experimental``, whose Linux containment (cgroup scope, ``prlimit``, resource
+monitor, superseded watcher) cannot run on Windows.
 
 * :class:`TestTheLeg`: one leg on ``windows-latest``, on ``latest``, the newest
   CPython the conda builds target, named ``Python <latest> on Windows (experimental)``,

@@ -230,8 +230,7 @@ class SingletonTests(_ReimportCase):
         """Every sentinel type derives from ``Sentinel``, which is exported and not instantiable.
 
         Its metaclass derives from :class:`abc.ABCMeta`, as the library's other
-        abstract bases' do, and the private name it had before review is gone,
-        with no alias left behind.
+        abstract bases' do, and it keeps no private alias.
 
         """
         module = _module()
@@ -398,7 +397,7 @@ class SubclassTests(_ReimportCase):
 
 
 class OldPickleTests(_ReimportCase):
-    """A pickle written before the change still loads, as the sentinel where it can."""
+    """A pickle written without the fix still loads, as the sentinel where it can."""
 
     def test_every_old_pickle_still_loads(self) -> 'None':
         module = _module()
@@ -433,7 +432,7 @@ class OldPickleTests(_ReimportCase):
         Below protocol 2 the default reduce rebuilds through
         :func:`copyreg._reconstructor`, which calls :meth:`object.__new__`
         directly. No hook on the class runs, so these load as a second instance.
-        Pickles written after the change reduce to the object's own name instead.
+        Pickles written with the fix reduce to the object's own name instead.
 
         """
         module = _module()

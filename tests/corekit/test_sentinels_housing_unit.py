@@ -117,10 +117,10 @@ class NoImportCycleTests(unittest.TestCase):
     The issue's own instruction: check for a cycle *deliberately*, because
     :command:`pylint` already reports hundreds of ``cyclic-import`` findings in
     this package, so one more would be invisible in the noise rather than caught.
-    This does not run :command:`pylint` -- that check is done separately and
-    reported alongside #922 -- it instead pins the one fact that actually
-    rules a cycle out for this specific set of modules: that
-    :mod:`pcapkit.corekit.sentinels` imports none of them.
+    This does not run :command:`pylint` -- that check is done separately (#922)
+    -- it instead pins the one fact that actually rules a cycle out for this
+    specific set of modules: that :mod:`pcapkit.corekit.sentinels` imports none
+    of them.
 
     """
 
@@ -205,9 +205,9 @@ class SentinelsModuleExportRuleTests(unittest.TestCase):
 
     Nothing forces :mod:`pcapkit.corekit.sentinels` to honour the ruling that the
     sentinel objects, and not their types, are what gets exported -- the ruling
-    was stated about the shim locations, which #916 already fixed -- but shipping
-    a brand new module that violates the rule its own docstring cites would be a
-    strange way to land it, so this pins that it does not.
+    was stated about the shim locations (#916) -- but a module that violates the
+    rule its own docstring cites would be self-contradictory, so this pins that
+    it does not.
 
     It does export :class:`~pcapkit.corekit.sentinels.Sentinel`, the abstract
     base every sentinel type shares, since that is no sentinel's own type.

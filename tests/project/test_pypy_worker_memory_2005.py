@@ -5,8 +5,8 @@ On PyPy an xdist worker's RSS grows with every test it runs, so through the
 whole tier at ``-n 4`` its workers outgrew the runner. ``Run unit tests`` runs
 pytest once per directory its ``SHARDS`` names on a PyPy leg, then once more
 over the rest, ignoring each, so every run starts its workers afresh. Every
-other leg runs pytest once, as before. :class:`TestTheRunsCoverTheTier` runs the
-step's own script with a stub ``python``, as
+other leg runs pytest once. :class:`TestTheRunsCoverTheTier` runs the step's
+own script with a stub ``python``, as
 :mod:`tests.project.test_sweeps_on_latest_only_1732` does.
 
 """

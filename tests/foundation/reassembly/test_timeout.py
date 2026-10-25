@@ -90,8 +90,8 @@ class IPReassemblyTimeoutTests(unittest.TestCase):
 
         ``PARTIAL`` says "these fragments had not arrived yet"; ``TIMEOUT`` says
         "these fragments are gone, and no further fragment will ever be added".
-        Both are falsy, so ``if datagram.completed`` reads as it did while the
-        field was a :obj:`bool`.
+        Both are falsy, so ``if datagram.completed`` reads as it would on a
+        :obj:`bool`.
 
         """
         from pcapkit.foundation.reassembly.data.data import Completion
@@ -246,10 +246,10 @@ class IPLooseModeTests(unittest.TestCase):
     def test_an_unterminated_datagram_reports_the_prefix_that_arrived(self) -> None:
         """No final fragment means no known length -- but the prefix is known.
 
-        ``TDL`` is still ``-1`` here, and ``datagram[:-1]`` was 65534 octets of the
-        preallocated buffer with ``completed=True`` on top. Neither that nor an
-        empty payload is right: the octets from offset zero to the first hole did
-        genuinely arrive, so they are what a caller asking for one contiguous
+        ``TDL`` is still ``-1`` here, and without the fix ``datagram[:-1]`` is 65534
+        octets of the preallocated buffer with ``completed=True`` on top. Neither that
+        nor an empty payload is right: the octets from offset zero to the first hole
+        did genuinely arrive, so they are what a caller asking for one contiguous
         payload gets, and the datagram is reported incomplete.
 
         """
@@ -292,10 +292,10 @@ class IPLooseModeTests(unittest.TestCase):
         self.assertEqual(datagram.payload, (b'A' * 16, b'C' * 16))
 
     def test_a_known_length_still_zero_fills_its_holes(self) -> None:
-        """With the last fragment in hand the length is known, so nothing changes.
+        """With the last fragment in hand the length is known, so the holes are zero-filled.
 
-        This is the case ``strict=False`` exists for, and its payload is exactly
-        what it always was -- only ``completed`` stopped claiming the datagram was
+        This is the case ``strict=False`` exists for: its payload is the
+        zero-filled datagram, and ``completed`` does not claim the datagram is
         whole.
 
         """

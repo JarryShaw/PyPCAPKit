@@ -194,7 +194,7 @@ class BaseGetProvenanceTests(unittest.TestCase):
         self.assertIs(_Closed.get(99, 2), _Closed.two)
 
     def test_old_call_sites_keep_catching(self) -> 'None':
-        """The whole reason the shape is preserved: the six in-library
+        """The whole reason the shape is preserved: the in-library
         ``except KeyError`` sites, and any caller's own, keep working."""
         try:
             _Closed.get('nosuch')
@@ -254,8 +254,9 @@ class BaseGetQuietnessTests(unittest.TestCase):
     inline: *"A pcapkit exception here would log at CRITICAL for something that
     is handled two lines later."*
 
-    Since GitHub issue #1845 the value miss is quiet as well, so the control
-    that shows the recorder can see a loud error constructs one directly.
+    The value miss is quiet as well (GitHub issue #1845), so the control
+    that shows the recorder can see a loud error constructs one
+    directly.
     """
 
     def setUp(self) -> 'None':
@@ -489,7 +490,7 @@ class CriticalityGetDeletionTests(unittest.TestCase):
 
 
 class MobilityHeaderNameMissTests(unittest.TestCase):
-    """The two :rfc:`5568` inline enumerations found by #923's own census.
+    """The :rfc:`5568` inline enumerations #923's own census found.
 
     Both raise from :mod:`pcapkit.utilities.exceptions` on a name miss -- the
     right provenance. Choosing ``EnumValueError`` for it, *"so the two ways of

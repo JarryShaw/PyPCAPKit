@@ -220,8 +220,8 @@ class TraceFlowBaseTests(unittest.TestCase):
                 def submit(self) -> tuple[DummyIndex, ...]:
                     return ()
 
-        # #514: registration is opt-in. Before it, the absent keyword fell back to
-        # ``cls.name`` -- i.e. ``__protocol_name__`` here -- and this registered
+        # #514: registration is opt-in. A fallback for the absent keyword to
+        # ``cls.name`` -- i.e. ``__protocol_name__`` here -- would register this
         # under ``'defaulttrace'``. A class attribute is not a registry key.
         register.assert_not_called()
         self.assertEqual(Default.name, 'DefaultTrace')
@@ -235,8 +235,8 @@ class TraceFlowBaseTests(unittest.TestCase):
 
         The keyword used here is deliberately *not* ``name``; see the sibling
         test in ``tests/foundation/reassembly/test_reassembly_base.py`` for why
-        four class keyword names collide with :meth:`abc.ABCMeta.__new__` on
-        Python 3.10. The colliding case is pinned separately below.
+        four class keyword names collide with :meth:`abc.ABCMeta.__new__` below
+        Python 3.11. The colliding case is pinned separately below.
 
         """
         from pcapkit.corekit.infoclass import Info, info_final

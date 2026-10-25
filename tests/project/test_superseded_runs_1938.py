@@ -639,8 +639,8 @@ class TestTheWorkflowCommands(unittest.TestCase):
     """#2047: the whole of what ``check`` and ``watch`` print, append to the summary and output, byte for byte.
 
     The tests above read the commands one by one; these pin each run's whole
-    standard output and files, with text each escape changes, so moving the
-    writes onto util/_actions.py can be shown to change nothing.
+    standard output and files, with text each escape changes, so any change
+    to what is written fails here.
 
     """
 

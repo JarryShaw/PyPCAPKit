@@ -5,16 +5,15 @@ GitHub issue #942: ``FEATCode``'s class docstring cited :rfc:`5797#secion-3` --
 ``secion``, missing the ``t`` -- in both :file:`pcapkit/vendor/ftp/command.py`
 (inside the ``LINE`` f-string template, the source of truth) and its generated
 copy :file:`pcapkit/const/ftp/command.py`. Under Sphinx the role is
-``sphinx.roles.RFC`` (:file:`sphinx/roles.py`, ``build_uri``, around
-:file:`~362-367`): it appends whatever follows ``#`` onto the RFC's base URL
-with no validation at all, and returns a plain ``nodes.reference`` carrying
-that URL as ``refuri`` -- never a ``pending_xref``. Docutils' own
-``rfc_reference_role`` behaves identically for the same reason. So this
-rendered a live link to a **non-existent** anchor, and no build warned: not
-because nitpicky mode is scoped to ``py:`` targets -- this repository's
-``docs/source/conf.py`` does not enable nitpicky at all -- but because there
-is no cross-reference node here for nitpicky to ever have inspected in the
-first place, on any Sphinx configuration.
+``sphinx.roles.RFC``, whose ``build_uri`` appends whatever follows ``#`` onto
+the RFC's base URL with no validation at all, and returns a plain
+``nodes.reference`` carrying that URL as ``refuri`` -- never a
+``pending_xref``. Docutils' own ``rfc_reference_role`` behaves identically for
+the same reason. So this rendered a live link to a **non-existent** anchor, and
+no build warned: not because nitpicky mode is scoped to ``py:`` targets -- this
+repository's ``docs/source/conf.py`` does not enable nitpicky at all -- but
+because there is no cross-reference node here for nitpicky to ever have
+inspected in the first place, on any Sphinx configuration.
 
 Pinning the exact string that was wrong only catches *this* typo coming back.
 :class:`RFCAnchorFragmentTests` instead walks every ``:rfc:`` role with a ``#``
@@ -44,13 +43,13 @@ catch. The generators behind :mod:`pcapkit.const.tcp.mp_tcp_option` and
 keeps only the number, so each emits ``#section-{sec}`` explicitly.
 
 :data:`ACCEPTED_FRAGMENT`'s set is not a survey of shapes this tree happens to
-use -- it is Sphinx's own. ``sphinx.roles._format_rfc_target`` titles
-exactly three anchor prefixes, ``{'appendix', 'page', 'section'}``, and
+use -- it is Sphinx's own. ``sphinx.roles._format_rfc_target`` titles exactly
+three anchor prefixes, ``{'appendix', 'page', 'section'}``, and
 :file:`tests/project/test_changelog_md.py` already exercises ``#page-N`` as a
-correctly-rendered citation (``793#page-5``); confirmed real against RFC
-793's own HTML (``id="page-5"`` present). A shapes-in-use survey would have
-missed it, since nothing under :mod:`pcapkit` cites a page anchor yet --
-``page-\\d+`` is accepted here anyway, matching Sphinx and that sibling test.
+correctly-rendered citation (``793#page-5``); confirmed real against RFC 793's
+own HTML (``id="page-5"`` present). A shapes-in-use survey would have missed
+it, since nothing under :mod:`pcapkit` cites a page anchor -- ``page-\\d+`` is
+accepted here anyway, matching Sphinx and that sibling test.
 
 That sibling test also exercises ``#introduction`` and a bare ``#section``
 (no number) as citations Sphinx does not error on. Deliberately **not**
@@ -149,20 +148,19 @@ KNOWN_DEAD_ANCHORS: 'dict[int, frozenset[str]]' = {
 #: one. That asymmetry is why the list holds prefix/suffix pairs rather than a single
 #: delimiter.
 #:
-#: **This list replaced a general masker, and the reason is the point.** Deciding
-#: "is this text inside any inline literal" over the whole tree was tried five times
-#: and was wrong five times -- a lookbehind heuristic, then a ``re.DOTALL`` span that
-#: crossed paragraph breaks and hid a live ``:rfc:`4303#section-2.1``` role, then a
-#: greedy close that swallowed the next literal's opener, then a role's own backtick
-#: fusing with an adjacent literal. Each fix addressed the mechanism the previous
-#: postmortem had found and missed the next. The general problem is RST's
-#: inline-markup grammar, which a regex was never going to model.
+#: **A list rather than a general masker, and the reason is the point.** Deciding "is
+#: this text inside any inline literal" over the whole tree was measured wrong by
+#: every approach tried -- a lookbehind heuristic, a ``re.DOTALL`` span that crosses
+#: paragraph breaks and hides a live ``:rfc:`4303#section-2.1``` role, a greedy close
+#: that swallows the next literal's opener, a role's own backtick fusing with an
+#: adjacent literal. The general problem is RST's inline-markup grammar, which a
+#: regex was never going to model.
 #:
-#: The bounded question is a different size. Rather than classifying every literal in
-#: the tree -- **23,869** spans across **926** files, every one of which had to be got
-#: right -- it asks only where a *denylisted fragment* appears, which is a
-#: handful of occurrences, and classifies each against this list. Adding a form means one
-#: reviewed entry, the same scrutiny :data:`KNOWN_DEAD_ANCHORS` entries already get.
+#: The bounded question is a different size. Rather than classifying every literal in the
+#: tree -- every one of which would have to be got right -- it asks only where a
+#: *denylisted fragment* appears, which is a handful of occurrences, and classifies each
+#: against this list. Adding a form means one reviewed entry, the same scrutiny
+#: :data:`KNOWN_DEAD_ANCHORS` entries already get.
 QUOTED_FORMS: 'tuple[tuple[str, str], ...]' = (
     ('``', '``'),
 )
@@ -215,9 +213,8 @@ def _is_documentation(text: 'str', start: 'int', length: 'int') -> 'bool':
 
     Local and exact: it looks only at the characters immediately either side of this
     one citation, so it cannot be thrown off by markup elsewhere in the file. That is
-    the whole advantage over the masker it replaced, which decided the same question by
-    pairing every literal delimiter in the file and got it wrong whenever the pairing
-    slipped.
+    the whole advantage over a masker, which decides the same question by pairing every
+    literal delimiter in the file and gets it wrong whenever the pairing slips.
 
     Args:
         text: The file's contents.
@@ -237,25 +234,24 @@ def _is_documentation(text: 'str', start: 'int', length: 'int') -> 'bool':
         # The opener has to *begin* a token, and only whitespace or the start of the
         # file may precede it.
         #
-        # An earlier version also allowed ``([{"'`` there, on the reasoning that an
-        # opening bracket or quote may sit before a literal. That was **the sixth
-        # mechanism**, and it was mine: those characters are equally valid as the last
-        # character of a literal's *content*, in which case the ``` `` ``` is a
-        # **closer** and the role after it is live. So ``` ``'base'``:rfc:`959#…`` ```
-        # read as documentation -- and ``` ``'base'`` ``` is a real literal in
-        # :file:`pcapkit/const/ftp/command.py`. Measured across the scanned roots,
-        # **764** literals in **188** files end in one of those five characters, so the
-        # exemption was one adjacency away from hiding a live dead link.
+        # ``([{"'`` are not allowed there, though an opening bracket or quote may sit
+        # before a literal -- that is **the sixth mechanism**: those characters are
+        # equally valid as the last character of a literal's *content*, in which case
+        # the ``` `` ``` is a **closer** and the role after it is live. So ```
+        # ``'base'``:rfc:`959#…`` ``` would read as documentation -- and
+        # ``` ``'base'`` ``` is a real literal in :file:`pcapkit/const/ftp/command.py`.
+        # Measured across the scanned roots, hundreds of literals end in one of those
+        # characters, so allowing them leaves the exemption one adjacency away from
+        # hiding a live dead link.
         #
         # Whitespace and start-of-file are safe by RST's own grammar: an inline
         # literal's *end*-string cannot be preceded by whitespace, so ``` `` ```
         # following whitespace is always an opener.
         #
-        # The comment this replaced claimed the condition was "measured, not reasoned
-        # about". It had been measured only against ``` ``foo`` ``` -- a literal ending
-        # in a letter -- and never against the characters in its own allowed set, which
-        # is exactly where it failed. A measurement that skips the interesting inputs
-        # is reasoning wearing a measurement's clothes.
+        # A condition measured only against ``` ``foo`` ``` -- a literal ending in a
+        # letter -- and never against the characters in its own allowed set fails
+        # exactly there. A measurement that skips the interesting inputs is reasoning
+        # wearing a measurement's clothes.
         if opener == 0 or text[opener - 1].isspace():
             return True
     return False
@@ -268,15 +264,14 @@ def _dead_anchor_citations() -> 'list[DeadAnchorFinding]':
     network -- so it runs the same way in CI, which has none.
 
     Searches for each denylisted fragment as a **literal string** rather than matching
-    every ``:rfc:`` role and comparing. Two consequences worth stating, because the
-    previous design had neither:
+    every ``:rfc:`` role and comparing. Two consequences worth stating:
 
     * The work is proportional to the number of *denylisted* fragments present, not to
       the amount of markup in the tree. There is no classifier to get wrong on a file
       that has nothing to do with these anchors.
-    * A citation this table has never heard of is not examined at all. That is not a
-      regression -- the denylist never made a claim about one -- but it means this
-      function answers a narrower question than its predecessor pretended to.
+    * A citation this table has never heard of is not examined at all. The denylist
+      makes no claim about one, so this function answers a narrower question than a
+      scan of every role would appear to.
 
     Scans :data:`DEAD_ANCHOR_SCAN` rather than :mod:`pcapkit` alone: scanning one
     directory is what let dead-anchor sites sit unnoticed outside it, most of them
@@ -317,7 +312,7 @@ class RFCAnchorFragmentTests(unittest.TestCase):
 
         Catches the *next* ``secion``, not just #942's: any freshly introduced
         typo of ``section-``/``appendix-``/``page-``, or any bare-number
-        fragment like the ten this same sweep found and fixed, shows up as a
+        fragment like those #942's sweep found and fixed, shows up as a
         finding and fails this test -- there is no allowlist left for one to
         hide behind. Shape only, not anchor existence -- see #944.
 
@@ -332,14 +327,14 @@ class RFCAnchorFragmentTests(unittest.TestCase):
     def test_the_documentation_exemption_holds_on_every_known_mechanism(self) -> 'None':
         """:func:`_is_documentation` on each input known to defeat a naive masker.
 
-        This is the regression suite for several rounds of review, and it exists because
-        each of those rounds fixed the mechanism the previous postmortem had named and
-        then missed the next one. Pinning the *table* rather than the latest fix is the
-        difference: a new mechanism has to be added here to be considered handled, and
-        a redesign has to keep every row passing.
+        This is the regression suite for every mechanism review has found, and it exists
+        because fixing the mechanism a postmortem names has repeatedly missed the next
+        one. Pinning the *table* rather than the latest fix is the difference: a new
+        mechanism has to be added here to be considered handled, and a redesign has to
+        keep every row passing.
 
-        The rows are the real inputs, not paraphrases of them. Four are false negatives
-        the masker produced -- a live role it hid -- which is the dangerous direction,
+        The rows are the real inputs, not paraphrases of them. Most are false negatives
+        a masker produces -- a live role it hides -- which is the dangerous direction,
         since a hidden role is a dead link nobody sees. One is the documentation idiom
         that must stay exempt, or the defect becomes impossible to write about in the
         very file that guards against it.
@@ -363,7 +358,7 @@ class RFCAnchorFragmentTests(unittest.TestCase):
              'cite %s``next`` after', True),
             ('a live role flush against a spaced literal',
              'cite %s` ``next`` after', True),
-            # Mechanism 6: the five characters an earlier boundary check allowed before
+            # Mechanism 6: the characters ``([{"'`` a boundary check might allow before
             # the opener are equally valid as a literal's last *content* character, in
             # which case the delimiter is a closer and the role is live. One row each,
             # because they were allowed as a set and had to be refuted as a set.
@@ -439,7 +434,7 @@ class RFCAnchorFragmentTests(unittest.TestCase):
         )
 
     #: Matches the ``FEATCode`` class header regardless of its base classes,
-    #: so a future re-parenting (like #930/#932/#937 did to five siblings)
+    #: so a future re-parenting (like #930/#932/#937 did to its siblings)
     #: does not fail this pin for a reason unrelated to the RFC citation --
     #: only the docstring wording and the citation itself stay exact.
     _FEATCODE_CITATION = re.compile(
@@ -470,8 +465,8 @@ class RFCAnchorFragmentTests(unittest.TestCase):
 
         Pinned by exact site for the same reason as the ``FEATCode`` pin above
         -- RFC 5797 §2.2 (*Registry Format*) is where the ``FEAT Code`` column
-        ``feat`` holds is actually defined, so only the spelling was ever
-        wrong here; the section number is correct and unchanged.
+        ``feat`` holds is actually defined, so only the spelling was
+        wrong here; the section number is correct.
 
         """
         expected = (

@@ -7,7 +7,7 @@ comment-only regenerations. The owner chose to commit such a regeneration
 without the bump, so that documentation still reaches ``main`` and only a code
 change cuts a beta.
 
-Three layers:
+The layers:
 
 * :class:`TestTheScriptOnARegeneratedTree` runs
   :file:`util/vendor_code_changed.py` in throwaway repositories, on fixtures

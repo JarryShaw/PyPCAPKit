@@ -15,17 +15,17 @@ raising, which is itself worth pinning (#575).
 
 Most of this is unit-tier: it exercises the parsing and formatting helpers
 against fabricated PDML/help-text fragments and a fabricated measurement list,
-never shelling out to :program:`editcap`/:program:`tshark`. Two classes do
-shell out, both gated on :data:`HAS_WIRESHARK` -- a real ``HAS_*`` flag,
-deliberately, rather than a same-effect :func:`shutil.which` check under an
-unprefixed name. The latter was this file's first cut, on the theory that a
-name ``tests/_dependency_gates.py``'s AST scan does not recognise cannot need
-an entry there -- true, but the wrong lesson: it also means the scan cannot
-see the gate at all, so a real skip on every CI leg (Wireshark is not
-installed on most of them) went unreported as anything. ``HAS_WIRESHARK`` is
-declared in :data:`~tests._dependency_gates.NON_DISTRIBUTION_FLAGS`, next to
-the existing ``HAS_PROC_FD`` precedent for "a flag that asks about something
-pip cannot install at all" -- see that module for the declaration, and
+never shelling out to :program:`editcap`/:program:`tshark`. Two classes do shell
+out, both gated on :data:`HAS_WIRESHARK` -- a real ``HAS_*`` flag, deliberately,
+rather than a same-effect :func:`shutil.which` check under an unprefixed name.
+The latter rests on the theory that a name ``tests/_dependency_gates.py``'s AST
+scan does not recognise cannot need an entry there -- true, but the wrong
+lesson: it also means the scan cannot see the gate at all, so a real skip on
+every CI leg (Wireshark is not installed on most of them) would go unreported as
+anything. ``HAS_WIRESHARK`` is declared in
+:data:`~tests._dependency_gates.NON_DISTRIBUTION_FLAGS`, next to the existing
+``HAS_PROC_FD`` precedent for "a flag that asks about something pip cannot
+install at all" -- see that module for the declaration, and
 :func:`tests.test_tier_guard.DependencyGateCoverageTests
 .test_every_gated_flag_is_classified` for the check that would fail if it were
 missing.
@@ -323,7 +323,7 @@ PDML = '''<?xml version="1.0" encoding="utf-8"?>
 
 @unittest.skipUnless(HAS_LXML, NO_LXML)
 class StrictPdmlTests(unittest.TestCase):
-    """#1894: the PDML is parsed by lxml with a hardened parser, where ElementTree read it before.
+    """#1894: the PDML is parsed by lxml with a hardened parser, not by ElementTree.
 
     Through :func:`~pyshark_encap_map.measure_encap`, against stand-ins for
     :program:`editcap` and :program:`tshark`: the first writes a pcap header

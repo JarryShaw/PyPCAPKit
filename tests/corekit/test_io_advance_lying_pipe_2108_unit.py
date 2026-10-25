@@ -1,12 +1,11 @@
 # -*- coding: utf-8 -*-
 """:func:`~pcapkit.corekit.io.advance` reads past a record on a pipe that only says it can seek (#2108).
 
-On Windows before CPython 3.16 a pipe's ``seekable()`` is :data:`True` and its
-``seek`` silently does nothing (CPython gh-86768). A frame reader built directly
-on a caller's stream -- ``Frame(file, ...)`` or ``PCAPNG(file, ...)`` -- hands that
-stream to :func:`advance` unwrapped, which then "skipped" a record without moving.
-:class:`LyingPipe` reproduces such a pipe on any platform, over a real
-:func:`os.pipe`.
+On Windows before CPython 3.16 a pipe's ``seekable()`` is :data:`True` and its ``seek``
+silently does nothing (CPython gh-86768). A frame reader built directly on a caller's
+stream -- ``Frame(file, ...)`` or ``PCAPNG(file, ...)`` -- hands that stream to
+:func:`advance` unwrapped, which without the fix "skips" a record without moving.
+:class:`LyingPipe` reproduces such a pipe on any platform, over a real :func:`os.pipe`.
 
 """
 
