@@ -41,7 +41,7 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 #: A version directive, as Sphinx spells it: reST allows any whitespace after the ``..`` (#1902).
 DIRECTIVE = re.compile(r'\.\.\s+version(?:added|changed|removed)::.*')
 
-#: The crawler modules whose templates carried a directive before #1884.
+#: The crawler modules #1884 names, whose templates must carry no directive.
 ISSUE_VENDORS = (
     'ftp/command.py',
     'http/method.py',

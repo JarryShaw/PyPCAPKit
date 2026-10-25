@@ -1,13 +1,13 @@
 # -*- coding: utf-8 -*-
 """#2051: 1.5.0 requires Python 3.8, and nothing converts the sources.
 
-The owner's ruling on #2040 raised ``requires-python`` to ``>=3.8`` and dropped the
+The owner ruled on #2040 for a ``requires-python`` of ``>=3.8`` and none of the
 ``bpc-*`` backport tools, which are no longer maintained. Pinned here:
 
 * ``requires-python`` is floored at 3.8, and at nothing else;
 * no requirement in :file:`pyproject.toml` names a ``bpc-`` distribution;
 * no requirement carries a ``python_version`` marker that reads the same on every
-  version from the floor up, as ``scapy``'s ``>= '3.7'`` did;
+  version from the floor up, such as ``>= '3.7'`` on ``scapy``;
 * :file:`vermin.ini` targets the floor.
 
 """

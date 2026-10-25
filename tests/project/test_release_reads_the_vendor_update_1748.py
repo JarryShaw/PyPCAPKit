@@ -106,7 +106,7 @@ class TestTheJob(unittest.TestCase):
         self.assertEqual(report['env'].get('PCAPKIT_VENDOR_UPDATED'), '${{ needs.vendor_update.outputs.updated }}')
 
     def test_only_a_skipped_vendor_update_job_stops_version_check(self) -> None:
-        """Run 38650191283's ``'false'`` skips it; an unread ``null`` runs it, as before #1748."""
+        """Run 38650191283's ``'false'`` skips it; an unread ``null`` runs it, as with no read at all."""
         condition = declared_if(self.jobs['version_check'])
         for updated, expected in (('false', False), ('true', True), (NULL, True)):
             with self.subTest(updated=updated):
@@ -157,7 +157,7 @@ class TestTheScript(unittest.TestCase):
         self.assertEqual(self.run_step(COVERED)[1], 'updated=true\n')
 
     def test_what_it_cannot_read_leaves_updated_unset_and_warns(self) -> None:
-        """Unset runs ``version_check`` as before #1748: it can cost a run, never a release."""
+        """Unset runs ``version_check``, as with no read at all: it can cost a run, never a release."""
         cases = {
             'the API refused': (COVERED, True),
             'no vendor-update job': ({'total_count': 0, 'jobs': []}, False),

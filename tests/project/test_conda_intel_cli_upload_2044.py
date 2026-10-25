@@ -3,12 +3,13 @@
 
 ``anaconda/actions/upload-package`` v0.3.1 installs its CLI from
 ``anaconda.sh/releases/stable/v0.2.1/ana-darwin-x86_64``, which returns 404, so
-the step "Upload conda packages to Anaconda" failed on every Intel leg of
-``conda-dist`` in :file:`.github/workflows/cron-conda.yml` and would on ``conda``
-in :file:`.github/workflows/create-release.yml`. That step skips the Intel
-leg, and "Upload conda packages to Anaconda (Intel)" runs there alone, making
-the action's own ``anaconda --token … upload --user …`` call from conda-forge's
-anaconda-client, with ``--skip-existing``.
+the action cannot upload from an Intel leg of ``conda-dist`` in
+:file:`.github/workflows/cron-conda.yml` or of ``conda`` in
+:file:`.github/workflows/create-release.yml`. The step "Upload conda packages to
+Anaconda" therefore skips the Intel leg, and "Upload conda packages to Anaconda
+(Intel)" runs there alone, making the action's own
+``anaconda --token … upload --user …`` call from conda-forge's anaconda-client,
+with ``--skip-existing``.
 
 Each step's ``if:`` is evaluated per matrix leg with
 :func:`tests.project.test_release_gates.evaluate_condition`. The CLI step's

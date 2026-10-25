@@ -2,12 +2,12 @@
 """#1672: a failed KTLO leg concludes ``success`` and reports a warning.
 
 The owner's ruling: a KTLO failure must not turn ``main`` or a pull request red.
-``Compat Python 3.7 (KTLO)`` carried job-level ``continue-on-error``, which keeps
-the *run* from failing but still concludes the job's own check run ``failure`` --
-check run 115490362417, the one failing check of 4673cffa9 -- and the KTLO steps
-of every other job wrote ``::error`` annotations.
+Job-level ``continue-on-error`` is not enough: it keeps the *run* from failing
+but still concludes the job's own check run ``failure`` -- check run
+115490362417, ``Compat Python 3.7 (KTLO)``, the one failing check of 4673cffa9 --
+and a KTLO step's ``::error`` annotations are errors all the same.
 
-Every job holding a KTLO leg now works one way: each step that can fail on the
+So every job holding a KTLO leg works one way: each step that can fail on the
 leg carries ``continue-on-error: ${{ matrix.ktlo == true }}`` and an ``id``; a
 step that needs an earlier one waits on that step's ``outcome``; the last step,
 ``KTLO summary``, reports each failed ``outcome`` as a warning and a job-summary

@@ -5,8 +5,8 @@
   :file:`MANIFEST.in` names a directory the repository tracks or ignores. Every
   other line there changes what the template selects (#1794).
 * No reStructuredText is tracked outside ``docs/`` (the #719 ruling), the
-  examples' Markdown READMEs still ship in the sdist, and nothing points at a
-  README path that no longer exists.
+  examples' Markdown READMEs ship in the sdist, and nothing points at a
+  README path that does not exist.
 
 """
 

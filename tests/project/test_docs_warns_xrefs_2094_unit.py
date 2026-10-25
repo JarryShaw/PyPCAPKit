@@ -126,7 +126,7 @@ class WarnsSectionTests(unittest.TestCase):
                          ':class:`~pcapkit.utilities.warnings.InfoWarning`')
 
     def test_real_docstring(self) -> 'None':
-        """``register_protocol``'s ``Warns:`` entry used to be ``**pcapkit.utilities.warnings.RegistryWarning**``."""
+        """``register_protocol``'s ``Warns:`` entry is not ``**pcapkit.utilities.warnings.RegistryWarning**``."""
         from pcapkit.foundation.registry.protocols import register_protocol  # pylint: disable=import-outside-toplevel
         lines = self.google(inspect.getdoc(register_protocol))
         warns = [line for line in lines if line.startswith(':Warns:')]

@@ -31,23 +31,17 @@ the ``Command`` class (not ``FEATCode``), in
 same one-character fix -- fixed alongside #942's rather than carried as a
 documented exception.
 
-A first version of this test accepted a *third* fragment shape, a bare
-``N[.N...]`` with no ``section-`` word, to match ten fragments already in the
-tree: nine in :file:`pcapkit/const/tcp/mp_tcp_option.py`
-(``:rfc:`8684#3.1``` through ``#3.7```) and one in
-:file:`pcapkit/const/reg/apptype/tcp.py` (``:rfc:`8765#6.1```). Those anchors
-do not exist either -- RFC 8684's real HTML uses ``id="section-3.1"``, never
-``id="3.1"`` -- so accepting that shape blessed exactly the defect class this
-test exists to catch, the same mistake as the allowlist above one layer down.
-The generators that produce them,
-``MPTCPOption.process`` in :file:`pcapkit/vendor/tcp/mp_tcp_option.py` and
-``AppType.records`` in :file:`pcapkit/vendor/reg/apptype/apptype.py` (both parsing IANA's
+A bare ``N[.N...]`` fragment with no ``section-`` word is not accepted either,
+as in ``:rfc:`8684#3.1``` or ``:rfc:`8765#6.1```. Such anchors do not exist --
+RFC 8684's real HTML uses ``id="section-3.1"``, never ``id="3.1"`` -- so
+accepting that shape would bless exactly the defect class this test exists to
+catch. The generators behind :mod:`pcapkit.const.tcp.mp_tcp_option` and
+:mod:`pcapkit.const.reg.apptype.tcp`, ``MPTCPOption.process`` in
+:file:`pcapkit/vendor/tcp/mp_tcp_option.py` and ``AppType.records`` in
+:file:`pcapkit/vendor/reg/apptype/apptype.py`, both parse IANA's
 ``RFC8684, Section 3.1`` with the same ``re.fullmatch(r'RFC(?P<rfc>\\d+)(, Section
 (?P<sec>.*?))?', ...)``, which discards the literal word ``Section`` and
-keeps only the number), are fixed to emit ``#section-{sec}``, and the ten
-already-generated lines are fixed to match -- exactly what a regeneration
-would produce, verified by reading the generators rather than by running
-them. The third shape is dropped from :data:`ACCEPTED_FRAGMENT` entirely.
+keeps only the number, so each emits ``#section-{sec}`` explicitly.
 
 :data:`ACCEPTED_FRAGMENT`'s set is not a survey of shapes this tree happens to
 use -- it is Sphinx's own. ``sphinx.roles._format_rfc_target`` titles
@@ -336,7 +330,7 @@ class RFCAnchorFragmentTests(unittest.TestCase):
         )
 
     def test_the_documentation_exemption_holds_on_every_known_mechanism(self) -> 'None':
-        """:func:`_is_documentation` on each input that defeated the old masker.
+        """:func:`_is_documentation` on each input known to defeat a naive masker.
 
         This is the regression suite for several rounds of review, and it exists because
         each of those rounds fixed the mechanism the previous postmortem had named and

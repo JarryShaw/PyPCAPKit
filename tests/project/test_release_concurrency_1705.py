@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 """#1705: a Create Release run that cannot release must not displace one that can.
 
-Create Release serialises on one workflow-level group per ref, and a group holds
-one pending run, cancelling it when another joins. Every Vendor Update completion
-raises a run, whatever its conclusion, and the one ``version_check`` skips used
-to join ``main``'s group too. On 2026-10-14, read off the runs' timestamps (each
-Create Release run was created 2-3 s after a Vendor Update run completed):
+Create Release serialises on a workflow-level concurrency group, and a group
+holds one pending run, cancelling it when another joins. Every Vendor Update
+completion raises a run, whatever its conclusion, and with a group keyed on the
+ref alone the one ``version_check`` skips joins ``main``'s group too. So it went
+on 2026-10-14, read off the runs' timestamps (each Create Release run was created
+2-3 s after a Vendor Update run completed):
 
 * 38497299656, from Vendor Update 38497182777 (``success``), ran until 02:12:48Z;
 * 38499150441, from 38498670543 (``success``), was pending from 02:04:54Z;
@@ -14,7 +15,7 @@ Create Release run was created 2-3 s after a Vendor Update run completed):
 * 38499303910, from 38499299431 (``skipped``), cancelled that in turn, and was
   the run that eventually ran.
 
-So the group is now keyed on the ref only for a run ``version_check`` can run;
+So the group is keyed on the ref only for a run ``version_check`` can run;
 any other run is keyed on its own ``github.run_id``. These tests evaluate the
 group with the evaluator :mod:`tests.project.test_release_gates` pins.
 
@@ -128,7 +129,7 @@ class TestReleaseConcurrency(unittest.TestCase):
         """#1748: the group reads the event only, so it cannot see ``vendor_update``.
 
         Vendor Update 38650191283 concluded ``success`` with ``vendor-update``
-        skipped. Its run now skips ``version_check`` but still waits in, and can
+        skipped. Its run skips ``version_check`` but still waits in, and can
         still displace a run pending in, ``main``'s group -- the one case where
         the two differ, recorded so that a change to either is a decision. The
         workflow's ``vendor_update`` comment gives what that costs.

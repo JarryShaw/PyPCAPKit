@@ -158,7 +158,7 @@ class CitationVersionTests(CitationTreeMixin, unittest.TestCase):
     def test_a_file_with_no_version_field_is_refused(self) -> None:
         # A file that is *present* and has no field to update means the shape has
         # changed underneath the script. Rewriting nothing while reporting success
-        # is the staleness this change exists to stop, so it raises instead.
+        # is the staleness this check exists to stop, so it raises instead.
         without = '\n'.join(line for line in FIXTURE.splitlines()
                            if not line.startswith('version:')) + '\n'
 

@@ -504,8 +504,9 @@ POSTERS = (
     ('cron-vendor.yml', 'vendor-update', 'cron-vendor: vendor constant update report', 'vendor-report',
      'vendor-report.md'),
 )
-#: Every job's own ``permissions:``, and the top-level block, as before #2030;
-#: ``None`` for a job with none of its own.
+#: Every job's own ``permissions:`` but ``discussion``'s, and the top-level block,
+#: so that only ``discussion`` may write discussions (#2030); ``None`` for a job
+#: with none of its own.
 PERMISSIONS = {
     'ci-timing.yml': {None: {'actions': 'read', 'contents': 'read'}, 'report': None},
     'cron-vendor.yml': {None: {}, 'head': {'contents': 'read'}, 'vendor-update': {'contents': 'write'}},

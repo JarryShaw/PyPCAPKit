@@ -7,8 +7,8 @@
 * :class:`TestTheFormerShellAgrees` runs the shell the steps held before the
   script against the same stand-ins and requires the same output, log and status.
 * :class:`TestTheStepsRunTheScript` pins the step in the ``integration``,
-  ``pypcap-parity`` and ``gate`` jobs to the script, and keeps the old inline
-  shell out of every workflow.
+  ``pypcap-parity`` and ``gate`` jobs to the script, and keeps an inline form of
+  it out of every workflow.
 
 """
 
@@ -32,7 +32,7 @@ RUN = 'python util/regenerate_samples.py'
 #: The jobs whose step runs the script, and the level each takes from where.
 LEVELLED_JOBS = ('integration', 'pypcap-parity')
 GATE = 'gate'
-#: Text only the old inline step held, which no workflow may hold.
+#: Text only an inline form of the step holds, which no workflow may hold.
 INLINE = ('make_samples.py', 'make-samples.log', '(download unavailable)', 'Sample fixture generation failed')
 
 FAILED = ('title=Sample fixture generation failed::examples/generators/make_samples.py could not rebuild '

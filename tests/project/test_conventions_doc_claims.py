@@ -1,28 +1,26 @@
 # -*- coding: utf-8 -*-
 """Claims the split *House Conventions* pages make that the tree can be asked about.
 
-:file:`docs/source/contributing/conventions.rst` used to record every design ruling
-on a single page, and most of what it records is reasoning -- which no test can
-check. Some of it is not: a count of classes, a per-class classification, a retired
-name, an exception type. Those are the parts that rot silently, because Sphinx builds
-without ``-W`` and without ``nitpicky``, so a page whose every factual claim has gone
-stale still renders and CI still passes.
+The *House Conventions* pages, under :file:`docs/source/contributing/conventions/`,
+record the settled design rulings, and most of what they record is reasoning --
+which no test can check. Some of it is not: a count of classes, a per-class
+classification, a retired name, an exception type. Those are the parts that rot
+silently, because Sphinx builds without ``-W`` and without ``nitpicky``, so a page
+whose every factual claim has gone stale still renders and CI still passes.
 
-GitHub issue #918 part 1 harvested the settled rulings onto that page; part 2 then
+GitHub issue #918 part 1 harvested the settled rulings onto a single page; part 2
 split it into :file:`docs/source/contributing/conventions/`, one file per
 ``.. _label:`` anchor plus the :file:`index.rst` that carries the ``.. important::``
 preamble and the toctree. This file pins the checkable claims, plus the split's own
 structure:
 
-* :class:`ConventionAnchorTests` -- every ``.. _label:`` anchor, one now per
-  file. Before the split the original anchors lived on one page, and
-  ``tests/corekit/test_sentinel_exports_unit.py`` sliced the file *between* two of
-  them -- which is exactly what GitHub issue #930 named as the split's concrete
-  blocker, since separating those two anchors into different files made that slice
-  raise :exc:`ValueError`. This class pins the post-split shape: every anchor still
-  exists, lives in exactly its own file, is listed in the index's toctree, and the
-  top-level :file:`docs/source/index.rst` points at the new index page rather than
-  the retired bare document path.
+* :class:`ConventionAnchorTests` -- every ``.. _label:`` anchor, one per file:
+  every anchor exists, lives in exactly its own file, is listed in the index's
+  toctree, and the top-level :file:`docs/source/index.rst` points at the index
+  page rather than a bare ``contributing/conventions`` document path. A reader
+  that slices one page *between* two anchors cannot work on this layout -- GitHub
+  issue #930 named that slice the split's concrete blocker -- so each reader takes
+  an anchor's file whole.
 * :class:`PhaseTwoRemainderTests` -- what the page says about
   `#877 <https://github.com/JarryShaw/PyPCAPKit/issues/877>`__'s phase 2 and the
   population its audit covers, measured rather than remembered. The page said the
@@ -37,16 +35,16 @@ structure:
   good. A ruling that a name must not exist is exactly the kind a later change
   reintroduces without noticing.
 * :class:`FailedLookupExceptionTests` -- the worked example the page gives for a name
-  miss, which named :exc:`KeyError` until #918 and now names
-  :exc:`~pcapkit.utilities.exceptions.EnumKeyError`.
+  miss, which names :exc:`~pcapkit.utilities.exceptions.EnumKeyError`, not the
+  true but unspecific :exc:`KeyError` (#918).
 * :class:`GetOverrideContractTests` -- what a ``get`` override owes the base:
   ``@classmethod`` for delegation, which Python forces rather than anyone ruling
   (#913's precedent, followed by #908), plus the rulings part 1 harvested --
   ``quiet=True`` on the raise (#933), no suppression standing in for an honoured
   signature (#935), and deletion rather than repair when the override only
-  reimplements the base (#940). Includes the guard for the audit row #940 falsified,
-  which rendered fine and failed nothing while claiming overrides that no longer
-  exist.
+  reimplements the base (#940). Includes a guard against an audit row claiming
+  overrides that do not exist, as the one #940 falsified did while rendering fine
+  and failing nothing.
 * :class:`AenumRoleExclusionTests` -- GitHub issue #934 part C's ruling that
   ``aenum`` cannot be cross-referenced at all (``conf.py`` excludes it: its
   ``objects.inv`` carries no ``py:`` objects), converted to plain literals rather
@@ -97,12 +95,10 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 #: it either way would hide that.
 CONVENTIONS_DIR = ROOT / 'docs' / 'source' / 'contributing' / 'conventions'
 
-#: The index page that carries the toctree and the ``.. important::`` preamble the
-#: single page used to open with.
+#: The index page that carries the toctree and the ``.. important::`` preamble.
 INDEX = CONVENTIONS_DIR / 'index.rst'
 
-#: Every ``.. _label:`` anchor, in the narrative order the pre-split page carried
-#: them in -- which is also the order the index's toctree lists the files in.
+#: Every ``.. _label:`` anchor, in the order the index's toctree lists the files in.
 #: ``mint-criterion``, ``sentinel-convention`` and ``registry-protocol`` predate
 #: #918; ``extension-header-subclassing`` arrived with it, and ``process`` came
 #: next, on the owner's ruling that the settled *process*
@@ -130,17 +126,17 @@ ANCHORS = (
     'utilities-or-corekit',
 )
 
-#: Each anchor's own file, one-to-one since the split -- there is no longer a single
-#: shared page to slice between two of them.
+#: Each anchor's own file, one-to-one -- there is no shared page to slice between
+#: two of them.
 PAGES = {anchor: CONVENTIONS_DIR / f'{anchor}.rst' for anchor in ANCHORS}
 
 def _page(anchor: 'str') -> 'str':
     """``anchor``'s own page, whole.
 
-    The split retired the anchor-to-anchor slice this used to need: each anchor is
-    now the whole of its own file, rather than a range between two markers in one
-    shared page. ``tests/corekit/test_sentinel_exports_unit.py``'s
-    ``_sentinel_section`` made the same change, for the same reason.
+    Each anchor is the whole of its own file, rather than a range between two
+    markers in one shared page, so no anchor-to-anchor slice is needed.
+    ``tests/corekit/test_sentinel_exports_unit.py``'s ``_sentinel_section`` reads
+    its page whole for the same reason.
 
     Args:
         anchor: One of :data:`ANCHORS`.
@@ -166,9 +162,9 @@ def _page(anchor: 'str') -> 'str':
 def _every_page() -> 'str':
     """Every split page's text, concatenated, index included.
 
-    For the checks that used to scan the single-page file end to end -- a forbidden
-    role, a qualified reference -- and still need to scan across every section
-    plus the preamble, since either could in principle land on any of them.
+    For the checks that scan across every section plus the preamble -- a forbidden
+    role, a qualified reference -- since either could in principle land on any of
+    them.
 
     """
     return '\n'.join([INDEX.read_text(encoding='utf-8')]
@@ -277,7 +273,7 @@ def _every_enumeration() -> 'dict[type, str]':
 
 
 class ConventionAnchorTests(unittest.TestCase):
-    """The labels other files cross-reference, one now per file."""
+    """The labels other files cross-reference, one per file."""
 
     def test_every_page_exists(self) -> 'None':
         """Every page :data:`ANCHORS` names, plus the index, is on disk."""
@@ -289,9 +285,8 @@ class ConventionAnchorTests(unittest.TestCase):
         """A missing anchor is a dead ``:ref:`` that renders as plain text.
 
         Sphinx is run here without ``-W`` and without ``nitpicky``, so an unresolved
-        reference is not a build failure -- it is a word that used to be a link.
-        Checked against each anchor's own file, since the split gave each anchor
-        exactly one home rather than one shared page.
+        reference is not a build failure -- it is a plain word where a link belongs.
+        Checked against each anchor's own file, its one home.
 
         """
         for anchor in ANCHORS:
@@ -306,18 +301,16 @@ class ConventionAnchorTests(unittest.TestCase):
     def test_no_page_carries_a_different_page_s_anchor(self) -> 'None':
         """Each anchor lives in exactly one file -- the split's whole point.
 
-        Before the split, ``tests/corekit/test_sentinel_exports_unit.py`` sliced one
-        shared page between ``.. _sentinel-convention:`` and
-        ``.. _registry-protocol:`` -- reading ``text.index('.. _sentinel-convention:')``
-        through ``text.index('.. _registry-protocol:', start)``. GitHub issue #930
-        named separating those two anchors into different files as the split's
-        concrete blocker, because that slice would then raise :exc:`ValueError` from
-        :meth:`str.index` rather than a wrong answer. #918 part 2 retired the slice
-        instead of working around it -- ``_sentinel_section`` now reads
-        :file:`sentinel-convention.rst` whole. What used to be a hard constraint on
-        the single page is now a fact about the separate files, pinned here so a later
-        merge back into one page, or a bad copy-paste across two of them, does not
-        silently resurrect it.
+        A reader that slices one shared page between ``.. _sentinel-convention:``
+        and ``.. _registry-protocol:`` -- ``text.index('.. _sentinel-convention:')``
+        through ``text.index('.. _registry-protocol:', start)`` -- raises
+        :exc:`ValueError` from :meth:`str.index` once those anchors sit in different
+        files, which is why GitHub issue #930 named that slice the split's concrete
+        blocker. ``tests/corekit/test_sentinel_exports_unit.py``'s
+        ``_sentinel_section`` reads :file:`sentinel-convention.rst` whole instead
+        (#918 part 2). One anchor per file is pinned here, so a later merge back into
+        one page, or a bad copy-paste across two of them, fails here rather than
+        silently.
 
         """
         for anchor in ANCHORS:
@@ -336,8 +329,7 @@ class ConventionAnchorTests(unittest.TestCase):
         An orphan page still resolves cross-references -- Sphinx's reference
         inventory does not care whether a page is reachable from a toctree -- but it
         produces a distinct "document isn't included in any toctree" warning. Order
-        matches :data:`ANCHORS`, the narrative order the single page used to carry
-        its sections in, with pages added since appended in the order they arrived.
+        matches :data:`ANCHORS`.
 
         """
         entries = _toctree_entries(INDEX.read_text(encoding='utf-8'))
@@ -348,11 +340,11 @@ class ConventionAnchorTests(unittest.TestCase):
     def test_the_top_level_index_points_at_the_new_index_page(self) -> 'None':
         """:file:`docs/source/index.rst` has to name a document, not a directory.
 
-        ``.. toctree::`` entries are docnames, and the bare ``contributing/conventions``
-        entry it used to carry stopped being one the moment the split turned that
-        path into a directory -- Sphinx would report "unknown document" for it,
-        silently, since the build here runs without ``-W``/``-n``. Checked
-        structurally rather than trusted to a nitpicky build alone.
+        ``.. toctree::`` entries are docnames, and a bare ``contributing/conventions``
+        entry is not one, that path being a directory -- Sphinx would report
+        "unknown document" for it, silently, since the build here runs without
+        ``-W``/``-n``. Checked structurally rather than trusted to a nitpicky build
+        alone.
 
         """
         text = (ROOT / 'docs' / 'source' / 'index.rst').read_text(encoding='utf-8')
@@ -367,24 +359,23 @@ class ConventionAnchorTests(unittest.TestCase):
     def test_the_index_preamble_does_not_claim_to_be_a_ruling_page_itself(self) -> 'None':
         """The index's own prose has to read true of a hub, not of a page.
 
-        Round 1 of #918 part 2's split moved the ``.. important::`` preamble onto
-        :data:`INDEX` unedited, and its prose was written when the whole thing was
-        one page: *"This page records design rulings"*, and a future one *"is
-        written onto this page"*. Both went false the moment the index stopped
-        carrying any ruling of its own -- its children do -- and the second
-        is worse than stale, because it is the standing instruction #918 part 3
-        exists to keep alive, now telling a contributor to write onto the wrong
-        file. A cross-review caught this on the first PR revision.
+        Preamble prose written for a single page -- *"This page records design
+        rulings"*, and a future one *"is written onto this page"* -- reads false on
+        :data:`INDEX`, which carries no ruling of its own; its children do. The
+        second is worse than stale, because it is the standing instruction #918
+        part 3 exists to keep alive, and on the index it tells a contributor to
+        write onto the wrong file. #918 part 2's first round moved the preamble
+        across unedited, and a cross-review caught it.
 
         Checked as a ban on the self-referential singular ``"this page"`` rather
-        than against the exact old sentences, so a future rewrite that
-        reintroduces the same mistake in different words still trips this -- the
-        index legitimately never needs that phrase, since every true statement
-        about ruling content here names a child page, or says "the pages below"
-        / "here" for the set of them. Paired with a positive check that the
-        corrected standing-instruction phrase actually landed, rather than merely
-        that the old one is gone, following :class:`RetiredNameTests`'s two-sided
-        pattern for a retired name elsewhere in this module.
+        than against those exact sentences, so a rewrite that makes the same
+        mistake in different words still trips this -- the index legitimately
+        never needs that phrase, since every true statement about ruling content
+        here names a child page, or says "the pages below" / "here" for the set of
+        them. Paired with a positive check that the standing-instruction phrase is
+        present, rather than merely that the single-page one is absent, following
+        :class:`RetiredNameTests`'s two-sided pattern for a retired name elsewhere
+        in this module.
 
         """
         text = INDEX.read_text(encoding='utf-8')
@@ -668,10 +659,11 @@ class FailedLookupExceptionTests(unittest.TestCase):
     """The worked example the page gives for a lookup that does not resolve."""
 
     def test_the_page_names_the_exception_the_code_actually_raises(self) -> 'None':
-        """It said :exc:`KeyError` until #918, which was true but no longer specific.
+        """It names ``EnumKeyError``, not the true but unspecific :exc:`KeyError`.
 
-        ``EnumKeyError`` is what GitHub issue #923 made ``get`` raise, and it *is* a
-        :exc:`KeyError` -- which is why the stale wording never failed anything.
+        ``EnumKeyError`` is what ``get`` raises (GitHub issue #923), and it *is* a
+        :exc:`KeyError` -- which is why a page naming :exc:`KeyError` fails nothing
+        else.
 
         """
         from pcapkit.const.ftp.command import FEATCode
@@ -788,9 +780,8 @@ class GetOverrideContractTests(unittest.TestCase):
     half is what rots: the same claims are already pinned in ``tests/corekit``
     and ``tests/protocols`` against the *code*, so a later change that moves the code
     fails there, while a page still describing the old shape fails nothing. This
-    class is the other direction, and it is how the stale audit row this change
-    corrected (*"Two of them define a ``get`` of their own"*, false since #940)
-    would have been caught.
+    class is the other direction: it is what catches a stale audit row such as
+    *"Two of them define a ``get`` of their own"*, false since #940.
 
     """
 
@@ -830,7 +821,7 @@ class GetOverrideContractTests(unittest.TestCase):
         # -- which is exactly what GitHub pull request #940 did to the mh/ngap helpers,
         # so it is a live failure mode rather than a hypothetical one. The KeyError
         # fails the test either way, so nothing regressed silently; what it does not do
-        # is say *which* class stopped defining `get`, or that the page is now wrong to
+        # is say *which* class stopped defining `get`, or that the page is then wrong to
         # list it. The sibling at `test_the_two_redundant_overrides_are_gone` already
         # does this the right way round, with `assertNotIn('get', vars(klass))`.
         # Deliberately *not* under `subTest`: a subTest records its failure and lets
@@ -999,9 +990,9 @@ class GetOverrideContractTests(unittest.TestCase):
         """#940: the owner ruled for deleting the redundant overrides, not widening them.
 
         Several things at once, because the ruling is only settled if they all hold:
-        neither class defines ``get``, the module defines none at all, and the
-        ``[override]``/``arguments-differ`` pair the old signatures needed went with
-        them. Scoped to that exact pair rather than to ``arguments-differ`` alone,
+        neither class defines ``get``, the module defines none at all, and no
+        ``[override]``/``arguments-differ`` pair, which such signatures need, is
+        left behind. Scoped to that exact pair rather than to ``arguments-differ`` alone,
         which mh.py still carries for ``read`` and ``__post_init__`` --
         unrelated to any ``get``, and measured before asserting on it.
 
@@ -1070,9 +1061,9 @@ class GetOverrideContractTests(unittest.TestCase):
             {'FastBindingAcknowledgmentStatus', 'IPv6AddressPrefixCode',
              'LMAAddressCode', 'LocalizedRoutingStatus', 'Criticality', 'PDUKind'})
 
-        # The page's own row, which measurement alone does not pin. It once stated a
-        # helper count that disagreed with the measured one; it now names each
-        # helper, so a helper added without its name on the row fails here.
+        # The page's own row, which measurement alone does not pin. It names each
+        # helper rather than a count, which can disagree with the measured one, so a
+        # helper added without its name on the row fails here.
         page = _page('registry-protocol')
         head = '   * - The :mod:`~pcapkit.protocols.internet.mh` and'
         self.assertIn(head, page, 'the audit table has no mh/ngap helper row')
@@ -1351,10 +1342,9 @@ class ProcessConventionTests(unittest.TestCase):
         """
         text = self.CHANGELOG.read_text(encoding='utf-8')
 
-        # Was ``assertIn(f'* **{kind}** --')`` against the inline bold labels the file
-        # used before the by-module restructure. Those labels are gone -- the kinds are
-        # now ``~``-underlined subsections inside each module section -- so the inline
-        # form would fail for a reason that has nothing to do with this claim.
+        # The kinds are ``~``-underlined subsections inside each module section, not
+        # inline bold ``* **{kind}** --`` labels, so the subsection heading is what is
+        # read.
         for kind in ('Added', 'Changed', 'Fixed'):
             with self.subTest(kind=kind):
                 self.assertRegex(
@@ -1491,12 +1481,12 @@ class ProcessConventionTests(unittest.TestCase):
             ecosystems, ['pip', 'github-actions'],
             'dependabot now watches a different set of ecosystems, so the page\'s claim '
             f'about which labels it applies needs re-deriving: {ecosystems}')
-        # Derived rather than pinned to one phrasing. The previous form asserted the
-        # single literal ``dependencies`` and ``github_actions``, so a re-attribution
-        # worded any other way -- "dependabot applies ``github_actions``", a comma for
-        # the "and", the two labels in the other order -- slipped straight past it, which
-        # is the weakness GitHub issue #949 asked to be looked at. Every sentence pairing
-        # the tool with the label is checked instead, so the phrasing no longer matters.
+        # Derived rather than pinned to one phrasing. Asserting the single literal
+        # ``dependencies`` and ``github_actions`` lets a re-attribution worded any other
+        # way -- "dependabot applies ``github_actions``", a comma for the "and", the two
+        # labels in the other order -- slip straight past, which is the weakness GitHub
+        # issue #949 asked to be looked at. Every sentence pairing the tool with the
+        # label is checked instead, so the phrasing does not matter.
         #
         # Proximity is not the test, and a first attempt at #949 that used it was wrong:
         # the section then stated more than once, deliberately, that ``github_actions``
@@ -1575,13 +1565,12 @@ class ProcessConventionTests(unittest.TestCase):
 
         Scans every page rather than one, since a link can land on any of them.
 
-        The pages have since moved to the ``:issue:``/``:pr:`` roles configured in
-        ``docs/source/conf.py``, which is the move the floor below was written to
-        notice. A role carries no second number, so there is nothing to disagree with
-        itself -- the mismatch class this check exists for cannot arise there, and
-        Sphinx errors on a role name it does not know. So the floor now counts both
-        forms, and the pairwise comparison still runs over whatever explicit links
-        remain.
+        The pages also cite with the ``:issue:``/``:pr:`` roles configured in
+        ``docs/source/conf.py``. A role carries no second number, so there is nothing
+        to disagree with itself -- the mismatch class this check exists for cannot
+        arise there, and Sphinx errors on a role name it does not know. So the floor
+        counts both forms, and the pairwise comparison runs over whatever explicit
+        links remain.
 
         """
         pattern = re.compile(
@@ -1595,8 +1584,8 @@ class ProcessConventionTests(unittest.TestCase):
         # check disables itself silently on any citation-style change -- a
         # single-underscore named reference, or a further move away from the roles,
         # takes both patterns to zero while the docstring goes on claiming it closes
-        # the largest class of unpinned claim. The module guards this shape five other
-        # times; this one had been left out.
+        # the largest class of unpinned claim -- the shape the module's other floors
+        # guard against too.
         self.assertGreater(
             len(found) + len(roles), 40,
             f'only {len(found)} explicit links and {len(roles)} role citations matched '
@@ -1613,20 +1602,11 @@ class ProcessConventionTests(unittest.TestCase):
     def test_the_page_describes_the_changelog_grouping_as_it_is(self) -> 'None':
         """The current shape of ``1.5.0.rst``, counted rather than eyeballed.
 
-        This replaces a check on the file's *previous* shape. The page used to say the
-        entries carried inline kind labels in a given number of separate runs,
-        and this test measured those runs and required the figure in the prose. The
-        by-module restructure removed the inline labels outright, so that test did not
-        merely go stale -- it went **vacuous**: its ``re.findall`` matched nothing,
-        ``runs`` was empty, and its ``assertGreater`` floors failed before the
-        prose needle was ever reached. A test whose subject has been deleted cannot be
-        repaired by updating a number.
-
-        What is checked is the shape that actually shipped: one ``-`` underlined
-        section per top-level module plus one for what belongs to none, each carrying
-        ``~`` underlined kind subsections, with no inline kind label left anywhere. The
-        page used to state the section count as well, pinned here; it states the shape
-        instead (#1103's ruling, #1811), so what is checked is its one-to-one claim:
+        What is checked is the file's shape: one ``-`` underlined section per
+        top-level module plus one for what belongs to none, each carrying ``~``
+        underlined kind subsections, with no inline kind label anywhere. The page
+        states the shape rather than a section count (#1103's ruling, #1811), so what
+        is checked is its one-to-one claim:
         the sections are the packages under :file:`pcapkit/` and *Project
         infrastructure*, nothing more and nothing less.
 
@@ -1688,9 +1668,9 @@ class ProcessConventionTests(unittest.TestCase):
         from pcapkit.utilities.exceptions import BaseError, ProtocolError
 
         # Not `issubclass(ProtocolError, Exception)`, which every exception class
-        # satisfies and which therefore verified nothing. The page's claim is that
-        # #811 made a *library* error escape where a bare struct.error used to, so
-        # what is checkable locally is that the type is the library's own.
+        # satisfies and which therefore verifies nothing. The page claims that a
+        # *library* `ProtocolError` escapes rather than a bare `struct.error` (#811),
+        # so what is checkable locally is that the type is the library's own.
         self.assertEqual(ProtocolError.__module__, 'pcapkit.utilities.exceptions',
                          'the page cites ProtocolError as an in-library exception '
                          'type, but it no longer comes from '

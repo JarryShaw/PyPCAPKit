@@ -2,13 +2,13 @@
 """#1962: ``Run unit tests`` counts the ``MemoryError`` raised, not a mention of one.
 
 The count behind ``Containment summary``'s ``tests raised MemoryError`` warning
-was ``grep -cw MemoryError``, which also matched a test's docstring that a
-traceback printed (``fail with :exc:`MemoryError```), so every GraalPy run that
-timed out warned of a ``MemoryError`` none of its tests raised (job
-118149195212). The step counts the lines that ``MemoryError`` heads, as an
-exception's own line: at the line's start, or after pytest's ``E``, an
-``INTERNALERROR>`` or an exception group's ``|``. The lines below are the
-experimental logs' own, the raised one from job 116172356218 (#1753).
+must not be a bare ``grep -cw MemoryError``: that also matches a test's
+docstring that a traceback prints (``fail with :exc:`MemoryError```), and so
+warned of a ``MemoryError`` none of a timed-out GraalPy run's tests raised (job
+118149195212). Instead the step counts the lines that ``MemoryError`` heads, as an exception's own line: at
+the line's start, or after pytest's ``E``, an ``INTERNALERROR>`` or an exception
+group's ``|``. The lines below are the experimental logs' own, the raised one
+from job 116172356218 (#1753).
 
 """
 

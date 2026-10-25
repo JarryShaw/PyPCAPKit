@@ -127,7 +127,7 @@ class TestTheCrashesAreCounted(unittest.TestCase):
         self.assertIn('7 worker(s) down', result.stdout)
 
     def test_a_status_without_the_count_warns_of_nothing_new(self) -> None:
-        """A ``tests-status`` from before #1753, or a partial one, is no crash."""
+        """A ``tests-status`` without #1753's count, or a partial one, is no crash."""
         (self.temp / 'tests-status').write_text('exit=1\nscope=12G\noom_kills=0\nmemory_errors=0\n', encoding='utf-8')
         result = sh(step(SUMMARY)['run'], self.env, BASH)
         self.assertEqual(result.returncode, 0, result.stderr)

@@ -711,8 +711,8 @@ class TestTheRewrite(unittest.TestCase):
         """An App token needs ``workflows: write`` to push a workflow change, and ``pr``'s has none.
 
         So the script writes no workflow, :func:`publish` refuses one, and the
-        workflow comments that restated the tiers before Part B now name them;
-        a restatement coming back would go stale on the first tier move.
+        workflow comments name the tiers rather than restate them; a
+        restatement would go stale on the first tier move.
         """
         module = updater()
         self.assertFalse([path for path in module.TARGETS if path.startswith('.github/workflows/')])

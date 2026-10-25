@@ -2,7 +2,7 @@
 """Pins the engine comparison on its own page, :file:`docs/source/engines.rst`.
 
 The comparison -- engines, Python ceilings, prerequisites and the benchmark
-tables -- moved off the root document, which keeps a summary and a link.
+tables -- lives on its own page; the root document carries a summary and a link.
 
 * :class:`PlacementTests` -- the page is in a toctree, the root document links it
   and does not carry the tables, and the prerequisites label is on the page.

@@ -44,7 +44,8 @@ POST = 'Post the report to Discussions'
 #: Each workflow's thread, and the report file the post step reads.
 TITLES = {LINT: ('lint: weekly lint report', 'lint-report.md'),
           PAGES: ('deploy-pages: documentation build report', 'pages-report.md')}
-#: Every job's own ``permissions:``, and the top-level block, as before #2030.
+#: Every job's own ``permissions:`` but ``discussion``'s, and the top-level block,
+#: so that only ``discussion`` may write discussions (#2030).
 PERMISSIONS = {
     LINT: {None: {'contents': 'read'}, 'lint': None},
     PAGES: {None: {'contents': 'read'}, 'head': {'contents': 'read'}, 'deploy-pages': None,

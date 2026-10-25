@@ -60,18 +60,18 @@ same split as ``test_the_rewritten_date_is_a_string_and_not_a_yaml_date`` in
 :file:`tests/project/test_bump_version.py`: the assertion that must run everywhere
 does not need the dependency, and the one that needs it guards the substitute.
 
-#888: every job past ``version_check`` used to share one guard -- "the ``v*``
-tag exists" -- as a proxy for "this version was already published", which
-diverges exactly when a release half-completes and made every downstream job
-skip silently while the run reported green. :class:`TestEvidenceBasedGating`
-below asserts the fix: ``tag``, ``pypi`` and ``conda`` each read their own
-evidence instead of that shared tag, and -- the part that is easy to get
+#888: one guard shared by every job past ``version_check`` -- "the ``v*`` tag
+exists" -- as a proxy for "this version was already published" diverges exactly
+when a release half-completes, and makes every downstream job skip silently
+while the run reports green. :class:`TestEvidenceBasedGating` below guards
+against that: ``tag``, ``pypi`` and ``conda`` each read their own evidence
+instead of a shared tag, and -- the part that is easy to get
 subtly wrong -- their ``if:`` conditions bypass GitHub's default status check
 explicitly (``!cancelled()``) rather than relying on evidence alone, because a
 job whose ``needs:`` includes a legitimately-skipped predecessor is skipped
 before its own ``if:`` is even evaluated otherwise. :func:`declared_if` is
 what makes an ``if:`` condition -- including the multi-line, folded-scalar
-form this fix introduces -- checkable the same coarse, textual way the rest of
+form these conditions take -- checkable the same coarse, textual way the rest of
 this module already checks ``environment:`` and ``needs:``.
 
 A cross-review of the #888 change (PR #905) found two defects that every test
@@ -102,7 +102,7 @@ catch, because none of them executed anything the workflow itself executes:
   interpreter is 3.14 itself, which is exactly how both defects shipped
   despite every earlier test in this module passing.
 
-#962: the same argument, one layer up, now against the ``if:`` expressions
+#962: the same argument, one layer up, applies to the ``if:`` expressions
 themselves. Review rounds on #961 produced mutation after mutation of a single
 clause, and each strengthening of the text assertions was defeated by one the
 previous round had not anticipated -- because vocabulary is not structure and
@@ -199,13 +199,13 @@ step's verdict on what actually landed, so the rows carry *step* outputs and
 :class:`TestCondaPushReportsWhatLanded` runs that step's script against a local
 origin to show the verdict is the right one.
 
-And making the chain reachable opened a third (#1643's review): Push Changes
-rebased onto whatever ``main`` held by then and Conda Tag tagged ``main``'s tip
-after a ``git pull``, so a commit landing during the run could be tagged and
-uploaded with no ``Unit Tests`` verdict of its own. Push Changes now pushes only
-when what its rebase brings in is covered by :file:`util/verdict_covers_checkout.py`'s
-rule, and Conda Tag tags the ``CONDA_COMMIT`` it pushed;
-:class:`TestCondaTagTagsWhatWasPushed` runs Conda Tag's own steps after it.
+A reachable chain has a third hazard (#1643's review): a Push Changes that
+rebases onto whatever ``main`` holds by then, and a Conda Tag that tags
+``main``'s tip after a ``git pull``, let a commit landing during the run be
+tagged and uploaded with no ``Unit Tests`` verdict of its own. So Push Changes
+pushes only when what its rebase brings in is covered by
+:file:`util/verdict_covers_checkout.py`'s rule, and Conda Tag tags the
+``CONDA_COMMIT`` it pushed; :class:`TestCondaTagTagsWhatWasPushed` runs Conda Tag's own steps after it.
 
 Since #1967 the ``unit-tests`` gate and the ``verdict`` job are the jobs of
 :file:`cron-head.yml`, which ``cron-conda.yml`` calls as its ``head`` job. The
@@ -1077,8 +1077,8 @@ PUBLISHING_PREDECESSORS = {
 #: The direct dependencies every downstream gate holds to ``== 'success'``
 #: alone, with no ``|| 'skipped'``: ``version_check`` because it produces the
 #: evidence they read, and -- #1052 -- ``unit-tests`` because it is the
-#: release test gate, which since that issue skips whenever nothing is
-#: publishable and so no longer gates by sitting first in the chain. A
+#: release test gate, which skips whenever nothing is publishable and so
+#: does not gate by sitting first in the chain. A
 #: skipped gate admitted here would publish untested.
 STRICT_PREDECESSORS = ('version_check', 'unit-tests')
 
@@ -1800,7 +1800,7 @@ def conda_context(unit_tests: 'str' = 'skipped',
 #: while its result is handed downstream as ``success``), and then it passes or
 #: fails for reasons unrelated to the gate under test.
 CONDA_ROWS = [
-    # The issue itself. Before the fix, `conda-tag` and `conda-dist` are
+    # The issue itself. Without `!cancelled()`, `conda-tag` and `conda-dist` are
     # cascade-skipped here while their own conditions are true.
     ('run 38325136710: workflow_run, the gate skipped, a bump committed',
      conda_context(),
@@ -2103,14 +2103,14 @@ def gate_coverage_violations(gate: 'str', jobs: 'dict[str, str]') -> 'list[str]'
 
 
 class TestNothingPublishesWithoutTheGate(WorkflowMixin, unittest.TestCase):
-    """#1052: the release test gate now skips when nothing is publishable, and
+    """#1052: the release test gate skips when nothing is publishable, and
     no release may skip it.
 
-    Until #1052 ``unit-tests`` was the root of the graph, so every job reached
-    it through ``version_check``'s implicit ``success()`` and no publisher had
-    to name it. It now runs *after* ``version_check`` and only when a release
-    will happen, so a ``skipped`` gate is routine and position no longer gates
-    anything. Two independent halves keep "nothing publishes without a passing
+    A gate at the root of the graph would reach every job through
+    ``version_check``'s implicit ``success()``, so no publisher would have to
+    name it. ``unit-tests`` runs *after* ``version_check`` and only when a
+    release will happen, so a ``skipped`` gate is routine and position gates
+    nothing. Two independent halves keep "nothing publishes without a passing
     gate" true, and each is asserted here on its own, so that losing either is
     a failure even while the other still holds:
 
@@ -2192,11 +2192,12 @@ class TestNothingPublishesWithoutTheGate(WorkflowMixin, unittest.TestCase):
         """#1748: the gate and every publisher skip for ``v1.5.0b12``'s shape.
 
         Its tag names ``2025da5e5`` and Anaconda holds 1 of its 10 files, so
-        ``conda`` used to run on every later commit -- after the gate -- and fail
-        #1634's check on each leg. ``github`` skipped there already, the tag
-        existing; its copy of the clause is for a tag pushed between
-        ``check_tag`` and ``owner``, which :meth:`test_the_gate_runs_whenever_any_publisher_would`
-        finds without it. A ``v*`` push of it still reaches that check.
+        without a ``PCAPKIT_RELEASED_ELSEWHERE`` clause ``conda`` would run on
+        every later commit -- after the gate -- and fail #1634's check on each
+        leg. ``github`` skips there regardless, the tag existing; its copy of the
+        clause is for a tag pushed between ``check_tag`` and ``owner``, which
+        :meth:`test_the_gate_runs_whenever_any_publisher_would` finds without it.
+        A ``v*`` push of it still reaches that check.
 
         """
         shape = dict(released_elsewhere='true',
@@ -2235,8 +2236,8 @@ EVIDENCE_SCRIPT = 'util/release_published.py'
 
 
 class TestEvidenceBasedGating(WorkflowMixin, unittest.TestCase):
-    """#888: ``tag``, ``pypi`` and ``conda`` read their own evidence now,
-    instead of ``PCAPKIT_TAG_EXISTS`` -- the tag ``github`` creates, which
+    """#888: ``tag``, ``pypi`` and ``conda`` read their own evidence,
+    not ``PCAPKIT_TAG_EXISTS`` -- the tag ``github`` creates, which
     answers "was this tagged" and not "was this published", and those diverge
     exactly when a release half-completes.
 
@@ -2399,12 +2400,11 @@ class TestEvidenceBasedGating(WorkflowMixin, unittest.TestCase):
     def test_the_release_test_gate_must_strictly_succeed(self) -> None:
         """#1052: the same bar, for ``unit-tests``.
 
-        Before #1052 the gate sat first in the chain and ``version_check``'s
-        implicit ``success()`` carried it to every publisher, so no publisher
-        named it. Now ``version_check`` runs first and the gate skips whenever
-        nothing is publishable, so a ``skipped`` gate is routine -- and these
-        three open with ``!cancelled()``, which opts them out of the implicit
-        check that would otherwise have stopped them. Hence an explicit
+        ``version_check`` runs first and the gate skips whenever nothing is
+        publishable, so a ``skipped`` gate is routine and its place in the chain
+        carries it to no publisher -- and these three open with
+        ``!cancelled()``, which opts them out of the implicit check that would
+        otherwise stop them. Hence an explicit
         top-level ``needs.unit-tests.result == 'success'`` conjunct, referenced
         exactly once, for the reasons the test above gives.
 
@@ -3400,7 +3400,7 @@ class TestReleaseStatusScriptExecutesCorrectly(WorkflowMixin, unittest.TestCase)
             0,
         ),
         (
-            # #1052: the gate now runs after version_check, so its failure
+            # #1052: the gate runs after version_check, so its failure
             # is reported with the evidence already in hand.
             'release_test_gate_failed',
             {
@@ -3884,8 +3884,8 @@ class TestCondaBumpIsTaggedAndUploaded(CondaWorkflowMixin, unittest.TestCase):
 
     #: Stripped from each publishing job's condition to recover the shape #1632
     #: found. A removal from the real text rather than a hand-written copy of
-    #: the old condition, so it cannot drift into testing something the file no
-    #: longer says.
+    #: that shape, so it cannot drift into testing something the file does not
+    #: say.
     PRE_FIX_REMOVAL = '!cancelled() && '
 
     def _pre_fix_jobs(self) -> 'dict[str, str]':
@@ -4607,7 +4607,7 @@ class TestCondaPushReportsWhatLanded(CondaStepHarness, unittest.TestCase):
     def test_a_push_the_remote_declines_fails_the_step(self) -> None:
         """A refusal with ``main`` where it was fetched -- a hook here, a ruleset
         on GitHub -- is no race, and must not pass as one: the step fails, as
-        every push failure did before #1649.
+        for any push failure that is not a race (#1649).
 
         """
         clone = self._clone('first')

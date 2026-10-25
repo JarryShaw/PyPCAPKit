@@ -30,20 +30,17 @@ fixed by different halves of the change:
   ``pcapkit`` carrying only ``__path__``, so ``__all__`` entries resolve to
   nothing rather than raising.
 * :meth:`OrderIndependenceTests.test_the_cli_polluter_order_passes` is the third
-  leak, in ``tests/cli/test_main.py``. It used to pin the *structural* half of the
-  fix: that file rolled its own purge loop and did not import
-  :mod:`tests._support`, so nothing in that module could have fixed it and only
-  :func:`tests.conftest.restore_module_table` did, and it was deliberately left
-  that way as the standing witness that the guard covers a file which has not
-  opted into anything. That turned out to be the wrong trade. The guard healed the
-  leak on every run, which is exactly why it took an audit rather than a red test
-  to notice the leak was still there -- issue #688. The file now calls
+  leak, in ``tests/cli/test_main.py``. That file calls
   :func:`tests._support.isolate_modules` like its neighbours, so this case is a
-  control on the pairing rather than a witness for the guard, and the witness role
-  is left vacant on purpose: a test whose job is to leave :data:`sys.modules`
-  broken is a defect the suite would have to maintain deliberately, and the next
-  file written without the helpers is covered by the guard whether or not such a
-  test exists.
+  control on the pairing rather than a witness that the guard,
+  :func:`tests.conftest.restore_module_table`, covers a file which has not opted
+  into anything. The witness role is left vacant on purpose; keeping a file
+  unfixed to fill it is the wrong trade. The guard heals such a leak on every run,
+  which is exactly why it took an audit rather than a red test to notice this one
+  -- issue #688 -- and a test whose job is to leave :data:`sys.modules` broken is a
+  defect the suite would have to maintain deliberately, while the next file
+  written without the helpers is covered by the guard whether or not such a test
+  exists.
 
 The guard is also why the :program:`pytest` runs above cannot see a leak at all.
 What they assert is that the *guarded* suite is order-independent -- which it was
@@ -99,8 +96,8 @@ from tests._tiers import ROOT
 #: interpreter's import system.
 __tier__ = 'ALL'
 
-#: Selections that failed before #660 was fixed, each as (label, files). The
-#: polluting file comes first in every one, because that is the order that broke.
+#: Selections that fail without #660's fix, each as (label, files). The
+#: polluting file comes first in every one, because that is the order that breaks.
 POLLUTING_ORDERS = [
     (
         'the three files from the issue',
@@ -233,7 +230,7 @@ def run_unittest(modules: 'list[str]') -> 'subprocess.CompletedProcess[str]':
 
 
 class OrderIndependenceTests(unittest.TestCase):
-    """Each selection that used to fail on collection order now passes."""
+    """Each selection a module-table leak breaks by collection order passes."""
 
     def assert_selection_passes(self, label: str, selection: 'list[str]') -> None:
         """Run ``selection`` and fail with its output if pytest did not exit 0.
@@ -271,9 +268,9 @@ class OrderIndependenceTests(unittest.TestCase):
     def test_the_reverse_order_passes_too(self) -> None:
         """The control from the issue: the same files, victims first.
 
-        This one passed before the fix as well, and is kept because it is what
-        makes the pair meaningful -- a change that broke it would have traded one
-        order dependence for another rather than removing it.
+        This one passes with or without the fix, and is kept because it is what
+        makes the pair meaningful -- a change that broke it would trade one order
+        dependence for another rather than removing it.
 
         """
         label, selection = POLLUTING_ORDERS[0]

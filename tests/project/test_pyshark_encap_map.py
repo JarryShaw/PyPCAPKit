@@ -157,8 +157,8 @@ _TSHARK_VERSION = detect_tshark_version(_TSHARK)
 class ParseParenthesisedNumberTests(unittest.TestCase):
     """:func:`~pyshark_encap_map.parse_parenthesised_number`'s own robustness.
 
-    **What this does not pin, stated plainly because it was previously
-    overclaimed here:** #851/#850's real defect -- rows lost,
+    **What this does not pin, stated plainly because it is easy to
+    overclaim:** #851/#850's real defect -- rows lost,
     including ``null`` -- was in how the original ad hoc script extracted the
     *name* portion of a PDML ``showname`` such as ``"Encapsulation type:
     NULL/Loopback (15)"``. This generator never does that extraction at all;

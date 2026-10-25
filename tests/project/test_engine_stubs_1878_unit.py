@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 """Each third-party engine types the package it drives (#1878).
 
-An engine keeps that package in ``_expkg``. #1870 annotated it ``'ModuleType'``,
-which mypy reads as :data:`~typing.Any` for every attribute, so nothing called
-through it was checked. Each engine now annotates it with a
+An engine keeps that package in ``_expkg``. Each engine annotates it with a
 :class:`~typing.Protocol` of its own, defined in its module-level
-``if TYPE_CHECKING:`` block and declaring what the engine reads through it.
+``if TYPE_CHECKING:`` block and declaring what the engine reads through it. An
+``'ModuleType'`` annotation, as #1870 gave it, is read by mypy as
+:data:`~typing.Any` for every attribute, so nothing called through it would be
+checked.
 
 ``scapy`` ships its own types. The other engine packages ship none, so
 :file:`typings/` holds stubs for the part of each that :mod:`pcapkit` uses,

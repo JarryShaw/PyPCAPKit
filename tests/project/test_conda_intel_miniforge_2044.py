@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 """#2044: the conda jobs' ``macos-26-intel`` legs install Miniforge.
 
-The step "Conda environment creation and activation" of ``conda-dist`` in
+Given no installer, setup-miniconda downloads
+``Miniconda3-latest-MacOSX-x86_64.sh`` on the Intel runner. That installer is
+frozen at conda 25.7.0, which conflicts with conda-forge's conda-content-trust
+plugin and has no py314 build. So on the Intel legs, the step "Conda environment
+creation and activation" of ``conda-dist`` in
 :file:`.github/workflows/cron-conda.yml` and of ``conda`` in
-:file:`.github/workflows/create-release.yml` named no installer, so on the Intel
-runner setup-miniconda downloaded ``Miniconda3-latest-MacOSX-x86_64.sh``. That
-installer is frozen at conda 25.7.0, which conflicts with conda-forge's
-conda-content-trust plugin and has no py314 build. The Intel legs pass
+:file:`.github/workflows/create-release.yml` passes
 ``miniforge-version: latest``; every other leg passes an empty string, which
 names no installer, so it keeps the bundled or downloaded Miniconda.
 
@@ -17,12 +18,12 @@ the runner casts a ``with:`` value, and trimmed as ``core.getInput`` trims it.
 ``installer-url`` first, then Miniforge when ``miniforge-version`` or
 ``miniforge-variant`` is non-empty, else Miniconda.
 
-#2123: with Miniforge, the Intel legs broke twice more. Installing the matrix
-Python into base rebuilt conda-forge's libmambapy at 2.10.0, which
-conda-libmamba-solver 26.10.0 cannot drive, so the Intel legs leave base's
-Python alone, as 3.15 does everywhere; :class:`TestTheIntelLegsKeepBasesPython`
-pins that. And conda-build 26.9's rpath relocation failed on the vendored chardet
-extensions, so :file:`conda/pypcapkit/meta.yaml` turns it off on osx-64 alone;
+#2123: with Miniforge, installing the matrix Python into base rebuilds
+conda-forge's libmambapy at 2.10.0, which conda-libmamba-solver 26.10.0 cannot
+drive, so the Intel legs leave base's Python alone, as 3.15 does everywhere;
+:class:`TestTheIntelLegsKeepBasesPython` pins that. And conda-build 26.9's rpath
+relocation fails on the vendored chardet extensions, so
+:file:`conda/pypcapkit/meta.yaml` turns it off on osx-64 alone;
 :class:`TestOsx64SkipsBinaryRelocation` evaluates that line's selector as
 conda-build does, for each leg's platform.
 

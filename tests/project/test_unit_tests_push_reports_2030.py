@@ -69,7 +69,8 @@ RUN_ID = '39718608950'
 SHA = 'da8596414e3e6a53f43b20b85c86755cc2ed6686'
 SUITE = 'CS_kwDOBotKYc8AAAAZD_cS-g'
 POSTER = {'actions': 'read', 'checks': 'read', 'contents': 'read', 'discussions': 'write'}
-#: The pull-request comment's condition and scopes, as before #2030.
+#: The pull-request comment's condition and scopes, which the ``discussion`` job
+#: leaves alone (#2030).
 COMMENT_IF = ("${{ github.event.workflow_run.event == 'pull_request' && "
               "github.event.workflow_run.conclusion != 'cancelled' }}")
 COMMENT_SCOPES = {'actions': 'read', 'pull-requests': 'write'}
@@ -141,8 +142,8 @@ RETRY = ('WARNING', '', "WARNING: Retrying (Retry(total=4, connect=None, read=No
 #: An engine's KTLO cell that failed, in a blocking job (#1672).
 ENGINE_KTLO = ('Engines (Scapy)', 'SUCCESS', [('WARNING', 'Scapy failed on Python 3.9 (KTLO, non-blocking)'),
                                               ('FAILURE', '')])
-#: The list as it stood for pypy3.10's install failure, before #2040, which the
-#: tests of the matching itself pass in place of a workflow's empty one.
+#: A list that holds pypy3.10's install failure as by design, which the tests of
+#: the matching itself pass in place of a workflow's empty one (#2040).
 LISTED = {'Python pypy3.10 (KTLO)': (('WARNING', 'install failed on Python pypy3.10 (KTLO, non-blocking)'),
                                      ('FAILURE', ''),
                                      ('WARNING', 'pcapkit did not install on Python pypy3.10 (KTLO, non-blocking)'))}
@@ -609,7 +610,7 @@ class TestTheReport(unittest.TestCase):
                     self.assertEqual(found.warned, [f'`{job}`: `{title}`'])
 
     def test_with_nothing_listed_the_old_install_failures_warn(self) -> None:
-        """Run 39718608950's pypy3.10 install failure is no longer by design (#2040)."""
+        """Run 39718608950's pypy3.10 install failure warns: nothing lists it as by design (#2040)."""
         outputs, report, _ = self.report('success', check_runs(PYPY, GREEN))
         self.assertEqual(outputs['status'], 'warning')
         self.assertIn('- `Python pypy3.10 (KTLO)`: `install failed on Python pypy3.10 (KTLO, non-blocking)`', report)

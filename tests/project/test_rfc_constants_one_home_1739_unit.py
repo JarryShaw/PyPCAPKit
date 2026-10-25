@@ -15,8 +15,8 @@ These checks pin that:
   name, at module or class level, and none spells the distinctive literals (the
   PCAP and PCAP-NG magic numbers and the PCAP timestamp resolutions) itself;
 * :class:`TestReaders` -- each reader imports the constant from its home and
-  reads it, and :mod:`pcapkit.toolkit.pypcapfile`, which defined several of them,
-  no longer binds those names at all;
+  reads it, and :mod:`pcapkit.toolkit.pypcapfile`, a reader of several, binds
+  none of those names at all;
 * :class:`TestNotReinlined` -- no module in :data:`SWEPT`, the homes included,
   spells a homed value anywhere but in the home's own definition: not as an
   operand, a call argument, a subscript, a default, a returned value, a tuple
@@ -77,8 +77,8 @@ HOMES = (
     }),
 )
 
-#: Names that used to be defined elsewhere and now must not be, mapped to the
-#: module that held them. ``MAGIC_NUMBER`` stays a class attribute of the PCAP
+#: Names a module other than their home must not define, mapped to the module
+#: that once held them (#1739). ``MAGIC_NUMBER`` stays a class attribute of the PCAP
 #: and PCAP-NG engines -- the extractor dispatches on it -- but is built from
 #: the home rather than spelled out, which :class:`TestOneDefinition` checks
 #: through the literals.
@@ -187,8 +187,8 @@ READERS = (
 
 #: Readers that reach a home as a module attribute, ``Module.NAME``, rather than
 #: importing the name: the module, the home's module path and the name.
-#: :mod:`pcapkit.toolkit.pypcapfile` does so because binding the four names it
-#: used to define would re-export them (see :meth:`TestReaders.test_pypcapfile_binds_none`).
+#: :mod:`pcapkit.toolkit.pypcapfile` does so because binding the homed names it
+#: reads would re-export them (see :meth:`TestReaders.test_pypcapfile_binds_none`).
 ATTRIBUTE_READERS = (
     ('pcapkit/toolkit/pypcapfile.py', 'pcapkit.protocols.schema.internet.ipv4', 'IPV4_HEADER_LEN'),
     ('pcapkit/toolkit/pypcapfile.py', 'pcapkit.protocols.internet.ipv6', 'IPV6_HEADER_LEN'),

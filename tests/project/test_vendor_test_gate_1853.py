@@ -509,8 +509,8 @@ class TestTheMemorySampler(unittest.TestCase):
                                      NoSuchProcess=_NoSuchProcess, AccessDenied=_AccessDenied)
 
     def rss(self, psutil: 'Any') -> 'Optional[int]':
-        # ``create``: before #1894 the script had no ``psutil`` to bind over, and
-        # this should fail there on what it returns.
+        # ``create``: a script that does not use ``psutil`` (#1894) has none to bind
+        # over, and this should fail there on what it returns.
         with mock.patch.object(self.gate, 'psutil', psutil, create=True):
             return self.gate.group_rss(os.getpgrp())
 
