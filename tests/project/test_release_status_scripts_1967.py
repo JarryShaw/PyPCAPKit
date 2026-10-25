@@ -6,7 +6,9 @@
   cases below, and the script on the same, and requires the same status,
   standard output and error, ``$GITHUB_OUTPUT``, ``$GITHUB_STEP_SUMMARY`` and
   ``gh`` calls. The former body is kept here verbatim, and the case table is
-  checked to reach every branch of it.
+  checked to reach every branch of it. The one sentence the shell never had,
+  the Anaconda remedy #2140 added, is dropped from the script's output first;
+  :mod:`tests.project.test_release_gates` pins it.
 * :class:`TestTheVendorUpdateStaysInline` pins ``vendor_update``'s "Read whether
   its vendor-update job ran", which #1967 moved to a script and then put back
   inline as too plain to need one, to its shell verbatim, with no checkout, and
@@ -270,6 +272,11 @@ ELSEWHERE = {'PCAPKIT_UNIT_TESTS': 'skipped', **ALL_SKIPPED, 'PCAPKIT_RELEASED_E
              'PCAPKIT_RELEASED_AT': OTHER}
 #: A value standing for a variable left unset.
 UNSET = None
+#: The sentence #2140 appended to the unfinished warning where Anaconda files are
+#: missing, which the former shell never printed.
+ANACONDA_REMEDY = re.compile(r"(?m) Its Anaconda files are the exception: while main's version is still .*?, "
+                             r"dispatch Conda Update with publish on main, .*? only if that run's own conda legs "
+                             r'can still succeed\.$')
 
 #: ``release_status``'s cases: ``(name, overrides of STATUS_BASE)``.
 STATUS_CASES = (
@@ -524,7 +531,7 @@ class TestTheFormerShellAgrees(_Stand):
         for name, overrides in STATUS_CASES + tuple(sampled_status_cases()):
             with self.subTest(case=name):
                 old, new = self.run_both(FORMER_STATUS, 'release_status.py', self.status_env(overrides))
-                self.assertEqual(new, old)
+                self.assertEqual((new[0], ANACONDA_REMEDY.sub('', str(new[1])), *new[2:]), old)
 
     def test_every_status_branch_is_reached(self) -> None:
         """The curated cases alone reach each of :data:`STATUS_BRANCHES`, each case exactly one."""

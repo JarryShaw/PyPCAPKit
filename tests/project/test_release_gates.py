@@ -3570,7 +3570,41 @@ class TestReleaseStatusScriptExecutesCorrectly(WorkflowMixin, unittest.TestCase)
             f'::warning title=v1.5.0b12 is unfinished (#1634)::v1.5.0b12 names {TAGGED_COMMIT}, not this '
             f"run's commit {RUN_COMMIT}, and still lacks some of its PyPI files, some of its Anaconda files. "
             f"Only that commit's run may finish it (#1634), so this run released nothing: re-run the Create "
-            f'Release run created for {TAGGED_COMMIT}, or release the next version.',
+            f'Release run created for {TAGGED_COMMIT}, or release the next version. Its Anaconda files are the '
+            "exception: while main's version is still 1.5.0b12, dispatch Conda Update with publish on main, "
+            'which uploads every platform under a bumped build (#2060); the re-run finishes them only if that '
+            "run's own conda legs can still succeed.",
+        ])
+
+    def test_missing_anaconda_files_name_the_conda_update_dispatch(self) -> None:
+        """#2140: 1.5.0b14's shape -- only Anaconda files lacking, which the tag's own legs could not build."""
+        overrides = dict(next(row[1] for row in self.VECTORS
+                              if row[0] == 'tag_on_another_commit_release_unfinished'))
+        overrides.update({'PCAPKIT_VERSION': '1.5.0b14'})
+        result = self._run(overrides)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.splitlines(), [
+            f'::warning title=v1.5.0b14 is unfinished (#1634)::v1.5.0b14 names {TAGGED_COMMIT}, not this '
+            f"run's commit {RUN_COMMIT}, and still lacks some of its Anaconda files. Only that commit's run may "
+            f'finish it (#1634), so this run released nothing: re-run the Create Release run created for '
+            f'{TAGGED_COMMIT}, or release the next version. Its Anaconda files are the exception: while '
+            "main's version is still 1.5.0b14, dispatch Conda Update with publish on main, which uploads "
+            "every platform under a bumped build (#2060); the re-run finishes them only if that run's own "
+            'conda legs can still succeed.',
+        ])
+
+    def test_complete_anaconda_files_keep_the_re_run_remedy_alone(self) -> None:
+        """#2140: with Anaconda complete, the PyPI files' remedy is still only the re-run."""
+        overrides = dict(next(row[1] for row in self.VECTORS
+                              if row[0] == 'tag_on_another_commit_release_unfinished'))
+        overrides.update({'PCAPKIT_PYPI_COMPLETE': 'false', 'PCAPKIT_CONDA_COMPLETE': 'true'})
+        result = self._run(overrides)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(result.stdout.splitlines(), [
+            f'::warning title=v1.5.0 is unfinished (#1634)::v1.5.0 names {TAGGED_COMMIT}, not this '
+            f"run's commit {RUN_COMMIT}, and still lacks some of its PyPI files. Only that commit's run may "
+            f'finish it (#1634), so this run released nothing: re-run the Create Release run created for '
+            f'{TAGGED_COMMIT}, or release the next version.',
         ])
 
     def test_the_release_apps_tag_push_is_quiet(self) -> None:
