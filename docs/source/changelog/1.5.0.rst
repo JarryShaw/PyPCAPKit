@@ -5,10 +5,10 @@ The largest release since 1.0, and the first recorded here as it happened rather
 than reconstructed. New extraction engines, ESP with payload decryption,
 SCTP and NGAP over SCTP, a library logger that no longer hijacks the consumer's,
 and a defect programme run through the issue tracker, citing issues and pull
-requests from :pr:`340` to :pr:`1895`.
+requests from :pr:`340` to :pr:`2151`.
 
 Preceded by ``1.5.0a1`` (2026-09-15), ``1.5.0b1`` to ``1.5.0b3`` (all 2026-09-19)
-and ``1.5.0b4`` to ``1.5.0b13`` (2026-09-20 to 2026-10-16), dated in UTC and all
+and ``1.5.0b4`` to ``1.5.0b14`` (2026-09-20 to 2026-10-22), dated in UTC and all
 published as prereleases and so resolved only by ``pip install --pre``.
 ``1.5.0b1`` half-shipped: the tag, the GitHub release and the Conda deployments
 landed, but PyPI rejected the wheel because ``twine check`` found a Sphinx-only
@@ -362,7 +362,9 @@ Fixed
   overrides it with the check its ``_missing_`` makes, raising :exc:`.EnumValueError`.
   ``get(value, default)`` on a value the hook refuses still returns ``default`` and logs
   nothing (:issue:`1792`, :pr:`1818`, :issue:`1816`, :pr:`1823`; the quiet miss is
-  :issue:`1845`, :pr:`1873`, under :mod:`pcapkit.corekit`).
+  :issue:`1845`, :pr:`1873`, under :mod:`pcapkit.corekit`). :meth:`.AppType.register`
+  and :meth:`.OptionType.register` keep that rejection loud inside a quiet ``get``, as
+  :meth:`.EnumRegistry.register` does (:issue:`1916`, :pr:`1927`).
 * :meth:`.Command.get` refuses a key that is not a ``str`` with :exc:`.EnumValueError`,
   as :meth:`.Method.get` does. ``get(b'\x01')`` minted a member keyed by ``bytes``, and
   ``get(-1)`` raised ``AttributeError`` whatever its ``default`` (:issue:`1824`,
@@ -402,6 +404,13 @@ Added
 * :mod:`pcapkit.corekit.fields.byteorder`, holding ``packet_byteorder`` and
   ``byteorder_callback``, the byte-order helpers the PCAP and PCAP-NG schemas share
   (:pr:`1528`, :issue:`1711`, :pr:`1715`).
+* :func:`~pcapkit.corekit.io.can_seek`, whether a stream really seeks: on Windows a pipe
+  answers ``seekable()`` with ``True`` while its ``seek`` does nothing. It trusts
+  ``seekable()`` only for a regular file or a stream with no descriptor.
+  :class:`.Extractor` wraps any other stream in :class:`.SeekableReader`, so ``pcapkit -``
+  reads a Windows pipe (:issue:`2097`, :pr:`2104`), and
+  :func:`~pcapkit.corekit.io.advance` skips a record on one by reading
+  (:issue:`2108`, :pr:`2118`, ``93a6173ae``).
 
 Changed
 ~~~~~~~
@@ -762,6 +771,17 @@ Fixed
   and neither it nor the sentinel takes an attribute write. A pickle written before this
   change at protocol 0 or 1 still loads, though not as the singleton (:issue:`1841`,
   :issue:`1842`, :pr:`1876`).
+* defects off CPython on Linux. On GraalPy, :class:`.SeekableReader`'s reads aliased a
+  buffer a later slide rewrote, so they copy out of it, and a :class:`.MultiDict` nested
+  each value list, so it is built from a ``dict`` (:issue:`1963`, :pr:`1974`); and a
+  sentinel type refused the cache writes ``_py_abc`` makes, so ``isinstance`` against it
+  raised ``TypeError`` (:issue:`1960`, :pr:`1966`). ``Field.pack`` hands ``struct`` a
+  ``bytearray`` as ``bytes`` for the ``s``, ``p`` and ``c`` formats, which PyPy refuses
+  for ``s`` and ``p`` and GraalPy accepts for ``c`` where CPython does not, so it packs
+  alike on every interpreter (:issue:`2004`, :pr:`2007`, :issue:`2015`, :pr:`2018`). On
+  Windows, ``SeekableReader(buffer_save=True)`` with no ``buffer_path`` could not reopen
+  its temporary file; it creates one it can, and deletes it on ``close()`` or collection
+  (:issue:`2098`, :pr:`2105`).
 
 pcapkit.dumpkit
 ---------------
@@ -832,6 +852,9 @@ Fixed
 * a PCAP trace record scales its fraction to the trace's resolution (:issue:`1500`,
   :pr:`1529`), and writes the octets it has rather than a truncated record's claimed
   length (:issue:`1541`, :pr:`1543`).
+* a subclass of a dumper ``make_dumper`` builds recursed without end in its
+  ``object_hook`` fallback, which called ``super(type(self), self)`` (:issue:`2144`,
+  :pr:`2146`).
 
 pcapkit.foundation
 ------------------
@@ -962,6 +985,11 @@ Changed
   (:issue:`1024`).
 * **a breaking change to** ``register_mh_extension``: ``schema`` is keyword-only, as
   in the other schema-taking registrars (:issue:`516`, :pr:`526`).
+* the ``pypcap`` and ``pcap_ct`` engines probe the ``pcap`` backend once per extraction
+  rather than three times, and find its distribution without parsing each candidate's
+  ``METADATA``, which ``importlib.metadata`` does on Python 3.15 and which made
+  ``pcap_ct`` extraction about 2.4x slower there (:issue:`2110`, :pr:`2112`,
+  :issue:`2113`, :pr:`2121`).
 
 Fixed
 ~~~~~
@@ -985,7 +1013,9 @@ Fixed
   finaliser releases the handle of an extraction *abandoned* before end of file
   (``auto=False``, iterated part way and dropped); the files :issue:`610` names
   emit no such warning. Leaving a ``with`` block follows the same rule, so a caller's
-  stream stays open after it (:issue:`1999`).
+  stream stays open after it (:issue:`1999`, :pr:`2000`). The finaliser is a
+  ``weakref.finalize``, so it also runs where ``__del__`` never does, as on GraalPy
+  (:issue:`1997`, :pr:`1998`).
 * ``extract(..., no_eof=True)`` never returned. End of stream was detected and
   ``ExtractionWarning: EOF reached`` fired, but every loop that handles it
   (``record_frames``, ``__next__``, ``__call__``) read ``if self._flag_n: continue``,
@@ -1150,6 +1180,18 @@ Fixed
   pyshark, pypcap, pcap-ct and pypcapfile engines replaced it with their own printer,
   which now runs only for ``verbose=True``, its output unchanged (:issue:`1874`,
   :pr:`1880`).
+* an :class:`.Extractor` whose constructor raises closes what it owns, the input it
+  opened and then the engine it chose, so a PyShark capture's ``tshark`` does not
+  outlive it; the original exception still propagates, and a caller's stream stays open
+  (:issue:`2100`, :pr:`2106`, :issue:`2107`, :pr:`2119`).
+* ``engine='pypcap'`` warns and falls back to the default engine when the ``pcap`` module
+  is installed but cannot load, as ``engine='pcap_ct'`` already did, where it raised the
+  loader's ``OSError`` (:issue:`2132`, :pr:`2133`).
+* TCP reassembly bounded its holes with ``sys.maxsize``, which on GraalPy and 32-bit
+  builds is ``2**31 - 1``, inside TCP's sequence space, so a stream past it never
+  completed. The bound is
+  :data:`~pcapkit.foundation.reassembly.data.tcp.HOLE_OPEN_BOUND`, ``2**63 - 1``, the
+  value 64-bit builds already used (:issue:`1959`, :pr:`1965`).
 
 pcapkit.interface
 -----------------
@@ -1416,6 +1458,15 @@ Changed
   :mod:`pcapkit.protocols.internet.mh`. As Mappings they no longer index, unpack,
   compare or hash as a tuple does; ``.seconds`` and ``.fraction`` still work, and the
   dumpers write both as keys (:issue:`1886`, :pr:`1887`).
+* **a breaking change to** rebuilding from ``to_dict()``: the payload is dispatched only
+  from the ``__next_name__`` and ``__next_type__`` keys, and the IPv6 extension-header
+  chain only from ``__exthdr__``, never from key order, which on PyPy follows an earlier
+  instance's attribute layout and so picked the wrong layer. ``to_dict()``, iteration
+  and ``len()`` carry the dunder keys a new :attr:`.Info.__included__` names, and
+  :attr:`.Info.__excluded__` only keeps a key out of ``repr``, ``str`` and the dumps. A
+  hand-written dict needs those keys, ``__short_read__`` among them, to rebuild, and a
+  custom :class:`.Info` lists its own dunder keys in ``__included__`` (:issue:`2003`,
+  :pr:`2014`).
 
 Fixed
 ~~~~~
@@ -2443,8 +2494,9 @@ Fixed
   :exc:`.ProtocolError` for a ``total_length`` with ``length_flag=False``.
 * **a breaking change to** ``IPv6.from_data``: it dropped the extension-header
   chain, so a packet carrying a Routing header rebuilt 48 octets as 40. The chain is
-  now kept in wire order under a hidden ``__exthdr__`` key, absent from ``to_dict``
-  and dumped output, and re-emitted ahead of the upper layer. Sample frames that
+  now kept in wire order under a hidden ``__exthdr__`` key, absent from dumped output
+  (``to_dict`` carries it since :pr:`2014`, below), and re-emitted ahead of the upper
+  layer. Sample frames that
   rebuilt wrong now rebuild exactly, though some that had rebuilt with wrong bytes
   raised ``AttributeError`` instead (:issue:`1177`), from older defects fixed with it:
   :attr:`.HIP.alias` read ``_info`` before ``read`` had set it, which also broke a
@@ -2604,6 +2656,29 @@ Fixed
 * the MPL option's ``seed`` in the HOPOPT and IPv6-Opts schemas is annotated
   ``int | IPv6Address``, since an S=0 option holds the source address
   (:issue:`1840`, :pr:`1866`).
+* a declared length above ``sys.maxsize``, such as a PCAP ``incl_len`` of
+  ``2**31 - 16`` on GraalPy or 32-bit CPython, raised ``OverflowError`` from a read or
+  seek. Every length-driven read in :meth:`.Schema.unpack`, :meth:`.Frame.read` and
+  :meth:`.PCAPNG.read` is bounded at ``sys.maxsize``, so such a claim gets the overrun
+  handling it gets on 64-bit CPython (:issue:`1975`, :pr:`1979`).
+* PCAP-NG blocks cut short by the file or by their own framing no longer abort an
+  extraction. A Decryption Secrets Block whose ``secrets_length`` runs past the block
+  keeps the declared length and warns, its secrets capped at what the block holds
+  (:issue:`1980`, :pr:`1983`); an unknown, Custom or systemd journal export block the
+  file truncates gets the "block truncated" warning the other block types give
+  (:issue:`1984`, :pr:`1988`); and a malformed TLS or WireGuard key-log line warns with
+  :exc:`.ProtocolWarning` and is left out of ``entries``, where it raised
+  :exc:`.FieldValueError` (:issue:`1985`, :pr:`1989`). A ZigBee NWK or APS key off its
+  fixed width rebuilds as captured, where it was zero-padded or cut to that width
+  (:issue:`1986`, :pr:`2001`).
+* capture timestamps convert without the platform's ``fromtimestamp`` limits. Windows'
+  C runtime covers only 1970 to 3000, so a PCAP-NG timestamp outside that range fell
+  back to 1970 with ``invalid timestamp``, and the Mobility Header's NTP and PMIPv6
+  timestamps had the same gap. PCAP, PCAP-NG and MH convert through
+  :func:`pcapkit.utilities.datetime.fromtimestamp`, which gives the stdlib's result on
+  Linux (:issue:`2099`, :pr:`2111`), and encode through
+  :func:`pcapkit.utilities.datetime.totimestamp`, since GraalPy's ``timestamp()`` put a
+  pre-1970 instant with a fraction one second late (:issue:`2134`, :pr:`2136`).
 
 pcapkit.toolkit
 ---------------
@@ -2727,6 +2802,11 @@ Added
   bad value warns with :exc:`.ConfigWarning` and falls back to the default; ``-1`` lifts
   a limit. The homes these limits had in the prereleases keep no re-export
   (:issue:`1726`, :pr:`1743`).
+* :mod:`pcapkit.utilities.datetime`, holding
+  :func:`~pcapkit.utilities.datetime.fromtimestamp` and
+  :func:`~pcapkit.utilities.datetime.totimestamp`, the timestamp conversions of the
+  capture-timestamp entry under :mod:`pcapkit.protocols` (:pr:`2111`, :pr:`2136`). Its
+  first name, ``pcapkit.utilities.timestamp``, shipped in no release.
 
 Changed
 ~~~~~~~
@@ -2778,6 +2858,9 @@ Fixed
   which truncated every later traceback, pcapkit's or not; lazily installed
   ``sys.excepthook`` and ``threading.excepthook`` keep its output terse instead
   (:pr:`983`).
+* an import-time warning names the importing module on GraalPy too, where the
+  importer's stack level counted the bootstrap frames GraalPy's ``warnings.warn`` skips,
+  attributing the warning to ``<sys>:0`` (:issue:`1963`, :pr:`1996`).
 
 pcapkit.vendor
 --------------
@@ -2959,6 +3042,28 @@ Added
   declaring what pcapkit uses of each, so mypy checks the engines against them.
   ``mypy.ini`` reads them through ``mypy_path``, and neither the sdist nor the wheel
   ships them (:issue:`1878`, :pr:`1882`).
+* a glossary page for the terms with several meanings -- registry, schema, data model,
+  info and default engine -- each sense linked to the page that explains it
+  (:issue:`1949`, :pr:`1955`).
+* the engine benchmark on GitHub Actions: ``benchmark.yml``, weekly and on dispatch,
+  measures every engine on the runner's own interpreters through
+  ``examples/benchmark/native.sh`` and posts the report to the *CI reports* discussions
+  (:issue:`2125`, :pr:`2128`). A ``pcap`` engine whose module cannot load is an explained
+  row rather than a fatal error (:issue:`2129`, :pr:`2131`), and the report is reST with
+  footnotes, so it pastes unedited onto ``docs/source/engines.rst`` (:pr:`2142`), the
+  page the engine comparison and prerequisites move to from ``index.rst``, carrying the
+  first run's figures (``f9de043d6``, ``d7aa41535``). The tables had first been
+  regenerated with Python 3.15 measured (:pr:`2109`).
+* a win-64 Conda package (:issue:`2060`). Conda Update builds and smoke-tests it
+  (:pr:`2067`), reading the environment without ``os.environb`` (:issue:`2120`,
+  :pr:`2122`) and conda-forge's CFEP-27 site-packages layout (:issue:`2126`,
+  :pr:`2127`); then it publishes from Conda Update and Create Release, and a release is
+  complete only once the platforms its tagged commit lists, win-64 among them, are on
+  Anaconda (:pr:`2138`). A manual Conda Update run builds only (``c5081fbfe``) unless
+  dispatched on ``main`` with ``publish``, which forces the bump that ships a release's
+  missing Anaconda files (:pr:`2150`), and Create Release's warning about an unfinished
+  release names that remedy when Anaconda files are what is missing (:issue:`2140`,
+  :pr:`2151`).
 
 Changed
 ~~~~~~~
@@ -2996,7 +3101,8 @@ Changed
   joined the Installation section of ``docs/source/index.rst``. Requested by the
   project owner, and a deliberate exception to the reStructuredText convention, for the
   README only, since its renderers are GitHub and PyPI rather than Sphinx.
-  ``setup.py`` reads ``README.md`` and declares ``text/markdown``, and ``MANIFEST.in``
+  ``setup.py`` read ``README.md`` and declared ``text/markdown`` (``pyproject.toml``
+  declares the ``readme`` statically since :pr:`1994`), and ``MANIFEST.in``
   gains ``include README.md``, which is belt-and-braces rather than load-bearing:
   setuptools' ``sdist`` ships a ``README.md`` regardless. Of the ``include`` lines
   only ``CHANGELOG.md`` is load-bearing, measured in the :pr:`631` entry below.
@@ -3138,10 +3244,12 @@ Changed
   carries what CI needs (:issue:`910`, :pr:`914`).
 * the ``Scapy`` and ``dev`` extras require ``scapy>=2.6.0`` (:issue:`1572`,
   :pr:`1578`), and the ``docs`` extra ``Sphinx>=7.3``, the first release with
-  ``versionremoved`` (:pr:`1743`), and ``sphinx-autodoc-typehints==3.15.0``
-  (:issue:`1856`, :pr:`1877`). The ``test`` extra gains ``psutil``,
+  ``versionremoved`` (:pr:`1743`), and an exact ``sphinx-autodoc-typehints`` pin
+  (:issue:`1856`, :pr:`1877`), 3.17.2 since the weekly dependency update (:pr:`1944`). The ``test`` extra gains ``psutil``,
   ``markdown-it-py`` and ``lxml``, which the scripts under ``util/`` use
-  (:issue:`1894`, :pr:`1896`).
+  (:issue:`1894`, :pr:`1896`). The ``crypto`` and ``all`` extras cap ``cryptography``
+  below 46 on PyPy older than 3.11, for which no later release has a Linux wheel
+  (:issue:`2040`, :pr:`2046`).
 * the READMEs of ``examples/benchmark`` and ``examples/legacy_smoke`` are Markdown,
   ``README.md`` rather than ``README.rst``, and ``MANIFEST.in`` ships them through
   ``recursive-include examples *.md``. Stale build leftovers go: ``setup.py``'s
@@ -3155,6 +3263,20 @@ Changed
 * the contributor pages state no counts that a test or the Python version updater
   pinned, and each pin checks the fact it stood for instead (:issue:`1811`,
   :pr:`1817`).
+* the workflows' supply chain (:issue:`1968`): every third-party action is pinned to a
+  commit SHA that Dependabot updates by pull request (:pr:`1981`); no third-party step
+  runs after the deploy key is loaded, and every workflow declares its top-level
+  permissions, the GitHub Pages build read-only beside a separate publishing job
+  (:pr:`1970`); and the cron jobs name the environments that hold their secrets
+  (:pr:`1993`). ``pyproject.toml`` declares the ``readme`` statically, so Dependabot can
+  build the editable install (:pr:`1994`).
+* CodeQL skips ``tests/``, where the recurring clear-text-logging alerts in
+  :mod:`pcapkit.foundation.extraction` and :mod:`pcapkit.corekit.io` traced to a test
+  fixture's ``secrets`` names; ``pcapkit/`` is still scanned by every query
+  (:issue:`2130`, :pr:`2139`). The advisory linters drop their long-standing false
+  positives with no behaviour change: vermin honours the ``# novermin`` markers and
+  confirms the 3.8 floor, bandit reports nothing, and the unused ``type: ignore``
+  comments go, from the vendor templates too (:issue:`2145`, :pr:`2147`).
 
 Fixed
 ~~~~~
@@ -3341,6 +3463,9 @@ Fixed
 * ``make_samples.py`` builds fixtures from the tree it runs in, not the shared
   checkout (:issue:`1343`, :pr:`1388`), and retries the Wireshark sample downloads on
   429, 5xx and timeouts (:issue:`1658`, :pr:`1659`).
+  ``examples/generators/options.py``'s deadline discards a ``SIGALRM`` still pending as
+  it puts the old handler back, which on GraalPy could kill the process
+  (:issue:`2090`, :pr:`2091`).
 * the Conda Update workflow tags and uploads each bump exactly once
   (:issue:`1632`, :pr:`1641`), stays green when a merge races its push
   (:issue:`1649`, :pr:`1669`), and keeps the release's name and notes when it
@@ -3365,7 +3490,7 @@ Fixed
 * the API reference renders what the code declares. :attr:`.Extractor._vfunc` keeps its
   annotation (:issue:`1839`, :pr:`1867`), and the HTTP/2 frame schemas' and the engine
   classes' annotations resolve (:issue:`1857`, :pr:`1870`). Under the pinned
-  sphinx-autodoc-typehints 3.15.0 (:issue:`1856`, :pr:`1877`), ``conf.py`` renders an
+  sphinx-autodoc-typehints (:issue:`1856`, :pr:`1877`), ``conf.py`` renders an
   ``aenum`` base as such, keeps a default as written (``byteorder=sys.byteorder``
   rather than the build host's value), gives a class the parameters of the
   ``__init__`` its ``__new__`` hides and an enumeration ``(*values)``, keeps table ids
@@ -3373,6 +3498,27 @@ Fixed
   :issue:`1863`, :pr:`1881`). The generated const tables carry no version
   directives; each note is on the module's hand-written page instead (:issue:`1884`,
   :pr:`1895`).
+* cross-references resolve or render as literals. A role into a package with no
+  inventory is a literal or an ``rst_epilog`` link (:issue:`1919`, :pr:`1928`,
+  :issue:`1936`, :pr:`1939`, :issue:`1920`, :pr:`1945`); a ``pcap`` module mention
+  links the note on PyPCAP and pcap-ct (:issue:`1948`, :pr:`1952`); library-internal
+  names link, and the classes and special methods they name are documented
+  (:issue:`1940`, :pr:`1946`, :issue:`1947`, :pr:`1953`), the const registries' ``get``
+  overrides among them (:issue:`1921`, :pr:`1935`); and a ``Warns:`` section's warning
+  classes link as ``Raises:`` entries do (:issue:`2094`, :pr:`2096`). ``conf.py``
+  resolves a decorated function's overloads and qualifies a third-party class whose
+  bare name collides (:issue:`1917`, :issue:`1918`, :pr:`1929`). The ``versionchanged``
+  directives on :class:`.Info` iteration and :class:`~pcapkit.protocols.misc.raw.Raw`
+  name ``1.3.1.post8``, the release that shipped their change (:issue:`1933`,
+  :pr:`1934`).
+* the Conda release legs: Create Release's Anaconda completeness check counts
+  osx-arm64 (:issue:`1922`, :pr:`1932`); the ``macos-26-intel`` legs install
+  Miniforge, upload with the ``anaconda`` CLI where the upload action's download
+  returned 404, and build again past upstream conda and conda-build breakage
+  (:issue:`2044`, :pr:`2045`, :pr:`2049`, :issue:`2123`, :pr:`2124`); and
+  ``util/conda_vendor.py``'s pin refresh warns when it cannot move a platform pin, or
+  when a pinned release has lost a wheel (:issue:`2025`, :pr:`2026`, :issue:`2028`,
+  :pr:`2035`).
 * ``pcapkit-cli``'s help strings say what each option does: ``-o`` describes the
   output rather than the input, an extension is appended only under
   ``--auto-extension``, and each format flag names the flags that take precedence
