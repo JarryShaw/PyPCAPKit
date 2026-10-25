@@ -13,7 +13,7 @@
   run writes, and the errors for a leg on another platform.
 * :class:`TestTheStepsRunTheScripts` pins each step to its script and its
   ``env:``, both jobs' legs to :data:`release_conda.PLATFORMS`, and the script
-  to Python 3.7's syntax.
+  to Python 3.8's syntax.
 
 """
 
@@ -33,6 +33,7 @@ import unittest
 from typing import TYPE_CHECKING
 
 from tests._workflows import job, steps
+from tests.project.test_requires_python_floor_2051 import FLOOR
 from util import release_conda
 
 if TYPE_CHECKING:
@@ -561,8 +562,8 @@ class TestTheStepsRunTheScripts(unittest.TestCase):
                 self.assertLessEqual(set(labels), set(release_conda.PLATFORMS))
         self.assertEqual(set(release_conda.PLATFORMS), legs)
 
-    def test_the_scripts_parse_as_python_3_7(self) -> None:
-        ast.parse((UTIL / 'release_conda.py').read_text(encoding='utf-8'), feature_version=(3, 7))
+    def test_the_scripts_parse_as_python_3_8(self) -> None:
+        ast.parse((UTIL / 'release_conda.py').read_text(encoding='utf-8'), feature_version=FLOOR)
 
 
 if __name__ == '__main__':

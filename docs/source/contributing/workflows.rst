@@ -1440,7 +1440,7 @@ setup-python, ``build`` on conda's base ``python`` under the login shell, from
 :file:`conda/pypcapkit`, and ``upload`` on setup-python's. A project
 pin runs each on the cases the shell it replaced handled and requires the same
 status, output and calls.
-:file:`util/_actions.py` is standard library only, and keeps to 3.7's syntax,
+:file:`util/_actions.py` is standard library only, and keeps to 3.8's syntax,
 since the scripts on ``/usr/bin/python3`` and on every leg's interpreter import it.
 
 The scripts a person runs as well, or alone, sit beside the CI-only ones in

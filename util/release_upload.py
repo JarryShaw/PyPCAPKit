@@ -27,7 +27,7 @@ for the files it matches, sorted, and for itself where it matches none; a word
 that is not then a regular file gets an ``::error`` and exits 1. A failing
 ``gh`` ends the script with its status, as ``set -e`` ended the step.
 
-The script is standard library only, and keeps to Python 3.7's syntax.
+The script is standard library only, and keeps to Python 3.8's syntax.
 
 """
 

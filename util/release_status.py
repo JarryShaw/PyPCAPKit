@@ -34,7 +34,7 @@ script with ``<name>: unbound variable`` and status 1 at the point the shell's
 ``set -u`` would have, rather than with a traceback.
 
 The job checks out only :file:`util/` and has no setup-python, so this runs on
-the image's ``python3``: standard library only, and Python 3.7's syntax.
+the image's ``python3``: standard library only, and Python 3.8's syntax.
 
 """
 

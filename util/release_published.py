@@ -34,7 +34,7 @@ added are the ``http`` the log line names; a count that is not an integer is
 ``[``'s error and reads ``false``; a variable it reads that is unset, which
 Actions never leaves it, is ``<name>: unbound variable`` and status 1.
 
-It keeps to the standard library and Python 3.7's syntax as the other
+It keeps to the standard library and Python 3.8's syntax as the other
 :file:`util/` scripts do.
 
 """

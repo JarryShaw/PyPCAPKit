@@ -31,7 +31,7 @@ wrote them, a line each, and the scratch directory is left behind as ``mktemp
 -d`` left it.
 
 It runs on setup-python's ``python3``, the interpreter it runs the tag's
-reader on, but keeps to the standard library and Python 3.7's syntax as the
+reader on, but keeps to the standard library and Python 3.8's syntax as the
 other :file:`util/` scripts do.
 
 """
