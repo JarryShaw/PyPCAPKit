@@ -31,16 +31,16 @@ For every encapsulation :program:`editcap` accepts under ``-T``:
    .layer_name`` and what :func:`pcapkit.toolkit.pyshark.tcp_traceflow` falls
    back to when a capture carries no ``frame.encap_type`` field at all.
 
-Traps that cost real time when #850's tables were first produced
-----------------------------------------------------------------
+Traps in the round trip
+-----------------------
 
 **A PDML ``showname`` can hold a ``/``.** ``tshark`` renders
 ``frame.encap_type``'s ``showname`` as ``"Encapsulation type: NULL/Loopback
 (15)"`` -- the display name itself, not just this one, can contain the
 character. A regex that expects the name to be made of "word" characters up
 to the parenthesised number -- ``r'(\\w+) \\((\\d+)\\)'``, say -- stops at the
-``/`` and drops the row outright. That silently lost 10 of 157 rows,
-including ``null`` itself, when #850's tables were first produced.
+``/`` and drops the row outright, which silently loses 10 of the 157 rows,
+``null`` itself among them.
 :func:`parse_parenthesised_number` is anchored to the *end* of the string
 instead, so the name in front of the number can contain anything at all.
 
@@ -109,7 +109,7 @@ Requires the :program:`tshark` and :program:`editcap` binaries (Wireshark
 reported on :data:`sys.stderr` and exits cleanly rather than raising, so a
 host without Wireshark installed does not turn "nothing to regenerate" into a
 traceback. It reads the PDML with lxml (#1894), which the ``test`` extra
-installs except on GraalPy, which has no wheel for it.
+installs on CPython alone, since PyPI has no wheel of it for GraalPy or PyPy.
 
 This cannot be run in CI to verify the committed tables, only locally against
 a pinned Wireshark
@@ -123,8 +123,8 @@ that a discrepancy here is a finding, not license to overwrite what was
 measured and committed) -- see :class:`EncapSweepError`. Ubuntu noble's
 packaged Wireshark, what every ``apt``-based CI runner installs, is 4.2.2: its
 ``editcap -T`` accepts 224 encapsulations, not 226, so this script's own
-assertion trips there every time, by design (found the hard way: the first
-CI run for #851, three legs, ``AssertionError: 224 != 226``).
+assertion trips there every time, by design (measured on #851's CI legs:
+``AssertionError: 224 != 226``).
 
 That is harmless to the *committed* tables at runtime -- an
 ``ENCAP_TYPE_TO_LINKTYPE``/``FILTER_NAME_TO_LINKTYPE`` entry a 4.2.2 install
@@ -187,7 +187,7 @@ EXPECTED_WRITABLE = 157
 EXPECTED_REFUSED = 69
 
 #: The ``<token> - <description>`` shape of ``editcap -T ''``'s listing,
-#: anchored to leading whitespace so the banner line -- which has none --
+#: anchored to leading whitespace so the banner lines -- which have none --
 #: cannot match. See the module docstring's second trap.
 _ENCAP_LINE = re.compile(r'^[ \t]+([A-Za-z0-9._-]+) - .*$')
 
@@ -407,15 +407,13 @@ def build_tables(measurements: 'Sequence[Measurement]', linktype: 'Any') -> (
     notes = []  # type: list[str]
 
     # *linktype* is one of this project's registry enums: an unknown value
-    # does not raise out of the constructor, it mints a placeholder member
-    # via ``_missing_``/``extend_enum`` (#575) -- so ``LinkType(121)``
-    # *succeeds*, returning a freshly minted ``Unassigned_121`` rather than
-    # telling us 121 was never a real member. The set of values genuinely
-    # registered has to be captured *before* any such lookup runs, or the
-    # very first miss would mint a member that every later check then finds
-    # already there. ``dlt in known_values`` is the check; ``linktype(dlt)``
-    # is only ever called once *that* has already said yes, so it can never
-    # reach ``_missing_`` itself.
+    # does not raise out of the constructor, ``_missing_`` answers it with an
+    # unregistered ``Unassigned`` pseudo-member (#775) -- so ``LinkType(121)``
+    # *succeeds* rather than telling us 121 was never a real member. So the
+    # values genuinely registered are read off the members themselves, and
+    # ``dlt in known_values`` is the check; ``linktype(dlt)`` is only ever
+    # called once *that* has already said yes, so it never reaches
+    # ``_missing_`` itself.
     known_values = frozenset(member.value for member in linktype)
 
     by_encap_type = {}  # type: dict[int, list[Measurement]]

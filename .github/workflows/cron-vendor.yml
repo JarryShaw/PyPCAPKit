@@ -180,10 +180,10 @@ jobs:
           find pcapkit/const -mindepth 2 -name '*.py' -exec isort -l100 -ppcapkit {} +
 
       # #1853: both gates in `head` judge the commit from before the crawl, so
-      # 1.5.0b13 was committed with a test failing on it. The owner's ruling:
-      # test it here under #872's rule -- a module the tests fail with goes
-      # back to HEAD's copy, the rest are committed. util/vendor_test_gate.py's
-      # docstring gives the rule.
+      # they pass a crawl the tests fail on, as they did 1.5.0b13's. The
+      # owner's ruling: test it here under #872's rule -- a module the tests
+      # fail with goes back to HEAD's copy, the rest are committed.
+      # util/vendor_test_gate.py's docstring gives the rule.
       #
       # `continue-on-error`, so the tests never fail the job; if the step fails
       # or times out, the next one discards every regenerated module. `.[test]`

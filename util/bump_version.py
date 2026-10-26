@@ -49,9 +49,8 @@ one a day behind it.
 
 The ``version`` half is guarded by a test that fails when the file drifts from
 ``pcapkit.__version__`` -- which also covers the version changes made by hand,
-which never run this script at all. Those are about a quarter of the commits
-that have moved ``__version__`` on ``main`` over the project's life, and a larger
-share of the recent ones.
+which never run this script at all. Measured at ``a41137716`` (#625), those were
+about a quarter of the commits that had moved ``__version__`` on ``main``.
 
 The rewrite is line-oriented rather than a :mod:`yaml` load-and-dump. A round
 trip through a YAML library would reorder keys, normalise quoting, and drop the

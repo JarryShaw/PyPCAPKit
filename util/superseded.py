@@ -29,7 +29,7 @@ superseded, it sends SIGTERM, then SIGKILL after ``--grace`` seconds, to the
 session or, with ``--scope UNIT``, to every process of that systemd scope
 (``sudo -n systemctl kill``): ``COMMAND`` then starts a root-owned ``sudo``, and
 the tests run in the scope as the runner's user, out of reach of a signal to
-the session's group (:func:`stop`). Where ``COMMAND`` exits, it writes the notice, the summary
+the session's group (:func:`stop`). Where ``COMMAND`` then exits, it writes the notice, the summary
 line and ``stopped=true`` to ``$GITHUB_OUTPUT``, and exits 0: a stopped pytest writes no JUnit
 file, so the upload after it reads the output and expects none (#2073). Otherwise it exits
 with ``COMMAND``'s own status, ``128 + N`` for a signal ``N`` as a shell reports it, so a test
@@ -91,7 +91,7 @@ if TYPE_CHECKING:
 
 #: The REST API's root, where ``GITHUB_API_URL`` does not name one.
 API = 'https://api.github.com'
-#: The two answers.
+#: The answers :func:`check` gives.
 CURRENT, SUPERSEDED = 'current', 'superseded'
 #: Seconds between two checks while ``watch`` runs its command.
 INTERVAL = 60.0

@@ -77,8 +77,9 @@ pipenv:
 vendor:
 	pipenv run pcapkit-vendor
 
-# Sample captures under examples/captures/ are not tracked (see .gitignore);
-# regenerate the ones the runtime, regression and integration tests read.
+# Sample captures under examples/captures/, but for the inputs .gitignore
+# lists, are not tracked; regenerate the ones the runtime, regression and
+# integration tests read.
 samples:
 	pipenv run python examples/generators/make_samples.py
 

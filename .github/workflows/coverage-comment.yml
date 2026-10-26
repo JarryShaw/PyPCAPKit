@@ -100,7 +100,7 @@ jobs:
           if tests not in ('success', 'failure', 'cancelled', 'skipped'):
               sys.exit(f'invalid test outcome in artifact: {tests!r}')
           total = number(data['total'])
-          # The leg's version, from the artifact; one written before #1660 has none.
+          # The leg's version, from the artifact; one without it reads as the coverage leg.
           python = data.get('python')
           if python is not None and not (isinstance(python, str) and re.fullmatch(r'3\.\d+', python)):
               sys.exit(f'invalid Python version in artifact: {python!r}')

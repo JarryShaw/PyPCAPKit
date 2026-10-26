@@ -6,7 +6,7 @@ not have: every engine but ``default`` wraps an optional third-party package, an
 ``pyshark`` additionally drives the external ``tshark`` binary from Wireshark.
 On top of that, ``pyshark`` 0.6 calls
 ``asyncio.get_event_loop_policy().get_event_loop()`` on a thread with no running
-loop. Creating one implicitly there was deprecated years ago and Python 3.14 no
+loop. Creating one implicitly there was deprecated in Python 3.12, and 3.14 no
 longer does it, raising ``RuntimeError: There is no current event loop in thread
 'MainThread'`` instead -- so on 3.14 ``pyshark`` cannot be used at all, whatever else
 is installed.

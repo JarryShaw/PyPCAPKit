@@ -2,9 +2,10 @@
 """Test a Vendor Update regeneration before it is committed (#1853).
 
 :file:`.github/workflows/cron-vendor.yml` runs ``pcapkit-vendor`` and isort, then
-commits what changed. Neither of its gates sees that tree: the Vendor test gate
-runs on the schedule alone, and a ``workflow_run`` reads the Unit Tests verdict
-on the commit from before the crawl. So 1.5.0b13 was committed with a pinned
+commits what changed. Neither gate of its ``head`` job sees that tree: both
+judge the commit from before the crawl, the test gate by running the tests on
+it, on the schedule or a manual run, and ``verdict`` by reading the Unit Tests
+verdict on it, on a ``workflow_run``. So 1.5.0b13 was committed with a pinned
 test failing on it, and ``main`` stayed red until #1820. The owner's ruling on
 #1853 is that the job tests the regenerated tree before it commits, under
 #872's rule: a failed sub-vendor's changes are discarded, the others are kept,

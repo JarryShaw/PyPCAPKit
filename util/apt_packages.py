@@ -14,8 +14,8 @@ with no cache to plan or collect for (#2125).
 
 ``APT_PACKAGES``, the job's environment, names the packages, separated by
 whitespace, for both ``plan`` and ``install``, so the cache key cannot describe a
-set other than the one installed. Each subcommand runs the commands the steps'
-shell ran, ``sudo`` included, and writes the same lines and annotations:
+set other than the one installed. Each subcommand runs these commands, ``sudo``
+included, and writes these lines and annotations:
 
 ``plan``
    ``sudo timeout 60 apt-get update``, up to twice, with a ``::warning`` titled by
@@ -43,12 +43,12 @@ shell ran, ``sudo`` included, and writes the same lines and annotations:
    installed at its version, as ``dpkg-deb -f`` and ``dpkg-query -W`` report them,
    and says how many it holds. A failed ``dpkg-deb`` ends the script with its status.
 
-The bounds stay GNU's ``timeout(1)`` run under ``sudo``, as in the shell, rather than
-a :mod:`subprocess` timeout: apt runs as root, so this process could signal
+The bounds are GNU's ``timeout(1)`` run under ``sudo``, rather than a
+:mod:`subprocess` timeout: apt runs as root, so this process could signal
 ``sudo`` alone and not apt's own children, its download methods, which ``timeout``,
 running as root in a process group of its own, ends with apt. It is given no
 option, so uutils' ``timeout`` on Ubuntu 26.04 behaves as GNU's (#2020). The
-step's ``timeout-minutes`` stays the hang detector. The script is standard library
+step's ``timeout-minutes`` is the hang detector. The script is standard library
 only, and runs on every interpreter the matrices hold.
 
 """
@@ -99,7 +99,7 @@ def call(command: 'Sequence[str]', **kwargs: 'object') -> 'subprocess.CompletedP
 
 
 def packages() -> 'list[str]':
-    """``APT_PACKAGES``, split on whitespace as the shell split it."""
+    """``APT_PACKAGES``, split on whitespace as an unquoted shell expansion splits it."""
     return os.environ['APT_PACKAGES'].split()
 
 

@@ -2,7 +2,7 @@ name: Project Status
 
 # Keeps the project board's Status field (users/JarryShaw/projects/2) in line with
 # each item's state labels, which no built-in board workflow observes. The mapping
-# is util/project_status.py:status_for; it and the PROJECT_TOKEN setup are
+# is `status_for` in util/project_status.py; it and the PROJECT_TOKEN setup are
 # documented under "Milestones and the Project Board" in
 # docs/source/contributing/conventions/process.rst.
 #

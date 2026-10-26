@@ -7,15 +7,15 @@ name: Milestone
 # "Milestone" in docs/source/contributing/workflows.rst: an open item, a merged
 # pull request or an issue closed as completed gets the open milestone named
 # after the checked-out `pcapkit.__version__`, unless it already holds another;
-# an unmerged pull request or an issue closed as not planned loses whichever
-# milestone it holds. A missing milestone is a warning, never created.
+# an unmerged pull request or an issue closed as not planned or as a duplicate
+# loses whichever milestone it holds. A missing milestone is a warning, never created.
 #
 # SECURITY. `pull_request_target` gives this run a write token on events a
 # stranger can cause, so it must never execute anything the pull request
 # supplies. The job below:
 #
 #   * checks out `github.sha`, which under `pull_request_target` is the tip of
-#     the *base* branch, never the PR head, and only the three files it reads,
+#     the *base* branch, never the PR head, and only the files it reads,
 #     without persisting the token;
 #   * reads `__version__` from pcapkit/__init__.py as text, importing nothing;
 #   * takes nothing from the event payload but the item number, passed through

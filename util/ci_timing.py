@@ -170,8 +170,8 @@ HARD_CAP_SHARE = 0.5
 MERGEABLE_P90 = 30.0
 #: H3: that p90, over the floor, rising this much against the baseline report's.
 #: Absolute, it measures runner-queue load as much as test time, so it pages only on
-#: a regression; the absolute breach alone is W9. Initial value, to tune once weekly
-#: reports exist -- W1's 20% median rise, loosened for a tail statistic.
+#: a regression; the absolute breach alone is W9. Set from W1's 20% median rise,
+#: loosened for a tail statistic, rather than tuned against the weekly reports.
 HARD_MERGEABLE_RISE = 0.25
 #: H4: a linear projection reaching its cap within this many days.
 HARD_PROJECTION_DAYS = 14.0

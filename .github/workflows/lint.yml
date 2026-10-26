@@ -30,7 +30,7 @@ on:
   pull_request:
     branches: [main]
   schedule:
-    # Saturdays, an hour clear of the other Saturday jobs.
+    # Saturdays, at an hour no other Saturday job uses.
     - cron: '0 6 * * 6'
   workflow_dispatch:
 

@@ -123,7 +123,7 @@ jobs:
           cache: pip
 
       # DPKT (#729), crypto and NGAP (#738) are here so the unit-tier tests
-      # gated on them run instead of skipping; all three install cleanly. On
+      # gated on them run instead of skipping; each installs cleanly. On
       # PyPy 8.0 PyPI has no Linux wheel of cryptography, so pip builds it with
       # the image's Rust and libssl-dev (#1958). `cli` (emoji) is not here: its
       # only gated tests are in tests/integration, which this job ignores.
@@ -1166,8 +1166,8 @@ jobs:
     runs-on: ubuntu-latest
     # 45, as `test`'s: this is the only test job with no xdist, so a cell
     # carries its whole serial cost, and a contended run once passed 20
-    # minutes. The slowest cell, with #1029's split, is 8.2m; even #1029's slowdown
-    # window, at least 1.6x, leaves it far inside the cap.
+    # minutes. Each cell is held well inside it by its run step's own cap,
+    # which ci-timing.yml's weekly report watches (#2254).
     timeout-minutes: 45
     strategy:
       fail-fast: false
@@ -1224,8 +1224,9 @@ jobs:
           python -c "import os; print('cpu_count', os.cpu_count())"
 
       # `--verbose` names every test as it runs, so a hung cell shows where it
-      # was. The step cap is about twice the slowest cell's measured maximum,
-      # under the job's, so a hang reports as this step timing out.
+      # was. The step cap sits under the job's, so a hang reports as this step
+      # timing out. util/ci_timing.py flags a cell whose p90 reaches half of
+      # it, and such a cell is split, as `project` is (#2254).
       - name: Run tests/${{ matrix.leg }} and the root-level modules under plain unittest
         timeout-minutes: 20
         run: python util/cap_file_size.py python util/run_unittest_leg.py ${{ matrix.leg }} ${{ matrix.exclude }} ${{ matrix.shard }} --verbose

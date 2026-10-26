@@ -9,8 +9,9 @@ is what bounds them. ``Run unit tests`` therefore runs, on the GraalPy leg::
 
     /usr/bin/python3 util/pytest_shards.py "$SHARDS" -- python -m pytest ...
 
-unit-tests.yml's ``Run unit tests`` runs it the same way on PyPy's legs, whose
-xdist workers' RSS grows with every test as well (#2005).
+unit-tests.yml's ``Run unit tests`` runs it on PyPy's legs too, on the leg's own
+interpreter and under :file:`util/cap_file_size.py`, since their xdist workers'
+RSS grows with every test as well (#2005).
 
 ``SHARDS`` holds the shards, separated by whitespace, and each is a directory or
 a glob of the entries of one directory, such as ``tests/corekit/test_i*``.
@@ -33,15 +34,16 @@ each; a shard's run also gets a ``--junitxml`` of its own, beside the command's,
 named after the shard -- ``junit-tests-protocols.xml`` beside ``junit.xml`` --
 and the last run keeps the command's.
 
-The runs share the step's one ``timeout``, scope and watcher, which run this
-script, so the step's caps hold over the whole tier rather than a shard. On
+On the GraalPy leg the runs share the step's one ``timeout``, scope and watcher,
+which run this script, so the step's caps hold over the whole tier rather than a shard. On
 ``SIGINT``, which ``timeout`` sends to its whole process group, the run then in
 progress ends as pytest ends it, with its JUnit file written, and no later run
 starts. Any other signal ends this script as it would any process.
 
 The exit status is that of the last run to fail, as a shell gives it for a run
 a signal ended, or 0 where none did. The script runs on the image's own
-interpreter, apart from the leg's, so it is standard library only.
+interpreter on the GraalPy leg, and on the leg's own on PyPy's, so it is
+standard library only.
 
 """
 

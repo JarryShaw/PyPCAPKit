@@ -36,10 +36,9 @@ undocumented: running ``pytest --noconftest`` over just those same
 modules, in that order, disables the very same autouse fixture directly and
 reproduces the identical ``subTest`` failures in about 70s on a tree without
 #981's fix, under the exact :program:`pytest` version this CI already installs.
-Whether that single invocation would have been sufficient instead of this
-dedicated runner and its per-directory matrix was not evaluated when this
-script was written; this paragraph records that gap rather than inventing a
-reason for the choice after the fact.
+Whether that single invocation would suffice in place of this dedicated
+runner and its per-directory matrix has not been evaluated; this paragraph
+records that gap rather than inventing a reason for the choice.
 
 Scope, and why it stops where it does
 --------------------------------------
@@ -176,7 +175,7 @@ DEFAULT_STALL_DUMP = 1080
 #: Environment override for :data:`DEFAULT_STALL_DUMP`; ``--stall-dump`` wins.
 STALL_DUMP_ENV = 'PCAPKIT_UNITTEST_STALL_DUMP'
 
-#: The module name each flat leg ``--half`` splits is cut at (#2254). Move it to
+#: The module name at which ``--half`` cuts each flat leg (#2254). Move it to
 #: rebalance; the workflow's cells and steps ask for a half and follow.
 SHARD_BOUNDARIES = {'project': 'test_q'}
 

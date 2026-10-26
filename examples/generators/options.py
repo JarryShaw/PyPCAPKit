@@ -95,10 +95,10 @@ test purge :mod:`pcapkit` and *then* load the case table without the two
 orderings fighting.
 
 :func:`roundtrip` puts a :func:`signal.alarm` deadline around each case. That
-is not defensive dressing: GitHub issue #431 is a parser defect that
-degenerates into a loop making no progress, ``HOPOPT``'s ``SMF_DPD`` reaches it,
-and without a deadline ``make samples`` does not fail -- it *hangs*, taking the
-whole build with it. A signal is what interrupts it, because the loop is pure
+is not defensive dressing: it guards against a parser defect that degenerates
+into a loop making no progress, as GitHub issue #431 did on ``HOPOPT``'s
+``SMF_DPD``. Without a deadline ``make samples`` does not fail on such a case --
+it *hangs*, taking the whole build with it. A signal is what interrupts it, because the loop is pure
 Python and holds the GIL for the whole of an iteration, so no watchdog thread
 would ever get to run. The deadline is wall-clock time, so a stalled runner
 can trip it on a case that normally takes milliseconds (#1428):
@@ -239,10 +239,11 @@ class Outcome(NamedTuple):
 #: Statuses whose octets may go into a capture, i.e. the ones whose *parse*
 #: step ran to completion.
 #:
-#: This is a safety property, not a tidiness one. ``HOPOPT``'s ``SMF_DPD``
-#: constructs perfectly well and then spins forever on the way back in, so its
-#: octets are available and putting them in a fixture would produce a capture
-#: that wedges every reader of it -- including the rest of this suite. A
+#: This is a safety property, not a tidiness one. A case that constructs
+#: perfectly well and then spins forever on the way back in, as ``HOPOPT``'s
+#: ``SMF_DPD`` did under GitHub issue #431, has octets available, and putting
+#: them in a fixture would produce a capture that wedges every reader of it --
+#: including the rest of this suite. A
 #: ``CONSTRUCT`` or ``PARSE`` failure is milder but no more useful: the frame
 #: would be one no reader can get through. So a capture carries only frames
 #: that are known to parse, and the cases that do not are recorded in
@@ -419,10 +420,10 @@ def _named_registry(owner: 'type', enum: 'Any', prefix: 'str',
 #: Every key here has to be spelled the way :meth:`TCP.make
 #: <pcapkit.protocols.transport.tcp.TCP.make>` declares it: an undeclared
 #: keyword raises :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` (#617).
-#: Without that check, ``make``'s ``**kwargs`` drops it silently, and GitHub
-#: issue #602 is this table's keys spelled wrong and so ignored:
+#: Without that check, ``make``'s ``**kwargs`` drops it silently, so a key
+#: spelled wrong in this table is ignored (GitHub issue #602):
 #:
-#: * ``'seq'`` for ``seq_no``. The mapping reads as sequence number 1 and
+#: * ``'seq'`` for ``seq_no``. The mapping reads as sequence number 1 while
 #:   every generated frame carries 0, so the captures are not the packets this
 #:   table describes.
 #: * ``'urgent_pointer'`` for ``urgent``. Harmless in effect, since the value
@@ -882,8 +883,8 @@ def _mh_option_overrides() -> 'dict[Any, dict[str, Any]]':
         LMAControlledMAGSuboption as Enum_LMAControlledMAGSuboption
     from pcapkit.const.mh.option import Option as Enum_Option
     return {
-        # ``{}`` makes ``_make_opt_pad`` warn and silently emit a Pad1, so the
-        # PadN case would otherwise be a duplicate of the Pad1 one.
+        # ``{}`` gives a valid zero-length PadN [RFC 6275 section 6.2.3]; a
+        # non-zero length exercises the padding octets as well.
         Enum_Option.PadN: {'length': 4},
         # The authenticator has to be a multiple of 8 octets.
         Enum_Option.Authorization_Data: {'data': b'\xa5' * 8},
@@ -1004,74 +1005,25 @@ HIP_VERSION = {129: 2, 128: 1, 577: 1}
 
 #: How many copies of the parameter under test go in one packet.
 #:
-#: One (#689). What follows records why a pair is not needed, and what a pair
-#: would hide.
+#: One (#689), because a pair hides the length defects a single parameter
+#: exposes. ``HIP.make`` computes the header's ``len`` field as
+#: ``total_length // 8 + 4``, which is lossless only when the parameter octets
+#: are a multiple of eight, and each parameter is padded to :rfc:`7401`
+#: Section 5.2.1's ``Total Length = 11 + Length - (Length + 3) % 8`` so that it
+#: is one on its own (#651). A record that is ``4 (mod 8)`` -- from padding that
+#: aligns only the contents and ignores the four-octet type-and-length header
+#: (#651), or from a packed length that disagrees with the declared ``Length``
+#: (#672, #679) -- makes the floor division drop four octets, and
+#: ``_read_hip_param``, which compares the recovered length exactly, rejects the
+#: packet. Two such records sum to a multiple of eight, so a pair makes the
+#: arithmetic come out exact and the defect invisible.
 #:
-#: A pair hides the defect #651 fixed. ``HIP.make`` computes the
-#: header's ``len`` field as ``total_length // 8 + 4``, which is lossless only
-#: when the parameter octets are a multiple of eight; and every padding site in
-#: the two HIP modules aligned the *contents* to eight, ignoring the four-octet
-#: type-and-length header, so a single parameter was always ``4 (mod 8)``, the
-#: floor division always dropped those four octets, and ``_read_hip_param``
-#: -- which compares the recovered length exactly -- rejected the library's own
-#: single-parameter packets. Two copies summed to a multiple of eight, so the
-#: arithmetic came out exact and the parameter constructors became reachable.
-#: #651 made the padding :rfc:`7401` Section 5.2.1's
-#: ``Total Length = 11 + Length - (Length + 3) % 8``, so each parameter is a
-#: multiple of eight on its own and the pair stopped being needed for that --
-#: measured at the time as 45 OK of 49 at one copy against 46 at two.
-#:
-#: What kept the pair afterwards was a short list of codes whose own packed
-#: length disagreed with the ``len`` they declared, so their record was not
-#: 8-aligned however the padding was computed, and a pair cancelled that
-#: misalignment the same way it cancelled #651's padding defect. #672 and #679
-#: closed two of those -- ``R1_COUNTER`` (129), whose 8-octet :rfc:`7401`
-#: Section 5.2.3 counter had packed as four, and ``LOCATOR_SET`` (193), whose
-#: ``Length`` had been counted in 4-octet units where the RFC counts bytes --
-#: which is what moved the one-copy figure from 44 to 46, level with two copies.
-#:
-#: Two remained after that, neither helped by a second copy since each failed at
-#: two copies as well as at one. Both are closed:
-#:
-#: * ``HOST_ID`` declared four octets for the single 16-bit DI-Type/DI-Length
-#:   word of :rfc:`7401` Section 5.2.9, so it packed two surplus octets -- 18 at
-#:   this table's key, where ``len=8`` makes the record 16 -- and read a
-#:   conformant record two octets late, taking the curve as ``Algorithm``. #1118
-#:   made the field two octets.
-#: * ``HIP_TRANSFORM`` is HIPv1-only -- ``_read_param_hip_transform`` raises for
-#:   any other version -- and is built at version 1 through
-#:   :data:`HIP_VERSION`, so it round-trips and needs no entry.
-#:
-#: A third gap here, ``R1_Counter`` (128), was closed separately by #690 and was
-#: never one of the pair's cancellations above: it parsed as an
-#: ``UnassignedParameter`` because the *schema* registry is keyed on the
-#: ``code=`` of the class statement and ``R1CounterParameter`` declared only
-#: 129 -- even though ``__parameter__``'s ``_read_param_*``/``_make_param_*``
-#: entries already existed for both codes, as two hand-written dict entries,
-#: not because of any name-normalisation rule. #690 registered
-#: ``R1CounterParameter`` for 128 too, so it needs no entry.
-#:
-#: So the pair was routing around nothing by the time #672, #679 and #690 had
-#: all landed, and dropping to one copy does not change what round-trips.
-#: Measured over this table's 49 HIP codes on ``5f0a1aa90`` (after #696, which
-#: #689 itself waited on -- see the issue), again after #690, and again once
-#: #1128 and #1118 had landed:
-#:
-#: ======================  ========  ==========
-#: tree                    one copy  two copies
-#: ======================  ========  ==========
-#: ``5f0a1aa90``           46 OK     46 OK
-#: after #690              47 OK     47 OK
-#: after #1128 and #1118   49 OK     49 OK
-#: ======================  ========  ==========
-#:
-#: ``HOST_ID`` and ``HIP_TRANSFORM`` were the only two cases either setting
-#: failed at those measurements, and neither their ``status`` nor their
-#: ``defect`` moved between settings, so
-#: :data:`tests.protocols.test_option_roundtrip_unit.EXPECTED_FAILURES` needed no
-#: change to keep recording them accurately at one copy. #1128 and #1118 closed
-#: them, which takes both columns to all 49 and leaves that table with no HIP
-#: entries at all.
+#: ``HIP_TRANSFORM`` is HIPv1-only -- ``_read_param_hip_transform`` raises for
+#: any other version -- and is built at version 1 through :data:`HIP_VERSION`.
+#: ``R1_Counter`` (128) parses through ``R1CounterParameter``, which the schema
+#: registry holds for both counter codes (#690). Every HIP code round-trips at
+#: one copy, so :data:`tests.protocols.test_option_roundtrip_unit.EXPECTED_FAILURES`
+#: has no HIP entries.
 #:
 #: The single-parameter case is asserted directly, and positively, by
 #: ``test_a_hip_packet_carrying_one_parameter_round_trips`` in
@@ -1097,20 +1049,14 @@ def _hip_overrides() -> 'dict[Any, dict[str, Any]]':
         Parameter.HOST_ID: {'hi_curve': ECDSACurve.NIST_P_256},
         # These two are not here because the default fails -- ``counter=0``
         # constructs and parses perfectly well. They are here because a
-        # zero-valued field cannot discriminate a width defect from a correct
-        # one, which is how this parameter's width defect (#672) stayed
-        # hidden. The RFC-only walk over
-        # ``options-internet.pcap`` -- which takes its stride solely from
-        # :rfc:`7401` Section 5.2.1's ``Total Length = 11 + Length - (Length +
-        # 3) % 8`` -- read ``Length = 12``, advanced 16 over a 12-octet record,
-        # landed four octets inside the second copy, and found a phantom
-        # ``Type = 0, Length = 0`` record there whose "padding" was four zero
-        # octets. Every octet it mis-read was zero, so its zero-padding check
-        # passed and it reported no violation. Measured: patching one counter to
-        # ``aabbccdd`` turned that silence into ``type 0 padding not zeroed:
-        # aabbccdd``. With a non-zero counter the fixture cannot conceal a
-        # mis-stride here, whether or not the width is right -- which is the
-        # reason to keep this override, #672 having corrected the width.
+        # zero-valued field cannot discriminate a width defect (#672) from a
+        # correct width. An RFC-only walk over ``options-internet.pcap``, which
+        # takes its stride solely from :rfc:`7401` Section 5.2.1's ``Total
+        # Length = 11 + Length - (Length + 3) % 8``, mis-strides over a counter
+        # packed at the wrong width; where every octet it mis-reads is zero, its
+        # zero-padding check passes and it reports no violation. With a non-zero
+        # counter the fixture cannot conceal a mis-stride here, whether or not
+        # the width is right.
         Parameter.R1_COUNTER: {'counter': 0xaabbccdd},
         Parameter.R1_Counter: {'counter': 0xaabbccdd},
     }
@@ -1225,13 +1171,13 @@ def _httpv2_rebuild(frame: 'Any') -> 'Any':
 #
 # These families are exercised by :func:`roundtrip` but deliberately write
 # no capture, and the reason is not that a PCAP-NG capture would be
-# uninteresting -- it is that the construction API cannot produce a
+# uninteresting -- it is that the construction API's defaults do not produce a
 # *reproducible* one. ``_make_block_shb`` takes the section's byte order from
-# :data:`sys.byteorder` with no way to override it, and the TLS and WireGuard
-# key-log writers stamp :meth:`datetime.datetime.now` into the block body with
-# no keyword to pin it. A fixture built this way would differ between a
-# little-endian and a big-endian host, and the two key-log types would differ
-# between one run and the next.
+# :data:`sys.byteorder` unless given ``byteorder``, and the TLS and WireGuard
+# key-log writers stamp the running pcapkit version into the block body. A
+# fixture built this way would differ between a little-endian and a big-endian
+# host, and the two key-log types would differ between one release and the
+# next.
 #
 # The PCAP-NG option space is not left uncovered by that decision:
 # :file:`examples/generators/pcapng.py` already builds ``profile.pcapng``,
@@ -1258,9 +1204,8 @@ PCAPNG_TIME = 1500000000
 #: 6 octets of destination, 6 of source, the EtherType, then the body.
 PCAPNG_PACKET = bytes.fromhex('02000000000102000000000288b50000')
 
-#: A systemd journal export entry whose length is a multiple of four.
-#: ``_make_block_systemd`` adds no padding, unlike every other block, so an
-#: unaligned entry makes the block length invalid.
+#: A systemd journal export entry whose length is a multiple of four, so that
+#: ``_make_block_systemd`` has no padding to add to it.
 PCAPNG_JOURNAL = (b'__REALTIME_TIMESTAMP=1500000000000000\n_TRANSPORT=journal\n'
                   b'PRIORITY=6\nMESSAGE=probe.....\n\n')
 
@@ -1375,8 +1320,8 @@ def _pcapng_block_overrides() -> 'dict[Any, dict[str, Any]]':
             'records': [(Enum_RecordType.nrb_record_end, {})]},
         Enum_BlockType.Interface_Statistics_Block: {'timestamp': PCAPNG_TIME},
         Enum_BlockType.systemd_Journal_Export_Block: {'entries': PCAPNG_JOURNAL},
-        # ZigBee rather than the default TLS key log, whose writer stamps the
-        # current time into the body and so can never round-trip.
+        # ZigBee rather than the default TLS key log: the default empty
+        # ``secrets_data`` does not read back as a key log.
         Enum_BlockType.Decryption_Secrets_Block: {
             'secrets_type': Enum_SecretsType.ZigBee_NWK_Key,
             'secrets_data': {'nwk_key': bytes(range(16)), 'pan_id': 0x1234}},
@@ -1650,8 +1595,8 @@ FAMILIES = (
            _hip_build, _hip_parse, _hip_extract, _hip_rebuild,
            capture='options-internet.pcap', envelope='ipv6', proto=139),
     # The PCAP-NG families write no capture -- see the section comment
-    # above ``PCAPNG_TIME`` for why the construction API cannot make a
-    # reproducible one, and what already covers that space instead.
+    # above ``PCAPNG_TIME`` for why the construction API's defaults do not
+    # make a reproducible one, and what already covers that space instead.
     Family('pcapng-block', _pcapng_block_registry, _pcapng_block_overrides,
            _pcapng_block_build, _pcapng_parse, _pcapng_block_extract,
            _pcapng_block_rebuild, capture=None, envelope=None),

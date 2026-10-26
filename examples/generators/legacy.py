@@ -4,8 +4,9 @@
 The demonstration scripts under ``examples/legacy_smoke/`` predate the test
 suite and read their captures out of ``examples/captures/`` by relative path.
 Most of them read fixtures the sibling generators in this directory already
-write, but two read captures that exist nowhere in the repository, so those two
-scripts cannot run at all on a fresh checkout. This module writes them, with
+write, but ``test_reassembly.py`` and ``test_analyse.py`` read captures that
+exist nowhere in the repository, so those scripts cannot run at all on a fresh
+checkout. This module writes them, with
 :mod:`scapy`, deterministically and without network access.
 
 ``test.pcap``
@@ -66,7 +67,7 @@ look like for a datagram to come out of it at all:
 4. The payload of a complete datagram goes to
    :meth:`pcapkit.protocols.transport.transport.Transport.analyze`, which
    picks the application protocol from the two port numbers. Port 80 is what
-   maps to HTTP/1.*, so every connection in both fixtures runs on port 80.
+   maps to HTTP, so every connection in both fixtures runs on port 80.
 
 One absence is deliberate and worth flagging, because it looks like an
 oversight and is not: neither fixture contains a datagram that reassembles
@@ -79,10 +80,10 @@ and one retransmitted, so the holes that open all close again before the FIN or
 RST that submits the buffer.
 
 ``submit`` converts each hole's absolute bounds -- TCP sequence numbers,
-``first=tcp_info.seq`` in ``pcapkit/toolkit/pcap.py`` -- into offsets into the
-buffer it is reading, which is indexed from the start of the direction's data,
-and decides completeness from that payload buffer's own gap list (GitHub issue
-#349). Were it to slice with the absolute bounds instead, every slice would
+``first=segment.seq`` in ``tcp_reassembly`` (``pcapkit/toolkit/pcap.py``) --
+into offsets into the buffer it is reading, which is indexed from the start of
+the direction's data, and decides completeness from that payload buffer's own
+gap list (GitHub issue #349). Were it to slice with the absolute bounds instead, every slice would
 start far beyond the end of the buffer for any real initial sequence number,
 every fragment would come out empty, and ``if data:`` would discard the
 datagram without a word, so no capture could reach the incomplete branch at

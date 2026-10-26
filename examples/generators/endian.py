@@ -18,8 +18,8 @@ big-endian capture then byte-swaps ``ts_sec``, ``ts_usec``, ``incl_len`` and
 swallows the rest of the file and the read that follows is handed a negative
 payload length, raising
 ``ValueError: read length must be non-negative or -1`` out of
-:file:`pcapkit/protocols/schema/schema.py`. The fix is one character, and
-nothing but these fixtures can tell whether it works.
+:file:`pcapkit/protocols/schema/schema.py`. The defect is one character, and
+nothing but these fixtures can tell whether it is present.
 
 =============================== ==========================================
 Fixture                         Exercises
