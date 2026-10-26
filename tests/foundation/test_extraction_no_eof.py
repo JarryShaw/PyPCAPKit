@@ -46,10 +46,11 @@ make the cut-off intermittent instead of absent, so following a growing file is
 left to a policy of its own. :class:`NoEOFOverAGrowingFileStopsAtWhatIsThere`
 pins the decision so that it stays a decision rather than becoming folklore.
 
-Worth knowing while reading that: an append landing *mid-record* fails with
-``ValueError: read length must be non-negative or -1`` with or without the
-stopping rule, so ``no_eof`` over a growing file only works for a writer flushing
-whole records. That is a separate matter, not addressed here.
+Worth knowing while reading that: an append landing *mid-record* raises nothing
+(#1265). If extraction stops there, a record cut inside its header ends it at the
+last whole record, and a record cut inside its data is yielded with only the
+octets present. So over a growing file, ``no_eof`` drops or truncates the record
+a writer was partway through when the stopping rule fired.
 
 Why the end-to-end cases run in a child process
 -----------------------------------------------
@@ -551,8 +552,8 @@ class NoEOFOverAGrowingFileStopsAtWhatIsThere(ChildBoundedTestCase):
 
             # Record boundaries of in.pcap; 430 is five whole frames, so the append
             # lands exactly on one -- what a per-packet-flushing writer produces.
-            # An append landing mid-record raises ValueError on every tree, which
-            # is a separate, pre-existing matter.
+            # The boundary keeps the count exact: a split inside the sixth
+            # record's data would yield that record truncated, as a sixth frame.
             split = 430
             with tempfile.TemporaryDirectory(prefix='pcapkit-grow-') as tmp:
                 path = os.path.join(tmp, 'growing.pcap')
