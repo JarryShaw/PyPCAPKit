@@ -341,9 +341,17 @@ class MD5Signature(Option):
 
 @info_final
 class QuickStartResponse(Option):
-    """Data model for TCP quick start response option."""
+    """Data model for TCP quick start response option.
 
-    #: Rate request.
+    .. versionchanged:: 1.5.0
+
+       ``req_rate`` is an :obj:`int` rather than a :obj:`float`
+       (:issue:`2167`).
+
+    """
+
+    #: Rate request, in kbps: ``40 * 2 ** N`` for the Rate Request field
+    #: ``N``, or ``0`` if ``N`` is ``0`` (:rfc:`4782` Section 3.1).
     req_rate: 'int'
     #: TTL difference.
     ttl_diff: 'int'

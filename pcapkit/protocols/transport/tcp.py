@@ -2156,6 +2156,14 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Returns:
             Tuple of options and total length of options.
 
+        Raises:
+            ProtocolError: If an option maker rejects its option, e.g. a user
+                timeout too large for 15 bits of minutes, or an MPTCP option
+                whose fields, or the segment's flags, it cannot encode.
+            ProtocolNotImplemented: If an option argument given by name, an
+                MPTCP ``subtype`` or an alternate checksum ``algorithm``, is
+                not in its namespace and has no default.
+
         Note:
             The options are emitted in the given order, ``NOP`` and ``EOOL``
             included, so that a parsed option list re-emits the same octets.
@@ -2974,6 +2982,10 @@ class TCP(Transport[Data_TCP, Schema_TCP],
 
         Returns:
             Constructed option schema.
+
+        Raises:
+            ProtocolError: If the segment's flags are none of SYN, SYN/ACK and
+                ACK.
 
         """
         if Enum_Flags.SYN in self._flags and Enum_Flags.ACK not in self._flags:  # MP_JOIN-SYN

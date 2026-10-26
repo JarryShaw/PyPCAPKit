@@ -219,11 +219,19 @@ class PDMOption(Option):
 
 
 class QuickStartOption(Option):
-    """Data model for IPv6-Opts Quick Start option."""
+    """Data model for IPv6-Opts Quick Start option.
+
+    .. versionchanged:: 1.5.0
+
+       ``rate`` is an :obj:`int` rather than a :obj:`float` (:issue:`2167`).
+
+    """
 
     #: QS function.
     func: 'QSFunction'
-    #: Rate request/report.
+    #: Rate request/report, in kbps: ``40 * 2 ** N`` for the Rate Request or
+    #: Rate Report field ``N``, or ``0`` if ``N`` is ``0`` (:rfc:`4782`
+    #: Section 3.1).
     rate: 'int'
 
 
