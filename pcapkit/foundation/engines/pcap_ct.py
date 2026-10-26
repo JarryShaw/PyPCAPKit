@@ -309,6 +309,9 @@ class PCAP_CT(EngineBase['RawFrame']):
                   and/or :attr:`self.extractor._exptl <pcapkit.foundation.extraction.Extractor._exptl>`
                   is provided as the pcap-ct engine does not
                   support such operations.
+                * if :attr:`self.extractor._exctx <pcapkit.foundation.extraction.Extractor._exctx>`
+                  is provided, as the pcap-ct engine does not parse with :mod:`pcapkit`'s
+                  own protocol implementations.
                 * if reassembly and/or flow tracing is enabled, as the pcap-ct
                   engine performs no protocol dissection and so cannot support
                   either operation.
@@ -355,6 +358,12 @@ class PCAP_CT(EngineBase['RawFrame']):
         if ext._exlyr != 'none' or ext._exptl != 'null':
             warn("'Extractor(engine=pcap_ct)' does not support protocol and layer threshold; "
                  f"'layer={ext._exlyr}' and 'protocol={ext._exptl}' ignored",
+                 AttributeWarning, stacklevel=stacklevel())
+
+        if ext._exctx:
+            warn("'Extractor(engine=pcap_ct)' does not parse with pcapkit's own protocol "
+                 "implementations, so the parsing context supplied through "
+                 "'context=' is ignored",
                  AttributeWarning, stacklevel=stacklevel())
 
         if ext.magic_number not in PCAP.MAGIC_NUMBER:
