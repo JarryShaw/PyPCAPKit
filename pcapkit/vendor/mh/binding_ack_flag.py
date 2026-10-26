@@ -104,7 +104,7 @@ class BindingACKFlag(Vendor):
             data: CSV data.
 
         Returns:
-            Enumeration fields and missing fields.
+            Enumeration fields.
 
         """
         reader = csv.reader(data)

@@ -11,7 +11,7 @@ enumerations include:
 
 .. list-table::
 
-   * - :const:`VLAN_PriorityLevel <pcapkit.const.vlan.priority_level.PriorityLevel>`
+   * - :class:`VLAN_PriorityLevel <pcapkit.const.vlan.priority_level.PriorityLevel>`
      - Priority Levels [*]_
 
 .. [*] https://en.wikipedia.org/wiki/IEEE_P802.1p#Priority_levels

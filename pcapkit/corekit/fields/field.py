@@ -433,8 +433,8 @@ class FieldBase(Generic[_T], metaclass=FieldMeta):
         # NOTE: ``length`` is frequently wire-derived -- resolved by a
         # ``_length_callback`` against the very packet being parsed, per
         # :meth:`Field.__call__` below, or by a schema's own selector building a
-        # field from a value it just read off the wire (e.g. ``DecryptionSecretsBlock``'s
-        # ``secrets_data: BytesField(length=lambda pkt: pkt['__length__'])``) --
+        # field from a value it just read off the wire (e.g. HIP's
+        # ``host_id_hi_selector`` returning ``BytesField(length=pkt['hi_len'])``) --
         # and is thus attacker-controlled: a corrupt or hostile capture can
         # declare an arbitrarily large one. Past :data:`~pcapkit.utilities.config.MAX_ZERO_PAD_LENGTH`, a
         # length that ``buffer`` falls short of is provably bogus: the padding

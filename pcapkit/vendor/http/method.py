@@ -131,8 +131,8 @@ class {NAME}(EnumRegistry, StrEnum):
         IANA methods whose member *name* differs from their *value* --
         ``BASELINE_CONTROL`` / ``'BASELINE-CONTROL'`` and
         ``VERSION_CONTROL`` / ``'VERSION-CONTROL'``, a hyphen being unusable
-        in a Python identifier -- which :meth:`_missing_` (and so the
-        constructor) also finds by value.
+        in a Python identifier -- which the constructor also finds by
+        value, before it falls back to :meth:`_missing_`.
 
         It is a :class:`classmethod`, as the base is, because a
         zero-argument ``super()`` needs a first argument to bind

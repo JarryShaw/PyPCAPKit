@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 # pylint: disable=unused-import
 """:class:`~pcapkit.protocols.application.ospf.OSPF` Constant Enumerations
-======================================================================
+=======================================================================
 
 .. module:: pcapkit.const.ospf
 

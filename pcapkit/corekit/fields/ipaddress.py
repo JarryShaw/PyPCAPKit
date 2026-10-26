@@ -158,19 +158,18 @@ def parse_ip_address(value: 'IPv4Address | IPv6Address | bytes | int | str',
         length is the only thing on the wire that carries the family -- must
         convert the argument itself, and that conversion happens **before**
         the schema, so it launders a :obj:`bool` into an
-        :class:`~ipaddress.IPv4Address` that the guard added for :issue:`491`
-        in :meth:`_IPAddressField.pre_process` can then only see as a
+        :class:`~ipaddress.IPv4Address` that the :issue:`491` guard in
+        :meth:`_IPAddressField.pre_process` can then only see as a
         legitimate address: ``True`` / ``False`` become ``0.0.0.1`` /
         ``0.0.0.0`` -- or ``::1`` / ``::`` where the wire format fixes the
         family as IPv6 -- without complaint.
 
         Routing every one of them through here rather than giving each its own
-        :func:`isinstance` check is the whole point: :issue:`469` added
-        exactly such a check to :meth:`MH._make_opt_mn_id
-        <pcapkit.protocols.internet.mh.MH._make_opt_mn_id>`, and :issue:`491`
-        was the same defect surviving at every site that had not been thought
-        of. A guard that has to be remembered per call site is a guard that
-        will be forgotten at the next one.
+        :func:`isinstance` check is the whole point: :meth:`MH._make_opt_mn_id
+        <pcapkit.protocols.internet.mh.MH._make_opt_mn_id>` carries exactly
+        such a check (:issue:`469`), and :issue:`491` is the same defect at
+        every site that lacks one. A guard that has to be remembered per call
+        site is a guard that will be forgotten at the next one.
 
         The :obj:`bool` rejection is the **first** statement here, ahead of any
         dispatch on the value's type, for the placement reason :issue:`469`
@@ -195,8 +194,8 @@ def parse_ip_address(value: 'IPv4Address | IPv6Address | bytes | int | str',
         exception classes derive from
         :exc:`~pcapkit.utilities.exceptions.BaseError` *and* :exc:`ValueError`,
         so the difference is invisible to ``except BaseError`` and ``except
-        ValueError``, and nothing in the library catches either one
-        specifically.
+        ValueError``, and no call of this function or of a ``_make_*`` in the
+        library sits inside an ``except`` for either one specifically.
 
     .. versionadded:: 1.5.0
 

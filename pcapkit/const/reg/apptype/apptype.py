@@ -2734,7 +2734,8 @@ class AppType(EnumRegistry, StrEnum):
         collapsed = '_'.join(stripped.split())
         replaced = re.sub(r'\W', '_', collapsed)
         identifier = '_'.join(filter(None, replaced.split('_')))
-        # NOTE: matches process()'s own keyword guard below -- a name that
+        # NOTE: matches the keyword guard AppType.process applies at generation
+        # time in pcapkit.vendor.reg.apptype.apptype -- a name that
         # sanitises to a reserved word is not usable as an attribute as is,
         # and a trailing underscore is the same fix the generator already
         # applies to a statically declared member with the same problem.
