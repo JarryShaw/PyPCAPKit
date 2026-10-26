@@ -177,8 +177,8 @@ class ReassemblyBase(Generic[_PT, _DT, _IT, _BT], metaclass=ReassemblyMeta):
         """Protocol name of current reassembly object.
 
         Note:
-            This property is not available as a class
-            attribute.
+            The same value is also available as a class attribute,
+            from the property of the same name on :class:`ReassemblyMeta`.
 
         """
         if hasattr(self, '__protocol_name__'):
@@ -190,8 +190,8 @@ class ReassemblyBase(Generic[_PT, _DT, _IT, _BT], metaclass=ReassemblyMeta):
         """Protocol of current reassembly object.
 
         Note:
-            This property is not available as a class
-            attribute.
+            The same value is also available as a class attribute,
+            from the property of the same name on :class:`ReassemblyMeta`.
 
         """
         if hasattr(self, '__protocol_type__'):
@@ -287,10 +287,10 @@ class ReassemblyBase(Generic[_PT, _DT, _IT, _BT], metaclass=ReassemblyMeta):
         Note:
             The clock only advances when *this* reassembly object is fed, since
             a packet handed to it is the only evidence an offline parser has that
-            capture time has moved on. For IPv4 and TCP that is nearly every
-            frame of the relevant protocol; for IPv6 it is only the fragments,
-            so an IPv6 buffer that stalls and is followed by no further IPv6
-            fragment is reported as
+            capture time has moved on. For TCP that is every segment, for IPv4
+            every frame whose **DF** flag is clear, and for IPv6 only the
+            fragments, so an IPv6 buffer that stalls and is followed by no
+            further IPv6 fragment is reported as
             :attr:`Completion.PARTIAL <pcapkit.foundation.reassembly.data.data.Completion.PARTIAL>`
             at the end of the capture. That is the honest answer: the capture
             never shows that the deadline passed. A caller with an outside

@@ -116,7 +116,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
     #: fragmentation one, and the numbers that look like candidates are not
     #: reassembly timeouts: the Maximum Segment Lifetime of
     #: :rfc:`9293#section-3.4.1` bounds how long a *segment* may linger in the
-    #: network, and the user timeout of :rfc:`9293#section-3.8.3` aborts a
+    #: network, and the user timeout of :rfc:`9293#section-3.10.8` aborts a
     #: connection whose data goes unacknowledged. Picking either as a default
     #: would silently discard buffered stream data on captures that are merely
     #: idle -- a long-lived connection with a two-minute lull is ordinary, while

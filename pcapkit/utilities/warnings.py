@@ -19,11 +19,11 @@ Every warning :mod:`pcapkit` reports goes through :func:`warn`, which reports it
    exactly as they govern any other library's (see below for the one wrinkle in
    naming a category on the command line).
 
-The counts are the same in development mode as outside it;
-:data:`~pcapkit.utilities.logging.DEVMODE` and
-:data:`~pcapkit.utilities.logging.VERBOSE` change how much detail the log record
-carries, never how many records there are. Constructing a warning class is not
-an act of reporting one, and has no side effects at all.
+The counts are the same in development mode as outside it:
+:data:`~pcapkit.utilities.logging.DEVMODE` changes where the log records go, and
+:data:`~pcapkit.utilities.logging.VERBOSE` how much detail they carry, never how
+many records there are. Constructing a warning class is not an act of reporting
+one, and has no side effects at all.
 
 To silence :mod:`pcapkit` warnings, filter them like any other category::
 
@@ -424,9 +424,10 @@ class ExtractionWarning(BaseWarning, RuntimeWarning):
 class ConfigWarning(BaseWarning, RuntimeWarning):
     """Configuration warning.
 
-    Reported by :mod:`pcapkit.utilities.config` for an environment variable that
-    is invalid, and so falls back to its default, or that lifts a limit past its
-    default.
+    Reported for an environment variable that is invalid, and so falls back to
+    its default, or that lifts a limit past its default: by the readers of
+    :mod:`pcapkit.utilities.config`, and by this module for the flags
+    :mod:`pcapkit.utilities.logging` reads.
 
     .. versionadded:: 1.5.0
 

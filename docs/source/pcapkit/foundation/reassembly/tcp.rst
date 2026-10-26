@@ -349,9 +349,10 @@ Terminology
        its own ``isn`` -- ``raw[n]`` holds the octet with sequence number
        ``isn + n``, and ``isn`` is revised downwards whenever a segment turns
        up below the data already buffered, so it is not necessarily the
-       connection's own initial sequence number.
-       :meth:`TCP.submit <pcapkit.foundation.reassembly.tcp.TCP.submit>` is the
-       one place that converts between the two.
+       connection's own initial sequence number. Each ACK's ``gap`` and
+       ``conflict`` lists are kept in sequence numbers too;
+       :meth:`TCP.submit <pcapkit.foundation.reassembly.tcp.TCP.submit>` turns
+       the ``gap`` entries into offsets into ``raw`` when it reports the buffer.
 
 Data Models
 ===========

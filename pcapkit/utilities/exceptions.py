@@ -285,8 +285,8 @@ class BaseError(Exception):
     def __init__(self, *args: 'Any', quiet: 'bool' = False, **kwargs: 'Any') -> 'None':
         """Log the error, unless it is quiet, and initialise the exception.
 
-        A loud error logs at ``CRITICAL`` and, unless ``PCAPKIT_DEVMODE`` is set,
-        installs the terse exception hooks; the class docstring says when an error is
+        A loud error logs at ``CRITICAL`` and, unless ``PCAPKIT_DEVMODE`` turns
+        development mode on, installs the terse exception hooks; the class docstring says when an error is
         quiet.
 
         Args:

@@ -62,8 +62,8 @@ following objects and functions:
 
 It also exports :mod:`pathlib`, :exc:`ModuleNotFoundError`,
 :class:`collections.abc.Collection` and :func:`functools.cached_property` as the
-standard library has them. Their fallbacks were for interpreters below Python 3.8,
-which 1.5.0 no longer installs on (:issue:`2051`).
+standard library has them, with no fallback, since 1.5.0 requires Python 3.8 or
+later (:issue:`2051`).
 
 .. function:: final(f)
 
@@ -100,5 +100,5 @@ which 1.5.0 no longer installs on (:issue:`2051`).
 
    .. versionchanged:: 1.5.0
 
-      No longer a backport below Python 3.8, which 1.5.0 no longer installs on
+      No longer a backport below Python 3.8, which 1.5.0 does not install on
       (:issue:`2051`).

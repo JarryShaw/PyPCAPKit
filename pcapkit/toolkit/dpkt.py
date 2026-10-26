@@ -561,11 +561,11 @@ def ipv4_reassembly(packet: 'Packet', timestamp: 'float', *,
         :class:`~pcapkit.foundation.engines.dpkt.DPKT` attached to the frame, so
         they are the captured ones. A packet built by hand carries no such
         buffer, and its octets are then |dpkt|_'s re-serialisation of it, in
-        which a zeroed checksum or length comes back recomputed --
-        :func:`attach_buffer` is what makes them the wire's again. They are that
-        re-serialisation too where |dpkt|_'s own lengths misplace the layer
-        in the record, as behind some stacks of VLAN tags (:issue:`1646`). The
-        packet itself is left untouched either way.
+        which a zeroed checksum comes back recomputed, along with the Total
+        Length -- :func:`attach_buffer` is what makes them the wire's again.
+        They are that re-serialisation too where |dpkt|_'s own lengths
+        misplace the layer in the record, as behind some stacks of VLAN tags
+        (:issue:`1646`). The packet itself is left untouched either way.
 
         The header is the IHL's octets, and the payload ends at the Total
         Length, or at the end of the frame for a zero one. A Total Length
@@ -648,7 +648,7 @@ def ipv6_reassembly(packet: 'Packet', timestamp: 'float', *,
         :class:`~pcapkit.foundation.engines.dpkt.DPKT` attached to the frame, so
         they are the captured ones. A packet built by hand carries no such
         buffer, and its octets are then |dpkt|_'s re-serialisation of it, in
-        which a zeroed checksum or length comes back recomputed --
+        which a zeroed TCP, UDP or ICMPv6 checksum comes back recomputed --
         :func:`attach_buffer` is what makes them the wire's again. They are that
         re-serialisation too where |dpkt|_'s own lengths misplace the layer
         in the record, as behind some stacks of VLAN tags (:issue:`1646`). The
@@ -757,15 +757,15 @@ def tcp_reassembly(packet: 'Packet', timestamp: 'float', *,
         reassembled; otherwise :data:`None`.
 
     Note:
-        The header and payload are sliced out of the record octets
+        The header is sliced out of the record octets
         :class:`~pcapkit.foundation.engines.dpkt.DPKT` attached to the frame, so
-        they are the captured ones. A packet built by hand carries no such
-        buffer, and its octets are then |dpkt|_'s re-serialisation of it, in
-        which a zeroed checksum or length comes back recomputed --
-        :func:`attach_buffer` is what makes them the wire's again. They are that
-        re-serialisation too where |dpkt|_'s own lengths misplace the layer
-        in the record, as behind some stacks of VLAN tags (:issue:`1646`). The
-        packet itself is left untouched either way.
+        it is the captured one, and the payload is the segment data |dpkt|_
+        itself read from the frame. A packet built by hand carries no such
+        buffer, and its header is then |dpkt|_'s serialisation of the TCP
+        layer, which recomputes nothing. It is that serialisation too where
+        |dpkt|_'s own lengths misplace the layer in the record, as behind some
+        stacks of VLAN tags (:issue:`1646`). The packet itself is left untouched
+        either way.
 
     See Also:
         :class:`pcapkit.foundation.reassembly.tcp.TCP`
@@ -836,15 +836,15 @@ def tcp_traceflow(packet: 'Packet', timestamp: 'float', *,
         traced; otherwise :data:`None`.
 
     Note:
-        The header and payload are sliced out of the record octets
+        The header is sliced out of the record octets
         :class:`~pcapkit.foundation.engines.dpkt.DPKT` attached to the frame, so
-        they are the captured ones. A packet built by hand carries no such
-        buffer, and its octets are then |dpkt|_'s re-serialisation of it, in
-        which a zeroed checksum or length comes back recomputed --
-        :func:`attach_buffer` is what makes them the wire's again. They are that
-        re-serialisation too where |dpkt|_'s own lengths misplace the layer
-        in the record, as behind some stacks of VLAN tags (:issue:`1646`). The
-        packet itself is left untouched either way.
+        it is the captured one, and the payload is the segment data |dpkt|_
+        itself read from the frame. A packet built by hand carries no such
+        buffer, and its header is then |dpkt|_'s serialisation of the TCP
+        layer, which recomputes nothing. It is that serialisation too where
+        |dpkt|_'s own lengths misplace the layer in the record, as behind some
+        stacks of VLAN tags (:issue:`1646`). The packet itself is left untouched
+        either way.
 
     See Also:
         :class:`pcapkit.foundation.traceflow.tcp.TCP`

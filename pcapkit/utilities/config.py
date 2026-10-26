@@ -212,8 +212,6 @@ EXTENSION_HEADER_LIMIT = read_limit('EXTENSION_HEADER_LIMIT', 32, risk=_RECURSIO
 #: warn exactly once each.
 #:
 #: .. versionadded:: 1.5.0
-#:
-#:    Moved from ``pcapkit.toolkit.pypcapfile.IPV6_TCP_WARNED_LIMIT`` (:issue:`1726`).
 IPV6_TCP_WARNED_LIMIT = read_limit('IPV6_TCP_WARNED_LIMIT', 32, risk=(
     'each capture remembered pins one of its packets in memory'))
 
@@ -325,10 +323,10 @@ MAX_ZERO_PAD_LENGTH = read_limit('MAX_ZERO_PAD_LENGTH', 0x40_000, risk=(
 #: been parsed before it. A guard whose answer moves with history is not a guard.
 #:
 #: 65,536 is what removes that. It is the whole span of a 16-bit wire length
-#: field -- which is how an IP header, an IPv6 payload, a TCP or IPv4 option and
-#: a PCAP-NG option all declare their size -- so no shortfall that one of those
-#: can produce is subject to the budget at all, and every one of them is padded
-#: unconditionally. Measured: the largest legitimate single
+#: field -- which is how an IPv4 datagram, an IPv6 payload and a PCAP-NG option
+#: all declare their size, and a TCP or IPv4 option's 8-bit length declares less
+#: -- so no shortfall that one of those can produce is subject to the budget at
+#: all, and every one of them is padded unconditionally. Measured: the largest legitimate single
 #: shortfall found anywhere was 65,495 octets, from a snapshot-truncated
 #: offload-sized frame (100 frames at ``incl_len`` 54 declaring an IPv4 total
 #: length of 65,535, padding 6,549,500 octets from 7,024 read), and 64,750 from a

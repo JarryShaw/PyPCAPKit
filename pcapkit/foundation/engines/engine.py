@@ -104,8 +104,9 @@ class EngineBase(Generic[_T], metaclass=EngineMeta):
         """Engine name.
 
         Note:
-            This property is not available as a class
-            attribute.
+            This instance property is not what a class attribute lookup
+            reaches: on the class, the metaclass property of the same name
+            answers instead, with the same value.
 
         """
         if hasattr(self, '__engine_name__'):
@@ -117,8 +118,9 @@ class EngineBase(Generic[_T], metaclass=EngineMeta):
         """Engine module name.
 
         Note:
-            This property is not available as a class
-            attribute.
+            This instance property is not what a class attribute lookup
+            reaches: on the class, the metaclass property of the same name
+            answers instead, with the same value.
 
         """
         if hasattr(self, '__engine_module__'):

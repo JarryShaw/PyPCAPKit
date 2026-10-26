@@ -174,10 +174,10 @@ Terminology
            |     |--> ipv6_frag.id   |
            |     |--> ipv6_frag.next |
            |                         |--> 'TDL' : (int) total data length
-           |                         |--> RCVBT : (bytearray) fragment received bit table
-           |                         |             |--> (bytes) b'\\x00' -> not received
-           |                         |             |--> (bytes) b'\\x01' -> received
-           |                         |             |--> (bytes) ...
+           |                         |--> 'RCVBT' : (bytearray) fragment received bit table
+           |                         |               |--> (bytes) b'\\x00' -> not received
+           |                         |               |--> (bytes) b'\\x01' -> received
+           |                         |               |--> (bytes) ...
            |                         |--> 'index' : (list) list of reassembled packets
            |                         |               |--> (int) packet range number
            |                         |--> 'header' : (bytes) header buffer

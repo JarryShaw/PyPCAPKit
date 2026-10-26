@@ -54,13 +54,14 @@ APP = 'application'
 
 # extraction engines
 #
-# NOTE: each value is the key the engine is registered under in
+# NOTE: each third-party engine's value is the key it is registered under in
 # :attr:`Extractor.__engine__ <pcapkit.foundation.extraction.Extractor.__engine__>`,
 # not its display name -- ``Extractor`` looks the requested engine up in that
 # mapping, and an unknown key only warns and falls back to the default engine, so a
-# constant whose value does not match the key would silently do nothing. The
-# identifiers, by contrast, follow each engine's ``__engine_name__``, which is why
-# the casing of the two sides differs.
+# constant whose value does not match the key would silently do nothing.
+# ``PCAPKit`` is ``'default'``, which ``Extractor`` resolves to its built-in engine
+# without a lookup. The third-party identifiers, by contrast, follow each engine's
+# ``__engine_name__``, which is why the casing of the two sides differs.
 DPKT = 'dpkt'
 Scapy = 'scapy'
 PCAPKit = 'default'
@@ -88,7 +89,7 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
 
     Arguments:
         fin: file name to be read or a binary IO object;
-            if file not exist, raise :exc:`~pcapkit.utilities.exceptions.FileNotFound`
+            if the file does not exist, raise :exc:`~pcapkit.utilities.exceptions.FileNotFound`
         fout: file name to be written
         format: file format of output
 
@@ -98,7 +99,7 @@ def extract(fin: 'Optional[str | IO[bytes]]' = None, fout: 'Optional[str]' = Non
 
         files: if split each frame into different files
         nofile: if no output file is to be dumped
-        verbose: a :obj:`bool` value or a function takes the
+        verbose: a :obj:`bool` value or a function that takes the
             :class:`~pcapkit.foundation.extraction.Extractor`
             instance and current parsed frame (depends on engine selected) as
             parameters to print verbose output information
