@@ -244,7 +244,7 @@ class CGAParametersRegressionTests(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
-    def test_cga_parameters_option_now_parses_end_to_end(self) -> None:
+    def test_cga_parameters_option_parses_end_to_end(self) -> None:
         from pcapkit.const.mh.option import Option as Enum_Option
         from pcapkit.protocols.internet.mh import MH
 

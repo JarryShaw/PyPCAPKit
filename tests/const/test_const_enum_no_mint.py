@@ -64,7 +64,7 @@ its ``str`` path are ``_unregistered_member`` calls too -- the same
 ruling" argument that converts :class:`Command`'s and :class:`Method`'s own
 ``get()`` mint sites below; see
 :meth:`BespokeUnmintConvertedRegistriesTests.
-test_optiontype_get_int_path_no_longer_mints`,
+test_optiontype_get_int_path_does_not_mint`,
 ``..._namespace_path_...`` and ``..._str_path_...``.
 
 Open-vocabulary registries whose mint used the exact, unmodified observed
@@ -542,7 +542,7 @@ RULING_CONVERTED_WITH_REACHABLE_GAP = (
 #: "Old Xerox Experimental values. Invalid as an Ethertype since 1983." both
 #: convert, because the label itself says nothing was assigned. Every *other*
 #: named block -- companies the historical list attributes a real code range
-#: to -- converts too (#775); :data:`ETHERTYPE_FORMERLY_KEPT_PROBE` pins one
+#: to -- converts too (#775); :data:`ETHERTYPE_ATTRIBUTED_PROBE` pins one
 #: (``Xyplex``) as a regression guard that it does not mint.
 #:
 #: "Old Xerox Experimental" (0x0101-0x01FF) is a strict subset of the wider
@@ -570,23 +570,23 @@ ETHERTYPE_UNASSIGNED_PROBES = {
 #: own constant, distinct from :data:`ETHERTYPE_UNASSIGNED_PROBES`, because
 #: :class:`EtherTypeMixedMintTests` below wants it named individually in
 #: its own regression test.
-ETHERTYPE_FORMERLY_KEPT_PROBE = (0x0888, 'Xyplex_0x0888')
+ETHERTYPE_ATTRIBUTED_PROBE = (0x0888, 'Xyplex_0x0888')
 
 #: :class:`~pcapkit.const.ipx.socket.Socket` probes for the owner's #775/#847
 #: ruling: ``Experimental`` and the dynamically/statically assigned labels
 #: convert, as notation for the reader rather than a final concrete assigned
 #: name. ``Registered by Xerox``, the company one, is pinned by
-#: :data:`IPX_SOCKET_FORMERLY_KEPT_PROBE`.
+#: :data:`IPX_SOCKET_ATTRIBUTED_PROBE`.
 IPX_SOCKET_UNASSIGNED_PROBES = {
     0x0025: 'Experimental',
     0x4001: 'Dynamically Assigned Socket Numbers',
     0x8001: 'Statically Assigned Socket Numbers',
     0x0BBA: 'Dynamically Assigned',
 }
-#: The mirror of :data:`ETHERTYPE_FORMERLY_KEPT_PROBE` for
+#: The mirror of :data:`ETHERTYPE_ATTRIBUTED_PROBE` for
 #: :class:`~pcapkit.const.ipx.socket.Socket`: ``Registered by Xerox`` also
 #: converts (#775), keeping its hex-suffixed name.
-IPX_SOCKET_FORMERLY_KEPT_PROBE = (0x0010, 'Registered by Xerox_0x0010')
+IPX_SOCKET_ATTRIBUTED_PROBE = (0x0010, 'Registered by Xerox_0x0010')
 
 
 def _first_unregistered_value(cls: 'type') -> 'Optional[int]':
@@ -1271,7 +1271,7 @@ class UnregisteredMemberNameIsBareTests(unittest.TestCase):
     :meth:`~pcapkit.const.ftp.command.Command._unregistered_member`'s own
     docstring documents as the shared convention (see
     :meth:`BespokeOpenVocabularyUnmintConvertedTests.
-    test_command_missing_no_longer_mints` and its siblings). Neither
+    test_command_missing_does_not_mint` and its siblings). Neither
     argument is *formatted* with a numeric suffix on any of the three,
     which is the one thing that would risk a genuine ``__members__``
     collision if these were ever minted instead of built unregistered.
@@ -1430,7 +1430,7 @@ class RulingConversionSourceTests(unittest.TestCase):
     :data:`_MIXED_REGISTRIES` is empty, so nothing is excluded here -- see
     its own comment."""
 
-    def test_no_reachable_gap_registries_no_longer_call_extend_enum(self) -> None:
+    def test_no_reachable_gap_registries_do_not_call_extend_enum(self) -> None:
         # EtherType belongs to RULING_CONVERTED_WITH_REACHABLE_GAP: its Old
         # Xerox branch is not shadowed by the wider IEEE802.3 range (GitHub
         # issue #862), so its first converted branch by source order is
@@ -1450,7 +1450,7 @@ class RulingConversionSourceTests(unittest.TestCase):
                 self.assertNotIn('extend_enum', source)
                 self.assertIn('_unregistered_member', source)
 
-    def test_every_wholly_converted_registry_no_longer_calls_extend_enum(self) -> None:
+    def test_every_wholly_converted_registry_does_not_call_extend_enum(self) -> None:
         for module_name, class_name in RULING_CONVERTED_REGISTRIES:
             if (module_name, class_name) in _MIXED_REGISTRIES:
                 continue
@@ -1459,10 +1459,10 @@ class RulingConversionSourceTests(unittest.TestCase):
                 source = inspect.getsource(cls._missing_)  # type: ignore[attr-defined]
                 self.assertNotIn('extend_enum', source)
 
-    def test_ethertype_and_socket_no_longer_call_extend_enum_either(self) -> None:
+    def test_ethertype_and_socket_do_not_call_extend_enum_either(self) -> None:
         """EtherType and Socket carry no ``extend_enum`` call either (#775),
         the same invariant
-        :meth:`test_every_wholly_converted_registry_no_longer_calls_extend_enum`
+        :meth:`test_every_wholly_converted_registry_does_not_call_extend_enum`
         proves for the rest -- named separately because Socket is not a
         member of :data:`RULING_CONVERTED_REGISTRIES`, so the loop above alone
         would never reach it."""
@@ -1503,7 +1503,7 @@ class EtherTypeMixedMintTests(unittest.TestCase):
                 self.assertEqual(before, len(EtherType.__members__))
                 self.assertNotIn(value, EtherType._value2member_map_)  # type: ignore[attr-defined]
 
-    def test_formerly_attributed_vendor_block_no_longer_mints(self) -> None:
+    def test_an_attributed_vendor_block_does_not_mint(self) -> None:
         """``Xyplex`` (0x0888), a real attributed name, does not mint (#775):
         it resolves to an unregistered member with the hex-suffixed name
         exactly as the crawler renders it -- PR #878 scoped it this way:
@@ -1512,7 +1512,7 @@ class EtherTypeMixedMintTests(unittest.TestCase):
         :meth:`test_unassigned_rows_do_not_mint` above."""
         from pcapkit.const.reg.ethertype import EtherType
 
-        value, name = ETHERTYPE_FORMERLY_KEPT_PROBE
+        value, name = ETHERTYPE_ATTRIBUTED_PROBE
         self.assertNotIn(value, EtherType._value2member_map_)  # type: ignore[attr-defined]
         before = len(EtherType.__members__)
 
@@ -1534,7 +1534,7 @@ class IPXSocketMixedMintTests(unittest.TestCase):
     dynamically/statically assigned labels, and #775 converts ``Registered
     by Xerox``, the company one, too, so ``Socket(0x0010)`` resolves to an
     unregistered ``Registered by Xerox_0x0010``; see
-    :meth:`test_registered_by_xerox_no_longer_mints` below."""
+    :meth:`test_registered_by_xerox_does_not_mint` below."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self, restore=True)
@@ -1554,16 +1554,16 @@ class IPXSocketMixedMintTests(unittest.TestCase):
                 self.assertEqual(before, len(Socket.__members__))
                 self.assertNotIn(value, Socket._value2member_map_)  # type: ignore[attr-defined]
 
-    def test_registered_by_xerox_no_longer_mints(self) -> None:
+    def test_registered_by_xerox_does_not_mint(self) -> None:
         """``Registered by Xerox`` (0x0010), the company name, does not mint
         (#775): it resolves to an unregistered member with the hex-suffixed
         name exactly as the crawler renders it -- same ruling, same reasoning
         as
         :meth:`EtherTypeMixedMintTests.
-        test_formerly_attributed_vendor_block_no_longer_mints`."""
+        test_an_attributed_vendor_block_does_not_mint`."""
         from pcapkit.const.ipx.socket import Socket
 
-        value, name = IPX_SOCKET_FORMERLY_KEPT_PROBE
+        value, name = IPX_SOCKET_ATTRIBUTED_PROBE
         self.assertNotIn(value, Socket._value2member_map_)  # type: ignore[attr-defined]
         before = len(Socket.__members__)
 
@@ -1753,7 +1753,7 @@ class BespokeUnmintConvertedRegistriesTests(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertIsNot(first, second)
 
-    def test_optiontype_get_int_path_no_longer_mints(self) -> None:
+    def test_optiontype_get_int_path_does_not_mint(self) -> None:
         """Guards against :meth:`OptionType.get` minting directly on a miss
         (bypassing ``_missing_`` entirely) -- a second, independent mint
         site, on the wire-facing path
@@ -1781,7 +1781,7 @@ class BespokeUnmintConvertedRegistriesTests(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertIsNot(first, second)
 
-    def test_optiontype_get_namespace_path_no_longer_mints(self) -> None:
+    def test_optiontype_get_namespace_path_does_not_mint(self) -> None:
         """The same call, through a non-default ``namespace=`` -- a
         different branch of the same ``if isinstance(key, int)`` block."""
         from pcapkit.const.pcapng.option_type import OptionType
@@ -1802,7 +1802,7 @@ class BespokeUnmintConvertedRegistriesTests(unittest.TestCase):
         self.assertEqual(first, second)
         self.assertIsNot(first, second)
 
-    def test_optiontype_get_str_path_no_longer_mints(self) -> None:
+    def test_optiontype_get_str_path_does_not_mint(self) -> None:
         """The subtler of the two: guards against ``get()``'s ``str``-keyed
         branch minting ``key`` itself as the member's *name*, with
         ``default`` as its value -- the same "no information to register one
@@ -1858,7 +1858,7 @@ class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
     ``tests/protocols/application/test_ftp_unit.py::FTPUnitTests::test_command_get_is_case_insensitive``,
     which pins exactly that with ``assertEqual``, ``assertIsNot`` and
     ``assertNotEqual``. Its HTTP counterpart is
-    ``tests/protocols/application/test_http_unit.py::HTTPUnitTests::test_method_get_is_now_case_sensitive``
+    ``tests/protocols/application/test_http_unit.py::HTTPUnitTests::test_method_get_is_case_sensitive``
     (#896).
 
     """
@@ -1919,7 +1919,7 @@ class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
         self.assertIs(Command.MLST.feat, FEATCode.MLST)  # type: ignore[attr-defined]
         self.assertIs(Command.MLSD.feat, Command.MLST.feat)  # type: ignore[attr-defined]
 
-    def test_featcode_missing_no_longer_mints(self) -> None:
+    def test_featcode_missing_does_not_mint(self) -> None:
         """The convention pinned across every open-vocabulary class:
         an unregistered member's *value* is the caller's own casing,
         unchanged -- ``FEATCode`` never minted any other way, and
@@ -1940,7 +1940,7 @@ class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
         self.assertIsNot(first, second)
         self.assertEqual(repr(first), '<FEATCode [PYPCAPKIT860PROBE]>')
 
-    def test_command_missing_no_longer_mints(self) -> None:
+    def test_command_missing_does_not_mint(self) -> None:
         """Same convention as :class:`~pcapkit.const.ftp.command.FEATCode`'s:
         the *value* is exactly what was observed (``value == 'wire casing'``
         holds), matching what a mint does for this class -- only the *name*
@@ -1968,7 +1968,7 @@ class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
         self.assertEqual(first.conf, ConformanceRequirement.O)
         self.assertEqual(repr(first), '<Command.PYPCAPKIT860PROBE: None>')
 
-    def test_command_get_unknown_no_longer_mints(self) -> None:
+    def test_command_get_unknown_does_not_mint(self) -> None:
         """The value keeps the caller's own casing (see :meth:`Command.
         _unregistered_member`'s own docstring) -- so a repeated call with
         the *same* casing is equal but not identical, while a *different*
@@ -1992,7 +1992,7 @@ class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
         self.assertEqual(different_case, 'PYPCAPKIT860PROBE2')
         self.assertNotEqual(first, different_case)
 
-    def test_method_missing_no_longer_mints(self) -> None:
+    def test_method_missing_does_not_mint(self) -> None:
         """Same convention as :class:`~pcapkit.const.ftp.command.FEATCode`'s
         and :class:`~pcapkit.const.ftp.command.Command`'s: an *unregistered*
         member's value is the caller's own casing, with real :class:`str`
@@ -2025,7 +2025,7 @@ class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
         # caller's own casing shows through in the repr too.
         self.assertEqual(repr(first), '<Method.pypcapkit860probe>')
 
-    def test_method_get_unknown_no_longer_mints(self) -> None:
+    def test_method_get_unknown_does_not_mint(self) -> None:
         """Same convention and same reasoning as :meth:`Command.
         _unregistered_member`'s -- the value keeps the caller's own
         casing, so same-casing repeats are equal-not-identical and a
@@ -2058,8 +2058,8 @@ class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
         method token :rfc:`9110#section-9.1` covers is case-sensitive
         (GitHub issue #896), so ``Method.get('get')`` does not resolve to
         :attr:`Method.GET` --
-        see :class:`BespokeGetUnchangedTests`'s
-        ``test_method_get_is_now_case_sensitive`` for that behaviour
+        see :class:`BespokeGetOverrideTests`'s
+        ``test_method_get_is_case_sensitive`` for that behaviour
         directly. ``Method('GET')`` (the constructor, reaching
         :meth:`Method._missing_` rather than :meth:`Method.get`) is
         untouched either way, since #896 is scoped to ``get`` alone.
@@ -2072,7 +2072,7 @@ class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
         self.assertIs(Method('GET'), Method.GET)  # type: ignore[attr-defined]
         self.assertIs(Method.get('GET'), Method.GET)  # type: ignore[attr-defined]
 
-    def test_all_three_carry_the_registry_protocol(self) -> None:
+    def test_featcode_command_and_method_carry_the_registry_protocol(self) -> None:
         """#842's ruling is that ``get``/``get_all``/``register``/
         ``register_alias`` exist on every registry -- #860 step 2 is what
         actually delivers that for these three."""
@@ -2138,7 +2138,7 @@ class BespokeGetReplacementTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             StatusCode.get(9999)
 
-    def test_statuscode_get_minus_one_is_now_an_ordinary_default(self) -> None:
+    def test_statuscode_get_minus_one_is_an_ordinary_default(self) -> None:
         """``-1`` is not the sentinel for *no default* (it is under the
         retired ``default == -1`` convention); it is just an :class:`int`
         that -- like any other -- is only honoured if it already names a
@@ -2189,7 +2189,7 @@ class BespokeGetReplacementTests(unittest.TestCase):
                 self.assertTrue(callable(getattr(cls, 'register_alias', None)))
 
 
-class BespokeGetUnchangedTests(unittest.TestCase):
+class BespokeGetOverrideTests(unittest.TestCase):
     """:class:`~pcapkit.const.ftp.command.Command`,
     :class:`~pcapkit.const.http.method.Method` and
     :class:`~pcapkit.const.pcapng.option_type.OptionType` keep their own
@@ -2206,7 +2206,7 @@ class BespokeGetUnchangedTests(unittest.TestCase):
     issue #896, over #583's case-insensitive lookup), since RFC 9110 Section
     9.1 makes the HTTP method token case-sensitive, unlike FTP's command codes
     (RFC 959 Section 5.3), so ``Method.get('Get')`` does not return :attr:`Method.GET`
-    -- see ``test_method_get_is_now_case_sensitive`` below. ``Method`` keeps
+    -- see ``test_method_get_is_case_sensitive`` below. ``Method`` keeps
     its own ``get()`` rather than the base's, because it needs to build an
     unregistered member preserving the caller's own casing on a miss (the
     base's generic ``get()`` only ever raises or falls back to an
@@ -2224,7 +2224,7 @@ class BespokeGetUnchangedTests(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self, restore=True)
 
-    def test_method_get_is_now_case_sensitive(self) -> None:
+    def test_method_get_is_case_sensitive(self) -> None:
         """GitHub issue #896: only the exact registered casing resolves.
 
         RFC 9110 Section 9.1 makes the method token case-sensitive, so a
@@ -2427,7 +2427,7 @@ class AppTypeUnmintConvertedTests(unittest.TestCase):
         self.assertEqual(len(TCP.__members__), tcp_before)
         self.assertEqual(len(UDP.__members__), udp_before)
 
-    def test_get_second_mint_site_no_longer_mints(self) -> None:
+    def test_get_second_mint_site_does_not_mint(self) -> None:
         """54321 is not a declared member and not inside any of
         ``_missing_``'s ranges either, so it reaches :meth:`AppType.
         get`'s own, second, independent mint site --
@@ -2524,7 +2524,7 @@ class AppTypeUnmintConvertedTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             AppType.register(1234, 'x')
 
-    def test_register_alias_still_works_after_the_sanitizer_refactor(self) -> None:
+    def test_register_alias_goes_through_the_shared_sanitizer(self) -> None:
         """:meth:`AppType.register`/:meth:`AppType.register_alias` share
         :meth:`AppType._sanitize_identifier` rather than each carrying its
         own copy of the sanitising steps -- this checks the alias path
@@ -2621,7 +2621,7 @@ class TransportProtocolAutoTests(unittest.TestCase):
         with self.assertRaises(KeyError):
             TransportProtocol.get('not-a-real-transport')
 
-    def test_stale_power_of_two_comment_is_gone(self) -> None:
+    def test_apptype_source_claims_no_power_of_two_spacing(self) -> None:
         """Per GitHub issue #860: an in-code comment claiming the values
         "must keep" power-of-two spacing contradicts the PR #836 ruling that
         nothing composes a ``TransportProtocol``, so the generated source

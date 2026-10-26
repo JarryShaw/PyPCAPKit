@@ -25,7 +25,7 @@ The schema layer is not so permissive: :meth:`Schema.__update__
 :exc:`~pcapkit.utilities.warnings.UnknownFieldWarning` for a field it does not
 know (:file:`pcapkit/protocols/schema/schema.py`). The asymmetry between the two
 is what #617 is about, and
-:meth:`AsymmetryTests.test_the_schema_layer_still_warns_where_construction_now_raises`
+:meth:`AsymmetryTests.test_the_schema_layer_warns_where_construction_raises`
 pins both halves of it in one place.
 
 What is checked, and what is deliberately not
@@ -183,7 +183,7 @@ def _protocol_class(**namespace: 'Any') -> 'Any':
 class RejectionTests(unittest.TestCase):
     """An undeclared construction keyword raises rather than vanishing."""
 
-    def test_the_three_misspellings_of_the_defect_are_each_refused(self) -> None:
+    def test_each_tcp_base_misspelling_is_refused(self) -> None:
         """Each key of #602, put back one at a time, raises and is named.
 
         ``TCP_BASE`` is correct, so reproducing the report means
@@ -636,7 +636,7 @@ class ReconstructionTests(unittest.TestCase):
 class AsymmetryTests(unittest.TestCase):
     """The two layers, and what each does with a name it does not know."""
 
-    def test_the_schema_layer_still_warns_where_construction_now_raises(self) -> None:
+    def test_the_schema_layer_warns_where_construction_raises(self) -> None:
         """One unknown name, two layers, both of them audible.
 
         This is the asymmetry #617 reported, asserted from both ends so that it

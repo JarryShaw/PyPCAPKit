@@ -29,7 +29,7 @@ against the protocol's signatures and raise
 declares. ``TCP.make`` still ends in ``**kwargs`` and still reads nothing out of
 it -- the check is upstream of it -- so the account above remains the account of
 how the defect was possible, and
-:meth:`TCPBaseKeywordTests.test_an_undeclared_keyword_is_now_refused_rather_than_absorbed`
+:meth:`TCPBaseKeywordTests.test_an_undeclared_keyword_is_refused_rather_than_absorbed`
 is where the refusal is pinned.
 
 Why the expected header is written out here
@@ -244,7 +244,7 @@ class TCPBaseKeywordTests(unittest.TestCase):
         options = _load_generator()
         self.assertEqual(dict(options.TCP_BASE), EXPECTED_HEADER)
 
-    def test_an_undeclared_keyword_is_now_refused_rather_than_absorbed(self) -> None:
+    def test_an_undeclared_keyword_is_refused_rather_than_absorbed(self) -> None:
         """Constructing with an undeclared keyword raises.
 
         ``make`` ends its signature with ``**kwargs`` and reads nothing out of it,
@@ -282,7 +282,7 @@ class TCPBaseKeywordTests(unittest.TestCase):
         # silence here is the silence of an exception having been raised.
         self.assertEqual([str(warning.message) for warning in caught], [])
 
-    def test_the_three_keys_of_the_defect_are_each_refused(self) -> None:
+    def test_each_tcp_base_misspelling_is_refused(self) -> None:
         """Each misspelling of #602 raises, named, rather than being dropped.
 
         ``TCP_BASE`` is correct, so the mapping itself cannot

@@ -218,7 +218,7 @@ class CrawlerReachabilityTests(unittest.TestCase):
                          f'`pcapkit-vendor --target <protocol>` either, because they are absent '
                          f'from their own subpackage\'s __all__')
 
-    def test_the_two_target_lists_agree(self) -> None:
+    def test_the_root_target_list_agrees_with_its_subpackages(self) -> None:
         # pcapkit/vendor/__init__.py re-lists what its subpackages list, by hand,
         # so the root and the union of the parts are two copies of one fact and
         # are allowed to disagree without anything noticing. The duplicate was

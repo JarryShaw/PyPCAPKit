@@ -234,7 +234,7 @@ class L2TPVersionTests(unittest.TestCase):
         self.assertEqual(ipv4_info['raw']['packet'], payload)
         self.assertIn('invalid version', ipv4_info['raw']['error'])
 
-    def test_l2tpv3_over_udp_1701_no_longer_parses_as_l2tpv2(self) -> None:
+    def test_l2tpv3_over_udp_1701_does_not_parse_as_l2tpv2(self) -> None:
         """:rfc:`3931` §4.1.2 puts L2TPv3 on port 1701 too, and that is a live capture.
 
         This is the case that guards a real dissection rather than a

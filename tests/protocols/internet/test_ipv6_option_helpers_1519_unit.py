@@ -80,7 +80,7 @@ class TestIPv6OptionHelpers(unittest.TestCase):
     def _headers(self) -> 'list[tuple[object, str]]':
         return [(importlib.import_module(name), prefix) for name, prefix in HEADERS]
 
-    def test_shared_module_holds_all_nine_helpers(self) -> None:
+    def test_shared_module_holds_every_helper(self) -> None:
         shared = self._shared()
         self.assertEqual(sorted(shared.__all__), sorted([*BOUND, 'quick_start_data_selector', *UNBOUND]))
 

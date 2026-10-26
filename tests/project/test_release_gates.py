@@ -3884,18 +3884,18 @@ class TestCondaBumpIsTaggedAndUploaded(CondaWorkflowMixin, unittest.TestCase):
     #: found. A removal from the real text rather than a hand-written copy of
     #: that shape, so it cannot drift into testing something the file does not
     #: say.
-    PRE_FIX_REMOVAL = '!cancelled() && '
+    STATUS_CHECK_PREFIX = '!cancelled() && '
 
-    def _pre_fix_jobs(self) -> 'dict[str, str]':
+    def _jobs_without_the_status_check(self) -> 'dict[str, str]':
         """The scan with both publishing jobs' status-check function removed."""
         jobs = dict(self.jobs)  # type: ignore[arg-type]
         for name in ('conda-tag', 'conda-dist'):
             condition = declared_if(jobs[name])
-            self.assertIn(self.PRE_FIX_REMOVAL, condition)
-            mutant = condition.replace(self.PRE_FIX_REMOVAL, '', 1)
+            self.assertIn(self.STATUS_CHECK_PREFIX, condition)
+            mutant = condition.replace(self.STATUS_CHECK_PREFIX, '', 1)
             self.assertFalse(
                 calls_status_check(mutant),
-                f'removing {self.PRE_FIX_REMOVAL!r} from `{name}` left another '
+                f'removing {self.STATUS_CHECK_PREFIX!r} from `{name}` left another '
                 f'status-check call behind, so this mutation no longer reproduces '
                 f'#1632: {mutant!r}',
             )
@@ -4003,7 +4003,7 @@ class TestCondaBumpIsTaggedAndUploaded(CondaWorkflowMixin, unittest.TestCase):
         stands, rather than quoted from the issue.
 
         """
-        pre_fix = self._pre_fix_jobs()
+        pre_fix = self._jobs_without_the_status_check()
         # #1967: the gate is a job of `head`, and a row reports a call one
         # of whose jobs ran as `success` (see `head_result`). `skipped` is the
         # shape #1632 found, a skipped job ahead of the chain.
@@ -4932,7 +4932,7 @@ class TestTheCascadeModel(unittest.TestCase):
         with self.assertRaises(UnsupportedExpression):
             cascade_skipped_by(self.jobs, 'tag', {'gate': 'success'})
 
-    def test_the_pre_fix_condition_is_what_the_cascade_catches(self) -> None:
+    def test_the_cascade_stops_tag_whose_own_condition_is_true(self) -> None:
         """The two halves of #1632, on the fixture: ``tag``'s condition is true
         and ``tag`` does not run.
 

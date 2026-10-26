@@ -292,7 +292,7 @@ class ChainedExceptionTests(unittest.TestCase):
 
     """
 
-    def test_an_explicit_from_chain_matches_the_old_shape(self) -> None:
+    def test_an_explicit_from_chain_matches_the_tracebacklimit_zero_shape(self) -> None:
         code = '''
             import contextlib
             import io
@@ -341,7 +341,7 @@ class ChainedExceptionTests(unittest.TestCase):
         self.assertEqual(proc.returncode, 0, proc.stderr)
         self.assertEqual(proc.stdout.strip(), 'MATCH', proc.stdout)
 
-    def test_an_implicit_context_chain_matches_the_old_shape(self) -> None:
+    def test_an_implicit_context_chain_matches_the_tracebacklimit_zero_shape(self) -> None:
         code = '''
             import contextlib
             import io
@@ -546,7 +546,7 @@ class ThreadingExcepthookTests(unittest.TestCase):
 
     """
 
-    def test_a_loud_base_error_on_a_thread_matches_the_old_two_line_shape(self) -> None:
+    def test_a_loud_base_error_on_a_thread_matches_the_tracebacklimit_zero_shape(self) -> None:
         code = '''
             import io
             import sys
@@ -598,7 +598,7 @@ class ThreadingExcepthookTests(unittest.TestCase):
         self.assertEqual(proc.returncode, 0, proc.stderr)
         self.assertEqual(proc.stdout.strip(), 'MATCH', proc.stdout)
 
-    def test_a_chained_error_on_a_thread_also_matches_the_old_shape(self) -> None:
+    def test_a_chained_error_on_a_thread_also_matches_the_tracebacklimit_zero_shape(self) -> None:
         code = '''
             import io
             import sys

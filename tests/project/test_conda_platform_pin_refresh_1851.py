@@ -423,7 +423,7 @@ class BumpTests(unittest.TestCase):
                                              'on osx-64, and the newest release up to 52.0.0 with wheels for '
                                              'all of cp311, cp312, cp313, cp314, cp315 there is 48.0.1')])
 
-    def test_a_pin_pypi_no_longer_lists_warns(self) -> None:
+    def test_a_pin_with_no_stable_pypi_release_warns(self) -> None:
         # #2028: a pinned release gone from PyPI, or a pre-release, is not one newest_wheel weighs.
         for version in ('48.5.0', '49.0.0rc1'):
             with self.subTest(pin=version):

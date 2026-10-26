@@ -275,7 +275,7 @@ class NegativeBitLengthTests(unittest.TestCase):
         self.assertEqual(called.bit_length, 3)
         self.assertEqual(called._bit_mask, 0b111)
 
-    def test_bit_length_zero_still_works_exactly_as_it_does_on_main(self) -> None:
+    def test_bit_length_zero_constructs_with_a_zero_mask(self) -> None:
         """The boundary the fix must not break: ``bit_length=0`` is not negative.
 
         ``bit_length=0`` constructs and calls cleanly with a mask of ``0``,

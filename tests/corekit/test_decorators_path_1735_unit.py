@@ -46,13 +46,13 @@ class DecoratorsPathTests(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
-    def test_the_old_module_path_no_longer_imports(self) -> None:
+    def test_the_utilities_decorators_path_does_not_import(self) -> None:
         with self.assertRaises(ModuleNotFoundError) as ctx:
             importlib.import_module(OLD_PATH)
         self.assertEqual(ctx.exception.name, OLD_PATH)
         self.assertIsNone(importlib.util.find_spec(OLD_PATH))
 
-    def test_utilities_no_longer_exports_the_decorators(self) -> None:
+    def test_utilities_does_not_export_the_decorators(self) -> None:
         utilities = importlib.import_module('pcapkit.utilities')
         self.assertFalse(hasattr(utilities, 'decorators'))
         for name in NAMES:

@@ -133,7 +133,7 @@ class GeneratedSourceInheritsTests(unittest.TestCase):
                 with self.subTest(registry=name, method=method):
                     self.assertNotIn(f'def {method}(', source)
 
-    def test_converted_crawlers_no_longer_spell_their_own_get(self) -> None:
+    def test_converted_crawlers_do_not_spell_their_own_get(self) -> None:
         for relpath in CONVERTED_VENDORS:
             with self.subTest(vendor=relpath):
                 source = (REPO_ROOT / relpath).read_text()
@@ -253,7 +253,7 @@ class TCPFlagsConversionTests(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self, restore=True)
 
-    def test_tcp_flags_now_inherits_the_base(self) -> None:
+    def test_tcp_flags_inherits_the_base(self) -> None:
         """Guards against ``Flags`` being a plain ``IntFlag``.
 
         Resolves ``EnumRegistry`` freshly from the just-reimported
@@ -933,7 +933,7 @@ class GeneratedMissingRangeParityTests(unittest.TestCase):
             Hardware.get(65536)
         self.assertIs(Hardware.get(65536, 1), Hardware.Ethernet)
 
-    def test_transtype_no_longer_mints_its_declared_unassigned_range(self) -> None:
+    def test_transtype_does_not_mint_its_declared_unassigned_range(self) -> None:
         """:class:`~pcapkit.const.reg.transtype.TransType`'s own
         ``_missing_`` goes through ``_unregistered_member`` for ``148..252``,
         not a permanent :func:`~aenum.extend_enum` mint: per the #775/#847
@@ -973,7 +973,7 @@ class RegisterAlreadyRegisteredNowRaisesOnAGeneratedRegistryTests(unittest.TestC
     def setUp(self) -> None:
         reimport_once_per_class(self, restore=True)
 
-    def test_register_over_a_taken_value_now_raises(self) -> None:
+    def test_register_over_a_taken_value_raises(self) -> None:
         from pcapkit.const.reg.transtype import TransType
 
         names_before = list(TransType._member_names_)
@@ -1171,7 +1171,7 @@ class StrEnumValueFallbackTests(unittest.TestCase):
     mint regardless of what a subclass's own ``_missing_`` does.
     """
 
-    def test_a_str_key_that_is_a_value_but_not_a_name_now_resolves(self) -> None:
+    def test_a_str_key_that_is_a_value_but_not_a_name_resolves(self) -> None:
         """The defect itself: without the fix, this raises ``KeyError``."""
         class _Str(EnumRegistry, StrEnum):
             KNOWN = 'known-value'
@@ -1364,7 +1364,7 @@ class NoDefaultSentinelTests(unittest.TestCase):
 
         self.assertIs(module_again.NO_DEFAULT, first_import)
 
-    def test_missing_name_with_default_negative_one_is_now_a_real_default(self) -> None:
+    def test_missing_name_with_default_negative_one_is_a_real_default(self) -> None:
         """``-1`` and ``-1.0`` are honoured as defaults by
         :meth:`~pcapkit.corekit.enum.EnumRegistry.get` itself.
 
@@ -1399,7 +1399,7 @@ class NoDefaultSentinelTests(unittest.TestCase):
         :exc:`KeyError` propagates, as with no default at all; without #864
         the lookup raises :exc:`ValueError` from ``cls(-1)`` instead. This does *not*
         discriminate #857, which raised the same :exc:`KeyError`;
-        :meth:`test_missing_name_with_default_negative_one_is_now_a_real_default`
+        :meth:`test_missing_name_with_default_negative_one_is_a_real_default`
         does.
         """
         from pcapkit.const.ipv6.extension_header import ExtensionHeader
@@ -1456,7 +1456,7 @@ class GetDefaultNoMintTests(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self, restore=True)
 
-    def test_the_issues_own_case_no_longer_mints_and_raises_instead(self) -> None:
+    def test_get_with_an_unregistered_default_raises_rather_than_mints(self) -> None:
         """The exact reproduction from #864, on the real shipped registry.
         Measured live without #864's fix::
 
@@ -1471,7 +1471,7 @@ class GetDefaultNoMintTests(unittest.TestCase):
         falls to ``default``; ``0x0888`` (2184) falls inside the ``Xyplex``
         range, which resolves without minting when reached as a ``key``
         (#775; see
-        :meth:`GetDefaultNoMintTests.test_key_path_minting_is_preserved`).
+        :meth:`GetDefaultNoMintTests.test_key_path_resolves_without_minting`).
         Without #864's fix the lookup reaches ``cls(default)``; with it,
         ``default`` does not reach ``cls(default)`` at all, so ``0x0888``
         not being an *already-registered* value propagates the ``0x1234``
@@ -1490,7 +1490,7 @@ class GetDefaultNoMintTests(unittest.TestCase):
         self.assertEqual(before, len(EtherType.__members__))
         self.assertNotIn('Xyplex_0x0888', EtherType.__members__)
 
-    def test_key_path_minting_is_preserved(self) -> None:
+    def test_key_path_resolves_without_minting(self) -> None:
         """``EtherType.get(0x0888)`` -- no ``default`` at all -- falls through
         ``_missing_``, the one path by which #864 ruled ``get`` may mint.
         ``Xyplex`` is a real-attributed-name range, and like every other range

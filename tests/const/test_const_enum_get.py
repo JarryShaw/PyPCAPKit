@@ -54,7 +54,7 @@ fall back *silently* when the caller asked for no fallback would be a worse
 defect than the one it replaced.
 
 These modules are generated from :mod:`pcapkit.vendor`, so
-``test_the_vendor_template_still_emits_the_fix`` renders the shared template and
+``test_the_vendor_template_leaves_get_to_the_base`` renders the shared template and
 compares it against a generated module. Without it a regeneration would quietly
 undo the fix and the rest of this suite would still pass, because the *tree* is
 what is committed and the *template* is what rebuilds it.
@@ -281,7 +281,7 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
                 # rather than raising at all.
                 self.assertIs(enum.get(99999, 0), enum(0))
 
-    def test_the_two_unverified_enums_from_the_issue(self) -> None:
+    def test_operation_and_linktype_get_honour_a_default(self) -> None:
         """#584 named ``Operation`` and ``LinkType`` but verified only ``Hardware``."""
         from pcapkit.const.arp.operation import Operation
         from pcapkit.const.reg.linktype import LinkType
@@ -429,7 +429,7 @@ class ConstEnumGetDefaultTests(unittest.TestCase):
 
     @unittest.skipUnless(importlib.util.find_spec('requests') is not None,
                          'pcapkit.vendor needs requests')
-    def test_the_vendor_template_still_emits_the_fix(self) -> None:
+    def test_the_vendor_template_leaves_get_to_the_base(self) -> None:
         """A regeneration must not undo the fix.
 
         #584's fix lives in :meth:`~pcapkit.corekit.enum.EnumRegistry.get`

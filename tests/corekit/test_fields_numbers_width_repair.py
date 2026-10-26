@@ -157,7 +157,7 @@ class WidthRepairBoundaryTests(unittest.TestCase):
                                  smallest_past.to_bytes(n + 1, 'big'))
                 self.assertEqual(field._length, n + 1)
 
-    def test_the_smallest_mis_sized_value_is_one_not_two_hundred_and_fifty_six(self) -> None:
+    def test_a_value_under_eight_bits_takes_one_octet(self) -> None:
         """The issue understates the reach, and this is where it shows.
 
         #599 frames the defect as hitting values "just past an octet boundary",
@@ -176,7 +176,7 @@ class WidthRepairBoundaryTests(unittest.TestCase):
                 self.assertEqual(field._length, 1,
                                  f'{value} needs one octet; floor division sized it at zero')
 
-    def test_the_repaired_width_is_the_ceiling_of_the_bit_length_over_eight(self) -> None:
+    def test_the_width_is_the_ceiling_of_the_bit_length_over_eight(self) -> None:
         """The invariant the fix establishes, stated as such.
 
         Every width the repair picks is ``ceil(bit_length / 8)``. Holding it over
@@ -195,7 +195,7 @@ class WidthRepairBoundaryTests(unittest.TestCase):
                 self.assertEqual(field.pack(value, dict()), value.to_bytes(expected, 'big'))
                 self.assertEqual(field._length, expected)
 
-    def test_a_bit_length_that_is_a_multiple_of_eight_is_untouched_by_the_fix(self) -> None:
+    def test_a_bit_length_that_is_a_multiple_of_eight_keeps_its_width(self) -> None:
         """The control, and the reason this survived #591's test suite.
 
         Floor division and the ceiling agree exactly when the bit length divides

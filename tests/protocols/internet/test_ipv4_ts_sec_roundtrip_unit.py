@@ -115,7 +115,7 @@ class TestIPv4TimestampSecurityRoundTrip(unittest.TestCase):
         option = self.option(header('820301'), 'SEC')
         self.assertEqual(option.termination, ())  # type: ignore[attr-defined]
 
-    def test_indicators_that_no_longer_cover_the_octets_are_positional(self) -> None:
+    def test_indicators_that_do_not_cover_the_octets_are_positional(self) -> None:
         from pcapkit.const.ipv4.classification_level import ClassificationLevel
         from pcapkit.const.ipv4.option_number import OptionNumber
         from pcapkit.const.ipv4.protection_authority import ProtectionAuthority

@@ -124,7 +124,7 @@ class NoImportCycleTests(unittest.TestCase):
 
     """
 
-    def test_sentinels_module_imports_none_of_its_four_consumers(self) -> 'None':
+    def test_sentinels_module_imports_none_of_its_consumers(self) -> 'None':
         """Parse the source's *import statements*, rather than trust that nothing
         changes them later.
 
@@ -214,7 +214,7 @@ class SentinelsModuleExportRuleTests(unittest.TestCase):
 
     """
 
-    def test_all_names_the_three_public_objects_and_no_types(self) -> 'None':
+    def test_all_names_the_public_objects_and_no_types(self) -> 'None':
         """``ABSENT`` stays out too: it is private regardless of which module
         defines it."""
         self.assertIn('NULL', sentinels.__all__)

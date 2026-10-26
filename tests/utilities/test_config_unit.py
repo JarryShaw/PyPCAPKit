@@ -293,7 +293,7 @@ class LayoutTests(unittest.TestCase):
     def test_logging_does_not_import_config(self) -> None:
         self.assertNotIn('pcapkit.utilities.config', self.imports(PACKAGE / 'utilities' / 'logging.py'))
 
-    def test_the_old_paths_are_gone(self) -> None:
+    def test_a_moved_name_has_no_re_export(self) -> None:
         for module, names in MOVED.items():
             loaded = importlib.import_module(module)
             for name in names:

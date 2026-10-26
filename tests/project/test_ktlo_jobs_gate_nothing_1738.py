@@ -125,7 +125,7 @@ class TestNothingGatingWaitsOnKTLO(unittest.TestCase):
                 self.assertEqual(sorted(leg['python-version'] for leg in matrix_legs(job_id)), sorted(versions))
 
 
-class TestTheCheckNamesAreUnchanged(unittest.TestCase):
+class TestEachLegIsNamedForItsVersion(unittest.TestCase):
     """Each leg is named ``<prefix> <version>``, with ``(KTLO)`` after it on a KTLO job."""
 
     def test_each_leg_keeps_its_name(self) -> None:

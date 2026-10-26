@@ -3182,7 +3182,7 @@ class HIPUnitTests(unittest.TestCase):
         # own ``Length`` rather than off ``pkt['len']``, which its nested
         # locators shadow while they pack. The identity of that one callback is
         # asserted directly in
-        # :meth:`test_hip_padding_sites_are_the_two_known_callbacks_and_nothing_else`,
+        # :meth:`test_hip_padding_sites_are_the_known_callbacks_and_nothing_else`,
         # so a third expression cannot appear unnoticed.
         #
         # The sweep above covers all eight residues, which is enough for any
@@ -3219,7 +3219,7 @@ class HIPUnitTests(unittest.TestCase):
         with self.assertRaisesRegex(FieldValueError, 'invalid parameter length'):
             hip_schema.parameter_padding_len({'len': -1})
 
-    def test_hip_padding_sites_are_the_two_known_callbacks_and_nothing_else(self) -> None:
+    def test_hip_padding_sites_are_the_known_callbacks_and_nothing_else(self) -> None:
         """#651/#664/#679: two padding callbacks cover every parameter, and no third exists.
 
         Every HIP padding site goes through

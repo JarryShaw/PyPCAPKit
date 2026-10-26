@@ -177,7 +177,7 @@ class HttpV2FlagsHierarchyTests(unittest.TestCase):
         self.assertEqual(FrameType.Flags.__bases__, (EnumLookup, enum.IntFlag))
         self.assertIn(EnumLookup, FrameType.Flags.__mro__)
 
-    def test_all_six_concrete_subclasses_carry_it_transitively(self) -> None:
+    def test_every_concrete_subclass_carries_it_transitively(self) -> None:
         from pcapkit.corekit.enum import EnumLookup
         from pcapkit.protocols.schema.application.httpv2 import (ContinuationFrame, DataFrame,
                                                                    FrameType, HeadersFrame,
@@ -269,7 +269,7 @@ class TransportProtocolGetTests(unittest.TestCase):
     own ``get``, delegating. Every behaviour the override carries is pinned
     here, not merely that the delegated call runs."""
 
-    def test_get_is_now_a_classmethod(self) -> None:
+    def test_get_is_a_classmethod(self) -> None:
         from pcapkit.const.reg.apptype.apptype import TransportProtocol
 
         self.assertIsInstance(inspect.getattr_static(TransportProtocol, 'get'), classmethod)

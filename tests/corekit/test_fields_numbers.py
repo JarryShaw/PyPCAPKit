@@ -116,7 +116,7 @@ class FixedSignTests(unittest.TestCase):
             UInt8Field(signed=1)
         self.assertIs(UInt8Field(signed=0)._signed, False)
 
-    def test_the_fixed_classes_still_parse_as_they_always_did(self) -> None:
+    def test_the_fixed_signedness_classes_parse_with_their_own_sign(self) -> None:
         """The rejection must not have moved the sign of a default construction."""
         from pcapkit.corekit.fields.numbers import Int8Field, UInt8Field
 

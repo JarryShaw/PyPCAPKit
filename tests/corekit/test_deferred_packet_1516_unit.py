@@ -210,7 +210,7 @@ class WiringTests(unittest.TestCase):
                 self.assertIn('packet', cls.__additional__)
                 self.assertIs(cls.__deferred__, importlib.import_module(deferred_module).Deferred)
 
-    def test_the_old_import_paths_are_gone(self) -> 'None':
+    def test_deferred_packet_has_no_re_export(self) -> 'None':
         """None of the three paths the name was public at keeps a re-export
         (GitHub issue #1744; #1715: a moved name keeps no re-export at its old
         path), so :mod:`pcapkit.corekit.packet` is the one home.

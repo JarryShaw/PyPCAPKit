@@ -389,7 +389,7 @@ class ConstFlagMissingRecursionTests(unittest.TestCase):
 
     @unittest.skipUnless(importlib.util.find_spec('requests') is not None,
                          'pcapkit.vendor needs requests')
-    def test_the_vendor_templates_still_emit_the_fix(self) -> None:
+    def test_the_vendor_templates_render_the_committed_modules(self) -> None:
         """A regeneration must not undo the fix.
 
         ``pcapkit/const/`` is generated from ``pcapkit/vendor/``, so the

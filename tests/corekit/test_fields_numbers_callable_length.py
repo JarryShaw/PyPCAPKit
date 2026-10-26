@@ -34,7 +34,7 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 #: Widths :func:`struct` has a native integer code for, paired with the
 #: unsigned and signed format characters they build. These are the widths the
 #: defect hit, and -- established by :meth:`CallableLengthTests
-#: .test_every_native_width_was_affected_not_only_the_reported_eight` rather
+#: .test_every_native_width_packs_from_a_callable_length` rather
 #: than assumed -- *all four* were hit, not only the 8 that #591 reproduces.
 NATIVE_WIDTHS = {1: ('B', 'b'), 2: ('H', 'h'), 4: ('I', 'i'), 8: ('Q', 'q')}
 
@@ -57,7 +57,7 @@ class CallableLengthTests(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
-    def test_the_reported_case_a_callable_resolving_to_eight_packs(self) -> None:
+    def test_a_callable_resolving_to_eight_packs(self) -> None:
         """``NumberField(length=lambda pkt: 8)`` could not pack at all.
 
         The reproduction in #591 verbatim: ``_make_mptcp_dss(DSS, ack=1 << 40)``
@@ -97,7 +97,7 @@ class CallableLengthTests(unittest.TestCase):
                 self.assertIs(dynamic._need_process, static._need_process)
                 self.assertEqual(dynamic.pack(value, dict()), static.pack(value, dict()))
 
-    def test_every_native_width_was_affected_not_only_the_reported_eight(self) -> None:
+    def test_every_native_width_packs_from_a_callable_length(self) -> None:
         """#591 left this open; it is established here rather than assumed.
 
         The issue reproduces the 8-octet case only and says explicitly that

@@ -1435,7 +1435,7 @@ class MHUnitTests(unittest.TestCase):
                                    chksum=parsed.chksum, data=parsed))
                 self.assertEqual(rebuilt, raw)
 
-        with self.subTest('FBack, unassigned status now raises on construction'):
+        with self.subTest('FBack, unassigned status raises on construction'):
             # A status value RFC 5568 leaves unassigned is not one of the
             # ``cases`` above. Constructing from ``data=`` builds the wire bytes
             # and then reads them straight back to populate ``.info`` -- that
@@ -1569,7 +1569,7 @@ class MHUnitTests(unittest.TestCase):
                     with self.assertRaises(EnumValueError):
                         enum_cls(value)
 
-        with self.subTest('get() backports string and integer lookups, and no longer mints'):
+        with self.subTest('get() resolves string and integer lookups without minting'):
             # An unknown *name* is ``EnumKeyError`` (GitHub issue #923), not
             # ``EnumValueError``, so a name miss and a value miss do not report
             # identically: stdlib ``E['nosuch']`` raises ``KeyError``, so the
@@ -1656,7 +1656,7 @@ class MHUnitTests(unittest.TestCase):
         classes = (FastBindingAcknowledgmentStatus, IPv6AddressPrefixCode,
                    LMAAddressCode, LocalizedRoutingStatus)
 
-        with self.subTest('a default argument no longer raises TypeError'):
+        with self.subTest('a default argument does not raise TypeError'):
             # This is exactly the call GitHub issue #935 reports as failing:
             # a second positional argument to a ``@staticmethod`` that declares
             # only one.
@@ -1697,7 +1697,7 @@ class MHUnitTests(unittest.TestCase):
                     with self.assertRaises(EnumValueError):
                         cls.get(9999, 99999)
 
-        with self.subTest('omitting default still raises EnumKeyError, exactly as before'):
+        with self.subTest('omitting default raises EnumKeyError'):
             for cls in classes:
                 with self.subTest(cls=cls.__name__):
                     with self.assertRaises(EnumKeyError):
@@ -1731,7 +1731,7 @@ class MHUnitTests(unittest.TestCase):
         from pcapkit.protocols.misc.raw import Raw
         from pcapkit.utilities.exceptions import EnumValueError
 
-        with self.subTest('LocalizedRoutingStatus and LMAAddressCode raise and now have get()'):
+        with self.subTest('LocalizedRoutingStatus and LMAAddressCode raise and have get()'):
             # Neither carries a hand-rolled ``get()`` (GitHub issue #880); both
             # inherit ``get``/``get_all`` from
             # :class:`~pcapkit.corekit.enum.EnumLookup` (GitHub issue #930), as
@@ -1825,7 +1825,7 @@ class MHUnitTests(unittest.TestCase):
             self.assertIsInstance(ip.payload, Raw)
             self.assertEqual(bytes(ip.payload), bytes(lra_raw))
 
-        with self.subTest('over IPv6, the raise now costs only the MH slot (GitHub issue #891)'):
+        with self.subTest('over IPv6, the raise costs only the MH slot (GitHub issue #891)'):
             # Mobility Header is *also* one of IPv6's own chained extension
             # headers (``Enum_ExtensionHeader.Mobility_Header``, value 135, in
             # ``pcapkit/const/ipv6/extension_header.py``), so IPv6 never
@@ -2055,7 +2055,7 @@ class MHUnitTests(unittest.TestCase):
                 self.assertEqual(bytes(MH(next=parsed.next, type=parsed.type,
                                           chksum=parsed.chksum, data=parsed)), raw)
 
-    def test_mh_opaque_message_body_cannot_be_padded(self) -> None:
+    def test_mh_opaque_message_body_is_padded_with_a_warning(self) -> None:
         """An opaque message body is padded to alignment, with a warning.
 
         A message whose body is raw bytes carries no mobility options, so the
@@ -2448,7 +2448,7 @@ class MHUnitTests(unittest.TestCase):
         Note:
             :attr:`~pcapkit.const.mh.option.Option.CGA_Parameters` is absent,
             deliberately: it parses (see
-            :meth:`test_mh_cga_parameters_option_now_parses`), but this test's
+            :meth:`test_mh_cga_parameters_option_parses`), but this test's
             stricter round-trip identity is not verified for it -- a separate,
             deliberate scope decision, not implied by parsing alone.
         """
@@ -3553,7 +3553,7 @@ class MHUnitTests(unittest.TestCase):
                          {'vendor': 32473, 'subtype': 3, 'data': payload})])
         self.assertIn(payload, option.pack())
 
-    def test_mh_cga_parameters_option_now_parses(self) -> None:
+    def test_mh_cga_parameters_option_parses(self) -> None:
         """The CGA Parameters option parses end to end.
 
         This guards against a :exc:`KeyError` on the exact reproduction below:
@@ -3567,7 +3567,7 @@ class MHUnitTests(unittest.TestCase):
         :class:`~pcapkit.corekit.fields.misc.ForwardMatchField` miscounted into
         the nested schema's length (#446/#456). See also
         :meth:`tests.corekit.test_fields_misc_packet_context.
-        CGAParametersRegressionTests.test_cga_parameters_option_now_parses_end_to_end`
+        CGAParametersRegressionTests.test_cga_parameters_option_parses_end_to_end`
         for the same reproduction asserting the parsed fields.
         """
         from pcapkit.const.mh.option import Option

@@ -211,7 +211,7 @@ class TestTCPRoundTrip(unittest.TestCase):
         large = proto._make_mode_timeout(code, timeout=40000, granularity=False)
         self.assertEqual(large.pack().hex(), '1c04829a')
 
-    def test_edited_user_timeout_switches_unit_when_it_no_longer_fits(self) -> None:
+    def test_edited_user_timeout_switches_unit_when_it_does_not_fit(self) -> None:
         from pcapkit.protocols.data.transport.tcp import UserTimeout
         from pcapkit.protocols.transport.tcp import TCP
         from pcapkit.utilities.exceptions import ProtocolError
