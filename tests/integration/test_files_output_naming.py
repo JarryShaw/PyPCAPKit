@@ -39,6 +39,7 @@ FORMATS = {
     'plist': '.plist',
     'xml': '.plist',
     'tree': '.txt',
+    'text': '.txt',
     'txt': '.txt',
 }
 
