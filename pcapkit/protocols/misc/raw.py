@@ -63,7 +63,7 @@ class Raw(ProtocolBase[Data_Raw, Schema_Raw],
     # Methods.
     ##########################################################################
 
-    def read(self, length: 'Optional[int]' = None, *, error: 'Optional[Exception]' = None,  # pylint: disable=arguments-differ
+    def read(self, length: 'Optional[int]' = None, *, error: 'Optional[str]' = None,  # pylint: disable=arguments-differ
              alias: 'Optional[int]' = None, **kwargs: 'Any') -> 'Data_Raw':  # pylint: disable=unused-argument
         """Read raw packet data.
 
