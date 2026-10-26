@@ -307,8 +307,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             Parsed packet data.
 
         Raises:
-            ProtocolError: If the version is not 4, or if ``ihl`` declares
-                more header than the data holds.
+            ProtocolError: If the version is not 4, if ``ihl`` declares
+                more header than the data holds, or if an option is malformed.
 
         """
         if length is None:
@@ -477,7 +477,8 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             reserved: Reserved flag bit, i.e. the high-order bit of the flags.
             df: Don't fragment flag.
             mf: More fragments flag.
-            offset: Fragment offset.
+            offset: Fragment offset, in the 8-octet units of the wire field;
+                the parsed ``offset`` is in octets, see :meth:`_make_data`.
             ttl: Time to live of the packet.
             protocol: Payload protocol of the packet.
             protocol_default: Default value of ``protocol``.
@@ -1708,6 +1709,9 @@ class IPv4(IP[Data_IPv4, Schema_IPv4],
             Constructed option schema.
 
         Raises:
+            ProtocolError: If ``option`` is not given and ``timestamp`` is
+                neither a :obj:`list` nor a :obj:`dict`, which includes the
+                default :data:`None`.
             FieldValueError: If an address is a :obj:`bool` or is not a valid
                 IPv4 address.
 

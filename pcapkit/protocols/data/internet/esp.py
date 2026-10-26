@@ -43,10 +43,12 @@ class ESP(Protocol):
     #: byte of the packet that ESP owns.
     length: 'int'
     #: Payload data exactly as transmitted -- ciphertext, prefixed by any
-    #: cryptographic synchronisation data (IV) -- excluding the ICV.
+    #: cryptographic synchronisation data (IV) -- excluding the ICV whenever
+    #: :attr:`icv` holds it.
     payload_data: 'bytes'
-    #: Integrity check value as transmitted; empty when absent, or when no
-    #: Security Association was available to say how long it is.
+    #: Integrity check value as transmitted; empty when absent, when no
+    #: Security Association was available to say how long it is, or when the
+    #: packet is shorter than the ICV its Security Association declares.
     icv: 'bytes'
     #: Outcome of the decryption and integrity check.
     status: 'ESPStatus'

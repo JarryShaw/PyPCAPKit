@@ -146,7 +146,7 @@ Known Limitations
   stateless parser cannot recover them; they are required both for the ICV
   computation and for the AEAD associated data. An ESN protected packet
   therefore fails the integrity check *cleanly* rather than being decoded.
-* **Traffic Flow Confidentiality (TFC) padding (§2.4) is not detected.**
+* **Traffic Flow Confidentiality (TFC) padding (§2.7) is not detected.**
   TFC padding is indistinguishable from real payload without inspecting the
   inner protocol's own length field, so it is handed to the next layer as
   part of the plaintext.
@@ -1251,8 +1251,11 @@ class ESP(IPsec[Data_ESP, Schema_ESP], IPv6_Ext[Data_ESP, Schema_ESP],
 
         Raises:
             ProtocolError: If ``encrypt`` is :data:`True` and no Security
-                Association is available for ``spi``, or if ``pad_len`` does
-                not satisfy the algorithm's alignment requirement.
+                Association is available for ``spi``, if ``pad_len`` is
+                outside ``0`` to ``255`` or does not satisfy the algorithm's
+                alignment requirement, or if
+                :meth:`SecurityAssociation.encrypt` rejects ``iv`` or cannot
+                run without |cryptography|_.
 
         """
         if not encrypt:

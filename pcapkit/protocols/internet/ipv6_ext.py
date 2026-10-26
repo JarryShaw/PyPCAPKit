@@ -97,9 +97,9 @@ This class is reached in these ways:
    would default it to plain :class:`~pcapkit.protocols.misc.raw.Raw`. That
    has no ``next`` field, so the walk in
    :meth:`IPv6._decode_next_layer <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>`
-   would crash on it (GitHub issue :issue:`891`). This module registers itself
-   for that code instead (see the bottom of the module), so dispatch reaches a
-   working generic parser directly. The registration is global, shared by
+   would crash on it (GitHub issue :issue:`891`). This module registers this
+   class for that code instead (see the bottom of the module), so dispatch
+   reaches a working generic parser directly. The registration is global, shared by
    every :class:`~pcapkit.protocols.internet.internet.Internet` subclass, so
    :meth:`__post_init__` gates on ``version == 6`` to keep it from also
    activating for an IPv4 payload that carries protocol number 140; see its
@@ -124,20 +124,22 @@ left, then read only what is left. See
 :func:`pcapkit.protocols.schema.misc.pcapng.bounded_area` and
 :meth:`pcapkit.protocols.misc.pcapng.PCAPNG.read`.
 
-This class follows that convention's *warning*
-(:class:`~pcapkit.utilities.warnings.SchemaWarning`) and deliberately diverges
-on the *action*. Clipping is right when the declared length only governs how
-much of the current object to read, since there is always a well-defined
-"what is left" to fall back to. Here the declared length also decides *where
-the next header starts*; a clipped skip distance points at whatever bytes
-end the buffer, which are not a header. Continuing from there would
-fabricate a layer and record a false entry in
+This class follows that convention's *warning* -- a
+:class:`~pcapkit.utilities.warnings.SchemaWarning`, as
+:func:`~pcapkit.protocols.schema.misc.pcapng.bounded_area` emits -- and
+deliberately diverges on the *action*. Clipping is right when the declared
+length only governs how much of the current object to read, since there is
+always a well-defined "what is left" to fall back to. Here the declared length
+also decides *where the next header starts*; a clipped skip distance points at
+whatever bytes end the buffer, which are not a header. Continuing from there
+would fabricate a layer and record a false entry in
 :class:`~pcapkit.corekit.protochain.ProtoChain`, which reads as a parsed fact
-rather than a guess. So :meth:`read` warns in the same wording as the sites
-above, then **stops the walk**: this instance absorbs every remaining octet
-and reports :data:`None` for ``next``, which the caller's loop already reads
-as "no more extension headers". The chain ends honestly at the bad header
-instead of inventing what follows it.
+rather than a guess. So :meth:`read` warns in the same form as
+:func:`~pcapkit.protocols.schema.misc.pcapng.bounded_area`, then **stops the
+walk**: this instance absorbs every remaining octet and reports :data:`None`
+for ``next``, which the caller's loop already reads as "no more extension
+headers". The chain ends honestly at the bad header instead of inventing what
+follows it.
 
 """
 from typing import TYPE_CHECKING, Generic, cast, overload
@@ -162,9 +164,10 @@ if TYPE_CHECKING:
     class _NextHeaderData(Protocol):
         """The one field every IPv6 extension header's data model carries.
 
-        :rfc:`8200#section-4.1` puts a Next Header octet first in every
-        extension header, and every implemented one records it under this
-        name -- which is what lets :attr:`IPv6_Ext.next` be a *shared* member
+        :rfc:`8200#section-4` identifies each extension header by the Next
+        Header field of the header before it, and every implemented one
+        records its own Next Header under this name, ESP from its decrypted
+        trailer -- which is what lets :attr:`IPv6_Ext.next` be a *shared* member
         rather than a fallback-role-only one. Narrower than
         :class:`~pcapkit.protocols.data.internet.ipv6_ext.IPv6_Ext` on
         purpose: ``length`` is deliberately absent, because
@@ -208,8 +211,8 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
        :class:`~pcapkit.protocols.internet.mh.MH`,
        :class:`~pcapkit.protocols.internet.ah.AH` and
        :class:`~pcapkit.protocols.internet.esp.ESP`), which is what the
-       ``_extf`` guards on :attr:`payload`, :attr:`protocol` and
-       :attr:`protochain` are for.
+       ``_extf`` guards on :attr:`payload` and :attr:`protochain`, and each
+       subclass's own on ``protocol``, are for.
 
     It is generic in its data and schema types, like
     :class:`~pcapkit.protocols.internet.ipsec.IPsec`, another base in this
@@ -260,8 +263,9 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
         <pcapkit.protocols.internet.ipv6_frag.IPv6_Frag.alias>` and
         :attr:`IPv6_Opts.alias <pcapkit.protocols.internet.ipv6_opts.IPv6_Opts.alias>`,
         for the same reason: :meth:`IPv6._decode_next_layer
-        <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>` builds the
-        packet-dict key with ``self.alias.lstrip('IPv6-').lower()``, and
+        <pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer>` keys the
+        packet dict through ``IPv6._exthdr_key``, which is
+        ``alias.lstrip('IPv6-').lower()``, and
         :meth:`str.lstrip` strips a character *set*, not a prefix. The default
         (class-name) alias ``'IPv6_Ext'`` would strip to ``'_Ext'`` and key the
         dict as ``_ext``; the hyphen makes every leading character (``I``,
@@ -489,14 +493,17 @@ class IPv6_Ext(Internet[_PT, _ST], Generic[_PT, _ST],
             **Declared, and keyword-only**, each for its own reason.
 
             These keywords stay *declared*, unlike :meth:`read`'s own,
-            because ``_check_construction_keywords()``
-            builds its allowlist from :func:`inspect.signature` of ``make``.
-            Hiding them in ``**kwargs`` **breaks construction**: a plain
+            because ``_check_construction_keywords()`` builds its allowlist
+            from the :func:`inspect.signature` of ``make`` and the other
+            construction methods of every class in the MRO, plus any
+            ``__keywords__``. Hiding them in ``**kwargs`` **breaks
+            construction**: a plain
             ``IPv6_Ext(next=..., len=..., data=..., payload=...)`` raises
             ``UnsupportedCall: IPv6_Ext: unexpected keyword(s)``. The
-            ``__keywords__`` escape hatch would cover that, but it is unioned
-            down the MRO, so it would widen the allowlist, and weaken that
-            misspelling check, for every subclass too.
+            ``__keywords__`` escape hatch would cover that too, with no
+            difference for subclasses: signatures and ``__keywords__`` are
+            both unioned down the MRO, so every subclass's allowlist takes
+            these names either way.
 
             They are keyword-*only* because this class is also a base and each
             subclass's ``make`` puts different names in the same positions. As

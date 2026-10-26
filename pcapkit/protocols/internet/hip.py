@@ -1758,7 +1758,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
                          options: 'Parameter') -> 'Data_CertParameter':  # pylint: disable=unused-argument
         """Read HIP ``CERT`` parameter.
 
-        Structure of HIP ``CERT`` parameter [:rfc:`7401`]:
+        Structure of HIP ``CERT`` parameter [:rfc:`8002`]:
 
         .. code-block:: text
 
@@ -3028,7 +3028,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         Structure of HIP ``RELAY_HMAC`` parameter [:rfc:`5770`]:
 
-        .. code-block::
+        .. code-block:: text
 
             0                   1                   2                   3
             0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
@@ -3162,7 +3162,7 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             code: parameter code
             param: parameter data
             version: HIP protocol version
-            reserved: reserved octets, zero when sent (:rfc:`7402#section-5.1.1`)
+            reserved: reserved octets (:rfc:`7402#section-5.1.1`)
             index: KEYMAT index
             old_spi: old SPI
             new_spi: new SPI
@@ -3355,8 +3355,9 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
         """Encode a ``PUZZLE`` ``Lifetime`` octet.
 
         :rfc:`7401#section-5.2.4` gives the puzzle lifetime as ``2^(value - 32)``
-        seconds -- and it is the *only* place either RFC defines that encoding, so
-        it applies to ``PUZZLE`` alone. ``SOLUTION``'s octet at the same offset is
+        seconds -- and the ``PUZZLE`` section is the only place either RFC defines
+        that encoding (:rfc:`5201#section-5.2.4` identically), so it applies to
+        ``PUZZLE`` alone. ``SOLUTION``'s octet at the same offset is
         ``Reserved`` (:rfc:`7401#section-5.2.5`) and does not come through here.
 
         Args:
@@ -4021,6 +4022,12 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
 
         Returns:
             HIP parameter schema.
+
+        Raises:
+            ProtocolError: If neither ``hi`` nor ``param`` is given and
+                ``hi_curve`` is not an ECDSA, ECDSA_LOW or EdDSA curve, or if
+                ``hi`` is a :class:`~pcapkit.protocols.data.internet.hip.HostIdentity`
+                whose ``curve`` is none of those.
 
         """
         if param is not None:
@@ -5082,7 +5089,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             protocol_default: default transport protocol
             protocol_namespace: transport protocol namespace
             protocol_reversed: reverse transport protocol namespace
-            address: relay address
+            address: the address the relay server received the relayed
+                packet from (:rfc:`5770`)
             reserved: the reserved octet, truncated or
                 zero-filled to 1 octet
             **kwargs: arbitrary keyword arguments
@@ -5130,7 +5138,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             protocol_default: default transport protocol
             protocol_namespace: transport protocol namespace
             protocol_reversed: reverse transport protocol namespace
-            address: relay address
+            address: the address the relay server forwards the packet to
+                (:rfc:`5770`)
             reserved: the reserved octet, truncated or
                 zero-filled to 1 octet
             **kwargs: arbitrary keyword arguments
@@ -5247,7 +5256,8 @@ class HIP(IPv6_Ext[Data_HIP, Schema_HIP], Internet[Data_HIP, Schema_HIP],
             code: parameter code
             param: parameter data
             version: HIP protocol version
-            address: relay address
+            address: the original source address of the relayed packet
+                (:rfc:`8004`)
             **kwargs: arbitrary keyword arguments
 
         Returns:

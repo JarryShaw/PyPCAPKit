@@ -306,7 +306,12 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
 
         Raises:
             FieldValueError: If ``dst`` is a :obj:`bool` (see
-                :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`).
+                :func:`~pcapkit.corekit.fields.ipaddress.parse_ip_address`)
+                and ``data`` is a :obj:`dict` or a data model; ``dst`` is not
+                read for any other ``data``.
+            ProtocolError: If ``data`` is :obj:`bytes` that do not parse as
+                the routing data of ``type``, or is of none of the accepted
+                types.
 
         .. versionchanged:: 1.5.0
 
@@ -577,6 +582,9 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
         Returns:
             Parsed route data.
 
+        Raises:
+            ProtocolError: If ``Hdr Ext Len`` is odd.
+
         """
         # ``header.length`` is ``Hdr Ext Len``, in 8-octet units (:rfc:`8200
         # #section-4.4`), not octets. Each 16-octet address costs 2 of those
@@ -672,6 +680,11 @@ class IPv6_Route(IPv6_Ext[Data_IPv6_Route, Schema_IPv6_Route],
 
         Returns:
             Parsed route data.
+
+        Raises:
+            ProtocolError: If ``Hdr Ext Len``, ``Pad``, ``CmprI`` and
+                ``CmprE`` do not give a whole number of addresses, at least
+                one (:rfc:`6554#section-4.2`).
 
         """
         # NOTE: ``header.length`` is ``Hdr Ext Len``, in the 8-octet units

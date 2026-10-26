@@ -137,7 +137,8 @@ class CALIPSOOption(Option):
 
     #: CALIPSO domain of interpretation.
     domain: 'int'
-    #: Compartment length.
+    #: Compartment bitmap length, in octets: four times the ``Cmpt Length``
+    #: field, which counts 32-bit words.
     cmpt_len: 'int'
     #: Sensitivity level.
     level: 'int'
@@ -166,7 +167,8 @@ class SMFIdentificationBasedDPDOption(SMFDPDOption):
 
     #: TaggerID type.
     tid_type: 'TaggerID'
-    #: TaggerID length.
+    #: ``TidLen`` field as on the wire: the TaggerID length in octets minus
+    #: one, or ``0`` when there is no TaggerID [:rfc:`6621#section-6.1.1`].
     tid_len: 'int'
     #: TaggerID.
     tid: 'Optional[bytes | IPv4Address | IPv6Address]'

@@ -60,7 +60,7 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
 
         #: IP version.
         version: int
-        #: Internet header length.
+        #: Internet header length, in 32-bit words.
         ihl: int
 
     #: Type of service field.
@@ -81,13 +81,13 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         df: int
         #: More fragments flag.
         mf: int
-        #: Fragment offset.
+        #: Fragment offset, in 8-octet units.
         offset: int
 
     class TSFlags(TypedDict):
         """Timestamp flags field."""
 
-        #: Timestamp overflow flag.
+        #: Overflow count.
         oflw: int
         #: Timestamp type flag.
         flag: int

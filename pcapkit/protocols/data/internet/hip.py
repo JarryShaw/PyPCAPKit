@@ -87,7 +87,8 @@ class Parameter(Data):
     type: 'Enum_Parameter'
     #: Critical flag.
     critical: 'bool'
-    #: Content length.
+    #: Parameter length, in octets -- the whole record, including ``Type``,
+    #: ``Length`` and ``Padding`` (:rfc:`7401#section-5.2.1`).
     length: 'int'
 
     if TYPE_CHECKING:
@@ -130,7 +131,7 @@ class HIP(Protocol):
     version_fixed: 'int'
     #: Checksum.
     chksum: 'bytes'
-    #: Control
+    #: Control.
     control: 'Control'
     #: Sender's host identity tag.
     shit: 'int'
@@ -416,7 +417,7 @@ class NATTraversalModeParameter(Parameter):
 
     #: The two reserved octets, as captured.
     reserved: 'bytes'
-    #: Mode IDs
+    #: Mode IDs.
     mode_id: 'tuple[NATTraversal, ...]'
 
     if TYPE_CHECKING:
@@ -718,7 +719,7 @@ class PayloadMICParameter(Parameter):
 
     #: The three reserved octets, as captured.
     reserved: 'bytes'
-    #: Next header
+    #: Next header.
     next: 'TransType'
     #: Payload data.
     payload: 'bytes'

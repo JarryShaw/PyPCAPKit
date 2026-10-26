@@ -7,7 +7,7 @@ both the Hop-by-Hop Options header
 (:mod:`~pcapkit.protocols.schema.internet.hopopt`) and the Destination Options
 header (:mod:`~pcapkit.protocols.schema.internet.ipv6_opts`).
 
-Each of those two modules declares its own option schemas, so the helpers take
+Each of those modules declares its own option schemas, so the helpers take
 what differs between them as parameters: ``prefix`` is the name of the header,
 which leads each error message (``HOPOPT`` or ``IPv6-Opts``), and the selectors
 take the option schemas they choose from. Each module binds the parameters in
