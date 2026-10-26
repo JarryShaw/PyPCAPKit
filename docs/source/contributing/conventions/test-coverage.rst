@@ -55,9 +55,9 @@ The rules those tables carry:
    entry records the status, a failure-detail fragment narrow enough to match one
    site, and the defect: the function, class or method that causes it, by name, and the
    issue that tracks it.
-   Routing a case around a defect hides it: the generator's ``HIP_COPIES`` once put two
-   parameters in every HIP packet, so the unrepresentable length of a lone one
-   (:issue:`651`) was never constructed.
+   Routing a case around a defect hides it: a generator that puts two parameters in
+   every HIP packet never constructs the unrepresentable length of a lone one
+   (:issue:`651`), which is why the generator's ``HIP_COPIES`` is one.
    ``KNOWN_DEGRADED`` entries have a different shape -- the fragments of the probe's
    ``'error'`` value the entry accepts, any one of which may match, and a reason -- and
    they record why the probe's placeholder payload cannot reach the target, not a

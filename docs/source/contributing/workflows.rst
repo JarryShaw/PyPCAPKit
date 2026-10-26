@@ -804,7 +804,7 @@ permission to the reusable workflow.
   ``!cancelled()``, so the cells still run when ``test`` fails, and a red cell still
   fails the push run that GitHub Pages, Conda Update and Vendor Update (and so Create
   Release) wait on. The cost is wall time: the push run, and those workflows, finish
-  about one slowest cell later, about 6 min before any queue wait (estimate).
+  about one slowest cell later, plus any queue wait.
 * ``engine-tests`` has no ``DPKT`` cell. Its only path would be
   :file:`tests/toolkit/test_dpkt_unit.py`, which ``test`` runs with ``DPKT`` installed
   on every leg. What that gives up is the file in a venv holding only ``test`` and
@@ -854,7 +854,8 @@ Anything else, and a diff the script cannot list, is code: ``code: true`` and
      - skipped
      - skipped
    * - ``unit-tests.yml``: ``project-tests``
-     - the project pins' plain-unittest run and the docs readers
+     - :file:`tests/project` and the root-level modules under plain unittest, a half
+       per step, and the docs readers
      - the project pins
    * - ``experimental.yml``: ``experimental``, ``windows``
      - skipped
@@ -1407,7 +1408,9 @@ that import ``pcapkit`` are no pins either; those the tiers send to ``latest`` r
 on ``test``'s ``latest`` leg, under coverage.
 
 ``project-tests`` runs the pins under pytest, with ``test``'s flags, on ``latest``,
-on every pull request and every push to ``main``, and ``required-checks`` needs it.
+on every push to ``main`` and every pull request but a docs-only one, which runs
+:file:`tests/project` under plain unittest instead (see `Light Pull Requests
+(#2243)`_), and ``required-checks`` needs it.
 Every ``test``, ``test-ktlo`` and ``experimental`` leg passes each pin as an
 ``--ignore``, ``latest``'s coverage leg included, which measures only ``pcapkit``.
 ``latest`` asks ``project_pin_paths()`` at run time, and every other leg
@@ -1602,8 +1605,8 @@ before theirs, and :file:`util/release_upload.py` on the leg's, after it.
 setup-python. :file:`util/release_conda.py` runs ``leg`` on the image's ``python3``, before
 setup-python, ``build`` on conda's base ``python`` under the login shell, from
 :file:`conda/pypcapkit`, and ``upload`` on setup-python's. A project
-pin runs each on the cases the shell it replaced handled and requires the same
-status, output and calls.
+pin runs each, and the step's inline shell form it must match, on the same cases
+and requires the same status, output and calls.
 :file:`util/_actions.py` is standard library only, and keeps to 3.8's syntax,
 since the scripts on ``/usr/bin/python3`` and on every leg's interpreter import it.
 Their project tests parse these scripts and the helper with ``ast.parse(...,
@@ -1638,8 +1641,8 @@ script not listed here is CI-only.
      - ``python util/changelog_md.py`` after editing the newest changelog entry,
        to regenerate :file:`CHANGELOG.md`.
    * - :file:`util/run_unittest_leg.py`
-     - ``unit-tests.yml``'s ``unittest-ordering``, once per leg, and
-       ``project-tests``.
+     - ``unit-tests.yml``'s ``unittest-ordering``, once per cell, and
+       ``project-tests``, once per half of :file:`tests/project`.
      - ``python util/run_unittest_leg.py <directory>`` over the :file:`tests/`
        directory a change touches, when it moves imports or module state (see
        :doc:`conventions/test-coverage`).
@@ -1844,10 +1847,10 @@ and cannot be the source of a data flow.
 by CodeQL's `sensitive-data heuristics
 <https://github.com/github/codeql/blob/main/shared/concepts/codeql/concepts/internal/SensitiveDataHeuristics.qll>`__.
 The tests that build a pcapng Decryption Secrets Block call its bytes
-``secrets``. Through :func:`~pcapkit.interface.core.extract` those bytes reached
+``secrets``. Through :func:`~pcapkit.interface.core.extract` those bytes reach
 ``logger`` calls in :mod:`pcapkit.foundation.extraction` and the buffer file's
-write in :mod:`pcapkit.corekit.io`, and each alert's dismissal was lost whenever
-a pull request moved the line it named. The alert on the ``logger`` call in
+write in :mod:`pcapkit.corekit.io`, and with :file:`tests` analysed, a dismissal of
+each such alert is lost whenever a pull request moves the line it names. The alert on the ``logger`` call in
 :mod:`pcapkit.utilities.warnings` begins in :mod:`pcapkit` itself, at the block's
 ``secrets_length`` field, the spec's name for it, so it is still raised and still
 dismissed by hand. :file:`tests/project/test_codeql_config_2130.py` pins the

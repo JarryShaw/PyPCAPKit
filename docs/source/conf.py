@@ -115,8 +115,9 @@ extensions = [
 ]
 
 # Opt-in roles for the tracker references that the prose cites constantly. A bare
-# ``#NNN`` renders as literal text -- nothing in Sphinx resolves it -- so every
-# citation in a docstring or an ``.rst`` page is unclickable in the built docs.
+# ``#NNN`` renders as literal text -- nothing in Sphinx resolves it -- so a
+# citation written that way in a docstring or an ``.rst`` page is unclickable in
+# the built docs.
 #
 # These are deliberately opt-in per site rather than an automatic ``#NNN`` rule,
 # because no digit-keyed pattern can tell a citation from a packet-diagram label:
@@ -472,13 +473,14 @@ def bind_type_checking_names(app: 'Sphinx', env: 'BuildEnvironment',  # pylint: 
     here. Autodoc reads a class attribute's type with
     :func:`typing.get_type_hints`, and a single unresolvable name makes that raise
     :exc:`NameError` for the *whole class*; Sphinx then falls back to the raw
-    ``__annotations__`` strings. So ``pre: 'ToSPrecedence'`` was rendered as the
-    bare word ``ToSPrecedence``, which the Python domain has to resolve by
-    suffix-matching -- and both :class:`pcapkit.const.ipv4.tos_pre.ToSPrecedence`
-    and its generator :class:`pcapkit.vendor.ipv4.tos_pre.ToSPrecedence` end in
-    it. That is where the bulk of the ``more than one target found`` warnings came
-    from, and roughly half of the links Sphinx picked went to the vendor crawler
-    rather than to the enumeration the attribute actually holds.
+    ``__annotations__`` strings. So, without the binding, ``pre: 'ToSPrecedence'``
+    renders as the bare word ``ToSPrecedence``, which the Python domain has to
+    resolve by suffix-matching -- and both
+    :class:`pcapkit.const.ipv4.tos_pre.ToSPrecedence` and its generator
+    :class:`pcapkit.vendor.ipv4.tos_pre.ToSPrecedence` end in it. That is the bulk
+    of the ``more than one target found`` warnings, and roughly half of the links
+    Sphinx picks then go to the vendor crawler rather than to the enumeration the
+    attribute actually holds.
 
     Binding the guarded names into each module up front lets
     :func:`typing.get_type_hints` succeed, so the annotation is stringified from
@@ -676,11 +678,12 @@ def save_enum_member_docstring(app: 'Sphinx', what: str, name: str,  # pylint: d
     Napoleon takes the first line of every attribute docstring as Google's
     inline ``type: description`` form and splits it at the first colon. A
     registry member's docstring is the registry's own text, so the colon is
-    usually a URL's: ``H.323 [http://standard.pictel.com/...]`` rendered as
-    *Type:* ``H.323 [http`` above the description ``//standard.pictel.com/...``,
-    and every member whose first docstring line holds a colon split the same
-    way. The bogus type was also parsed as a cross-reference, which is where the
-    ``http`` and ``Echo`` ``more than one target found`` warnings came from.
+    usually a URL's: left to napoleon, ``H.323 [http://standard.pictel.com/...]``
+    renders as *Type:* ``H.323 [http`` above the description
+    ``//standard.pictel.com/...``, and every member whose first docstring line
+    holds a colon splits the same way. The bogus type is also parsed as a
+    cross-reference, which is where the ``http`` and ``Echo`` ``more than one
+    target found`` warnings come from.
 
     Args:
         app: Sphinx application.
