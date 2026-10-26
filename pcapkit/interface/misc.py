@@ -75,7 +75,7 @@ class Stream(Info):
         def __init__(self, filename: 'Optional[str]', packets: 'tuple[Packet, ...]', conversations: 'tuple[bytes | tuple[bytes, ...], ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long
 
 
-def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,              # Extrator options
+def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,              # Extractor options
                       extension: 'bool' = True, engine: 'Optional[Engines]' = None,
                       fout: 'Optional[str]' = None, format: 'Optional[Formats]' = None,  # TraceFlow options # pylint: disable=redefined-builtin
                       byteorder: 'ByteOrder' = sys.byteorder, nanosecond: 'bool' = False,
@@ -84,7 +84,7 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
     """Follow TCP streams.
 
     Arguments:
-        fin: file name to be read; if file not exist, raise
+        fin: file name to be read; if the file does not exist, raise
             :exc:`~pcapkit.utilities.exceptions.FileNotFound`
         extension: if check and append extensions to output file
         verbose: if print verbose output information

@@ -220,7 +220,7 @@ def render_enum(o: 'enum.Enum | aenum.Enum') -> 'str':
         plausible member name, so a consumer splitting the rendering on ``::``
         cannot tell it from a member genuinely so named -- and ``NONE`` *is* a
         declared name elsewhere in the library. And the defect is not confined to
-        zero: ``Flags(1)``, ``Flags(8)`` and ``Flags(65536)`` are every bit as
+        zero: ``Flags(1)``, ``Flags(8)`` and ``Flags(15)`` are every bit as
         nameless, so a guard written against ``value == 0`` would fix one case
         and leave the rest.
 

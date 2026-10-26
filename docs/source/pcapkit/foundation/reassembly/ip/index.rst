@@ -52,19 +52,20 @@ Algorithm
       IF (FO = 0 AND MF = 0) {
          IF (buffer with BUFID is allocated) {
             flush all reassembly for this BUFID;
-            Submit datagram to next step;
-            DONE.
          }
+         Submit datagram to next step;
+         DONE.
       }
 
       IF (no buffer with BUFID is allocated) {
          allocate reassembly resources with BUFID;
          TIMER <- TLB;
          TDL <- 0;
-         put data from fragment into data buffer with BUFID
-            [from octet FO*8 to octet (TL-(IHL*4))+FO*8];
-         set RCVBT bits [from FO to FO+((TL-(IHL*4)+7)/8)];
       }
+
+      put data from fragment into data buffer with BUFID
+         [from octet FO*8 to octet (TL-(IHL*4))+FO*8];
+      set RCVBT bits [from FO to FO+((TL-(IHL*4)+7)/8)];
 
       IF (MF = 0) {
          TDL <- TL-(IHL*4)+(FO*8)
@@ -100,6 +101,10 @@ Departures from the procedure above:
   timeout after its first-arriving fragment, on the capture's clock -- 60
   seconds by default, per :rfc:`1122#section-3.3.2` for IPv4 and
   :rfc:`8200#section-4.5` for IPv6.
+* A buffer flushed by an unfragmented datagram reusing its ``BUFID`` is
+  reported as an incomplete datagram rather than discarded.
+* ``TDL`` starts at ``-1`` rather than ``0``, so that a datagram carrying no
+  data can complete (:issue:`1359`).
 * Only the final fragment's partial last ``RCVBT`` block is set. A non-final
   fragment carries a multiple of 8 octets, so one ending mid-block was cut or
   is malformed, and setting its last block would complete the datagram with

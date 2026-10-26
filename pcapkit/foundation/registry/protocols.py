@@ -1158,8 +1158,9 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
             ``name``. A composite such as ``tcp | udp``, or its string form
             ``'tcp|udp'``, names two and is refused for the same reason: one call
             registers under one transport protocol.
-        pcapkit.utilities.exceptions.ProtocolError: Raised lazily, from
+        pcapkit.utilities.exceptions.ProtocolError: Raised from
             :attr:`ModuleDescriptor.klass <pcapkit.corekit.module.ModuleDescriptor.klass>`,
+            which the port-keyed registry resolves before storing the entry,
             when ``module`` is a :class:`str` and either ``class_`` names no
             attribute of it, or ``class_`` was never given at all -- the
             latter distinguished from the former rather than reported as a
@@ -1503,7 +1504,7 @@ def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier', module: 'str | M
 ###############################################################################
 
 
-# NOTE: pcapkit.protocols.application.httpv2.HTTPv2.__frame__
+# NOTE: pcapkit.protocols.application.httpv2.HTTP.__frame__
 def register_http_frame(code: 'HTTP_Frame', meth: 'str | tuple[HTTP_FrameParser, HTTP_FrameConstructor]', *,
                         schema: 'Optional[Type[Schema_HTTP_FrameType]]' = None) -> 'None':
     """Register a frame parser.

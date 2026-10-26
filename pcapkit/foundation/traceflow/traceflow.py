@@ -175,8 +175,8 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
         """Protocol name of current flow tracing object.
 
         Note:
-            This property is not available as a class
-            attribute.
+            The same value is also available as a class attribute,
+            from the property of the same name on :class:`TraceFlowMeta`.
 
         """
         if hasattr(self, '__protocol_name__'):
@@ -188,8 +188,8 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
         """Protocol of current flow tracing object.
 
         Note:
-            This property is not available as a class
-            attribute.
+            The same value is also available as a class attribute,
+            from the property of the same name on :class:`TraceFlowMeta`.
 
         """
         if hasattr(self, '__protocol_type__'):
@@ -334,7 +334,8 @@ class TraceFlowBase(Generic[_DT, _BT, _IT, _PT], metaclass=TraceFlowMeta):
                 raise FileExists(*error.args).with_traceback(error.__traceback__)
 
         dumper = make_dumper(output)
-        # NOTE: as above -- make_dumper()'s subclass is always called 'DictDumper'.
+        # NOTE: logs ``output``, not ``dumper`` -- make_dumper()'s subclass is
+        # always called 'DictDumper'.
         logger.debug('flow tracing output root %s, format %s via %s', fout, fmt, output.__name__)
         return dumper, ext
 

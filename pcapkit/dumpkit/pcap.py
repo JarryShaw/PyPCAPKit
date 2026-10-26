@@ -246,8 +246,8 @@ class PCAPIO(DumperBase):
         # NOTE: The payload is read before the metadata so that a caller passing a
         # mapping rather than a dissected frame -- which the flow-tracing adapters
         # of several engines do -- still fails naming ``packet``.
-        # :mod:`pcapkit.foundation.extraction` substitutes a
-        # dict-capable trace format on the strength of that error.
+        # :mod:`pcapkit.foundation.extraction` cites that error when it
+        # substitutes a dict-capable trace format for those engines up front.
         packet = value.packet
         frame_info = value.frame_info
         ts_sec, ts_frac = self._make_timestamp(frame_info, value.time_epoch)

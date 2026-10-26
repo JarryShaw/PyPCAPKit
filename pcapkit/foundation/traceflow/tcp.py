@@ -228,6 +228,9 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
 
                f'{packet.src}_{packet.srcport}-{packet.dst}_{packet.dstport}-{packet.timestamp}'
 
+            On an IPv6 flow every ``:`` in it is replaced by ``.``, since a
+            Windows file name cannot carry one.
+
             It is built from the packet that **opened** the flow, not from the
             canonical buffer ID, so the label names the initiator first. The
             reverse half of a bidirectional
@@ -272,8 +275,8 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         if BUFID not in self._buffer:
             label = f'{packet.src}_{packet.srcport}-{packet.dst}_{packet.dstport}-{packet.timestamp}'
             if packet.src.version != 4:
-                # ``:`` is a path separator on Windows and a drive separator
-                # elsewhere in the tooling, so an IPv6 label cannot carry it
+                # ``:`` cannot appear in a Windows file name, where it separates
+                # the drive letter, so an IPv6 label cannot carry it
                 label = label.replace(':', '.')
             label = self._unique_label(label)
             logger.debug('new TCP flow %s', label)
@@ -465,7 +468,7 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         Returns:
             Whether a teardown was observed -- a **FIN from both endpoints**, the
             polite close of :rfc:`9293#section-3.6`, or a **RST** from either, the
-            abrupt one of :rfc:`9293#section-3.5.2`.
+            abrupt one of :rfc:`9293#section-3.5.3`.
 
         This is not the same as "nothing more will arrive on these endpoints": the
         acknowledgement that completes a four-way close, and any duplicate of it,

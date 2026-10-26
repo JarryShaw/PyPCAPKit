@@ -67,7 +67,7 @@ class DatagramID(Info, Generic[_AT]):
     src: '_AT'
     #: Destination address.
     dst: '_AT'
-    #: IP protocol identifier.
+    #: IP identification.
     id: 'int'
     #: Payload protocol type.
     proto: 'TransType'
@@ -150,10 +150,9 @@ class Datagram(DeferredPacket, Info, Generic[_AT]):
         # ``bytes`` payload and a parsed ``packet``, and an incomplete one with a
         # tuple of fragments and ``packet=None``, but that correlation does not hold:
         # under ``strict=False`` an *incomplete* datagram is reported as one
-        # contiguous ``bytes`` with its holes zero-filled, and analysed, because
-        # that is the payload buffer as it stands -- which is what
-        # :func:`~pcapkit.interface.misc.follow_tcp_stream` reconstructs a stream
-        # from. Overloads keyed on a literal cannot be selected from a ``completed``
+        # contiguous ``bytes`` -- its holes zero-filled, or only the prefix up to
+        # the first hole while the total length is unknown -- and analysed.
+        # Overloads keyed on a literal cannot be selected from a ``completed``
         # computed at runtime anyway, so they would make the reassemblers' own calls
         # untypeable while promising a correlation the code does not keep.
         def __init__(self, completed: 'Completion', id: 'DatagramID[_AT]', index: 'tuple[int, ...]', header: 'bytes', payload: 'bytes | tuple[bytes, ...]', packet: 'Optional[ProtocolBase | Deferred]', conflict: 'tuple[tuple[int, int], ...]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements,line-too-long,redefined-builtin

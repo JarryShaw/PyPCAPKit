@@ -30,7 +30,7 @@ components.
 
 - Protocols (:mod:`pcapkit.protocols`)
 
-  Collection of all protocol family, with detailed
+  Collection of all protocol families, with detailed
   implementation and methods.
 
 - Utilities (:mod:`pcapkit.utilities`)

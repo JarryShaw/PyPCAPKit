@@ -835,11 +835,9 @@ class Extractor(Generic[_P]):
         * pcap-ct driver: :class:`pcapkit.foundation.engines.pcap_ct.PCAP_CT`
         * PyPCAPFile driver: :class:`pcapkit.foundation.engines.pypcapfile.PyPCAPFile`
 
-        Warns:
-            pcapkit.utilities.warnings.EngineWarning: If the extraction engine is not
-                available: its dependency is not installed, its
-                :meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`
-                rules it out, or the supplied engine is unknown.
+        Note:
+            An unavailable engine is not reported here: :meth:`__init__` settles
+            the engine, and warns about it, before calling this method.
 
         Raises:
             FormatError: If the selected engine cannot read the input's format --
@@ -1263,9 +1261,9 @@ class Extractor(Generic[_P]):
                 :class:`~pcapkit.corekit.context.ContextRegistry`, a single
                 :class:`~pcapkit.corekit.context.ProtocolContext`, a mapping,
                 or any iterable of contexts. The channel is honoured by the
-                ``default``, ``pcap`` and ``pcapng`` engines, which parse with
-                :mod:`pcapkit`'s own protocol implementations; the third party
-                engines ignore it.
+                :term:`default engine`, whose PCAP and PCAP-NG readers parse
+                with :mod:`pcapkit`'s own protocol implementations; the third
+                party engines ignore it.
 
         Warns:
             pcapkit.utilities.warnings.FormatWarning: Warns under the following circumstances:
@@ -1281,7 +1279,9 @@ class Extractor(Generic[_P]):
                 engine first, which supports PCAP output.
 
             pcapkit.utilities.warnings.EngineWarning: If the requested extraction
-                engine is not available, cf. :meth:`run`.
+                engine is not available: its dependency is not installed, its
+                :meth:`~pcapkit.foundation.engines.engine.EngineBase.unsupported_reason`
+                rules it out, or the supplied engine is unknown.
             pcapkit.utilities.warnings.AttributeWarning: If ``trace_analyse`` is
                 requested while the extraction engine is PyShark.
 

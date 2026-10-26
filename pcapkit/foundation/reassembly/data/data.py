@@ -51,7 +51,7 @@ class Completion(EnumLookup, StrEnum):
     :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel` is the same kind of
     string enumeration, but it is generated like its :mod:`pcapkit.const.pcapng`
     siblings (:issue:`886`), so it derives from |aenum|_'s own
-    ``StrEnum`` (via :class:`~pcapkit.corekit.enum.EnumRegistry`). The
+    ``StrEnum``, alongside :class:`~pcapkit.corekit.enum.EnumRegistry`. The
     properties above hold for it, as ``aenum.StrEnum`` is a :class:`str`
     subclass, but ``isinstance``/``issubclass`` against
     ``pcapkit.utilities.compat.StrEnum`` does not on Python 3.11 and later,
