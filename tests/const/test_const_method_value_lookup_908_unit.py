@@ -126,7 +126,7 @@ class ValueLookupTests(unittest.TestCase):
 class PreservedBehaviourTests(unittest.TestCase):
     """The two settled behaviours the fix must not disturb."""
 
-    def test_case_sensitivity_from_896_still_holds(self) -> None:
+    def test_get_matches_names_case_sensitively(self) -> None:
         """RFC 9110 Section 9.1, via GitHub issue #896: a name match is
         case-**sensitive**, so ``get('get')`` must not resolve to
         :attr:`Method.GET`. Fails against a naive fix that resolves ``key``
@@ -158,7 +158,7 @@ class DefaultSignatureTests(unittest.TestCase):
     rather than widening to the base's ``NO_DEFAULT`` sentinel -- see the
     module docstring's reasoning."""
 
-    def test_default_still_names_the_unregistered_members_value(self) -> None:
+    def test_default_names_the_unregistered_members_value(self) -> None:
         """Omitted or ``None``, ``default`` uses ``key`` itself; supplied,
         it replaces the *value* of the freshly minted unregistered member --
         the same with or without #908's fix, and distinct from the base's own
@@ -177,10 +177,9 @@ class DefaultSignatureTests(unittest.TestCase):
 
         self.assertEqual(len(Method.__members__), before)
 
-    def test_get_is_now_a_classmethod_bound_the_same_way_for_callers(self) -> None:
-        """The ``staticmethod`` -> ``classmethod`` switch GitHub issue #908's
-        own correction required is invisible to a caller: ``Method.get('X')``
-        binds identically either way."""
+    def test_get_is_a_classmethod_that_binds_to_the_class(self) -> None:
+        """``get`` is a ``classmethod``, the shape GitHub issue #908's own
+        correction required, and ``Method.get('X')`` binds to the class."""
         from pcapkit.const.http.method import Method
 
         self.assertIsInstance(inspect.getattr_static(Method, 'get'), classmethod)

@@ -288,7 +288,7 @@ class TestChangesClassifier(unittest.TestCase):
 class TestJobGating(unittest.TestCase):
     """Which jobs run on which events, read off their job-level keys."""
 
-    def test_the_four_legs_skip_only_on_a_docs_only_diff(self) -> None:
+    def test_each_leg_skips_only_on_a_docs_only_diff(self) -> None:
         """Each leg is gated on ``changes`` by a job-level ``if:``."""
         for name in LEGS:
             with self.subTest(job=name):

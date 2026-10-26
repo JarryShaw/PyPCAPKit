@@ -604,7 +604,7 @@ class ResidualMarkupTests(ChangelogTreeMixin, unittest.TestCase):
         self._reject('\nA sub heading\n^^^^^^^^^^^^^\n\nSome prose.\n',
                      'setext underline joined')
 
-    def test_the_two_new_sub_heading_levels_become_atx_headings(self) -> None:
+    def test_dash_and_tilde_sub_headings_become_atx_headings(self) -> None:
         # The other half: ``-`` and ``~`` *convert* rather than being rejected, one
         # ATX level deeper each, so that the by-module sections and their
         # Added/Changed/Fixed subsections survive into ``CHANGELOG.md``. Against a

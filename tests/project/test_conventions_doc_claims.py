@@ -786,7 +786,7 @@ class GetOverrideContractTests(unittest.TestCase):
         # so it is a live failure mode rather than a hypothetical one. The KeyError
         # fails the test either way, so nothing regressed silently; what it does not do
         # is say *which* class stopped defining `get`, or that the page is then wrong to
-        # list it. The sibling at `test_the_two_redundant_overrides_are_gone` already
+        # list it. The sibling at `test_the_mh_helpers_define_no_get_override` already
         # does this the right way round, with `assertNotIn('get', vars(klass))`.
         # Deliberately *not* under `subTest`: a subTest records its failure and lets
         # the method run on, so the bare `KeyError` this guard exists to pre-empt
@@ -794,7 +794,7 @@ class GetOverrideContractTests(unittest.TestCase):
         # plain assertion aborts here, which is the whole point.
         for klass in (Method, Command, OptionType):
             self.assertIn('get', vars(klass),
-                          f'{klass.__name__} no longer defines a get of its own, so '
+                          f'{klass.__name__} defines no get of its own, so '
                           'the page is wrong to name it among the overrides -- an '
                           'override folded into the inherited base is what #940 did '
                           'to the mh/ngap helpers')
@@ -809,8 +809,8 @@ class GetOverrideContractTests(unittest.TestCase):
                                       'followed it')
                 self.assertIn('return super().get(key)',
                               inspect.getsource(vars(klass)['get'].__func__),
-                              f'{klass.__name__}.get no longer delegates, so the page is '
-                              'wrong to give it as a delegating override')
+                              f'{klass.__name__}.get does not delegate to super().get(key), '
+                              'so the page is wrong to give it as a delegating override')
         self.assertIsInstance(vars(OptionType)['get'], staticmethod)
         self.assertNotIn('super()', inspect.getsource(vars(OptionType)['get'].__func__),
                          'OptionType.get delegates to super(), so the page is wrong to list it '
@@ -948,7 +948,7 @@ class GetOverrideContractTests(unittest.TestCase):
                       'the page no longer states the ruling as its headline, so a '
                       'later mention of quiet=True is doing the work of pinning it')
 
-    def test_the_two_redundant_overrides_are_gone(self) -> 'None':
+    def test_the_mh_helpers_define_no_get_override(self) -> 'None':
         """#940: the owner ruled for deleting the redundant overrides, not widening them.
 
         Several things at once, because the ruling is only settled if they all hold:
@@ -1200,14 +1200,14 @@ class ProcessConventionTests(unittest.TestCase):
                     'requirement string and a comment containing "]" are the two '
                     'shapes that broke it before')
 
-    def test_the_all_extra_is_exactly_the_three_core_addon_extras(self) -> 'None':
+    def test_the_all_extra_is_exactly_the_core_addon_extras(self) -> 'None':
         """``all`` carries core addons only, and the page's listing says what it is.
 
         Two halves, because either can rot without the other. The tree half asks
-        :file:`pyproject.toml` whether ``all`` is still the union of ``cli``,
+        :file:`pyproject.toml` whether ``all`` is the union of ``cli``,
         ``crypto`` and ``NGAP`` and nothing else -- the shape GitHub issue #910's
         ruling produced, narrowed to the core addons. The page half asks whether
-        the ``toml`` block on the page still shows that same list, since a page that
+        the ``toml`` block on the page shows that same list, since a page that
         prints a stale ``all =`` line is worse than one that prints none.
 
         """
@@ -1216,14 +1216,14 @@ class ProcessConventionTests(unittest.TestCase):
         core = [requirement for extra in ('cli', 'crypto', 'NGAP')
                 for requirement in extras[extra]]
         self.assertEqual(sorted(extras['all']), sorted(core),
-                         f"all is {extras['all']!r}, which is no longer the union of "
+                         f"all is {extras['all']!r}, which is not the union of "
                          f'cli/crypto/NGAP {core!r} -- #910 narrowed it to the core '
                          'addons, so a change here is a change to that ruling')
 
         # The page prints the literal list, so the literal list is what is checked.
         listing = 'all    = [ ' + ', '.join(f'"{req}"' for req in extras['all']) + ' ]'
         self.assertIn(listing, _page(self.ANCHOR),
-                      f'process.rst no longer shows {listing!r}; its toml block has '
+                      f'process.rst does not show {listing!r}; its toml block has '
                       "drifted from pyproject.toml's own all extra")
 
     def test_the_page_keeps_the_engine_and_installability_exclusions_apart(self) -> 'None':

@@ -563,7 +563,7 @@ class TestEachWorkflowGatesOnTheVerdict(unittest.TestCase):
                 self.assertTrue(condition.startswith('!cancelled() && '))
                 self.assertTrue(evaluate_condition(condition, skipped))
 
-    def test_the_three_call_one_head(self) -> None:
+    def test_every_acting_workflow_calls_one_head(self) -> None:
         """#1967: one copy of the gate and the verdict, called the same way from each.
 
         The ``head`` jobs differ in their ``name:`` alone, no acting workflow
