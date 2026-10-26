@@ -186,6 +186,9 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
         Returns:
             Parsed packet data.
 
+        Raises:
+            ProtocolError: If the version nibble is not ``2``.
+
         """
         schema = self.__header__
         _flag = schema.flags
@@ -199,8 +202,8 @@ class L2TPv2(L2TP[Data_L2TP, Schema_L2TP],
         # reports a tunnel and session ID assembled out of octets that are
         # neither: an :rfc:`3931` §4.1.1 L2TPv3-over-IP datagram would otherwise
         # yield ``version=4``, ``tunnelid=0x5678`` and ``sessionid=0xff03``, read
-        # out of the top half of a Session ID and the first two octets of the PPP
-        # frame behind it (#548). This is also what keeps the hard-coded
+        # out of the lower half of a Session ID and the first two octets of the
+        # PPP frame behind it (#548). This is also what keeps the hard-coded
         # ``Literal[2]`` of ``version`` true, instead of disagreeing with
         # ``info.version`` on the same datagram.
         if _flag['version'] != 2:

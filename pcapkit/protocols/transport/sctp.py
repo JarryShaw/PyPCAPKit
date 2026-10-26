@@ -325,8 +325,9 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
        >>> SCTP.register(PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NG_Application_Protocol, NGAP)
        >>> SCTP.register(60, NGAP)  # equivalent, PPID given as a plain integer
 
-    By default, PPIDs 60 (``NG_Application_Protocol``) and 66
-    (``NGAP_over_DTLS_over_SCTP``) are registered to
+    By default, PPIDs 60 (``PayloadProtocolIdentifier_3GPP_NG_Application_Protocol``)
+    and 66 (``PayloadProtocolIdentifier_3GPP_NGAP_over_DTLS_over_SCTP``) are
+    registered to
     :class:`~pcapkit.protocols.application.ngap.NGAP`, and every other PPID
     resolves to :class:`~pcapkit.protocols.misc.raw.Raw`.
 
@@ -1037,10 +1038,12 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
             No alignment fix-up happens here, unlike
             :meth:`TCP._make_tcp_options
             <pcapkit.protocols.transport.tcp.TCP._make_tcp_options>`: every
-            chunk schema carries its own trailing
-            :class:`~pcapkit.corekit.fields.strings.PaddingField`, computed from
-            the chunk's own ``length``, so a chunk pads itself to the four-byte
-            boundary required by :rfc:`9260#section-3.2`.
+            chunk pads itself to the four-byte boundary required by
+            :rfc:`9260#section-3.2`. A chunk without a nested list carries its
+            own trailing :class:`~pcapkit.corekit.fields.strings.PaddingField`,
+            computed from the chunk's own ``length``; one with a nested
+            parameter or error cause list folds its padding into that list, see
+            :func:`~pcapkit.protocols.schema.transport.sctp.nested_length`.
 
         """
         chunks_list = []  # type: list[Schema_Chunk | bytes]
@@ -2068,7 +2071,7 @@ class SCTP(Transport[Data_SCTP, Schema_SCTP],
     def _make_chunk_sack(self, code: 'Enum_Chunk', chunk: 'Optional[Data_SACKChunk]' = None, *,
                          flags: 'bytes' = b'\x00',
                          cum_tsn_ack: 'int' = 0,
-                         a_rwnd: 'int' = 1500,  # minimum permitted by [RFC 9260]
+                         a_rwnd: 'int' = 1500,  # the INIT minimum [RFC 9260]; a SACK may advertise less
                          gap_blocks: 'Optional[list[Schema_GapAckBlock | Data_GapAckBlock | tuple[int, int]]]' = None,  # pylint: disable=line-too-long
                          dup_tsn: 'Optional[list[int]]' = None,
                          **kwargs: 'Any') -> 'Schema_SACKChunk':

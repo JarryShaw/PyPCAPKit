@@ -527,9 +527,9 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         # segment whose flags octet is all zero: the ``|=`` below is the only promotion and
         # never runs, and ``Enum_Flags.SYN in self._flags`` would raise ``TypeError:
         # argument of type 'int' is not a container or iterable``. A segment with any flag
-        # set would mask that. :class:`Enum_Flags` is an ``aenum.IntFlag`` with no
-        # ``_missing_`` of its own, so ``Enum_Flags(0)`` is a valid flagless member that
-        # compares equal to ``0`` and ORs as usual. This is the type :attr:`connection`
+        # set would mask that. :class:`Enum_Flags` is an ``aenum.IntFlag`` whose
+        # ``_missing_`` accepts any value from ``0`` to ``0xFFFF``, so ``Enum_Flags(0)`` is
+        # a valid flagless member that compares equal to ``0`` and ORs as usual. This is the type :attr:`connection`
         # advertises.
         _flag = Enum_Flags(0)
         for key, val in schema.flags.items():
@@ -2163,6 +2163,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
             ProtocolNotImplemented: If an option argument given by name, an
                 MPTCP ``subtype`` or an alternate checksum ``algorithm``, is
                 not in its namespace and has no default.
+            FieldValueError: If an ADD_ADDR ``addr`` is a :obj:`bool` or not a
+                valid IP address.
 
         Note:
             The options are emitted in the given order, ``NOP`` and ``EOOL``
@@ -3245,6 +3247,8 @@ class TCP(Transport[Data_TCP, Schema_TCP],
         Raises:
             ProtocolError: If ``hmac`` is not 8 octets, or is given together
                 with ``echo`` set.
+            FieldValueError: If ``addr`` is a :obj:`bool` or not a valid IP
+                address.
 
         Note:
             :rfc:`8684` section 3.4.1 allows an ADD_ADDR without the truncated

@@ -94,8 +94,9 @@ def padding_length(pkt: 'dict[str, Any]') -> 'int':
 
     Returns:
         Number of padding bytes, clamped to the number of bytes left in the
-        enclosing structure, since :rfc:`9260#section-3.2` allows the final
-        padding of a packet to be omitted. When packing, it is clamped as well
+        enclosing structure, so that a final chunk captured without (all of)
+        its padding still parses, although :rfc:`9260#section-3.2` has the
+        sender pad every chunk. When packing, it is clamped as well
         to the ``__padding__`` width :func:`pre_pack_padding` hands over, so a
         final chunk captured without (all of) its padding rebuilds without it
         (:issue:`1474`).
