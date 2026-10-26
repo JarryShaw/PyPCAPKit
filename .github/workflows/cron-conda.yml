@@ -736,7 +736,7 @@ jobs:
       # main's tip and fail Create Release's tag check. It also retargets a
       # draft at ``commit`` (``updateDraftOrCreateRelease`` and
       # ``updateRelease``), though Create Release's ``workflow_run`` run resets
-      # a draft's target to its sha (softprops/action-gh-release v3.0.2,
+      # a draft's target to its sha (softprops/action-gh-release v3.0.3,
       # ``release`` and ``findTagFromReleases`` in src/github.ts); skipping a
       # draft is a precaution. Only the GitHub upload is skipped; the build is
       # on anaconda.org regardless.

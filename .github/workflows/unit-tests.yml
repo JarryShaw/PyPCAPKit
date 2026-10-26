@@ -1406,12 +1406,13 @@ jobs:
         run: python util/cap_file_size.py python -m pytest -q -n auto --dist load
 
   # Ruleset 23497679's required_status_checks requires these contexts: this
-  # job's `Required checks passed`, and a `Compat Python` one per supported version,
-  # from the `compatibility` job in `.github/workflows/python-compatibility.yml`.
+  # job's `Required checks passed`, a `Compat Python` one per supported version,
+  # from the `compatibility` job in `.github/workflows/python-compatibility.yml`,
+  # and `Lint`, from the `lint` job in `.github/workflows/lint.yml`.
   # Rulesets match check names literally and support no wildcard, so this job
   # aggregates the gating jobs its `needs:` lists rather than the ruleset naming
-  # each matrix cell. The `Compat` legs are required on their own because a job
-  # cannot `needs:` a job in another workflow file.
+  # each matrix cell. The `Compat` legs and `Lint` are required on their own
+  # because a job cannot `needs:` a job in another workflow file.
   #
   # `if: ${{ always() && inputs.gate-only != true }}` and the explicit
   # per-job check below are both required, not decorative:

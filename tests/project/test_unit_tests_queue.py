@@ -634,11 +634,7 @@ BY_NAME = ('unit-tests.yml', 'create-release.yml', 'python-compatibility.yml',
 #: A document that names one of :data:`BY_NAME` may still cite another file bare,
 #: as ``:N``; each such citation is listed here with the file it does cite, and
 #: any other bare citation there reads as a line of the named workflow.
-BARE_ELSEWHERE: 'dict[str, dict[str, str]]' = {
-    'docs/source/contributing/releasing.rst': {
-        '631-647': "softprops/action-gh-release 3.0.2's src/github.ts",
-    },
-}
+BARE_ELSEWHERE: 'dict[str, dict[str, str]]' = {}
 
 #: A line-number citation: ``N``, ``N-M``, or several joined by commas.
 SPANS = r'(\d+(?:-\d+)?(?:,\d+(?:-\d+)?)*)'

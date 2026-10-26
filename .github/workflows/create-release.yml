@@ -442,7 +442,7 @@ jobs:
           # release upload``, which never calls Update a release; cron-conda.yml's
           # upload does, naming the default branch: see releasing.rst.
           target_commitish: ${{ github.event_name == 'workflow_run' && github.sha || '' }}
-          # "A non-empty explicit token overrides GITHUB_TOKEN" (3.0.2's
+          # "A non-empty explicit token overrides GITHUB_TOKEN" (the action's
           # ``action.yml``), so no ``env:`` names one.
           token: ${{ steps.app_token.outputs.token || secrets.GITHUB_TOKEN }}
 
@@ -673,10 +673,10 @@ jobs:
           attestations: false
 
       # #1634: ``gh release upload``, not ``action-gh-release``, which calls
-      # Update a release before every upload (3.0.2's ``src/github.ts``), where
-      # GitHub re-checks the release's target against the workflow-file rule: a
-      # workflow change reaching ``main`` after ``github`` ran would fail this
-      # after PyPI had published. #1640: a file already ``uploaded`` is left
+      # Update a release before every upload (``release`` in its
+      # ``src/github.ts``), where GitHub re-checks the release's target against
+      # the workflow-file rule: a workflow change reaching ``main`` after
+      # ``github`` ran would fail this after PyPI had published. #1640: a file already ``uploaded`` is left
       # alone, as a rebuild is not byte-identical; after a 502 an asset "may
       # leave an empty asset with a state of starter", which ``--clobber``
       # replaces. A missing release fails ("release not found") where the action

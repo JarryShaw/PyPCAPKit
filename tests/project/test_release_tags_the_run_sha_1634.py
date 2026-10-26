@@ -318,7 +318,7 @@ class TestEveryReleaseTagIsCreatedAtTheRunSha(WorkflowMixin, unittest.TestCase):
     def test_only_github_runs_the_release_action(self) -> None:
         """``pypi`` and ``conda`` used it to upload, which re-checked the target.
 
-        ``action-gh-release`` 3.0.2 calls Update a release on an existing
+        ``action-gh-release`` 3.0.3 calls Update a release on an existing
         release before uploading anything (``release`` in ``src/github.ts``), passing
         the release's own ``target_commitish`` when the input is unset, and
         GitHub's REST docs apply the workflow-file rule there to "the new value
@@ -401,7 +401,7 @@ class TestTheReleaseAppToken(WorkflowMixin, unittest.TestCase):
         self.assertEqual(self.index('github', MINT_STEP) + 1, self.steps['github'].index(self.create_release()))
 
     def test_only_create_release_spends_it(self) -> None:
-        """The ``token:`` input, with no ``env:`` beside it: 3.0.2's ``parseToken``
+        """The ``token:`` input, with no ``env:`` beside it: 3.0.3's ``parseToken``
         prefers a non-empty ``INPUT_TOKEN`` and falls back to ``GITHUB_TOKEN``
         (``src/util.ts``), so an ``env:`` token would only ever be a
         second credential handed to the action."""
@@ -1642,7 +1642,7 @@ class TestTheUploadScript(WorkflowMixin, unittest.TestCase):
 
     def test_a_pattern_matching_nothing_fails(self) -> None:
         """A change from the action, which only warned: ``fail_on_unmatched_files``
-        is unset here, so 3.0.2's ``run`` in ``src/run.ts`` logs "🤔 Pattern '…' does
+        is unset here, so 3.0.3's ``run`` in ``src/run.ts`` logs "🤔 Pattern '…' does
         not match any files." and carries on."""
         self.published()
         result = self.upload('pypi')
@@ -1652,7 +1652,7 @@ class TestTheUploadScript(WorkflowMixin, unittest.TestCase):
 
     def test_a_missing_release_fails_before_any_upload(self) -> None:
         """A change from the action, which made one: with no release for the tag,
-        3.0.2 calls ``createRelease`` (from ``release`` in ``src/github.ts``) with
+        3.0.3 calls ``createRelease`` (from ``release`` in ``src/github.ts``) with
         no notes and ``target_commitish`` unset (``parseConfig`` in ``src/util.ts``), which
         Create a release defaults to "the repository's default branch". Making
         the release is ``github``'s job, at the run's commit."""
@@ -1706,7 +1706,7 @@ class TestCondaUpdateNeverMakesTheRelease(CondaDistMixin, unittest.TestCase):
     (``omitDraftDuringUpdate``, through ``CoreInputs.updatedDraft`` in
     ``src/Inputs.ts``) but is retargeted at ``commit``; Create Release's
     ``workflow_run`` run finds the draft and resets its target to the run's sha
-    (``action-gh-release`` 3.0.2's ``release`` and ``findTagFromReleases`` in
+    (``action-gh-release`` 3.0.3's ``release`` and ``findTagFromReleases`` in
     ``src/github.ts``), so skipping a draft is a precaution against retargeting
     a release Create Release owns. On an existing release it calls Update a
     release with ``target_commitish: commit`` (``Action.updateRelease`` in
