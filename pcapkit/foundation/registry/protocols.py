@@ -556,13 +556,15 @@ def _check_code(code: 'Any', kind: 'type', *, number: 'bool' = False) -> 'None':
     Raises:
         RegistryError: If ``code`` is not a member of ``kind`` and, with
             ``number``, not an :class:`int` either. A member of another enum is
-            rejected even where an :class:`int` is accepted.
+            rejected even where an :class:`int` is accepted, and so is a
+            :class:`bool`, which would otherwise key ``0`` or ``1``
+            (:issue:`2269`).
 
     """
     if isinstance(code, kind):
         return
     member = isinstance(code, (enum.Enum, aenum.Enum))
-    if number and isinstance(code, int) and not member:
+    if number and isinstance(code, int) and not isinstance(code, bool) and not member:
         return
     expected = f'an int or a member of {kind.__name__}' if number else f'a member of {kind.__name__}'
     if member:
@@ -1150,7 +1152,8 @@ def register_apptype(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor
 
     Raises:
         pcapkit.utilities.exceptions.RegistryError: If ``code`` is neither an
-            :class:`int` nor an :class:`~pcapkit.const.reg.apptype.apptype.AppType`
+            :class:`int` (a :class:`bool` is not accepted, even though it is one)
+            nor an :class:`~pcapkit.const.reg.apptype.apptype.AppType`
             member, e.g. a member of another enum; if no transport protocol is
             given for a bare :class:`int`; if one of those given (member or name)
             names no port-keyed registry; or if a ``str`` matches no
@@ -1315,7 +1318,8 @@ def register_tcp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Pro
         class\_: class name
 
     Raises:
-        RegistryError: If ``code`` is neither an :class:`int` nor an
+        RegistryError: If ``code`` is neither an :class:`int` (a :class:`bool`
+            is not accepted, even though it is one) nor an
             :class:`~pcapkit.const.reg.apptype.apptype.AppType` member, e.g. a
             member of another enum.
 
@@ -1428,7 +1432,8 @@ def register_udp(code: 'int | Enum_AppType', module: 'str | ModuleDescriptor[Pro
         class\_: class name
 
     Raises:
-        RegistryError: If ``code`` is neither an :class:`int` nor an
+        RegistryError: If ``code`` is neither an :class:`int` (a :class:`bool`
+            is not accepted, even though it is one) nor an
             :class:`~pcapkit.const.reg.apptype.apptype.AppType` member, e.g. a
             member of another enum.
 
@@ -1480,7 +1485,8 @@ def register_sctp(code: 'int | SCTP_PayloadProtocolIdentifier', module: 'str | M
         association. See :rfc:`9260#section-3.3.1`.
 
     Raises:
-        RegistryError: If ``code`` is neither an :class:`int` nor a
+        RegistryError: If ``code`` is neither an :class:`int` (a :class:`bool`
+            is not accepted, even though it is one) nor a
             :class:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier`
             member, e.g. a member of the
             :class:`~pcapkit.const.reg.apptype.sctp.SCTP` port enum.
