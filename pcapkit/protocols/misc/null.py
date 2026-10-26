@@ -121,7 +121,8 @@ class NoPayload(ProtocolBase[Data_NoPayload, Schema_NoPayload],
 
         #: pcapkit.protocols.misc.null.NoPayload: Payload of current instance.
         self._next = self
-        #: pcapkit.corekit.protochain.ProtoChain: Protocol chain of current instance.
+        #: None: Protocol chain of current instance, which an empty payload
+        #: does not have.
         self._protos = None  # type: ignore[assignment]
 
     @classmethod

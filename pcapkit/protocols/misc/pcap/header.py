@@ -141,7 +141,11 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
             Parsed packet data.
 
         Raises:
-            FileError: If the magic number is invalid.
+            FileError: If the magic number is invalid. Parsing does not get
+                this far with one: the schema's
+                :func:`~pcapkit.protocols.schema.misc.pcap.header.magic_number_callback`
+                raises :exc:`~pcapkit.utilities.exceptions.ProtocolError` for it
+                while the header is unpacked.
 
         """
         if TYPE_CHECKING:

@@ -284,7 +284,7 @@ class SchemaMeta(abc.ABCMeta):
     #: positional-only, ``def __new__(mcls, name, bases, namespace, /,
     #: **kwargs)``), so a class keyword spelled the same as any of them binds
     #: that parameter twice: ``TypeError: ABCMeta.__new__() got multiple
-    #: values for argument '...'``. ``namespace`` collided this way, which is why
+    #: values for argument '...'``. ``namespace`` collides this way, which is why
     #: :mod:`pcapkit.protocols.schema.misc.pcapng`'s :class:`~pcapkit.protocols.schema.misc.pcapng.Option` subclasses
     #: spell it ``ns=`` instead.
     #:
@@ -445,8 +445,8 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
         """Create a new instance.
 
         The class will try to automatically generate ``__init__`` method with
-        the same signature as specified in class variables' type annotations,
-        which is inspired by :pep:`557` (:mod:`dataclasses`).
+        one keyword parameter per field in :attr:`__fields__`, which is
+        inspired by :pep:`557` (:mod:`dataclasses`).
 
         Note:
             Whether ``cls`` still needs finalising is read from its *own*
@@ -702,12 +702,12 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
                   **kwargs: '_VT') -> 'Self':
         r"""Create a new instance.
 
-        * If ``dict_`` is present and has a ``.keys()`` method, then does:
+        * If ``dict_`` is a mapping, then does:
           ``for k in dict_: self[k] = dict_[k]``.
-        * If ``dict_`` is present and has no ``.keys()`` method, then does:
+        * If ``dict_`` is present and not a mapping, then does:
           ``for k, v in dict_: self[k] = v``.
-        * If ``dict_`` is not present, then does:
-          ``for k, v in kwargs.items(): self[k] = v``.
+        * In either case, and if ``dict_`` is not present, this is followed
+          by: ``for k, v in kwargs.items(): self[k] = v``.
 
         Args:
             dict\_: Source data.
@@ -725,7 +725,7 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
         Important:
             We only convert nested :class:`Schema` objects into :obj:`dict` if
             they are the direct value of the :class:`Schema` object's attribute.
-            Should such :class:`Schema` objects be nested within other data,
+            Should such :class:`Schema` objects be nested within other data
             types, such as :obj:`list`, :obj:`tuple`, :obj:`set`, etc., we
             leave them intact rather than converting them into :obj:`dict`.
 
@@ -1018,9 +1018,9 @@ class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
             Unpacked data as :class:`Schema`.
 
         Notes:
-            We used a ``__length__`` key in ``packet`` to record the length
-            of the remaining data, which is used to determine the length of
-            the payload field.
+            A ``__length__`` key in ``packet`` records the length of the
+            remaining data, which is used to determine the length of the
+            payload field.
 
             When this schema is nested -- unpacked through a
             :class:`~pcapkit.corekit.fields.misc.SchemaField` rather than
@@ -1483,8 +1483,9 @@ def keep_short_read(protocol: 'ProtocolBase') -> 'None':
     Args:
         protocol: Protocol instance, just parsed.
 
-    Called by the layer base classes once a parse is done. When the data ended
-    inside one of the header's fields, ``info`` gains the ``__short_read__``
+    Called by the layer base classes, and by the PCAP global
+    :class:`~pcapkit.protocols.misc.pcap.header.Header`, once a parse is done.
+    When the data ended inside one of the header's fields, ``info`` gains the ``__short_read__``
     record :meth:`Schema.unpack` made, so that :func:`replay_short_read` can
     cut the rebuild back to what was captured (:issue:`1458`). The key is listed
     in :attr:`Data.__included__ <pcapkit.protocols.data.data.Data.__included__>`,

@@ -39,8 +39,9 @@ __all__ = ['HTTP', 'test_start_line']
 #: HTTP/2 connection -- with prior knowledge, over TLS, or after an upgrade --
 #: by sending exactly these 24 octets, and the sequence is *designed* to be
 #: identifiable without parsing: it is a well-formed HTTP/1.1 request line whose
-#: method ``PRI`` is reserved and permanently unregistered, so no valid HTTP/1
-#: message can begin with it and a prefix compare cannot false-positive on one.
+#: method ``PRI`` is registered as one no actual client uses
+#: (:rfc:`7540#section-11.6`), so no genuine HTTP/1 message begins with it and a
+#: prefix compare cannot false-positive on one.
 #: That makes it a positive identification rather than a heuristic, which is why
 #: :meth:`HTTP._guess_version` tests it before attempting any parse.
 _HTTP2_PREFACE = b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n'
@@ -338,7 +339,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         Args:
             version: Version of HTTP.
             preface: Whether the HTTP/2 connection preface goes ahead of the
-                frame; :meth:`~pcapkit.protocols.protocol.Protocol.pack` writes it.
+                frame; :meth:`pack` writes it.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:
@@ -470,7 +471,7 @@ class HTTP(Application[_PT, _ST], Generic[_PT, _ST]):
         Trying each version in turn and taking whichever parser does not object
         answers "did a parser accept this?" where the question is "what is
         this?": the HTTP/2 preface reads as a frame whose declared length is
-        5,265,993 (``b'PRI'`` as a 24-bit integer), and text that is not HTTP at
+        5,263,945 (``b'PRI'`` as a 24-bit integer), and text that is not HTTP at
         all can be accepted the same way.
 
         Args:

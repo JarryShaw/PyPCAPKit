@@ -802,7 +802,8 @@ class InterfaceStatisticsBlock(PCAPNG):
 class SystemdJournalExportBlock(PCAPNG):
     """Data model for PCAP-NG :manpage:`systemd(1)` Journal Export Block."""
 
-    #: Journal entry.
+    #: Journal entries; empty for a malformed block, whose entry is then kept
+    #: as captured under ``entry_raw`` (:issue:`1406`).
     data: 'tuple[OrderedMultiInfo[str, str | bytes], ...]'
 
     if TYPE_CHECKING:

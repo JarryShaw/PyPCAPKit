@@ -263,8 +263,9 @@ def _declared_keywords(cls: 'type') -> 'Optional[frozenset[str]]':
         <pcapkit.protocols.protocol.ProtocolBase.__keywords__>` found there,
         plus :data:`OUT_OF_BAND_KEYWORDS`. :obj:`None` if ``cls`` *itself* sets
         ``__keywords__`` to :obj:`None`, meaning its keywords cannot be enumerated
-        and are not to be checked -- inherited :obj:`None` does not count, for the
-        reason given at the read below.
+        and are not to be checked -- inherited :obj:`None` does not count, as
+        :attr:`ProtocolBase.__keywords__
+        <pcapkit.protocols.protocol.ProtocolBase.__keywords__>` explains.
 
     The union is deliberately wider than the signature of ``cls.make``, because
     a keyword reaching ``make`` is not necessarily *for* ``make``:
@@ -766,9 +767,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             Constructed packet data.
 
         Notes:
-            We used a special keyword argument ``__packet__`` to pass the
-            global packet data to underlying methods. This is useful when
-            the packet data is not available in the current instance.
+            The special keyword argument ``__packet__`` passes the global
+            packet data to underlying methods. This is useful when the packet
+            data is not available in the current instance.
 
             The octets are built from ``kwargs`` alone, through :meth:`make`;
             the instance's own parsed or constructed state is not read. A bare
@@ -835,9 +836,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             Parsed packet data.
 
         Notes:
-            We used a special keyword argument ``__packet__`` to pass the
-            global packet data to underlying methods. This is useful when
-            the packet data is not available in the current instance.
+            The special keyword argument ``__packet__`` passes the global
+            packet data to underlying methods. This is useful when the packet
+            data is not available in the current instance.
 
             When :attr:`self.__header__ <Protocol.__header__>` is already set,
             by :meth:`from_schema` or by the :meth:`pack` call that
@@ -942,7 +943,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         3. If ``value`` is :obj:`str`, the method will attempt to search for
            the existing registered protocol class from
            :data:`pcapkit.protocols.__proto__` and follow **step 2**; otherwise,
-           return the value itself.
+           return the value in upper case alone.
 
         Args:
             value: Protocol class or name.
@@ -1421,9 +1422,10 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         Raises:
             UnsupportedCall: If any unrecognised class keyword is given.
 
-        This method is called when a subclass of :class:`Protocol` is defined.
+        This method is called when a subclass of :class:`ProtocolBase` is defined.
         It is used to set the :attr:`self.__schema__ <pcapkit.protocols.protocol.Protocol.__schema__>`
-        attribute of the subclass, and, if ``code`` is given, to register the
+        and :attr:`self.__data__ <pcapkit.protocols.protocol.Protocol.__data__>`
+        attributes of the subclass, and, if ``code`` is given, to register the
         subclass into the next-layer dispatch :term:`registry` (or registries) that
         ``code`` names -- e.g. :attr:`Link.__proto__
         <pcapkit.protocols.link.link.Link.__proto__>`.
@@ -1764,7 +1766,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             Unpacked data upon success
 
         Raises:
-            StructError: If unpack (:func:`struct.unpack`) failed, and :exc:`struct.error` raised.
+            StructError: If the buffer is empty, whatever ``quiet`` says, or if
+                unpack (:func:`struct.unpack`) failed, and :exc:`struct.error`
+                raised, without ``quiet``.
 
         """
         endian = '<' if lilendian else '>'
@@ -2251,9 +2255,9 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             Current protocol with next layer extracted.
 
         Notes:
-            We added a new key ``__next_type__`` to ``dict_`` to store the
-            next layer protocol type, and a new key ``__next_name__`` to
-            store the next layer protocol name. :meth:`Info.to_dict
+            The method adds a ``__next_type__`` key to ``dict_`` to store the
+            next layer protocol type, and a ``__next_name__`` key to store the
+            next layer protocol name. :meth:`Info.to_dict
             <pcapkit.corekit.infoclass.Info.to_dict>` carries both, so that
             :meth:`_make_payload` dispatches a :obj:`dict` rebuild on them,
             while the dumpers and ``repr`` leave them out (:issue:`2003`).
@@ -2450,7 +2454,8 @@ class Protocol(ProtocolBase, Generic[_PT, _ST]):
 
         This method is called when a subclass of :class:`Protocol` is defined.
         It is used to set the :attr:`self.__schema__ <pcapkit.protocols.protocol.Protocol.__schema__>`
-        attribute of the subclass.
+        and :attr:`self.__data__ <pcapkit.protocols.protocol.Protocol.__data__>`
+        attributes of the subclass.
 
         Notes:
             When ``schema`` and/or ``data`` is not specified, the method will first
