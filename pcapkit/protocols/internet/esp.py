@@ -79,8 +79,8 @@ anything outside them rather than half-working:
    >>> CipherSuite.get('ENCR_3DES')     # but ESP cannot apply it
    Traceback (most recent call last):
      ...
-   pcapkit.utilities.exceptions.ProtocolError: unsupported ESP encryption
-   algorithm: ENCR_3DES; pcapkit implements ENCR_NULL, ENCR_AES_CBC,
+   pcapkit.utilities.exceptions.ProtocolError: ESP: unsupported encryption
+   algorithm: 'ENCR_3DES'; pcapkit implements ENCR_NULL, ENCR_AES_CBC,
    ENCR_AES_GCM_8, ENCR_AES_GCM_12, ENCR_AES_GCM_16
 
 Decryption requires the optional |cryptography|_ dependency
@@ -278,13 +278,13 @@ def _resolve(registry: 'Type[Cipher] | Type[Integrity]', value: 'Any',
         try:
             return registry(value)
         except ValueError:
-            raise ProtocolError(f'unknown ESP {kind} algorithm: {value}') from None
+            raise ProtocolError(f'ESP: unknown {kind} algorithm: {value!r}') from None
 
     name = str(value).upper().replace('-', '_')
     for candidate in (name, f'{prefix}{name}'):
         if candidate in registry.__members__:
             return registry[candidate]
-    raise ProtocolError(f'unknown ESP {kind} algorithm: {value!r}')
+    raise ProtocolError(f'ESP: unknown {kind} algorithm: {value!r}')
 
 
 @info_final
@@ -341,7 +341,7 @@ class CipherSuite(Info):
         cipher = _resolve(Cipher, value, 'ENCR_', 'encryption')
         suite = CIPHER_SUITES.get(cipher)
         if suite is None:
-            raise ProtocolError(f'unsupported ESP encryption algorithm: {cipher.name}; pcapkit '
+            raise ProtocolError(f'ESP: unsupported encryption algorithm: {cipher.name!r}; pcapkit '
                                 f'implements {", ".join(key.name for key in CIPHER_SUITES)}')
         return suite
 
@@ -395,8 +395,9 @@ class IntegritySuite(Info):
         integrity = _resolve(Integrity, value, 'AUTH_', 'integrity')
         suite = INTEGRITY_SUITES.get(integrity)
         if suite is None:
-            raise ProtocolError(f'unsupported ESP integrity algorithm: {integrity.name}; pcapkit '
-                                f'implements {", ".join(key.name for key in INTEGRITY_SUITES)}')
+            raise ProtocolError(f'ESP: unsupported integrity algorithm: {integrity.name!r}; '
+                                f'pcapkit implements '
+                                f'{", ".join(key.name for key in INTEGRITY_SUITES)}')
         return suite
 
 
@@ -551,7 +552,7 @@ class SecurityAssociation:
                  destination: 'Optional[IPv4Address | IPv6Address | str | int | bytes]' = None,
                  strict: 'bool' = True) -> 'None':
         if spi is not None and not 0 <= spi <= 0xFFFFFFFF:
-            raise ProtocolError(f'invalid SPI: {spi}')
+            raise ProtocolError(f'ESP: invalid SPI: {spi!r}')
 
         if isinstance(destination, bool):
             # NOTE: checked before the ``ipaddress.ip_address`` call below, for
@@ -564,7 +565,7 @@ class SecurityAssociation:
             # would silently become ``IPv4Address('0.0.0.1')``, with no
             # exception and no warning.
             raise ProtocolError(
-                f'invalid destination: must not be a bool, not {destination!r} -- '
+                f'ESP: invalid destination: must not be a bool, not {destination!r} -- '
                 f'pass int({destination!r}) if the numeric value is what is wanted')
 
         #: Optional[int]: Security Parameters Index, or :data:`None` for any.
@@ -584,8 +585,9 @@ class SecurityAssociation:
 
         if self.cipher_suite.is_aead and self.integrity is not Integrity.NONE:
             raise ProtocolError(
-                f'{self.encryption.name} is a combined mode algorithm and provides its own '
-                f'integrity; {self.integrity.name} must not be configured alongside it'
+                f'ESP: invalid integrity algorithm: {self.encryption.name} is a combined mode '
+                f'algorithm and provides its own integrity, so {self.integrity.name!r} must '
+                f'not be configured alongside it'
             )
 
         key, self.__salt__ = self._split_key(self.cipher_suite, encryption_key, salt)
@@ -600,7 +602,7 @@ class SecurityAssociation:
                      f'fail to verify', ProtocolWarning)
 
         if icv_length is not None and icv_length < 0:
-            raise ProtocolError(f'invalid ICV length: {icv_length}')
+            raise ProtocolError(f'ESP: invalid ICV length: {icv_length!r}')
         self.__icv_length__ = icv_length
 
         unavailable = self.unavailable()
@@ -689,8 +691,9 @@ class SecurityAssociation:
 
         """
         if self.cipher_suite.requires_cryptography and load_cryptography() is None:
-            return (f'{self.encryption.name} needs the optional "cryptography" dependency, '
-                    f'which is not installed (pip install pypcapkit[crypto])')
+            return (f'ESP: unavailable encryption algorithm: {self.encryption.name!r} needs the '
+                    f'optional "cryptography" dependency, which is not installed '
+                    f'(pip install pypcapkit[crypto])')
         return None
 
     def compute_icv(self, spi: 'int', seq: 'int', body: 'bytes') -> 'bytes':
@@ -715,7 +718,8 @@ class SecurityAssociation:
         """
         digest = self.integrity_suite.digest
         if digest is None:
-            raise ProtocolError(f'{self.integrity.name} computes no ICV')
+            raise ProtocolError(f'ESP: integrity algorithm computes no ICV: '
+                                f'{self.integrity.name!r}')
 
         mac = hmac.new(self.__integrity_key__,
                        spi.to_bytes(4, 'big') + seq.to_bytes(4, 'big') + body,
@@ -751,21 +755,22 @@ class SecurityAssociation:
 
         crypto = load_cryptography()
         if crypto is None:
-            raise ProtocolError(f'{cipher.name} needs the optional "cryptography" dependency, '
-                                f'which is not installed')
+            raise ProtocolError(f'ESP: unavailable encryption algorithm: {cipher.name!r} needs '
+                                f'the optional "cryptography" dependency, which is not '
+                                f'installed')
         crypto_cipher, algorithms, modes, _ = crypto
 
         iv_length = suite.iv_length
         if len(body) < iv_length:
-            raise ProtocolError(f'ESP payload is {len(body)} octets, too short for the '
+            raise ProtocolError(f'ESP: payload too short: {len(body)!r} octets, less than the '
                                 f'{iv_length}-octet {cipher.name} IV')
         iv, ciphertext = body[:iv_length], body[iv_length:]
 
         if cipher is Cipher.ENCR_AES_CBC:
             if not ciphertext or len(ciphertext) % suite.block_size:
-                raise ProtocolError(f'ESP ciphertext of {len(ciphertext)} octets is not a '
-                                    f'positive multiple of the {suite.block_size}-octet '
-                                    f'{cipher.name} block size')
+                raise ProtocolError(f'ESP: invalid ciphertext length: {len(ciphertext)!r} '
+                                    f'octets is not a positive multiple of the '
+                                    f'{suite.block_size}-octet {cipher.name} block size')
             decryptor = crypto_cipher(algorithms.AES(self.__key__), modes.CBC(iv)).decryptor()
             return decryptor.update(ciphertext) + decryptor.finalize()
 
@@ -773,8 +778,8 @@ class SecurityAssociation:
         # keying material followed by the explicit IV, and the associated
         # data is the SPI and the sequence number.
         if not icv:
-            raise ProtocolError(f'{cipher.name} requires an authentication tag, but the '
-                                f'packet carries no ICV')
+            raise ProtocolError(f'ESP: missing authentication tag: {cipher.name} requires '
+                                f'one, but the packet carries no ICV')
         nonce = self.__salt__ + iv
         aad = spi.to_bytes(4, 'big') + seq.to_bytes(4, 'big')
         decryptor = crypto_cipher(
@@ -813,15 +818,17 @@ class SecurityAssociation:
 
         crypto = load_cryptography()
         if crypto is None:
-            raise ProtocolError(f'{cipher.name} needs the optional "cryptography" dependency, '
-                                f'which is not installed')
+            raise ProtocolError(f'ESP: unavailable encryption algorithm: {cipher.name!r} needs '
+                                f'the optional "cryptography" dependency, which is not '
+                                f'installed')
         crypto_cipher, algorithms, modes, _ = crypto
 
         iv_length = suite.iv_length
         if iv is None:
             iv = os.urandom(iv_length)
         elif len(iv) != iv_length:
-            raise ProtocolError(f'{cipher.name} needs a {iv_length}-octet IV, got {len(iv)}')
+            raise ProtocolError(f'ESP: invalid IV: {cipher.name} needs a {iv_length}-octet IV, '
+                                f'got {len(iv)!r} octets')
 
         if cipher is Cipher.ENCR_AES_CBC:
             encryptor = crypto_cipher(algorithms.AES(self.__key__), modes.CBC(iv)).encryptor()
@@ -869,12 +876,12 @@ class SecurityAssociation:
             salt = bytes(salt)
 
         if len(salt) != salt_length:
-            raise ProtocolError(f'{suite.cipher.name} needs a {salt_length}-octet salt, '
-                                f'got {len(salt)}')
+            raise ProtocolError(f'ESP: invalid salt: {suite.cipher.name} needs a '
+                                f'{salt_length}-octet salt, got {len(salt)!r} octets')
         if len(material) not in suite.key_sizes:
-            raise ProtocolError(f'{suite.cipher.name} needs a key of '
+            raise ProtocolError(f'ESP: invalid key: {suite.cipher.name} needs a key of '
                                 f'{" or ".join(map(str, suite.key_sizes))} octets, '
-                                f'got {len(material)}')
+                                f'got {len(material)!r}')
         return material, salt
 
     ##########################################################################
@@ -933,7 +940,7 @@ class ESPContext(ProtocolContext):
 
         """
         if not isinstance(association, SecurityAssociation):
-            raise ProtocolError(f'not a security association: {association!r}')
+            raise ProtocolError(f'ESP: not a security association: {association!r}')
         self.__associations__.append(association)
 
     def match(self, spi: 'int',
@@ -1270,8 +1277,8 @@ class ESP(IPsec[Data_ESP, Schema_ESP], IPv6_Ext[Data_ESP, Schema_ESP],
         context = self._get_context(ESPContext)
         association = context.match(spi) if context is not None else None
         if association is None:
-            raise ProtocolError(f'no security association for SPI {spi:#010x}; ESP cannot be '
-                                f'constructed with encrypt=True without one')
+            raise ProtocolError(f'{self.alias}: no security association for SPI {spi:#010x}; '
+                                f'encrypt=True needs one')
 
         next_value = self._make_index(next, next_default, namespace=next_namespace,
                                       reversed=next_reversed, pack=False)
@@ -1281,11 +1288,11 @@ class ESP(IPsec[Data_ESP, Schema_ESP], IPv6_Ext[Data_ESP, Schema_ESP],
         if pad_len is None:
             pad_len = -(len(plain) + 2) % align
         elif (len(plain) + pad_len + 2) % align:
-            raise ProtocolError(f'pad length {pad_len} leaves '
+            raise ProtocolError(f'{self.alias}: invalid pad length: {pad_len!r} leaves '
                                 f'{len(plain) + pad_len + 2} octets, which is not a multiple '
                                 f'of the required {align}-octet alignment')
         if not 0 <= pad_len <= 255:
-            raise ProtocolError(f'invalid pad length: {pad_len}')
+            raise ProtocolError(f'{self.alias}: invalid pad length: {pad_len!r}')
 
         # RFC 4303 s2.4: padding bytes are a monotonically increasing
         # sequence starting at 1.
