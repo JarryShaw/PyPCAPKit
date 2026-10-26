@@ -109,6 +109,8 @@ class DispatchRegistryTests(unittest.TestCase):
     #: and the recorded reason -- kept in the test rather than only in the
     #: generator so that a change to either is a change a reviewer sees next
     #: to the assertion it affects.
+    #: :meth:`test_known_degraded_matches_the_generator` holds the two copies
+    #: to each other.
     KNOWN_DEGRADED = {
         label: Degrade(*value)
         for label, value in {
@@ -302,6 +304,30 @@ class DispatchRegistryTests(unittest.TestCase):
             f'these entries of KNOWN_DEGRADED name cases that no longer exist; '
             f'delete them, or fix the label'
         )
+
+    def test_known_degraded_matches_the_generator(self) -> None:
+        """:attr:`KNOWN_DEGRADED` and the generator's copy record the same entries (#2229).
+
+        The copy here is deliberate, per :attr:`KNOWN_DEGRADED`'s own note,
+        but :data:`examples.generators.dispatch.KNOWN_DEGRADED` is what the
+        generator's ``__main__`` summary counts, so the two must not drift: a
+        label, fragment or reason changed in one is changed in both.
+
+        """
+        generator = {label: Degrade(*value)
+                     for label, value in self.dispatch.KNOWN_DEGRADED.items()}
+        self.assertEqual(
+            sorted(self.KNOWN_DEGRADED), sorted(generator),
+            'KNOWN_DEGRADED here and in examples/generators/dispatch.py name '
+            'different cases; update both together'
+        )
+        for label, gap in self.KNOWN_DEGRADED.items():
+            with self.subTest(case=label):
+                self.assertEqual(
+                    gap, generator[label],
+                    f'{label}: the fragment or reason recorded here differs '
+                    f'from examples/generators/dispatch.py; update both together'
+                )
 
     def test_degraded_cases_are_a_small_minority(self) -> None:
         """Most of the dispatch space reaches its target, and the rest is accounted for.
