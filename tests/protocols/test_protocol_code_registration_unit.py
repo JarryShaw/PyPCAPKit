@@ -31,9 +31,14 @@ from __future__ import annotations
 import importlib.util
 import sys
 import unittest
+import warnings
+from typing import TYPE_CHECKING
 from unittest import mock
 
 from tests._support import reimport_once_per_class
+
+if TYPE_CHECKING:
+    from typing import Any
 
 #: Test tier (#1958): branches on the running interpreter's version or implementation.
 __tier__ = 'ALL'
@@ -405,6 +410,195 @@ class ProtocolCodeEndToEndTests(unittest.TestCase):
         self.assertIsInstance(internet_entry, ModuleDescriptor)
         self.assertEqual((internet_entry.module, internet_entry.name),
                          ('pcapkit.protocols.internet.ipv4', 'IPv4'))
+
+
+@unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
+class RegisterProtocolCodeKeyCheckTests(unittest.TestCase):
+    """Each ``code=`` key is checked against its destination's key type, all before any registers (#2268).
+
+    The typed registrars reject a member of another enum (#2224), but
+    ``register_protocol_code`` handed every ``{destination: key}`` pair straight
+    to ``destination.register``. The registry enums compare equal to their
+    values, so ``{Frame: TransType.ICMP}`` replaced the shipped entry at
+    ``LinkType.ETHERNET`` with only a warning. It also registered each target as
+    it flattened them, so a bad later target left the earlier ones in place.
+
+    Each case snapshots every dispatch registry and the name registry, expects
+    :exc:`~pcapkit.utilities.exceptions.RegistryError`, compares each registry
+    with its snapshot, and restores the snapshot whatever happened.
+    """
+
+    def setUp(self) -> None:
+        reimport_once_per_class(self)
+
+    def _assert_rejected_unchanged(self, call: 'Any') -> None:
+        from pcapkit.protocols import __proto__ as protocol_registry
+        from pcapkit.protocols.internet.internet import Internet
+        from pcapkit.protocols.link.link import Link
+        from pcapkit.protocols.misc.pcap.frame import Frame
+        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.udp import UDP
+        from pcapkit.utilities.exceptions import RegistryError
+
+        tables = {klass.__name__: klass.__proto__
+                  for klass in (Link, Internet, Frame, PCAPNG, TCP, UDP, SCTP)}
+        tables['pcapkit.protocols'] = protocol_registry
+        before = {name: dict(table) for name, table in tables.items()}
+        try:
+            with warnings.catch_warnings():
+                warnings.simplefilter('ignore')
+                with self.assertRaises(RegistryError):
+                    call()
+            for name, table in tables.items():
+                if name != 'pcapkit.protocols':
+                    self.assertEqual(dict(table), before[name], f'{name}.__proto__ changed')
+        finally:
+            for name, table in tables.items():
+                table.clear()
+                table.update(before[name])
+
+    def test_mapping_rejects_a_member_of_another_enum(self) -> None:
+        """The issue's example: ``TransType.ICMP`` equals ``LinkType.ETHERNET``."""
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.foundation.registry.protocols import register_protocol_code
+        from pcapkit.protocols.misc.pcap.frame import Frame
+        from pcapkit.protocols.misc.raw import Raw
+
+        self.assertEqual(TransType.ICMP, LinkType.ETHERNET)
+        self._assert_rejected_unchanged(lambda: register_protocol_code(Raw, {Frame: TransType.ICMP}))
+
+    def test_class_keyword_rejects_a_member_of_another_enum(self) -> None:
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.protocols.misc.pcap.frame import Frame
+        from pcapkit.protocols.misc.raw import Raw
+
+        def define() -> None:
+            class Evil(Raw, code={Frame: TransType.ICMP}):
+                pass
+
+        self._assert_rejected_unchanged(define)
+
+    def test_subclass_sharing_a_registry_is_checked_as_its_owner(self) -> None:
+        """``Ethernet`` inherits ``Link.__proto__``, so its keys are ``EtherType``s."""
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.foundation.registry.protocols import register_protocol_code
+        from pcapkit.protocols.link.ethernet import Ethernet
+        from pcapkit.protocols.misc.raw import Raw
+
+        self._assert_rejected_unchanged(lambda: register_protocol_code(Raw, {Ethernet: TransType.ICMP}))
+
+    def test_number_destination_rejects_a_member_of_another_enum(self) -> None:
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.foundation.registry.protocols import register_protocol_code
+        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.transport.udp import UDP
+
+        self._assert_rejected_unchanged(lambda: register_protocol_code(Raw, {UDP: LinkType(53)}))
+
+    def test_a_bad_later_target_leaves_the_earlier_ones_unregistered(self) -> None:
+        """The issue's list example, and one whose bad target fails the key check instead."""
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.foundation.registry.protocols import register_protocol_code
+        from pcapkit.protocols.internet.internet import Internet
+        from pcapkit.protocols.misc.raw import Raw
+
+        for code in ([TransType.L2TP, 5], [TransType.L2TP, {Internet: 115}]):
+            with self.subTest(code=code):
+                self._assert_rejected_unchanged(lambda: register_protocol_code(Raw, code))
+
+    def test_number_and_own_registry_destinations_still_accept_an_int(self) -> None:
+        """A port is a valid ``TCP`` key; ``Loopback`` keeps an unchecked registry of its own."""
+        from pcapkit.foundation.registry.protocols import register_protocol_code
+        from pcapkit.protocols.link.loopback import Loopback
+        from pcapkit.protocols.transport.tcp import TCP
+
+        class FakeProtocol:
+            pass
+
+        with mock.patch.object(TCP, 'register') as reg_tcp, \
+                mock.patch.object(Loopback, 'register') as reg_loopback:
+            register_protocol_code(FakeProtocol, [{TCP: 54324}, {Loopback: 2}])
+        reg_tcp.assert_called_once_with(54324, FakeProtocol)
+        reg_loopback.assert_called_once_with(2, FakeProtocol)
+
+    def test_every_destination_kind_row_is_enforced(self) -> None:
+        """Every row of ``_DESTINATION_KINDS`` is exercised, both cells of it.
+
+        The table is what the check is made of, so a row dropped from it, or a
+        ``kind``/``number`` cell changed in it, silently stops checking a
+        destination -- the registrars it stands in for are not called here, so
+        nothing else would notice. Each row is pinned by behaviour rather than
+        by comparing the table with a copy of itself:
+
+        * ``kind`` -- a member of *another* registry's enum must be rejected,
+          and must leave every registry as it was. That is the #2224 confusion
+          the check exists for, so a row that stops being checked, or one
+          checked against the wrong enum, fails here.
+        * ``number`` -- a bare :class:`int` is accepted where the registrar
+          accepts one (a port, a payload protocol identifier) and rejected
+          where it does not, which is the only observable difference the flag
+          makes. The :class:`int` given to a rejecting row is the *value* of a
+          member its registry already ships an entry at, so the check is pinned
+          as being on the type and the entry at risk is a real one.
+
+        The ``kind`` identity is asserted as well, since a row retyped to an
+        enum unrelated to every key used here would reject both keys for the
+        wrong reason.
+        """
+        from pcapkit.const.reg.apptype import AppType
+        from pcapkit.const.reg.ethertype import EtherType
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.const.reg.transtype import TransType
+        from pcapkit.const.sctp.payload_protocol_identifier import PayloadProtocolIdentifier
+        from pcapkit.foundation.registry.protocols import (_DESTINATION_KINDS,
+                                                           register_protocol_code)
+        from pcapkit.protocols.internet.internet import Internet
+        from pcapkit.protocols.link.link import Link
+        from pcapkit.protocols.misc.pcap.frame import Frame
+        from pcapkit.protocols.misc.pcapng import PCAPNG
+        from pcapkit.protocols.misc.raw import Raw
+        from pcapkit.protocols.transport.sctp import SCTP
+        from pcapkit.protocols.transport.tcp import TCP
+        from pcapkit.protocols.transport.udp import UDP
+
+        # destination -> (kind, number, a member of another enum, a bare int)
+        expected = {
+            # 0x0800 is EtherType.Internet_Protocol_version_4, where Link ships IPv4.
+            Link: (EtherType, False, TransType.ICMP, 0x0800),
+            # 6 is TransType.TCP, where Internet ships TCP.
+            Internet: (TransType, False, EtherType.XEROX_NS_IDP, 6),
+            # The issue's own example: TransType.ICMP == LinkType.ETHERNET, where
+            # both Frame and PCAPNG ship Ethernet.
+            Frame: (LinkType, False, TransType.ICMP, 1),
+            PCAPNG: (LinkType, False, TransType.ICMP, 1),
+            TCP: (AppType, True, LinkType(53), 54324),
+            UDP: (AppType, True, LinkType(53), 54324),
+            SCTP: (PayloadProtocolIdentifier, True, TransType.ICMP, 54324),
+        }
+
+        for destination, (kind, number, member, raw) in expected.items():
+            with self.subTest(destination=destination.__name__):
+                self.assertNotIsInstance(member, kind)  # the test data, not the table
+
+                self._assert_rejected_unchanged(
+                    lambda dest=destination, key=member: register_protocol_code(Raw, {dest: key}))
+
+                if number:
+                    with mock.patch.object(destination, 'register') as register:
+                        register_protocol_code(Raw, {destination: raw})
+                    register.assert_called_once_with(raw, Raw)
+                else:
+                    self._assert_rejected_unchanged(
+                        lambda dest=destination, key=raw: register_protocol_code(Raw, {dest: key}))
+
+                self.assertIs(_DESTINATION_KINDS.get(destination, (None, None))[0], kind,
+                              f'{destination.__name__} is not checked against {kind.__name__}')
+
+        self.assertEqual(set(_DESTINATION_KINDS), set(expected),
+                         '_DESTINATION_KINDS no longer lists the destinations cased here')
 
 
 if __name__ == '__main__':
