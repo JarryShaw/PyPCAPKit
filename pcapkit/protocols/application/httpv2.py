@@ -41,7 +41,7 @@ from typing import TYPE_CHECKING, cast
 from pcapkit.const.http.error_code import ErrorCode as Enum_ErrorCode
 from pcapkit.const.http.frame import Frame as Enum_Frame
 from pcapkit.const.http.setting import Setting as Enum_Setting
-from pcapkit.corekit.multidict import OrderedMultiDict
+from pcapkit.corekit.multidict import MultiDict, OrderedMultiDict
 from pcapkit.protocols.application.http import HTTP as HTTPBase
 from pcapkit.protocols.data.application.httpv2 import HTTP as Data_HTTP
 from pcapkit.protocols.data.application.httpv2 import ContinuationFrame as Data_ContinuationFrame
@@ -1282,7 +1282,7 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
 
     def _make_http_settings(self, frame: 'Optional[Data_SettingsFrame]' = None, *,
                             ack: 'bool' = False,
-                            settings: 'Optional[OrderedMultiDict[Enum_Setting, int] | bytes | list[Schema_SettingPair | tuple[Enum_Setting, int]]]' = None,  # pylint: disable=line-too-long
+                            settings: 'Optional[OrderedMultiDict[Enum_Setting, int] | dict[Enum_Setting | int, int] | bytes | list[Schema_SettingPair | tuple[Enum_Setting, int]]]' = None,  # pylint: disable=line-too-long
                             **kwargs: 'Any') -> 'tuple[Schema_SettingsFrame, Flags]':
         """Make HTTP/2 ``SETTINGS`` frame.
 
@@ -1290,7 +1290,8 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             frame: Frame data model.
             ack: Acknowledge flag.
             settings: Settings, as raw octets, an
-                :class:`~pcapkit.corekit.multidict.OrderedMultiDict` or a list of
+                :class:`~pcapkit.corekit.multidict.OrderedMultiDict`, a plain
+                :obj:`dict` of identifier to value or a list of
                 ``(identifier, value)`` pairs.
             **kwargs: Arbitrary keyword arguments.
 
@@ -1314,7 +1315,9 @@ class HTTP(HTTPBase[Data_HTTP, Schema_HTTP],
             settings_val = settings  # type: bytes | list[Schema_SettingPair]
         elif isinstance(settings, dict):
             settings_val = []
-            for key, val in settings.items(multi=True):
+            # A plain ``dict`` has no ``multi`` keyword (#2223).
+            items = settings.items(multi=True) if isinstance(settings, MultiDict) else settings.items()
+            for key, val in items:
                 settings_val.append(Schema_SettingPair(
                     id=key,
                     value=val,
