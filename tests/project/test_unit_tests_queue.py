@@ -304,7 +304,9 @@ class TestJobGating(unittest.TestCase):
         self.assertIn('if: ${{ inputs.gate-only != true }}', head)
         self.assertNotIn('needs.changes.outputs.code', head)
         for name, condition in (('Run the project pins', "needs.changes.outputs.code != 'false'"),
-                                ('Run tests/project and the root-level modules under plain unittest',
+                                ('Run the first half of tests/project and the root-level modules under plain unittest',
+                                 "needs.changes.outputs.code == 'false'"),
+                                ('Run the second half of tests/project and the root-level modules under plain unittest',
                                  "needs.changes.outputs.code == 'false'"),
                                 ('Run the other tests that read docs/ or Markdown',
                                  "needs.changes.outputs.code == 'false'")):

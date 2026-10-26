@@ -1132,6 +1132,15 @@ jobs:
   # by a root-level module survives. The modules directly in tests/protocols
   # stay in the rest cell, as moving them would split more pairs than it joins.
   #
+  # #2254: the project cell's run step ran near its step cap, so tests/project,
+  # which has no subdirectories, is cut at a module name: `--half 1` and
+  # `--half 2`, at the one boundary SHARD_BOUNDARIES in util/run_unittest_leg.py
+  # holds, which `project-tests` cuts at too, so every module, a new one
+  # included, runs in exactly one half. The boundary is chosen so the halves
+  # take about the same CI time; both also run the root-level modules. Move
+  # SHARD_BOUNDARIES to rebalance. The same cost as #1029's: a pair split
+  # between the two cells does not share a process.
+  #
   # Every tests/ subdirectory is a leg except those below, and
   # tests/project/test_unittest_ordering_shards.py fails on a new one left out:
   #
@@ -1140,7 +1149,7 @@ jobs:
   #     files, so the leg would run the root-level modules alone -- green,
   #     while covering none of it.
   #
-  # The `project` cell keeps the project pins (#1954): whether a module passes
+  # The `project` cells keep the project pins (#1954): whether a module passes
   # in one interpreter, in file order, with no xdist, is a question about the
   # module, so a pin can fail it as readily as any other.
   #
@@ -1170,7 +1179,6 @@ jobs:
           - dumpkit
           - foundation
           - interface
-          - project
           - protocols/internet
           - toolkit
           - utilities
@@ -1180,6 +1188,13 @@ jobs:
           - leg: protocols
             exclude: --exclude protocols/internet
             label: protocols (rest)
+          # tests/project, cut at one module name -- see the #2254 note above.
+          - leg: project
+            shard: --half 1
+            label: project (half 1)
+          - leg: project
+            shard: --half 2
+            label: project (half 2)
 
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -1213,7 +1228,7 @@ jobs:
       # under the job's, so a hang reports as this step timing out.
       - name: Run tests/${{ matrix.leg }} and the root-level modules under plain unittest
         timeout-minutes: 20
-        run: python util/cap_file_size.py python util/run_unittest_leg.py ${{ matrix.leg }} ${{ matrix.exclude }} --verbose
+        run: python util/cap_file_size.py python util/run_unittest_leg.py ${{ matrix.leg }} ${{ matrix.exclude }} ${{ matrix.shard }} --verbose
 
   # ``CHANGELOG.md`` is generated from the newest entry under
   # ``docs/source/changelog/`` by ``util/changelog_md.py``, and ``Create
@@ -1355,13 +1370,22 @@ jobs:
             --durations=30 --durations-min=1.0 --junitxml="$RUNNER_TEMP/junit.xml" "${pins[@]}"
 
       # #2164: the script's default stall dump sits under `unittest-ordering`'s
-      # 20-minute step cap, so this step passes its own, a minute under its
+      # 20-minute step cap, so these steps pass their own, a minute under their
       # 15. tests/project/test_run_unittest_leg_stall_dump.py pins every step
       # running the script to a dump inside its cap.
-      - name: Run tests/project and the root-level modules under plain unittest
+      #
+      # #2254: the whole leg ran near this cap, so it runs as
+      # `unittest-ordering`'s two `project` halves do, one step each, at the
+      # same boundary.
+      - name: Run the first half of tests/project and the root-level modules under plain unittest
         if: ${{ needs.changes.outputs.code == 'false' }}
         timeout-minutes: 15
-        run: python util/cap_file_size.py python util/run_unittest_leg.py project --verbose --stall-dump 840
+        run: python util/cap_file_size.py python util/run_unittest_leg.py project --half 1 --verbose --stall-dump 840
+
+      - name: Run the second half of tests/project and the root-level modules under plain unittest
+        if: ${{ needs.changes.outputs.code == 'false' }}
+        timeout-minutes: 15
+        run: python util/cap_file_size.py python util/run_unittest_leg.py project --half 2 --verbose --stall-dump 840
 
       - name: Run the other tests that read docs/ or Markdown
         if: ${{ needs.changes.outputs.code == 'false' }}

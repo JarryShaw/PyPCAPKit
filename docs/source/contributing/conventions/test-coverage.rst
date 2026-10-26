@@ -153,6 +153,8 @@ Running the Tests
 
       python util/run_unittest_leg.py protocols/internet
       python util/run_unittest_leg.py protocols --exclude protocols/internet
+      python util/run_unittest_leg.py project --half 1
+      python util/run_unittest_leg.py project --half 2
 
    The leg list lives in the workflow, not the script. Every :file:`tests/`
    subdirectory is a leg except :file:`tests/integration/`, which holds no unit-tier

@@ -7,7 +7,7 @@ does not vary by interpreter once per push, on pull requests and on pushes to
 ``pcapkit`` stay on every leg. :func:`tests._tiers.is_project_pin` decides which,
 and :file:`tests/test_tier_guard.py` checks that rule and runs the steps that use
 it. This module pins the rest: the job runs on every diff, on ``latest``, and
-blocks; the release gate and the ``unittest-ordering`` cell keep every pin; the
+blocks; the release gate and the ``unittest-ordering`` ``project`` cells keep every pin; the
 workflows page says so.
 
 """
@@ -67,15 +67,24 @@ class TestThePinsJob(unittest.TestCase):
 
 
 class TestEveryPinStillRunsWhereTheMatrixDoesNot(unittest.TestCase):
-    """The release gate's full suite and ``unittest-ordering``'s ``project`` cell keep every pin."""
+    """The release gate's full suite and ``unittest-ordering``'s ``project`` cells keep every pin."""
 
     def test_the_gate_runs_the_whole_suite(self) -> None:
         self.assertEqual(step(('unit-tests.yml', 'gate'), 'Run full test suite')['run'],
                          'python util/cap_file_size.py python -m pytest -q -n auto --dist load')
 
     def test_the_ordering_cell_runs_every_pin(self) -> None:
-        self.assertIn('project', job('unit-tests.yml', 'unittest-ordering')['strategy']['matrix']['leg'])
-        modules = set(run_unittest_leg.leg_modules('project'))
+        """#2254: the ``project`` cells between them, as they cut ``tests/project`` in two."""
+        matrix = job('unit-tests.yml', 'unittest-ordering')['strategy']['matrix']
+        cells = [{'leg': name} for name in matrix['leg']] + list(matrix.get('include') or [])
+        modules = set()
+        for cell in cells:
+            if cell['leg'] == 'project':
+                words = str(cell.get('shard', '')).split()
+                flags = dict(zip(words[::2], words[1::2]))
+                cut = run_unittest_leg.half_bounds('project', int(flags['--half'])) if '--half' in flags else {}
+                modules.update(run_unittest_leg.leg_modules('project', **cut))
+        self.assertTrue(modules, 'no unittest-ordering cell runs tests/project')
         pins = {pin[:-len('.py')].replace('/', '.') for pin in _tiers.project_pin_paths()}
         self.assertTrue(pins)
         self.assertEqual(pins - modules, set())
