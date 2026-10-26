@@ -8,8 +8,7 @@ and :func:`tests._support._keep_lazy_imports` -- a cleanup, so it runs *after*
 ``tearDown`` that also purges :mod:`pcapkit` empties :data:`sys.modules` before
 that cleanup reads it, so the class keeps nothing and every test pays the full
 re-import again (about 0.67s and 329 modules, by that helper's docstring) while
-the ``setUp`` reads as if it did not. Twelve classes in seven files did this
-on ``main`` after #1070 converted their ``setUp`` and left the ``tearDown``.
+the ``setUp`` reads as if it did not.
 
 A class that needs a fresh import for every test should say so by purging in
 ``setUp`` *instead of* calling :func:`~tests._support.reimport_once_per_class`,
@@ -44,7 +43,7 @@ TESTS = ROOT / 'tests'
 ALLOWED = {}  # type: dict[tuple[str, str], str]
 
 #: Fewest classes the scan must see calling the helper, so that a scan that
-#: silently matches nothing cannot pass. It counted 384 when this was written.
+#: silently matches nothing cannot pass. It counted 384 under #1538.
 MIN_CLASSES = 300
 
 

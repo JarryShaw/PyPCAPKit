@@ -70,15 +70,10 @@ would be asking for correct documentation to be deleted, which is the outcome
 the ``**kwargs`` exclusion exists to prevent.
 
 That exclusion has a known cost, recorded so it is not mistaken for coverage.
-:meth:`Reassembly.__init_subclass__
-<pcapkit.foundation.reassembly.reassembly.Reassembly.__init_subclass__>` and
-:meth:`TraceFlow.__init_subclass__
-<pcapkit.foundation.traceflow.traceflow.TraceFlow.__init_subclass__>` both
-document ``name`` where the parameter is ``protocol``, and both have
-``**kwargs``, so both are invisible here even though their bodies use
-``protocol`` and never read ``kwargs['name']``. Catching those needs the intent
-behind a keyword, not just its absence from the signature -- ``src_ip`` and
-``dst_ip`` on :meth:`IPv6_Route.__post_init__
+A function with ``**kwargs`` that documents ``name`` where its parameter is
+``protocol``, and whose body never reads ``kwargs['name']``, is invisible here.
+Catching that needs the intent behind a keyword, not just its absence from the
+signature -- ``src_ip`` and ``dst_ip`` on :meth:`IPv6_Route.__post_init__
 <pcapkit.protocols.internet.ipv6_route.IPv6_Route.__post_init__>` look
 identical and are very likely legitimate keywords forwarded to ``super()``.
 Guessing between the two would fail correct docstrings, so this module does not
@@ -352,8 +347,8 @@ def _raised_names(node: 'ast.AST') -> 'set[str]':
     ``ProtocolError`` and raises none itself, but its ``_read_locator`` helper
     does and it calls that helper once per locator. Attributing the raise
     outward is therefore correct there, and the clause is not a phantom. It can
-    mislead for a nested ``def`` that is *returned* rather than called, and four
-    of the six are: the wrappers inside
+    mislead for a nested ``def`` that is *returned* rather than called, and
+    several are: the wrappers inside
     :func:`~pcapkit.corekit.decorators.prepare` and
     :mod:`pcapkit.protocols.schema.misc.pcapng`'s ``bounded_option``, and the
     methods of the classes :func:`~pcapkit.dumpkit.common.make_dumper` and the
@@ -378,10 +373,12 @@ def _calls_anything_callable(node: 'ast.AST') -> 'bool':
     """Whether the body calls a method or free function that could raise.
 
     Data-model construction is excluded: this project's ``_read_*`` methods
-    build :class:`~pcapkit.corekit.infoclass.Info` subclasses whose names begin
-    ``Data_`` or ``Schema_``, and neither those nor :meth:`Info.__update__` can
-    raise a protocol error -- ``ProtocolError`` appears nowhere in
-    :file:`pcapkit/corekit/` outside one comment. Anything else counts as
+    build :class:`~pcapkit.corekit.infoclass.Info` subclasses named ``Data_*``
+    and :class:`~pcapkit.protocols.schema.schema.Schema` subclasses named
+    ``Schema_*``, and neither those nor :meth:`Info.__update__` can raise a
+    protocol error -- ``ProtocolError`` appears in neither
+    :mod:`pcapkit.corekit.infoclass` nor :mod:`pcapkit.protocols.schema.schema`.
+    Anything else counts as
     possibly-raising, which is what keeps :func:`_reachable` conservative.
 
     """
@@ -594,7 +591,7 @@ class DocstringRaisesTests(unittest.TestCase):
         :meth:`DocstringRaisesTests.test_documented_exceptions_are_reachable`,
         and ``_read_http_none`` is precisely the case that proves it. Of the six
         phantom clauses #519 counted, that reachability check finds only five:
-        ``_read_http_none``'s body opens ``if any(header.flags):``, and ``any``
+        ``_read_http_none``'s body opens ``if any(header.flags.values()):``, and ``any``
         is not in :func:`_calls_anything_callable`'s inert-call list, so the
         function is judged possibly-raising and is never reported. Widening that
         list until it caught this one would be the wrong fix -- every name added

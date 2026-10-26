@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """HTTP/2 payload lengths, asserted against the octets that went onto the wire.
 
-GitHub issue #668. Guards against three payload length callbacks in
+GitHub issue #668. Guards against the payload length callbacks of the frame
+types that take a ``PADDED`` flag in
 :mod:`pcapkit.protocols.schema.application.httpv2` putting the conditional
 expression in the wrong place, under which an **unpadded** ``DATA``,
 ``HEADERS`` or ``PUSH_PROMISE`` frame parses with its whole payload silently
@@ -79,11 +80,11 @@ padding content, so this is input its parser has to handle either way.
 Why the zero-length payload cases are here
 ------------------------------------------
 
-Each of the three frames has a "frame of only padding" case, where ``pad_len``
+Each padded frame type has a "frame of only padding" case, where ``pad_len``
 accounts for the whole payload area and the payload is legitimately empty. Those
 are not padding of the test matrix: with only the ``DATA`` one present -- every
 other fixture carrying a non-empty payload -- the module would be satisfied by a
-wrong fix returning ``max(computed, 1)`` for the two ``fragment`` fields, which
+wrong fix returning ``max(computed, 1)`` for the ``fragment`` fields, which
 leaks a padding octet into the fragment and swallows a ``SchemaWarning: packet
 length < 0: -1``. ``0`` is a legitimate answer from
 these callbacks and has to be asserted as one, at the wire and at the callback
@@ -96,8 +97,8 @@ The clean controls
 :attr:`~pcapkit.protocols.schema.application.httpv2.ContinuationFrame.fragment`,
 :attr:`~pcapkit.protocols.schema.application.httpv2.UnassignedFrame.data` and
 :attr:`~pcapkit.protocols.schema.application.httpv2.GoawayFrame.debug` use the
-plain ``length=lambda pkt: pkt['__length__']`` with no conditional, and all
-three carry their payload correctly with or without the defect.
+plain ``length=lambda pkt: pkt['__length__']`` with no conditional, and each
+carries its payload correctly with or without the defect.
 :class:`HTTPv2PlainLengthFormControlUnitTests` asserts them, because they are
 what shows the field machinery is not at fault -- it is the conditional's
 grouping alone.
@@ -109,7 +110,7 @@ Why the round-trip suite cannot see it
 type, but through ``make`` -> parse -> ``make``, and ``make`` writes the length
 field from ``HTTP._make_http_length``. Both sides therefore agree on an empty
 payload and the octets match. Its generator also passes no ``data`` or
-``fragment`` argument for these three frames (measured: ``kwargs={}`` for
+``fragment`` argument for these frames (measured: ``kwargs={}`` for
 ``httpv2-frame/DATA``, ``/HEADERS`` and ``/PUSH_PROMISE``), so the payload it
 round-trips is ``b''`` and there is nothing for the callback to lose.
 :meth:`tests.protocols.application.test_http_unit.HTTPUnitTests.test_httpv2_frame_readers_cover_successful_frames`
@@ -372,7 +373,7 @@ class HTTPv2HeadersFramePayloadLengthUnitTests(FramePayloadMixin, unittest.TestC
         The zero-length boundary, and it is load-bearing rather than decorative.
         Without this case -- and its ``PUSH_PROMISE`` and ``PRIORITY``
         counterparts below -- the module is satisfied by a wrong fix
-        returning ``max(computed, 1)`` for these two fields, since every other
+        returning ``max(computed, 1)`` for the ``fragment`` fields, since every other
         fixture here has a non-empty fragment and so never asks the callback
         for ``0``. Measured under that mutation: this
         frame's ``fragment`` came back ``b'\\xde'`` -- one padding octet leaked in
@@ -475,11 +476,11 @@ test_a_padded_headers_frame_of_only_padding_reads_an_empty_fragment`
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class HTTPv2PlainLengthFormControlUnitTests(FramePayloadMixin, unittest.TestCase):
-    """The three frames whose payload length has no conditional at all.
+    """The frames whose payload length has no conditional at all.
 
     ``ContinuationFrame.fragment``, ``UnassignedFrame.data`` and
     ``GoawayFrame.debug`` are written ``length=lambda pkt: pkt['__length__']``,
-    and all three carry their payload correctly whether or not the #668 grouping
+    and each carries its payload correctly whether or not the #668 grouping
     defect is present. That is what localises the defect to the conditional's grouping
     rather than to :class:`~pcapkit.corekit.fields.strings.BytesField`,
     ``__length__``'s bookkeeping, or the frame dispatch -- all of which these
@@ -532,7 +533,7 @@ class HTTPv2PlainLengthFormControlUnitTests(FramePayloadMixin, unittest.TestCase
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class HTTPv2PayloadLengthCallbackUnitTests(unittest.TestCase):
-    """The three callbacks, called directly, on the arm that was broken.
+    """The callbacks, called directly, on the arm that was broken.
 
     The wire tests above are the ones that matter, but they can only show the
     *consequence*. These call each length callback with a synthetic ``packet``
@@ -548,7 +549,7 @@ class HTTPv2PayloadLengthCallbackUnitTests(unittest.TestCase):
     PAD_LEN = 4
 
     def fields(self) -> 'list[tuple[str, Any, str]]':
-        """The three fields under test, as ``(label, schema, attribute)``.
+        """The fields under test, as ``(label, schema, attribute)``.
 
         Returns:
             One entry per mis-parenthesised site.
@@ -592,7 +593,7 @@ class HTTPv2PayloadLengthCallbackUnitTests(unittest.TestCase):
     def test_the_unpadded_arm_returns_the_remaining_length(self) -> None:
         """With ``PADDED`` clear the callback returns ``__length__``, not ``0``.
 
-        This is #668 stated as a number: with the defect all three return ``0``
+        This is #668 stated as a number: with the defect each returns ``0``
         here, which is why an unpadded frame's payload is dropped.
 
         """

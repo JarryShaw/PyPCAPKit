@@ -20,7 +20,7 @@ at all. Under that defect, after the first such error the extracted stack is
 *empty*, the ``for``/``else`` branch runs, and every subsequent warning in the
 process gets ``-1``.
 
-Three groups of tests here, because they fail for different reasons:
+The tests here fall into groups, because they fail for different reasons:
 
 * :class:`StacklevelArithmeticTests` -- the derivation and both clamps, over
   synthetic frames, including the shapes no real stack under :program:`pytest`
@@ -268,10 +268,10 @@ class StacklevelArithmeticTests(unittest.TestCase):
     def test_level_is_never_below_one(self) -> None:
         """``0`` and ``-1`` are not levels: exhaustively, over every shape.
 
-        ``-1`` was reachable -- ``index`` is ``0`` when the outermost frame is
-        already inside :mod:`pcapkit`, e.g. running the package as a script -- and
-        :meth:`logging.Logger.findCaller` reads a level below ``1`` as "do not walk
-        out at all", so it blamed :mod:`logging` itself.
+        Without the clamp ``-1`` is reachable -- ``index`` is ``0`` when the
+        outermost frame is already inside :mod:`pcapkit`, e.g. running the package
+        as a script -- and :meth:`logging.Logger.findCaller` reads a level below
+        ``1`` as "do not walk out at all", so it blames :mod:`logging` itself.
 
         """
         for outer in range(0, 5):
@@ -348,7 +348,7 @@ class StacklevelAttributionTests(unittest.TestCase):
         return emitted[-1]
 
     def test_warning_blames_the_same_line_from_every_depth(self) -> None:
-        """One logical call, six outer depths, one attribution."""
+        """One logical call, every outer depth, one attribution."""
         seen = {}  # type: dict[int, tuple[str, int]]
         for depth in DEPTHS:
             record = through(depth, self.warning_site)

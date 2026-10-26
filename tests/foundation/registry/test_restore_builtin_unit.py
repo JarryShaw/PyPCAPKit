@@ -2,16 +2,16 @@
 """A foundation registrar restores the built-in a name shipped with.
 
 GitHub issue #1363: the public engine, reassembly and flow tracing registrars
-refuse pcapkit's own classes (#513, #1016), so once ``register_extractor_engine
-('dpkt', MyEngine)`` overrode a built-in, handing ``DPKT`` back raised
-:exc:`~pcapkit.utilities.exceptions.RegistryError` and the override could not be
-undone. The owner ruled that a registrar accepts the shipped original for a name
-it shipped with, and still refuses every other built-in.
+refuse pcapkit's own classes (#513, #1016), so without the fix, once
+``register_extractor_engine('dpkt', MyEngine)`` overrides a built-in, handing
+``DPKT`` back raises :exc:`~pcapkit.utilities.exceptions.RegistryError` and the
+override cannot be undone. The owner ruled that a registrar accepts the shipped
+original for a name it shipped with, and still refuses every other built-in.
 
 The restore must leave each registry exactly as shipped: the same objects,
 which are :class:`~pcapkit.corekit.module.ModuleDescriptor` entries, not the
-classes they name. That also covers the dumper half of GitHub issue #1364, where
-handing a dumper registrar its own shipped entry warned and replaced the
+classes they name. That also covers the dumper half of GitHub issue #1364: a
+dumper registrar handed its own shipped entry must neither warn nor replace the
 descriptor with the class.
 
 Classes are imported inside each test, after
@@ -36,7 +36,7 @@ class TestRestoreBuiltin(unittest.TestCase):
 
     @contextlib.contextmanager
     def _registries(self):  # type: ignore[no-untyped-def]
-        """Snapshot the four registries, and put them back afterwards."""
+        """Snapshot the foundation registries, and put them back afterwards."""
         from pcapkit.foundation.extraction import Extractor
         from pcapkit.foundation.traceflow.traceflow import TraceFlow
 

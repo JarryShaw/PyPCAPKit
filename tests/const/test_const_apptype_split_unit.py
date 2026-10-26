@@ -43,8 +43,8 @@ _DUNDER_SAMPLE_SIZE = 48
 def _dunder_sample(registry: 'type') -> 'list':
     """The members of ``registry`` the byte-identity sweep formats, in row order.
 
-    GitHub issue #1062. Sweeping every member ran a subtest per member, and
-    per-test coverage contexts found only a few distinct arc sets among them:
+    GitHub issue #1062. Sweeping every member runs a subtest per member, and
+    per-test coverage contexts find only a few distinct arc sets among them:
     ``repr`` and ``str``, each with and without an ``(aliases: ...)`` suffix --
     the registry, the port and the service name never change which code runs.
     So the sample keeps every member that carries an alias (the suffix branch),
@@ -144,8 +144,8 @@ class AppTypeSplitTests(unittest.TestCase):
 
         # One service on two transports is two members, not one shared object --
         # they carry the same name and differ in which registry they belong to,
-        # which since GitHub issue #806 is what ``proto`` says. It named the whole
-        # IANA set on both of them before, so the two compared equal.
+        # which is what ``proto`` says (GitHub issue #806). Guards against it
+        # naming the whole IANA set on both, under which the two compare equal.
         self.assertIsNot(TCP.http, UDP.http)
         self.assertEqual(TCP.http.svc, UDP.http.svc)
         self.assertNotEqual(TCP.http.proto, UDP.http.proto)
@@ -1271,8 +1271,8 @@ class AppTypeSplitTests(unittest.TestCase):
                 apptype_registry.UDP.__proto__[65210] = previous
 
     def test_the_new_dunders_are_byte_identical_to_the_percent_form(self) -> None:
-        """GitHub issue #798: ``AppType``'s ``__new__``/``__repr__``/``__str__`` moved
-        from ``%`` formatting to f-strings, and ``__new__``'s format sets every
+        """GitHub issue #798: ``AppType``'s ``__new__``/``__repr__``/``__str__`` format
+        with f-strings rather than ``%``, and ``__new__``'s format sets every
         real member's underlying :class:`~aenum.StrEnum` value -- a far larger
         blast radius than an error path. It is checked on a deterministic
         sample rather than member by member, because one f-string formats every
@@ -1297,7 +1297,7 @@ class AppTypeSplitTests(unittest.TestCase):
         :meth:`~unittest.TestCase.addCleanup`, but the population check below
         is only meaningful against a registry no other test has touched.
 
-        GitHub issue #807 grew ``repr``/``str`` an ``(aliases: ...)`` suffix
+        ``repr``/``str`` carry an ``(aliases: ...)`` suffix (GitHub issue #807)
         for a member that shares its port with another service in the same
         registry, so ``old_repr``/``old_str`` below append the identical
         suffix through ``member.aliases`` before comparing. ``old_value``
@@ -1349,10 +1349,11 @@ class AppTypeSplitTests(unittest.TestCase):
 
         ``proto.name`` is folded into the member's underlying
         :class:`~aenum.StrEnum` *value* by ``__new__``, not merely into its display,
-        so retyping ``proto`` rewrites ``TCP.http.value`` from
-        ``'http [80 - tcp|udp|sctp]'`` to ``'http [80 - tcp]'``. ``_value_`` is the
-        live key in ``_value2member_map_``, which is why the retype has to happen in
-        the generated source rather than at runtime -- a member whose ``_value_``
+        so a single-transport ``proto`` makes ``TCP.http.value``
+        ``'http [80 - tcp]'`` where the whole IANA set would make it
+        ``'http [80 - tcp|udp|sctp]'``. ``_value_`` is the live key in
+        ``_value2member_map_``, which is why ``proto`` is set in the generated
+        source rather than at runtime -- a member whose ``_value_``
         were edited afterwards would no longer be reachable by its own value.
 
         Checked against the formula rather than against the member's own ``proto``:
@@ -1369,7 +1370,7 @@ class AppTypeSplitTests(unittest.TestCase):
         modules declare (see :func:`_declared`), not against counts a vendor
         update moves (GitHub issue #1820).
 
-        GitHub issue #807 grew ``str``/``repr`` an ``(aliases: ...)`` suffix
+        ``str``/``repr`` carry an ``(aliases: ...)`` suffix (GitHub issue #807)
         for a member sharing its port with another service in this registry,
         so ``value``/``shown`` below grow the identical suffix through
         ``member.aliases`` before comparing. The lookup round-trip at the

@@ -61,7 +61,7 @@ than a shape check. A bare ``section`` with no number is indistinguishable
 from a citation that dropped its number, the same incompleteness this test
 exists to catch -- Sphinx happening not to error on it is not the same claim
 as it being a well-formed citation. Neither shape appears under :mod:`pcapkit`,
-so this changes nothing here; rejecting is the more conservative
+so rejecting them flags nothing here, and is the more conservative
 default should either turn up later.
 
 One thing the shape check above does not catch: whether the anchor actually
@@ -70,11 +70,11 @@ that is exactly the class GitHub issue #944 found, ``:rfc:`959#section-4.1```
 (RFC 959's own rendered HTML carries only ``section-1`` through ``section-8``;
 verified by reading both ``https://www.rfc-editor.org/rfc/rfc959.html`` and
 the datatracker mirror). The maintainer ruled on #944 for the enclosing
-top-level section, so those citations became ``:rfc:`959#section-4``` --
+top-level section, so those citations cite ``:rfc:`959#section-4``` --
 which :data:`ACCEPTED_FRAGMENT` above already accepts as well-formed.
 
 More sites carried it than #944 reported: that issue grepped
-:mod:`pcapkit` only, and a cross-review of the fix found further rendered
+:mod:`pcapkit` only, and #944's cross-review found further rendered
 roles in :file:`docs/source/contributing/conventions/registry-protocol.rst`
 and one in :file:`tests/const/test_const_enum_no_mint.py`. Others
 cited ``959#section-5.3``, equally dead, in
@@ -118,7 +118,7 @@ RFC_FRAGMENT = re.compile(r':rfc:`(\d+)#([^`]+)`')
 #: excludes the untitled/numberless shapes (``introduction``, bare ``section``)
 #: that same function also does not error on -- see the module docstring
 #: above for why those stay rejected. No bare ``N[.N...]`` alternative either
-#: -- see the module docstring for why that shape was dropped rather than kept.
+#: -- see the module docstring for why that shape is rejected.
 ACCEPTED_FRAGMENT = re.compile(
     r'\A(?:section-\d+(?:\.\d+)*|appendix-[A-Z](?:\.\d+)*|page-\d+)\Z')
 
@@ -313,7 +313,7 @@ class RFCAnchorFragmentTests(unittest.TestCase):
         Catches the *next* ``secion``, not just #942's: any freshly introduced
         typo of ``section-``/``appendix-``/``page-``, or any bare-number
         fragment like those #942's sweep found and fixed, shows up as a
-        finding and fails this test -- there is no allowlist left for one to
+        finding and fails this test -- there is no allowlist for one to
         hide behind. Shape only, not anchor existence -- see #944.
 
         """
@@ -373,8 +373,8 @@ class RFCAnchorFragmentTests(unittest.TestCase):
             ('a live role after a literal whose content ends in a double quote',
              'See ``f"``%s`` dead.', True),
             # The real one: ``'base'`` is an inline literal in
-            # pcapkit/const/ftp/command.py, and 764 literals across 188 files end in
-            # one of those five characters, so this shape is one adjacency away.
+            # pcapkit/const/ftp/command.py, and hundreds of literals across the scanned
+            # roots end in one of those characters, so this shape is one adjacency away.
             ("a live role after this repository's own quoted literal",
              "See ``'base'``%s`` dead.", True),
             # Pins the suffix half of the (prefix, suffix) pair. Deleting the suffix

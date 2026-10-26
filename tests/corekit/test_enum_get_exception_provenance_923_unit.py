@@ -399,10 +399,9 @@ class TransportProtocolCaseFoldingTests(unittest.TestCase):
         pass every assertion above.
 
         An :mod:`ast` walk rather than a substring search over the text: this
-        method's body is mostly comment, and two of those comments legitimately
-        contain the word *except* (``exception-compatible``) and *raise*
-        (``used to raise AttributeError``), so a textual check reports a handler
-        that is not there.
+        method's body is mostly comment, and those comments legitimately contain
+        the word *except* (``exception-compatible``) and *raise*
+        (``would raise``), so a textual check reports a handler that is not there.
         """
         import pcapkit.const.reg.apptype.apptype as const_module
 

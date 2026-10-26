@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """MH flag words keep their reserved bits on rebuild.
 
-GitHub issue #1418: 24 MH ``flags`` bit fields named only some of their bits,
+GitHub issue #1418: MH ``flags`` bit fields named only some of their bits,
 and :class:`~pcapkit.corekit.fields.strings.BitField` packs an unnamed bit as
 zero, so a message, option or sub-structure whose reserved bits were set came
 back with them cleared. Each site names a ``reserved`` sub-field, read into

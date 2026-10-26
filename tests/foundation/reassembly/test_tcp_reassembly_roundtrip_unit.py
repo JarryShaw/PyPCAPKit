@@ -4,14 +4,14 @@
 GitHub issues #1354, #1355 and #1356, from the foundation round-trip audit
 (#1202):
 
-* #1354 -- completion was judged from the buffer-wide hole list, which never
-  learnt of a gap opened *below* the first segment to arrive, and which another
-  acknowledgement number's payload buffer could clear. A zero-filled gap came
+* #1354 -- completion judged from the buffer-wide hole list, which never
+  learns of a gap opened *below* the first segment to arrive, and which another
+  acknowledgement number's payload buffer can clear, brings a zero-filled gap
   back :attr:`~pcapkit.foundation.reassembly.data.data.Completion.COMPLETE`.
-* #1355 -- sequence numbers were compared as plain integers, so a stream
-  crossing ``2 ** 32`` read as a gap of about 4 GiB and allocated it.
-* #1356 -- a FIN submitted the buffer at once, so data reordered behind it was
-  split off into a buffer of its own.
+* #1355 -- sequence numbers compared as plain integers make a stream crossing
+  ``2 ** 32`` read as a gap of about 4 GiB and allocate it.
+* #1356 -- a FIN that submits the buffer at once splits data reordered behind
+  it off into a buffer of its own.
 
 Every case feeds hand-built segments and reads no capture. Classes are imported
 inside each test, after :func:`~tests._support.reimport_once_per_class`.

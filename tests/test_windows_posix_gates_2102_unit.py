@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """The POSIX-only stdlib the tests use is gated off on Windows (#2102).
 
-The first Windows run failed on :mod:`resource`, :func:`signal.alarm` and
-``chmod`` mode bits. Windows is not available here, so each case below loads or
+Without the gates, a Windows run fails on :mod:`resource`, :func:`signal.alarm`
+and ``chmod`` mode bits. Windows is not available here, so each case below loads or
 runs the affected module with the platform faked -- ``os.name`` set to ``'nt'``,
 :func:`signal.alarm` and ``SIGALRM`` removed, ``chmod`` keeping only the
 read-only bit -- and checks that it collects and skips, rather than errors.

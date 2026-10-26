@@ -46,7 +46,7 @@ LATEST_ONLY = {
 #: ``latest`` cannot install (PCAP_CT needs a system libpcap; the PyPCAP and
 #: PyPCAPFile markers stop below 3.12). ``engine-tests`` and ``pypcap-parity`` run them.
 STILL_DARK = frozenset({'HAS_MYPY', 'HAS_PYLINT', 'HAS_PCAP_CT', 'HAS_PYPCAP', 'HAS_PYPCAPFILE'})
-#: A test the audit found running nowhere, or in ``gate`` alone, per flag.
+#: Per flag, a test that runs nowhere, or in ``gate`` alone, without the ``latest`` install.
 DARK_TESTS = {
     'HAS_RUNTIME': 'tests/foundation/engines/test_runtime_engines.py',
     'HAS_SCAPY': 'tests/interface/test_core.py',

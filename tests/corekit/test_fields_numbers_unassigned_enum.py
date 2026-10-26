@@ -52,8 +52,8 @@ not the generated ones.
 one of thousands of unassigned codes and a fix special-casing it would pass a
 test that used only it, so
 :meth:`UnassignedEnumFieldTests.test_no_value_of_any_width_escapes_the_field_layer`
-walks every value a one- and two-octet field can carry, for four registries, and
-asserts that nothing foreign comes out.
+walks every value a one- and two-octet field can carry, for registries of each
+width, and asserts that nothing foreign comes out.
 """
 
 from __future__ import annotations
@@ -208,7 +208,8 @@ class UnassignedEnumFieldTests(unittest.TestCase):
         """The fallback is at the field layer and nowhere else.
 
         A registry rejecting a value is a statement about that registry, and
-        callers -- including the generated ``get()`` -- rely on it. The fallback
+        callers -- including :meth:`~pcapkit.corekit.enum.EnumLookup.get`, which every
+        generated registry inherits -- rely on it. The fallback
         lives in the field, which knows the value arrived in a field of a fixed
         width; it does not reach into the registry, so both of these go on
         raising.
@@ -235,8 +236,8 @@ class UnassignedEnumFieldTests(unittest.TestCase):
         :mod:`pcapkit.const`, which is why the stand-ins below are built here
         rather than borrowed. A *generated* guard raises a bare, unlogged
         :exc:`ValueError` on purpose -- ``tests/const/test_const_enum_builtin_parity.py``
-        pins exactly that, because each generated ``get()``'s ``except
-        ValueError`` fallback depends on it -- so no registry under
+        pins exactly that, because the ``except ValueError`` fallback in
+        :meth:`~pcapkit.corekit.enum.EnumLookup.get` depends on it -- so no registry under
         :mod:`pcapkit.const` exercises this branch, and none needs to: a
         generated guard that bounds its registry to a width rejects with that
         same bare :exc:`ValueError`, whether the registry is a bit-flag one such
@@ -329,7 +330,7 @@ class UnassignedEnumFieldTests(unittest.TestCase):
 
         ``28`` is one of thousands of unassigned codes, so a fix that special-cased
         it would pass a test written around it. This walks the *entire* value space
-        a one- and two-octet field can carry, across four registries of different
+        a one- and two-octet field can carry, across registries of different
         shapes, and asserts that nothing leaves the field layer except a member.
 
         Without the fix this raises for the overwhelming majority of
@@ -365,7 +366,7 @@ class UnassignedEnumFieldTests(unittest.TestCase):
                     f'first {escaped[:3]}'
                 )
 
-        # NOTE: All four registries are swept before anything is asserted, so a
+        # NOTE: Every registry is swept before anything is asserted, so a
         # report names every one that failed rather than only the first. A bare
         # ``assertEqual`` inside the loop would abort at the first failing
         # registry and leave the rest unmeasured, which is the difference between

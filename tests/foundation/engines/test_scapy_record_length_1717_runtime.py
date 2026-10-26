@@ -3,8 +3,8 @@
 
 :file:`examples/generators/options.py` writes HOPOPT's Jumbo Payload case as a
 genuine jumbogram, a 65,590-octet frame in a capture whose snaplen is 262,144.
-The scapy engine handed over its first 65,535 octets, Scapy's ``MTU``, which
-``recv()`` cuts every record to by default.
+Guards against the scapy engine handing over only its first 65,535 octets,
+Scapy's ``MTU``, which ``recv()`` cuts every record to by default.
 
 :file:`options-ipv6.pcap` is generated, so the module belongs to the
 fixture-dependent tier.

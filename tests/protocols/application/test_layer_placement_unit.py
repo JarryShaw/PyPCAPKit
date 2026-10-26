@@ -9,19 +9,21 @@ what encapsulates it, with the IETF as the single source of truth.
 Link Layer chapter at §2.3.2. The rule and its citations are written down at
 :doc:`/contributing/conventions/protocol-layer-placement`.
 
-Three separate things are pinned here, because each can break independently:
+These are pinned separately, because each can break independently:
 
 #. the ``__layer__`` values and the base classes, including the **order** of RARP's
    two bases -- ``ARP``'s chain reaches ``Link``, which owns ``__layer__``, so
    ``class RARP(ARP, Application)`` would still report ``'Link'``;
-#. that the dispatch keys did **not** move with the modules, only the
-   ``ModuleDescriptor`` paths they point at;
-#. that parsing still works, with **no per-class override**. ``Application`` accepts
+#. that the dispatch keys stay in the registries of the layer below --
+   ``TransType.OSPFIGP`` in ``Internet.__proto__``, RARP's EtherType in
+   ``Link.__proto__`` -- and only the ``ModuleDescriptor`` paths they hold point
+   into the application subpackage;
+#. that parsing works, with **no per-class override**. ``Application`` accepts
    the ``-1`` sentinel (the undissected remainder), so ``OSPF`` and ``RARP`` inherit
    ``__post_init__``, ``_decode_next_layer`` and ``_import_next_layer`` unchanged.
 
 Every case builds its own octets in memory and reads no capture under
-``examples/captures/``, which are generated rather than committed.
+``examples/captures/``, most of which are generated rather than committed.
 
 """
 from __future__ import annotations

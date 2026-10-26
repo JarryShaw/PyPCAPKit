@@ -166,7 +166,7 @@ class TestCommands(unittest.TestCase):
             _actions.annotation('debug', 'm')
 
     def test_the_title_escapes_as_the_scripts_did(self) -> None:
-        """``leg_summary.py`` escaped only ``,`` in a leg's name; for the legs the matrices name, that is all."""
+        """For the legs the matrices name, a title escapes only the ``,`` in the leg's name."""
         for leg in ('Python 3.8 (KTLO, non-blocking)', 'Python 3.14t (experimental, non-blocking)',
                     'Python pypy-3.10', 'Python graalpy-25.0'):
             with self.subTest(leg=leg):
@@ -234,7 +234,7 @@ class TestFiles(unittest.TestCase):
         self.assertIsNotNone(found, text)
 
     def test_an_unset_file(self) -> None:
-        """A ``required`` write raises, as ``os.environ[...]`` did; any other writes nothing."""
+        """A ``required`` write raises :exc:`KeyError`, as ``os.environ[...]`` does; any other writes nothing."""
         for env in ({}, {'GITHUB_OUTPUT': '', 'GITHUB_STEP_SUMMARY': ''}):
             with self.subTest(env=env):
                 self.assertFalse(_actions.set_output('code', 'true', required=False, environ=env))

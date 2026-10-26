@@ -7,7 +7,7 @@ module=None, ...)``, so
 :class:`~pcapkit.const.reg.apptype.apptype.AppType`,
 :class:`~pcapkit.const.pcapng.filter_type.FilterType` and
 :class:`FrameType.Flags <pcapkit.protocols.schema.application.httpv2.FrameType.Flags>`
-rendered it. ``restore_class_signature`` in :file:`docs/source/conf.py` gives
+render it by default. ``restore_class_signature`` in :file:`docs/source/conf.py` gives
 every enumeration the ``(*values)`` an enumeration with members renders.
 
 The tests call the hook directly and replay the event through Sphinx's own
@@ -34,7 +34,7 @@ if TYPE_CHECKING:
 #: on one interpreter.
 __tier__ = 'LATEST'
 
-#: The memberless enumerations that rendered the functional-API form.
+#: The memberless enumerations that render the functional-API form by default.
 MEMBERLESS = (
     'pcapkit.const.reg.apptype.apptype.AppType',
     'pcapkit.const.pcapng.filter_type.FilterType',

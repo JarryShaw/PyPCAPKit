@@ -1,23 +1,23 @@
 # -*- coding: utf-8 -*-
 """#1967: :file:`util/release_status.py`, and ``vendor_update``'s inline shell, run as Create Release runs them.
 
-* :class:`TestTheFormerShellAgrees` runs the shell ``release_status``'s "Report
-  why this run did or did not release anything" held before the script, on the
-  cases below, and the script on the same, and requires the same status,
+* :class:`TestTheFormerShellAgrees` runs ``release_status``'s "Report why this
+  run did or did not release anything" in its inline shell form, the reference
+  the script must match, on the cases below, and the script on the same, and requires the same status,
   standard output and error, ``$GITHUB_OUTPUT``, ``$GITHUB_STEP_SUMMARY`` and
-  ``gh`` calls. The former body is kept here verbatim, and the case table is
-  checked to reach every branch of it. The one sentence the shell never had,
-  the Anaconda remedy #2140 added, is dropped from the script's output first;
+  ``gh`` calls. That form is kept here verbatim, and the case table is
+  checked to reach every branch of it. The one sentence the shell form lacks,
+  the Anaconda remedy (#2140), is dropped from the script's output first;
   :mod:`tests.project.test_release_gates` pins it.
 * :class:`TestTheVendorUpdateStaysInline` pins ``vendor_update``'s "Read whether
-  its vendor-update job ran", which #1967 moved to a script and then put back
-  inline as too plain to need one, to its shell verbatim, with no checkout, and
-  runs that ``run:`` on its own case table, which reaches each of its branches.
+  its vendor-update job ran", inline as too plain to need a script (#1967), to
+  its shell verbatim, with no checkout, and runs that ``run:`` on its own case
+  table, which reaches each of its branches.
 * :class:`TestTheStepsRunTheScripts` pins ``release_status``'s step to its
-  script, after a checkout of :file:`util/` alone, and the script to the
-  standard library and Python 3.8's syntax.
+  script, after a checkout of :file:`util/` alone, and the script to
+  :file:`util/`, the standard library and Python 3.8's syntax.
 
-The shell ran as a step with no ``shell:`` runs on the runner, ``bash -e``, and
+The shell form runs as a step with no ``shell:`` runs on the runner, ``bash -e``, and
 ``bash`` prefixes each of its own errors with the script's path and line, which
 :meth:`_Stand.former` strips; the rest of standard error is compared whole.
 What the steps report, case by case, is
@@ -48,7 +48,7 @@ from tests.project.test_requires_python_floor_2051 import FLOOR
 if TYPE_CHECKING:
     from typing import Callable, Optional
 
-#: Test tier (#1958): runs the tree's own scripts and the workflow's former shell.
+#: Test tier (#1958): runs the tree's own scripts and the step's inline shell form.
 __tier__ = 'LATEST'
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -74,8 +74,8 @@ fi
 cat "$GH_REPLY"
 '''
 
-#: "Report why this run did or did not release anything" in ``release_status``, as
-#: it held before :file:`util/release_status.py`.
+#: "Report why this run did or did not release anything" in ``release_status``, in
+#: its inline shell form, the reference :file:`util/release_status.py` must match.
 FORMER_STATUS = textwrap.dedent(r'''
     set -euo pipefail
 
@@ -213,7 +213,7 @@ FORMER_STATUS = textwrap.dedent(r'''
 ''').lstrip()
 
 #: "Read whether its vendor-update job ran" in ``vendor_update``: its ``run:``,
-#: which a script held for a while (#1967).
+#: inline rather than a script (#1967).
 VENDOR_SHELL = textwrap.dedent(r'''
     set -uo pipefail
 
@@ -260,7 +260,7 @@ STATUS_BASE = {
     'PCAPKIT_RELEASED_AT': RUN, 'PCAPKIT_RELEASED_ELSEWHERE': 'false', 'PCAPKIT_PYPI_KTLO_310': '',
     'PCAPKIT_PYPI_KTLO_PYPY310': '',
     # The Vendor Update's own event. Only a manual one reads differently, a
-    # branch the former shell never had; test_build_only_dispatch.py pins it.
+    # branch the shell form lacks; test_build_only_dispatch.py pins it.
     'PCAPKIT_WORKFLOW_RUN_EVENT': 'push',
 }
 #: Every publisher skipped, and each one's evidence.
@@ -273,8 +273,8 @@ ELSEWHERE = {'PCAPKIT_UNIT_TESTS': 'skipped', **ALL_SKIPPED, 'PCAPKIT_RELEASED_E
              'PCAPKIT_RELEASED_AT': OTHER}
 #: A value standing for a variable left unset.
 UNSET = None
-#: The sentence #2140 appended to the unfinished warning where Anaconda files are
-#: missing, which the former shell never printed.
+#: The sentence ending the unfinished warning where Anaconda files are missing
+#: (#2140), which the shell form never prints.
 ANACONDA_REMEDY = re.compile(r"(?m) Its Anaconda files are the exception: while main's version is still .*?, "
                              r"dispatch Conda Update with publish on main, .*? only if that run's own conda legs "
                              r'can still succeed\.$')
@@ -346,7 +346,7 @@ STATUS_CASES = (
     ('the run sha unset where it is named', {**ELSEWHERE, **ALL_DONE, 'PCAPKIT_RUN_SHA': UNSET}),
 )
 
-#: Each way the former ``release_status`` shell ends: ``name -> (status, its last
+#: Each way the ``release_status`` shell form ends: ``name -> (status, its last
 #: line of standard output, as a pattern)``. Every case matches one, and every one
 #: is matched.
 STATUS_BRANCHES = {
@@ -517,7 +517,7 @@ def sampled_status_cases(count: 'int' = 150) -> 'list[tuple[str, dict[str, Optio
 
 @unittest.skipIf(not BASH, 'needs bash, which ran the former shell')
 class TestTheFormerShellAgrees(_Stand):
-    """Each script exits, prints, writes and calls exactly as the shell it replaced, on every case."""
+    """Each script exits, prints, writes and calls exactly as its step's inline shell form, on every case."""
 
     def status_env(self, overrides: 'dict[str, Optional[str]]') -> 'dict[str, str]':
         base = dict.fromkeys(status_env_names(), '')

@@ -221,8 +221,10 @@ class HIPLocatorSetLengthTests(unittest.TestCase):
         and it is built by hand rather than through the maker precisely so that
         the two lengths disagree. A parameter ``len`` of 9 over a single locator
         whose own ``len`` is 4 needs ``rfc_total(9) - 4 - 9`` = 3 padding octets;
-        the shadowed nested value would give the 4 that ``len = 4`` implies.
-        Measured on ``f0999858e``: 32 octets, i.e. 4 of padding. The declared
+        reading the shadowed nested value instead gives
+        ``parameter_padding_len({'len': 4})`` = 0 under the RFC formula. Measured
+        on ``f0999858e``, under the contents-aligning rule (#651): 32 octets,
+        i.e. 4 of padding. The declared
         ``Length`` deliberately does not match the 24 octets the locator actually
         occupies, so the record total here is not meaningful -- the padding count
         is what is under test.

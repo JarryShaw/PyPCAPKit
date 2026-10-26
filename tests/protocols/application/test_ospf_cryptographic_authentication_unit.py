@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Unit tests for the OSPF cryptographic-authentication names, :issue:`1090`.
+"""Unit tests for the OSPF cryptographic-authentication names, #1090.
 
 ``OSPF_CryptographicAuthentication`` is exported under that spelling, with no
 alias for the misspelled ``OSPF_CrytographicAuthentication``, and both OSPF names

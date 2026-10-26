@@ -19,7 +19,7 @@ path into exactly two levels:
    with open(os.path.join(ROOT, '..', 'const', STEM, FILE), 'w') as file:
 
 That is correct only for a crawler exactly one level under ``vendor/``, e.g.
-:mod:`pcapkit.vendor.reg.apptype` writing :file:`pcapkit/const/reg/apptype.py`.
+:mod:`pcapkit.vendor.reg.ethertype` writing :file:`pcapkit/const/reg/ethertype.py`.
 Traced by hand for a module one level deeper --
 :file:`pcapkit/vendor/reg/apptype/tcp.py`, the shape #732 needs -- ``temp`` is
 :file:`.../vendor/reg/apptype`, so ``ROOT`` becomes :file:`.../vendor/reg` and
@@ -94,7 +94,8 @@ only pytest jobs of :file:`.github/workflows/unit-tests.yml` that collect
 anything under :file:`tests/vendor/` at all, since ``integration`` and
 ``pypcap-parity`` never reach it and ``engine-tests`` runs only each engine's
 own test files (#849) -- unlike :file:`tests/vendor/test_user_agent_unit.py`,
-whose own gate also lists ``html5lib`` and so skips on both.
+whose own gate also lists ``html5lib`` and so skips on every ``test`` leg but
+``latest``, the one that installs ``vendor`` (#1958).
 
 """
 from __future__ import annotations
@@ -137,8 +138,8 @@ VENDOR_DEPS = ('requests', 'bs4')
 
 #: Whether the crawlers are importable at all. Both packages ship in the
 #: ``test`` extra (:file:`pyproject.toml`), so this is ``True`` under a plain
-#: ``pip install -e '.[test]'`` and both classes below run in CI as things
-#: stand -- kept as belt-and-braces for an environment that lacks them, the
+#: ``pip install -e '.[test]'`` and both classes below run in CI -- kept as
+#: belt-and-braces for an environment that lacks them, the
 #: same way :file:`tests/vendor/test_crawler_reachability_unit.py` guards it.
 HAS_VENDOR_DEPS = all(importlib.util.find_spec(name) is not None for name in VENDOR_DEPS)
 

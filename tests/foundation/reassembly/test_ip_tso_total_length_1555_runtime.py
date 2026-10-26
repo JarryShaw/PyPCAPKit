@@ -2,10 +2,10 @@
 """A TSO capture reassembles to the same IPv4 datagrams as the unmodified one.
 
 GitHub issue #1555. With the four IPv4 frames of :file:`tcp.pcap` given Total
-Length 0, as TCP segmentation offload leaves them, ``extract(ipv4=True,
-reassembly=True)`` reported four ``PARTIAL`` datagrams with no payload under
-every engine, against four ``COMPLETE`` ones of 44, 32, 244 and 32 octets on
-the unmodified capture: the reassembler took the data length from ``tl - ihl``.
+Length 0, as TCP segmentation offload leaves them, a reassembler that takes the
+data length from ``tl - ihl`` makes ``extract(ipv4=True, reassembly=True)``
+report four ``PARTIAL`` datagrams with no payload under every engine, against
+four ``COMPLETE`` ones of 44, 32, 244 and 32 octets on the unmodified capture.
 Wireshark does not reassemble such a frame at all -- it is one segment -- so the
 expected result is the unmodified capture's, the zeroed header aside.
 

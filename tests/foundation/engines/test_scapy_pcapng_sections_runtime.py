@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """The scapy engine starts each PCAP-NG section with its own interfaces (#1522).
 
-An interface ID counts the Interface Description Blocks of its own section only,
-but :class:`scapy.utils.RawPcapNgReader` appends every section's to one table, so
-a later section's interface 0 resolved to the first section's, link type and
-``if_tsresol`` included. :mod:`pcapkit.foundation.engines.scapy` resets the table
-at each Section Header Block in its own reader subclass.
+An interface ID counts the Interface Description Blocks of its own section only, but
+:class:`scapy.utils.RawPcapNgReader` appends every section's to one table, so
+without the fix a later section's interface 0 resolves to the first section's, link
+type and ``if_tsresol`` included. :mod:`pcapkit.foundation.engines.scapy` resets the
+table at each Section Header Block in its own reader subclass.
 
 Both captures are synthesised from :file:`tcp.pcap`, so the module belongs to the
 fixture-dependent tier. Each has two little-endian sections, the first on one

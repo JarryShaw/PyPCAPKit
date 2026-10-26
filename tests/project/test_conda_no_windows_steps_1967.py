@@ -9,13 +9,13 @@ twin, or a ``windows-latest`` arm in a ``case "${{ matrix.os }}"``.
 
 * :class:`TestNoDeadRunnerCode` pins that no step's ``if:`` or
   ``continue-on-error`` names a runner label the job's matrix lacks, no ``case``
-  arm maps one, :file:`util/release_conda.py`, which both jobs' steps run since
-  #1967, maps no label that neither job has a leg on, and, with no Windows leg,
+  arm maps one, :file:`util/release_conda.py`, which both jobs' steps run
+  (#1967), maps no label that neither job has a leg on, and, with no Windows leg,
   no step is Windows-only. So a Windows leg comes with its steps added
   deliberately, rather than reviving ones nobody has run, as #2060 added both
   jobs' Windows legs and steps.
 * :class:`TestTheCheckSeesDeadCode` feeds :func:`dead` the jobs with such dead
-  Windows code rebuilt into them from the current ones, so the pin cannot pass by
+  Windows code rebuilt into them from the real ones, so the pin cannot pass by
   reading nothing, and ``conda-dist`` without its Windows leg, whose steps must
   then read as dead.
 

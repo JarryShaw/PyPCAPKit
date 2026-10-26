@@ -76,9 +76,7 @@ __tier__ = 'ALL'
 #: parse its fixture. Spelled exactly as
 #: :data:`tests.vendor.test_request_prompt_unit.VENDOR_DEPS` so this file reaches
 #: the **existing** ``HAS_VENDOR_DEPS`` dependency gate rather than minting a new
-#: one -- its entry in :data:`tests._dependency_gates.DEPENDENCY_GATE_EXCLUSIONS`
-#: already accounts for that gate, with
-#: ``dark={'test': ('html5lib',), 'gate': ('html5lib',)}``.
+#: one, which :mod:`tests._dependency_gates` already maps.
 #:
 #: ``html5lib`` is the one that is actually missing on ``test``: ``requests`` and
 #: ``bs4`` are in the ``test`` extra (#507), but only
@@ -92,9 +90,10 @@ VENDOR_DEPS = ('requests', 'bs4', 'html5lib')
 #: rather than making the whole unit tier depend on the crawlers'.
 #:
 #: Consequence worth knowing: :class:`LinkTypeGeneratorLegacyOrderingTests` is the
-#: root-cause pin, and it runs only where the ``vendor`` extra is installed,
-#: which no ``unit-tests.yml`` job does (#849) -- so locally, and in
-#: ``cron-vendor.yml`` only when a crawl changed a constant module (#1853).
+#: root-cause pin, and it runs only where the ``vendor`` extra is installed:
+#: in ``unit-tests.yml``, the ``latest`` leg of ``test`` and the ``gate`` job
+#: (#1958), and in ``cron-vendor.yml`` only when a crawl changed a constant
+#: module (#1853).
 #: :class:`LinkType209ConstResolutionTests`
 #: needs no parser and so still guards the reported symptom everywhere.
 HAS_VENDOR_DEPS = all(importlib.util.find_spec(name) is not None for name in VENDOR_DEPS)
@@ -141,8 +140,8 @@ class LinkType209ConstResolutionTests(unittest.TestCase):
                          "'I2C_LINUX' one; see GitHub issue #844")
 
     def test_the_legacy_name_is_still_reachable_as_an_alias(self) -> None:
-        # The fix reorders which name is canonical for 209; it does not take
-        # the legacy name away -- both still name the same member by value.
+        # The current name is canonical for 209, and the legacy name is kept:
+        # both name the same member by value.
         from pcapkit.const.reg.linktype import LinkType
 
         self.assertEqual(LinkType['IPMB_LINUX'], LinkType['I2C_LINUX'])
@@ -274,14 +273,14 @@ def _duplicate_pair_table_html(first: str, second: str) -> str:
 class LinkTypeGeneratorValueAwareTests(unittest.TestCase):
     """Item 1 of GitHub issue #852: the sink predicate must be value-aware.
 
-    :meth:`~pcapkit.vendor.reg.linktype.LinkType.process`'s sink rule
-    (added by #848) tested a row's notes for the word "legacy" alone, with no
-    check that the row's value is actually claimed by another row. Issue
-    #852 pointed out this can invert in the *other* direction: a future
+    Guards against :meth:`~pcapkit.vendor.reg.linktype.LinkType.process`'s
+    sink rule (#848) testing a row's notes for the word "legacy" alone, with
+    no check that the row's value is actually claimed by another row, which
+    #852 points out can invert in the *other* direction: a future
     *current* row whose notes happen to mention "legacy" about some unrelated
     code gets sunk even though nothing else shares its value -- silently
     reordering the generated file's *emission order* for a value that was
-    never ambiguous in the first place. (It also cannot, by itself, save a
+    never ambiguous in the first place. (Value-awareness cannot, by itself, save a
     row from being wrongly sunk when tcpdump's wording is attached to the
     wrong member of a *genuine* duplicate pair; that residual risk is
     documented at the ``dup_values`` computation in
@@ -332,12 +331,11 @@ class LinkTypeGeneratorValueAwareTests(unittest.TestCase):
     def test_duplicate_pair_canonical_member_is_order_independent(self) -> None:
         """The *current* row must win regardless of which table position it is in.
 
-        Unlike an earlier version of this test, which fed only the
-        current-first ordering and left order-independence resting entirely
-        on :class:`LinkTypeGeneratorLegacyOrderingTests`'s separate,
-        legacy-first 209 fixture, this drives the *same* duplicate pair
-        through :meth:`process` in **both** orders in one test -- so the name
-        is earned here rather than borrowed from a sibling class. A predicate
+        This drives the *same* duplicate pair through :meth:`process` in
+        **both** orders in one test, rather than leaving order-independence
+        resting on :class:`LinkTypeGeneratorLegacyOrderingTests`'s separate,
+        legacy-first 209 fixture -- so the name is earned here rather than
+        borrowed from a sibling class. A predicate
         that regressed to counting only a positional prefix (e.g. "has this
         value already been appended to ``enum``") would still pass a
         single-order test, because that predicate is only

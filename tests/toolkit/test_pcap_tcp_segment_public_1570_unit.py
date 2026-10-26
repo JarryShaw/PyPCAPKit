@@ -2,11 +2,10 @@
 """``tcp_segment`` and ``TCPSegment`` are public in :mod:`pcapkit.toolkit.pcap`. C.f. #1570.
 
 The helper the TCP adapters of :mod:`pcapkit.toolkit.pcap` and
-:mod:`pcapkit.toolkit.pcapng` share was the private ``pcap._tcp_segment``, which
-``pcapng`` imported across modules. Under the rulings on #1519 a shared helper
-becomes public in the module both callers already import, as ``test_start_line``
-did in #1525, so the helper and its result type are public and stay in ``pcap``,
-which ``pcapng`` already imports. The adapters' end-to-end behaviour is covered by
+:mod:`pcapkit.toolkit.pcapng` share, and its result type, are public in
+``pcap``, which ``pcapng`` imports: under the rulings on #1519 a helper shared
+across modules is public in the module its callers already import, as
+``test_start_line`` is (#1525). The adapters' end-to-end behaviour is covered by
 ``tests/toolkit/test_pcap_tcp_segment_unit.py``; these tests pin the public surface
 and that both toolkits read the segment through it.
 

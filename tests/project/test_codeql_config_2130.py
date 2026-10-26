@@ -4,10 +4,10 @@
 ``py/clear-text-logging-sensitive-data`` and
 ``py/clear-text-storage-sensitive-data`` call a value secret from its name
 alone. The tests that build a pcapng Decryption Secrets Block call its bytes
-``secrets``, and those bytes reached ``logger`` calls in :mod:`pcapkit`, as a
+``secrets``, and those bytes reach ``logger`` calls in :mod:`pcapkit`, as a
 capture's stream, its name, or its magic number, and a buffer file's write.
-Each dismissal was lost when a
-pull request moved the line the alert named. Python is not built, so a path the
+A dismissal is lost when a
+pull request moves the line the alert names. Python is not built, so a path the
 config ignores is not extracted and cannot be a flow source.
 
 * :class:`TestTheInitStep` checks ``Initialize CodeQL`` in

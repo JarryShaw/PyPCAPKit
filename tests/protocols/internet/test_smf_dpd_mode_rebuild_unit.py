@@ -19,7 +19,7 @@ import unittest
 from tests._support import reimport_once_per_class
 
 #: Extension headers carrying one SMF_DPD option (type 0x08), next header 59,
-#: padded to 8 octets with Pad1 or PadN.
+#: padded to a multiple of 8 octets with Pad1 or PadN where needed.
 HEADERS = {
     'H-DPD': bytes.fromhex('3b00080481020304'),
     'I-DPD NULL': bytes.fromhex('3b00080300010200'),

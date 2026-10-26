@@ -4,11 +4,11 @@
 GitHub issue #576: the check of the sibling ``_make_mptcp_*`` helpers' length arithmetic that
 #567 suggests, outside the scope of #579 (``MPTCP.subtype`` and MP_CAPABLE).
 
-An MPTCP option carries its own octet count in its ``Length`` field, and three separate
-places have to agree on it: the ``_make_mptcp_*`` maker that *writes* that octet, the schema
+An MPTCP option carries its own octet count in its ``Length`` field, and each of these
+places has to agree on it: the ``_make_mptcp_*`` maker that *writes* that octet, the schema
 in :mod:`pcapkit.protocols.schema.transport.tcp` whose fields actually *pack* the octets, and
 the ``_read_mptcp_*`` reader whose guard *accepts* it coming back. These tests guard against
-any of the three disagreeing with :rfc:`8684` at each site below; at MP_FASTCLOSE all three can
+any of them disagreeing with :rfc:`8684` at each site below; at MP_FASTCLOSE all of them can
 disagree with each other.
 
 What each site is, and where its number comes from

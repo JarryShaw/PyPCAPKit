@@ -12,7 +12,7 @@ from tests._support import close_extractor, reimport_once_per_class, sample_path
 RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 
-#: Block types that carry captured packet octets, i.e. the three whose schema
+#: Block types that carry captured packet octets, i.e. those whose schema
 #: declares a ``__payload__``. Spelled as the wire values so that the test does
 #: not have to import the library to know what it is looking for.
 BLOCK_SHB = 0x0A0D0D0A
@@ -113,8 +113,8 @@ def _synthetic_pcapng(endian: str = '<') -> bytes:
     """A PCAP-NG file holding one block of every payload-carrying type.
 
     No committed fixture has a Simple Packet Block or an (obsolete) Packet Block --
-    :file:`examples/captures/dhcp.pcapng` is all Enhanced Packet Blocks -- so the
-    other two are built here rather than generated, which also keeps the expected
+    :file:`examples/captures/dhcp.pcapng` is all Enhanced Packet Blocks -- so those
+    are built here rather than generated, which also keeps the expected
     octets in the same file as the assertion.
 
     Both packet blocks that can carry options are given some, which no fixture
@@ -256,10 +256,10 @@ class PcapngPayloadOctetsTests(unittest.TestCase):
     def test_every_payload_carrying_block_type_carries_its_octets(self) -> None:
         """EPB, SPB and the obsolete Packet Block each keep their own payload.
 
-        All three declare ``__payload__ = 'packet_data'`` and all three put it at a
+        Each declares ``__payload__ = 'packet_data'`` and each puts it at a
         different offset, so a fix that only reached the Enhanced Packet Block --
         the only type any committed fixture has -- would pass the test above and
-        still corrupt the other two.
+        still corrupt the others.
 
         Run over both byte orders. The offset of the captured data is the same in
         either, but the fields it is summed from are not, so a byte order the walk

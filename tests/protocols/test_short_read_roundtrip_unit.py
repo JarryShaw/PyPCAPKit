@@ -154,7 +154,7 @@ class TestShortReadRoundTrip(unittest.TestCase):
         eth = Ethernet(raw, 13)
         self.assertEqual(Ethernet.from_data(eth.info).data, raw)
         self.assertEqual(Ethernet.from_data(eth.info.to_dict()).data, raw)
-        # the value decodes as before, the missing octet read as zero
+        # the value still decodes, the missing octet read as zero
         self.assertEqual(eth.info.type, 0x0800)
 
     def test_issue_1451_repro(self) -> None:

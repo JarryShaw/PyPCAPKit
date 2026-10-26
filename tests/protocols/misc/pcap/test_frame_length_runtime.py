@@ -34,7 +34,7 @@ neither format is the odd one out -- only the reader was.
 Why fixtures can miss it: **the two lengths are equal unless the snapshot length
 cut the frame short**, so a fixture without a truncated frame compares a value
 against itself and cannot tell the two assignments apart. This module therefore
-leans on the two truncated fixtures (#614), and asserts that they really are
+leans on the truncated fixtures (#614), and asserts that they really are
 truncated before asserting anything about them -- a fixture regenerated into
 something untruncated fails
 :meth:`PcapFrameLengthRuntimeTests.test_the_fixture_really_holds_a_truncated_frame`
@@ -67,7 +67,7 @@ RUNTIME_DEPS = ('tbtrim', 'aenum', 'chardet', 'dictdumper')
 HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME_DEPS)
 
 #: The classic-PCAP fixtures that carry a truncated frame, as ``(name, struct
-#: byte-order prefix)``. All three come from :file:`examples/generators/endian.py`
+#: byte-order prefix)``. They all come from :file:`examples/generators/endian.py`
 #: and hold the same three records, the third of them captured short.
 PCAP_FIXTURES = (
     ('big_endian.pcap', '>'),
@@ -281,7 +281,7 @@ class PcapFrameLengthRuntimeTests(unittest.TestCase):
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class PcapngFrameLengthRuntimeTests(unittest.TestCase):
-    """#618, on the PCAP-NG reader -- the one that was already right.
+    """#618, on the PCAP-NG reader -- the one whose assignment matches Wireshark's.
 
     This is the control. It passes without the fix too, and that is what it is
     for: it pins the convention the PCAP reader follows, so a change that

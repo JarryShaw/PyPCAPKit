@@ -4,9 +4,9 @@ A ``pcap`` module can be installed and still fail to import with something other
 than :exc:`ImportError` -- ``OSError: Cannot find libpcap.so library`` with no
 system libpcap, for one. :meth:`Extractor.import_test
 <pcapkit.foundation.extraction.Extractor.import_test>` lets that through, so the
-engine's ``unsupported_reason()`` has to report it. ``PCAP_CT`` did and ``PyPCAP``
-did not, so ``extract(engine='pypcap')`` raised the loader's error where
-``engine='pcap_ct'`` warned and fell back. Both ask
+engine's ``unsupported_reason()`` has to report it. Guards against ``PyPCAP``
+not reporting it, which makes ``extract(engine='pypcap')`` raise the loader's
+error where ``engine='pcap_ct'`` warns and falls back. Both ask
 :func:`pcapkit.foundation.engines._pcap_backend.engine_reason`.
 
 """

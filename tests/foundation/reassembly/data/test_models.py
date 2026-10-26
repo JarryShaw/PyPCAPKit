@@ -87,11 +87,10 @@ class ReassemblyDataModelTests(unittest.TestCase):
     def test_completion_values_are_pinned(self) -> None:
         """GitHub issue #884: pin every member's exact value and the member set.
 
-        :class:`~pcapkit.foundation.reassembly.data.data.Completion` was
-        converted from spelled-out literals to ``auto()`` -- which on a
-        :class:`~pcapkit.utilities.compat.StrEnum` returns
-        ``name.lower()`` and so is value-preserving here -- but a future
-        change to ``_generate_next_value_`` could silently alter these
+        :class:`~pcapkit.foundation.reassembly.data.data.Completion` spells its
+        values with ``auto()``, which on a
+        :class:`~pcapkit.utilities.compat.StrEnum` returns ``name.lower()``, so
+        a change to ``_generate_next_value_`` could silently alter these
         wire-visible strings without this test noticing unless every member
         and every value is asserted explicitly.
 

@@ -312,9 +312,9 @@ class ProbeWorkerCrashTests(unittest.TestCase):
     """A worker dying mid-probe fails that one test, not the session (#1756).
 
     xdist replaces the dead worker, and the replacement collects ``tests/``
-    afresh while the probe's cleanup never ran. Before ``collect_ignore`` in
-    :mod:`tests.conftest`, that collection audited the stale probe and the
-    controller ended the session with ``xdist.dsession.Interrupted``, exit 2.
+    afresh while the probe's cleanup never ran. Without ``collect_ignore`` in
+    :mod:`tests.conftest`, that collection audits the stale probe and the
+    controller ends the session with ``xdist.dsession.Interrupted``, exit 2.
 
     """
 
@@ -343,7 +343,7 @@ class ProbeWorkerCrashTests(unittest.TestCase):
             handle.write(_CRASH_PLUGIN_SOURCE)
 
     def test_a_worker_crash_mid_probe_does_not_interrupt_the_session(self) -> None:
-        """Fails on main: exit 2 and the probe's diagnostic as the interrupt reason."""
+        """Without ``collect_ignore``: exit 2 and the probe's diagnostic as the interrupt reason."""
         protocols = self.probe_path.parent
         environ = _child_environ()
         environ['PYTHONPATH'] = os.pathsep.join([self.plugin_dir, environ['PYTHONPATH']])
@@ -490,7 +490,7 @@ class ProbeLockNonBlockingTests(unittest.TestCase):
         self.assertEqual(self.held, 0, f'not every lock taken was released: {self.calls!r}')
 
     def test_graalpys_path_polls_and_never_blocks(self) -> None:
-        """Fails on the code before db36aed75, which asked for the lock blocking::
+        """Fails where GraalPy's path asks for the lock blocking::
 
             AssertionError: Lists differ: [1] != []
 
@@ -547,7 +547,7 @@ class ProbeLockWriterPriorityTests(unittest.TestCase):
         self.addCleanup(patcher.stop)
 
     def test_a_reader_arriving_behind_a_waiting_writer_waits_for_it(self) -> None:
-        """Fails on db36aed75 and before, which have no gate: ``['R'] != []``."""
+        """Fails without the gate: ``['R'] != []``."""
         # The blocking path only where it is the real one: on GraalPy it holds
         # the GIL, and these threads would deadlock exactly as #1977 describes.
         for polls in sorted({getattr(_conftest, 'TIER_GUARD_LOCK_POLLS', False), True}):
@@ -724,10 +724,10 @@ class ProbeLockNestedRunTests(unittest.TestCase):
 
     :mod:`tests.project.test_module_isolation` runs a nested :program:`pytest`
     inside its shared hold. A writer arriving meanwhile holds the gate while it
-    waits on that hold, so a nested shared request waited behind it, and the
-    hold waited on the nested run: on GraalPy the run's ``subprocess.run``
-    timeout, 600 s, was what broke it, with the writer and every other reader
-    stalled as long.
+    waits on that hold, so without the fix a nested shared request waits behind
+    it, and the hold waits on the nested run: on GraalPy only the run's
+    ``subprocess.run`` timeout, 600 s, breaks it, with the writer and every
+    other reader stalled as long.
 
     """
 

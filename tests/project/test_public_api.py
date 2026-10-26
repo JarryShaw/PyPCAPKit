@@ -48,8 +48,7 @@ of its ``sys.path`` save-and-restore, private as ``_path``; the attributes
 
 No import is wrapped in a skip, either. That is deliberate and also measured: with
 ``dpkt``, ``scapy``, ``emoji``, ``cryptography`` and ``pycrate`` all absent, every
-non-vendor module there was when this module was written still
-imported, because each optional dependency is guarded at its import site -- e.g.
+non-vendor module imported in that measurement, because each optional dependency is guarded at its import site -- e.g.
 ``pcapkit/toolkit/scapy.py`` catches :exc:`ModuleNotFoundError` and degrades to
 ``scapy = None`` with a warning. The vendor modules need nothing past the ``test``
 extra at import time: the NGAP crawlers import ``pycrate`` only inside the
@@ -99,8 +98,8 @@ happened, and this is the assertion that makes the next one fail immediately
 instead of in three years.
 
 Further assertions cover the rest of the family, because a name can fail to be
-exported in more ways than by being misspelled. Each of them failed against the
-tree this module was written on:
+exported in more ways than by being misspelled. Each of them guards against a
+defect the package had:
 
 * :meth:`~PublicAPISurfaceTests.test_no_misspelled_all` --
   ``pcapkit/const/pcapng/__init__.py`` spelled it ``___all__``, with *three*
@@ -287,8 +286,8 @@ class PublicAPISurfaceTests(unittest.TestCase):
     def test_public_modules_were_actually_found(self) -> None:
         # A bug in the walk above would turn every other test in this class into
         # a silent pass over an empty list, so pin the shape of what it returns.
-        # The floor is deliberately far below the population found when this was
-        # written: it catches "found nothing", not "the library gained a module".
+        # The floor is deliberately far below the tree's module population: it
+        # catches "found nothing", not "the library gained a module".
         # The vendor packages are pinned because excluding the subtree hid
         # __all__ gaps in each (#1772).
         modules = public_modules()
@@ -465,8 +464,8 @@ class PublicAPISurfaceTests(unittest.TestCase):
         # satisfied at all, so it gets an assertion of its own. Any of these kinds of
         # staleness turns an entry into an exclusion nobody decided, silently
         # excusing the next real omission of that name: the package is gone, the
-        # attribute is gone, or the name has since been added to __all__ and the
-        # entry now excuses nothing while looking as though it does.
+        # attribute is gone, or the name is in __all__ and the entry excuses
+        # nothing while looking as though it does.
         packages = {name for name, is_package in public_modules() if is_package}
 
         self.assertEqual(sorted(set(DELIBERATE_NON_EXPORTS) - packages), [],

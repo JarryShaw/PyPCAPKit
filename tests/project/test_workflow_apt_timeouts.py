@@ -9,10 +9,10 @@ unresponsive mirror turned a docs-only PR red after burning the entire job
 budget. It happened twice inside forty minutes.
 
 What makes that worth a test rather than only a fix is that the same hazard
-existed in a *second* step nobody was looking at. ``pypcap-parity`` installs the
-union of the packages ``engine-tests`` installs, from the same mirrors, and had
-no bound either -- it simply had not been the leg that stalled yet. Fixing only
-the step that happened to bite is the recurrence this module exists to prevent:
+sits in every step that runs apt, not only in the one that stalled:
+``pypcap-parity`` installs the union of the packages ``engine-tests`` installs,
+from the same mirrors. Bounding only the step that happened to bite is the
+recurrence this module exists to prevent:
 nothing about an unbounded ``apt-get`` warns, and the failure is invisible until
 a mirror misbehaves on whichever step was left out.
 
@@ -30,7 +30,7 @@ key being present.
 
 Two things this deliberately does **not** test:
 
-* **That the number is well chosen.** Whether 15 minutes is the right bound
+* **That the number is well chosen.** Whether a step's bound is the right one
   depends on how long the step legitimately takes, which is a property of
   Ubuntu's mirrors on the day and is not observable from the file. The reasoning
   and the measurements behind the current value live in the workflow's own
@@ -52,7 +52,7 @@ its ``plan`` or ``install`` counts as invoking apt, as one naming ``apt-get``
 does.
 
 Comments are stripped before the ``apt-get`` marker is looked for. Without that,
-prose *about* apt -- including the long note #974 added above the very step this
+prose *about* apt -- including the long #974 note above the very step this
 module guards -- would register as an invocation, so a step could be flagged for
 mentioning apt and, worse, a commented-out invocation could be credited as a
 live one. :func:`tests._dependency_gates._engine_matrix_variants` strips

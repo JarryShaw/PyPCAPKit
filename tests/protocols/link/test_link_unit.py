@@ -280,7 +280,7 @@ class LinkProtocolUnitTests(unittest.TestCase):
                 self.assertIn('must not be a bool', str(context.exception))
                 self.assertIn('int(True)', str(context.exception))
 
-        # the fix must not disturb a real address on either family
+        # the guard leaves a real address on either family packing as given
         self.assertEqual(
             proto._make_proto_resolve('198.51.100.9', EtherType.Internet_Protocol_version_4),
             b'\xc6\x33\x64\x09')
@@ -366,7 +366,8 @@ class LinkProtocolUnitTests(unittest.TestCase):
 
         # Neither the abstract base nor v2 has a numeral registry index: v2 is
         # reached by UDP port 1701, and a port is not an ``__index__`` value
-        # anywhere in this package. L2TPv3 will be the first with one (115).
+        # anywhere in this package. An L2TPv3 class would be the first with one
+        # (IP protocol 115).
         for klass in (L2TP, L2TPv2):
             with self.subTest(protocol=klass.__name__):
                 with self.assertRaises(UnsupportedCall):

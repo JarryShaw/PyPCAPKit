@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 """The :mod:`pcapkit.vendor` crawlers read their own variables.
 
-GitHub issue #1726: #1743 moved ``pcapkit.vendor.default.MAX_RETRY`` and
-``CI_MODE``, and the proxy lookups, into :mod:`pcapkit.utilities.config`; the
-issue then settled that the crawlers keep their variables in
-:mod:`pcapkit.vendor`. So :mod:`pcapkit.vendor.default` reads
+GitHub issue #1726 settled that the crawlers keep their variables --
+``pcapkit.vendor.default.MAX_RETRY`` and ``CI_MODE``, and the proxy lookups --
+in :mod:`pcapkit.vendor` rather than in :mod:`pcapkit.utilities.config`. So :mod:`pcapkit.vendor.default` reads
 :envvar:`PCAPKIT_VENDOR_RETRY` and :envvar:`PCAPKIT_CI_MODE` itself, through the
 public :func:`~pcapkit.utilities.config.read_limit` and
 :func:`~pcapkit.utilities.config.read_flag`, so a bad value still warns with a
@@ -194,8 +193,7 @@ class ReaderTests(_VendorCase):
                                     for count in range(1, retry + 1)])
 
     def test_proxies_are_read_on_every_call(self) -> None:
-        # Set after the import: the variables are read on every call, as
-        # get_proxies always read them.
+        # Set after the import: the variables are read on every call.
         with mock.patch.dict(os.environ, {'PCAPKIT_HTTP_PROXY': 'http://late'}):
             os.environ.pop('PCAPKIT_HTTPS_PROXY', None)
             self.assertEqual(self.default.get_proxies(), {'http': 'http://late'})

@@ -636,16 +636,16 @@ class SeekableReaderTests(unittest.TestCase):
         self.assertEqual(reader.read(13), b'ABCDEFGHIJKLM')
         with self.assertRaises(self.exceptions.SeekError):
             reader.seek(8)
-        self.assertEqual(reader.tell(), 13)          # was 8, the rejected target
-        self.assertEqual(reader.read(1), b'N')       # was b'L', the octet at 11
+        self.assertEqual(reader.tell(), 13)          # without the fix: 8, the rejected target
+        self.assertEqual(reader.read(1), b'N')       # without the fix: b'L', the octet at 11
         self._close_reader(reader)
 
         reader = self.SeekableReader(io.BytesIO(b'ABCDEFGHIJKLMNOPQRSTUVWXYZ'), buffer_size=4)
         self.assertEqual(reader.read(6), b'ABCDEF')
         with self.assertRaises(self.exceptions.SeekError):
             reader.seek(0)
-        self.assertEqual(reader.tell(), 6)           # was 0
-        self.assertEqual(reader.read(1), b'G')       # was b'C', the octet at 2
+        self.assertEqual(reader.tell(), 6)           # without the fix: 0
+        self.assertEqual(reader.read(1), b'G')       # without the fix: b'C', the octet at 2
         self._close_reader(reader)
 
     def test_seek_refuses_a_negative_absolute_position_under_every_whence(self) -> None:
@@ -694,10 +694,10 @@ class SeekableReaderTests(unittest.TestCase):
             reader = self.SeekableReader(io.BytesIO(b'abcdefghij'), buffer_size=4,
                                          buffer_save=True, buffer_path=path)
             with self.assertRaises(self.exceptions.SeekError) as ctx:
-                reader.seek(-5, io.SEEK_CUR)     # returned -5, no exception at all
+                reader.seek(-5, io.SEEK_CUR)     # without the fix: returns -5, no exception at all
             self.assertEqual(str(ctx.exception), 'negative seek value -5')
             self.assertEqual(reader.tell(), 0)
-            self.assertEqual(reader.read(1), b'a')   # was OSError: [Errno 22]
+            self.assertEqual(reader.read(1), b'a')   # without the fix: OSError: [Errno 22]
             self._close_reader(reader)
         finally:
             if os.path.exists(path):
@@ -741,7 +741,7 @@ class SeekableReaderTests(unittest.TestCase):
         self.assertEqual(reader.tell(), 2)
         # the cursor is the position's other half, and a preview may not have moved it
         self.assertEqual(reader._buffer.tell(), reader._tell - reader._buffer_set)
-        self.assertEqual(reader.read(3), control)   # was b'\x06\x07\x08'
+        self.assertEqual(reader.read(3), control)   # without the fix: b'\x06\x07\x08'
         self._close_reader(reader)
 
         stream = self._pipe_stream(data)
@@ -756,7 +756,7 @@ class SeekableReaderTests(unittest.TestCase):
         reader.read(8)
         self.assertEqual(reader.peek(4), b'\x09\x0a\x0b\x0c')
         self.assertEqual(reader.tell(), 8)
-        self.assertEqual(reader.read(4), control)   # was b'\x01\x02\x03\x04'
+        self.assertEqual(reader.read(4), control)   # without the fix: b'\x01\x02\x03\x04'
         self._close_reader(reader)
 
     # ------------------------------------------------------------------ #
@@ -789,10 +789,10 @@ class SeekableReaderTests(unittest.TestCase):
         """
         # the `- 1` alone: seek to the base, ask for more than the cap allowed
         for method, data, size, expected in [
-            ('read', b'abcde', 5, b'abcde'),                  # was b'abce'
-            ('readline', b'abcde\nfghij\n', 6, b'abcde\n'),   # was b'abce\n'
-            ('read1', b'abcde', 4, b'abcd'),                  # was b'abc'
-            ('peek', b'abcde', 4, b'abcd'),                   # was b'abc'
+            ('read', b'abcde', 5, b'abcde'),                  # without the fix: b'abce'
+            ('readline', b'abcde\nfghij\n', 6, b'abcde\n'),   # without the fix: b'abce\n'
+            ('read1', b'abcde', 4, b'abcd'),                  # without the fix: b'abc'
+            ('peek', b'abcde', 4, b'abcd'),                   # without the fix: b'abc'
         ]:
             with self.subTest(half='count-less-one', method=method):
                 reader = self.SeekableReader(io.BytesIO(data))
@@ -803,7 +803,7 @@ class SeekableReaderTests(unittest.TestCase):
 
         # the wrong origin: seek strictly inside the buffered region, ask past its end
         for method, data, size, expected in [
-            ('read', b'0123456789' + b'X' * 20, 8, b'56789XXX'),   # was b'56789\x00\x00\x00'
+            ('read', b'0123456789' + b'X' * 20, 8, b'56789XXX'),   # without the fix: b'56789\x00\x00\x00'
             ('readline', b'0123456789\n' + b'X' * 20, 8, b'56789\n'),
             ('read1', b'0123456789' + b'X' * 20, 8, b'56789'),
             ('peek', b'0123456789' + b'X' * 20, 8, b'56789'),
@@ -844,14 +844,13 @@ class SeekableReaderTests(unittest.TestCase):
     def test_the_window_base_and_content_pointer_track_the_stream_consumption(self) -> None:
         """``_buffer_set + _buffer_cur`` is how far the stream has been read, always.
 
-        This is the invariant a draft of #633 broke, turning a loud :exc:`ValueError` into
-        silent data corruption: :meth:`seek` reads the pair as the stream's consumption
+        Breaking this invariant turns a loud :exc:`ValueError` into silent data
+        corruption (#633): :meth:`seek` reads the pair as the stream's consumption
         point and reads ahead from it to fill a gap, so a pair that under-reports makes
         the next forward seek splice octets in from the wrong absolute offset without
         complaining. It is asserted directly here, against a stream that counts what has
         actually been taken off it, after *every* operation rather than at the end -- an
-        output assertion can pass while the bookkeeping behind it is already wrong, which
-        is exactly how that draft got as far as review.
+        output assertion can pass while the bookkeeping behind it is already wrong.
 
         Deriving the buffer's cursor from ``_tell`` at each point of use is what preserves
         the pair by construction: nothing clamps or adjusts either member to make a read fit,

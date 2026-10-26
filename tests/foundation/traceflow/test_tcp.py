@@ -555,9 +555,10 @@ class TCPTraceFlowTests(unittest.TestCase):
     def test_an_empty_extension_reports_the_written_file_open_or_finalised(self) -> None:
         """An empty extension still writes a file, and every report names it (#2237).
 
-        The flow file is named after the label alone. :meth:`TCP.submit` reported
-        :data:`None` for a flow still open while :meth:`TCP._finalise` reported the
-        path, so one flow's ``fpout`` depended on when it was read.
+        The flow file is named after the label alone. Without the fix,
+        :meth:`TCP.submit` reports :data:`None` for a flow still open while
+        :meth:`TCP._finalise` reports the path, so one flow's ``fpout`` depends on
+        when it is read.
 
         """
         from dictdumper import JSON

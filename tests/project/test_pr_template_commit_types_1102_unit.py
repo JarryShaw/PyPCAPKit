@@ -3,8 +3,8 @@
 
 :file:`CONTRIBUTING.md` lists the valid ``type`` prefixes of a commit subject, and
 :file:`.github/PULL_REQUEST_TEMPLATE.md` asks the contributor to tick the one their
-subject carries. The template had no ``release`` box although ``release`` is a listed
-type with commits in the history, so a version-bump pull request had nothing to tick.
+subject carries. Without a ``release`` box, though ``release`` is a listed type with
+commits in the history, a version-bump pull request has nothing to tick.
 
 """
 

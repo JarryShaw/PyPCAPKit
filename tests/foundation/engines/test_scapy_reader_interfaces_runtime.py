@@ -8,11 +8,11 @@ engine, all fixed in the reader subclass of
 * #1503 -- a Simple Packet Block carries no timestamp. Scapy leaves the packet
   with the time it was built, i.e. the moment it was read; the default engine
   reads 0.
-* #1517 -- the flow tracer looked the link type up by the name of the packet's
-  first layer, and a raw IPv4 packet's is ``IP``, which names no link type, so
-  tracing raised :exc:`~pcapkit.utilities.exceptions.MissingKeyError`.
-* #1549 -- Scapy ignores an interface's ``if_tsoffset``, so each timestamp on it
-  was short by the offset.
+* #1517 -- a flow tracer that looks the link type up by the name of the
+  packet's first layer finds ``IP`` for a raw IPv4 packet, which names no link
+  type, so tracing raises :exc:`~pcapkit.utilities.exceptions.MissingKeyError`.
+* #1549 -- Scapy ignores an interface's ``if_tsoffset``, so each timestamp it
+  reads on that interface is short by the offset.
 
 The captures are synthesised from :file:`tcp.pcap`, whose frames 1, 2, 6 and 7
 are one IPv4 flow and 3, 4 and 5 one IPv6 flow, so the module belongs to the

@@ -267,8 +267,8 @@ class DumpkitCommonTests(unittest.TestCase):
         """GitHub issue #772, the half the hook above cannot reach.
 
         ``PLIST._append_dict`` in :mod:`dictdumper.plist` writes a key as
-        ``'<key>{item}</key>'.format(item=item)`` and calls ``_encode_value`` on
-        the *value* two lines down, never on the key -- so :meth:`object_hook`
+        ``'<key>{item}</key>'.format(item=item)`` and then calls ``_encode_value``
+        on the *value*, never on the key -- so :meth:`object_hook`
         is handed every value the writer interpolates and no key at all, and the
         escaping proven above cannot reach one. Both branches that build a
         mapping therefore escape their own keys:
@@ -307,9 +307,9 @@ class DumpkitCommonTests(unittest.TestCase):
         converted = [plist_dumper.object_hook(entry) for entry in plist_dumper.object_hook(multidict)]
         self.assertEqual(converted, [{'a &amp; b &lt;c&gt;': 'value'}, {ESCAPED_BYTES_KEY: 'secret'}])
 
-        # An enum-derived key is still escaped exactly once: the escaping moved
-        # out of this branch and into one shared helper, so escaping it twice is
-        # the shape of mistake that move could have made.
+        # An enum-derived key is escaped exactly once: this branch renders it
+        # with ``render_enum`` and escapes the result through the one shared
+        # ``escape_key`` helper, so escaping it twice is the mistake to rule out.
         unknown = enum.IntEnum('<unknown>', {'<unassigned>': 1})
         member = getattr(unknown, '<unassigned>')
         multidict = MultiDict()
@@ -551,7 +551,7 @@ class DumpkitIOTests(unittest.TestCase):
 
     def test_pcap_dumper_cannot_serialise_a_mapping_frame(self) -> None:
         # Why Extractor substitutes a dict-capable trace format for the PyShark
-        # and PyPCAPFile engines (DPKT and Scapy left that guard in #1507): their
+        # and PyPCAPFile engines (DPKT and Scapy are outside it, #1507): their
         # flow-tracing adapters report each frame as a plain dict from
         # ``packet2dict``, and this dumper reads
         # ``value.packet`` and ``value.frame_info`` off a dissected Frame. Pinned

@@ -57,8 +57,9 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 #: Every distribution importing :mod:`pcapkit.vendor` needs -- see
 #: :mod:`tests.vendor.test_user_agent_unit` for why ``requests`` alone is not
 #: enough. ``html5lib`` ships in the ``vendor`` extra (:file:`pyproject.toml`),
-#: not ``test`` -- so these skip on the ``test`` and ``gate`` jobs, which do not
-#: install it. ``engine-tests`` does not run them either: each of its cells
+#: not ``test`` -- so these skip on every leg of the ``test`` job but ``latest``,
+#: the one that installs ``vendor`` (#1958). ``engine-tests`` does not run them
+#: either: each of its cells
 #: runs only that engine's own test files (#849).
 VENDOR_DEPS = ('requests', 'bs4', 'html5lib')
 

@@ -424,7 +424,7 @@ class TestTheFailuresWarn(_FakeGitHub):
                 self.assertEqual(self.calls(), [])
 
     def test_a_bad_command_line_exits_2(self) -> None:
-        """A missing or unknown mode or status, or a removed flag."""
+        """A missing or unknown mode or status, or a flag the script does not take."""
         base = [sys.executable, str(SCRIPT), '--category', CATEGORY, '--title', TITLE, '--report', str(self.report)]
         for args in ((), ('--mode', 'scheduled'), ('--status', 'success'), ('--mode', 'nightly', '--status', 'success'),
                      ('--mode', 'push', '--status', 'passed'), ('--mode', 'push', '--status', 'success', '--always'),

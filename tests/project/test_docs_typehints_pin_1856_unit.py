@@ -4,7 +4,7 @@
 GitHub issue #1856: :file:`docs/source/conf.py` imports
 ``resolve_type_guarded_imports`` from a private module of
 ``sphinx-autodoc-typehints``, and 3.14.0 replaced that module, ``_resolver``,
-with the ``_resolve`` package, so a dependency bump to such a release failed the
+with the ``_resolve`` package, so a dependency bump to such a release fails the
 docs build at import.
 
 The file is written against a pinned release rather than branching on the
@@ -14,8 +14,8 @@ installed one. :file:`docs/requirements.txt` pins it for the docs build, and the
 everywhere.
 
 3.14.0 also stopped binding a module's ``if TYPE_CHECKING:`` names into the
-module, so Sphinx's own signature introspection lost them again: the schema
-class signatures fell back to a bare ``_VT``, which matched another module's
+module, so on its own Sphinx's signature introspection loses them: the schema
+class signatures fall back to a bare ``_VT``, which matches another module's
 TypeVar as well. ``bind_guarded_names`` binds them itself.
 
 The tests that load :file:`conf.py` need Sphinx and the pinned release, and skip

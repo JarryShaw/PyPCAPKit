@@ -115,7 +115,7 @@ class TestReleaseConcurrency(unittest.TestCase):
         self.assertFalse(first.startswith('create-release-refs/'), first)
 
     def test_runs_that_may_release_still_wait_for_each_other(self) -> None:
-        """The double-publish guard the group was for: never per run, never cancelling."""
+        """The double-publish guard the group is for: never per run, never cancelling."""
         self.assertEqual(self.cancel, 'false')
         self.assertEqual(self.group(run_context('34894022730')),
                          self.group(run_context('34894646592')))

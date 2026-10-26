@@ -2,10 +2,10 @@
 """A pipe that says it can seek and does not still yields every frame (#2097).
 
 On Windows before CPython 3.16 a pipe's ``seekable()`` is :data:`True` and its
-``seek`` silently does nothing (CPython gh-86768). ``Extractor`` took that at
-its word, skipped :class:`~pcapkit.corekit.io.SeekableReader`, and lost the
-octets its look at the magic number read. :class:`LyingPipe` reproduces such a
-pipe on any platform, over a real :func:`os.pipe`.
+``seek`` silently does nothing (CPython gh-86768). Guards against ``Extractor``
+taking that at its word, skipping :class:`~pcapkit.corekit.io.SeekableReader`, and
+losing the octets its look at the magic number read. :class:`LyingPipe` reproduces
+such a pipe on any platform, over a real :func:`os.pipe`.
 
 """
 

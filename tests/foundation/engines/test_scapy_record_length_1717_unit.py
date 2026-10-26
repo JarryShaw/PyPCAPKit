@@ -5,7 +5,8 @@
 ``MTU`` of 65,535 octets, and every Scapy reader cuts a record to ``size`` --
 Scapy 2.6's PCAP-NG reader to ``MTU`` whatever the ``size``. Scapy 2.8's PCAP
 reader also reads at most ``MTU * 4`` octets of a record, 262,140, and skips
-the rest. So a record longer than either reached the engine's frames short.
+the rest. So, without the fix, a record longer than either reaches the
+engine's frames short.
 The reader subclass of :mod:`pcapkit.foundation.engines.scapy` reads it whole.
 
 The captures are synthesised, so the module belongs to the unit tier.

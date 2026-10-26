@@ -43,8 +43,8 @@ class FakeFragment:
     Next Header field, ``frag_off`` is the fragment offset in 8-octet units and
     ``m_flag`` is the More Fragments flag. In particular there is **no** ``nh``
     attribute, because the real :class:`dpkt.ip6.IP6FragmentHeader` has none --
-    a fake that invented one is exactly what let the defect behind the
-    ``AttributeError`` reach a release unnoticed.
+    a fake that invented one would let code reading ``nh`` pass here and raise
+    ``AttributeError`` on every real fragment.
 
     """
 
@@ -256,7 +256,8 @@ class DPKTToolkitTests(unittest.TestCase):
 
     def test_a_bare_ip_packet_is_its_own_network_layer(self) -> None:
         # On a raw-IP link type dpkt reads a frame as a bare IP or IP6, which
-        # names no ``ip`` or ``ip6`` layer, so every adapter returned None (#1548)
+        # names no ``ip`` or ``ip6`` layer, so without the fix every adapter
+        # returns None (#1548)
         import dpkt
 
         from pcapkit.const.reg.linktype import LinkType
@@ -900,8 +901,8 @@ def _assemble(segments: 'list[tuple[int, bytes]]') -> bytes:
 class DPKTEngineReassemblyTests(unittest.TestCase):
     """The ``dpkt`` engine reassembles the captured octets, octet for octet.
 
-    This is the check that would have caught the Data Offset defect: the split
-    was wrong in a way that left the datagram *lengths* untouched, because the
+    This is the check that catches a Data Offset defect: a split in the wrong
+    place leaves the datagram *lengths* untouched, because the
     reassembly buffer is indexed by sequence number, so only a byte-level
     comparison against the capture's own octets shows it.
 
@@ -941,9 +942,9 @@ class DPKTTimestampTests(unittest.TestCase):
 
     DPKT's reader yields ``(timestamp, bytes)`` and only the octets become a
     packet, so a frame does not know when it was captured unless the engine says
-    so. It did not, and
+    so. Without the fix it does not, and
     :func:`~pcapkit.interface.misc.follow_tcp_stream` -- which reads frames back
-    after the extraction loop has finished -- had nothing to pass its reassembler
+    after the extraction loop has finished -- has nothing to pass its reassembler
     but a bound zero.
 
     """
@@ -987,7 +988,7 @@ class DPKTTimestampTests(unittest.TestCase):
         """And the real timestamp changes nothing, which is worth pinning.
 
         TCP reassembly has no timeout by default, so the value never reaches a
-        decision -- the fix removes a workaround rather than altering a result.
+        decision, and no result depends on it.
         ``in.pcap`` holds two TCP conversations, of two frames and one, each
         segment alone, so none has a payload to reassemble.
 

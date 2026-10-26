@@ -6,8 +6,8 @@ category with :file:`util/discussion_report.py`, which
 :mod:`tests.project.test_discussion_report_2030` tests on its own.
 
 * :class:`TestTheWorkflowsPost` pins both workflows: the ``discussion`` job
-  alone holds ``discussions: write``, every other job's permissions as they
-  were, first-party actions only, the command each posts with, the mode each
+  alone holds ``discussions: write``, every other job's permissions as
+  :data:`PERMISSIONS` lists them, first-party actions only, the command each posts with, the mode each
   event maps to, Lint's report steps and their guards, and when each job runs:
   never on a pull request, and for GitHub Pages never on a verdict for another
   commit.

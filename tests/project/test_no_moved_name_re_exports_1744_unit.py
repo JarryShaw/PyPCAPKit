@@ -2,10 +2,9 @@
 """A moved name keeps no re-export at its old path (GitHub issue #1744).
 
 The owner ruled on #1715 and #1103 that a moved name or module keeps no
-re-export at its old path, ``TLSKeyLabel`` included, and #1744 swept the ones
-that survived. Under ruling D1 on #1744 only an *explicit* re-export goes: an
-alias assignment, a name in a non-home module's ``__all__``, or a name
-documented as importable there. A module that still uses a name it imports from
+re-export at its old path, ``TLSKeyLabel`` included. Under ruling D1 on #1744
+only an *explicit* re-export goes: an alias assignment, a name in a non-home
+module's ``__all__``, or a name documented as importable there. A module that still uses a name it imports from
 the new home keeps the import, so the old path resolving through it is expected.
 
 These checks pin that:

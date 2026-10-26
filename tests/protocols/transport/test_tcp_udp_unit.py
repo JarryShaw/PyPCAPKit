@@ -1262,13 +1262,13 @@ class TCPUDPUnitTests(unittest.TestCase):
         """``TCP(srcport=80, dstport=443)`` is the documented construction path.
 
         :meth:`TCP.make <pcapkit.protocols.transport.tcp.TCP.make>` advertises
-        ``Enum_AppType | int``, but the schema field converted an :obj:`int` only
-        on its way out to :obj:`bytes`, so the schema attribute kept the
-        :obj:`int` -- and :meth:`TCP.read
+        ``Enum_AppType | int``. Guards against the schema field converting an
+        :obj:`int` only on its way out to :obj:`bytes`, which leaves the schema
+        attribute an :obj:`int` -- and :meth:`TCP.read
         <pcapkit.protocols.transport.tcp.TCP.read>`, which reads ``srcport.port``
-        to pick the next layer, raised ``AttributeError: 'int' object has no
-        attribute 'port'``. UDP failed identically; SCTP did not, only because it
-        keys its next layer on the DATA chunk's PPID and never reads ``.port``.
+        to pick the next layer, then raises ``AttributeError: 'int' object has no
+        attribute 'port'``. UDP is exposed identically; SCTP is not, only because
+        it keys its next layer on the DATA chunk's PPID and never reads ``.port``.
 
         """
         from pcapkit.const.reg.apptype import AppType, TransportProtocol
@@ -1301,8 +1301,8 @@ class TCPUDPUnitTests(unittest.TestCase):
         :rfc:`7413` sends a cookie request as option ``22 02``: length 2 and no
         cookie. The data model annotates ``cookie`` as :class:`bytes`, and a
         segment built with ``cookie=b''`` reads back ``b''``, so a parsed one
-        reading :obj:`None` broke both the annotation and the parse/construct
-        agreement. Both round trips are checked byte for byte.
+        reading :obj:`None` would break both the annotation and the
+        parse/construct agreement. Both round trips are checked byte for byte.
 
         """
         import struct
@@ -1541,8 +1541,8 @@ class TCPUDPUnitTests(unittest.TestCase):
         packet context does not carry -- so it raises before
         :meth:`~pcapkit.protocols.transport.tcp.TCP._read_mode_mp` ever looks the
         subtype up. Construction reaches the sibling read site in
-        :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mode_mp`, which had the
-        identical defect.
+        :meth:`~pcapkit.protocols.transport.tcp.TCP._make_mode_mp`, which is open to
+        the identical defect.
 
         """
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption

@@ -9,7 +9,7 @@ registry's ``IPv6 Extension Header`` column disagree on header 147
 does not have. :mod:`tests.vendor.test_vendor_ipv6_extension_header_925_unit`
 pins the crawler to the authoritative registry, and its
 ``test_context_matches_the_committed_const_file_byte_for_byte`` proves this
-file is exactly what the fixed crawler produces from the fixture the issue's
+file is exactly what the crawler produces from the fixture the issue's
 own investigation fetched.
 
 :meth:`pcapkit.protocols.internet.ipv6.IPv6._decode_next_layer` resolves

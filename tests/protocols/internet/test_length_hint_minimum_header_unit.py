@@ -3,7 +3,7 @@
 
 GitHub issue #1173. :meth:`~pcapkit.protocols.protocol.ProtocolBase._parse_next_layer`
 keeps a next layer as :class:`~pcapkit.protocols.misc.raw.Raw` when fewer octets
-were captured than its ``__length_hint__`` (:issue:`1170`). ``IPv6_Route`` hinted
+were captured than its ``__length_hint__`` (#1170). ``IPv6_Route`` hinted
 4 octets and ``MH`` 6, though each header is at least 8, so a stream of 4--7 or
 6--7 octets was parsed and rebuilt as a full 8-octet header. ``HOPOPT`` and
 ``IPv6_Opts`` hinted 2 for the same 8-octet minimum. An application layer's

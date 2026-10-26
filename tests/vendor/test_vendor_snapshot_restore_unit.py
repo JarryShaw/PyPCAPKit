@@ -61,7 +61,7 @@ content before the injected failure fires;
 :func:`~pcapkit.vendor.__main__._snapshot_and_restore` is what restores it
 afterwards. It asserts on the *reported* error
 (:meth:`~unittest.TestCase.assertWarnsRegex` against the crawler's own
-``RuntimeError`` text) rather than merely on ``run()`` returning falsy,
+``RuntimeError`` text) as well as on ``run()`` returning falsy,
 deliberately: a mutant that deletes the ``raise`` from
 ``_snapshot_and_restore``'s ``except BaseException:`` clause does not
 merely misreport the failure, it makes it disappear. Because
@@ -69,9 +69,11 @@ merely misreport the failure, it makes it disappear. Because
 exception its generator catches and does not re-raise,
 :meth:`Vendor.__init__`'s ``RuntimeError`` never reaches ``run()``'s own
 ``except Exception as error:`` at all under that mutant -- no warning, no
-stderr line, and ``run()`` returns :data:`True`. A bare
-``assertFalse(run(...))`` cannot catch a return value that flips to *true*;
-only asserting that the crawler's own error was actually reported can. It
+stderr line, and ``run()`` returns :data:`True`, which the ``assertFalse``
+on its result catches. The error-text assertion is what catches the variant
+that also collapses the ``else:`` clause into an unindented
+``os.remove(backup)``: ``run()`` stays falsy there, but reports that call's
+:exc:`FileNotFoundError` instead of the crawler's own error. It
 also asserts the destination's mode (``0o640`` in, ``0o640`` out) alongside
 its content, which is the measurement that justifies a single mode
 assertion: restore preserves mode as a side effect of :func:`shutil.copy2`
@@ -285,11 +287,12 @@ class SnapshotRestoreTests(unittest.TestCase):
 
         # assertWarnsRegex against the crawler's OWN error text, not merely
         # assertFalse(run(...)): a mutant that deletes the `raise` from
-        # _snapshot_and_restore's `except BaseException:` still returns a
-        # falsy run() -- the unguarded os.remove(backup) that then runs
-        # raises FileNotFoundError instead (the backup was just renamed away
-        # by os.replace), and run() reports THAT, not this test's injected
-        # RuntimeError. A bare falsy check cannot tell "failed for the right
+        # _snapshot_and_restore's `except BaseException:` and collapses its
+        # `else:` into an unindented os.remove(backup) still returns a falsy
+        # run() -- that os.remove raises FileNotFoundError (the backup was
+        # just renamed away by os.replace), and run() reports THAT, not this
+        # test's injected RuntimeError. Deleting the `raise` alone makes
+        # run() return True, which the assertFalse below catches. A bare falsy check cannot tell "failed for the right
         # reason" from "failed for the wrong one"; this can.
         with mock.patch('builtins.print', side_effect=_raise_on_render):
             with self.assertWarnsRegex(self.VendorRuntimeWarning, 'simulated failure'):

@@ -123,7 +123,7 @@ class IPv6ReassemblyRuntimeTests(unittest.TestCase):
         # the payload bytes, not just their count
         self.assertEqual(self._payload(datagram), body)
         self.assertEqual(len(self._payload(datagram)), 1536)
-        # the truncation the unscaled offset produced: 128 units + 512 octets
+        # the truncation an unscaled offset produces: 128 units + 512 octets
         self.assertNotEqual(len(self._payload(datagram)), 640)
 
     def test_reassembly_keys_on_identification_not_flow_label(self) -> None:

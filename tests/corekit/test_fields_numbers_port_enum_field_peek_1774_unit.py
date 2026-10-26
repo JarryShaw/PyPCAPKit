@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 #: interpreter.
 __tier__ = 'ALL'
 
-#: An unassigned port on all four transports, in none of ``_missing_``'s spans.
+#: An unassigned port on every transport, in none of ``_missing_``'s spans.
 PORT = 50000
 
 

@@ -26,8 +26,8 @@ These fail silently if they drift, so they are pinned here:
 * Every test outside :file:`tests/project` that reads ``docs/`` or Markdown is
   run by ``project-tests``, so a docs-only PR cannot break it unseen.
 
-The workflow is sliced as text, not parsed with :mod:`yaml`, which is in no
-extra of :file:`pyproject.toml`; the same split
+The workflow is sliced as text, not parsed with :mod:`yaml`, which comes only
+with the ``test`` extra of :file:`pyproject.toml`; the same split
 :file:`tests/project/test_workflow_apt_timeouts.py` uses.
 
 """
@@ -357,7 +357,7 @@ class TestJobGating(unittest.TestCase):
                       " && github.event_name != 'pull_request' }}\n", head)
 
     def test_the_ktlo_cell_runs_on_every_event(self) -> None:
-        """#1633: the KTLO cell runs on every event; #1538's main-only cut was for a prerelease."""
+        """#1633: the KTLO cell runs on every event."""
         ktlo = step(job('engine-tests'), 'Run the KTLO cells (non-blocking)')
         self.assertNotRegex(ktlo, r'(?m)^        if:')
 
@@ -730,7 +730,7 @@ class TestDocsOnlyPathRunsEveryDocsReader(unittest.TestCase):
     """A docs-only PR must still run every test that reads what it changed."""
 
     def listed(self) -> 'set[str]':
-        """The modules project-tests' second run step names."""
+        """The modules project-tests' ``Run the other tests that read docs/ or Markdown`` step names."""
         script = step(job('project-tests'), 'Run the other tests that read docs/ or Markdown')
         command = re.search(r'(?m)^        run: python util/cap_file_size.py python -m unittest -v (.+)$', script)
         self.assertIsNotNone(command)
@@ -748,7 +748,7 @@ class TestDocsOnlyPathRunsEveryDocsReader(unittest.TestCase):
                 self.assertTrue((ROOT / (name.replace('.', '/') + '.py')).is_file())
 
     def test_the_scan_is_not_blind(self) -> None:
-        """The one known reader is found, so a passing run is not vacuous."""
+        """A known reader is found, so a passing run is not vacuous."""
         self.assertIn('tests.corekit.test_sentinel_exports_unit', docs_readers())
 
 

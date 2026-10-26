@@ -73,8 +73,8 @@ class FakePySharkPacket:
             # ``LayerFieldsContainer``, which subclasses ``str`` -- so
             # ``frame.encap_type`` arrives as text, never as an ``int``, and the
             # fake has to match that or it would not exercise the ``int()`` the
-            # toolkit needs. Left absent by default so the tests below that
-            # predate it keep exercising the filter-name fallback: a frame layer
+            # toolkit needs. Left absent by default so the tests below that do
+            # not set it exercise the filter-name fallback: a frame layer
             # without the field is exactly what selects that path.
             frame_fields['encap_type'] = encap_type
         self.frame_info = FakeLayer('frame', **frame_fields)
@@ -159,7 +159,7 @@ class PySharkToolkitTests(unittest.TestCase):
     def test_tcp_traceflow_negative_paths(self) -> None:
         """The ``ip=False``/``tcp=False`` short-circuits return ``None``
         before ``tcp_traceflow`` ever resolves a link type, so they are
-        unaffected by #775 tier 1 dropping the ``LinkType.NULL`` default
+        unaffected by the lookup having no ``LinkType.NULL`` default (#775 tier 1)
         (see ``test_tcp_traceflow_raises_for_an_ip_rooted_packet`` and the
         ``FILTER_NAME_TO_LINKTYPE``-resolving tests below for that).
 
@@ -199,7 +199,7 @@ class PySharkToolkitTests(unittest.TestCase):
         """Wireshark's Token Ring dissector -- the ``DLT_IEEE802`` root layer
         -- files its PDML node under the filter name ``tr``, per
         ``packet-tr.c``'s ``proto_register_protocol("Token-Ring",
-        "Token-Ring", "tr")``, and measured since on this host: ``editcap -T
+        "Token-Ring", "tr")``, and measured on this host: ``editcap -T
         tr`` writes DLT 6 and ``tshark`` roots the result at ``tr``. That name
         is also not a LinkType member on its own, so it needs the same
         ``FILTER_NAME_TO_LINKTYPE`` entry as ``eth`` to resolve to
@@ -219,8 +219,8 @@ class PySharkToolkitTests(unittest.TestCase):
     def test_tcp_traceflow_raises_for_an_ip_rooted_packet(self) -> None:
         """``'ip'`` is absent from ``FILTER_NAME_TO_LINKTYPE``, so the
         fallback path raises. The name is reported as PyShark gave it
-        rather than upper-cased (#843), there being no upper-case
-        ``Enum_LinkType.get()`` attempt left to upper-case it for.
+        rather than upper-cased (#843), the fallback making no upper-cased
+        ``Enum_LinkType.get()`` attempt to upper-case it for.
 
         The double feeds ``'ip'`` as ``layers[0]`` to exercise that path. A real
         raw-IP capture would root at ``raw`` instead -- measured, and recorded in
@@ -267,7 +267,7 @@ class PySharkToolkitTests(unittest.TestCase):
 
     def test_tcp_traceflow_disambiguates_the_shared_filter_names(self) -> None:
         """#843: one Wireshark display-filter name serves several DLTs, so
-        keying on ``packet.layers[0].layer_name`` answered a *valid but
+        keying on ``packet.layers[0].layer_name`` alone answers a *valid but
         wrong* DLT with no error. ``frame.encap_type`` separates them, and
         ``ENCAP_TYPE_TO_LINKTYPE`` turns it into the right member.
 
@@ -389,13 +389,13 @@ class PySharkToolkitTests(unittest.TestCase):
 
     def test_filter_name_fallback_resolves_the_measured_names(self) -> None:
         """Per the maintainer's ruling on #842, the fallback table covers
-        **every** filter name the sweep measured as unambiguous, not only the
-        two it started with. The owner's reason on #842 for covering every
+        **every** filter name the sweep measured as unambiguous. The owner's
+        reason on #842 for covering every
         filter name that differs from the one pcapkit uses was that nobody
         should have to come back later to update the table; he also wanted the
         values generated if possible, or at least a comment pointing at the
         source of truth. None of the names below spells a LinkType member, so
-        each one raised before the expansion.
+        each one raises without its table entry.
 
         Each pair was measured the same way as the rest of the table: the
         root PDML ``<proto name>`` of an ``editcap -F pcap -T <encap>``
@@ -494,7 +494,7 @@ class LayerField(str):
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class PySharkFlagTests(unittest.TestCase):
     """#1514: tshark 4.x reports a boolean field as ``'True'``/``'False'``, which
-    ``bool(int(...))`` refused with :exc:`ValueError` on the first traced TCP frame.
+    ``bool(int(...))`` refuses with :exc:`ValueError` on the first traced TCP frame.
 
     """
 
@@ -546,7 +546,7 @@ class PySharkFlagTests(unittest.TestCase):
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class PySharkTraceFieldTests(unittest.TestCase):
     """The ``timestamp``, ``seq`` and ``ack`` ``tcp_traceflow`` hands the tracer
-    must equal the default engine's. #1514's ``ValueError`` hid that they did not.
+    must equal the default engine's, which #1514's ``ValueError`` hides.
 
     """
 
@@ -557,7 +557,7 @@ class PySharkTraceFieldTests(unittest.TestCase):
         """tshark prints ``frame.time_epoch`` to the nanosecond. The default
         engine computes ``ts_sec + Decimal(ts_usec) / 10**6`` (or ``10**9``)
         and hands the tracer ``float()`` of it
-        (``pcapkit/protocols/misc/pcap/frame.py``), so the float must be
+        (:meth:`Frame.read <pcapkit.protocols.misc.pcap.frame.Frame.read>`), so the float must be
         identical, not just close.
 
         """
@@ -720,9 +720,10 @@ class PySharkCommentedPacketTests(unittest.TestCase):
         self.assertEqual(data.index, 6)
 
     def test_a_commented_tcp_packet_resolves_its_link_type(self) -> None:
-        """Reading ``encap_type`` from ``frame_info`` found none on the
-        ``pkt_comment`` layer, fell back to ``layers[0]``, which is ``frame``,
-        and raised ``MissingKeyError: 'frame'``.
+        """Reading ``encap_type`` from ``frame_info`` finds none on the
+        ``pkt_comment`` layer, falls back to ``layers[0]``, which is ``frame``,
+        and raises ``MissingKeyError: 'frame'``, so it is read from the
+        ``frame`` layer.
 
         """
         from pcapkit.const.reg.linktype import LinkType
@@ -734,8 +735,8 @@ class PySharkCommentedPacketTests(unittest.TestCase):
         self.assertEqual(data.timestamp, 70.5)
 
     def test_packet2dict_puts_the_frame_layer_on_top(self) -> None:
-        """``frame_info`` put the comment's fields at the top level and nested
-        the frame fields under ``FRAME``. The frame layer's fields belong on
+        """Without the fix, ``frame_info`` puts the comment's fields at the top
+        level and nests the frame fields under ``FRAME``. The frame layer's fields belong on
         top, as for any other packet, and the comment keeps its own key.
 
         """
@@ -783,10 +784,10 @@ class PySharkCommentedPacketTests(unittest.TestCase):
 class PySharkFixedHeaderTests(unittest.TestCase):
     """#1611: a TCP layer without a whole fixed header is not traced.
 
-    Reading a field tshark had not reported raised a bare :exc:`AttributeError`
-    and aborted the whole extraction. A header cut at octets 14 to 19 has every
-    field ``tcp_traceflow`` reads, so it was traced where the default engine
-    skips it.
+    Without the fix, reading a field tshark did not report raises a bare
+    :exc:`AttributeError` and aborts the whole extraction, and a header cut at
+    octets 14 to 19, which has every field ``tcp_traceflow`` reads, is traced
+    where the default engine skips it.
 
     """
 
@@ -823,8 +824,8 @@ class PySharkAddressTests(unittest.TestCase):
     """#1671: a TCP layer whose IP layer lacks an address is not traced.
 
     tshark reports no ``ip.dst`` behind an LSRR or SSRR option whose route data
-    is no whole number of addresses. Reading it raised a bare
-    :exc:`AttributeError` and aborted the whole extraction.
+    is no whole number of addresses. Without the fix, reading it raises a bare
+    :exc:`AttributeError` and aborts the whole extraction.
 
     """
 

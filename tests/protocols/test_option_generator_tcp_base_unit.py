@@ -26,9 +26,9 @@ Issue #617 has :meth:`ProtocolBase.__init__
 <pcapkit.protocols.protocol.ProtocolBase.__init__>` check a construction keyword
 against the protocol's signatures and raise
 :exc:`~pcapkit.utilities.exceptions.UnsupportedCall` for one that no signature
-declares. ``TCP.make`` still ends in ``**kwargs`` and still reads nothing out of
-it -- the check is upstream of it -- so the account above remains the account of
-how the defect was possible, and
+declares. ``TCP.make`` ends in ``**kwargs`` and reads nothing out of it -- the
+check is upstream of it -- so the account above is the account of how the
+defect was possible, and
 :meth:`TCPBaseKeywordTests.test_an_undeclared_keyword_is_refused_rather_than_absorbed`
 is where the refusal is pinned.
 
@@ -238,7 +238,7 @@ class TCPBaseKeywordTests(unittest.TestCase):
 
         The two are maintained side by side on purpose. This is the assertion
         that fails when somebody edits one of them, which is the reminder that
-        twenty-five captured frames change with it.
+        every frame of ``options-tcp.pcap`` changes with it.
 
         """
         options = _load_generator()
@@ -335,8 +335,8 @@ class TCPBaseHeaderTests(unittest.TestCase):
     def test_the_header_fields_are_the_ones_expected(self) -> None:
         """Every value the mapping states reaches the field it names.
 
-        ``seq`` is the one that moved: the mapping read as ``1`` and the segment
-        reported ``0``. The rest are asserted alongside it because a fixture
+        ``seq`` is the field #602 lost: a mapping reading ``1`` built a segment
+        reporting ``0``. The rest are asserted alongside it because a fixture
         header nobody has checked is a fixture header that could differ
         anywhere.
 

@@ -126,8 +126,8 @@ class EngineBaseTests(unittest.TestCase):
 
         Unguarded by version on purpose: ``protocol`` is not one of the four
         names that collide with :meth:`abc.ABCMeta.__new__` below Python 3.11, so
-        the guard is reached on every supported version. Verified against this
-        tree on 3.10.21, where it raises ``UnsupportedCall`` as it does on 3.14.
+        the guard is reached on every supported version. Verified on 3.10.21,
+        where it raises ``UnsupportedCall`` as it does on 3.14.
 
         ``name`` is an unrecognised keyword here too, and is checked
         separately below because it is the one typo whose exception *type* is

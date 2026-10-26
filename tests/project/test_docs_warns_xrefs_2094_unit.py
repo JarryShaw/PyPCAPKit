@@ -4,7 +4,7 @@
 GitHub issue #2094: napoleon turns a ``Raises:`` entry into a ``:raises:``
 field, which the Python domain links to the exception, but writes a ``Warns:``
 entry into a plain field with the class name in bold, linking nothing -- and a
-``~`` prefix was printed as it stands. ``parse_warns_section`` in
+``~`` prefix is printed as it stands. ``parse_warns_section`` in
 :file:`docs/source/conf.py`, which ``setup`` installs over napoleon's own parser,
 writes each warning class as an ``exc`` role that searches the way the
 ``:raises:`` field does.

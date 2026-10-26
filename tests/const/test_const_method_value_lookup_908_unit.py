@@ -5,14 +5,15 @@ GitHub issue #908. Of :class:`~pcapkit.const.http.method.Method`'s members,
 only ``BASELINE_CONTROL`` (value ``'BASELINE-CONTROL'``)
 and ``VERSION_CONTROL`` (value ``'VERSION-CONTROL'``) have a member *name*
 that differs from their *value*, because a hyphen cannot appear in a Python
-identifier. The override's own ``get`` checked only ``_member_map_`` (names)
-and fell straight through to building an *unregistered* member on any miss,
-so a caller spelling either method by its registered *value* got back a
-freshly minted, hollowed-out member (``safe=False``, ``idempotent=False``)
-instead of the real one the IANA registry describes (``idempotent=True`` for
-both) -- even though the very same value already resolved correctly through
-the constructor (:meth:`~pcapkit.const.http.method.Method._missing_`, which
-this override never touched).
+identifier. Guards against the override's own ``get`` checking only
+``_member_map_`` (names) and falling straight through to building an
+*unregistered* member on any miss, under which a caller spelling either method
+by its registered *value* gets back a freshly minted, hollowed-out member
+(``safe=False``, ``idempotent=False``) instead of the real one the IANA registry
+describes (``idempotent=True`` for both) -- even though the very same value
+resolves correctly through the constructor
+(:meth:`~pcapkit.const.http.method.Method._missing_`, which the override does
+not touch).
 
 **Why a capture reaches it.** ``pcapkit/protocols/application/http.py``'s
 ``_RE_METHOD = re.compile(rb"(?P<method>[A-Z][A-Z-]*)\\Z")``, which
@@ -27,11 +28,10 @@ not be enough.
 
 **The fix, and the trap in the version the issue first proposed.** Delegate
 to :meth:`~pcapkit.corekit.enum.EnumLookup.get` and keep the override only
-for the unregistered-member fallback -- but ``Method.get`` was a
-:class:`staticmethod` while the base is a :class:`classmethod`, and a
-zero-argument ``super()`` inside a :class:`staticmethod` has no first
-argument to bind (``RuntimeError: super(): no arguments``). So the override
-had to move to :class:`classmethod` as well, following the shape
+for the unregistered-member fallback -- but the base is a
+:class:`classmethod`, and a zero-argument ``super()`` inside a
+:class:`staticmethod` has no first argument to bind (``RuntimeError: super():
+no arguments``). So the override is a :class:`classmethod` as well, following the shape
 PR #913's ``FEATCode.get`` sets for the same base method.
 
 **Two behaviours settled by earlier issues must survive unchanged**, each
@@ -54,7 +54,7 @@ would therefore be caller-visible (a non-``None`` ``default`` on an unknown
 minting a new one carrying that string), even though nothing in this tree
 calls ``get`` with a non-``None`` ``default`` to notice --
 confirmed by grepping every call site under ``pcapkit/`` and ``tests/``.
-So the signature and the default's meaning are left exactly as they were;
+So the signature and the default's meaning stay the override's own;
 :class:`DefaultSignatureTests` below pins that explicitly.
 
 """
@@ -223,15 +223,15 @@ class HTTPv1EndToEndTests(unittest.TestCase):
 
 
 class NonStrKeyTests(unittest.TestCase):
-    """The non-``str`` surface, which GitHub issue #908's fix moved.
+    """The non-``str`` surface of the delegation (GitHub issue #908).
 
     Delegating to the base routes a non-``str`` key through ``cls(key)`` and
     so ``_missing_``, which raises :exc:`ValueError`. The override catches
     only :exc:`KeyError` -- a failed *name* lookup -- so that
-    :exc:`ValueError` reaches the caller. Pinned because it is a
-    caller-visible change that the fix makes as a side effect rather than as
-    its purpose, and because the ``bytes`` case moved from *returning* a
-    member to raising.
+    :exc:`ValueError` reaches the caller. Pinned because it is
+    caller-visible behaviour the delegation has as a side effect rather than
+    as its purpose, and because without it the ``bytes`` case *returns* a
+    member rather than raising.
     """
 
     def setUp(self) -> None:

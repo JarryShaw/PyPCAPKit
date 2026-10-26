@@ -12,7 +12,7 @@ every unrecognised frame resolves the same descriptor again. A registered
 descriptor is not written back either (GitHub issue #1559), so an extraction of
 :file:`many_interfaces.pcapng` performs 296 resolutions, 48 of them fallbacks.
 
-GitHub pull request #563 proposes paying that cost with a class-level cache of
+GitHub pull request #563 proposed paying that cost with a class-level cache of
 resolved classes and no invalidation, under which an :func:`importlib.reload`
 leaves it serving the pre-reload class forever. These
 tests pin the shape taken instead: the repeats are cheap because

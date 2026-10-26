@@ -386,9 +386,9 @@ class CLIMainTests(unittest.TestCase):
     def test_layer_and_protocol_reach_the_extractor(self) -> None:
         """``-L``/``-P`` are forwarded under the names ``Extractor`` reads.
 
-        The CLI half of GH-356. The forwarding was always correct -- it is the
-        core that dropped the limits -- so this pins the contract that made it
-        correct: ``Extractor`` takes ``layer=`` and ``protocol=``, and the CLI
+        The CLI half of GH-356. The defect there is the core dropping the
+        limits, not the forwarding, so this pins the contract the forwarding
+        rests on: ``Extractor`` takes ``layer=`` and ``protocol=``, and the CLI
         must not invent its own spelling for either.
 
         """

@@ -104,7 +104,7 @@ class DeclaredLengthRoundTripTests(unittest.TestCase):
         """``test.pcapng`` frame 3 is cut inside the IPv4 header itself.
 
         Only 18 of the 20 header octets were recorded, so they are kept as raw
-        octets rather than parsed into a header (:issue:`1170`). The rebuild is
+        octets rather than parsed into a header (#1170). The rebuild is
         then byte for byte, and keeps the declared 300 rather than the 18 that
         were kept.
 

@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """Pins the internal references and special-method docstrings of the AppType and OptionType templates (#1947).
 
-#1940 converts library-internal literals to roles and gives every special
-method that an API page names an entry; the AppType and OptionType templates,
+Library-internal literals are written as roles, and every special method that
+an API page names has an entry (#1940); the AppType and OptionType templates,
 and the const modules generated from them, are the part #1947 covers.
 
 * :class:`ConvertedReferenceTests` -- the references in those templates and

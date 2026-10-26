@@ -51,7 +51,7 @@ PREFIX = '[monitor] '
 PROBES = ('free -m', 'df -h / "$GITHUB_WORKSPACE"', 'cat /proc/loadavg',
           'ps -eo pid,rss,vsz,etime,args --sort=-rss | head -6')
 #: The experimental job's caps and its check name, which the monitor leaves alone.
-#: #1938 adds the watcher's interpreter and its requests, capped as the rest are.
+#: The watcher's interpreter and its requests (#1938) are capped as the rest are.
 CAPS = {'python': 5, 'install': 10, 'watcher-python': 1, 'watcher': 1, 'tests': 120}
 CHECK_NAME = 'Python ${{ matrix.python-version }} (experimental)'
 #: A sample's first line, ``[monitor] <UTC time> sample <n>``.
@@ -146,7 +146,7 @@ DEFAULT = ('bash', '-e')
 @unittest.skipUnless(sys.platform.startswith('linux') and all(map(shutil.which, ('bash', 'free', 'tail', 'ps'))),
                      'the sampler reads /proc and procps, as on the Ubuntu runners')
 class TestTheSamplesReachTheTestsLog(unittest.TestCase):
-    """The three scripts, run in order, with ``sleep 30`` made 0.2 s and pytest a stub."""
+    """The start, tests and stop scripts, run in order, with ``sleep 30`` made 0.2 s and pytest a stub."""
 
     def setUp(self) -> None:
         tmp = tempfile.TemporaryDirectory(prefix='pcapkit-1740-')  # pylint: disable=consider-using-with
@@ -237,8 +237,8 @@ class TestTheSamplesReachTheTestsLog(unittest.TestCase):
         self.assertEqual(stop.stdout, 'The resource monitor did not start on this leg.\n')
 
 
-#: The containment, as the issue's research sized it (estimates); #1753
-#: adds the exit on a spent heap, which
+#: The containment, as the issue's research sized it (estimates); the exit
+#: on a spent heap is #1753's, which
 #: tests/project/test_graalpy_worker_heap_1753.py pins.
 HEAP, GRAAL_WORKERS, SCOPE_MEMORY = '--vm.Xmx2g --vm.XX:+ExitOnOutOfMemoryError', '3', '12G'
 #: A ``LATEST``-tier module, as ``List the LATEST tier`` would hand the tests step (#1958):

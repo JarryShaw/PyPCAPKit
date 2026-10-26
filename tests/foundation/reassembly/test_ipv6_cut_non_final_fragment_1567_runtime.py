@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """A snaplen-cut first IPv6 fragment leaves a hole under every engine.
 
-GitHub issue #1567. A 3-fragment IPv6 datagram of 64, 64 and 72 octets, its
-first fragment captured to 60 octets, came out ``COMPLETE`` with octets 60-63
-zero-filled under the default, dpkt and scapy engines, since every IPv6 adapter
-passes ``tl`` as the captured length. The fix is in the reassembler they share,
-so each engine is run over the same capture here and has to report the same
+GitHub issue #1567. Without the fix, a 3-fragment IPv6 datagram of 64, 64 and 72
+octets, its first fragment captured to 60 octets, comes out ``COMPLETE`` with octets
+60-63 zero-filled under the default, dpkt and scapy engines, since every IPv6
+adapter passes ``tl`` as the captured length. The fix is in the reassembler they
+share, so each engine is run over the same capture here and has to report the same
 ``PARTIAL`` datagram.
 
 The captures are built in memory, through the engines, so the module belongs to

@@ -258,22 +258,21 @@ class TCPReassemblyCoordinateTests(unittest.TestCase):
 
     TCP reassembly keeps its :rfc:`815` hole descriptor list in absolute
     sequence numbers, and each payload buffer indexed from its own initial
-    sequence number. Mixing the two produced three separate wrong answers, none
-    of which the rest of the suite could see, because they all need an initial
-    sequence number that is not zero:
+    sequence number. Mixing the two produces three separate wrong answers, none
+    of which shows without an initial sequence number that is not zero:
 
-    * a stream with a gap in it yielded **no datagram at all**, silently, since
-      every hole bound landed far past the end of a buffer a few kilobytes long;
-    * a stream captured without its handshake yielded only its *first* fragment,
-      since the completeness test counted hole descriptors instead of asking
-      whether any hole fell inside the data;
-    * every extracted fragment came out one octet too long, since a hole bound
-      was computed as the sequence number *after* the segment while the
+    * a stream with a gap in it yields **no datagram at all**, silently, since
+      every hole bound lands far past the end of a buffer a few kilobytes long;
+    * a stream captured without its handshake yields only its *first* fragment,
+      if the completeness test counts hole descriptors instead of asking
+      whether any hole falls inside the data;
+    * every extracted fragment comes out one octet too long, if a hole bound
+      is computed as the sequence number *after* the segment while the
       descriptor list treats its bounds as inclusive.
 
     A closely related error is pinned too: the sequence number a SYN spends
-    became a NUL octet at the head of the payload, so a complete datagram
-    did not compare equal to the octets that were sent.
+    must not become a NUL octet at the head of the payload, which would make a
+    complete datagram compare unequal to the octets that were sent.
 
     Every stream here is driven through :class:`~pcapkit.foundation.reassembly.tcp.TCP`
     with segment descriptors built exactly as the :mod:`pcapkit.toolkit` modules
@@ -389,9 +388,9 @@ class TCPReassemblyCoordinateTests(unittest.TestCase):
     def test_the_answer_does_not_depend_on_the_initial_sequence_number(self) -> None:
         """The same stream reassembles the same way whatever ISN it uses.
 
-        This is the property the defect broke: at zero the two coordinate
-        systems coincide and the fragments came out one octet too long
-        each; anywhere else the datagram disappeared entirely.
+        This is the property the defect breaks: at zero the two coordinate
+        systems coincide and the fragments come out one octet too long
+        each; anywhere else the datagram disappears entirely.
 
         """
         from pcapkit.foundation.reassembly.data.data import Completion
@@ -518,9 +517,9 @@ class TCPReassemblyCoordinateTests(unittest.TestCase):
         """The hole list is in sequence space; the payload buffer is not.
 
         Asserted on the live buffer rather than through a datagram, because this
-        is the invariant the defect broke: the list was seeded with
+        is the invariant the defect breaks: a list seeded with
         ``first=info.len`` -- a payload length -- and then extended with absolute
-        sequence numbers, so one descriptor held one of each.
+        sequence numbers leaves one descriptor holding one of each.
 
         """
         from pcapkit.foundation.reassembly.data.tcp import HOLE_OPEN_BOUND
@@ -583,9 +582,9 @@ class TCPReassemblyCoordinateTests(unittest.TestCase):
         """Holes stay right above ``2 ** 31`` when :data:`sys.maxsize` is ``2 ** 31 - 1``.
 
         That is :data:`sys.maxsize` on GraalPy and on 32-bit builds, and it lies
-        inside the ``2 ** 32`` sequence space. Used as the open bound, it left
+        inside the ``2 ** 32`` sequence space. Used as the open bound, it leaves
         the open-ended hole with ``last`` below its own ``first`` once sequence
-        numbers passed ``2 ** 31`` (#1959).
+        numbers pass ``2 ** 31`` (#1959).
 
         """
         from unittest import mock
@@ -605,9 +604,10 @@ class TCPReassemblyCoordinateTests(unittest.TestCase):
     def test_fin_completes_a_stream_above_2_31_whatever_sys_maxsize(self) -> None:
         """A whole stream is submitted at its FIN, with or without its handshake.
 
-        With :data:`sys.maxsize` at ``2 ** 31 - 1`` the open-ended hole above a
-        stream past ``2 ** 31`` survived the FIN, so the stream never counted as
-        whole and was held until the capture ended (#1959).
+        Guards against the open-ended hole above a stream past ``2 ** 31``
+        surviving the FIN with :data:`sys.maxsize` at ``2 ** 31 - 1``, so that
+        the stream never counts as whole and is held until the capture ends
+        (#1959).
 
         """
         from unittest import mock
@@ -815,13 +815,12 @@ class TCPReassemblyConflictTests(unittest.TestCase):
         :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment`, and this is
         what proves it rather than arguing it from where the field is declared.
 
-        Worth stating why this case in particular. The data loss this whole
-        mechanism exists to fix survived the boundary tests precisely because
-        every one of them used a *single* ACK bucket, so none could see state
-        leaking across buckets, and the
+        Worth stating why this case in particular: boundary tests that all use
+        a *single* ACK bucket cannot see state leaking across buckets, which is
+        where the data loss this whole mechanism exists to fix hides, and the
+        single-bucket tests of the
         :attr:`~pcapkit.foundation.reassembly.data.tcp.Fragment.gap`
-        representation came with more single-bucket tests -- the same blind
-        spot.
+        representation share that blind spot.
 
         Bucket 1000 takes a real conflicting retransmission over ``base..base+3``
         and must report exactly that range. Bucket 2000 is interleaved with it,

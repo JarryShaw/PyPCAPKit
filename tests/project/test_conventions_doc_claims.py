@@ -23,14 +23,14 @@ structure:
   an anchor's file whole.
 * :class:`PhaseTwoRemainderTests` -- what the page says about
   `#877 <https://github.com/JarryShaw/PyPCAPKit/issues/877>`__'s phase 2 and the
-  population its audit covers, measured rather than remembered. The page said the
-  phase *"has not happened yet"* for as long as it did because nothing contradicted
-  it once #921 landed. The page states no counts (#1103's ruling, #1811), so what is
-  checked is each claim about the whole population.
+  population its audit covers, measured rather than remembered: unchecked, a claim
+  such as the phase *"has not happened yet"* outlives the work that falsifies it
+  (#921), because nothing contradicts it. The page states no counts (#1103's ruling,
+  #1811), so what is checked is each claim about the whole population.
 * :class:`ExtensionHeaderClassificationTests` -- the page's bases-per-header table
   against the declarations themselves. ``tests/protocols/internet/test_ipv6_ext_unit.py``
-  already pins the *code* to the ruling; nothing pinned the *page* to the code, which is
-  the half that goes stale when a new header lands.
+  pins the *code* to the ruling; this pins the *page* to the code, which is the half
+  that goes stale when a new header lands.
 * :class:`FailedLookupExceptionTests` -- the worked example the page gives for a name
   miss, which names :exc:`~pcapkit.utilities.exceptions.EnumKeyError`, not the
   true but unspecific :exc:`KeyError` (#918).
@@ -223,7 +223,7 @@ def _every_enumeration() -> 'dict[type, str]':
             continue
         # Not guarded: every module under pcapkit imports cleanly, and swallowing an
         # ImportError here would let this walk go quietly partial -- which is the one
-        # failure mode that would make every count below pass vacuously.
+        # failure mode that would make every check below pass vacuously.
         importlib.import_module(module.name)
 
     found = {}  # type: dict[type, str]
@@ -398,7 +398,7 @@ class PhaseTwoRemainderTests(unittest.TestCase):
         self.note = ' '.join(_page('registry-protocol').split())
 
     def test_the_walk_found_something_to_count(self) -> 'None':
-        """Guards every count below from passing on an empty discovery."""
+        """Guards every check below from passing on an empty discovery."""
         self.assertGreater(len(self.enumerations), 100,
                            'the enumeration walk collapsed; the counts below would '
                            'pass vacuously')
@@ -422,7 +422,7 @@ class PhaseTwoRemainderTests(unittest.TestCase):
                          'enumerations outside EnumLookup, which the page says none are')
 
     def test_the_page_names_every_enumeration_outside_the_hierarchy(self) -> 'None':
-        """The count alone would pass on a wrong list of the right length.
+        """The page names each enumeration outside the hierarchy.
 
         Vacuous while :attr:`self.outside` is empty -- GitHub issue #930 emptied
         it, and an empty dict gives the loop below nothing to iterate, so this
@@ -659,11 +659,10 @@ class AenumRoleExclusionTests(unittest.TestCase):
 
     ``docs/source/conf.py`` excludes ``aenum`` from ``intersphinx_mapping``
     deliberately -- its ``objects.inv`` carries no ``py:`` objects, so no
-    ``:mod:``/``:class:``/``:func:``/etc. role naming it could ever resolve. Part
-    B converted every such role this page carried to plain double-backtick
-    literals rather than leaving them promising a link that can never exist. A
-    forbidden role needs a test, or a later edit reintroduces one without
-    noticing.
+    ``:mod:``/``:class:``/``:func:``/etc. role naming it could ever resolve. The
+    pages write it as a plain double-backtick literal instead, rather than as a
+    role promising a link that can never exist. A forbidden role needs a test,
+    or a later edit reintroduces one without noticing.
 
     The other half of the same fix is pinned alongside it: the references to
     ``AbsentType``, ``NoValueType`` and ``ABSENT`` that part B qualified to their
@@ -817,9 +816,9 @@ class GetOverrideContractTests(unittest.TestCase):
                          'as the surviving staticmethod')
 
         # Execute the outcomes rather than assert the page names them. A grep
-        # for the error string cannot tell a wrong one -- the page once claimed
+        # for the error string cannot tell a wrong one -- a page claiming
         # `RuntimeError: super(): no arguments` for a shape that actually raises
-        # `TypeError`, and a prose-only assertion passed it.
+        # `TypeError` passes a prose-only assertion.
         class _Base:
             @classmethod
             def get(cls, key, default=None):  # noqa: D102
@@ -863,15 +862,14 @@ class GetOverrideContractTests(unittest.TestCase):
         # Each wording pinned by a needle unique to it. The shared substring
         # ``instance or subtype of type`` occurs more than once on the page -- in both
         # quoted errors and in the sentence explaining what they share -- so asserting it
-        # pinned neither: corrupting the 3.13+ quote to something false still passed.
+        # pins neither: a 3.13+ quote corrupted to something false still passes.
         #
-        # **A recurring defect shape**, after ``labels: bug`` (a bare token matched
-        # elsewhere), a bare figure (matched by the page's own ``wc -l`` output) and
-        # ``quiet=True`` (several occurrences). The rule, stated once here
-        # because it kept being rediscovered: **an assertIn whose needle appears more
-        # than once on the page pins nothing** -- a later occurrence satisfies it and
-        # the claim it guards can be inverted freely. Count occurrences before
-        # asserting, and anchor to something unique.
+        # **A recurring defect shape**, shared with a bare ``labels: bug`` token matched
+        # elsewhere and a ``quiet=True`` with several occurrences. The rule, stated once
+        # here: **an assertIn whose needle appears more than once on the page pins
+        # nothing** -- a later occurrence satisfies it and the claim it guards can be
+        # inverted freely. Count occurrences before asserting, and anchor to something
+        # unique.
         self.assertIn('is not an instance or subtype of type', flat,
                       'the page no longer shows the 3.13+ wording of what a '
                       'staticmethod delegation raises')
@@ -941,9 +939,9 @@ class GetOverrideContractTests(unittest.TestCase):
         # Anchored to the headline sentence, not the bare token. `quiet=True` occurs
         # more than once on the page, so `assertIn('``quiet=True``')` is satisfied by a
         # later mention -- inverting the ruling itself to `quiet=False` would fail
-        # nothing. The same shape as the `labels: bug` assertion and the bare figure,
-        # which passed the same way, so the rule is explicit -- never assert a token
-        # that appears more than once on the page it is meant to pin.
+        # nothing. The same shape as a bare `labels: bug` assertion, so the rule is
+        # explicit -- never assert a token that appears more than once on the page it
+        # is meant to pin.
         self.assertIn('Raise the way the base raises, which means** ``quiet=True``', flat,
                       'the page no longer states the ruling as its headline, so a '
                       'later mention of quiet=True is doing the work of pinning it')
@@ -955,7 +953,7 @@ class GetOverrideContractTests(unittest.TestCase):
         neither class defines ``get``, the module defines none at all, and no
         ``[override]``/``arguments-differ`` pair, which such signatures need, is
         left behind. Scoped to that exact pair rather than to ``arguments-differ`` alone,
-        which mh.py still carries for ``read`` and ``__post_init__`` --
+        which mh.py carries for ``read`` and ``__post_init__`` --
         unrelated to any ``get``, and measured before asserting on it.
 
         """
@@ -992,14 +990,14 @@ class GetOverrideContractTests(unittest.TestCase):
                          'which #940 made false')
 
     def test_a_non_string_key_raises_a_value_miss_on_every_helper(self) -> 'None':
-        """The divergence #940's deletion closed, which is the page's worked reason.
+        """No divergence between the helpers (#940), which is the page's worked reason.
 
         The base branches on ``isinstance(key, str)`` and treats everything else as
-        a value, so ``get(None)`` is a *value* miss. The deleted overrides branched
-        on :class:`int` and fell through to the name path, making it a ``KeyError``
-        on those two and a ``ValueError`` on the other helpers. The page names the
-        helpers rather than counting them (#1811), so each name is checked against
-        the derived population below.
+        a value, so ``get(None)`` is a *value* miss. Without #940's deletion, the two
+        mh overrides branch on :class:`int` and fall through to the name path, making
+        it a ``KeyError`` on those two and a ``ValueError`` on the other helpers. The
+        page names the helpers rather than counting them (#1811), so each name is
+        checked against the derived population below.
 
         """
         from pcapkit.utilities.exceptions import EnumValueError
@@ -1052,27 +1050,21 @@ class GetOverrideContractTests(unittest.TestCase):
 def _optional_dependencies() -> 'dict[str, list[str]]':
     """``pyproject.toml``'s ``[project.optional-dependencies]``, without a TOML library.
 
-    :mod:`tomllib` is 3.11+ and CI still tests 3.8-3.10 (#1633) -- a first version used it
-    and failed the ``Python 3.10`` leg with ``ModuleNotFoundError`` while passing locally
-    on 3.14. ``tomli``, the usual backport, is not a dependency here either
+    :mod:`tomllib` is 3.11+ and CI tests 3.8-3.10 (#1633), where importing it fails
+    with ``ModuleNotFoundError`` although a local run on 3.11 or later passes.
+    ``tomli``, the usual backport, is not a dependency here either
     (``grep -n tomli pyproject.toml`` finds nothing), so there is nothing to fall back to
     and adding one for a docs-claims test is not worth it.
 
     **Verified against** :mod:`tomllib` **rather than asserted.** Matching arrays
-    with a non-greedy bracket pattern, which stops at the first literal ``]``, was
-    measured to mis-parse several extras, silently:
-
-    * ``vendor`` came back **empty**, because the ``]`` inside ``"requests[socks]"``
-      closed the match early.
-    * ``dev`` silently dropped its trailing entries for the same reason.
-    * ``test`` was truncated at a ``]`` inside a *comment* and then picked up a quoted
-      example from the prose, **inventing a dependency called** ``9 skipped``.
-
-    No shipped assertion read those keys, so no test gave a wrong verdict -- but
-    ``dev`` and ``vendor`` are both described in the page's own prose, so the next
-    assertion to check either would have got wrong data with nothing raised. That is
-    precisely the "renders fine and fails nothing" failure this suite exists to close,
-    which is why it is fixed rather than documented around.
+    with a non-greedy bracket pattern, which stops at the first literal ``]``,
+    mis-parses an extra silently: ``vendor`` comes back **empty**, because the ``]``
+    inside ``"requests[socks]"`` closes the match early, and ``dev`` drops its trailing
+    entries for the same reason; a ``]`` inside a *comment* truncates an extra the same
+    way, and a quoted example in the comment prose then reads as a dependency.
+    ``dev`` and ``vendor`` are both described in the page's own prose, so an assertion
+    checking either would get wrong data with nothing raised -- precisely the "renders
+    fine and fails nothing" failure this suite exists to close.
 
     So: strip ``#`` comments, then track bracket **depth** rather than matching to the
     first ``]``. Nested brackets inside requirement strings and comments containing ``]``
@@ -1136,9 +1128,9 @@ class ProcessConventionTests(unittest.TestCase):
     Each check pins the *claim the page makes* next to the *fact behind it*, and
     deliberately pins neither against the owner's own phrasing. Quoting him is what
     the page is forbidden to do here -- his instruction on GitHub issue #918 was to
-    paraphrase -- and asserting a quoted sentence is separately a trap this module has
-    already been bitten by: pinning an off-hand reply of his as a literal string makes
-    a sentence typed into a GitHub thread a CI build dependency (GitHub issue #949).
+    paraphrase -- and asserting a quoted sentence is separately a trap: pinning an
+    off-hand reply of his as a literal string makes a sentence typed into a GitHub
+    thread a CI build dependency (GitHub issue #949).
     Attribution lives in the issue number the page cites; the tests check substance.
 
     """
@@ -1148,7 +1140,7 @@ class ProcessConventionTests(unittest.TestCase):
 
     #: The changelog entry file the changelog ruling is about. Named rather than
     #: discovered: this is the 1.5.0 cycle's file, which is the one GitHub pull
-    #: request #657 accumulates into and the one the page cites.
+    #: request #657 accumulated into and the one the page cites.
     CHANGELOG = ROOT / 'docs' / 'source' / 'changelog' / '1.5.0.rst'
 
     #: ``.github/PULL_REQUEST_TEMPLATE.md``'s commit-type tickbox list is the tree's
@@ -1165,11 +1157,11 @@ class ProcessConventionTests(unittest.TestCase):
     def test_the_extras_reader_agrees_with_tomllib(self) -> 'None':
         """:func:`_optional_dependencies` matches a real TOML parser, key for key.
 
-        The reader exists because :mod:`tomllib` is 3.11+ and CI still tests 3.8-3.10
+        The reader exists because :mod:`tomllib` is 3.11+ and CI tests 3.8-3.10
         (#1633's KTLO legs), so the assertions above cannot use it. That makes the reader itself an
-        unverified dependency of every extras claim on the page -- and its second
-        version mis-parsed several extras silently, inventing a requirement
-        called ``9 skipped`` out of comment prose.
+        unverified dependency of every extras claim on the page -- and a reader that
+        matches to the first ``]`` mis-parses several extras silently, reading a
+        quoted example in comment prose as a requirement.
 
         So wherever a real parser *is* available -- which is every interpreter from 3.11
         up, including the one this suite usually runs on -- the two are compared
@@ -1232,7 +1224,7 @@ class ProcessConventionTests(unittest.TestCase):
         #910 excluded the third-party engines **by kind** -- they are not core
         addons -- where ``PyPCAP`` and ``PCAP_CT`` were already out for
         *installability*, which the ruling did not touch. Reading those as one reason
-        is what let the list drift the first time, so the page has to state both. The
+        is what lets the list drift, so the page has to state both. The
         tree half checks the engine extras still exist to be excluded from, since
         a prose distinction about extras that no longer exist is not a distinction.
 
@@ -1269,7 +1261,7 @@ class ProcessConventionTests(unittest.TestCase):
         The claim is narrow on purpose: entries are grouped by topic and are **not**
         one per commit. The grouping scheme is ruled too -- a section per top-level
         module, with the kind headings nested inside -- so the page records the scheme
-        and this checks for it. What is still unruled is narrower: which module an
+        and this checks for it. What is unruled is narrower: which module an
         entry spanning several belongs under.
 
         """
@@ -1293,8 +1285,8 @@ class ProcessConventionTests(unittest.TestCase):
         """The tree half: the file already groups, and already merges issues.
 
         Structural rather than counted. An entry count would be pinned to whatever
-        GitHub pull request #657 had accumulated on the day, and would fail on its
-        next merge for no reason a reader could act on -- so what is checked is that
+        the file held on the day, and would fail on the next entry for no reason a
+        reader could act on -- so what is checked is that
         the kind headings are all present and that at least one entry cites two or
         more issues, which is the property that makes "one entry per commit" false of
         the file rather than merely discouraged.
@@ -1343,17 +1335,16 @@ class ProcessConventionTests(unittest.TestCase):
     def test_the_page_names_what_the_tree_has(self) -> 'None':
         """Every claim the page makes that has local ground truth.
 
-        A cross-review once corrupted a batch of claims on these pages at once and
-        the suite stayed green, which is the honest measure of how much of the prose
-        was decorative. This closes the subset that has local ground truth: a path
-        the page cites, a module it names. The page states no entry count (#1103's
-        ruling, #1811), so none is pinned.
+        A batch of claims on these pages can be corrupted at once with the suite
+        green wherever no check reads them. This closes the subset that has local
+        ground truth: a path the page cites, a module it names. The page states no
+        entry count (#1103's ruling, #1811), so none is pinned.
 
         **What stays unpinned, and why, so the gap is stated rather than implied.**
         Every claim whose ground truth is a GitHub query -- the label count, which
         default labels are in live use, the ``breaking`` census, the issue and pull
         request numbers -- cannot be checked here, because this repository's CI has no
-        network. Those are why the page gives the *command* alongside the figure: the
+        network. Those are why the page gives the *command* instead of a figure: the
         command is the pin, run by a reader rather than by CI. Inverting the page's
         live-use claim about GitHub's default labels still passes this suite, measured,
         and no offline test can change that.
@@ -1361,9 +1352,9 @@ class ProcessConventionTests(unittest.TestCase):
         """
         import re as _re
 
-        # The module list the page prints as the by-module target. The tree half was
-        # already checked; this is the page half, which a corruption inserting a
-        # non-existent module survived.
+        # The module list the page prints as the by-module target. The tree half is
+        # test_the_page_denies_one_changelog_entry_per_commit's; this is the page half,
+        # which catches a non-existent module inserted into the listing.
         packages = sorted(d.name for d in (ROOT / 'pcapkit').iterdir()
                           if d.is_dir() and not d.name.startswith('__'))
         for name in packages:
@@ -1373,7 +1364,7 @@ class ProcessConventionTests(unittest.TestCase):
                               'among the modules the changelog groups by')
         # Only the ``ls -d`` comment block, not the whole page: elsewhere the page
         # legitimately writes the *distribution* name (``pip install
-        # pypcapkit[Scapy]``), which is not a module and which a looser sweep flagged.
+        # pypcapkit[Scapy]``), which is not a module and which a looser sweep flags.
         listing = _re.search(r'ls -d pcapkit/\*/.*?(?=\n\n\S)',
                              _page(self.ANCHOR), _re.DOTALL)
         self.assertIsNotNone(
@@ -1416,9 +1407,9 @@ class ProcessConventionTests(unittest.TestCase):
                       'process.rst no longer states that the labels are applied by '
                       'hand, which is the correction it was asked to carry')
 
-        # The issue templates are the second automated path, and the first version of
-        # this test could not see it: it read only dependabot.yml, so it passed while
-        # the page claimed dependabot was the *single* exception. Every template that
+        # The issue templates are the second automated path: a check reading only
+        # dependabot.yml passes while the page claims dependabot is the *single*
+        # exception. Every template that
         # sets a label in its front matter has to be named on the page, or the page
         # understates how many labels arrive without judgement behind them.
         templated = {}
@@ -1427,12 +1418,11 @@ class ProcessConventionTests(unittest.TestCase):
                 if line.startswith('labels:'):
                     templated[template.name] = line.split(':', 1)[1].strip()
 
-        # The dependabot attribution: unpinned, the page once named ``github_actions``
-        # as dependabot-applied while .github/dependabot.yml configured only ``pip``.
-        # It configures ``github-actions`` too (#1968), so the label is dependabot's on
-        # a workflow bump and hand-applied everywhere else. Getting either half wrong
-        # is this section's own point stated backwards, and the places the page
-        # mentioned it once disagreed with each other about ``python``.
+        # The dependabot attribution: .github/dependabot.yml configures ``pip`` and
+        # ``github-actions`` (#1968), so ``github_actions`` is dependabot's on a
+        # workflow bump and hand-applied everywhere else. Getting either half wrong is
+        # this section's own point stated backwards, and so is the page's mentions of
+        # it disagreeing with each other about ``python``.
         dependabot = (ROOT / '.github' / 'dependabot.yml').read_text(encoding='utf-8')
         ecosystems = re.findall(r'package-ecosystem:\s*"([^"]+)"', dependabot)
 
@@ -1447,13 +1437,12 @@ class ProcessConventionTests(unittest.TestCase):
         # issue #949 asked to be looked at. Every sentence pairing the tool with the
         # label is checked instead, so the phrasing does not matter.
         #
-        # Proximity is not the test, and was measured wrong on #949: the section then
-        # stated more than once, deliberately, that ``github_actions`` was *not*
-        # dependabot's, and each of those sentences named the tool and the label
-        # together. Distinguishing an attribution from a denial by looking for a
-        # negation nearby also failed -- the attributing bullet's own sentence ended
-        # "so it never opens a workflow bump here", so the negation was present in the
-        # sentence that made the claim as well as in the two that denied it.
+        # Proximity is not the test (#949): a sentence stating, deliberately, that a
+        # label is *not* dependabot's names the tool and the label together too.
+        # Distinguishing an attribution from a denial by looking for a negation nearby
+        # fails as well -- an attributing sentence can carry one, such as one ending
+        # "so it never opens a workflow bump here", so the negation is present in the
+        # sentence that makes the claim as well as in those that deny it.
         #
         # So the page's attribution is *parsed* instead: the one clause that says what
         # dependabot puts on its pull requests is located, the labels named inside it are
@@ -1468,7 +1457,7 @@ class ProcessConventionTests(unittest.TestCase):
 
         # `findall`, not `search`: a first-match-only read checks one attributing
         # clause and lets a second, contradicting one through. That is the same
-        # walk-past-the-check defect this whole rewrite exists to remove, so every
+        # walk-past-the-check defect the parse exists to remove, so every
         # clause matching the shape is required to name the same set.
         clauses = re.findall(r'\*\*dependabot\*\* puts (.+?) on its own pull requests',
                              self.flat)
@@ -1502,10 +1491,9 @@ class ProcessConventionTests(unittest.TestCase):
                               f'{name} applies a label from its front matter, but the '
                               'page does not name it among the automated paths')
                 # Anchored to the template's own sentence, not a bare substring.
-                # `assertIn('bug', flat)` passed against a page saying `labels:
+                # `assertIn('bug', flat)` passes against a page saying `labels:
                 # defect`, because the word `bug` occurs elsewhere ("alongside ``bug``,
-                # ``enhancement``") -- the same coincidence trap the changelog-runs
-                # test already guards against.
+                # ``enhancement``").
                 self.assertIn(f'``labels: {label}``', self.flat,
                               f'{name} applies {label!r} automatically, but the page '
                               'does not state that label next to the template that '
@@ -1515,9 +1503,9 @@ class ProcessConventionTests(unittest.TestCase):
         """A ``#NNN`` label and the issue or pull number in its own URL must agree.
 
         Purely local, needing no network, and it closes the largest single class of
-        unpinned claim on these pages: a cross-review corrupted a run of link
-        numbers across these files and not one was caught, because nothing compared the
-        displayed number against the target. A mismatch is invisible to a reader --
+        unpinned claim on these pages: a run of link numbers corrupted across these
+        files goes uncaught unless something compares the displayed number against the
+        target. A mismatch is invisible to a reader --
         the text says #918 and the link goes to #919 -- and Sphinx cannot warn, since
         both halves are well-formed.
 
@@ -1540,7 +1528,7 @@ class ProcessConventionTests(unittest.TestCase):
 
         # A floor, because `assertEqual([], [])` is what an emptied page produces. This
         # check disables itself silently on any citation-style change -- a
-        # single-underscore named reference, or a further move away from the roles,
+        # single-underscore named reference, or any form other than these two,
         # takes both patterns to zero while the docstring goes on claiming it closes
         # the largest class of unpinned claim -- the shape the module's other floors
         # guard against too.

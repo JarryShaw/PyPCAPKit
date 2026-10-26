@@ -156,7 +156,7 @@ class IPv4UnitTests(unittest.TestCase):
             # the same, with a 4-octet Router Alert option ahead of the payload
             ('with options', '4600002000000005000600007f0000010000000094040001aaaaaaaaaaaaaaaa',
              [OptionNumber.RTRALT], Raw),
-            # options-ipv4.pcap frame 8: options, and no payload at all
+            # the RTRALT frame of options-ipv4.pcap: options, and no payload at all
             ('with options, no payload', '460000180000000000060000c0000201c633640194040001',
              [OptionNumber.RTRALT], NoPayload),
         ]
@@ -503,8 +503,8 @@ class IPv4UnitTests(unittest.TestCase):
         authority octet a *field termination indicator*: ``1`` means another
         octet follows, ``0`` means this is the last. ``_read_opt_sec`` enforces
         it, warning ``field termination indicator not set`` when the final octet
-        has it set. #537 made the writer and the reader agree with each other on
-        the opposite convention; #1321 made both agree with the RFC.
+        has it set. The writer and the reader agree with each other (#537) and
+        with the RFC (#1321).
 
         The round trip is asserted through a real datagram and with warnings
         promoted to errors, because a disagreement's only symptom is a warning.
@@ -674,25 +674,25 @@ class IPv4UnitTests(unittest.TestCase):
     def test_ipv4_sid_option_is_four_octets_wide_on_the_wire(self) -> None:
         """RFC 791's four-octet Stream ID option survives the round trip. C.f. #534.
 
-        ``SIDOption.sid`` was a
-        :class:`~pcapkit.corekit.fields.numbers.UInt32Field` where :rfc:`791`
-        section 3.1 gives the Stream ID two octets inside a four-octet option --
-        which is what ``_make_opt_sid`` itself had always written into
-        ``length``. Only the schema field disagreed, so it over-read a
-        well-formed option by two octets on the way in, warning
-        ``packet length < 0: -2``, and over-wrote it by two on the way out:
-        ``880400000037`` for an option that is ``88040037``.
+        :rfc:`791` section 3.1 gives the Stream ID two octets inside a
+        four-octet option, which is the ``length`` ``_make_opt_sid`` writes.
+        This guards against ``SIDOption.sid`` being a
+        :class:`~pcapkit.corekit.fields.numbers.UInt32Field`, under which only
+        the schema field disagrees: it over-reads a well-formed option by two
+        octets on the way in, warning ``packet length < 0: -2``, and over-writes
+        it by two on the way out: ``880400000037`` for an option that is
+        ``88040037``.
 
-        Six not being a multiple of four, the option area then reached the
-        32-bit padding branch and picked up a ``NOP`` and an ``EOOL``, so the
-        rebuilt datagram came back four octets longer than the one it was read
+        Six not being a multiple of four, the option area then reaches the
+        32-bit padding branch and picks up a ``NOP`` and an ``EOOL``, so the
+        rebuilt datagram comes back four octets longer than the one it was read
         from, with ``ihl`` and total length grown to match -- 28 octets and
         ``ihl=7`` against the 24 and ``ihl=6`` on the wire.
 
         This starts from wire octets rather than from a constructed option
         because that is the only place the width shows: constructing and
         reconstructing both go through the same ``_make_opt_sid``, so the two
-        halves agreed with each other while disagreeing with :rfc:`791`. That
+        halves agree with each other while disagreeing with :rfc:`791`. That
         symmetry is why the defect could not be recorded as an
         ``EXPECTED_FAILURES`` entry, and it is why the assertion here is
         byte-for-byte identity against the input rather than a comparison of two
@@ -1373,7 +1373,7 @@ class IPv4UnitTests(unittest.TestCase):
 
         # Which is why the alignment branch gets a case of its own rather than
         # relying on SID to reach it. The padding terminator is an EOOL
-        # *option*, not the bare wire code -- that is what #506 fixed. A SEC
+        # *option*, not the bare wire code (#506). A SEC
         # option carrying a two-octet bitmap packs to five, so it is one: three
         # octets of padding, two NOPs and the EOOL.
         padded, padded_length = proto._make_ipv4_options([

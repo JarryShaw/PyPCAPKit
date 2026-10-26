@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """Tests that the ``unittest-ordering`` matrix shards ``protocols`` and ``project`` without losing a module.
 
-#1029: the ``protocols`` cell of ``unittest-ordering`` measured 30.4 minutes
-against the job's ``timeout-minutes: 45`` while every sibling leg stays under
-about 6.2 minutes, so the cell was split into sub-legs. Splitting has one way
+#1029: unsharded, the ``protocols`` cell of ``unittest-ordering`` measured 30.4
+minutes against the job's ``timeout-minutes: 45`` while every sibling leg stayed
+under about 6.2 minutes, so the cell is split into sub-legs. Splitting has one way
 to go quietly wrong, which is what this module pins: a module that falls between
 two shards is never run by that job again, and nothing fails to say so -- the
 job stays green while covering less. The assertions are therefore over the
@@ -21,7 +21,7 @@ job stays green while covering less. The assertions are therefore over the
   ``--exclude`` or boundary, i.e. runs that whole directory;
 * every ``tests/`` subdirectory holding a test module is a leg, except the
   :data:`NOT_LEGS` names, each left out for the reason the workflow comment
-  gives (#2115: ``corekit`` was missing, and nothing said so).
+  gives (#2115: a directory such as ``corekit`` left out, with nothing to say so).
 
 The workflow is read with a small hand-rolled scan rather than :mod:`yaml`,
 which comes only with the ``test`` extra of :file:`pyproject.toml`; the same split

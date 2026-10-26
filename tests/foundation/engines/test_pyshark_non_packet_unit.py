@@ -3,14 +3,14 @@
 
 :program:`tshark` numbers every record wiretap hands it, and a PCAP-NG systemd
 Journal Export Block, Custom Block or Sysdig Event Block is one. The default
-engine counts Enhanced, Simple and obsolete Packet Blocks only, so a capture
-holding a journal block read as one frame more through ``pyshark``, and every
-later frame was off by one.
+engine counts Enhanced, Simple and obsolete Packet Blocks only. Guards against a
+capture holding a journal block reading as one frame more through ``pyshark``,
+with every later frame off by one.
 
 The same lookup serves the verbose handler. ``pyshark`` takes the second PDML
 ``<proto>`` as ``frame_info``, and on a packet that carries a comment that is
-``pkt_comment``, which has no ``protocols``. So ``verbose=True`` raised
-:exc:`AttributeError` on frame 1 of :file:`examples/captures/test.pcapng`.
+``pkt_comment``, which has no ``protocols``. Without the fix, ``verbose=True``
+raises :exc:`AttributeError` on frame 1 of :file:`examples/captures/test.pcapng`.
 
 The packets here are stand-ins shaped like what ``pyshark`` 0.6 builds from
 :program:`tshark` 4.6.9's PDML. The field names are the ones measured on

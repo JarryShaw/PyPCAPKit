@@ -167,7 +167,7 @@ class DispatchRegistryTests(unittest.TestCase):
 
         :data:`~examples.generators.dispatch.PINNED_TARGETS` records the
         expected class by hand, independently of whatever the corresponding
-        ``__proto__`` table currently holds -- see that table's own docstring
+        ``__proto__`` table holds -- see that table's own docstring
         for why: checking dispatch against a value read out of the very table
         under test cannot tell a correct entry from a mis-pointed one. A case
         with no pinned entry has :attr:`Case.target` set to :data:`None`,
@@ -197,7 +197,7 @@ class DispatchRegistryTests(unittest.TestCase):
         :meth:`test_cases_cover_every_table_named_in_the_issue` looks at, nor
         anything a registry-derived dispatch check would, and both pass. This
         test does not: it compares
-        :attr:`Case.registered` -- what the table says right now -- against
+        :attr:`Case.registered` -- what the table says at run time -- against
         :attr:`Case.target` -- what it is pinned to say -- and is independent
         of whether the target dissector can actually parse anything, which is
         :meth:`test_dispatch_reaches_target_or_is_a_recorded_degrade`'s job.

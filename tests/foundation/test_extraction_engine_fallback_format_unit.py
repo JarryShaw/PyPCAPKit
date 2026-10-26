@@ -1,12 +1,13 @@
 # -*- coding: utf-8 -*-
 """PCAP output survives a fallback from an unavailable engine to the default one.
 
-GitHub issue #1264: :class:`~pcapkit.foundation.extraction.Extractor` replaced
-``format='pcap'`` with ``'json'`` from the *requested* engine name, before
-:meth:`~pcapkit.foundation.extraction.Extractor.run` found the engine missing
-and ran the default :class:`~pcapkit.foundation.engines.pcap.PCAP` engine --
-which writes PCAP -- so ``out.json`` appeared where ``out.pcap`` was asked for.
-The trace format was replaced the same way.
+GitHub issue #1264: guards against
+:class:`~pcapkit.foundation.extraction.Extractor` replacing ``format='pcap'``
+with ``'json'`` from the *requested* engine name, before
+:meth:`~pcapkit.foundation.extraction.Extractor.run` finds the engine missing
+and runs the default :class:`~pcapkit.foundation.engines.pcap.PCAP` engine --
+which writes PCAP -- so that ``out.json`` appears where ``out.pcap`` was asked
+for, and against the trace format being replaced the same way.
 
 Each engine is made unavailable by patching its own check, so the result does
 not depend on what this host has installed: ``unsupported_reason`` covers the

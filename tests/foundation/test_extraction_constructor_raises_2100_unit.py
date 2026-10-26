@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 """An ``Extractor`` whose constructor raises has closed the input it opened (#2100).
 
-Only a ``KeyboardInterrupt`` reached ``_cleanup``, so a ``FormatError`` out of
-``__init__`` left the file open until collection, and the exception holds the
-frame that keeps it alive. Windows then refuses to delete the file
-(``WinError 32``); POSIX hides it, so the handles are recorded here instead.
+Guards against only a ``KeyboardInterrupt`` reaching ``_cleanup``, which leaves the
+file open until collection after a ``FormatError`` out of ``__init__``, and the
+exception holds the frame that keeps it alive. Windows then refuses to delete the
+file (``WinError 32``); POSIX hides it, so the handles are recorded here instead.
 
 """
 

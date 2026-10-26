@@ -7,13 +7,13 @@ the ``Create Release`` workflow's release body and the source distribution get
 Markdown without a second copy of the history to keep in step by hand.
 
 The conversion is a set of mechanical rules over a small reStructuredText subset,
-and there is one test per rule. Each asserts both halves -- that the Markdown form
+and each rule has tests of its own. Each asserts both halves -- that the Markdown form
 arrived *and* that the reStructuredText form is gone -- because a rule that fires
 in the wrong place and a rule that does not fire at all both leave markup in a
 published release body, and only checking for the new spelling would miss the
 second.
 
-The rest cover the two things that are easy to get wrong and invisible when they
+Others cover two things that are easy to get wrong and invisible when they
 are: which entry counts as "newest" (the toctree's first line, not a sort of the
 version strings), and ``--check``, which is what a CI gate calls and is worthless
 if it cannot fail.
@@ -160,10 +160,10 @@ class ConversionRuleTests(ChangelogTreeMixin, unittest.TestCase):
         self.assertNotIn(':rfc:', markdown)
 
     def test_rule_2_rfc_role_with_a_section_anchor_becomes_a_deep_link(self) -> None:
-        # #592: ``(\d+)`` between the backticks accepted digits and nothing else,
-        # so the anchored spelling Sphinx also accepts fell past rule 2 and was
-        # rejected by the guard -- which reported the *role* as uncovered when only
-        # the spelling ever was. The fragment has to reach the target, or the link
+        # #592: a ``(\d+)`` between the backticks accepts digits and nothing else,
+        # so the anchored spelling Sphinx also accepts falls past rule 2 to the
+        # guard -- which then reports the *role* as uncovered when only the
+        # spelling is. The fragment has to reach the target, or the link
         # lands at the top of a 100-page RFC.
         markdown = self.convert(ENTRY.replace(':rfc:`4303`', ':rfc:`4303#section-2.1`'))
 
@@ -194,7 +194,7 @@ class ConversionRuleTests(ChangelogTreeMixin, unittest.TestCase):
                              f'rule 2 mis-rendered :rfc:`{target}`')
 
     def test_rule_2_leaves_an_anchor_it_cannot_read_to_the_guard(self) -> None:
-        # The widened pattern is deliberately not "anything between the backticks".
+        # Rule 2's pattern is deliberately not "anything between the backticks".
         # An anchor it cannot read has to reach the guard and be reported, rather
         # than being carried into a link whose text nobody checked.
         markdown = self.convert(ENTRY + '\nSee :rfc:`6554#section 3` for more.\n')
@@ -611,7 +611,7 @@ class ResidualMarkupTests(ChangelogTreeMixin, unittest.TestCase):
         # converter that handles ``=`` alone this does not reach the assertions at
         # all -- ``render()`` raises ``ResidualMarkupError`` on the joined
         # ``A module --------`` first, which is what makes this a real check
-        # rather than a restatement of current behaviour.
+        # rather than a restatement of whatever the converter emits.
         index = self.make_tree(
             entry=ENTRY + '\nA module\n--------\n\nAdded\n~~~~~\n\nSome prose.\n')
 
@@ -683,8 +683,8 @@ class ComplaintLocationTests(ChangelogTreeMixin, unittest.TestCase):
 
     The guard blocks merges, so its message is the whole of the author's
     experience of it. These do not check the wording; they check that a cited line
-    read back out of the entry holds the construct it was cited for, which the
-    numbers counted against the converted body could not do.
+    read back out of the entry holds the construct it was cited for, which a
+    number counted against the converted body cannot do.
 
     No ``subTest`` here on purpose: under this repository's pytest a failing
     subtest gets a ``SUBFAILED`` line of its own while its parent's line still
@@ -772,8 +772,7 @@ class ComplaintLocationTests(ChangelogTreeMixin, unittest.TestCase):
 
     def test_an_unreached_double_backtick_literal_is_located_too(self) -> None:
         # Rule 3's ``[^`]+`` cannot cross a backtick, so a literal holding one is
-        # copied through and only the guard catches it. That branch of the guard had
-        # no test of its own.
+        # copied through and only the guard catches it.
         entry = padded_entry('an ``a`b`` literal rule 3 cannot reach.')
 
         complaints = self.complaints(entry)

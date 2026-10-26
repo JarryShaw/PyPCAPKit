@@ -44,7 +44,7 @@ class FEATCodeAPIPageTests(unittest.TestCase):
         self.assertTrue(PAGE.is_file(), f'{PAGE} does not exist')
 
     def test_page_documents_the_featcode_class(self) -> 'None':
-        """The page declares an ``autoclass`` for the class conventions.rst names.
+        """The page declares an ``autoclass`` for the class registry-protocol.rst names.
 
         Without this directive, ``:class:`~pcapkit.const.ftp.command.FEATCode```
         in :file:`docs/source/contributing/conventions/registry-protocol.rst`

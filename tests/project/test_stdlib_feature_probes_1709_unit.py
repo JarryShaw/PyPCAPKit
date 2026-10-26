@@ -118,7 +118,7 @@ class StdlibFeatureProbeTests(unittest.TestCase):
                 self.assertIn(call, [found for (_, found) in probes(source)])
 
     def test_the_issue_1709_shapes_are_matched(self) -> None:
-        """The scan sees each shape issue #1709 removed, so a pass is not vacuous."""
+        """The scan sees each shape issue #1709 is about, so a pass is not vacuous."""
         source = (
             'import hashlib\n'
             'import inspect\n'

@@ -16,9 +16,8 @@ file that has been passing tests for months. Issue #642 found these, and mypy
 
 This module is the same check without mypy: cheap enough to run on every commit,
 and it does not depend on a type checker being installed or on which version of
-one. Run against the tree that carried those defects it reports exactly
-those, name for name and line for line, which is what says it is measuring
-the right thing.
+one. Without the #642 fix it reports exactly those, name for name and line
+for line, which is what says it is measuring the right thing.
 
 A deliberate non-goal: this says nothing about whether the annotations resolve at
 *runtime*. They do not, and not because of anything this catches --
@@ -63,8 +62,8 @@ def annotation_strings(tree: 'ast.AST') -> 'Iterator[tuple[str, int]]':
     These are the places a string is a type rather than a value, and each is used
     in this package: a variable annotation, a parameter annotation, a return
     annotation, and the first argument of :func:`typing.cast`. The ``cast`` case
-    is the one that is easiest to miss and is exactly where
-    the ``Optional`` in ``RPL.post_process`` of ``ipv6_route.py`` hid -- :func:`typing.cast` never
+    is the one that is easiest to miss and is exactly where #642 found
+    the ``Optional`` in ``RPL.post_process`` of ``ipv6_route.py`` -- :func:`typing.cast` never
     evaluates that argument, so an unresolvable name there is invisible to every
     test that runs the line.
 
@@ -126,17 +125,16 @@ def bound_names(tree: 'ast.AST') -> 'set[str]':
     is not trying to reimplement Python's scoping rules, because the failure it
     exists to catch is a name bound *nowhere in the file at all*.
 
-    A stricter version was tried and reverted, and the reason is worth recording
-    because the strict version looks obviously better. ``get_type_hints`` resolves
+    A stricter version looks obviously better, and the reason it is wrong is
+    worth recording. ``get_type_hints`` resolves
     a *parameter or return* annotation against module and class scope only, never
     against a function's locals, so narrowing to those scopes catches a real
     defect: a module that binds ``Optional`` as an ordinary local somewhere and
     then writes ``'Optional[int]'`` without importing it. But the same narrowing
-    false-positived on real code here, because a :func:`typing.cast` string is
-    resolved *lexically*, in the function containing the call -- until #1652,
-    :file:`pcapkit/toolkit/scapy.py` cast to ``'IPv6ExtHdrFragment'``, imported
-    six lines above it inside the same function, which is correct and which mypy
-    accordingly did not flag. Distinguishing the two would mean tracking a
+    false-positives on correct code, because a :func:`typing.cast` string is
+    resolved *lexically*, in the function containing the call: a function that
+    imports a name and then casts to it is correct, and mypy accordingly does not
+    flag it. Distinguishing the two would mean tracking a
     binding set per scope and knowing which construct resolves in which, i.e.
     reimplementing the type checker this deliberately is not.
 
@@ -181,9 +179,9 @@ def referenced_names(source: str) -> 'Optional[set[str]]':
     A string *inside* the annotation is descended into, because a nested forward
     reference is still a type reference: ``'list["Nested"]'`` needs ``Nested`` in
     scope just as ``'list[Nested]'`` does, and the typing machinery resolves it the
-    same way. Walking only the :class:`ast.Name` nodes missed that entirely -- a
+    same way. Walking only the :class:`ast.Name` nodes misses that entirely -- a
     nested reference parses as an :class:`ast.Constant`, invisible to the walk --
-    so an unresolvable name one level of quoting down went unreported.
+    so an unresolvable name one level of quoting down would go unreported.
 
     Which is why the descent below is explicit rather than :func:`ast.walk`: the
     two places a string inside an annotation is a *value* and not a type have to be
@@ -356,9 +354,9 @@ class AnnotationNamesAreInScopeTests(unittest.TestCase):
 
         ``'list["Nested"]'`` parses to a :class:`ast.Constant` inside the
         subscript, so a walk that looks only at :class:`ast.Name` nodes never sees
-        ``Nested`` at all. This was a real hole, found by review rather than by the
-        self-check above, and it is the shape most likely to recur because it looks
-        exactly like the annotations that *are* checked.
+        ``Nested`` at all. The self-check above does not exercise this shape, and
+        it is the one most likely to recur because it looks exactly like the
+        annotations that *are* checked.
 
         """
         findings = self._findings_for(
@@ -374,8 +372,8 @@ class AnnotationNamesAreInScopeTests(unittest.TestCase):
         to know what it is descending into: inside ``Literal`` a string is a
         *value*, and this package writes many of them. Following those
         indiscriminately reports every literal member as an unresolvable name -- a
-        false positive on real code, which is worse than the missed defect it was
-        meant to fix. ``Annotated``'s trailing metadata is the same case.
+        false positive on real code, which is worse than the missed defect the
+        descent exists to catch. ``Annotated``'s trailing metadata is the same case.
 
         """
         self.assertEqual(
@@ -395,13 +393,11 @@ class AnnotationNamesAreInScopeTests(unittest.TestCase):
     def test_a_cast_to_a_function_local_import_is_not_a_finding(self) -> None:
         """The case that keeps :func:`bound_names` scope-blind.
 
-        Until #1652, :file:`pcapkit/toolkit/scapy.py` imported ``IPv6ExtHdrFragment``
-        inside a function and cast to it six lines later in the same function. A
-        :func:`typing.cast` string resolves lexically, so that is correct code and
-        mypy does not flag it -- and a check narrowed to module and class scope
-        reports it, which is how the stricter version of :func:`bound_names` was
-        discovered to be wrong. Pinned here so that reintroducing the narrowing
-        fails a test rather than a real module.
+        A function that imports a name and casts to it later in the same function
+        is correct code: a :func:`typing.cast` string resolves lexically, and mypy
+        does not flag it. A check narrowed to module and class scope reports it,
+        which is why :func:`bound_names` stays scope-blind. Pinned here so that
+        introducing the narrowing fails a test rather than a real module.
 
         """
         self.assertEqual(

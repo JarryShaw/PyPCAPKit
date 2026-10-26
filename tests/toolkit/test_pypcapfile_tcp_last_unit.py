@@ -1,5 +1,5 @@
 """Regression tests for the TCP sequence range of
-:func:`pcapkit.toolkit.pypcapfile.tcp_reassembly` (GH#1100).
+:func:`pcapkit.toolkit.pypcapfile.tcp_reassembly` (#1100).
 
 :attr:`TCP_Packet.last <pcapkit.foundation.reassembly.data.tcp.Packet.last>` is
 the *inclusive* sequence number of the segment's last payload octet, as every

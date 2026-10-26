@@ -4,10 +4,11 @@
 * :class:`TestNoThirdPartyCodeAfterTheDeployKey`: ``webfactory/ssh-agent``
   exports the deploy key's agent socket to every later step of its job, so no
   later step may run an action from outside ``actions/``, ``github/`` or this
-  repository. ``tj-actions/verify-changed-files`` did, in Vendor Update and Conda
-  Update.
+  repository, as ``tj-actions/verify-changed-files`` would in Vendor Update and
+  Conda Update.
 * :class:`TestTheChangedFilesStep` runs the ``Verify Changed files`` script that
-  replaced it, in a throwaway repository, on paths a crawl could write.
+  stands in for that action, in a throwaway repository, on paths a crawl could
+  write.
 * :class:`TestEveryWorkflowDeclaresPermissions`: a workflow without top-level
   ``permissions:`` hands the repository default to any job without its own.
   GitHub Pages builds a pull request's tree, so that build holds ``contents:
@@ -45,8 +46,8 @@ DEPLOY_KEY_ACTION = 'webfactory/ssh-agent@'
 #: Owners whose actions may run with the deploy key loaded: GitHub's own, and
 #: ``./`` for an action in this repository.
 FIRST_PARTY = ('actions/', 'github/', './')
-#: The jobs that load the deploy key and then commit, which the step replaced
-#: by #1968 ran in.
+#: The jobs that load the deploy key and then commit, where ``Verify Changed
+#: files`` runs (#1968).
 CHANGED_FILES_JOBS = (('cron-vendor.yml', 'vendor-update'), ('cron-conda.yml', 'conda-update'))
 #: The step's id, which every reader of its outputs names.
 STEP_ID = 'verify-changed-files'

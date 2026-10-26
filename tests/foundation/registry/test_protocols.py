@@ -598,7 +598,7 @@ class ProtocolRegistryTests(unittest.TestCase):
         # NOTE: a composite name such as ``'tcp|udp'`` raises for the same
         # reason the equivalent composite member is refused above: one call
         # registers under one transport protocol. On an ``IntFlag`` base,
-        # which #808 removed from ``TransportProtocol``, aenum's ``Flag``
+        # which ``TransportProtocol`` does not have (#808), aenum's ``Flag``
         # getitem parses a ``'|'``-joined name into a composite value on its
         # own, so a resolver built on it unguarded would accept this silently
         # instead of refusing it.
@@ -671,14 +671,14 @@ class ProtocolRegistryTests(unittest.TestCase):
                 udp_register.assert_not_called()
                 register_protocol.assert_not_called()
 
-        # NOTE: further maintainer ruling on #815: ``class_`` is positional
-        # again, at the sibling position, and the swallow it once caused is
-        # disambiguated by ``type(module)`` alone, never by what the value
-        # looks like. Checked against the *real* ``TCP``/``UDP`` registries
-        # rather than mocks, because the branch lives inside the function
-        # body and a mock's ``call_args`` cannot distinguish "landed in
-        # ``transport`` and got registered" from "landed in ``class_`` and
-        # was silently dropped" as cleanly as the registry contents can.
+        # NOTE: further maintainer ruling on #815: ``class_`` is positional, at the
+        # sibling position, and whether the third positional is a class name or a
+        # transport is decided by ``type(module)`` alone, never by what the value
+        # looks like. Checked against the *real* ``TCP``/``UDP`` registries rather
+        # than mocks, because the branch lives inside the function body and a mock's
+        # ``call_args`` cannot distinguish "landed in ``transport`` and got
+        # registered" from "landed in ``class_`` and was silently dropped" as
+        # cleanly as the registry contents can.
         self._guard_registry(registry.TCP.__proto__, 65200)
         self._guard_registry(registry.UDP.__proto__, 65200)
         with mock.patch.object(registry, 'register_protocol'):

@@ -6,7 +6,7 @@
 the action cannot upload from an Intel leg of ``conda-dist`` in
 :file:`.github/workflows/cron-conda.yml` or of ``conda`` in
 :file:`.github/workflows/create-release.yml`. The step "Upload conda packages to
-Anaconda" therefore skips the Intel leg, and "Upload conda packages to Anaconda
+Anaconda" therefore skips the Intel leg, as it does the Windows one (#2060), and "Upload conda packages to Anaconda
 (Intel)" runs there alone, making the action's own
 ``anaconda --token … upload --user …`` call from conda-forge's anaconda-client,
 with ``--skip-existing``.
@@ -116,7 +116,7 @@ def action_arguments(inputs: 'dict[str, str]', token: 'str', packages: 'str', la
 
 
 class TestOnlyTheIntelLegUsesTheCLI(unittest.TestCase):
-    """The action on every leg but ``macos-26-intel``, the CLI step there alone."""
+    """The action on every leg but ``macos-26-intel`` and Windows (#2060), the CLI step on Intel alone."""
 
     def test_the_action_step_is_still_the_action(self) -> None:
         for name, job_id in JOBS:
@@ -143,7 +143,7 @@ class TestOnlyTheIntelLegUsesTheCLI(unittest.TestCase):
                     self.assertFalse(runs(step(name, job_id, CLI_STEP), os))
 
     def test_a_published_release_leg_runs_neither(self) -> None:
-        """#888's per-leg check still gates both release uploads."""
+        """#888's per-leg check gates both release uploads."""
         for os in legs('create-release.yml', 'conda'):
             with self.subTest(os=os):
                 self.assertFalse(runs(step('create-release.yml', 'conda', ACTION_STEP), os, published='true'))

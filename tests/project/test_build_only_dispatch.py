@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """A scheduled workflow can be started by hand, and a manual run publishes nothing.
 
-The maintainer asked for "build-only workflow triggers for those scheduled jobs
-so that we can easily debug without waiting". So:
+The maintainer asked for build-only manual triggers on the scheduled workflows,
+so that one can be debugged without waiting for its schedule. So:
 
 * :class:`TestEveryScheduledWorkflowCanBeStarted`: each workflow with a
   ``schedule:`` has ``workflow_dispatch:``, except those in :data:`EXEMPT`,
@@ -22,9 +22,9 @@ so that we can easily debug without waiting". So:
 * :class:`TestCreateReleaseIgnoresAManualVendorUpdate`: Create Release, which
   every completed Vendor Update raises, releases nothing for a manual one.
 
-The workflows that had ``workflow_dispatch`` before, Lint, Project Status, CI
-Timing and Python Versions, keep the runs they had, and are not in
-:data:`BUILD_ONLY`.
+The other scheduled workflows with ``workflow_dispatch``, Lint, Project Status,
+CI Timing, Python Versions and Engine Benchmark, run in full on a manual run, and
+are not in :data:`BUILD_ONLY`.
 
 """
 
@@ -284,7 +284,7 @@ class TestAManualRunStillBuilds(unittest.TestCase):
                 self.assertFalse(job_runs(jobs, 'conda-tag', context))
                 self.assertTrue(job_runs(jobs, 'conda-dist', context))
                 self.assertFalse(job_runs(jobs, 'discussion', context))
-        # The schedule is unchanged: no pushed bump, no build.
+        # On the schedule, no pushed bump means no build.
         context = conda_context(event_name='schedule', unit_tests='success', verdict='skipped', verified=NULL,
                                 files_changed='false', pushed=NULL, conda_tag='skipped')
         self.assertFalse(job_runs(self.jobs['cron-conda.yml'], 'conda-dist', context))

@@ -182,8 +182,8 @@ class ReassemblyBaseTests(unittest.TestCase):
         """A misspelled class keyword raises instead of being swallowed.
 
         Guards against it landing in ``**kwargs``, being dropped by a bare
-        ``super().__init_subclass__()``, and leaving the class registered under
-        its own class name -- no exception, no warning.
+        ``super().__init_subclass__()``, and, registration being opt-in, leaving
+        the class silently unregistered -- no exception, no warning.
 
         The keyword used here is deliberately *not* ``name``. Four class keyword
         names -- ``mcls``, ``name``, ``bases`` and ``namespace`` -- collide with

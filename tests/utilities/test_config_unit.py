@@ -1,15 +1,16 @@
 # -*- coding: utf-8 -*-
 """Every tunable limit has one home, :mod:`pcapkit.utilities.config`.
 
-GitHub issue #1726 guards against the limits being spread across packages, with
-the readers in ``ipv6.py`` and ``toolkit/pypcapfile.py`` copying two of them with
-``from ... import``, so that patching the defining module leaves those readers on
-the old value. Each is a ``PCAPKIT_*`` environment variable read once by
-:mod:`pcapkit.utilities.config`, every reader looks it up there at call time,
-and the old import paths are gone. A bad value warns and falls back to the
-default; ``-1`` lifts a limit, and that or any value above the default warns of
-the risk. The :mod:`pcapkit.vendor` crawlers' variables are not held here:
-``tests/vendor/test_vendor_variables_1726_unit.py`` covers them.
+Guards against the limits being spread across packages, with readers such as
+:mod:`pcapkit.protocols.internet.ipv6` and :mod:`pcapkit.toolkit.pypcapfile`
+copying them with ``from ... import``, so that patching the defining module leaves
+those readers on a stale value (#1726). Each is a ``PCAPKIT_*`` environment
+variable read once by :mod:`pcapkit.utilities.config`, every reader looks it up
+there at call time, and no other module re-exports it (#1715). A bad value
+warns and falls back to the default; ``-1`` lifts a limit, and that or any
+value above the default warns of the risk. The :mod:`pcapkit.vendor` crawlers'
+variables are not held here: ``tests/vendor/test_vendor_variables_1726_unit.py``
+covers them.
 
 """
 
@@ -596,8 +597,8 @@ class ImporterStacklevelTests(unittest.TestCase):
     CPython names :mod:`importlib`'s bootstrap frames ``<frozen importlib._bootstrap>``
     and ``<frozen importlib._bootstrap_external>``, GraalPy ``<frozen _frozen_importlib>``
     and ``<frozen _frozen_importlib_external>``, and each one's :func:`warnings.warn`
-    leaves its own out. Counting GraalPy's ran the level past the outermost frame,
-    so the import-time warnings above named ``<sys>:0`` there.
+    leaves its own out. Counting GraalPy's would run the level past the outermost
+    frame, so the import-time warnings above would name ``<sys>:0`` there.
 
     """
 

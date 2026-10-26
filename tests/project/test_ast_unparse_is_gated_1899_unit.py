@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """No test calls :func:`ast.unparse` outside a version gate (#1899).
 
-:func:`ast.unparse` is 3.9+, and the unit tier also runs on the
+:func:`ast.unparse` is 3.9+, and the ``ALL`` test tier (#1958) also runs on the
 ``Python 3.8 (KTLO)`` leg, where the call raises :class:`AttributeError`. That
 leg reads green even when a test fails (#1679), so the failure shows only in its
 annotations and log, which is how the #1878 engine-stub tests broke there
@@ -29,7 +29,7 @@ from tests._tiers import ROOT
 if TYPE_CHECKING:
     from typing import Iterator
 
-#: Directory that is scanned: every module of it runs on the 3.8 leg.
+#: Directory that is scanned, whatever each module's test tier: an ``ALL`` one runs on the 3.8 leg.
 TESTS = ROOT / 'tests'
 
 

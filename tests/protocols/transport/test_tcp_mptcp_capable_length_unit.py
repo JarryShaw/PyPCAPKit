@@ -3,16 +3,16 @@
 
 GitHub issue #567, with the remaining lengths from #1042.
 
-Three sites that must agree
----------------------------
+The sites that must agree
+-------------------------
 
 :rfc:`8684` section 3.1 gives ``MP_CAPABLE`` as **12** octets without the receiver's key and
-**20** octets with it. Three sites encode that split -- the maker
-``TCP._make_mptcp_capable``, the predicate on ``MPTCPCapable.rkey``, and the reader
-``TCP._read_mptcp_capable`` -- and the tests here guard each against its own wrong constant:
+**20** octets with it. The maker ``TCP._make_mptcp_capable``, the predicate on
+``MPTCPCapable.rkey``, and the reader ``TCP._read_mptcp_capable`` all encode that split, and
+the tests here guard each against its own wrong constant:
 
 * a maker writing ``length=20 if rkey is None else 32`` -- both branches wrong, and the no-key
-  branch writing the value RFC 8684 assigns to the *other* case. Measured with all three sites
+  branch writing the value RFC 8684 assigns to the *other* case. Measured with every site
   wrong, ``rkey=None`` packed a *20*-octet option carrying no key octets, and an explicit
   ``rkey`` packed a *32*-octet option whose last 12 octets are entirely unaccounted for by the
   RFC 8684 figure;

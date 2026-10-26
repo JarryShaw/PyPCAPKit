@@ -190,7 +190,8 @@ class InstalledDistributionsTests(unittest.TestCase):
         from pcapkit.foundation.engines import _pcap_backend
 
         # From Python 3.15 ``importlib.metadata.distribution`` parses every
-        # candidate's METADATA, which ran on each pcap_ct extraction (#2110).
+        # candidate's METADATA, which would run on each pcap_ct extraction
+        # (#2110).
         # Existence is all that is asked, so here a METADATA read is an error.
         def unread(self, filename):
             raise AssertionError(f'read {filename} of {self}')

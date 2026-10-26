@@ -2,9 +2,10 @@
 """A callback given as ``verbose`` reaches every frame on every engine (#1874).
 
 :class:`~pcapkit.foundation.extraction.Extractor` keeps a callable ``verbose``
-as its ``_vfunc``, but each third-party engine installed its own printer
-whenever verbose output was on, so the caller's callback was replaced and never
-called. An engine installs its printer only for ``verbose=True``.
+as its ``_vfunc``. Guards against a third-party engine installing its own
+printer whenever verbose output is on, which replaces the caller's callback so
+that it is never called. An engine installs its printer only for
+``verbose=True``.
 
 Each case runs a real extraction of :file:`in.pcap`, which git tracks, so the
 module is unit tier. It proves first that the requested engine ran: the
@@ -136,7 +137,7 @@ class _VerboseCases:
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class DefaultEngineVerboseTests(_VerboseCases, unittest.TestCase):
-    """The built-in PCAP engine, which always kept the callback."""
+    """The built-in PCAP engine, which keeps the callback too."""
 
     ENGINE = 'default'
 

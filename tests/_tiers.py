@@ -14,9 +14,9 @@ fixture-dependent                   :file:`tests/integration/`,
                                     :file:`*_runtime.py`, :file:`*_regression.py`
 =================================== ==========================================
 
-The unit tier has to pass on a fresh clone with nothing installed but
-``pip install -e '.[test]'``, which is exactly how the ``test`` job of
-:file:`.github/workflows/unit-tests.yml` runs it -- see
+The unit tier has to pass on a fresh clone with no capture generated, which is
+exactly how the ``test`` job of :file:`.github/workflows/unit-tests.yml` runs
+it -- see
 :data:`UNIT_TIER_SELECTION` for the selection it uses. The fixture-dependent
 tier runs only after :file:`examples/generators/make_samples.py` has rebuilt
 :file:`examples/captures/`, so it may read any capture it likes.
@@ -278,9 +278,11 @@ FIXTURE_ALL_TIER_SELECTOR = (
 #: :func:`is_project_pin`.
 PROJECT_PINS_DIR = 'project'
 #: The project pins' selector, verbatim from the workflows: the ``project-tests``
-#: job runs what it prints, and every ``test`` and ``experimental`` leg passes each
-#: path as an ``--ignore``. Asked at run time, as :data:`FIXTURE_TIER_SELECTOR` is,
-#: so neither workflow can drift from :func:`is_project_pin`.
+#: job runs what it prints, and the ``latest`` leg of ``test`` passes each path as
+#: an ``--ignore``. Every other ``test`` leg and every ``experimental`` leg leaves
+#: the pins out through :data:`LATEST_TIER_SELECTOR`, since every pin is
+#: ``LATEST``. Asked at run time, as :data:`FIXTURE_TIER_SELECTOR` is, so no
+#: workflow can drift from :func:`is_project_pin`.
 PROJECT_PINS_SELECTOR = (
     'python -c "from tests._tiers import project_pin_paths; '
     'print(\' \'.join(project_pin_paths()))"'

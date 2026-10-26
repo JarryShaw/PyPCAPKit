@@ -4,11 +4,12 @@
 * :class:`TestPlan`, :class:`TestInstall` and :class:`TestCollect` run each
   subcommand in this process with :func:`subprocess.run` stubbed, so every command
   it would run, and every failure of one, is checked without ``sudo`` or apt.
-* :class:`TestTheFormerShellAgrees` runs the shell the steps held before the script,
-  and then the steps' own ``run:``, against the same stand-in ``sudo``, ``timeout``,
-  ``apt-get``, ``dpkg``, ``dpkg-deb``, ``dpkg-query`` and ``debconf-set-selections``,
-  and requires the same status, output, commands and files. The seed steps, which
-  #1967 put back inline as one copy and a count, run their own ``run:`` there.
+* :class:`TestTheFormerShellAgrees` runs the steps' inline shell form, the
+  reference the script must match (#1967), and then the steps' own ``run:``, against the same stand-in ``sudo``,
+  ``timeout``, ``apt-get``, ``dpkg``, ``dpkg-deb``, ``dpkg-query`` and
+  ``debconf-set-selections``, and requires the same status, output, commands and
+  files. The seed steps, whose shell is inline as one copy and a count, run their
+  own ``run:`` there.
 * :class:`TestTheStepsRunTheScript` pins each apt step to the script, or the seed
   steps to their shell, with its ``id``, ``if:``, ``continue-on-error`` and
   ``timeout-minutes``, the KTLO twin to the same steps, and the AppArmor step
@@ -401,7 +402,7 @@ class TestArguments(_InProcess):
                 self.assertEqual(raised.exception.code, 2)
 
 
-#: The steps' shell before the script, each with the runner paths it named.
+#: The steps' inline shell form, the reference the script must match, each with the runner paths it names.
 FORMER_PLAN = textwrap.dedent(r'''
     set -eu
     for attempt in 1 2; do
@@ -421,7 +422,7 @@ FORMER_PLAN = textwrap.dedent(r'''
       echo "key=${prefix}$(printf '%s\n' "$plan" | sha256sum | cut -c1-16)" >> "$GITHUB_OUTPUT"
     fi
 ''').lstrip()  # noqa: E501
-#: The seed steps' ``run:``, which a ``seed`` subcommand held for a while (#1967).
+#: The seed steps' ``run:``, inline rather than a ``seed`` subcommand (#1967).
 SEED = textwrap.dedent(r'''
     set -eu
     sudo cp "$RUNNER_TEMP"/apt-debs/*.deb /var/cache/apt/archives/
@@ -506,10 +507,10 @@ SITES = {'engine-tests': ENGINE_STEPS, 'pypcap-parity': PARITY_STEPS}
 #: cache to plan or collect for, as (workflow, step name). Each is pinned by its
 #: workflow's own test, as :mod:`tests.project.test_benchmark_workflow_2125`.
 ELSEWHERE = {('benchmark.yml', 'Install libpcap headers and tshark')}
-#: Each step's former shell, by the subcommand that replaced it.
+#: Each subcommand's inline shell form, the reference it must match, by subcommand.
 FORMER = {'plan': FORMER_PLAN, 'collect': FORMER_COLLECT}
 APPARMOR = 'Let tshark read the checkout past its AppArmor profile'
-#: Text only the apt steps' former shell held.
+#: Text only inline apt shell holds.
 INLINE = ('apt-get', 'dpkg', 'debconf-set-selections', 'apt-mirrors', '/var/cache/apt', 'apt_install')
 
 #: Stand-ins, each logging its call to ``$CALLS``. ``apt-get``'s first ``$FAIL_UPDATES``
@@ -555,7 +556,7 @@ STUBS = {
                                                              'find', 'wc', 'head', 'cp', 'env')),
                  'needs bash and the coreutils the former shell ran')
 class TestTheFormerShellAgrees(unittest.TestCase):
-    """Each step's ``run:`` writes, runs and leaves what its former shell did, on the same stand-ins."""
+    """Each step's ``run:`` writes, runs and leaves what its inline shell form does, on the same stand-ins."""
 
     def setUp(self) -> None:
         steps(WORKFLOW, 'engine-tests')  # skips the test, not each subtest, without PyYAML
@@ -595,7 +596,7 @@ class TestTheFormerShellAgrees(unittest.TestCase):
 
     def both(self, job: 'str', step: 'str', former: 'str', prepare: 'Callable[[], None]',
              **env: 'str') -> 'tuple[tuple[object, ...], tuple[object, ...]]':
-        """``(status, output, *state)`` of the former shell, then of the step's ``run:``, each from ``prepare``."""
+        """``(status, output, *state)`` of ``former``, then of the step's ``run:``, each from ``prepare``."""
         run = next(item for item in steps(WORKFLOW, job) if item.get('name') == step)['run']
         command = run.split(f'{SCRIPT} ', 1)[1].split()[0]
         option = {'install': '--mirrors', 'plan': None}.get(command, '--archives')
@@ -627,7 +628,7 @@ class TestTheFormerShellAgrees(unittest.TestCase):
         self.calls.write_text('', encoding='utf-8')
 
     def scenarios(self) -> 'Iterator[tuple[str, str, str, dict[str, str]]]':
-        """``(job, step, former shell, env)`` for every apt step but the installs."""
+        """``(job, step, former, env)`` for every apt step but the installs, ``former`` its inline shell form."""
         for job, sites in SITES.items():
             for name, _, _, _, _, run in sites:
                 if SCRIPT not in run:

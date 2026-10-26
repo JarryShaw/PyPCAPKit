@@ -128,9 +128,9 @@ class ExtensionHeaderChainRebuildTests(unittest.TestCase):
         return messages
 
     def test_rebuilding_a_cut_frame_warns_as_often_as_parsing_it(self) -> None:
-        # Rebuilt, IPv6 and the Ethernet around it both warned, and over IPv4
-        # so did each header rebuilt whose own count got to the chain limit
-        # before the frame limit: 33 times.
+        # Without the #1619 fix, a rebuild warns from IPv6 and the Ethernet
+        # around it both, and over IPv4 from each header rebuilt whose own
+        # count gets to the chain limit before the frame limit: 33 times.
         from pcapkit.protocols.link.ethernet import Ethernet
 
         for carrier in ETHERTYPE:
@@ -158,8 +158,9 @@ class ExtensionHeaderChainRebuildTests(unittest.TestCase):
                 self.assert_rebuilds_as_parsed(HOPOPT, chain(count, 0), warned)
 
     def test_where_both_limits_fall_on_one_layer_rebuilding_warns_once(self) -> None:
-        # The 33rd header in a row is also the 65th layer: rebuilt, every IP
-        # layer around the chain warned of it once more, 33 times in all.
+        # The 33rd header in a row is also the 65th layer. Without the #1619
+        # fix, a rebuild warns of it once more from every IP layer around the
+        # chain, 33 times in all.
         # Ethernet constructed on its own is not counted, so it takes 31
         # tunnels, and 30 in a frame.
         from pcapkit.protocols.link.ethernet import Ethernet
@@ -192,10 +193,11 @@ class ExtensionHeaderChainRebuildTests(unittest.TestCase):
                 self.assertIn('limit of 64 layers', messages[0])
 
     def test_rebuilding_a_cut_frame_goes_no_deeper_than_parsing_it(self) -> None:
-        # Each header rebuilt over IPv4 counted the chain from itself, so its
-        # parse went up to 32 headers past the cut: 123 frames deeper than the
-        # parse, at 1000 headers. It may go a frame or two deeper, from
-        # ``from_data`` itself, but not a header's worth.
+        # Without the #1619 fix, each header rebuilt over IPv4 counts the chain
+        # from itself, so its parse goes up to 32 headers past the cut: 123
+        # frames deeper than the parse, at 1000 headers. A rebuild may go a
+        # frame or two deeper, from ``from_data`` itself, but not a header's
+        # worth.
         from pcapkit.protocols.link.ethernet import Ethernet
 
         for carrier in ETHERTYPE:

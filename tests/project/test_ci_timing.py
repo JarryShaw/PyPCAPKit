@@ -26,7 +26,7 @@ checked, offline, since this tier has no network and no token:
 * :class:`TestTimingArtifacts` and :class:`TestReviewWorkflow` -- what the script
   relies on in :file:`unit-tests.yml` (artifact names, the coverage leg, upload
   steps that cannot fail a required leg) and the review workflow's own triggers and
-  permissions, which have to stay read-only.
+  permissions, which have to stay read-only but for posting its report (#2030).
 
 """
 
@@ -63,8 +63,8 @@ if tomllib is None:
     raise unittest.SkipTest(NO_TOMLLIB)
 
 #: Whether lxml, which the script parses JUnit with (#1894), is installed. The
-#: test extra installs it everywhere but GraalPy, which has no wheel; with no
-#: laxer parser to fall back to, what reads a JUnit artifact skips there.
+#: test extra installs it on CPython alone; with no laxer parser to fall back
+#: to, what reads a JUnit artifact skips elsewhere.
 HAS_LXML = importlib.util.find_spec('lxml') is not None
 NO_LXML = 'lxml, from the test extra, is not installed'
 
@@ -84,7 +84,8 @@ LINK_ROOT = 'https://api.github.com/repositories/109791841/actions/workflows/uni
 PAGE = 2
 PR_RUN, CANCELLED_RUN, PUSH_RUN, TIMEOUT_RUN = 38001768735, 38002005234, 37998639834, 37323913186
 #: The coverage leg, and the legs paired with it, when the fixtures were recorded.
-#: #1661 moved coverage to 3.15, which no fixture run has.
+#: The script's own are ``latest``'s and the supported tier's (#1661), legs no
+#: fixture run has.
 FIXTURE_COVERAGE_JOB = 'Python 3.14'
 FIXTURE_PAIRED_JOBS = ('Python 3.11', 'Python 3.12', 'Python 3.13')
 JUNIT_ARTIFACT_ID = 11648726901
@@ -317,8 +318,8 @@ class TestWorkflowText(unittest.TestCase):
         self.assertEqual(ci_timing.match_job(compat, 'Compat Python 3.10 (KTLO)')['id'],
                          'compatibility')
         self.assertEqual(ci_timing.match_job(compat, 'Compat Python 3.12')['id'], 'compatibility')
-        # #1633 retired the literal ``Compat Python 3.15 (scheduled)`` job this used
-        # to read, so the literal-over-template rule is checked on a stand-in.
+        # python-compatibility.yml has no literal job name beside its template
+        # (#1633), so the literal-over-template rule is checked on a stand-in.
         both = ci_timing.parse_workflow(
             'jobs:\n  matrixed:\n    name: Compat Python ${{ matrix.python-version }}\n'
             '  pinned:\n    name: Compat Python 3.15 (scheduled)\n')

@@ -277,10 +277,10 @@ class OptionRoundTripTests(unittest.TestCase):
 
         A registry entry naming a handler that does not exist is a live bug that
         nothing else catches: dispatch falls through to the fallback and the
-        option is quietly parsed as unassigned. Two of the ``MH`` registries'
-        own docstrings name prefixes that were never implemented
-        (``_read_option_*`` and ``_read_extension_*``, where the code uses
-        ``_read_opt_*`` and ``_read_ext_*``), so the hazard is not theoretical.
+        option is quietly parsed as unassigned. ``MH``'s registry docstrings
+        named prefixes the code never implemented (``_read_option_*`` and
+        ``_read_extension_*``, for ``_read_opt_*`` and ``_read_ext_*``; #1035),
+        so the hazard is not theoretical.
 
         And every one of these registries is a :class:`collections.defaultdict`
         on a class attribute, so a lookup that misses *inserts*, permanently, for

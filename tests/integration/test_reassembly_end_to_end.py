@@ -285,23 +285,23 @@ class IPv6FragmentPayloadTests(EndToEndTestCase):
     def test_the_four_fragments_reassemble_into_the_whole_datagram(self) -> None:
         """The reassembled payload is the four fragments, in order.
 
-        This is a regression test for two fixed defects, which is why it asserts
-        the exact octet count rather than only that the payload is non-empty.
+        This guards against two defects, which is why it asserts the exact
+        octet count rather than only that the payload is non-empty.
 
-        The first was the fragment offset scaling.
-        ``pcapkit/protocols/internet/ipv6_frag.py`` passed the IPv6 fragment
-        offset through unscaled where the IPv4 path scaled it into octets, and
-        ``pcapkit/toolkit/pcap.py`` then handed it to the reassembly machinery as
-        ``fo``, which is an octet offset. The four fragments landed at octets 0,
-        181, 362 and 543 instead of 0, 1448, 2896 and 4344, overwrote one
-        another, and the datagram came out 977 octets long -- ``543 + 434`` --
+        The first is the fragment offset scaling. With
+        ``pcapkit/protocols/internet/ipv6_frag.py`` passing the IPv6 fragment
+        offset through unscaled where the IPv4 path scales it into octets, and
+        ``pcapkit/toolkit/pcap.py`` handing it to the reassembly machinery as
+        ``fo``, which is an octet offset, the four fragments land at octets 0,
+        181, 362 and 543 instead of 0, 1448, 2896 and 4344, overwrite one
+        another, and the datagram comes out 977 octets long -- ``543 + 434`` --
         while still reporting ``completed=True``. That is what the assertion on
         ``len(datagram.payload)`` pins.
 
-        The second was the buffer identifier. ``pcapkit/toolkit/pcap.py`` keyed
-        the reassembly buffer on the IPv6 header's flow label rather than on the
-        fragment header's identification, so ``datagram.id.id`` came out 0 where
-        this fixture's identification is 110308. One fragmented datagram cannot
+        The second is the buffer identifier. With ``pcapkit/toolkit/pcap.py``
+        keying the reassembly buffer on the IPv6 header's flow label rather than
+        on the fragment header's identification, ``datagram.id.id`` comes out 0
+        where this fixture's identification is 110308. One fragmented datagram cannot
         show the merging that the wrong key causes, but it does show the wrong
         value, so the identification is asserted here.
 

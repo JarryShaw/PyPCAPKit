@@ -4,8 +4,9 @@
 * :class:`TestRegenerateSamples` runs the script against a stand-in generator: a
   clean run, a run on stand-in captures, a failed run at either level, and a bad
   level.
-* :class:`TestTheFormerShellAgrees` runs the shell the steps held before the
-  script against the same stand-ins and requires the same output, log and status.
+* :class:`TestTheFormerShellAgrees` runs the step's inline shell form,
+  :data:`FORMER_SHELL`, against the same stand-ins and requires the same output,
+  log and status.
 * :class:`TestTheStepsRunTheScript` pins the step in the ``integration``,
   ``pypcap-parity`` and ``gate`` jobs to the script, and keeps an inline form of
   it out of every workflow.
@@ -58,8 +59,9 @@ DEGRADED_RUN = (('out', 'wrote examples/captures/a.pcap'),
                 ('err', 'urlopen failed'),
                 ('out', 'other.pcapng: synthesised (download unavailable)'))
 
-#: The ``run:`` the ``integration`` and ``pypcap-parity`` steps held before the
-#: script; ``gate``'s differed only in a literal ``error`` for ``${ANNOTATION_LEVEL}``.
+#: The step's inline shell form, the reference the script must match, as the
+#: ``integration`` and ``pypcap-parity`` jobs spell it; ``gate``'s differs only in a
+#: literal ``error`` for ``${ANNOTATION_LEVEL}``.
 FORMER_SHELL = textwrap.dedent('''\
     if ! python examples/generators/make_samples.py 2>&1 | tee "$RUNNER_TEMP/make-samples.log"; then
       echo "::${ANNOTATION_LEVEL} title=Sample fixture generation failed::examples/generators/make_samples.py could not rebuild examples/captures/. This is a fixture-generation failure, not a test failure -- the test suite has not run."
@@ -173,7 +175,7 @@ class TestRegenerateSamples(_Scratch):
 @unittest.skipIf(shutil.which('bash') is None or shutil.which('tee') is None or shutil.which('grep') is None,
                  'needs bash, tee and grep')
 class TestTheFormerShellAgrees(_Scratch):
-    """The script prints, logs and exits as the steps' former shell did, under ``shell: bash``."""
+    """The script prints, logs and exits as :data:`FORMER_SHELL` does, under ``shell: bash``."""
 
     def former(self, level: 'str') -> 'subprocess.CompletedProcess[str]':
         # `python` is the leg's interpreter on the runner; here, this one's.

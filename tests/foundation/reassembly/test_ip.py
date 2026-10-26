@@ -269,11 +269,10 @@ class IPOverlapConflictTests(unittest.TestCase):
 
     def test_conflict_stays_scoped_to_its_own_bufid(self) -> None:
         """Coverage gap named in #482's review: ``Buffer.conflict`` is created
-        fresh per BUFID, but "created fresh" is an argument, not a test --
-        nothing exercised two BUFIDs actually in flight at once. This is the
-        more valuable of the two gaps: #478's boundary cases all shared a
-        single ACK bucket, and that is exactly the shape of gap that let a
-        genuine cross-bucket data-loss regression through undetected.
+        fresh per BUFID, but "created fresh" is an argument, not a test -- this
+        exercises two BUFIDs actually in flight at once. Cases that all share a
+        single ACK bucket, as #478's boundary cases do, cannot see a genuine
+        cross-bucket data-loss regression.
 
         So this interleaves two datagrams' fragments -- neither one completes
         before the other's next fragment arrives -- rather than finishing one
@@ -309,10 +308,10 @@ class IPOverlapConflictTests(unittest.TestCase):
     def test_single_write_produces_two_conflict_runs_separated_by_a_match(self) -> None:
         """Coverage gap named in #482's review: the inner loop of
         :meth:`~pcapkit.foundation.reassembly.ip.IP._detect_conflicts` breaks a
-        conflict run on a match and resumes detection afterwards, but no
-        existing test drove a single fragment's comparison pass through two
-        separate, non-adjacent conflict runs -- only a leading match (or
-        mismatch) followed by one trailing run.
+        conflict run on a match and resumes detection afterwards. This drives a
+        single fragment's comparison pass through two separate, non-adjacent
+        conflict runs, rather than only a leading match (or mismatch) followed
+        by one trailing run.
 
         One arriving fragment overlaps a base fragment across three 8-octet
         blocks: octets 8-15 and 24-31 disagree with the base, octets 16-23
@@ -358,8 +357,9 @@ class DeferredAnalysisTests(unittest.TestCase):
     datagram is submitted for *every* frame -- ``pcapkit/toolkit/pcap.py``
     dismisses an IPv4 frame only when its **DF** flag is set, so a frame with
     ``DF=0, MF=0, FO=0`` is not fragmented in any sense and still arrives here.
-    On ``http.pcap``, which holds no fragments at all, that was 1117 re-parses
-    per extraction and 86% of the cost of IP reassembly.
+    On ``http.pcap``, which holds no fragments at all, analysing at submit time
+    means 1117 re-parses per extraction, measured at 86% of the cost of IP
+    reassembly.
 
     What a caller sees must not change, which is why the assertions below are
     about *when* the analyser runs and not only about what it returns.

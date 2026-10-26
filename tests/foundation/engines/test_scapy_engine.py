@@ -11,22 +11,22 @@ modules. Two matter here, and neither is populated by ``scapy/__init__.py``:
   dissects down as far as the loaded modules reach and then stops at ``Raw``.
 
 So this engine's *import statement* is load-bearing in a way an engine's usually
-is not, and #406 is what happens when it is wrong: the engine imported only
-:mod:`scapy.sendrecv`, and every frame of every capture came back as ``Raw`` --
-no exception, no :mod:`pcapkit` warning, and a stderr line from `Scapy`_ that a
-library consumer never sees. ``follow_tcp_stream`` quietly reported no streams.
+is not, and #406 is what happens when it is wrong: an engine that imports only
+:mod:`scapy.sendrecv` returns every frame of every capture as ``Raw`` -- no
+exception, no :mod:`pcapkit` warning, and a stderr line from `Scapy`_ that a
+library consumer never sees. ``follow_tcp_stream`` quietly reports no streams.
 
 **Why these tests use a subprocess.** The tables live on `Scapy`_'s process-wide
 ``conf`` singleton, and once any module has populated them they stay populated: no
 public API resets them, and ``sys.modules`` surgery does not un-run a
-``bind_layers`` call. So an in-process assertion here would pass whenever
-something earlier in the run had imported a `Scapy`_ layer -- which is exactly
-how #406 went unnoticed. :mod:`tests.toolkit.test_scapy_unit` imports
-:mod:`scapy.layers.l2`, :mod:`~scapy.layers.inet` and :mod:`~scapy.layers.inet6`
-to build its fixtures, so ``pytest tests/toolkit tests/interface/test_misc.py``
-saw correct dissection while ``pytest tests/interface/test_misc.py`` alone did
-not. A fresh interpreter is the only place the engine's own import can be held
-responsible for the outcome, so that is where it is asserted.
+``bind_layers`` call. So an in-process assertion here would pass whenever something
+earlier in the run had imported a `Scapy`_ layer -- which is exactly how #406 went
+unnoticed. :mod:`tests.toolkit.test_scapy_unit` imports :mod:`scapy.layers.l2`,
+:mod:`~scapy.layers.inet` and :mod:`~scapy.layers.inet6` to build its fixtures, so
+under #406 ``pytest tests/toolkit tests/interface/test_misc.py`` sees correct
+dissection while ``pytest tests/interface/test_misc.py`` alone does not. A fresh
+interpreter is the only place the engine's own import can be held responsible for
+the outcome, so that is where it is asserted.
 
 The end-to-end behaviour these guard is asserted through the public interface in
 :meth:`tests.interface.test_misc.FollowTCPStreamTests.test_scapy_engine_matches_the_default_engine`;

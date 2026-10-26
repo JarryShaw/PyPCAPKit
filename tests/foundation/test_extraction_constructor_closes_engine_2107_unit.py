@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """An ``Extractor`` whose constructor raises after choosing an engine closes it (#2107).
 
-#2100 closed the input such a constructor owns, but not the engine, so an
-engine's own resources -- PyShark's ``tshark`` process and temporary file -- were
-left for collection. Closing it must not replace the error that stopped the
+Guards against closing the input such a constructor owns (#2100) but not the engine,
+which leaves an engine's own resources -- PyShark's ``tshark`` process and temporary
+file -- for collection. Closing it must not replace the error that stopped the
 constructor, even when the close raises too.
 
 The constructor does that through ``_cleanup(failed=True)``, and ``__exit__``

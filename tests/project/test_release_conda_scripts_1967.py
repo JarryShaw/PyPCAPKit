@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """#1967: :file:`util/release_conda.py`, run as both conda jobs' steps run it.
 
-* :class:`TestTheFormerShellAgrees` runs the shell each step held before the
-  scripts -- ``conda``'s "Check whether this leg is already on Anaconda", both
+* :class:`TestTheFormerShellAgrees` runs each step's inline shell form, the
+  reference the script must match -- ``conda``'s "Check whether this leg is already on Anaconda", both
   conda jobs' "Build conda packages" and "Upload conda packages to Anaconda
   (Intel)" -- and the script, on the cases below, against stand-in ``curl``, ``conda`` and ``anaconda``, and
   requires the same status, standard output and error, step outputs and calls.
@@ -39,7 +39,7 @@ from util import release_conda
 if TYPE_CHECKING:
     from typing import Optional
 
-#: Test tier (#1958): runs the tree's own scripts and the workflows' former shell.
+#: Test tier (#1958): runs the tree's own scripts and the steps' inline shell forms.
 __tier__ = 'LATEST'
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -100,7 +100,8 @@ FAKE_ANACONDA = r'''#!/bin/sh
 exit "${ANACONDA_FAIL:-0}"
 '''
 
-#: "Check whether this leg is already on Anaconda" in ``conda``, before :file:`util/release_conda.py`.
+#: "Check whether this leg is already on Anaconda" in ``conda``, as inline shell: what
+#: :file:`util/release_conda.py`'s ``leg`` must match.
 FORMER_LEG = textwrap.dedent(r'''
     set -euo pipefail
 
@@ -152,8 +153,8 @@ FORMER_LEG = textwrap.dedent(r'''
     fi
 ''').lstrip()
 
-#: "Build conda packages" in ``conda-dist``, before :file:`util/release_conda.py`;
-#: ``conda``'s was the same but for the ``windows-latest`` arm (:data:`FORMER_RELEASE_BUILD`).
+#: "Build conda packages" in ``conda-dist``, as inline shell: what ``build`` must match;
+#: ``conda``'s is the same but for the ``windows-latest`` arm (:data:`FORMER_RELEASE_BUILD`).
 FORMER_BUILD = textwrap.dedent(r'''
     set -euo pipefail
 
@@ -213,7 +214,7 @@ FORMER_BUILD = textwrap.dedent(r'''
 ''').lstrip()
 FORMER_RELEASE_BUILD = FORMER_BUILD.replace('  windows-latest)\n    target_platform="win-64"\n    ;;\n', '')
 
-#: "Upload conda packages to Anaconda (Intel)" in both jobs, before :file:`util/release_conda.py`.
+#: "Upload conda packages to Anaconda (Intel)" in both jobs, as inline shell: what ``upload`` must match.
 FORMER_UPLOAD = textwrap.dedent(r'''
     set -euo pipefail
 
@@ -418,7 +419,7 @@ UPLOAD_RUN = STEPS[('cron-conda.yml', 'conda-dist', 'Upload conda packages to An
 
 @unittest.skipIf(not BASH, 'needs bash, which ran the former shell')
 class TestTheFormerShellAgrees(_Stand):
-    """Each script exits, prints, writes and calls exactly as the shell it replaced, on every case."""
+    """Each script exits, prints, writes and calls exactly as the step's inline shell form, on every case."""
 
     def agree(self, shell: 'str', run: 'str', env: 'dict[str, str]', label: 'str' = '',
               python: 'str' = '') -> 'tuple[object, ...]':
@@ -496,7 +497,7 @@ class TestTheScripts(_Stand):
                                 'https://api.anaconda.org/release/jarryshaw/pypcapkit/1.5.0\n')
 
     def test_only_a_200_is_read(self) -> None:
-        """As ``[ "$status" = "200" ]`` was: a 201 holding this very leg reads ``false``, uncounted."""
+        """As :data:`FORMER_LEG`'s ``[ "$status" = "200" ]``: a 201 holding this very leg reads ``false``, uncounted."""
         case = next(case for case in LEG_CASES if case[0] == 'a 2xx other than 200 is not read')
         status, stdout, stderr, outputs, calls = self.script(LEG_RUN, self.leg_env(case))
         self.assertEqual((status, stdout, stderr), (0, '', ''))

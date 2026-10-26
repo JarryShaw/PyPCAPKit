@@ -275,7 +275,8 @@ class EnginePCAPTraceTests(unittest.TestCase):
     @unittest.skipUnless(HAS_DPKT, 'dpkt not installed')
     def test_a_raw_ip_link_type_is_traced(self) -> None:
         # With the Ethernet header stripped, dpkt reads each frame as a bare IP or
-        # IP6, which names no ``ip`` or ``ip6`` layer, so it traced nothing (#1548).
+        # IP6, which names no ``ip`` or ``ip6`` layer, so without the fix it traces
+        # nothing (#1548).
         # The capture keeps every frame, its IPv6 ones under LINKTYPE_IPV4
         # included, and those are not traced.
         for capture, linktype, flows in (('tcp.pcap', 228, RAW_TCP_FLOWS), ('http6.cap', 229, RAW_HTTP6_FLOWS)):

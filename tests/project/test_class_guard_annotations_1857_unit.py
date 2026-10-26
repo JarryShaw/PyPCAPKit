@@ -7,10 +7,10 @@ a class-level ``if TYPE_CHECKING:`` that never runs, copies them into
 {})``. That is the module's globals with an empty local namespace, so neither the
 class body nor a class-level guarded import is in scope. :file:`docs/source/conf.py`
 binds the names of each module's *module-level* ``if TYPE_CHECKING:`` block first,
-but not those of a class-level one. ``__flags__: 'Flags'`` named a nested class
-bare, and each third-party engine's ``_expkg`` named a module imported only inside
-the class guard. Each raised :exc:`NameError`, which fails the whole class, so
-autodoc rendered every annotation of ``FrameType``, its frame schemas and those
+but not those of a class-level one. A ``__flags__: 'Flags'`` naming a nested class
+bare, or an engine's ``_expkg`` naming a module imported only inside the class
+guard, raises :exc:`NameError`, which fails the whole class: #1857 found autodoc
+rendering every annotation of ``FrameType``, its frame schemas and the third-party
 engines as raw strings.
 
 This module makes the same evaluation without Sphinx:

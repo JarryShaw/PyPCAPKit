@@ -11,7 +11,7 @@ out, and one built with 69.0.0 has it. Pinned here:
 * every setuptools pin in :file:`conda/pypcapkit/meta.yaml` matches that floor.
 
 These read the declarations, not a built wheel: they catch the floor being
-lowered again, not a later setuptools release dropping the behaviour.
+lowered, not a later setuptools release dropping the behaviour.
 
 """
 

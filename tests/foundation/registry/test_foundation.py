@@ -153,23 +153,23 @@ class FoundationRegistryTests(unittest.TestCase):
 
         This is the regression for GitHub issue #513. A test that mocks
         ``Extractor.register_*`` away never reaches the validation in
-        :file:`pcapkit/foundation/extraction.py` -- which is how the defect
-        survived: all three entry points rejected pcapkit's *own* engines,
-        reassembly and flow-tracing classes with
+        :mod:`pcapkit.foundation.extraction`, so it cannot catch the entry points
+        rejecting pcapkit's *own* engines, reassembly and flow-tracing classes with
         :exc:`~pcapkit.utilities.exceptions.RegistryError`.
 
-        The cause was that each check named the auto-registering public class
-        (``Engine``, ``Reassembly``, ``TraceFlow``) while every built-in subclasses
+        Guards against a check that names the auto-registering public class
+        (``Engine``, ``Reassembly``, ``TraceFlow``), while every built-in subclasses
         the ``*Base`` variant directly, specifically so that it is not
-        auto-registered. So ``issubclass(PCAP, Engine)`` was :data:`False` while
-        ``issubclass(PCAP, EngineBase)`` was :data:`True`.
+        auto-registered: ``issubclass(PCAP, Engine)`` is :data:`False` while
+        ``issubclass(PCAP, EngineBase)`` is :data:`True`.
 
         Deliberately does **not** mock, because the point is to exercise the gate.
 
         """
         # NOTE: the public ``register_*`` guards accept ``Engine``/``Reassembly``/
         # ``TraceFlow`` (the registration surface third parties extend), so the public
-        # door refuses the built-ins (#1016) -- see
+        # door refuses a built-in under any name other than the one it shipped with
+        # (#1016, #1363) -- see
         # ``test_public_registration_rejects_base_only_classes`` below. What #513
         # guards -- that pcapkit's *own* classes are registrable through a real,
         # unmocked gate -- is checked through the internal

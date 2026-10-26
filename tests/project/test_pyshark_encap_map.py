@@ -15,8 +15,8 @@ raising, which is itself worth pinning (#575).
 
 Most of this is unit-tier: it exercises the parsing and formatting helpers
 against fabricated PDML/help-text fragments and a fabricated measurement list,
-never shelling out to :program:`editcap`/:program:`tshark`. Two classes do shell
-out, both gated on :data:`HAS_WIRESHARK` -- a real ``HAS_*`` flag, deliberately,
+never shelling out to :program:`editcap`/:program:`tshark`. The classes that do
+shell out are gated on :data:`HAS_WIRESHARK` -- a real ``HAS_*`` flag, deliberately,
 rather than a same-effect :func:`shutil.which` check under an unprefixed name.
 The latter rests on the theory that a name ``tests/_dependency_gates.py``'s AST
 scan does not recognise cannot need an entry there -- true, but the wrong
@@ -98,7 +98,7 @@ _TSHARK = shutil.which('tshark')
 #: Whether Wireshark is on ``PATH`` at all. Named with the ``HAS_`` prefix
 #: deliberately: ``tests/_dependency_gates.py``'s AST scan keys on exactly that
 #: prefix inside a ``skipUnless(...)`` call, and it needs to *see* this gate
-#: darkening two classes on every CI leg -- see the module docstring for why
+#: darkening the real-sweep classes on every CI leg -- see the module docstring for why
 #: an unprefixed same-effect name was the wrong fix. Declared in
 #: :data:`~tests._dependency_gates.NON_DISTRIBUTION_FLAGS` rather than
 #: :data:`~tests._dependency_gates.MODULE_PROVIDERS`, since a Wireshark binary
@@ -106,8 +106,8 @@ _TSHARK = shutil.which('tshark')
 HAS_WIRESHARK = _EDITCAP is not None and _TSHARK is not None
 
 #: Whether lxml, which the generator parses PDML with (#1894), is installed. The
-#: test extra installs it everywhere but GraalPy, which has no wheel; with no
-#: laxer parser to fall back to, everything here that parses PDML skips there.
+#: test extra installs it on CPython only, as PyPy and GraalPy have no wheel; with
+#: no laxer parser to fall back to, everything here that parses PDML skips there.
 HAS_LXML = importlib.util.find_spec('lxml') is not None
 NO_LXML = 'lxml, from the test extra, is not installed'
 
@@ -164,9 +164,9 @@ class ParseParenthesisedNumberTests(unittest.TestCase):
     NULL/Loopback (15)"``. This generator never does that extraction at all;
     a key comes from ``frame.encap_type``'s number directly, and a filter
     name comes from the PDML ``<proto name=...>`` attribute, never parsed out
-    of prose. Reverting :data:`~pyshark_encap_map._PAREN_NUMBER` to #850's
-    original naive shape, ``r'(\\w+) \\((\\d+)\\)'`` used with
-    :func:`re.search`, leaves every test below still passing: ``.search`` is
+    of prose. #850's original naive shape, ``r'(\\w+) \\((\\d+)\\)'`` used with
+    :func:`re.search` in place of :data:`~pyshark_encap_map._PAREN_NUMBER`,
+    passes every test below as well: ``.search`` is
     unanchored, so ``\\w+`` matches ``Loopback`` and steps straight over the
     ``/`` -- confirmed by trying it.
 

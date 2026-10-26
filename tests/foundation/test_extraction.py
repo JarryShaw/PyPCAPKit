@@ -91,11 +91,11 @@ class ExtractorTests(unittest.TestCase):
 
         from pcapkit.foundation.extraction import Extractor
 
-        # Several tests here register into the four registries for real --
+        # Several tests here register into the registries for real --
         # overwriting ``json``, ``dpkt``, ``ipv4`` and ``tcp`` with stand-ins,
         # or adding ``unit-*`` names -- and the class shares one import, so each
-        # table is put back afterwards. Without that, a later extraction ran the
-        # stand-in engine and hung, and :mod:`tests.interface.test_core` found
+        # table is put back afterwards. Without that, a later extraction runs the
+        # stand-in engine and hangs, and :mod:`tests.interface.test_core` finds
         # engines it has no constant for (GitHub issue #1065).
         for table in (Extractor.__output__, Extractor.__engine__,
                       Extractor.__reassembly__, Extractor.__traceflow__):
@@ -181,10 +181,11 @@ class ExtractorTests(unittest.TestCase):
     def test_declared_engine_type_is_satisfied_by_the_built_in_engines(self) -> None:
         """``_exeng``, ``engine`` and ``record_header`` must name a type the engine holds.
 
-        Both built-in engines subclass :class:`~pcapkit.foundation.engines.engine.EngineBase`
-        directly (so that they are not auto-registered), hence neither is an
+        The built-in engines subclass
+        :class:`~pcapkit.foundation.engines.engine.EngineBase` directly (so that
+        they are not auto-registered), hence none is an
         :class:`~pcapkit.foundation.engines.engine.Engine`. Guards against the
-        three declarations saying ``Engine``, a gap ``cast`` calls can hide (#1022).
+        declarations saying ``Engine``, a gap ``cast`` calls can hide (#1022).
         """
         import pcapkit.foundation.extraction as module
         from pcapkit.foundation.engines.pcap import PCAP
@@ -428,10 +429,10 @@ class ExtractorTests(unittest.TestCase):
     def test_register_helpers_reject_a_non_class_with_registry_error(self) -> None:
         """GitHub issue #1021: a non-class raises ``RegistryError``, not ``TypeError``.
 
-        Each guard was a bare ``issubclass(x, Base)``, which refuses a non-class
-        itself -- ``register_dumper`` directly (``Dumper`` has a plain ``type``
-        metaclass), the other three from inside ``abc`` -- so the documented
-        ``RegistryError`` was unreachable. A wrong *class* still reaches the
+        Guards against a bare ``issubclass(x, Base)`` guard, which refuses a
+        non-class itself -- in ``register_dumper`` directly (``Dumper`` has a plain
+        ``type`` metaclass), in the others from inside ``abc`` -- and so leaves the
+        documented ``RegistryError`` unreachable. A wrong *class* still reaches the
         subclass check and raises ``RegistryError``.
         """
         from pcapkit.corekit.module import ModuleDescriptor
@@ -466,10 +467,10 @@ class ExtractorTests(unittest.TestCase):
     def test_register_engine_identity_guard(self) -> None:
         """GitHub issue #739: re-registering the same engine class is silent.
 
-        ``register_engine`` used a presence-only guard, so the *second* of two
-        calls registering the exact same class under the exact same name
-        warned about an overwrite that never happened. This mirrors the
-        identity guard GitHub issue #718 gave the code-keyed protocol
+        Guards against a presence-only guard in ``register_engine``, with which
+        the *second* of two calls registering the exact same class under the
+        exact same name warns about an overwrite that never happened. This
+        mirrors the identity guard GitHub issue #718 gave the code-keyed protocol
         registrars (see ``test_register_stays_quiet_on_same_object_reregistration``
         in ``tests/protocols/test_protocol_base_unit.py``): the guard
         fires only when the incumbent differs from the replacement, and the
@@ -620,7 +621,7 @@ class ExtractorTests(unittest.TestCase):
         """GitHub issue #739: re-registering the same dumper class is silent.
 
         Same defect and fix as ``test_register_engine_identity_guard``, for
-        ``register_dumper``. Unlike the other three, ``__output__`` maps each
+        ``register_dumper``. Unlike the other registries, ``__output__`` maps each
         format to a ``(dumper, ext)`` pair and is a
         :class:`collections.defaultdict`, so this also pins that the
         identity check compares the incumbent *dumper* (not the pair, which
@@ -682,7 +683,7 @@ class ExtractorTests(unittest.TestCase):
             # dot. ``Extractor.__output__`` spells its extensions *with* the dot
             # and ``make_name`` normalises it away, because ``_fext`` reaches the
             # engines, which each compose a per-frame name as
-            # ``f'{name}.{ext._fext}'`` -- leaving the dot on gave
+            # ``f'{name}.{ext._fext}'`` -- leaving the dot on gives
             # ``Frame 1..json`` on disk. The output filename below keeps exactly
             # one dot, which is the other half of the same contract.
             self.assertEqual(
@@ -1215,9 +1216,9 @@ class ExtractorTests(unittest.TestCase):
 
     def test_warns_bullet_for_pcap_trace_output_names_the_engines_its_guard_warns_for(self) -> None:
         # The bullet lists engines by name and the guard lists them again as a
-        # tuple, and nothing else ties the two: the bullet once went on naming
-        # DPKT and Scapy after #1507 took them out of the guard (#1719). Every
-        # engine is put through the guard -- ``_traced`` takes the requested
+        # tuple, and nothing else ties the two, so the bullet can go on naming
+        # an engine the guard does not hold (#1719). Every engine is put
+        # through the guard -- ``_traced`` takes the requested
         # engine as the one that runs -- and the set that warns is compared
         # with the set the bullet names.
         from pcapkit.foundation.extraction import Extractor

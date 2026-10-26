@@ -2,9 +2,9 @@
 """An IP datagram longer than the data buffer is never complete.
 
 GitHub issue #1566. The data buffer holds 65,535 octets and ``RCVBT`` 8,192
-blocks. Both completion checks tested ``all(RCVBT[0:(TDL + 7) // 8])``, and the
-slice stops silently at the table's end, so a final fragment declaring more data
-than fits completed its datagram short. A datagram completes only if its
+blocks. Guards against a completion check of ``all(RCVBT[0:(TDL + 7) // 8])``,
+whose slice stops silently at the table's end, so a final fragment declaring
+more data than fits completes its datagram short. A datagram completes only if its
 total data length fits the buffer.
 
 A fragment the buffer's end clips counts as cut there: its partial last block is

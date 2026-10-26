@@ -1,11 +1,12 @@
 # -*- coding: utf-8 -*-
 """The release conda leg smoke-tests its package as Conda Update does (#1855).
 
-#1821 added ``util/conda_vendor.py --smoke`` to ``conda-dist`` in
-:file:`.github/workflows/cron-conda.yml`, after ``conda build`` and before any
-upload. ``conda`` in :file:`.github/workflows/create-release.yml`, which
-publishes the release packages, had no such step, and its build step did not
-write the ``host_package`` output the step reads. The jobs are read with
+``conda-dist`` in :file:`.github/workflows/cron-conda.yml` runs
+``util/conda_vendor.py --smoke`` after ``conda build`` and before any upload
+(#1821). ``conda`` in :file:`.github/workflows/create-release.yml`, which
+publishes the release packages, runs the same step, and its build step writes
+the ``host_package`` output the step reads; without either, a release package
+is published untested. The jobs are read with
 :func:`tests._workflows.steps`, and each build step is run with a stand-in ``conda``,
 as ``test_conda_native_platforms_1822.py`` runs it.
 

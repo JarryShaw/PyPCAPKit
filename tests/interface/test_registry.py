@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """Unit tests for :mod:`pcapkit.interface.registry`.
 
-GitHub issue #1519: the registry-entry helpers the registrars share were private
-functions of :mod:`pcapkit.foundation.extraction`, imported from there by
-:mod:`pcapkit.foundation.traceflow.traceflow`. The owner ruled that they become
-public and move to a module of their own under :mod:`pcapkit.interface`. The
-registrars' end-to-end behaviour is covered by
+The registry-entry helpers that the registrars of
+:mod:`pcapkit.foundation.extraction` and
+:mod:`pcapkit.foundation.traceflow.traceflow` share are public, in a module of
+their own under :mod:`pcapkit.interface`, as the owner ruled on GitHub issue
+#1519. The registrars' end-to-end behaviour is covered by
 ``tests/foundation/registry/test_restore_builtin_unit.py``; these tests pin each
 helper's own contract.
 

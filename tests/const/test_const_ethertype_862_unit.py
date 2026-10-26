@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """``EtherType(0x0101)`` must resolve to Old Xerox, not IEEE802.3 Length Field.
 
-GitHub issue #862: :meth:`pcapkit.const.reg.ethertype.EtherType._missing_` tested
-``0x0000 <= value <= 0x05DC`` (IEEE802.3 Length Field) *before*
+GitHub issue #862: guards against :meth:`pcapkit.const.reg.ethertype.EtherType._missing_`
+testing ``0x0000 <= value <= 0x05DC`` (IEEE802.3 Length Field) *before*
 ``0x0101 <= value <= 0x01FF`` (Old Xerox Experimental values). The second range is
 wholly contained in the first, and the generated ``_missing_`` returns on the
-first matching ``if``, so the Old Xerox branch was unreachable for every value
-it covers -- ``EtherType(0x0101).name`` resolved to
+first matching ``if``, so in that order the Old Xerox branch is unreachable for
+every value it covers -- ``EtherType(0x0101).name`` resolves to
 ``'IEEE802_3_Length_Field_0x0101'`` instead of the Old Xerox name.
 
 Same shape as #844/#852 (``LinkType`` 209) and #841 (IPX socket ranges): the
@@ -228,8 +228,7 @@ class EtherTypeGeneratorGeneralOrderingTests(unittest.TestCase):
           on them, so they are not exercised below.
 
         So this test drives two orders, one representative of each
-        discriminating pair, rather than one order claimed (wrongly, in an
-        earlier revision) to catch both.
+        discriminating pair, since no single order catches both.
         """
         from pcapkit.vendor.reg.ethertype import EtherType
 

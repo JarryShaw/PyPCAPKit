@@ -3,7 +3,7 @@
 
 GitHub issue #1178. :meth:`~pcapkit.protocols.protocol.ProtocolBase._parse_next_layer`
 keeps a next layer as :class:`~pcapkit.protocols.misc.raw.Raw` when fewer octets
-were captured than its ``__length_hint__`` (:issue:`1170`).
+were captured than its ``__length_hint__`` (#1170).
 :class:`~pcapkit.protocols.internet.ipv6_ext.IPv6_Ext` hinted 2, though
 :rfc:`6564#section-4` and :rfc:`8200#section-4` make every extension header at
 least 8 octets, so a 2--7 octet tail of a longer declared payload was parsed as

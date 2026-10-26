@@ -22,7 +22,7 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 
 
 class StdFlags(enum.IntFlag):
-    """A stdlib replica of :class:`pcapkit.const.tcp.flags.Flags`' declared bits.
+    """``ACK`` and ``SYN`` of :class:`pcapkit.const.tcp.flags.Flags`, as a stdlib flag enumeration.
 
     Present so the tests can show the nameless pseudo-member is not an
     :mod:`aenum` quirk. :mod:`enum` and :mod:`aenum` spell a wholly-undeclared
@@ -78,13 +78,13 @@ class NamelessEnumRenderingTests(unittest.TestCase):
     """#648 -- a nameless flag member must not render as ``Type::None [n]``.
 
     :func:`~pcapkit.dumpkit.common.make_dumper`'s ``object_hook`` renders every
-    enumeration member as ``Type::name [value]``, and it interpolated
-    :attr:`~enum.Enum.name` unguarded at three separate places. A
+    enumeration member as ``Type::name [value]``, through
+    :func:`~pcapkit.dumpkit.common.render_enum` in each branch that meets one. A
     :class:`~enum.Flag` value composed entirely of undeclared bits has
-    ``name is None``, so all three put the literal four characters ``None`` into
-    the name half.
+    ``name is None``, so interpolating :attr:`~enum.Enum.name` unguarded puts
+    the literal four characters ``None`` into the name half.
 
-    The replacement is the value's own decimal spelling -- ``'Flags::0 [0]'``,
+    The fallback is the value's own decimal spelling -- ``'Flags::0 [0]'``,
     ``'Flags::8 [8]'`` -- chosen for reasons these tests pin:
 
     * It is what the enumeration libraries themselves already use for an
@@ -185,8 +185,8 @@ class NamelessEnumRenderingTests(unittest.TestCase):
     def test_multidict_key_path_renders_a_nameless_key(self) -> None:
         """The ``MultiDict``/``OrderedMultiDict`` *key* path.
 
-        A second, separate interpolation of the same shape. It builds the
-        dictionary key rather than the value, so a nameless key collapsed every
+        A separate branch rendering the same way. It builds the dictionary key
+        rather than the value, so an unguarded nameless key collapses every
         undeclared flag value onto the single key ``'Flags::None [n]'`` -- and,
         for two different nameless values, onto keys distinguished only by the
         bracketed half.
@@ -216,15 +216,14 @@ class NamelessEnumRenderingTests(unittest.TestCase):
         self.assertEqual(dumper.object_hook(ordered), [{'Flags::0 [0]': 'first'}, {'Flags::0 [0]': 'second'}])
 
     def test_addon_branch_renders_a_nameless_member(self) -> None:
-        """The third interpolation -- the ``'enum'`` key of the ``addon`` mapping.
+        """The ``'enum'`` key of the ``addon`` mapping, rendered the same way.
 
         Reached when the member carries public instance attributes, which for a
         pseudo-member takes a :meth:`~enum.Enum._missing_` override. No registry
         under :mod:`pcapkit.const` is both a flag enumeration and an annotated
-        one, so this branch is not reachable from a capture -- but the
-        interpolation is character-for-character the same as the other two, so
-        it is guarded with them rather than left as the one place the literal
-        ``None`` survives.
+        one, so this branch is not reachable from a capture -- but its
+        rendering is the same as the other branches', so it is guarded with them
+        rather than left as the one place the literal ``None`` survives.
 
         """
         from pcapkit.dumpkit.common import make_dumper

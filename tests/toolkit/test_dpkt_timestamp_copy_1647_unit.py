@@ -3,13 +3,13 @@
 
 :func:`copy.copy` and :func:`copy.deepcopy` look up ``__copy__`` and
 ``__deepcopy__`` before ``__reduce_ex__``, and :class:`decimal.Decimal` defines
-both, so :class:`~pcapkit.toolkit.dpkt.DecimalTimestamp`'s own
-:meth:`~object.__reduce__` was never asked. The C :mod:`_decimal` returns
+both, so unless :class:`~pcapkit.toolkit.dpkt.DecimalTimestamp` defines them
+too, its own :meth:`~object.__reduce__` is never asked. The C :mod:`_decimal` returns
 ``self``. The pure-Python :mod:`_pydecimal` returns ``self.__class__(str(self))``,
 which resets ``resolution`` and ``orig_len`` to the constructor's defaults. CPython
 3.15 no longer falls back to its bundled libmpdec, so a build on a host without
 the library has no :mod:`_decimal` -- the ``actions/setup-python`` 3.15.0 build
-reports it missing -- and CI's 3.15 leg alone lost them.
+reports it missing -- so without the fix CI's 3.15 leg alone loses them.
 
 The in-process tests run under whichever implementation this interpreter has;
 :class:`PurePythonDecimalTests` reruns them under :mod:`_pydecimal` in a fresh

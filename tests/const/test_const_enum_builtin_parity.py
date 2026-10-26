@@ -25,7 +25,7 @@ something other than raise:
   :exc:`AttributeError` (``'int' object has no attribute 'upper'``) rather than
   :exc:`ValueError`.
 
-All six carry a guard raising a bare :exc:`ValueError`, emitted by their
+Each carries a guard raising a bare :exc:`ValueError`, emitted by their
 templates under :mod:`pcapkit.vendor` rather than hand-written -- the tree is
 generated, so a fix that is not in the template is reverted by the next crawl.
 
@@ -74,7 +74,7 @@ __tier__ = 'ALL'
 #: same reason.
 UNRESOLVABLE = 1 << 70
 
-#: The six registries GitHub issue #647 converged, as ``(module, class name,
+#: The registries GitHub issue #647 converged, as ``(module, class name,
 #: what the lookup did with an invalid value without the fix)``. Named individually as
 #: well as swept, so a regression reports *which* registry came apart rather
 #: than only that the sweep shrank.
@@ -119,12 +119,8 @@ EXPECTED_TO_REGISTER = frozenset({
 #: Each was rendering a registry that GitHub issue #647 found unguarded.
 #:
 #: Keyed to each template's own guard text rather than one literal shared by
-#: all of them, kept as a dict rather than collapsed back to one shared literal:
-#: GitHub issue #792 moved ``pcapkit.vendor.reg.apptype.apptype``'s copy to an
-#: f-string first, deliberately leaving the others on ``%`` so its own diff over
-#: the registry's very large generated file stayed reviewable, and GitHub issue
-#: #798 swept the rest onto the same f-string form. They all agree, but the
-#: dict stays: a future bespoke guard is not guaranteed to match this
+#: all of them. They all use the same f-string form (GitHub issues #792 and
+#: #798), but the dict stays: a future bespoke guard is not guaranteed to match this
 #: one's shape, and what #647 actually needs pinned is that each template
 #: still carries *a* guard rejecting an invalid value, not that every template
 #: shares one literal.
@@ -143,7 +139,7 @@ ISSUE_804_PAIR = (
     ('pcapkit.vendor.http.method', 'Method', 'pcapkit.const.http.method'),
 )
 
-#: The three GitHub issue #818 finishes, as ``(vendor module, class name,
+#: The registries GitHub issue #818 finishes, as ``(vendor module, class name,
 #: const module)`` -- the same shape as :data:`ISSUE_804_PAIR`, for the
 #: ``__repr__`` methods #804 deliberately left out of its own scope.
 #:
@@ -155,7 +151,7 @@ ISSUE_804_PAIR = (
 #: :mod:`pcapkit.vendor.default` template) and which the issue's own last
 #: comment split back out, plus ``pcapkit.const.reg.apptype.apptype`` (an
 #: f-string, #792). What is left with an actual ``%``-formatted ``__repr__``
-#: is exactly these three -- each its own bespoke vendor template, like
+#: is exactly these -- each its own bespoke vendor template, like
 #: :data:`ISSUE_804_PAIR`'s pair, so each gets a const half and a vendor half.
 ISSUE_818_TRIPLE = (
     ('pcapkit.vendor.ftp.return_code', 'ReturnCode', 'pcapkit.const.ftp.return_code'),
@@ -167,14 +163,14 @@ ISSUE_818_TRIPLE = (
 def percent_format_lines_in_repr(source: 'str') -> 'list[int]':
     """Every ``%``-formatting line inside a ``def __repr__`` body, and nowhere else.
 
-    Narrower than :func:`percent_format_lines`, which the four
-    :data:`BESPOKE_TEMPLATES` const modules cannot use for this: all three of
-    :data:`ISSUE_818_TRIPLE` still format their ``__str__`` and ``_missing_``
+    Narrower than :func:`percent_format_lines`, which the
+    :data:`BESPOKE_TEMPLATES` const modules cannot use for this: every module of
+    :data:`ISSUE_818_TRIPLE` formats its ``__str__`` and ``_missing_``
     with ``%``, deliberately -- GitHub issue #818 is about ``__repr__``
     specifically, not the module-wide sweep #804 already finished for its own
     pair. Walking only the ``__repr__`` :class:`ast.FunctionDef` is what makes
     that distinction possible; a whole-module :func:`percent_format_lines`
-    would report the same nonzero count before and after this fix, because
+    would report the same nonzero count with or without the fix, because
     the ``__str__`` and ``_missing_`` sites it also matches are untouched by
     it either way.
 
@@ -267,7 +263,7 @@ class _StdStrEnum(str, enum.Enum):
     """A built-in string enumeration.
 
     Spelled ``(str, enum.Enum)`` rather than :class:`enum.StrEnum`, which is
-    3.11+, because CI still tests 3.8-3.10 (KTLO, #1633).
+    3.11+, because CI tests 3.8-3.10 (KTLO, #1633).
     """
 
     A = 'a'
@@ -466,7 +462,7 @@ class ConstEnumBuiltinParityTests(unittest.TestCase):
                                                       f'{raised.__name__ if raised else None}')
 
     def test_the_registries_named_in_issue_647(self) -> None:
-        """The six outliers, by name, with what each did without the fix."""
+        """The outliers, by name, with what each did without the fix."""
         for module_name, class_name, before in ISSUE_647_OUTLIERS:
             with self.subTest(enum=f'{module_name}.{class_name}', before=before):
                 obj = getattr(importlib.import_module(module_name), class_name)
@@ -486,7 +482,7 @@ class ConstEnumBuiltinParityTests(unittest.TestCase):
         :mod:`tests.const.test_const_enum_lookup` pins the fix -- but its sweep
         is ``_iter_const_int_enums``, which excludes :class:`~aenum.IntFlag`, and
         it never sees a :class:`~aenum.StrEnum` either. Every guard GitHub issue
-        #647 added is on one of those two kinds, so all six would have been
+        #647 added is on one of those two kinds, so every one of them would be
         outside it.
         """
         checked = 0
@@ -502,7 +498,7 @@ class ConstEnumBuiltinParityTests(unittest.TestCase):
         self.assertEqual(offenders, [],
                          f'_missing_ without @classmethod (GitHub issue #492): {offenders}')
 
-        # The six of issue #647 specifically, since the sweep above would still
+        # The registries of issue #647 specifically, since the sweep above would still
         # pass if they had no ``_missing_`` at all -- which was the defect.
         #
         # ``TransportProtocol`` is the one deliberate exception: it has no
@@ -524,7 +520,7 @@ class ConstEnumBuiltinParityTests(unittest.TestCase):
                 self.assertIsInstance(vars(obj)['_missing_'], classmethod)
 
     def test_a_string_registry_rejects_a_non_string_rather_than_crashing(self) -> None:
-        """The three ``StrEnum`` outliers reached ``value.upper()`` unguarded."""
+        """Guards against the ``StrEnum`` outliers reaching ``value.upper()`` unguarded."""
         from pcapkit.const.ftp.command import Command, FEATCode
         from pcapkit.const.http.method import Method
 
@@ -643,7 +639,7 @@ class ConstFlagCompositeTests(unittest.TestCase):
 
 
 class ConstEnumRegisterFallbackTests(unittest.TestCase):
-    """A once-sanctioned divergence, retired for these specific registries.
+    """The registering fallback, ruled out for these specific registries.
 
     The owner's design intent, recorded on GitHub issue #647, was for the const
     enums to mirror the built-in enum's behaviour with one exception: a missing
@@ -659,9 +655,8 @@ class ConstEnumRegisterFallbackTests(unittest.TestCase):
     registry entry, and for these registries only IANA-registered values
     are legitimate -- ``get()`` does not have enough information to build
     one on its own. Stated for :class:`Method`, :class:`Command` and
-    :class:`FEATCode`, the three registries PR 1 converted, but the
-    reasoning is unconditional and PR 2 applies it to ``AppType``
-    identically. Concretely,
+    :class:`FEATCode`, but the reasoning is unconditional and applies to
+    ``AppType`` identically. Concretely,
     :class:`Command` needs :attr:`~pcapkit.const.ftp.command.Command.feat`/
     :attr:`~pcapkit.const.ftp.command.Command.desc`/
     :attr:`~pcapkit.const.ftp.command.Command.type`/
@@ -912,7 +907,7 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
     def test_no_bespoke_const_module_still_uses_percent_formatting_for_its_guard(self) -> None:
         """The committed side of :data:`BESPOKE_TEMPLATES`, needing no ``requests``.
 
-        GitHub issue #798: the three vendor templates the previous test's
+        GitHub issue #798: the vendor templates the previous test's
         ``skipUnless`` can silently skip -- exactly how #792's regression
         reached seven CI legs -- so this checks the same guards through the
         committed :mod:`pcapkit.const` modules instead, which need no network
@@ -1010,7 +1005,7 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
         """Member by member, the ``__repr__`` output is byte-identical.
 
         The conversion is only safe if ``%s`` and an f-string's default
-        conversion agree on every operand these three dunders interpolate.
+        conversion agree on every operand these dunders interpolate.
         They do -- ``format(x, '')`` falls through to ``str(x)`` for both
         :class:`str` and :data:`None`, and ``Command.desc`` is the one
         ``Optional[str]`` among them -- but GitHub issue #796's text claimed
@@ -1188,7 +1183,7 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
         """The whole file, character for character.
 
         Mirrors ``test_the_vendor_templates_render_the_committed_modules`` in
-        :mod:`tests.const.test_const_enum_lookup`, which does this for the four
+        :mod:`tests.const.test_const_enum_lookup`, which does this for the
         Mobility Header templates. Needs no network: the crawl supplies only the
         enumeration block, which is read back out of the committed module.
 
@@ -1267,15 +1262,15 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
                 self.assertEqual(len(percent_format_lines_in_repr(source)), expected)
 
     def test_no_percent_formatting_survives_in_the_issue_818_triples_repr(self) -> None:
-        """None of :data:`ISSUE_818_TRIPLE`'s three ``__repr__`` methods still format with ``%``.
+        """None of :data:`ISSUE_818_TRIPLE`'s ``__repr__`` methods formats with ``%``.
 
         Scoped to ``__repr__`` alone via :func:`percent_format_lines_in_repr`,
-        because unlike :data:`ISSUE_804_PAIR`'s pair, all three of these
-        modules keep formatting their ``__str__`` and ``_missing_`` guard with
+        because unlike :data:`ISSUE_804_PAIR`'s pair, each of these
+        modules keeps formatting its ``__str__`` and ``_missing_`` guard with
         ``%`` -- that is unrelated to GitHub issue #818, which is about
         ``__repr__`` specifically, and a whole-module check would never turn
         green. Without #818's conversion it reports one line apiece in the
-        three const modules.
+        const modules.
 
         The vendor half is checked separately, by
         :meth:`test_no_percent_formatting_survives_in_the_issue_818_triples_vendor_repr_template`,
@@ -1320,7 +1315,7 @@ class ConstEnumGuardTemplateTests(unittest.TestCase):
         :meth:`test_the_converted_reprs_render_exactly_what_percent_formatting_did`,
         derived per member rather than assumed: ``%s`` and an f-string's
         default conversion agree for :class:`str` and :class:`int` operands,
-        which is all three of these interpolate (``__class__.__name__``,
+        which is all these interpolate (``__class__.__name__``,
         ``_value_``/``opt_name``, and -- for :class:`~pcapkit.const.pcapng
         .option_type.OptionType` -- ``opt_value``, an :class:`int` that
         ``%d`` and ``str()`` render identically for every non-negative value

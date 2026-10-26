@@ -2,19 +2,19 @@
 """:class:`~pcapkit.corekit.io.SeekableReader` over a stream that answers short (#1586).
 
 One read of a pipe, or of a raw stream, may return fewer octets than were asked
-for at any point; only an empty read means the stream has ended. The reader took
-the first answer as all there was in three places, and the frame readers, which
-measure what is left with ``seek(0, SEEK_END)``, took that for the end of the
-capture:
+for at any point; only an empty read means the stream has ended. Without the fix
+the reader takes the first answer as all there is in each of these places, and
+the frame readers, which measure what is left with ``seek(0, SEEK_END)``, take
+that for the end of the capture:
 
-* ``read(n)`` made one read of the stream, so it came back short mid-stream.
-* ``seek(0, SEEK_END)`` was the buffer's far edge. Once the buffer had filled,
-  that is exactly how far the stream has been read, so nothing more was read,
-  and the first record ending there measured nothing left after it.
-* A forward ``seek`` made one read too, and landed wherever that read ended --
-  short of the target, or past it when the stream answered more than the gap.
+* ``read(n)`` makes one read of the stream, so it comes back short mid-stream.
+* ``seek(0, SEEK_END)`` is the buffer's far edge. Once the buffer has filled,
+  that is exactly how far the stream has been read, so nothing more is read,
+  and the first record ending there measures nothing left after it.
+* A forward ``seek`` makes one read too, and lands wherever that read ends --
+  short of the target, or past it when the stream answers more than the gap.
 
-Each test here fails on ``e9f3340f7``, the parent of the fix.
+Each test here fails without the fix.
 
 """
 
@@ -73,7 +73,7 @@ class TestShortReads(unittest.TestCase):
         return reader
 
     def test_read_returns_every_octet_asked_for(self) -> None:
-        """``read(10)`` over three-octet answers returned three octets."""
+        """Without the fix, ``read(10)`` over three-octet answers returns three octets."""
         reader = self.reader()
         self.assertEqual(reader.read(10), DATA[:10])
         # half from the buffer, half from the stream
@@ -93,7 +93,8 @@ class TestShortReads(unittest.TestCase):
         self.assertEqual(reader.read(1), b'')
 
     def test_end_of_stream_is_a_buffer_past_the_position(self) -> None:
-        """Before the buffer fills, the end was where one three-octet read left it."""
+        """Before the buffer fills, the end is a buffer past the position, not where one
+        three-octet read leaves it."""
         reader = self.reader()
         self.assertEqual(reader.seek(0, io.SEEK_END), 16)
         self.assertEqual(reader.seek(0), 0)
@@ -103,15 +104,15 @@ class TestShortReads(unittest.TestCase):
         """The #1586 cut-off: a full buffer's edge measured nothing left to read.
 
         This is what a frame reader does at the first octet of every record, so
-        the record after the one that filled the buffer was taken for the end of
-        the capture -- 870 of the 1,117 frames of ``http.pcap``.
+        without the fix the record after the one that fills the buffer is taken
+        for the end of the capture -- 870 of the 1,117 frames of ``http.pcap``.
 
         """
         reader = self.reader(chunk=4096)
         self.assertEqual(reader.read(40), DATA[:40])
 
         current = reader.tell()
-        self.assertEqual(reader.seek(0, io.SEEK_END) - current, 16)   # was 0
+        self.assertEqual(reader.seek(0, io.SEEK_END) - current, 16)   # without the fix: 0
         self.assertEqual(reader.seek(current), current)
         self.assertEqual(reader.read(16), DATA[40:56])
 
@@ -122,18 +123,19 @@ class TestShortReads(unittest.TestCase):
         self.assertEqual(reader.read(1), b'')
 
     def test_forward_seek_lands_on_its_target_over_short_answers(self) -> None:
-        """A seek past the octets read stopped at the end of one three-octet read."""
+        """Without the fix, a seek past the octets read stops at the end of one three-octet read."""
         reader = self.reader()
-        self.assertEqual(reader.seek(10), 10)                          # was 3
+        self.assertEqual(reader.seek(10), 10)                          # without the fix: 3
         self.assertEqual(reader.read(2), DATA[10:12])
 
     def test_forward_seek_does_not_overshoot_its_target(self) -> None:
-        """The read that filled the gap asked for more than it, and the seek landed there."""
+        """Without the fix, the read that fills the gap asks for more than it, and the
+        seek lands there."""
         from pcapkit.corekit.io import SeekableReader  # pylint: disable=import-outside-toplevel
 
         reader = SeekableReader(io.BytesIO(DATA), buffer_size=16, stream_closing=False)
         self.addCleanup(reader.close)
-        self.assertEqual(reader.seek(1), 1)                            # was 4
+        self.assertEqual(reader.seek(1), 1)                            # without the fix: 4
         self.assertEqual(reader.read(2), DATA[1:3])
 
     def test_end_of_stream_reads_ahead_only_as_far_as_asked(self) -> None:
@@ -146,7 +148,7 @@ class TestShortReads(unittest.TestCase):
         reader = self.reader(DATA[:30], chunk=4096)
         reader._read_ahead_size = 10  # pylint: disable=protected-access
         self.assertEqual(reader.seek(0, io.SEEK_END), 10)
-        self.assertEqual(reader.raw.consumed, 10)    # was 16: the whole buffer's worth
+        self.assertEqual(reader.raw.consumed, 10)    # without the fix: 16, the whole buffer's worth
         self.assertEqual(reader.seek(0), 0)
         self.assertEqual(reader.read(30), DATA[:30])
 
@@ -154,15 +156,15 @@ class TestShortReads(unittest.TestCase):
         """A record longer than the buffer is held whole, from its first octet on.
 
         The frame readers measure a record from its first octet and then seek back to
-        it. Capped at the buffer, the read-ahead measured it short; read on, the record
-        slid out of the buffer, and the seek back failed with ``cannot seek before the
+        it. Capped at the buffer, the read-ahead measures it short; read on, the record
+        slides out of the buffer, and the seek back fails with ``cannot seek before the
         beginning of the buffer``.
 
         """
         reader = self.reader(chunk=7)
         self.assertEqual(reader.read(8), DATA[:8])
         reader._read_ahead_size = 40  # pylint: disable=protected-access
-        self.assertEqual(reader.seek(0, io.SEEK_END), 48)          # was 24: 8 + 16
+        self.assertEqual(reader.seek(0, io.SEEK_END), 48)          # without the fix: 24, i.e. 8 + 16
         self.assertEqual(reader.seek(8), 8)
         self.assertEqual(reader.read(40), DATA[8:48])
 
@@ -170,7 +172,7 @@ class TestShortReads(unittest.TestCase):
         """A length read from a damaged record is read as far as the stream goes."""
         reader = self.reader(DATA[:50], chunk=4096)
         reader._read_ahead_size = 1 << 40  # pylint: disable=protected-access
-        self.assertEqual(reader.seek(0, io.SEEK_END), 50)          # was 16
+        self.assertEqual(reader.seek(0, io.SEEK_END), 50)          # without the fix: 16
         self.assertEqual(reader.seek(0), 0)
         self.assertEqual(reader.read(), DATA[:50])
 
@@ -188,7 +190,7 @@ class TestShortReads(unittest.TestCase):
         reader = SeekableReader(stream, buffer_size=16, stream_closing=False)
         self.assertEqual(reader.read(4), DATA[:4])
         stream.close()
-        reader.close()                               # was ValueError
+        reader.close()                               # without the fix: ValueError
         self.assertTrue(reader.closed)
 
     def test_seek_past_a_stream_that_ended_inside_the_buffer_is_silent(self) -> None:

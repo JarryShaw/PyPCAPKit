@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 """#2061: there is no :file:`setup.py`, and the benchmark image copies only files that exist.
 
-``pyproject.toml`` declares everything, and the 3.8 floor (#2051) left
-:file:`setup.py` a Python 2 guard and a bare ``setup()``, so it went.
+``pyproject.toml`` declares everything; under the 3.8 floor (#2051) a
+:file:`setup.py` would hold only a Python 2 guard and a bare ``setup()``.
 
-* :class:`TestNoSetupPy` fails if one comes back at the repository root.
+* :class:`TestNoSetupPy` fails on one at the repository root.
 * :class:`TestBenchmarkDockerfileCopies` checks every source a ``COPY`` in
   :file:`examples/benchmark/Dockerfile` names is in the build context, the
-  repository root that ``run.sh`` passes. Its ``COPY`` of the packaging files
-  named :file:`setup.py` too, and a missing source fails only at ``docker
-  build``, which no CI job runs.
+  repository root that ``run.sh`` passes. A ``COPY`` of a missing source, such
+  as :file:`setup.py`, fails only at ``docker build``, which no CI job runs.
 
 """
 

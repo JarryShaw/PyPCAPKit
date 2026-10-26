@@ -5,7 +5,7 @@
 ``--rcfile=.github/coverage.toml``, and coverage reads exactly one config file.
 So the ``[tool.coverage.*]`` tables in :file:`pyproject.toml` are *not* read on
 that run; the rcfile has to repeat them, plus the keys only the CI run needs
-(``parallel``, ``patch`` and ``core``). A setting changed in :file:`pyproject.toml` alone
+(``parallel``, ``patch``, ``sigterm`` and ``core``). A setting changed in :file:`pyproject.toml` alone
 would silently not apply in CI, which is the drift asserted against here.
 
 """

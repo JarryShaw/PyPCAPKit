@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 """A PCAP global header or PCAP-NG block cut short rebuilds as captured.
 
-GitHub issue #1470. The two classes under :mod:`pcapkit.protocols.misc` that
-read a file's own framing do not inherit the layer base classes, so the short
-read #1458 records did not reach them. ``Header(raw[:4])`` rebuilt from its
-``info`` as all 24 octets, and a PCAP-NG block the capture ended inside rebuilt
-at the length it declares, or raised -- :exc:`ProtocolError` on a rebuilt Block
-Total Length that was not a multiple of four, and a bare :exc:`ValueError` on a
-Decryption Secrets Block cut inside a TLS key log line.
+GitHub issue #1470. The PCAP ``Header`` and the ``PCAPNG`` block classes under
+:mod:`pcapkit.protocols.misc` read a file's own framing and do not inherit the
+layer base classes, so the short read #1458 records did not reach them.
+``Header(raw[:4])`` rebuilt from its ``info`` as all 24 octets, and a PCAP-NG
+block the capture ended inside rebuilt at the length it declares, or raised --
+:exc:`ProtocolError` on a rebuilt Block Total Length that was not a multiple of
+four, and a bare :exc:`ValueError` on a Decryption Secrets Block cut inside a
+TLS key log line.
 
 Each header and each block type found in the sample captures is cut at every
 offset. A PCAP header must be refused with an in-library exception, or rebuild

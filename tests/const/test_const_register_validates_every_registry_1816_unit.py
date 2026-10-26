@@ -25,9 +25,9 @@ The oracle is ``get`` with no default, except where ``get`` is a
 :class:`staticmethod` backport that bypasses the base lookup. ``OptionType``'s
 answers every integer code with an unregistered member, so there the constructor
 is the oracle instead; ``OptionType``'s ``_missing_`` refusing anything above
-``0xFFFF`` is what the issue cites. ``Command``'s was one too, calling
-``key.upper()`` and so answering :class:`bytes`, until #1824 made it a
-:class:`classmethod` that hands a non-``str`` key to the base.
+``0xFFFF`` is what the issue cites. ``Command``'s is a :class:`classmethod`
+that hands a non-``str`` key to the base (#1824); without that fix it is a
+backport calling ``key.upper()``, and so answers :class:`bytes`.
 
 Each test imports the registries after
 :func:`~tests._support.reimport_once_per_class`, whose ``restore`` puts the class's

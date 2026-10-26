@@ -26,7 +26,7 @@ concludes ``success``, Compat's included, and reports a failed step as a warning
 No leg runs below 3.8, the ``requires-python`` floor pip enforces at install
 (#2051). A KTLO leg that cannot install or compile still fails fast and says
 why, at warning level, and :class:`TestAKTLOLegFailsFast` pins that -- the
-install and verify steps are executed with ``python`` stubbed, and each
+install and verify steps are executed with ``python``, or its ``pip``, stubbed, and each
 annotation is parsed as the runner parses it.
 
 The tiers are declared once, in :file:`.github/python-versions.toml` (#1660),
@@ -271,7 +271,7 @@ class TestTheSupportedTierBlocks(unittest.TestCase):
         self.assertEqual(listed, list(SUPPORTED))
 
     def test_requires_python_is_the_oldest_ktlo_version(self) -> None:
-        """#2051 raised the floor to 3.8, the oldest version a KTLO leg runs."""
+        """``requires-python`` is ``>=3.8`` (#2051), the oldest version a KTLO leg runs."""
         text = (ROOT / 'pyproject.toml').read_text(encoding='utf-8')
         self.assertEqual(re.findall(r'(?m)^requires-python = (.+)$', text), ['">=3.8"'])
         self.assertEqual(min(KTLO, key=lambda v: tuple(map(int, v.split('.')))), '3.8')
@@ -519,7 +519,7 @@ INSTALLS = (
     ('unit-tests.yml', 'pypcap-parity', 'Install package, test and generator dependencies'),
     ('python-compatibility.yml', 'compatibility', 'Install package'),
 )
-#: The install steps of :data:`KTLO_STEPS`, each running util/pip_install.py (#1967).
+#: The install steps of :data:`KTLO_STEPS`' jobs, each running util/pip_install.py (#1967).
 INSTALLS_KTLO = (KTLO_STEPS[0], KTLO_STEPS[1], INSTALLS[3])
 
 
@@ -643,10 +643,11 @@ class TestAKTLOLegFailsFast(unittest.TestCase):
         """The install needs setup-python's interpreter, and every later step needs the install.
 
         ``outcome``, not ``conclusion``: ``continue-on-error`` turns a failed step's
-        conclusion into ``success``, so only its outcome still says it failed. #1672
-        brought Compat and ``pypcap-parity`` in; ``KTLO summary`` is the one step
-        that has to run after a failed install, to report it, with the two after
-        it that keep that report for the run's Discussions post (#2030).
+        conclusion into ``success``, so only its outcome still says it failed. Compat
+        and ``pypcap-parity`` follow it too (#1672). ``KTLO summary`` is the one step
+        that has to run after a failed install, to report it, with ``Name the job
+        summary`` and ``Upload the job summary`` after it, which keep that report for
+        the run's Discussions post (#2030).
 
         """
         for name, job_id, install in INSTALLS:
@@ -796,10 +797,9 @@ def prose(path: 'pathlib.Path') -> 'str':
 class TestTheProseFollowsTheTiers(unittest.TestCase):
     """What the docs and comments say about the matrices, read against the matrices.
 
-    Nothing executes these, so a tier change leaves them stale without failing
-    anything else: a first pass at #1633 left the workflows page miscounting the
-    ``test`` legs, and comments naming 3.10 as CI's floor or 3.15 as allowed to
-    fail.
+    Nothing executes these, so a tier change can leave them stale without failing
+    anything else: the workflows page miscounting the ``test`` legs, or comments
+    naming 3.10 as CI's floor or 3.15 as allowed to fail (#1633).
 
     """
 

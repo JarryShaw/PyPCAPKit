@@ -301,9 +301,9 @@ class ExtractorLeavesTheCallersStreamAlone(unittest.TestCase):
         A non-seekable input is wrapped in a
         :class:`~pcapkit.corekit.io.SeekableReader`, which ``Extractor``
         constructed and so may close -- but ``stream_closing`` has to keep the
-        caller's stream underneath it open. That argument was
-        ``not self._flag_s``, i.e. always :data:`True` here, so the stream went
-        down with the wrapper.
+        caller's stream underneath it open. Guards against that argument being
+        ``not self._flag_s``, i.e. always :data:`True` here, which takes the
+        stream down with the wrapper.
 
         """
         import pcapkit
@@ -343,9 +343,9 @@ class ExtractorLeavesTheCallersStreamAlone(unittest.TestCase):
 class ContextExitFollowsOwnership(unittest.TestCase):
     """#1999: leaving a ``with`` block closes only what ``Extractor`` owns.
 
-    ``__exit__`` closed the input unconditionally, so scoping an extraction with
-    ``with`` closed a stream the caller had passed in and still held, which the
-    rule of #610 says is the caller's to close.
+    Guards against ``__exit__`` closing the input unconditionally, which makes
+    scoping an extraction with ``with`` close a stream the caller passed in and
+    still holds, which the rule of #610 says is the caller's to close.
 
     """
 

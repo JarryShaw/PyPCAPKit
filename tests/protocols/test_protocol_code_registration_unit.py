@@ -10,8 +10,8 @@ exactly like the ``engine=``/``protocol=``/``fmt=`` keywords part (a) (#547)
 gave :class:`~pcapkit.foundation.engines.engine.Engine`,
 :class:`~pcapkit.foundation.reassembly.reassembly.Reassembly`,
 :class:`~pcapkit.foundation.traceflow.traceflow.TraceFlow` and
-:class:`~pcapkit.dumpkit.common.Dumper` (#557 renamed ``Engine``'s from
-``name=``): omitting ``code`` leaves the
+:class:`~pcapkit.dumpkit.common.Dumper` (``Engine``'s is ``engine=`` rather
+than ``name=``, #557): omitting ``code`` leaves the
 subclass unregistered, which is exactly what every built-in protocol class
 does, since the built-in dispatch tables are populated by literal
 assignment in each layer module rather than by ``__init_subclass__``.

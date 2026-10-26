@@ -43,8 +43,10 @@ class SchemaMetaAbcCacheTests(unittest.TestCase):
     that same ``dict`` then reads the *same* cache entry straight back, without
     ever running :class:`Schema`'s real subclass check.
 
-    The corruption runs **both ways**, which is why two tests below ask the two
-    questions in opposite orders rather than one test asking them in the
+    The corruption runs **both ways**, which is why
+    :meth:`test_a_plain_dict_is_not_a_schema_after_mapping_is_asked_first` and
+    :meth:`test_asking_schema_first_does_not_break_mapping_for_a_plain_dict` ask
+    the two questions in opposite orders rather than one test asking them in the
     "obvious" order. Asking ``Schema`` *first* computes a fresh (correct)
     ``False`` for ``dict`` -- but caches it in the shared object's *negative*
     cache, and since that object is ``Mapping``'s own, a plain ``dict`` then
@@ -168,7 +170,7 @@ class SchemaMetaAbcCacheTests(unittest.TestCase):
         falls through the MRO to :class:`collections.abc.Mapping`'s -- exactly
         the shape #439's bypass in ``SchemaMeta.__new__`` produced on Python < 3.11,
         confirmed below rather than assumed. Building this on plain
-        ``abc.ABCMeta`` rather than ``SchemaMeta`` keeps the two tests below
+        ``abc.ABCMeta`` rather than ``SchemaMeta`` keeps the probing tests below
         about ``abc.ABCMeta`` in general, not about this library's fix.
 
         """

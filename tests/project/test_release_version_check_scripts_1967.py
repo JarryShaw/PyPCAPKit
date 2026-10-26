@@ -1,10 +1,11 @@
 # -*- coding: utf-8 -*-
 """#1967: ``version_check``'s :file:`util/` scripts, run as Create Release runs them.
 
-* :class:`TestTheFormerShellAgrees` runs the shell ``version_check``'s "Read
-  the released Python versions", "Check PyPI publish completeness" and "Check
-  Anaconda publish completeness" held before :file:`util/release_tiers.py` and
-  :file:`util/release_published.py`, on the cases below, and each script on the
+* :class:`TestTheFormerShellAgrees` runs ``version_check``'s "Read the released
+  Python versions", "Check PyPI publish completeness" and "Check Anaconda
+  publish completeness" in their inline shell form, the reference
+  :file:`util/release_tiers.py` and :file:`util/release_published.py` must
+  match, on the cases below, and each script on the
   same, against stand-in ``python3``, ``git``, ``mktemp`` and ``curl``, and
   requires the same status, standard output and error,
   ``$GITHUB_OUTPUT``, calls and scratch files. The step bodies are kept here
@@ -13,7 +14,7 @@
 * :class:`TestAPlantedDivergenceIsCaught` changes each script in a copy, one
   plant at a time, and requires the cases to tell it from the shell.
 * :class:`TestTheStepsRunTheScripts` pins each step to its script, and the
-  scripts to the standard library and Python 3.8's syntax.
+  scripts to :file:`util/`, the standard library and Python 3.8's syntax.
 
 The steps run with no ``shell:``, so on the runner's ``bash -e``, and ``bash``
 prefixes each of its own errors with the script's path and line, which
@@ -44,7 +45,7 @@ from tests.project.test_requires_python_floor_2051 import FLOOR
 if TYPE_CHECKING:
     from typing import Optional, Union
 
-#: Test tier (#1958): runs the tree's own scripts and the workflow's former shell.
+#: Test tier (#1958): runs the tree's own scripts and the steps' inline shell form.
 __tier__ = 'LATEST'
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -99,7 +100,8 @@ esac
 #: A ``git`` answering as "Read the released Python versions" calls it, from
 #: the tags in ``$GIT_TAGS`` and ``$GIT_REMOTE_TAGS`` (``<tag> <sha>`` lines),
 #: the ``<sha>:<path>`` blobs in ``$GIT_FILES``, ``$GIT_LOG_REPLY``'s bytes,
-#: and ``$GIT_HEAD``; each ``*_FAIL`` fails its command with that status.
+#: and ``$GIT_HEAD``; ``$SHOW_FAIL`` fails ``show`` for a path ending in it,
+#: and each other ``*_FAIL`` fails its command with that status.
 FAKE_GIT = r'''#!/bin/sh
 printf 'git %s\n' "$*" >> "$CALL_LOG"
 die() { [ "$1" != TERM ] || kill -TERM $$; exit "$1"; }
@@ -168,12 +170,13 @@ printf '%s' "${CURL_CODE-200}"
 [ -z "${CURL_FAIL:-}" ] || { [ "$CURL_FAIL" != TERM ] || kill -TERM $$; exit "$CURL_FAIL"; }
 '''
 
-#: What the stand-ins and the former shell run besides each other and bash's builtins.
+#: What the stand-ins and the shell forms run besides each other and bash's builtins.
 TOOLS = ('awk', 'cat', 'cp', 'grep', 'mkdir', 'tail')
 #: Each stand-in, by name.
 FAKES = {'python3': FAKE_PYTHON3, 'git': FAKE_GIT, 'mktemp': FAKE_MKTEMP, 'curl': FAKE_CURL}
 
-#: "Read the released Python versions", before :file:`util/release_tiers.py`.
+#: "Read the released Python versions" in its inline shell form, the reference
+#: :file:`util/release_tiers.py` must match.
 FORMER_TIERS = textwrap.dedent(r'''
     set -euo pipefail
 
@@ -212,7 +215,8 @@ FORMER_TIERS = textwrap.dedent(r'''
     echo "conda-builds=${builds}" >> "$GITHUB_OUTPUT"
 ''').lstrip()
 
-#: "Check PyPI publish completeness", before :file:`util/release_published.py`.
+#: "Check PyPI publish completeness" in its inline shell form, the reference
+#: :file:`util/release_published.py` must match.
 FORMER_PYPI = textwrap.dedent(r'''
     set -euo pipefail
 
@@ -297,8 +301,8 @@ FORMER_ANACONDA = textwrap.dedent(r'''
     echo "PCAPKIT_CONDA_COMPLETE=$complete" >> "$GITHUB_OUTPUT"
 ''').lstrip()
 
-#: Each step, its id, the ``run:`` it holds, and the former shell, the
-#: ``/tmp`` file it wrote standing for where the cases write it.
+#: Each step, its id, the ``run:`` it holds, and its inline shell form, the
+#: ``/tmp`` file it writes standing for where the cases write it.
 STEPS = {
     'Read the released Python versions': ('released', 'python3 util/release_tiers.py', FORMER_TIERS),
     'Check PyPI publish completeness': ('check_pypi', 'python3 util/release_published.py pypi /tmp/pypi_release.json',
@@ -434,7 +438,7 @@ PYPI_CASES = (
 )
 
 #: "Check Anaconda publish completeness"'s base, and its platforms.
-#: #2060: untagged, as the former shell knew no tag; a tagged version's platforms are
+#: #2060: untagged, as the shell form knows no tag; a tagged version's platforms are
 #: test_release_tags_the_run_sha_1634.TestTheCountsAreOfTheReleasedPlatforms'.
 ANACONDA_BASE = {'PCAPKIT_VERSION': '1.5.0', 'PCAPKIT_CONDA_BUILDS': 'py311 py312', 'PCAPKIT_TAG_EXISTS': 'false'}
 PLATFORMS = ('linux-64', 'osx-64', 'osx-arm64', 'win-64')
@@ -629,7 +633,7 @@ def unbound(state: 'tuple[object, ...]') -> 'bool':
 #: other signals, which the script does not copy; the rest is compared.
 SIGNALLED = frozenset({'the fetch was killed'})
 
-#: Each way each former shell ends, as a predicate on its state; every case
+#: Each way each shell form ends, as a predicate on its state; every case
 #: meets exactly one.
 EXITS = {
     'Read the released Python versions': {
@@ -650,7 +654,7 @@ EXITS['Check PyPI publish completeness'] = EXITS['Check Anaconda publish complet
     'complete': lambda s: s[0] == 0 and written(s).endswith('_COMPLETE=true\n'),
 }
 
-#: Each path through each former shell short of its end; every one is taken.
+#: Each path through each shell form short of its end; every one is taken.
 PATHS = {
     'Read the released Python versions': {
         "this run's tiers": lambda s: s[4] is None,
@@ -682,7 +686,7 @@ PATHS['Check Anaconda publish completeness'] = {
 
 @unittest.skipIf(not BASH, 'needs bash, which ran the former shell')
 class TestTheFormerShellAgrees(_Stand):
-    """Each script exits, prints, writes and calls exactly as the shell it replaced, on every case."""
+    """Each script exits, prints, writes and calls exactly as its step's inline shell form, on every case."""
 
     def compare(self, step: 'str') -> 'None':
         _, run, former = STEPS[step]
@@ -761,7 +765,7 @@ PLANTS = (
 
 @unittest.skipIf(not BASH, 'needs bash, which ran the former shell')
 class TestAPlantedDivergenceIsCaught(_Stand):
-    """The cases tell each plant from the former shell, so their agreement means something."""
+    """The cases tell each plant from the shell form, so their agreement means something."""
 
     def test_each_plant_applies_once(self) -> None:
         for step, name, old, _ in PLANTS:
@@ -787,7 +791,7 @@ class TestAPlantedDivergenceIsCaught(_Stand):
 
 
 class TestTheStepsRunTheScripts(unittest.TestCase):
-    """Each step runs its script, after a whole checkout and setup-python, with its ``env:`` and ``id`` unchanged."""
+    """Each step runs its script under its own ``id``, after a whole checkout and setup-python."""
 
     def test_each_step_runs_its_script(self) -> None:
         found = steps(WORKFLOW, 'version_check')
@@ -800,7 +804,7 @@ class TestTheStepsRunTheScripts(unittest.TestCase):
                 self.assertFalse(set(step) - {'name', 'id', 'env', 'run'})
 
     def test_the_scripts_run_after_the_checkout_and_setup_python(self) -> None:
-        """``python3`` is setup-python's, as each step's was, and the checkout holds :file:`util/` and its history."""
+        """``python3`` is setup-python's, and the checkout holds :file:`util/` and its history."""
         found = steps(WORKFLOW, 'version_check')
         uses = [str(step.get('uses', '')) for step in found]
         checkout = next(index for index, use in enumerate(uses) if use.startswith('actions/checkout@'))

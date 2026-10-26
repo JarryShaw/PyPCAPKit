@@ -77,7 +77,7 @@ if TYPE_CHECKING:
 _pinned_snapshot = None  # type: Optional[dict[str, types.ModuleType]]
 
 #: What :func:`pytest_sessionstart` imports before the pin: the package, plus the
-#: two app-type registries it loads on first use rather than with itself (GitHub
+#: app-type registries it loads on first use rather than with itself (GitHub
 #: issue #1538). See that hook for why the registries cannot be left out.
 WARM_MODULES = ('pcapkit', 'pcapkit.const.reg.apptype.tcp', 'pcapkit.const.reg.apptype.udp')
 
@@ -163,7 +163,7 @@ def pytest_sessionstart(session: 'pytest.Session') -> 'None':
     that imports the library and nothing else leaves the region exactly as it
     found it, so there is nothing to put back.
 
-    The two lazily loaded app-type registries in :data:`WARM_MODULES` are
+    The lazily loaded app-type registries in :data:`WARM_MODULES` are
     imported here too, and that is for correctness rather than speed. Left out
     of the pin, they were dropped from :data:`sys.modules` after whichever test
     first loaded them, while the package kept the classes it had already bound
@@ -692,7 +692,7 @@ def _tier_guard_reader_hold() -> 'Iterator[None]':
 
 @pytest.fixture(autouse=True)
 def _tier_guard_reader_lock(request: 'pytest.FixtureRequest') -> 'Iterator[None]':
-    """Hold the probe/scan mutex shared, for every unit-tier test but the two
+    """Hold the probe/scan mutex shared, for every unit-tier test but those
     that self-manage it.
 
     See :func:`_tier_guard_lock` for the race this closes. Deciding by

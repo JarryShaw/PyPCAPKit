@@ -230,7 +230,7 @@ class FrameLayerLimitTests(unittest.TestCase):
             with self.subTest(shape=shape):
                 parsed, messages = self.frame(ethernet(build(64)))
                 self.assertIn('TCP', parsed)
-                # the 64 layers, and the TCP payload, left raw as before
+                # the 64 layers, then the TCP payload, left raw
                 self.assertEqual(len(parsed.protochain), 65)  # type: ignore[attr-defined]
                 self.assertEqual(messages, [])
 

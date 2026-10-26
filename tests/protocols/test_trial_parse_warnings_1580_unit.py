@@ -284,7 +284,7 @@ class TestTrialParseWarnings(unittest.TestCase):
         self.assertEqual(self._schema(caught), ['packet length < 0: -2'] * 2)
 
     def test_error_filter_chains_match_holding_nothing(self) -> None:
-        """Under ``error``, every cut of four frames parses to the chain it has holding nothing.
+        """Under ``error``, every cut of :data:`FRAMES` parses to the chain it has holding nothing.
 
         A warning made an error is raised where the trial that kept it ends,
         inside the guard it was raised in when nothing was held, so the same

@@ -416,7 +416,7 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
     #: has no ``length`` field at all), and ``__index__`` raises.
     REQUIRED_OVERRIDES = ('name', 'alias', 'protocol', 'length', '__index__')
 
-    #: The family as it stands, so a member silently *leaving* the base is
+    #: The expected family, so a member silently *leaving* the base is
     #: caught as well as one joining without the overrides. Named rather than
     #: counted: a count alone cannot tell a swap from a no-op.
     KNOWN_MEMBERS = frozenset({
@@ -617,8 +617,8 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
                 self.assertNotEqual(self._constant(klass, 'alias'), base_alias)
 
     def test_ah_and_esp_double_inherit_and_linearise(self) -> None:
-        """Both are IPsec members *and* IPv6 extension headers -- IANA marks
-        each ``Y`` in the *IPv6 Extension Header* column -- so each carries two
+        """Both are IPsec members *and* IPv6 extension headers -- IANA's *IPv6
+        Extension Header Types* registry lists each -- so each carries two
         identically-parameterised generic bases. The MRO is pinned because it
         is what makes the ``super()`` delegation in their ``protocol`` guards
         land on :class:`~pcapkit.protocols.protocol.ProtocolBase` rather than
@@ -768,8 +768,10 @@ class IPv6ExtSharedBaseContractTests(unittest.TestCase):
     def test_next_is_shared_by_every_subclass(self) -> None:
         """Every subclass inherits the base's ``next`` property (#917) --
         without it, reading one raises :exc:`AttributeError` -- which is sound
-        because :rfc:`8200#section-4.1` puts a Next Header octet first in every
-        extension header and every subclass records it under that name.
+        because every subclass's data model records its Next Header under that
+        name: first in the header for the :rfc:`6564#section-4` format, and from
+        the encrypted trailer for ESP (:rfc:`4303`), :data:`None` when it cannot
+        be decrypted.
         """
         from pcapkit.const.reg.transtype import TransType
         from pcapkit.protocols.internet.hopopt import HOPOPT

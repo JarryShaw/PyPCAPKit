@@ -120,8 +120,8 @@ __all__ = [
 #: (#1732), and :file:`cron-vendor.yml` runs ``tests/const`` and ``tests/vendor``
 #: over a freshly crawled tree, where a failure discards modules rather than
 #: failing the job (#1853); neither is read here. Other workflows install
-#: ``.[all]`` somewhere -- a docs build, a conda recipe, the lint pass, and the
-#: release packaging workflow -- and none of them invokes the suite;
+#: ``.[all]`` somewhere -- a docs build, a conda recipe, and the lint pass --
+#: and none of them invokes the suite;
 #: :file:`python-compatibility.yml` installs a bare ``.`` and only compiles and
 #: imports, and :file:`codeql-analysis.yml` installs nothing explicitly at all
 #: (CodeQL's own autobuild step). That is exactly why this module keys on *jobs that
@@ -621,7 +621,7 @@ class AmbiguousProvider(NamedTuple):
 def requirement_key(text: 'str') -> 'Requirement':
     """Split one requirement string into a :class:`Requirement`.
 
-    Deliberately not a PEP 508 parser: it handles the four things the extras in
+    Deliberately not a PEP 508 parser: it handles what the extras in
     :file:`pyproject.toml` actually use -- a name, optional bracketed extras, an
     optional version specifier, and an optional ``;`` marker -- and normalises
     the name per PEP 503 so ``pcap-ct``, ``pcap_ct`` and ``PCAP.CT`` compare
@@ -1040,11 +1040,11 @@ def _flag_imports(path: 'pathlib.Path') -> 'dict[str, str]':
 def flag_requirements() -> 'dict[tuple[str, str], frozenset[str]]':
     """``(module, flag)`` -> the modules that flag needs importable.
 
-    Resolved per file rather than per flag name, which matters for exactly one
-    flag and matters a lot: ``HAS_RUNTIME`` names the core dependencies in
-    every module but one, and in
+    Resolved per file rather than per flag name, because one flag name can
+    probe different modules in different files: ``HAS_RUNTIME`` names the core
+    dependencies in most modules, and in
     :file:`tests/foundation/engines/test_runtime_engines.py` it names those
-    plus ``dpkt``, ``scapy`` and ``pyshark``. Keyed on the name alone, that one
+    plus ``dpkt``, ``scapy`` and ``pyshark``. Keyed on the name alone, one
     module's requirements would be demanded of every other module that gates on
     it, or they would excuse it.
 
@@ -1420,7 +1420,7 @@ def job_reaches(job: 'Job', gate: 'Gate') -> 'bool':
     that gate skip, so one selected test is enough for the install line to
     matter. A node ID naming one method of a class therefore does reach a
     class-level gate on that class, even though the class's other methods run
-    elsewhere; :data:`Gap` counts gate decorators rather than methods, so nothing
+    elsewhere; :class:`Gap` counts gate decorators rather than methods, so nothing
     is double-counted by that. The strict reading -- "every test the gate guards"
     -- would be the unsafe one, because it would let a job that runs one gated
     test out of three off the hook entirely.
