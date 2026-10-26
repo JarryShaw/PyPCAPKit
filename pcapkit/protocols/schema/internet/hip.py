@@ -591,8 +591,8 @@ class R1CounterParameter(Parameter, code=[Enum_Parameter.R1_Counter,
     #: order", so the width is stated twice and inferred from neither.
     #: :rfc:`5201#section-5.2.3` gives the same 4 + 8 layout, so there is no
     #: version under which four octets is right, and both codes that reach this
-    #: class -- ``R1_Counter`` (128, HIPv1) and ``R1_COUNTER`` (129) -- are
-    #: affected. With the four ``reserved`` octets the contents are 12 octets,
+    #: class -- ``R1_Counter`` (128, HIPv1) and ``R1_COUNTER`` (129) -- take
+    #: the eight. With the four ``reserved`` octets the contents are 12 octets,
     #: which :rfc:`7401` Section 5.2.1's arithmetic pads to a 16-octet record.
     counter: 'int' = UInt64Field()
     #: Padding.
