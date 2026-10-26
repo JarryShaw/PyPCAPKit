@@ -173,7 +173,7 @@ class Internet(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=ab
 
         Raises:
             pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a
-                class, or not a :class:`~pcapkit.protocols.protocol.Protocol` subclass.
+                class, or not a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
 
         Warns:
             pcapkit.utilities.warnings.RegistryWarning: If this protocol number

@@ -512,7 +512,7 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
     #: :meth:`self._decode_next_layer <pcapkit.protocols.protocol.Protocol._decode_next_layer>`
     #: and :meth:`self._import_next_layer <pcapkit.protocols.protocol.Protocol._import_next_layer>`.
     #: Each value is a :class:`~pcapkit.corekit.module.ModuleDescriptor` naming the
-    #: module and class, or a :class:`Protocol` subclass.
+    #: module and class, or a :class:`ProtocolBase` subclass.
     __proto__: 'DefaultDict[int, ModuleDescriptor[ProtocolBase] | Type[ProtocolBase]]' = collections.defaultdict(
         lambda: ModuleDescriptor('pcapkit.protocols.misc.raw', 'Raw'),
     )

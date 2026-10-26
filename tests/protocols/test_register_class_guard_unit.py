@@ -10,6 +10,10 @@ leaked out of ``abc`` rather than
 :class:`~pcapkit.corekit.module.ModuleDescriptor` is unwrapped, so a descriptor
 naming a non-class attribute is rejected too.
 
+GitHub issue #2316: every ``register``'s ``Raises:`` clause, and the
+``__proto__`` comment, name ``ProtocolBase``, the class the guard checks; the
+error message names ``Protocol``, as #1016 ruled.
+
 Every registry is process-wide, so each call runs under
 :func:`unittest.mock.patch.dict`; the refusals under test write nothing, and the
 patch keeps a regression that *did* write from leaking into other tests.
@@ -19,6 +23,8 @@ from __future__ import annotations
 
 import importlib
 import importlib.util
+import inspect
+import re
 import unittest
 import warnings
 from unittest import mock
@@ -38,6 +44,13 @@ SITES = (
     # itself; a concrete subclass reaches the guard.
     ('TCP', 'pcapkit.protocols.transport.tcp', 'TCP', 1),
     ('UDP', 'pcapkit.protocols.transport.udp', 'UDP', 1),
+)
+
+#: Modules whose ``__proto__`` ``#:`` comment names the type of a value.
+PROTO_COMMENT_MODULES = (
+    'pcapkit.protocols.protocol',
+    'pcapkit.protocols.misc.pcap.frame',
+    'pcapkit.protocols.misc.pcapng',
 )
 
 
@@ -108,6 +121,30 @@ class RegisterClassGuardTests(unittest.TestCase):
                         warnings.simplefilter('ignore')
                         klass.register(code, arg)
                         self.assertIs(klass.__proto__[code], Raw)
+
+    def test_raises_names_protocol_base_for_the_subclass_check(self) -> None:
+        # #2316: the guard checks ``issubclass(protocol, ProtocolBase)``, so the
+        # ``Raises:`` clause names ``ProtocolBase``; the error message keeps
+        # naming ``Protocol``, as #1016 ruled.
+        for label, klass, _ in self._sites():
+            with self.subTest(site=label):
+                doc = inspect.getdoc(klass.register) or ''
+                self.assertIn('Raises:', doc)
+                raises = ' '.join(doc.split('Raises:', 1)[1].split('\n\n', 1)[0].split())
+                self.assertIn('not a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass', raises)
+                self.assertNotIn('Protocol` subclass', raises)
+
+    def test_proto_comment_names_protocol_base(self) -> None:
+        # #2316: a ``__proto__`` value is checked against ``ProtocolBase`` too.
+        for module in PROTO_COMMENT_MODULES:
+            with self.subTest(module=module):
+                source = inspect.getsource(importlib.import_module(module))
+                match = re.search(r'((?:^[ \t]*#:.*\n)+)[ \t]*__proto__\b', source, re.MULTILINE)
+                self.assertIsNotNone(match)
+                assert match is not None
+                comment = ' '.join(line.strip()[2:].strip() for line in match.group(1).splitlines())
+                self.assertRegex(comment, r'ProtocolBase` subclass')
+                self.assertNotIn('Protocol` subclass', comment)
 
     def test_transport_itself_is_still_unsupported(self) -> None:
         from pcapkit.protocols.transport.transport import Transport

@@ -90,7 +90,7 @@ class Transport(ProtocolBase[_PT, _ST], Generic[_PT, _ST]):  # pylint: disable=a
             pcapkit.utilities.exceptions.UnsupportedCall: If called on
                 :class:`Transport` itself.
             pcapkit.utilities.exceptions.RegistryError: If ``protocol`` is not a
-                class, or not a :class:`~pcapkit.protocols.protocol.Protocol` subclass.
+                class, or not a :class:`~pcapkit.protocols.protocol.ProtocolBase` subclass.
 
         Warns:
             pcapkit.utilities.warnings.RegistryWarning: If this port is already
