@@ -220,7 +220,7 @@ def checkout(work: 'pathlib.Path') -> None:
 class TestTheJobs(unittest.TestCase):
     """The relays' jobs, and what each may do."""
 
-    def test_the_pull_request_comment_is_as_it_was(self) -> None:
+    def test_the_comment_job_posts_only_the_pull_request_comment(self) -> None:
         spec = load(NAME)
         self.assertEqual(sorted(spec['jobs']), ['comment', 'discussion'])
         comment = spec['jobs']['comment']

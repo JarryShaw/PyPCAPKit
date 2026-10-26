@@ -49,7 +49,7 @@ def _ipv6_bytes(next_code: 'int', ext_and_payload: 'bytes') -> 'bytes':
     return header + ext_and_payload
 
 
-class ExtensionHeaderBitEmuRemovedTests(unittest.TestCase):
+class ExtensionHeaderHasNoBitEmuTests(unittest.TestCase):
     """There is no ``BIT_EMU``, and the ``ipv6.py`` walk handles 147 cleanly."""
 
     def test_extension_header_has_no_bit_emu_member(self) -> None:
@@ -78,7 +78,7 @@ class ExtensionHeaderBitEmuRemovedTests(unittest.TestCase):
 
         self.assertEqual(int(TransType.BIT_EMU), 147)
 
-    def test_ipv6_walk_stops_cleanly_on_the_code_bit_emu_used_to_occupy(self) -> None:
+    def test_ipv6_walk_stops_cleanly_on_next_header_147(self) -> None:
         # The behaviour actually worth protecting, restated for 147, which is
         # not an ExtensionHeader member: IPv6._decode_next_layer
         # must not raise or lose the packet's own header just because a

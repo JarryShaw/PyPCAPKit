@@ -481,7 +481,7 @@ class TestTheReportOfAnUnpushedForcedBump(_ReportStep):
         self.assertTrue(text.endswith(f'- Pushed: build 4 as {"f" * 40}\n'), text)
         self.assertEqual(status, 'success')
 
-    def test_an_unforced_bump_not_pushed_is_as_before(self) -> None:
+    def test_an_unforced_bump_not_pushed_points_at_the_push_notice(self) -> None:
         text, status = self.report(PUBLISHES='true', FILES_CHANGED='true', CHANGED_FILES='conda/build',
                                    BUMP='true', FORCED='false', PUSH='success')
         self.assertTrue(text.endswith("- Pushed: nothing; Push Changes' notice says why\n"), text)

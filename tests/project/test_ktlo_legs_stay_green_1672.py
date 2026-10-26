@@ -22,7 +22,7 @@ step's failure is tried on every leg instead of read off the text. Expressions g
 through :mod:`tests.project.test_release_gates`'s evaluator, and the scripts that
 write annotations are executed. Both summaries run :file:`util/leg_summary.py`
 (#1967), :file:`create-release.yml`'s ``pypi``'s too, and the script is run
-against :data:`FORMER_RELEASE_SUMMARY`, the step's inline shell form and the
+against :data:`REFERENCE_RELEASE_SUMMARY`, the step's inline shell form and the
 reference it must match, on the same steps.
 
 The experimental tier, free-threaded CPython and GraalPy (#1660), is a job of its
@@ -153,7 +153,7 @@ EXPERIMENTAL_SUMMARY_RUN = f'{IMAGE_PYTHON} util/leg_summary.py experimental'
 UNCOPIED_SUMMARY = ('create-release.yml', 'pypi')
 #: ``pypi``'s ``KTLO summary`` in its inline shell form, the reference
 #: :data:`SUMMARY_RUN`'s script must match (#1967).
-FORMER_RELEASE_SUMMARY = '''\
+REFERENCE_RELEASE_SUMMARY = '''\
 failed=$(jq -r 'to_entries[] | select(.value.outcome == "failure") | .key' <<< "$STEPS")
 if [ -z "$failed" ]; then
   echo "$LEG: no step failed."
@@ -564,12 +564,12 @@ class TestAKTLOFailureIsAWarning(unittest.TestCase):
         self.assertEqual(page, '')
         self.assertIn(f'{LEG_KTLO}: no step failed.', result.stdout)
 
-    def test_the_former_release_copy_reports_as_the_script_does(self) -> None:
+    def test_the_reference_release_copy_reports_as_the_script_does(self) -> None:
         """``pypi``'s ``KTLO summary`` in its inline shell form and the script report alike (#1967)."""
         if shutil.which('jq') is None:  # pragma: no cover
-            self.skipTest('jq, on every Ubuntu runner image, is needed to run the former KTLO summary')
+            self.skipTest('jq, on every Ubuntu runner image, is needed to run the reference KTLO summary')
         self.assertEqual(summary_step(job(*UNCOPIED_SUMMARY))['run'], SUMMARY_RUN)
-        inline = FORMER_RELEASE_SUMMARY
+        inline = REFERENCE_RELEASE_SUMMARY
         for steps in ({'checkout': 'success', 'python': 'success', 'tests': 'success'},
                       {'checkout': 'success', 'python': 'success', 'install': 'failure', 'tests': 'skipped'},
                       {'checkout': 'failure', 'python': 'failure', 'install': 'skipped'}):

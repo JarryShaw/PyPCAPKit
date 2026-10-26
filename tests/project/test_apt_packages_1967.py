@@ -4,7 +4,7 @@
 * :class:`TestPlan`, :class:`TestInstall` and :class:`TestCollect` run each
   subcommand in this process with :func:`subprocess.run` stubbed, so every command
   it would run, and every failure of one, is checked without ``sudo`` or apt.
-* :class:`TestTheFormerShellAgrees` runs the steps' inline shell form, the
+* :class:`TestTheStepMatchesTheReferenceShell` runs the steps' inline shell form, the
   reference the script must match (#1967), and then the steps' own ``run:``, against the same stand-in ``sudo``,
   ``timeout``, ``apt-get``, ``dpkg``, ``dpkg-deb``, ``dpkg-query`` and
   ``debconf-set-selections``, and requires the same status, output, commands and
@@ -403,7 +403,7 @@ class TestArguments(_InProcess):
 
 
 #: The steps' inline shell form, the reference the script must match, each with the runner paths it names.
-FORMER_PLAN = textwrap.dedent(r'''
+REFERENCE_PLAN = textwrap.dedent(r'''
     set -eu
     for attempt in 1 2; do
       if sudo timeout 60 apt-get update; then
@@ -428,7 +428,7 @@ SEED = textwrap.dedent(r'''
     sudo cp "$RUNNER_TEMP"/apt-debs/*.deb /var/cache/apt/archives/
     echo "Seeded $(find "$RUNNER_TEMP/apt-debs" -name '*.deb' | wc -l) .deb files"
 ''').lstrip()
-FORMER_RETRY = textwrap.dedent(r'''
+REFERENCE_RETRY = textwrap.dedent(r'''
     for attempt in 1 2; do
       if sudo timeout 60 apt-get update \
          && sudo DEBIAN_FRONTEND=noninteractive timeout 180 apt-get install -y --no-install-recommends PACKAGES; then
@@ -443,8 +443,8 @@ FORMER_RETRY = textwrap.dedent(r'''
       fi
     done
 ''')  # noqa: E501
-FORMER_ENGINE_INSTALL = ('set -eu\nmirrors=/etc/apt/apt-mirrors.txt\napt_install() {\n'
-                         + textwrap.indent(FORMER_RETRY.lstrip().replace('PACKAGES', '"$@"')
+REFERENCE_ENGINE_INSTALL = ('set -eu\nmirrors=/etc/apt/apt-mirrors.txt\napt_install() {\n'
+                         + textwrap.indent(REFERENCE_RETRY.lstrip().replace('PACKAGES', '"$@"')
                                            .replace('SUCCEED', 'return 0').replace(' SUFFIX', ' (${ENGINE})'), '  ')
                          + '  return 1\n}\n' + textwrap.dedent('''\
     if [ "$ENGINE" = "PyShark" ]; then
@@ -456,12 +456,12 @@ FORMER_ENGINE_INSTALL = ('set -eu\nmirrors=/etc/apt/apt-mirrors.txt\napt_install
       apt_install build-essential libpcap-dev
     fi
 '''))
-FORMER_PARITY_INSTALL = ('set -eu\n'
+REFERENCE_PARITY_INSTALL = ('set -eu\n'
                          'echo "wireshark-common wireshark-common/install-setuid boolean false" '
                          '| sudo debconf-set-selections\nmirrors=/etc/apt/apt-mirrors.txt\n'
-                         + FORMER_RETRY.lstrip().replace('PACKAGES', 'build-essential libpcap-dev tshark')
+                         + REFERENCE_RETRY.lstrip().replace('PACKAGES', 'build-essential libpcap-dev tshark')
                          .replace('SUCCEED', 'exit 0').replace(' SUFFIX', '') + 'exit 1\n')
-FORMER_COLLECT = textwrap.dedent(r'''
+REFERENCE_COLLECT = textwrap.dedent(r'''
     set -eu
     out="$RUNNER_TEMP/apt-debs"
     rm -rf "$out"
@@ -508,7 +508,7 @@ SITES = {'engine-tests': ENGINE_STEPS, 'pypcap-parity': PARITY_STEPS}
 #: workflow's own test, as :mod:`tests.project.test_benchmark_workflow_2125`.
 ELSEWHERE = {('benchmark.yml', 'Install libpcap headers and tshark')}
 #: Each subcommand's inline shell form, the reference it must match, by subcommand.
-FORMER = {'plan': FORMER_PLAN, 'collect': FORMER_COLLECT}
+REFERENCE = {'plan': REFERENCE_PLAN, 'collect': REFERENCE_COLLECT}
 APPARMOR = 'Let tshark read the checkout past its AppArmor profile'
 #: Text only inline apt shell holds.
 INLINE = ('apt-get', 'dpkg', 'debconf-set-selections', 'apt-mirrors', '/var/cache/apt', 'apt_install')
@@ -554,8 +554,8 @@ STUBS = {
 
 @unittest.skipIf(any(shutil.which(tool) is None for tool in ('bash', 'sed', 'grep', 'sort', 'sha256sum', 'cut',
                                                              'find', 'wc', 'head', 'cp', 'env')),
-                 'needs bash and the coreutils the former shell ran')
-class TestTheFormerShellAgrees(unittest.TestCase):
+                 'needs bash and the coreutils the reference shell runs')
+class TestTheStepMatchesTheReferenceShell(unittest.TestCase):
     """Each step's ``run:`` writes, runs and leaves what its inline shell form does, on the same stand-ins."""
 
     def setUp(self) -> None:
@@ -594,9 +594,9 @@ class TestTheFormerShellAgrees(unittest.TestCase):
         listing = sorted(str(path.relative_to(cache)) for path in cache.rglob('*')) if cache.is_dir() else None
         return read(self.calls), read(self.output), read(self.mirrors), listing
 
-    def both(self, job: 'str', step: 'str', former: 'str', prepare: 'Callable[[], None]',
+    def both(self, job: 'str', step: 'str', reference: 'str', prepare: 'Callable[[], None]',
              **env: 'str') -> 'tuple[tuple[object, ...], tuple[object, ...]]':
-        """``(status, output, *state)`` of ``former``, then of the step's ``run:``, each from ``prepare``."""
+        """``(status, output, *state)`` of ``reference``, then of the step's ``run:``, each from ``prepare``."""
         run = next(item for item in steps(WORKFLOW, job) if item.get('name') == step)['run']
         command = run.split(f'{SCRIPT} ', 1)[1].split()[0]
         option = {'install': '--mirrors', 'plan': None}.get(command, '--archives')
@@ -604,7 +604,7 @@ class TestTheFormerShellAgrees(unittest.TestCase):
         script = run.replace(IMAGE_PYTHON, shlex.quote(sys.executable))
         if option is not None:
             script = script.replace(f'{SCRIPT} {command}', f'{SCRIPT} {command} {option} {shlex.quote(str(target))}')
-        shell = former.replace('/etc/apt/apt-mirrors.txt', str(self.mirrors)) \
+        shell = reference.replace('/etc/apt/apt-mirrors.txt', str(self.mirrors)) \
                       .replace('/var/cache/apt/archives', str(self.archives))
         found = []
         for text in (shell, script):
@@ -628,28 +628,28 @@ class TestTheFormerShellAgrees(unittest.TestCase):
         self.calls.write_text('', encoding='utf-8')
 
     def scenarios(self) -> 'Iterator[tuple[str, str, str, dict[str, str]]]':
-        """``(job, step, former, env)`` for every apt step but the installs, ``former`` its inline shell form."""
+        """``(job, step, reference, env)`` for every apt step but the installs, ``reference`` its inline shell form."""
         for job, sites in SITES.items():
             for name, _, _, _, _, run in sites:
                 if SCRIPT not in run:
                     continue
                 command = run.split(f'{SCRIPT} ', 1)[1].split()[0]
-                if command in FORMER:
-                    yield job, name, FORMER[command], {}
+                if command in REFERENCE:
+                    yield job, name, REFERENCE[command], {}
 
     def test_plan(self) -> None:
         simulations = (SIMULATION, b'', b'NOTE: This is only a simulation!\n', SIMULATION[::-1],
                        b'Inst b (1)\nInst a (2)\nInst B (3)\nInst a-b (1)\nInst a.b (1)\n')
         keyed = 0
-        for job, step, former, _ in self.scenarios():
-            if former is not FORMER_PLAN:
+        for job, step, reference, _ in self.scenarios():
+            if reference is not REFERENCE_PLAN:
                 continue
             for simulation in simulations:
                 for env in ({}, {'FAIL_UPDATES': '1'}, {'FAIL_UPDATES': '2'}, {'SIM_STATUS': '100'},
                             {'ImageOS': ''}, {'APT_PACKAGES': 'build-essential  libpcap-dev\ttshark'}):
                     with self.subTest(job=job, simulation=simulation, env=env):
                         env = {'APT_PACKAGES': 'tshark', **env}
-                        old, new = self.both(job, step, former,
+                        old, new = self.both(job, step, reference,
                                              lambda: (self.tmp / 'sim').write_bytes(simulation), **env)
                         self.assertEqual(new, old)
                         keyed += 'key=' in str(old[3])
@@ -709,24 +709,24 @@ class TestTheFormerShellAgrees(unittest.TestCase):
                 (self.runner_temp / 'apt-debs' / 'stale.deb').write_text('', encoding='utf-8')
             return prepare
 
-        for job, step, former, _ in self.scenarios():
-            if former is not FORMER_COLLECT:
+        for job, step, reference, _ in self.scenarios():
+            if reference is not REFERENCE_COLLECT:
                 continue
             for broken in (False, True):
                 with self.subTest(job=job, broken=broken):
-                    old, new = self.both(job, step, former, archive(broken))
+                    old, new = self.both(job, step, reference, archive(broken))
                     self.assertEqual(new, old)
                     self.assertEqual(old[0], 2 if broken else 0)
 
     def test_install(self) -> None:
         engines = {'Scapy': '', 'PyShark': 'tshark', 'PyPCAPFile': '', 'PyPCAP': 'build-essential libpcap-dev',
                    'PCAP_CT': 'libpcap0.8'}
-        cases = [('engine-tests', FORMER_ENGINE_INSTALL, {'ENGINE': engine, 'APT_PACKAGES': packages})
+        cases = [('engine-tests', REFERENCE_ENGINE_INSTALL, {'ENGINE': engine, 'APT_PACKAGES': packages})
                  for engine, packages in engines.items()]
-        cases.append(('pypcap-parity', FORMER_PARITY_INSTALL, {'APT_PACKAGES': 'build-essential libpcap-dev tshark'}))
+        cases.append(('pypcap-parity', REFERENCE_PARITY_INSTALL, {'APT_PACKAGES': 'build-essential libpcap-dev tshark'}))
         step = {job: sites[2][0] for job, sites in SITES.items()}
         seen = set()  # type: set[str]
-        for job, former, base in cases:
+        for job, reference, base in cases:
             for mirrors in (MIRRORS, MIRRORS.splitlines(True)[0], None, ''):
                 for failures in ({}, {'FAIL_UPDATES': '1'}, {'FAIL_INSTALLS': '1'}, {'FAIL_UPDATES': '2'},
                                  {'FAIL_UPDATES': '1', 'FAIL_INSTALLS': '1'},
@@ -735,7 +735,7 @@ class TestTheFormerShellAgrees(unittest.TestCase):
                         if mirrors is not None:
                             self.mirrors.write_text(mirrors, encoding='utf-8')
                     with self.subTest(job=job, env=base, mirrors=mirrors, failures=failures):
-                        old, new = self.both(job, step[job], former, prepare, **base, **failures)
+                        old, new = self.both(job, step[job], reference, prepare, **base, **failures)
                         self.assertEqual(new, old)
                         seen.update(piece for piece in ('fallback mirror', 'attempt 2 of 2', 'debconf', 'Setting up')
                                     if piece in str(old))

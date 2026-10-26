@@ -768,7 +768,7 @@ class UnassignedRangeDoesNotMintTests(unittest.TestCase):
             Hardware(1 << 32)
 
 
-class GetNoLongerMintsTests(unittest.TestCase):
+class GetDoesNotMintTests(unittest.TestCase):
     """``get()``'s string path must resolve without minting, matching the
     same ruling applied to the int path above."""
 

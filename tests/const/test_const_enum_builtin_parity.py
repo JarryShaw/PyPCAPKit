@@ -196,10 +196,10 @@ def percent_format_lines_in_repr(source: 'str') -> 'list[int]':
 #: with ``%`` in a sibling method, the property :func:`percent_format_lines`
 #: cannot distinguish from the ``__repr__`` site and this function must.
 REPR_PERCENT_WALK_FIXTURES = (
-    ('a %-formatted __repr__, the pre-#818 shape',
+    ('a %-formatted __repr__, which the walk reports',
      "class C:\n    def __repr__(self):\n        return '<%s>' % self.x\n"
      "    def __str__(self):\n        return '%s' % self.x\n", 1),
-    ('an f-string __repr__, the post-#818 shape',
+    ('an f-string __repr__, which the walk passes',
      "class C:\n    def __repr__(self):\n        return f'<{self.x}>'\n"
      "    def __str__(self):\n        return '%s' % self.x\n", 0),
     ('no __repr__ at all', "class C:\n    def __str__(self):\n        return '%s' % self.x\n", 0),

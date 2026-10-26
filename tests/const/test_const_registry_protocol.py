@@ -295,7 +295,7 @@ class TCPFlagsConversionTests(unittest.TestCase):
                 self.assertEqual(_resolve_or_raise(_PreConversionFlags, value),
                                  _resolve_or_raise(Flags, value))
 
-    def test_tcp_flags_gains_the_protocol_it_never_had(self) -> None:
+    def test_tcp_flags_carries_the_registry_protocol(self) -> None:
         """Without the conversion none of these exist on ``Flags`` -- its own
         hand-copied ``get`` is the only member of the protocol it carries,
         with no ``get_all``, ``register``, ``register_alias``,
@@ -954,7 +954,7 @@ class GeneratedMissingRangeParityTests(unittest.TestCase):
             TransType(9999)
 
 
-class RegisterAlreadyRegisteredNowRaisesOnAGeneratedRegistryTests(unittest.TestCase):
+class RegisterAlreadyRegisteredRaisesOnAGeneratedRegistryTests(unittest.TestCase):
     """The residue #855 disclosed: the duplicate-value guard keeps
     ``register()`` on an already-registered value from silently aliasing
     on a generated registry. Without it, ``TransType.register(6,

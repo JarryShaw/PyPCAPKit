@@ -1602,7 +1602,7 @@ class DependencyRequirementTests(unittest.TestCase):
         ``crypto`` and ``pycrate`` (``NGAP``) -- and the third-party capture
         engines (``dpkt``, ``scapy``, ``pyshark``, ``pypcapfile``) have their
         own on-demand extras instead, covered by
-        :meth:`test_dev_carries_what_all_used_to_for_the_toolchain`.
+        :meth:`test_dev_carries_what_the_toolchain_imports`.
 
         """
         declared = _dependency_gates.declared_requirements()
@@ -1613,7 +1613,7 @@ class DependencyRequirementTests(unittest.TestCase):
             with self.subTest(removed=removed):
                 self.assertFalse(_dependency_gates.provided_by(declared['all'], removed))
 
-    def test_dev_carries_what_all_used_to_for_the_toolchain(self) -> None:
+    def test_dev_carries_what_the_toolchain_imports(self) -> None:
         """#910's ``dev`` extra: what pylint/mypy/Sphinx need to see, not what an end user wants.
 
         Installed alongside ``all`` (``.[all,dev]``) by ``lint.yml`` and

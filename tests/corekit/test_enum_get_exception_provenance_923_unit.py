@@ -193,7 +193,7 @@ class BaseGetProvenanceTests(unittest.TestCase):
         self.assertIs(_Closed.get('nosuch', 1), _Closed.one)
         self.assertIs(_Closed.get(99, 2), _Closed.two)
 
-    def test_old_call_sites_keep_catching(self) -> 'None':
+    def test_except_clauses_on_the_builtins_catch_the_misses(self) -> 'None':
         """The whole reason the shape is preserved: the in-library
         ``except KeyError`` sites, and any caller's own, keep working."""
         try:
@@ -437,7 +437,7 @@ class CriticalityGetDeletionTests(unittest.TestCase):
 
         self.assertNotIn('get', Criticality.__dict__)
 
-    def test_names_and_values_resolve_as_before(self) -> 'None':
+    def test_names_and_values_resolve_through_the_inherited_get(self) -> 'None':
         """Invariants rather than repros -- they pass without the #923 fix too,
         and are what relying on the inherited ``get`` has to preserve."""
         from pcapkit.protocols.application.ngap import Criticality

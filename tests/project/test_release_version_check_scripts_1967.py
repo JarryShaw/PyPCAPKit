@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """#1967: ``version_check``'s :file:`util/` scripts, run as Create Release runs them.
 
-* :class:`TestTheFormerShellAgrees` runs ``version_check``'s "Read the released
+* :class:`TestTheStepMatchesTheReferenceShell` runs ``version_check``'s "Read the released
   Python versions", "Check PyPI publish completeness" and "Check Anaconda
   publish completeness" in their inline shell form, the reference
   :file:`util/release_tiers.py` and :file:`util/release_published.py` must
@@ -18,7 +18,7 @@
 
 The steps run with no ``shell:``, so on the runner's ``bash -e``, and ``bash``
 prefixes each of its own errors with the script's path and line, which
-:meth:`_Stand.former` strips; the rest of standard error is compared whole,
+:meth:`_Stand.reference` strips; the rest of standard error is compared whole,
 ``[``'s complaint as bash 5.2, ``ubuntu-latest``'s, words it. The runs against
 a real repository are
 :mod:`tests.project.test_release_tags_the_run_sha_1634`'s.
@@ -177,7 +177,7 @@ FAKES = {'python3': FAKE_PYTHON3, 'git': FAKE_GIT, 'mktemp': FAKE_MKTEMP, 'curl'
 
 #: "Read the released Python versions" in its inline shell form, the reference
 #: :file:`util/release_tiers.py` must match.
-FORMER_TIERS = textwrap.dedent(r'''
+REFERENCE_TIERS = textwrap.dedent(r'''
     set -euo pipefail
 
     wheels="$PCAPKIT_PYPI_WHEELS"
@@ -217,7 +217,7 @@ FORMER_TIERS = textwrap.dedent(r'''
 
 #: "Check PyPI publish completeness" in its inline shell form, the reference
 #: :file:`util/release_published.py` must match.
-FORMER_PYPI = textwrap.dedent(r'''
+REFERENCE_PYPI = textwrap.dedent(r'''
     set -euo pipefail
 
     # One wheel per supported leg, plus the sdist.
@@ -258,7 +258,7 @@ FORMER_PYPI = textwrap.dedent(r'''
 ''').lstrip()
 
 #: "Check Anaconda publish completeness", likewise.
-FORMER_ANACONDA = textwrap.dedent(r'''
+REFERENCE_ANACONDA = textwrap.dedent(r'''
     set -euo pipefail
 
     # Each platform the ``conda`` legs publish, for each supported version.
@@ -304,11 +304,11 @@ FORMER_ANACONDA = textwrap.dedent(r'''
 #: Each step, its id, the ``run:`` it holds, and its inline shell form, the
 #: ``/tmp`` file it writes standing for where the cases write it.
 STEPS = {
-    'Read the released Python versions': ('released', 'python3 util/release_tiers.py', FORMER_TIERS),
+    'Read the released Python versions': ('released', 'python3 util/release_tiers.py', REFERENCE_TIERS),
     'Check PyPI publish completeness': ('check_pypi', 'python3 util/release_published.py pypi /tmp/pypi_release.json',
-                                        FORMER_PYPI),
+                                        REFERENCE_PYPI),
     'Check Anaconda publish completeness': (
-        'check_conda', 'python3 util/release_published.py anaconda /tmp/anaconda_release.json', FORMER_ANACONDA),
+        'check_conda', 'python3 util/release_published.py anaconda /tmp/anaconda_release.json', REFERENCE_ANACONDA),
 }
 
 #: A value standing for a variable left unset.
@@ -570,7 +570,7 @@ class _Stand(unittest.TestCase):
                 *(path.read_text(encoding='utf-8', errors='surrogateescape') if path.exists() else None
                   for path in (self.output, self.calls)), scratch)
 
-    def former(self, shell: 'str', env: 'dict[str, bytes]', reply: 'bytes' = b'',
+    def reference(self, shell: 'str', env: 'dict[str, bytes]', reply: 'bytes' = b'',
                git: 'tuple[str, str, str, bytes]' = ('', '', '', b'')) -> 'tuple[object, ...]':
         """``shell`` as a step with no ``shell:`` runs it, ``bash -e``, its own errors' ``<path>: line N:`` dropped."""
         self.shell.write_text(shell.replace('/tmp/pypi_release.json', str(self.tmp / 'release.json'))
@@ -684,16 +684,16 @@ PATHS['Check Anaconda publish completeness'] = {
 }
 
 
-@unittest.skipIf(not BASH, 'needs bash, which ran the former shell')
-class TestTheFormerShellAgrees(_Stand):
+@unittest.skipIf(not BASH, 'needs bash, which runs the reference shell')
+class TestTheStepMatchesTheReferenceShell(_Stand):
     """Each script exits, prints, writes and calls exactly as its step's inline shell form, on every case."""
 
     def compare(self, step: 'str') -> 'None':
-        _, run, former = STEPS[step]
+        _, run, reference = STEPS[step]
         for name, overrides, reply, git in cases(step):
             with self.subTest(case=name):
                 env = self.env(BASES[step], overrides)
-                new, old = self.script(run, env, reply, git), self.former(former, env, reply, git)
+                new, old = self.script(run, env, reply, git), self.reference(reference, env, reply, git)
                 if name in SIGNALLED:
                     self.assertRegex(str(old[2]), r'(?m)^Terminated\b')
                 self.assertEqual(compared(name, new), compared(name, old))
@@ -712,7 +712,7 @@ class TestTheFormerShellAgrees(_Stand):
         exits = {}  # type: dict[str, list[str]]
         paths = {}  # type: dict[str, list[str]]
         for name, overrides, reply, git in cases(step):
-            old = self.former(STEPS[step][2], self.env(BASES[step], overrides), reply, git)
+            old = self.reference(STEPS[step][2], self.env(BASES[step], overrides), reply, git)
             met = [label for label, test in EXITS[step].items() if test(old)]
             with self.subTest(case=name):
                 self.assertEqual(len(met), 1, f'{name} meets {met}: {old!r}')
@@ -763,7 +763,7 @@ PLANTS = (
 )
 
 
-@unittest.skipIf(not BASH, 'needs bash, which ran the former shell')
+@unittest.skipIf(not BASH, 'needs bash, which runs the reference shell')
 class TestAPlantedDivergenceIsCaught(_Stand):
     """The cases tell each plant from the shell form, so their agreement means something."""
 
@@ -778,12 +778,12 @@ class TestAPlantedDivergenceIsCaught(_Stand):
             util.mkdir()
             shutil.copy(UTIL / '_actions.py', util / '_actions.py')
             (util / name).write_text((UTIL / name).read_text(encoding='utf-8').replace(old, new), encoding='utf-8')
-            _, run, former = STEPS[step]
+            _, run, reference = STEPS[step]
             caught = []
             for case, overrides, reply, git in cases(step):
                 env = self.env(BASES[step], overrides)
                 if compared(case, self.script(run, env, reply, git, util=util)) \
-                        != compared(case, self.former(former, env, reply, git)):
+                        != compared(case, self.reference(reference, env, reply, git)):
                     caught.append(case)
                     break
             with self.subTest(step=step, plant=new):
@@ -815,7 +815,7 @@ class TestTheStepsRunTheScripts(unittest.TestCase):
         self.assertLess(setup, first)
         self.assertEqual(load(WORKFLOW)['jobs']['version_check']['permissions'], {'contents': 'read'})
 
-    def test_no_step_holds_the_former_shell(self) -> None:
+    def test_no_step_holds_the_reference_shell(self) -> None:
         for job, spec in sorted(load(WORKFLOW)['jobs'].items()):
             for step in spec.get('steps', []):
                 for line in ('python-versions.toml', "data.get('urls'", 'PCAPKIT_CONDA_SUBDIRS',

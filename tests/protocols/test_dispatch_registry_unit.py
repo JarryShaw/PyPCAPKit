@@ -186,7 +186,7 @@ class DispatchRegistryTests(unittest.TestCase):
             f'registry: {unpinned}'
         )
 
-    def test_registry_currently_matches_pinned_target(self) -> None:
+    def test_registry_matches_pinned_target(self) -> None:
         """The live registry still names the class :data:`PINNED_TARGETS` expects.
 
         This is the check that actually catches a mis-pointed entry --

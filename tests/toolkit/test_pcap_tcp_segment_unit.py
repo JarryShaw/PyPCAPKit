@@ -195,7 +195,7 @@ class TCPSegmentAdapterTests(unittest.TestCase):
                 with self.subTest(container=container, **kwargs):
                     self.assertEqual(self._records(write(*snap(ipv4(tcp()))), **kwargs), ([], None, None))
 
-    def test_a_parsed_segment_is_reported_as_before(self) -> None:
+    def test_a_parsed_segment_is_reported_with_its_header_and_payload(self) -> None:
         octets = ipv4(tcp(payload=b'data'))
         for container, write in (('pcap', pcap), ('pcapng', pcapng)):
             with self.subTest(container=container):

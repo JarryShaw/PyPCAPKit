@@ -274,7 +274,7 @@ class IPXSocketVendorTests(unittest.TestCase):
     def test_range_order_is_preserved(self) -> None:
         self.assertEqual(tuple(self.vendor_module.RANGES), EXPECTED_RANGES)
 
-    def test_previously_shadowed_ranges_are_reachable(self) -> None:
+    def test_a_nested_range_resolves_as_its_own(self) -> None:
         # GitHub issue #841: with each wider range listed first, these values
         # would resolve as the range that masks their own -- 0x0030 as
         # 'Registered by Xerox_0x0030', 0x4080 and 0x8100 both as

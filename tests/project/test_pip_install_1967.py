@@ -4,8 +4,8 @@
 * :class:`TestPipInstall` runs the script against a stand-in ``pip``: a clean
   install, a failed one with and without an ``ERROR:`` line, a failed upgrade,
   and the arguments and levels it refuses.
-* :class:`TestTheFormerShellAgrees` runs the steps' inline shell form,
-  :data:`FORMER_ANNOTATED` and :data:`FORMER_BARE`, the reference the script
+* :class:`TestTheStepMatchesTheReferenceShell` runs the steps' inline shell form,
+  :data:`REFERENCE_ANNOTATED` and :data:`REFERENCE_BARE`, the reference the script
   must match, against the same stand-in and requires the same output, log and
   status;
   for the steps whose shell wrote no annotation, the same except for the
@@ -141,7 +141,7 @@ PIP = textwrap.dedent('''\
 #: ``test``'s and ``integration``'s install in its inline shell form, under
 #: ``shell: bash``, the reference the script must match; ``SPEC`` stands for each
 #: job's extras.
-FORMER_ANNOTATED = textwrap.dedent('''\
+REFERENCE_ANNOTATED = textwrap.dedent('''\
     python -m pip install -U pip setuptools wheel
     if ! python -m pip install -e 'SPEC' 2>&1 | tee "$RUNNER_TEMP/pip-install.log"; then
       reason=$(sed -n 's/^ERROR: //p' "$RUNNER_TEMP/pip-install.log" | tail -n 1)
@@ -151,7 +151,7 @@ FORMER_ANNOTATED = textwrap.dedent('''\
     fi
 ''').replace('SPEC', SPEC)  # noqa: E501
 #: The other covered steps' install in its inline shell form, under the default shell.
-FORMER_BARE = textwrap.dedent('''\
+REFERENCE_BARE = textwrap.dedent('''\
     python -m pip install -U pip setuptools wheel
     python -m pip install -e 'SPEC'
 ''').replace('SPEC', SPEC)
@@ -311,10 +311,10 @@ class TestPipInstall(_Scratch):
 
 @unittest.skipIf(any(shutil.which(tool) is None for tool in ('bash', 'tee', 'sed', 'tail')),
                  'needs bash, tee, sed and tail')
-class TestTheFormerShellAgrees(_Scratch):
+class TestTheStepMatchesTheReferenceShell(_Scratch):
     """The script prints, logs and exits as the steps' inline shell form does."""
 
-    def former(self, shell: 'str', env: 'dict[str, str]') -> 'subprocess.CompletedProcess[str]':
+    def reference(self, shell: 'str', env: 'dict[str, str]') -> 'subprocess.CompletedProcess[str]':
         """``shell`` as a step runs it: ``shell: bash`` for the annotated steps, ``bash -e`` for the rest."""
         bin_dir = self.tmp / 'bin'
         bin_dir.mkdir(exist_ok=True)
@@ -322,7 +322,7 @@ class TestTheFormerShellAgrees(_Scratch):
         if not python.exists():
             python.symlink_to(sys.executable)  # the leg's `python`; here, this interpreter
         env = dict(env, PATH=f'{bin_dir}{os.pathsep}{env.get("PATH", "")}')
-        command = (['bash', '--noprofile', '--norc', '-eo', 'pipefail', '-c', shell] if shell is FORMER_ANNOTATED
+        command = (['bash', '--noprofile', '--norc', '-eo', 'pipefail', '-c', shell] if shell is REFERENCE_ANNOTATED
                    else ['bash', '-e', '-c', shell])
         return subprocess.run(command, cwd=self.tmp, env=env,  # nosec: B603
                               capture_output=True, text=True, check=False, timeout=120)
@@ -330,7 +330,7 @@ class TestTheFormerShellAgrees(_Scratch):
     def both(self, shell: 'str', level: 'str', **pip: 'object') -> 'tuple[tuple[object, ...], tuple[object, ...]]':
         """``(status, stdout, log, pip's calls)`` of the inline shell, then of the script, each with its stderr."""
         found = []
-        for run in (lambda env: self.former(shell, env), lambda env: self.script('-e', SPEC, env=env)):
+        for run in (lambda env: self.reference(shell, env), lambda env: self.script('-e', SPEC, env=env)):
             result = run(self.env(level, **pip))
             log = self.log.read_text(encoding='utf-8') if self.log.exists() else None
             if self.log.exists():
@@ -342,7 +342,7 @@ class TestTheFormerShellAgrees(_Scratch):
         for output, status in OUTCOMES:
             for level in ('error', 'warning'):
                 with self.subTest(output=output, status=status, level=level):
-                    (old, _), (new, _) = self.both(FORMER_ANNOTATED, level, install_output=output,
+                    (old, _), (new, _) = self.both(REFERENCE_ANNOTATED, level, install_output=output,
                                                    install_status=status)
                     self.assertEqual(new, old)
 
@@ -351,7 +351,7 @@ class TestTheFormerShellAgrees(_Scratch):
         (#2041). Everything else still matches, and so does an outcome where both find the same line."""
         for level in ('error', 'warning'):
             with self.subTest(level=level):
-                (old, _), (new, _) = self.both(FORMER_ANNOTATED, level, install_output=WHEEL_FAILED,
+                (old, _), (new, _) = self.both(REFERENCE_ANNOTATED, level, install_output=WHEEL_FAILED,
                                                install_status=1)
                 self.assertEqual((new[0], new[2], new[3]), (old[0], old[2], old[3]))
                 head = text(WHEEL_FAILED) + f'::{level} title={TITLE}::'
@@ -359,9 +359,9 @@ class TestTheFormerShellAgrees(_Scratch):
                 self.assertEqual(new[1], f'{head}Failed building wheel for cryptography{SKIPPED}\n')
 
     def test_a_failed_upgrade_matches_on_both_forms(self) -> None:
-        for shell in (FORMER_ANNOTATED, FORMER_BARE):
+        for shell in (REFERENCE_ANNOTATED, REFERENCE_BARE):
             for status in (1, 3, -signal.SIGTERM):
-                with self.subTest(annotated=shell is FORMER_ANNOTATED, status=status):
+                with self.subTest(annotated=shell is REFERENCE_ANNOTATED, status=status):
                     (old, _), (new, _) = self.both(shell, 'error', upgrade_output=['err:no index'],
                                                    upgrade_status=status)
                     self.assertEqual(new, old)
@@ -372,7 +372,7 @@ class TestTheFormerShellAgrees(_Scratch):
         the annotation."""
         for output, status in OUTCOMES:
             with self.subTest(output=output, status=status):
-                (old, old_stderr), (new, new_stderr) = self.both(FORMER_BARE, 'error', install_output=output,
+                (old, old_stderr), (new, new_stderr) = self.both(REFERENCE_BARE, 'error', install_output=output,
                                                                  install_status=status)
                 self.assertEqual(new[3], old[3])
                 self.assertEqual((old[1], old[2]), (text([line for line in output if line.startswith('out:')]), None))

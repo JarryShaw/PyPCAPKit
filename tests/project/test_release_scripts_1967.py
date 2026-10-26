@@ -6,7 +6,7 @@
   commit" and of "Check which commit the version's tag names".
 * :class:`TestReleaseUpload` runs ``release_upload.py``, "Upload package to
   GitHub Release", against a stand-in ``gh``.
-* :class:`TestTheFormerShellAgrees` runs those steps' inline shell form, the
+* :class:`TestTheStepMatchesTheReferenceShell` runs those steps' inline shell form, the
   reference the scripts must match, against the same stand-ins and requires the same status, standard
   output and error, ``$GITHUB_OUTPUT`` and calls.
 * :class:`TestTheStepsRunTheScripts` pins each step to its script, after a whole
@@ -94,7 +94,7 @@ esac
 #: "Check the release tags name this run's commit" in ``github``, ``pypi`` and
 #: ``conda``, in its inline shell form, the reference :file:`util/release_tags.py`
 #: must match.
-FORMER_CHECK = textwrap.dedent(r'''
+REFERENCE_CHECK = textwrap.dedent(r'''
     set -euo pipefail
 
     run_commit="$(git rev-parse --verify "${PCAPKIT_RUN_SHA}^{commit}")"
@@ -110,7 +110,7 @@ FORMER_CHECK = textwrap.dedent(r'''
 ''').lstrip()
 
 #: "Check which commit the version's tag names" in ``version_check``, likewise.
-FORMER_OWNER = textwrap.dedent(r'''
+REFERENCE_OWNER = textwrap.dedent(r'''
     set -euo pipefail
 
     run_commit="$(git rev-parse --verify "${PCAPKIT_RUN_SHA}^{commit}")"
@@ -128,7 +128,7 @@ FORMER_OWNER = textwrap.dedent(r'''
 
 #: "Upload package to GitHub Release" in ``pypi`` and ``conda``, in its inline
 #: shell form, the reference :file:`util/release_upload.py` must match.
-FORMER_UPLOAD = textwrap.dedent(r'''
+REFERENCE_UPLOAD = textwrap.dedent(r'''
     set -euo pipefail
 
     published="$(gh release view "$PCAPKIT_RELEASE_TAG" --repo "$GITHUB_REPOSITORY" --json assets --jq '.assets[] | [.name, .state] | @tsv')"
@@ -273,7 +273,7 @@ class _Stand(unittest.TestCase):
         return subprocess.run([sys.executable, str(UTIL / name), *args], cwd=self.work,  # nosec: B603
                               env=env, capture_output=True, text=True, check=False, timeout=120)
 
-    def former(self, shell: 'str', env: 'dict[str, str]') -> 'subprocess.CompletedProcess[str]':
+    def reference(self, shell: 'str', env: 'dict[str, str]') -> 'subprocess.CompletedProcess[str]':
         """``shell`` as ``shell: bash`` runs it, ``bash --noprofile --norc -eo pipefail``."""
         script = self.tmp / 'step.sh'
         script.write_text(shell, encoding='utf-8')
@@ -436,14 +436,14 @@ class TestReleaseUpload(_Stand):
         self.assertEqual(self.calls(), [])
 
 
-@unittest.skipIf(not BASH, 'needs bash, which ran the former shell')
-class TestTheFormerShellAgrees(_Stand):
+@unittest.skipIf(not BASH, 'needs bash, which runs the reference shell')
+class TestTheStepMatchesTheReferenceShell(_Stand):
     """Each script exits, prints, writes and calls exactly as its step's inline shell form, on every case."""
 
     def both(self, shell: 'str', command: 'list[str]', env: 'dict[str, str]',
              prepare: 'Callable[[], None]') -> 'tuple[tuple[object, ...], tuple[object, ...]]':
         found = []
-        for run in (lambda: self.former(shell, env), lambda: self.script(*command, env=env)):
+        for run in (lambda: self.reference(shell, env), lambda: self.script(*command, env=env)):
             self.reset()
             prepare()
             found.append(self.state(run()))
@@ -452,7 +452,7 @@ class TestTheFormerShellAgrees(_Stand):
     def test_the_tag_check(self) -> None:
         for name, tags, tagged, extra in CHECK_CASES:
             with self.subTest(case=name):
-                old, new = self.both(FORMER_CHECK, ['release_tags.py', 'check'],
+                old, new = self.both(REFERENCE_CHECK, ['release_tags.py', 'check'],
                                      self.tags_env(extra, PCAPKIT_TAGS=tags),
                                      functools.partial(self.prepare_tags, tagged))
                 self.assertEqual(new, old)
@@ -460,7 +460,7 @@ class TestTheFormerShellAgrees(_Stand):
     def test_the_owner_check(self) -> None:
         for name, tagged, extra in OWNER_CASES:
             with self.subTest(case=name):
-                old, new = self.both(FORMER_OWNER, ['release_tags.py', 'owner'],
+                old, new = self.both(REFERENCE_OWNER, ['release_tags.py', 'owner'],
                                      self.tags_env(extra, PCAPKIT_TAG='v1.5.0'),
                                      functools.partial(self.prepare_tags, tagged))
                 self.assertEqual(new, old)
@@ -468,7 +468,7 @@ class TestTheFormerShellAgrees(_Stand):
     def test_the_upload(self) -> None:
         for name, assets, built, published, extra in UPLOAD_CASES:
             with self.subTest(case=name):
-                old, new = self.both(FORMER_UPLOAD, ['release_upload.py'], self.upload_env(assets, extra),
+                old, new = self.both(REFERENCE_UPLOAD, ['release_upload.py'], self.upload_env(assets, extra),
                                      functools.partial(self.prepare_assets, built, published))
                 self.assertEqual(new, old)
 
@@ -476,16 +476,16 @@ class TestTheFormerShellAgrees(_Stand):
         """The check and upload cases end each shell in success, in refusal and with ``git``'s or ``gh``'s
         own failing status, so agreement is not agreement on one path."""
         statuses = set()
-        for shell, cases in ((FORMER_CHECK, CHECK_CASES), (FORMER_UPLOAD, UPLOAD_CASES)):
+        for shell, cases in ((REFERENCE_CHECK, CHECK_CASES), (REFERENCE_UPLOAD, UPLOAD_CASES)):
             for case in cases:
                 self.reset()
-                if shell is FORMER_CHECK:
+                if shell is REFERENCE_CHECK:
                     self.prepare_tags(case[2])
                     env = self.tags_env(case[3], PCAPKIT_TAGS=case[1])
                 else:
                     self.prepare_assets(case[2], case[3])
                     env = self.upload_env(case[1], case[4])
-                statuses.add((shell is FORMER_CHECK, self.former(shell, env).returncode))
+                statuses.add((shell is REFERENCE_CHECK, self.reference(shell, env).returncode))
         self.assertEqual(statuses, {(True, 0), (True, 1), (True, 128), (True, 143),
                                     (False, 0), (False, 1), (False, 3), (False, 4)})
 
@@ -500,7 +500,7 @@ class TestTheStepsRunTheScripts(unittest.TestCase):
                 self.assertEqual(len(found), 1)
                 self.assertEqual(found[0]['run'], run)
 
-    def test_no_other_step_holds_the_former_shell(self) -> None:
+    def test_no_other_step_holds_the_reference_shell(self) -> None:
         for job, found in sorted(load(WORKFLOW)['jobs'].items()):
             for step in found.get('steps', []):
                 for line in ('gh release', 'for tag in ${PCAPKIT_TAGS}', 'released elsewhere'):

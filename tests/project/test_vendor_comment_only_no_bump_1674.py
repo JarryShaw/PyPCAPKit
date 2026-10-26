@@ -438,7 +438,7 @@ SCENARIOS = [
     ('comments only, held after a documentation commit: nothing pushed', 'true',
      ('success', {'code_changed': 'false'}), {},
      ('Classify Changed files', 'Commit documentation changes')),
-    ('the classifier failed: the bump stands, as before #1674', 'true', ('failure', {}), {},
+    ('the classifier failed: the bump stands', 'true', ('failure', {}), {},
      ('Classify Changed files', 'Bump Version', 'Commit changes', 'Push changes')),
     ('the classifier wrote neither answer: the bump stands', 'true',
      ('success', {'code_changed': ''}), {},

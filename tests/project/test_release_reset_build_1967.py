@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """#1967: :file:`util/release_reset_build.py`, run as Create Release's "Reset Build Number" runs it.
 
-* :class:`TestTheFormerShellAgrees` runs the step's inline shell form, the
+* :class:`TestTheStepMatchesTheReferenceShell` runs the step's inline shell form, the
   reference the script must match, kept here verbatim, and the script, each against a fresh scratch
   repository built the same way at the same path, and requires the same status,
   standard output and error, the refs ``origin`` is left with, and the checkout's
@@ -16,7 +16,7 @@
 
 The shell form runs as a step with no ``shell:`` runs on the runner, ``bash -e``, and
 ``bash`` prefixes each of its own errors with the script's path and line, which
-:meth:`TestTheFormerShellAgrees.former` strips. The step's runs against the
+:meth:`TestTheStepMatchesTheReferenceShell.reference` strips. The step's runs against the
 scenarios of #1634, after "Create Tag", are
 :mod:`tests.project.test_release_tags_the_run_sha_1634`'s.
 
@@ -58,7 +58,7 @@ GIT = shutil.which('git') or ''
 VERSION = '1.5.0b9'
 
 #: The step's inline shell form, the reference the script must match, verbatim.
-FORMER_RESET = textwrap.dedent(r'''
+REFERENCE_RESET = textwrap.dedent(r'''
     set -euo pipefail
 
     run_commit="$(git rev-parse --verify "${PCAPKIT_RUN_SHA}^{commit}")"
@@ -347,8 +347,8 @@ CASES = (
 )
 
 
-@unittest.skipIf(not (BASH and GIT), 'needs bash, which ran the former shell, and git')
-class TestTheFormerShellAgrees(unittest.TestCase):
+@unittest.skipIf(not (BASH and GIT), 'needs bash, which runs the reference shell, and git')
+class TestTheStepMatchesTheReferenceShell(unittest.TestCase):
     """The script exits, prints and leaves the repositories exactly as the inline shell form, on every case."""
 
     def setUp(self) -> None:
@@ -356,7 +356,7 @@ class TestTheFormerShellAgrees(unittest.TestCase):
         self.addCleanup(tmp.cleanup)
         self.tmp = pathlib.Path(tmp.name)
         self.shell = self.tmp / 'step.sh'
-        self.shell.write_text(FORMER_RESET, encoding='utf-8')
+        self.shell.write_text(REFERENCE_RESET, encoding='utf-8')
 
     def scratch(self, build: 'Callable[[Scratch], str]') -> 'tuple[Scratch, str]':
         """A fresh scratch repository at the same path as the last, built by ``build``."""
@@ -386,7 +386,7 @@ class TestTheFormerShellAgrees(unittest.TestCase):
                 read('-C', str(scratch.work), 'rev-parse', 'HEAD'),
                 build.read_bytes() if build.is_file() else None)
 
-    def former(self, build: 'Callable[[Scratch], str]', env: 'dict[str, Optional[str]]') -> 'tuple[object, ...]':
+    def reference(self, build: 'Callable[[Scratch], str]', env: 'dict[str, Optional[str]]') -> 'tuple[object, ...]':
         """The inline shell form as a step runs it, ``bash -e``, its own errors' ``<path>: line N:`` dropped."""
         scratch, run = self.scratch(build)
         result = subprocess.run([BASH, '-e', str(self.shell)], cwd=scratch.work,  # nosec: B603
@@ -406,14 +406,14 @@ class TestTheFormerShellAgrees(unittest.TestCase):
     def test_each_case(self) -> None:
         for name, build, env, _ in CASES:
             with self.subTest(case=name):
-                self.assertEqual(self.script(build, env), self.former(build, env))
+                self.assertEqual(self.script(build, env), self.reference(build, env))
 
     def test_every_case_was_reached(self) -> None:
         """Each case ends the shell on its own line, and together they reach every way it ends."""
         statuses = set()
         for name, build, env, line in CASES:
             with self.subTest(case=name):
-                status, stdout, stderr, *_ = self.former(build, env)
+                status, stdout, stderr, *_ = self.reference(build, env)
                 self.assertIn(line, f'{stdout}{stderr}')
                 statuses.add(status)
         self.assertEqual(statuses, {0, 1, 2, 127, 128, 143})
@@ -428,7 +428,7 @@ class TestTheStepRunsTheScript(unittest.TestCase):
         self.assertEqual(found[0]['run'], RUN)
         self.assertEqual(found[0].get('env'), ENV)
 
-    def test_no_step_holds_the_former_shell(self) -> None:
+    def test_no_step_holds_the_reference_shell(self) -> None:
         for job_id in ('tag', 'github', 'pypi', 'conda'):
             for step in steps(WORKFLOW, job_id):
                 with self.subTest(job=job_id, step=step.get('name')):

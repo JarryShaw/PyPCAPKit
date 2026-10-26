@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """#1967: :file:`util/release_status.py`, and ``vendor_update``'s inline shell, run as Create Release runs them.
 
-* :class:`TestTheFormerShellAgrees` runs ``release_status``'s "Report why this
+* :class:`TestTheStepMatchesTheReferenceShell` runs ``release_status``'s "Report why this
   run did or did not release anything" in its inline shell form, the reference
   the script must match, on the cases below, and the script on the same, and requires the same status,
   standard output and error, ``$GITHUB_OUTPUT``, ``$GITHUB_STEP_SUMMARY`` and
@@ -19,7 +19,7 @@
 
 The shell form runs as a step with no ``shell:`` runs on the runner, ``bash -e``, and
 ``bash`` prefixes each of its own errors with the script's path and line, which
-:meth:`_Stand.former` strips; the rest of standard error is compared whole.
+:meth:`_Stand.reference` strips; the rest of standard error is compared whole.
 What the steps report, case by case, is
 :mod:`tests.project.test_release_gates`'s and
 :mod:`tests.project.test_release_reads_the_vendor_update_1748`'s.
@@ -76,7 +76,7 @@ cat "$GH_REPLY"
 
 #: "Report why this run did or did not release anything" in ``release_status``, in
 #: its inline shell form, the reference :file:`util/release_status.py` must match.
-FORMER_STATUS = textwrap.dedent(r'''
+REFERENCE_STATUS = textwrap.dedent(r'''
     set -euo pipefail
 
     # #1633: pypi's KTLO legs reach neither needs.pypi.result
@@ -454,7 +454,7 @@ class _Stand(unittest.TestCase):
                 *(path.read_text(encoding='utf-8', errors='surrogateescape') if path.exists() else None
                   for path in (self.output, self.summary, self.gh_log)))
 
-    def former(self, shell: 'str', env: 'dict[str, str]', reply: 'bytes' = b'') -> 'tuple[object, ...]':
+    def reference(self, shell: 'str', env: 'dict[str, str]', reply: 'bytes' = b'') -> 'tuple[object, ...]':
         """``shell`` as a step with no ``shell:`` runs it, ``bash -e``, its own errors' ``<path>: line N:`` dropped."""
         self.shell.write_text(shell, encoding='utf-8')
         found = self.state([BASH, '-e', str(self.shell)], env, reply)
@@ -463,15 +463,15 @@ class _Stand(unittest.TestCase):
 
     def run_both(self, shell: 'str', script: 'str', env: 'dict[str, str]',
                  reply: 'bytes' = b'') -> 'tuple[tuple[object, ...], tuple[object, ...]]':
-        """The state each leaves: :meth:`former` on ``shell``, then ``python3 util/<script>`` as its step runs it."""
-        return self.former(shell, env, reply), self.state([sys.executable, str(UTIL / script)], env, reply)
+        """The state each leaves: :meth:`reference` on ``shell``, then ``python3 util/<script>`` as its step runs it."""
+        return self.reference(shell, env, reply), self.state([sys.executable, str(UTIL / script)], env, reply)
 
     def branches(self, shell: 'str', cases: 'list[tuple[str, dict[str, str], bytes]]',
                  classify: 'Callable[[tuple[object, ...]], list[str]]') -> 'dict[str, list[str]]':
         """Each case's branch, as ``classify(state)`` names it from ``shell``'s run."""
         reached = {}  # type: dict[str, list[str]]
         for name, env, reply in cases:
-            old = self.former(shell, env, reply)
+            old = self.reference(shell, env, reply)
             branch = classify(old)
             with self.subTest(case=name):
                 self.assertEqual(len(branch), 1, f'{name} matches {branch}: {old!r}')
@@ -515,8 +515,8 @@ def sampled_status_cases(count: 'int' = 150) -> 'list[tuple[str, dict[str, Optio
             for index in range(count)]
 
 
-@unittest.skipIf(not BASH, 'needs bash, which ran the former shell')
-class TestTheFormerShellAgrees(_Stand):
+@unittest.skipIf(not BASH, 'needs bash, which runs the reference shell')
+class TestTheStepMatchesTheReferenceShell(_Stand):
     """Each script exits, prints, writes and calls exactly as its step's inline shell form, on every case."""
 
     def status_env(self, overrides: 'dict[str, Optional[str]]') -> 'dict[str, str]':
@@ -531,7 +531,7 @@ class TestTheFormerShellAgrees(_Stand):
     def test_the_release_status(self) -> None:
         for name, overrides in STATUS_CASES + tuple(sampled_status_cases()):
             with self.subTest(case=name):
-                old, new = self.run_both(FORMER_STATUS, 'release_status.py', self.status_env(overrides))
+                old, new = self.run_both(REFERENCE_STATUS, 'release_status.py', self.status_env(overrides))
                 self.assertEqual((new[0], ANACONDA_REMEDY.sub('', str(new[1])), *new[2:]), old)
 
     def test_every_status_branch_is_reached(self) -> None:
@@ -543,7 +543,7 @@ class TestTheFormerShellAgrees(_Stand):
             return [name for name, (code, pattern) in STATUS_BRANCHES.items()
                     if status == code and re.match(pattern, last)
                     and (name != 'an unset variable' or 'unbound variable' in str(state[2]))]
-        reached = self.branches(FORMER_STATUS,
+        reached = self.branches(REFERENCE_STATUS,
                                 [(name, self.status_env(overrides), b'') for name, overrides in STATUS_CASES],
                                 classify)
         self.assertEqual(sorted(reached), sorted(STATUS_BRANCHES))
@@ -552,7 +552,7 @@ class TestTheFormerShellAgrees(_Stand):
         """So agreement on them is agreement on the reconciliation, not only on case 1."""
         titles = set()
         for _, overrides in sampled_status_cases():
-            stdout = str(self.former(FORMER_STATUS, self.status_env(overrides))[1])
+            stdout = str(self.reference(REFERENCE_STATUS, self.status_env(overrides))[1])
             titles.add(stdout.splitlines()[-1].split('::', 2)[1])
         for title in ('notice title=Release complete', 'warning title=Release did not complete',
                       'error title=Stranded partial release (#888)', 'notice title=Nothing to release'):
@@ -609,7 +609,7 @@ class TestTheStepsRunTheScripts(unittest.TestCase):
                 self.assertEqual(load(WORKFLOW)['jobs'][job]['permissions'], permissions)
                 self.assertFalse([step for step in found if 'setup-python' in str(step.get('uses', ''))])
 
-    def test_no_step_holds_the_former_shell(self) -> None:
+    def test_no_step_holds_the_reference_shell(self) -> None:
         for job, found in sorted(load(WORKFLOW)['jobs'].items()):
             for step in found.get('steps', []):
                 for line in ('reconciled_github', 'Stranded partial release'):

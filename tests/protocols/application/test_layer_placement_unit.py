@@ -140,7 +140,7 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
     # Re-exports.
     ##########################################################################
 
-    def test_the_public_re_exports_are_unaffected_by_the_move(self) -> None:
+    def test_the_top_level_packages_re_export_the_classes(self) -> None:
         import pcapkit
         import pcapkit.protocols
         from pcapkit.protocols.application.ospf import OSPF
@@ -153,7 +153,7 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
                 self.assertIn(name, pcapkit.__all__)
                 self.assertIn(name, pcapkit.protocols.__all__)
 
-    def test_the_names_left_the_link_subpackage(self) -> None:
+    def test_the_link_subpackage_does_not_hold_the_names(self) -> None:
         """No deprecated re-export under ``link``, by ruling."""
         import pcapkit.protocols.application
         import pcapkit.protocols.link
@@ -173,7 +173,7 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
     # Dispatch.
     ##########################################################################
 
-    def test_dispatch_keys_did_not_move_with_the_modules(self) -> None:
+    def test_dispatch_keys_stay_in_the_registries_of_the_layer_below(self) -> None:
         """The dispatch tier is decoupled from the subpackage, deliberately."""
         from pcapkit.const.reg.ethertype import EtherType
         from pcapkit.const.reg.transtype import TransType
@@ -197,7 +197,7 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
                 # the descriptor must actually resolve, not merely read right
                 self.assertIs(getattr(importlib.import_module(entry.module), entry.name), cls)
 
-    def test_ospf_leaves_links_registry_behind_and_rarp_keeps_it(self) -> None:
+    def test_ospf_has_none_of_links_registry_and_rarp_shares_it(self) -> None:
         """``Link`` sets names of its own; OSPF has none of its EtherType machinery.
 
         ``__proto__``, its shipped copy ``_shipped_proto``, ``register`` and
@@ -307,7 +307,7 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
         ospf = frame.payload.payload
         self.assertIsInstance(ospf, OSPF)
         self.assertEqual(ospf.layer, 'Application')
-        self.assertFalse(ospf._sigterm, "'link' must no longer terminate at OSPF")
+        self.assertFalse(ospf._sigterm, "'link' must not terminate at OSPF")
 
     def test_layer_application_extraction_terminates_at_ospf(self) -> None:
         """The flip side: ``layer='application'`` matches at OSPF."""
@@ -317,7 +317,7 @@ class ProtocolLayerPlacementTests(unittest.TestCase):
         ospf = frame.payload.payload
         self.assertTrue(ospf._sigterm, "'application' must terminate at OSPF")
 
-    def test_layer_internet_extraction_stops_at_ipv4_as_before(self) -> None:
+    def test_layer_internet_extraction_stops_at_ipv4(self) -> None:
         """OSPF is not reached under ``internet`` either way: IPv4 terminates first."""
         frame = self.extract_ipv4_ospf(layer='internet')
         self.assertEqual(str(frame.protochain), 'IPv4:OSPFIGP')

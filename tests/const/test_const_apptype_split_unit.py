@@ -1418,7 +1418,7 @@ class AppTypeSplitTests(unittest.TestCase):
         self.assertEqual(wrong[:20], [])
         self.assertEqual(len(wrong), 0)
 
-    def test_transport_protocol_dropped_its_flag_base(self) -> None:
+    def test_transport_protocol_has_no_flag_base(self) -> None:
         """GitHub issue #808: the base itself, with no member carrying a composite (#806).
 
         Pins three things directly, so a regression that reintroduces the

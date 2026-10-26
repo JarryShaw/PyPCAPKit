@@ -365,7 +365,7 @@ class TestPublishSkipsAnOlderBuild(unittest.TestCase):
         self.assertEqual(outputs, {'publish': 'true'})
         self.assertNotIn('compare/', calls)
 
-    def test_what_it_cannot_read_publishes_as_before(self) -> None:
+    def test_what_it_cannot_read_publishes(self) -> None:
         """A head this workflow did not write, or an API error: it publishes, as with no check at all."""
         default = f'Deploying to gh-pages from @ JarryShaw/PyPCAPKit@{THEIRS} \U0001f680'
         self.assertEqual(self.run_check(default, 'behind')[0], {'publish': 'true'})

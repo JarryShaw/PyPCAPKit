@@ -4,8 +4,8 @@
 * :class:`TestRegenerateSamples` runs the script against a stand-in generator: a
   clean run, a run on stand-in captures, a failed run at either level, and a bad
   level.
-* :class:`TestTheFormerShellAgrees` runs the step's inline shell form,
-  :data:`FORMER_SHELL`, against the same stand-ins and requires the same output,
+* :class:`TestTheStepMatchesTheReferenceShell` runs the step's inline shell form,
+  :data:`REFERENCE_SHELL`, against the same stand-ins and requires the same output,
   log and status.
 * :class:`TestTheStepsRunTheScript` pins the step in the ``integration``,
   ``pypcap-parity`` and ``gate`` jobs to the script, and keeps an inline form of
@@ -62,7 +62,7 @@ DEGRADED_RUN = (('out', 'wrote examples/captures/a.pcap'),
 #: The step's inline shell form, the reference the script must match, as the
 #: ``integration`` and ``pypcap-parity`` jobs spell it; ``gate``'s differs only in a
 #: literal ``error`` for ``${ANNOTATION_LEVEL}``.
-FORMER_SHELL = textwrap.dedent('''\
+REFERENCE_SHELL = textwrap.dedent('''\
     if ! python examples/generators/make_samples.py 2>&1 | tee "$RUNNER_TEMP/make-samples.log"; then
       echo "::${ANNOTATION_LEVEL} title=Sample fixture generation failed::examples/generators/make_samples.py could not rebuild examples/captures/. This is a fixture-generation failure, not a test failure -- the test suite has not run."
       exit 1
@@ -174,10 +174,10 @@ class TestRegenerateSamples(_Scratch):
 
 @unittest.skipIf(shutil.which('bash') is None or shutil.which('tee') is None or shutil.which('grep') is None,
                  'needs bash, tee and grep')
-class TestTheFormerShellAgrees(_Scratch):
-    """The script prints, logs and exits as :data:`FORMER_SHELL` does, under ``shell: bash``."""
+class TestTheStepMatchesTheReferenceShell(_Scratch):
+    """The script prints, logs and exits as :data:`REFERENCE_SHELL` does, under ``shell: bash``."""
 
-    def former(self, level: 'str') -> 'subprocess.CompletedProcess[str]':
+    def reference(self, level: 'str') -> 'subprocess.CompletedProcess[str]':
         # `python` is the leg's interpreter on the runner; here, this one's.
         bin_dir = self.tmp / 'bin'
         bin_dir.mkdir(exist_ok=True)
@@ -186,7 +186,7 @@ class TestTheFormerShellAgrees(_Scratch):
             python.symlink_to(sys.executable)
         env = self.env(level)
         env['PATH'] = f'{bin_dir}{os.pathsep}{env.get("PATH", "")}'
-        return subprocess.run(['bash', '--noprofile', '--norc', '-eo', 'pipefail', '-c', FORMER_SHELL],  # nosec
+        return subprocess.run(['bash', '--noprofile', '--norc', '-eo', 'pipefail', '-c', REFERENCE_SHELL],  # nosec
                               cwd=self.tmp, env=env, capture_output=True, text=True, check=False, timeout=120)
 
     def test_every_outcome_matches(self) -> None:
@@ -194,7 +194,7 @@ class TestTheFormerShellAgrees(_Scratch):
                                      (DEGRADED_RUN, 3, 'error'), (CLEAN, 1, 'warning')):
             with self.subTest(status=status, level=level, degraded=lines is DEGRADED_RUN):
                 self.generator(lines, status)
-                old = self.former(level)
+                old = self.reference(level)
                 old_log = self.log.read_text(encoding='utf-8')
                 self.log.unlink()
                 new = self.script(level)

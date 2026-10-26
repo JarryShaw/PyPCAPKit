@@ -313,7 +313,7 @@ class TransportProtocolGetTests(unittest.TestCase):
         self.assertIn('is not a valid', str(caught.exception))
         self.assertEqual(len(TransportProtocol.__members__), before)
 
-    def test_default_is_a_new_capability_not_exercised_before(self) -> None:
+    def test_default_falls_back_to_a_registered_member(self) -> None:
         """``default`` exists on this override purely because dropping an
         optional parameter the base declares is a genuine ``mypy``
         ``[override]`` violation. Forwarded

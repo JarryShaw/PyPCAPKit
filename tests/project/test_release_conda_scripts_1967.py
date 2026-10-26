@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """#1967: :file:`util/release_conda.py`, run as both conda jobs' steps run it.
 
-* :class:`TestTheFormerShellAgrees` runs each step's inline shell form, the
+* :class:`TestTheStepMatchesTheReferenceShell` runs each step's inline shell form, the
   reference the script must match -- ``conda``'s "Check whether this leg is already on Anaconda", both
   conda jobs' "Build conda packages" and "Upload conda packages to Anaconda
   (Intel)" -- and the script, on the cases below, against stand-in ``curl``, ``conda`` and ``anaconda``, and
@@ -102,7 +102,7 @@ exit "${ANACONDA_FAIL:-0}"
 
 #: "Check whether this leg is already on Anaconda" in ``conda``, as inline shell: what
 #: :file:`util/release_conda.py`'s ``leg`` must match.
-FORMER_LEG = textwrap.dedent(r'''
+REFERENCE_LEG = textwrap.dedent(r'''
     set -euo pipefail
 
     case "${{ matrix.os }}" in
@@ -154,8 +154,8 @@ FORMER_LEG = textwrap.dedent(r'''
 ''').lstrip()
 
 #: "Build conda packages" in ``conda-dist``, as inline shell: what ``build`` must match;
-#: ``conda``'s is the same but for the ``windows-latest`` arm (:data:`FORMER_RELEASE_BUILD`).
-FORMER_BUILD = textwrap.dedent(r'''
+#: ``conda``'s is the same but for the ``windows-latest`` arm (:data:`REFERENCE_RELEASE_BUILD`).
+REFERENCE_BUILD = textwrap.dedent(r'''
     set -euo pipefail
 
     out_dir="$(mktemp -d -t compilation-XXXXXXXXXX)"
@@ -212,10 +212,10 @@ FORMER_BUILD = textwrap.dedent(r'''
       echo EOF
     } >> "$GITHUB_OUTPUT"
 ''').lstrip()
-FORMER_RELEASE_BUILD = FORMER_BUILD.replace('  windows-latest)\n    target_platform="win-64"\n    ;;\n', '')
+REFERENCE_RELEASE_BUILD = REFERENCE_BUILD.replace('  windows-latest)\n    target_platform="win-64"\n    ;;\n', '')
 
 #: "Upload conda packages to Anaconda (Intel)" in both jobs, as inline shell: what ``upload`` must match.
-FORMER_UPLOAD = textwrap.dedent(r'''
+REFERENCE_UPLOAD = textwrap.dedent(r'''
     set -euo pipefail
 
     conda install -n base --override-channels -c conda-forge -y anaconda-client
@@ -375,7 +375,7 @@ class _Stand(unittest.TestCase):
         return self.state(subprocess.run([sys.executable, str(script), *words[2:]], cwd=self.work,  # nosec: B603
                                          env=env, capture_output=True, text=True, check=False, timeout=120))
 
-    def former(self, shell: 'str', env: 'dict[str, str]', label: 'str' = '',
+    def reference(self, shell: 'str', env: 'dict[str, str]', label: 'str' = '',
                python: 'str' = '') -> 'tuple[object, ...]':
         """``shell``, templated for the leg, as ``shell: bash`` runs it, its own errors' ``<path>: line N:`` dropped."""
         self.shell.write_text(shell.replace('/tmp/anaconda_release.json', str(self.release))
@@ -417,14 +417,14 @@ BUILD_RUN = STEPS[('cron-conda.yml', 'conda-dist', 'Build conda packages')]
 UPLOAD_RUN = STEPS[('cron-conda.yml', 'conda-dist', 'Upload conda packages to Anaconda (Intel)')]
 
 
-@unittest.skipIf(not BASH, 'needs bash, which ran the former shell')
-class TestTheFormerShellAgrees(_Stand):
+@unittest.skipIf(not BASH, 'needs bash, which runs the reference shell')
+class TestTheStepMatchesTheReferenceShell(_Stand):
     """Each script exits, prints, writes and calls exactly as the step's inline shell form, on every case."""
 
     def agree(self, shell: 'str', run: 'str', env: 'dict[str, str]', label: 'str' = '',
               python: 'str' = '') -> 'tuple[object, ...]':
         self.reset()
-        old = self.former(shell, env, label, python)
+        old = self.reference(shell, env, label, python)
         self.reset()
         new = self.script(run, env)
         self.assertEqual(new, old)
@@ -433,29 +433,29 @@ class TestTheFormerShellAgrees(_Stand):
     def test_the_leg_check(self) -> None:
         for case in LEG_CASES:
             with self.subTest(case=case[0]):
-                self.agree(FORMER_LEG, LEG_RUN, self.leg_env(case), str(case[1]), str(case[2]))
+                self.agree(REFERENCE_LEG, LEG_RUN, self.leg_env(case), str(case[1]), str(case[2]))
 
     def test_the_build(self) -> None:
-        for shell, cases in ((FORMER_BUILD, BUILD_CASES),
-                             (FORMER_RELEASE_BUILD, [case for case in BUILD_CASES if case[1] != 'windows-latest'])):
+        for shell, cases in ((REFERENCE_BUILD, BUILD_CASES),
+                             (REFERENCE_RELEASE_BUILD, [case for case in BUILD_CASES if case[1] != 'windows-latest'])):
             for case in cases:
-                with self.subTest(case=case[0], release=shell is FORMER_RELEASE_BUILD):
+                with self.subTest(case=case[0], release=shell is REFERENCE_RELEASE_BUILD):
                     self.agree(shell, BUILD_RUN, self.build_env(case), str(case[1]), '3.14')
 
     def test_the_upload(self) -> None:
         for case in UPLOAD_CASES:
             with self.subTest(case=case[0]):
-                self.agree(FORMER_UPLOAD, UPLOAD_RUN, self.upload_env(case))
+                self.agree(REFERENCE_UPLOAD, UPLOAD_RUN, self.upload_env(case))
 
     def test_every_way_each_shell_ends_was_reached(self) -> None:
         """So agreement is not agreement on one path."""
         ended = {}  # type: dict[str, set[object]]
         for name, shell, cases, env in (
-                ('leg', FORMER_LEG, LEG_CASES, self.leg_env), ('build', FORMER_BUILD, BUILD_CASES, self.build_env),
-                ('upload', FORMER_UPLOAD, UPLOAD_CASES, self.upload_env)):
+                ('leg', REFERENCE_LEG, LEG_CASES, self.leg_env), ('build', REFERENCE_BUILD, BUILD_CASES, self.build_env),
+                ('upload', REFERENCE_UPLOAD, UPLOAD_CASES, self.upload_env)):
             for case in cases:
                 self.reset()
-                found = self.former(shell, env(case), str(case[1]), '3.14' if name == 'build' else str(case[2]))
+                found = self.reference(shell, env(case), str(case[1]), '3.14' if name == 'build' else str(case[2]))
                 ended.setdefault(name, set()).add((found[0], dict(found[3]).get('PCAPKIT_LEG_EXISTS')))
         self.assertEqual(ended, {
             'leg': {(0, 'true'), (0, 'false'), (1, None)},
@@ -497,7 +497,7 @@ class TestTheScripts(_Stand):
                                 'https://api.anaconda.org/release/jarryshaw/pypcapkit/1.5.0\n')
 
     def test_only_a_200_is_read(self) -> None:
-        """As :data:`FORMER_LEG`'s ``[ "$status" = "200" ]``: a 201 holding this very leg reads ``false``, uncounted."""
+        """As :data:`REFERENCE_LEG`'s ``[ "$status" = "200" ]``: a 201 holding this very leg reads ``false``, uncounted."""
         case = next(case for case in LEG_CASES if case[0] == 'a 2xx other than 200 is not read')
         status, stdout, stderr, outputs, calls = self.script(LEG_RUN, self.leg_env(case))
         self.assertEqual((status, stdout, stderr), (0, '', ''))
@@ -547,7 +547,7 @@ class TestTheStepsRunTheScripts(unittest.TestCase):
                 self.assertEqual(build['working-directory'], 'conda/pypcapkit')
                 self.assertEqual(build['shell'], 'bash -el {0}')
 
-    def test_no_step_keeps_the_former_shell(self) -> None:
+    def test_no_step_holds_the_reference_shell(self) -> None:
         for workflow, job_id in JOBS:
             for entry in steps(workflow, job_id):
                 for line in ('target_platform', 'anaconda --token', '/bin/anaconda', 'conda build .'):

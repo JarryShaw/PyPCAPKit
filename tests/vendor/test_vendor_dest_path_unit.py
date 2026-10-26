@@ -151,7 +151,7 @@ def _old_algorithm(module_file: 'str') -> 'str':
     calls and a pair of ``os.path.join(ROOT, '..', ...)`` -- kept here rather
     than imported, since the whole point is a copy independent of
     :class:`~pcapkit.vendor.default.Vendor`. Used only by
-    :meth:`NestedCrawlerDestPathTests.test_old_algorithm_would_have_written_inside_vendor`
+    :meth:`NestedCrawlerDestPathTests.test_the_two_level_split_writes_inside_vendor`
     to show *what* the two-level split gets wrong, independent of
     ``Vendor._dest_path``.
 
@@ -378,7 +378,7 @@ class NestedCrawlerDestPathTests(unittest.TestCase):
         # as a "destination" to open with 'w'.
         self.assertIn(module_file, str(ctx.exception))
 
-    def test_old_algorithm_would_have_written_inside_vendor(self) -> None:
+    def test_the_two_level_split_writes_inside_vendor(self) -> None:
         # Independent evidence that the two-level split is genuinely wrong
         # here, not only that Vendor._dest_path exists. This runs the
         # two-level formula itself, copied verbatim into

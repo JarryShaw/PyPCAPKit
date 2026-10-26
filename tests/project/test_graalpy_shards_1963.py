@@ -168,7 +168,7 @@ class TestTheStepRuns(unittest.TestCase):
         status = self.status()
         self.assertEqual((status['exit'], status['crashed_workers']), ('1', '2'))
 
-    def test_without_shards_pytest_runs_once_as_before(self) -> None:
+    def test_without_shards_pytest_runs_once(self) -> None:
         self.env['SHARDS'] = ''
         result = self.run_step('exit 0\n')
         self.assertEqual(result.returncode, 0, result.stderr)
