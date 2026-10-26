@@ -84,9 +84,12 @@ registry is one enumeration per transport protocol sharing a memberless base.
    ``aenum.IntEnum`` rather than an ``aenum.IntFlag`` (:issue:`808`), numbered
    sequentially: ``sctp`` is ``3`` and ``dccp`` is ``4``, where they were ``4``
    and ``8``, and no :class:`int` is decoded as a ``|`` composite
-   (:issue:`860`). Its ``get()`` refuses a name no member declares, with
-   :exc:`~pcapkit.utilities.exceptions.EnumKeyError`, rather than minting a
-   member for it (:issue:`808`, :issue:`923`).
+   (:issue:`860`). An :class:`int` kept from the old numbering is refused
+   unless a member carries it, and where one does it can name a different
+   transport: ``3``, once ``tcp | udp``, is ``sctp``, and a bare ``4`` is
+   ``dccp``, not ``sctp``. ``TransportProtocol.get()`` refuses a name no member
+   declares, with :exc:`~pcapkit.utilities.exceptions.EnumKeyError`, rather
+   than minting a member for it (:issue:`808`, :issue:`923`).
 
 .. autoclass:: pcapkit.const.reg.apptype.apptype.TransportProtocol
    :members:

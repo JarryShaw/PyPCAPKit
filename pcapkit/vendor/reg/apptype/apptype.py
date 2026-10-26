@@ -150,10 +150,6 @@ class TransportProtocol(EnumLookup, IntEnum):
     # value it already is; a plain ``dict.get`` lookup cannot tell a composed
     # ``int`` from any other one that happens to equal it. So ``tcp | udp``
     # (``3``) resolves as ``sctp``'s own value, silently, with no exception.
-    # Before 1.5.0 the class was an ``IntFlag`` with ``sctp`` at ``4`` and
-    # ``dccp`` at ``8``, so an integer held from that numbering (composed or
-    # not) can land on a different real transport's registry rather than
-    # merely be refused: a bare ``4`` resolves as ``dccp``'s.
 
     #: No transport protocol. ``TransportProtocol(0) is undefined`` and
     #: ``bool(undefined)`` is ``False``; it is the ``proto`` sentinel default
@@ -191,15 +187,13 @@ class TransportProtocol(EnumLookup, IntEnum):
         that the exception follows what stdlib's ``Enum`` would raise in the
         circumstances, :exc:`ValueError` or :exc:`KeyError` as the case may
         be, and comes from :mod:`pcapkit.utilities.exceptions` rather than
-        being a builtin. A
-        stdlib ``E['nosuch']`` raises :exc:`KeyError`, and :issue:`923`'s census
-        found :class:`~pcapkit.corekit.enum.EnumLookup` subclasses answering a
-        name miss that way. The exceptions were :class:`AppType` and its
-        per-transport registries, and they answered with :exc:`ValueError` only
-        because their own ``get()`` takes an :class:`int` port and never accepts
-        a name at all, rather than from any name-miss policy. So there was no policy here to
-        preserve, and a name miss reaches the caller as
-        :exc:`~pcapkit.utilities.exceptions.EnumKeyError` from the base. The
+        being a builtin. A stdlib ``E['nosuch']`` raises :exc:`KeyError`, so a
+        name miss reaches the caller as
+        :exc:`~pcapkit.utilities.exceptions.EnumKeyError` from the base.
+        :class:`AppType` and its per-transport registries raise
+        :exc:`ValueError` from their own ``get()`` because it takes an
+        :class:`int` port and never accepts a name; that is not a name-miss
+        policy, so it sets none for this class to follow. The
         maintainer's ruling given in review of the work for :issue:`808`, that
         :class:`TransportProtocol` is not to be extended at all, holds either
         way: the refusal is a refusal and mints nothing, whichever exception
