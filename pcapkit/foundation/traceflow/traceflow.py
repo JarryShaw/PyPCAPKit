@@ -34,8 +34,8 @@ __all__ = ['TraceFlow']
 logger = get_logger(__name__)
 
 # NB: declared above the ``TYPE_CHECKING`` block, not below it, so that
-# ``CallbackFn`` can name ``_IT`` outright. As a quoted forward reference it was
-# resolvable only from this module's namespace, and every module that spells
+# ``CallbackFn`` can name ``_IT`` outright. As a quoted forward reference it would
+# resolve only from this module's namespace, and every module that spells
 # ``CallbackFn`` in an annotation -- ``pcapkit.foundation.registry.foundation``
 # does -- has to evaluate the alias in its own.
 _DT = TypeVar('_DT')

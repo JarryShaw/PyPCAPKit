@@ -4,9 +4,9 @@
 
 .. module:: pcapkit.utilities.exceptions
 
-:mod:`pcapkit.utilities.exceptions` refined built-in exceptions.
-Make it possible to show only user error stack information [*]_,
-when exception raised on user's operation.
+:mod:`pcapkit.utilities.exceptions` holds refined built-in exceptions,
+which make it possible to show only user error stack information [*]_
+when an exception is raised on user's operation.
 
 .. [*] See |tbtrim|_ project for Pythonic implementation.
 
@@ -388,7 +388,7 @@ def _excepthook(etype: 'Type[BaseException]', value: 'BaseException',
 # A generic, external marker -- "some pcapkit instance's hook is active" -- for
 # a caller that only has :func:`sys.excepthook` and no reference to a particular
 # loaded copy of this module. Diagnostic only: :func:`_install_excepthook`'s own
-# guard below does *not* use this, and must not go back to doing so. The marker
+# guard below does *not* use this, and must not. The marker
 # is a plain :obj:`True`, identical on every reloaded copy of this function, so
 # it cannot tell "my own instance's hook" from "some *other* instance's" --
 # which is exactly the distinction the guard needs and a shared value cannot
@@ -748,9 +748,9 @@ class StreamEOFError(BaseError, EOFError):
     of a schema's read was derived by measuring what is actually left in the
     stream -- rather than declared by the caller -- and that measurement came
     back zero. This is the frame reader's "no more packets" signal, so it
-    subclasses :exc:`EOFError` rather than replacing it: existing ``except
-    (EOFError, StopIteration)`` handlers keep working unchanged, and a caller
-    that wants to be more specific can catch this instead.
+    subclasses :exc:`EOFError` rather than replacing it: an ``except
+    (EOFError, StopIteration)`` handler catches it, and a caller that wants to
+    be more specific can catch this instead.
 
     A *declared* zero length -- a nested schema legitimately sized to have
     nothing to read -- is a different situation and does not raise this.
@@ -805,8 +805,8 @@ class EnumKeyError(BaseError, KeyError):
     the in-library call sites catch :meth:`~pcapkit.corekit.enum.EnumLookup.get`'s
     name miss as :exc:`KeyError` -- :class:`~pcapkit.const.http.method.Method`'s
     ``get`` catches it in order to build an unregistered member, so for that one
-    a failed name lookup is part of a successful call -- and every one of them
-    keeps catching.
+    a failed name lookup is part of a successful call -- so every one of them
+    catches this as well.
 
     Note:
         Distinct from :exc:`~pcapkit.utilities.exceptions.MissingKeyError`,

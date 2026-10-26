@@ -160,8 +160,8 @@ class IP(ReassemblyBase[Packet[_AT], Datagram[_AT], BufferID, Buffer[_AT]], Gene
 
         # initialise buffer with BUFID; ``RCVBT`` holds one entry per 8-octet
         # block of the data buffer, its partial last block included -- 8191
-        # covered octets 0 to 65527 only, so a fragment reaching octet 65528,
-        # e.g. at the largest Fragment Offset, indexed past it (#1565)
+        # would cover octets 0 to 65527 only, so a fragment reaching octet 65528,
+        # e.g. at the largest Fragment Offset, would index past it (#1565)
         if BUFID not in self._buffer:
             self._buffer[BUFID] = Buffer(
                 TDL=-1,                              # Total Data Length

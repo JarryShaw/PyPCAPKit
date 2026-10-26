@@ -76,7 +76,7 @@ class RecordTimestamp:
     resolution and its original length would be lost between the reader and
     :func:`packet2frame`. The engine's readers yield a :class:`Timestamp` or a
     :class:`DecimalTimestamp` instead, which *is* the value `DPKT`_ yields --
-    so a stored frame's timestamp is exactly what it was before -- and also
+    so a stored frame's timestamp is unchanged by it -- and also
     carries what would otherwise be lost. Reassembly and flow tracing are handed a plain
     :obj:`float` of it (:issue:`1501`): of its exact value, since `DPKT`_'s
     own for a microsecond PCAP rounds twice (:issue:`1668`; see
@@ -303,8 +303,9 @@ def packet2frame(packet: 'Packet', timestamp: 'float | Decimal', *,
     ts_sec = int(epoch)
     ts_usec = int((epoch - ts_sec) * RESOLUTION[resolution > RESOLUTION[False]])
 
-    # the mapping is exactly the one reported before #1507, plain value types
-    # included, so that the dict-capable trace formats write the same bytes
+    # the mapping carries plain value types rather than the timestamp subclasses,
+    # so that the dict-capable trace formats write the same bytes as for a plain
+    # timestamp (#1507)
     if isinstance(timestamp, float):
         timestamp = float(timestamp)
     elif isinstance(timestamp, decimal.Decimal):
@@ -725,8 +726,8 @@ def _tcp_flags(tcp: 'TCP') -> 'tuple[bool, bool, bool]':
         Each flag is masked out of :attr:`dpkt.tcp.TCP.flags` by its ``TH_*``
         value, so it is read from the flags octet alone. `DPKT`_ 1.9.8 makes
         that field nine bits wide, its top bit the NS bit (:rfc:`3540`): read by
-        its position among the field's binary digits, every flag was one bit low
-        with NS set, a SYN reading as a FIN (:issue:`1618`).
+        its position among the field's binary digits, every flag would be one bit
+        low with NS set, a SYN reading as a FIN (:issue:`1618`).
 
     """
     from dpkt.tcp import TH_FIN, TH_RST, TH_SYN  # isort:skip

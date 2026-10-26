@@ -98,7 +98,7 @@ def follow_tcp_stream(fin: 'Optional[str]' = None, verbose: 'bool' = False,     
             as one stream, which is the default -- a stream then holds the
             frames and the reassembled payload of *both* directions, which is
             what "following a TCP stream" means elsewhere. :data:`False`
-            restores one stream per direction.
+            gives one stream per direction.
         trace_analyse: whether each traced flow reassembles its application
             layer, so that :attr:`Index.packet <pcapkit.foundation.traceflow.data.tcp.Index.packet>` can be read off
             :attr:`Extractor.trace <pcapkit.foundation.extraction.Extractor.trace>`.

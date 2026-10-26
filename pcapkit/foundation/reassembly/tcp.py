@@ -733,7 +733,7 @@ class TCP(ReassemblyBase[Packet, Datagram, BufferID, Buffer]):
             # if this buffer is complete -- or if it is not, and ``strict``
             # asked for one contiguous payload rather than the received runs
             #
-            # NOTE: ``strict=False`` deliberately keeps reporting the whole
+            # NOTE: ``strict=False`` deliberately reports the whole
             # payload buffer with its holes zero-filled, which is what
             # :func:`~pcapkit.interface.misc.follow_tcp_stream` wants of a stream
             # it is reconstructing best-effort. ``completed`` says so, rather than

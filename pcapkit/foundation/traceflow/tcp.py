@@ -129,7 +129,7 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
 
         It is **off by default** because buffering every traced payload is a cost
         tracing does not otherwise pay, and tracing's per-packet cost is something
-        this package has deliberately driven down. Nothing is reassembled, parsed
+        this package deliberately keeps low. Nothing is reassembled, parsed
         or retained unless it is asked for.
 
     """
@@ -255,8 +255,8 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         # A SYN arriving on a flow whose teardown has already been observed is a
         # *new* connection reusing the endpoints, and the only signal that proves
         # the previous one can receive nothing further. It is what finalises a
-        # bidirectional flow mid-capture; everything else is flushed by
-        # :meth:`submit` at the end of the capture.
+        # bidirectional flow mid-capture; everything else is finalised by
+        # :meth:`finish` at the end of the capture.
         #
         # The state test matters. A SYN alone does not mean "new connection" --
         # the peer's SYN-ACK carries the flag too, and it belongs to the flow the
@@ -465,10 +465,11 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         Returns:
             The flow's :term:`index <trace.tcp.index>` entry.
 
-        Called once per flow, from the one place that can prove a flow is over --
-        a new connection superseding it, or :meth:`submit` at the end of the
-        capture. Registering the flow here rather than at teardown is what keeps
-        the acknowledgement that completes a close inside the flow it belongs to.
+        Called once per flow, from where a flow can be proved over -- a new
+        connection superseding it, or :meth:`finish` at the end of the capture --
+        or, tracing unidirectionally, on that direction's FIN. Registering a
+        bidirectional flow here rather than at teardown is what keeps the
+        acknowledgement that completes a close inside the flow it belongs to.
 
         """
         buf = self._buffer.pop(bufid)
