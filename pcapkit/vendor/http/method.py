@@ -172,9 +172,8 @@ class {NAME}(EnumRegistry, StrEnum):
                 reach ``_missing_``, and is **not** caught by
                 the miss fallback described under *Returns* -- only a failed
                 lookup is. Raising is the intended behaviour for
-                ``get(b'GET')`` as well: a member whose name and
-                value were both the :class:`bytes` object is not a thing
-                this registry should hand back.
+                ``get(b'GET')`` as well, since no member of this registry
+                has a :class:`bytes` name or value.
 
         """
         try:

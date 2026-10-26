@@ -302,8 +302,8 @@ class NonStrKeyTests(unittest.TestCase):
         # NOTE: a distinctive sentence rather than the bare word
         # ``ValueError``, which occurs incidentally elsewhere in 4kB of
         # docstring and would make this assertion near-vacuous.
-        self.assertIn('value were both the :class:`bytes` object', source)
-        self.assertIn('value were both the :class:`bytes` object', rendered)
+        self.assertIn('has a :class:`bytes` name or value', source)
+        self.assertIn('has a :class:`bytes` name or value', rendered)
 
 
 class VendorTemplateParityTests(unittest.TestCase):
