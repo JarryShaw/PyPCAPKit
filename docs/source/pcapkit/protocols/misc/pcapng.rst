@@ -260,6 +260,9 @@ Header Schemas
 
 .. autodata:: pcapkit.protocols.schema.misc.pcapng.DEFAULT_RESOLUTION
 
+.. autodata:: pcapkit.protocols.schema.misc.pcapng.PACKET_FLAGS
+   :no-value:
+
 .. autoclass:: pcapkit.protocols.schema.misc.pcapng.PCAPNG
    :members:
    :show-inheritance:
@@ -537,6 +540,10 @@ Header Schemas
    :members:
    :show-inheritance:
 
+.. autoclass:: pcapkit.protocols.schema.misc.pcapng.FlagsField
+   :members:
+   :show-inheritance:
+
 .. autoclass:: pcapkit.protocols.schema.misc.pcapng.OptionEnumField
    :members:
    :show-inheritance:
@@ -577,6 +584,7 @@ shared with the PCAP frame header and documented in
 .. autofunction:: pcapkit.protocols.schema.misc.pcapng.dsb_secrets_selector
 
 .. autofunction:: pcapkit.protocols.schema.misc.pcapng.nonnegative
+.. autofunction:: pcapkit.protocols.schema.misc.pcapng.held_body
 .. autofunction:: pcapkit.protocols.schema.misc.pcapng.bounded_option
 .. autofunction:: pcapkit.protocols.schema.misc.pcapng.bounded_area
 .. autofunction:: pcapkit.protocols.schema.misc.pcapng.captured_area
