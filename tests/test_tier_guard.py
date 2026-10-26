@@ -84,6 +84,20 @@ def write_module(directory: 'pathlib.Path', name: 'str', source: 'str') -> 'path
     return path
 
 
+def on_disk_test_modules() -> 'list[str]':
+    """Every ``test_*.py`` file under :file:`tests/`, relative to the root, sorted.
+
+    The walk :func:`~tests._tiers.suite_modules` is checked against, with the
+    same exclusions: :file:`__pycache__` and the
+    :func:`probe module <tests._tiers.is_probe_module>`, which
+    :class:`tests.test_tier_guard_xdist.XdistSubprocessTests` may have on disk
+    while the walk runs (#2341).
+
+    """
+    return sorted(path.relative_to(_tiers.ROOT).as_posix() for path in _tiers.TESTS_ROOT.rglob('test_*.py')
+                  if '__pycache__' not in path.parts and not _tiers.is_probe_module(path))
+
+
 def doctored_workflow(case: 'unittest.TestCase', old: 'str', new: 'str') -> 'pathlib.Path':
     """A throwaway copy of the unit-test workflow, with ``old`` replaced by ``new``.
 
@@ -593,8 +607,7 @@ class TestTierTests(unittest.TestCase):
         for module in tiers[_tiers.TIER_ALL]:
             with self.subTest(module=module):
                 self.assertEqual(_tiers.declared_tier(module), _tiers.TIER_ALL)
-        found = sorted(path.relative_to(_tiers.ROOT).as_posix() for path in _tiers.TESTS_ROOT.rglob('test_*.py'))
-        self.assertEqual(list(modules), found)
+        self.assertEqual(list(modules), on_disk_test_modules())
 
     def test_all_is_opt_in(self) -> None:
         """#1963: ``ALL`` is a curated list, so only a marker puts a module in it."""
@@ -1434,6 +1447,17 @@ class ProbeModuleTests(unittest.TestCase):
         self.assertFalse(_tiers.is_probe_module(elsewhere))
         self.assertEqual(_tiers.suite_modules(),
                          ('tests/test_kept.py', f'tests/{_tiers.PROBE_MODULE_NAME}'))
+
+    def test_the_on_disk_scan_agrees_with_the_listing_while_the_probe_exists(self) -> None:
+        """As on the Windows leg (#2341): the module-list check runs with the probe on disk.
+
+        Fails without the fix with ``First differing element 0:
+        'tests/protocols/test_zzz_xdist_guard_probe_unit.py'``.
+
+        """
+        self.assertTrue(self.probe.exists())
+        self.assertEqual(on_disk_test_modules(), list(_tiers.suite_modules()))
+        self.assertEqual(on_disk_test_modules(), ['tests/test_kept.py'])
 
     def test_a_probe_removed_mid_listing_does_not_break_the_tiers(self) -> None:
         """As on the Windows leg: the probe is removed between the walk and the tier read.
