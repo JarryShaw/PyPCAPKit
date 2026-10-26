@@ -120,25 +120,27 @@ are properties of Wireshark 4.6.9, not of this script's method, and this
 script refuses to rewrite anything when the installed Wireshark disagrees with
 them rather than silently regenerating a *different* table (#851 was explicit
 that a discrepancy here is a finding, not license to overwrite what was
-measured and committed) -- see :class:`EncapSweepError`. Ubuntu noble's
-packaged Wireshark, what every ``apt``-based CI runner installs, is 4.2.2: its
-``editcap -T`` accepts 224 encapsulations, not 226, so this script's own
-assertion trips there every time, by design (measured on #851's CI legs:
+measured and committed) -- see :class:`EncapSweepError`. A distribution's
+packaged Wireshark, what an ``apt``-based CI runner installs, is whatever its
+Ubuntu release ships rather than 4.6.9, and the counts move with the release:
+Wireshark 4.2.2's ``editcap -T`` accepts 224 encapsulations, not 226, so this
+script's own assertion trips there, by design (measured on #851's CI legs:
 ``AssertionError: 224 != 226``).
 
 That is harmless to the *committed* tables at runtime -- an
-``ENCAP_TYPE_TO_LINKTYPE``/``FILTER_NAME_TO_LINKTYPE`` entry a 4.2.2 install
+``ENCAP_TYPE_TO_LINKTYPE``/``FILTER_NAME_TO_LINKTYPE`` entry an older install
 would never produce is simply never looked up by one -- and is arguably the
 right way round: the tables should be at least as rich as the newest
 Wireshark a user might have, not capped at whatever a distribution happens to
 package. The real consequence is narrower and worth being plain about: **this
 generator can only be re-run, and its output only re-verified, on a host with
 Wireshark pinned to :data:`EXPECTED_ACCEPTED`'s version (4.6.9) or one that
-still sweeps to the same 226/157/69**. CI cannot do either with its packaged
-Wireshark, so CI does not run this script at all; what it does still exercise
-against whatever Wireshark it has -- structural invariants that hold at any
-version, plus the parsing and formatting helpers against fabricated
-input -- lives in ``tests/project/test_pyshark_encap_map.py``, not here.
+still sweeps to the same 226/157/69**. CI's packaged Wireshark is not pinned
+to that version, so CI does not run this script at all. The tests of it live
+in ``tests/project/test_pyshark_encap_map.py``: the parsing and formatting
+helpers against fabricated input run everywhere, and the classes that shell
+out to a real Wireshark skip in CI, because the jobs that install
+:program:`tshark` run their own test selections, which leave that module out.
 
 """
 from __future__ import annotations

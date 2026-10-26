@@ -34,17 +34,21 @@ missing.
   accepted, 157 writable, 69 refused) and byte-identical reproduction of the
   committed tables. It additionally requires :data:`MEASURED_WIRESHARK_VERSION`
   itself, because those counts are properties of *that* Wireshark release, not
-  of the sweep method -- Ubuntu noble's packaged 4.2.2, what CI's runners
-  install, accepts 224 encapsulations, not 226, and asserting 226 there is a
-  test bug, not a generator bug (found the hard way: PR #853's first CI run).
+  of the sweep method -- Wireshark 4.2.2 accepts 224 encapsulations, not 226,
+  and asserting 226 there is a test bug, not a generator bug (PR #853's first
+  CI run).
 * :class:`VersionIndependentInvariantTests` runs the same real sweep on
   *whatever* Wireshark is on ``PATH`` and checks properties that hold
   regardless of how many encapsulations that copy accepts: no
   ``frame.encap_type`` key resolves to two different DLTs, no DLT resolves to
   two different keys, and every key or filter name the local sweep *did*
   measure agrees with the committed table rather than merely being present or
-  absent from it. This is what still exercises the real binaries on the CI
-  legs :class:`RealSweepTests` skips.
+  absent from it. This is what still exercises the real binaries on a host
+  whose Wireshark :class:`RealSweepTests` skips.
+
+Both classes skip in CI: a runner's Wireshark is whatever its Ubuntu release
+packages, not :data:`MEASURED_WIRESHARK_VERSION`, and the jobs that install
+:program:`tshark` run their own test selections, which leave this module out.
 * :class:`StrictPdmlTests` checks the hardened lxml parser the PDML is read
   with (#1894), against stand-ins for editcap and tshark. It and the classes
   above are gated on :data:`HAS_LXML` too, since the generator has no laxer
@@ -119,10 +123,10 @@ NO_LXML = 'lxml, from the test extra, is not installed'
 MEASURED_WIRESHARK_VERSION = '4.6.9'
 
 #: ``tshark --version``'s first line reads
-#: ``"TShark (Wireshark) 4.6.9 (Git commit ...)."`` -- Ubuntu noble's packaged
-#: build reads ``"TShark (Wireshark) 4.2.2 (Git commit ...)."`` in exactly the
-#: same shape, just a different number -- so an ``X.Y.Z`` anywhere in the
-#: output is enough.
+#: ``"TShark (Wireshark) 4.6.9 (Git commit ...)."`` -- a distribution's packaged
+#: build, such as Ubuntu's 4.2.2, reads ``"TShark (Wireshark) 4.2.2 (Git ...)."``
+#: in exactly the same shape, just a different number -- so an ``X.Y.Z``
+#: anywhere in the output is enough.
 _VERSION_PATTERN = re.compile(r'(\d+\.\d+\.\d+)')
 
 
@@ -557,9 +561,9 @@ class DetectTsharkVersionTests(unittest.TestCase):
     Unit-tier and binary-free: each case fabricates the *text* a real
     ``tshark --version`` would print, rather than requiring a second Wireshark
     install to prove the parser handles more than one release. The 4.2.2 case
-    is exactly what CI's runners install (Ubuntu noble's
-    ``libwireshark-data 4.2.2-1.1build3``) -- this is "the simulated older
-    version" that PR #853's own CI run could not be, locally.
+    is the banner of Ubuntu noble's ``libwireshark-data 4.2.2-1.1build3``, the
+    packaged release PR #853's CI run measured -- "the simulated older
+    version" a local run cannot otherwise be.
 
     """
 
@@ -621,10 +625,9 @@ class RealSweepTests(unittest.TestCase):
     it -- on any host without Wireshark installed, or whose Wireshark is not
     :data:`MEASURED_WIRESHARK_VERSION`. Where it does run, it is the
     executable form of #851's acceptance criteria: the sweep arithmetic
-    and byte-identical reproduction of the committed tables. CI's runners
-    install Ubuntu noble's packaged 4.2.2 (224 accepted, not 226), so this
-    class is expected to skip there and run only locally, on a pinned
-    Homebrew/self-built 4.6.9 -- see the module docstring and
+    and byte-identical reproduction of the committed tables. It skips in CI
+    and runs only locally, on a pinned Homebrew/self-built 4.6.9 -- see the
+    module docstring and
     :file:`util/pyshark_encap_map.py`'s own docstring for why that is the
     right trade rather than a gap.
 
@@ -665,10 +668,10 @@ class VersionIndependentInvariantTests(unittest.TestCase):
     """Properties of a real sweep that hold on any Wireshark, not only 4.6.9.
 
     Where :class:`RealSweepTests` skips -- any Wireshark that is not
-    :data:`MEASURED_WIRESHARK_VERSION`, which is every CI leg -- this
-    still runs the real sweep against whatever :program:`editcap`/
-    :program:`tshark` *is* on ``PATH`` (224 accepted on CI's Ubuntu noble
-    4.2.2, not the 226 :class:`RealSweepTests` requires) and checks structure
+    :data:`MEASURED_WIRESHARK_VERSION` -- this still runs the real sweep
+    against whatever :program:`editcap`/:program:`tshark` *is* on ``PATH``
+    (224 accepted on 4.2.2, not the 226 :class:`RealSweepTests` requires)
+    and checks structure
     instead of counts: no ``frame.encap_type`` key or DLT is ambiguous within
     this sweep, and every key or filter name this sweep *did* measure agrees
     with what is committed. It does not require the committed table to be
