@@ -108,7 +108,7 @@ class HTTPGuessHTTP2Tests(unittest.TestCase):
         """The #1141 reproduction: a stream-0 ``DATA`` frame is not HTTP/2 by guess."""
         from pcapkit.utilities.exceptions import ProtocolError
 
-        with self.assertRaisesRegex(ProtocolError, 'unknown HTTP version'):
+        with self.assertRaisesRegex(ProtocolError, 'HTTP: unknown version'):
             self._guess(bytes(9))
 
     def test_explicit_version_still_parses_nine_zero_octets(self) -> None:
@@ -125,7 +125,7 @@ class HTTPGuessHTTP2Tests(unittest.TestCase):
 
         for name, octets in REJECTED_FRAMES:
             with self.subTest(frame=name):
-                with self.assertRaisesRegex(ProtocolError, 'unknown HTTP version'):
+                with self.assertRaisesRegex(ProtocolError, 'HTTP: unknown version'):
                     self._guess(bytes.fromhex(octets))
 
     def test_every_legal_frame_type_is_still_guessed_as_http2(self) -> None:

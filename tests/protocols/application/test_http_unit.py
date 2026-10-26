@@ -509,7 +509,7 @@ class HTTPUnitTests(unittest.TestCase):
         preface's own ASCII as a frame header, ``b'PRI'`` becoming a declared
         length of 5,263,945, which the consistency check of #799/#802 refuses --
         so a real HTTP/2 connection opening, bare preface or
-        preface-plus-SETTINGS, would raise ``unknown HTTP version``.
+        preface-plus-SETTINGS, raises ``HTTP: unknown version``.
 
         Three things are asserted, because "it answers 2" alone would also be
         true of a parse that consumed the preface as framing:
@@ -683,7 +683,7 @@ class HTTPUnitTests(unittest.TestCase):
 
         Asserted on the message, because the exception *type* is
         ``ProtocolError`` either way: a payload both arms declined comes back
-        ``unknown HTTP version``, while these come back ``HTTP: invalid format``
+        ``HTTP: unknown version``, while these come back ``HTTP: invalid format``
         from the version that was actually identified.
 
         """
@@ -871,7 +871,7 @@ class HTTPUnitTests(unittest.TestCase):
                 self.assertEqual(guessed.info, explicit.info)
 
     def test_guess_version_still_reports_an_unknown_http_version(self) -> None:
-        """Bytes neither arm accepts must raise ``unknown HTTP version``.
+        """Bytes neither arm accepts must raise ``HTTP: unknown version``.
 
         ``_guess_version``'s closing ``raise`` is only reachable when *both*
         arms fail with :class:`~pcapkit.utilities.exceptions.ProtocolError`, so
@@ -899,7 +899,7 @@ class HTTPUnitTests(unittest.TestCase):
 
         with self.assertRaises(ProtocolError) as ctx:
             HTTP(io.BytesIO(raw), len(raw))
-        self.assertEqual(str(ctx.exception), 'unknown HTTP version')
+        self.assertEqual(str(ctx.exception), 'HTTP: unknown version')
 
     def test_guess_version_reports_unknown_version_for_a_short_payload(self) -> None:
         """A payload too short for an HTTP/2 frame header must not leak :exc:`struct.error`.
@@ -1004,7 +1004,7 @@ class HTTPUnitTests(unittest.TestCase):
         legal. The header block is then the start line alone, with no CRLF in
         it, which ``_read_http_header`` must not refuse as malformed. Asserted
         through the dispatcher too: were ``test_start_line`` to mirror such a
-        refusal, ``HTTP`` would answer ``unknown HTTP version`` for the same
+        refusal, ``HTTP`` would answer ``HTTP: unknown version`` for the same
         bytes.
 
         """
@@ -1129,8 +1129,8 @@ class HTTPUnitTests(unittest.TestCase):
 
         cases = (
             ('preface', b'PRI * HTTP/2.0\r\n\r\nSM\r\n\r\n', 'HTTP/2: connection preface with no frame'),
-            ('truncated preface', b'PRI * HTTP/2.0\r\n\r\n', 'unknown HTTP version'),
-            ('preface, corrupt tail', b'PRI * HTTP/2.0\r\n\r\nXX\r\n\r\n', 'unknown HTTP version'),
+            ('truncated preface', b'PRI * HTTP/2.0\r\n\r\n', 'HTTP: unknown version'),
+            ('preface, corrupt tail', b'PRI * HTTP/2.0\r\n\r\nXX\r\n\r\n', 'HTTP: unknown version'),
         )
 
         for label, raw, dispatched in cases:
@@ -1398,7 +1398,7 @@ class HTTPUnitTests(unittest.TestCase):
         and the HTTP/2 arm accepts any payload of at least nine octets -- so a
         swallowed error on arm 1 becomes a confident ``version='2'`` for a
         message that is plainly HTTP/1, which is the mislabel #787 exists to
-        stop rather than a tidier failure. ``unknown HTTP version`` is only the
+        stop rather than a tidier failure. ``HTTP: unknown version`` is only the
         best case, needing arm 2 to decline as well.
 
         The *outer*-header slice of the class this suppression exists for is
