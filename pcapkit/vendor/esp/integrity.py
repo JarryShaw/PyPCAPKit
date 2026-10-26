@@ -40,14 +40,18 @@ class Integrity(Vendor):
         Returns:
             The cell with its ``[RFCxxxx]`` citations turned into
             :rst:role:`rfc` roles, or an empty string when the cell names no
-            document at all. IANA's ``[RFC xxxx]; [RFC yyyy]`` spelling of a
+            document at all, bracketed (``[UNSPECIFIED]``) or not
+            (:issue:`2294`). IANA's ``[RFC xxxx]; [RFC yyyy]`` spelling of a
             cell is rendered as its ``[RFCxxxx][RFCyyyy]`` one is, as
             :meth:`~pcapkit.vendor.default.Vendor.split_references` does for
             the other crawlers (:issue:`1664`).
 
         """
         text = re.sub(r'\][\s;]*\[', '][', re.sub(r'\s+', ' ', text)).strip()
-        if text.upper() in UNKNOWN:
+        # IANA brackets a placeholder as it brackets a citation, so one
+        # surrounding pair is dropped before the placeholder test (#2294).
+        bare = text[1:-1].strip() if text.startswith('[') and text.endswith(']') else text
+        if bare.upper() in UNKNOWN:
             return ''
         return re.sub(r'\[RFC\s*(\d+)\]',
                       lambda match: f'[:rfc:`{match.group(1)}`]', text).replace('_', ' ')
