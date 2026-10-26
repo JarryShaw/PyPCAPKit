@@ -372,13 +372,18 @@ def _raised_names(node: 'ast.AST') -> 'set[str]':
 def _calls_anything_callable(node: 'ast.AST') -> 'bool':
     """Whether the body calls a method or free function that could raise.
 
-    Data-model construction is excluded: this project's ``_read_*`` methods
-    build :class:`~pcapkit.corekit.infoclass.Info` subclasses named ``Data_*``
-    and :class:`~pcapkit.protocols.schema.schema.Schema` subclasses named
-    ``Schema_*``, and neither those nor :meth:`Info.__update__` can raise a
-    protocol error -- ``ProtocolError`` appears in neither
-    :mod:`pcapkit.corekit.infoclass` nor :mod:`pcapkit.protocols.schema.schema`.
-    Anything else counts as
+    Data-model construction without a packet context is excluded: this
+    project's ``_read_*`` methods build :class:`~pcapkit.corekit.infoclass.Info`
+    subclasses named ``Data_*`` and
+    :class:`~pcapkit.protocols.schema.schema.Schema` subclasses named
+    ``Schema_*``, and constructing one without a packet context runs no field
+    code -- ``Schema_UDP(srcport=70000, ...)`` constructs, and only ``bytes()``
+    packs it. A call that passes ``__packet__``, or a ``**`` mapping that may
+    carry it, is a different matter: :meth:`Schema.__post_init__
+    <pcapkit.protocols.schema.schema.Schema.__post_init__>` packs on the spot,
+    and field code under :mod:`pcapkit.corekit.fields` raises
+    ``ProtocolError``, so such a call counts as possibly-raising (#2319).
+    :meth:`Info.__update__` is excluded too. Anything else counts as
     possibly-raising, which is what keeps :func:`_reachable` conservative.
 
     """
@@ -393,6 +398,8 @@ def _calls_anything_callable(node: 'ast.AST') -> 'bool':
         else:  # pragma: no cover
             continue
         if name.startswith(('Data_', 'Schema_')):
+            if any(keyword.arg in ('__packet__', None) for keyword in sub.keywords):
+                return True
             continue
         if name in ('bool', 'int', 'str', 'bytes', 'len', 'tuple', 'list',
                     'dict', 'set', 'cast', 'warn', '__update__'):
@@ -576,6 +583,37 @@ class DocstringRaisesTests(unittest.TestCase):
         self.assertEqual(unexpected, [], '\n'.join(
             ['%d phantom Raises: clause(s):' % len(unexpected)]
             + ['  %s  %s() documents %r' % finding for finding in unexpected]))
+
+    def test_schema_call_with_a_packet_context_may_raise(self) -> 'None':
+        """A ``Schema_*`` call that passes ``__packet__`` counts as raising.
+
+        :meth:`Schema.__post_init__
+        <pcapkit.protocols.schema.schema.Schema.__post_init__>` packs when given
+        a packet context, and packing runs field code that raises
+        ``ProtocolError`` -- the live construction below is that case. Treating
+        the call as inert would report a correct ``Raises: ProtocolError`` as a
+        phantom (#2319). Without a packet context the call stays inert, which is
+        what lets the reachability check catch a phantom at all.
+
+        """
+        from pcapkit.protocols.schema.misc.pcapng import CommentOption
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        with self.assertRaises(ProtocolError):
+            CommentOption(type=1, length=10, comment='x' * 10,
+                          __packet__={'__length__': 6})
+
+        cases = {
+            'Schema_X(a=1, __packet__=packet)': True,
+            'Schema_X(a=1, **context)': True,
+            'Data_X(a=1, __packet__=packet)': True,
+            'Schema_X(a=1)': False,
+            'Data_X(a=1)': False,
+        }
+        for call, expected in cases.items():
+            with self.subTest(call=call):
+                node = ast.parse('def f(packet, context):\n    return %s\n' % call).body[0]
+                self.assertIs(_reachable(node, 'ProtocolError'), expected)
 
     def test_commented_out_raise_leaves_no_clause_behind(self) -> 'None':
         """A commented-out ``raise`` never keeps its ``Raises:`` clause.
