@@ -112,6 +112,7 @@ class PyPCAPEngineTests(unittest.TestCase):
             '_frnum': 0,
             '_exlyr': 'none',
             '_exptl': 'null',
+            '_exctx': {},
             '_vfunc': mock.Mock(),
             'magic_number': PCAP_MAGIC,
         }
@@ -307,6 +308,25 @@ class PyPCAPEngineTests(unittest.TestCase):
                 self.assertEqual(warn.call_count, 1)
                 self.assertIn('protocol and layer threshold', warn.call_args.args[0])
                 self.assertIs(warn.call_args.args[1], AttributeWarning)
+
+    def test_run_warns_that_a_parsing_context_is_ignored(self) -> None:
+        from pcapkit.utilities.warnings import AttributeWarning
+
+        # #2313: the engine never parses with pcapkit's own protocols, so a
+        # ``context=`` has no effect and the caller is told so, as DPKT, Scapy and
+        # PyShark already do. The fixture's empty ``_exctx`` stays silent, which
+        # the threshold test above pins through its call count.
+        extractor, _ = self.make_extractor(_exctx={'ipv4': mock.sentinel.context})
+        engine = self.engine(extractor)
+        with mock.patch.object(engine._expkg, 'pcap', return_value=FakeHandle()):
+            with mock.patch('pcapkit.foundation.engines.pypcap.warn') as warn:
+                engine.run()
+        self.assertEqual(warn.call_count, 1)
+        self.assertEqual(warn.call_args.args[0],
+                         "'Extractor(engine=pypcap)' does not parse with pcapkit's own "
+                         "protocol implementations, so the parsing context supplied "
+                         "through 'context=' is ignored")
+        self.assertIs(warn.call_args.args[1], AttributeWarning)
 
     def test_run_rejects_pcapng_rather_than_yielding_no_frames(self) -> None:
         from pcapkit.utilities.exceptions import FormatError

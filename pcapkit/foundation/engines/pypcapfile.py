@@ -221,6 +221,9 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
                   and/or :attr:`self.extractor._exptl <pcapkit.foundation.extraction.Extractor._exptl>`
                   is provided as the PyPCAPFile engine does not
                   support such operations.
+                * if :attr:`self.extractor._exctx <pcapkit.foundation.extraction.Extractor._exctx>`
+                  is provided, as the PyPCAPFile engine does not parse with :mod:`pcapkit`'s
+                  own protocol implementations.
                 * if IPv6 reassembly is enabled, as |pcapfile|_ has no IPv6
                   decoder.
                 * if |pcapfile|_ has no decoder for the savefile's link layer
@@ -239,6 +242,12 @@ class PyPCAPFile(EngineBase['PCAPFilePacket']):
         if ext._exlyr != 'none' or ext._exptl != 'null':
             warn("'Extractor(engine=pypcapfile)' does not support protocol and layer threshold; "
                  f"'layer={ext._exlyr}' and 'protocol={ext._exptl}' ignored",
+                 AttributeWarning, stacklevel=stacklevel())
+
+        if ext._exctx:
+            warn("'Extractor(engine=pypcapfile)' does not parse with pcapkit's own protocol "
+                 "implementations, so the parsing context supplied through "
+                 "'context=' is ignored",
                  AttributeWarning, stacklevel=stacklevel())
 
         if ext.magic_number not in PCAP.MAGIC_NUMBER:
