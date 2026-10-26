@@ -370,7 +370,19 @@ class SchemaMeta(abc.ABCMeta):
 
 
 class Schema(Mapping[str, _VT], Generic[_VT], metaclass=SchemaMeta):
-    """Schema for protocol headers."""
+    """Schema for protocol headers.
+
+    Note:
+        Building a schema directly does not range-check its field values. A
+        :class:`~pcapkit.corekit.fields.numbers.NumberField` masks an
+        out-of-range integer to its width on packing, so e.g. ``70000`` in a
+        two-octet field packs as ``0x1170``. The range checks live in each
+        protocol's :meth:`~pcapkit.protocols.protocol.Protocol.make`, and in a
+        field whose values have a range of their own, such as
+        :class:`~pcapkit.corekit.fields.numbers.PortEnumField`. See GitHub issue
+        :issue:`2314`.
+
+    """
 
     if TYPE_CHECKING:
         #: Mapping of name conflicts with builtin methods (original names to

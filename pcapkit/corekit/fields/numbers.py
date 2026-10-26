@@ -158,6 +158,14 @@ class NumberField(Field[int], Generic[_T]):
         -- see GitHub issue :issue:`545`. Omitting it, or passing the sign the
         class already fixes, stays legal.
 
+        Packing does not range-check a value: :meth:`pre_process` masks it to
+        :attr:`bit_length` bits, so e.g. ``70000`` in a two-octet field packs
+        as ``0x1170`` and ``-1`` as ``0xffff``, with no error or warning. This
+        is the documented contract a parsed value's round trip relies on
+        (:issue:`1488`). A range check belongs in the protocol's ``make`` or in
+        a field whose values have a range of their own, such as
+        :class:`PortEnumField` (:issue:`2314`).
+
     """
 
     __length__ = None  # type: Optional[int]
@@ -1065,6 +1073,20 @@ class PortEnumField(EnumField):
         Returns:
             Processed field value.
 
+        Raises:
+            FieldValueError: If ``value`` is a port outside this field's width,
+                i.e. ``0``-``65535`` for the two-octet TCP, UDP and SCTP
+                ports.
+
+        Notes:
+            :meth:`NumberField.pre_process` masks a value to the field's width
+            rather than range-checking it, so without this check a schema built
+            directly would write port ``70000`` as ``0x1170`` and ``-1`` as
+            ``0xffff``. A port is a whole field with no bits to carry outside
+            its width, so the check costs no wire value its round trip: every
+            port :meth:`post_process` can return is in range. The bound is the
+            one :meth:`post_process` tests. See GitHub issue :issue:`2314`.
+
         """
         # NOTE: imported here rather than at module level, as
         # :mod:`pcapkit.const` itself imports :mod:`pcapkit.corekit`; and tested
@@ -1073,6 +1095,11 @@ class PortEnumField(EnumField):
 
         if isinstance(value, AppType):
             value = value.port
+        if isinstance(value, int) and not 0 <= value < (1 << (8 * self.length)):
+            raise FieldValueError(
+                f'Field {self.name} has invalid value: port {value!r} is outside '
+                f'0-{(1 << (8 * self.length)) - 1}.'
+            )
         return super().pre_process(value, packet)
 
     def post_process(self, value: 'int | bytes', packet: 'dict[str, Any]') -> 'AppType':
