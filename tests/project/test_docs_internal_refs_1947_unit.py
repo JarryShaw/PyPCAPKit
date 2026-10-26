@@ -37,10 +37,10 @@ APPTYPE_GET = ':meth:`AppType.get() <pcapkit.const.reg.apptype.apptype.AppType.g
 
 #: ``(source, literal in context, the same context with the role)``.
 CONVERTED = (
-    ('pcapkit/vendor/reg/apptype/apptype.py', "dropped ``TransportProtocol``'s",
-     f"dropped\n                {TRANSPORT_PROTOCOL}'s"),
-    ('pcapkit/const/reg/apptype/apptype.py', "dropped ``TransportProtocol``'s",
-     f"dropped\n                {TRANSPORT_PROTOCOL}'s"),
+    ('pcapkit/vendor/reg/apptype/apptype.py', '``TransportProtocol`` is an ``IntEnum``',
+     f'{TRANSPORT_PROTOCOL}\n                is an ``IntEnum``'),
+    ('pcapkit/const/reg/apptype/apptype.py', '``TransportProtocol`` is an ``IntEnum``',
+     f'{TRANSPORT_PROTOCOL}\n                is an ``IntEnum``'),
     ('pcapkit/vendor/reg/apptype/apptype.py', 'as a ``TransportProtocol`` expression',
      f'as a\n        {TRANSPORT_PROTOCOL} expression'),
 ) + tuple(

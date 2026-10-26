@@ -101,7 +101,7 @@ CONVERTED = (
      ':class:`~pcapkit.const.ftp.command.CommandType`'),
     ('docs/source/contributing/conventions/sentinel-convention.rst', '``NoDefaultType``',
      ':class:`~pcapkit.corekit.sentinels.NoDefaultType`'),
-    # On this page with the backport it names (#2051).
+    # On this page as the re-export of functools.cached_property (#2051).
     ('docs/source/contributing/conventions/sentinel-convention.rst', '``cached_property``',
      ':class:`~pcapkit.utilities.compat.cached_property`'),
     ('docs/source/contributing/releasing.rst', '``pcapkit.__version__``',

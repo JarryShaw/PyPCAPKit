@@ -2513,10 +2513,10 @@ class AppType(EnumRegistry, StrEnum):
             key: Port number the caller is looking up, validated here so that
                 every entry point rejects a non-port identically.
             proto: Transport protocol, as a member, its name, or a bare
-                :class:`int`. That last shape is not merely defensive: GitHub
-                issue :issue:`808` dropped
-                :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`'s
-                ``IntFlag`` base, so
+                :class:`int`. That last shape is not merely defensive:
+                :class:`~pcapkit.const.reg.apptype.apptype.TransportProtocol`
+                is an ``IntEnum``, not an ``IntFlag`` (GitHub issue
+                :issue:`808`), so
                 ``TransportProtocol.a | TransportProtocol.b`` -- built by hand,
                 the same as any caller passing a literal port-transport bitmask
                 -- falls through to ``int.__or__`` and returns a bare

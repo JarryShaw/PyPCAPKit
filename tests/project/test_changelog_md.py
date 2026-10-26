@@ -419,9 +419,9 @@ class ExtlinksRoleTests(ChangelogTreeMixin, unittest.TestCase):
         self.assertIn(r'[a \[b\]](https://en.wikipedia.org/wiki/Foo_%28bar%29%20baz)', markdown)
 
     def test_an_unknown_role_is_still_fatal(self) -> None:
-        # Shows the guard was not loosened; it is not evidence of new behaviour. The
-        # ``:ref:`` half passed before the change too -- only the ``:issue:`` half
-        # failed without it, by being left unconverted.
+        # The guard refuses a role it does not know: the ``:ref:`` half is left
+        # unconverted and raises, and the ``:issue:`` half converts, so only
+        # ``:ref:`` is named in the error.
         index = self.make_tree(
             entry=ENTRY + '\nSee :issue:`29` and :ref:`changelog` for more.\n')
 

@@ -42,7 +42,7 @@ META_MENTIONS = frozenset({
      '# ``:issue:`` would link to a page that does not exist.'),
     # Describes the changelog converter's test input, which uses the role.
     ('tests/project/test_changelog_md.py',
-     '# ``:ref:`` half passed before the change too -- only the ``:issue:`` half'),
+     '# unconverted and raises, and the ``:issue:`` half converts, so only'),
 })
 
 
