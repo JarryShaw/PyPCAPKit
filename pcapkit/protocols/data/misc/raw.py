@@ -27,9 +27,9 @@ class Raw(Protocol):
 
     #: Original enumeration of this protocol.
     protocol: 'Optional[int]'
-    #: Message saying why the packet data is kept raw, if any: the error its
+    #: Message saying why the packet data is kept raw, if any: that of the error its
     #: parse raised, or the dissection limit it is past.
-    error: 'Optional[Exception]'
+    error: 'Optional[str]'
 
     if TYPE_CHECKING:
-        def __init__(self, protocol: 'Optional[int]', error: 'Optional[Exception]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
+        def __init__(self, protocol: 'Optional[int]', error: 'Optional[str]') -> 'None': ...  # pylint: disable=unused-argument,super-init-not-called,multiple-statements
