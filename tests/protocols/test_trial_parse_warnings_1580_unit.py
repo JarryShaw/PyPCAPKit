@@ -56,10 +56,14 @@ MACS = bytes(6) + bytes.fromhex('020000000001')
 #: An IPv4 header of total length 30, carrying TCP.
 IPV4_TCP = bytes.fromhex('4500001e00000000400600007f0000017f000001')
 
-#: Messages for a 10-octet TCP header kept in the chain, measured the same with
-#: and without the fix: the data offset is cut off, so its length reads as 0.
-TCP_CUT_MESSAGES = ['packet length < 0: -2', 'packet length < 0: -3', 'packet length < 0: -4',
-                    'packet length < 0: -6', 'packet length < 0: -8', 'packet length < 0: -10']
+#: An Ethernet frame carrying IPv6 whose Shim6 header (140) is cut to 1 octet.
+#: The header's length field is cut off, so its length reads as 0 and it is kept.
+SHIM6_CUT = (MACS + b'\x86\xdd' + bytes.fromhex('600000000001' '8c40') + bytes(15) + b'\x01'
+             + bytes(15) + b'\x02' + b'\x00')
+#: Messages for :data:`SHIM6_CUT`, measured the same with and without the fix.
+SHIM6_CUT_MESSAGES = ['packet length < 0: -1',
+                      'IPv6: extension header declares a length of 8 octet(s) with 1 octet(s) '
+                      'left in the chain; stopping the walk instead of skipping past it']
 
 
 #: Whole frames cut at every length by the chain comparison: Ethernet, IPv4 with
@@ -189,32 +193,24 @@ class TestTrialParseWarnings(unittest.TestCase):
         self.assertEqual(self._schema(caught), ['packet length < 0: -2', 'packet length < 0: -4'])
 
     def test_kept_cut_layers_still_warn_from_the_callers_line(self) -> None:
-        """Held layers that are kept, or that raise, report as they did, on both channels."""
+        """A held layer that is kept reports as it did, on both channels."""
         from pcapkit.protocols.link.ethernet import Ethernet
         from pcapkit.utilities.logging import logger
         from pcapkit.utilities.warnings import SchemaWarning
 
-        # TCP cut to 10 octets is held, inside IPv4 and Ethernet, which are not;
-        # IPv4 cut to 18 octets is held and raises, and the error path keeps it.
-        cases = ((MACS + b'\x08\x00' + IPV4_TCP + bytes(10), 'Ethernet:IPv4:TCP', TCP_CUT_MESSAGES),
-                 (MACS + b'\x08\x00' + IPV4_TCP[:18], 'Ethernet:Internet_Protocol_version_4',
-                  ['packet length < 0: -2'] * 2))
-        for frame, chain, messages in cases:
-            with self.subTest(chain=chain):
-                with capture(logger) as recorder:
-                    with warnings.catch_warnings(record=True) as caught:
-                        warnings.simplefilter('always')
-                        line = inspect.currentframe().f_lineno + 1  # type: ignore[union-attr]
-                        parsed = Ethernet(frame, len(frame))
-                self.assertEqual(str(parsed.protochain), chain)
-                self.assertEqual(self._schema(caught), messages)
-                self.assertEqual({(item.category, item.filename, item.lineno) for item in caught},
-                                 {(SchemaWarning, __file__, line)})
-                # the error path also logs the error itself, which is not a warning
-                self.assertEqual([(record.getMessage(), record.pathname, record.lineno)
-                                  for record in recorder.records
-                                  if record.getMessage().startswith('packet length')],
-                                 [(message, __file__, line) for message in messages])
+        # Shim6 cut to 1 octet is held, inside IPv6 and Ethernet, which are not.
+        with capture(logger) as recorder:
+            with warnings.catch_warnings(record=True) as caught:
+                warnings.simplefilter('always')
+                line = inspect.currentframe().f_lineno + 1  # type: ignore[union-attr]
+                parsed = Ethernet(SHIM6_CUT, len(SHIM6_CUT))
+        self.assertEqual(str(parsed.protochain), 'Ethernet:IPv6:IPv6-Ext')
+        self.assertEqual(self._schema(caught), SHIM6_CUT_MESSAGES)
+        self.assertEqual({(item.category, item.filename, item.lineno) for item in caught},
+                         {(SchemaWarning, __file__, line)})
+        self.assertEqual([(record.getMessage(), record.pathname, record.lineno)
+                          for record in recorder.records if record.getMessage() in SHIM6_CUT_MESSAGES],
+                         [(message, __file__, line) for message in SHIM6_CUT_MESSAGES])
 
     def test_cut_layer_logs_nothing(self) -> None:
         """The logger channel drops a discarded trial's warnings too."""
@@ -258,7 +254,11 @@ class TestTrialParseWarnings(unittest.TestCase):
         self.assertEqual({item.filename for item in caught}, {__file__})
 
     def test_layer_that_cannot_be_replaced_holds_nothing(self) -> None:
-        """Ethernet of 32 octets is past its hint, so even a discarding block cannot drop its warnings."""
+        """TCP of 24 octets is past its hint, so even a discarding block cannot drop its warnings.
+
+        It holds nothing, so they are reported as they are raised, and stay
+        reported when the parse then raises and is kept as ``Raw`` (#2308).
+        """
         from pcapkit.protocols.link.ethernet import Ethernet
         from pcapkit.protocols.misc.raw import Raw
         from pcapkit.protocols.protocol import ProtocolBase, _short_of_hint
@@ -274,14 +274,15 @@ class TestTrialParseWarnings(unittest.TestCase):
                           _short_of_hint(Raw, 0), _short_of_hint(NeedsAnInstance, 10 ** 6)],  # type: ignore[arg-type]
                          [True, False, False, True])
 
-        frame = MACS + b'\x08\x00' + IPV4_TCP[:18]
+        frame = FRAMES[0][:62]  # TCP cut to 24 octets, past its hint, raises
         with warnings.catch_warnings(record=True) as caught:
             warnings.simplefilter('always')
             with hold_warnings() as outer:
                 parsed = ProtocolBase._parse_next_layer(Ethernet, frame, len(frame))  # pylint: disable=protected-access
                 outer.discard = True
-        self.assertEqual(str(parsed.protochain), 'Ethernet:Internet_Protocol_version_4')
-        self.assertEqual(self._schema(caught), ['packet length < 0: -2'] * 2)
+        self.assertEqual(str(parsed.protochain), 'Ethernet:IPv4:TCP')
+        self.assertIsInstance(parsed.payload.payload, Raw)
+        self.assertEqual(self._schema(caught), ['packet length < 0: -95'])
 
     def test_error_filter_chains_match_holding_nothing(self) -> None:
         """Under ``error``, every cut of :data:`FRAMES` parses to the chain it has holding nothing.
@@ -362,17 +363,19 @@ class TestTrialParseWarnings(unittest.TestCase):
                     self.assertEqual(caught, [])
 
     def test_hold_left_by_an_error_reports(self) -> None:
-        """A block left by an exception reports what it held, discarded or not."""
+        """A block left by an exception reports what it held unless discarded (#2308)."""
         from pcapkit.utilities.warnings import SchemaWarning, hold_warnings, warn
 
-        with warnings.catch_warnings(record=True) as caught:
-            warnings.simplefilter('always')
-            with self.assertRaises(KeyError):
-                with hold_warnings() as held:
-                    warn('held, then an error', SchemaWarning)
-                    held.discard = True
-                    raise KeyError('mid-parse')
-        self.assertEqual(self._schema(caught), ['held, then an error'])
+        for discard, reported in ((False, ['held, then an error']), (True, [])):
+            with self.subTest(discard=discard):
+                with warnings.catch_warnings(record=True) as caught:
+                    warnings.simplefilter('always')
+                    with self.assertRaises(KeyError):
+                        with hold_warnings() as held:
+                            warn('held, then an error', SchemaWarning)
+                            held.discard = discard
+                            raise KeyError('mid-parse')
+                self.assertEqual(self._schema(caught), reported)
 
     def test_held_frame_gone_is_reported_outside_pcapkit(self) -> None:
         """A level past the stack, with no frame to find again, still blames this file."""
@@ -481,13 +484,13 @@ class TestTrialParseWarnings(unittest.TestCase):
 
             _unrelated_warning.emit()
             Extractor(NamedBuffer(octets, 'truncated.pcapng'), nofile=True, store=True)  # dropped
-            Ethernet(MACS + b'\x08\x00' + IPV4_TCP + bytes(10))  # held and kept
+            Ethernet(SHIM6_CUT)  # held and kept
             _unrelated_warning.emit()
 
             self.assertEqual(warnings.filters, snapshot)
         unrelated = [item for item in caught if item.category is _unrelated_warning.UnrelatedWarning]
         self.assertEqual(len(unrelated), 1)
-        self.assertEqual(self._schema(caught), TCP_CUT_MESSAGES)
+        self.assertEqual(self._schema(caught), SHIM6_CUT_MESSAGES)
 
     def test_hold_warnings_is_exported(self) -> None:
         """``import *`` brings ``hold_warnings`` in, as it does ``warnings.catch_warnings`` (#1602)."""

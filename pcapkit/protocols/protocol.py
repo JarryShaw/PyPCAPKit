@@ -44,7 +44,7 @@ from typing import TYPE_CHECKING, Any, Generic, Optional, Type, TypeVar, cast, o
 import aenum
 
 from pcapkit.corekit.context import ContextRegistry
-from pcapkit.corekit.decorators import beholder, seekset
+from pcapkit.corekit.decorators import _beholding, beholder, seekset
 from pcapkit.corekit.fields.misc import ConditionalField, SchemaField, SwitchField
 from pcapkit.corekit.module import ModuleDescriptor
 from pcapkit.corekit.protochain import ProtoChain
@@ -2352,8 +2352,13 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
             an Ethernet frame of 10 octets (:issue:`1580`) -- and reported as the
             parse ends when it is kept, still inside the guard that catches them
             under an ``error`` filter. A layer kept with its header cut short
-            still warns. A layer captured at least as long as its hint cannot be
-            replaced, and is parsed holding nothing, even inside one that holds.
+            still warns. The held warnings of a parse that raises are dropped
+            too when :func:`~pcapkit.corekit.decorators.beholder` replaces the
+            layer, as it does around :meth:`_import_next_layer`, since the
+            replacement's ``error`` reports the failure (:issue:`2308`); outside
+            it, they are reported as the error leaves. A layer captured at least
+            as long as its hint cannot be replaced, and is parsed holding
+            nothing, even inside one that holds.
 
             A layer past :data:`~pcapkit.utilities.config.FRAME_LAYER_LIMIT` in its frame is not parsed:
             it and the rest of the frame are kept as
@@ -2387,7 +2392,14 @@ class ProtocolBase(Generic[_PT, _ST], metaclass=ProtocolMeta):
         token = _frame_depth.set(depth)
         try:
             with hold_warnings(_short_of_hint(klass, captured)) as held:
-                next_ = klass(file_, length, **kwargs)  # type: ignore[abstract]
+                try:
+                    next_ = klass(file_, length, **kwargs)  # type: ignore[abstract]
+                except Exception:
+                    # NOTE: Under ``beholder`` the layer that raised is replaced,
+                    # so its warnings go with it; outside it, the error reaches
+                    # the caller and they are reported as it leaves (#2308).
+                    held.discard = _beholding.get()
+                    raise
 
                 length_hint = getattr(next_, '__length_hint__', None)
                 hint = None if length_hint is None else length_hint()

@@ -24,6 +24,7 @@ so they live with the packet model rather than in :mod:`pcapkit.utilities`
    decorators either.
 
 """
+import contextvars
 import functools
 import io
 import os
@@ -52,6 +53,12 @@ __all__ = ['seekset', 'beholder', 'prepare']
 #: logging.Logger: Module-level logger, a child of the package-wide
 #: :data:`pcapkit.utilities.logging.logger`.
 logger = get_logger(__name__)
+
+#: contextvars.ContextVar[bool]: Whether a call :func:`beholder` wraps is under
+#: way, so that an :exc:`Exception` raised inside it ends with the layer that
+#: raised replaced; see :meth:`ProtocolBase._parse_next_layer
+#: <pcapkit.protocols.protocol.ProtocolBase._parse_next_layer>` (:issue:`2308`).
+_beholding = contextvars.ContextVar('_beholding', default=False)
 
 
 def seekset(func: 'Callable[Concatenate[ProtocolBase, P], R_seekset]') -> 'Callable[P, R_seekset]':
@@ -109,6 +116,12 @@ def beholder(
     :class:`~pcapkit.protocols.misc.null.NoPayload`, if the error is an
     end-of-file :exc:`~pcapkit.utilities.exceptions.StructError`.
 
+    When :meth:`ProtocolBase._parse_next_layer
+    <pcapkit.protocols.protocol.ProtocolBase._parse_next_layer>` held the
+    warnings of the layer that raised, they are dropped with it: they describe a
+    layer the result does not have, and the replacement's ``error`` reports the
+    failure (:issue:`2308`).
+
     Note:
         The decorated function should have the following signature::
 
@@ -141,7 +154,11 @@ def beholder(
 
         try:
             # call method
-            return func(*args, **kwargs)
+            token = _beholding.set(True)
+            try:
+                return func(*args, **kwargs)
+            finally:
+                _beholding.reset(token)
         except Exception as exc:
             if isinstance(exc, StructError) and exc.eof:  # pylint: disable=no-member
                 from pcapkit.protocols.misc.null import NoPayload as protocol  # isort: skip # pylint: disable=import-outside-toplevel

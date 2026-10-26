@@ -237,11 +237,11 @@ class hold_warnings:  # pylint: disable=invalid-name
     Every :func:`warn` call inside the block is held, with the frame it is
     attributed to. On leaving the block they are reported in order, with the
     same message and category and attributed to the same frame on both
-    channels, unless :attr:`discard` was set, in which case they are dropped. A
-    block left by an :exc:`Exception` reports them whatever :attr:`discard`
-    says; one left by any other :exc:`BaseException` -- :exc:`KeyboardInterrupt`,
-    :exc:`SystemExit`, :exc:`GeneratorExit` -- drops them, so that a filter
-    turning them into errors cannot replace it.
+    channels, unless :attr:`discard` was set, in which case they are dropped,
+    whether the block ends or is left by an :exc:`Exception`. A block left by any
+    other :exc:`BaseException` -- :exc:`KeyboardInterrupt`, :exc:`SystemExit`,
+    :exc:`GeneratorExit` -- drops them whatever :attr:`discard` says, so that a
+    filter turning them into errors cannot replace it.
 
     The line named is the frame's line when the block is left. For the frame
     :func:`~pcapkit.utilities.exceptions.stacklevel` names -- the caller of
@@ -255,8 +255,9 @@ class hold_warnings:  # pylint: disable=invalid-name
     :meth:`ProtocolBase._parse_next_layer
     <pcapkit.protocols.protocol.ProtocolBase._parse_next_layer>` uses this for the
     trial parse it replaces with :class:`~pcapkit.protocols.misc.raw.Raw` when the
-    header was not captured: the warnings describe a layer the result does not
-    have (:issue:`1580`).
+    header was not captured, or that :func:`~pcapkit.corekit.decorators.beholder`
+    replaces when it raises: the warnings describe a layer the result does not
+    have (:issue:`1580`, :issue:`2308`).
 
     Note:
         Nothing here touches ``warnings.filters`` or a module's
@@ -310,9 +311,7 @@ class hold_warnings:  # pylint: disable=invalid-name
                 _HELD.set(outer)
 
         held, self._held = self._held, []
-        if self.discard and exc_type is None:
-            return
-        if exc_type is not None and not issubclass(exc_type, Exception):
+        if self.discard or (exc_type is not None and not issubclass(exc_type, Exception)):
             return
         for message, category, target in held:
             _replay(message, category, target)
