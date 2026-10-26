@@ -1,26 +1,24 @@
 # -*- coding: utf-8 -*-
 """A registered ``StrEnum`` member's :class:`str` payload must be its value.
 
-GitHub issue #870: :meth:`pcapkit.const.http.method.Method.__new__` built every
-registered member with ``obj = str.__new__(cls)`` -- no second argument -- so
-the underlying :class:`str` content was permanently empty regardless of the
-member's own declared value. ``_value_`` was set correctly (``Method.GET.value
-== 'GET'``), but the :class:`str` the member itself *is* was not:
-``str(Method.GET) == ''``, ``len(str(Method.GET)) == 0`` and, most visibly,
-``Method.GET == 'GET'`` was :data:`False` for every declared member, as
-measured, and true since the class was first written -- GitHub
-pull request #869 fixed the same inconsistency for an *unregistered* member's
-own str payload
+GitHub issue #870: guards against :meth:`pcapkit.const.http.method.Method.__new__`
+building every registered member with ``obj = str.__new__(cls)`` -- no second
+argument -- under which the underlying :class:`str` content is empty regardless
+of the member's own declared value. ``_value_`` is still set correctly
+(``Method.GET.value == 'GET'``), but the :class:`str` the member itself *is* is
+not: ``str(Method.GET) == ''``, ``len(str(Method.GET)) == 0`` and, most visibly,
+``Method.GET == 'GET'`` is :data:`False` for every declared member, as
+measured. An *unregistered* member carries its value as its str payload
 (:meth:`~pcapkit.const.http.method.Method._unregistered_member` calls the
 base's :meth:`~pcapkit.corekit.enum.EnumRegistry._unregistered_member`, which
-does pass the value along), which is what exposed this half: after #869,
+passes the value along; GitHub pull request #869), so with the defect
 ``str(Method('frob')) == 'frob'`` while ``str(Method.GET) == ''`` -- a
 registered member and an unregistered one disagreeing about the one thing
 they are both supposed to be, a :class:`str`.
 
 The fix is ``obj = str.__new__(cls, value)``, mirroring
 :meth:`pcapkit.const.ftp.command.Command.__new__`
-(``obj = str.__new__(cls, name)``), which never had this defect. Applied to
+(``obj = str.__new__(cls, name)``), which has no such defect. Applied to
 both :mod:`pcapkit.const.http.method` (the generated module) and
 :mod:`pcapkit.vendor.http.method` (the generator template that produces it),
 since a fix only in the former is silently reverted by the next crawl.
@@ -38,7 +36,7 @@ member from the wire string, and
 :meth:`~pcapkit.protocols.application.httpv1.HTTP._make_start_line` reads
 ``.value``; neither calls ``str()`` or ``==`` on the member itself), so the fix is
 observable only to external callers and to this module's own dunders
-(``__repr__``, which reads ``_value_`` and was already correct).
+(``__repr__`` reads ``_value_`` and is unaffected).
 
 The wider sweep below -- :class:`StrValuedRegistryPayloadTests` -- checks the
 same property, ``str(member) == member.value``, for every ``EnumRegistry``
@@ -46,10 +44,10 @@ same property, ``str(member) == member.value``, for every ``EnumRegistry``
 ``__new__``: :class:`~pcapkit.const.ftp.command.Command`,
 :class:`~pcapkit.const.ftp.command.FEATCode`,
 :class:`~pcapkit.const.http.method.Method` and
-:class:`~pcapkit.const.pcapng.option_type.OptionType`. ``Command`` already
-passed ``name`` to ``str.__new__`` and ``FEATCode`` has no custom ``__new__``
-at all (the base :class:`~aenum.StrEnum` machinery handles it), so neither
-carried this defect -- only ``Method`` did. ``OptionType`` is deliberately
+:class:`~pcapkit.const.pcapng.option_type.OptionType`. ``Command`` passes
+``name`` to ``str.__new__`` and ``FEATCode`` has no custom ``__new__``
+at all (the base :class:`~aenum.StrEnum` machinery handles it), so the defect
+is ``Method``'s alone. ``OptionType`` is deliberately
 *not* swept the same way: its own :attr:`~pcapkit.const.pcapng.option_type.
 OptionType.value` is *itself* the formatted display string
 (``'%s [%d]' % (opt_name, opt_value)``, set by its own ``__new__``), not the
@@ -102,10 +100,9 @@ class MethodStrPayload870RegressionTests(unittest.TestCase):
                 self.assertEqual(len(str(member)), len(member.value))
 
     def test_registered_and_unregistered_members_both_carry_their_value(self) -> None:
-        """The inconsistency #870 reported: with #869's fix to the
-        unregistered half alone, ``str(Method('frob')) == 'frob'`` while
-        ``str(Method.GET) == ''``. With #870's fix to the registered half,
-        both carry real content."""
+        """The inconsistency #870 reported: without the fix to the
+        registered half, ``str(Method('frob')) == 'frob'`` while
+        ``str(Method.GET) == ''``. Both carry real content."""
         from pcapkit.const.http.method import Method
 
         registered = Method.GET
@@ -117,9 +114,9 @@ class MethodStrPayload870RegressionTests(unittest.TestCase):
         self.assertNotEqual(str(unregistered), '')
 
     def test_repr_and_the_extra_attributes_are_unaffected(self) -> None:
-        """The fix touches only the :class:`str` payload -- ``__repr__`` (which
-        reads ``_value_``, already correct) and the ``safe``/``idempotent``
-        attributes :meth:`__new__` also sets must be untouched."""
+        """Only the :class:`str` payload is at stake -- ``__repr__`` (which
+        reads ``_value_``) and the ``safe``/``idempotent`` attributes
+        :meth:`__new__` also sets must be unaffected."""
         from pcapkit.const.http.method import Method
 
         self.assertEqual(repr(Method.GET), '<Method.GET>')
@@ -139,8 +136,8 @@ class StrValuedRegistryPayloadTests(unittest.TestCase):
     :meth:`test_optiontype_is_exempt_but_its_own_contract_still_holds` instead.
     """
 
-    #: The three registries this sweep actually checks. ``Command`` and
-    #: ``FEATCode`` never carried GitHub issue #870's defect (see the module
+    #: The registries this sweep checks. ``Command`` and
+    #: ``FEATCode`` do not carry GitHub issue #870's defect (see the module
     #: docstring's sibling survey); they are swept anyway so a regression in
     #: either would be caught here too, not only in ``Method``.
     SWEPT_REGISTRIES = ('Command', 'FEATCode', 'Method')
@@ -174,7 +171,7 @@ class StrValuedRegistryPayloadTests(unittest.TestCase):
         """Not swept above because ``OptionType.value`` *is* the formatted
         display string already -- ``str(member) == member.value`` would pass
         trivially and check nothing about a raw wire payload, unlike the
-        other three. This pins what its ``__new__``/``__str__`` actually
+        others. This pins what its ``__new__``/``__str__`` actually
         promise instead: the value equals the display string built from
         ``opt_name``/``opt_value``, and the wire-facing ``opt_value`` is
         reachable separately via :attr:`~pcapkit.const.pcapng.option_type.

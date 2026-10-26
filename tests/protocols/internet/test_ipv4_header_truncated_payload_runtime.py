@@ -8,7 +8,7 @@ all-zero header, and :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data`
 rebuilt those 8 octets as if they had been on the wire. Such a payload is a
 :class:`~pcapkit.protocols.misc.null.NoPayload`. ``test.pcapng`` frame 3, cut
 inside the IPv4 header itself (18 of 20 octets), is kept as raw octets
-(:issue:`1170`).
+(#1170).
 
 The capture case reads a generated sample, so this module belongs to the
 fixture-dependent tier. The in-memory cases need no capture.

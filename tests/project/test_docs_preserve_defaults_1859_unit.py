@@ -2,11 +2,11 @@
 """Pins the docs build's signature defaults to their source text.
 
 GitHub issue #1859: autodoc renders a default's ``repr()`` unless
-``autodoc_preserve_defaults`` is on, so every ``byteorder=sys.byteorder`` showed
-the build host's ``'little'``, and the ``corekit.fields`` pages showed
+``autodoc_preserve_defaults`` is on, so with it off every ``byteorder=sys.byteorder``
+shows the build host's ``'little'``, and the ``corekit.fields`` pages show
 ``default=<pcapkit.corekit.sentinels.NoValueType object>`` and
 ``callback=<function NumberField.<lambda>>``. :file:`docs/source/conf.py` turns
-the setting on. Source text then exposed the private aliases the protocol
+the setting on. Source text then exposes the private aliases the protocol
 modules import their registries under, ``next=Enum_TransType.UDP``, so
 ``name_aliased_defaults`` names each such class by its own name.
 

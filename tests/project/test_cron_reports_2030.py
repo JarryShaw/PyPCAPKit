@@ -6,9 +6,9 @@ category with :file:`util/discussion_report.py`, which
 :mod:`tests.project.test_discussion_report_2030` tests on its own.
 
 * :class:`TestTheWorkflowsPost` pins both workflows: the ``discussion`` job
-  alone holds ``discussions: write``, every other job's permissions as they
-  were, first-party actions only, the mode each event maps to, the report
-  steps and their guards, cron-conda's job running on a failed gate but not on
+  alone holds ``discussions: write``, every other job's permissions as
+  :data:`PERMISSIONS` lists them, first-party actions only, the mode each event
+  maps to, the report steps and their guards, cron-conda's job running on a failed gate but not on
   a deliberate skip, and no ``workflow_run`` consumer of either.
 * :class:`TestThePinRefresh` runs cron-conda's ``Refresh the platform pins``
   with a stand-in ``python``: the log it keeps, and the exit status it keeps.

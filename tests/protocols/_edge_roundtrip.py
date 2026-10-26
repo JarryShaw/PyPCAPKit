@@ -5,7 +5,7 @@ The owner's rule is that parse -> rebuild and make -> parse are byte-exact
 everywhere. The ``test_*_edge_roundtrip_unit`` modules beside this one hold
 hand-built edge-case packets -- minimum and maximum lengths, reserved bits set,
 zero-length values, padding variants, unassigned codes -- and this module runs
-them through three checks:
+them through these checks:
 
 * a **parse case** must parse, its ``data`` must be the input, and
   ``from_data(info).data`` must be the input too;
@@ -208,7 +208,7 @@ def cuts(cases: 'tuple[Case, ...]') -> 'tuple[Case, ...]':
 class EdgeRoundTripBase(unittest.TestCase):
     """The assertions, shared by every family module.
 
-    A subclass sets the four tables; this class is not collected itself
+    A subclass sets the tables; this class is not collected itself
     because it has no tables (:attr:`CASES` is empty).
 
     """

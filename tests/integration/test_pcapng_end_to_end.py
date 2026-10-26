@@ -5,8 +5,8 @@ Translates :file:`examples/legacy_smoke/test_pcapng.py`, which dumped
 :file:`dhcp.pcapng` to a tree report and checked nothing.
 :file:`tests/protocols/test_pcapng_regression.py` already asserts that each
 PCAP-NG fixture extracts with ``length > 0`` and ``nofile=True``; this module
-pins the exact block inventory *and* dumps a real report file, which is the part
-that was never covered.
+pins the exact block inventory *and* dumps a real report file, which that module
+does not cover.
 
 The fixtures and what each is for are documented in the module docstring of
 :file:`examples/generators/pcapng.py`, which also records the parser defects

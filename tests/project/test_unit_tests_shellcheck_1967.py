@@ -2,8 +2,8 @@
 """#1967: every ``run:`` block of unit-tests.yml passes shellcheck.
 
 Lint's ``actionlint`` step runs shellcheck over every workflow's ``run:`` blocks,
-and a finding fails Lint. Step 5 of #1967 fixed unit-tests.yml's findings at the
-root, and this test keeps it clean without waiting for a Lint run: it checks each
+and a finding fails Lint. This test keeps unit-tests.yml free of findings (#1967,
+step 5) without waiting for a Lint run: it checks each
 ``run:`` block of a ``bash`` or ``sh`` step as actionlint does: each
 ``${{ ... }}`` expression replaced by underscores of the same length, the
 shell's ``set -e`` line above it, and the checks actionlint disables left out.
@@ -77,7 +77,7 @@ class TestShellcheck(unittest.TestCase):
                 self.assertEqual(findings(shell, script), [])
 
     def test_a_finding_is_reported(self) -> None:
-        """The check itself sees the finding #1967 fixed, an unquoted selection."""
+        """The check itself sees an unquoted selection, the finding it guards against (#1967)."""
         self.assertTrue(findings('bash', 'selection=$(echo a b)\npytest $selection\n'))
 
 

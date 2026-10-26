@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """#1853: Vendor Update tests the regenerated tree before it commits.
 
-:file:`.github/workflows/cron-vendor.yml` committed whatever ``pcapkit-vendor``
-regenerated with no test step in between, and 1.5.0b13 turned ``main`` red. The
-owner chose to test the regenerated tree in the job itself, under #872's rule: a
+With no test step between the crawl and the commit,
+:file:`.github/workflows/cron-vendor.yml` commits whatever ``pcapkit-vendor``
+regenerates, as it did for 1.5.0b13, which turned ``main`` red. The owner chose to test the regenerated tree in the job itself, under #872's rule: a
 failed sub-vendor's changes are discarded, the rest are kept, and the job as a
 whole does not fail.
 

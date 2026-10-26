@@ -550,7 +550,7 @@ class TestTheTiers(unittest.TestCase):
         self.assertNotIn('3.5', result.entries)
 
     def test_a_dropped_version_with_builds_left_is_not_re_added(self) -> None:
-        """#2051 dropped 3.7 by hand, below ``requires-python``, while setup-python still builds it."""
+        """3.7 is below ``requires-python`` (#2051) and off the file by hand, while setup-python still builds it."""
         sources = add_build(as_of_the_file(snapshot()), '3.7.17', True, (('linux', '24.04', 'x64'),))
         current = {version: entry for version, entry in frozen()['versions']['cpython'].items()
                    if version != '3.7'}
@@ -696,7 +696,7 @@ class TestTheRewrite(unittest.TestCase):
                 self.assertEqual(rewritten, text)
 
     def test_a_claim_rewrites_each_group_and_never_spans_a_break(self) -> None:
-        """#1811 retired the count claims and their spelt-out words, #2165 the line ones: a claim states versions."""
+        """A claim states versions: never a count or its spelt-out word (#1811), nor a line number (#2165)."""
         module = updater()
         claim = module.Claim(r'(3\.\d+) to (3\.\d+)', lambda facts: ('3.12', '3.16'))
         self.assertEqual(module.apply_claims('Tests 3.11 to 3.15.', [claim], {}), ('Tests 3.12 to 3.16.', []))
@@ -829,8 +829,7 @@ def run_prose_audit(root: 'pathlib.Path') -> 'unittest.TestResult':
     """The audit's prose class, reading ``root`` instead of the checkout.
 
     The prose the script rewrites is what :class:`TestTheProseFollowsTheFile` reads;
-    the leg-count check :mod:`tests.project.test_python_matrix_tiers_1633` added to
-    it went with the counts (#1811).
+    none of it states a leg count (#1811).
 
     """
     # pylint: disable=import-outside-toplevel
@@ -854,7 +853,7 @@ def run_prose_audit(root: 'pathlib.Path') -> 'unittest.TestResult':
 ###############################################################################
 
 
-#: Two lines of ``python -m unittest -v`` output for a failed and an errored test.
+#: ``python -m unittest -v`` output naming a failed and an errored test.
 AUDIT_LOG = '''\
 test_x (tests.project.test_python_matrix_tiers_1633.TestPython37IsKTLO.test_x) ... FAIL
 ======================================================================
@@ -1440,7 +1439,7 @@ class TestTheWorkflowCommands(unittest.TestCase):
                                   "::error title=Cannot update the Python version tiers::KeyError: 'other'\n")
 
     def test_the_proposal_branch_and_the_outputs(self) -> None:
-        """What ``--proposal-branch`` finds, as its annotation, and ``--github-output``'s three outputs."""
+        """What ``--proposal-branch`` finds, as its annotation, and ``--github-output``'s outputs."""
         afresh = (f'::notice title=Proposing afresh::{ODD_DATA} has no open pull request, so what it holds was '
                   'merged or closed; publish recreates it from main.\n')
         already = (f'::notice title=Already proposed::{ODD_DATA} already proposes these tiers ({FINGERPRINT}); '
@@ -1604,7 +1603,7 @@ class TestTheWorkflow(unittest.TestCase):
         self.assertEqual(set(on), {'push', 'workflow_run'})
         self.assertEqual(on['push'], {'tags': ['v*']})
         self.assertEqual(on['workflow_run']['workflows'], ['Vendor Update'])
-        # #1748 added the triggering Vendor Update's own reading, which names no branch either.
+        # The triggering Vendor Update's own reading (#1748) names no branch either.
         self.assertEqual(' '.join(spec['jobs']['version_check']['if'].split()),
                          "${{ !cancelled() && (github.event_name != 'workflow_run' || "
                          "(github.event.workflow_run.conclusion == 'success' && "

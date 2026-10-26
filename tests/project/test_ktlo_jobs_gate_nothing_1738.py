@@ -7,7 +7,7 @@ The owner's option A. As legs of ``test``, ``integration`` and
 the job cap -- would still fail the job, and so ``Required checks passed``, which
 reads one ``needs.<job>.result`` per job, and skip ``unittest-ordering``, which
 needs ``test``. So they are ``test-ktlo``, ``integration-ktlo`` and
-``pypcap-parity-ktlo``, and this module pins the three things that make that hold:
+``pypcap-parity-ktlo``, and this module pins what makes that hold:
 
 * no job that can fail the run -- one without job-level ``continue-on-error`` --
   ``needs:`` a KTLO job, directly or through another job;

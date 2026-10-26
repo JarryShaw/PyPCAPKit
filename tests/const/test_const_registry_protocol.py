@@ -1,15 +1,14 @@
 # -*- coding: utf-8 -*-
 """Tests for :class:`pcapkit.corekit.enum.EnumRegistry`, tier 2 of issue #775.
 
-Tier 1 (#838) removed the mint from the sites in
+Tier 1 (#838) takes the mint out of the sites in
 :data:`pcapkit.vendor.default.LINE` that the default-template registries
-inherit. It could not reach the crawlers that replace that template with
-their own, because each of those carries a hand-copied ``get()`` -- and none of
-them carries ``register``, ``register_alias`` or ``get_all`` at all.
+inherit, which leaves out the crawlers that replace that template with their
+own.
 
 The design ruling on #842 finalises the abstraction: ``get``, ``get_all``,
 ``register`` and ``register_alias`` should always exist on the const enums, so they
-move to the base class and every registry answers the same four calls. The
+live on the base class and every registry answers the same calls. The
 ``AppType`` sub-base class keeps its own overrides and dispatching logic, and its
 subclasses override further where their contracts differ.
 
@@ -44,7 +43,7 @@ REPO_ROOT = pathlib.Path(__file__).resolve().parents[2]
 #: ``_name_`` and ``_value_`` -- builds a complete member for them. ``tcp/flags``
 #: is one of them: ``grep -c 'def __new__'`` reports ``0`` for both
 #: ``pcapkit/vendor/tcp/flags.py`` and ``pcapkit/const/tcp/flags.py``, so it is
-#: the same shape as the four ``mh/*_flag`` registries, not the templates below
+#: the same shape as the ``mh/*_flag`` registries, not the templates below
 #: that "each attach extra attributes in ``__new__``". Its own ``_missing_``
 #: does its own 16-bit range check ending in ``super()._missing_(value)``,
 #: whichever base it has: that call chain resolves through :mod:`aenum`'s own
@@ -240,12 +239,12 @@ def _resolve_or_raise(cls: 'Any', value: 'Any') -> 'Any':
 
 
 class TCPFlagsConversionTests(unittest.TestCase):
-    """GitHub issue #775's own finding: the stated reason for excluding
-    ``tcp/flags`` from :data:`CONVERTED` -- "each attach extra attributes in
-    ``__new__``" -- does not hold for it.
+    """GitHub issue #775's own finding: the reason for excluding a bespoke
+    template from :data:`CONVERTED` -- "each attach extra attributes in
+    ``__new__``" -- does not hold for ``tcp/flags``.
     ``grep -c 'def __new__'`` reports ``0`` for both
     ``pcapkit/vendor/tcp/flags.py`` and ``pcapkit/const/tcp/flags.py``, the
-    same shape as the four ``mh/*_flag`` registries in :data:`CONVERTED`, so
+    same shape as the ``mh/*_flag`` registries in :data:`CONVERTED`, so
     it belongs there rather than among the templates excluded for actually
     defining one.
     """
@@ -659,8 +658,8 @@ class UnregisteredMemberTests(unittest.TestCase):
 
     def test_str_valued_registries(self) -> None:
         """``cls._member_type_.__new__`` is what generalises this beyond ``int``
-        -- the generated fragment it replaces hardcoded ``int.__new__``, so the
-        five :class:`~aenum.StrEnum` registries could not have shared it."""
+        -- a generated fragment hardcoding ``int.__new__`` could not serve the
+        :class:`~aenum.StrEnum` registries."""
         class _Str(EnumRegistry, StrEnum):
             known = 'known'
 
@@ -673,8 +672,9 @@ class UnregisteredMemberTests(unittest.TestCase):
         self.assertNotIn('unit_test_absent', _Str.__members__)
 
 
-#: Sample of the default-template registries GitHub issue #775's tier 3
-#: moved onto :class:`~pcapkit.corekit.enum.EnumRegistry`, chosen to cover
+#: Sample of the default-template registries on
+#: :class:`~pcapkit.corekit.enum.EnumRegistry` (GitHub issue #775's tier 3),
+#: chosen to cover
 #: the two shapes the census turned up in ``pcapkit/vendor/default.py``'s
 #: ``LINE`` template: a registry whose own ``_missing_`` mints directly via
 #: :func:`~aenum.extend_enum` for an unassigned value (``TransType``,
@@ -901,8 +901,7 @@ class GeneratedProtocolIsInheritedTests(unittest.TestCase):
 
 class GeneratedMissingRangeParityTests(unittest.TestCase):
     """``_missing_``'s own bounded ranges are deliberately outside the
-    conversion onto the base, so this is a regression pin on that claim
-    rather than a test of new behaviour."""
+    conversion onto the base, so this is a regression pin on that claim."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self, restore=True)
@@ -1355,7 +1354,7 @@ class NoDefaultSentinelTests(unittest.TestCase):
         would do that (see :class:`~pcapkit.corekit.sentinels.NoDefaultType`'s own
         docstring caveat, and :class:`~pcapkit.corekit.sentinels.NullType`'s
         before it), and nothing in this package reloads
-        :mod:`pcapkit.corekit.enum` after import."""
+        :mod:`pcapkit.corekit.sentinels` after import."""
         import importlib
 
         from pcapkit.corekit.sentinels import NO_DEFAULT as first_import

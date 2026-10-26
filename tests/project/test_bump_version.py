@@ -367,7 +367,7 @@ class AbsentCitationFileTests(CitationTreeMixin, unittest.TestCase):
     """The absent-file case, which is a reported skip rather than a failure.
 
     Not fatal on purpose. :file:`.github/workflows/cron-vendor.yml` runs the script
-    under ``bash -e`` *before* its ``git commit``, so a non-zero exit there discards
+    in its ``Bump Version`` step, *before* ``Commit changes``, so a non-zero exit there discards
     the whole vendor crawl the run existed to produce and the release that would
     have followed. Announced rather than swallowed, because a bump that quietly
     skips a file it maintains is how the staleness starts.
@@ -523,12 +523,13 @@ class InitRewriteTests(CitationTreeMixin, unittest.TestCase):
 class RepositoryCitationTests(unittest.TestCase):
     """A gate: the committed :file:`CITATION.cff` must name the packaged version.
 
-    This is the half the script cannot guarantee on its own. Of the 159 commits
-    that have moved ``__version__`` on ``main``, 40 are hand-authored and so never
-    ran :file:`util/bump_version.py` -- a quarter over the project's life, and 11
-    of the most recent 25, which is where ``1.4.0``, ``1.4.1``, ``1.5.0a1`` and the
-    ``1.5.0b1`` through ``b3`` run all came from. Without a check here the citation
-    metadata would still go stale through exactly those releases.
+    This is the half the script cannot guarantee on its own. Measured at
+    ``a41137716`` (#625): of the 159 commits that had moved ``__version__`` on
+    ``main``, 40 were hand-authored and so never ran :file:`util/bump_version.py`
+    -- a quarter over the project's life, and 11 of the latest 25, which is where
+    ``1.4.0``, ``1.4.1``, ``1.5.0a1`` and the ``1.5.0b1`` through ``b3`` run all
+    came from. Without a check here the citation metadata goes stale through
+    exactly such releases.
 
     """
 

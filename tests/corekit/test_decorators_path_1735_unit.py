@@ -5,10 +5,10 @@ GitHub issue #1735, applying #1712's placement rule. ``seekset``, ``beholder``
 and ``prepare`` act on a protocol's file and the schema it unpacks, and
 ``beholder`` falls back to protocol classes, so they live in
 :mod:`pcapkit.corekit.decorators` rather than ``pcapkit.utilities.decorators``.
-Per the ruling on #1715 nothing is left at the old path, and
+Per the ruling on #1715 nothing is left at ``pcapkit.utilities.decorators``, and
 :mod:`pcapkit.utilities` does not export those names. This pins both halves of
-that: the old path
-and the old exports are gone, and every importer uses the new module.
+that: neither the module nor the exports exist, and every importer uses
+:mod:`pcapkit.corekit.decorators`.
 
 """
 import importlib

@@ -2,11 +2,11 @@
 """GitHub issue #1558: a Simple Packet Block keeps its padding when the snaplen is 0.
 
 An SPB's packet data is ``min(original_len, snaplen)`` octets, with interface
-0's snaplen, and a snaplen of 0 means no limit. The default engine handed
-interface 0's snaplen to the parser as ``__packet__['snaplen']`` as it stood, so
-a 0 read as a limit of no octets, and the block's padding was read as packet
-data: 57 data octets came out as 60. The engine hands over no limit for a
-zero snaplen, and :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` reads a zero
+0's snaplen, and a snaplen of 0 means no limit. Guards against the default
+engine handing interface 0's snaplen to the parser as ``__packet__['snaplen']``
+as it stands, which reads a 0 as a limit of no octets and the block's padding as
+packet data: 57 data octets come out as 60. The engine hands over no limit for
+a zero snaplen, and :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` reads a zero
 snaplen handed in as no limit too.
 
 Each case builds its capture here. Everything from :mod:`pcapkit` is imported

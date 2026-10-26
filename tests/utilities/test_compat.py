@@ -27,7 +27,7 @@ faked load performs the first ``import aenum`` of the process. Every
 'TransportProtocol' object has no attribute '__set_name__'``, so a later
 ``import pcapkit`` failed outright.
 
-Hence the two guards here, neither of which is about the shims themselves:
+Hence the guards here, none of which is about the shims themselves:
 
 #. :data:`WARM_BEFORE_FAKING` is imported *before* the fake goes in, so the
    memoised value is the true one, and
@@ -122,23 +122,23 @@ __tier__ = 'ALL'
 #: running the test until it stopped complaining, and that distinction is the
 #: point of having it. Every module imported at ``(3, 8)``: :mod:`builtins`,
 #: :mod:`collections.abc`, :mod:`functools`, :mod:`pathlib` and :mod:`typing`,
-#: which no version gate guards (#2051), and, behind the gates that
-#: remain, :mod:`urllib.parse`, :mod:`aenum`, :mod:`typing_extensions`,
+#: which no version gate guards (#2051), and, behind its version gates,
+#: :mod:`urllib.parse`, :mod:`aenum`, :mod:`typing_extensions`,
 #: :mod:`contextlib`, :mod:`decimal`, :mod:`enum` and :mod:`_thread`.
-#: :mod:`threading` stays on the list because :meth:`CompatTests.load_compat_as`
+#: :mod:`threading` is on the list because :meth:`CompatTests.load_compat_as`
 #: reads :data:`threading.excepthook` for PyPy's stand-in ``_thread._excepthook``.
 #:
-#: Four of those never actually surface, and *why* is the point. Three --
-#: :mod:`collections.abc`, :mod:`contextlib` and :mod:`pathlib` -- are imported at
+#: Some of those never actually surface, and *why* is the point.
+#: :mod:`collections.abc`, :mod:`contextlib` and :mod:`pathlib` are imported at
 #: module scope by :mod:`tests._support`, and :mod:`enum` by this module itself. It
-#: is not the runtime that keeps them warm: under ``python -S`` none of the four is
+#: is not the runtime that keeps them warm: under ``python -S`` none of them is
 #: in :data:`sys.modules` at all. So "some other module imports it for us" is
 #: precisely the unenforced ordering this file exists to stop relying on, which is
-#: why the four are on the list despite costing a :data:`sys.modules` lookup each
-#: and nothing else. Measured: with only the five that do surface warmed and
+#: why they are on the list despite costing a :data:`sys.modules` lookup each
+#: and nothing else. Measured: with only the ones that do surface warmed and
 #: :mod:`pathlib` forced cold, the window leaks ``['pathlib', 'pathlib._os']``;
 #: with the full list, then nine names, it is empty even with five of them forced
-#: cold. :mod:`urllib.parse`, added since for issue #1693, is warm before this
+#: cold. :mod:`urllib.parse`, on the list for issue #1693, is warm before this
 #: module runs on 3.8 to 3.10, where :mod:`pathlib` imports it, and cold on 3.14
 #: (both under ``python -S``).
 WARM_BEFORE_FAKING = ('_thread', 'aenum', 'builtins', 'collections.abc', 'contextlib',

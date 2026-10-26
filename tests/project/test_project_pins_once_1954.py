@@ -41,7 +41,11 @@ def step(where: 'tuple[str, str]', name: 'str') -> 'dict[str, object]':
 
 
 class TestThePinsJob(unittest.TestCase):
-    """``project-tests`` runs the pins on every diff but ``gate-only``'s, on ``latest``, and gates."""
+    """``project-tests`` runs on every diff but ``gate-only``'s, on ``latest``, and gates.
+
+    Its pins step skips a docs-only diff.
+
+    """
 
     def test_it_runs_on_every_diff_but_not_under_gate_only(self) -> None:
         spec = job(*JOB)

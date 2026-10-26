@@ -282,7 +282,7 @@ class CaseSensitiveDefaultStillHoldsTests(unittest.TestCase):
         """:class:`~pcapkit.const.ftp.command.Command` shares this module and
         folds for a different reason -- RFC 959 Section 5.3's *"Upper and
         lower case alphabetic characters are to be treated identically"* --
-        so it must be unaffected by the sibling class changing."""
+        so it must be unaffected by the sibling class's fold."""
         self.assertIs(Command.get('RETR'), Command.RETR)  # type: ignore[attr-defined]
         self.assertIs(Command.get('retr'), Command.RETR)  # type: ignore[attr-defined]
 
@@ -315,9 +315,9 @@ class VendorTemplateParityTests(unittest.TestCase):
         """``NO_DEFAULT`` is the sentinel the override's own signature carries,
         so the template has to import it as well as emit the method.
 
-        ``EnumLookup`` joined the same import with GitHub issue #930, which
-        re-parented ``CommandType`` and ``ConformanceRequirement`` -- the last
-        two of #877's non-registry enumerations -- onto it.
+        ``EnumLookup`` is in the same import because GitHub issue #930
+        re-parents ``CommandType`` and ``ConformanceRequirement`` -- #877's
+        remaining non-registry enumerations -- onto it.
         """
         from pcapkit.vendor.ftp.command import LINE
 

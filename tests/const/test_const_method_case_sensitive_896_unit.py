@@ -29,9 +29,7 @@ neither a member name nor an already-registered value, and with no
 ``default`` supplied, ``EnumRegistry.get`` raises :exc:`KeyError` -- it never
 builds an unregistered member the way ``Method._missing_`` does for the
 *constructor* path. Confirmed on :class:`~pcapkit.const.ftp.command.FEATCode`,
-which ran the base unmodified when this was measured -- GitHub issue #903's
-audit has since given it a case-insensitive ``get`` of its own per
-:rfc:`5797#section-2`, and the measurement still stands, because that override
+whose case-insensitive ``get`` (GitHub issue #903, per :rfc:`5797#section-2`)
 delegates to the base for any key it cannot match even after folding:
 ``FEATCode.get('totally-unknown-thing')`` raises ``KeyError``, while
 ``FEATCode('totally-unknown-thing')`` -- the constructor, reaching
@@ -43,8 +41,8 @@ asks for -- and as :mod:`tests.protocols.application.test_http_unit` and
 :mod:`tests.const.test_const_enum_no_mint` also require. So the fix keeps
 ``Method``'s own ``get`` override -- it still needs to build that unregistered
 member on a miss, which the base's ``get`` does not do for a ``str`` key -- and
-only removes the ``.upper()`` folding from the *match* it performs before
-falling through to that fallback. The ``_unregistered_member`` call it falls
+does no ``.upper()`` folding in the *match* it performs before falling
+through to that fallback. The ``_unregistered_member`` call it falls
 through to still canonicalises the
 *name* (the identifier) to upper case, exactly as :meth:`Method._missing_`
 does; only the *value* -- and the match against a *registered* name --
@@ -268,12 +266,11 @@ class MethodGetCaseSensitivityTests(unittest.TestCase):
 
         # And the fix itself is actually present in both -- a byte-identical
         # comparison above already implies this, but names the exact shape
-        # so a failure here is legible without a diff. GitHub issue #908
-        # moved ``get`` from testing ``_member_map_`` by hand to delegating
-        # to the base's own ``get`` (which also checks
-        # ``_value2member_map_``), so the markers pinned here moved with it
-        # -- see tests.const.test_const_method_value_lookup_908_unit for
-        # that change's own dedicated coverage.
+        # so a failure here is legible without a diff. ``get`` delegates to
+        # the base's own ``get`` (which also checks ``_value2member_map_``;
+        # GitHub issue #908), so the markers pinned here are that delegation
+        # -- see tests.const.test_const_method_value_lookup_908_unit for its
+        # own dedicated coverage.
         for label, source in (('template render', rendered), ('generated module', committed)):
             with self.subTest(rendering=label):
                 self.assertIn('return super().get(key)', source)

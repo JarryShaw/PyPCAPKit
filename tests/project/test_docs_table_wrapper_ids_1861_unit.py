@@ -3,8 +3,8 @@
 
 GitHub issue #1861: furo wraps each table in a ``table-wrapper`` container and
 copies every attribute of the table onto it, ``ids`` included, so a titled
-``list-table`` -- which Sphinx gives an id, to number it -- carried its id on
-the wrapper as well as on the table on ``const/reg.html``. ``DropTableWrapperIds`` in
+``list-table`` -- which Sphinx gives an id, to number it, as on ``const/reg.html``
+-- carries its id on the wrapper as well as on the table. ``DropTableWrapperIds`` in
 :file:`docs/source/conf.py` takes the table's ids off the wrapper after furo's
 transform has run.
 

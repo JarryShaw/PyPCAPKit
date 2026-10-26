@@ -4,8 +4,10 @@
 * :class:`TestPipInstall` runs the script against a stand-in ``pip``: a clean
   install, a failed one with and without an ``ERROR:`` line, a failed upgrade,
   and the arguments and levels it refuses.
-* :class:`TestTheFormerShellAgrees` runs the shell the steps held before the
-  script against the same stand-in and requires the same output, log and status;
+* :class:`TestTheFormerShellAgrees` runs the steps' inline shell form,
+  :data:`FORMER_ANNOTATED` and :data:`FORMER_BARE`, the reference the script
+  must match, against the same stand-in and requires the same output, log and
+  status;
   for the steps whose shell wrote no annotation, the same except for the
   annotation the script writes for a failed install; and for an indented
   ``ERROR:`` line, the same except for the reason the shell missed (#2041).
@@ -74,7 +76,7 @@ LEFT_INLINE = frozenset({
 })
 #: The KTLO jobs, which run their twin's steps by alias (#1738).
 TWINS = {'test-ktlo': 'test', 'integration-ktlo': 'integration', 'pypcap-parity-ktlo': 'pypcap-parity'}
-#: Text only the former inline install held.
+#: Text only the inline install holds.
 INLINE = ('pip-install.log', 'did not install on', "s/^ERROR: //p")
 #: The covered steps outside ``unit-tests.yml``, as ``(workflow, job)``, each step whole,
 #: and its job's ``ANNOTATION_LEVEL``. The experimental legs are never blocking, so
@@ -136,8 +138,9 @@ PIP = textwrap.dedent('''\
     sys.exit(status)
 ''')
 
-#: The ``run:`` of ``test``'s and ``integration``'s install before the script,
-#: under ``shell: bash``; ``SPEC`` stands for each job's extras.
+#: ``test``'s and ``integration``'s install in its inline shell form, under
+#: ``shell: bash``, the reference the script must match; ``SPEC`` stands for each
+#: job's extras.
 FORMER_ANNOTATED = textwrap.dedent('''\
     python -m pip install -U pip setuptools wheel
     if ! python -m pip install -e 'SPEC' 2>&1 | tee "$RUNNER_TEMP/pip-install.log"; then
@@ -147,7 +150,7 @@ FORMER_ANNOTATED = textwrap.dedent('''\
       exit 1
     fi
 ''').replace('SPEC', SPEC)  # noqa: E501
-#: The ``run:`` of the other covered steps before the script, under the default shell.
+#: The other covered steps' install in its inline shell form, under the default shell.
 FORMER_BARE = textwrap.dedent('''\
     python -m pip install -U pip setuptools wheel
     python -m pip install -e 'SPEC'
@@ -157,7 +160,7 @@ CLEAN = ['out:Obtaining file:///checkout', 'err:a deprecation warning', 'out:Suc
 FAILED = ['out:Collecting pytest>=8', 'err:ERROR: Ignored the following versions: 8.0.0 Requires-Python >=3.8',
           'out:INFO: pip is looking at multiple versions', 'err:ERROR: No matching distribution found for pytest>=8']
 #: The tail of a failed wheel build, as pip printed it on ``Python pypy3.10 (KTLO)``:
-#: its one ``ERROR:`` line is indented, so the former shell found none (#2041).
+#: its one ``ERROR:`` line is indented, so the inline shell finds none (#2041).
 WHEEL_FAILED = ['out:  note: This error originates from a subprocess, and is likely not a problem with pip.',
                 'out:  ERROR: Failed building wheel for cryptography', 'out:Successfully built pypcapkit',
                 'out:Failed to build cryptography', 'out:',
@@ -309,10 +312,10 @@ class TestPipInstall(_Scratch):
 @unittest.skipIf(any(shutil.which(tool) is None for tool in ('bash', 'tee', 'sed', 'tail')),
                  'needs bash, tee, sed and tail')
 class TestTheFormerShellAgrees(_Scratch):
-    """The script prints, logs and exits as the steps' former shell did."""
+    """The script prints, logs and exits as the steps' inline shell form does."""
 
     def former(self, shell: 'str', env: 'dict[str, str]') -> 'subprocess.CompletedProcess[str]':
-        """``shell`` as the step ran it: ``shell: bash`` for the annotated steps, ``bash -e`` for the rest."""
+        """``shell`` as a step runs it: ``shell: bash`` for the annotated steps, ``bash -e`` for the rest."""
         bin_dir = self.tmp / 'bin'
         bin_dir.mkdir(exist_ok=True)
         python = bin_dir / 'python'
@@ -325,7 +328,7 @@ class TestTheFormerShellAgrees(_Scratch):
                               capture_output=True, text=True, check=False, timeout=120)
 
     def both(self, shell: 'str', level: 'str', **pip: 'object') -> 'tuple[tuple[object, ...], tuple[object, ...]]':
-        """``(status, stdout, log, pip's calls)`` of the former shell, then of the script, each with its stderr."""
+        """``(status, stdout, log, pip's calls)`` of the inline shell, then of the script, each with its stderr."""
         found = []
         for run in (lambda env: self.former(shell, env), lambda env: self.script('-e', SPEC, env=env)):
             result = run(self.env(level, **pip))
@@ -344,7 +347,7 @@ class TestTheFormerShellAgrees(_Scratch):
                     self.assertEqual(new, old)
 
     def test_an_indented_error_line_departs_on_purpose(self) -> None:
-        """The former shell's ``^ERROR: `` missed an indented line and fell back; the script names it
+        """The inline shell's ``^ERROR: `` misses an indented line and falls back; the script names it
         (#2041). Everything else still matches, and so does an outcome where both find the same line."""
         for level in ('error', 'warning'):
             with self.subTest(level=level):
@@ -451,7 +454,7 @@ class TestTheStepsRunTheScript(unittest.TestCase):
 
 
 class TestTheOtherWorkflowsRunTheScript(unittest.TestCase):
-    """The experimental and Compat installs run the script, guards unchanged; nothing else there keeps the shell."""
+    """The experimental and Compat installs run the script, with their guards; nothing else there keeps the shell."""
 
     def test_each_site_is_the_script_with_its_guards(self) -> None:
         for (name, job_id), (expected, _) in ELSEWHERE.items():

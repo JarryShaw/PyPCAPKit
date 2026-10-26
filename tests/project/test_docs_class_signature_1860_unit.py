@@ -8,8 +8,8 @@ does. :class:`~pcapkit.protocols.protocol.ProtocolBase`,
 :class:`~pcapkit.corekit.infoclass.Info`,
 :class:`~pcapkit.protocols.schema.schema.Schema` and the reassembly and
 flow-tracing bases each define a ``__new__`` that only passes ``*args`` and
-``**kwargs`` through, so their classes rendered that catch-all, and their
-class docstrings lost the types of the parameters they list.
+``**kwargs`` through, so by default their classes render that catch-all, and
+their class docstrings lose the types of the parameters they list.
 
 ``restore_class_signature`` in :file:`docs/source/conf.py` gives such a class its
 ``__init__``'s parameters, and ``constructor_for_types`` has the library read the
@@ -43,7 +43,7 @@ __tier__ = 'LATEST'
 #: The event the signature hook answers.
 EVENT = 'autodoc-process-signature'
 
-#: The catch-all the build rendered for these classes.
+#: The catch-all the build renders for these classes by default.
 CATCH_ALL = '(*args, **kwargs)'
 
 
@@ -145,7 +145,7 @@ class ClassSignatureTests(unittest.TestCase):
         return self.conf.restore_class_signature(self.app, what, name, resolve(name), {}, CATCH_ALL, None)
 
     def test_classes_get_their_init_parameters(self) -> 'None':
-        """Each rendered ``(*args, **kwargs)``, or ``PCAPIO`` its base's ``(fname, **kwargs)``."""
+        """Each renders ``(*args, **kwargs)`` by default, or ``PCAPIO`` its base's ``(fname, **kwargs)``."""
         for name, expected in RESTORED.items():
             with self.subTest(name=name):
                 self.assertEqual(self.restore(name), (expected, None))
@@ -215,7 +215,7 @@ class ConstructorTypesTests(unittest.TestCase):
         cls.conf = load_conf()
 
     def test_init_behind_a_pass_through_new_is_read(self) -> 'None':
-        """Each class docstring lists the ``__init__`` parameters, which lost their types."""
+        """Each class docstring lists the ``__init__`` parameters, which otherwise lose their types."""
         for name in ('pcapkit.foundation.reassembly.ipv4.IPv4', 'pcapkit.foundation.traceflow.tcp.TCP',
                      'pcapkit.corekit.infoclass.Info', 'pcapkit.corekit.infoclass.MultiInfo'):
             cls = resolve(name)

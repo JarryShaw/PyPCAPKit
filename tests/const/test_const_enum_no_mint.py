@@ -55,8 +55,8 @@ any of the tier-2 registries above), so each has its own
 ``_unregistered_member`` override reconstructing those attributes rather
 than the shared base's generic one, and :class:`StatusCode` and
 :class:`ReturnCode` use the base's ``get()`` rather than a hand-written one
--- see :class:`BespokeGetReplacementTests` for the ``default == -1`` ->
-``NO_DEFAULT`` behaviour change that implies.
+-- see :class:`BespokeGetReplacementTests` for the ``NO_DEFAULT`` convention,
+rather than ``default == -1``, that implies.
 :class:`OptionType` keeps its own ``get()`` (genuine multi-namespace
 dispatch the base does not replicate), and both its int/namespace path and
 its ``str`` path are ``_unregistered_member`` calls too -- the same
@@ -2193,7 +2193,7 @@ class BespokeGetOverrideTests(unittest.TestCase):
     """:class:`~pcapkit.const.ftp.command.Command`,
     :class:`~pcapkit.const.http.method.Method` and
     :class:`~pcapkit.const.pcapng.option_type.OptionType` keep their own
-    hand-written ``get()`` in PR 1, because each does real dispatch the
+    hand-written ``get()``, because each does real dispatch the
     base's generic ``get()`` does not replicate. :class:`Command` resolves
     case-insensitively (GitHub issue #582 -- ``Command.get('abor')`` must
     return :attr:`Command.ABOR`, not raise), which the base's plain
@@ -2217,7 +2217,7 @@ class BespokeGetOverrideTests(unittest.TestCase):
 
     :class:`OptionType`'s ``get()`` does its own multi-namespace dispatch via
     :attr:`__members_ns__` with no base equivalent at all. These are
-    regression guards, not new coverage.
+    regression guards.
 
     """
 
@@ -2264,13 +2264,13 @@ class BespokeGetOverrideTests(unittest.TestCase):
 
 
 class AppTypeUnmintConvertedTests(unittest.TestCase):
-    """GitHub issue #860 step 2, PR 2 (the second and final PR of this step):
-    :class:`~pcapkit.const.reg.apptype.apptype.AppType` and its four
+    """GitHub issue #860 step 2, PR 2:
+    :class:`~pcapkit.const.reg.apptype.apptype.AppType` and its
     per-transport registries -- :class:`~pcapkit.const.reg.apptype.tcp.TCP`,
     :class:`~pcapkit.const.reg.apptype.udp.UDP`,
     :class:`~pcapkit.const.reg.apptype.sctp.SCTP`,
-    :class:`~pcapkit.const.reg.apptype.dccp.DCCP` -- brought onto
-    :class:`~pcapkit.corekit.enum.EnumRegistry` and stopped from minting.
+    :class:`~pcapkit.const.reg.apptype.dccp.DCCP` -- on
+    :class:`~pcapkit.corekit.enum.EnumRegistry`, minting nothing.
 
     Largest of the bespoke classes #860 step 2 converts: an AST walk over
     :meth:`AppType._missing_` finds range-bounded branches
@@ -2355,8 +2355,8 @@ class AppTypeUnmintConvertedTests(unittest.TestCase):
 
     def test_unassigned_range_resolves_without_minting(self) -> None:
         """226 sits in the base registry's 225-241 ``reserved`` span, which
-        names no transport protocol, so it answers every one of the four
-        per-transport registries identically -- the same shape as
+        names no transport protocol, so it answers every
+        per-transport registry identically -- the same shape as
         :class:`UnassignedRangeDoesNotMintTests` above, generalised to a
         registry whose ``_unregistered_member`` reconstructs three
         attributes rather than the generic zero."""

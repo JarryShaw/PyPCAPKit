@@ -60,7 +60,8 @@ These properties are easy to get subtly wrong, and each has a test here for the
 :meth:`DecoratorCombinationTests`
     The four rows above, both families, with ``@info_final @final`` and ``@final
     @info_final`` asserted to agree rather than merely each asserted to work --
-    order-independence is the property that broke, so it is the property stated.
+    order-independence is the property a ``__final__``-keyed re-entry check
+    breaks, so it is the property stated.
 
 :meth:`AncestryWalkTests`
     The check walks the whole MRO rather than ``__bases__``, so a *grandchild*
@@ -68,11 +69,11 @@ These properties are easy to get subtly wrong, and each has a test here for the
     leave a one-line way round the rule.
 
 :meth:`VersionPortabilityTests`
-    ``typing.final`` only records ``__final__`` from Python 3.11 on, and 3.10 is
-    in the CI matrix. A guard reading the dunder is therefore a silent no-op on
-    3.10 unless ``final`` comes from :mod:`pcapkit.utilities.compat`, whose
-    shim asks ``typing_extensions`` for it below 3.11. This is the test that
-    would have caught that, and the one that fails first if the import is ever
+    ``typing.final`` only records ``__final__`` from Python 3.11 on, and the CI
+    matrix runs older versions. A guard reading the dunder is therefore a silent
+    no-op below 3.11 unless ``final`` comes from :mod:`pcapkit.utilities.compat`,
+    whose shim asks ``typing_extensions`` for it below 3.11. This is the test
+    that catches that, and the one that fails first if the import is ever
     pointed back at :mod:`typing`.
 
 """
@@ -531,11 +532,12 @@ class VersionPortabilityTests(unittest.TestCase):
         """Without this the guard is a silent no-op below Python 3.11.
 
         :func:`typing.final` gained the ``__final__`` side effect in 3.11
-        (gh-90500); before that it returns the class untouched. 3.10 is in the
-        test matrix, so a guard reading the dunder needs ``final`` to come from
-        :mod:`pcapkit.utilities.compat`, which asks ``typing_extensions`` for it
-        below 3.11. On 3.11 and up this assertion holds either way -- it is 3.10
-        where it is load-bearing, and it is cheap enough to run everywhere.
+        (gh-90500); before that it returns the class untouched. The test matrix
+        runs older versions, so a guard reading the dunder needs ``final`` to
+        come from :mod:`pcapkit.utilities.compat`, which asks
+        ``typing_extensions`` for it below 3.11. On 3.11 and up this assertion
+        holds either way -- it is below 3.11 where it is load-bearing, and it is
+        cheap enough to run everywhere.
 
         """
         from pcapkit.corekit.infoclass import Info, info_final
@@ -556,8 +558,9 @@ class VersionPortabilityTests(unittest.TestCase):
         """Pinned by identity, because the failure is silent on one version only.
 
         Pointing either import back at :mod:`typing` would leave every test
-        above passing on 3.11+ and every one of them failing on 3.10, i.e. a
-        single matrix leg going red for a reason nothing in the diff explains.
+        above passing on 3.11+ and every one of them failing below 3.11, i.e.
+        only the older matrix legs going red for a reason nothing in the diff
+        explains.
         Asserting the identity says which import is the load-bearing one.
 
         """
@@ -614,9 +617,9 @@ class DecoratorCombinationTests(unittest.TestCase):
     """One test per row of the table in this module's docstring, both families.
 
     Every case exercises the **generated constructor** rather than inspecting
-    markers, because that is where the defect showed: a class can carry both
+    markers, because that is where the defect shows: a class can carry both
     markers, report itself finalised, and still be unusable. Checking
-    ``__final__`` alone would have passed on the broken code.
+    ``__final__`` alone passes on such a class.
 
     """
 
@@ -675,10 +678,10 @@ class DecoratorCombinationTests(unittest.TestCase):
 
         Decorators apply bottom-up, so the first spelling runs ``final`` first
         and reaches :func:`info_final` with ``__final__`` already set. Keying the
-        re-entry check on that marker made this spelling warn and skip the
-        generation while the other spelling did the work -- so the two are
+        re-entry check on that marker makes this spelling warn and skip the
+        generation while the other spelling does the work -- so the two are
         asserted to *agree*, not merely each asserted to pass. That is the
-        property that broke, and comparing them is the only way to state it.
+        property at stake, and comparing them is the only way to state it.
 
         """
         from pcapkit.corekit.infoclass import Info, info_final
@@ -703,13 +706,13 @@ class DecoratorCombinationTests(unittest.TestCase):
                 self.assert_silently_finalised(cls, lambda c: list(c(1).to_dict().items(multi=True)), [('x', 1)])
 
     def test_schema_final_and_final_agree_in_either_order(self) -> None:
-        """The schema-side half, where the old failure was *silent*.
+        """The schema-side half, where the failure is *silent*.
 
         Fielded rather than field-less, for the reason given in the baseline test
         above -- a field-less schema cannot distinguish "finalised and usable"
-        from "silently unfinalised". With a real field, the old defect's shape is
-        exactly what a field-less class could not show: an unfinalised schema has
-        an empty :attr:`__excluded__`, so rather than raising it returned its own
+        from "silently unfinalised". With a real field, the defect's shape is
+        exactly what a field-less class cannot show: an unfinalised schema has
+        an empty :attr:`__excluded__`, so rather than raising it returns its own
         bookkeeping -- ``{'__map__': {}, '__map_reverse__': {}, '__buffer__': {},
         '__updated__': True}`` -- from :meth:`to_dict`, with ``x`` nowhere in it.
 
@@ -812,7 +815,7 @@ class DecoratorCombinationTests(unittest.TestCase):
                 self.assertEqual(Mismarked.__finalised__, FinalisedState.NONE)
 
     def test_schema_refusal_repeats_rather_than_firing_once(self) -> None:
-        """The schema-side half of the test above, which had no counterpart."""
+        """The schema-side half of the test above."""
         from pcapkit.corekit.infoclass import FinalisedState
         from pcapkit.protocols.schema.schema import Schema
         from pcapkit.utilities.compat import final
@@ -829,7 +832,7 @@ class DecoratorCombinationTests(unittest.TestCase):
                 self.assertEqual(Mismarked.__finalised__, FinalisedState.NONE)
 
     def test_a_prior_bare_info_construction_does_not_defeat_the_guard(self) -> None:
-        """Order independence is the property #778's cross-review found broken.
+        """Order independence, against a bare ``Info()`` built first (#778's cross-review).
 
         :meth:`Info.__new__` auto-finalises an undecorated class to
         :attr:`~FinalisedState.BASE` on its first construction -- including
@@ -838,11 +841,11 @@ class DecoratorCombinationTests(unittest.TestCase):
         ``BASE`` by that bare construction, every subclass declared afterwards
         would read ``BASE`` off ``Info`` and never see its own
         ``FinalisedState.NONE`` -- silently defeating the bare-``@final`` guard
-        nested inside that branch for the rest of the process. This is exactly
-        what made :meth:`test_the_refusal_repeats_rather_than_firing_once` above
+        nested inside that branch for the rest of the process. That would make
+        :meth:`test_the_refusal_repeats_rather_than_firing_once` above
         order-dependent on whatever else in the suite had already bare-constructed
-        ``Info()`` -- nothing in this file did, at time of writing, so it passed
-        by luck rather than by guarantee. This test pins the guarantee directly
+        ``Info()``, passing by luck rather than by guarantee. This test pins the
+        guarantee directly
         by constructing ``Info()`` bare first, in this same process, immediately
         before declaring the mismarked class.
 
@@ -895,17 +898,17 @@ class DecoratorCombinationTests(unittest.TestCase):
         self.assertIn('never finalised', message)
 
     def test_repeated_bare_info_construction_does_not_grow_excluded_without_bound(self) -> None:
-        """The cost of the ``cls is not Info`` fix, pinned rather than assumed.
+        """The cost of the ``cls is not Info`` guard, pinned rather than assumed.
 
         ``Info`` never reaches :attr:`~FinalisedState.BASE`, so a bare
         ``Info()`` would re-enter :func:`info_final` on *every* call rather than
         once, and ``cls.__excluded__.extend(cls.__builtin__)`` would append the
-        same ~60 names again each time -- correctness untouched (``__excluded__``
+        same names again each time -- correctness untouched (``__excluded__``
         is only ever read for membership), but the list growing without bound,
         with the cost resurfacing at every later subclass declaration, since
         :class:`InfoMeta`'s own dedup pass is then against a base list that keeps
-        growing. Fixed by short-circuiting the re-entry itself for ``Info``, via
-        its own ``__base_ready__`` marker --
+        growing. The re-entry itself is short-circuited for ``Info``, via its own
+        ``__base_ready__`` marker --
         :meth:`test_repeated_bare_info_construction_does_not_re_enter_the_base_setup`
         below pins that the short-circuit is what closes it, not merely that the
         length happens to stay put.
@@ -938,13 +941,12 @@ class DecoratorCombinationTests(unittest.TestCase):
         self.assertEqual(len(Schema.__excluded__), len(set(Schema.__excluded__)))
 
     def test_repeated_bare_info_construction_does_not_re_enter_the_base_setup(self) -> None:
-        """The assertion that would have caught both this round and the last.
+        """Bare construction skips the base setup, rather than redoing it to the same result.
 
-        A dedup'd ``extend`` also keeps ``__excluded__``'s *length* bounded, but
-        it does so by redoing the ``dir()``-over-the-MRO scan and rebuilding
-        ``cls.__builtin__`` on every single bare call -- the previous round's
-        fix, and the reason bare construction got 41x-49x slower rather than
-        cheaper. ``cls.__builtin__ = set(temp)`` is a *reassignment*, so its
+        A dedup'd ``extend`` would also keep ``__excluded__``'s *length* bounded,
+        but only by redoing the ``dir()``-over-the-MRO scan and rebuilding
+        ``cls.__builtin__`` on every single bare call, which makes bare
+        construction 41x-49x slower rather than cheaper. ``cls.__builtin__ = set(temp)`` is a *reassignment*, so its
         identity changes every time the base setup actually reruns, even when
         the resulting set looks the same; a short-circuit that truly skips the
         work leaves that same object in place. Identity is what tells "skipped"
@@ -954,9 +956,8 @@ class DecoratorCombinationTests(unittest.TestCase):
         A held reference, not a bare ``id()`` snapshot: comparing ``id()``
         values across separate calls is unreliable the moment the first object
         is garbage-collected, since CPython is then free to hand the very next
-        ``set()`` of the same size the same address -- which is exactly what let
-        this assertion pass by coincidence against the previous round's fix on
-        one of the two classes. Keeping ``marker`` alive as the object itself,
+        ``set()`` of the same size the same address, so an ``id()`` comparison
+        can pass by coincidence on a class that did redo the work. Keeping ``marker`` alive as the object itself,
         not its address, is what makes the ``is`` check below trustworthy.
 
         """

@@ -11,13 +11,13 @@ subtype are right either way, and nothing downstream parses these strings -- but
 it is the string a user sees when an MP_JOIN or DSS option is rejected, and an
 empty field reads as a value that failed to interpolate.
 
-The correct form is not a matter of taste: every other message in the same file
-spells the prefix ``f'{self.alias}: [OptNo {schema.kind}] …'``, so a doubled one
-is an outlier against a house form in its own module.
+The correct form is not a matter of taste: every other option message in the same
+file spells the prefix ``f'{self.alias}: [OptNo …] …'`` with a single separator, so
+a doubled one is an outlier against a house form in its own module.
 
 Every message here is asserted **in full** rather than by substring. A substring
-assertion on ``'invalid flags combination'`` matches both forms, so the two
-places that also exercise these messages cannot catch the doubling --
+assertion on ``'invalid flags combination'`` matches both forms, so the other
+places that exercise these messages cannot catch the doubling --
 
 * ``TCPMPTCPJoinFlagOrderingUnitTests.test_neither_syn_nor_ack_raises_protocol_error``
   in ``test_tcp_mptcp_join_flag_ordering_unit.py``, which asserts

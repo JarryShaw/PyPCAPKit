@@ -62,7 +62,7 @@ class MakefileTests(unittest.TestCase):
 
 
 class ManifestTests(unittest.TestCase):
-    """What :file:`MANIFEST.in` names exists, and the examples' READMEs still ship."""
+    """What :file:`MANIFEST.in` names exists, and the examples' READMEs ship."""
 
     def test_every_prune_names_a_tracked_or_ignored_directory(self) -> None:
         files = tracked()

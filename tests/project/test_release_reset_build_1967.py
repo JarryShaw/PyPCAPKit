@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """#1967: :file:`util/release_reset_build.py`, run as Create Release's "Reset Build Number" runs it.
 
-* :class:`TestTheFormerShellAgrees` runs the shell the step held before the
-  script, kept here verbatim, and the script, each against a fresh scratch
+* :class:`TestTheFormerShellAgrees` runs the step's inline shell form, the
+  reference the script must match, kept here verbatim, and the script, each against a fresh scratch
   repository built the same way at the same path, and requires the same status,
   standard output and error, the refs ``origin`` is left with, and the checkout's
   ``HEAD`` and ``conda/build``. A stand-in ``git`` in front of the real one
@@ -11,10 +11,10 @@
   shell ends.
 * :class:`TestTheStepRunsTheScript` pins the step to its script and its
   ``env:``, after a whole checkout of the repository, its ``git`` calls to ones
-  that never pull, merge, rebase, reset or force, and the script to Python 3.8's
+  that never pull, merge, rebase, reset or force-push, and the script to Python 3.8's
   syntax.
 
-The shell ran as a step with no ``shell:`` runs on the runner, ``bash -e``, and
+The shell form runs as a step with no ``shell:`` runs on the runner, ``bash -e``, and
 ``bash`` prefixes each of its own errors with the script's path and line, which
 :meth:`TestTheFormerShellAgrees.former` strips. The step's runs against the
 scenarios of #1634, after "Create Tag", are
@@ -42,7 +42,7 @@ from tests.project.test_requires_python_floor_2051 import FLOOR
 if TYPE_CHECKING:
     from typing import Callable, Optional
 
-#: Test tier (#1958): runs the tree's own script and the workflow's former shell.
+#: Test tier (#1958): runs the tree's own script and the step's inline shell form.
 __tier__ = 'LATEST'
 
 ROOT = pathlib.Path(__file__).resolve().parents[2]
@@ -57,7 +57,7 @@ GIT = shutil.which('git') or ''
 
 VERSION = '1.5.0b9'
 
-#: The step's ``run:`` before the script, verbatim.
+#: The step's inline shell form, the reference the script must match, verbatim.
 FORMER_RESET = textwrap.dedent(r'''
     set -euo pipefail
 
@@ -349,7 +349,7 @@ CASES = (
 
 @unittest.skipIf(not (BASH and GIT), 'needs bash, which ran the former shell, and git')
 class TestTheFormerShellAgrees(unittest.TestCase):
-    """The script exits, prints and leaves the repositories exactly as the shell it replaced, on every case."""
+    """The script exits, prints and leaves the repositories exactly as the inline shell form, on every case."""
 
     def setUp(self) -> None:
         tmp = tempfile.TemporaryDirectory(prefix='pcapkit-1967-reset-')  # pylint: disable=consider-using-with
@@ -387,7 +387,7 @@ class TestTheFormerShellAgrees(unittest.TestCase):
                 build.read_bytes() if build.is_file() else None)
 
     def former(self, build: 'Callable[[Scratch], str]', env: 'dict[str, Optional[str]]') -> 'tuple[object, ...]':
-        """The former shell as the step ran it, ``bash -e``, its own errors' ``<path>: line N:`` dropped."""
+        """The inline shell form as a step runs it, ``bash -e``, its own errors' ``<path>: line N:`` dropped."""
         scratch, run = self.scratch(build)
         result = subprocess.run([BASH, '-e', str(self.shell)], cwd=scratch.work,  # nosec: B603
                                 env=self.environ(scratch, run, env), capture_output=True, text=True,

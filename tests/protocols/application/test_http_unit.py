@@ -459,7 +459,7 @@ class HTTPUnitTests(unittest.TestCase):
         The preface prepended to the frame in one buffer is asserted here on the
         *explicit* path only: ``read(version=2)`` skips the preface (#1242)
         rather than reading its ASCII octets as a frame header, which would make
-        ``b'PRI'`` a declared length of 5,265,993 that the ``schema.length >
+        ``b'PRI'`` a declared length of 5,263,945 that the ``schema.length >
         length`` check (#799) refuses. The guess path's handling of the preface
         is pinned by ``test_guess_version_identifies_the_http2_connection_preface``
         below.
@@ -507,7 +507,7 @@ class HTTPUnitTests(unittest.TestCase):
         (:rfc:`9113#section-3.4`). Without the prefix compare the dispatcher has
         no notion of it: the HTTP/1 arm declines it and the HTTP/2 arm reads the
         preface's own ASCII as a frame header, ``b'PRI'`` becoming a declared
-        length of 5,265,993, which the consistency check of #799/#802 refuses --
+        length of 5,263,945, which the consistency check of #799/#802 refuses --
         so a real HTTP/2 connection opening, bare preface or
         preface-plus-SETTINGS, would raise ``unknown HTTP version``.
 
@@ -639,7 +639,7 @@ class HTTPUnitTests(unittest.TestCase):
         Guards against ``b'foo bar baz\\r\\nX: y\\r\\n\\r\\n'`` answering
         ``version='2'`` -- the headline wrong answer of #800 -- as it does when
         the HTTP/2 arm accepts any buffer of nine octets or more and ``b'foo'``
-        reads as a declared length of 6,712,175 that nothing checks.
+        reads as a declared length of 6,713,199 that nothing checks.
 
         Two defences refuse it. #802's ``schema.length > length`` check refuses
         the inconsistent length, and independently of that check (#800) text
@@ -1470,11 +1470,10 @@ class HTTPUnitTests(unittest.TestCase):
         ``_guess_version``'s last arm suppresses :exc:`struct.error` alongside
         ``ProtocolError`` regardless: #805 does not touch every
         ``__length__``-keyed field in every one of those modules, so the
-        suppression stays as defence in depth. Narrowing it was tried and broke
-        the direct ``HTTP()`` guess path for the sub-nine-octet outer-header class.
-        This test drives real wire bytes through the actual guess path -- no
-        ``mock.patch`` -- specifically because a mocked fault cannot see a
-        regression in the *un-mocked* route the fault is meant to stand in for.
+        suppression stays as defence in depth. This test drives real wire bytes
+        through the actual guess path -- no ``mock.patch`` -- specifically
+        because a mocked fault cannot see a regression in the *un-mocked* route
+        the fault is meant to stand in for.
 
         """
         import io
@@ -2697,13 +2696,11 @@ class HTTPUnitTests(unittest.TestCase):
     def test_httpv1_type_values_are_pinned(self) -> None:
         """GitHub issue #884: pin every member's exact value and the member set.
 
-        :class:`~pcapkit.protocols.application.httpv1.Type` was converted
-        from spelled-out literals to ``auto()`` -- which on a
-        :class:`~pcapkit.utilities.compat.StrEnum` returns ``name.lower()``
-        and so is value-preserving here -- but a future change to
-        ``_generate_next_value_`` could silently alter these wire-visible
-        strings without this test noticing unless every member and every
-        value is asserted explicitly.
+        :class:`~pcapkit.protocols.application.httpv1.Type` takes its values
+        from ``auto()``, which on a :class:`~pcapkit.utilities.compat.StrEnum`
+        returns ``name.lower()``, so a change to ``_generate_next_value_``
+        could silently alter these wire-visible strings without this test
+        noticing unless every member and every value is asserted explicitly.
 
         """
         from pcapkit.protocols.application.httpv1 import Type

@@ -177,7 +177,7 @@ class NestedPacketContextSemanticsTests(unittest.TestCase):
 
         :func:`~pcapkit.corekit.fields.byteorder.packet_byteorder` is called
         both with a plain dict built by hand -- as several tests and
-        :func:`~pcapkit.foundation.engines.pcapng` construct -- and with what
+        :mod:`pcapkit.foundation.engines.pcapng` construct -- and with what
         ``SchemaField`` actually builds. Both must work: the site implements the
         fallback itself and does not route through
         :func:`~pcapkit.corekit.fields.misc.nested_packet_context`.

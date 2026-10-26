@@ -57,8 +57,9 @@ VENDOR_DEPS = ('requests', 'bs4', 'html5lib')
 
 #: Whether the crawlers are importable at all. ``html5lib`` ships in the
 #: ``vendor`` extra (:file:`pyproject.toml`), not ``test`` -- so these tests skip
-#: on the ``test`` and ``gate`` jobs of :file:`.github/workflows/unit-tests.yml`,
-#: which never install ``vendor``. ``engine-tests`` does not run them either:
+#: on every leg of the ``test`` job of :file:`.github/workflows/unit-tests.yml`
+#: but ``latest``, the one that installs ``vendor`` (#1958), as ``gate`` does.
+#: ``engine-tests`` does not run them either:
 #: each of its cells runs only that engine's own test files (#849).
 #: Guarded the same way
 #: :file:`tests/protocols/test_dispatch_registry_unit.py` guards its own optional

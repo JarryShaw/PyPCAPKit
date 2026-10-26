@@ -71,9 +71,9 @@ needs no flag to get there, and because a second runner is worth exercising for
 its own sake.
 
 Why not simply move ``test_protochain.py`` so it sorts after its victims: because
-that is what was already happening by accident. It sorts last inside
-``tests/corekit/``, so no sibling healed it, and the full CI selection passed only
-because unrelated directories sort between it and ``tests/project/``. A fix that
+sort order is what hid #660. The file sorted last inside ``tests/corekit/``, so no
+sibling healed it, and the full CI selection passed only because unrelated
+directories sort between it and ``tests/project/``. A fix that
 rearranges the collection order leaves the defect in place and re-hides it, and
 the next file added anywhere between the two re-exposes it.
 

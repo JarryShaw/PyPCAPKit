@@ -11,9 +11,9 @@ library hands it, since :meth:`Frame.pack
 This pins the helper, its ``__packet__`` fallback, and that both schemas use it.
 
 Per GitHub issue #1711 the helper lives in
-:mod:`pcapkit.corekit.fields.byteorder`, with no re-export at the old
-``pcapkit.protocols.schema.misc.byteorder`` path. This also pins that the old
-path does not import, and that the module reaches no higher than
+:mod:`pcapkit.corekit.fields.byteorder`, with no re-export at
+``pcapkit.protocols.schema.misc.byteorder``. This also pins that importing it
+fails, and that the module reaches no higher than
 :mod:`pcapkit.corekit`.
 
 """
@@ -103,7 +103,7 @@ class TestSchemaByteorder(unittest.TestCase):
                 self.assertEqual(header.pack(dict(packet)), raw)
 
     def test_the_schema_misc_byteorder_path_does_not_import(self) -> None:
-        """#1711: the move leaves no re-export at the old path."""
+        """#1711: the move leaves no re-export at ``pcapkit.protocols.schema.misc.byteorder``."""
         with self.assertRaises(ModuleNotFoundError) as ctx:
             importlib.import_module(OLD_PATH)
         self.assertEqual(ctx.exception.name, OLD_PATH)

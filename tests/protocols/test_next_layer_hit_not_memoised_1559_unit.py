@@ -4,7 +4,7 @@
 This guards against :meth:`ProtocolBase._lookup_next_layer
 <pcapkit.protocols.protocol.ProtocolBase._lookup_next_layer>` writing the class a
 registered :class:`~pcapkit.corekit.module.ModuleDescriptor` resolved to back
-over that descriptor. That has three consequences, one test each:
+over that descriptor. That has these consequences, one test each:
 
 * after :func:`importlib.reload` of the protocol's module, dispatch keeps
   reaching the pre-reload class, so a parsed layer fails :func:`isinstance`

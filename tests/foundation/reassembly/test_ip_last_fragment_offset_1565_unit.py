@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 """IP reassembly buffers a fragment that reaches octet 65,528.
 
-GitHub issue #1565. The data buffer holds 65,535 octets, but the received-bit
-table ``RCVBT`` had only 8,191 entries, one per 8-octet block, which cover
-octets 0 to 65,527. A fragment whose data reached octet 65,528 -- the last
-fragment at the largest Fragment Offset, 8191, among them -- made
+GitHub issue #1565. The data buffer holds 65,535 octets. Guards against a
+received-bit table ``RCVBT`` of only 8,191 entries, one per 8-octet block, which
+cover octets 0 to 65,527: a fragment whose data reaches octet 65,528 -- the last
+fragment at the largest Fragment Offset, 8191, among them -- then makes
 :meth:`IP._detect_conflicts <pcapkit.foundation.reassembly.ip.IP._detect_conflicts>`
-index past the table, and the whole extraction raised :exc:`IndexError`. The
+index past the table, and the whole extraction raises :exc:`IndexError`. The
 table has 8,192 entries, the partial last block included.
 
 Every case builds its fragments in memory and reads no capture. Classes are

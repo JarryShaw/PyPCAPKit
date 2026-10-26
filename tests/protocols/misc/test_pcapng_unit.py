@@ -253,9 +253,9 @@ class PCAPNGUnitTests(unittest.TestCase):
         self.assertEqual(option_map.get(_option_key(OptionType.get(2, namespace='opt')), 'unknown'), 'unknown')
 
     def test_unregistered_pcapng_codes_do_not_mutate_the_class_registries(self) -> None:
-        """Parsing must not write to any of PCAP-NG's four dispatch registries.
+        """Parsing must not write to any of PCAP-NG's dispatch registries.
 
-        #425's defect, four times over. ``__block__``, ``__option__``,
+        #425's defect, once per registry. ``__block__``, ``__option__``,
         ``__record__`` and ``__secrets__`` are each a
         :class:`collections.defaultdict` on a class attribute shared by every
         :class:`~pcapkit.protocols.misc.pcapng.PCAPNG` instance in the process, so
@@ -2906,7 +2906,7 @@ class PCAPNGUnitTests(unittest.TestCase):
         ]
 
     def test_pcapng_every_block_schema_packs(self) -> None:
-        # Regression for #366: seven of the eleven block schemas could not be
+        # Regression for #366: most of the block schemas could not be
         # packed at all, from four independent causes -- a ``BytesField``
         # standing in for a ``PaddingField``, an option length callback reading
         # a ``PaddingField``'s value, ``Schema.pre_pack`` never being called,
@@ -3414,10 +3414,11 @@ class PCAPNGUnitTests(unittest.TestCase):
 
         #361: ``_read_timestamp`` added ``tzone.utcoffset(None)`` to the epoch
         it returned, and ``_get_timezone`` fell back to the *reading host's* zone
-        whenever the capture named no ``if_tzone`` -- which
-        draft-ietf-opsawg-pcapng-02 §4.2 says should be the normal case, since
-        the option "SHOULD NOT be used". So the same file parsed to a different
-        absolute time on every host, by that host's UTC offset.
+        whenever the capture named no ``if_tzone`` -- which the Interface
+        Description Block section of draft-ietf-opsawg-pcapng-02 says should be
+        the normal case, since the option "SHOULD NOT be used". So the same
+        file parsed to a different absolute time on every host, by that host's
+        UTC offset.
 
         The defect is invisible on a UTC machine, which is why it survived, so
         this drives several zones explicitly and asserts they were really
@@ -3816,9 +3817,7 @@ class PCAPNGOptionAreaBoundTests(unittest.TestCase):
         :class:`~pcapkit.corekit.fields.strings.StringField` repair a negative
         width in ``pre_process``, resetting it to ``len(value)``, so the pack
         path cannot see the guard at all. It is kept as a no-regression check
-        rather than as a discriminator;
-        :meth:`test_a_negative_remainder_is_left_alone_rather_than_clamped_to` is
-        the input that actually exercises the guard.
+        rather than as a discriminator.
 
         """
         from pcapkit.protocols.schema.misc.pcapng import UnknownOption
@@ -3956,7 +3955,7 @@ class PCAPNGTruncatedFileTests(unittest.TestCase):
     """
 
     #: The result of :meth:`_sweep`, computed by the first test that asks for it
-    #: and shared by the other three: one extraction per octet of the sample is
+    #: and shared by the rest: one extraction per octet of the sample is
     #: this class's whole cost (GitHub issue #1062).
     _swept = None  # type: tuple[dict[int, int], dict[int, BaseException]] | None
 
@@ -4609,7 +4608,7 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
     def test_a_trailing_separator_with_no_padding_still_starts_an_entry(self) -> None:
         """A trailing separator landing exactly on the last octet is not dropped.
 
-        The two tests above see their trailing separator followed by the
+        The tests above see their trailing separator followed by the
         block's own NUL padding, which the walk also treats as ending an
         entry -- so the extra empty entry that padding produces stands in for
         the one the separator itself should produce, and can hide a gap.
@@ -4685,7 +4684,7 @@ class PCAPNGNegativeLengthTests(unittest.TestCase):
         :exc:`UnicodeDecodeError` is a :exc:`ValueError`, so it is neither in
         :mod:`pcapkit.utilities.exceptions` nor an :exc:`EOFError`. The octet is
         reported, and since the replaced text would not rebuild it, the entry is
-        kept as captured. Asserted for all three sites that decode -- a field
+        kept as captured. Asserted for each site that decodes -- a field
         name, a key and a value.
 
         """

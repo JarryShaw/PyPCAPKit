@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Two user-facing messages are spelt correctly.
+"""The IPv4 timestamp warning and the MH prefix error are spelt correctly.
 
 GitHub issue #2171: :meth:`TSOption.post_process
 <pcapkit.protocols.schema.internet.ipv4.TSOption.post_process>` warned of an

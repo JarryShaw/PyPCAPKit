@@ -5,8 +5,7 @@
 ``peek`` one, for :class:`~pcapkit.foundation.extraction.Extractor` (#1506,
 #1509). :class:`~pcapkit.corekit.io.NamedStream` gives a stream the ``name``
 :func:`pcapfile.savefile.load_savefile` reads, for the PyPCAPFile engine
-(formerly the file-local ``_NamedStream`` in
-:mod:`pcapkit.foundation.engines.pypcapfile`). Both live beside
+(:mod:`pcapkit.foundation.engines.pypcapfile`). Both live beside
 :class:`~pcapkit.corekit.io.SeekableReader`.
 
 Every class is imported from :mod:`pcapkit.corekit.io` inside each test, after

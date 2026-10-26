@@ -9,17 +9,16 @@ the rendered reports :file:`examples/legacy_smoke/` produces out of those two
 inputs -- :file:`out.json`, :file:`out.plist`, :file:`out.txt` and
 :file:`pcapng.txt`, via ``make fixtures`` there.
 
-Those reports were tracked once, and GitHub issue #685 is why they are not. A
-tracked report has no reader: no test asserts on one, and the documentation
-only quotes them as prose. So a parser change that alters how a
-frame renders leaves the committed copy wrong with nothing anywhere to say so --
-:file:`pcapng.txt` sat recording ``packet -> NIL`` for blocks that had
-started carrying their captured octets, and it was found by somebody reading the
-file rather than by anything failing.
+GitHub issue #685 is why those reports are not tracked. A tracked report has no
+reader: no test asserts on one, and the documentation only quotes them as prose.
+So a parser change that alters how a frame renders leaves a committed copy wrong
+with nothing anywhere to say so -- #685 found :file:`pcapng.txt` recording
+``packet -> NIL`` for blocks that carried their captured octets, by somebody
+reading the file rather than by anything failing.
 
-Untracking them fixed that instance. This module is what keeps it fixed, because
-the mistake is one commit away in either direction and neither direction looks
-interesting in a diff review:
+This module keeps the reports out of the index, because the mistake is one
+commit away in either direction and neither direction looks interesting in a
+diff review:
 
 * ``git add -f examples/captures/out.txt`` on a freshly rebuilt report puts the
   staleness straight back, :file:`.gitignore` notwithstanding -- and so would a
@@ -45,7 +44,7 @@ from tests import _tiers
 
 #: Reports rendered by :file:`examples/legacy_smoke/`, none of which git tracks.
 #: Named explicitly, rather than derived as "everything without a capture
-#: suffix", because these are the ones that were tracked and the ones any
+#: suffix", because these are the ones #685 is about and the ones any
 #: regression would most likely reinstate.
 RENDERED_REPORTS = ('out.json', 'out.plist', 'out.txt', 'pcapng.txt')
 #: The captures that must stay committed, because nothing regenerates them:
@@ -138,7 +137,7 @@ class TrackedCaptureTests(unittest.TestCase):
 class ReportReadTests(unittest.TestCase):
     """That no test module reads a rendered report as though it were a capture.
 
-    This is the regression untracking invites, and it is *not* covered by the
+    This is the regression an untracked report invites, and it is *not* covered by the
     tier guard's own audit. That audit only flags a **unit-tier** module reading
     a capture git does not track. These reports are worse than untracked: nothing
     rebuilds them as part of fixture generation either, because

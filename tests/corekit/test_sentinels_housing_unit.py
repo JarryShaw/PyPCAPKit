@@ -20,17 +20,16 @@ moved name keeps no re-export at its old path;
 ``tests/project/test_no_moved_name_re_exports_1744_unit.py`` pins that.
 
 Without #922 the sentinels module does not exist, which is exactly what makes
-this a regression test rather than a description: at ``d31c0aaf6``, a ``main``
-commit without #922, ``import pcapkit.corekit.sentinels`` itself
-fails --
+this a regression test rather than a description:
+``import pcapkit.corekit.sentinels`` itself fails --
 
 .. code-block:: text
 
    ModuleNotFoundError: No module named 'pcapkit.corekit.sentinels'
 
 -- so every test below, including the module-level import at the top of this
-file, fails before its body ever runs. Quoted from an actual run against that
-commit, not inferred:
+file, fails before its body ever runs. Quoted from an actual run against
+``d31c0aaf6``, a ``main`` commit without #922, not inferred:
 
 .. code-block:: text
 
@@ -254,7 +253,8 @@ class PicklePayloadTests(unittest.TestCase):
         self.null = self.sentinels.NULL
 
     def test_a_freshly_written_payload_names_the_new_home(self) -> 'None':
-        """Every protocol names the new home, never the old one, and loads back."""
+        """Every protocol names :mod:`pcapkit.corekit.sentinels`, never
+        ``pcapkit.corekit.module``, and loads back."""
         for protocol in range(0, pickle.HIGHEST_PROTOCOL + 1):
             with self.subTest(protocol=protocol):
                 blob = pickle.dumps(self.null, protocol=protocol)

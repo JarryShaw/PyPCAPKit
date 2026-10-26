@@ -3,8 +3,9 @@
 
 GitHub issue #1360: the label is built from the packet that opens a flow, and the
 output file is named after it and opened -- truncating it -- when the flow starts.
-Two flows opened on the same endpoints at the same capture timestamp got one label
-and one file, and the later flow erased the earlier one's frames. That happens
+Without the fix, two flows opened on the same endpoints at the same capture
+timestamp get one label and one file, and the later flow erases the earlier one's
+frames. That happens
 unidirectionally when a direction resumes after its FIN, and bidirectionally when a
 new connection reuses a torn-down conversation's endpoints.
 

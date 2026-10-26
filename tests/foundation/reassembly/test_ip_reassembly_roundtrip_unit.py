@@ -1,13 +1,14 @@
 # -*- coding: utf-8 -*-
 """IP reassembly reports exactly the octets it received.
 
-- GitHub issue #1357: a snaplen-truncated fragment shrank the data buffer and
-  marked its whole declared range received, so the datagram came out
+- GitHub issue #1357: a snaplen-truncated fragment that shrinks the data buffer
+  and marks its whole declared range received makes the datagram come out
   ``COMPLETE`` with zeros in it and the rest shifted.
-- GitHub issue #1358: ``strict`` runs copied whole 8-octet blocks past the
-  total data length, and dropped a run that reached the end of the bit table.
+- GitHub issue #1358: ``strict`` runs must neither copy whole 8-octet blocks
+  past the total data length nor drop a run that reaches the end of the bit
+  table.
 - GitHub issue #1359: a datagram whose total data length is ``0`` never
-  completed, because the length was tested for truthiness.
+  completes if the length is tested for truthiness.
 
 Every case builds its fragments in memory and reads no capture. Classes are
 imported inside each test, after :func:`~tests._support.reimport_once_per_class`.

@@ -70,8 +70,8 @@ exists to stop and which #779 avoids the same way for the sibling ``mypy``
 check.
 
 The install line is the other half. ``isort`` is a ``test`` extra requirement,
-so the pytest jobs whose selection collects this module -- ``test`` and
-``gate``, not ``engine-tests`` (#849) -- run it for real rather than reporting
+so the pytest jobs whose selection collects this module -- ``project-tests``
+and ``gate``, not ``engine-tests`` (#849) -- run it for real rather than reporting
 a skip. That is the opposite resolution from ``mypy``'s, whose
 :data:`~tests._dependency_gates.DEPENDENCY_GATE_EXCLUSIONS` entry declines the
 install line, and the difference is not taste: :file:`lint.yml` already runs
@@ -82,8 +82,7 @@ not one of the linters it installs -- it appears only in
 on a schedule rather than as a check. So declining the install line here would
 leave ``make isort``'s verdict checked nowhere at all, which is what #766
 objected to. It is cheap enough to be uncontroversial, too: the lines below
-take about 1.5s together, the "costs nothing per leg" category the test job's
-own install comment puts ``DPKT`` in rather than the ``Scapy`` one.
+take about 1.5s together.
 
 ``isort`` is in ``Pipfile``'s ``[dev-packages]`` too (#810) -- that being what
 ``make isort``'s own ``pipenv run`` prefix resolves against, so the target does

@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""OSPF rebuilds byte for byte from the dict form of its info, :issue:`1464`.
+"""OSPF rebuilds byte for byte from the dict form of its info, #1464.
 
 Under cryptographic authentication (AuType 2) the ``auth`` field is a
 :class:`~pcapkit.protocols.data.application.ospf.CryptographicAuthentication`,

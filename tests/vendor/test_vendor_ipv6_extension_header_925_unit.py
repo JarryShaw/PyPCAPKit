@@ -187,7 +187,7 @@ def _normalize(context: 'str') -> 'str':
 
 @unittest.skipUnless(HAS_VENDOR_DEPS, f'vendor extra not installed ({", ".join(VENDOR_DEPS)})')
 class ExtensionHeaderVendorTests(unittest.TestCase):
-    """The crawler fix: correct registry, 3-column parser, names preserved."""
+    """The crawler: authoritative registry, 3-column parser, names preserved."""
 
     if TYPE_CHECKING:
         vendor_module: 'Any'
@@ -271,7 +271,7 @@ class ExtensionHeaderVendorTests(unittest.TestCase):
         # Documents the divergence rather than hiding it: these five members'
         # *comments* differ from the committed const file because the two
         # registries carry different Reference/Description text for the same
-        # header -- not because the new parser mishandles them. Names and
+        # header -- not because the parser mishandles them. Names and
         # values still match EXPECTED_MEMBERS exactly (see the sibling test).
         vendor, lines = self._vendor()
         enum, _ = vendor.process(lines)

@@ -170,7 +170,7 @@ class DecoratorTests(unittest.TestCase):
         self._assert_call_shape_result(DemoSchema.unpack(b'payload', 7))
 
     def test_prepare_accepts_data_length_and_packet_positionally(self) -> None:
-        """``unpack(data, length, packet)`` -- the shape that never needed the fix."""
+        """``unpack(data, length, packet)`` -- the one shape that works without the fix."""
         DemoSchema = self._demo_schema_for_call_shapes()
         self._assert_call_shape_result(DemoSchema.unpack(b'payload', 7, {}))
 

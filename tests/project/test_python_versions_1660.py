@@ -13,8 +13,10 @@ step outputs. These things are pinned here:
   on the ``python3`` of every runner that runs it.
 * **Nothing moved.** The tiers as #1660 introduced them expand to exactly
   the legs, in the same order, that ``main`` spelt out at :data:`MAIN`, apart
-  from the one deliberate move: the coverage leg and the ``gate`` from 3.14 to
-  ``latest``, 3.15. Job-name templates are compared too, since rulesets match
+  from the deliberate moves: the coverage leg and the ``gate`` from 3.14 to
+  ``latest``, 3.15 (#1661); PyPy's legs in ``test`` and ``integration`` (#1958);
+  the conda jobs' Intel macOS and Windows legs (#1822, #2060); and unit-tests.yml's
+  KTLO legs in jobs of their own (#1738). Job-name templates are compared too, since rulesets match
   check names literally. Where git still has :data:`MAIN`, the recorded
   matrices are read back against it.
 * **Every version comes from the file.** No workflow pins a Python version --
@@ -334,7 +336,7 @@ EXPERIMENTAL_TEMPLATE = 'Python ${{ matrix.python-version }} (experimental)'
 
 
 def render(template: 'str', leg: 'dict[str, Any]') -> 'str':
-    """A matrix job's name for one leg, for the three expression shapes these names use."""
+    """A matrix job's name for one leg, for the expression shapes these names use."""
     name = template.replace("${{ matrix.ktlo && ' (KTLO)' || '' }}", ' (KTLO)' if leg.get('ktlo') is True else '')
     name = name.replace("${{ matrix.experimental && ' (experimental)' || '' }}",
                         ' (experimental)' if leg.get('experimental') is True else '')
@@ -578,7 +580,8 @@ class TestTheFileAndTheScript(unittest.TestCase):
         """On 3.8-3.10 these modules skip, or their tests do, rather than fail to import.
 
         Run in a fresh interpreter whose ``import tomllib`` fails, as it does there,
-        where the two scripts that read the file cannot load at all. That
+        where :file:`util/python_versions.py` and :file:`util/ci_timing.py`, which
+        read the file, cannot load at all. That
         interpreter may already hold :mod:`tomllib`: on the coverage leg,
         ``patch = subprocess`` starts coverage in it, which reads its TOML
         config first. So the module is dropped and its entry set to ``None``,
@@ -632,7 +635,7 @@ class TestTheFileAndTheScript(unittest.TestCase):
 
 
 class TestNothingMovedButLatest(unittest.TestCase):
-    """The file reproduces every matrix ``main`` spelt out, but for the coverage leg."""
+    """The file reproduces every matrix ``main`` spelt out, but for the deliberate moves."""
 
     @classmethod
     def setUpClass(cls) -> None:
@@ -640,7 +643,10 @@ class TestNothingMovedButLatest(unittest.TestCase):
             cls.values = script().outputs(script().load(write_tiers(pathlib.Path(tmp), TIERS_AT_MAIN)))
 
     def test_every_matrix_expands_to_mains_legs(self) -> None:
-        """Same legs, same order; the coverage leg moves from 3.14 to ``latest`` (#1661), and PyPy's join (#1958).
+        """Same legs, same order; the coverage leg moves from 3.14 to ``latest`` (#1661), PyPy's join (#1958).
+
+        The conda jobs' ``os`` axis adds Intel macOS and Windows (#1822, #2060), and
+        the KTLO legs of each job in :data:`KTLO_TWINS` are its twin's (#1738).
 
         Where the clone holds :data:`MAIN`, :data:`MAIN_MATRICES` is read back
         against it first, so the comparison is with what ``main`` really ran.
@@ -1013,7 +1019,7 @@ class TestTheProseFollowsTheFile(unittest.TestCase):
         self.assertEqual(re.findall(r'\* - ``Compat Python (3\.\d+)``', page), self.supported)
 
     def test_the_workflows_page_cites_each_version_by_its_key(self) -> None:
-        """The required contexts' rows, and the two tiers' spans under them, cite the file's keys (#2165).
+        """The required contexts' rows, and the supported and KTLO spans under them, cite the file's keys (#2165).
 
         A key names its entry; a line number has to be looked up, so none is cited.
 
@@ -1054,7 +1060,7 @@ class TestTheProseFollowsTheFile(unittest.TestCase):
                 self.assertEqual(re.findall(pattern, prose(ROOT / path)), [self.latest])
 
 
-#: The two builds as setup-python spells them, at actions/setup-python 3892123fb: a
+#: The experimental builds as setup-python spells them, at actions/setup-python 3892123fb: a
 #: free-threaded CPython as ``3.14t`` (src/find-python.ts's ``desugarFreeThreadedVersion``,
 #: ``/^(\d+\.\d+(\.\d+)?)(t)$/``), and GraalPy as ``graalpy-<version>``
 #: (src/find-graalpy.ts's ``parseGraalPyVersion``; README.md's "Basic usage",

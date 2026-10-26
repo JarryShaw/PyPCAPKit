@@ -1,19 +1,19 @@
 # -*- coding: utf-8 -*-
 """The field modules' :attr:`__all__` lists keep in step with one another.
 
-GitHub issue #2174. :mod:`pcapkit.corekit.fields.misc` left
+GitHub issue #2174 found :mod:`pcapkit.corekit.fields.misc` leaving
 :class:`~pcapkit.corekit.fields.misc.SchemaField` and
 :func:`~pcapkit.corekit.fields.misc.nested_packet_context` out of its
-:attr:`__all__`, :mod:`pcapkit.corekit.fields.strings` left out
+:attr:`__all__`, :mod:`pcapkit.corekit.fields.strings` leaving out
 :class:`~pcapkit.corekit.fields.strings.BytesField`, and
 :mod:`pcapkit.corekit.fields`, :mod:`pcapkit.corekit` and
-:mod:`pcapkit.all` all left out
+:mod:`pcapkit.all` all leaving out
 :class:`~pcapkit.corekit.fields.misc.SwitchField` and
 :class:`~pcapkit.corekit.fields.numbers.PortEnumField`, so ``import *`` from any
 of them dropped documented field classes.
 :mod:`tests.project.test_all_exports_unit` checks :mod:`pcapkit.all` against
-:mod:`pcapkit.corekit`, but nothing checked the field package against its own
-submodules, nor :mod:`pcapkit.corekit` against the field package it re-lists by
+:mod:`pcapkit.corekit`; this module checks the field package against its own
+submodules, and :mod:`pcapkit.corekit` against the field package it re-lists by
 hand.
 
 The same issue found :meth:`DeferredPacket.to_dict
@@ -94,8 +94,8 @@ class FieldsExportsTests(unittest.TestCase):
 
     def test_each_field_is_exported_by_its_own_module(self) -> None:
         # The converse of the check above: a field the package exports is
-        # also in the __all__ of the module defining it. strings.__all__ had
-        # dropped BytesField, and misc.__all__ SchemaField (#2174).
+        # also in the __all__ of the module defining it. Guards against
+        # strings.__all__ dropping BytesField and misc.__all__ SchemaField (#2174).
         for name in pcapkit.corekit.fields.__all__:
             home = getattr(pcapkit.corekit.fields, name).__module__
             with self.subTest(name=name, module=home):

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """#1963: GraalPy's leg runs its tier in shards, so no xdist worker outlives its heap.
 
-#1753 gives every GraalPy process a 2 GiB heap and an exit once it is spent, and a
+#1740 gives every GraalPy process a 2 GiB heap and #1753 an exit once it is spent, and a
 worker's live heap grows with every test it runs. Over the curated ``ALL`` tier
 that took job 118912680486's workers to 2.5-3.0 GB RSS and nine of them down, each
 failing the test it ran, though each such test passes alone. So ``Run unit tests``
@@ -11,8 +11,9 @@ own, all under the step's one ``timeout``, scope and watcher. 3.14t's leg runs
 pytest once.
 
 :class:`TestTheStep` reads the step, :class:`TestTheStepRuns` runs it with
-``sudo`` and ``python`` stubbed on ``PATH``, and :class:`TestTheScript` runs the
-script alone.
+``sudo`` and ``python`` stubbed on ``PATH``, :class:`TestTheShardsPartitionTheTier`
+collects the tier through the script, and :class:`TestTheScript` runs the script
+alone.
 
 """
 

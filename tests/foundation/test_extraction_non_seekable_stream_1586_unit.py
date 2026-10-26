@@ -2,23 +2,24 @@
 """Extracting from a pipe or another non-seekable stream drops no frame (#1586).
 
 ``examples/captures/http.pcap`` holds 1,117 frames. Read by path the default
-engine gets all of them; piped in -- ``cat http.pcap | ...`` with ``fin`` set to
-``sys.stdin.buffer``, an :func:`os.pipe` written in 4,096-octet chunks, or a raw
-stream answering short -- it got 870, silently, with ``no_eof`` or without.
-Frame 870 is the first to end past the window
+engine gets all of them. Without the fix, piped in -- ``cat http.pcap | ...``
+with ``fin`` set to ``sys.stdin.buffer``, an :func:`os.pipe` written in
+4,096-octet chunks, or a raw stream answering short -- it gets 870, silently,
+with ``no_eof`` or without. Frame 870 is the first to end past the window
 :class:`~pcapkit.corekit.io.SeekableReader` keeps over such a stream, 131,072
-octets on CPython 3.14. Cut into seven-octet reads it got none at all, and
-one-octet reads failed on the magic number.
+octets on CPython 3.14. Cut into seven-octet reads it gets none at all, and
+one-octet reads fail on the magic number.
 
-The frame readers measure what is left with ``seek(0, SEEK_END)``, and the
-reader answered that with its window's far edge -- once the window has filled,
-exactly how far the stream has been read, so the next record measured nothing
-left. ``read`` and a forward ``seek`` took one short answer from the stream as
-all there was, and ``Extractor`` took a short ``peek`` for a short file. See
+The frame readers measure what is left with ``seek(0, SEEK_END)``. Guards
+against the reader answering that with its window's far edge -- once the window
+has filled, exactly how far the stream has been read, so the next record
+measures nothing left -- against ``read`` and a forward ``seek`` taking one short
+answer from the stream as all there was, and against ``Extractor`` taking a
+short ``peek`` for a short file. See
 :mod:`tests.corekit.test_io_seekable_reader_short_reads_1586_unit` for the
-reader itself. Reading a buffer's worth ahead to measure each record then held a
-live capture's frames back until that much more had arrived, so the engines read
-ahead only as far as the record they are about to parse.
+reader itself. Reading a buffer's worth ahead to measure each record would hold
+a live capture's frames back until that much more has arrived, so the engines
+read ahead only as far as the record they are about to parse.
 
 The captures here are built in memory, past two windows of the default buffer,
 so the window fills and slides whatever :data:`io.DEFAULT_BUFFER_SIZE` the
@@ -323,10 +324,10 @@ class TestNonSeekableStream(unittest.TestCase):
     def test_a_record_longer_than_the_buffer_reads_as_from_a_file(self) -> None:
         """A record the buffer cannot hold is read whole, as it is from a file.
 
-        The read-ahead was capped at the buffer, so a PCAP-NG block longer than it was
-        measured short and parsed as cut, and a PCAP record slid out of the buffer
-        before its reader sought back to it, which failed with ``cannot seek before
-        the beginning of the buffer``.
+        Guards against a read-ahead capped at the buffer, with which a PCAP-NG
+        block longer than it is measured short and parsed as cut, and a PCAP
+        record slides out of the buffer before its reader seeks back to it, which
+        fails with ``cannot seek before the beginning of the buffer``.
 
         """
         for kind in ('pcap', 'epb', 'shb'):
@@ -341,9 +342,9 @@ class TestNonSeekableStream(unittest.TestCase):
         """The dpkt engine seeks back to the first octet once the section header is read.
 
         That is :meth:`Extractor.record_header
-        <pcapkit.foundation.extraction.Extractor.record_header>`, which failed with
-        ``cannot seek before the beginning of the buffer: 0`` once the section header
-        had slid out of it.
+        <pcapkit.foundation.extraction.Extractor.record_header>`, which without the
+        fix fails with ``cannot seek before the beginning of the buffer: 0`` once
+        the section header has slid out of it.
 
         """
         data = oversize('shb')
@@ -356,9 +357,9 @@ class TestNonSeekableStream(unittest.TestCase):
         The PCAP-NG engine reads a stream ahead only as far as the next block, but two
         kinds of block are parsed past that: one shorter than its own fixed fields,
         and a Decryption Secrets Block whose Secrets Length runs past it. Read only as
-        far as the block, the first warned ``packet length < 0`` where the file did
-        not, and the second was kept as cut where the file read the blocks after it
-        as secrets and failed.
+        far as the block, the first warns ``packet length < 0`` where the file does
+        not, and the second is kept as cut where the file reads the blocks after it
+        as secrets and fails.
 
         """
         import pcapkit.utilities.exceptions as errors  # pylint: disable=import-outside-toplevel
@@ -382,7 +383,7 @@ class TestNonSeekableStream(unittest.TestCase):
                     self.assertEqual(got, expected)
 
     def test_a_packet_block_before_any_interface_fails_as_from_a_file(self) -> None:
-        """The engine's look at the next block type was a ``peek``, short on a pipe."""
+        """The engine's look at the next block type is not cut short on a pipe."""
         import pcapkit.utilities.exceptions as errors  # pylint: disable=import-outside-toplevel
 
         data = make_pcapng()

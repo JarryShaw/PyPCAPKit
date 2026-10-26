@@ -1114,9 +1114,8 @@ class SCTPUnitTests(unittest.TestCase):
         :meth:`~pcapkit.protocols.transport.sctp.SCTP.register_chunk` and its
         siblings report an overwrite of something nobody registered.
 
-        The chunk type is unassigned by IANA, and both the parameter type and the
-        error cause code are drawn from the ``0xFFF0``-and-up range :rfc:`9260`
-        reserves for IETF-Defined extensions, so nothing is expected to register
+        The chunk type, the parameter type and the error cause code (both
+        ``0xFFF0``) are all unassigned by IANA, so nothing is expected to register
         them.
 
         """

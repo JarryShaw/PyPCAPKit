@@ -2,9 +2,9 @@
 """The workflows page's "At a Glance" table and graph, against the files.
 
 :file:`docs/source/contributing/workflows.rst` tabulates the triggers of each
-workflow under :file:`.github/workflows/` and draws them as a graph. #1732 added
-:file:`experimental.yml` and left both without it, so each is checked here against
-the ``on:`` block of every file: one table row per file with its name and
+workflow under :file:`.github/workflows/` and draws them as a graph. A file can
+land with neither a row nor a node, as :file:`experimental.yml` did (#1732), so
+each is checked here against the ``on:`` block of every file: one table row per file with its name and
 triggers, and one graph node per file with an edge for each ``push``,
 ``pull_request`` and ``workflow_run`` trigger. The page states no count of the
 files (#1103's ruling, #1811); the row and node per file are what keep it whole.

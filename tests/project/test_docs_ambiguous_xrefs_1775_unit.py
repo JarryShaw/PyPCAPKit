@@ -1,23 +1,22 @@
 # -*- coding: utf-8 -*-
 """Pins the fixes for the docs build's ambiguous cross-references.
 
-GitHub issue #1775: the docs build gave ``more than one target found for
-cross-reference`` warnings, and every one of those links landed on the wrong
-object. They had these causes, each fixed where it starts rather than at the
-references:
+GitHub issue #1775: ``more than one target found for cross-reference`` warnings
+in the docs build, each a link landing on the wrong object. These are their
+causes, each fixed where it starts rather than at the references:
 
-* A bare builtin name in a type -- ``dict``, ``type``, ``set`` -- was
+* A bare builtin name in a type -- ``dict``, ``type``, ``set`` -- is
   suffix-matched to registry members such as ``TCP.dict``.
   ``resolve_builtins_exactly`` in :file:`docs/source/conf.py` stops it.
-* Napoleon read a URL's colon in a registry member's docstring as Google's inline
-  ``type: description`` form, and the bogus type was then parsed as references --
+* Napoleon reads a URL's colon in a registry member's docstring as Google's inline
+  ``type: description`` form, and the bogus type is then parsed as references --
   ``http``, ``Echo``. ``save_enum_member_docstring`` and
   ``restore_enum_member_docstring`` undo it.
-* Hand-written ``.. data::`` and ``.. function::`` directives spelled out their
-  full dotted name under a ``.. module::`` that already supplied it, so each was
-  registered as ``<module>.<module>.<name>``. The exact lookup for a TypeVar such
-  as ``_AT`` then failed, and the fuzzy one found every ``_AT`` in the package --
-  the remaining warnings.
+* A hand-written ``.. data::`` or ``.. function::`` directive spelling out its
+  full dotted name under a ``.. module::`` that already supplies it is registered
+  as ``<module>.<module>.<name>``. The exact lookup for a TypeVar such as ``_AT``
+  then fails, and the fuzzy one finds every ``_AT`` in the package.
+  :class:`DirectiveNameTests` keeps every directive to the bare name.
 
 The hook tests drive the hooks with the nodes Sphinx's own producers build and
 with napoleon itself, and check that ``setup`` connects each one where the build

@@ -68,7 +68,7 @@ def _toctree_entries(text: 'str') -> 'list[str]':
 
 
 class SentinelsAPIPageTests(unittest.TestCase):
-    """The page GitHub issue #934 added, and its registration in the toctree."""
+    """The API page GitHub issue #934 asks for, and its registration in the toctree."""
 
     def test_page_exists(self) -> 'None':
         """The API page itself is present on disk."""
@@ -101,7 +101,7 @@ class SentinelsAPIPageTests(unittest.TestCase):
         inventory does not care whether a page is reachable from a toctree --
         but it produces a distinct "document isn't included in any toctree"
         warning, which is a different defect from the one GitHub issue #934
-        reports. Pinning both closes the two ways this fix can go wrong.
+        reports. Pinning both closes both ways the page can fail.
 
         """
         entries = _toctree_entries(INDEX.read_text(encoding='utf-8'))

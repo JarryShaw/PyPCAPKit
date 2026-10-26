@@ -2,9 +2,9 @@
 """Tests for the apt ``.deb`` cache and fallback mirror in :file:`unit-tests.yml` (#1432).
 
 #1432: ``azure.archive.ubuntu.com`` served ~75 kB/s, so ``timeout 180`` killed
-both tshark install attempts, three times in one day. The fix wraps the install
-step (pinned by :class:`tests.project.test_unit_tests_queue.TestAptRetry`) with
-a plan step that computes a cache key, ``actions/cache``
+both tshark install attempts, three times in one day. So the install step
+(pinned by :class:`tests.project.test_unit_tests_queue.TestAptRetry`) is wrapped
+with a plan step that computes a cache key, ``actions/cache``
 restore/seed/collect/save steps, and a retry that drops azure from the runner's
 ``mirror+file:`` list.
 
@@ -19,8 +19,8 @@ reading the step text where only the Actions runner could execute it:
   install step installs, for every engine in the matrix, since both read it;
 * the key is ``apt-debs-<ImageOS>-<arch>-<APT_SET>-<digest>`` of the sorted
   ``Inst`` lines, and ``restore-keys`` is that same-image, same-set prefix only;
-* only one job per key saves, so ``pypcap-parity``'s two cells do not race to
-  reserve the same entry.
+* only one job per key saves, so the parity cells of ``pypcap-parity`` and
+  ``pypcap-parity-ktlo`` do not race to reserve the same entry.
 
 """
 

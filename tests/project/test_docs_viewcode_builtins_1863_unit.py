@@ -3,8 +3,8 @@
 
 GitHub issue #1863: each ``BufferID`` alias is a subscripted ``Tuple``, which is
 the builtin :class:`tuple` on every Python the docs build on, so it reports
-``__module__ == 'builtins'``. viewcode followed that, and its module index linked
-a ``builtins.html`` that is never written. ``follow_builtins_alias`` in
+``__module__ == 'builtins'``. Left to itself, viewcode follows that, and its module
+index links a ``builtins.html`` that is never written. ``follow_builtins_alias`` in
 :file:`docs/source/conf.py` keeps viewcode on the module that binds such a name.
 
 The tests call the hook directly and replay the event through Sphinx's own

@@ -51,12 +51,12 @@ class NonStrKeyTests(unittest.TestCase):
         return caught.exception
 
     def test_a_bytes_key_raises_instead_of_returning_a_bytes_keyed_member(self) -> 'None':
-        """Was ``<Command.b'\\x01': None>`` -- a member, not an error."""
+        """Guards against returning ``<Command.b'\\x01': None>`` -- a member, not an error."""
         self._refused(b'\x01')
         self._refused(b'ABOR')
 
     def test_an_int_key_raises_the_in_library_error(self) -> 'None':
-        """Was a builtin :exc:`AttributeError` from ``key.upper()``."""
+        """Guards against a builtin :exc:`AttributeError` from ``key.upper()``."""
         error = self._refused(-1)
         self.assertNotIsInstance(error, AttributeError)
         self.assertIsInstance(error, ValueError)
@@ -171,7 +171,7 @@ class ShapeTests(unittest.TestCase):
 
 
 class FEATCodeUnaffectedTests(unittest.TestCase):
-    """``FEATCode.get`` already delegated a non-``str`` key, so it never had the defect."""
+    """``FEATCode.get`` delegates a non-``str`` key to the base, so it has no such defect."""
 
     def test_a_non_str_key_raises_the_in_library_error(self) -> 'None':
         from pcapkit.const.ftp.command import FEATCode

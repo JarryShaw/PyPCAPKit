@@ -27,9 +27,8 @@ Why a round trip cannot see it
 Three things can hide it at once, and the third is the reason this module asserts
 against the RFC's arithmetic rather than against a round trip.
 
-1. With two copies of each parameter in a frame (``HIP_COPIES = 2`` in
-   :mod:`examples.generators.options`), two four-octet shortfalls sum to eight,
-   so the record area stays 8-aligned and ``HIP.make``'s
+1. With two copies of each parameter in a frame, two four-octet shortfalls sum
+   to eight, so the record area stays 8-aligned and ``HIP.make``'s
    ``total_length // 8 + 4`` comes out exact.
 2. A padding rule that aligns the parameter *contents* rather than the record
    (the #651 defect) appends, at ``Length = 12``, exactly the four surplus octets
@@ -45,7 +44,8 @@ A zero counter hides it from the fixture too
 --------------------------------------------
 
 Without an entry in ``_hip_overrides()``, the generator builds ``R1_COUNTER``
-with ``counter = 0``. Given the four-octet field, an RFC-only walk over
+with ``counter = 0``. Given the four-octet field and two copies of each
+parameter in a frame, an RFC-only walk over
 :file:`options-internet.pcap` reads ``Length = 12``, advances 16 over a 12-octet
 record, lands four octets inside the second copy, and finds a phantom
 ``Type = 0, Length = 0`` record in that copy's own zeroed contents -- whose
@@ -174,8 +174,8 @@ class HIPR1CounterWidthTests(unittest.TestCase):
         parameter that is not a multiple of eight on its own cannot survive
         alone -- the floor division drops the remainder. Measured on
         ``f0999858e`` this raised ``ProtocolError: HIPv2: invalid format`` at
-        both codes; the two-copy pairing in
-        :mod:`examples.generators.options` is what concealed that.
+        both codes; pairing two copies of the parameter in one frame conceals
+        that.
 
         Code 128 is deliberately not exercised here. ``R1CounterParameter`` is
         registered for 128 as well as 129 (#690), so 128 reaches this same

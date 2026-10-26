@@ -192,8 +192,9 @@ class TCPMPTCPSubtypeUnitTests(unittest.TestCase):
     def test_dss_subtype_round_trips(self) -> None:
         """``DSS`` built through ``TCP()`` reports its own subtype.
 
-        ``ack`` alone (no ``dsn``) keeps clear of the unrelated length-arithmetic defect
-        of #576, which is not what this test is about.
+        ``ack`` alone (no ``dsn``) keeps the case off the DSS length arithmetic of #576,
+        which :mod:`tests.protocols.transport.test_tcp_mptcp_length_arithmetic_unit`
+        covers and which is not what this test is about.
 
         """
         from pcapkit.const.tcp.mp_tcp_option import MPTCPOption as Enum_MPTCPOption

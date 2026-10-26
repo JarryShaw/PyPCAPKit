@@ -1,8 +1,8 @@
 # -*- coding: utf-8 -*-
 """HTTP/2 frames rebuild byte for byte through ``from_data``.
 
-The application round-trip audit (#1202) found seven ways a parsed HTTP/2
-frame lost octets on rebuild, and one way ``make`` refused its own input:
+The application round-trip audit (#1202) found these ways a parsed HTTP/2 frame
+lost octets on rebuild, and a way ``make`` refused its own input:
 
 * #1242 -- the 24-octet connection preface was skipped and never rebuilt.
 * #1243 -- a frame's payload ran to the end of the buffer instead of to its

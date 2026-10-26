@@ -15,7 +15,7 @@ The cost is not hypothetical. Issue #602 was
     declared seq = 1   built info.seq = 0
     warnings captured: []
 
-Without the fix, twenty-five generated fixture frames carry sequence number
+Without the fix, every frame of ``options-tcp.pcap`` carries sequence number
 ``0`` while the generator says ``1``, one octet per frame, and nothing but
 reading the mapping against the signature reveals it. Issues #541 and #556 are
 the same family of silence.
@@ -42,11 +42,11 @@ keyword declared only by ``read`` travels through ``make`` as well.
 :class:`ForwardedKeywordTests` is where it is pinned; rejecting on ``make``'s
 signature alone would reject correct code.
 
-Two things are left alone on purpose, and each has a test saying so:
+These are left alone on purpose, and each has a test saying so:
 
 :meth:`ScopeTests.test_the_parse_path_is_unaffected`
     Parsing. There the keywords are not field values but whatever the engines and
-    the four ``_import_next_layer`` implementations forward -- ``alias``,
+    the ``_import_next_layer`` implementations forward -- ``alias``,
     ``packet``, and the parse limits -- and a protocol cannot know which of its
     ancestors' keywords its parent chose to pass on. Nothing was ever lost that
     way either: a dropped parse keyword changes how a packet is read, not what

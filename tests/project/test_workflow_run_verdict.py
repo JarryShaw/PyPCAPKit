@@ -663,7 +663,7 @@ class TestEachWorkflowGatesOnTheVerdict(unittest.TestCase):
     def test_a_stale_run_cannot_share_a_concurrency_group_with_a_fresh_one(self) -> None:
         """GitHub cancels a pending run when a newer one joins its group, so a run
         that will skip must not join the group of one that will not. Every other
-        event keeps the group it had.
+        event's group is its ref.
 
         """
         for workflow in ACTING_JOBS:

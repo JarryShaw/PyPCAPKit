@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """PCAP-NG blocks build from keywords, and rebuild from their data model.
 
-Five defects, each of which stopped a block from surviving
+Defects, each of which stopped a block from surviving
 :meth:`~pcapkit.protocols.protocol.ProtocolBase.from_data`:
 
 * #1267 -- :meth:`PCAPNG.__post_init__ <pcapkit.protocols.misc.pcapng.PCAPNG.__post_init__>`

@@ -39,8 +39,8 @@ TAIL = bytes.fromhex('03e8' 'abcd' '0000')
 
 SYN, ACK = 0x02, 0x10
 
-#: ``name -> (TCP flags, option octets)``; the octets are padded with leading
-#: NOPs to a multiple of 4.
+#: ``name -> (TCP flags, option octets)``; the octets are padded with NOPs to
+#: a multiple of 4.
 OPTIONS = {
     # 1212
     'join-syn-reserved': (SYN, '1e0c1e01 00000002 00000003'),

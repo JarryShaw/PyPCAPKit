@@ -2,18 +2,18 @@
 """The DPKT engine resolves every PCAP-NG packet against its own interface.
 
 GitHub issue #1379: :class:`dpkt.pcapng.Reader` reads only the first Interface
-Description Block (IDB) of a file, so the DPKT engine gave every packet the
-first interface's link type and ``if_tsresol`` -- a packet on a nanosecond
-interface came out 1000 times too late, a raw-IP interface was dissected as
-Ethernet, and a later section's interfaces were never read at all.
+Description Block (IDB) of a file. Guards against the DPKT engine giving every
+packet the first interface's link type and ``if_tsresol`` -- a packet on a
+nanosecond interface coming out 1000 times too late, a raw-IP interface
+dissected as Ethernet, and a later section's interfaces never read at all.
 
 Each case writes a capture built here to a temporary directory: two sections of
 opposite byte order, whose interfaces differ in link type, ``if_tsresol`` and
 ``if_tsoffset``. Everything from :mod:`pcapkit` is imported inside each test,
 after :func:`~tests._support.reimport_once_per_class`, not at module load.
 
-GitHub issue #1520: the engine's reader skipped Simple Packet Blocks, so their
-packets were missing and every later frame was numbered one short.
+GitHub issue #1520: guards against the engine's reader skipping Simple Packet
+Blocks, which loses their packets and numbers every later frame one short.
 
 """
 

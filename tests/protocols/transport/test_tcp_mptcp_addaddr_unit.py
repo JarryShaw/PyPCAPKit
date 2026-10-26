@@ -28,21 +28,21 @@ construction succeeds even with the fields missing and only ``pack()`` fails.
 
 The same missing fields break *unpacking*, not only packing, and for the identical reason:
 with no real ``kind``/``length`` fields on the base class, ``MPTCPAddAddress``'s own leading
-field (``test``, the subtype/IP-version octet) starts reading one octet too early -- the
+field (``test``, the subtype/flags octet) starts reading two octets too early -- the
 ``kind`` octet itself (``0x1e``) -- rather than the third octet of the option. That is an
 off-by-two in field alignment, not a wire-format change: the octets a correct sender puts on
 the wire are right, only the reading of them is shifted. The hand-built, spec-correct wire
 octets :data:`ADD_ADDR_SPEC_OCTETS` and :data:`MP_PRIO_SPEC_OCTETS` below pin it (neither is
 built through any ``_make_mptcp_*`` maker, so the pack and parse directions cannot cancel
-each other's bug out). Misaligned, ``0x1e`` decodes as subtype ``1``/version ``14``, an IP
-version nothing accepts, so
-:class:`TCPMPTCPUnpackUnitTests.test_add_addr_spec_octets_parse_correctly` would raise
-``FieldError: TCP: [OptNo 30] 3 invalid IP version``; MP_PRIO has no such guard, so
-:class:`TCPMPTCPUnpackUnitTests.test_mp_prio_spec_octets_parse_correctly` would instead run
-the misaligned bytes as far as ``MPTCPPriority.addr_id``'s own ``pkt['length']``-gated
-:class:`~pcapkit.corekit.fields.misc.ConditionalField` and raise ``KeyError: 'length'`` --
-the same exception #541 was filed against, reached from the opposite direction. Both parse
-every field exactly as the octets were built.
+each other's bug out). Misaligned, ``0x1e`` decodes as subtype ``1``, and both cases then
+reach a ``pkt['length']`` read with no ``length`` in the packet mapping:
+:meth:`TCPMPTCPUnpackUnitTests.test_add_addr_spec_octets_parse_correctly` in
+:func:`~pcapkit.protocols.schema.transport.tcp.mptcp_add_address_selector`, which takes the
+address family from the option length (#1217), and
+:meth:`TCPMPTCPUnpackUnitTests.test_mp_prio_spec_octets_parse_correctly` in
+``MPTCPPriority.addr_id``'s own :class:`~pcapkit.corekit.fields.misc.ConditionalField`.
+Either raises ``KeyError: 'length'`` -- the same exception #541 was filed against, reached
+from the opposite direction. Both parse every field exactly as the octets were built.
 
 """
 from __future__ import annotations
@@ -132,8 +132,8 @@ class TCPMPTCPAddAddressUnitTests(unittest.TestCase):
     def test_ipv4_without_port(self) -> None:
         """``kind=0x1e length=8 test=0x34 addr_id=1 address=1.2.3.4``, no ``port`` octets.
 
-        Length is ``4 + 4 + 0 == 8``, one of the two values (with 22) the ``port``
-        field's own condition never selects, so no port octets are packed.
+        Length is ``4 + 4 + 0 == 8``, a length the ``port`` field's own condition
+        does not select, so no port octets are packed.
 
         """
         packed = make_addaddr(addr_id=1, addr='1.2.3.4')
@@ -145,8 +145,8 @@ class TCPMPTCPAddAddressUnitTests(unittest.TestCase):
     def test_ipv4_with_port(self) -> None:
         """``length=10`` (``4 + 4 + 2``) and the port octets ``01bb`` (443) are appended.
 
-        10 is one of the two values the predicate ``pkt['length'] in (10, 22)`` selects
-        for, so this is the IPv4 case where ``port`` actually packs.
+        10 is one of the lengths the predicate ``pkt['length'] in (10, 18, 22, 30)``
+        selects for, so this is the IPv4 case where ``port`` actually packs.
 
         """
         packed = make_addaddr(addr_id=1, addr='1.2.3.4', port=443)
@@ -165,7 +165,7 @@ class TCPMPTCPAddAddressUnitTests(unittest.TestCase):
         self.assertEqual(packed[1], 20)
 
     def test_ipv6_with_port(self) -> None:
-        """``length=22`` (``4 + 16 + 2``), the second value the predicate selects for."""
+        """``length=22`` (``4 + 16 + 2``), the IPv6 length without an HMAC the predicate selects."""
         packed = make_addaddr(addr_id=2, addr='::1', port=443)
 
         self.assertEqual(
@@ -215,7 +215,7 @@ class TCPMPTCPUnpackUnitTests(unittest.TestCase):
     """Spec-correct MPTCP option octets parse into a :class:`TCP`, field by field.
 
     Every case above builds an option and packs it; none of them asks the library to
-    *parse* one, so the off-by-two that breaks packing -- ``MPTCPAddAddress`` (and its
+    *parse* one, so the off-by-two the same missing fields cause -- ``MPTCPAddAddress`` (and its
     siblings) reading the ``kind`` octet as their own first field, when ``MPTCP``
     supplies no real ``kind``/``length`` fields for anything ahead of it to consume --
     needs pinning on the read side too. These two do not construct anything
@@ -228,12 +228,11 @@ class TCPMPTCPUnpackUnitTests(unittest.TestCase):
     def test_add_addr_spec_octets_parse_correctly(self) -> None:
         """RFC 8684 section 3.4.1's IPv4 ``ADD_ADDR``, addr_id=1, 192.0.2.1.
 
-        Guards against ``FieldError: TCP: [OptNo 30] 3 invalid IP version``, raised when
-        ``MPTCPAddAddress.test`` reads the ``kind`` octet ``0x1e`` (``0001 1110``) as its
-        own subtype/version octet, decoding ``version=14``, which a selector keyed on the
-        version would reject outright since it is neither 4 nor 6.
-        :func:`~pcapkit.protocols.schema.transport.tcp.mptcp_add_address_selector` takes
-        the address family from the option length instead (#1217).
+        Guards against ``KeyError: 'length'``, raised when ``MPTCPAddAddress.test`` reads
+        the ``kind`` octet ``0x1e`` (``0001 1110``) as its own subtype/flags octet and
+        :func:`~pcapkit.protocols.schema.transport.tcp.mptcp_add_address_selector`, which
+        takes the address family from the option length (#1217), finds no ``length``
+        read ahead of it.
 
         """
         from pcapkit.const.tcp.option import Option as Enum_Option
@@ -253,8 +252,7 @@ class TCPMPTCPUnpackUnitTests(unittest.TestCase):
     def test_mp_prio_spec_octets_parse_correctly(self) -> None:
         """RFC 8684 section 3.3.8's ``MP_PRIO`` with the optional Address ID, backup set.
 
-        Guards against ``KeyError: 'length'``: ``MP_PRIO`` carries no IP-version guard
-        the way ``ADD_ADDR`` does, so the same off-by-two misalignment would run on
+        Guards against ``KeyError: 'length'``: the same off-by-two misalignment runs on
         through to ``MPTCPPriority.addr_id``'s own
         ``ConditionalField(UInt8Field(), lambda pkt: pkt['length'] == 4)`` -- the same
         exception #541 was filed against, reached by parsing rather than by packing.

@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Toolkit readers of the RFC-fixed constants behave at the constants' edges. C.f. #1739.
 
-The constants moved to their homes in :mod:`pcapkit.protocols`; these pin the
+The constants live in :mod:`pcapkit.protocols`; these pin the
 behaviour of the toolkit code that reads them, at exactly the value each one
 gives:
 

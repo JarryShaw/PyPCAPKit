@@ -101,7 +101,7 @@ class FakeIP:
         self.p = 6
         self.sum = 0xBEEF
         # Dotted-decimal ASCII bytes, PyPCAPFile 0.12.0's actual ``IP.src``/``.dst``
-        # form (see GH#743) -- not an ``int``, so this stand-in exercises the same
+        # form (see #743) -- not an ``int``, so this stand-in exercises the same
         # parsing path the real decoder does instead of hiding behind a shortcut.
         self.src = b'10.1.1.2'
         self.dst = b'10.1.1.3'
@@ -242,7 +242,7 @@ class PyPCAPFileToolkitTests(unittest.TestCase):
                                       data_link=LinkType.ETHERNET), 'ETHERNET:Raw')
 
     def test_packet2dict_reports_an_undecoded_frames_octets(self) -> None:
-        # GH#1667: the engine hands a frame left undecoded over hex-encoded
+        # #1667: the engine hands a frame left undecoded over hex-encoded
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.toolkit.pypcapfile import packet2dict
 
@@ -254,7 +254,7 @@ class PyPCAPFileToolkitTests(unittest.TestCase):
                 self.assertEqual(info[link.name], {'raw_len': 47, 'raw': frame})
 
     ##########################################################################
-    # Address and hex-text parsing helpers (see GH#743).
+    # Address and hex-text parsing helpers (see #743).
     ##########################################################################
 
     def test_parse_ipv4_address_decodes_dotted_decimal_ascii_bytes(self) -> None:
@@ -284,10 +284,9 @@ class PyPCAPFileToolkitTests(unittest.TestCase):
             ('not an address', b'not-an-ip'),
             ('not ASCII', b'\xff\xff\xff\xff\xff'),
             ('none', None),
-            # ``int`` is deliberately rejected, not merely unparsed: an earlier
-            # revision accepted it only to keep ``FakeIP``'s int-typed stand-in
-            # passing, which is exactly the fixture that hid GH#743 in the
-            # first place. See ``_parse_ipv4_address``'s docstring.
+            # ``int`` is deliberately rejected, not merely unparsed: accepting it
+            # would only keep an int-typed stand-in passing, the kind of fixture
+            # that hides #743. See ``_parse_ipv4_address``'s docstring.
             ('int', int(ipaddress.IPv4Address('10.1.1.2'))),
         ):
             with self.subTest(case=label):
@@ -419,7 +418,7 @@ class PyPCAPFileToolkitTests(unittest.TestCase):
                 self.assertIsNone(tcp_traceflow(packet, data_link=LinkType.ETHERNET, count=1))
 
     def test_a_later_fragment_carries_no_tcp_header(self) -> None:
-        # GH#1576: from its offset on, a fragment's data is no TCP header
+        # #1576: from its offset on, a fragment's data is no TCP header
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.toolkit.pypcapfile import _transport, tcp_reassembly, tcp_traceflow
 
@@ -431,7 +430,7 @@ class PyPCAPFileToolkitTests(unittest.TestCase):
         self.assertEqual(_transport(FakeIP(segment, flags=0b001)), segment)  # a first fragment
 
     def test_the_tcp_segment_ends_at_the_total_length(self) -> None:
-        # GH#1577: the Ethernet padding after the datagram is no part of the segment
+        # #1577: the Ethernet padding after the datagram is no part of the segment
         from pcapkit.toolkit.pypcapfile import _transport
 
         segment = make_tcp(b'x')
@@ -446,7 +445,7 @@ class PyPCAPFileToolkitTests(unittest.TestCase):
                 self.assertEqual(_transport(FakeIP(padded, **fields)), expected)
 
     def test_a_data_offset_below_five_words_is_no_tcp_header(self) -> None:
-        # GH#1590: the header is not read as 20 octets
+        # #1590: the header is not read as 20 octets
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.toolkit.pypcapfile import _transport, tcp_reassembly, tcp_traceflow
 
@@ -460,7 +459,7 @@ class PyPCAPFileToolkitTests(unittest.TestCase):
         self.assertEqual(_transport(FakeIP(segment)), segment)
 
     def test_an_ihl_past_the_captured_octets_is_no_ipv4_layer(self) -> None:
-        # GH#1591: pypcapfile slices the options at the IHL, however few octets
+        # #1591: pypcapfile slices the options at the IHL, however few octets
         # there are -- here up to 20 short of a declared 60
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.toolkit.pypcapfile import _network, ipv4_reassembly, tcp_reassembly, tcp_traceflow
@@ -478,7 +477,7 @@ class PyPCAPFileToolkitTests(unittest.TestCase):
         self.assertIs(_network(make_packet(FakeEthernet(whole))), whole)
 
     def test_tcp_over_ipv6_warns_once_per_capture(self) -> None:
-        # GH#1513
+        # #1513
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.toolkit.pypcapfile import tcp_reassembly, tcp_traceflow
         from pcapkit.utilities.warnings import AttributeWarning
@@ -504,7 +503,7 @@ class PyPCAPFileToolkitTests(unittest.TestCase):
             for count in (3, 4)])
 
     def test_either_tcp_adapter_alone_warns_of_tcp_over_ipv6(self) -> None:
-        # GH#1513: a capture whose TCP over IPv6 reaches only one of the two
+        # #1513: a capture whose TCP over IPv6 reaches only one of the two
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.toolkit.pypcapfile import tcp_reassembly, tcp_traceflow
         from pcapkit.utilities.warnings import AttributeWarning
@@ -521,7 +520,7 @@ class PyPCAPFileToolkitTests(unittest.TestCase):
                                  [(AttributeWarning, 'Frame 1: TCP over IPv6 is left out of')])
 
     def test_tcp_over_ipv6_is_read_off_a_whole_ipv6_header_only(self) -> None:
-        # GH#1513: the Next Header of an IPv6 frame, whose 40-octet header was captured
+        # #1513: the Next Header of an IPv6 frame, whose 40-octet header was captured
         from pcapkit.toolkit.pypcapfile import tcp_reassembly
 
         whole = binascii.unhexlify(ipv6_frame(6).payload)[:40]
@@ -562,7 +561,7 @@ class PyPCAPFileToolkitTests(unittest.TestCase):
                 self.assertEqual(_capture_of(packet), (id(value), value))
 
     def test_tcp_over_ipv6_warns_once_per_capture_of_ctypes_records(self) -> None:
-        # GH#1513: pypcapfile's record reaches its savefile header through a
+        # #1513: pypcapfile's record reaches its savefile header through a
         # ``ctypes`` pointer field, which builds a new pointer on every read
         from pcapkit.toolkit.pypcapfile import tcp_reassembly
 
@@ -688,18 +687,18 @@ class PyPCAPFileToolkitAgainstRealDecodersTests(unittest.TestCase):
             return make_packet(FakeEthernet(IP(raw)))
 
         segment = make_tcp(b'x', flags=0b00011000)
-        # GH#1577: a datagram padded to the Ethernet minimum
+        # #1577: a datagram padded to the Ethernet minimum
         padded = packet(make_ipv4(segment) + b'\x00' * 5)
         data = tcp_reassembly(padded, count=1)
         self.assertEqual((data.header, bytes(data.payload), data.len), (segment[:20], b'x', 1))
         self.assertEqual(bytes(tcp_traceflow(padded, data_link=LinkType.ETHERNET, count=1).payload), b'x')
-        # GH#1576, GH#1590: a later fragment, and a Data Offset of 4
+        # #1576, #1590: a later fragment, and a Data Offset of 4
         for label, raw in (('later fragment', make_ipv4(b'A' * 40, offset=185)),
                            ('data offset 4', make_ipv4(with_data_offset(segment, 4)))):
             with self.subTest(case=label):
                 self.assertIsNone(tcp_reassembly(packet(raw), count=2))
                 self.assertIsNone(tcp_traceflow(packet(raw), data_link=LinkType.ETHERNET, count=2))
-        # GH#1591: an IHL of 15 in a 40-octet packet
+        # #1591: an IHL of 15 in a 40-octet packet
         cut = bytes([0x4F]) + make_ipv4(bytes(20), protocol=17, flags=0b001)[1:]
         self.assertIsNone(ipv4_reassembly(packet(cut), count=3))
 
@@ -730,9 +729,9 @@ class PyPCAPFileToolkitAgainstRealDecodersTests(unittest.TestCase):
 
         from pcapkit.toolkit.pypcapfile import _layer2dict
 
-        # Regression for the inconsistency a partial fix left behind: ``opt``
-        # correctly un-hexed while the nested ``'Raw'`` payload stayed
-        # hex-encoded (and twice its true length) in the very same dict.
+        # Guards against a partial un-hexing: ``opt`` un-hexed while the nested
+        # ``'Raw'`` payload stays hex-encoded (and twice its true length) in the
+        # very same dict.
         payload = b'x' * 32
         raw = make_ipv4(payload, options=b'\x94\x04\x00\x00')
         info = _layer2dict(IP(raw))

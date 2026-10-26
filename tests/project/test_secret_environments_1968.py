@@ -5,7 +5,8 @@
 PAT and ``PYPCAPKIT_ACTIONS_DEPLOY_KEY`` in ``conda-tag``, rather than at
 repository level. GitHub hands an environment's secrets only to a job that
 names it, so a job reading one without the matching ``environment:`` gets an
-empty string -- and the scheduled jobs in Conda Update and Vendor Update did.
+empty string -- the shape #1968 found in the scheduled jobs of Conda Update and
+Vendor Update.
 
 The scan covers every workflow, so a new job reading one of these secrets is
 held to the same rule. YAML drops comments, so a secret named only in a comment

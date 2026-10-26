@@ -128,10 +128,10 @@ class ScapyToolkitTests(unittest.TestCase):
         return Ether(bytes(Ether(**self._ether_kwargs()) / Raw(b'raw')))
 
     def _make_ip_rooted_tcp_packet(self):
-        # No Ether layer, so ``packet.name`` (what #775's tier 1 fix in
-        # ``tcp_traceflow`` feeds ``Enum_LinkType.get()``) is ``'IP'`` -- not a
-        # LinkType member name, unlike the Ether-rooted packets above whose
-        # name is ``'Ethernet'``.
+        # No Ether layer, so ``packet.name`` (what ``tcp_traceflow`` feeds
+        # ``Enum_LinkType.get()`` for a packet built by hand, #775 tier 1) is
+        # ``'IP'`` -- not a LinkType member name, unlike the Ether-rooted packets
+        # above whose name is ``'Ethernet'``.
         from scapy.layers.inet import IP, TCP
         from scapy.packet import Raw
 
@@ -380,9 +380,9 @@ class ScapyTrailerTests(unittest.TestCase):
 
     Scapy files the octets past an IP layer's Total Length or Payload Length as a
     ``Padding`` layer, and ``bytes()`` of every layer above it ends with them, so
-    an IPv6 fragment's data and a TCP segment's payload both carried the frame's
-    trailer. Every frame here is written to a capture and read back through the
-    engine.
+    without the fix an IPv6 fragment's data and a TCP segment's payload both
+    carry the frame's trailer. Every frame here is written to a capture and read
+    back through the engine.
 
     """
 
@@ -471,7 +471,8 @@ class ScapyTrailerTests(unittest.TestCase):
                 datagram, = datagrams
                 # only ``Completion.COMPLETE`` is truthy
                 self.assertTrue(datagram.completed)
-                # IPv6 came back 84 octets long, ending in the trailer
+                # without the fix IPv6 comes back 84 octets long, ending in the
+                # trailer
                 self.assertEqual(datagram.payload, DATAGRAM)
 
     def test_tcp_payload_stops_at_the_datagram_end(self) -> None:
@@ -523,7 +524,8 @@ class ScapyTrailerTests(unittest.TestCase):
         from scapy.packet import Raw
 
         # a header shorter than 20 octets is malformed (:rfc:`9293#section-3.1`);
-        # the payload here had started with the last of the header's octets
+        # without the fix the payload here starts with the last of the header's
+        # octets
         self._assert_tcp_records([
             bytes(self._ether() / IP(src='192.0.2.1', dst='198.51.100.1') /
                   TCP(sport=1, dport=2, flags='PA', dataofs=dataofs) / Raw(b'abcdef')) + TRAILER
@@ -537,7 +539,7 @@ class ScapyTrailerTests(unittest.TestCase):
         frame = bytes(self._ether() / IP(src='192.0.2.1', dst='198.51.100.1') /
                       TCP(sport=1, dport=2, flags='PA') / Raw(b'abcdef'))
         # 10 octets is less than the IPv4 header, and 30 holds only half the TCP
-        # header; the former had come back as an empty record
+        # header; without the fix the former comes back as an empty record
         self._assert_tcp_records([frame[:16] + struct.pack('!H', length) + frame[18:]
                                   for length in (10, 30)], [None, None])
 
@@ -694,8 +696,8 @@ class ScapyFrameGuardTests(unittest.TestCase):
 
     def test_ipv6_reassembly_takes_only_its_own_fragment_header(self) -> None:
         # The Fragment header of a packet the IPv6 layer carries, here the inner
-        # packet of 6in6, had been handed on with the outer packet's addresses,
-        # and both IPv6 headers as the part before the Fragment header
+        # packet of 6in6, is handed on without the fix with the outer packet's
+        # addresses, and both IPv6 headers as the part before the Fragment header
         from scapy.layers.inet import IP
         from scapy.layers.inet6 import IPv6, IPv6ExtHdrFragment
         from scapy.layers.l2 import Ether

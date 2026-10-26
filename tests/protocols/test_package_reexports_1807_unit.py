@@ -32,7 +32,7 @@ import pkgutil
 import types
 import unittest
 
-#: The two trees this module covers; each root is itself a package.
+#: The trees this module covers; each root is itself a package.
 ROOTS = ('pcapkit.protocols.data', 'pcapkit.protocols.schema')
 
 #: Names a submodule lists in :attr:`__all__` that its package deliberately does

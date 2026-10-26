@@ -182,7 +182,7 @@ class TestDependabotCoversEveryManifest(unittest.TestCase):
 
         dependabot-core's ``SharedFileFetcher.req_files_for_dir`` fetches them, and
         ``FileFetchers::Base.filter_excluded`` drops an entry whose path from the
-        repository root matches ``exclude-paths``; without it the job checked
+        repository root matches ``exclude-paths``; without it the job checks
         :file:`conda/requirements.txt`'s cryptography pin.
         """
         self.assertIn('conda/requirements.txt', updates()['pip'].get('exclude-paths') or [])

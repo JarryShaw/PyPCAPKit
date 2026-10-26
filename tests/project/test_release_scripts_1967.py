@@ -6,8 +6,8 @@
   commit" and of "Check which commit the version's tag names".
 * :class:`TestReleaseUpload` runs ``release_upload.py``, "Upload package to
   GitHub Release", against a stand-in ``gh``.
-* :class:`TestTheFormerShellAgrees` runs the shell those steps held before the
-  scripts against the same stand-ins and requires the same status, standard
+* :class:`TestTheFormerShellAgrees` runs those steps' inline shell form, the
+  reference the scripts must match, against the same stand-ins and requires the same status, standard
   output and error, ``$GITHUB_OUTPUT`` and calls.
 * :class:`TestTheStepsRunTheScripts` pins each step to its script, after a whole
   checkout of the repository, and the scripts to Python 3.8's syntax.
@@ -92,7 +92,8 @@ esac
 '''
 
 #: "Check the release tags name this run's commit" in ``github``, ``pypi`` and
-#: ``conda``, as each held it before :file:`util/release_tags.py`.
+#: ``conda``, in its inline shell form, the reference :file:`util/release_tags.py`
+#: must match.
 FORMER_CHECK = textwrap.dedent(r'''
     set -euo pipefail
 
@@ -125,8 +126,8 @@ FORMER_OWNER = textwrap.dedent(r'''
     echo "PCAPKIT_RELEASED_ELSEWHERE=${elsewhere}" >> "$GITHUB_OUTPUT"
 ''').lstrip()
 
-#: "Upload package to GitHub Release" in ``pypi`` and ``conda``, before
-#: :file:`util/release_upload.py`.
+#: "Upload package to GitHub Release" in ``pypi`` and ``conda``, in its inline
+#: shell form, the reference :file:`util/release_upload.py` must match.
 FORMER_UPLOAD = textwrap.dedent(r'''
     set -euo pipefail
 
@@ -437,7 +438,7 @@ class TestReleaseUpload(_Stand):
 
 @unittest.skipIf(not BASH, 'needs bash, which ran the former shell')
 class TestTheFormerShellAgrees(_Stand):
-    """Each script exits, prints, writes and calls exactly as the shell it replaced, on every case."""
+    """Each script exits, prints, writes and calls exactly as its step's inline shell form, on every case."""
 
     def both(self, shell: 'str', command: 'list[str]', env: 'dict[str, str]',
              prepare: 'Callable[[], None]') -> 'tuple[tuple[object, ...], tuple[object, ...]]':
@@ -472,7 +473,8 @@ class TestTheFormerShellAgrees(_Stand):
                 self.assertEqual(new, old)
 
     def test_every_case_was_reached(self) -> None:
-        """The cases cover both exits of each script, so agreement is not agreement on one path."""
+        """The check and upload cases end each shell in success, in refusal and with ``git``'s or ``gh``'s
+        own failing status, so agreement is not agreement on one path."""
         statuses = set()
         for shell, cases in ((FORMER_CHECK, CHECK_CASES), (FORMER_UPLOAD, UPLOAD_CASES)):
             for case in cases:
@@ -489,7 +491,7 @@ class TestTheFormerShellAgrees(_Stand):
 
 
 class TestTheStepsRunTheScripts(unittest.TestCase):
-    """Each step runs its script from a whole checkout, with the shell it had."""
+    """Each step runs its script from a whole checkout."""
 
     def test_each_step_runs_its_script(self) -> None:
         for (job, name), run in sorted(STEPS.items()):

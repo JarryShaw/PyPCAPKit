@@ -18,7 +18,7 @@ table, so they keep their directives.
 * :class:`TestGeneratedModules` scans every module under :mod:`pcapkit.const`.
 * :class:`TestVendorTemplates` scans the template text of every crawler, and
   checks on a sample module which literals count as template text.
-* :class:`TestDocsPages` pins the notes #1884 moved onto the docs pages.
+* :class:`TestDocsPages` pins the notes the docs pages carry for the tables (#1884).
 
 This module is unit-tier and reads no capture.
 
@@ -52,7 +52,7 @@ ISSUE_VENDORS = (
     'tcp/flags.py',
 )
 
-#: The notes #1884 moved from a template onto a docs page, as
+#: The notes a docs page carries for its generated tables (#1884), as
 #: ``(page, directive, text the directive's body must hold)``.
 MOVED_NOTES = (
     ('ftp.rst', 'versionchanged:: 1.5.0', ':issue:`860`'),
@@ -245,7 +245,7 @@ class TestVendorTemplates(unittest.TestCase):
 
 
 class TestDocsPages(unittest.TestCase):
-    """The notes moved off the templates are on the hand-written docs pages."""
+    """The notes the templates leave out are on the hand-written docs pages."""
 
     def test_each_moved_note_is_on_its_page(self) -> 'None':
         for page, directive, text in MOVED_NOTES:

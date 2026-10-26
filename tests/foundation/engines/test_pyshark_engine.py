@@ -247,7 +247,7 @@ class PySharkUnsupportedReasonTests(unittest.TestCase):
 
     @unittest.skipUnless(HAS_PYSHARK, 'pyshark not installed')
     def test_a_config_ini_naming_an_off_path_tshark_is_not_read_as_missing(self) -> None:
-        """Regression for the cross-review's measured "2 failed".
+        """A tshark that only ``config.ini`` names is found, not reported missing.
 
         pyshark's own ``get_process_path()`` reads ``tshark_path`` from a
         ``config.ini`` on :func:`pathlib.Path.cwd` *before* it ever consults
@@ -255,23 +255,21 @@ class PySharkUnsupportedReasonTests(unittest.TestCase):
         exact case that makes :func:`shutil.which` the wrong probe: a tshark
         stand-in that ``config.ini`` names but that sits in a directory never on
         ``PATH``, so ``which`` cannot resolve *that* path while pyshark finds it
-        anyway. A probe keyed on ``which`` -- what this file used before -- would
-        call this "missing" and fail both
+        anyway. A probe keyed on ``which`` would call this "missing" and fail both
         :meth:`test_the_reason_tracks_the_running_interpreter` and
         :meth:`test_this_host_really_has_no_tshark_so_the_check_is_not_vacuous`;
         :func:`_tshark_missing` and ``PyShark.unsupported_reason`` must not.
 
-        Deliberately host-independent, and that is itself the regression:
-        asserting ``shutil.which('tshark') is None``, i.e. that the *host* has
-        no tshark anywhere on ``PATH`` at all, is true on a machine without it
-        and false on every ``engine-tests`` CI leg once #755's own
-        ``apt-get install … tshark`` step runs, which is exactly the asymmetry
-        that escaped review. The claim this test actually needs is narrower:
-        that ``which`` cannot resolve *the stand-in specifically*, because its
-        directory was never put on ``PATH`` -- true regardless of whether some
-        unrelated ``tshark`` happens to sit on ``PATH`` elsewhere. Both worlds
-        are constructed and checked below rather than left to whatever the
-        running host happens to provide.
+        Deliberately host-independent, and that is itself the regression: asserting
+        ``shutil.which('tshark') is None``, i.e. that the *host* has no tshark
+        anywhere on ``PATH`` at all, is true on a machine without it and false on
+        every ``engine-tests`` CI leg once #755's own ``apt-get install … tshark``
+        step runs. The claim this test actually needs is narrower: that ``which``
+        cannot resolve *the stand-in specifically*, because its directory was never
+        put on ``PATH`` -- true regardless of whether some unrelated ``tshark``
+        happens to sit on ``PATH`` elsewhere. Both worlds are constructed and
+        checked below rather than left to whatever the running host happens to
+        provide.
 
         """
         import os

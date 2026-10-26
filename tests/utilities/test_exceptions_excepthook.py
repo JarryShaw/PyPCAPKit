@@ -274,21 +274,20 @@ class ChainingTests(unittest.TestCase):
                  'its chain, so it is no reference for the shape (#1958)')
 class ChainedExceptionTests(unittest.TestCase):
     """A chained exception must come out in the *shape* ``tracebacklimit = 0``
-    produced, not just "one line".
+    produces, not just "one line".
 
-    ``traceback.print_exception(etype, value, None)`` -- the hook's first
-    draft -- discards only the *top* exception's own traceback by handing in
-    ``tb=None``; it never touches ``value.__cause__`` or ``value.__context__``,
-    each of which carries its *own*, real ``__traceback__`` that
-    :func:`traceback.print_exception` walks and prints in full regardless,
-    since no ``limit`` was given for it to apply there either. The old
-    ``sys.tracebacklimit = 0`` applied to the whole chain, because
+    ``traceback.print_exception(etype, value, None)`` discards only the *top*
+    exception's own traceback by handing in ``tb=None``; it never touches
+    ``value.__cause__`` or ``value.__context__``, each of which carries its
+    *own*, real ``__traceback__`` that :func:`traceback.print_exception` walks
+    and prints in full regardless, since no ``limit`` is given for it to apply
+    there either. ``sys.tracebacklimit = 0`` applies to the whole chain, because
     :func:`traceback.StackSummary.extract` -- which every link's formatting
     goes through -- consults the global itself, independently, at every link.
     ``limit=0`` against the *real* traceback (not ``None``) is what reaches
-    every link the same way, and is what the two tests below compare against:
+    every link the same way, and is what the chain tests below compare against:
     not a one-line assertion, but the exact text ``sys.tracebacklimit = 0``
-    would have produced for the same exception, chain included.
+    produces for the same exception, chain included.
 
     """
 
@@ -535,7 +534,7 @@ class CrossInstanceReinstallTests(unittest.TestCase):
 class ThreadingExcepthookTests(unittest.TestCase):
     """The thread analogue of :class:`LoudErrorPrintsOneLineTests` and friends.
 
-    :data:`threading.excepthook` needed its own hook for a reason distinct from
+    :data:`threading.excepthook` needs its own hook for a reason distinct from
     "symmetry with :data:`sys.excepthook`": the interpreter's *default*
     :data:`threading.excepthook` itself consults :data:`sys.tracebacklimit`
     when printing, so without the global and without a hook on this side too, a
@@ -751,8 +750,8 @@ class ThreadingExcepthookTests(unittest.TestCase):
     def test_a_non_base_error_with_no_previous_hook_goes_to_the_default_hook(self) -> None:
         """Nothing captured yet: the default hook's own output, on every Python.
 
-        GitHub issue #1691: this delegate was ``threading.__excepthook__``,
-        which Python 3.8 and 3.9 lack, so the call raised instead of printing.
+        GitHub issue #1691: a delegate of ``threading.__excepthook__``, which
+        Python 3.8 and 3.9 lack, raises there instead of printing.
 
         """
         code = '''

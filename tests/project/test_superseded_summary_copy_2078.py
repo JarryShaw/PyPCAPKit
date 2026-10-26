@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 """#2078: a stopped experimental leg's summary line reaches the uploaded job summary.
 
-Experimental Tests run 39898485708 uploaded no ``job-summary-*`` artifact: its
-legs were stopped as superseded, and the one line their job summaries held was
-util/superseded.py's, which went to ``$GITHUB_STEP_SUMMARY`` alone, so
-``job-summary.md`` was never written and ``Upload the job summary`` found nothing.
-The watcher takes the copy's path as ``--summary-copy``, which ``Run unit
+Without the copy, a leg stopped as superseded uploads no ``job-summary-*``
+artifact, as Experimental Tests run 39898485708 measured: the one line its job
+summary holds is util/superseded.py's, which goes to ``$GITHUB_STEP_SUMMARY``
+alone, so ``job-summary.md`` is never written and ``Upload the job summary``
+finds nothing. The watcher takes the copy's path as ``--summary-copy``, which ``Run unit
 tests`` passes it, and the tests it runs never see.
 
 * :class:`TestTheSteps` runs ``Run unit tests`` and ``Name the job summary`` as

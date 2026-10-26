@@ -17,15 +17,16 @@ legs do (#2044).
 * :class:`TestTheWindowsClient`: ``release_conda.py upload`` runs base's
   ``Scripts\\anaconda.exe`` on Windows.
 * :class:`TestBldBat`: ``conda/pypcapkit/bld.bat`` does what ``build.sh`` does:
-  one install of every downloaded file, then the project, each checked. Its
-  previous ``FOR`` loop wrote ``%A``, a syntax error in a batch file.
+  one install of every downloaded file, then the project, each checked. The
+  check refuses a ``FOR`` loop writing ``%A``, a syntax error in a batch file.
 * :class:`TestPortableExecutable` and :class:`TestTheWindowsLayout`:
   :file:`util/conda_vendor.py` reads a ``.pyd``'s PE machine, and ``--smoke``
   takes a Windows package's ``Lib/site-packages``, or from Python 3.15 its
   ``lib/python/site-packages`` (conda-forge's CFEP-27), whose path names no Python.
 * :class:`TestTheEnvironmentWithoutEnvironb`: the scripts read their variables
-  where :data:`os.environb` is missing, as on Windows (#2120), where
-  ``release_conda.py build`` died reading ``PCAPKIT_CONDA_OS``.
+  where :data:`os.environb` is missing, as on Windows (#2120), where reading
+  it raises :exc:`AttributeError`, so ``release_conda.py build`` would die
+  reading ``PCAPKIT_CONDA_OS``.
 
 Nothing here runs on Windows; what a real run shows is the rest.
 

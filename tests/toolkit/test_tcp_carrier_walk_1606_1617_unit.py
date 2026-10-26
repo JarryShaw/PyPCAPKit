@@ -9,8 +9,8 @@ row (#1606).
 
 A later IPv4 fragment carries no upper-layer header (:rfc:`791#section-3.2`), so
 the default engine reads no TCP in one, but `Scapy`_ binds IPv6 to IPv4 protocol
-41, and AH to protocol 51, whatever the fragment offset, and its engine handed on
-the TCP it then dissected (#1617). It stops at such a fragment.
+41, and AH to protocol 51, whatever the fragment offset, and without the fix its
+engine hands on the TCP it dissects there (#1617). It stops at such a fragment.
 
 `dpkt`_ decodes protocol 0 as IPv4, so a Hop-by-Hop header there can read as an
 IPv4 packet dpkt cannot decode, or whose payload is no packet; neither ends the
@@ -241,7 +241,7 @@ class TCPCarrierWalkTests(unittest.TestCase):
         self.assert_reads('default', EXTENSION_HEADERS)
 
     def test_no_tcp_is_read_in_a_later_ipv4_fragment(self) -> None:
-        # #1617: Scapy dissected TCP behind a later fragment
+        # #1617: Scapy dissects TCP behind a later fragment
         for engine in ('default', 'scapy'):
             with self.subTest(engine=engine):
                 if engine != 'default' and not has(engine):

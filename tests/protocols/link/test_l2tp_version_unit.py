@@ -201,8 +201,9 @@ class L2TPVersionTests(unittest.TestCase):
 
         Measured without the version guard, that combination reported
         ``version=4``, ``tunnelid=0x5678`` and ``sessionid=0xff03``: a
-        confident header assembled out of the top half of a Session ID and the
-        first two octets of a PPP frame. Degrading to
+        confident header assembled out of a Session ID and the first two octets
+        of a PPP frame, its top half read as the flags word and its lower half
+        as the Tunnel ID. Degrading to
         :class:`~pcapkit.protocols.misc.raw.Raw` is the honest answer, and is
         what the library does for any payload it has no dissector for.
 
@@ -239,10 +240,11 @@ class L2TPVersionTests(unittest.TestCase):
 
         This is the case that guards a real dissection rather than a
         hypothetical registration: port 1701 is bound, so without the version
-        guard a v3 datagram arriving on it is dissected as L2TPv2 and reports
-        ``tunnelid=0x1234``/``sessionid=0x5678`` read out of v3's Control
-        Connection ID. :rfc:`3931` §3.2.1 requires ``Ver`` to
-        be 3, so the nibble is exactly the signal that this is not v2.
+        guard a v3 data message arriving on it is dissected as L2TPv2 and
+        reports ``tunnelid=0x1234``/``sessionid=0x5678`` read out of v3's
+        Reserved field and the top half of its Session ID. :rfc:`3931`
+        §4.1.2.1 requires ``Ver`` to be 3, so the nibble is exactly the signal
+        that this is not v2.
 
         """
         def udp(src: 'int', dst: 'int', payload: bytes) -> bytes:

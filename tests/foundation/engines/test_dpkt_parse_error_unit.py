@@ -3,8 +3,8 @@
 
 GitHub issue #1351: dpkt 1.9.8 reads ``frag_off`` from whatever header follows
 an IPv6 Fragment header, so a Fragment header followed by ESP or Destination
-Options raises :exc:`AttributeError` from ``dpkt/ip6.py``. The engine did not
-catch it, so the third-party exception ended the whole extraction.
+Options raises :exc:`AttributeError` from ``dpkt/ip6.py``. Guards against the
+engine letting that third-party exception end the whole extraction.
 
 Every case writes its own capture to a temporary directory. Everything
 from :mod:`pcapkit` is imported inside each test, after
@@ -68,10 +68,10 @@ class TestDPKTParseError(unittest.TestCase):
                                     and 'cannot parse' in str(item.message) for item in caught))
 
     def test_unparsable_frame_is_written_out(self) -> None:
-        # The engine writes every frame through packet2dict, which read the
-        # header fields a frame kept raw does not have, so AttributeError ended
-        # the extraction there (#1662). It maps to no fields, then the next frame
-        # is read.
+        # The engine writes every frame through packet2dict. Without the fix,
+        # packet2dict reads the header fields a frame kept raw does not have, so
+        # AttributeError ends the extraction there (#1662). Such a frame maps to
+        # no fields, then the next frame is read.
         import pcapkit
         from pcapkit.const.reg.linktype import LinkType
         from pcapkit.toolkit.dpkt import packet2dict

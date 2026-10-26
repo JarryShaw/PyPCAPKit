@@ -15,7 +15,7 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class TransportUnitTests(unittest.TestCase):
     def setUp(self) -> None:
-        # ``isolate_modules`` rather than ``purge_modules``: two tests below bind
+        # ``isolate_modules`` rather than ``purge_modules``: tests below bind
         # stand-ins over ``pcapkit.protocols.misc.raw`` and ``...misc.null``, which
         # are on the import path of most of the package. See #660.
         isolate_modules(self)

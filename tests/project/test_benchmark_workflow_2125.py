@@ -246,8 +246,8 @@ class TestTheJobs(unittest.TestCase):
     def test_the_timeout_is_sized_from_a_measured_run(self) -> None:
         """Run 40062653380 took about 38 minutes on the default runner with everything.
 
-        The placeholder was 300, which let a hung extraction hold a runner for five
-        hours. 90 leaves over twice the measured time, and the comment names the run.
+        A bound of 300 would let a hung extraction hold a runner for five hours.
+        90 leaves over twice the measured time, and the comment names the run.
 
         """
         self.assertEqual(job(WORKFLOW, 'benchmark')['timeout-minutes'], 90)

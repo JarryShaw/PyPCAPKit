@@ -99,13 +99,10 @@ class MHUnitTests(unittest.TestCase):
         siblings warn about an overwrite that never happened.
 
         ``__extension__`` is reached through the construction path rather than a
-        parse: CGA extensions arrive inside a CGA Parameters option, whose schema
-        sizes its extension area from ``pkt['length']`` -- a key the nested packet
-        context does not carry -- so
-        :meth:`~pcapkit.protocols.internet.mh.MH._read_cga_extensions` is
-        unreachable from bytes. The sibling read site in
-        :meth:`~pcapkit.protocols.internet.mh.MH._make_cga_extensions` had the
-        identical defect.
+        parse: :meth:`~pcapkit.protocols.internet.mh.MH._make_cga_extensions`
+        reads that registry as
+        :meth:`~pcapkit.protocols.internet.mh.MH._read_cga_extensions` does, and
+        had the identical defect.
 
         """
         from pcapkit.const.mh.cga_extension import CGAExtension
@@ -1646,7 +1643,8 @@ class MHUnitTests(unittest.TestCase):
         as :class:`LMAAddressCode` and :class:`LocalizedRoutingStatus` -- the
         module's pure re-parents -- do, so ``default`` works the same way on
         every class here, because there is only one implementation to call.
-        This test fails with the ``TypeError`` above at 382375811.
+        Measured at 382375811, the one-argument overrides raise the
+        ``TypeError`` above.
         """
         from pcapkit.protocols.internet.mh import (FastBindingAcknowledgmentStatus,
                                                    IPv6AddressPrefixCode, LMAAddressCode,
@@ -2208,7 +2206,7 @@ class MHUnitTests(unittest.TestCase):
         self.assertEqual(again.pack(), schema.pack())
 
     def test_mh_multiprefix_extension_length_matches_its_payload(self) -> None:
-        """The Multi-Prefix CGA extension declared a length it did not emit.
+        """The Multi-Prefix CGA extension declares the length it emits.
 
         ``_make_ext_multiprefix`` computed ``1 + len(prefixes) * 16`` for an
         extension whose data is a 4-octet flag word followed by one **8**-octet
@@ -2605,7 +2603,7 @@ class MHUnitTests(unittest.TestCase):
             Option.DLIF_Link_Layer_Address: {'lla': b'\x00\x11\x22\x33\x44\x55'},
         }
 
-        # the whole registry bar the one option that cannot be parsed at all
+        # the whole registry bar CGA Parameters, left out as the docstring says
         self.assertEqual(sorted([*cases, Option.CGA_Parameters]), sorted(Option))
 
         for code, args in cases.items():
@@ -3106,8 +3104,8 @@ class MHUnitTests(unittest.TestCase):
         """The ``option is not None`` path of the unassigned sub-option branch.
 
         The same maker that carries #508's target care-of conversion ends in a
-        catch-all for sub-option types the library does not model, and that
-        catch-all's data-model path was unexercised.
+        catch-all for sub-option types the library does not model, and this
+        exercises that catch-all's data-model path.
         """
         from pcapkit.const.mh.flow_id_suboption import FlowIDSuboption
         from pcapkit.protocols.data.internet.mh import \
@@ -3513,7 +3511,8 @@ class MHUnitTests(unittest.TestCase):
         proto = object.__new__(MH)
         payload = b'\xde\xad\xbe\xef'
 
-        # the registered vendor-specific attribute: the case that was broken
+        # the registered vendor-specific attribute, whose ``data`` field is the
+        # case the docstring describes
         attr = proto._make_qos_attribute(  # type: ignore[arg-type]
             QoSAttribute.QoS_Vendor_Specific_Attribute,
             vendor=32473, subtype=3, data=payload)

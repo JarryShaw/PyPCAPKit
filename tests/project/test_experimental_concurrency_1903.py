@@ -5,8 +5,8 @@ A group per push queues a GraalPy leg of up to two hours per commit in a merge
 wave, holding runners the open pull requests' CI then waits behind. The owner
 chose option 1: in experimental.yml only, a push to ``main`` is superseded by
 the next one, as a pull request's run is. Nothing waits on these legs (#1732),
-so the newest commit's run is enough. #1938 keeps that rule and drops the
-cancelling: experimental.yml has no group (:class:`TestExperimentalHasNoGroup`),
+so the newest commit's run is enough. Under #1938 that rule holds without
+cancelling anything: experimental.yml has no group (:class:`TestExperimentalHasNoGroup`),
 and its gate and watcher skip or stop a superseded run instead, which
 :mod:`tests.project.test_superseded_runs_1938` pins.
 

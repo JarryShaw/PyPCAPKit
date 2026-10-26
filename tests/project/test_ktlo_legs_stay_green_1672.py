@@ -21,15 +21,16 @@ only the steps that name and upload the job's copy of its summary,
 step's failure is tried on every leg instead of read off the text. Expressions go
 through :mod:`tests.project.test_release_gates`'s evaluator, and the scripts that
 write annotations are executed. Both summaries run :file:`util/leg_summary.py`
-(#1967), :file:`create-release.yml`'s ``pypi``'s too, whose former inline copy
-of its shell is run against the script on the same steps.
+(#1967), :file:`create-release.yml`'s ``pypi``'s too, and the script is run
+against :data:`FORMER_RELEASE_SUMMARY`, the step's inline shell form and the
+reference it must match, on the same steps.
 
 The experimental tier, free-threaded CPython and GraalPy (#1660), is a job of its
 own, ``experimental``, which nothing gating needs (#1732). They are non-blocking
 by the same mechanics, every step that can fail guarded, and report through
 ``Experimental summary``, that job's last step:
-:class:`TestAnExperimentalLegIsNonBlockingTheSameWay`. Their setup-python, install
-and test steps have caps of their own, so a slow or hung leg fails a step rather
+:class:`TestAnExperimentalLegIsNonBlockingTheSameWay`. Their setup-python, install,
+watcher setup and test steps have caps of their own, so a slow or hung leg fails a step rather
 than being cancelled with its job:
 :class:`TestASlowExperimentalLegTimesOutAStepNotTheJob`.
 
@@ -150,7 +151,8 @@ EXPERIMENTAL_SUMMARY_RUN = f'{IMAGE_PYTHON} util/leg_summary.py experimental'
 #: The ``KTLO summary`` whose job keeps no copy of its summary: no CI report reads
 #: Create Release's runs (#2030).
 UNCOPIED_SUMMARY = ('create-release.yml', 'pypi')
-#: ``pypi``'s ``KTLO summary`` before it ran :data:`SUMMARY_RUN` (#1967).
+#: ``pypi``'s ``KTLO summary`` in its inline shell form, the reference
+#: :data:`SUMMARY_RUN`'s script must match (#1967).
 FORMER_RELEASE_SUMMARY = '''\
 failed=$(jq -r 'to_entries[] | select(.value.outcome == "failure") | .key' <<< "$STEPS")
 if [ -z "$failed" ]; then
@@ -563,7 +565,7 @@ class TestAKTLOFailureIsAWarning(unittest.TestCase):
         self.assertIn(f'{LEG_KTLO}: no step failed.', result.stdout)
 
     def test_the_former_release_copy_reports_as_the_script_does(self) -> None:
-        """``pypi``'s ``KTLO summary`` shell from before #1967 and the script report alike."""
+        """``pypi``'s ``KTLO summary`` in its inline shell form and the script report alike (#1967)."""
         if shutil.which('jq') is None:  # pragma: no cover
             self.skipTest('jq, on every Ubuntu runner image, is needed to run the former KTLO summary')
         self.assertEqual(summary_step(job(*UNCOPIED_SUMMARY))['run'], SUMMARY_RUN)
@@ -674,7 +676,7 @@ class TestASupportedLegStillFails(unittest.TestCase):
                             self.assertFalse(continue_on_error(by_id[gated], context), gated)
 
     def test_no_summary_runs_on_a_supported_leg(self) -> None:
-        """``test`` has one, ``KTLO summary``; ``Experimental summary`` left it with its legs (#1732)."""
+        """``test`` has one, ``KTLO summary``; ``Experimental summary`` is the ``experimental`` job's (#1732)."""
         spec = job('unit-tests.yml', 'test')
         self.assertNotIn(EXPERIMENTAL_SUMMARY, [label(step) for step in spec['steps']])
         position = len(spec['steps']) - 1 - len(JOB_SUMMARY_STEPS)
@@ -737,7 +739,7 @@ class TestAnExperimentalLegIsNonBlockingTheSameWay(unittest.TestCase):
         # One script with the KTLO summary's, so a fix to either reaches both (#1967).
         self.assertEqual(self.summary['run'], EXPERIMENTAL_SUMMARY_RUN)
         self.assertEqual(summary_step(job('unit-tests.yml', 'test'))['run'], SUMMARY_RUN)
-        # #2060: no `conda-windows` tier since the win-64 conda leg blocks as the others do.
+        # #2060: the win-64 conda leg blocks as the others do, so it has no tier of its own.
         self.assertEqual(REASONS, {'ktlo': KTLO_REASON, 'experimental': EXPERIMENTAL_REASON})
 
     def test_each_step_names_the_leg_by_its_tier(self) -> None:

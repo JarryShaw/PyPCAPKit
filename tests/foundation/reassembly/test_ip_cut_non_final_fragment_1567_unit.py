@@ -2,11 +2,11 @@
 """A non-final IP fragment that ends mid-block leaves a hole, not zeros.
 
 GitHub issue #1567. The IPv6 adapters derive ``tl`` from the captured payload,
-so a fragment the snapshot length cut declares exactly what was captured, and
-the reassembler marked its partial last block received. A 3-fragment datagram
-with its first fragment cut from 64 octets to 60 then came out ``COMPLETE``,
-octets 60-63 zero-filled; cut to 52, strict mode's first run carried 4
-zero-filled octets.
+so a fragment the snapshot length cut declares exactly what was captured.
+Guards against the reassembler marking its partial last block received, with
+which a 3-fragment datagram whose first fragment is cut from 64 octets to 60
+comes out ``COMPLETE``, octets 60-63 zero-filled, and, cut to 52, strict mode's
+first run carries 4 zero-filled octets.
 
 Every fragment but the last carries a multiple of 8 octets
 (:rfc:`8200#section-4.5`, :rfc:`791#section-3.2`), so only the final fragment's

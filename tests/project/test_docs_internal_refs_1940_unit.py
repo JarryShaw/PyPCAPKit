@@ -2,9 +2,9 @@
 """Pins library-internal references in rendered text as roles with a documented target (#1940).
 
 A library-internal name written as a double-backtick literal in rendered prose
-never links, and neither does a role whose target has no documented entry. #1940
-converts those literals to Python-domain roles wherever the prose means the
-object, and every object such a reference names has an entry -- the public
+never links, and neither does a role whose target has no documented entry. So
+rendered prose writes such a name as a Python-domain role wherever it means the
+object (#1940), and every object such a reference names has an entry -- the public
 classes, and the private helpers and special methods that rendered text refers
 to -- so that each reference has a target.
 
@@ -90,7 +90,7 @@ HELPERS = (
     ('pcapkit/vendor/reg.rst', 'pcapkit.vendor.reg.ethertype.EtherType._insert_range'),
 )
 
-#: ``(source, literal, the role that replaced it)``. The first two are the
+#: ``(source, literal, the role written instead)``. The first two are the
 #: examples #1940 names.
 CONVERTED = (
     ('docs/source/contributing/conventions/registry-protocol.rst', '``AppType.get``',

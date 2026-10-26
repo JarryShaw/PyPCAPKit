@@ -297,7 +297,8 @@ class TestEveryCheckoutPinsTheRunSha(WorkflowMixin, unittest.TestCase):
         self.assertEqual(found, dict.fromkeys(CHECKOUT_JOBS, 1))
 
     def test_every_checkout_pins_the_run_sha(self) -> None:
-        """``tag``'s used no ``ref:``, ``pypi``'s ``v<version>``, ``conda``'s ``conda-<version>+0``."""
+        """Guards against ``tag``'s with no ``ref:``, ``pypi``'s at ``v<version>`` and ``conda``'s at
+        ``conda-<version>+0``."""
         for job, steps in sorted(self.checkouts().items()):
             for step in steps:
                 with self.subTest(job=job):
@@ -316,7 +317,7 @@ class TestEveryReleaseTagIsCreatedAtTheRunSha(WorkflowMixin, unittest.TestCase):
                 if step.get('uses', '').startswith('softprops/action-gh-release@')]
 
     def test_only_github_runs_the_release_action(self) -> None:
-        """``pypi`` and ``conda`` used it to upload, which re-checked the target.
+        """Guards against ``pypi`` and ``conda`` uploading with it, which re-checks the target.
 
         ``action-gh-release`` 3.0.3 calls Update a release on an existing
         release before uploading anything (``release`` in ``src/github.ts``), passing
@@ -324,8 +325,8 @@ class TestEveryReleaseTagIsCreatedAtTheRunSha(WorkflowMixin, unittest.TestCase):
         GitHub's REST docs apply the workflow-file rule there to "the new value
         of target_commitish if you are changing it, otherwise the existing
         target". On ``workflow_run`` that target is ``github.sha``, so by the
-        docs a workflow change reaching ``main`` after ``github`` ran would have
-        failed these uploads after PyPI and anaconda.org had published.
+        docs a workflow change reaching ``main`` after ``github`` ran fails such
+        an upload after PyPI and anaconda.org have published.
         """
         self.assertEqual([(job, label(step)) for job, step in self.releases()], [('github', 'Create Release')])
 
@@ -544,7 +545,7 @@ class TestTagNeverMovesOntoMain(WorkflowMixin, unittest.TestCase):
         self.assertTrue(tagging[0].rstrip().endswith('"$run_commit"'), tagging[0])
 
     def test_nothing_before_the_tag_reads_main(self) -> None:
-        """The defect was a fast-forward onto ``main`` *before* ``git tag`` ran."""
+        """Guards against a fast-forward onto ``main`` *before* ``git tag`` runs (#1634)."""
         upto = self.index('tag', 'Create Tag')
         for step in self.steps['tag'][:upto + 1]:
             with self.subTest(step=label(step)):
@@ -585,7 +586,7 @@ class TestPublishersCheckTheirTags(WorkflowMixin, unittest.TestCase):
         self.assertEqual(len(set(scripts.values())), 1, 'the three copies have drifted apart')
 
     def test_the_check_blocks_every_leg(self) -> None:
-        """#1633's KTLO legs carry ``continue-on-error`` on every other step; this one must not.
+        """#1633's KTLO legs carry ``continue-on-error`` on every step after this one; this one must not.
 
         It fails alike on every leg, and with ``continue-on-error`` a KTLO leg
         would run its later steps and publish under a tag naming another commit.
@@ -1184,9 +1185,9 @@ class TestTheCountsAreOfTheReleasedTiers(ScratchRepository):
 
     ``pre`` is tagged before the tier file existed, ``added`` adds it as #1677
     did, and ``grown`` merges the first weekly proposal, pypy3.12; the run is on
-    ``grown``. Counting ``grown``'s tiers for a version tagged earlier read the
-    finished release as incomplete, ran the gate and ``pypi``, and failed the
-    tag check above on every run.
+    ``grown``. Guards against counting ``grown``'s tiers for a version tagged
+    earlier, which reads the finished release as incomplete, runs the gate and
+    ``pypi``, and fails the tag check above on every run.
 
     """
 
@@ -1299,7 +1300,8 @@ class TestTheCountsAreOfTheReleasedTiers(ScratchRepository):
         self.assertEqual(self.released(exists=True)[1], self.values[self.added])
 
     def test_a_tag_older_than_the_tier_file_counts_the_tiers_it_was_added_with(self) -> None:
-        """As ``v1.5.0b12`` (``2025da5e5``) is: tagged before #1677 (``727c0fc60``) added the file."""
+        """As ``v1.5.0b12`` (``2025da5e5``) is: tagged at a commit older than ``727c0fc60``, which added the
+        file (#1677)."""
         self.push(self.pre, f'refs/tags/v{self.VERSION}')
         self.checkout(self.grown)
         result, written = self.released(exists=True)
@@ -1351,9 +1353,9 @@ class TestTheCountsAreOfTheReleasedPlatforms(ScratchRepository):
     ``pre`` is tagged before util/release_published.py existed, as every tag up to
     v1.5.0b14 is; ``added`` adds it with the platforms #1967 transcribed
     from the step's shell; ``windows`` adds win-64, as #2060 did; the run is on
-    ``windows``. Counting this run's platforms for a version tagged earlier read
-    v1.5.0b14 as lacking win-64, and Release status warned that it was unfinished
-    on every run.
+    ``windows``. Guards against counting this run's platforms for a version
+    tagged earlier, which reads v1.5.0b14 as lacking win-64 and has Release
+    status warn that it is unfinished on every run.
 
     """
 
@@ -1435,7 +1437,8 @@ class TestTheCountsAreOfTheReleasedPlatforms(ScratchRepository):
         self.assertEqual(self.count(True, 'linux-64 osx-arm64')[0], 'false')
 
     def test_a_tag_older_than_the_script_counts_the_platforms_it_was_added_with(self) -> None:
-        """As v1.5.0b14 (``6a9b666a1``) is: tagged before #1967 (``79934ddd9``) added the script."""
+        """As v1.5.0b14 (``6a9b666a1``) is: tagged at a commit older than ``79934ddd9``, which added the
+        script (#1967)."""
         self.push(self.pre, f'refs/tags/v{self.VERSION}')
         self.checkout(self.windows)
         state, log = self.count(True, self.BEFORE)
@@ -1492,9 +1495,9 @@ class TestTheRefusalExplanation(WorkflowMixin, unittest.TestCase):
 #: A stand-in for ``gh``. ``$GH_ASSETS`` holds the release's assets as
 #: ``name<TAB>state`` lines; absent, there is no release, and ``release view``
 #: fails as the real one does ("release not found", exit 1, measured with gh
-#: 2.102.0). It answers the three ``--json``/``--jq`` pairs the workflows ask,
-#: the bare-name one being the script's before ``state`` was read, and
-#: ``isDraft`` from ``$GH_DRAFT``. ``release upload`` appends the file as
+#: 2.102.0). It answers the ``--json``/``--jq`` pairs the workflows ask --
+#: :data:`ASSETS_JQ`, and ``isDraft`` from ``$GH_DRAFT`` -- and a bare-name
+#: ``assets`` pair no workflow asks. ``release upload`` appends the file as
 #: ``uploaded`` and, like the real one, refuses a name already there unless
 #: ``--clobber`` deletes it first. ``$GH_FAIL`` fails any call. Anything else
 #: exits 96-99.
@@ -1641,7 +1644,7 @@ class TestTheUploadScript(WorkflowMixin, unittest.TestCase):
         self.assertEqual(self.calls(), self.expected_calls(*paths))
 
     def test_a_pattern_matching_nothing_fails(self) -> None:
-        """A change from the action, which only warned: ``fail_on_unmatched_files``
+        """Unlike the action, which only warns: ``fail_on_unmatched_files``
         is unset here, so 3.0.3's ``run`` in ``src/run.ts`` logs "🤔 Pattern '…' does
         not match any files." and carries on."""
         self.published()
@@ -1651,7 +1654,7 @@ class TestTheUploadScript(WorkflowMixin, unittest.TestCase):
         self.assertEqual(self.calls(), self.expected_calls())
 
     def test_a_missing_release_fails_before_any_upload(self) -> None:
-        """A change from the action, which made one: with no release for the tag,
+        """Unlike the action, which makes one: with no release for the tag,
         3.0.3 calls ``createRelease`` (from ``release`` in ``src/github.ts``) with
         no notes and ``target_commitish`` unset (``parseConfig`` in ``src/util.ts``), which
         Create a release defaults to "the repository's default branch". Making

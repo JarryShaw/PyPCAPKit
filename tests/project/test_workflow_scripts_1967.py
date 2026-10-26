@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""#1967: the ``util/`` scripts that replace shell the workflows repeated, run as the steps run them.
+"""#1967: the ``util/`` scripts that hold shell the workflows would otherwise repeat, run as the steps run them.
 
 * :file:`util/leg_summary.py`, every ``KTLO summary`` and the ``Experimental
   summary``: :class:`TestLegSummary`. The steps themselves are pinned in
@@ -91,7 +91,7 @@ class TestLegSummary(_Scratch):
         self.assertEqual(self.page.read_text(encoding='utf-8'), 'earlier\n')
 
     def test_bad_input_fails_the_step(self) -> None:
-        """As ``jq`` failing under ``bash -e`` did; the step's ``continue-on-error`` contains it."""
+        """As a failing command does under ``bash -e``; the step's ``continue-on-error`` contains it."""
         for tier, steps in (('ktlo', 'not json'), ('nightly', steps_json(install='failure'))):
             with self.subTest(tier=tier, steps=steps):
                 result = self.summary(tier, steps)
@@ -176,7 +176,7 @@ class TestCoverageReport(_Scratch):
             'packages': [['pcapkit (top level)', 10, 0, 0, 0, 100.0], ['pcapkit/protocols', 10, 4, 4, 1, 64.29]]})
 
     def test_a_failing_coverage_command_ends_the_step_with_its_status(self) -> None:
-        """As ``set -e`` did: no summary after a failed ``coverage`` command."""
+        """As under ``set -e``: no summary after a failed ``coverage`` command."""
         (self.tmp / 'coverage-processes.log').write_text(
             "  100.ab: New process: cmd: ['/x', 'run', '--rcfile=.github/coverage.toml', '-m', 'pytest']\n"
             '  100.ab: New process parent pid: 1\n  101.ab: New process parent pid: 100\n', encoding='utf-8')

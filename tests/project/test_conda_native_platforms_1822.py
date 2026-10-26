@@ -69,7 +69,7 @@ JOBS = (('cron-conda.yml', 'conda-dist'), ('create-release.yml', 'conda'))
 #: as read on 2026-10-16; the test below checks the snapshot of the image table too.
 LEGS = {'macos-latest': 'osx-arm64', 'macos-26-intel': 'osx-64', 'ubuntu-latest': 'linux-64',
         'windows-latest': 'win-64'}
-#: Each job's legs, alike for both (#2060 gave the release job its Windows one).
+#: Each job's legs, alike for both, Windows included (#2060).
 JOB_LEGS = {('cron-conda.yml', 'conda-dist'): LEGS, ('create-release.yml', 'conda'): LEGS}
 #: ``platform.machine()``, as the runner-images table names the architecture.
 ARCH = {'x86_64': 'x64', 'arm64': 'arm64', 'AMD64': 'x64'}

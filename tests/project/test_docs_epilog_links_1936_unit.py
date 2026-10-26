@@ -15,7 +15,8 @@ error for a substitution, a warning for a target with another URL.
   docstring defines an epilog name again.
 
 Only the text Sphinx renders is read: ``.rst`` pages under :file:`docs/` apart
-from the changelog, and docstrings and ``#:`` comments under :file:`pcapkit/`.
+from the changelog, which only the redefinition check reads, and docstrings and
+``#:`` comments under :file:`pcapkit/`.
 
 """
 

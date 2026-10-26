@@ -29,17 +29,11 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 #: Output formats that ``files=True`` can be driven with, and the extension each
 #: is expected to land on.
 #:
-#: Three registered formats are deliberately absent, each because it raises
-#: before any file is named -- so none of them can say anything about how a name
-#: is composed, and all three are separate defects from #358:
-#:
-#: * ``'pcap'`` and ``'cap'`` -- ``PCAPIO.__init__`` wants a ``protocol``
-#:   keyword that the extractor never supplies, so they fail with
-#:   ``TypeError: PCAPIO.__init__() missing 1 required keyword-only argument``.
-#: * ``'text'`` -- :attr:`Extractor.__output__
-#:   <pcapkit.foundation.extraction.Extractor.__output__>` maps it to
-#:   ``dictdumper.Text``, which :mod:`dictdumper` does not export, so it fails
-#:   with ``AttributeError: module 'dictdumper' has no attribute 'Text'``.
+#: ``'pcap'`` and ``'cap'`` are deliberately absent: ``PCAPIO.__init__`` wants a
+#: ``protocol`` keyword that the extractor never supplies, so they fail with
+#: ``TypeError: PCAPIO.__init__() missing 1 required keyword-only argument``
+#: before any file is named, and so cannot say anything about how a name is
+#: composed -- a separate defect from #358.
 FORMATS = {
     'json': '.json',
     'plist': '.plist',

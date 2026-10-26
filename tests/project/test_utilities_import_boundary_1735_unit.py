@@ -5,9 +5,9 @@ GitHub issue #1712 settled which of :mod:`pcapkit.utilities` and
 :mod:`pcapkit.corekit` a module belongs in: ``utilities`` holds cross-cutting
 services, and a service imports nothing from :mod:`pcapkit` outside
 ``utilities`` -- not at top level, not inside a function, and not under
-``TYPE_CHECKING``. ``pcapkit.utilities.decorators`` broke that, reaching
-:mod:`pcapkit.protocols` both under ``TYPE_CHECKING`` and lazily inside
-``beholder``, and #1735 moved it to :mod:`pcapkit.corekit.decorators`.
+``TYPE_CHECKING``. So the decorators, which reach :mod:`pcapkit.protocols` both
+under ``TYPE_CHECKING`` and lazily inside ``beholder``, belong in
+:mod:`pcapkit.corekit.decorators` (#1735), not in ``pcapkit.utilities``.
 
 The check reads each module with :mod:`ast` rather than importing it, so a lazy
 import is seen whether or not anything ever calls the function that holds it.

@@ -1,28 +1,29 @@
 # -*- coding: utf-8 -*-
 """Tests for the helpers in :mod:`tests._support`.
 
-Two of them are pinned here, both for the same reason: they are *machinery* the
-rest of the suite leans on, so a fault in either reports itself as a failure in
-whichever test happened to be running rather than as a fault in the helper.
-:func:`~tests._support.time_limit` is covered by :class:`TimeLimitTests` at the
-end; the rest of the module is :func:`~tests._support.close_extractor`.
+They are pinned here for one reason: they are *machinery* the rest of the
+suite leans on, so a fault in one reports itself as a failure in whichever test
+happened to be running rather than as a fault in the helper. The module opens
+with :func:`~tests._support.close_extractor`; :func:`~tests._support.time_limit`
+is covered by :class:`TimeLimitTests`, and :func:`~tests._support.stand_in_reason`
+by :class:`StandInReasonTests` at the end.
 
-That helper is teardown machinery: nearly every runtime and integration test
-hands it an extractor from ``addCleanup`` or a ``finally`` block. Teardown code
-is exactly the code whose bugs stay invisible -- a leak leaks silently, and a
-teardown that raises reports itself as a failure in whichever test happened to
-be running rather than as a fault in the helper. So the contract is pinned here
-rather than left to be inferred from the call sites.
-
-Three things are worth pinning, and they are the three ways this could rot:
+:func:`~tests._support.close_extractor` is teardown machinery: nearly every
+runtime and integration test hands it an extractor from ``addCleanup`` or a
+``finally`` block. Teardown code is exactly the code whose bugs stay invisible
+-- a leak leaks silently, and a teardown that raises reports itself as a failure
+in whichever test happened to be running rather than as a fault in the helper.
+So the contract is pinned here rather than left to be inferred from the call
+sites, as the ways it could rot:
 
 * both resources are released, not just the input file
-  (:class:`ClosesBothTests`) -- the original helper closed ``_ifile`` alone and
-  leaked the engine's :class:`pcap.pcap` handle on every abandoned extractor;
+  (:class:`ClosesBothTests`) -- a helper closing ``_ifile`` alone leaks the
+  engine's :class:`pcap.pcap` handle on every abandoned extractor;
 * one broken resource cannot strand the other
   (:class:`IndependenceTests`);
 * nothing it is handed in teardown makes it raise
-  (:class:`ToleranceTests`).
+  (:class:`ToleranceTests`), while a :exc:`KeyboardInterrupt` still gets
+  through (:class:`PropagationTests`).
 
 The module-isolation helpers are pinned here too, for the same reason and with
 more cause: :class:`SnapshotRestoreTests` and
@@ -341,9 +342,9 @@ class TimeLimitTests(unittest.TestCase):
     def test_an_enclosing_alarm_is_restored(self) -> None:
         """An outer deadline keeps counting down across the ``with``.
 
-        Before this was fixed the helper cancelled the pending alarm on the way out
-        and never re-armed it, so an outer ``signal.alarm(30)`` read back as ``0``
-        afterwards: the enclosing deadline was gone, silently.
+        Without the fix, the helper cancels the pending alarm on the way out and
+        never re-arms it, so an outer ``signal.alarm(30)`` reads back as ``0``
+        afterwards: the enclosing deadline is gone, silently.
 
         """
         own_handler = signal.getsignal(signal.SIGALRM)
@@ -434,10 +435,11 @@ class TimeLimitTests(unittest.TestCase):
     def test_an_oversized_scale_is_refused_and_leaks_no_handler(self) -> None:
         """A scale past a day is refused, not handed to ``signal.alarm``.
 
-        ``1e9`` once reached :func:`signal.alarm` as an int past its C ``int``,
-        which raised :exc:`OverflowError` after the helper's handler was installed
-        and before anything would restore it, so the handler leaked into every test
-        that ran afterwards. ``1e308`` overflows the float product itself.
+        Without the refusal, ``1e9`` reaches :func:`signal.alarm` as an int past
+        its C ``int``, which raises :exc:`OverflowError` after the helper's handler
+        is installed and before anything would restore it, so the handler leaks
+        into every test that runs afterwards. ``1e308`` overflows the float
+        product itself.
 
         """
         own_handler = signal.getsignal(signal.SIGALRM)
@@ -545,9 +547,10 @@ class TimeLimitTests(unittest.TestCase):
     def test_a_stall_before_the_try_still_leaves_a_raise_to_drop(self) -> None:
         """#1902: a runner stalled past the deadline before the body's ``try`` changes nothing.
 
-        Armed as the ``with`` was entered, the deadline came due in the stall,
-        before the ``try`` meant to drop its first raise. That raise went straight
-        through and none was dropped.
+        Armed as the ``with`` is entered, the deadline would come due in the
+        stall, before the ``try`` meant to drop its first raise, and that raise
+        would go straight through with none dropped. :meth:`held_deadline` arms
+        it from :meth:`spin` instead, inside the ``try``.
 
         """
         own_handler = signal.getsignal(signal.SIGALRM)
@@ -628,7 +631,7 @@ class TimeLimitTests(unittest.TestCase):
 
         GraalPy delivers a signal asynchronously, so one that fired just before the
         cancel can still be pending once the previous handler is back -- under
-        pytest that is ``SIG_DFL``, and it ended the worker (#2084). Blocking the
+        pytest that is ``SIG_DFL``, and it ends the worker (#2084). Blocking the
         signal stands in for that delay here: it is sent from inside the cancel and
         stays pending until the ``with`` has been left, and this class's handler
         must not then receive it.
@@ -860,11 +863,13 @@ class LoadedModulesDoNotOutliveTheirTestTests(unittest.TestCase):
 
     """
 
-    #: Borrowed test cases, as ``module`` / ``class`` pairs. The first three reach
-    #: the loaders through :func:`~tests._support.bootstrap_core_modules`, the
-    #: last two through :func:`~tests._support.load_module` on its own. Both
-    #: routes installed stubs, so both are pinned -- fixing only the former would
-    #: have left :mod:`tests.utilities.test_compat` leaking.
+    #: Borrowed test cases, as ``module`` / ``class`` pairs. The ``corekit``
+    #: multidict and io cases and the exceptions/warnings case reach the loaders
+    #: through :func:`~tests._support.bootstrap_core_modules`; the
+    #: ``test_module`` and ``test_compat`` cases call
+    #: :func:`~tests._support.load_module` on its own. Both routes install stubs,
+    #: so both are pinned -- a fix to the former alone would leave
+    #: :mod:`tests.utilities.test_compat` leaking.
     BORROWED = (
         ('tests.corekit.test_multidict', 'MultiDictTests'),
         ('tests.corekit.test_io', 'SeekableReaderTests'),
@@ -964,10 +969,10 @@ class ArrangedRestoreTests(unittest.TestCase):
         """Repeated calls register one restore, to the table before any load.
 
         :func:`~tests._support.bootstrap_core_modules` announces itself and then
-        makes seven :func:`~tests._support.load_module` calls, each of which
+        makes a run of :func:`~tests._support.load_module` calls, each of which
         announces itself too. Re-snapshotting on the later calls would capture a
         table that already held the earlier loads, and restoring to *that* would
-        leave them bound -- which is the original bug with more steps.
+        leave them bound -- which is #674 with more steps.
 
         """
         probe = _bare_case()
@@ -1024,8 +1029,8 @@ class ArrangedRestoreTests(unittest.TestCase):
         :class:`~unittest.TestCase`, it would win the walk on the name alone --
         and a cleanup registered on a test that has already finished is never run,
         so the stubs outlive the test exactly as in #674 but with no error to show
-        for it. Measured before :func:`~tests._support._is_running_test` was
-        consulted: names left bound, silently.
+        for it. Measured without the :func:`~tests._support._is_running_test`
+        check: names left bound, silently.
 
         Contrived, and deliberately so: no call site in the suite looks like this,
         which is the point. The heuristic has to be sound for the call sites

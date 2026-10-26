@@ -333,8 +333,8 @@ class PCAPToolkitTests(unittest.TestCase):
         """The descriptor the toolkit builds reassembles to the octets sent.
 
         Guards the seam rather than either side of it: the toolkit and the
-        reassembler each looked self-consistent while disagreeing about what
-        ``first`` and ``last`` meant.
+        reassembler can each look self-consistent while disagreeing about what
+        ``first`` and ``last`` mean.
 
         """
         from pcapkit.foundation.reassembly.tcp import TCP

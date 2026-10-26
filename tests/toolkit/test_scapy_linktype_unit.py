@@ -2,10 +2,10 @@
 """:func:`pcapkit.toolkit.scapy.tcp_traceflow` takes the link type the engine attached (#1517).
 
 A packet's first layer does not name its link type: a raw IPv4 packet's is
-``IP``, which is no :class:`~pcapkit.const.reg.linktype.LinkType` name, so the
-name lookup raised :exc:`~pcapkit.utilities.exceptions.MissingKeyError`, and a
-raw-IP packet whose first layer is ``IPv6`` resolved to ``LINKTYPE_IPV6`` whatever
-its interface said. :class:`~pcapkit.foundation.engines.scapy.Scapy` attaches
+``IP``, which is no :class:`~pcapkit.const.reg.linktype.LinkType` name, so a
+name lookup raises :exc:`~pcapkit.utilities.exceptions.MissingKeyError`, and
+resolves a raw-IP packet whose first layer is ``IPv6`` to ``LINKTYPE_IPV6``
+whatever its interface says. :class:`~pcapkit.foundation.engines.scapy.Scapy` attaches
 the interface's link type with :func:`~pcapkit.toolkit.scapy.attach_linktype`,
 and only a packet built by hand, which carries none, is looked up by name.
 

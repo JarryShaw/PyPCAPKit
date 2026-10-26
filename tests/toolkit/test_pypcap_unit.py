@@ -1,7 +1,7 @@
 """Unit tests for :mod:`pcapkit.toolkit.pypcap`.
 
-`pypcap`_ hands back raw bytes, so this toolkit has only the two auxiliary
-functions; the reassembly and flow tracing adapters exist purely to refuse
+`pypcap`_ hands back raw bytes, so this toolkit's only working functions are
+its auxiliary ones; the reassembly and flow tracing adapters exist purely to refuse
 loudly, and that refusal is asserted here so it cannot regress into a silent
 :data:`None`.
 

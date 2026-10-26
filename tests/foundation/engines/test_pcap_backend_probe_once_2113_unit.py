@@ -1,9 +1,10 @@
 # -*- coding: utf-8 -*-
 """An extraction probes the pcap backend once, not three times (#2113).
 
-Engine selection asked ``unsupported_reason`` in the constructor and again in
-``run``, and the engine's constructor probed a third time; each probe scans the
-installed distributions. The probe is shared within one extraction only, so a
+Engine selection asks ``unsupported_reason`` in the constructor and again in
+``run``, and the engine's constructor asks once more; each probe scans the
+installed distributions. Guards against each of those asks probing afresh. The
+probe is shared within one extraction only, so a
 later extraction, or a direct ``unsupported_reason`` call, still asks afresh.
 
 """

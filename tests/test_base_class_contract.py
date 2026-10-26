@@ -19,14 +19,14 @@ dumpers           :class:`pcapkit.dumpkit.common.DumperBase`      ``Dumper``
 Two different things are checked here, and the split between them is deliberate
 because only one of them is a behaviour claim.
 
-:class:`BaseClassAliasTests` is the part with teeth. Until #514 part (c),
-import statements across the library read ``from ... import ProtocolBase as
-Protocol`` -- binding the *base* to the *public* name -- so a module went on to
-say ``class Application(Protocol)`` while in fact inheriting ``ProtocolBase``.
-Nothing was wrong at runtime; the classes were correct. What was wrong is that
-the source said the opposite of what it did, and that is not a cosmetic
-complaint: the aliasing was a *convention* rather than a mechanism, so a sweep
-over it could miss a site and nothing would fail. It missed one twice --
+:class:`BaseClassAliasTests` is the part with teeth. It guards against an
+import such as ``from ... import ProtocolBase as Protocol`` -- binding the
+*base* to the *public* name -- after which a module says
+``class Application(Protocol)`` while in fact inheriting ``ProtocolBase``.
+Nothing is wrong at runtime; the classes are correct. What is wrong is that
+the source says the opposite of what it does, and that is not a cosmetic
+complaint: aliasing kept in check by *convention* rather than by a mechanism
+lets a sweep miss a site with nothing failing. A sweep missed one twice --
 issue #506 (a runtime import in ``schema/schema.py`` unreachable for three
 years) and issue #513 (the ``extraction.py`` gates rejecting the library's own
 built-ins for three years). These tests replace the convention with
@@ -62,7 +62,7 @@ convention.
    ``tests.protocols.application.test_http_unit`` run before this module, one
    process, plain :mod:`unittest`, desyncs
    :class:`RegistrationGateTests.test_user_style_subclass_registers_when_it_opts_in`
-   on all four suites. That test's own ``setUp`` calls
+   on every suite it covers. That test's own ``setUp`` calls
    :func:`tests._support.purge_modules` on ``pcapkit`` and re-imports it from
    source, which mints a *second generation* of every ``pcapkit`` class --
    deliberately asymmetric, see that function's own docstring, and ordinarily
@@ -200,11 +200,11 @@ class BaseClassAliasTests(unittest.TestCase):
     def test_no_library_module_imports_a_base_under_its_public_name(self) -> None:
         """Source-level sweep: the alias must not appear.
 
-        This is the source-level half, and it is the half that sees the ~53
-        aliases that live inside ``if TYPE_CHECKING:``. Those have no runtime
-        effect at all -- they exist so an annotation can say ``Protocol`` -- so
+        This is the source-level half, and it is the half that sees an alias
+        inside ``if TYPE_CHECKING:``. Such an alias has no runtime effect at
+        all -- it exists so an annotation can say ``Protocol`` -- so
         :meth:`test_library_modules_do_not_bind_the_public_name_at_runtime`
-        cannot see them and this one has to.
+        cannot see it and this one has to.
 
         """
         offenders = {}

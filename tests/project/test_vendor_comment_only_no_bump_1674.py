@@ -2,8 +2,8 @@
 """#1674: a regeneration that changes only comments or docstrings is committed
 without a version bump.
 
-Vendor Update bumped on any changed file, so 1.5.0b9, b10 and b11 were cut for
-comment-only regenerations. The owner chose to commit such a regeneration
+Bumping on any changed file cuts a beta for a comment-only regeneration, as
+1.5.0b9, b10 and b11 were cut. The owner chose to commit such a regeneration
 without the bump, so that documentation still reaches ``main`` and only a code
 change cuts a beta.
 

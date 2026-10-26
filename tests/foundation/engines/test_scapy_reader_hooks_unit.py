@@ -9,7 +9,7 @@ the parent method, whichever Scapy is installed:
 
 * ``_check_interface_id`` returns whether the interface exists since Scapy 2.8,
   which then skips the block on a false result; before 2.8 it returns
-  :data:`None` and raises instead. An override that dropped the result made 2.8
+  :data:`None` and raises instead. An override that drops the result makes 2.8
   skip every packet block.
 * Scapy 2.5 keeps an interface as ``(linktype, snaplen, tsresol)`` and 2.7 as
   ``(linktype, snaplen, options)``, so the ``if_tsoffset`` of each interface is

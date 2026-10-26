@@ -1,19 +1,20 @@
 # -*- coding: utf-8 -*-
 """#1685: Vendor Update's bump commit carries the modules a crawl adds.
 
-``Commit changes`` in :file:`.github/workflows/cron-vendor.yml` ran ``git commit
--am``, which stages modified and deleted tracked files and never an untracked
-one. ``Verify Changed files`` reports untracked files too (the ``??`` entries of
-``git status -u --porcelain``), so a crawl that generated a module for a new
-registry bumped the version and left the module out of the commit. Every later
-crawl found it untracked again, and bumped again.
+Guards against ``Commit changes`` in :file:`.github/workflows/cron-vendor.yml`
+staging with ``git commit -am`` alone, which stages modified and deleted tracked
+files and never an untracked one. ``Verify Changed files`` reports untracked
+files too (the ``??`` entries of ``git status -u --porcelain``), so without the
+fix a crawl that generates a module for a new registry bumps the version and
+leaves the module out of the commit, and every later crawl finds it untracked
+again, and bumps again.
 
 :class:`TestTheBumpCommitStep` runs that step's script, and ``Verify Changed
 files``', in a throwaway repository the way the runner runs them, with ``${{ }}``
 substituted first. The second test
 classifies a new module with :file:`util/vendor_code_changed.py` and walks the
-steps, which shows ``Commit documentation changes``, still ``-a`` alone, never
-sees one. The harness is #1674's, from
+steps, which shows ``Commit documentation changes``, which stages with ``-a``
+alone, never sees one. The harness is #1674's, from
 :mod:`tests.project.test_vendor_comment_only_no_bump_1674`.
 
 """
@@ -80,10 +81,10 @@ class TestTheBumpCommitStep(WorkflowMixin, ScratchRepository):
         self.base = self.git('rev-parse', 'HEAD')
 
     def v17(self) -> 'list[str]':
-        """What ``tj-actions/verify-changed-files@v17``, which ``Verify Changed
-        files`` replaced (#1968), reported: its ``entrypoint.sh`` with no ``files``
-        pattern, so ``git diff --diff-filter=ACMUXTR``, the ``??`` lines of ``git
-        status -u --porcelain`` and ``git ls-files --deleted``, de-duplicated.
+        """What ``tj-actions/verify-changed-files@v17``, whose report ``Verify
+        Changed files`` reproduces (#1968), reports: its ``entrypoint.sh`` with no
+        ``files`` pattern, so ``git diff --diff-filter=ACMUXTR``, the ``??`` lines of
+        ``git status -u --porcelain`` and ``git ls-files --deleted``, de-duplicated.
 
         """
         tracked = self.git('diff', '--diff-filter=ACMUXTR', '--name-only').splitlines()

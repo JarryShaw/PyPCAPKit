@@ -63,7 +63,7 @@ class LoggingEnvironmentTests(unittest.TestCase):
         self.assertTrue(logging_module.SPHINX_TYPE_CHECKING)
 
     def test_invalid_boolean_environment_values_fall_back_to_false_and_warn(self) -> None:
-        # GitHub issue #1726 guards against the value being taken as off in silence.
+        # Guards against the value being taken as off in silence (#1726).
         # logging loads before warnings, so it records the value and warnings
         # reports it once it has loaded, naming the variable and the value.
         os.environ['PCAPKIT_DEVMODE'] = 'maybe'
@@ -511,9 +511,9 @@ class ExtractorLoggingTests(unittest.TestCase):
 
         The frame chains are a feature of the tool and of the CLI's ``-v``, so
         they go to stdout via :func:`print` and are readable without the
-        consumer configuring a logging handler. Removing the import-time stderr
-        handler must not turn that into silence, and moving it onto the logger
-        would have changed both the stream and the visibility.
+        consumer configuring a logging handler. The logger having no import-time
+        stderr handler must not turn that into silence, and moving the output
+        onto the logger would change both the stream and the visibility.
 
         """
         import contextlib

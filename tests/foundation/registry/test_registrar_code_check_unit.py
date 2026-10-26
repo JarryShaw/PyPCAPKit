@@ -2,8 +2,9 @@
 """A registrar handed a ``code`` outside its enum changes nothing. C.f. #2186 and #2224.
 
 The registrars keyed on an enum code log ``code.name`` once the registration is
-done, so an ``int`` or :obj:`None` failed there with :exc:`AttributeError` after
-the protocol's table had been written. Each registrar rejects such a ``code``
+done, so without a check an ``int`` or :obj:`None` fails there with
+:exc:`AttributeError` after the protocol's table has been written. Each
+registrar rejects such a ``code``
 with :exc:`~pcapkit.utilities.exceptions.RegistryError` before it touches
 anything.
 
@@ -18,7 +19,7 @@ code there.
 Every registrar, those four included, also rejects a member of an enum other
 than the one it is typed on (#2224). The registry enums compare equal to their
 values, so such a member keys the entry of the registrar's own member of that
-value: ``register_linktype(TransType.ICMP, ...)`` replaced
+value: without the check, ``register_linktype(TransType.ICMP, ...)`` replaces
 ``Frame.__proto__[LinkType.ETHERNET]``. Each wrong-enum case picks a member
 equal to one of the registrar's own where the value types allow, so the check
 has to be on the type.

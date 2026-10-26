@@ -3,10 +3,11 @@
 
 Every code registrar in :mod:`pcapkit.foundation.registry.protocols` --
 ``register_tcp``, ``register_linktype`` and the rest -- ends by naming the class
-it registered in :data:`pcapkit.protocols.__proto__`. Registering the shipped
-entry back restored the code but never the name: ``register_tcp(80, Custom)``
-then ``register_tcp(80, shipped)`` left ``'CUSTOM'`` behind for good, and a
-custom class named like a built-in left the built-in displaced.
+it registered in :data:`pcapkit.protocols.__proto__`. Guards against registering
+the shipped entry back restoring the code but never the name:
+``register_tcp(80, Custom)`` then ``register_tcp(80, shipped)`` leaving
+``'CUSTOM'`` behind for good, and a custom class named like a built-in leaving
+the built-in displaced.
 
 :mod:`tests.foundation.registry.test_registry_symmetry_unit` covers the plain
 round trip for every registrar. These pin the cases it does not reach: a
@@ -207,7 +208,7 @@ class TestRegistryNameRestore(unittest.TestCase):
         """Seeded fuzz: register at random, restore every code, compare with the start.
 
         Custom classes, some named like each other and some like built-ins, and the
-        built-ins themselves (``IPv4`` and the three ``HTTP`` classes), go through
+        built-ins themselves (``IPv4`` and each ``HTTP`` class), go through
         ``register_tcp``, ``register_udp`` and ``register_apptype`` at a handful of
         shipped ports, with restores mixed in. Every code is then restored to its
         shipped entry, in a shuffled order, and the names must be exactly as found.

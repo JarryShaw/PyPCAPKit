@@ -29,7 +29,7 @@ from tests._support import reimport_once_per_class
 COMMON = struct.pack('!HHII', 1, 2, 0, 0)
 #: COOKIE ACK chunk.
 COOKIE_ACK = struct.pack('!BBH', 11, 0, 4)
-#: DATA chunk carrying ``b'hi'`` under PPID 0, padded to eight octets.
+#: DATA chunk carrying ``b'hi'`` under PPID 0: Length 18, padded to 20 octets.
 DATA = struct.pack('!BBHIHHI', 0, 3, 18, 1, 0, 0, 0) + b'hi' + bytes(2)
 #: INIT chunk declaring 32 octets, 28 present.
 INIT_CUT = bytes.fromhex('01000020 00000001 00010000 00010001 00000001 000c0010 00050000')

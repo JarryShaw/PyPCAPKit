@@ -122,8 +122,8 @@ import unittest
 #: Header fields shared by every constructed segment here, spelled with the parameter
 #: names :meth:`TCP.make <pcapkit.protocols.transport.tcp.TCP.make>` actually declares.
 #:
-#: Deliberately *not* a copy of :data:`examples.generators.options.TCP_BASE`, which the
-#: sibling modules in this directory reuse -- and, unlike them, this dict omits
+#: Deliberately *not* a copy of :data:`examples.generators.options.TCP_BASE`, which
+#: sibling modules in this directory mirror -- and, unlike theirs, this dict omits
 #: ``syn``/``ack`` altogether, since every case here passes those two explicitly to
 #: select a layout, where a shared constant could not. The names matter: ``ack`` is the
 #: *acknowledgement flag*, not ``ack_no``, and ``make`` raises ``UnsupportedCall`` for any
@@ -631,7 +631,7 @@ class TCPMPTCPJoinReadPathUnitTests(unittest.TestCase):
     """The control: the parse path dispatches each layout to its own reader.
 
     #587 is a defect on the make path only, and its ordering lives inside ``make``. These
-    are regression guards rather than new coverage -- they fail only if reordering
+    guard the read path rather than #587 itself -- they fail only if reordering
     ``make`` disturbs something it is not supposed to touch.
 
     """

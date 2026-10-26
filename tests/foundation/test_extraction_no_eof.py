@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
 """``no_eof`` has to stop eventually -- #620.
 
-``extract(..., no_eof=True)`` never returned. End of stream was detected
-correctly, and ``ExtractionWarning: EOF reached`` fired, but the three loops that
-handle it all read
+Without the fix, ``extract(..., no_eof=True)`` never returns. End of stream is
+detected correctly, and ``ExtractionWarning: EOF reached`` fires, but every loop
+that handles it reads
 
 .. code-block:: python
 
    if self._flag_n:
        continue
 
-with nothing else to stop them, so an exhausted input was retried forever. The
-flag suppressed the error that *ended* the loop without supplying any other
+with nothing else to stop it, so an exhausted input is retried forever. The
+flag suppresses the error that *ends* the loop without supplying any other
 ending.
 
 The flag is not pointless, which is why it gets a termination condition rather
@@ -96,8 +96,9 @@ GraalPy 25.4.4 a child spends 4-8s importing :mod:`pcapkit` and 7-13s on its
 first extraction, which imports more modules and is otherwise cold code:
 about 21 CPU-seconds before the case under test begins, after which every case
 here takes 0.02-0.06s. CPython takes 0.9s in all. A single 30s timeout over the
-whole child therefore failed four of eleven GraalPy runs on ``main``, the other
-exhausted-input cases in each finishing at 25-30s, and called it #620. So the
+whole child is therefore not enough: measured on ``main``, it failed four of
+eleven GraalPy runs, the other exhausted-input cases in each finishing at
+25-30s, and reported them as #620. So the
 child warms up with one plain extraction and prints :data:`READY`; that phase
 gets :data:`STARTUP`, and only what follows counts against :data:`DEADLINE`.
 
@@ -319,8 +320,8 @@ class ChildBoundedTestCase(unittest.TestCase):
 class ChildAllowances(unittest.TestCase):
     """:func:`run_child` charges warm-up to :data:`STARTUP`, not :data:`DEADLINE`.
 
-    #2085: one timeout over the whole child failed GraalPy runs whose extraction
-    had not even begun, and reported them as #620. These children are bare
+    #2085: one timeout over the whole child fails GraalPy runs whose extraction
+    has not even begun, and reports them as #620. These children are bare
     interpreters that sleep, so the cases need no capture and no runtime
     dependencies.
 
@@ -374,11 +375,11 @@ class ChildAllowances(unittest.TestCase):
 
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class NoEOFTerminatesOnAnExhaustedInput(ChildBoundedTestCase):
-    """The reproduction from #620, over all three loops that handle end of stream.
+    """The reproduction from #620, over every loop that handles end of stream.
 
     ``record_frames`` (the ``auto=True`` path), ``__next__`` and ``__call__`` each
-    carried their own copy of the unbounded retry, so each needs its own case:
-    the issue reproduced the first two and this covers the third as well.
+    handle end of stream themselves, so each needs its own case: the issue
+    reproduces the first two and this covers the third as well.
 
     Every case here parses a real capture, so every case runs in a child process
     -- see the module docstring for why an in-process deadline does not hold.
@@ -456,10 +457,10 @@ class NoEOFTerminatesOnAnExhaustedInput(ChildBoundedTestCase):
         """The ``pcapkit -`` case: a non-seekable input, exhausted.
 
         ``pcapkit/__main__.py`` sets ``no_eof`` precisely for ``fin='-'``, so this
-        is the flag's own documented use. #620 does not mention it, but it hung
-        too: a pipe reports end of stream once its writer has closed, and that was
-        retried forever like any other. A ``BufferedReader`` over a non-seekable
-        raw stream is what ``sys.stdin.buffer`` is.
+        is the flag's own documented use. #620 does not mention it, but without the
+        fix it hangs too: a pipe reports end of stream once its writer has closed,
+        and that is retried forever like any other. A ``BufferedReader`` over a
+        non-seekable raw stream is what ``sys.stdin.buffer`` is.
 
         """
         self.run_bounded(f"""
@@ -514,8 +515,8 @@ class NoEOFOverAGrowingFileStopsAtWhatIsThere(ChildBoundedTestCase):
     written down here.
 
     The case below sequences the append on the extractor's own end of stream, not
-    on that 0.6s timer: a loaded runner took longer than 0.6s to get there, read
-    the sixth frame, and failed (#1583).
+    on that 0.6s timer: a loaded runner can take longer than 0.6s to get there,
+    read the sixth frame, and fail (#1583).
 
     """
 

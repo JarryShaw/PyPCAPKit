@@ -68,7 +68,7 @@ CONSUMERS = ('coverage-comment.yml', 'deploy-pages.yml', 'cron-vendor.yml', 'cro
 REPORTERS = ('ci-reports.yml',)
 #: Each job's ``timeout-minutes``, and its capped steps', by ``id``: ``test``'s are
 #: main's, ``experimental``'s are sized for GraalPy (88-113 minutes, estimate).
-#: #1938 adds the watcher's interpreter and its requests, capped too.
+#: The watcher's interpreter and its requests are capped too (#1938).
 CAPS = {JOB: (45, {}), EXPERIMENTAL: (140, {'python': 5, 'install': 10, 'watcher-python': 1, 'watcher': 1, 'tests': 120})}
 #: The jobs whose result reaches a gate: ``required-checks`` and what it needs, and
 #: ``unittest-ordering``, which runs on main's pushes and gates publishing.
@@ -477,8 +477,8 @@ class TestTheExperimentalLegsAreAWorkflowOfTheirOwn(unittest.TestCase):
             return next(entry['run'] for entry in spec['jobs']['changes']['steps'] if entry.get('id') == 'classify')
         self.assertEqual(classify(self.own), classify(self.unit))
         spec = self.own['jobs']['experimental']
-        # #1938 adds `current`, the gate every job needs, and `!cancelled()`, so the two results stand in
-        # for the implicit `success()`.
+        # `current` is the gate every job needs (#1938), and `!cancelled()` drops the implicit `success()`,
+        # so the two results stand in for it.
         self.assertEqual(spec['needs'], ['current', 'changes', 'python-versions'])
         self.assertEqual(spec['if'],
                          "${{ !cancelled() && needs.changes.result == 'success' && "

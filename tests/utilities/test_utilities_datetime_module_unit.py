@@ -2,9 +2,7 @@
 """#2134: the timestamp conversions live in :mod:`pcapkit.utilities.datetime`.
 
 The owner ruled on #2136 that the module reuses the stdlib name, as
-:mod:`pcapkit.utilities.logging` and :mod:`pcapkit.utilities.warnings` do. The
-old ``pcapkit.utilities.timestamp`` path was added by #2111 and is in no
-release, so it is deleted rather than re-exported (#1715).
+:mod:`pcapkit.utilities.logging` and :mod:`pcapkit.utilities.warnings` do.
 
 """
 

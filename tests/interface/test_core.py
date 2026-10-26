@@ -260,7 +260,7 @@ class EngineConstantTests(unittest.TestCase):
                          'the engine constants and the engine registry have diverged')
 
     def test_constants_are_reachable_from_the_package_root(self) -> None:
-        # ``pcapkit.DPKT`` has always worked, so ``pcapkit.PyPCAP`` has to as well --
+        # ``pcapkit.DPKT`` works, so ``pcapkit.PyPCAP`` has to as well --
         # a constant that exists only in the submodule is a constant nobody finds.
         # Both re-export lists name their symbols explicitly, so neither picks a new
         # one up on its own.

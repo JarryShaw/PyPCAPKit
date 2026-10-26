@@ -6,8 +6,7 @@ engines are best effort, their adapters need not match the default engine one
 to one, and protocol rules belong in the default engine only. So prose that
 says an adapter does something "as the default engine does", "as every other
 engine's adapters do", or "stops at the same depth" states a contract nobody
-keeps. Issue #1708 removed the tests and the code behind those claims, then the
-claims themselves.
+keeps.
 
 This scans every module of :mod:`pcapkit` and every page and module under
 :file:`docs/source` but the changelog for the shapes in :data:`PATTERNS`. The
@@ -178,7 +177,7 @@ class EngineAgreementProseTests(unittest.TestCase):
                 self.assertIn(phrase, [found for (_, _, found) in claims(text)])
 
     def test_the_issue_1708_shapes_are_matched(self) -> None:
-        """Each claim issue #1708 removed is seen, wrapped or not, so a pass is not vacuous."""
+        """Each claim of a shape #1708 names is seen, wrapped or not, so a pass is not vacuous."""
         source = (
             '    """Reassembly and flow tracing are handed a plain float of it, as by\n'
             '    every other engine (#1501). The float nearest the exact timestamp, as\n'

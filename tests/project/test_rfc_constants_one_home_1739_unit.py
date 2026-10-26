@@ -5,7 +5,7 @@ Ruling 7 on GitHub issue #1726, tracked as #1739: a protocol constant that the
 RFC (or the file format) fixes, and that more than one module spelled out, is
 defined once, in the module that owns the protocol -- or that protocol's schema
 or :mod:`pcapkit.const` module -- and every reader imports it from there. Such a
-constant is never configurable, and the old homes do not re-export it.
+constant is never configurable, and no other module re-exports it.
 
 These checks pin that:
 
@@ -77,8 +77,8 @@ HOMES = (
     }),
 )
 
-#: Names a module other than their home must not define, mapped to the module
-#: that once held them (#1739). ``MAGIC_NUMBER`` stays a class attribute of the PCAP
+#: Names a module other than their home must not define, each with a module
+#: that must not define it (#1739). ``MAGIC_NUMBER`` stays a class attribute of the PCAP
 #: and PCAP-NG engines -- the extractor dispatches on it -- but is built from
 #: the home rather than spelled out, which :class:`TestOneDefinition` checks
 #: through the literals.
@@ -670,7 +670,7 @@ class TestReaders(unittest.TestCase):
                 self.assertTrue(loads, f'{rel} never reads {module}.{name}')
 
     def test_pypcapfile_binds_none(self) -> 'None':
-        # The names #1739 moved out of there: reading them through
+        # The homed names it reads (#1739): reading them through
         # ``pcapkit.toolkit.pypcapfile`` would be a re-export, which
         # ruling 1 on #1726 rules out, so the module reaches them as
         # module attributes.

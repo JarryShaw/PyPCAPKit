@@ -2,11 +2,11 @@
 """#1938: Experimental Tests skips or stops a superseded run instead of cancelling it.
 
 GitHub counts a ``cancelled`` check against its commit in the status rollup, so
-#1903's ``cancel-in-progress`` marked every superseded commit red, and a merged
-pull request's last run, which nothing supersedes, kept its runner to the end.
-The owner chose both remedies together: a gate job that skips the rest of a run
-whose commit is no longer current, and a watcher that stops the tests once it
-stops being current, each ending green.
+``cancel-in-progress`` (#1903) marks every superseded commit red, and it never
+reaches a merged pull request's last run, which nothing supersedes and which
+keeps its runner to the end. The owner chose both remedies together: a gate job
+that skips the rest of a run whose commit is no longer current, and a watcher
+that stops the tests once it stops being current, each ending green.
 
 * :class:`TestNothingIsCancelled` and :class:`TestTheGate` read experimental.yml.
 * :class:`TestCheck` drives util/superseded.py's rule through a fake transport.

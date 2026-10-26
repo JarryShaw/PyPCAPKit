@@ -6,7 +6,8 @@ binding :class:`pcapkit.protocols.application.httpv1.HTTP` directly for ports 80
 and 8080, which makes a segment on either port HTTP/1 by assertion of the port
 number: an HTTP/2 payload there would be refused by the HTTP/1 parser and
 reported as :class:`~pcapkit.protocols.misc.raw.Raw`. Both versions share those ports on the
-wire -- :rfc:`9113#section-3.1` keeps the cleartext form on ``http`` -- so the
+wire -- :rfc:`9113#section-3` gives HTTP/2 the ``http`` scheme and HTTP/1.1's
+default port numbers -- so the
 port cannot decide the version and the payload has to, which is what
 :class:`pcapkit.protocols.application.http.HTTP` does.
 
@@ -53,8 +54,8 @@ class TCPHTTPDispatchTests(unittest.TestCase):
     def test_tcp_binds_the_http_proxy_on_both_http_ports(self) -> None:
         """Ports 80 and 8080 resolve to ``application.http``, not ``application.httpv1``.
 
-        The descriptor is checked rather than the imported class because all three
-        HTTP classes are named ``HTTP`` (c.f. #682's own subject, the registry key
+        The descriptor is checked rather than the imported class because every
+        HTTP class is named ``HTTP`` (c.f. #682's own subject, the registry key
         collision), so the module name is the only thing that tells them apart.
 
         """

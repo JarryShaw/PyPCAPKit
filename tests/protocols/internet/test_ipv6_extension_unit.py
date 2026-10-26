@@ -1909,7 +1909,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
     def _assert_smf_dpd_options_parse_from_the_wire(self, protocol_cls: type) -> None:
         """A hash-based ``SMF_DPD`` option must consume exactly what it declares.
 
-        Per :rfc:`6621#section-8.1` the option is an ``Option Type`` octet, an
+        Per :rfc:`6621#section-6.1.1` the option is an ``Option Type`` octet, an
         ``Opt Data Len`` octet, and ``Opt Data Len`` further octets whose first
         bit is the DPD mode -- set, here, for hash-based DPD, so that the whole of
         the hash assist value is the ``Opt Data Len`` octets. Two things have to
@@ -1985,7 +1985,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         Identification-based DPD reaches the same mis-sized read by a different
         route: its length comes from ``Opt Data Len`` too, but the octets it
         covers are a TaggerID whose own width comes from the ``TidLen`` nibble
-        [:rfc:`6621#section-8.1`], so a wrong ``Opt Data Len`` mis-sizes the
+        [:rfc:`6621#section-6.1.1`], so a wrong ``Opt Data Len`` mis-sizes the
         identifier rather than the whole option. Without the fix, both cases
         below hang exactly as the hash-based ones do.
 
@@ -2382,7 +2382,7 @@ class IPv6ExtensionUnitTests(unittest.TestCase):
         ``0xFFFFFF`` -- bit length 24, the value the option-round-trip
         generator happens to use -- is one of the few values floor division
         gets right, which is why the round-trip suite never caught this. Every
-        case below bar the two marked controls therefore has a bit length that
+        case below bar the marked controls therefore has a bit length that
         is deliberately **not** a multiple of eight, and several are below 256
         (c.f. #601).
 

@@ -2,8 +2,8 @@
 """Pins the docs build's rendering of :mod:`aenum` classes in types.
 
 GitHub issue #1858: ``typehints_fully_qualified`` is off and :mod:`aenum` has no
-inventory, so a parameter annotated ``StdlibIntEnum | AenumIntEnum`` rendered as
-``IntEnum | IntEnum``. ``format_class`` in :file:`docs/source/conf.py`, the
+inventory, so by default a parameter annotated ``StdlibIntEnum | AenumIntEnum``
+renders as ``IntEnum | IntEnum``. ``format_class`` in :file:`docs/source/conf.py`, the
 build's ``typehints_formatter``, names an :mod:`aenum` class ``aenum.IntEnum``,
 as a literal since there is nothing to link to (#1920), and leaves the classes
 of pcapkit and the standard library to the default rendering.

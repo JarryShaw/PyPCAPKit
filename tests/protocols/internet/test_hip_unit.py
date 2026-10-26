@@ -2519,8 +2519,8 @@ class HIPUnitTests(unittest.TestCase):
         On the widths chosen
         --------------------
         Only the widths that are **not** multiples of 8 can tell the right
-        formula from the wrong ones, which is why five of the eight cases below
-        are 1, 9, 12, 17 and 25 bits. At 12 bits, for instance, the four
+        formula from the wrong ones, which is why the cases below include 1, 9,
+        12, 17 and 25 bits. At 12 bits, for instance, the four
         plausible field-pair widths disagree: ``2 * ceil(12 / 8) == 4``
         (correct), ``ceil(12 / 4) == 3`` (the defect), ``2 * floor(12 / 8) == 2``,
         and ``ceil(12 / 8) == 2`` (one field's worth rather than two). At 1 bit
@@ -3183,7 +3183,7 @@ class HIPUnitTests(unittest.TestCase):
         # locators shadow while they pack. The identity of that one callback is
         # asserted directly in
         # :meth:`test_hip_padding_sites_are_the_known_callbacks_and_nothing_else`,
-        # so a third expression cannot appear unnoticed.
+        # so another expression cannot appear unnoticed.
         #
         # The sweep above covers all eight residues, which is enough for any
         # formula periodic in ``Length % 8`` -- but not for one that is not.
@@ -3220,7 +3220,7 @@ class HIPUnitTests(unittest.TestCase):
             hip_schema.parameter_padding_len({'len': -1})
 
     def test_hip_padding_sites_are_the_known_callbacks_and_nothing_else(self) -> None:
-        """#651/#664/#679: two padding callbacks cover every parameter, and no third exists.
+        """#651/#664/#679: every HIP parameter pads through a known callback, and no other.
 
         Every HIP padding site goes through
         :func:`~pcapkit.protocols.schema.internet.hip.parameter_padding_len`
@@ -3244,9 +3244,9 @@ class HIPUnitTests(unittest.TestCase):
         Three failure modes make the shape worth guarding, none of which
         anything else catches:
 
-        * **A third expression appearing.** A later change that gives some
+        * **Another expression appearing.** A later change that gives some
           parameter an inline lambda -- to make a pinned literal pass, say --
-          would be indistinguishable from the two legitimate callbacks by
+          would be indistinguishable from the legitimate callbacks by
           inspection. ``bespoke`` below must stay empty.
         * **The ``LOCATOR_SET`` callback regressing to a raw ``pkt['len']``
           read.** That silently re-introduces

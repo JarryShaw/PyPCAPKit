@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Pins the API entries #2234 adds for members that had a docstring but no directive.
+"""Pins the API entries of members whose docstring no directive would otherwise render (#2234).
 
 * ``Protocol.context`` -- a public property of every protocol, listed on the
   ``Protocol`` autoclass and in the ``ProtocolBase`` property group beside its

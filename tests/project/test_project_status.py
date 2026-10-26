@@ -2,8 +2,8 @@
 """Tests for :file:`util/project_status.py` and the workflow that runs it.
 
 :file:`.github/workflows/project-status.yml` sets each item's *Status* on the
-project board from its state labels. Three things about it are checkable from the
-tree, and each has its own class:
+project board from its state labels. What is checkable about it from the tree
+has a class of its own:
 
 * :class:`TestMapping` -- :func:`status_for` gives the documented status for every
   row of the table, precedence included.
@@ -263,8 +263,8 @@ def scan(text: 'str') -> 'list[tuple[tuple[str, ...], str]]':
 
     It *fails closed*: any line outside that subset raises :exc:`UnsupportedYAML`
     rather than being read as something it is not. A value the scan misreads is a
-    ``run:`` script the safety tests never see -- a flow-mapping step, ``run :``,
-    ``run: |2``, or ``run: *alias`` all were (#1060) -- and a run without PyYAML
+    ``run:`` script the safety tests never see -- as a flow-mapping step, ``run :``,
+    ``run: |2`` or ``run: *alias`` is to a laxer scan (#1060) -- and a run without PyYAML
     has nothing to catch the disagreement, so refusing is the only answer that
     cannot pass vacuously.
 
@@ -411,7 +411,7 @@ class TestWorkflowSafety(unittest.TestCase):
 
     def test_the_env_exemption_is_the_value_s_own_mapping(self) -> None:
         # A job or step key merely *under* something named ``env`` is not in an
-        # ``env:`` block; ``'env' in path`` exempted both (#1060).
+        # ``env:`` block; an ``'env' in path`` test would exempt both (#1060).
         text = (f'jobs:\n  env:\n    runs-on: {_TITLE}\n'
                 f'    steps:\n      - name: x\n        if: {_TITLE}\n'
                 f'        env:\n          T: {_TITLE}\n')
@@ -463,8 +463,8 @@ class TestConcurrency(unittest.TestCase):
 _TITLE = '${{ github.event.issue.title }}'
 _STEPS = 'jobs:\n  j:\n    steps:\n'
 
-#: Workflows that splice :data:`_TITLE` into a ``run:`` script in a form the old
-#: line scan read as something else (#1060). Each must make :func:`scan` raise.
+#: Workflows that splice :data:`_TITLE` into a ``run:`` script in a form a laxer
+#: line scan reads as something else (#1060). Each must make :func:`scan` raise.
 BYPASSES = {
     'flow-mapping step': f'      - {{name: x, run: "echo {_TITLE}"}}\n',
     'space before the colon': f'      - name: x\n        run : echo {_TITLE}\n',

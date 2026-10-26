@@ -3,9 +3,9 @@
 
 Each of :mod:`pcapkit.toolkit.pcap`, :mod:`pcapkit.toolkit.pcapng`,
 :mod:`pcapkit.toolkit.dpkt` and :mod:`pcapkit.toolkit.scapy` builds a
-:term:`reasm.ipv6.packet` from whatever object model its engine hands it, and
-each was only ever tested against itself. That is how #415 survived: for
-``ipv6.pcap`` frame 13 the four reported ``ihl`` 48/48/40/40, ``len(header)``
+:term:`reasm.ipv6.packet` from whatever object model its engine hands it.
+Tested only against itself, each can drift from the RFC unnoticed, as in
+#415: for ``ipv6.pcap`` frame 13 the adapters reported ``ihl`` 48/48/40/40, ``len(header)``
 48/48/40/40 and ``tl`` 1496/1496/1488/1496, where the RFC calls for 40, 40 and
 1488.
 
@@ -277,9 +277,10 @@ class IPv6DatagramHeaderTests(EndToEndTestCase):
     def test_every_engine_reassembles_the_captured_payload(self) -> None:
         """The datagram itself, not only its header.
 
-        ``scapy``'s ``tl`` counted the Fragment header while its ``ihl`` did not,
-        so the reassembly machinery wrote each fragment's payload over a span 8
-        octets too wide and the datagram came out 4786 octets instead of 4778 --
+        Guards against ``scapy``'s ``tl`` counting the Fragment header while its
+        ``ihl`` does not, under which the reassembly machinery writes each
+        fragment's payload over a span 8 octets too wide and the datagram comes
+        out 4786 octets instead of 4778 --
         eight stray zeroes per fragment boundary. Each engine's datagram is the
         fragments' payloads as captured, read past the Ethernet, IPv6 and
         Fragment headers of frames 13 to 16.
