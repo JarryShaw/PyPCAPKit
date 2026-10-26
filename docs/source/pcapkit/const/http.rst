@@ -71,6 +71,11 @@ which is automatically generated from :class:`pcapkit.vendor.http.method.Method`
    :exc:`AttributeError` from ``key.upper()``, and ``get(b'GET')`` raised
    :exc:`TypeError`.
 
+   :meth:`Method._missing_ <pcapkit.const.http.method.Method._missing_>` also checks a
+   folded ``value`` against member values, not only names, so a hyphenated method such
+   as ``'baseline-control'`` resolves to :attr:`Method.BASELINE_CONTROL`, with the
+   registered ``safe`` and ``idempotent``, in any case (:issue:`2284`).
+
 .. autoclass:: pcapkit.const.http.method.Method
    :members:
    :undoc-members:

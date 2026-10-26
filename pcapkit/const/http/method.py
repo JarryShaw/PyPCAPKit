@@ -316,7 +316,9 @@ class Method(EnumRegistry, StrEnum):
 
         Args:
             value: Value to get enum item. Matched case-insensitively against
-                the canonical upper-case member names -- deliberately unlike
+                the canonical upper-case member names, then against member
+                values, so ``'baseline-control'`` resolves to
+                ``BASELINE_CONTROL`` (:issue:`2284`) -- deliberately unlike
                 :meth:`get`, which is case-**sensitive** per
                 :rfc:`9110#section-9.1`. The split was ruled deliberate on
                 GitHub issue :issue:`896`; GitHub issue :issue:`908` is the pointer between
@@ -329,4 +331,6 @@ class Method(EnumRegistry, StrEnum):
         name = value.upper()
         if name in cls._member_map_:
             return cls._member_map_[name]
+        if name in cls._value2member_map_:
+            return cls._value2member_map_[name]
         return cls._unregistered_member(value, name)
