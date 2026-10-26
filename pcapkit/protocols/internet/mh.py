@@ -2316,10 +2316,10 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
 
         Note:
             :rfc:`5568` reserves the whole first octet of the message data; the
-            ``U``, ``P`` and ``F`` flags carved out of it, and code values ``5``
-            and ``6``, are added by :rfc:`5949#section-6.1.2`. All of these flags
-            are registered in the IANA *Handover Acknowledge Flags* registry,
-            hence all are parsed here.
+            ``U``, ``P`` and ``F`` flags carved out of it, and code values ``5``,
+            ``6``, ``131`` and ``132``, are added by :rfc:`5949#section-6.1.2`.
+            All of these flags are registered in the IANA *Handover Acknowledge
+            Flags* registry, hence all are parsed here.
 
         Args:
             schema: Parsed message type schema.
@@ -2868,10 +2868,13 @@ class MH(IPv6_Ext[Data_MH, Schema_MH],
         Length fields"* -- so the whole option, which is what every
         ``_read_opt_*`` below reports back as the parsed option's own
         ``.length``, is two octets more. The read-side call sites share this
-        helper so the arithmetic lives in one place; a ``Pad1`` option -- the
-        one option with no ``Option Length`` field at all -- is its sole
-        exception (see the ``Note:`` on :meth:`_read_opt_pad` below). Do NOT
-        drop the ``+ 2``.
+        helper so the arithmetic lives in one place. The exceptions are the
+        options whose ``Option Length`` is not that octet count: a ``Pad1``
+        option, which has no ``Option Length`` field at all (see the ``Note:``
+        on :meth:`_read_opt_pad` below), the BADF option, whose length leaves
+        out its SPI (see :meth:`_read_opt_badf`), and the multicast mobility
+        and acknowledgement options, whose length counts 32-bit words (see
+        :meth:`_read_opt_mcast`). Do NOT drop the ``+ 2``.
 
         The ``+ 2`` is specific to an :rfc:`6275#section-6.2` mobility
         option, whose Option Type and Option Length are one octet each. It

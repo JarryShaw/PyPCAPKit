@@ -256,7 +256,7 @@ Known Limitations
   stateless parser cannot recover them; they are required both for the ICV
   computation and for the AEAD associated data. An ESN protected packet
   therefore fails the integrity check *cleanly* rather than being decoded.
-* **Traffic Flow Confidentiality (TFC) padding (§2.4) is not detected.**
+* **Traffic Flow Confidentiality (TFC) padding (§2.7) is not detected.**
   TFC padding is indistinguishable from real payload without inspecting the
   inner protocol's own length field, so it is handed to the next layer as
   part of the plaintext.

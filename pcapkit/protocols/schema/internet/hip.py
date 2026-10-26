@@ -242,8 +242,7 @@ def two_octet_prefix_list_len(pkt: 'dict[str, Any]') -> 'int':
     two-octet ``reserved`` or ``port`` field with a list of items sized by
     the remainder of the parameter.
 
-    :class:`TransportFormatListParameter` looks like another call site --
-    same ``pkt['len'] - 2`` expression -- but is not: see
+    :class:`TransportFormatListParameter` is not a call site: see
     :func:`transport_format_list_len` for why it has no such prefix to
     subtract.
 
@@ -541,9 +540,10 @@ class ESPInfoParameter(Parameter, code=Enum_Parameter.ESP_INFO):
 
     """
 
-    #: Reserved, "zero when sent, ignored when received" (:rfc:`7402#section-5.1.1`).
-    #: Read as a value rather than as padding, so that re-serialising a parsed
-    #: parameter reproduces the octets it arrived with.
+    #: Reserved. :rfc:`7402#section-5.1.1` draws it in the diagram but gives
+    #: it no description in the field list that follows. Read as a value rather
+    #: than as padding, so that re-serialising a parsed parameter reproduces the
+    #: octets it arrived with.
     reserved: 'int' = UInt16Field()
     #: Key management index.
     index: 'int' = UInt16Field()
@@ -651,11 +651,11 @@ class LocatorSetParameter(Parameter, code=Enum_Parameter.LOCATOR_SET):
     #: ``field.length`` octets off the stream and hands only those to
     #: :meth:`ListField.unpack
     #: <pcapkit.corekit.fields.collections.ListField.unpack>`, so a ``Length``
-    #: in locator units would offer a set of *n* plain IPv6 locators ``4n``
-    #: octets of a ``24n``-octet contents, parse one truncated locator and leave
-    #: the rest of the record unconsumed. With ``Length`` a byte count the
-    #: budget is the contents, and each locator bills the 8 + ``Locator
-    #: Length`` * 4 octets it actually consumed.
+    #: summed from the locators' ``Locator Length`` values would offer a set
+    #: of *n* plain IPv6 locators ``4n`` octets of a ``24n``-octet contents,
+    #: parse one truncated locator and leave the rest of the record unconsumed.
+    #: With ``Length`` a byte count the budget is the contents, and each locator
+    #: bills the 8 + ``Locator Length`` * 4 octets it actually consumed.
     locators: 'list[Locator]' = ListField(
         length=lambda pkt: pkt['len'],
         item_type=SchemaField(schema=Locator),
@@ -672,8 +672,8 @@ class LocatorSetParameter(Parameter, code=Enum_Parameter.LOCATOR_SET):
     #: overwrites it before ``padding`` is reached.
     #:
     #: The shadowed ``len`` is 4 for any IPv6 locator, so a padding read off
-    #: ``pkt['len']`` directly would append exactly four octets whatever the
-    #: locator count.
+    #: ``pkt['len']`` directly would append no padding at all whatever the
+    #: locator count, where a set of plain IPv6 locators needs four octets.
     padding: 'bytes' = PaddingField(length=locator_set_padding_len)
 
     if TYPE_CHECKING:
@@ -729,7 +729,8 @@ class SolutionParameter(Parameter, code=Enum_Parameter.SOLUTION):
     #: Reserved octet -- "zero when sent, ignored when received"
     #: (:rfc:`7401#section-5.2.5`, and :rfc:`5201#section-5.2.5` identically).
     #: This octet is *not* a lifetime: only ``PUZZLE`` carries one, at the same
-    #: offset, and only :rfc:`7401#section-5.2.4` defines the ``2^(value - 32)``
+    #: offset, and only the ``PUZZLE`` section (:rfc:`7401#section-5.2.4`, and
+    #: :rfc:`5201#section-5.2.4` identically) defines the ``2^(value - 32)``
     #: seconds encoding that goes in it.
     reserved: 'int' = UInt8Field()
     #: Opaque data.

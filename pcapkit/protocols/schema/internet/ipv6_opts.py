@@ -87,7 +87,7 @@ if SPHINX_TYPE_CHECKING:  # pragma: no cover
         #: number that was received from the MPL Seed.
         max: int
         #: Verification flag. ``0`` indicates that the MPL Option
-        #: conforms to this specification.
+        #: conforms to :rfc:`7731`.
         drop: int
         #: Reserved bits (``rsv``).
         reserved: int
@@ -297,7 +297,7 @@ class CALIPSOOption(Option, code=Enum_Option.CALIPSO):
 
     #: CALIPSO domain of interpretation.
     domain: 'int' = UInt32Field()
-    #: Compartment length.
+    #: Compartment length, in 32-bit words.
     cmpt_len: 'int' = UInt8Field()
     #: Sens level.
     level: 'int' = UInt8Field()
@@ -327,7 +327,7 @@ class _SMFDPDOption(Schema):
     choose the schema which then reads the option properly. Its ``namespace``
     offsets are therefore bit offsets into the *option*, not into any one field
     of it: ``Opt Data Len`` is octet 1, i.e. bits 8 to 15, and the mode bit is
-    the first bit of octet 2 [:rfc:`6621#section-8.1`].
+    the first bit of octet 2 [:rfc:`6621#section-6.1.1`].
 
     """
 

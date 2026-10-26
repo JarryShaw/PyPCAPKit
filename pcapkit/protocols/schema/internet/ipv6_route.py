@@ -191,7 +191,7 @@ class RPL(RoutingType, code=Enum_Routing.RPL_Source_Route_Header):
 
     .. versionremoved:: 1.5.0
 
-       ``cmpr_i`` and ``cmpr_e``, now the keys of :attr:`cmpr`
+       ``cmpr_i`` and ``cmpr_e``, which are the keys of :attr:`cmpr`
        (:issue:`1456`).
 
     """

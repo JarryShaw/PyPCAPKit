@@ -112,7 +112,7 @@ class IPv4(Protocol):
 
     #: Version.
     version: 'Literal[4]'
-    #: Internet header length.
+    #: Internet header length, in octets.
     hdr_len: 'int'
     #: Type of service.
     tos: 'ToSField'
@@ -122,7 +122,7 @@ class IPv4(Protocol):
     id: 'int'
     #: Flags.
     flags: 'Flags'
-    #: Fragment offset.
+    #: Fragment offset, in octets.
     offset: 'int'
     #: Time to live.
     ttl: 'timedelta'
@@ -150,7 +150,7 @@ class IPv4(Protocol):
 class OptionType(Data):
     """Data model for IPv4 option type data."""
 
-    #: Change flag.
+    #: Copied flag, i.e. whether the option is copied into every fragment.
     change: 'bool'
     #: Option class.
     #class: 'int'

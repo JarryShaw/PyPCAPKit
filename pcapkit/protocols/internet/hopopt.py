@@ -1512,6 +1512,10 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         Returns:
             Constructed option schema.
 
+        Warns:
+            ProtocolWarning: If ``code`` is ``Pad1`` but ``length`` is not
+                ``0``; a ``PadN`` option is made instead.
+
         Note:
             :attr:`Data_PadOption.length
             <pcapkit.protocols.data.internet.hopopt.Option.length>` counts the
@@ -1817,6 +1821,10 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         Returns:
             Constructed option schema.
 
+        Warns:
+            ProtocolWarning: If a scale exceeds ``255``, too large for its
+                one-octet field.
+
         """
         if opt is not None:
             psntp = opt.psntp
@@ -1889,6 +1897,10 @@ class HOPOPT(IPv6_Ext[Data_HOPOPT, Schema_HOPOPT],
         Returns:
             Constructed option schema; an unassigned option schema if ``opt``
             is a Quick-Start option parsed as unassigned, see :meth:`_read_opt_qs`.
+
+        Raises:
+            ProtocolError: If the QS function is neither a Quick-Start Request
+                nor a Report of Approved Rate.
 
         """
         if isinstance(opt, Data_UnassignedOption):
