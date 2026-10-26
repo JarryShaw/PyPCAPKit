@@ -610,15 +610,25 @@ class RegResponseParameter(Parameter):
 
 @info_final
 class RegFailedParameter(Parameter):
-    """Data model for HIP ``REG_FAILED`` parameter."""
+    """Data model for HIP ``REG_FAILED`` parameter.
 
-    #: Registration lifetime.
-    lifetime: 'timedelta'
+    .. versionchanged:: 1.5.0
+
+       ``lifetime`` is replaced by :attr:`failure_type`, with no alias, and
+       :attr:`reg_type` holds :class:`~pcapkit.const.hip.registration.Registration`
+       values: ``REG_FAILED`` carries a Failure Type octet ahead of its
+       registration types and no lifetime (:rfc:`8003#section-4.5`,
+       :issue:`2309`).
+
+    """
+
     #: Registration failure type.
-    reg_type: 'tuple[RegistrationFailure, ...]'
+    failure_type: 'RegistrationFailure'
+    #: Registration types that failed with :attr:`failure_type`.
+    reg_type: 'tuple[Registration, ...]'
 
     if TYPE_CHECKING:
-        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', lifetime: 'timedelta', reg_type: 'tuple[RegistrationFailure, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
+        def __init__(self, type: 'Enum_Parameter', critical: 'bool', length: 'int', failure_type: 'RegistrationFailure', reg_type: 'tuple[Registration, ...]') -> 'None': ...  # pylint: disable=unused-argument,multiple-statements,redefined-builtin,super-init-not-called,line-too-long
 
 
 @info_final
