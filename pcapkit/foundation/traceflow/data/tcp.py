@@ -167,7 +167,8 @@ class Index(DeferredPacket, Info):
     #: :class:`~pcapkit.corekit.packet.DeferredPacket` to resolve.
     __deferred__ = Deferred
 
-    #: Output filename if exists.
+    #: Path of the flow's output file, or :data:`None` when the output format
+    #: writes no file. Open and finalised flows report the same path.
     fpout: 'Optional[str]'
     #: Tuple of frame index, **both directions**, in capture order.
     index: 'tuple[int, ...]'
