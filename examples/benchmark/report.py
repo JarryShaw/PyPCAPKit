@@ -1083,7 +1083,7 @@ def render_versions_rst(rows: 'Sequence[Row]', documents: 'Sequence[dict[str, An
     lines.extend(_simple_table(headers, body, numeric=True))
     lines.append('')
 
-    # The owner's own sentence about the hand-maintained table, kept word for word:
+    # The sentence docs/source/engines.rst carries under its table, kept word for word:
     # it is the right warning, and a regenerated table that rewords it would show up as
     # a diff in the prose every time the numbers changed. It sits between the table and
     # the footnotes, where docs/source/engines.rst has it.

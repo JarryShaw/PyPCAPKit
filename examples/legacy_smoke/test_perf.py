@@ -54,7 +54,8 @@ def pyshark() -> 'None':
                 format='tree', engine='pyshark')
 
 
-#: The benchmark for each engine name in :data:`_engine_support.ENGINES`.
+#: The benchmark for each engine name this demo covers, a subset of
+#: :data:`_engine_support.ENGINES`.
 BENCHMARKS = {
     'default': default,
     'pyshark': pyshark,

@@ -132,10 +132,11 @@ walk asserting that each block's total length is 4-octet aligned, repeated
 identically at both ends, and that the block chain covers the file exactly. So
 the complaints above are pcapkit's readings, not malformed fixtures.
 
-One complaint is expected rather than a defect: ``test.pcapng`` carries a
-deliberately truncated packet (``captured_len`` below ``original_len``, to
-exercise snapshot-length handling) and dissecting it reports ``packet length <
-0: -2``, which is simply what a snapped frame looks like to a dissector.
+The complaints about one packet are expected rather than a defect:
+``test.pcapng`` carries a deliberately truncated packet (``captured_len`` below
+``original_len``, to exercise snapshot-length handling), and dissecting it
+reports ``packet length < 0: -2`` and an IPv4 header that runs past the end of
+the data, which is simply what a snapped frame looks like to a dissector.
 
 Usage
 -----
@@ -422,8 +423,8 @@ def _journal_entry(message: 'str', realtime_us: 'int') -> 'bytes':
     unaligned entry's own NUL padding is read as a binary field name and
     raises a bare ``struct.error``. Measured on ``ef859f776``: a misaligned
     entry parses with no ``SchemaWarning``. The loop stays only because
-    removing it regenerates ``test.pcapng`` -- an untracked fixture change,
-    not a prose one; see `#791
+    removing it would change the bytes of the generated ``test.pcapng``; see
+    `#791
     <https://github.com/JarryShaw/PyPCAPKit/issues/791>`__.
 
     """
@@ -455,10 +456,9 @@ def _timestamp_options(writer: '_Blocks',
     """The timestamp options every synthesised interface carries.
 
     pcapkit looks ``if_tsresol``, ``if_tzone`` and ``if_tsoffset`` up on the
-    owning interface for each packet block and logs a ``MissingKeyError`` for
-    each one that is absent -- harmless, but it buries the interesting output
-    under a line per missing option per packet. Declaring them explicitly keeps the fixtures
-    quiet as well as complete.
+    owning interface for each packet block, and falls back to the format's
+    default for each one that is absent. Declaring them explicitly keeps the
+    fixtures complete rather than reliant on those defaults.
 
     Args:
         writer: Writer whose byte order the option values are packed in.
@@ -826,7 +826,7 @@ def _transient(exc: 'OSError') -> 'bool':
 
     Only HTTP 429, an HTTP 5xx, and a timeout are. Any other HTTP error is the
     server's final answer, and an unreachable host fails at once rather than
-    after a wait, which keeps an offline run as quick as it was.
+    after a wait, which keeps an offline run quick.
 
     :mod:`requests` raises a :exc:`~requests.Timeout` for a timeout while it
     connects or waits for the headers, but a timeout while the body is read
@@ -977,12 +977,12 @@ def _materialise(fixture: '_Fixture', path: 'pathlib.Path') -> 'tuple[bytes, str
 class _LogCapture(logging.Handler):
     """Collect pcapkit's own log records rather than letting them print.
 
-    pcapkit reports a parse complaint twice -- once through :mod:`warnings` and
-    once through its ``pcapkit`` logger -- but only the logger call is reliable:
-    it passes a computed ``stacklevel`` to :func:`warnings.warn` that can point
-    outside the stack, and the record then never reaches a
-    :func:`warnings.catch_warnings` recorder. So the logger is what this listens
-    to. Duplicates are dropped, because one complaint per block in a capture
+    pcapkit reports a parse complaint on its ``pcapkit`` logger, and a
+    complaint raised as a warning goes through :mod:`warnings` as well, where
+    the application's filters decide its fate. Only the logger sees all of
+    them: :func:`~pcapkit.corekit.decorators.beholder` logs a dissector
+    failure it recovers from without issuing a warning at all. So the logger
+    is what this listens to. Duplicates are dropped, because one complaint per block in a capture
     with many packets is not that many pieces of information.
 
     """

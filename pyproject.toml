@@ -300,15 +300,16 @@ test = [
     "pytest-timeout",
     "typing-extensions",
     # Enough of the ``vendor`` extra for a test to import a vendor crawler.
-    # Without these, ``tests/vendor/test_ipx_socket_unit.py`` reports its tests as
-    # skipped rather than failing, so the byte-for-byte regeneration check that is the
-    # only guard on the hand-maintained IPX socket registry runs in no
-    # ``unit-tests.yml`` job: every one's install line builds on ``.[test]``.
-    # ``cron-vendor.yml`` does run it, but needs nothing from here to: its job
-    # installs ``.[all,vendor]`` before ``.[test]``, and runs ``tests/vendor``
-    # only when a crawl changed a constant module, by which point
-    # ``pcapkit-vendor`` has rewritten the IPX constant file from that same table
-    # (#1853).
+    # Every ``unit-tests.yml`` install line builds on ``.[test]``, and only the
+    # whole-suite set on ``latest`` adds ``vendor`` (#1958). Without these, the
+    # ``ALL``-tier tests that import ``pcapkit.vendor`` behind a ``requests``
+    # gate would skip on every other leg rather than run: the vendor-template
+    # checks in ``tests/const/test_const_enum_get.py``,
+    # ``tests/const/test_const_enum_lookup.py`` and
+    # ``tests/const/test_const_enum_builtin_parity.py``, and
+    # ``tests/corekit/test_enum_get_exception_provenance_923_unit.py``, among
+    # them. ``cron-vendor.yml``'s test gate needs nothing from here: its job
+    # installs ``.[all,vendor]`` before ``.[test]`` (#1853).
     #
     # Both are needed, not just ``requests``. ``pcapkit.vendor.default`` imports
     # ``requests`` at module scope, and ``pcapkit.vendor.__init__`` then imports

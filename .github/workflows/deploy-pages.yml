@@ -77,7 +77,7 @@ jobs:
         github.event.workflow_run.head_branch == 'main' &&
         needs.head.outputs.verified == 'true'
       ))
-    concurrency: ci-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.ref }} # Recommended if you intend to make multiple deployments in quick succession.
+    concurrency: ci-${{ github.event_name == 'workflow_dispatch' && github.run_id || github.ref }}
     runs-on: macos-latest
     steps:
       - name: Checkout 🛎️

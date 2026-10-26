@@ -30,8 +30,8 @@ actions/runner-images' READMEs at 2c421200c.
     and ``os`` as above, for unit-tests.yml's jobs of the same names, which
     nothing gating waits on (#1738).
 ``pypcap-parity-ktlo``
-    The same, for CPython's KTLO versions below 3.12. No other unit-tests.yml
-    output holds a KTLO version.
+    The same, for CPython's KTLO versions below 3.12. Of the outputs
+    unit-tests.yml reads, only the ``*-ktlo`` ones hold a KTLO version.
 ``experimental``
     Each experimental version as a leg carrying ``experimental: true``, for
     experimental.yml's ``experimental`` job, a workflow of its own so that nothing
@@ -50,10 +50,10 @@ actions/runner-images' READMEs at 2c421200c.
     The supported tier's wheel tags and conda build tags, which Create Release's
     completeness checks count.
 
-Each matrix keeps the shape its job had when the versions were spelled out in
-the workflow -- a ``python-version`` axis, then ``include`` -- so GitHub expands
-it to the same legs in the same order.
-``tests/project/test_python_versions_1660.py`` compares the two.
+Each matrix has the shape of the one its job spelled out by hand at the commit
+``tests/project/test_python_versions_1660.py`` pins -- a ``python-version`` axis,
+then ``include`` -- so GitHub expands it to the same legs in the same order, and
+that test compares the two.
 
 Run without arguments it prints every output; with names, just their values.
 
@@ -134,7 +134,7 @@ def load(path: 'pathlib.Path' = FILE) -> 'dict[str, Any]':
     key or tier, a misspelt version or runner, a ``latest`` that is not a
     supported CPython, an exemption missing a field, or a pre-release entry -- no
     workflow has the non-blocking pre-release legs one needs
-    (``allow-prereleases``, a name of its own) yet, so listing one fails here
+    (``allow-prereleases``, a name of its own), so listing one fails here
     instead of running it as something else. An exemption's reason is the
     comment above it, which :mod:`tomllib` does not keep.
 
@@ -253,7 +253,7 @@ def ktlo_matrix(data: 'dict[str, Any]') -> 'dict[str, Any]':
 
     ``Required checks passed`` reads one ``needs.<job>.result`` per job, and
     ``unittest-ordering`` needs ``test``, so a KTLO leg that fails as a job -- a
-    lost runner, or the job cap -- failed both from inside ``test``.
+    lost runner, or the job cap -- would fail both from inside ``test``.
 
     """
     return legs_matrix([leg for impl in TESTED for leg in ktlo_legs(data, impl)])

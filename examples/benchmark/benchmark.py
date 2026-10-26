@@ -67,7 +67,8 @@ if TYPE_CHECKING:
 __all__ = ['ENGINES', 'ROUNDS', 'REPEATS', 'expected_drivers', 'preflight', 'measure', 'run']
 
 #: Every engine ``pcapkit.extract(engine=...)`` accepts, in the order the suite
-#: exercises them. Matches :data:`examples.legacy_smoke._engine_support.ENGINES`.
+#: exercises them. The same engines as
+#: :data:`examples.legacy_smoke._engine_support.ENGINES`, in a different order.
 #: ``'default'`` is ``pcapkit``'s own parser and is the cross-environment
 #: baseline, so it is always measured first and never dropped from the list.
 ENGINES = ('default', 'dpkt', 'scapy', 'pypcap', 'pcap_ct', 'pypcapfile', 'pyshark')

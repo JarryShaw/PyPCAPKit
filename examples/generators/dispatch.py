@@ -9,10 +9,10 @@ test modules reference ``__proto__``, and
 *resolves* to the right class object, but that is a weaker property than the one
 that actually matters -- it is satisfied by a table whose target could not parse
 a packet if it tried.
-:file:`tests/protocols/test_dispatch_bindings_unit.py` exists because exactly
-that shipped once: its own docstring records that
-:class:`~pcapkit.protocols.application.ospf.OSPF` "was reachable from no table at all
-and could not have parsed a packet if it had been". But that module hand-picks
+:file:`tests/protocols/test_dispatch_bindings_unit.py` asserts on the parsed
+protocol chain for exactly that reason: as its own docstring records, a
+protocol can be reachable from no table at all, and unable to parse a packet
+if it were. But that module hand-picks
 its cases rather than enumerating, so it guards the entries someone
 remembered rather than the registries themselves. See GitHub issue #496.
 
@@ -59,7 +59,7 @@ defect: building a well-formed PER-encoded ``NGAP-PDU`` is out of scope for
 a minimal dispatch probe, so both use the same placeholder payload
 :meth:`~tests.protocols.transport.test_sctp_unit.SCTPUnitTests.test_ppid_dispatch_hook`
 already does, and for the same documented reason -- one PPID is DTLS-wrapped,
-which pcapkit implements no DTLS for, and the other degrades identically
+and pcapkit implements no DTLS; the other degrades identically
 because the payload is not an aligned PER encoding, exactly as that test's own
 docstring records.
 
@@ -136,9 +136,8 @@ def code_name(code: 'Any', enum: 'Optional[Any]' = None) -> 'str':
     """Render a registry key as a name usable in a test id.
 
     Most ``__proto__`` tables are keyed entirely by enumeration members, whose
-    own ``.name`` is used directly. ``Link.__proto__`` and
-    ``Internet.__proto__`` each hold an entry keyed by a bare :class:`int`
-    instead (0x8137 for IPX, in ``Link``'s case) -- :func:`_resolve` does not
+    own ``.name`` is used directly. ``Link.__proto__`` holds an entry keyed by
+    a bare :class:`int` instead (0x8137 for IPX) -- :func:`_resolve` does not
     care, since dict lookup does not distinguish an :class:`~enum.IntEnum`
     member from the plain :class:`int` it equals, but a case label needs a
     name. ``enum`` is consulted for that one, so the label reads
@@ -188,7 +187,7 @@ def _pcapng_bytes(linktype: 'Any', packet_data: 'bytes') -> 'bytes':
     Built through :mod:`pcapkit`'s own :class:`~pcapkit.protocols.misc.pcapng.PCAPNG`
     construction API rather than hand-rolled :mod:`struct` packing, the same way
     :func:`examples.generators.options._pcapng_context` does -- GitHub issue
-    #496 judged hand-building a valid SHB+IDB+EPB stream by hand riskier than
+    #496 judged hand-building a valid SHB+IDB+EPB stream riskier than
     the check was worth, and this sidesteps that by reusing the library's own
     ``make`` path, which is exactly what is under test one layer further down
     anyway.

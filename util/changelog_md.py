@@ -231,9 +231,10 @@ _PY_ROLE = re.compile(
     r':(?:py:)?(' + '|'.join(sorted(PY_ROLES, key=len, reverse=True)) + r'):`([^`\n]+)`')
 
 #: Where the full rendered history lives. Must match ``[project.urls].changelog``
-#: in ``pyproject.toml`` -- ``MANIFEST.in`` prunes ``docs/``, so in a source
-#: distribution this is the only route from the shipped entry to the rest of the
-#: history. ``tests/project/test_changelog_md.py`` asserts the two agree.
+#: in ``pyproject.toml`` -- ``MANIFEST.in`` prunes ``docs/`` but for the
+#: per-version entries, so a source distribution carries the history only as
+#: reStructuredText files, and this is its one route to the rendered history.
+#: ``tests/project/test_changelog_md.py`` asserts the two agree.
 DOCS_URL = 'https://jarryshaw.github.io/PyPCAPKit/changelog.html'
 
 #: Closing note on the generated file, pointing at the rest of the history.
@@ -492,7 +493,8 @@ def py_role(name: str, text: str) -> str:
 
     A code span rather than a link: the page that documents an object is known only
     to a built ``objects.inv``, and this script runs where there is no
-    documentation build -- a source distribution prunes ``docs/`` altogether.
+    documentation build -- a source distribution keeps nothing of ``docs/`` but
+    the per-version entries.
 
     The displayed name follows Sphinx's ``XRefRole`` and ``PyXRefRole``
     (Sphinx 9.1.0), so an entry names the same thing in the Markdown as in the
@@ -646,8 +648,8 @@ def unwrap(lines: Sequence[str], origin: Sequence[int]) -> tuple[str, list[tuple
             flush()
             # One blank row per run: the flush cycle can leave several behind, and
             # a run of blank lines is one paragraph break however long it is -- and
-            # a run before the first block is no break at all, where the ``\n{3,}``
-            # substitution this replaces left an empty first line behind.
+            # a run before the first block is no break at all, so the output never
+            # opens on an empty line.
             if rows and rows[-1]:
                 rows.append([])
             continue

@@ -53,7 +53,7 @@ if TYPE_CHECKING:
 #: The board, by owner and number. Resolved to node ids at runtime.
 OWNER = 'JarryShaw'
 PROJECT_NUMBER = 2
-#: The ids the board had when this was written. A resolved id that differs means
+#: The ids the board is known by. A resolved id that differs means
 #: the board was recreated, and writing to it blind is the wrong default.
 EXPECTED_PROJECT_ID = 'PVT_kwHOAO8M8c4Bl2gH'
 EXPECTED_FIELD_ID = 'PVTSSF_lAHOAO8M8c4Bl2gHzhkhthA'

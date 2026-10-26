@@ -37,7 +37,7 @@ KTLO
     image ``ubuntu-latest`` may mean has no ``runner``; otherwise it names the
     newest hosted Ubuntu image that has one.
 dropped
-    ``end-of-life`` with no build for any hosted Ubuntu image.
+    ``end-of-life`` with no stable build for any hosted Ubuntu image.
 pre-release
     ``feature`` or ``prerelease`` once setup-python has a build. No workflow runs
     pre-release legs, and :func:`python_versions.load` refuses the tier, so
@@ -903,7 +903,7 @@ def computed(versions: 'dict[str, dict[str, Any]]') -> 'dict[str, dict[str, Any]
 
 
 def fingerprint(latest: 'str', versions: 'dict[str, Any]') -> 'str':
-    """A proposal's identity: its computed tiers, whatever else moved on ``main``, hand-kept entries included."""
+    """A proposal's identity: its computed tiers alone, whatever else moved on ``main``, hand-kept entries included."""
     canonical = json.dumps({'latest': latest, 'versions': computed(versions)}, sort_keys=True,
                            separators=(',', ':'))
     return hashlib.sha256(canonical.encode('utf-8')).hexdigest()[:16]

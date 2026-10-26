@@ -752,8 +752,7 @@ jobs:
           - macos-latest
           - macos-26-intel
           - ubuntu-latest
-          # #2060: win-64, once Conda Update's leg had built and smoke-tested it
-          # green. Its `run:` steps name `bash`, as Windows runs `pwsh`.
+          # #2060: win-64. Its `run:` steps name `bash`, as Windows runs `pwsh`.
           - windows-latest
         # #1633, #1660: the supported tier only. No KTLO 3.10 leg: the list
         # util/conda_vendor.py derives omits typing-extensions, which
