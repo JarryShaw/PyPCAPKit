@@ -34,16 +34,16 @@ __all__ = ['Packet']
 ###############################################################################
 # NOTE: this crawler does not crawl: the registry below is maintained by hand;
 # see #518. It is the same failure, on the same article and the same removal
-# revision, that retired the sibling socket crawler in #507.
+# revision, that keeps the sibling socket crawler maintained by hand (#507).
 #
 # Its source was the packet-type table in
 # https://en.wikipedia.org/wiki/Internetwork_Packet_Exchange#IPX_packet_structure,
 # and two separate things broke that. Wikipedia answers ``requests``'
 # default ``python-requests/<version>`` User-Agent with HTTP 403 (measured
 # 2026-09-19: 403 and 126 bytes of robot-policy text for the default agent, 200
-# and 114117 bytes for a descriptive one). That half is fixed in
-# ``Vendor._request``, which sends the descriptive agent
-# :func:`~pcapkit.vendor.default.get_user_agent` builds -- but it only gets the
+# and 114117 bytes for a descriptive one). ``Vendor._request`` answers that
+# half by sending the descriptive agent
+# :func:`~pcapkit.vendor.default.get_user_agent` builds -- but that only gets the
 # crawler as far as a page that does not hold the data. The table was deleted
 # from the article on 2026-08-25, in revision 1371327031 ("deleted some
 # irrelevant technical tables"), leaving the live page (revision 1372814585)
@@ -54,8 +54,7 @@ __all__ = ['Packet']
 # Pointing ``LINK`` at the last revision that still carries the table
 # (``oldid=1368657333``, re-measured 2026-09-19: 200, 118834 bytes, 4
 # ``wikitable``s, ``table[1]`` headers ``['Value', 'Meaning/Protocol']``, 8 body
-# rows) would have worked, and running the crawler's original ``process()``
-# against it
+# rows) would have worked, and scraping it with a table-reading ``process()``
 # reproduces the committed constant file byte for byte. It is still the wrong
 # fix: a network fetch pinned to a frozen snapshot is all of the fragility of a
 # crawler with none of the freshness, and it would go on selecting a table by
@@ -79,9 +78,8 @@ __all__ = ['Packet']
 #: Maps a packet type to the enumeration name it takes and the comment rendered
 #: above it. Names go through :meth:`~Vendor.rename`, so the generated member is
 #: the :meth:`~Vendor.safe_name` of the first element; comments are stored as the
-#: scrape rendered them, reStructuredText markup and all, since the prose-mangling
-#: the crawler's original ``process()`` did to Wikipedia's cell text has no source
-#: left to mangle.
+#: scrape rendered them, reStructuredText markup and all, since no Wikipedia
+#: cell text remains for a scraping ``process()`` to rework.
 #:
 #: Every value below is independently corroborated by Wireshark's IPX dissector,
 #: ``epan/dissectors/packet-ipx.h`` (fetched 2026-09-19), which defines

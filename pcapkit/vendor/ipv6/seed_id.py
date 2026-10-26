@@ -39,7 +39,7 @@ class SeedID(Vendor):
         """Fetch registry data.
 
         Returns:
-            Registry data (:attr:`~pcapkit.vendor.ipv6.seed_id.DATA`).
+            Registry data (:data:`~pcapkit.vendor.ipv6.seed_id.DATA`).
 
         """
         return DATA

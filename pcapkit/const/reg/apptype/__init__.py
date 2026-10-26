@@ -59,7 +59,7 @@ __all__ = ['AppType', 'TransportProtocol', 'TCP', 'UDP', 'SCTP', 'DCCP']
 
 #: Registries imported on first use rather than with this package, as submodule
 #: name to class name -- GitHub issue :issue:`1538`. Generated from IANA's
-#: registry, the two hold about 49,700 lines of members, about 30% of
+#: registry, they hold about 49,700 lines of members, about 30% of
 #: ``import pcapkit`` when imported eagerly, while SCTP's and DCCP's cost a few
 #: milliseconds and stay eager.
 _LAZY = {'tcp': 'TCP', 'udp': 'UDP'}

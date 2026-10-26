@@ -85,20 +85,18 @@ class {NAME}(EnumRegistry, IntEnum):
 class ExtensionHeader(Vendor):
     """IPv6 Extension Header Types"""
 
-    #: Keyword-style names carried over from this crawler's *previous* data
-    #: source, keyed by protocol number. The Protocol Numbers registry
-    #: (``protocol-numbers-1.csv``, this crawler's :attr:`LINK` before GitHub
-    #: issue :issue:`925`) paired each of these headers with a short ``Keyword``
-    #: column value, e.g. ``IPv6-Route`` for header 43. The registry
-    #: :attr:`LINK` points at -- IANA's authoritative *IPv6 Extension
-    #: Header Types* registry -- has no such column, only a verbose
-    #: ``Description`` (``Routing Header for IPv6`` for the same header), so
-    #: deriving names the same way :meth:`process` does for every other
-    #: 3-column registry (see e.g.
-    #: :class:`~pcapkit.vendor.ipv6.router_alert.RouterAlert`)
-    #: would silently rename these members. This mapping keeps
-    #: the shorter names instead; any header not listed here falls back to a
-    #: name derived from its description.
+    #: Keyword-style names taken from the *Protocol Numbers* registry
+    #: (``protocol-numbers-1.csv``), keyed by protocol number. That registry
+    #: pairs each of these headers with a short ``Keyword`` column value, e.g.
+    #: ``IPv6-Route`` for header 43. The registry :attr:`LINK` points at --
+    #: IANA's authoritative *IPv6 Extension Header Types* registry -- has no
+    #: such column, only a verbose ``Description`` (``Routing Header for
+    #: IPv6`` for the same header), so deriving names the same way
+    #: :meth:`process` does for every other 3-column registry (see e.g.
+    #: :class:`~pcapkit.vendor.ipv6.router_alert.RouterAlert`) would give
+    #: these members long description-derived names (GitHub issue
+    #: :issue:`925`). This mapping keeps the shorter names instead; any header
+    #: not listed here falls back to a name derived from its description.
     NAMES = {
         0: 'HOPOPT',
         43: 'IPv6-Route',

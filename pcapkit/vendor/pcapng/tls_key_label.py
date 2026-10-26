@@ -123,10 +123,10 @@ class TLSKeyLabel(Vendor):
         Returns:
             Enumeration fields and missing fields. ``RSA`` is prepended by
             hand -- see :data:`RSA_COMMENT` -- since it has no row in the
-            registry itself. The second element is always empty: this
-            registry does not mint an ``_missing_`` (see
-            :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`'s own
-            docstring for why), so there is nothing to render there.
+            registry itself. The second element is always empty: the
+            generated :class:`pcapkit.const.pcapng.tls_key_label.TLSKeyLabel`
+            has no ``_missing_`` -- its constructor refuses every value no
+            member carries -- so there is nothing to render there.
 
         """
         enum = [

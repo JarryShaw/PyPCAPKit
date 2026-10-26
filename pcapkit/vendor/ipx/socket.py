@@ -83,8 +83,8 @@ DATA = {
     # reserved to mean unknown and all, respectively." The same sentence
     # reserves all-ones -- 0xFFFF, to mean "all" -- and this table has no entry
     # for that; ``_missing_`` resolves 0xFFFF through the "Dynamically Assigned"
-    # range instead. Adding it would change the generated file, so it is left as
-    # a follow-up rather than done here.
+    # range instead. Adding it would change the generated file, so it is left
+    # out.
     0x0000: ('Unspecified', "Unspecified socket; this is IPX's own default for the dst/src socket field."),
 
     # Sockets in the "Registered by Xerox" range below. These are formally
@@ -123,14 +123,14 @@ DATA = {
     # it reads 0x451 NCP, 0x452 SAP, 0x453 RIP, 0x455 Novell NetBIOS, 0x456
     # Diagnostics, 0x9001 NLSP, 0x9004 "IPXWAN(TM) protocol". The last two have
     # never been in this enumeration, and 0x9004 is independently reserved by
-    # :rfc:`1634` line 552 -- "The socket number 0x9004 is a Novell reserved
-    # socket number for exclusive use with IPX WAN protocol exchange" -- and by
-    # the two RFCs it obsoletes: :rfc:`1551` line 532 word for word, and
-    # :rfc:`1362` line 253 with "information exchange" for "protocol exchange".
-    # So they are known omissions with good sourcing, not rows nobody noticed.
-    # Adding them would add members to the generated file and so give up the
-    # byte-identity proof #507 rests on, which makes them a follow-up rather
-    # than part of it.
+    # :rfc:`1634#section-4`, "Information Exchange Packet Formats" -- "The
+    # socket number 0x9004 is a Novell reserved socket number for exclusive use
+    # with IPX WAN protocol exchange" -- and by the same section of the two RFCs
+    # it obsoletes: :rfc:`1551` word for word, and :rfc:`1362` with
+    # "information exchange" for "protocol exchange". So they are known
+    # omissions with good sourcing, not rows nobody noticed. Adding them would
+    # add members to the generated file and so give up the byte-identity proof
+    # #507 rests on.
     #
     # Some of the rows below also depart from Novell's own wording: Novell writes
     # "Novell NetBIOS" and "Diagnostics" where this table says "NetBIOS" and

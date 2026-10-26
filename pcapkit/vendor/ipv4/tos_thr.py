@@ -30,6 +30,7 @@ DATA = {
 class ToSThroughput(Vendor):
     """ToS (DS Field) Throughput"""
 
+    #: Value limit checker.
     FLAG = 'isinstance(value, int) and 0 <= value <= 1'
 
     def request(self) -> 'dict[int, str]':  # type: ignore[override] # pylint: disable=arguments-differ

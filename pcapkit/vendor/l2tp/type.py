@@ -56,7 +56,7 @@ class Type(Vendor):
         return collections.Counter(map(self.safe_name, data.values()))
 
     def process(self, data: 'dict[int, str]') -> 'tuple[list[str], list[str]]':  # type: ignore[override] # pylint: disable=arguments-differ
-        """Process CSV data.
+        """Process registry data.
 
         Args:
             data: Registry data.

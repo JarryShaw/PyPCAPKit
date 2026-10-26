@@ -14,9 +14,9 @@ Unrecognised Values
 Nearly every :term:`registry` below departs from :mod:`enum` in one deliberate way, and it
 is the behaviour to know about before using any of them: looking one up by a value
 it does not define does **not** raise. Its ``_missing_`` override returns a
-member-like object for a value inside the registry's valid range, named for the
-unassigned or reserved band it falls in. Only a value outside that range, or of the
-wrong type, raises :exc:`ValueError`.
+member-like object for a value that falls in one of the registry's unassigned or
+reserved bands, named for that band. Only a value no band covers, or of the wrong
+type, raises :exc:`ValueError`.
 
 In almost every registry that object is **not** installed: the registry does not
 grow, and a second lookup of the same value returns an equal but distinct object.
@@ -38,7 +38,7 @@ Some behave otherwise, and :ref:`mint-criterion` gives the full split:
 
 That is what makes the enumerations usable against live capture data, where a
 protocol number assigned after this release was generated is a routine
-occurrence rather than an error. It also means an enumeration member is not a
+occurrence rather than an error. It also means an enumeration is not a
 closed set: an unassigned value resolves to a member that is, apart from
 :class:`~pcapkit.const.mh.cga_type.CGAType`, absent from iteration and ``__members__``,
 and whether a repeat lookup returns the same object varies by registry, so compare such
@@ -46,7 +46,7 @@ members by value, not identity.
 
 The common form of the override is generated -- see :mod:`pcapkit.vendor.default`,
 whose template emits it -- while the valid range and the names of the unassigned
-bands are per-registry, taken from that registry's own IANA data. The individual
+bands are per-registry, taken from that registry's own source data. The individual
 overrides are therefore not documented per class.
 
 .. seealso::

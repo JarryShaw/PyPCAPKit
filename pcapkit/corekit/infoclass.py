@@ -1272,8 +1272,9 @@ def _nested_types(cls: 'Type[Info]') -> 'dict[str, Type[Info]]':
         forward reference whose target is defined only *after* the first
         :meth:`Info.from_dict` call stays one-way for the life of the process.
         That is accepted rather than fixed: :meth:`Info.from_dict` runs per
-        parsed packet (see :meth:`IPv4._read_ipv4_options
-        <pcapkit.protocols.internet.ipv4.IPv4._read_ipv4_options>`), and
+        parsed packet (see :meth:`IPv4.read
+        <pcapkit.protocols.internet.ipv4.IPv4.read>`, which builds its ToS
+        field with it), and
         re-resolving the annotations on every call to catch a case that does
         not arise in this package costs far more than it saves.
 

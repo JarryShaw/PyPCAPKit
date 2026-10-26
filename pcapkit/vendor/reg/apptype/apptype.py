@@ -688,7 +688,8 @@ class {NAME}(EnumRegistry, StrEnum):
         collapsed = '_'.join(stripped.split())
         replaced = re.sub(r'\\W', '_', collapsed)
         identifier = '_'.join(filter(None, replaced.split('_')))
-        # NOTE: matches process()'s own keyword guard below -- a name that
+        # NOTE: matches the keyword guard AppType.process applies at generation
+        # time in pcapkit.vendor.reg.apptype.apptype -- a name that
         # sanitises to a reserved word is not usable as an attribute as is,
         # and a trailing underscore is the same fix the generator already
         # applies to a statically declared member with the same problem.
@@ -1014,8 +1015,9 @@ class Record(Info):
     """One registry entry, as grouped by :meth:`AppType.records`.
 
     IANA's CSV carries one row per ``(service, port, transport)`` triple, so a
-    service on both TCP and UDP is two rows that become one member. This is what
-    they are merged into.
+    service on both TCP and UDP is two rows that become one entry, which each of
+    those transports' registries then renders as a member of its own. This is
+    what they are merged into.
 
     Every field a merge has to grow is a container, appended to in place, because
     :class:`~pcapkit.corekit.infoclass.Info` refuses attribute assignment. That is
@@ -1024,7 +1026,8 @@ class Record(Info):
 
     """
 
-    #: Service name, as IANA spells it.
+    #: Service name, lower-cased, or one derived from the description where
+    #: IANA names none.
     svc: 'str'
     #: Port number as text, or ``'-1'`` where IANA assigned none.
     port: 'str'

@@ -491,7 +491,7 @@ class EnumLookup:
 
 
 class EnumRegistry(EnumLookup):
-    """Registry protocol shared by every constant enumeration under
+    """Registry protocol shared by every open constant enumeration under
     :mod:`pcapkit.const`.
 
     :class:`EnumLookup` above carries the read half -- :meth:`~EnumLookup.get`,

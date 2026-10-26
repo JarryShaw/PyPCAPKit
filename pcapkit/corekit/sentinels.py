@@ -457,8 +457,8 @@ class NoDefaultType(Sentinel):
     then reads :data:`False` where it once read :data:`True`.
     :meth:`EnumLookup.get <pcapkit.corekit.enum.EnumLookup.get>` is such a
     consumer but is not affected: its fallback is guarded by
-    ``default not in cls._value2member_map_`` (added by GitHub issue
-    :issue:`864` to stop ``default`` minting a new member), and a
+    ``default not in cls._value2member_map_`` (the GitHub issue
+    :issue:`864` guard that stops ``default`` minting a new member), and a
     :class:`NoDefaultType` instance, stale or fresh, is never a registered
     enum value, so the guard reads :data:`True` for it either way and ``get``
     re-raises the original lookup error regardless of which
@@ -476,7 +476,7 @@ class NoDefaultType(Sentinel):
     docstring note on why it declines to memoise a resolved class, and
     :mod:`tests.protocols.test_dispatch_default_resolution_unit`'s own
     ``test_no_stale_class_survives_a_module_reload``, which reloads a module
-    deliberately to pin the fix for exactly that class of bug. A *future*
+    deliberately to guard against exactly that class of bug. A *future*
     comparison site written the vulnerable way -- a bare ``is NO_DEFAULT``
     with no independent guard behind it -- would reproduce it. Nothing in
     this package reloads :mod:`pcapkit.corekit.sentinels` after import, but
