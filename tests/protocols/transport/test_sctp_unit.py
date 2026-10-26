@@ -31,30 +31,6 @@ HAS_RUNTIME = all(importlib.util.find_spec(name) is not None for name in RUNTIME
 HAS_SCAPY = importlib.util.find_spec('scapy') is not None
 
 
-def bitfield_packs_zero_bits() -> bool:
-    """Whether :class:`~pcapkit.corekit.fields.strings.BitField` packs a clear bit.
-
-    It guards against a ``BitField.pre_process`` that seeds its working buffer
-    with NUL bytes and then writes the ASCII characters ``b'0'`` and ``b'1'``
-    into it, before collapsing the buffer by truth-testing each byte -- ``b'0'``
-    is ``0x30``, which is truthy, so every named bit comes out **set** regardless
-    of its value, and a flag word constructed with any bit clear does not survive
-    a round trip.
-
-    That is a library-wide concern of :mod:`pcapkit.corekit`, not an SCTP one.
-    The tests that need clear bits on the *construction* side are gated on this
-    probe, so that they run wherever :mod:`pcapkit.corekit` packs clear bits
-    correctly. Parsing does not depend on it -- ``BitField.post_process`` reads
-    the bits separately -- so the wire-conformance and scapy cross-check tests
-    below exercise mixed flags unconditionally.
-
-    """
-    from pcapkit.corekit.fields.strings import BitField
-
-    field = BitField(length=1, namespace={'a': (0, 1), 'b': (7, 1)})
-    return field.pre_process({'a': 0, 'b': 1}, {}) == b'\x01'
-
-
 @unittest.skipUnless(HAS_RUNTIME, 'runtime dependencies not installed')
 class SCTPUnitTests(unittest.TestCase):
     # NOTE: Unlike the sibling TCP/UDP unit tests, this module does not purge
@@ -246,11 +222,10 @@ class SCTPUnitTests(unittest.TestCase):
         from pcapkit.const.sctp.chunk import Chunk
         from pcapkit.const.sctp.parameter import Parameter
 
-        # Every flag in the flag-carrying chunks is set, so that these tests do
-        # not depend on the BitField construction probe
-        # :func:`bitfield_packs_zero_bits`; mixed flags are covered on the
-        # parsing side by the wire-conformance and scapy tests below, and on the
-        # construction side by the gated test that follows this one.
+        # Every flag in the flag-carrying chunks is set; mixed flags are covered
+        # on the parsing side by the wire-conformance and scapy tests below, and
+        # on the construction side by
+        # ``test_chunk_flags_round_trip_with_mixed_bits``.
         cases = [
             (Chunk.Payload_Data,
              dict(I=True, U=True, B=True, E=True, tsn=0x0A0B0C0D, stream_id=1,
@@ -328,10 +303,6 @@ class SCTPUnitTests(unittest.TestCase):
 
     def test_chunk_flags_round_trip_with_mixed_bits(self) -> None:
         from pcapkit.const.sctp.chunk import Chunk
-
-        if not bitfield_packs_zero_bits():
-            self.skipTest('BitField.pre_process sets every named bit regardless '
-                          'of value; see bitfield_packs_zero_bits()')
 
         raw = self._build([(Chunk.Payload_Data,
                             dict(I=False, U=False, B=True, E=True, tsn=1, data=b'x'))])
