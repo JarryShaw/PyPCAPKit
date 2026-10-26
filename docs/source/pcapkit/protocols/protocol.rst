@@ -41,6 +41,7 @@ Internal Definitions below.
    .. autoproperty:: protochain
    .. autoproperty:: packet
    .. autoproperty:: schema
+   .. autoproperty:: context
 
    .. automethod:: id
    .. automethod:: register
@@ -166,6 +167,7 @@ Internal Definitions
                     protochain
                     packet
                     schema
+                    context
       :no-index-entry:
       :no-contents-entry:
 
@@ -174,7 +176,7 @@ Internal Definitions
       :attr:`~Protocol.data`, :attr:`~Protocol.length`,
       :attr:`~Protocol.payload`, :attr:`~Protocol.protocol`,
       :attr:`~Protocol.protochain`, :attr:`~Protocol.packet`,
-      :attr:`~Protocol.schema`
+      :attr:`~Protocol.schema`, :attr:`~Protocol.context`
 
    .. py:method:: id
                   register
