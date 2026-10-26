@@ -1482,8 +1482,8 @@ class EtherTypeMixedMintTests(unittest.TestCase):
     Unassigned`` and the "Old Xerox Experimental..." row, and #775 converts
     every attributed vendor block (a real company's own name for its own
     code) too, so no branch mints -- ``EtherType(0x0888)`` resolves to an
-    unregistered ``Xyplex_0x0888``. :meth:`test_formerly_attributed_vendor_block_
-    no_longer_mints` below pins that one named probe (``Xyplex``)."""
+    unregistered ``Xyplex_0x0888``. :meth:`test_an_attributed_vendor_block_does_not_mint`
+    below pins that one named probe (``Xyplex``)."""
 
     def setUp(self) -> None:
         reimport_once_per_class(self, restore=True)
@@ -2046,7 +2046,7 @@ class BespokeOpenVocabularyUnmintConvertedTests(unittest.TestCase):
         self.assertEqual(different_case, 'PYPCAPKIT860PROBE2')
         self.assertNotEqual(first, different_case)
 
-    def test_registered_lookups_are_still_unaffected(self) -> None:
+    def test_registered_words_resolve_to_their_registered_members(self) -> None:
         """A word IANA already assigned still resolves to the same,
         genuinely-registered, identical member every time -- this
         conversion only changes what happens for a word that is not one of

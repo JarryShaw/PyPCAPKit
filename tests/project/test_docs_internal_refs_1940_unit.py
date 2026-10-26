@@ -250,7 +250,7 @@ class HelperEntryTests(unittest.TestCase):
 class ConvertedReferenceTests(unittest.TestCase):
     """Each curated reference is a role, not a literal."""
 
-    def test_literal_is_now_a_role(self) -> 'None':
+    def test_each_curated_reference_is_a_role_not_a_literal(self) -> 'None':
         for source, literal, role in CONVERTED:
             with self.subTest(source=source, literal=literal):
                 text = (ROOT / source).read_text(encoding='utf-8')

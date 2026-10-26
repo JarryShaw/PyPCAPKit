@@ -179,7 +179,7 @@ class ProtocolRegistryTests(unittest.TestCase):
         """A fresh key and an identical re-registration are both silent.
 
         The code-keyed siblings share this identity guard too (#718) -- see
-        ``test_sibling_registries_now_stay_quiet_on_an_identical_re_registration`` in
+        ``test_sibling_registries_stay_quiet_on_an_identical_re_registration`` in
         this file. Here the key is *derived* from the class rather than supplied by
         the caller, and this function is the funnel every wrapper registrar ends in,
         so registering one class under two codes -- supported, and exactly what
@@ -232,7 +232,7 @@ class ProtocolRegistryTests(unittest.TestCase):
         self.assertIs(udp_registry[udp_port], UnitProtocol)
         self.assertEqual(self._registry_warnings(caught, RegistryWarning), [])
 
-    def test_sibling_registries_now_stay_quiet_on_an_identical_re_registration(self) -> None:
+    def test_sibling_registries_stay_quiet_on_an_identical_re_registration(self) -> None:
         """GitHub issue #718: the siblings share ``register_protocol``'s guard.
 
         A repeat registration naming the exact same class stays silent, exactly
