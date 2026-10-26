@@ -446,12 +446,11 @@ That leaves the classes with something to decide:
        RFC 5797 §2 above is. Note also that the §2 sentence is wrapped across a
        line break in the RFC's text file, at ``case-`` / ``insensitive``, so a
        line-oriented grep for the phrase finds nothing.
-     - **case-insensitive** -- was a defect; ``get`` folds
+     - **case-insensitive** -- ``get`` folds (:issue:`903`)
    * - :class:`~pcapkit.const.http.method.Method`
      - :rfc:`9110#section-9.1`
      - *"The method token is case-sensitive."* Explicitly the opposite of limb 1.
-     - **case-sensitive** -- was a defect, fixed by
-       :issue:`896`
+     - **case-sensitive** -- ``get`` does not fold (:issue:`896`)
    * - :class:`~pcapkit.const.pcapng.option_type.OptionType`
      - ``draft-tuexen-opsawg-pcapng``
      - Nothing states a rule; the draft never discusses option-name case.
