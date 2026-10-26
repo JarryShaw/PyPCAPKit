@@ -55,11 +55,11 @@ to work out whether an engine can run on this host.
 
 Most of these run with nothing but `pcapkit`. These do not:
 
-- **test_engine, test_time, test_perf** exercise the `dpkt`, `scapy` and
-  `pyshark` engines, and test_engine and test_time the `pypcap`, `pcap_ct` and
-  `pypcapfile` engines too. Those are optional packages, and `pyshark` additionally
-  drives Wireshark's `tshark` binary. An engine that is missing is reported as
-  skipped, with the reason, and the rest still run -- see `_engine_support.py`.
+- **test_engine, test_time, test_perf** exercise the `dpkt`, `scapy`, `pyshark`,
+  `pypcap`, `pcap_ct` and `pypcapfile` engines. Those are optional packages, and
+  `pyshark` additionally drives Wireshark's `tshark` binary. An engine that is
+  missing is reported as skipped, with the reason, and the rest still run -- see
+  `_engine_support.py`.
   Worth knowing:
 
   - `pyshark` 0.6 does not work on Python 3.14 at all. It asks

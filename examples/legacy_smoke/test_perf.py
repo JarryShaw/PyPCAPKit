@@ -34,34 +34,10 @@ except ImportError:
 from pcapkit import extract  # noqa: E402  # pylint: disable=wrong-import-position
 
 
-def default() -> 'None':
-    extract(fin='../captures/in.pcap', fout='../captures/engines/default.txt',
-                format='tree', engine='default')
+def bench(engine: 'str') -> 'None':
+    extract(fin='../captures/in.pcap', fout=f'../captures/engines/{engine}.txt',
+            format='tree', engine=engine)
 
-
-def scapy() -> 'None':
-    extract(fin='../captures/in.pcap', fout='../captures/engines/scapy.txt',
-                format='tree', engine='scapy')
-
-
-def dpkt() -> 'None':
-    extract(fin='../captures/in.pcap', fout='../captures/engines/dpkt.txt',
-                format='tree', engine='dpkt')
-
-
-def pyshark() -> 'None':
-    extract(fin='../captures/in.pcap', fout='../captures/engines/pyshark.txt',
-                format='tree', engine='pyshark')
-
-
-#: The benchmark for each engine name this demo covers, a subset of
-#: :data:`_engine_support.ENGINES`.
-BENCHMARKS = {
-    'default': default,
-    'pyshark': pyshark,
-    'scapy': scapy,
-    'dpkt': dpkt,
-}
 
 runner = pyperf.Runner()
 
@@ -72,7 +48,7 @@ for engine in ENGINES:
         report(engine, f'skipped -- {reason}')
         continue
 
-    runner.bench_func(engine, BENCHMARKS[engine])
+    runner.bench_func(engine, bench, engine)
     benched += 1
 
 if not benched:
