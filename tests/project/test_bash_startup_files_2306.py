@@ -100,8 +100,10 @@ class TestEveryBashGoesThroughTheHelper(unittest.TestCase):
         for path in sorted(TESTS.rglob('*.py')):
             if path.resolve() == pathlib.Path(__file__).resolve():
                 continue
-            tree = ast.parse(path.read_text(encoding='utf-8'), str(path))
-            found.extend(f'{path.relative_to(TESTS.parent).as_posix()}:{node.lineno}: {ast.unparse(node)}'
+            source = path.read_text(encoding='utf-8')
+            tree = ast.parse(source, str(path))
+            found.extend(f'{path.relative_to(TESTS.parent).as_posix()}:{node.lineno}: '
+                         f'{ast.get_source_segment(source, node)}'
                          for node in ast.walk(tree) if is_bash_argv(node))
         self.assertEqual(found, [], 'build these with tests._support.bash_argv')
 
