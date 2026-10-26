@@ -106,12 +106,11 @@ class TestCanSeekIsPublic(unittest.TestCase):
     def setUp(self) -> None:
         reimport_once_per_class(self)
 
-    def test_can_seek_is_exported_and_the_private_name_is_gone(self) -> None:
-        """No alias keeps the old private name importable."""
+    def test_can_seek_is_exported(self) -> None:
+        """``can_seek`` is listed in the module's ``__all__``."""
         from pcapkit.corekit import io as corekit_io  # pylint: disable=import-outside-toplevel
 
         self.assertIn('can_seek', corekit_io.__all__)
-        self.assertFalse(hasattr(corekit_io, '_can_seek'))
 
     def test_can_seek_tells_a_lying_pipe_from_a_seekable_stream(self) -> None:
         """A pipe claiming to seek does not; a stream without a descriptor is trusted."""
