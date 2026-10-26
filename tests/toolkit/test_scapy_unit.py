@@ -584,11 +584,9 @@ class ScapyTrailerTests(unittest.TestCase):
 class ScapyFrameGuardTests(unittest.TestCase):
     """Frames whose Scapy layers claim more than their octets hold (GitHub issue #1708).
 
-    Each guard here first came with a fix that #1708 reverted, as that fix's
-    aim was to read frames as the default engine does. They are kept because
-    they are the adapters' own job, whatever any other engine reads: to end no
-    extraction, and to hand on only the frame's own octets, as the datagram
-    the adapter reports them for.
+    Guards against an adapter ending an extraction on such a frame, or handing
+    on more than the frame's own octets as the datagram it reports them for
+    (#1708). These are the adapters' own job, whatever any other engine reads.
 
     """
 
