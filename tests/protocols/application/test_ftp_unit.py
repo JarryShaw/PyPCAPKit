@@ -173,7 +173,7 @@ class FTPUnitTests(unittest.TestCase):
         ftp = object.__new__(FTP)
         request = ftp.make(cmmd=Command.USER, args='anonymous')
         request_bytes = ftp.make(cmmd=b'NOOP')
-        request_value = ftp.make(cmmd=SimpleNamespace(value=b'PWD'))
+        request_bytearray = ftp.make(cmmd=bytearray(b'PWD'))
         response = ftp.make(code=ReturnCode.CODE_220, args='Ready', more=True)
         response_bytes = ftp.make(code=b'230', args=b'Logged in')
 
@@ -181,7 +181,7 @@ class FTPUnitTests(unittest.TestCase):
         # separator is written without arguments, and none after a hyphen.
         self.assertEqual(request.data, b'USER anonymous\r\n')
         self.assertEqual(request_bytes.data, b'NOOP\r\n')
-        self.assertEqual(request_value.data, b'PWD\r\n')
+        self.assertEqual(request_bytearray.data, b'PWD\r\n')
         self.assertEqual(response.data, b'220-Ready\r\n')
         self.assertEqual(response_bytes.data, b'230 Logged in\r\n')
 
@@ -195,6 +195,25 @@ class FTPUnitTests(unittest.TestCase):
             ftp.make()
         with self.assertRaises(ProtocolError):
             ftp.make(cmmd='USER', code=220)
+
+    def test_ftp_make_rejects_a_command_that_is_not_str_bytes_or_bytearray(self) -> None:
+        """A command of any other type raises ``ProtocolError`` (#2290)."""
+        from pcapkit.protocols.application.ftp import FTP
+        from pcapkit.utilities.exceptions import ProtocolError
+
+        ftp = object.__new__(FTP)
+
+        for cmmd in (42, True, 1.5, SimpleNamespace(value=b'PWD')):
+            with self.subTest(cmmd=cmmd):
+                with self.assertRaises(ProtocolError) as context:
+                    ftp.make(cmmd=cmmd, args='anon')
+                self.assertEqual(
+                    str(context.exception),
+                    f'FTP: invalid command: must be a str, bytes or bytearray, not {cmmd!r}')
+
+        # a bytearray is accepted as bytes are, and keeps the captured case
+        self.assertEqual(ftp.make(cmmd=bytearray(b'user'), args='anon', raw_cmmd=b'user').data,
+                         b'user anon\r\n')
 
     def test_ftp_make_data_preserves_request_and_response_fields(self) -> None:
         from pcapkit.const.ftp.command import Command
