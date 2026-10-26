@@ -1415,7 +1415,7 @@ Every ``test``, ``test-ktlo`` and ``experimental`` leg passes each pin as an
 selection, so no workflow lists the pins, and :file:`tests/test_tier_guard.py` runs
 the steps to check what each does with the answer. Under ``gate-only``, ``gate``'s
 full suite runs the pins with everything else. ``unittest-ordering``'s ``project``
-cell keeps them, as it asks how a module runs in one interpreter, in file order and
+cells keep them, as they ask how a module runs in one interpreter, in file order and
 without xdist, which is a question about the module rather than the Python version.
 
 A pin's skip where ``tomllib`` is missing, before 3.11, runs on no leg: the scripts

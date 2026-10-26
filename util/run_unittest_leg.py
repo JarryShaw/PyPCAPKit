@@ -86,6 +86,13 @@ The price is that modules in different shards do not share a process, so
 pollution between them is invisible; the workflow comment records which
 pairs that loses.
 
+GitHub issue #2254 -- sharding a flat leg: :mod:`tests.project` has no
+subdirectories to exclude, so ``--half 1`` and ``--half 2`` cut it at the module
+name :data:`SHARD_BOUNDARIES` holds for it: half 1 is every module sorting before
+it, half 2 the rest, so a new module lands in exactly one half. Every caller asks
+for a half rather than naming the boundary, so they cannot cut in different
+places. ``--before NAME`` and ``--from NAME`` cut at any other name, by hand.
+
 What this still does not catch: a defect running the *other* direction (a
 root module polluting a directory module), interference between two
 directories neither of which is bundled with the other in the same leg, and
@@ -169,6 +176,10 @@ DEFAULT_STALL_DUMP = 1080
 #: Environment override for :data:`DEFAULT_STALL_DUMP`; ``--stall-dump`` wins.
 STALL_DUMP_ENV = 'PCAPKIT_UNITTEST_STALL_DUMP'
 
+#: The module name each flat leg ``--half`` splits is cut at (#2254). Move it to
+#: rebalance; the workflow's cells and steps ask for a half and follow.
+SHARD_BOUNDARIES = {'project': 'test_q'}
+
 #: Run a full :func:`gc.collect` after every this many tests; see the
 #: module docstring for the measurements behind it. ``--gc-every 0`` disables.
 DEFAULT_GC_EVERY = 10
@@ -218,7 +229,8 @@ def _resolve(spec: 'str', what: 'str') -> 'pathlib.Path':
     return path
 
 
-def leg_modules(directory: 'str', exclude: 'Sequence[str]' = ()) -> 'tuple[str, ...]':
+def leg_modules(directory: 'str', exclude: 'Sequence[str]' = (), *,
+                before: 'str | None' = None, start: 'str | None' = None) -> 'tuple[str, ...]':
     """Every unit-tier ``test_*.py`` module under ``tests/<directory>``.
 
     Args:
@@ -229,6 +241,12 @@ def leg_modules(directory: 'str', exclude: 'Sequence[str]' = ()) -> 'tuple[str, 
             :data:`TESTS_ROOT`) whose modules are left out, so that one shard
             can be "everything in ``directory`` except its sibling shards".
             Empty by default, as for every unsharded leg.
+        before: keep only the modules whose path below ``tests/<directory>``,
+            in POSIX form, sorts before this string (#2254).
+        start: keep only the modules whose path sorts at or after it. One
+            boundary passed as ``before`` to one shard and as ``start`` to the
+            other splits a flat directory such as ``project`` in two, with every
+            module, a new one included, in exactly one of them.
 
     Returns:
         Dotted module names, in path-sorted order.
@@ -244,21 +262,42 @@ def leg_modules(directory: 'str', exclude: 'Sequence[str]' = ()) -> 'tuple[str, 
         if leg_root not in path.parents:
             raise SystemExit(f'--exclude is not a subdirectory of the leg: {path.relative_to(ROOT)}')
 
+    def in_range(path: 'pathlib.Path') -> 'bool':
+        key = path.relative_to(leg_root).as_posix()
+        return (before is None or key < before) and (start is None or key >= start)
+
     return tuple(
         _dotted(path) for path in sorted(leg_root.rglob('test_*.py'))
-        if is_unit_tier(path) and not any(skip in path.parents for skip in skipped)
+        if is_unit_tier(path) and not any(skip in path.parents for skip in skipped) and in_range(path)
     )
 
 
-def build_suite(directory: 'str', exclude: 'Sequence[str]' = ()) -> 'unittest.TestSuite':
+def half_bounds(directory: 'str', half: 'int') -> 'dict[str, str]':
+    """:func:`leg_modules`'s ``before`` or ``start`` for half ``half`` of ``directory``.
+
+    Raises:
+        SystemExit: ``directory`` has no :data:`SHARD_BOUNDARIES` entry, or
+            ``half`` is neither 1 nor 2.
+
+    """
+    if directory not in SHARD_BOUNDARIES:
+        raise SystemExit(f'--half: tests/{directory} has no boundary in SHARD_BOUNDARIES')
+    if half not in (1, 2):
+        raise SystemExit(f'--half is 1 or 2, not {half}')
+    return {'before' if half == 1 else 'start': SHARD_BOUNDARIES[directory]}
+
+
+def build_suite(directory: 'str', exclude: 'Sequence[str]' = (), *,
+                before: 'str | None' = None, start: 'str | None' = None) -> 'unittest.TestSuite':
     """The combined suite for one leg: ``directory``'s own tests, then root's.
 
-    See the module docstring for why that order, not the reverse.
+    See the module docstring for why that order, not the reverse; ``before`` and
+    ``start`` are :func:`leg_modules`'s.
 
     """
     loader = unittest.TestLoader()
     suite = unittest.TestSuite()
-    for name in leg_modules(directory, exclude):
+    for name in leg_modules(directory, exclude, before=before, start=start):
         suite.addTests(loader.loadTestsFromName(name))
     for name in root_modules():
         suite.addTests(loader.loadTestsFromName(name))
@@ -278,6 +317,19 @@ def main(argv: 'list[str] | None' = None) -> 'int':
              "repeatable. Used to run the remainder of a sharded leg.",
     )
     parser.add_argument(
+        '--half', type=int, choices=(1, 2),
+        help='run half 1 or 2 of DIRECTORY, cut at its SHARD_BOUNDARIES name',
+    )
+    parser.add_argument(
+        '--before', metavar='NAME',
+        help="keep only the modules whose path below DIRECTORY sorts before NAME, "
+             "e.g. 'test_q'. Used with --from to shard a flat leg in two.",
+    )
+    parser.add_argument(
+        '--from', dest='start', metavar='NAME',
+        help='keep only the modules whose path below DIRECTORY sorts at or after NAME',
+    )
+    parser.add_argument(
         '-v', '--verbose', action='store_true',
         help='pass verbosity 2 to unittest.TextTestRunner instead of the default 1',
     )
@@ -291,6 +343,11 @@ def main(argv: 'list[str] | None' = None) -> 'int':
         help=f'run gc.collect() after every N tests (default {DEFAULT_GC_EVERY}); 0 disables',
     )
     args = parser.parse_args(argv)
+    if args.half is not None:
+        if args.before is not None or args.start is not None:
+            parser.error('--half sets the boundary itself; drop --before and --from')
+        for key, value in half_bounds(args.directory, args.half).items():
+            setattr(args, key, value)
     stall_dump = args.stall_dump
     if stall_dump is None:
         try:
@@ -314,7 +371,10 @@ def main(argv: 'list[str] | None' = None) -> 'int':
 
 def _run(args: 'argparse.Namespace', start: 'float') -> 'int':
     """Build and run the leg, then print its one-line tally whatever happened."""
-    suite = build_suite(args.directory, args.exclude)
+    # An unsharded leg passes no boundary, so its build_suite call matches what the stall-dump tests stub.
+    cut = {key: getattr(args, key, None) for key in ('before', 'start')}
+    suite = build_suite(args.directory, args.exclude,
+                        **{key: value for key, value in cut.items() if value is not None})
     result_class = type('_LegResult', (_CollectingResult,), {'gc_every': args.gc_every})
     runner = unittest.TextTestRunner(verbosity=2 if args.verbose else 1, resultclass=result_class)
     result: 'unittest.TestResult | None' = None
@@ -332,6 +392,10 @@ def _run(args: 'argparse.Namespace', start: 'float') -> 'int':
                  f'{result.testsRun} test(s), {len(result.failures)} failure(s), '
                  f'{len(result.errors)} error(s)')
         left_out = ''.join(f' (without tests/{spec})' for spec in args.exclude)
+        if cut['before'] is not None:
+            left_out += f" (before {cut['before']})"
+        if cut['start'] is not None:
+            left_out += f" (from {cut['start']})"
         print(f'tests/{args.directory}{left_out} + {len(root_modules())} root module(s): '
               f'{tally}, {elapsed:.1f}s elapsed')
 

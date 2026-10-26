@@ -197,6 +197,17 @@ class TierClassificationTests(unittest.TestCase):
 class WorkflowAgreementTests(unittest.TestCase):
     """The tier rule here matches the one the workflow actually runs."""
 
+    #: :data:`PYTHON_STUB`'s ``$SELECTOR_CACHE`` for this class's steps, so each
+    #: selector runs once per class rather than once per step run (#2254).
+    selectors = ''
+
+    @classmethod
+    def setUpClass(cls) -> None:
+        super().setUpClass()
+        temp = tempfile.TemporaryDirectory(prefix='pcapkit-selectors-')
+        cls.addClassCleanup(temp.cleanup)
+        cls.selectors = temp.name
+
     def test_ignore_flags_match_the_fixture_tier_constants(self) -> None:
         """Every ignored path and glob is accounted for by a constant.
 
@@ -278,9 +289,9 @@ class WorkflowAgreementTests(unittest.TestCase):
         latest = list(_tiers.latest_tier_paths())
         self.assertTrue(pins)
         self.assertLess(len(pins), len(latest))
-        self.assertEqual(leg_ignores(text, 'true'), pins)
-        self.assertEqual(leg_ignores(text, 'false'), latest)
-        self.assertEqual(project_pins_run(text), pins)
+        self.assertEqual(leg_ignores(text, 'true', self.selectors), pins)
+        self.assertEqual(leg_ignores(text, 'false', self.selectors), latest)
+        self.assertEqual(project_pins_run(text, self.selectors), pins)
         for workflow, job, step, selector in (
                 (WORKFLOW, 'test', 'Run unit tests', _tiers.PROJECT_PINS_SELECTOR),
                 (WORKFLOW, 'test', 'Run unit tests', _tiers.LATEST_TIER_SELECTOR),
@@ -306,7 +317,7 @@ class WorkflowAgreementTests(unittest.TestCase):
         self.assertEqual(text.count(loop), 1, 'the loop this test removes has been reworded')
         for latest in ('true', 'false'):
             with self.subTest(latest=latest):
-                self.assertEqual(leg_ignores(text.replace(loop, ':'), latest), [])
+                self.assertEqual(leg_ignores(text.replace(loop, ':'), latest, self.selectors), [])
 
     @unittest.skipIf(BASH is None, 'the steps are bash scripts')
     def test_a_leg_that_asks_for_the_wrong_list_is_caught(self) -> None:
@@ -318,9 +329,10 @@ class WorkflowAgreementTests(unittest.TestCase):
         pins = _tiers.PROJECT_PINS_SELECTOR.split('"', 1)[1]
         self.assertEqual(text.count(latest), 1)
         self.assertEqual(text.count(pins), 2)  # the `test` step's and `project-tests`'s
-        self.assertNotEqual(leg_ignores(text.replace(latest, pins), 'false'), list(_tiers.latest_tier_paths()))
+        self.assertNotEqual(leg_ignores(text.replace(latest, pins), 'false', self.selectors),
+                            list(_tiers.latest_tier_paths()))
         swapped = text.replace(pins, latest, 1)
-        self.assertNotEqual(leg_ignores(swapped, 'true'), list(_tiers.project_pin_paths()))
+        self.assertNotEqual(leg_ignores(swapped, 'true', self.selectors), list(_tiers.project_pin_paths()))
 
 
 #: The experimental legs' workflow (#1732), whose unit-tier step leaves the ``LATEST`` tier out too.
@@ -330,7 +342,22 @@ EXPERIMENTAL_WORKFLOW = _tiers.ROOT / '.github' / 'workflows' / 'experimental.ym
 #: command it execs, as the script does, with no real interpreter: under the coverage
 #: leg one would be measured, be logged as a second ``coverage run --rcfile``
 #: controller, and exec before saving, which fails the #1387 guard (#1969).
-PYTHON_STUB = ('#!/bin/sh\ncase "$1" in -c) exec "$REAL_PYTHON" "$@";; util/cap_file_size.py) shift; exec "$@";; esac\n'
+#:
+#: With ``$SELECTOR_CACHE`` set, a ``-c`` runs the real interpreter once per distinct
+#: argument list and replays its output after that (#2254): each selector call rescans
+#: the suite in a fresh interpreter, and :class:`WorkflowAgreementTests` asks the same
+#: selectors repeatedly. A doctored step that asks something else is keyed apart and
+#: runs for real; a failing run is not kept.
+PYTHON_STUB = ('#!/bin/sh\n'
+               'if [ "$1" = -c ] && [ -n "$SELECTOR_CACHE" ]; then\n'
+               '  answer="$SELECTOR_CACHE/$(printf \'%s\\n\' "$@" | cksum | tr \' \' _)"\n'
+               '  if [ ! -f "$answer" ]; then\n'
+               '    "$REAL_PYTHON" "$@" > "$answer.part" || { status=$?; cat "$answer.part"; exit "$status"; }\n'
+               '    mv "$answer.part" "$answer"\n'
+               '  fi\n'
+               '  exec cat "$answer"\n'
+               'fi\n'
+               'case "$1" in -c) exec "$REAL_PYTHON" "$@";; util/cap_file_size.py) shift; exec "$@";; esac\n'
                'printf \'%s\\n\' "$@" > "$ARGS_FILE"\n')
 
 
@@ -385,19 +412,54 @@ class PythonStubTests(unittest.TestCase):
             self.assertFalse(real.exists(), 'the real interpreter ran the capped command')
             self.assertEqual(record.read_text(encoding='utf-8').splitlines(), command)
 
+    @unittest.skipIf(os.name == 'nt', 'the stub is found on PATH by name, as Windows does not find a sh script')
+    def test_a_selector_runs_once_per_cache_and_a_failure_is_not_kept(self) -> None:
+        """#2254: with ``$SELECTOR_CACHE`` set, each distinct ``-c`` reaches the real interpreter once."""
+        real_python = '#!/bin/sh\necho "$@" >> "$REAL_LOG"\necho "answer $2"\n[ "$2" != fail ]\n'
+        with tempfile.TemporaryDirectory() as temp:
+            for name, text in (('python', PYTHON_STUB), ('real', real_python)):
+                path = pathlib.Path(temp, name)
+                path.write_text(text, encoding='utf-8')
+                path.chmod(0o755)
+            cache, real = pathlib.Path(temp, 'cache'), pathlib.Path(temp, 'real.log')
+            cache.mkdir()
+            env = dict(os.environ, ARGS_FILE=str(pathlib.Path(temp, 'args')), SELECTOR_CACHE=str(cache),
+                       REAL_PYTHON=str(pathlib.Path(temp, 'real')), REAL_LOG=str(real),
+                       PATH=temp + os.pathsep + os.environ.get('PATH', ''))
 
-def leg_ignores(text: 'str', latest: 'str') -> 'list[str]':
-    """The modules a ``test`` leg's ``Run unit tests`` step ``--ignore``\\ s, ``latest`` or not."""
+            def ask(code: 'str') -> 'subprocess.CompletedProcess[str]':
+                return subprocess.run(['python', '-c', code], env=env, capture_output=True, text=True,
+                                      check=False, timeout=60)
+
+            self.assertEqual([ask(code).stdout for code in ('a', 'a', 'b')], ['answer a\n', 'answer a\n', 'answer b\n'])
+            for _ in range(2):
+                failed = ask('fail')
+                self.assertEqual((failed.returncode, failed.stdout), (1, 'answer fail\n'))
+            self.assertEqual(real.read_text(encoding='utf-8').splitlines(), ['-c a', '-c b', '-c fail', '-c fail'])
+
+
+def leg_ignores(text: 'str', latest: 'str', cache: 'str' = '') -> 'list[str]':
+    """The modules a ``test`` leg's ``Run unit tests`` step ``--ignore``\\ s, ``latest`` or not.
+
+    ``cache`` is a directory for :data:`PYTHON_STUB`'s ``$SELECTOR_CACHE``; empty runs every selector.
+
+    """
     script = run_script(job_section(text, 'test'), 'Run unit tests')
     # #2005: a leg that runs pytest once, as a PyPy leg's own `SHARDS` would otherwise reach the stubbed step.
-    argv = stubbed_argv(script, {'ANNOTATION_LEVEL': 'error', 'COVERAGE': 'false', 'LATEST': latest, 'SHARDS': ''})
+    argv = stubbed_argv(script, {'ANNOTATION_LEVEL': 'error', 'COVERAGE': 'false', 'LATEST': latest, 'SHARDS': '',
+                                 'SELECTOR_CACHE': cache})
     return [arg.split('=', 1)[1] for arg in argv
             if arg.startswith('--ignore=') and arg != f'--ignore=tests/{next(iter(_tiers.FIXTURE_TIER_DIRS))}']
 
 
-def project_pins_run(text: 'str') -> 'list[str]':
-    """The modules ``project-tests``'s ``Run the project pins`` step hands pytest."""
-    argv = stubbed_argv(run_script(job_section(text, 'project-tests'), 'Run the project pins'), {})
+def project_pins_run(text: 'str', cache: 'str' = '') -> 'list[str]':
+    """The modules ``project-tests``'s ``Run the project pins`` step hands pytest.
+
+    ``cache`` is as for :func:`leg_ignores`.
+
+    """
+    argv = stubbed_argv(run_script(job_section(text, 'project-tests'), 'Run the project pins'),
+                        {'SELECTOR_CACHE': cache})
     return [arg for arg in argv if arg.endswith('.py')]
 
 
