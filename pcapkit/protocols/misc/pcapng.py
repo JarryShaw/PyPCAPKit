@@ -419,9 +419,9 @@ class PacketReception(EnumLookup, enum.IntEnum):
 # ``Enum_TLSKeyLabel`` like its :mod:`pcapkit.const.pcapng` siblings. This
 # module does not re-export it under the unaliased name (#1744).
 # :class:`WireGuardKeyLabel` below stays hand-written: it is a closed set
-# (draft-ietf-opsawg-pcapng-06 section 4.7's "is one of" four names), not a
-# registry, so filing it under :mod:`pcapkit.const` would misrepresent it as
-# one. The ``Enum_*`` alias convention covers imports of const enums, so it does
+# (draft-ietf-opsawg-pcapng-06 section 4.7, Decryption Secrets Block, says
+# the label "is one of" four names), not a registry, so filing it under
+# :mod:`pcapkit.const` would misrepresent it as one. The ``Enum_*`` alias convention covers imports of const enums, so it does
 # not apply to a local definition.
 
 
@@ -982,7 +982,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
 
     @property
     def nanosecond(self) -> 'bool':
-        """Whether the timestamp is in nanoseconds."""
+        """Whether the timestamp resolution is finer than microseconds."""
         return self.ts_resolution > RESOLUTION[False]
 
     @property
@@ -1397,11 +1397,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             # :class:`~pcapkit.corekit.fields.misc.SchemaField`, which fails with
             # a bare ``ValueError: read length must be non-negative or -1``. That
             # would cost the whole extraction rather than the one truncated
-            # block, the opposite of the `#431
-            # <https://github.com/JarryShaw/PyPCAPKit/issues/431>`__ accommodation
-            # for damaged input. ``_read_fileng`` stops at the end of the file, so
-            # the octets it returned are the authority on where the block really
-            # finishes.
+            # block, the opposite of the #431 accommodation for damaged input.
+            # ``_read_fileng`` stops at the end of the file, so the octets it
+            # returned are the authority on where the block really finishes.
             read = len(self._data)
             if read < schema.block.length:
                 warn(f'PCAP-NG: [Block {schema.type}] block length '
@@ -1835,10 +1833,11 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         """
         # NOTE: UTC, not the host's timezone, is the default in both branches
         # below. A capture carries no timezone of its own unless it says so, and
-        # draft-ietf-opsawg-pcapng-02 §4.3 defines the block timestamp as an
-        # offset from 1970-01-01 00:00:00 UTC with no timezone term at all, so
-        # substituting the *reading* machine's zone would make the same file
-        # parse to different instants on different hosts. ``_get_resolution``
+        # draft-ietf-opsawg-pcapng-02 section 4.3, Enhanced Packet Block,
+        # defines the block timestamp as an offset from 1970-01-01 00:00:00 UTC
+        # with no timezone term at all, so substituting the *reading* machine's
+        # zone would make the same file parse to different instants on different
+        # hosts. ``_get_resolution``
         # and ``_get_offset`` fall back to the format's own defaults in this
         # situation; this is the matching one.
         if self._ctx is None:
@@ -1897,8 +1896,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             # ``tzone.utcoffset(None)`` added. The block
             # timestamp is an offset from the UNIX epoch, so it is
             # timezone-independent by definition (draft-ietf-opsawg-pcapng-02
-            # §4.3 spells out the arithmetic and has no timezone term), and the
-            # same draft §4.2 says of ``if_tzone`` that it "SHOULD NOT be used"
+            # section 4.3, Enhanced Packet Block, spells out the arithmetic and
+            # has no timezone term), and the same draft's section 4.2, Interface
+            # Description Block, says of ``if_tzone`` that it "SHOULD NOT be used"
             # and of ``if_tsoffset`` that it is "not intended to be used as an
             # offset between local time and UTC". A shifted epoch would also
             # contradict ``ts_datetime`` below, which is built from the
@@ -4135,7 +4135,7 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             # NOTE: The padding to 32 bits, if it is not all zeros (#1437).
             self._read_padding(schema, data)
 
-            # record option data
+            # record name resolution record data
             records.add(type, data)
 
             # break when ``nrb_record_end`` is reached
@@ -4232,6 +4232,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             schema: Parsed secret schema.
             block: Parsed PCAP-NG decryption secrets block.
 
+        Returns:
+            Parsed decryption secrets data.
+
         """
         secrets = Data_UnknownSecrets(
             data=schema.data,
@@ -4245,6 +4248,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         Args:
             schema: Parsed secret schema.
             block: Parsed PCAP-NG decryption secrets block.
+
+        Returns:
+            Parsed decryption secrets data.
 
         """
         secrets = Data_TLSKeyLog(
@@ -4878,8 +4884,9 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
             data = block.data
             options = cast('Option', getattr(block, 'options', None))
 
-        # NOTE: Unlike every other block, a custom block has no ``OptionField``
-        # to name an option registry: :class:`~pcapkit.protocols.schema.misc.pcapng.CustomBlock`
+        # NOTE: Unlike every other block that carries options, a custom block
+        # has no ``OptionField`` to name an option registry:
+        # :class:`~pcapkit.protocols.schema.misc.pcapng.CustomBlock`
         # spans the custom data, its padding and the options as one opaque blob,
         # since only the owner of the private enterprise number knows where the
         # custom data ends. Its options are therefore resolved in the generic
@@ -5443,7 +5450,8 @@ class PCAPNG(ProtocolBase[Data_PCAPNG, Schema_PCAPNG],
         Args:
             type: Option type.
             option: Option data model.
-            tzone: Timezone offset, in seconds.
+            tzone: Timezone offset from UTC, as a :class:`~datetime.timezone`,
+                a :class:`~datetime.timedelta` or an :obj:`int` of seconds.
             **kwargs: Arbitrary keyword arguments.
 
         Returns:

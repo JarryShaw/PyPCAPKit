@@ -270,9 +270,10 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
             Constructed packet data.
 
         Raises:
-            ProtocolError: If ``auth_data`` is of an invalid type, or is
-                :obj:`bytes` that are not exactly 8 octets long; or if
-                ``packet_length`` is not an :obj:`int` in ``0..65535``.
+            ProtocolError: If ``auth_data`` is of an invalid type, is
+                :obj:`bytes` that are not exactly 8 octets long, or is a
+                :obj:`dict` missing a required key; or if ``packet_length``
+                is not an :obj:`int` in ``0..65535``.
 
         .. versionchanged:: 1.5.0
 
@@ -455,8 +456,9 @@ class OSPF(Application[Data_OSPF, Schema_OSPF],
             Authentication schema.
 
         Raises:
-            ProtocolError: If ``auth_data`` is of an invalid type, or is
-                :obj:`bytes` that are not exactly 8 octets long.
+            ProtocolError: If ``auth_data`` is of an invalid type, is
+                :obj:`bytes` that are not exactly 8 octets long, or is a
+                :obj:`dict` missing a required key.
 
         """
         if isinstance(auth_data, Schema_CryptographicAuthentication):

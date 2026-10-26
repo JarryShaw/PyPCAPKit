@@ -15,8 +15,11 @@ NGAP is the control plane between a 5G RAN node (gNB or ng-eNB) and an AMF.
 It runs over SCTP and is named by the DATA chunk's *payload protocol
 identifier* rather than by a port, so :class:`NGAP` is registered on
 :attr:`SCTP.__proto__ <pcapkit.protocols.transport.sctp.SCTP.__proto__>` under
-PPID 60 (``NG_Application_Protocol``) and PPID 66
-(``NGAP_over_DTLS_over_SCTP``); see
+PPID 60
+(:attr:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NG_Application_Protocol`)
+and PPID 66
+(:attr:`~pcapkit.const.sctp.payload_protocol_identifier.PayloadProtocolIdentifier.PayloadProtocolIdentifier_3GPP_NGAP_over_DTLS_over_SCTP`);
+see
 :func:`pcapkit.foundation.registry.protocols.register_sctp`.
 
 An SCTP DATA chunk that names NGAP carries exactly one ``NGAP-PDU``, encoded
@@ -72,7 +75,7 @@ surfaced as first-class fields on
 Known Limitations
 -----------------
 
-* **PPID 66 payloads are not decoded.** ``NGAP_over_DTLS_over_SCTP`` wraps the
+* **PPID 66 payloads are not decoded.** NGAP over DTLS over SCTP wraps the
   ``NGAP-PDU`` in a DTLS record, and :mod:`pcapkit` implements no DTLS, so the
   bytes reaching :meth:`NGAP.read` are not an APER encoding. The PPID is
   registered so that it is *named* rather than anonymous; the payload itself

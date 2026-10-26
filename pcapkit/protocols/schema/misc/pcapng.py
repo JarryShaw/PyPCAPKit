@@ -269,12 +269,14 @@ def nonnegative(length: 'Callable[[dict[str, Any]], int]') -> 'Callable[[dict[st
     <pcapkit.corekit.fields.strings._TextField.__call__>` builds its
     :mod:`struct` template as ``f'{length}s'`` unconditionally, so a negative
     length becomes the format ``'-8s'`` and :func:`struct.calcsize` raises a bare
-    :exc:`struct.error`; a negative :class:`~pcapkit.corekit.fields.misc.SchemaField`
-    length reaches :meth:`io.RawIOBase.read` and raises a bare :exc:`ValueError`.
-    Neither is one of :mod:`pcapkit.utilities.exceptions`, so a caller cannot tell
-    either from a bug in its own code, and neither is an :exc:`EOFError`, so
-    neither is caught by the frame loop -- one malformed block would therefore
-    cost the whole extraction.
+    :exc:`struct.error`. That is not one of :mod:`pcapkit.utilities.exceptions`,
+    so a caller cannot tell it from a bug in its own code, and it is not an
+    :exc:`EOFError`, so the frame loop does not catch it -- one malformed block
+    would therefore cost the whole extraction. A negative
+    :class:`~pcapkit.corekit.fields.misc.SchemaField` length fails silently
+    instead: :meth:`SchemaField.unpack
+    <pcapkit.corekit.fields.misc.SchemaField.unpack>` reads it as no declared
+    length, and sizes the nested schema by whatever is left of the stream.
 
     Two shapes reach here. A Block Total Length below the block's own fixed-field
     floor -- 28 octets for a Section Header Block, 20 for an Interface
@@ -708,9 +710,10 @@ def pcapng_block_selector(packet: 'dict[str, Any]') -> 'Field':
         or not those four octets were there to read --
         :meth:`FieldBase.unpack <pcapkit.corekit.fields.field.FieldBase.unpack>`
         zero-pads a short read rather than refusing it. A tail of one, two or
-        three octets therefore arrives here negative, and
-        :meth:`io.RawIOBase.read` would raise a bare ``ValueError``. The floor is a
-        backstop: :meth:`PCAPNG._check_block_floor
+        three octets therefore arrives here negative, which
+        :meth:`SchemaField.unpack <pcapkit.corekit.fields.misc.SchemaField.unpack>`
+        would read as no declared length, sizing the block by whatever is left
+        of the stream. The floor is a backstop: :meth:`PCAPNG._check_block_floor
         <pcapkit.protocols.misc.pcapng.PCAPNG._check_block_floor>` reports that
         tail as end-of-stream before it gets here, and on the packing path
         :meth:`Schema.pack <pcapkit.protocols.schema.schema.Schema.pack>` seeds
@@ -900,7 +903,7 @@ class OptionEnumField(EnumField):
 
     Important:
         This class is specifically designed for :class:`~pcapkit.const.pcapng.option_type.OptionType`
-        as it is actually a :class:`~enum.StrEnum` class.
+        as it is actually an ``aenum.StrEnum`` class.
 
     """
     if TYPE_CHECKING:
@@ -1023,8 +1026,8 @@ class BlockType(EnumSchema[Enum_BlockType]):
     def post_process(self, packet: 'dict[str, Any]') -> 'Schema':
         """Revise ``schema`` data after unpacking process.
 
-        This method validates the two block lengths and raises
-        :exc:`~pcapkit.utilities.exceptions.ProtocolError` if they are not
+        This method compares the two block lengths and issues a
+        :class:`~pcapkit.utilities.warnings.ProtocolWarning` if they are not
         equal.
 
         Args:
@@ -1484,7 +1487,8 @@ class IF_SpeedOption(_IF_Option, code=Enum_OptionType.if_speed):
 class IF_TSResolOption(_IF_Option, code=Enum_OptionType.if_tsresol):
     """Header schema for PCAP-NG file ``if_tsresol`` options."""
 
-    #: Interface timestamp resolution, in units per second.
+    #: Interface timestamp resolution, as the option encodes it: the base flag
+    #: and the exponent, from which :attr:`resolution` is computed.
     tsresol: 'ResolutionData' = BitField(length=1, namespace={
         'flag': (0, 1),
         'resolution': (1, 7),
