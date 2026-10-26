@@ -552,7 +552,6 @@ class HTTPUnitTests(unittest.TestCase):
                          dict(frame_only.info.items()))
         self.assertEqual(guessed.info.packet, b'')
         self.assertEqual(guessed.info.length, 0)
-        self.assertNotEqual(guessed.info.length, 5265993)
         self.assertEqual([w for w in caught if issubclass(w.category, ProtocolWarning)], [])
 
         # The frame after the preface is parsed for real, not assumed: a padded
