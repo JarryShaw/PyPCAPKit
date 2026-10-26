@@ -261,10 +261,14 @@ class ARP(Link[Data_ARP, Schema_ARP],
             Constructed packet data.
 
         Raises:
-            ProtocolError: If a packed hardware address is not ``hlen`` octets
-                long (with ``hlen`` not given and ``htype`` Ethernet, not 6
-                octets long), or a packed protocol address is not ``plen``
-                octets long.
+            FieldValueError: If ``spa`` or ``tpa`` is rejected by
+                :meth:`_make_proto_resolve`, e.g. a :obj:`bool`.
+            ProtocolError: If ``sha`` or ``tha`` is rejected by
+                :meth:`_make_addr_resolve`, or ``spa`` or ``tpa`` by
+                :meth:`_make_proto_resolve`; if a packed hardware address is
+                not ``hlen`` octets long (with ``hlen`` not given and
+                ``htype`` Ethernet, not 6 octets long), or a packed protocol
+                address is not ``plen`` octets long.
 
         """
         _htype = self._make_index(htype, htype_default, namespace=htype_namespace,
@@ -474,7 +478,7 @@ class ARP(Link[Data_ARP, Schema_ARP],
             pack as ``00000001`` (IPv4) or ``::1`` (IPv6) with no exception and
             no warning.
 
-            The description below uses :attr:`self.__class__.__name__
+            The messages are prefixed with :attr:`self.__class__.__name__
             <type.__name__>` rather than :attr:`self.alias
             <pcapkit.protocols.protocol.Protocol.alias>`, even though the
             latter is this project's usual choice: :attr:`alias` here reads

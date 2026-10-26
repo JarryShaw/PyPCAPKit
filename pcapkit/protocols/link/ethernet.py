@@ -156,6 +156,10 @@ class Ethernet(Link[Data_Ethernet, Schema_Ethernet],
         Returns:
             Constructed packet data.
 
+        Raises:
+            ProtocolError: If ``dst`` or ``src`` is rejected by
+                :meth:`_make_mac_addr`.
+
         """
         _type = self._make_index(type, type_default, namespace=type_namespace,
                                  reversed=type_reversed, pack=False)
