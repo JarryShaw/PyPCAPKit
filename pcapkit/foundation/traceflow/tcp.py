@@ -436,6 +436,25 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
             timestamp=packet.timestamp,          # capture timestamp
         )
 
+    def _output_path(self, label: 'str') -> 'Optional[str]':
+        """Path of a flow's output file, as an index entry reports it.
+
+        Arguments:
+            label: the flow's label
+
+        Returns:
+            The file :meth:`trace` writes the flow to, or :data:`None` when the
+            output format writes no file at all. An *empty* extension still
+            writes one, named after the label alone.
+
+        Both :meth:`submit` and :meth:`_finalise` report through this, so an
+        open flow and a finalised one name the same file (:issue:`2237`).
+
+        """
+        if self._fdpext is None:
+            return None
+        return f'{self._fproot}/{label}{self._fdpext}'
+
     @staticmethod
     def _ended(buffer: 'Buffer[_AT]') -> 'bool':
         """Whether a flow's connection has been seen to end.
@@ -478,7 +497,7 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
         logger.debug('TCP flow %s finalised after %d frame(s) (%d forward, %d reverse)',
                      label, len(buf.index), len(buf.forward), len(buf.reverse))
         index = Index(
-            fpout=f'{self._fproot}/{label}{self._fdpext}' if self._fdpext is not None else None,
+            fpout=self._output_path(label),
             index=tuple(buf.index),
             label=label,
             forward=tuple(buf.forward),
@@ -550,7 +569,7 @@ class TCP(TraceFlowBase[BufferID, Buffer[_AT], Index, Packet[_AT]], Generic[_AT]
 
         ret = []  # type: list[Index]
         for buf in self._buffer.values():
-            ret.append(Index(fpout=f"{self._fproot}/{buf.label}{self._fdpext}" if self._fdpext else None,
+            ret.append(Index(fpout=self._output_path(buf.label),
                              index=tuple(buf.index),
                              label=buf.label,
                              forward=tuple(buf.forward),

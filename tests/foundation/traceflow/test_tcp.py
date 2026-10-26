@@ -552,6 +552,35 @@ class TCPTraceFlowTests(unittest.TestCase):
             self.assertEqual(final_index.index, (1, 2))
             self.assertFalse(pathlib.Path(tempdir, f'{label}.None').exists())
 
+    def test_an_empty_extension_reports_the_written_file_open_or_finalised(self) -> None:
+        """An empty extension still writes a file, and every report names it (#2237).
+
+        The flow file is named after the label alone. :meth:`TCP.submit` reported
+        :data:`None` for a flow still open while :meth:`TCP._finalise` reported the
+        path, so one flow's ``fpout`` depended on when it was read.
+
+        """
+        from dictdumper import JSON
+
+        from pcapkit.foundation.traceflow.tcp import TCP
+
+        TCP.register_dumper('unit-noext', JSON, '')
+
+        with tempfile.TemporaryDirectory() as tempdir:
+            trace = TCP(tempdir, 'unit-noext')
+            label = trace.trace(self._packet(index=1, syn=True))
+            expected = f'{tempdir}/{label}'
+            self.assertTrue(pathlib.Path(expected).is_file())
+
+            # mid-capture: the flow is open, reported by ``submit``
+            open_index, = trace.index
+            self.assertEqual(open_index.fpout, expected)
+
+            # end of capture: the same flow, reported by ``_finalise``
+            trace.finish()
+            final_index, = trace.index
+            self.assertEqual(final_index.fpout, expected)
+
 
 if __name__ == '__main__':
     unittest.main()
