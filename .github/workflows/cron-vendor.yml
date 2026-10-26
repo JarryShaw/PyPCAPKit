@@ -115,10 +115,10 @@ jobs:
           python -m pip install -U pip setuptools wheel packaging
           python -m pip install -U isort
 
-          # `vendor` for `requests` and `beautifulsoup4`, which `all` lacks
-          # since #910: `pcapkit-vendor` with no target runs every crawler, and
-          # some import them at module scope (#507). See the `vendor` extra's
-          # comment in pyproject.toml.
+          # `vendor` for `requests` and `beautifulsoup4`, which `all` does not
+          # carry, as it holds core addons only (#910): `pcapkit-vendor` with no
+          # target runs every crawler, and some import them at module scope
+          # (#507). See the `vendor` extra's comment in pyproject.toml.
           python -m pip install -e '.[all,vendor]'
 
       - name: Update Vendor
@@ -271,9 +271,10 @@ jobs:
         run: |
           git config --local user.email "github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
-          # #1685: `-a` skips untracked files, so a new module was bumped for but
-          # never committed, and every later crawl bumped again. Quoted, so git
-          # matches at any depth; `.py` only, so a leftover backup stays out.
+          # #1685: `-a` skips untracked files, so a new module is staged here;
+          # left out, it would stay uncommitted and every later crawl would bump
+          # for it again. Quoted, so git matches at any depth; `.py` only, so a
+          # leftover backup stays out.
           git add -A -- 'pcapkit/const/*.py'
           git commit -am"Bumped version to $(python -c 'import pcapkit; print(pcapkit.__version__)')
 
