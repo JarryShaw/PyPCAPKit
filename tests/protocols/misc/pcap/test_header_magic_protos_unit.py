@@ -56,6 +56,32 @@ class PCAPHeaderMagicProtosUnitTests(unittest.TestCase):
                 self.assertEqual(header._read_protos(size), LinkType.ETHERNET)
                 self.assertEqual(header._file.tell(), size)
 
+    def test_read_protos_honours_file_byte_order(self) -> None:
+        # #2312: a big-endian file was read as little-endian.
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.protocols.misc.pcap.header import Header
+
+        for byteorder in ('big', 'little'):
+            for size in (1, 2, 4):
+                with self.subTest(byteorder=byteorder, size=size):
+                    header = object.__new__(Header)
+                    header._byte = byteorder
+                    header._file = io.BytesIO(int(LinkType.ETHERNET).to_bytes(size, byteorder) + b'\xff' * 4)
+                    self.assertEqual(header._read_protos(size), LinkType.ETHERNET)
+                    self.assertEqual(header._file.tell(), size)
+
+    def test_read_protos_parsed_big_endian_header(self) -> None:
+        # #2312: the byte order comes from the magic number ``read`` parsed.
+        from pcapkit.const.reg.linktype import LinkType
+        from pcapkit.protocols.misc.pcap.header import Header
+
+        raw = Header(bigendian=True, network=LinkType.ETHERNET).data
+        self.assertEqual(raw[:4], b'\xa1\xb2\xc3\xd4')
+        header = Header(io.BytesIO(raw))
+        self.assertEqual(header.byteorder, 'big')
+        header._file = io.BytesIO(b'\x00\x00\x00\x01')
+        self.assertEqual(header._read_protos(4), LinkType.ETHERNET)
+
 
 if __name__ == '__main__':
     unittest.main()

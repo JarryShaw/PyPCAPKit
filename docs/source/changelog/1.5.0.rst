@@ -2397,7 +2397,9 @@ Fixed
   :exc:`.UnknownFieldWarning` and rebuilt every header with the host-default
   ``d4c3b2a1`` magic. ``_make_data`` now returns ``byteorder`` and ``nanosecond``, and
   every byte order and timestamp resolution rebuilds unchanged. ``Header._read_protos``
-  also read four octets whatever ``size`` asked for (:issue:`1125`). And ``_make_magic``
+  also read four octets whatever ``size`` asked for (:issue:`1125`), and read them
+  little-endian in a big-endian file; it now follows the file's byte order
+  (:issue:`2312`). And ``_make_magic``
   honoured ``lilendian`` and ``bigendian`` only as a pair, so ``Header(bigendian=True)``
   wrote ``d4c3b2a1`` on a little-endian host; either flag alone now picks the byte order
   and overrides ``byteorder``, and equal flags still raise :exc:`.EndianError`

@@ -339,6 +339,10 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
     def _read_protos(self, size: int) -> 'Enum_LinkType':
         """Read next layer protocol type.
 
+        Reads ``size`` octets as an unsigned integer in the file's byte order
+        (:attr:`byteorder`), falling back to little-endian before :meth:`read`
+        has set it (:issue:`2312`).
+
         Arguments:
             size: buffer size
 
@@ -346,7 +350,7 @@ class Header(ProtocolBase[Data_Header, Schema_Header],
             Link layer protocol enumeration.
 
         """
-        _byte = self._read_unpack(size, lilendian=True)
+        _byte = self._read_unpack(size, lilendian=getattr(self, '_byte', 'little') == 'little')
         _prot = Enum_LinkType.get(_byte)
         return _prot
 
